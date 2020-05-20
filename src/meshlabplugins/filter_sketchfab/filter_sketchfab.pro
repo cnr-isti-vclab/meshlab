@@ -1,7 +1,8 @@
 include (../../shared.pri)
 
 HEADERS += \
-    filter_sketchfab.h
+    filter_sketchfab.h \
+    miniz.h
 
 SOURCES += \
     filter_sketchfab.cpp

@@ -230,7 +230,6 @@ else()
         meshlabplugins/filter_sdfgpu
         meshlabplugins/filter_select
         meshlabplugins/filter_sketchfab
-        meshlabplugins/filter_sketchfab_xml
         meshlabplugins/filter_ssynth
         meshlabplugins/filter_texture
         meshlabplugins/filter_trioptimize

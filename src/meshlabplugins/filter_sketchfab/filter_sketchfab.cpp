@@ -23,109 +23,274 @@
 
 #include "filter_sketchfab.h"
 #include <QtScript>
-
-// Constructor usually performs only two simple tasks of filling the two lists 
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+#include <QHttpMultiPart>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <wrap/io_trimesh/export_ply.h>
+#include "miniz.h"
 
 FilterSketchFabPlugin::FilterSketchFabPlugin()
 { 
-	typeList << FP_MOVE_VERTEX;
-  
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+	typeList << FP_SKETCHFAB;
+
+	for(FilterIDType tt : types())
+		actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
-// (this string is used also to define the menu entry)
+QString FilterSketchFabPlugin::pluginName() const
+{
+	return "FilterSketchFab";
+}
+
 QString FilterSketchFabPlugin::filterName(FilterIDType filterId) const
 {
-  switch(filterId) {
-        case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
-		default : assert(0); 
+	switch(filterId) {
+	case FP_SKETCHFAB :
+		return "Export to Sketchfab";
+	default :
+		assert(0);
+		return "";
 	}
-  return QString();
 }
 
-// Info() must return the longer string describing each filtering action 
-// (this string is used in the About plugin dialog)
- QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
+QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
 {
-  switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 
-		default : assert(0); 
+	switch(filterId) {
+	case FP_SKETCHFAB :
+		return "Upload the current layer on Sketchfab. It requires that you have an account and that you set your private API token in the preferences of MeshLab.";
+	default :
+		assert(0);
+		return "Unknown Filter";
 	}
-	return QString("Unknown Filter");
 }
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
-// More than a single class can be chosen.
 FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(QAction *a)
 {
-  switch(ID(a))
-	{
-		case FP_MOVE_VERTEX :  return MeshFilterInterface::Smoothing; 
-		default : assert(0); 
-	}
-	return MeshFilterInterface::Generic;
-}
-
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterSketchFabPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
-{
-	 switch(ID(action))	 {
-		case FP_MOVE_VERTEX :  
- 		  parlst.addParam(new RichBool ("UpdateNormals",
-											true,
-											"Recompute normals",
-											"Toggle the recomputation of the normals after the random displacement.\n\n"
-											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-			parlst.addParam(new RichAbsPerc("Displacement",
-												m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(),
-												"Max displacement",
-												"The vertex are displaced of a vector whose norm is bounded by this value"));
-											break;
-											
-		default : assert(0); 
+	switch(ID(a)) {
+	case FP_SKETCHFAB :
+		return MeshFilterInterface::Smoothing;
+	default :
+		assert(0);
+		return MeshFilterInterface::Generic;
 	}
 }
 
-// The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
-bool FilterSketchFabPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(QAction* a) const
 {
-	CMeshO &m = md.mm()->cm;
-	srand(time(NULL)); 
-	const float max_displacement =par.getAbsPerc("Displacement");
-
-	for(unsigned int i = 0; i< m.vert.size(); i++){
-		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
-		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-		  cb(100*i/m.vert.size(), "Randomly Displacing...");
-
-		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
+	switch(ID(a)) {
+	case FP_SKETCHFAB :
+		return SINGLE_MESH;
+	default:
+		return NONE;
 	}
-	
-	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log("Successfully displaced %i vertices",m.vn);
-	
-	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-	if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m);
-  
+}
+
+int FilterSketchFabPlugin::getPreConditions(QAction*) const
+{
+	return MeshModel::MM_NONE;
+}
+
+int FilterSketchFabPlugin::postCondition(QAction*) const
+{
+	return MeshModel::MM_NONE;
+}
+
+void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterSet& parlst)
+{
+	switch(ID(action)) {
+	case FP_SKETCHFAB :
+		parlst.addParam(new RichString("sketchFabKeyCode", "00000000", "Sketch Fab Code", "Mandatory."));
+		parlst.addParam(new RichString("title", "MeshLabModel", "Title", "Mandatory."));
+		parlst.addParam(new RichString("description", "A model generated with meshlab", "Description", "Mandatory. A short description of the model that is uploaded."));
+		parlst.addParam(new RichString("tags", "meshlab", "Tags", "Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry."));
+		parlst.addParam(new RichBool("isPrivate", false, "Private", "This parameter can be true only for PRO account."));
+		parlst.addParam(new RichBool("isPublished", false, "Publish", "If true the model will be published immediately."));
+		parlst.addParam(new RichBool("autoRotate", true, "Auto Rotate", "If true the model rotated by 90 degree on the X axis to maintain similar default orientation."));
+		break;
+	default :
+		assert(0);
+	}
+}
+
+bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb)
+{
+	switch (ID(action)) {
+	case FP_SKETCHFAB:
+		return sketchfab(md, cb,
+						 par.getString("sketchFabKeyCode"), par.getString("title"),
+						 par.getString("description"), par.getString("tags"),
+						 par.getBool("isPrivate"), par.getBool("isPublished"),
+						 par.getBool("autoRotate"));
+	default:
+		assert(0);
+		return false;
+	}
+}
+
+bool FilterSketchFabPlugin::sketchfab(
+		MeshDocument& md,
+		vcg::CallBackPos* cb,
+		const QString& apiToken,
+		const QString& name,
+		const QString& description,
+		const QString& tags,
+		bool isPrivate,
+		bool isPublished,
+		bool /*autoRotate*/)
+{
+	qDebug("Export to SketchFab start ");
+	this->fcb=cb;
+	this->fcb(1,"Compressing Mesh");
+	qDebug("APIToken = '%s' ",qUtf8Printable(apiToken));
+	Matrix44m rot; rot.SetRotateDeg(-90,Point3m(1,0,0));
+	Matrix44m rotI; rot.SetRotateDeg(90,Point3m(1,0,0));
+
+	if(apiToken.isEmpty() || apiToken=="0000000") {
+		this->errorMessage = QString("Please set in the MeshLab preferences your private API Token string that you can find on the<a href=\"https://sketchfab.com/settings/password\">Sketchfab Password Settings.");
+		return false;
+	}
+
+	QString tmpObjFileName = QDir::tempPath() + "/xxxx.ply";
+	QString tmpZipFileName = QDir::tempPath() + "/xxxx.zip";
+
+	int mask=0;
+	if(md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR)) mask+=vcg::tri::io::Mask::IOM_VERTCOLOR;
+	vcg::tri::UpdatePosition<CMeshO>::Matrix(md.mm()->cm,rot);
+	vcg::tri::io::ExporterPLY<CMeshO>::Save(md.mm()->cm,qUtf8Printable(tmpObjFileName),mask,true);
+	vcg::tri::UpdatePosition<CMeshO>::Matrix(md.mm()->cm,rotI);
+	qDebug("Saved %20s",qUtf8Printable(tmpObjFileName));
+	qDebug("Compressed %20s",qUtf8Printable(tmpZipFileName));
+	saveMeshZip(qUtf8Printable(tmpObjFileName),"xxxx.ply",qUtf8Printable(tmpZipFileName));
+
+	qDebug("Model Title %s %s %s\n",qUtf8Printable(name),qUtf8Printable(description),qUtf8Printable(tags));
+	qDebug("Starting Upload");
+	this->fcb(10,"Starting Upload");
+	std::string urlModel;
+	bool ret = upload(tmpZipFileName, apiToken, name, description, tags, QString::number(isPrivate), QString::number(isPublished), urlModel);
+	if(!ret){
+		qDebug("Upload FAILED");
+		return false;
+	}
+
+	this->Log("Upload Completed; you can access the uploaded model at the following URL:\n");
+	this->Log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
 	return true;
+}
+
+bool FilterSketchFabPlugin::upload(
+		const QString& zipFileName,
+		const QString& apiToken,
+		const QString& name,
+		const QString& description,
+		const QString& tags,
+		const QString& isPrivate,
+		const QString& isPublished,
+		std::string& urlModel)
+{
+	QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+	// upload parameters data
+	multiPart->append(part_parameter("token", apiToken));
+	multiPart->append(part_parameter("name", name));
+	multiPart->append(part_parameter("description", description));
+	multiPart->append(part_parameter("tags", tags));
+	multiPart->append(part_parameter("private", isPrivate));
+	multiPart->append(part_parameter("isPublished", isPublished));
+	multiPart->append(part_parameter("source", "meshlab-exporter"));
+
+	// upload file data
+	QHttpPart modelPart;
+	modelPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"modelFile\"; filename=\""+zipFileName+"\""));
+	modelPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
+	QFile *zipfileToUpload = new QFile(zipFileName);
+
+	zipfileToUpload->open(QIODevice::ReadOnly);
+	modelPart.setBodyDevice(zipfileToUpload);
+	zipfileToUpload->setParent(multiPart);
+	multiPart->append(modelPart);
+
+	QUrl url("https://api.sketchfab.com/v2/models");
+	QNetworkRequest request(url);
+
+	QNetworkAccessManager manager;
+	QNetworkReply *reply = manager.post(request, multiPart);
+	multiPart->setParent(reply);
+	qDebug() << "Transmitting" << zipfileToUpload->size() << "bytes file.";
+
+	QObject::connect(reply, SIGNAL(finished()), this, SLOT(finished()));
+	QObject::connect(reply, SIGNAL(uploadProgress(qint64,qint64)),this,SLOT(uploadProgress(qint64,qint64)));
+	uploadCompleteFlag=false;
+	while(!uploadCompleteFlag) {
+		QApplication::processEvents();
+	}
+	qDebug("got it!");
+	// test for network error
+	QNetworkReply::NetworkError err = reply->error();
+	if (err != QNetworkReply::NoError) {
+		qDebug() << reply->errorString();
+		return false;
+	}
+
+	// get the api answer
+	QByteArray result = reply->readAll();
+	QScriptValue sc;
+	QScriptEngine engine;
+	qDebug() << "Result:" << result;
+	sc = engine.evaluate("(" + QString(result) + ")");
+	QString uid = sc.property("uid").toString();
+	if(uid.isEmpty())         return false;
+	qDebug() << "Model uploaded with id" << uid;
+	urlModel = "https://sketchfab.com/models/"+uid.toStdString();
+	return true;
+}
+
+QHttpPart FilterSketchFabPlugin::part_parameter(QString key, QString value) {
+	QHttpPart part;
+	part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"" + key + "\""));
+	part.setBody(value.toLatin1());
+	return part;
+}
+
+int FilterSketchFabPlugin::saveMeshZip(
+		const std::string& fileName,
+		const std::string& internalName,
+		const std::string& zipName)
+{
+	qDebug("Trying to add %s to %s", fileName.c_str(), zipName.c_str());
+	mz_zip_archive zip_archive;
+	memset(&zip_archive, 0, sizeof (zip_archive)); //Saving memory for the zip archive
+	if (!mz_zip_writer_init_file(&zip_archive, zipName.c_str(), 65537)) {
+		qDebug("Failed creating zip archive");
+		mz_zip_writer_end(&zip_archive);
+		return 0;
+	}
+
+	const char *pTestComment = "test comment";
+
+	//MZ_BEST_COMPRESSION = 9
+	if (!mz_zip_writer_add_file(&zip_archive, internalName.c_str(), fileName.c_str(), pTestComment, strlen(pTestComment), MZ_UBER_COMPRESSION)) {
+		qDebug("failed adding %s to %s", fileName.c_str(), zipName.c_str());
+		mz_zip_writer_end(&zip_archive);
+		return 0;
+	}
+
+	mz_zip_writer_finalize_archive(&zip_archive);
+	qDebug("Compressed %llu",zip_archive.m_archive_size);
+	return 1;
+}
+
+void FilterSketchFabPlugin::uploadProgress(qint64 bytesSent, qint64 bytesTotal)
+{
+	qDebug("Upload progress %i on %i",int(bytesSent),int(bytesTotal));
+	char buf[1024]; sprintf(buf,"Upload progress %i on %i",int(bytesSent),int(bytesTotal));
+	if(bytesTotal) this->fcb(100*int(bytesSent)/int(bytesTotal),buf);
+}
+
+void FilterSketchFabPlugin::finished()
+{
+	qDebug("FilterSketchFabPlugin::finished()");
+
+	uploadCompleteFlag = true;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterSketchFabPlugin)

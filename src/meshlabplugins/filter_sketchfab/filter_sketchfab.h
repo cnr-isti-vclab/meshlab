@@ -20,21 +20,12 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log: sampleplugins.h,v $
-Revision 1.2  2006/11/29 00:59:21  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
 
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add sampleplugins
-
-****************************************************************************/
-
-#ifndef SAMPLEFILTERSPLUGIN_H
-#define SAMPLEFILTERSPLUGIN_H
+#ifndef FILTERSKETCHFAB_H
+#define FILTERSKETCHFAB_H
 
 #include <common/interfaces.h>
+#include <QHttpPart>
 
 class FilterSketchFabPlugin : public QObject, public MeshFilterInterface
 {
@@ -43,20 +34,56 @@ class FilterSketchFabPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_MOVE_VERTEX  } ;
+	enum { FP_SKETCHFAB  } ;
 
 	FilterSketchFabPlugin();
 
-	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
-
+	virtual QString pluginName(void) const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *a);
+	FILTER_ARITY filterArity(QAction *a) const;
+	int getPreConditions(QAction *) const;
+	int postCondition( QAction* ) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
-    FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+
+public slots:
+	void finished();
+	void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
+
+private:
+	bool sketchfab(
+			MeshDocument &md,
+			vcg::CallBackPos* cb,
+			const QString& apiToken,
+			const QString&,
+			const QString&,
+			const QString&,
+			bool,
+			bool,
+			bool);
+
+	bool upload(
+			const QString& zipFileName,
+			const QString& apiToken,
+			const QString& name,
+			const QString& description,
+			const QString& tags,
+			const QString& isPrivate,
+			const QString& isPublished,
+			std::string& urlModel);
+
+	QHttpPart part_parameter(QString key, QString value);
+
+	int saveMeshZip(
+			const std::string& fileName,
+			const std::string& internalName,
+			const std::string& zipName);
+
+	bool uploadCompleteFlag;
+	vcg::CallBackPos * fcb;
+
 };
 
-
-#endif
+#endif //FILTERSKETCHFAB_H
