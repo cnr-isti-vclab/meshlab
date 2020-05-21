@@ -206,7 +206,7 @@ public:
 class FloatListValue : public Value
 {
 public:
-	FloatListValue(QList<float>& val) :pval(val) {}
+	FloatListValue(const QList<float>& val) :pval(val) {}
 	inline QList<float> getFloatList() const { return pval; }
 	inline void	set(const Value& p) { pval = p.getFloatList(); }
 	inline QString typeName() const { return QString("FloatList"); }
@@ -229,7 +229,7 @@ public:
 class FileValue : public Value
 {
 public:
-	FileValue(QString filename) :pval(filename) {}
+	FileValue(const QString& filename) :pval(filename) {}
 	inline QString getFileName() const { return pval; }
 	inline bool isFileName() const { return true; }
 	inline QString typeName() const { return QString("FileName"); }
@@ -344,7 +344,7 @@ public:
 class FloatListDecoration : public ParameterDecoration
 {
 public:
-	FloatListDecoration(FloatListValue* defvalue, const QString desc = QString(), const QString tltip = QString())
+	FloatListDecoration(FloatListValue* defvalue, const QString& desc = QString(), const QString& tltip = QString())
 		:ParameterDecoration(defvalue, desc, tltip) {}
 	~FloatListDecoration() {}
 };
@@ -621,7 +621,7 @@ public:
 class RichParameterCopyConstructor : public Visitor
 {
 public:
-	RichParameterCopyConstructor() {}
+	RichParameterCopyConstructor() : lastCreated(nullptr){}
 
 	void visit(RichBool& pd);
 	void visit(RichInt& pd);
@@ -688,7 +688,7 @@ public:
 class RichParameterXMLVisitor : public Visitor
 {
 public:
-	RichParameterXMLVisitor(QDomDocument& doc) : docdom(doc) {}
+	RichParameterXMLVisitor(const QDomDocument& doc) : docdom(doc) {}
 
 	void visit(RichBool& pd);
 	void visit(RichInt& pd);
