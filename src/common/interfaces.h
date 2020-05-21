@@ -27,7 +27,7 @@
 
 #include "filterparameter.h"
 #include "GLLogStream.h"
-#include "scriptinterface.h"
+#include "meshmodel.h"
 
 #include <QtCore>
 #include <QApplication>

@@ -41,9 +41,6 @@
 #include <QProgressBar>
 #include <QDesktopServices>
 
-
-
-#include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
 #include "../common/mlapplication.h"
@@ -1339,22 +1336,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 		mvc->updateAllDecoratorsForAllViewers();
 		mvc->updateAllViewers();
 	}
-}
-
-void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,const QString& output )
-{
-    if (val.isError())
-    {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",val.property("lineNumber").toInt32(),qUtf8Printable(val.toString()));
-        layerDialog->updateLog(meshDoc()->Log);
-    }
-    else
-    {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Code executed in %d millisecs.\nOutput:\n%s",time,qUtf8Printable(output));
-		//bool res;
-		//updateSharedContextDataAfterFilterExecution((int)MeshModel::MM_ALL, (int)MeshFilterInterface::Generic, res);
-        GLA()->update();
-    }
 }
 
 // Edit Mode Management

@@ -3,7 +3,6 @@
 #include <QtScript/QtScript>
 #include <vcg/complex/algorithms/create/platonic.h>
 
-#include "scriptinterface.h"
 #include "mlexception.h"
 
 
@@ -32,7 +31,6 @@ static QString DLLFileNamePreamble() {
 }
 
 PluginManager::PluginManager()
-:/*currentDocInterface(NULL),*/scriptplugcode()
 {
   //pluginsDir=QDir(getPluginDirPath());
   // without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -72,9 +70,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	pluginsDir.setNameFilters(pluginfilters);
 
 	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
-	scriptplugcode = "";
-	ScriptAdapterGenerator gen;
-	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
 	for(QString fileName : pluginsDir.entryList(QDir::Files))
 	{
 		//      qDebug() << fileName;

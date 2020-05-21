@@ -25,6 +25,8 @@
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QScriptValue>
+#include <QScriptEngine>
 #include <wrap/io_trimesh/export_ply.h>
 #include "miniz.h"
 
