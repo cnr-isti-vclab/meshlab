@@ -317,7 +317,7 @@ if(ALLOW_BUNDLED_SSYNTH AND EXISTS "${LEVMAR_DIR}/lm.h")
     # "${SSYNTH_DIR}/ssynth/SyntopiaCore/GLEngine/Sphere.cpp"
     # "${SSYNTH_DIR}/ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp"
     target_include_directories(external-ssynth SYSTEM PUBLIC "${SSYNTH_DIR}/ssynth")
-    target_link_libraries(external-ssynth PRIVATE Qt5::Core Qt5::Xml Qt5::OpenGL Qt5::Script OpenGL::GLU)
+    target_link_libraries(external-ssynth PRIVATE Qt5::Core Qt5::Xml Qt5::OpenGL OpenGL::GLU)
     set_property(TARGET external-ssynth PROPERTY FOLDER External)
 endif()
 
