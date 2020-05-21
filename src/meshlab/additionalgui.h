@@ -25,90 +25,6 @@
 #include <QSyntaxHighlighter>
 #include <QProxyStyle>
 
-class CheckBoxListItemDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-public:
-    CheckBoxListItemDelegate(QObject *parent);
-    void paint(QPainter *painter, const QStyleOptionViewItem&option,const QModelIndex &index) const;
-};
-
-//WARNING!!!!DON'T USE QComboBox currentText() to get selected elements! Instead use selectedItemsString.
-class CheckBoxList: public QComboBox
-{
-    Q_OBJECT;
-
-public:
-    CheckBoxList(QWidget *widget = 0);
-    CheckBoxList(const QString& defaultValue,QWidget *widget = 0);
-    ~CheckBoxList();
-    void paintEvent(QPaintEvent *);
-    bool eventFilter(QObject *object, QEvent *event);
-    QStringList getSelected() const;
-    void insertCheckableItem(const int pos,const QString& lab,const bool checked);
-    void insertCheckableItem(const QString& lab,const bool checked );
-    void updateSelected(int ind);
-    QString selectedItemsString(const QString& sep = QString(" | ")) const;
-    QStringList selectedItemsNames() const;
-    void setDefaultValue(const QString& defaultValue);
-protected:
-    void	focusOutEvent ( QFocusEvent * e );
-private slots:
-    void currentHighlighted(int high);
-public slots:
-    void setCurrentValue(const QStringList& st);
-private:
-    QStringList sel;
-    int highli;
-    QString defaultval;
-    bool popupopen;
-};
-
-class PrimitiveButton : public QPushButton
-{
-    Q_OBJECT
-public:
-    PrimitiveButton(QWidget* parent);
-    PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent);
-    ~PrimitiveButton();
-    void setPrimitiveElement(const QStyle::PrimitiveElement el);
-protected:
-    void paintEvent(QPaintEvent * event);
-private:
-    QStyle::PrimitiveElement elem;
-};
-
-class ExpandButtonWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    ExpandButtonWidget(QWidget* parent);
-    ~ExpandButtonWidget();
-private slots:
-    void changeIcon();
-signals:
-    void expandView(bool exp);
-private:
-    PrimitiveButton* exp;
-    bool isExpanded;
-};
-
-class TreeWidgetWithMenu : public QTreeWidget
-{
-    Q_OBJECT
-public:
-    TreeWidgetWithMenu(QWidget* parent = NULL);
-    ~TreeWidgetWithMenu();
-
-    void insertInMenu(const QString& st,const QVariant& data);
-protected:
-    void contextMenuEvent( QContextMenuEvent * event );
-private:
-    QMenu* menu;
-
-signals:
-    void selectedAction(QAction* act);
-};
 
 class DelayedToolButtonPopUpStyle : public QProxyStyle
 {
@@ -184,7 +100,7 @@ private slots:
     void changeFocus(const int k);
 };
 
-class MLFloatSlider : public QSlider 
+class MLFloatSlider : public QSlider
 {
     Q_OBJECT
 
