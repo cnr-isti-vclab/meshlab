@@ -50,7 +50,6 @@ HEADERS += 	\
     ml_mesh_type.h \
     meshmodel.h \
     pluginmanager.h \
-    xmlfilterinfo.h \
     mlexception.h \
     mlapplication.h \
     scriptsyntax.h \
@@ -67,7 +66,6 @@ SOURCES += \
     GLLogStream.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
-    xmlfilterinfo.cpp \
     mlapplication.cpp \
     scriptsyntax.cpp \
     searcher.cpp \

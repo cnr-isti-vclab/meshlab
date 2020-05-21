@@ -586,9 +586,6 @@ QString ExternalLib::libCode() const
 	if (!lib.open(QFile::ReadOnly))
 		qDebug("Warning: Library %s has not been loaded.", qUtf8Printable(name));
 	QByteArray libcode = lib.readAll();
-		/*QScriptValue res = env.evaluate(QString(libcode));
-		if (res.isError())
-		throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");*/
 	return QString(libcode);
 }
 

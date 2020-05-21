@@ -49,7 +49,6 @@ class MeshModel;
 class RenderMode;
 class GLArea;
 class GLAreaReg;
-class QScriptEngine;
 
 class MeshModel;
 

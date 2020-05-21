@@ -23,7 +23,6 @@
 
 
 #include "../common/interfaces.h"
-#include "../common/xmlfilterinfo.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
 #include "../common/mlexception.h"
