@@ -25,8 +25,7 @@ set(SOURCES
     mlapplication.cpp
     pluginmanager.cpp
     scriptsyntax.cpp
-    searcher.cpp
-    xmlfilterinfo.cpp)
+    searcher.cpp)
 
 set(HEADERS
     GLExtensionsManager.h
@@ -45,8 +44,7 @@ set(HEADERS
     mlexception.h
     pluginmanager.h
     scriptsyntax.h
-    searcher.h
-    xmlfilterinfo.h)
+    searcher.h)
 
 set(RESOURCES common.qrc)
 

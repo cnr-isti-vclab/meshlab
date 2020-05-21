@@ -25,13 +25,11 @@
 #define PLUGINMANAGER_H
 
 #include "interfaces.h"
-#include "xmlfilterinfo.h"
 #include "scriptsyntax.h"
 
 #include<QMap>
 #include<QObject>
 
-class QScriptEngine;
 /**
 \brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
 */
