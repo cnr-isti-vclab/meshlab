@@ -654,9 +654,6 @@ void MainWindow::initSearchEngine()
 	for (QMap<QString, QAction*>::iterator it = PM.actionFilterMap.begin(); it != PM.actionFilterMap.end(); ++it)
 		initItemForSearching(it.value());
 
-	for (QMap<QString, MeshLabXMLFilterContainer>::iterator it = PM.stringXMLFilterMap.begin(); it != PM.stringXMLFilterMap.end(); ++it)
-		initItemForSearching(it.value().act);
-
 	initMenuForSearching(editMenu);
 	initMenuForSearching(renderMenu);
 }
@@ -827,114 +824,6 @@ void MainWindow::fillFilterMenu()
 		//    filterToolBar->addAction(filterAction);
 
 
-	}
-
-	QMap<QString, MeshLabXMLFilterContainer>::iterator xmlit;
-	for (xmlit = PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end(); ++xmlit)
-	{
-		try
-		{
-			//MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
-			QAction *filterAction = xmlit.value().act;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter action value.");
-			MLXMLPluginInfo* info = xmlit.value().xmlInfo;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter info value.");
-			QString filterName = xmlit.key();
-
-			QString help = info->filterHelp(filterName);
-			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
-			connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
-			QString filterClasses = info->filterAttribute(filterName, MLXMLElNames::filterClass);
-			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-			foreach(QString nameClass, filterClassesList)
-			{
-				if (nameClass == QString("FaceColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("VertexColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("Selection"))
-				{
-					filterMenuSelect->addAction(filterAction);
-				}
-				if (nameClass == QString("Cleaning"))
-				{
-					filterMenuClean->addAction(filterAction);
-				}
-				if (nameClass == QString("Remeshing"))
-				{
-					filterMenuRemeshing->addAction(filterAction);
-				}
-				if (nameClass == QString("Smoothing"))
-				{
-					filterMenuSmoothing->addAction(filterAction);
-				}
-				if (nameClass == QString("Normal"))
-				{
-					filterMenuNormal->addAction(filterAction);
-				}
-				if (nameClass == QString("Quality"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Measure"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Layer"))
-				{
-					filterMenuMeshLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("RasterLayer"))
-				{
-					filterMenuRasterLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("MeshCreation"))
-				{
-					filterMenuCreate->addAction(filterAction);
-				}
-				if (nameClass == QString("RangeMap"))
-				{
-					filterMenuRangeMap->addAction(filterAction);
-				}
-				if (nameClass == QString("PointSet"))
-				{
-					filterMenuPointSet->addAction(filterAction);
-				}
-				if (nameClass == QString("Sampling"))
-				{
-					filterMenuSampling->addAction(filterAction);
-				}
-				if (nameClass == QString("Texture"))
-				{
-					filterMenuTexture->addAction(filterAction);
-				}
-				if (nameClass == QString("Polygonal"))
-				{
-					filterMenuPolygonal->addAction(filterAction);
-				}
-				if (nameClass == QString("Camera"))
-				{
-					filterMenuCamera->addAction(filterAction);
-				}
-				//  //  MeshFilterInterface::Generic :
-				if (nameClass == QString("Generic"))
-				{
-					filterMenu->addAction(filterAction);
-				}
-				//if(!filterAction->icon().isNull())
-				//    filterToolBar->addAction(filterAction);
-			}
-		}
-		catch (ParsingException &e)
-		{
-			meshDoc()->Log.Log(GLLogStream::SYSTEM, e.what());
-		}
 	}
 }
 

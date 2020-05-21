@@ -143,20 +143,6 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                     foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
                                     addItems(pluginItem,Templist);
                                 }
-                                MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-                                if (iXMLFilter)
-                                {
-                                    QString xmlFile = computeXmlFilename(dir, fileName);
-                                    XMLMessageHandler xmlErr;
-                                    MeshLabXMLFilterContainer fc;
-                                    fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-                                    if (fc.xmlInfo != NULL)
-                                    {
-                                        QStringList fn = fc.xmlInfo->filterNames();
-                                        addItems(pluginItem,fn);
-                                    }
-                                    MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
-                                }
                                 MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
                                 if (iRender){
                                     QStringList Templist;
@@ -223,21 +209,6 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
         {
             foreach(QAction *a,iFilter->actions())
                             if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
-        }
-        MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-        if (iXMLFilter)
-        {
-            QString xmlFile = computeXmlFilename(dir, parent);
-            XMLMessageHandler xmlErr;
-            MeshLabXMLFilterContainer fc;
-            fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-            if (fc.xmlInfo != NULL)
-            {
-                QStringList ls = fc.xmlInfo->filterNames();
-                foreach(QString fn,ls)
-                    labelInfo->setText(fc.xmlInfo->filterHelp(fn));
-            }
-            MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
         }
         MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
         if (iRender){
