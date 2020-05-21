@@ -24,7 +24,6 @@ set(SOURCES
     ml_thread_safe_memory_info.cpp
     mlapplication.cpp
     pluginmanager.cpp
-    scriptinterface.cpp
     scriptsyntax.cpp
     searcher.cpp
     xmlfilterinfo.cpp)
@@ -45,7 +44,6 @@ set(HEADERS
     mlapplication.h
     mlexception.h
     pluginmanager.h
-    scriptinterface.h
     scriptsyntax.h
     searcher.h
     xmlfilterinfo.h)

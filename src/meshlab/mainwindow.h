@@ -30,7 +30,6 @@
 #include <GL/glew.h>
 
 #include "../common/pluginmanager.h"
-#include "../common/scriptinterface.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 
@@ -233,7 +232,7 @@ private slots:
     ///////////Solt Wrapper for QMdiArea //////////////////
     void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
-    void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
+	//void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
     void updateGPUMemBar(int,int,int,int);
 

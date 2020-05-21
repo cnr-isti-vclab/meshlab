@@ -26,7 +26,6 @@
 
 #include "interfaces.h"
 #include "xmlfilterinfo.h"
-#include "scriptinterface.h"
 #include "scriptsyntax.h"
 
 #include<QMap>
@@ -38,9 +37,6 @@ class QScriptEngine;
 */
 class PluginManager
 {
-private:
-	QString scriptplugcode;
-
 public:
     PluginManager();
     ~PluginManager();
