@@ -25,7 +25,7 @@
 #define PLUGINMANAGER_H
 
 #include "interfaces.h"
-#include "scriptsyntax.h"
+//#include "scriptsyntax.h"
 
 #include<QMap>
 #include<QObject>
@@ -77,7 +77,6 @@ public:
 
     static QString osDependentFileBaseName(const QString& plname);
     static QString osIndependentPluginName(const QString& plname);
-    QList<LibraryElementInfo> libinfolist;
 };
 
 #endif // PLUGINMANAGER_H
