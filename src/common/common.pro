@@ -4,7 +4,6 @@ EXIF_DIR = ../external/jhead-3.04
 QT += opengl
 QT += xml
 QT += xmlpatterns
-QT += script
 
 TEMPLATE = lib
 TARGET = meshlab-common
