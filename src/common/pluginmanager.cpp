@@ -74,7 +74,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	QStringList pluginfilters;
 
 	pluginfilters << QString("*." + DLLExtension());
-	pluginfilters << "*.xml";
+	//pluginfilters << "*.xml";
 
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(pluginfilters);
@@ -84,125 +84,83 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	ScriptAdapterGenerator gen;
 	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
 	scriptplugcode += MLXMLUtilityFunctions::pluginsNameSpace() + " = { };\n";
-	foreach(QString fileName, pluginsDir.entryList(QDir::Files))
+	for(QString fileName : pluginsDir.entryList(QDir::Files))
 	{
 		//      qDebug() << fileName;
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
-		if (fin.suffix() == "xml")
+		QPluginLoader loader(absfilepath);
+		QObject *plugin = loader.instance();
+		if (plugin)
 		{
-			try
+			pluginsLoaded.push_back(fileName);
+			MeshCommonInterface *iCommon = nullptr;
+			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			if (iFilter)
 			{
-				MLXMLPluginInfo* pluginfo = loadXMLPlugin(fileName);
-                if (pluginfo == NULL)
-                {
-                    QString err;
-                    err = "WARNING! " + fileName + " xml-based plugin was not found!";
-                    throw MLException(err);
-                }
-//				//WARNING!!!! Why this piece of code is not inside the loadXMLPlugin function?!?!?!?!?!?!
-//				//Because one day, hopefully, the RichParameterSet class (the old parameters system) will disappear and we don't want to spread it inside the XML functions
-
-//				if (pluginfo != NULL)
-//				{
-//					QString pluginprogname = pluginfo->pluginScriptName();
-//					foreach(QString filtername, pluginfo->filterNames())
-//					{
-//						QString filterprogname = pluginfo->filterAttribute(filtername, MLXMLElNames::filterScriptFunctName);
-//						foreach(MLXMLPluginInfo::XMLMap params, pluginfo->filterParametersExtendedInfo(filtername))
-//						{
-//							if (params[MLXMLElNames::paramIsPersistent] == QString("true"))
-//							{
-//                                //RichParameter* rp = NULL;
-//								QString completepreamble = MLXMLUtilityFunctions::completeFilterProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), pluginprogname, filterprogname);
-//								/*RichParameterAdapter::create(completepreamble,params, &rp);
-//								if (rp != NULL)
-//								defaultGlobal.addParam(rp);*/
-//							}
-//						}
-//					}
-//				}
-			}
-			catch (MeshLabXMLParsingException& e)
-			{
-				qDebug() << e.what();
-			}
-    }
-		else
-		{
-			QPluginLoader loader(absfilepath);
-			QObject *plugin = loader.instance();
-			if (plugin)
-			{
-				pluginsLoaded.push_back(fileName);
-				MeshCommonInterface *iCommon = nullptr;
-				MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-				if (iFilter)
+				iCommon = iFilter;
+				meshFilterPlug.push_back(iFilter);
+				for(QAction *filterAction : iFilter->actions())
 				{
-					iCommon = iFilter;
-					meshFilterPlug.push_back(iFilter);
-					foreach(QAction *filterAction, iFilter->actions())
-					{
-						filterAction->setData(QVariant(fileName));
-						actionFilterMap.insert(filterAction->text(), filterAction);
-						stringFilterMap.insert(filterAction->text(), iFilter);
-						iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
-                        if(iFilter->getClass(filterAction)==MeshFilterInterface::Generic)     
-                          throw MLException("Missing class for "        +fileName+filterAction->text());
-                        if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))   
-                          throw MLException("Missing requirements for " +fileName+filterAction->text());
-                        if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN))  
-                          throw MLException("Missing preconditions for "+fileName+filterAction->text());
-                        if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN ))    
-                          throw MLException("Missing postcondition for "+fileName+filterAction->text());
-                        if(iFilter->filterArity(filterAction) == MeshFilterInterface::UNKNOWN_ARITY )    
-                          throw MLException("Missing Arity for "        +fileName+filterAction->text());
-					}
-				}
-				MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-				if (iIO)
-				{
-					iCommon = iIO;
-					meshIOPlug.push_back(iIO);
-					iIO->initGlobalParameterSet(NULL, defaultGlobal);
-				}
-
-				MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
-				if (iDecorator)
-				{
-					iCommon = iDecorator;
-					meshDecoratePlug.push_back(iDecorator);
-					foreach(QAction *decoratorAction, iDecorator->actions())
-					{
-						decoratorActionList.push_back(decoratorAction);
-						iDecorator->initGlobalParameterSet(decoratorAction, defaultGlobal);
-					}
-				}
-
-				MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-				if (iRender)
-				{
-					iCommon = iRender;
-					meshRenderPlug.push_back(iRender);
-				}
-
-				MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-				if (iEditFactory)
-				{
-					meshEditInterfacePlug.push_back(iEditFactory);
-					foreach(QAction* editAction, iEditFactory->actions())
-						editActionList.push_back(editAction);
-				}
-				else if (iCommon)
-				{
-					ownerPlug.push_back(iCommon);
-				} else {
-					// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
+					filterAction->setData(QVariant(fileName));
+					actionFilterMap.insert(filterAction->text(), filterAction);
+					stringFilterMap.insert(filterAction->text(), iFilter);
+					iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
+					if(iFilter->getClass(filterAction)==MeshFilterInterface::Generic)
+						throw MLException("Missing class for "        +fileName+filterAction->text());
+					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))
+						throw MLException("Missing requirements for " +fileName+filterAction->text());
+					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN))
+						throw MLException("Missing preconditions for "+fileName+filterAction->text());
+					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN ))
+						throw MLException("Missing postcondition for "+fileName+filterAction->text());
+					if(iFilter->filterArity(filterAction) == MeshFilterInterface::UNKNOWN_ARITY )
+						throw MLException("Missing Arity for "        +fileName+filterAction->text());
 				}
 			}
-			else
-				qDebug() << loader.errorString();
+			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			if (iIO)
+			{
+				iCommon = iIO;
+				meshIOPlug.push_back(iIO);
+				iIO->initGlobalParameterSet(NULL, defaultGlobal);
+			}
+
+			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
+			if (iDecorator)
+			{
+				iCommon = iDecorator;
+				meshDecoratePlug.push_back(iDecorator);
+				foreach(QAction *decoratorAction, iDecorator->actions())
+				{
+					decoratorActionList.push_back(decoratorAction);
+					iDecorator->initGlobalParameterSet(decoratorAction, defaultGlobal);
+				}
+			}
+
+			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			if (iRender)
+			{
+				iCommon = iRender;
+				meshRenderPlug.push_back(iRender);
+			}
+
+			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+			if (iEditFactory)
+			{
+				meshEditInterfacePlug.push_back(iEditFactory);
+				foreach(QAction* editAction, iEditFactory->actions())
+					editActionList.push_back(editAction);
+			}
+			else if (iCommon)
+			{
+				ownerPlug.push_back(iCommon);
+			} else {
+				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
+			}
 		}
+		else
+			qDebug() << loader.errorString();
 	}
 	knownIOFormats();
 }
@@ -364,168 +322,6 @@ void PluginManager::knownIOFormats()
 		allKnownFormatsFilter.append(')');
 		if (formatFilters != NULL)
 			formatFilters->push_front(allKnownFormatsFilter);
-	}
-}
-
-//void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
-//{
-//	//WARNING!
-//	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
-//	currentDocInterface = new MeshDocumentSI(&doc);
-//	QScriptValue val = env.newQObject(currentDocInterface);
-//	env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val);
-//}
-
-QString PluginManager::pluginsCode() const
-{
-  return scriptplugcode;
-}
-
-MLXMLPluginInfo* PluginManager::loadXMLPlugin(const QString& fileName)
-{
-	ScriptAdapterGenerator gen;
-	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
-	QFileInfo fin(absfilepath);
-	if (fin.suffix() == "xml")
-	{
-
-		QString dllfile = osDependentFileBaseName(fin.completeBaseName());
-
-		MeshLabXMLFilterContainer fc;
-		//fc.filterInterface = NULL;
-		XMLMessageHandler xmlErr;
-		MLXMLPluginInfo* pluginfo = MLXMLPluginInfo::createXMLPluginInfo(absfilepath, MLXMLUtilityFunctions::xmlSchemaFile(), xmlErr);
-		if (pluginfo != NULL)
-		{
-			xmlpluginfo << pluginfo;
-			fc.xmlInfo = xmlpluginfo[xmlpluginfo.size() - 1];
-			//      QStringList fn = fc.xmlInfo->filterNames();
-			QObject* par = NULL;
-			if (pluginsDir.exists(dllfile))
-			{
-				QPluginLoader loader(fin.absoluteDir().absolutePath() + "/" + dllfile);
-				QObject* plugin = loader.instance();
-				MeshLabFilterInterface* iXMLfilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-				if (iXMLfilter != NULL)
-				{
-					meshlabXMLFilterPlug << iXMLfilter;
-					fc.filterInterface = meshlabXMLFilterPlug[meshlabXMLFilterPlug.size() - 1];
-					par = plugin;
-				}
-			}
-			else
-			{
-				// we have loaded an xml without the corresponding dll. Let's check that it is a pure javascript plugin
-				bool foundANonJavaScriptFilter = false;
-				foreach(QString filterName, pluginfo->filterNames())
-				{
-					if (pluginfo->filterElement(filterName, MLXMLElNames::filterJSCodeTag).isEmpty())
-						foundANonJavaScriptFilter = true;
-				}
-				if (foundANonJavaScriptFilter)
-				{
-					throw(MeshLabXMLParsingException("We are trying to load a xml file that does not correspond to any dll or javascript code; please delete all the spurious xml files"));
-				}
-				par = new QObject();
-			}
-			QString pname = pluginfo->pluginScriptName();
-			if (pname != "")
-			{
-				QString plugnamespace = MLXMLUtilityFunctions::pluginsNameSpace() + "." + pname;
-				//pluginnamespaces << plugnamespace;
-				scriptplugcode += plugnamespace + " = { };\n";
-				QStringList filters = pluginfo->filterNames();
-				foreach(QString filter, filters)
-				{
-					MLXMLPluginInfo::XMLMapList paramsinfo = pluginfo->filterParametersExtendedInfo(filter);
-					QString completename = plugnamespace;
-					fc.act = new QAction(filter, par);
-					fc.act->setData(QVariant(dllfile));
-					stringXMLFilterMap.insert(filter, fc);
-					QString filterFunction = pluginfo->filterScriptCode(filter);
-					if (filterFunction == "")
-						filterFunction = gen.funCodeGenerator(filter, *pluginfo);
-					else
-						filterFunction = "{" + filterFunction + "};";
-					QString jname = pluginfo->filterAttribute(filter, MLXMLElNames::filterScriptFunctName);
-					completename += "." + jname;
-					//filterscriptnames << completename;
-					scriptplugcode += completename + " = " + filterFunction + "\n";
-					completename += ".";
-					//for (MLXMLPluginInfo::XMLMap& paraminfo : paramsinfo)
-					//{
-					//	if (paraminfo[MLXMLElNames::paramIsPersistent] == "true")
-					//	{	
-					//		QString fullvarname = completename + paraminfo[MLXMLElNames::paramName];
-					//		//scriptplugcode += namespaceVariableAssignment(fullvarname, paraminfo[MLXMLElNames::paramDefExpr]);
-					//		paraminfo[MLXMLElNames::paramDefExpr] = fullvarname;
-					//	}
-					//}
-
-					completename += "(" + gen.parNames(filter, *pluginfo) + ")";
-					LibraryElementInfo li;
-					li.completename = completename;
-					li.help = pluginfo->filterHelp(filter);
-					libinfolist << li;
-				}
-			}
-			return pluginfo;
-		}
-		else
-		{
-			QString err = xmlErr.statusMessage();
-			qDebug("Error in XMLFile: %s - line: %d, column: %d - %s", qUtf8Printable(fileName), xmlErr.line(), xmlErr.column(), qUtf8Printable(err));
-		}
-	}
-	return nullptr;
-}
-
-//MLXMLPluginInfo* PluginManager::getXMLPluginInfo( const QString& plugname )
-//{
-//	for(int ii = 0;ii < xmlpluginfo.size();++ii)
-//		if (xmlpluginfo[ii]->pluginFilePath() != plugname)
-//			return xmlpluginfo[ii];
-//	return NULL;
-//}
-
-void PluginManager::deleteXMLPlugin(const QString& plugscriptname)
-{
-	bool found = false;
-	int ii = 0;
-	while ((ii < xmlpluginfo.size()) && !found)
-	{
-		if (xmlpluginfo[ii]->pluginScriptName() == plugscriptname)
-			found = true;
-		else
-			++ii;
-	}
-	if (found)
-	{
-		QStringList removefilters;
-		QSet<MeshLabFilterInterface*> tobedeleted;
-		for (QMap<QString, MeshLabXMLFilterContainer>::iterator it = stringXMLFilterMap.begin(); it != stringXMLFilterMap.end();)
-		{
-			if (xmlpluginfo[ii] == it.value().xmlInfo)
-			{
-				QString rem = it.key();
-				if (it.value().filterInterface != NULL)
-					tobedeleted.insert(it.value().filterInterface);
-				++it;
-				stringXMLFilterMap.remove(rem);
-			}
-			else
-				++it;
-		}
-		MLXMLPluginInfo* tmp = xmlpluginfo[ii];
-		xmlpluginfo.remove(ii);
-		MLXMLPluginInfo::destroyXMLPluginInfo(tmp);
-		for (QSet<MeshLabFilterInterface*>::iterator it = tobedeleted.begin(); it != tobedeleted.end(); ++it)
-		{
-			int ii = meshlabXMLfilterPlugins().indexOf(*it);
-			MeshLabFilterInterface* fi = meshlabXMLfilterPlugins()[ii];
-			meshlabXMLfilterPlugins().remove(ii);
-			delete fi;
-		}
 	}
 }
 

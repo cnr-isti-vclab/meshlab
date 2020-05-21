@@ -27,9 +27,7 @@
 
 #include "filterparameter.h"
 #include "GLLogStream.h"
-//#include "meshmodel.h"
 #include "scriptinterface.h"
-//#include "xmlfilterinfo.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -65,10 +63,6 @@ public:
 	virtual void executeFilter(QAction *, RichParameterSet &, bool = false) {}
 	//parexpval is a string map containing the parameter expression values set in the filter's dialog.
 	//These parameter expression values will be evaluated when the filter will start.
-	virtual void executeFilter(MeshLabXMLFilterContainer*, const QMap<QString, QString>&, bool = false) {}
-	//virtual void executeFilter(MeshLabXMLFilterContainer*,Env& envcode , bool  isPreview = false) {}
-
-	//virtual void getCurrentPersistentParsMap(QMap<QString, QString>&) const {}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.

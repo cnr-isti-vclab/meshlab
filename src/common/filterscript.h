@@ -35,6 +35,7 @@ class FilterNameParameterValuesPair
 {
 public:
 	virtual QString filterName() const { return pair.first; }
+	virtual ~FilterNameParameterValuesPair() {}
 	QPair< QString, RichParameterSet > pair;
 };
 

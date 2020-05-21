@@ -47,9 +47,6 @@ public:
     enum TypeIO{IMPORT,EXPORT};
     void loadPlugins(RichParameterSet& defaultGlobal);
     QString pluginsCode() const;
-	MLXMLPluginInfo* loadXMLPlugin(const QString& filename);
-    //MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
-    void deleteXMLPlugin(const QString& plugscriptname);
 
     inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
     inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
