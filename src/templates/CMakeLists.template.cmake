@@ -35,13 +35,6 @@ set(UI
     {{ ui | join('\n') | indent(4) }}
 )
 {% endif %}
-{% if xml %}
-set(XML
-    {{ xml | join('\n') | indent(4) }}
-)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
-{% endif %}
 
 
 {% block add_target %}
