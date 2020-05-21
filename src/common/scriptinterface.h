@@ -73,22 +73,6 @@ public:
     static Matrix44m vector16ToVcgMatrix44(const QVector<Scalarm>& v);
 };
 
-//class VCGPoint3fSI : public QObject
-//{
-//	Q_OBJECT
-//public:
-//
-//	VCGPoint3fSI& operator =(const VCGPoint3fSI& b);
-//	VCGPoint3fSI();
-//	VCGPoint3fSI(const float x,const float y,const float z);
-//	Q_INVOKABLE void add(const VCGPoint3fSI& p);
-//	Q_INVOKABLE void mult(const float s);
-//	//Q_INVOKABLE VCGPoint3fSI& set(const float x,const float y,const float z);
-//	vcg::Point3f pp;
-//};
-
-
-
 class VCGVertexSI : public QObject
 {
     Q_OBJECT
@@ -282,27 +266,6 @@ QScriptValue ShotSI_defctor(QScriptContext* c,QScriptEngine* e);
     {
         return e->toScriptValue(*qscriptvalue_cast<VCGPoint3SI*>(c->argument(0)) * (Scalarm) c->argument(1).toNumber());
     }
-
-
-//QScriptValue VCGPoint3SI_multV3S(QScriptContext * c,QScriptEngine *e );
-//class EnvWrap : protected virtual QScriptEngine
-//{
-//private:
-//	bool constStatement(const QString& statement) const;
-//	QScriptValue getExp( const QString& nm );
-//public:
-//	EnvWrap();
-//	bool getBool(const QString& nm);
-//	float getFloat(const QString& nm);
-//};
-//
-//
-//class Env : public EnvWrap, public virtual QScriptEngine
-//{
-//public:
-//	Env();
-//	void insertExpressionBinding(const QString& nm,const QString& exp);
-//};
 
 
 #endif

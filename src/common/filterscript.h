@@ -39,14 +39,6 @@ public:
 	QPair< QString, RichParameterSet > pair;
 };
 
-//class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
-//{
-//public:
-//	~XMLFilterNameParameterValuesPair() {}
-//	QString filterName() const { return pair.first; }
-//	QPair< QString, QMap<QString, QString> > pair;
-//};
-
 /*
 The filterscipt class abstract the concept of history of processing.
 It is simply a list of all the performed actions
@@ -65,9 +57,6 @@ public:
 
 	QList< FilterNameParameterValuesPair* > filtparlist;
 	typedef QList< FilterNameParameterValuesPair* >::iterator iterator;
-
-//public slots:
-	//void addExecutedXMLFilter(const QString& name, const QMap<QString, QString>& parvalue);
 };
 
 #endif
