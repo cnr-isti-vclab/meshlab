@@ -25,7 +25,6 @@
 #define SAMPLEFILTERSPLUGIN_H
 
 #include <common/interfaces.h>
-//class QScriptEngine;
 
 class FilterScreenedPoissonPlugin : public QObject, public MeshFilterInterface
 {

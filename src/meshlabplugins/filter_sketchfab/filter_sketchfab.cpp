@@ -25,8 +25,7 @@
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QScriptValue>
-#include <QScriptEngine>
+#include <QJSEngine>
 #include <wrap/io_trimesh/export_ply.h>
 #include "miniz.h"
 
@@ -234,12 +233,13 @@ bool FilterSketchFabPlugin::upload(
 
 	// get the api answer
 	QByteArray result = reply->readAll();
-	QScriptValue sc;
-	QScriptEngine engine;
+	QJSValue sc;
+	QJSEngine engine;
 	qDebug() << "Result:" << result;
 	sc = engine.evaluate("(" + QString(result) + ")");
 	QString uid = sc.property("uid").toString();
-	if(uid.isEmpty())         return false;
+	if(uid.isEmpty())
+		return false;
 	qDebug() << "Model uploaded with id" << uid;
 	urlModel = "https://sketchfab.com/models/"+uid.toStdString();
 	return true;
