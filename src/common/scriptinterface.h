@@ -42,10 +42,7 @@ public:
     inline static const QString meshDocVarName() {return QString("meshDoc");}
 
     QString mergeOptParamsCodeGenerator() const;
-    QString parNames(const QString&  filterName,MLXMLPluginInfo& xmlInfo) const;
     QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
-    QString funCodeGenerator(const QString&  filtername,MLXMLPluginInfo& xmlInfo) const;
-
 };
 
 QScriptValue IRichParameterSet_prototype_setBool(QScriptContext* c,QScriptEngine* e);

@@ -53,14 +53,6 @@ PluginManager::~PluginManager()
 	for (int ii = 0; ii < meshEditInterfacePlug.size(); ++ii)
 		delete meshEditInterfacePlug[ii];
 	meshEditInterfacePlug.clear();
-
-	for (int ii = 0; ii < meshlabXMLFilterPlug.size(); ++ii)
-		delete meshlabXMLFilterPlug[ii];
-	meshlabXMLFilterPlug.clear();
-
-	for (int ii = 0; ii < xmlpluginfo.size(); ++ii)
-		MLXMLPluginInfo::destroyXMLPluginInfo(xmlpluginfo[ii]);
-	xmlpluginfo.clear();
 }
 
 
@@ -83,7 +75,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	scriptplugcode = "";
 	ScriptAdapterGenerator gen;
 	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
-	scriptplugcode += MLXMLUtilityFunctions::pluginsNameSpace() + " = { };\n";
 	for(QString fileName : pluginsDir.entryList(QDir::Files))
 	{
 		//      qDebug() << fileName;
