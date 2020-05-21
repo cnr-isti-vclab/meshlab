@@ -350,9 +350,6 @@ public:
     QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 
 private:
-    //the xml filters run in a different thread. The xmlfiltertimer starts on executeFilter and stops on postFilterExecution
-    //function linked to the thread finished signal.
-    QElapsedTimer xmlfiltertimer;
     WordActionsMapAccessor wama;
     //////// ToolBars ///////////////
     QToolBar *mainToolBar;

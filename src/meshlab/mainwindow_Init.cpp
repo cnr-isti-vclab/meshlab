@@ -51,14 +51,10 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-	:mwsettings(), gpumeminfo(NULL), xmlfiltertimer(), wama()
+	:mwsettings(), gpumeminfo(NULL), wama()
 {
 	_currviewcontainer = NULL;
-	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
-	//Subsequently restart function will be invoked.
 	setContextMenuPolicy(Qt::NoContextMenu);
-	xmlfiltertimer.start();
-	//xmlfiltertimer.elapsed();
 
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
@@ -447,11 +443,6 @@ connectRenderModeActionList(rendlist);*/
 	connect(splitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(splitFromHandle(QAction *)));
 
 	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
-
-	//TOOL MENU
-	//showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"), this);
-	//showFilterEditAct->setEnabled(true);
-	//connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 
 }
 

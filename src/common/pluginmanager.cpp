@@ -1,6 +1,5 @@
 #include "pluginmanager.h"
 #include <QObject>
-#include <QtScript/QtScript>
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
@@ -64,7 +63,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	QStringList pluginfilters;
 
 	pluginfilters << QString("*." + DLLExtension());
-	//pluginfilters << "*.xml";
 
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(pluginfilters);
