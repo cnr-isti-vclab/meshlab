@@ -48,11 +48,6 @@ public:
 
 };
 
-
-//QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine, void * param);
-//QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine, void * param);
-QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *engine, void * param);
-
 QScriptValue IRichParameterSet_prototype_setBool(QScriptContext* c,QScriptEngine* e);
 QScriptValue IRichParameterSet_prototype_setInt(QScriptContext* c,QScriptEngine* e);
 QScriptValue IRichParameterSet_prototype_setAbsPerc(QScriptContext* c,QScriptEngine* e);
@@ -221,12 +216,6 @@ public:
 
     QString output();
     void appendOutput(const QString& output);
-    QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm);
-
-	//global map contains purified name (i.e. Env::convertToAMLScriptValidName(paramname) fun is called) of the global parameters and their values
-	QScriptValue loadMLScriptEnv(MeshDocument& md, PluginManager& pm, const QMap<QString, QString>& global);
-	////global map contains purified name (i.e. Env::convertToAMLScriptValidName(paramname) fun is called) of the global parameters and their values
-	//QScriptValue loadMLScriptEnv(MeshDocument& md, PluginManager& pm, const QString & xmlpluginnamespace, const QString & pluginname, const QString & filtername, const QMap<QString,QString>& global);
 
 private:
 	void insertParamsExpressionBinding(const QString & xmlpluginnamespace, const QString & pluginname, const QString & filtername, const QMap<QString, QString>& parvalmap);

@@ -191,62 +191,6 @@ static bool TestCallback(const int, const char*)
 	return true;
 }
 
-//QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine, void * param)
-//{
-//	QString filterName = context->argument(0).toString();
-//	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
-//	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
-//	if (it == pm->stringFilterMap.end())
-//	{
-//		return false;
-//	}
-//
-//	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
-//	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
-//
-//	MeshFilterInterface * mi = it.value();
-//	QAction act(filterName, NULL);
-//	mi->initParameterSet(&act, (md->current()->mm), *rps);
-//
-//	return true;
-//}
-
-//QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine, void * param)
-//{
-//	QString filterName = context->argument(0).toString();
-//	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
-//	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
-//	if (it == pm->stringFilterMap.end())
-//	{
-//		return false;
-//	}
-//
-//	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
-//	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
-//
-//	MeshFilterInterface * mi = it.value();
-//	QAction act(filterName, NULL);
-//	const bool res = mi->applyFilter(&act, *(md->md), *rps, TestCallback);
-//
-//	return res;
-//}
-
-QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *engine, void * param)
-{
-	QString filterName = context->argument(0).toString();
-	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
-	QMap<QString, MeshLabXMLFilterContainer>::iterator it = pm->stringXMLFilterMap.find(filterName);
-	if (it == pm->stringXMLFilterMap.end())
-		return false;
-
-	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
-	EnvWrap* envWrap = qscriptvalue_cast<EnvWrap*>(context->argument(1));
-
-	MeshLabFilterInterface * mi = it->filterInterface;
-	const bool res = mi->applyFilter(filterName, *(md->md), *envWrap, TestCallback);
-	return QScriptValue(res);
-}
-
 Q_DECLARE_METATYPE(RichParameterSet)
 Q_DECLARE_METATYPE(RichParameterSet*)
 
@@ -928,36 +872,6 @@ QString Env::output()
 void Env::appendOutput(const QString& output)
 {
 	out = out + output;
-}
-
-QScriptValue Env::loadMLScriptEnv(MeshDocument& md, PluginManager& pm)
-{
-	QString code;
-	MeshDocumentSI* mi = new MeshDocumentSI(&md);
-	_tobedeleted << mi;
-	QScriptValue val = newQObject(mi);
-	globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(), val);
-	JavaScriptLanguage lang;
-	code += lang.getExternalLibrariesCode();
-	QScriptValue applyFun = newFunction(PluginInterfaceApplyXML, &pm);
-	globalObject().setProperty("_applyFilter", applyFun);
-	//QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
-	code += pm.pluginsCode();
-	QScriptValue res = evaluate(code);
-	return res;
-}
-
-QScriptValue Env::loadMLScriptEnv(MeshDocument& md, PluginManager& pm, const QMap<QString, QString>& global)
-{
-	QScriptValue res = loadMLScriptEnv(md, pm);
-	if (res.isError())
-		throw JavaScriptException("A current environment evaluation generated a JavaScript Error: " + res.toString() + "\n");
-
-	for (QMap<QString, QString>::const_iterator it = global.begin(); it != global.end(); ++it)
-		insertExpressionBinding(Env::convertToAMLScriptValidName(it.key()), it.value());
-	//insertParamsExpressionBinding(xmlpluginnamespace,pluginname, filtername,global);
-
-	return res;
 }
 
 QString Env::convertToAMLScriptValidName(const QString& name)

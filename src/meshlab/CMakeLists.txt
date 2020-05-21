@@ -10,7 +10,6 @@ set(SOURCES
     changetexturename.cpp
     customDialog.cpp
     filterScriptDialog.cpp
-    filterthread.cpp
     glarea.cpp
     glarea_setting.cpp
     layerDialog.cpp
@@ -36,7 +35,6 @@ set(HEADERS
     changetexturename.h
     customDialog.h
     filterScriptDialog.h
-    filterthread.h
     glarea.h
     glarea_setting.h
     layerDialog.h

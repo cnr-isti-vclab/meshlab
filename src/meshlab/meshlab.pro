@@ -50,8 +50,7 @@ HEADERS += \
     ml_default_decorators.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
-    $$VCGDIR/wrap/gl/trimesh.h \
-    filterthread.h
+    $$VCGDIR/wrap/gl/trimesh.h
 
 SOURCES += \
     main.cpp \
@@ -75,9 +74,7 @@ SOURCES += \
     $$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     $$VCGDIR/wrap/gui/coordinateframe.cpp \
-    glarea_setting.cpp \
-    filterthread.cpp
-
+    glarea_setting.cpp
 FORMS += \
     ui/layerDialog.ui \
     ui/filterScriptDialog.ui \
