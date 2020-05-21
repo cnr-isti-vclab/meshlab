@@ -2,244 +2,11 @@
 #include "../common/mlexception.h"
 
 #include <QStylePainter>
-#include <QHBoxLayout>
-#include <QToolTip>
+
 #include <QWidgetAction>
-#include <QApplication>
-#include <QScrollBar>
+
 #include <QStyle>
 #include <QDebug>
-#include <QMetaEnum>
-#include <qgl.h>
-
-CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
-: QStyledItemDelegate(parent)
-{
-}
-
-void CheckBoxListItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,const QModelIndex &index) const
-{
-    bool value = index.data(Qt::CheckStateRole).toBool();
-    QString text = index.data(Qt::DisplayRole).toString();
-
-    // fill style options with item data
-    const QStyle *style = QApplication::style();
-    QStyleOptionButton opt;
-    opt.state |= value ? QStyle::State_On : QStyle::State_Off;
-    opt.state |= QStyle::State_Enabled;
-    opt.text = text;
-    opt.rect = QRect(option.rect.x(),option.rect.y(),16,16);
-
-    QRect textrect(option.rect.x() + 16,option.rect.y(),option.rect.width() - 16,option.rect.height());
-    style->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,painter);
-    style->drawItemText(painter,textrect,Qt::AlignLeft,opt.palette,true,text);
-}
-
-CheckBoxList::CheckBoxList(const QString& defaultValue,QWidget *widget )
-:QComboBox(widget),highli(0),defaultval(defaultValue),popupopen(false)
-{
-    view()->viewport()->installEventFilter(this);
-    view()->setItemDelegate(new CheckBoxListItemDelegate(this));
-    connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
-}
-
-CheckBoxList::CheckBoxList( QWidget *widget /*= 0*/ )
-:QComboBox(widget),highli(0),defaultval(),popupopen(false)
-{
-    view()->viewport()->installEventFilter(this);
-        view()->setItemDelegate(new CheckBoxListItemDelegate(this));
-    connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
-}
-
-CheckBoxList::~CheckBoxList()
-{
-}
-
-void CheckBoxList::paintEvent(QPaintEvent *)
-{
-    QStylePainter painter(this);
-    painter.setPen(palette().color(QPalette::Text));
-    QStyleOptionComboBox opt;
-    initStyleOption(&opt);
-    opt.currentText = "";
-    if (selectedItemsNames().empty())
-        opt.currentText = defaultval;
-    else
-        opt.currentText = selectedItemsString(QString(" | "));
-    for (int ii=0;ii<count();++ii)
-    {
-        Qt::CheckState v;
-        if (sel.contains(itemText(ii)))
-            v = Qt::Checked;
-        else
-            v = Qt::Unchecked;
-        setItemData(ii,QVariant(v),Qt::CheckStateRole);
-    }
-    painter.drawComplexControl(QStyle::CC_ComboBox, opt);
-    painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
-}
-
-bool CheckBoxList::eventFilter(QObject *object, QEvent * event)
-{
-    if ((event->type() == QEvent::MouseButtonPress) && (!popupopen))
-    {
-        popupopen = true;
-        return true;
-    }
-    if((event->type() == QEvent::MouseButtonRelease) &&
-        (object==view()->viewport()) && popupopen)
-    {
-        updateSelected(highli);
-        repaint();
-        popupopen = true;
-        return true;
-    }
-    return QComboBox::eventFilter(object,event);
-}
-
-void CheckBoxList::focusOutEvent ( QFocusEvent * /*e*/ )
-{
-    if (popupopen)
-        popupopen = false;
-}
-
-QStringList CheckBoxList::getSelected() const
-{
-    return sel;
-}
-
-void CheckBoxList::updateSelected(const int ind)
-{
-    bool checked = itemData(ind,Qt::CheckStateRole).toBool();
-    QString text = itemText(highli);
-    if (checked)
-        sel.removeAll(text);
-    else
-        sel.push_back(text);
-}
-
-void CheckBoxList::insertCheckableItem( const int pos,const QString&
-                                       lab,const bool checked )
-{
-    insertItem(pos,lab);
-    if (checked)
-        sel.push_back(lab);
-}
-
-void CheckBoxList::insertCheckableItem(const QString& lab,const bool
-                                       checked )
-{
-    addItem(lab);
-    if (checked)
-        sel.push_back(lab);
-}
-
-void CheckBoxList::currentHighlighted( int high )
-{
-    highli = high;
-}
-
-QStringList CheckBoxList::selectedItemsNames() const
-{
-    return sel;
-}
-
-QString CheckBoxList::selectedItemsString(const QString& sep) const
-{
-    QStringList ll = selectedItemsNames();
-    if (ll.isEmpty())
-        return defaultval;
-    return ll.join(sep);
-}
-
-void CheckBoxList::setDefaultValue( const QString& defaultValue )
-{
-    defaultval = defaultValue;
-}
-
-void CheckBoxList::setCurrentValue( const QStringList& st )
-{
-    sel = st;
-    sel.removeAll(defaultval);
-}
-
-ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
-:QWidget(parent),isExpanded(false)
-{
-    exp = new PrimitiveButton(QStyle::PE_IndicatorArrowDown,this);
-    exp->setMaximumSize(16,16);
-    QHBoxLayout *hlay = new QHBoxLayout(this);
-    hlay->addWidget(exp,0,Qt::AlignHCenter);
-    connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
-}
-
-ExpandButtonWidget::~ExpandButtonWidget()
-{
-
-}
-
-void ExpandButtonWidget::changeIcon()
-{
-    isExpanded = !isExpanded;
-    if (isExpanded)
-        exp->setPrimitiveElement(QStyle::PE_IndicatorArrowUp);
-    else
-        exp->setPrimitiveElement(QStyle::PE_IndicatorArrowDown);
-    emit expandView(isExpanded);
-}
-
-PrimitiveButton::PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent )
-:QPushButton(parent),elem(el)
-{
-}
-
-PrimitiveButton::PrimitiveButton( QWidget* parent )
-:QPushButton(parent),elem(QStyle::PE_CustomBase)
-{
-
-}
-
-PrimitiveButton::~PrimitiveButton()
-{
-
-}
-
-void PrimitiveButton::paintEvent( QPaintEvent * /*event*/ )
-{
-    QStylePainter painter(this);
-    QStyleOptionButton option;
-    option.initFrom(this);
-    //painter.drawControl(QStyle::CE_PushButton,option);
-    painter.drawPrimitive (elem,option);
-}
-
-void PrimitiveButton::setPrimitiveElement( const QStyle::PrimitiveElement el)
-{
-    elem = el;
-}
-
-TreeWidgetWithMenu::TreeWidgetWithMenu( QWidget* parent /*= NULL*/ )
-:QTreeWidget(parent)
-{
-    menu = new QMenu(this);
-    connect(menu,SIGNAL(triggered(QAction*)),this,SIGNAL(selectedAction(QAction*)));
-}
-
-TreeWidgetWithMenu::~TreeWidgetWithMenu()
-{
-
-}
-
-void TreeWidgetWithMenu::contextMenuEvent( QContextMenuEvent * event )
-{
-    menu->popup(event->globalPos());
-}
-
-void TreeWidgetWithMenu::insertInMenu(const QString& st,const QVariant& data)
-{
-    QAction* act = menu->addAction(st);
-    act->setData(data);
-}
 
 SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth)
 :MenuWithToolTip(QString(),parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
@@ -477,7 +244,7 @@ int& SearchMenu::searchLineWidth()
     return fixedwidthsize;
 }
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
-MyToolButton::MyToolButton( int msecdelay,QWidget * parent /*= 0 */ ) 
+MyToolButton::MyToolButton( int msecdelay,QWidget * parent /*= 0 */ )
     : QToolButton( parent )
 {
     if (msecdelay != 0)
@@ -508,7 +275,7 @@ void MyToolButton::paintEvent( QPaintEvent * )
 {
     QStylePainter p(this);
     QStyleOptionToolButton opt;
-    initStyleOption( & opt ); 
+    initStyleOption( & opt );
     opt.features &= (~ QStyleOptionToolButton::HasMenu);
     p.drawComplexControl( QStyle::CC_ToolButton, opt );
 }
@@ -567,7 +334,7 @@ int DelayedToolButtonPopUpStyle::styleHint(QStyle::StyleHint sh, const QStyleOpt
     return QProxyStyle::styleHint(sh,opt,widget,hret);
 }
 
-MLFloatSlider::MLFloatSlider( QWidget *parent /*= 0*/ ) 
+MLFloatSlider::MLFloatSlider( QWidget *parent /*= 0*/ )
     : QSlider(parent)
 {
     connect(this, SIGNAL(valueChanged(int)),

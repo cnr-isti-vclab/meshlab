@@ -46,6 +46,7 @@
 #include <QColorDialog>
 #include <QMdiSubWindow>
 #include <QSplitter>
+#include <QProgressBar>
 
 #define MAXRECENTFILES 4
 

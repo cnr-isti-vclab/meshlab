@@ -1302,7 +1302,7 @@ MLRenderingFloatSlider::~MLRenderingFloatSlider()
 
 MLRenderingAction* MLRenderingFloatSlider::getRenderingAction()
 {
-	return _act;
+    return _act;
 }
 
 void MLRenderingFloatSlider::setRenderingFloatAction( MLRenderingFloatAction* act )
@@ -1326,7 +1326,7 @@ void MLRenderingFloatSlider::valueChanged( float val)
     {
         _act->setValue(val);
         emit updateRenderingDataAccordingToAction(_meshid,_act);
-		emit updateRenderingDataAccordingToAction(_meshid, _act,true);
+        emit updateRenderingDataAccordingToAction(_meshid, _act,true);
     }
 }
 
