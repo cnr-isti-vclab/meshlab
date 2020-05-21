@@ -714,63 +714,8 @@ public:
 
 };
 
-
-
-/**************************************************************************************************************************************************************/
-/*The new class of filter defined through XML file*/
-
-typedef bool SignalCallBack();
-
-class MeshLabFilterInterface : public QObject, public MeshLabInterface
-{
-	Q_OBJECT
-public:
-	MeshLabFilterInterface();
-	virtual ~MeshLabFilterInterface() {}
-
-	MLPluginGLContext* glContext;
-
-	static void initConvertingMap(QMap<QString, MeshModel::MeshElement>& convertingMap);
-	static void initConvertingCategoryMap(QMap<QString, MeshFilterInterface::FilterClass>& convertingMap);
-	static bool arePreCondsValid(const int filterPreConds, const MeshModel& m, QStringList &MissingItems);
-	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
-	static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
-	virtual bool applyFilter(const QString& filterName, MeshDocument& md, EnvWrap& env, vcg::CallBackPos* cb) = 0;
-	const QString &errorMsg() { return this->errorMessage; }
-	public slots:
-	inline void setInterrupt(const bool& inter) { intteruptreq = inter; };
-
-protected:
-	////This function has two different aims:
-	////1) should be invoked by filters in order to request a redraw of a subset of meshes and/or rasters inside the MeshDocument.
-	////2) like a synchronization point where the filter can safely stop is execution.
-	////if filter has not a pending interrupt request a render state update request will be sent to the framework.
-	////return value: true if the request has been sent, false otherwise (filter has an interrupt request).
-
-	//bool sendUpdateRequest(const MeshDocument& md,);
-
-	//QList<int> meshestobeupdated;
-	//int meshmaskattributestobeupdated;
-	//QList<int> rasterstobeupdated;
-	//int rastermaskattributestobeupdated;
-
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	QString errorMessage;
-	bool intteruptreq;
-signals:
-	void renderingDataRequested(int);
-	void updateDecorators(int);
-};
-
-#if (QT_VERSION  >= 0x050000)
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
-#else
-#define MESHLAB_PLUGIN_IID_EXPORTER(x)
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x) Q_EXPORT_PLUGIN(x)
-#endif
-
-
 
 #define MESH_IO_INTERFACE_IID "vcg.meshlab.MeshIOInterface/1.0"
 #define MESH_FILTER_INTERFACE_IID  "vcg.meshlab.MeshFilterInterface/1.0"

@@ -450,9 +450,9 @@ connectRenderModeActionList(rendlist);*/
 	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
 
 	//TOOL MENU
-	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"), this);
-	showFilterEditAct->setEnabled(true);
-	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
+	//showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"), this);
+	//showFilterEditAct->setEnabled(true);
+	//connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 
 }
 

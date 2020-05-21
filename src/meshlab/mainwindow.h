@@ -140,7 +140,6 @@ private slots:
 	void documentUpdateRequested();
     bool importMesh(QString fileName=QString(), bool isareload = false);
     void endEdit();
-    void postFilterExecution();
     void updateProgressBar(const int pos,const QString& text);
     void updateTexture(int meshid);
 public:
@@ -428,7 +427,7 @@ private:
     QAction *lastFilterAct;
     QAction *runFilterScriptAct;
     QAction *showFilterScriptAct;
-    QAction* showFilterEditAct;
+    //QAction* showFilterEditAct;
     /////////// Actions Menu Edit  /////////////////////
     QAction *suspendEditModeAct;
    
