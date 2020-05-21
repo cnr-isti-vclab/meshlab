@@ -32,7 +32,6 @@
 #include "savemaskexporter.h"
 #include "alnParser.h"
 #include <exception>
-#include "filterthread.h"
 #include "ml_default_decorators.h"
 
 #include <QToolBar>

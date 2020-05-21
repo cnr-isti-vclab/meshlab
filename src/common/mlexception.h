@@ -19,16 +19,6 @@ protected:
 
 };
 
-class MeshLabXMLParsingException : public MLException
-{
-public:
-        MeshLabXMLParsingException(const QString& text)
-                :MLException(QString("Error While parsing the XML filter plugin descriptors: ") + text){}
-
-        ~MeshLabXMLParsingException() throw() {}
-};
-
-
 class ParsingException : public MLException
 {
 public:
