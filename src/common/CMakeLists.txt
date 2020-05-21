@@ -24,7 +24,6 @@ set(SOURCES
     ml_thread_safe_memory_info.cpp
     mlapplication.cpp
     pluginmanager.cpp
-    scriptsyntax.cpp
     searcher.cpp)
 
 set(HEADERS
@@ -43,7 +42,6 @@ set(HEADERS
     mlapplication.h
     mlexception.h
     pluginmanager.h
-    scriptsyntax.h
     searcher.h)
 
 set(RESOURCES common.qrc)

@@ -92,7 +92,7 @@ void GLLogStream::Clear()
 	S.clear();
 }
 
-void GLLogStream::Log( int Level, const char * buf )
+void GLLogStream::Log(int Level, const char * buf )
 {
 	QString tmp(buf);
 	S.push_back(std::make_pair(Level,tmp));

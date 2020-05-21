@@ -82,8 +82,7 @@ FORMS += \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
-    ui/filtergui.ui \
-    ui/filtercreatortab.ui
+    ui/filtergui.ui
 	
 RESOURCES += \
     meshlab.qrc

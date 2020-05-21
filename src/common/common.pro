@@ -51,7 +51,6 @@ HEADERS += 	\
     pluginmanager.h \
     mlexception.h \
     mlapplication.h \
-    scriptsyntax.h \
     meshlabdocumentxml.h \
     ml_shared_data_context.h \
     ml_selection_buffers.h \
@@ -66,7 +65,6 @@ SOURCES += \
     meshmodel.cpp \
     pluginmanager.cpp \
     mlapplication.cpp \
-    scriptsyntax.cpp \
     searcher.cpp \
     meshlabdocumentxml.cpp \
     meshlabdocumentbundler.cpp \
