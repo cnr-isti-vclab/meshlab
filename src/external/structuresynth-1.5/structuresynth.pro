@@ -3,7 +3,7 @@ include(../ext_common.pri)
 CONFIG += c++11
 
 CONFIG+=opengl
-QT+=xml opengl script
+QT+=xml opengl
 
 TEMPLATE = lib
 TARGET = ssynth

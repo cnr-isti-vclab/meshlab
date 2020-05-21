@@ -67,7 +67,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 find_package(
     Qt5
-    COMPONENTS OpenGL Xml XmlPatterns Script
+    COMPONENTS OpenGL Xml XmlPatterns
     REQUIRED)
 
 message(STATUS "Searching for required components with bundled fallback")
