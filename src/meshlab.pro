@@ -277,6 +277,8 @@ edit_pickpoints.depends = common
 # we need to copy all the files inside $$PWD/../distrib in the actual
 # distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
 !equals(PWD, $$OUT_PWD) : !equals(PWD, $$OUT_PWD/..) {
+    message("PWD: $$PWD")
+    message("OUT_PWD: $$OUT_PWD")
     #copying the "lib" folder inside the $$OUT_PWD/distrib
     win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD/distrib)\"
     !win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD)\"
