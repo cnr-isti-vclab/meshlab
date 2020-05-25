@@ -276,8 +276,7 @@ edit_pickpoints.depends = common
 # if distrib folder is not in $$PWD/../distrib (shadow build case),
 # we need to copy all the files inside $$PWD/../distrib in the actual
 # distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
-!equals(PWD, $$OUT_PWD) {
-
+!equals(PWD, $$OUT_PWD) : !equals(PWD, $$OUT_PWD/..) {
     #copying the "lib" folder inside the $$OUT_PWD/distrib
     win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD/distrib)\"
     !win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD)\"

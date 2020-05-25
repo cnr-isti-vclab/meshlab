@@ -30,7 +30,9 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/linux/linux_build.sh
+        #sh install/linux/linux_build.sh
+        qmake src/meshlab.pro
+        make -j4
     - name: Deploy MeshLab and MeshLabServer
       run : |
         sh install/linux/linux_appimages.sh
