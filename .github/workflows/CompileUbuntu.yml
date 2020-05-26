@@ -64,9 +64,10 @@ jobs:
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Install dependencies
       run: |
-       curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-       sudo apt update
-       sudo apt-get install -y snapcraft
+        #needed for some reason...
+        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+        sudo apt update
+        sudo apt-get install -y snapcraft
     - name: Setup env variables
       id: envs
       run: |
@@ -75,6 +76,14 @@ jobs:
       run: |
         cd install/linux/
         snapcraft
+    - name: mv snap
+      run: |
+        mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+    - name: Upload Meshlab Snap
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_snap
+        path: MeshLab${{steps.envs.outputs.date}}-linux.snap
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)
