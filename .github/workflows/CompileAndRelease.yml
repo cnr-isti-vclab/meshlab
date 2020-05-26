@@ -1,13 +1,13 @@
 name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   update_ml_version:
-    name: Update ML_VERSION and Info.plist
+    name: Update ML_VERSION, snapcraft.yaml and Info.plist
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,10 +28,13 @@ jobs:
       run: |
         /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+    - name: Update Snap file
+      run: |
+         sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
     - name: commit ML_VERSION and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: Apply automatic ML_VERSION and Info.plist change
+        commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
 
   ubuntu_build:
     needs: [update_ml_version]
