@@ -1,4 +1,4 @@
-# Known to build in Ubuntu 20.04
+# Known to build in Ubuntu 18.04
 name: meshlab
 base: core18
 version: 'MESHLAB_VERSION'
