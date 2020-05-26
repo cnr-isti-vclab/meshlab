@@ -4,7 +4,7 @@ on:
   [push, pull_request]
 
 jobs:
-  ubuntu_build:
+  ubuntu_build_appimage:
     name: Build MeshLab (Ubuntu - AppImage)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
@@ -76,7 +76,7 @@ jobs:
       run: |
         cd install/linux/
         snapcraft
-    - name: mv snap
+    - name: Rename Snap
       run: |
         mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
     - name: Upload Meshlab Snap
