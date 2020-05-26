@@ -34,6 +34,7 @@
 #include <QFileDialog>
 #include <QClipboard>
 #include <QLocale>
+#include <QPainterPath>
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
