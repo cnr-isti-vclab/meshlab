@@ -5,7 +5,7 @@ How to build
 ------------
 Just type
 ```
-snapcraft
+SNAPCRAFT_BUILD_ENVIRONMENT_CPU=6 SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=8G snapcraft
 ```
 from the *parent* directory: that is, not from the directory containing this
 README file, but from its parent directory. This snap has been successfully
