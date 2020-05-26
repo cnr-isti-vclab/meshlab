@@ -5,7 +5,7 @@ on:
 
 jobs:
   ubuntu_build:
-    name: Build MeshLab (Ubuntu)
+    name: Build MeshLab (Ubuntu - AppImage)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
@@ -51,7 +51,7 @@ jobs:
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
   ubuntu_build_snap:
-    name: Build MeshLab (Ubuntu - CMake)
+    name: Build MeshLab (Ubuntu - Snap)
     runs-on: ubuntu-latest
 
     steps:
