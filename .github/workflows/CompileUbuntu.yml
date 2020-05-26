@@ -4,8 +4,8 @@ on:
   [push, pull_request]
 
 jobs:
-  ubuntu_build:
-    name: Build MeshLab (Ubuntu)
+  ubuntu_build_appimage:
+    name: Build MeshLab (Ubuntu - AppImage)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
@@ -50,6 +50,40 @@ jobs:
         name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
+  ubuntu_build_snap:
+    name: Build MeshLab (Ubuntu - Snap)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Install dependencies
+      run: |
+        #needed for some reason...
+        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+        sudo apt update
+        sudo apt-get install -y snapcraft
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Build MeshLab Snap
+      run: |
+        cd install/linux/
+        snapcraft
+    - name: Rename Snap
+      run: |
+        mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+    - name: Upload Meshlab Snap
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_snap
+        path: MeshLab${{steps.envs.outputs.date}}-linux.snap
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)
@@ -63,7 +97,7 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Instal dependencies
+    - name: Install dependencies
       run: |
        sh install/linux/linux_setup_env_ubuntu.sh
        sudo apt-get install cmake ninja-build

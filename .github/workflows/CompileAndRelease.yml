@@ -7,7 +7,7 @@ on:
 
 jobs:
   update_ml_version:
-    name: Update ML_VERSION and Info.plist
+    name: Update ML_VERSION, snapcraft.yaml and Info.plist
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,14 +28,17 @@ jobs:
       run: |
         /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
-    - name: commit ML_VERSION and Info.plist change
+    - name: Update Snap file
+      run: |
+         sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
+    - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: Apply automatic ML_VERSION and Info.plist change
+        commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
 
-  ubuntu_build:
+  ubuntu_build_appimage:
     needs: [update_ml_version]
-    name: Build MeshLab (Ubuntu)
+    name: Build MeshLab (Ubuntu - AppImage)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
@@ -79,6 +82,42 @@ jobs:
       with:
         name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+
+  ubuntu_build_snap:
+    needs: [update_ml_version]
+    name: Build MeshLab (Ubuntu - Snap)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Install dependencies
+      run: |
+        #needed for some reason...
+        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+        sudo apt update
+        sudo apt-get install -y snapcraft
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Build MeshLab Snap
+      run: |
+        cd install/linux/
+        snapcraft
+    - name: Rename Snap
+      run: |
+        mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+    - name: Upload Meshlab Snap
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_snap
+        path: MeshLab${{steps.envs.outputs.date}}-linux.snap
 
   macos_build:
     needs: [update_ml_version]
@@ -191,7 +230,7 @@ jobs:
 #after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
-    needs: [ubuntu_build, macos_build, windows_build]
+    needs: [ubuntu_build_appimage, ubuntu_build_snap, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Setup env variables
@@ -225,6 +264,10 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlabserver_linux_appimage
+    - name: Download Linux Snap
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_linux_snap
     - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -255,6 +298,16 @@ jobs:
         asset_path: meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLabServer AppImage for Linux
+    - name: Upload ReleaseLinuxSnap
+      id: upload-release-linux-snap
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: meshlab_linux_snap/MeshLab${{steps.envs.outputs.date}}-linux.snap
+        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.snap
+        asset_content_type: MeshLab Snap for Linux
 
     #MacOS Release
     - name: Download MacOS DMG
