@@ -50,9 +50,11 @@ mkdir -p usr/share/applications
 mkdir -p usr/share/meshlab
 mkdir -p usr/share/doc/meshlab
 mkdir -p usr/share/icons/hicolor/512x512/apps/
+mkdir -p usr/share/icons/Yaru/512x512/apps/
 
 cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
-mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
+cp meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
+mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
 mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
