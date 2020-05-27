@@ -82,8 +82,20 @@ parts:
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
       cd distrib
-      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
-      cp -a meshlab* plugins shaders $SNAPCRAFT_PART_INSTALL/bin
-      mkdir -p $SNAPCRAFT_PART_INSTALL/lib
-      cp -a lib* $SNAPCRAFT_PART_INSTALL/lib
-
+      
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
+      
+      mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
+      mv meshlab $SNAPCRAFT_PART_INSTALL/usr/bin
+      mv lib/libmeshlab-common* $SNAPCRAFT_PART_INSTALL/usr/lib/
+      mv plugins/ $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
+      mv lib/linux/* $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/plugins
+      #chrpath -r ../lib/ $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/plugins/*.so
+      mv shaders/ $SNAPCRAFT_PART_INSTALL/usr/share/meshlab/
+      
+      #mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      #cp -a meshlab* plugins shaders $SNAPCRAFT_PART_INSTALL/bin
+      #mkdir -p $SNAPCRAFT_PART_INSTALL/lib
+      #cp -a lib* $SNAPCRAFT_PART_INSTALL/lib
