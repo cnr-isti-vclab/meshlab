@@ -10,7 +10,6 @@ HEADERS += \
     alignDialog.h \
     AlignPairDialog.h \
     AlignPairWidget.h \
-    align/AlignPair.h \
     align/AlignGlobal.h \
     align/OccupancyGrid.h \
     align/align_parameter.h \
@@ -26,7 +25,6 @@ SOURCES += \
     alignDialog.cpp \
     AlignPairWidget.cpp \
     AlignPairDialog.cpp \
-    align/AlignPair.cpp \
     align/AlignGlobal.cpp \
     align/OccupancyGrid.cpp \
     align/align_parameter.cpp \

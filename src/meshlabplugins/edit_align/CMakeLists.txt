@@ -11,7 +11,6 @@ if(TARGET external-newuoa)
     set(SOURCES
         align/align_parameter.cpp
         align/AlignGlobal.cpp
-        align/AlignPair.cpp
         align/OccupancyGrid.cpp
         alignDialog.cpp
         AlignPairDialog.cpp
@@ -27,7 +26,6 @@ if(TARGET external-newuoa)
     set(HEADERS
         align/align_parameter.h
         align/AlignGlobal.h
-        align/AlignPair.h
         align/OccupancyGrid.h
         alignDialog.h
         AlignPairDialog.h

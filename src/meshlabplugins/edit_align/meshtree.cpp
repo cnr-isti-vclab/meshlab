@@ -81,7 +81,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
   else
   {
     Fix.init(vcg::Matrix44d::Identity());
-    vcg::AlignPair::InitFix(&Fix, ap, UG);
+	vcg::AlignPair::initFix(&Fix, ap, UG);
   }
   // 2) Convert the second mesh and sample a <ap.SampleNum> points on it.
 

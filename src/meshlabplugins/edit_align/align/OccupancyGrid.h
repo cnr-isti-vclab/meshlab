@@ -23,7 +23,7 @@
 #ifndef ALIGN_OCCUPANCY_GRID_H
 #define ALIGN_OCCUPANCY_GRID_H
 
-#include "AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include <bitset>
 #include <vcg/space/index/grid_static_obj.h>
 
