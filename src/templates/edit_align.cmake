@@ -20,7 +20,6 @@ AlignPairWidget.cpp
 edit_align_factory.cpp
 edit_align.cpp
 meshtree.cpp
-point_matching_scale.cpp
 ../../meshlab/stdpardialog.cpp
 ${VCGDIR}/wrap/gui/trackball.cpp
 ${VCGDIR}/wrap/gui/trackmode.cpp
