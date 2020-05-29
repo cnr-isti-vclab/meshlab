@@ -34,7 +34,15 @@ $Log: meshedit.cpp,v $
 #include "AlignPairDialog.h"
 #include "align/align_parameter.h"
 #include <vcg/space/point_matching.h>
+#include <vcg/complex/algorithms/point_matching_scale.h>
+
 using namespace vcg;
+
+//todo: remove these orrible defs from here
+//make vcg::PointMatchingScale indipendent
+std::vector<vcg::Point3d>* vcg::PointMatchingScale::fix;
+std::vector<vcg::Point3d>* vcg::PointMatchingScale::mov;
+vcg::Box3d vcg::PointMatchingScale::b;
 
 EditAlignPlugin::EditAlignPlugin()
 {

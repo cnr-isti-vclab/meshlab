@@ -394,7 +394,7 @@ bool AlignPair::Align(
     Matrix44d newout;
     switch (ap.MatchMode) 
     {
-	case AlignPair::Param::MMSimilarity: PointMatchingScale::computeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
+	case AlignPair::Param::MMSimilarity: vcg::PointMatchingScale::computeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
     case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, Pmov, newout);   break;
     default:
       status = UNKNOWN_MODE;
