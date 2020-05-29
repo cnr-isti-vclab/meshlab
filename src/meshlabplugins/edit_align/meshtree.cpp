@@ -90,7 +90,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
   std::vector<vcg::AlignPair::A2Vertex> tmpmv;
 //  aa.ConvertVertex(Mov.vert,tmpmv);
   aa.convertVertex(MM(movId)->cm.vert,tmpmv);
-  aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
+  aa.sampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
 
   aa.mov=&tmpmv;
   aa.fix=&Fix;
@@ -98,7 +98,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 
   vcg::Matrix44d In=MovM;
   // Perform the ICP algorithm
-  aa.Align(In,UG,VG,result);
+  aa.align(In,UG,VG,result);
 
   result.FixName=fixId;
   result.MovName=movId;
@@ -185,7 +185,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
     {
       ProcessArc(OG.SVA[i].s, OG.SVA[i].t, *curResult, ap);
       curResult->area= OG.SVA[i].norm_area;
-      if( curResult->IsValid() )
+      if( curResult->isValid() )
       {
         hasValidAlign = true;
         std::pair<double,double> dd=curResult->computeAvgErr(); 
@@ -208,7 +208,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 
   vcg::Distribution<float> H; // stat for printing
   for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
-    if ((*li).IsValid())
+    if ((*li).isValid())
       H.Add(li->err);
   cb(0,qUtf8Printable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f; Median %5.3f; 90%% %5.3f\n", H.Avg(), H.Percentile(0.5f), H.Percentile(0.9f))));
 
@@ -246,7 +246,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 	vcg::AlignGlobal AG;
 	std::vector<vcg::AlignPair::Result *> ResVecPtr;
 	for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
-    if ((*li).IsValid())
+    if ((*li).isValid())
 	    ResVecPtr.push_back(&*li);
 	AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
 
