@@ -132,57 +132,57 @@ MaxPointNum an (unused) hard limit on the number of points that are chosen
 MinPointNum the minimum number of points that have to be chosen to be usable
 
 */
-bool AlignPair::ChoosePoints(vector<Point3d> &Ps,		// vertici corrispondenti su src (rossi)
-  vector<Point3d> &Ns, 		// normali corrispondenti su src (rossi)
-  vector<Point3d> &Pt,		// vertici scelti su trg (verdi)
-  vector<Point3d> &OPt,		// vertici scelti su trg (verdi)
-  double PassHi,
-  Histogramf &H)
-{
-  const int N = ap.MaxPointNum;
-  double newmaxd = H.Percentile(float(PassHi));
-  //printf("%5.1f of the pairs has a distance less than %g and greater than %g (0..%g) avg %g\n",	Perc*100,newmind,newmaxd,H.maxv,H.Percentile(.5));
-  int sz = int(Ps.size());
-  int fnd = 0;
-  int lastgood = sz - 1;
-  math::SubtractiveRingRNG myrnd;
-  while (fnd < N && fnd < lastgood)
-  {
-    int index = fnd + myrnd.generate(lastgood - fnd);
-    double dd = Distance(Ps[index], Pt[index]);
-    if (dd <= newmaxd)
-    {
-      swap(Ps[index], Ps[fnd]);
-      swap(Ns[index], Ns[fnd]);
-      swap(Pt[index], Pt[fnd]);
-      swap(OPt[index], OPt[fnd]);
-      ++fnd;
-    }
-    else
-    {
-      swap(Ps[index], Ps[lastgood]);
-      swap(Ns[index], Ns[lastgood]);
-      swap(Pt[index], Pt[lastgood]);
-      swap(OPt[index], OPt[lastgood]);
-      lastgood--;
-    }
-  }
-  Ps.resize(fnd);
-  Ns.resize(fnd);
-  Pt.resize(fnd);
-  OPt.resize(fnd);
-//  printf("Scelte %i coppie tra le %i iniziali, scartate quelle con dist > %f\n", fnd, sz, newmaxd);
+//bool AlignPair::ChoosePoints(vector<Point3d> &Ps,		// vertici corrispondenti su src (rossi)
+//  vector<Point3d> &Ns, 		// normali corrispondenti su src (rossi)
+//  vector<Point3d> &Pt,		// vertici scelti su trg (verdi)
+//  vector<Point3d> &OPt,		// vertici scelti su trg (verdi)
+//  double PassHi,
+//  Histogramf &H)
+//{
+//  const int N = ap.MaxPointNum;
+//  double newmaxd = H.Percentile(float(PassHi));
+//  //printf("%5.1f of the pairs has a distance less than %g and greater than %g (0..%g) avg %g\n",	Perc*100,newmind,newmaxd,H.maxv,H.Percentile(.5));
+//  int sz = int(Ps.size());
+//  int fnd = 0;
+//  int lastgood = sz - 1;
+//  math::SubtractiveRingRNG myrnd;
+//  while (fnd < N && fnd < lastgood)
+//  {
+//    int index = fnd + myrnd.generate(lastgood - fnd);
+//    double dd = Distance(Ps[index], Pt[index]);
+//    if (dd <= newmaxd)
+//    {
+//      swap(Ps[index], Ps[fnd]);
+//      swap(Ns[index], Ns[fnd]);
+//      swap(Pt[index], Pt[fnd]);
+//      swap(OPt[index], OPt[fnd]);
+//      ++fnd;
+//    }
+//    else
+//    {
+//      swap(Ps[index], Ps[lastgood]);
+//      swap(Ns[index], Ns[lastgood]);
+//      swap(Pt[index], Pt[lastgood]);
+//      swap(OPt[index], OPt[lastgood]);
+//      lastgood--;
+//    }
+//  }
+//  Ps.resize(fnd);
+//  Ns.resize(fnd);
+//  Pt.resize(fnd);
+//  OPt.resize(fnd);
+////  printf("Scelte %i coppie tra le %i iniziali, scartate quelle con dist > %f\n", fnd, sz, newmaxd);
 
-  if ((int)Ps.size() < ap.MinPointNum)		{
-    printf("Troppi pochi punti!\n");
-    Ps.clear();
-    Ns.clear();
-    Pt.clear();
-    OPt.clear();
-    return false;
-  }
-  return true;
-}
+//  if ((int)Ps.size() < ap.MinPointNum)		{
+//    printf("Troppi pochi punti!\n");
+//    Ps.clear();
+//    Ns.clear();
+//    Pt.clear();
+//    OPt.clear();
+//    return false;
+//  }
+//  return true;
+//}
 
 /*
 Funzione chiamata dalla Align ad ogni ciclo
@@ -270,193 +270,193 @@ la uniform grid sia gia' inizializzata con la mesh fix
 
 */
 
-bool AlignPair::Align(
-  A2Grid &u,
-  A2GridVert &uv,
-  const	Matrix44d &in,					// trasformazione Iniziale (che porta i punti di mov su fix)
-  Matrix44d &out,					// trasformazione calcolata
-  vector<Point3d> &Pfix,		// vertici corrispondenti su src (rossi)
-  vector<Point3d> &Nfix, 		// normali corrispondenti su src (rossi)
-  vector<Point3d> &OPmov,		// vertici scelti su trg (verdi) prima della trasformazione in ingresso (Original Point Target)
-  vector<Point3d> &ONmov, 		// normali scelti su trg (verdi)
-  Histogramf &H,
-  AlignPair::Stat &as)
-{
-  vector<char> beyondCntVec;    // vettore per marcare i movvert che sicuramente non si devono usare
-  // ogni volta che un vertice si trova a distanza oltre max dist viene incrementato il suo contatore;
-  // i movvert che sono stati scartati piu' di MaxCntDist volte non si guardano piu';
-  const int maxBeyondCnt = 3;
-  vector< Point3d > movvert;
-  vector< Point3d > movnorm;
-  vector<Point3d> Pmov; // vertici scelti dopo la trasf iniziale
-  status = SUCCESS;
-  int tt0 = clock();
+//bool AlignPair::align(
+//  A2Grid &u,
+//  A2GridVert &uv,
+//  const	Matrix44d &in,					// trasformazione Iniziale (che porta i punti di mov su fix)
+//  Matrix44d &out,					// trasformazione calcolata
+//  vector<Point3d> &Pfix,		// vertici corrispondenti su src (rossi)
+//  vector<Point3d> &Nfix, 		// normali corrispondenti su src (rossi)
+//  vector<Point3d> &OPmov,		// vertici scelti su trg (verdi) prima della trasformazione in ingresso (Original Point Target)
+//  vector<Point3d> &ONmov, 		// normali scelti su trg (verdi)
+//  Histogramf &H,
+//  AlignPair::Stat &as)
+//{
+//  vector<char> beyondCntVec;    // vettore per marcare i movvert che sicuramente non si devono usare
+//  // ogni volta che un vertice si trova a distanza oltre max dist viene incrementato il suo contatore;
+//  // i movvert che sono stati scartati piu' di MaxCntDist volte non si guardano piu';
+//  const int maxBeyondCnt = 3;
+//  vector< Point3d > movvert;
+//  vector< Point3d > movnorm;
+//  vector<Point3d> Pmov; // vertici scelti dopo la trasf iniziale
+//  status = SUCCESS;
+//  int tt0 = clock();
 
-  out = in;
+//  out = in;
 
-  int i;
+//  int i;
 
-  double CosAngleThr = cos(ap.MaxAngleRad);
-  double StartMinDist = ap.MinDistAbs;
-  int tt1 = clock();
-  int ttsearch = 0;
-  int ttleast = 0;
-  int nc = 0;
-  as.clear();
-  as.StartTime = clock();
+//  double CosAngleThr = cos(ap.MaxAngleRad);
+//  double StartMinDist = ap.MinDistAbs;
+//  int tt1 = clock();
+//  int ttsearch = 0;
+//  int ttleast = 0;
+//  int nc = 0;
+//  as.clear();
+//  as.StartTime = clock();
 
-  beyondCntVec.resize(mov->size(), 0);
+//  beyondCntVec.resize(mov->size(), 0);
 
-  /**************** BEGIN ICP LOOP ****************/
-  do
-  {
-    Stat::IterInfo ii;
-    Box3d movbox;
-    InitMov(movvert, movnorm, movbox, out);
-    H.SetRange(0.0f, float(StartMinDist), 512, 2.5f);
-    Pfix.clear();
-    Nfix.clear();
-    Pmov.clear();
-    OPmov.clear();
-    ONmov.clear();
-    int tts0 = clock();
-    ii.MinDistAbs = StartMinDist;
-    int LocSampleNum = min(ap.SampleNum, int(movvert.size()));
-    Box3d fixbox;
-    if (u.Empty()) fixbox = uv.bbox;
-    else fixbox = u.bbox;
-    for (i = 0; i < LocSampleNum; ++i)
-    {
-      if (beyondCntVec[i] < maxBeyondCnt)
-      {
+//  /**************** BEGIN ICP LOOP ****************/
+//  do
+//  {
+//    Stat::IterInfo ii;
+//    Box3d movbox;
+//    InitMov(movvert, movnorm, movbox, out);
+//    H.SetRange(0.0f, float(StartMinDist), 512, 2.5f);
+//    Pfix.clear();
+//    Nfix.clear();
+//    Pmov.clear();
+//    OPmov.clear();
+//    ONmov.clear();
+//    int tts0 = clock();
+//    ii.MinDistAbs = StartMinDist;
+//    int LocSampleNum = min(ap.SampleNum, int(movvert.size()));
+//    Box3d fixbox;
+//    if (u.Empty()) fixbox = uv.bbox;
+//    else fixbox = u.bbox;
+//    for (i = 0; i < LocSampleNum; ++i)
+//    {
+//      if (beyondCntVec[i] < maxBeyondCnt)
+//      {
       
-        if (fixbox.IsIn(movvert[i]))
-        {
-          double error = StartMinDist;
-          Point3d closestPoint, closestNormal;
-          double maxd = StartMinDist;
-          ii.SampleTested++;
-          if (u.Empty()) // using the point cloud grid
-          {
-            A2Mesh::VertexPointer vp = tri::GetClosestVertex(*fix, uv, movvert[i], maxd, error);
-            if (error >= StartMinDist) {
-              ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
-            }
-            if (movnorm[i].dot(vp->N()) < CosAngleThr) {
-              ii.AngleDiscarded++; continue;
-            }
-            closestPoint = vp->P();
-            closestNormal = vp->N();
-          }
-          else // using the standard faces and grid
-          {
-            A2Mesh::FacePointer f = vcg::tri::GetClosestFaceBase<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint);
-            if (error >= StartMinDist) {
-              ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
-            }
-            if (movnorm[i].dot(f->N()) < CosAngleThr) {
-              ii.AngleDiscarded++; continue;
-            }
-            Point3d ip;
-            InterpolationParameters<A2Face, double>(*f, f->N(), closestPoint, ip);
-            const double IP_EPS = 0.00001;
-            // If ip[i] == 0 it means that we are on the edge opposite to i
-            if ((fabs(ip[0]) <= IP_EPS && f->IsB(1)) || (fabs(ip[1]) <= IP_EPS && f->IsB(2)) || (fabs(ip[2]) <= IP_EPS && f->IsB(0))){
-              ii.BorderDiscarded++;  continue;
-            }
-            closestNormal = f->N();
-          }
-          // The sample was accepted. Store it.
-          Pmov.push_back(movvert[i]);
-          OPmov.push_back((*mov)[i].P());
-          ONmov.push_back((*mov)[i].N());
-          Nfix.push_back(closestNormal);
-          Pfix.push_back(closestPoint);
-          H.Add(float(error));
-          ii.SampleUsed++;
-        }
-        else
-          beyondCntVec[i] = maxBeyondCnt + 1;
-      }
-    } // End for each pmov
-    int tts1 = clock();
-    //printf("Found %d pairs\n",(int)Pfix.size());
-    if (!ChoosePoints(Pfix, Nfix, Pmov, OPmov, ap.PassHiFilter, H))
-    {
-      if (int(Pfix.size()) < ap.MinPointNum)
-      {
-        status = TOO_FEW_POINTS;
-        ii.Time = clock();
-        as.I.push_back(ii);
-        return false;
-      }
-    }
-    Matrix44d newout;
-    switch (ap.MatchMode) 
-    {
-	case AlignPair::Param::MMSimilarity: vcg::PointMatchingScale::computeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
-    case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, Pmov, newout);   break;
-    default:
-      status = UNKNOWN_MODE;
-      ii.Time = clock();
-      as.I.push_back(ii);
-      return false;
-    }
+//        if (fixbox.IsIn(movvert[i]))
+//        {
+//          double error = StartMinDist;
+//          Point3d closestPoint, closestNormal;
+//          double maxd = StartMinDist;
+//          ii.SampleTested++;
+//          if (u.Empty()) // using the point cloud grid
+//          {
+//            A2Mesh::VertexPointer vp = tri::GetClosestVertex(*fix, uv, movvert[i], maxd, error);
+//            if (error >= StartMinDist) {
+//              ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
+//            }
+//            if (movnorm[i].dot(vp->N()) < CosAngleThr) {
+//              ii.AngleDiscarded++; continue;
+//            }
+//            closestPoint = vp->P();
+//            closestNormal = vp->N();
+//          }
+//          else // using the standard faces and grid
+//          {
+//            A2Mesh::FacePointer f = vcg::tri::GetClosestFaceBase<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint);
+//            if (error >= StartMinDist) {
+//              ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
+//            }
+//            if (movnorm[i].dot(f->N()) < CosAngleThr) {
+//              ii.AngleDiscarded++; continue;
+//            }
+//            Point3d ip;
+//            InterpolationParameters<A2Face, double>(*f, f->N(), closestPoint, ip);
+//            const double IP_EPS = 0.00001;
+//            // If ip[i] == 0 it means that we are on the edge opposite to i
+//            if ((fabs(ip[0]) <= IP_EPS && f->IsB(1)) || (fabs(ip[1]) <= IP_EPS && f->IsB(2)) || (fabs(ip[2]) <= IP_EPS && f->IsB(0))){
+//              ii.BorderDiscarded++;  continue;
+//            }
+//            closestNormal = f->N();
+//          }
+//          // The sample was accepted. Store it.
+//          Pmov.push_back(movvert[i]);
+//          OPmov.push_back((*mov)[i].P());
+//          ONmov.push_back((*mov)[i].N());
+//          Nfix.push_back(closestNormal);
+//          Pfix.push_back(closestPoint);
+//          H.Add(float(error));
+//          ii.SampleUsed++;
+//        }
+//        else
+//          beyondCntVec[i] = maxBeyondCnt + 1;
+//      }
+//    } // End for each pmov
+//    int tts1 = clock();
+//    //printf("Found %d pairs\n",(int)Pfix.size());
+//	if (!choosePoints(Pfix, Nfix, Pmov, OPmov, ap.PassHiFilter, H))
+//    {
+//      if (int(Pfix.size()) < ap.MinPointNum)
+//      {
+//        status = TOO_FEW_POINTS;
+//        ii.Time = clock();
+//        as.I.push_back(ii);
+//        return false;
+//      }
+//    }
+//    Matrix44d newout;
+//    switch (ap.MatchMode)
+//    {
+//	case AlignPair::Param::MMSimilarity: vcg::PointMatchingScale::computeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
+//    case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, Pmov, newout);   break;
+//    default:
+//      status = UNKNOWN_MODE;
+//      ii.Time = clock();
+//      as.I.push_back(ii);
+//      return false;
+//    }
 
-    //    double sum_before=0;
-    //    double sum_after=0;
-    //    for(unsigned int iii=0;iii<Pfix.size();++iii)
-    //    {
-    //      sum_before+=Distance(Pfix[iii], out*OPmov[iii]);
-    //      sum_after+=Distance(Pfix[iii], newout*OPmov[iii]);
-    //    }
-    //    //printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
+//    //    double sum_before=0;
+//    //    double sum_after=0;
+//    //    for(unsigned int iii=0;iii<Pfix.size();++iii)
+//    //    {
+//    //      sum_before+=Distance(Pfix[iii], out*OPmov[iii]);
+//    //      sum_after+=Distance(Pfix[iii], newout*OPmov[iii]);
+//    //    }
+//    //    //printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
 
-    // le passate successive utilizzano quindi come trasformazione iniziale questa appena trovata.
-    // Nei prossimi cicli si parte da questa matrice come iniziale.
-    out = newout * out;
+//    // le passate successive utilizzano quindi come trasformazione iniziale questa appena trovata.
+//    // Nei prossimi cicli si parte da questa matrice come iniziale.
+//    out = newout * out;
 
-    assert(Pfix.size() == Pmov.size());
-    int tts2 = clock();
-    ttsearch += tts1 - tts0;
-    ttleast += tts2 - tts1;
-    ii.pcl50 = H.Percentile(.5);
-    ii.pclhi = H.Percentile(float(ap.PassHiFilter));
-    ii.AVG = H.Avg();
-    ii.RMS = H.RMS();
-    ii.StdDev = H.StandardDeviation();
-    ii.Time = clock();
-    as.I.push_back(ii);
-    nc++;
-    // The distance of the next points to be considered is lowered according to the <ReduceFactor> parameter.
-    // We use 5 times the <ReduceFactor> percentile of the found points.
-    if (ap.ReduceFactorPerc<1) StartMinDist = max(ap.MinDistAbs*ap.MinMinDistPerc, min(StartMinDist, 5.0*H.Percentile(float(ap.ReduceFactorPerc))));
-  } while (
-    nc <= ap.MaxIterNum &&
-    H.Percentile(.5) > ap.TrgDistAbs &&
-	(nc<ap.EndStepNum + 1 || !as.stable(ap.EndStepNum))
-    );
-  /**************** END ICP LOOP ****************/
-  int tt2 = clock();
-  out[3][0] = 0; out[3][1] = 0; out[3][2] = 0; out[3][3] = 1;
-  Matrix44d ResCopy = out;
-  Point3d scv, shv, rtv, trv;
-  Decompose(ResCopy, scv, shv, rtv, trv);
-  if ((ap.MatchMode == vcg::AlignPair::Param::MMRigid) && (math::Abs(1 - scv[0])>ap.MaxScale || math::Abs(1 - scv[1]) > ap.MaxScale || math::Abs(1 - scv[2]) > ap.MaxScale)) {
-    status = TOO_MUCH_SCALE;
-    return false;
-  }
-  if (shv[0] > ap.MaxShear || shv[1] > ap.MaxShear || shv[2] > ap.MaxShear) {
-    status = TOO_MUCH_SHEAR;
-    return false;
-  }
-  printf("Grid %i %i %i - fn %i\n", u.siz[0], u.siz[1], u.siz[2], fix->fn);
-  printf("Init %8.3f Loop %8.3f Search %8.3f least sqrt %8.3f\n",
-    float(tt1 - tt0) / CLOCKS_PER_SEC, float(tt2 - tt1) / CLOCKS_PER_SEC,
-    float(ttsearch) / CLOCKS_PER_SEC, float(ttleast) / CLOCKS_PER_SEC);
+//    assert(Pfix.size() == Pmov.size());
+//    int tts2 = clock();
+//    ttsearch += tts1 - tts0;
+//    ttleast += tts2 - tts1;
+//    ii.pcl50 = H.Percentile(.5);
+//    ii.pclhi = H.Percentile(float(ap.PassHiFilter));
+//    ii.AVG = H.Avg();
+//    ii.RMS = H.RMS();
+//    ii.StdDev = H.StandardDeviation();
+//    ii.Time = clock();
+//    as.I.push_back(ii);
+//    nc++;
+//    // The distance of the next points to be considered is lowered according to the <ReduceFactor> parameter.
+//    // We use 5 times the <ReduceFactor> percentile of the found points.
+//    if (ap.ReduceFactorPerc<1) StartMinDist = max(ap.MinDistAbs*ap.MinMinDistPerc, min(StartMinDist, 5.0*H.Percentile(float(ap.ReduceFactorPerc))));
+//  } while (
+//    nc <= ap.MaxIterNum &&
+//    H.Percentile(.5) > ap.TrgDistAbs &&
+//	(nc<ap.EndStepNum + 1 || !as.stable(ap.EndStepNum))
+//    );
+//  /**************** END ICP LOOP ****************/
+//  int tt2 = clock();
+//  out[3][0] = 0; out[3][1] = 0; out[3][2] = 0; out[3][3] = 1;
+//  Matrix44d ResCopy = out;
+//  Point3d scv, shv, rtv, trv;
+//  Decompose(ResCopy, scv, shv, rtv, trv);
+//  if ((ap.MatchMode == vcg::AlignPair::Param::MMRigid) && (math::Abs(1 - scv[0])>ap.MaxScale || math::Abs(1 - scv[1]) > ap.MaxScale || math::Abs(1 - scv[2]) > ap.MaxScale)) {
+//    status = TOO_MUCH_SCALE;
+//    return false;
+//  }
+//  if (shv[0] > ap.MaxShear || shv[1] > ap.MaxShear || shv[2] > ap.MaxShear) {
+//    status = TOO_MUCH_SHEAR;
+//    return false;
+//  }
+//  printf("Grid %i %i %i - fn %i\n", u.siz[0], u.siz[1], u.siz[2], fix->fn);
+//  printf("Init %8.3f Loop %8.3f Search %8.3f least sqrt %8.3f\n",
+//    float(tt1 - tt0) / CLOCKS_PER_SEC, float(tt2 - tt1) / CLOCKS_PER_SEC,
+//    float(ttsearch) / CLOCKS_PER_SEC, float(ttleast) / CLOCKS_PER_SEC);
 
-  return true;
-}
+//  return true;
+//}
 
 
 
@@ -619,32 +619,32 @@ return maxfnd;
 /**********************************************************/
 // Funzioni per la scelta dei vertici sulla mesh da muovere
 
-bool AlignPair::SampleMovVert(vector<A2Vertex> &vert, int SampleNum, AlignPair::Param::SampleModeEnum SampleMode)
-{
-  switch (SampleMode)
-  {
-  case AlignPair::Param::SMRandom:					 return SampleMovVertRandom(vert, SampleNum);
-  case AlignPair::Param::SMNormalEqualized: return SampleMovVertNormalEqualized(vert, SampleNum);
-  default: assert(0);
-  }
-  return false;
-}
+//bool AlignPair::SampleMovVert(vector<A2Vertex> &vert, int SampleNum, AlignPair::Param::SampleModeEnum SampleMode)
+//{
+//  switch (SampleMode)
+//  {
+//  case AlignPair::Param::SMRandom:					 return SampleMovVertRandom(vert, SampleNum);
+//  case AlignPair::Param::SMNormalEqualized: return SampleMovVertNormalEqualized(vert, SampleNum);
+//  default: assert(0);
+//  }
+//  return false;
+//}
 
 
 // Scelta a caso semplice
-bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
-{
-  if (int(vert.size()) <= SampleNum) return true;
-  int i;
-  for (i = 0; i < SampleNum; ++i)
-  {
-    int pos = myrnd.generate(vert.size());
-    assert(pos >= 0 && pos < int(vert.size()));
-    swap(vert[i], vert[pos]);
-  }
-  vert.resize(SampleNum);
-  return true;
-}
+//bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
+//{
+//  if (int(vert.size()) <= SampleNum) return true;
+//  int i;
+//  for (i = 0; i < SampleNum; ++i)
+//  {
+//    int pos = myrnd.generate(vert.size());
+//    assert(pos >= 0 && pos < int(vert.size()));
+//    swap(vert[i], vert[pos]);
+//  }
+//  vert.resize(SampleNum);
+//  return true;
+//}
 
 /*
 Scelta a caso in maniera tale che la distribuzione delle normali dei
@@ -658,53 +658,53 @@ e poi un punto all'interno del bucket
 
 */
 
-bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleNum)
-{
-  //  assert(0);
+//bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleNum)
+//{
+//  //  assert(0);
 
-  //	int t0=clock();
-  vector<Point3d> NV;
-  if (NV.size() == 0)
-  {
-    GenNormal<double>::Fibonacci(30, NV);
-    printf("Generated %i normals\n", int(NV.size()));
-  }
-  // Bucket vector dove, per ogni normale metto gli indici
-  // dei vertici ad essa corrispondenti
-  vector<vector <int> > BKT(NV.size());
-  for (size_t i = 0; i < vert.size(); ++i)
-  {
-    int ind = GenNormal<double>::BestMatchingNormal(vert[i].N(), NV);
-    BKT[ind].push_back(int(i));
-  }
-  //int t1=clock();
+//  //	int t0=clock();
+//  vector<Point3d> NV;
+//  if (NV.size() == 0)
+//  {
+//    GenNormal<double>::Fibonacci(30, NV);
+//    printf("Generated %i normals\n", int(NV.size()));
+//  }
+//  // Bucket vector dove, per ogni normale metto gli indici
+//  // dei vertici ad essa corrispondenti
+//  vector<vector <int> > BKT(NV.size());
+//  for (size_t i = 0; i < vert.size(); ++i)
+//  {
+//    int ind = GenNormal<double>::BestMatchingNormal(vert[i].N(), NV);
+//    BKT[ind].push_back(int(i));
+//  }
+//  //int t1=clock();
 
-  // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
-  vector <int> BKTpos(BKT.size(), 0);
+//  // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
+//  vector <int> BKTpos(BKT.size(), 0);
 
-  if (SampleNum >= int(vert.size())) SampleNum = vert.size() - 1;
+//  if (SampleNum >= int(vert.size())) SampleNum = vert.size() - 1;
 
-  for (int i = 0; i < SampleNum;)
-  {
-    int ind = myrnd.generate(BKT.size()); // Scelgo un Bucket
-    int &CURpos = BKTpos[ind];
-    vector<int> &CUR = BKT[ind];
+//  for (int i = 0; i < SampleNum;)
+//  {
+//    int ind = myrnd.generate(BKT.size()); // Scelgo un Bucket
+//    int &CURpos = BKTpos[ind];
+//    vector<int> &CUR = BKT[ind];
 
-    if (CURpos<int(CUR.size()))
-    {
-      swap(CUR[CURpos], CUR[CURpos + myrnd.generate(BKT[ind].size() - CURpos)]);
-      swap(vert[i], vert[CUR[CURpos]]);
-      ++BKTpos[ind];
-      ++i;
-    }
-  }
-  vert.resize(SampleNum);
-  //	int t2=clock();
-  //	printf("Matching   %6i\n",t1-t0);
-  //	printf("Collecting %6i\n",t2-t1);
-  //  printf("Total      %6i\n",t2-t0);
+//    if (CURpos<int(CUR.size()))
+//    {
+//      swap(CUR[CURpos], CUR[CURpos + myrnd.generate(BKT[ind].size() - CURpos)]);
+//      swap(vert[i], vert[CUR[CURpos]]);
+//      ++BKTpos[ind];
+//      ++i;
+//    }
+//  }
+//  vert.resize(SampleNum);
+//  //	int t2=clock();
+//  //	printf("Matching   %6i\n",t1-t0);
+//  //	printf("Collecting %6i\n",t2-t1);
+//  //  printf("Total      %6i\n",t2-t0);
 
-  return true;
-}
+//  return true;
+//}
 
 
