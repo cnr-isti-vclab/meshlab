@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "AlignPair.h"
-#include "../point_matching_scale.h"
+#include "vcg/complex/algorithms/point_matching_scale.h"
 
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/update/position.h>
@@ -394,7 +394,7 @@ bool AlignPair::Align(
     Matrix44d newout;
     switch (ap.MatchMode) 
     {
-    case AlignPair::Param::MMSimilarity: ComputeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
+	case AlignPair::Param::MMSimilarity: PointMatchingScale::ComputeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
     case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, Pmov, newout);   break;
     default:
       status = UNKNOWN_MODE;

@@ -21,7 +21,6 @@ HEADERS += \
 
 SOURCES += \
     edit_align_factory.cpp \
-    point_matching_scale.cpp \
     edit_align.cpp \
     meshtree.cpp \
     alignDialog.cpp \
