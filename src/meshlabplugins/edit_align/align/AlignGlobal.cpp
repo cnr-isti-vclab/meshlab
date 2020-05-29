@@ -23,9 +23,8 @@
 
 #include <cstdarg>
 #include <stack>
-#include "AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include "AlignGlobal.h"
-#include "vcg/complex/algorithms/point_matching_scale.h"
 #include <vcg/space/point_matching.h>
 using namespace vcg;
 using namespace std;
