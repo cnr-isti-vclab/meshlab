@@ -41,95 +41,86 @@
 using namespace vcg;
 using namespace std;
 
-bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr)
-{
-  int err = tri::io::Importer<A2Mesh>::Open(*this, filename);
-  if (err) {
-    printf("Error in reading %s: '%s'\n", filename, tri::io::Importer<A2Mesh>::ErrorMsg(err));
-    exit(-1);
-  }
-  printf("read mesh `%s'\n", filename);
-  return Init(Tr);
-}
+//bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr)
+//{
+//  int err = tri::io::Importer<A2Mesh>::Open(*this, filename);
+//  if (err) {
+//    printf("Error in reading %s: '%s'\n", filename, tri::io::Importer<A2Mesh>::ErrorMsg(err));
+//    exit(-1);
+//  }
+//  printf("read mesh `%s'\n", filename);
+//  return Init(Tr);
+//}
 
-bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr)
-{
-  Matrix44d Idn; Idn.SetIdentity();
-  if (Tr != Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this, Tr);
-  tri::UpdateNormal<A2Mesh>::NormalizePerVertex(*this);
-  tri::UpdateBounding<A2Mesh>::Box(*this);
-  return true;
-}
+//bool AlignPair::A2Mesh::Init(const Matrix44d &Tr)
+//{
+//  Matrix44d Idn; Idn.SetIdentity();
+//  tri::Clean<A2Mesh>::RemoveUnreferencedVertex(*this);
+//  if (Tr != Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this, Tr);
+//  tri::UpdateNormal<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this);
+//  tri::UpdateFlags<A2Mesh>::FaceBorderFromNone(*this);
+//  tri::UpdateBounding<A2Mesh>::Box(*this);
 
-bool AlignPair::A2Mesh::Init(const Matrix44d &Tr)
-{
-  Matrix44d Idn; Idn.SetIdentity();
-  tri::Clean<A2Mesh>::RemoveUnreferencedVertex(*this);
-  if (Tr != Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this, Tr);
-  tri::UpdateNormal<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this);
-  tri::UpdateFlags<A2Mesh>::FaceBorderFromNone(*this);
-  tri::UpdateBounding<A2Mesh>::Box(*this);
-
-  return true;
-}
+//  return true;
+//}
 
 
-void AlignPair::Stat::clear()
-{
-  I.clear();
-  StartTime = 0;
-  MovVertNum = 0;
-  FixVertNum = 0;
-  FixFaceNum = 0;
-}
+//void AlignPair::Stat::clear()
+//{
+//  I.clear();
+//  StartTime = 0;
+//  MovVertNum = 0;
+//  FixVertNum = 0;
+//  FixFaceNum = 0;
+//}
 
 // Restituisce true se nelle ultime <lastiter> iterazioni non e' diminuito
 // l'errore
-bool AlignPair::Stat::Stable(int lastiter)
-{
-  if (I.empty()) return false;
-  int parag = int(I.size()) - lastiter;
+//bool AlignPair::Stat::Stable(int lastiter)
+//{
+//  if (I.empty()) return false;
+//  int parag = int(I.size()) - lastiter;
 
-  if (parag < 0) parag = 0;
-  if (I.back().pcl50 < I[parag].pcl50) return false; // se siamo diminuiti non e' stabile
+//  if (parag < 0) parag = 0;
+//  if (I.back().pcl50 < I[parag].pcl50) return false; // se siamo diminuiti non e' stabile
 
-  return true;
+//  return true;
 
-}
+//}
 
 
-void AlignPair::Stat::Dump(FILE *fp)
-{
-  if (I.size() == 0) {
-    fprintf(fp, "Empty AlignPair::Stat\n");
-    return;
-  }
-  fprintf(fp, "Final Err %8.5f In %i iterations Total Time %ims\n", LastPcl50(), (int)I.size(), TotTime());
-  fprintf(fp, "Mindist   Med   Hi    Avg  RMS   StdDev   Time Tested Used  Dist Bord Angl \n");
-  for (unsigned int qi = 0; qi < I.size(); ++qi)
-    fprintf(fp, "%5.2f (%6.3f:%6.3f) (%6.3f %6.3f %6.3f) %4ims %5i %5i %4i+%4i+%4i\n",
-    I[qi].MinDistAbs,
-    I[qi].pcl50, I[qi].pclhi,
-    I[qi].AVG, I[qi].RMS, I[qi].StdDev,
-    IterTime(qi),
-    I[qi].SampleTested, I[qi].SampleUsed, I[qi].DistanceDiscarded, I[qi].BorderDiscarded, I[qi].AngleDiscarded);
-}
+//void AlignPair::Stat::Dump(FILE *fp)
+//{
+//  if (I.size() == 0) {
+//    fprintf(fp, "Empty AlignPair::Stat\n");
+//    return;
+//  }
+//  fprintf(fp, "Final Err %8.5f In %i iterations Total Time %ims\n", LastPcl50(), (int)I.size(), TotTime());
+//  fprintf(fp, "Mindist   Med   Hi    Avg  RMS   StdDev   Time Tested Used  Dist Bord Angl \n");
+//  for (unsigned int qi = 0; qi < I.size(); ++qi)
+//    fprintf(fp, "%5.2f (%6.3f:%6.3f) (%6.3f %6.3f %6.3f) %4ims %5i %5i %4i+%4i+%4i\n",
+//    I[qi].MinDistAbs,
+//    I[qi].pcl50, I[qi].pclhi,
+//    I[qi].AVG, I[qi].RMS, I[qi].StdDev,
+//    IterTime(qi),
+//    I[qi].SampleTested, I[qi].SampleUsed, I[qi].DistanceDiscarded, I[qi].BorderDiscarded, I[qi].AngleDiscarded);
+//}
 
 // Scrive una tabella con tutti i valori
-void AlignPair::Stat::HTMLDump(FILE *fp)
-{
-  fprintf(fp, "Final Err %8.5f In %i iterations Total Time %ims\n", LastPcl50(), (int)I.size(), TotTime());
-  fprintf(fp, "<table border>\n");
-  fprintf(fp, "<tr> <th>Mindist</th><th>    50ile </th><th>  Hi </th><th>   Avg  </th><th> RMS </th><th>  StdDev  </th><th> Time </th><th> Tested </th><th> Used </th><th> Dist </th><th> Bord </th><th> Angl \n");
-  for (unsigned int qi = 0; qi < I.size(); ++qi)
-    fprintf(fp, "<tr> <td> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %5.3f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %4ims </td><td align=\"right\"> %5i </td><td align=\"right\"> %5i </td><td align=\"right\"> %4i </td><td align=\"right\"> %4i </td><td align=\"right\">%4i </td><td align=\"right\"></tr>\n",
-    I[qi].MinDistAbs,
-    I[qi].pcl50, I[qi].pclhi,
-    I[qi].AVG, I[qi].RMS, I[qi].StdDev,
-    IterTime(qi),
-    I[qi].SampleTested, I[qi].SampleUsed, I[qi].DistanceDiscarded, I[qi].BorderDiscarded, I[qi].AngleDiscarded);
-  fprintf(fp, "</table>\n");
-}
+//void AlignPair::Stat::HTMLDump(FILE *fp)
+//{
+//  fprintf(fp, "Final Err %8.5f In %i iterations Total Time %ims\n", LastPcl50(), (int)I.size(), TotTime());
+//  fprintf(fp, "<table border>\n");
+//  fprintf(fp, "<tr> <th>Mindist</th><th>    50ile </th><th>  Hi </th><th>   Avg  </th><th> RMS </th><th>  StdDev  </th><th> Time </th><th> Tested </th><th> Used </th><th> Dist </th><th> Bord </th><th> Angl \n");
+//  for (unsigned int qi = 0; qi < I.size(); ++qi)
+//    fprintf(fp, "<tr> <td> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %5.3f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %4ims </td><td align=\"right\"> %5i </td><td align=\"right\"> %5i </td><td align=\"right\"> %4i </td><td align=\"right\"> %4i </td><td align=\"right\">%4i </td><td align=\"right\"></tr>\n",
+//    I[qi].MinDistAbs,
+//    I[qi].pcl50, I[qi].pclhi,
+//    I[qi].AVG, I[qi].RMS, I[qi].StdDev,
+//    IterTime(qi),
+//    I[qi].SampleTested, I[qi].SampleUsed, I[qi].DistanceDiscarded, I[qi].BorderDiscarded, I[qi].AngleDiscarded);
+//  fprintf(fp, "</table>\n");
+//}
 
 
 
