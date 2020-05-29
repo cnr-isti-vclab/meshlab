@@ -18,7 +18,7 @@ cd "${0%/*}" #move to script directory
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH="../../src"
+    BUILD_PATH="./bld"
 else
     BUILD_PATH=$1
 fi
