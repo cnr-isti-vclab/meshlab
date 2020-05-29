@@ -71,7 +71,7 @@ else()
 endif()
 
 # newuoa - optional and header-only, for several plugins including all that use levmar
-set(NEWUOA_DIR ${EXTERNAL_DIR}/newuoa)
+set(NEWUOA_DIR ${VCGDIR}/wrap/newuoa)
 if(ALLOW_BUNDLED_NEWUOA AND EXISTS "${NEWUOA_DIR}/include/newuoa.h")
     message(STATUS "- newuoa - using bundled source")
     add_library(external-newuoa INTERFACE)

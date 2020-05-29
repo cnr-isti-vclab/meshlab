@@ -19,9 +19,9 @@ SOURCES += \
     parameters.cpp   \
     pointCorrespondence.cpp  \
     solver.cpp
-		
+
 TARGET = filter_mutualglobal
 
 INCLUDEPATH *= \
     $$MESHLAB_EXTERNAL_DIRECTORY/levmar-2.3 \
-    $$MESHLAB_EXTERNAL_DIRECTORY/newuoa/include
+    $$VCGDIR/wrap/newuoa/include
