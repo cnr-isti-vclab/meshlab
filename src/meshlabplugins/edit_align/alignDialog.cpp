@@ -186,7 +186,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* /*meshTree*/, vcg::AlignPair::R
 		.arg((*A).area, 6, 'f', 3)
 		.arg((*A).err, 6, 'f', 3)
 		.arg((*A).ap.SampleNum, 6)
-		.arg((*A).as.LastSampleUsed());
+		.arg((*A).as.lastSampleUsed());
 	setText(3, buf);
 
 	QFont fixedFont("Courier");
