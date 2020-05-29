@@ -68,19 +68,19 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 
   // 1) Convert fixed mesh and put it into the grid.
   MM(fixId)->updateDataMask(MeshModel::MM_FACEMARK);
-  aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
+  aa.convertMesh<CMeshO>(MM(fixId)->cm,Fix);
 
   vcg::AlignPair::A2Grid UG;
   vcg::AlignPair::A2GridVert VG;
 
   if(MM(fixId)->cm.fn==0 || ap.UseVertexOnly)
   {
-    Fix.InitVert(vcg::Matrix44d::Identity());
+    Fix.initVert(vcg::Matrix44d::Identity());
     vcg::AlignPair::InitFixVert(&Fix,ap,VG);
   }
   else
   {
-    Fix.Init(vcg::Matrix44d::Identity());
+    Fix.init(vcg::Matrix44d::Identity());
     vcg::AlignPair::InitFix(&Fix, ap, UG);
   }
   // 2) Convert the second mesh and sample a <ap.SampleNum> points on it.
@@ -89,7 +89,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 //  aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
   std::vector<vcg::AlignPair::A2Vertex> tmpmv;
 //  aa.ConvertVertex(Mov.vert,tmpmv);
-  aa.ConvertVertex(MM(movId)->cm.vert,tmpmv);
+  aa.convertVertex(MM(movId)->cm.vert,tmpmv);
   aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
 
   aa.mov=&tmpmv;
@@ -188,14 +188,14 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
       if( curResult->IsValid() )
       {
         hasValidAlign = true;
-        std::pair<double,double> dd=curResult->ComputeAvgErr(); 
+        std::pair<double,double> dd=curResult->computeAvgErr(); 
 #pragma omp critical
         cb(0,qUtf8Printable(buf.sprintf("(%3i/%3zu) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
       }
       else
       {
 #pragma omp critical
-        cb(0,qUtf8Printable(buf.sprintf( "(%3i/%3zu) %2i -> %2i Failed Alignment of one arc %s\n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
+        cb(0,qUtf8Printable(buf.sprintf( "(%3i/%3zu) %2i -> %2i Failed Alignment of one arc %s\n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::errorMsg(curResult->status))));
       }
     }
   }

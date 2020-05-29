@@ -434,7 +434,7 @@ bool AlignPair::Align(
   } while (
     nc <= ap.MaxIterNum &&
     H.Percentile(.5) > ap.TrgDistAbs &&
-    (nc<ap.EndStepNum + 1 || !as.Stable(ap.EndStepNum))
+	(nc<ap.EndStepNum + 1 || !as.stable(ap.EndStepNum))
     );
   /**************** END ICP LOOP ****************/
   int tt2 = clock();
@@ -461,20 +461,20 @@ bool AlignPair::Align(
 
 
 
-const char *AlignPair::ErrorMsg(ErrorCode code)
-{
-  switch (code){
-  case SUCCESS:         return "Success         ";
-  case NO_COMMON_BBOX: return "No Common BBox  ";
-  case TOO_FEW_POINTS: return "Too few points  ";
-  case LSQ_DIVERGE: return "LSQ not converge";
-  case TOO_MUCH_SHEAR: return "Too much shear  ";
-  case TOO_MUCH_SCALE: return "Too much scale  ";
-  case UNKNOWN_MODE: return "Unknown mode    ";
-  default:  assert(0); return "Catastrophic Error";
-  }
-  return 0;
-}
+//const char *AlignPair::ErrorMsg(ErrorCode code)
+//{
+//  switch (code){
+//  case SUCCESS:         return "Success         ";
+//  case NO_COMMON_BBOX: return "No Common BBox  ";
+//  case TOO_FEW_POINTS: return "Too few points  ";
+//  case LSQ_DIVERGE: return "LSQ not converge";
+//  case TOO_MUCH_SHEAR: return "Too much shear  ";
+//  case TOO_MUCH_SCALE: return "Too much scale  ";
+//  case UNKNOWN_MODE: return "Unknown mode    ";
+//  default:  assert(0); return "Catastrophic Error";
+//  }
+//  return 0;
+//}
 /*
 
 Questa parte era relativa all'allineatore automatico.
