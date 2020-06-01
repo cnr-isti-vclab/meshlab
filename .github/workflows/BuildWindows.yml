@@ -1,4 +1,4 @@
-name: CompileWindows
+name: BuildWindows
 
 on: [push, pull_request]
 
