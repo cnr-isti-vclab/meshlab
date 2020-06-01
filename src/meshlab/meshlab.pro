@@ -5,7 +5,6 @@ QT += opengl
 QT += xml
 QT += xmlpatterns
 QT += network
-QT += script
 
 #CONFIG += debug_and_release
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
@@ -43,17 +42,14 @@ HEADERS += \
     layerDialog.h \
     stdpardialog.h \
     ml_std_par_dialog.h \
-    xmlstdpardialog.h \
     additionalgui.h \
-    xmlgeneratorgui.h \
     snapshotsetting.h \
     ml_render_gui.h \
     ml_rendering_actions.h \
     ml_default_decorators.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
-    $$VCGDIR/wrap/gl/trimesh.h \
-    filterthread.h
+    $$VCGDIR/wrap/gl/trimesh.h
 
 SOURCES += \
     main.cpp \
@@ -70,18 +66,14 @@ SOURCES += \
     changetexturename.cpp \
     stdpardialog.cpp \
     ml_std_par_dialog.cpp \
-    xmlstdpardialog.cpp \
     additionalgui.cpp \
-    xmlgeneratorgui.cpp \
     ml_render_gui.cpp \
     ml_rendering_actions.cpp \
     ml_default_decorators.cpp \
     $$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     $$VCGDIR/wrap/gui/coordinateframe.cpp \
-    glarea_setting.cpp \
-    filterthread.cpp
-
+    glarea_setting.cpp
 FORMS += \
     ui/layerDialog.ui \
     ui/filterScriptDialog.ui \
@@ -91,8 +83,7 @@ FORMS += \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
-    ui/filtergui.ui \
-    ui/filtercreatortab.ui
+    ui/filtergui.ui
 	
 RESOURCES += \
     meshlab.qrc

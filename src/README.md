@@ -24,7 +24,7 @@ There are also two folders that contains MeshLab plugins that are no longer supp
 
 MeshLab compiles with the three major compilers: `gcc`, `clang`, and `msvc`.
 
-MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with `script` and `xmlpatterns` as additional packages.
+MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with `xmlpatterns` as additional package.
 
 After setting up the Qt environment:
 
@@ -44,7 +44,7 @@ You can also use `cmake`:
 
 You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
 
-1. Install QtCreator and Qt >= 5.9 with `script` and `xmlpatterns` as additional packages;
+1. Install QtCreator and Qt >= 5.9 with `xmlpatterns` as additional package;
 2. Open `meshlab.pro` inside `src`;
 3. Select your favourite shadow build directory;
 4. Before the build, deactive the `QtQuickCompiler` option from the qmake call in the project options;

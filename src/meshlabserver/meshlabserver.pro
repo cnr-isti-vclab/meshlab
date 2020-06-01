@@ -16,8 +16,7 @@ RC_FILE = ../meshlab/meshlab.rc
 QT += \
     xml \
     opengl \
-    xmlpatterns \
-    script
+    xmlpatterns
 
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
 

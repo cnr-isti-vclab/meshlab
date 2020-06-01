@@ -4,7 +4,6 @@ EXIF_DIR = ../external/jhead-3.04
 QT += opengl
 QT += xml
 QT += xmlpatterns
-QT += script
 
 TEMPLATE = lib
 TARGET = meshlab-common
@@ -50,11 +49,8 @@ HEADERS += 	\
     ml_mesh_type.h \
     meshmodel.h \
     pluginmanager.h \
-    scriptinterface.h \
-    xmlfilterinfo.h \
     mlexception.h \
     mlapplication.h \
-    scriptsyntax.h \
     meshlabdocumentxml.h \
     ml_shared_data_context.h \
     ml_selection_buffers.h \
@@ -68,10 +64,7 @@ SOURCES += \
     GLLogStream.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
-    scriptinterface.cpp \
-    xmlfilterinfo.cpp \
     mlapplication.cpp \
-    scriptsyntax.cpp \
     searcher.cpp \
     meshlabdocumentxml.cpp \
     meshlabdocumentbundler.cpp \

@@ -52,7 +52,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        modules: qtscript xmlpatterns
+        modules: xmlpatterns
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
@@ -139,7 +139,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        modules: qtscript xmlpatterns
+        modules: xmlpatterns
     - name: Setup env variables
       id: envs
       shell: bash
@@ -196,7 +196,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        modules: qtscript xmlpatterns
+        modules: xmlpatterns
         version: '5.14.2'
         #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab

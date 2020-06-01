@@ -10,7 +10,6 @@ set(SOURCES
     changetexturename.cpp
     customDialog.cpp
     filterScriptDialog.cpp
-    filterthread.cpp
     glarea.cpp
     glarea_setting.cpp
     layerDialog.cpp
@@ -26,8 +25,6 @@ set(SOURCES
     saveSnapshotDialog.cpp
     savemaskexporter.cpp
     stdpardialog.cpp
-    xmlgeneratorgui.cpp
-    xmlstdpardialog.cpp
     ${VCGDIR}/wrap/gui/trackball.cpp
     ${VCGDIR}/wrap/gui/trackmode.cpp
     ${VCGDIR}/wrap/gui/coordinateframe.cpp)
@@ -38,7 +35,6 @@ set(HEADERS
     changetexturename.h
     customDialog.h
     filterScriptDialog.h
-    filterthread.h
     glarea.h
     glarea_setting.h
     layerDialog.h
@@ -54,8 +50,6 @@ set(HEADERS
     savemaskexporter.h
     snapshotsetting.h
     stdpardialog.h
-    xmlgeneratorgui.h
-    xmlstdpardialog.h
     ${VCGDIR}/wrap/gui/trackball.h
     ${VCGDIR}/wrap/gui/trackmode.h
     ${VCGDIR}/wrap/gl/trimesh.h)

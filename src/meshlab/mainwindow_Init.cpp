@@ -23,9 +23,9 @@
 
 
 #include "../common/interfaces.h"
-#include "../common/xmlfilterinfo.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
+#include "../common/mlexception.h"
 
 #include <QToolBar>
 #include <QProgressBar>
@@ -51,14 +51,10 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-	:mwsettings(), gpumeminfo(NULL), xmlfiltertimer(), wama()
+	:mwsettings(), gpumeminfo(NULL), wama()
 {
 	_currviewcontainer = NULL;
-	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
-	//Subsequently restart function will be invoked.
 	setContextMenuPolicy(Qt::NoContextMenu);
-	xmlfiltertimer.start();
-	//xmlfiltertimer.elapsed();
 
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
@@ -102,7 +98,6 @@ MainWindow::MainWindow()
 	createMenus();
 	gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
 	stddialog = 0;
-	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(MeshLabApplication::shortName());
@@ -118,23 +113,9 @@ MainWindow::MainWindow()
     nvgpumeminfo->setStyleSheet(" QProgressBar { background-color: #d0d0d0; border: 2px solid grey; border-radius: 0px; text-align: center; }"
                                 " QProgressBar::chunk {background-color: #80c080; width: 1px;}");
 	statusBar()->addPermanentWidget(nvgpumeminfo, 0);
-	//updateMenus();
 	newProject();
-	//PM should be initialized before passing it to PluginGeneratorGUI
-	plugingui = new PluginGeneratorGUI(PM, this);
-	plugingui->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::LeftDockWidgetArea, plugingui);
 	updateCustomSettings();
-	connect(plugingui, SIGNAL(scriptCodeExecuted(const QScriptValue&, const int, const QString&)), this, SLOT(scriptCodeExecuted(const QScriptValue&, const int, const QString&)));
-	connect(plugingui, SIGNAL(insertXMLPluginRequested(const QString&, const QString&)), this, SLOT(loadAndInsertXMLPlugin(const QString&, const QString&)));
-	connect(plugingui, SIGNAL(historyRequest()), this, SLOT(sendHistory()));
-	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
-	//wid->showMaximized();
-	//ar->update();
 
-	//qb->setAutoClose(true);
-	//qb->setMinimumDuration(0);
-	//qb->reset();
 	connect(this, SIGNAL(updateLayerTable()), this, SLOT(updateLayerDialog()));
 	connect(layerDialog, SIGNAL(removeDecoratorRequested(QAction*)), this, SLOT(switchOffDecorator(QAction*)));
 }
@@ -463,11 +444,6 @@ connectRenderModeActionList(rendlist);*/
 
 	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
 
-	//TOOL MENU
-	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"), this);
-	showFilterEditAct->setEnabled(true);
-	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
-
 }
 
 void MainWindow::createToolBars()
@@ -668,9 +644,6 @@ void MainWindow::initSearchEngine()
 	for (QMap<QString, QAction*>::iterator it = PM.actionFilterMap.begin(); it != PM.actionFilterMap.end(); ++it)
 		initItemForSearching(it.value());
 
-	for (QMap<QString, MeshLabXMLFilterContainer>::iterator it = PM.stringXMLFilterMap.begin(); it != PM.stringXMLFilterMap.end(); ++it)
-		initItemForSearching(it.value().act);
-
 	initMenuForSearching(editMenu);
 	initMenuForSearching(renderMenu);
 }
@@ -841,114 +814,6 @@ void MainWindow::fillFilterMenu()
 		//    filterToolBar->addAction(filterAction);
 
 
-	}
-
-	QMap<QString, MeshLabXMLFilterContainer>::iterator xmlit;
-	for (xmlit = PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end(); ++xmlit)
-	{
-		try
-		{
-			//MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
-			QAction *filterAction = xmlit.value().act;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter action value.");
-			MLXMLPluginInfo* info = xmlit.value().xmlInfo;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter info value.");
-			QString filterName = xmlit.key();
-
-			QString help = info->filterHelp(filterName);
-			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
-			connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
-			QString filterClasses = info->filterAttribute(filterName, MLXMLElNames::filterClass);
-			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-			foreach(QString nameClass, filterClassesList)
-			{
-				if (nameClass == QString("FaceColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("VertexColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("Selection"))
-				{
-					filterMenuSelect->addAction(filterAction);
-				}
-				if (nameClass == QString("Cleaning"))
-				{
-					filterMenuClean->addAction(filterAction);
-				}
-				if (nameClass == QString("Remeshing"))
-				{
-					filterMenuRemeshing->addAction(filterAction);
-				}
-				if (nameClass == QString("Smoothing"))
-				{
-					filterMenuSmoothing->addAction(filterAction);
-				}
-				if (nameClass == QString("Normal"))
-				{
-					filterMenuNormal->addAction(filterAction);
-				}
-				if (nameClass == QString("Quality"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Measure"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Layer"))
-				{
-					filterMenuMeshLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("RasterLayer"))
-				{
-					filterMenuRasterLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("MeshCreation"))
-				{
-					filterMenuCreate->addAction(filterAction);
-				}
-				if (nameClass == QString("RangeMap"))
-				{
-					filterMenuRangeMap->addAction(filterAction);
-				}
-				if (nameClass == QString("PointSet"))
-				{
-					filterMenuPointSet->addAction(filterAction);
-				}
-				if (nameClass == QString("Sampling"))
-				{
-					filterMenuSampling->addAction(filterAction);
-				}
-				if (nameClass == QString("Texture"))
-				{
-					filterMenuTexture->addAction(filterAction);
-				}
-				if (nameClass == QString("Polygonal"))
-				{
-					filterMenuPolygonal->addAction(filterAction);
-				}
-				if (nameClass == QString("Camera"))
-				{
-					filterMenuCamera->addAction(filterAction);
-				}
-				//  //  MeshFilterInterface::Generic :
-				if (nameClass == QString("Generic"))
-				{
-					filterMenu->addAction(filterAction);
-				}
-				//if(!filterAction->icon().isNull())
-				//    filterToolBar->addAction(filterAction);
-			}
-		}
-		catch (ParsingException &e)
-		{
-			meshDoc()->Log.Log(GLLogStream::SYSTEM, e.what());
-		}
 	}
 }
 

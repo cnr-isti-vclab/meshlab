@@ -39,10 +39,6 @@ add sampleplugins
 #include <common/interfaces.h>
 #include "alignset.h"
 
-
-
-class QScriptEngine;
-
 class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT

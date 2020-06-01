@@ -24,10 +24,7 @@ set(SOURCES
     ml_thread_safe_memory_info.cpp
     mlapplication.cpp
     pluginmanager.cpp
-    scriptinterface.cpp
-    scriptsyntax.cpp
-    searcher.cpp
-    xmlfilterinfo.cpp)
+    searcher.cpp)
 
 set(HEADERS
     GLExtensionsManager.h
@@ -45,10 +42,7 @@ set(HEADERS
     mlapplication.h
     mlexception.h
     pluginmanager.h
-    scriptinterface.h
-    scriptsyntax.h
-    searcher.h
-    xmlfilterinfo.h)
+    searcher.h)
 
 set(RESOURCES common.qrc)
 
@@ -63,7 +57,6 @@ target_link_libraries(
     common
     PUBLIC Qt5::Core
            Qt5::OpenGL
-           Qt5::Script
            Qt5::Widgets
            Qt5::Xml
            Qt5::XmlPatterns
