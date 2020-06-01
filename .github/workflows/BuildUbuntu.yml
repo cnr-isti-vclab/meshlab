@@ -1,4 +1,4 @@
-name: CompileUbuntu
+name: BuildUbuntu
 
 on:
   [push, pull_request]
@@ -109,7 +109,8 @@ jobs:
       run: |
         cmake src/ -G Ninja
     - name: Build MeshLab
-      run: ninja -C .
+      run: |
+        ninja -C .
     - name: Install Meshlab
       run: sudo ninja -C . install
 
