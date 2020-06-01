@@ -68,11 +68,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2020.05</string>
+	<string>2020.06</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>2020.05</string>
+	<string>2020.06</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>NOTE</key>
