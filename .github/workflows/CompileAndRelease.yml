@@ -1,9 +1,9 @@
 name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   update_ml_version:
@@ -31,10 +31,10 @@ jobs:
     - name: Update Snap file
       run: |
          sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
-    - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
-      uses: stefanzweifel/git-auto-commit-action@v4.1.1
-      with:
-        commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
+    #- name: commit ML_VERSION, snapcraft.yaml and Info.plist change
+    #  uses: stefanzweifel/git-auto-commit-action@v4.1.1
+    #  with:
+    #    commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
 
   ubuntu_build_appimage:
     needs: [update_ml_version]
