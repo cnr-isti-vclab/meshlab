@@ -1,9 +1,9 @@
 # ![MeshLab Logo](src/meshlab/images/eye64.png) MeshLab
 
 
-[![Actions Status](https://github.com/cnr-isti-vclab/meshlab/workflows/CompileUbuntu/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions)
-[![Actions Status](https://github.com/cnr-isti-vclab/meshlab/workflows/CompileMacOS/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions)
-[![Actions Status](https://github.com/cnr-isti-vclab/meshlab/workflows/CompileWindows/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions)
+![BuildUbuntu](https://github.com/cnr-isti-vclab/meshlab/workflows/BuildUbuntu/badge.svg)
+![BuildMacOS](https://github.com/cnr-isti-vclab/meshlab/workflows/BuildMacOS/badge.svg)
+![BuildWindows](https://github.com/cnr-isti-vclab/meshlab/workflows/BuildWindows/badge.svg)
 
 This is the official repository for the source and the binaries of MeshLab. 
 
