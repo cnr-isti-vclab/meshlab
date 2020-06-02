@@ -58,7 +58,7 @@ parts:
     build-packages:
       - qt5-default
       - qttools5-dev-tools
-      - qtscript5-dev
+      - qtdeclarative5-dev
       - libqt5xmlpatterns5-dev
       - mesa-common-dev
       - libglu1-mesa-dev
@@ -76,7 +76,6 @@ parts:
       - libglew-dev
       - libqt5opengl5-dev
       - libqt5xmlpatterns5-dev
-      - libqt5script5
       - libqt5gui5
     override-build: |
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
