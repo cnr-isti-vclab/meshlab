@@ -33,7 +33,7 @@ jobs:
         sh install/linux/linux_build.sh
     - name: Deploy MeshLab and MeshLabServer
       run : |
-        sh install/linux/linux_appimages.sh
+        sh install/linux/linux_appimages.sh 
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:

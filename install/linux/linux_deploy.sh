@@ -66,6 +66,9 @@ $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bu
 
 rm -r lib
 
+chmod +x usr/bin/meshlab
+chmod +x usr/bin/meshlabserver
+
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
 
