@@ -30,7 +30,8 @@ jobs:
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
-         sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
+        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > snapcraft.yaml
+        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
     - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
