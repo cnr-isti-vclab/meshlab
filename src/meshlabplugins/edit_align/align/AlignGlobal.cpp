@@ -23,9 +23,8 @@
 
 #include <cstdarg>
 #include <stack>
-#include "AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include "AlignGlobal.h"
-#include "../point_matching_scale.h"
 #include <vcg/space/point_matching.h>
 using namespace vcg;
 using namespace std;
@@ -337,7 +336,7 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
   //if(Rigid) ret=ComputeRigidMatchMatrix(out,FixP,MovP);
   //else ret=ComputeMatchMatrix2(out,FixP,FixN,MovP);
   if(Rigid) ComputeRigidMatchMatrix(FixP,MovP,out);
-  else ComputeRotoTranslationScalingMatchMatrix(out,FixP,MovP);
+  else vcg::PointMatchingScale::computeRotoTranslationScalingMatchMatrix(out,FixP,MovP);
 
   Matrix44d outIn=vcg::Inverse(out);
   //double maxdiff = MatrixNorm(out);

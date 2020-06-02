@@ -27,7 +27,7 @@
 #include <QObject>
 
 #include <common/interfaces.h>
-#include "align/AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include "align/AlignGlobal.h"
 #include "align/OccupancyGrid.h"
 #include <wrap/gui/trackball.h>

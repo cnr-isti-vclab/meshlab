@@ -11,7 +11,6 @@ if(TARGET external-newuoa)
     set(SOURCES
         align/align_parameter.cpp
         align/AlignGlobal.cpp
-        align/AlignPair.cpp
         align/OccupancyGrid.cpp
         alignDialog.cpp
         AlignPairDialog.cpp
@@ -19,7 +18,6 @@ if(TARGET external-newuoa)
         edit_align_factory.cpp
         edit_align.cpp
         meshtree.cpp
-        point_matching_scale.cpp
         ../../meshlab/stdpardialog.cpp
         ${VCGDIR}/wrap/gui/trackball.cpp
         ${VCGDIR}/wrap/gui/trackmode.cpp
@@ -28,7 +26,6 @@ if(TARGET external-newuoa)
     set(HEADERS
         align/align_parameter.h
         align/AlignGlobal.h
-        align/AlignPair.h
         align/OccupancyGrid.h
         alignDialog.h
         AlignPairDialog.h

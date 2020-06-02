@@ -68,20 +68,20 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 
   // 1) Convert fixed mesh and put it into the grid.
   MM(fixId)->updateDataMask(MeshModel::MM_FACEMARK);
-  aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
+  aa.convertMesh<CMeshO>(MM(fixId)->cm,Fix);
 
   vcg::AlignPair::A2Grid UG;
   vcg::AlignPair::A2GridVert VG;
 
   if(MM(fixId)->cm.fn==0 || ap.UseVertexOnly)
   {
-    Fix.InitVert(vcg::Matrix44d::Identity());
+    Fix.initVert(vcg::Matrix44d::Identity());
     vcg::AlignPair::InitFixVert(&Fix,ap,VG);
   }
   else
   {
-    Fix.Init(vcg::Matrix44d::Identity());
-    vcg::AlignPair::InitFix(&Fix, ap, UG);
+    Fix.init(vcg::Matrix44d::Identity());
+	vcg::AlignPair::initFix(&Fix, ap, UG);
   }
   // 2) Convert the second mesh and sample a <ap.SampleNum> points on it.
 
@@ -89,8 +89,8 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 //  aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
   std::vector<vcg::AlignPair::A2Vertex> tmpmv;
 //  aa.ConvertVertex(Mov.vert,tmpmv);
-  aa.ConvertVertex(MM(movId)->cm.vert,tmpmv);
-  aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
+  aa.convertVertex(MM(movId)->cm.vert,tmpmv);
+  aa.sampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
 
   aa.mov=&tmpmv;
   aa.fix=&Fix;
@@ -98,7 +98,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 
   vcg::Matrix44d In=MovM;
   // Perform the ICP algorithm
-  aa.Align(In,UG,VG,result);
+  aa.align(In,UG,VG,result);
 
   result.FixName=fixId;
   result.MovName=movId;
@@ -185,17 +185,17 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
     {
       ProcessArc(OG.SVA[i].s, OG.SVA[i].t, *curResult, ap);
       curResult->area= OG.SVA[i].norm_area;
-      if( curResult->IsValid() )
+      if( curResult->isValid() )
       {
         hasValidAlign = true;
-        std::pair<double,double> dd=curResult->ComputeAvgErr(); 
+        std::pair<double,double> dd=curResult->computeAvgErr(); 
 #pragma omp critical
         cb(0,qUtf8Printable(buf.sprintf("(%3i/%3zu) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
       }
       else
       {
 #pragma omp critical
-        cb(0,qUtf8Printable(buf.sprintf( "(%3i/%3zu) %2i -> %2i Failed Alignment of one arc %s\n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
+        cb(0,qUtf8Printable(buf.sprintf( "(%3i/%3zu) %2i -> %2i Failed Alignment of one arc %s\n",i+1,totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::errorMsg(curResult->status))));
       }
     }
   }
@@ -208,7 +208,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 
   vcg::Distribution<float> H; // stat for printing
   for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
-    if ((*li).IsValid())
+    if ((*li).isValid())
       H.Add(li->err);
   cb(0,qUtf8Printable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f; Median %5.3f; 90%% %5.3f\n", H.Avg(), H.Percentile(0.5f), H.Percentile(0.9f))));
 
@@ -246,7 +246,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 	vcg::AlignGlobal AG;
 	std::vector<vcg::AlignPair::Result *> ResVecPtr;
 	for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
-    if ((*li).IsValid())
+    if ((*li).isValid())
 	    ResVecPtr.push_back(&*li);
 	AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
 

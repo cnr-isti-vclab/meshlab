@@ -25,7 +25,7 @@
 #define EditAlignPLUGIN_H
 
 #include <common/interfaces.h>
-#include "align/AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include "align/OccupancyGrid.h"
 #include "meshtree.h"
 #include <wrap/gui/trackball.h>

@@ -1,7 +1,7 @@
 include (../../shared.pri)
 
 INCLUDEPATH += \
-    $$MESHLAB_EXTERNAL_DIRECTORY/newuoa/include
+    $$VCGDIR/wrap/newuoa/include
 
 HEADERS += \
     edit_align_factory.h \
@@ -10,7 +10,6 @@ HEADERS += \
     alignDialog.h \
     AlignPairDialog.h \
     AlignPairWidget.h \
-    align/AlignPair.h \
     align/AlignGlobal.h \
     align/OccupancyGrid.h \
     align/align_parameter.h \
@@ -21,13 +20,11 @@ HEADERS += \
 
 SOURCES += \
     edit_align_factory.cpp \
-    point_matching_scale.cpp \
     edit_align.cpp \
     meshtree.cpp \
     alignDialog.cpp \
     AlignPairWidget.cpp \
     AlignPairDialog.cpp \
-    align/AlignPair.cpp \
     align/AlignGlobal.cpp \
     align/OccupancyGrid.cpp \
     align/align_parameter.cpp \
