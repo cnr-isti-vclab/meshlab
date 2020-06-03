@@ -47,6 +47,7 @@
 #include <QMdiSubWindow>
 #include <QSplitter>
 #include <QProgressBar>
+#include <QNetworkAccessManager>
 
 #define MAXRECENTFILES 4
 
@@ -229,7 +230,7 @@ private slots:
 
     void dropEvent ( QDropEvent * event );
     void dragEnterEvent(QDragEnterEvent *);
-    void connectionDone(QNetworkReply *reply);
+	void connectionDone(QNetworkReply *reply);
     ///////////Solt Wrapper for QMdiArea //////////////////
     void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
@@ -265,10 +266,10 @@ private:
 	void setCurrentMeshBestTab();
 
 
-    QNetworkAccessManager *httpReq;
+	QNetworkAccessManager httpReq;
     int idHost;
     int idGet;
-    bool VerboseCheckingFlag;
+	bool verboseCheckingFlag;
 
     MeshlabStdDialog *stddialog;
     static QProgressBar *qb;
