@@ -29,7 +29,6 @@
 
 #include <QToolBar>
 #include <QProgressBar>
-#include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFileOpenEvent>
@@ -51,7 +50,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-	:mwsettings(), gpumeminfo(NULL), wama()
+	:mwsettings(), httpReq(this), gpumeminfo(NULL), wama()
 {
 	_currviewcontainer = NULL;
 	setContextMenuPolicy(Qt::NoContextMenu);
@@ -72,8 +71,8 @@ MainWindow::MainWindow()
 	connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(switchCurrentContainer(QMdiSubWindow *)));
-	httpReq = new QNetworkAccessManager(this);
-	connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
+	//httpReq = new QNetworkAccessManager(this);
+	connect(&httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
 
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
@@ -1017,85 +1016,95 @@ void MainWindow::saveRecentProjectList(const QString &projName)
 
 void MainWindow::checkForUpdates(bool verboseFlag)
 {
-	VerboseCheckingFlag = verboseFlag;
+	verboseCheckingFlag = verboseFlag;
+
 	QSettings settings;
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
 	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
 	QString UID = settings.value("UID", QString("")).toString();
-	if (UID.isEmpty())
-	{
+	if (UID.isEmpty()) {
 		UID = QUuid::createUuid().toString();
 		settings.setValue("UID", UID);
 	}
-
 	QString BaseCommand("/~cignoni/meshlab_latest.php");
 
-#ifdef Q_OS_WIN
-	QString OS = "Win";
-#elif defined( Q_OS_OSX)
-	QString OS = "Mac";
-#else
-	QString OS = "Lin";
-#endif
+	#ifdef Q_OS_WIN
+		QString OS = "Win";
+	#elif defined( Q_OS_OSX)
+		QString OS = "Mac";
+	#else
+		QString OS = "Lin";
+	#endif
 	QString message = BaseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
-	//idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
-	httpReq->get(QNetworkRequest(MeshLabApplication::organizationHost() + message));
-	//idGet=httpReq->get(message,&myLocalBuf);     // id == 2
+
+	QNetworkAccessManager stats;
+	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
+	stats.get(statreq);
+
+	QNetworkRequest request(QString("http://www.meshlab.net/ML_VERSION"));
+	httpReq.get(request);
 }
 
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
-    QString answer = reply->readAll();
+	QSettings settings;
+	QSettings::setDefaultFormat(QSettings::NativeFormat);
 
-    QSettings settings;
-    QSettings::setDefaultFormat(QSettings::NativeFormat);
+	bool dontRemindMeAboutUpgradeVal = false;
+	const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
 
-    // Check if the user specified not to be reminded to upgrade
-    const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
-    bool dontRemindMeAboutUpgradeVal = false;
-    if (settings.contains(dontRemindMeAboutUpgradeVar))
-        dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+	// Check if the user specified not to be reminded to upgrade
+	if (!verboseCheckingFlag) {
+		if (settings.contains(dontRemindMeAboutUpgradeVar))
+			dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+		if (dontRemindMeAboutUpgradeVal)
+			return;
+	}
 
-    // This block is for debugging. Uncomment the lines below
-    // to force the message box to appear.
-    // answer = QString("NEW You must upgrade.");
-    // dontRemindMeAboutUpgradeVal = false;
+	QByteArray ddata = reply->readAll();
+	QString onlineVersion = QString::fromStdString(ddata.toStdString());
+	QStringList splitOnlineVersion = onlineVersion.split(".");
 
-    if (dontRemindMeAboutUpgradeVal)
-        return;
 
-    // Set up a message box for the user
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle("MeshLab Version Checking");
-    msgBox.addButton(QMessageBox::Ok);
-    QCheckBox dontShowCheckBox("Don't show this message again.");
-    dontShowCheckBox.blockSignals(true);
-    msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+	QString thisVersion = MeshLabApplication::appVer();
+	QStringList splitThisVersion = thisVersion.split(".");
 
-    if (answer.left(3) == QString("NEW"))
-    {
-        msgBox.setText(answer.remove(0, 3));
-    }
-    else if (VerboseCheckingFlag)
-    {
-        if (answer.left(2) == QString("ok"))
-            msgBox.setText("Your MeshLab version is the most recent one.");
-        else
-            msgBox.setText("Warning. Update Checking server did not answer correctly: " + answer);
-    }
-    reply->deleteLater();
+	bool newVersionAvailable = false;
+	if (splitOnlineVersion.first().toInt() > splitThisVersion.first().toInt()){
+		newVersionAvailable = true;
+	}
+	else if (splitOnlineVersion.first().toInt() == splitThisVersion.first().toInt()){
+		if (splitOnlineVersion[1].toInt() > splitThisVersion[1].toInt()) {
+			newVersionAvailable = true;
+		}
+	}
 
-    // Showing the dialog only if there is a new version or if we are verbose
-    if (answer.left(3) == QString("NEW") || VerboseCheckingFlag)
-    {
-        int userReply = msgBox.exec();
-        if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
-            settings.setValue(dontRemindMeAboutUpgradeVar, true);
-    }
+	// Set up a message box for the user
+	QMessageBox msgBox(this);
+	msgBox.setWindowTitle("MeshLab Version Checking");
+	msgBox.addButton(QMessageBox::Ok);
+	QCheckBox dontShowCheckBox("Don't show this message again.");
+	dontShowCheckBox.blockSignals(true);
+	msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
 
-    int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
-    settings.setValue("lastComunicatedValue", loadedMeshCounter);
+	if (newVersionAvailable){
+		msgBox.setText(
+					"<center>You are using an old version of MeshLab.<br><br>"
+					"Please, upgrade to the new version!<br><br>"
+					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>");
+	}
+	else if (verboseCheckingFlag && !newVersionAvailable) {
+		msgBox.setText("<center>Your MeshLab version is the most recent one.</center>");
+	}
+	reply->deleteLater();
+
+	// Showing the dialog only if there is a new version or if we are verbose
+	if (newVersionAvailable || verboseCheckingFlag) {
+		int userReply = msgBox.exec();
+		if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
+			settings.setValue(dontRemindMeAboutUpgradeVar, true);
+	}
 }
 
 
