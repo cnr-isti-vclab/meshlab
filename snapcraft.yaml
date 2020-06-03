@@ -18,6 +18,7 @@ apps:
   meshlab:
     command: desktop-launch meshlab
     plugs: [home, x11, mir, opengl]
+    desktop: usr/share/applications/meshlab.desktop
   meshlabserver:
     command: desktop-launch meshlabserver
     plugs: [home, x11, opengl]
