@@ -101,7 +101,7 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
       
-      cp ../install/linux/resources/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp ../install/linux/snap/gui/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
       cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
       mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
