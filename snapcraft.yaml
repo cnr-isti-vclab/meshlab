@@ -87,8 +87,7 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons
 
       cd distrib
       
@@ -103,9 +102,7 @@ parts:
       rm -r README.md
       
       cp ../install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/applications/icon.png
-      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
-      mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
+      mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
       mv meshlab $SNAPCRAFT_PART_INSTALL/usr/bin
       mv LICENSE.txt $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab/
