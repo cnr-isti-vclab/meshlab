@@ -101,7 +101,7 @@ parts:
       rm -r plugins/plugins.txt
       rm -r README.md
       
-      cp ../install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp ../install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
       mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
       mv meshlab $SNAPCRAFT_PART_INSTALL/usr/bin
