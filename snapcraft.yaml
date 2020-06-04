@@ -16,7 +16,7 @@ confinement: strict
 
 apps:
   meshlab:
-    command: desktop-launch meshlab
+    command: desktop-launch usr/bin/meshlab
     plugs: [home, x11, mir, opengl]
     desktop: usr/share/applications/meshlab.desktop
   meshlabserver:
