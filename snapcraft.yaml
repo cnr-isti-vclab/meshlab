@@ -78,7 +78,17 @@ parts:
       - libqt5opengl5-dev
       - libqt5xmlpatterns5-dev
       - libqt5gui5
-    override-build: |      
+    override-build: |  
+      echo "-------"
+      ls
+      echo "-------"
+      ls install/
+      echo "-------"
+      ls install/linux/
+      echo "-------"
+      ls install/linux/snap/
+      echo "-------"
+        
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
 
