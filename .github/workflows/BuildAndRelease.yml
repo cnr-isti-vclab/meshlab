@@ -30,8 +30,7 @@ jobs:
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
-        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" snap_noversion.yaml > snapcraft.yaml
-        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/snap/local/snap_noversion.yaml > install/linux/snap/snapcraft.yaml
+        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
     - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
@@ -109,11 +108,10 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab Snap
       run: |
-        cd install/linux/
         snapcraft
     - name: Rename Snap
       run: |
-        mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+        mv ./meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
     - name: Upload Meshlab Snap
       uses: actions/upload-artifact@v1
       with:

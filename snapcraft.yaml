@@ -9,7 +9,7 @@ description: |
   rendering, texturing and converting meshes. It offers features for processing
   raw data produced by 3D digitization tools/devices and for preparing models
   for 3D printing.
-icon: install/linux/snap/gui/meshlab.png
+icon: meshlab.png
 
 grade: stable
 confinement: strict
@@ -78,9 +78,17 @@ parts:
       - libqt5opengl5-dev
       - libqt5xmlpatterns5-dev
       - libqt5gui5
-    override-build: |
+    override-build: |          
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
+
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons
+
       cd distrib
       
       rm -r lib/macx64/
@@ -92,18 +100,9 @@ parts:
       rm -r plugins/U3D_W32/
       rm -r plugins/plugins.txt
       rm -r README.md
-
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
       
-      cp ../install/linux/snap/gui/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
-      mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
+      cp ../install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
       mv meshlab $SNAPCRAFT_PART_INSTALL/usr/bin
       mv LICENSE.txt $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab/
