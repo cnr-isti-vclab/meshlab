@@ -79,6 +79,16 @@ parts:
       - libqt5xmlpatterns5-dev
       - libqt5gui5
     override-build: |
+      echo "------"
+      ls -l
+      echo "------"
+      ls install/
+      echo "------"
+      ls install/linux/
+      echo "------"
+      ls install/linux/snap/
+      echo "------"
+      
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
 
@@ -90,6 +100,15 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
       
+      echo "------"
+      ls -l
+      echo "------"
+      ls install/
+      echo "------"
+      ls install/linux/
+      echo "------"
+      ls install/linux/snap/
+      echo "------"
       cp install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
       
       cd distrib
