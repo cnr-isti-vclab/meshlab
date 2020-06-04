@@ -81,6 +81,17 @@ parts:
     override-build: |
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
+
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
+      
+      cp install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      
       cd distrib
       
       rm -r lib/macx64/
@@ -92,19 +103,8 @@ parts:
       rm -r plugins/U3D_W32/
       rm -r plugins/plugins.txt
       rm -r README.md
-
-      mkdir -p $SNAPCRAFT_PART_INSTALL/snap/local/
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
       
-      cp ../install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
       cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      cp ../install/linux/snap/README.md $SNAPCRAFT_PART_INSTALL/snap/local/
       cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
       mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin

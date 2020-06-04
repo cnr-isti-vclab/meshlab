@@ -7,8 +7,7 @@ Just type
 ```
 SNAPCRAFT_BUILD_ENVIRONMENT_CPU=6 SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=8G snapcraft
 ```
-from the *parent* directory: that is, not from the directory containing this
-README file, but from its parent directory. This snap has been successfully
+from the root directory of the MeshLab repository. This snap has been successfully
 built in Ubuntu 17.04; Ubuntu 16.10 will not work because MeshLab needs Qt 5.7,
 which is not available there. It should be possible to build MeshLab as a snap
 in older Ubuntu distributions by using the [qt57
