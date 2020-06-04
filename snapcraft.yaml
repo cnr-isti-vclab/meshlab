@@ -103,7 +103,7 @@ parts:
       rm -r README.md
       
       cp ../install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/applications/icon.png
       cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
       mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
