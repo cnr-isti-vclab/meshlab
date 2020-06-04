@@ -9,7 +9,7 @@ description: |
   rendering, texturing and converting meshes. It offers features for processing
   raw data produced by 3D digitization tools/devices and for preparing models
   for 3D printing.
-icon: install/linux/snap/gui/meshlab.png
+icon: meshlab.png
 
 grade: stable
 confinement: strict
@@ -93,6 +93,7 @@ parts:
       rm -r plugins/plugins.txt
       rm -r README.md
 
+      mkdir -p $SNAPCRAFT_PART_INSTALL/snap/local/
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
@@ -101,7 +102,9 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/
       
-      cp ../install/linux/snap/gui/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp ../install/linux/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp ../install/linux/snap/README.md $SNAPCRAFT_PART_INSTALL/snap/local/
       cp meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/hicolor/512x512/apps/meshlab.png
       mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/Yaru/512x512/apps/meshlab.png
       mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin

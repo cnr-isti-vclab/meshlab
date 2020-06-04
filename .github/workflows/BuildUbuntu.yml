@@ -74,11 +74,10 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab Snap
       run: |
-        cd install/linux/
         snapcraft
     - name: Rename Snap
       run: |
-        mv install/linux/meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+        mv ./meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
     - name: Upload Meshlab Snap
       uses: actions/upload-artifact@v1
       with:
