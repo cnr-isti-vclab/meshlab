@@ -1586,7 +1586,7 @@ void MainWindow::saveProject()
 bool MainWindow::openProject(QString fileName)
 {
     bool visiblelayer = layerDialog->isVisible();
-    showLayerDlg(false);
+    //showLayerDlg(false);
 	globrendtoolbar->setEnabled(false);
     if (fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), tr("All Project Files (*.mlp *.mlb *.aln *.out *.nvm);;MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)"));
@@ -2244,7 +2244,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
     if (layerDialog != NULL)
     {
         layervisible = layerDialog->isVisible();
-        showLayerDlg(false);
+        //showLayerDlg(false);
     }
 	globrendtoolbar->setEnabled(false);
     bool res = importMesh(fileName,false);
