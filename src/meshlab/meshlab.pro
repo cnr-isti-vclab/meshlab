@@ -105,11 +105,6 @@ ICON = images/meshlab.icns
 # You have to copy the file by hand into the meshlab.app/Contents/Resources directory.
 # ICON += images/meshlab_obj.icns
 
-
-# the following line is needed to avoid mismatch between
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
-
 CONFIG += stl
 
 win32-msvc:LIBS += \

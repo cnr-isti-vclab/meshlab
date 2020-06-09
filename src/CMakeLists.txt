@@ -48,6 +48,7 @@ option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
 option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
 option(ALLOW_BUNDLED_SSYNTH "Allow use of bundled structure-synth source" ON)
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
+option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
 
 option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
