@@ -95,7 +95,12 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		//conversion from idtf to u3d
 		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
 
-		//saving latex:
+        if(result==false) {
+            QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
+            return false;
+        }
+
+        //saving latex:
 		QDir::setCurrent(curr);
 		QString lat (fileName);
 		QStringList l = lat.split(".");
@@ -104,10 +109,6 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		dir.remove(tmp);
 
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
-		if(result==false) {
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
 	}
 	
 	if(formatName.toUpper() == tr("IDTF")) 
