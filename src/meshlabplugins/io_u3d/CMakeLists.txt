@@ -6,24 +6,33 @@
 ### or create a derived template in src/templates/io_u3d.cmake,
 ### then re-run ./make-cmake.py
 
-set(SOURCES io_u3d.cpp)
+# Only build if we have u3d
+if(TARGET external-IDTFConverter)
 
-set(HEADERS io_u3d.h)
+	set(SOURCES io_u3d.cpp)
 
-add_library(io_u3d MODULE ${SOURCES} ${HEADERS})
+	set(HEADERS io_u3d.h)
 
-target_include_directories(io_u3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_u3d PUBLIC common)
+	add_library(io_u3d MODULE ${SOURCES} ${HEADERS})
 
-set_property(TARGET io_u3d PROPERTY FOLDER Plugins)
+	target_include_directories(io_u3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+	target_link_libraries(io_u3d PUBLIC common)
 
-set_property(TARGET io_u3d PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                    ${MESHLAB_PLUGIN_OUTPUT_DIR})
+	target_link_libraries(io_u3d PRIVATE external-IDTFConverter)
 
-set_property(TARGET io_u3d PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                    ${MESHLAB_PLUGIN_OUTPUT_DIR})
+	set_property(TARGET io_u3d PROPERTY FOLDER Plugins)
 
-install(
-    TARGETS io_u3d
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)
+	set_property(TARGET io_u3d PROPERTY RUNTIME_OUTPUT_DIRECTORY
+										${MESHLAB_PLUGIN_OUTPUT_DIR})
+
+	set_property(TARGET io_u3d PROPERTY LIBRARY_OUTPUT_DIRECTORY
+										${MESHLAB_PLUGIN_OUTPUT_DIR})
+
+	install(
+		TARGETS io_u3d
+		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+		COMPONENT Plugins)
+
+else()
+	message(STATUS "Skipping io_u3d - missing u3d")
+endif()
