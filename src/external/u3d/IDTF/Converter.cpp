@@ -65,7 +65,8 @@ namespace IDTFConverter {
 
 bool IDTFToU3d(
 		const std::string& inputFileName,
-		const std::string& outputFileName)
+		const std::string& outputFileName,
+		int positionQuality)
 {
 	const char* argv[] = {
 		"IDTFConverter",
@@ -74,7 +75,7 @@ bool IDTFToU3d(
 		"-rzf",
 		"0",
 		"-pq",
-		"500",
+		std::to_string(positionQuality).c_str(),
 		"-input",
 		inputFileName.c_str(),
 		"-output",

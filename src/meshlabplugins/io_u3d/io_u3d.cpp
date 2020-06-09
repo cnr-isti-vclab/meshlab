@@ -30,9 +30,12 @@
 #include <common/pluginmanager.h>
 
 #include <wrap/io_trimesh/export.h>
+#include <wrap/io_trimesh/export_idtf.h>
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QMessageBox>
+#include "Converter.h"
+
 using namespace std;
 using namespace vcg;
 
@@ -65,68 +68,43 @@ QString U3DIOPlugin::computePluginsPath()
 
 bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, vcg::CallBackPos *, QWidget *parent)
 {
-  vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
-	string filename = QFile::encodeName(fileName).constData ();
-  //std::string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData();
 	std::string ex = formatName.toUtf8().data();
-	//QString curr = QDir::currentPath();	
-	//QString tmp(QDir::tempPath());
-	//
-	//if there are textures file that aren't in tga format I have to convert them	
-	//
-	//I maintain the converted file name (i.e. file_path + originalname without extension + tga) in mesh.textures but I have to revert to the original ones	////before the function return. 
-	//QStringList oldtextname;	
-	//for(unsigned int ii = 0; ii < m.cm.textures.size();++ii)	
-	//	oldtextname.push_back(m.cm.textures[ii].c_str());
-	//
-	//tmp vector to save the tga created files that should be deleted.	
-	//QStringList convfile;	
-	//vcg::tri::io::TGA_Exporter::convertTexturesFiles(m.cm,curr,convfile);	
+
 	
 	QStringList textures_to_be_restored;	
 	QStringList lst = vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(m.cm,QDir::tempPath(),textures_to_be_restored);
-	if(formatName.toUpper() == tr("U3D"))
-	{
+	if(formatName.toUpper() == tr("U3D")) {
 		qApp->restoreOverrideCursor();	
-		/*vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
-		mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
-		U3D_GUI pw(mp,parent);
-		pw.exec();
-		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-		qDebug("Quality parameter %i",mp.positionQuality);*/
 		saveParameters(par);
 		QSettings settings;
 		
-		QString converterPath = computePluginsPath();
-		QString converterCommandLine;		
-	#if defined(Q_OS_WIN)
-		converterPath += "/IDTFConverter.exe";
-		converterCommandLine = converterPath;
-	#elif defined(Q_OS_MAC)
-        converterPath += "/bin/IDTFConverter.sh";
-        converterCommandLine = converterPath;
-        #elif defined(Q_OS_LINUX)
-		converterPath += "/bin/IDTFConverter";
-		converterCommandLine = converterPath;
-	#endif
-		if (settings.contains("U3D/converter"))
-			converterPath=settings.value("U3D/converter").toString();
-		//else 
-		//	settings.setValue("U3D/converter",converterPath);
-	  QFileInfo converterFI(converterPath);
-		if(!converterFI.exists())
-		{
-			QMessageBox::warning(parent, tr("Saving Error"), QString("Missing converter executable '%1'").arg(converterPath));
-			return false;
-		}
-		
-		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qUtf8Printable(converterCommandLine),_param,mask);
+		//tmp idtf
+		QString tmp(QDir::tempPath());
+		QString curr = QDir::currentPath();
+		QString out(fileName);
+		QStringList out_trim;
+		vcg::tri::io::QtUtilityFunctions::splitFilePath(fileName,out_trim);
+		tmp = tmp + "/" + vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(out_trim) + ".idtf";
+		vcg::tri::io::ExporterIDTF<CMeshO>::Save(m.cm,qPrintable(tmp),mask);
+
+		//conversion from idtf to u3d
+		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
+
+		//saving latex:
+		QDir::setCurrent(curr);
+		QString lat (fileName);
+		QStringList l = lat.split(".");
+		saveLatex(l[0], _param);
+		QDir dir(QDir::tempPath());
+		dir.remove(tmp);
+
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
-		if(result!=0)
-		{
+		if(result==false) {
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
@@ -164,16 +142,14 @@ QList<MeshIOInterface::Format> U3DIOPlugin::exportFormats() const
 */
 void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	if(format.toUpper() == tr("U3D"))
-	{
+	if(format.toUpper() == tr("U3D")) {
 		capability = defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_FACECOLOR);
 		return;
 	}
-	if(format.toUpper() == tr("IDTF"))
-	{
+	if(format.toUpper() == tr("IDTF")) {
 		capability=defaultBits = vcg::tri::io::ExporterIDTF<CMeshO>::GetExportMaskCapability();
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
@@ -223,6 +199,50 @@ void U3DIOPlugin::saveParameters(const RichParameterSet &par)
 	_param.positionQuality = par.getInt(QString("compression_val"));
 
 	delete sw;
+}
+
+void U3DIOPlugin::saveLatex(const QString& file,const vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& mov_par)
+{
+	Output_File latex(file.toStdString() + ".tex");
+	QString u3df = file + ".u3d";
+	QStringList file_trim;
+	vcg::tri::io::QtUtilityFunctions::splitFilePath(u3df,file_trim);
+	std::string u3d_final = vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(file_trim).toStdString();
+	latex.write(0,"\\documentclass[a4paper]{article}");
+	latex.write(0,"\\usepackage[3D]{movie15}");
+	latex.write(0,"\\usepackage{hyperref}");
+	latex.write(0,"\\usepackage[UKenglish]{babel}");
+	latex.write(0,"\\begin{document}");
+	latex.write(0,"\\includemovie[");
+	latex.write(1,"poster,");
+	latex.write(1,"toolbar, %same as `controls\'");
+
+
+	QString u3d_text = QString::fromStdString(u3d_final);
+	substituteChar(u3d_text,QChar('_'),QString(""));
+	latex.write(1,"label=" + u3d_text.toStdString() + ",");
+	latex.write(1,"text=(" + u3d_text.toStdString() + "),");
+	std::string cam_string;
+	typename vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters* cam = mov_par._campar;
+	if (cam != NULL)
+	{
+		cam_string = cam_string + "3Daac=" + TextUtility::nmbToStr(cam->_cam_fov_angle) +
+				", 3Droll=" + TextUtility::nmbToStr(cam->_cam_roll_angle) +
+				", 3Dc2c=" + TextUtility::nmbToStr(cam->_obj_to_cam_dir.X()) + " " + TextUtility::nmbToStr(cam->_obj_to_cam_dir.Z()) + " " + TextUtility::nmbToStr(cam->_obj_to_cam_dir.Y()) +
+				", 3Droo=" + TextUtility::nmbToStr(cam->_obj_to_cam_dist) +
+				", 3Dcoo=" + TextUtility::nmbToStr(-cam->_obj_pos.X()) + " " + TextUtility::nmbToStr(cam->_obj_pos.Z()) + " " + TextUtility::nmbToStr(cam->_obj_pos.Y()) + ",";
+		latex.write(1,cam_string);
+	}
+	latex.write(1,"3Dlights=CAD,");
+	latex.write(0,"]{\\linewidth}{\\linewidth}{" + u3d_final + "}");
+	latex.write(0,"\\end{document}");
+}
+
+void U3DIOPlugin::substituteChar(QString& st,const QChar& ch_remove,const QString& sub)
+{
+	int ii = 0;
+	while ((ii = st.indexOf(ch_remove,ii)) != -1)
+		st = st.replace(ii,1,sub);
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(U3DIOPlugin)

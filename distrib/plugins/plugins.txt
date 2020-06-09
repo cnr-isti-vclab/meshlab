@@ -1,6 +1,0 @@
-This folder contains all the plugins of MeshLab. 
-Most of the functionalities available in MeshLab are
-implemented through dynamically loaded libraries. 
-Look in the < Help->About Plugins > menu to see what
-functionalities are associated to each file in this 
-directory.
