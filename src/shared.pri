@@ -10,7 +10,7 @@ QT += xmlpatterns
 
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/meshlab-common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -lmeshlab-common -lopengl32 -lGLU32
-linux:LIBS += -lmeshlab-common -lGL -lGLU
+linux:LIBS += -fopenmp -lmeshlab-common -lGL -lGLU
 
 macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 macx:QMAKE_POST_LINK = " \ #every plugin needs to point to meshlab-common placed in the appbundle
