@@ -34,11 +34,11 @@
 
 class U3DIOPlugin : public QObject, public MeshIOInterface
 {
-  Q_OBJECT
+	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
-  Q_INTERFACES(MeshIOInterface)
-  
- public:
+	Q_INTERFACES(MeshIOInterface)
+
+public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 
@@ -51,13 +51,15 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 
 	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par);
 
-	private:
+private:
 	QString computePluginsPath();
 
-
 	void saveParameters(const RichParameterSet &par);
+
+	void saveLatex(const QString& file,const vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& mov_par);
+	void substituteChar(QString& st, const QChar& ch_remove, const QString& sub);
+
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
-	
 };
 
 #endif

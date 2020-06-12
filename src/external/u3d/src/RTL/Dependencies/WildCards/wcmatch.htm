@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Irregular expression module documentation</title>
+</head>
+
+<body>
+<h1>The Irregular expressions</h1>
+
+<p>This C module realizes pattern-matching with dos-style wildcard
+characters '*' and '?'. This module doesn't offer the power of
+"regular expressions", but might be slightly easier to use. '*'
+matches zero or more instances of any characters, while '?' matches
+one (no more, no less) instance of any character.  '\*' matches '*',
+'\?' matches '?' and '\\' matches '\', but in string literals you will
+have to type them as '\\*','\\?' and '\\\\', since the compiler parses
+'\\' as a single backslash. '*' is "greedy", so that with "variation",
+"v*i" matches "variati", instead of "vari" that would be matched if
+'*' was non-greedy. This module works with more complex patterns than
+early MS-DOS implementations, so that "c*p*d" matches "crepitud" in
+"decrepitude".
+
+<h2>The functions</h2>
+
+<p><code>int WCMatchPos(char *string, char *wildcard, char **begin, char **end,int icase);</code>
+
+<p>Example:
+<p><code>WCMatchPos("garage","a*g",&amp;beg,&amp;end,1);</code>
+
+<p>Where you have previously declared <code>char *beg,*end;</code> so
+that beg and end are of type "pointer-to-character".  <p>The example
+would make <variable>beg</variable> point at the first 'a' in the
+string "garage", and <variable>end</variable> to point at the last
+'g'. It would return 2, which is the offset of 'a' <b>plus 1</b>. In
+case of no match, 0 would be returned. The last argument,
+<variable>icase</variable>, should be set to 0 if you want
+case-sensitive matching, or nonzero if you want case-insensitive
+matching.
+
+
+<p><code>int WCMatch(char *string, char *wildcard,int icase);</code>
+
+<p>This is a front-end to WCMatchPos, return value is similar and you
+don't have to provide pointers to pointers to chars, if such things
+don't interest you. For example:
+
+<p><code>if (WCMatch(filename,"*.txt",1)) puts("It is a text file!");</code>
+
+<p>But do note that '*'-wildcards at the beginning of pattern are
+often unnecessary and only slow down the algorithm. If you only care
+about the truth value, you might as well use ".txt" as a wildcard. It
+only matches the ".txt"-part, so that if you want to include the full
+file name into match (ie utilize the return value apart from
+zero-nonzero distinction, or in conjunction with WCMatchPos), you
+might want to use the full form "*.txt", even though it's slower.
+
+<p><code>char *WCReplaceOne(char *string, char *wildcard, char *replacewith, char *resultbuf,int icase);</code>
+
+<p>This function results in 'resultbuf' containing the same value as
+'string', except that the first occurence of wildcard will be replaced
+by the string contained in 'replacewith'. For example:
+
+<p><code>
+char *word="Mountain";<br>
+char result[300];<br>
+WCReplaceOne(word,"u*a",".......", result,0);<br>
+</code>
+
+<p>Would result in 'result' containing the string 'Mo.......in'. Note
+that you <b>must</b> allocate enough memory for the result, otherwise
+the program will crash (if you are lucky).
+
+<p><code>int WCPossible(char *string, char *wildcard,int icase);</code>
+
+<p>You won't probably need this function, it checks if it's possible
+for wildcard to match string, but it can and will return false
+positives. It's used internally for optimization, as it's much faster
+than the actual matching functions.
+
+<h2>Installation</h2>
+
+You need to #inlude the file <i>wcmatch.h</i>, and compile/link your
+program with <i>wcmatch.c</i>. That's about it. If you are working
+with C++, you can safely rename <i>wcmatch.c</i> to
+<i>wcmatch.cpp</i>. No heap memory is allocated in any of the
+functions.
+
+<h2>Copying</h2>
+
+This library is freeware, and you may use it for whatever you
+want. There is no warranty of any kind, and the author doesn't
+guarantee its suitability for any purpose.
+
+<h2>The Author</h2>
+<a href="http://go.to/vvainio">Ville Vainio</a><br>
+email: vvainio@tp.spt.fi
+
+<hr>
+<!-- hhmts start -->
+Last modified: Mon Jan 24 18:57:34 Suomen normaaliaika 2000
+<!-- hhmts end -->
+</body> </html>
+
+
+
+
+
+
+
+
+
+
+

@@ -37,8 +37,6 @@ rm -r lib/win32-msvc/
 rm -r lib/win32-msvc2008/
 rm -r lib/win32-msvc2015/
 rm -r lib/readme.txt
-rm -r plugins/U3D_OSX/
-rm -r plugins/U3D_W32/
 rm -r plugins/plugins.txt
 rm -r README.md
 
@@ -58,8 +56,8 @@ mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
 mv lib/libmeshlab-common* usr/lib/
 mv plugins/ usr/lib/meshlab/
-mv lib/linux/* usr/lib/meshlab/plugins
-chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
+mv lib/linux/* usr/lib/meshlab/
+#chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
