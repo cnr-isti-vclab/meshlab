@@ -134,6 +134,9 @@ linux:LIBS += \
     -lmeshlab-common -lGLU \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
+#for appimage and snap
+linux:QMAKE_LFLAGS += -Wl,-rpath=../lib/meshlab/
+
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include
 }

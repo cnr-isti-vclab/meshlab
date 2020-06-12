@@ -5,7 +5,7 @@ HEADERS += \
 	$$VCGDIR/wrap/io_trimesh/export_u3d.h
 
 SOURCES += \
-    io_u3d.cpp
+	io_u3d.cpp
 
 INCLUDEPATH += \
 	$$MESHLAB_EXTERNAL_DIRECTORY/u3d/src/IDTF
