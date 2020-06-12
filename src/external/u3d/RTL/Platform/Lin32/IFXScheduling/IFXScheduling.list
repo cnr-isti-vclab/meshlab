@@ -1,4 +1,0 @@
-{ global:
-IFXPluginRegister;
-IFXPluginCanUnloadNow;
-local: *; };

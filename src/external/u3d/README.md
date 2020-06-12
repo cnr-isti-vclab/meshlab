@@ -1,8 +1,12 @@
-This is a fork of ningfei/u3d which is a fork of the v1.4.5 U3D library. It has been updated to support x86 and x64 Windows (VS2008, VS2010, VS2015), Linux and OS X, and it has been organized to generate a library for making conversions from IDTF to U3D format.
+This is a fork of ningfei/u3d which is a fork of the v1.4.5 U3D library. 
+It has been adapted to be included in [MeshLab](https://www.meshlab.net/) , used for the exporter to U3D format.
 
-This library is used for the [MeshLab](https://www.meshlab.net/) exporter to U3D.
+# Differences with ningfei/u3d
 
-No dependencies are required.
+- Can be built both with qmake and cmake, supporting Windows, Linux and OS X.
+- *IDTFConverter* is not anymore an executable, but it is a library that contains a function ```IDTFConverter::IDTFToU3d("file.idtf", "file.u3d")``` for conversions from IDTF to U3D (see IDTFTest subproject). 
+- no dependencies required;  zlib, libpng and jpeg are bundled
+- IFXImporting and libIDTF are not built since they are not required by the IDTFConverter.
 
 # Original Readme
 

@@ -1,0 +1,9 @@
+IFXCOMInitialize
+IFXCOMUninitialize
+IFXCreateComponent
+IFXRegisterComponent
+IFXAllocate
+IFXDeallocate
+IFXReallocate
+IFXGetMemoryFunctions
+IFXSetMemoryFunctions
