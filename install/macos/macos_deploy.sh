@@ -48,9 +48,6 @@ done
 
 echo 'Copying other files'
 
-#u3d
-cp -r $DISTRIB_PATH/plugins/U3D_OSX  $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
-
 #shaders
 mkdir $DISTRIB_PATH/$APPNAME/Contents/shaders
 cp -r $DISTRIB_PATH/shaders/*.gdp $DISTRIB_PATH/shaders/*.vert $DISTRIB_PATH/shaders/*.frag $DISTRIB_PATH/shaders/*.txt  $DISTRIB_PATH/$APPNAME/Contents/shaders
