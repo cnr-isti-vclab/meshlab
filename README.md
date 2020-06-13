@@ -81,8 +81,8 @@ DOI = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
 
 # Contacts
 
- - Paolo Cignoni (p.cignoni (at) isti.cnr.it)
- - Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it)
+ - Paolo Cignoni (paolo.cignoni (at) isti.cnr.it)
+ - Alessandro Muntoni (alessandro.muntoni (at) isti.cnr.it)
 
 # Feedback
 
