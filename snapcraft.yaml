@@ -96,7 +96,6 @@ parts:
       rm -r lib/win32-msvc2008/
       rm -r lib/win32-msvc2015/
       rm -r lib/readme.txt
-      rm -r plugins/plugins.txt
       rm -r README.md
       
       cp ../install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
