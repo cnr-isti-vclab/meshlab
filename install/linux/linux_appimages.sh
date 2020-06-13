@@ -24,6 +24,8 @@ fi
 
 sh linux_make_boundle.sh $@
 
+mv usr/bin/libIFX* usr/lib/
+
 cd $DISTRIB_PATH
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
