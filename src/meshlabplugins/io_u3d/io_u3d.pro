@@ -24,7 +24,7 @@ win32-g++ {
 
 macx:LIBS +=-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/ -lIDTFConverter -lIFXCoreStatic -ldl
 
-linux:LIBS += -lIDTFConverter -lIFXCoreStatic -lIFXCore -lIFXExporting -lIFXScheduling -ldl
+linux:LIBS += -lIDTFConverter -lIFXCoreStatic -ldl
 
 TARGET = io_u3d
 
