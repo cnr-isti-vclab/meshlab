@@ -110,3 +110,7 @@ parts:
       mv plugins/ $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
       mv lib/linux/* $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
       mv shaders/ $SNAPCRAFT_PART_INSTALL/usr/share/meshlab/
+      
+      #tmp: moving libIXF to bin directory
+      mv $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/libIFX* $SNAPCRAFT_PART_INSTALL/usr/bin/
+      mv $SNAPCRAFT_PART_INSTALL/usr/bin/libIFXCoreStatic.a $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
