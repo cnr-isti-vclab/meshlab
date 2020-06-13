@@ -109,6 +109,4 @@ parts:
       mv lib/libmeshlab-common* $SNAPCRAFT_PART_INSTALL/usr/lib/
       mv plugins/ $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
       mv lib/linux/* $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
-      mv $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/libIDTF* $SNAPCRAFT_PART_INSTALL/usr/lib/
-      mv $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/libIFX* $SNAPCRAFT_PART_INSTALL/usr/lib/
       mv shaders/ $SNAPCRAFT_PART_INSTALL/usr/share/meshlab/

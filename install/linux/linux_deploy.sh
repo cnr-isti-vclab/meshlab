@@ -57,8 +57,6 @@ mv readme.txt usr/share/doc/meshlab/
 mv lib/libmeshlab-common* usr/lib/
 mv plugins/ usr/lib/meshlab/
 mv lib/linux/* usr/lib/meshlab/
-mv usr/lib/meshlab/libIDTF* usr/lib/
-mv usr/lib/meshlab/libIFX* usr/lib/
 #chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
 

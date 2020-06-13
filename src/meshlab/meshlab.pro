@@ -134,6 +134,10 @@ linux:LIBS += \
     -lmeshlab-common -lGLU \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
+#ldflags for linux deploy (appimage/snap)
+linux:QMAKE_LFLAGS += \
+	-Wl,-R,'$$ORIGIN/../lib/meshlab' -Wl,--enable-new-dtags
+
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include
 }
