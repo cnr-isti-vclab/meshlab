@@ -26,8 +26,6 @@ cd $DISTRIB_PATH
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
 
-rm -r lib
-
 chmod +x usr/bin/meshlab
 chmod +x usr/bin/meshlabserver
 

@@ -39,7 +39,8 @@ mkdir -p usr/share/doc/meshlab
 mkdir -p usr/share/icons/hicolor/512x512/apps/
 mkdir -p usr/share/icons/Yaru/512x512/apps/
 
-cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
+cp $INSTALL_PATH/resources/meshlab_appimage.desktop usr/share/applications/meshlab.desktop
+cp $INSTALL_PATH/resources/meshlab_server_appimage.desktop usr/share/applications/meshlab_server.desktop
 mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
 mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
 mv meshlab usr/bin
@@ -52,7 +53,9 @@ mv plugins/ usr/lib/meshlab/
 mv lib/linux/* usr/lib/meshlab/
 #chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
+rm -r lib
 
 #tmp: moving libIXF to bin directory
-mv usr/lib/meshlab/libIFX* usr/bin/
-mv usr/bin/libIFXCoreStatic.a usr/lib/meshlab/
+#mv usr/lib/meshlab/libIFX* usr/bin/
+#mv usr/bin/libIFXCoreStatic.a usr/lib/meshlab/
+

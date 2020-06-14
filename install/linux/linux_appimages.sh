@@ -27,30 +27,30 @@ sh linux_make_boundle.sh $@
 cd $DISTRIB_PATH
 
 mv usr/bin/libIFX* .
-rm -r lib
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
-
-mv usr/bin/meshlabserver ..
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
-mv *.AppImage ../MeshLab$VERSION-linux.AppImage
-chmod +x ../MeshLab$VERSION-linux.AppImage
-
-rm AppRun
-rm *.desktop
-rm *.png
-rm usr/share/applications/meshlab.desktop
-cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
-mv usr/bin/meshlab ..
-mv ../meshlabserver usr/bin
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
 mv *.AppImage ../MeshLabServer$VERSION-linux.AppImage
 chmod +x ../MeshLabServer$VERSION-linux.AppImage
 
+rm AppRun 
+rm *.desktop
+rm *.png
 
-cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
-mv ../meshlab usr/bin/
+#mv usr/bin/meshlabserver ..
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
+mv *.AppImage ../MeshLab$VERSION-linux.AppImage
+chmod +x ../MeshLab$VERSION-linux.AppImage
+
+#rm AppRun 
+#rm *.desktop
+#rm *.png
+#rm usr/share/applications/meshlab.desktop
+#mv usr/bin/meshlab ..
+#mv ../meshlabserver usr/bin
+#cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
+#mv ../meshlab usr/bin/
 
 chmod +x usr/bin/meshlab
 chmod +x usr/bin/meshlabserver
