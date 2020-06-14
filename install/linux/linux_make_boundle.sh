@@ -41,6 +41,7 @@ mkdir -p usr/share/icons/Yaru/512x512/apps/
 
 cp $INSTALL_PATH/resources/meshlab_appimage.desktop usr/share/applications/meshlab.desktop
 cp $INSTALL_PATH/resources/meshlab_server_appimage.desktop usr/share/applications/meshlab_server.desktop
+cp $INSTALL_PATH/resources/meshlab.sh usr/bin/
 mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
 mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
 mv meshlab usr/bin
