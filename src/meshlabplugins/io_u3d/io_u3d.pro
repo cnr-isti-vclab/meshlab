@@ -26,6 +26,8 @@ macx:LIBS +=-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/ -lIDTFConverter -lIFXCoreS
 
 linux:LIBS += -lIDTFConverter -lIFXCoreStatic -ldl
 
+linux:QMAKE_CXXFLAGS += -rpath=$$ORIGIN/../lib:$$ORIGIN/..
+
 TARGET = io_u3d
 
 CONFIG += STL

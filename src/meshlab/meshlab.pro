@@ -134,6 +134,8 @@ linux:LIBS += \
     -lmeshlab-common -lGLU \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
+linux:QMAKE_CXXFLAGS += -rpath=$$ORIGIN/../lib
+
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include
 }
