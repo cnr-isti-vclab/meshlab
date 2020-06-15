@@ -11,7 +11,7 @@
 #
 # You can give as argument the DISTRIB_PATH.
 
-cd "${0%/*}" #move to script directory
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 INSTALL_PATH=$(pwd)
 
 #checking for parameters
@@ -25,8 +25,6 @@ fi
 sh linux_make_boundle.sh $@
 
 cd $DISTRIB_PATH
-
-mv usr/bin/libIFX* .
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 

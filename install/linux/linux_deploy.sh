@@ -9,7 +9,7 @@
 # 
 # You can give as argument the DISTRIB_PATH.
 
-cd "${0%/*}" #move to script directory
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 INSTALL_PATH=$(pwd)
 
 #checking for parameters

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "${0%/*}" #move to script directory
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
 #checking for parameters
 if [ "$#" -eq 0 ]
@@ -28,7 +28,6 @@ rm -r lib/win32-msvc/
 rm -r lib/win32-msvc2008/
 rm -r lib/win32-msvc2015/
 rm -r lib/readme.txt
-rm -r plugins/plugins.txt
 rm -r README.md
 
 mkdir -p usr/bin
@@ -41,8 +40,7 @@ mkdir -p usr/share/icons/Yaru/512x512/apps/
 
 cp $INSTALL_PATH/resources/meshlab_appimage.desktop usr/share/applications/meshlab.desktop
 cp $INSTALL_PATH/resources/meshlab_server_appimage.desktop usr/share/applications/meshlab_server.desktop
-cp $INSTALL_PATH/resources/meshlab.sh usr/bin/
-mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
+cp meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
 mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
 mv meshlab usr/bin
 mv meshlabserver usr/bin
@@ -57,6 +55,5 @@ mv shaders/ usr/share/meshlab/
 rm -r lib
 
 #tmp: moving libIXF to bin directory
-#mv usr/lib/meshlab/libIFX* usr/bin/
-#mv usr/bin/libIFXCoreStatic.a usr/lib/meshlab/
-
+cp usr/lib/meshlab/libIFX* usr/lib/
+rm usr/lib/libIFXCoreStatic.a
