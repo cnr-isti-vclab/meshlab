@@ -39,7 +39,7 @@ $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -ap
 mv *.AppImage ../MeshLab$VERSION-linux.AppImage
 chmod +x ../MeshLab$VERSION-linux.AppImage
 
-chrpath -r '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
+patchelf --set-rpath '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
 
 chmod +x usr/bin/meshlab
 chmod +x usr/bin/meshlabserver

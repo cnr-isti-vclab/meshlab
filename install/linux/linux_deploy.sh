@@ -24,7 +24,7 @@ cd $DISTRIB_PATH
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
 
-chrpath -r '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
+patchelf --set-rpath '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
 
 chmod +x usr/bin/meshlab
 chmod +x usr/bin/meshlabserver
