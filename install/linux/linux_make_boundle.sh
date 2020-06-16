@@ -1,4 +1,11 @@
 #!/bin/bash
+# this is a script shell for setting up the application bundle for linux
+# Requires a properly built meshlab.
+#
+# Without given arguments, the application boundle will be placed in the meshlab/distrib
+# directory.
+#
+# You can give as argument the DISTRIB_PATH.
 
 cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
@@ -47,13 +54,15 @@ mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
-mv lib/libmeshlab-common* usr/lib/
+mv lib/libmeshlab-common* usr/lib/meshlab/
 mv plugins/ usr/lib/meshlab/
 mv lib/linux/* usr/lib/meshlab/
-#chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
+chrpath -r '$ORIGIN/..' usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
 rm -r lib
 
 #tmp: moving libIXF to bin directory
-cp usr/lib/meshlab/libIFX* usr/lib/
-rm usr/lib/libIFXCoreStatic.a
+mv usr/lib/meshlab/libIFX* .
+mv libIFXCoreStatic.a usr/lib/meshlab
+chrpath -r '$ORIGIN/../lib/meshlab/' usr/bin/meshlab
+chrpath -r '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver

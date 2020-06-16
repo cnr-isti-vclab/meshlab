@@ -1,7 +1,7 @@
 #!/bin/bash
-# this is a script shell for setting up the application bundle for linux
-# Requires a properly built meshlab (does not require to run the
-# linux_deploy.sh script).
+# this is a script shell for setting up the AppImage bundle for linux
+# Requires a properly built meshlab boundle (see linux_make_boundle.sh). It does not require to run the
+# linux_deploy.sh script.
 #
 # This script can be run only in the oldest supported linux distro that you are using
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
@@ -21,8 +21,6 @@ then
 else
     DISTRIB_PATH=$1
 fi
-
-sh linux_make_boundle.sh $@
 
 cd $DISTRIB_PATH
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # this is a script shell for deploying a meshlab-portable folder.
-# Requires a properly built meshlab.
+# Requires a properly built meshlab boundle (see linux_make_boundle.sh).
 #
 # This script can be run only in the oldest supported linux distro that you are using
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
@@ -19,8 +19,6 @@ then
 else
     DISTRIB_PATH=$1
 fi
-
-sh linux_make_boundle.sh $@
 
 cd $DISTRIB_PATH
 
