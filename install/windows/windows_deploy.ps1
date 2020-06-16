@@ -41,8 +41,8 @@ rm -r README.md
 
 windeployqt --no-translations meshlab.exe
 
-Copy-Item .\lib\win32-msvc\IFX* .
-rm IDTFConverter.lib
+Move-Item .\lib\win32-msvc\IFX* .
+Copy-Item IFXCoreStatic.lib .\lib\win32-msvc\
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
