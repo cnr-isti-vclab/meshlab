@@ -24,8 +24,11 @@ cd $DISTRIB_PATH
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
 
+chrpath -r '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
+
 chmod +x usr/bin/meshlab
 chmod +x usr/bin/meshlabserver
+chmod +x AppRun
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
