@@ -7,15 +7,15 @@
 #
 # You can give as argument the DISTRIB_PATH.
 
-cd "$(dirname "$(realpath "$0")")"; #move to script directory
-
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH=$PWD/../../distrib
+    DISTRIB_PATH="../../distrib"
 else
     DISTRIB_PATH=$(realpath $1)
 fi
+
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
 SOURCE_PATH=$PWD/../../src
 
