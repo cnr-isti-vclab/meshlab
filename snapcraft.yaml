@@ -16,7 +16,7 @@ confinement: strict
 
 apps:
   meshlab:
-    command: desktop-launch ./AppRun
+    command: desktop-launch $SNAP/AppRun
     plugs: [home, x11, mir, opengl]
     desktop: usr/share/applications/meshlab.desktop
   meshlabserver:
@@ -88,9 +88,10 @@ parts:
       rsync -av distrib/* $SNAPCRAFT_PART_INSTALL/
       
       rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab_server.desktop
-      
-      cp install/linux/resources/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/
-      mv $SNAPCRAFT_PART_INSTALL/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/AppRun
+      rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab.desktop
+      cp install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp install/linux/resources/AppRunSnap $SNAPCRAFT_PART_INSTALL/
+      mv $SNAPCRAFT_PART_INSTALL/AppRunSnap $SNAPCRAFT_PART_INSTALL/AppRun
       chmod +x $SNAPCRAFT_PART_INSTALL/AppRun
 
       #mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
