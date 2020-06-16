@@ -85,7 +85,7 @@ parts:
       
       sh install/linux/linux_make_boundle.sh distrib/
       
-      mv -v distrib/* $SNAPCRAFT_PART_INSTALL/
+      rsync -av distrib/* $SNAPCRAFT_PART_INSTALL/
       
       rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab_server.desktop
 
