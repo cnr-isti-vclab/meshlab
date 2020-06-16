@@ -56,7 +56,7 @@ jobs:
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
-       sudo apt-get install -y libxkbcommon-x11-0 chrpath patchelf
+       sudo apt-get install -y libxkbcommon-x11-0 patchelf
     - name: Setup env variables
       id: envs
       run: |
@@ -68,6 +68,9 @@ jobs:
       run: |
         sh install/linux/linux_make_boundle.sh
     - name: Deploy MeshLab and MeshLabServer
+      run : |
+        sh install/linux/linux_deploy.sh
+    - name: Build MeshLab and MeshLabServer AppImages
       run : |
         sh install/linux/linux_appimages.sh
     - name: Upload Meshlab Portable

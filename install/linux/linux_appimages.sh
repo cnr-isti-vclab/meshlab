@@ -1,12 +1,9 @@
 #!/bin/bash
-# this is a script shell for setting up the AppImage bundle for linux
-# Requires a properly built meshlab boundle (see linux_make_boundle.sh). It does not require to run the
-# linux_deploy.sh script.
+# This is a script shell for setting up the AppImage bundle for linux
+# Requires a properly built meshlab, boundled and deployed (see linux_deploy.sh)
+# inside the directory given as argument
 #
-# This script can be run only in the oldest supported linux distro that you are using
-# due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
-#
-# Without given arguments, MeshLab AppImage will be placed in the meshlab/distrib
+# Without given arguments, MeshLab AppImage(s) will be placed in the meshlab
 # directory.
 #
 # You can give as argument the DISTRIB_PATH.
@@ -23,27 +20,33 @@ cd "$(dirname "$(realpath "$0")")"; #move to script directory
 INSTALL_PATH=$(pwd)
 
 cd $DISTRIB_PATH
+PARENT_NAME="$(basename $DISTRIB_PATH)"
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
-mv *.AppImage ../MeshLabServer$VERSION-linux.AppImage
-chmod +x ../MeshLabServer$VERSION-linux.AppImage
+cd ..
 
-rm AppRun 
-rm *.desktop
-rm *.png
+#mv $PARENT_NAME/usr/share/applications/meshlab.desktop .
 
-#mv usr/bin/meshlabserver ..
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
-mv *.AppImage ../MeshLab$VERSION-linux.AppImage
-chmod +x ../MeshLab$VERSION-linux.AppImage
+mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLab
+mv $PARENT_NAME/AppRunMeshLabServer $PARENT_NAME/AppRun
+rm $PARENT_NAME/*.desktop
+cp $PARENT_NAME/usr/share/applications/meshlab_server.desktop $PARENT_NAME/
 
-patchelf --set-rpath '$ORIGIN/usr/lib:$ORIGIN/usr/lib/meshlab' AppRun
+$INSTALL_PATH/resources/appimagetool $PARENT_NAME
+mv MeshLabServer-$VERSION*.AppImage MeshLabServer$VERSION-linux.AppImage
+#chmod +x MeshLabServer$VERSION-linux.AppImage
 
-chmod +x usr/bin/meshlab
-chmod +x usr/bin/meshlabserver
-chmod +x AppRun
+#mv $PARENT_NAME/usr/share/applications/meshlab_server.desktop .
+#mv meshlab.desktop $PARENT_NAME/usr/share/applications/
+mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLabServer
+mv $PARENT_NAME/AppRunMeshLab $PARENT_NAME/AppRun
+rm $PARENT_NAME/*.desktop
+cp $PARENT_NAME/usr/share/applications/meshlab.desktop $PARENT_NAME/
+
+$INSTALL_PATH/resources/appimagetool $PARENT_NAME
+mv MeshLab-$VERSION*.AppImage MeshLab$VERSION-linux.AppImage
+#chmod +x MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo MeshLab$VERSION-linux.AppImage and MeshLabServer$VERSION-linux.AppImage generated

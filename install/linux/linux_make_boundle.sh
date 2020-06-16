@@ -54,15 +54,15 @@ mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
-mv lib/libmeshlab-common* usr/lib/meshlab/
+mv lib/libmeshlab-common* usr/lib/
 mv plugins/ usr/lib/meshlab/
 mv lib/linux/* usr/lib/meshlab/
-chrpath -r '$ORIGIN/..' usr/lib/meshlab/plugins/*.so
+#patchelf --set-rpath '$ORIGIN/..' usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
 rm -r lib
 
 #tmp: moving libIXF to bin directory
-mv usr/lib/meshlab/libIFX* .
-mv libIFXCoreStatic.a usr/lib/meshlab
-chrpath -r '$ORIGIN/../lib/meshlab/' usr/bin/meshlab
-chrpath -r '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver
+#mv usr/lib/meshlab/libIFX* .
+#mv libIFXCoreStatic.a usr/lib/meshlab
+patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlab
+patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver
