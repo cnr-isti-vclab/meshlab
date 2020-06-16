@@ -17,7 +17,7 @@ if [ "$#" -eq 0 ]
 then
     DISTRIB_PATH=$PWD/../../distrib
 else
-    DISTRIB_PATH=$1
+    DISTRIB_PATH=$(realpath $1)
 fi
 
 cd $DISTRIB_PATH

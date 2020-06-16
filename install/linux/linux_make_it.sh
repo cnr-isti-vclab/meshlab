@@ -20,7 +20,7 @@ if [ "$#" -eq 0 ]
 then
     BUILD_PATH="../../src"
 else
-    BUILD_PATH=$1
+    BUILD_PATH=$(realpath $1)
 fi
 
 sh linux_build.sh $BUILD_PATH

@@ -14,7 +14,7 @@ if [ "$#" -eq 0 ]
 then
     DISTRIB_PATH=$PWD/../../distrib
 else
-    DISTRIB_PATH=$1
+    DISTRIB_PATH=$(realpath $1)
 fi
 
 SOURCE_PATH=$PWD/../../src
