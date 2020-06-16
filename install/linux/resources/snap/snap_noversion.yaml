@@ -16,7 +16,7 @@ confinement: strict
 
 apps:
   meshlab:
-    command: desktop-launch meshlab
+    command: desktop-launch $SNAP/AppRun
     plugs: [home, x11, mir, opengl]
     desktop: usr/share/applications/meshlab.desktop
   meshlabserver:
@@ -55,7 +55,7 @@ parts:
     after: [desktop-qt5]
     plugin: qmake
     qt-version: qt5
-    source: https://github.com/cnr-isti-vclab/meshlab.git
+    source: https://github.com/cnr-isti-vclab/meshlab
     build-packages:
       - qt5-default
       - qttools5-dev-tools
@@ -69,6 +69,7 @@ parts:
       - libopenctm-dev 
       - libgmp-dev 
       - libqhull-dev
+      - chrpath
     stage-packages:
       - lib3ds-1-3
       - libgomp1
@@ -78,38 +79,17 @@ parts:
       - libqt5opengl5-dev
       - libqt5xmlpatterns5-dev
       - libqt5gui5
-    override-build: |
+    override-build: |          
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
-
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/applications
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/icons
-
-      cd distrib
       
-      rm -r lib/macx64/
-      rm -r lib/win32-msvc/
-      rm -r lib/win32-msvc2008/
-      rm -r lib/win32-msvc2015/
-      rm -r lib/readme.txt
-      rm -r README.md
+      sh install/linux/linux_make_boundle.sh distrib/
       
-      cp ../install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      mv meshlab.png $SNAPCRAFT_PART_INSTALL/usr/share/icons/meshlab.png
-      mv meshlabserver $SNAPCRAFT_PART_INSTALL/usr/bin
-      mv meshlab $SNAPCRAFT_PART_INSTALL/usr/bin
-      mv LICENSE.txt $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab/
-      mv privacy.txt $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab/
-      mv readme.txt $SNAPCRAFT_PART_INSTALL/usr/share/doc/meshlab/
-      mv lib/libmeshlab-common* $SNAPCRAFT_PART_INSTALL/usr/lib/
-      mv plugins/ $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
-      mv lib/linux/* $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
-      mv shaders/ $SNAPCRAFT_PART_INSTALL/usr/share/meshlab/
+      rsync -av distrib/* $SNAPCRAFT_PART_INSTALL/
       
-      #tmp: moving libIXF to bin directory
-      mv $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/libIFX* $SNAPCRAFT_PART_INSTALL/usr/bin/
-      mv $SNAPCRAFT_PART_INSTALL/usr/bin/libIFXCoreStatic.a $SNAPCRAFT_PART_INSTALL/usr/lib/meshlab/
+      rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab_server.desktop
+      rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab.desktop
+      cp install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp install/linux/resources/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/
+      mv $SNAPCRAFT_PART_INSTALL/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/AppRun
+      chmod +x $SNAPCRAFT_PART_INSTALL/AppRun
