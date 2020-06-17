@@ -269,24 +269,6 @@ else()
         meshlabplugins/filter_sample_gpu)
 endif()
 
-function(meshlab_install_plugin_xml FN OUTVAR)
-    get_filename_component(NAME_ONLY ${FN} NAME)
-    set(OUTFN ${MESHLAB_PLUGIN_OUTPUT_DIR}/${NAME_ONLY})
-    add_custom_command(
-        OUTPUT ${OUTFN}
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_PLUGIN_OUTPUT_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FN}" "${OUTFN}"
-        COMMENT "Copying ${NAME_ONLY} to plugin build directory"
-        VERBATIM)
-    install(
-        FILES ${FN}
-        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-        COMPONENT Plugins)
-    set(${OUTVAR}
-        ${OUTFN}
-        PARENT_SCOPE)
-endfunction()
-
 message(STATUS "\nConfiguring plugins")
 foreach(PLUGIN ${POSSIBLE_PLUGINS})
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN}/CMakeLists.txt)
