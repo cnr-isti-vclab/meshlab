@@ -1,0 +1,33 @@
+1.4.4 05.2013
+disabled use of assembler, since performance gain is likely small, while portability risks high
+fixed warnings of unused variable values (when it was unclear if there was an error or a desired behavior,
+the current behavior was preserved). 
+changed cmake build not to use bundled libraries by default
+updated jpeg, png and zlib libraries
+
+1.4.3 02.2012
+fixed MSVC Win64 bit compilation - reported by Ingo Wulf
+updated jpeg, png and zlib libraries
+
+1.4.2 05.2011
+fixed Win32 compilation with __stdcall set in IFXAPI.h - reported by Rob Ebbers
+put vtkU3DExporter to the code samples section
+added headers to program and library sources in cmake, so they are correctly shown in MSVC GUI.
+made libIDTF shared library (but for MSVC)
+(there were problems on Linux with PIC if static libIDTF was used to build shared libraries)
+
+1.4.1 04.2011
+changes in IDTFConverter, to allow it to parse Adobe metadata for nodes
+MinGW compilation
+
+1.4.0 02.2011
+Many tiny fixes, but I do not remember what are they
+
+1.3.0 2009-2010
+Repackaged Intel sources from custom build system to autotools and cmake
+Fixed lots of compilation warnings, may be bugs.
+Dropped everything but parts required to create U3D files (i.e. Renderind component and sample Player).
+Set default compression parameters to minimal compression.
+Made libIDTF from converter part of IDTFConverter, so that instead of making huge IDTF files
+on disk and launching IDFConverter one can create equivalent binary scene in memory
+and call "convert" routine

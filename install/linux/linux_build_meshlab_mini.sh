@@ -9,15 +9,15 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries will be
 # then placed inside BUILD_PATH/distrib.
 
-cd "${0%/*}" #move to script directory
-
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
     BUILD_PATH="../../src"
 else
-    BUILD_PATH=$1
+    BUILD_PATH=$(realpath $1)
 fi
+
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
 if ! [ -d $BUILD_PATH ]
 then

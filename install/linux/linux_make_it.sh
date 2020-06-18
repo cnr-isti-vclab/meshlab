@@ -13,15 +13,18 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries and
 # AppImage will be then placed inside BUILD_PATH/distrib.
 
-cd "${0%/*}" #move to script directory
-
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
     BUILD_PATH="../../src"
+    DISTRIB_PATH="../../distrib"
 else
-    BUILD_PATH=$1
+    BUILD_PATH=$(realpath $1)
+    BUILD_PATH=$BUILD_PATH/distrib
 fi
 
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
+
 sh linux_build.sh $BUILD_PATH
-sh linux_appimages.sh $BUILD_PATH/distrib
+sh linux_deploy.sh $DISTRIB_PATH
+sh linux_appimages.sh $DISTRIB_PATH

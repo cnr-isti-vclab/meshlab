@@ -7,23 +7,28 @@
 # You can give as argument the DISTRIB_PATH.
 #
 # After running this script, $DISTRIB_PATH/meshlab.app will be a portable meshlab application.
- 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR #move to script directory
- 
+
+#realpath function
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH=$PWD/../../distrib
+    DISTRIB_PATH="../../distrib"
 else
-    DISTRIB_PATH=$1
+    DISTRIB_PATH=$( realpath $1 )
 fi
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
 
 SOURCE_PATH=$PWD/../../src
 
 APPNAME="meshlab.app"
 
-echo "Hopefully I should find" $BUILD_PATH/distrib/$APPNAME
+echo "Hopefully I should find" $DISTRIB_PATH/$APPNAME
 
 if ! [ -e $DISTRIB_PATH/$APPNAME -a -d $DISTRIB_PATH/$APPNAME ]
 then
@@ -41,15 +46,14 @@ do
 cp $x $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
 done
 
-for x in $DISTRIB_PATH/plugins/*.xml
-do
-cp $x $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
-done
+#copy libIFX libraries and change rpath u3d plugin
+cp -a $DISTRIB_PATH/lib/macx64/libIFX* $DISTRIB_PATH/$APPNAME/Contents/Frameworks
+rm $DISTRIB_PATH/$APPNAME/Contents/Frameworks/libIFXCoreStatic.a
+install_name_tool -change libIFXCore.1.so @rpath/libIFXCore.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
+install_name_tool -change libIFXExporting.1.so @rpath/libIFXExporting.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
+install_name_tool -change libIFXScheduling.1.so @rpath/libIFXScheduling.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
 
 echo 'Copying other files'
-
-#u3d
-cp -r $DISTRIB_PATH/plugins/U3D_OSX  $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
 
 #shaders
 mkdir $DISTRIB_PATH/$APPNAME/Contents/shaders

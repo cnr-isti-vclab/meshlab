@@ -1,95 +1,52 @@
 #!/bin/bash
-# this is a script shell for setting up the application bundle for linux
-# Requires a properly built meshlab (does not require to run the
-# linux_deploy.sh script).
+# This is a script shell for setting up the AppImage bundle for linux
+# Requires a properly built meshlab, boundled and deployed (see linux_deploy.sh)
+# inside the directory given as argument
 #
-# This script can be run only in the oldest supported linux distro that you are using
-# due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
-#
-# Without given arguments, MeshLab AppImage will be placed in the meshlab/distrib
+# Without given arguments, MeshLab AppImage(s) will be placed in the meshlab
 # directory.
 #
 # You can give as argument the DISTRIB_PATH.
 
-cd "${0%/*}" #move to script directory
-
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH=$PWD/../../distrib
+    DISTRIB_PATH="../../distrib"
 else
-    DISTRIB_PATH=$1
+    DISTRIB_PATH=$(realpath $1)
 fi
 
-SOURCE_PATH=$PWD/../../src
-
+cd "$(dirname "$(realpath "$0")")"; #move to script directory
 INSTALL_PATH=$(pwd)
+
 cd $DISTRIB_PATH
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)
-
-#check if we have an exec in distrib
-if ! [ -f meshlab ]
-then
-  echo "ERROR: meshlab bin not found inside distrib"
-  exit 1
-fi
-
-rm -r lib/macx64/
-rm -r lib/win32-msvc/
-rm -r lib/win32-msvc2008/
-rm -r lib/win32-msvc2015/
-rm -r lib/readme.txt
-rm -r plugins/U3D_OSX/
-rm -r plugins/U3D_W32/
-rm -r plugins/plugins.txt
-rm -r README.md
-
-mkdir -p usr/bin
-mkdir -p usr/lib/meshlab
-mkdir -p usr/share/applications
-mkdir -p usr/share/meshlab
-mkdir -p usr/share/doc/meshlab
-mkdir -p usr/share/icons/hicolor/512x512/apps/
-mkdir -p usr/share/icons/Yaru/512x512/apps/
-
-cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
-cp meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
-mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
-mv meshlabserver usr/bin
-mv LICENSE.txt usr/share/doc/meshlab/
-mv privacy.txt usr/share/doc/meshlab/
-mv readme.txt usr/share/doc/meshlab/
-mv lib/libmeshlab-common* usr/lib/
-mv plugins/ usr/lib/meshlab/
-mv lib/linux/* usr/lib/meshlab/plugins
-chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
-mv shaders/ usr/share/meshlab/
+PARENT_NAME="$(basename $DISTRIB_PATH)"
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
-mv *.AppImage ../MeshLabServer$VERSION-linux.AppImage
-chmod +x ../MeshLabServer$VERSION-linux.AppImage
+cd ..
 
-rm AppRun
-rm *.desktop
-rm *.png
-rm usr/share/applications/meshlab_server.desktop
-cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
-mv usr/bin/meshlabserver .
-mv meshlab usr/bin
+#mv $PARENT_NAME/usr/share/applications/meshlab.desktop .
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
-mv *.AppImage ../MeshLab$VERSION-linux.AppImage
-chmod +x ../MeshLab$VERSION-linux.AppImage
+mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLab
+mv $PARENT_NAME/AppRunMeshLabServer $PARENT_NAME/AppRun
+rm $PARENT_NAME/*.desktop
+cp $PARENT_NAME/usr/share/applications/meshlab_server.desktop $PARENT_NAME/
 
-cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
-mv meshlabserver usr/bin/
+$INSTALL_PATH/resources/appimagetool $PARENT_NAME
+mv MeshLabServer-$VERSION*.AppImage MeshLabServer$VERSION-linux.AppImage
+#chmod +x MeshLabServer$VERSION-linux.AppImage
 
-rm -r lib
+#mv $PARENT_NAME/usr/share/applications/meshlab_server.desktop .
+#mv meshlab.desktop $PARENT_NAME/usr/share/applications/
+mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLabServer
+mv $PARENT_NAME/AppRunMeshLab $PARENT_NAME/AppRun
+rm $PARENT_NAME/*.desktop
+cp $PARENT_NAME/usr/share/applications/meshlab.desktop $PARENT_NAME/
 
-chmod +x usr/bin/meshlab
-chmod +x usr/bin/meshlabserver
+$INSTALL_PATH/resources/appimagetool $PARENT_NAME
+mv MeshLab-$VERSION*.AppImage MeshLab$VERSION-linux.AppImage
+#chmod +x MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo MeshLab$VERSION-linux.AppImage and MeshLabServer$VERSION-linux.AppImage generated

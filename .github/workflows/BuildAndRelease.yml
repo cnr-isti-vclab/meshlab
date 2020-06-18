@@ -56,7 +56,7 @@ jobs:
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
-       sudo apt-get install -y libxkbcommon-x11-0 chrpath
+       sudo apt-get install -y libxkbcommon-x11-0 patchelf
     - name: Setup env variables
       id: envs
       run: |
@@ -64,7 +64,13 @@ jobs:
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
+    - name: Make MeshLab Boundle
+      run: |
+        sh install/linux/linux_make_boundle.sh
     - name: Deploy MeshLab and MeshLabServer
+      run : |
+        sh install/linux/linux_deploy.sh
+    - name: Build MeshLab and MeshLabServer AppImages
       run : |
         sh install/linux/linux_appimages.sh
     - name: Upload Meshlab Portable
@@ -253,9 +259,6 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_portable
-    - name: Create Meshlab Linux Archive
-      run: |
-        zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_linux_portable/
     - name: Download Linux AppImage
       uses: actions/download-artifact@v1
       with:
@@ -268,6 +271,16 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_snap
+    - name: Change Permissions
+      run: |
+        chmod +x meshlab_linux_portable/usr/bin/meshlab
+        chmod +x meshlab_linux_portable/usr/bin/meshlabserver
+        chmod +x meshlab_linux_portable/AppRun
+        chmod +x meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        chmod +x meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+    - name: Create MeshLab Portable Linux Archive
+      run: |
+        tar -cvzf MeshLab${{steps.envs.outputs.date}}-linux.tar.gz meshlab_linux_portable/
     - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -275,8 +288,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{steps.envs.outputs.date}}-linux.zip
-        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.zip
+        asset_path: MeshLab${{steps.envs.outputs.date}}-linux.tar.gz
+        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.tar.gz
         asset_content_type: MeshLab Portable for Linux
     - name: Upload ReleaseLinuxAppImage
       id: upload-release-linux-appimage
@@ -334,7 +347,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_windows_installer
-    - name: Create Meshlab Portable Archive
+    - name: Create MeshLab Portable Windows Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
     - name: Upload ReleaseWindowsPortable

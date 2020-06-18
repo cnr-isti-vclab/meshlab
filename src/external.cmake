@@ -357,3 +357,21 @@ elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/src/qhull.h")
     target_include_directories(external-qhull INTERFACE "${QHULL_DIR}/src")
     set_property(TARGET external-qhull PROPERTY FOLDER External)
 endif()
+
+# u3d - optional, for io_u3d
+set(U3D_DIR ${EXTERNAL_DIR}/u3d)
+if(ALLOW_BUNDLED_U3D)
+    message(STATUS "- u3d - using bundled source")
+    
+	include("${U3D_DIR}/src/u3d.cmake")
+	set_property(TARGET external-IDTFConverter PROPERTY FOLDER External)
+
+    # These sources were disabled in the .pro file: "${SSYNTH_DIR}/ssynth/SyntopiaCore/GLEngine/EngineWidget.cpp"
+    # "${SSYNTH_DIR}/ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.cpp"
+    # "${SSYNTH_DIR}/ssynth/SyntopiaCore/GLEngine/Sphere.cpp"
+    # "${SSYNTH_DIR}/ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp"
+
+	#target_include_directories(external-IDTFConverter SYSTEM PUBLIC "${U3D_DIR}/IDTF")
+	#set_property(TARGET external-IDTFConverter PROPERTY FOLDER External)
+endif()
+

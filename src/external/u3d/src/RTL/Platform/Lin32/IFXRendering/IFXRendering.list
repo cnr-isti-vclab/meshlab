@@ -1,0 +1,4 @@
+{ global:
+IFXPluginRegister;
+IFXPluginCanUnloadNow;
+local: *; };

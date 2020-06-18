@@ -48,6 +48,7 @@ option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
 option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
 option(ALLOW_BUNDLED_SSYNTH "Allow use of bundled structure-synth source" ON)
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
+option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
 
 option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
@@ -267,24 +268,6 @@ else()
         meshlabplugins/filter_geodesic
         meshlabplugins/filter_sample_gpu)
 endif()
-
-function(meshlab_install_plugin_xml FN OUTVAR)
-    get_filename_component(NAME_ONLY ${FN} NAME)
-    set(OUTFN ${MESHLAB_PLUGIN_OUTPUT_DIR}/${NAME_ONLY})
-    add_custom_command(
-        OUTPUT ${OUTFN}
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_PLUGIN_OUTPUT_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FN}" "${OUTFN}"
-        COMMENT "Copying ${NAME_ONLY} to plugin build directory"
-        VERBATIM)
-    install(
-        FILES ${FN}
-        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-        COMPONENT Plugins)
-    set(${OUTVAR}
-        ${OUTFN}
-        PARENT_SCOPE)
-endfunction()
 
 message(STATUS "\nConfiguring plugins")
 foreach(PLUGIN ${POSSIBLE_PLUGINS})
