@@ -47,7 +47,7 @@ cp $x $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
 done
 
 #copy libIFX libraries and change rpath u3d plugin
-cp $DISTRIB_PATH/lib/macx64/libIFX* $DISTRIB_PATH/$APPNAME/Contents/Frameworks
+cp -a $DISTRIB_PATH/lib/macx64/libIFX* $DISTRIB_PATH/$APPNAME/Contents/Frameworks
 rm $DISTRIB_PATH/$APPNAME/Contents/Frameworks/libIFXCoreStatic.a
 install_name_tool -change libIFXCore.1.so @rpath/libIFXCore.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
 install_name_tool -change libIFXExporting.1.so @rpath/libIFXExporting.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
