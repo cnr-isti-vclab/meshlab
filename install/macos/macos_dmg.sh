@@ -24,6 +24,8 @@ fi
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR #move to script directory
 
+DISTRIB_PATH=$( realpath $DISTRIB_PATH)
+
 if ! [ -e $DISTRIB_PATH/meshlab.app -a -d $DISTRIB_PATH/meshlab.app ]
 then
     echo "Started in the wrong dir: I have not found the meshlab.app"
