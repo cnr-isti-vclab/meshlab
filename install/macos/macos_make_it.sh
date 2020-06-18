@@ -10,17 +10,24 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries and
 # AppImage will be then placed inside BUILD_PATH/distrib.
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR #move to script directory
+#realpath function
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
     BUILD_PATH="../../src"
+    DISTRIB_PATH="../../distrib"
 else
-    BUILD_PATH=$1
+    BUILD_PATH=$( realpath $1 )
+    DISTRIB_PATH=$BUILD_PATH/distrib
 fi
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
+
 sh macos_build.sh $BUILD_PATH
-sh macos_deploy.sh $BUILD_PATH/distrib
-sh macos_dmg.sh $BUILD_PATH/distrib
+sh macos_deploy.sh $DISTRIB_PATH
+sh macos_dmg.sh $DISTRIB_PATH

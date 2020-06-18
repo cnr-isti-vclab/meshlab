@@ -9,23 +9,28 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries will be
 # then placed inside BUILD_PATH/distrib.
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR #move to script directory
+#realpath function
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH=$PWD/../../src
+    BUILD_PATH="../../src"
 else
-    BUILD_PATH=$1
+    BUILD_PATH=$( realpath $1 )
 fi
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
 
 if ! [ -d $BUILD_PATH ]
 then
     mkdir $BUILD_PATH
 fi
 
-echo "Build path is: " $BUILD_PATH
+echo "Build path is: " $(realpath $BUILD_PATH)
 SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH

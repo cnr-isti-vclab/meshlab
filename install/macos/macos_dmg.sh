@@ -8,16 +8,21 @@
 # 
 # You can give as argument the DISTRIB_PATH containing meshlab.app.
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR #move to script directory
+#realpath function
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH=$PWD/../../distrib
+    DISTRIB_PATH="../../distrib"
 else
-    DISTRIB_PATH=$1
+    DISTRIB_PATH=$( realpath $1 )
 fi
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
 
 if ! [ -e $DISTRIB_PATH/meshlab.app -a -d $DISTRIB_PATH/meshlab.app ]
 then

@@ -17,11 +17,14 @@
 if [ "$#" -eq 0 ]
 then
     BUILD_PATH="../../src"
+    DISTRIB_PATH="../../distrib"
 else
     BUILD_PATH=$(realpath $1)
+    BUILD_PATH=$BUILD_PATH/distrib
 fi
 
 cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
 sh linux_build.sh $BUILD_PATH
-sh linux_appimages.sh $BUILD_PATH/distrib
+sh linux_deploy.sh $DISTRIB_PATH
+sh linux_appimages.sh $DISTRIB_PATH

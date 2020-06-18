@@ -22,7 +22,8 @@ win32-g++ {
 		-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -lIDTFConverter -lIFXCoreStatic
 }
 
-macx:LIBS +=-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/ -lIDTFConverter -lIFXCoreStatic -ldl
+macx:LIBS +=-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/ \
+    -lIDTFConverter -lIFXCoreStatic -lIFXCore -lIFXExporting -lIFXScheduling -ldl
 
 linux:LIBS += -lIDTFConverter -lIFXCoreStatic -ldl
 
