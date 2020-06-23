@@ -68,13 +68,14 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
         }
         break;
     case DP_SHOW_GRID :
-        parset.addParam(new RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
-        parset.addParam(new RichFloat(GridMajorParam(),10.0f,"Major Spacing",""));
-        parset.addParam(new RichFloat(GridMinorParam(),1.0f,"Minor Spacing",""));
-        parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
-        parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
-        parset.addParam(new RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
-        parset.addParam(new RichColor(GridColorFrontParam(),QColor(22,139,119,255),"Front grid Color",""));
+      parset.addParam(new RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
+      parset.addParam(new RichFloat(GridMajorParam(),10.0f,"Major Spacing",""));
+      parset.addParam(new RichFloat(GridMinorParam(),1.0f,"Minor Spacing",""));
+      parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
+      parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
+      parset.addParam(new RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
+      parset.addParam(new RichColor(GridColorFrontParam(),QColor(22,139,119,255),"Front grid Color",""));
+      parset.addParam(new RichFloat(GridBaseLineWidthParam(),1.0f,"Line Width","The width of the lines of the grid"));
         break;
     }
 }
@@ -149,6 +150,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
             bool shadowFlag = parset->getBool(ShowShadowParam());
             Color4b backColor = parset->getColor4b(GridColorBackParam());
             Color4b frontColor = parset->getColor4b(GridColorFrontParam());
+            float baseLineWidth = parset->getFloat(GridBaseLineWidthParam());
             Box3m bb = m.bbox();
             float scalefactor = std::max(0.1, (scaleBB - 1.0));
             bb.Offset((bb.max - bb.min)*(scalefactor/2.0));
@@ -177,7 +179,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
                 shared = gla->mvc()->sharedDataContext();
             }
 
-            DrawGriddedCube(shared,cont,*m.mm(), bb, majorTick, minorTick, backFlag, shadowFlag, backColor, frontColor);
+            DrawGriddedCube(shared,cont,*m.mm(), bb, majorTick, minorTick, backFlag, shadowFlag, backColor, frontColor,baseLineWidth);
         } 
         break;
     }
@@ -190,7 +192,7 @@ void DrawGridPlane(int axis,
     Point3m minP, Point3m maxP,
     Point3m minG, Point3m maxG, // the box with vertex positions snapped to the grid (enlarging it).
     float majorTick, float minorTick,
-    Color4b lineColor)
+    Color4b lineColor, float baseLineWidth=1.0f)
 {
     int xAxis = (1+axis)%3;
     int yAxis = (2+axis)%3;
@@ -223,7 +225,7 @@ void DrawGridPlane(int axis,
     bMin = minG[yAxis];
     bMax = maxG[yAxis];
 
-    glLineWidth(0.5f);
+    glLineWidth(baseLineWidth*0.5f);
     glColor(minorColor);
     glBegin(GL_LINES);
     for (float alpha = aMin; alpha <= aMax; alpha += minorTick)
@@ -238,7 +240,7 @@ void DrawGridPlane(int axis,
     }
     glEnd();
 
-    glLineWidth(1.0f);
+    glLineWidth(baseLineWidth*1.0f);
     glColor(majorColor);
     glBegin(GL_LINES);
     for (float alpha = aMin; alpha <= aMax; alpha += majorTick)
@@ -255,7 +257,7 @@ void DrawGridPlane(int axis,
 
     // Draw the axis
     glColor(axisColor);
-    glLineWidth(1.5f);
+    glLineWidth(baseLineWidth*1.5f);
     glBegin(GL_LINES);
     if(minP[xAxis]*maxP[xAxis] <0 )
     {
@@ -327,7 +329,8 @@ void DrawFlatMesh(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel 
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
+void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* shared, QGLContext* cont, MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, 
+                                               bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, float baseLineWidth)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Point3m minP,maxP, minG,maxG;
@@ -365,7 +368,7 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* share
             bool front = FrontFacing(viewPos,ii,jj,minP,maxP);
             if( front || !backCullFlag)
             {
-                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,front?frontColor:backColor);
+                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,front?frontColor:backColor,baseLineWidth);
                 if(shadowFlag) 
                 {
                     glPushAttrib(GL_COLOR_BUFFER_BIT);
