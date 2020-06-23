@@ -61,6 +61,7 @@ inline QString BoxRatioParam() const { return  "MeshLab::Decoration::BoxRatio" ;
 inline QString ShowShadowParam() const { return  "MeshLab::Decoration::ShowShadow" ; }
 inline QString GridColorBackParam() const { return  "MeshLab::Decoration::GridColorBack" ; }
 inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridColorFront" ; }
+inline QString GridBaseLineWidthParam() const { return  "MeshLab::Decoration::GridBaseLineWidth" ; }
 
 public:
 
@@ -90,7 +91,7 @@ DecorateBackgroundPlugin()
 
 
 private:
-  void DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
+  void DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, float baseLineWidth);
   Shotm curShot;
 
 signals:
