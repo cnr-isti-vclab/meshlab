@@ -21,7 +21,7 @@ HEADERS = plymc.h \
     trivial_walker.h \
     tri_edge_collapse_mc.h \
     simplemeshprovider.h \
-    ../../meshlab/alnParser.h
+    ../../common/alnParser.h
 
 !CONFIG(system_glew): INCLUDEPATH *= ../../code/lib/glew/include
 

@@ -30,7 +30,6 @@
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
-#include "alnParser.h"
 #include <exception>
 #include "ml_default_decorators.h"
 
@@ -44,6 +43,7 @@
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
 #include "../common/mlapplication.h"
+#include "../common/alnParser.h"
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
 

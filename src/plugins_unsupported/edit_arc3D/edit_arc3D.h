@@ -35,7 +35,7 @@
 #include <vcg/complex/algorithms/clustering.h>
 #include <vcg/complex/algorithms/hole.h>
 #include <wrap/io_trimesh/export_ply.h>
-#include <meshlab/alnParser.h>
+#include <common/alnParser.h>
 
 
 class EditArc3DPlugin : public QObject, public MeshEditInterface

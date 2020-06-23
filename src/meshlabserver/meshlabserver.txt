@@ -10,7 +10,8 @@ meshlabserver [logargs] [args]
 
   where args can be:
 
-    -p filename         meshlab project (.mlp) to be loaded
+    -p filename         meshlab project (.mlp/.mlb/.aln/.out/.nvm) to 
+                        be loaded
 
     -w filename [-x]    output meshlab project (.mlp) to be saved.
                         If -x flag is specified a 3D model meshfile.ext
