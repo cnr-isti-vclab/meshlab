@@ -67,6 +67,7 @@ SUBDIRS += \ #sub projects names
     filter_dirt \
     filter_fractal \
     filter_func \
+	filter_globalregistration \
     filter_img_patch_param \
     filter_isoparametrization \
     filter_layer \
@@ -155,6 +156,7 @@ filter_csg.subdir = meshlabplugins/filter_csg
 filter_dirt.subdir = meshlabplugins/filter_dirt
 filter_fractal.subdir = meshlabplugins/filter_fractal
 filter_func.subdir = meshlabplugins/filter_func
+filter_globalregistration.subdir = meshlabplugins/filter_globalregistration
 filter_img_patch_param.subdir = meshlabplugins/filter_img_patch_param
 filter_isoparametrization.subdir = meshlabplugins/filter_isoparametrization
 filter_layer.subdir = meshlabplugins/filter_layer
@@ -231,6 +233,7 @@ filter_csg.depends = common
 filter_dirt.depends = common
 filter_fractal.depends = common
 filter_func.depends = common
+filter_globalregistration.depends = common
 filter_img_patch_param.depends = common
 filter_isoparametrization.depends = common
 filter_layer.depends = common
