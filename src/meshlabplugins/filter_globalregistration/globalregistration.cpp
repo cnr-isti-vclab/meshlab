@@ -28,6 +28,8 @@
 #include <gr/algorithms/PointPairFilter.h>
 //#include <QtScript>
 
+using PointType = gr::Point3D<float>;
+
 GlobalRegistrationPlugin::GlobalRegistrationPlugin()
 {
     typeList << FP_GLOBAL_REGISTRATION;
@@ -95,11 +97,11 @@ struct RealTimeTransformVisitor {
             float /*fraction*/,
             float best_LCP,
             Eigen::Ref<MatrixType> mat) {
-        plugin->Log("Found new configuration. LCP = %f", best_LCP);
+        //plugin->Log("Found new configuration. LCP = %f", best_LCP);
 
         mesh->Tr.FromEigenMatrix(mat);
     }
-	constexpr bool needsGlobalTransformation() const { return true; }
+    constexpr bool needsGlobalTransformation() const { return true; }
 };
 
 struct TransformVisitor {
@@ -109,15 +111,15 @@ struct TransformVisitor {
             float /*fraction*/,
             float best_LCP,
             Eigen::Ref<MatrixType> /*mat*/) const {
-        plugin->Log("Found new configuration. LCP = %f", best_LCP);
+        //plugin->Log("Found new configuration. LCP = %f", best_LCP);
     }
-	constexpr bool needsGlobalTransformation() const { return false; }
+    constexpr bool needsGlobalTransformation() const { return false; }
 };
 
 // init Super4PCS point cloud internal structure
 auto fillPointSet = [] (const CMeshO& m, std::vector<gr::Point3D<CMeshO::ScalarType>>& out) {
     using gr::Point3D;
-	Point3D<CMeshO::ScalarType> p;
+    Point3D<CMeshO::ScalarType> p;
     out.clear();
     out.reserve(m.vert.size());
 
@@ -135,7 +137,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
               MatrixType & mat,
               typename MatcherType::TransformVisitor & v) {
 
-	using SamplerType   = gr::UniformDistSampler<gr::Point3D<CMeshO::ScalarType>>;
+    using SamplerType   = gr::UniformDistSampler<gr::Point3D<CMeshO::ScalarType>>;
     using OptionType    = typename MatcherType::OptionsType;
 
     OptionType opt;
@@ -146,7 +148,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
     opt.max_color_distance    = par.getFloat("color_diff");
     opt.max_time_seconds      = par.getInt("max_time_seconds");
 
-	std::vector<gr::Point3D<CMeshO::ScalarType>> set1, set2;
+    std::vector<gr::Point3D<CMeshO::ScalarType>> set1, set2;
     fillPointSet(*refMesh, set1);
     fillPointSet(*trgMesh, set2);
 
@@ -180,10 +182,10 @@ bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
     v.plugin = this;
 
     if (useSuper4PCS) {
-        using MatcherType = gr::Match4pcsBase<gr::FunctorSuper4PCS, TransformVisitor, gr::AdaptivePointFilter, gr::AdaptivePointFilter::Options>;
+        using MatcherType = gr::Match4pcsBase<gr::FunctorSuper4PCS, PointType, TransformVisitor, gr::AdaptivePointFilter, gr::AdaptivePointFilter::Options>;
         score = align< MatcherType >(refMesh, trgMesh, par, mat, v);
     } else {
-        using MatcherType = gr::Match4pcsBase<gr::Functor4PCS, TransformVisitor, gr::AdaptivePointFilter, gr::AdaptivePointFilter::Options>;
+        using MatcherType = gr::Match4pcsBase<gr::Functor4PCS, PointType, TransformVisitor, gr::AdaptivePointFilter, gr::AdaptivePointFilter::Options>;
         score = align< MatcherType >(refMesh, trgMesh, par, mat, v);
     }
 
