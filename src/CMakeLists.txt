@@ -49,6 +49,7 @@ option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
 option(ALLOW_BUNDLED_SSYNTH "Allow use of bundled structure-synth source" ON)
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
+option(ALLOW_BUNDLED_OPENGR "Allow use of bundled OpenGR source" ON)
 
 option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
@@ -215,6 +216,7 @@ else()
         meshlabplugins/filter_dirt
         meshlabplugins/filter_fractal
         meshlabplugins/filter_func
+		meshlabplugins/filter_globalregistration
         meshlabplugins/filter_img_patch_param
         meshlabplugins/filter_isoparametrization
         meshlabplugins/filter_layer
