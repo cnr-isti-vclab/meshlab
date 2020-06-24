@@ -200,7 +200,7 @@ void GLArea::pasteTile()
         if (snapBuffer.isNull())
             snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.sizeInBytes());
+		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
         uchar *tilePtr = tileBuffer.bits();
 
         for (int y=0; y < tileBuffer.height(); y++)
