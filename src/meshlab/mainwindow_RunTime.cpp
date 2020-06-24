@@ -43,9 +43,11 @@
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
 #include "../common/mlapplication.h"
-#include "../common/alnParser.h"
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
+
+#include <wrap/io_trimesh/alnParser.h>
+
 
 extern "C" {
 #include "jhead.h"
