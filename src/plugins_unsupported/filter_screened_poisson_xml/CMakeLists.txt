@@ -2,20 +2,13 @@
 # SPDX-License-Identifier: BSL-1.0
 
 ### Generated file! Edit the templates in src/templates,
-### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
-### or create a derived template in src/templates/filter_screened_poisson_xml.cmake,
+### specifically src/templates/filter_screened_poisson_xml.cmake (custom for this directory),
 ### then re-run ./make-cmake.py
 
 set(SOURCES
-    Src/CmdLineParser.cpp
-    Src/Factor.cpp
-    Src/Geometry.cpp
-    Src/MarchingCubes.cpp
-    Src/PoissonRecon.cpp
-    Src/SSDRecon.cpp
-    Src/SurfaceTrimmer.cpp
-    Src/Time.cpp
-    filter_screened_poisson.cpp)
+    filter_screened_poisson.cpp Src/MarchingCubes.cpp
+    # Src/CmdLineParser.cpp
+    Src/Factor.cpp Src/Geometry.cpp)
 
 set(HEADERS
     Src/Allocator.h
@@ -42,21 +35,32 @@ set(HEADERS
     Src/Vector.h
     filter_screened_poisson.h)
 
-add_library(filter_screened_poisson_xml MODULE ${SOURCES} ${HEADERS})
+set(XML filter_screened_poisson.xml)
+meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
+list(APPEND SOURCES ${XML_OUT})
 
-target_include_directories(filter_screened_poisson_xml
+add_library(filter_screened_poisson MODULE ${SOURCES} ${HEADERS})
+
+target_compile_definitions(filter_screened_poisson PRIVATE BRUNO_LEVY_FIX
+                                                           FOR_RELEASE)
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(filter_screened_poisson PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+target_include_directories(filter_screened_poisson
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_screened_poisson_xml PUBLIC common)
+target_link_libraries(filter_screened_poisson PUBLIC common)
 
-set_property(TARGET filter_screened_poisson_xml PROPERTY FOLDER Plugins)
+set_property(TARGET filter_screened_poisson PROPERTY FOLDER Plugins)
 
-set_property(TARGET filter_screened_poisson_xml
+set_property(TARGET filter_screened_poisson
              PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-set_property(TARGET filter_screened_poisson_xml
+set_property(TARGET filter_screened_poisson
              PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
 install(
-    TARGETS filter_screened_poisson_xml
+    TARGETS filter_screened_poisson
     DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
     COMPONENT Plugins)

@@ -29,7 +29,6 @@ set(SOURCES
 set(HEADERS
     GLExtensionsManager.h
     GLLogStream.h
-    alnParser.h
     filterparameter.h
     filterscript.h
     interfaces.h
@@ -58,7 +57,6 @@ target_link_libraries(
     common
     PUBLIC Qt5::Core
            Qt5::OpenGL
-           Qt5::Script
            Qt5::Widgets
            Qt5::Xml
            Qt5::XmlPatterns

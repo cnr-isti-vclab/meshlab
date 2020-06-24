@@ -35,15 +35,15 @@ if(TARGET external-newuoa AND TARGET external-levmar)
     target_link_libraries(filter_mutualinfo PUBLIC common)
 
     target_link_libraries(filter_mutualinfo PRIVATE external-newuoa
-                                                    external-levmar)
+                                                      external-levmar)
 
     set_property(TARGET filter_mutualinfo PROPERTY FOLDER Plugins)
 
-    set_property(TARGET filter_mutualinfo PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                                   ${MESHLAB_PLUGIN_OUTPUT_DIR})
+    set_property(TARGET filter_mutualinfo
+                 PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-    set_property(TARGET filter_mutualinfo PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                                   ${MESHLAB_PLUGIN_OUTPUT_DIR})
+    set_property(TARGET filter_mutualinfo
+                 PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
     install(
         TARGETS filter_mutualinfo

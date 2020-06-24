@@ -5,8 +5,8 @@
 ### specifically src/templates/filter_isoparametrization.cmake (custom for this directory),
 ### then re-run ./make-cmake.py
 
-# Only build if we have newuoa and levmar
-if(TARGET external-newuoa AND TARGET external-levmar)
+# Only build if we have levmar
+if(TARGET external-levmar)
 
     set(SOURCES filter_isoparametrization.cpp)
 
@@ -64,6 +64,6 @@ if(TARGET external-newuoa AND TARGET external-levmar)
 else()
     message(
         STATUS
-            "Skipping filter_isoparametrization - missing either newuoa or levmar in external directory."
+            "Skipping filter_isoparametrization - missing levmar in external directory."
     )
 endif()
