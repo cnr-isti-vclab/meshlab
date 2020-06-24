@@ -1304,7 +1304,6 @@ void GLArea::wheelEvent(QWheelEvent*e)
 
 		const int WHEEL_STEP = 120;
 		float notch = e->angleDelta().y()/ float(WHEEL_STEP);
-		std::cerr << notch;
 		if (glas.wheelDirection)
 			notch *= -1;
 		switch(e->modifiers())
