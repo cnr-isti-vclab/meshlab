@@ -47,6 +47,10 @@
 #ifndef _PCS_UTILS_H_
 #define _PCS_UTILS_H_
 
+#ifdef WIN32
+#undef NO_DATA
+#endif
+
 #include <vector>
 #include <array>
 #include "gr/shared.h"
