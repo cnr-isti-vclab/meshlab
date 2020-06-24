@@ -200,7 +200,7 @@ void GLArea::pasteTile()
         if (snapBuffer.isNull())
             snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-        uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
+		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
         uchar *tilePtr = tileBuffer.bits();
 
         for (int y=0; y < tileBuffer.height(); y++)
@@ -1294,60 +1294,58 @@ void GLArea::tabletEvent(QTabletEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	makeCurrent();
-    setFocus();
-    if( (iEdit && !suspendedEditor) )
-    {
-        iEdit->wheelEvent(e,*mm(),this);
-    }
-    else
-    {
-        const int WHEEL_STEP = 120;
-        float notch = e->delta()/ float(WHEEL_STEP);
-        switch(e->modifiers())
-        {
-        case Qt::ControlModifier: 
-            {
-                clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); 
-                break;
-            }
-        case Qt::ShiftModifier: 
-            {
-                fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); 
-                break;
-            }
-        case Qt::AltModifier:
-            { 
-				glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
-                MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
-                if (cont != NULL)
-                {
-					foreach(MeshModel * mp, this->md()->meshList)
-					{
-						MLRenderingData dt;
-						cont->getRenderInfoPerMeshView(mp->id(), context(), dt);
-						MLPerViewGLOptions opt;
-						dt.get(opt);
-						opt._perpoint_pointsize = glas.pointSize;
-						opt._perpoint_pointsmooth_enabled = glas.pointSmooth;
-						opt._perpoint_pointattenuation_enabled = glas.pointDistanceAttenuation;
-						cont->setGLOptions(mp->id(), context(), opt);
-					}
-					if (mw() != NULL)
-						mw()->updateLayerDialog();
-                }
-                break;
-            }
-        default:
-            {            
-                if(isRaster())
-                    this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
-                else
-                    trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
-                break;
-            }
-        }
-    }
-    update();
+	setFocus();
+	if( (iEdit && !suspendedEditor) )
+	{
+		iEdit->wheelEvent(e,*mm(),this);
+	}
+	else
+	{
+
+		const int WHEEL_STEP = 120;
+		float notch = e->angleDelta().y()/ float(WHEEL_STEP);
+		if (glas.wheelDirection)
+			notch *= -1;
+		switch(e->modifiers())
+		{
+		case Qt::ControlModifier:
+			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f);
+			break;
+		case Qt::ShiftModifier:
+			fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f);
+			break;
+		case Qt::AltModifier:
+		{
+			glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
+			MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
+			if (cont != NULL)
+			{
+				foreach(MeshModel * mp, this->md()->meshList)
+				{
+					MLRenderingData dt;
+					cont->getRenderInfoPerMeshView(mp->id(), context(), dt);
+					MLPerViewGLOptions opt;
+					dt.get(opt);
+					opt._perpoint_pointsize = glas.pointSize;
+					opt._perpoint_pointsmooth_enabled = glas.pointSmooth;
+					opt._perpoint_pointattenuation_enabled = glas.pointDistanceAttenuation;
+					cont->setGLOptions(mp->id(), context(), opt);
+				}
+				if (mw() != NULL)
+					mw()->updateLayerDialog();
+			}
+			break;
+		}
+		default:
+			if(isRaster())
+				this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
+			else {
+				trackball.MouseWheel(notch);
+			}
+			break;
+		}
+	}
+	update();
 }
 
 
