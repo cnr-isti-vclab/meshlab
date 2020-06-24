@@ -95,13 +95,13 @@ struct RealTimeTransformVisitor {
     GlobalRegistrationPlugin* plugin;
     inline void operator() (
             float /*fraction*/,
-            float best_LCP,
+			float /*best_LCP*/,
             Eigen::Ref<MatrixType> mat) {
         //plugin->Log("Found new configuration. LCP = %f", best_LCP);
 
         mesh->Tr.FromEigenMatrix(mat);
     }
-    constexpr bool needsGlobalTransformation() const { return true; }
+	bool needsGlobalTransformation() const { return true; }
 };
 
 struct TransformVisitor {
@@ -109,11 +109,11 @@ struct TransformVisitor {
     GlobalRegistrationPlugin* plugin;
     inline void operator() (
             float /*fraction*/,
-            float best_LCP,
+			float /*best_LCP*/,
             Eigen::Ref<MatrixType> /*mat*/) const {
         //plugin->Log("Found new configuration. LCP = %f", best_LCP);
     }
-    constexpr bool needsGlobalTransformation() const { return false; }
+	bool needsGlobalTransformation() const { return false; }
 };
 
 // init Super4PCS point cloud internal structure
