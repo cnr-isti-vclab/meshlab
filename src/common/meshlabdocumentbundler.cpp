@@ -99,3 +99,8 @@ bool MeshDocumentFromNvm(MeshDocument &md, QString filename_nvm, QString model_f
 
 
 
+
+bool MeshDocumentFromAln(MeshDocument& md)
+{
+	return false;
+}

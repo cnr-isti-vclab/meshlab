@@ -20,8 +20,7 @@ HEADERS = plymc.h \
     volume.h \
     trivial_walker.h \
     tri_edge_collapse_mc.h \
-    simplemeshprovider.h \
-    ../../common/alnParser.h
+    simplemeshprovider.h 
 
 !CONFIG(system_glew): INCLUDEPATH *= ../../code/lib/glew/include
 

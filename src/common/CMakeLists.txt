@@ -29,7 +29,6 @@ set(SOURCES
 set(HEADERS
     GLExtensionsManager.h
     GLLogStream.h
-    alnParser.h
     filterparameter.h
     filterscript.h
     interfaces.h
