@@ -1,0 +1,43 @@
+# - Config file for the OpenGR package
+# It defines the following variables
+#  OPENGR_INCLUDE_DIRS - include directories for OpenGR
+#  OPENGR_LIB_DIR      - libraries to link against
+#  OPENGR_LIBRARIES    - libraries to link against
+#
+#
+# To use
+# ::
+# find_package(OpenGR REQUIRED)
+# include_directories(${OpenGR_INCLUDE_DIR})
+# add_executable(foo foo.cc)
+# target_link_libraries(foo ${OpenGR_LIBRARIES})
+# link_directories(${OpenGR_LIB_DIR})
+#
+# find_package( Eigen3 REQUIRED )
+# include_directories( ${EIGEN3_INCLUDE_DIR} )
+
+
+@PACKAGE_INIT@
+
+if(@OpenGR_USE_CHEALPIX@)
+  include("@OpenGR_EXPORT_TARGET_DIR@/chealpixTargets.cmake")
+endif(@OpenGR_USE_CHEALPIX@)
+
+
+include("@OpenGR_EXPORT_TARGET_DIR@/OpenGR-AccelLibTargets.cmake")
+include("@OpenGR_EXPORT_TARGET_DIR@/OpenGR-IOLibTargets.cmake")
+include("@OpenGR_EXPORT_TARGET_DIR@/OpenGR-AlgoLibTargets.cmake")
+include("@OpenGR_EXPORT_TARGET_DIR@/OpenGR-UtilsLibTargets.cmake")
+include("@OpenGR_EXPORT_TARGET_DIR@/OpenGRConfigVersion.cmake")
+
+
+# Compute paths
+set(OpenGR_INCLUDE_DIR "@OpenGR_INSTALL_INC_DIR@/")
+set(OpenGR_LIB_DIR "@OpenGR_INSTALL_LIB_DIR@/")
+set(OpenGR_LIBRARIES opengr_io)
+
+if(@OpenGR_USE_CHEALPIX@)
+  list(APPEND OpenGR_LIBRARIES chealpix)
+endif(@OpenGR_USE_CHEALPIX@)
+
+set(OpenGR_FOUND 1)

@@ -1,0 +1,11 @@
+Changes since v2.20a (incomplete):
+
+- The Healpix C library has been rewritten almost completely. Algorithms are now
+  as similar as possible to the ones in the C++ library, simplifying code
+  maintenance. Many functions have become much faster and shorter.
+  The interface is unaffected by this change, so existing codes using the
+  Healpix C library should not need to be changed.
+- An additional set of functions was added to support Nside values up to 2^29.
+- Nside values which are not powers of 2 are supported in RING scheme.
+- optional compilation without libcfitsio (the cfitsio-related functions are
+  skipped in this mode); contributed by Yu Feng

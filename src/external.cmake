@@ -375,3 +375,11 @@ if(ALLOW_BUNDLED_U3D)
 	#set_property(TARGET external-IDTFConverter PROPERTY FOLDER External)
 endif()
 
+# opengr - optional and header-only, for filter_globalregistration
+set(OPENGR_DIR ${EXTERNAL_DIR}/OpenGR)
+if(ALLOW_BUNDLED_OPENGR AND EXISTS "${OPENGR_DIR}/src/gr/algorithms/match4pcsBase.h")
+	message(STATUS "- OpenGR - using bundled source")
+	add_library(external-opengr INTERFACE)
+	target_include_directories(external-opengr INTERFACE ${OPENGR_DIR}/src/)
+endif()
+
