@@ -31,7 +31,6 @@ set(SOURCES
 
 set(HEADERS
     additionalgui.h
-    alnParser.h
     changetexturename.h
     customDialog.h
     filterScriptDialog.h

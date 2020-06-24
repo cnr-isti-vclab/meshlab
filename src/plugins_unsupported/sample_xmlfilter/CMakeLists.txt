@@ -10,10 +10,6 @@ set(SOURCES sample_xmlfilter.cpp)
 
 set(HEADERS sample_xmlfilter.h)
 
-set(XML sample_xmlfilter.xml)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
-
 add_library(sample_xmlfilter MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(sample_xmlfilter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
