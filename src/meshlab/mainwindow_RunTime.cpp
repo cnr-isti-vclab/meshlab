@@ -30,7 +30,6 @@
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
-#include "alnParser.h"
 #include <exception>
 #include "ml_default_decorators.h"
 
@@ -46,6 +45,9 @@
 #include "../common/mlapplication.h"
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
+
+#include <wrap/io_trimesh/alnParser.h>
+
 
 extern "C" {
 #include "jhead.h"

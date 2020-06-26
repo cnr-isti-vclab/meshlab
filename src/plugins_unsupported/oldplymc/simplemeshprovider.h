@@ -1,6 +1,6 @@
 #ifndef SIMPLEMESHPROVIDER_H
 #define SIMPLEMESHPROVIDER_H
-#include "../../meshlab/alnParser.h"
+#include "../../common/alnParser.h"
 #include <list>
 #include <vector>
 #include <vcg/space/box3.h>

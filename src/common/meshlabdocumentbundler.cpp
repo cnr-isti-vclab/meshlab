@@ -96,6 +96,3 @@ bool MeshDocumentFromNvm(MeshDocument &md, QString filename_nvm, QString model_f
 
     return true;
 }
-
-
-
