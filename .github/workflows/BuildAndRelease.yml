@@ -32,9 +32,8 @@ jobs:
       with:
         commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
     - name: Sleep for 2 minutes
-      uses: jakejarvis/wait-action@master
-      with:
-        time: '2m'
+      run: |
+        sleep 120
 
   ubuntu_build_appimage:
     needs: [update_ml_version]
