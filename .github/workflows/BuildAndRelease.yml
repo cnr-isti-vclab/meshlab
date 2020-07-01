@@ -1,9 +1,9 @@
 name: BuildAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 1 1 * *' #every first day of the month at 1am
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 1 1 * *' #every first day of the month at 1am
 
 jobs:
   update_ml_version:
@@ -31,6 +31,10 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
         commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
+    - name: Sleep for 2 minutes
+      uses: jakejarvis/wait-action@master
+      with:
+        time: '2m'
 
   ubuntu_build_appimage:
     needs: [update_ml_version]
