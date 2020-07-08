@@ -82,7 +82,7 @@ find_package(GMP)
 find_package(muparser)
 find_package(OpenCTM)
 # TODO dynamic qhull that isn't qhull_r is deprecated: port to qhull_r
-find_package(Qhull COMPONENTS qhull)
+find_package(Qhull COMPONENTS libqhull)
 find_package(OpenMP)
 
 if(WIN32)
