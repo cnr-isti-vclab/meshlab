@@ -4,7 +4,7 @@
 # Specify components:
 #
 # ::
-#   qhull          = Deprecated interface: use imported target Qhull::qhull
+#   libqhull       = Deprecated interface: use imported target Qhull::libqhull
 #   qhullstatic    = Recommended alternative to re-entrant interface: use imported target Qhull::qhullstatic
 #   qhull_r        = Recommended (re-entrant) interface: use imported target Qhull::qhull_r
 #   qhullstatic_r  = Recommended (re-entrant) interface: use imported target Qhull::qhullstatic_r
@@ -29,7 +29,7 @@ set(QHULL_ROOT_DIR
 # Look for a CMake config file
 find_package(Qhull QUIET NO_MODULE)
 set(_qh_found_any FALSE)
-foreach(_qh qhull qhullstatic qhull_r qhullstatic_r qhullcpp)
+foreach(_qh libqhull qhullstatic qhull_r qhullstatic_r qhullcpp)
     if(TARGET Qhull::${_qh})
         set(Qhull_${_qh}_FOUND TRUE)
         set(_qh_found_any TRUE)
@@ -39,7 +39,7 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 if(_qh_found_any)
     # Populate QHULL_bla_INCLUDE_DIR from imported targets
-    foreach(_qh qhull qhull_r qhullcpp)
+    foreach(_qh libqhull qhull_r qhullcpp)
         if(TARGET Qhull::${_qh})
             get_target_property(QHULL_${_qh}_INCLUDE_DIR Qhull::${_qh} INTERFACE_INCLUDE_DIRECTORIES)
         endif()
@@ -48,7 +48,7 @@ if(_qh_found_any)
 
 else()
     find_path(
-        QHULL_qhull_INCLUDE_DIR
+        QHULL_libqhull_INCLUDE_DIR
         NAMES libqhull/libqhull.h
         PATHS "${QHULL_ROOT_DIR}")
     find_path(
@@ -59,21 +59,21 @@ else()
         QHULL_qhullcpp_INCLUDE_DIR
         NAMES libqhullcpp/Qhull.h
         PATHS "${QHULL_ROOT_DIR}")
-    foreach(_qh_lib qhull qhull_r qhullstatic qhullstatic_r qhullcpp)
+    foreach(_qh_lib libqhull qhull_r qhullstatic qhullstatic_r qhullcpp)
         find_library(
             QHULL_${_qh_lib}_LIBRARY
             NAMES ${_qh_lib} lib${_qh_lib}
             PATHS "${QHULL_ROOT_DIR}")
     endforeach()
 
-    # Manually search for qhullstatic as a qhull library with a static library suffix
+    # Manually search for qhullstatic as a libqhull library with a static library suffix
     # (The extra condition is to avoid confusing a .dll import library with a static library)
     if(NOT QHULL_qhullstatic_LIBRARY AND NOT "${CMAKE_LINK_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}")
         set(_qh_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
         find_library(
             QHULL_qhullstatic_LIBRARY
-            NAMES qhullstatic libqhullstatic qhull
+            NAMES qhullstatic libqhullstatic libqhull
             PATHS "${QHULL_ROOT_DIR}")
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${_qh_CMAKE_FIND_LIBRARY_SUFFIXES})
         unset(_qh_CMAKE_FIND_LIBRARY_SUFFIXES)
@@ -84,7 +84,7 @@ else()
 
     set(_qh_required_vars)
     foreach(component ${Qhull_FIND_COMPONENTS})
-        foreach(candidate qhull qhull_r qhullstatic qhullstatic_r qhullcpp)
+        foreach(candidate libqhull qhull_r qhullstatic qhullstatic_r qhullcpp)
             if("${component}" STREQUAL "${candidate}")
                 string(REPLACE "static" "" candidate_nonstatic "${candidate}")
                 list(APPEND _qh_required_vars QHULL_${candidate}_LIBRARY QHULL_${candidate_nonstatic}_INCLUDE_DIR)
@@ -97,15 +97,15 @@ else()
 
     find_package_handle_standard_args(Qhull REQUIRED_VARS ${_qh_required_vars} HANDLE_COMPONENTS)
 
-    if(Qhull_qhull_FOUND AND NOT TARGET Qhull::qhull)
-        add_library(Qhull::qhull SHARED IMPORTED)
-        set_target_properties(Qhull::qhull PROPERTIES IMPORTED_LOCATION "${QHULL_qhull_LIBRARY}"
-                                                      INTERFACE_INCLUDE_DIRECTORIES "${QHULL_qhull_INCLUDE_DIR}")
+    if(Qhull_qhull_FOUND AND NOT TARGET Qhull::libqhull)
+        add_library(Qhull::libqhull SHARED IMPORTED)
+        set_target_properties(Qhull::libqhull PROPERTIES IMPORTED_LOCATION "${QHULL_libqhull_LIBRARY}"
+                                                      INTERFACE_INCLUDE_DIRECTORIES "${QHULL_libqhull_INCLUDE_DIR}")
     endif()
     if(Qhull_qhullstatic_FOUND AND NOT TARGET Qhull::qhullstatic)
         add_library(Qhull::qhullstatic STATIC IMPORTED)
         set_target_properties(Qhull::qhullstatic PROPERTIES IMPORTED_LOCATION "${QHULL_qhullstatic_LIBRARY}"
-                                                            INTERFACE_INCLUDE_DIRECTORIES "${QHULL_qhull_INCLUDE_DIR}")
+                                                            INTERFACE_INCLUDE_DIRECTORIES "${QHULL_libqhull_INCLUDE_DIR}")
     endif()
     if(Qhull_qhull_r_FOUND AND NOT TARGET Qhull::qhull_r)
         add_library(Qhull::qhull_r SHARED IMPORTED)
@@ -131,8 +131,8 @@ if(QHULL_FOUND)
 endif()
 
 mark_as_advanced(
-    QHULL_qhull_INCLUDE_DIR
-    QHULL_qhull_LIBRARY
+    QHULL_libqhull_INCLUDE_DIR
+    QHULL_libqhull_LIBRARY
     QHULL_qhull_r_INCLUDE_DIR
     QHULL_qhull_r_LIBRARY
     QHULL_qhullcpp_INCLUDE_DIR
