@@ -14,7 +14,6 @@
 # vc_redist.exe must be installed before.
 
 #saving location where script has been runned
-$DIR = Get-Location
 
 write-host "N of arguments: $($args.count)"
 
