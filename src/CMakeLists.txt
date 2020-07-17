@@ -343,7 +343,7 @@ endif()
 
 if(NOT WIN32 AND NOT APPLE)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../install/linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../install/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/pixmaps)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../install/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
 endif()
 
 if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)
