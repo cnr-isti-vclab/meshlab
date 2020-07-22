@@ -124,18 +124,13 @@ macx:QMAKE_POST_LINK += "\
     install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
     "
 
-#CONFIG(release,debug | release) {
-#	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
-#	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
-#	win32-g++:release:LIBS 		+= -L../common/release -lcommon
-#}
 
 linux:LIBS += \
     -lmeshlab-common -lGLU \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
 !CONFIG(system_glew) {
-	INCLUDEPATH *= $$GLEWDIR/include
+    INCLUDEPATH *= $$GLEWDIR/include
 }
 CONFIG(system_glew): LIBS += -lGLEW
 
