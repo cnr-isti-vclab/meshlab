@@ -39,7 +39,8 @@ public:
     PluginManager();
     ~PluginManager();
     enum TypeIO{IMPORT,EXPORT};
-    void loadPlugins(RichParameterSet& defaultGlobal);
+	void loadPlugins(RichParameterSet& defaultGlobal);
+	void loadPlugins(RichParameterSet& defaultGlobal, const QDir& pluginsDirectory);
     QString pluginsCode() const;
 
     inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}

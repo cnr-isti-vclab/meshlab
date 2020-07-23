@@ -56,7 +56,12 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 {
-	pluginsDir = QDir(getDefaultPluginDirPath());
+	loadPlugins(defaultGlobal, QDir(getDefaultPluginDirPath()));
+}
+
+void PluginManager::loadPlugins(RichParameterSet& defaultGlobal, const QDir& pluginsDirectory)
+{
+	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	qApp->addLibraryPath(getDefaultPluginDirPath());
 	qApp->addLibraryPath(getBaseDirPath());
