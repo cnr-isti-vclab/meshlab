@@ -64,6 +64,7 @@ public:
     QStringList inpFilters;
     QStringList outFilters;
 
+    QVector<MeshIOInterface*> meshIOPlug;
     QVector<MeshFilterInterface*> meshFilterPlug;
     QVector<MeshRenderInterface*> meshRenderPlug;
     QVector<MeshDecorateInterface*> meshDecoratePlug;
@@ -80,7 +81,7 @@ public:
 
 private:
     QDir pluginsDir;
-    QVector<MeshIOInterface*> meshIOPlug;
+
 
     void knownIOFormats();
 };
