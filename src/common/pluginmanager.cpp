@@ -154,6 +154,11 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal, const QDir& plu
 	knownIOFormats();
 }
 
+int PluginManager::numberIOPlugins() const
+{
+	return meshIOPlug.size();
+}
+
 // Search among all the decorator plugins the one that contains a decoration with the given name
 MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
 {

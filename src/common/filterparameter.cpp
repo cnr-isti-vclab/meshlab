@@ -124,9 +124,8 @@ bool RichParameterSet::operator==( const RichParameterSet& rps )
 
 RichParameterSet::~RichParameterSet()
 {
-    //int val = _CrtCheckMemory( );
-    for(int ii = 0;ii < paramList.size();++ii)
-        delete paramList.at(ii);
+    for(RichParameter* rp : paramList)
+        delete rp;
     paramList.clear();
 
 }
@@ -171,6 +170,8 @@ bool RichParameterSet::isEmpty() const
 
 void RichParameterSet::clear()
 {
+    for(RichParameter* rp : paramList)
+        delete rp;
     paramList.clear();
 }
 

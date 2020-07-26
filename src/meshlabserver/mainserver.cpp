@@ -83,7 +83,7 @@ public:
         PM.loadPlugins(defaultGlobal);
 
         printf("Total %i filtering actions\n", PM.actionFilterMap.size());
-        printf("Total %i io plugins\n", PM.meshIOPlugins().size());
+        printf("Total %i io plugins\n", PM.numberIOPlugins());
     }
 
     void dumpPluginInfoWiki(FILE *fp)
