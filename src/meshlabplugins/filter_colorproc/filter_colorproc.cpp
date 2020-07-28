@@ -111,7 +111,7 @@ FilterColorProc::~FilterColorProc()
 	case CP_FACE_TO_VERTEX:            return QString("Transfer Color: Face to Vertex");
 	case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
 	case CP_RANDOM_FACE:               return QString("Random Face Color");
-	case CP_RANDOM_CONNECTED_COMPONENT:return QString("Random Component Color ");
+	case CP_RANDOM_CONNECTED_COMPONENT:return QString("Random Component Color");
 
     default: assert(0);
   }
