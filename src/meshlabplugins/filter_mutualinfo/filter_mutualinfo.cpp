@@ -104,6 +104,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*m
 		parlst.addParam(new RichFloat("Tolerance", 0.1, "Tolerance", "Threshold to stop convergence"));
 		parlst.addParam(new RichFloat("ExpectedVariance", 2.0, "Expected Variance", "Expected Variance"));
 		parlst.addParam(new RichInt("BackgroundWeight", 2, "Background Weight", "Weight of background pixels (1, as all the other pixels; 2, one half of the other pixels etc etc)"));
+		break;
 	default :
 		assert(0);
 	}
