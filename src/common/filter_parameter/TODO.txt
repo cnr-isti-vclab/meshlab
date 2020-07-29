@@ -1,0 +1,3 @@
+RichBool constructor - remove unused parameter
+RichInt        "          "      "      "
+RichFloat        "          "      "      "

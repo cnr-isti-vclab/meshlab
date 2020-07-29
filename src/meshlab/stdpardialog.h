@@ -755,7 +755,7 @@ public:
     void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
     void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
     void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
-    void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
+    //void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
     void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
     void visit(RichOpenFile& pd){lastCreated = new OpenFileWidget(par,&pd);};
     void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
@@ -784,7 +784,7 @@ public:
     void visit(RichColor& pd);
     void visit(RichAbsPerc& pd);
     void visit(RichEnum& pd);
-    void visit(RichFloatList& /*pd*/){assert(0);};
+    //void visit(RichFloatList& /*pd*/){assert(0);};
     void visit(RichDynamicFloat& pd);
     void visit(RichOpenFile& pd);
     void visit(RichSaveFile& /*pd*/){assert(0);};

@@ -21,6 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
+#ifndef MESHLAB_VALUE_H
+#define MESHLAB_VALUE_H
+
 #include <QString>
 #include <QColor>
 #include <vcg/math/matrix44.h>
@@ -69,7 +72,7 @@ public:
 class BoolValue : public Value
 {
 public:
-	BoolValue(const bool val);
+	BoolValue(const bool val) : pval(val) {};
 	inline bool getBool() const { return pval; }
 	inline bool isBool() const { return true; }
 	inline QString typeName() const { return QString("Bool"); }
@@ -241,3 +244,5 @@ public:
 private:
 	MeshModel* pval;
 };
+
+#endif //MESHLAB_VALUE_H

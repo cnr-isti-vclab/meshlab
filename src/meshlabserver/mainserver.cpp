@@ -120,7 +120,7 @@ public:
                     foreach(RichParameter* pp, FPM[filterAction->text()].paramList)
                     {
                         fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
-							qUtf8Printable(pp->val->typeName()), qUtf8Printable(pp->pd->fieldDesc), qUtf8Printable(pp->pd->tooltip));
+                            qUtf8Printable(pp->val->typeName()), qUtf8Printable(pp->fieldDesc), qUtf8Printable(pp->tooltip));
                     }
                     fprintf(fp,"</TABLE>\n");
                 }

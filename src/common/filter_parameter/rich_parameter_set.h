@@ -20,3 +20,62 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+
+#ifndef MESHLAB_RICH_PARAMETER_SET_H
+#define MESHLAB_RICH_PARAMETER_SET_H
+
+#include "rich_parameter.h"
+
+class RichParameterSet
+{
+
+public:
+	RichParameterSet();
+	RichParameterSet(const RichParameterSet& rps);
+	// The data is just a list of Parameters
+	//QMap<QString, FilterParameter *> paramMap;
+	QList<RichParameter*> paramList;
+	bool isEmpty() const;
+	RichParameter* findParameter(const QString& name) const;
+	bool hasParameter(const QString& name) const;
+
+
+	RichParameterSet& operator=(const RichParameterSet& rps);
+	RichParameterSet& copy(const RichParameterSet& rps);
+	RichParameterSet& join(const RichParameterSet& rps);
+	bool operator==(const RichParameterSet& rps);
+
+	RichParameterSet& addParam(RichParameter* pd);
+
+	//remove a parameter from the set by name
+	RichParameterSet& removeParameter(const QString& name);
+
+	void clear();
+
+	void setValue(const QString& name, const Value& val);
+
+	bool				getBool(const QString& name) const;
+	int					getInt(const QString& name) const;
+	float				getFloat(const QString& name) const;
+	QString			getString(const QString& name) const;
+	vcg::Matrix44f		getMatrix44(const QString& name) const;
+	vcg::Matrix44<MESHLAB_SCALAR>		getMatrix44m(const QString& name) const;
+	vcg::Point3f getPoint3f(const QString& name) const;
+	vcg::Point3<MESHLAB_SCALAR> getPoint3m(const QString& name) const;
+	vcg::Shotf getShotf(const QString& name) const;
+	vcg::Shot<MESHLAB_SCALAR> getShotm(const QString& name) const;
+	QColor		   getColor(const QString& name) const;
+	vcg::Color4b getColor4b(const QString& name) const;
+	float		     getAbsPerc(const QString& name) const;
+	int					 getEnum(const QString& name) const;
+	MeshModel*   getMesh(const QString& name) const;
+	QList<float> getFloatList(const QString& name) const;
+	float        getDynamicFloat(const QString& name) const;
+	QString getOpenFileName(const QString& name) const;
+	QString getSaveFileName(const QString& name) const;
+
+
+	~RichParameterSet();
+};
+
+#endif // MESHLAB_RICH_PARAMETER_SET_H
