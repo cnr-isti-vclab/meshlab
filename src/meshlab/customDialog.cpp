@@ -132,6 +132,7 @@ SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultP
 	dialoglayout->addWidget(closebut,1,4);
 
 	RichParameterCopyConstructor cp;
+	RichParameterSet tmpParSet;
 	curPar->accept(cp);
 	tmppar = cp.lastCreated;
 	tmpParSet.addParam(tmppar);
