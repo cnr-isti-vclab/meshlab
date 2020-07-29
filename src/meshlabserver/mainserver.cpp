@@ -30,7 +30,7 @@
 #include <common/meshlabdocumentxml.h>
 #include <common/meshlabdocumentbundler.h>
 #include <common/mlexception.h>
-#include <common/filterparameter.h>
+#include <common/filter_parameter/filterparameter.h>
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 #include <wrap/io_trimesh/alnParser.h>
 

@@ -26,7 +26,7 @@
 
 #include<QString>
 #include <vcg/space/color4.h>
-#include "../common/filterparameter.h"
+#include "../common/filter_parameter/filterparameter.h"
 
 class GLAreaSetting
 {

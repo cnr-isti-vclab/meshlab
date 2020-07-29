@@ -30,7 +30,7 @@
 #include <QTabWidget>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <common/filterparameter.h>
+#include <common/filter_parameter/filterparameter.h>
 #include <common/ml_shared_data_context.h>
 #include "ml_render_gui.h"
 
