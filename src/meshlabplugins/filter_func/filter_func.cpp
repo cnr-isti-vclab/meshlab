@@ -368,7 +368,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
   if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
     md.addNewMesh("",this->filterName(ID(filter)));

@@ -292,7 +292,7 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
  }
 }
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
 if (md.mm() == NULL)
 	return false;

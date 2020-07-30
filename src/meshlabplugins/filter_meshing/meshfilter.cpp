@@ -669,7 +669,7 @@ void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool 
 }
 
 
-bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
+bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, const RichParameterSet & par, vcg::CallBackPos * cb)
 {
 MeshModel & m = *md.mm();
 
@@ -1113,7 +1113,7 @@ switch(ID(filter))
 		if(par.getBool("snapFlag"))
 		{
 			angleDeg = floor(angleDeg / snapAngle)*snapAngle;
-			par.setValue("angle", DynamicFloatValue(angleDeg));
+			//par.setValue("angle", DynamicFloatValue(angleDeg));
 		}
 
 		trRot.SetRotateDeg(angleDeg,axis);

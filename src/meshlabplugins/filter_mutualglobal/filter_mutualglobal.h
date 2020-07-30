@@ -55,11 +55,11 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
 	FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
-	bool preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+	bool preAlignment(MeshDocument &md, const RichParameterSet& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
 	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);
 	std::vector<SubGraph> CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs);

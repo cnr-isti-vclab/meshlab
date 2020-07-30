@@ -174,7 +174,7 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
   Log("stdDev Edge:  %5.2f",stdE/avE);
 }
 
-bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, RichParameterSet & par, vcg::CallBackPos  *cb)
+bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, const RichParameterSet & par, vcg::CallBackPos  *cb)
 {
   MeshModel* m = md.mm();  //get current mesh from document
   CMeshO *mesh=&m->cm;

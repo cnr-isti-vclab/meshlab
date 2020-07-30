@@ -691,7 +691,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   }
 }
 
-bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
 switch(ID(action))
 {

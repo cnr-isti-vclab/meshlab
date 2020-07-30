@@ -17,7 +17,7 @@
   *
   * public:
   *     MyFilter();
-  *     bool applyFilter(MeshDocument &, RichParameterSet &, vcg::CallBackPos* cb = 0);
+  *     bool applyFilter(MeshDocument &, const RichParameterSet &, vcg::CallBackPos* cb = 0);
   * };
   * \endcode
   *
@@ -29,7 +29,7 @@
   *     //... your initialization code here
   * }
   *
-  * bool MyFilter::applyFilter(MeshDocument &, RichParameterSet&, vcg::CallBackPos*){
+  * bool MyFilter::applyFilter(MeshDocument &, const RichParameterSet&, vcg::CallBackPos*){
   *     //... your algorithm implementation here
   * }
   *
@@ -101,7 +101,7 @@ public:
       * and is used to understand what type of plugin is being developed. This information will be used
       * by meshlab to determine in which filter sub-folder insert this filter.
       */
-  virtual bool applyFilter(MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
+  virtual bool applyFilter(MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
   
   /**
       * @brief The pre-conditions required by the filter on the input mesh
@@ -153,7 +153,7 @@ private:
   int postCondition() const{
     return MeshModel::MM_NONE;
   }
-  bool applyFilter(QAction *, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos * cb){
+  bool applyFilter(QAction *, MeshDocument &md, const RichParameterSet& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
   virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterSet &par){

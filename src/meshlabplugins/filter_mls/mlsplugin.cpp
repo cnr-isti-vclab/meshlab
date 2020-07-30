@@ -352,7 +352,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
     }
 }
 
-bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb)
+bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterSet& par, vcg::CallBackPos* cb)
 {
     int id = ID(filter);
 

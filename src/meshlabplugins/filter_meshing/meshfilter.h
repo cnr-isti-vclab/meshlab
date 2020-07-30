@@ -88,7 +88,7 @@ public:
 
 	FilterClass getClass(QAction *);
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(QAction *filter) const;
 	int getPreCondition(QAction *filter) const;
 	FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}

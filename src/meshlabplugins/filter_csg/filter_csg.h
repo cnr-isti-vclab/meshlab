@@ -61,8 +61,8 @@ public:
     virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
     virtual void initParameterSet(QAction *, MeshModel &, RichParameterSet &) { assert(0); }
 
-    virtual bool applyFilter(QAction *, MeshDocument &, RichParameterSet &, vcg::CallBackPos *);
-    virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
+    virtual bool applyFilter(QAction *, MeshDocument &, const RichParameterSet &, vcg::CallBackPos *);
+    virtual bool applyFilter(QAction *, MeshModel &, const RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
 
     virtual FilterClass getClass(QAction *) { return MeshFilterInterface::FilterClass( MeshFilterInterface::Layer + MeshFilterInterface::Remeshing ); }
     FILTER_ARITY filterArity(QAction*) const {return FIXED;}

@@ -84,12 +84,12 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
                                       int textureGutter,
                                       bool allowUVStretching );
 
-    void                patchBasedTextureParameterization( RasterPatchMap &patches,
+    void                patchBasedTextureParameterization(RasterPatchMap &patches,
                                                            PatchVec &nullPatches,
                                                            int meshid,
                                                            CMeshO &mesh,
                                                            QList<RasterModel*> &rasterList,
-                                                           RichParameterSet &par );
+                                                           const RichParameterSet& par );
 
     float               computeTotalPatchArea( RasterPatchMap &patches );
     int                 computePatchCount( RasterPatchMap &patches );
@@ -113,7 +113,7 @@ public:
 
     virtual bool        applyFilter( QAction *act,
                                      MeshDocument &md,
-                                     RichParameterSet &par,
+                                     const RichParameterSet &par,
                                      vcg::CallBackPos *cb );
 
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}

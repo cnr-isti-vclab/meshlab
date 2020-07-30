@@ -153,7 +153,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	QElapsedTimer filterTime;
 	filterTime.start();
@@ -331,7 +331,7 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 	return QString();
 }
 
-bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	Solver solver;
 	MutualInfo mutual;

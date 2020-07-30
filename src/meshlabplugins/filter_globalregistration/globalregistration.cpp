@@ -133,7 +133,7 @@ auto fillPointSet = [] (const CMeshO& m, std::vector<gr::Point3D<CMeshO::ScalarT
 
 template <typename MatcherType>
 float align ( CMeshO* refMesh, CMeshO* trgMesh,
-              RichParameterSet & par,
+              const RichParameterSet & par,
               MatrixType & mat,
               typename MatcherType::TransformVisitor & v) {
 
@@ -163,7 +163,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
 // Move Vertex of a random quantity
 bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
                                            MeshDocument &/*md*/,
-                                           RichParameterSet & par,
+                                           const RichParameterSet & par,
                                            vcg::CallBackPos */*cb*/)
 {
 

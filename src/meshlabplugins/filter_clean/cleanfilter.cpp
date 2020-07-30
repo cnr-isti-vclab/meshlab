@@ -264,7 +264,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
   }
 }
 
-bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
+bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * cb)
 {
  MeshModel &m=*(md.mm());
  switch(ID(filter))

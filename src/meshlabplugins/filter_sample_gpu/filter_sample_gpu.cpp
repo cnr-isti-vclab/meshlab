@@ -103,7 +103,7 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
 	switch(ID(a))
 	{

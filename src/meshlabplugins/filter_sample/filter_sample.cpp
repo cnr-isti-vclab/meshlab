@@ -153,7 +153,7 @@ void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichPara
  * @param cb: callback object to tell MeshLab the percentage of execution of the filter
  * @return true if the filter has been applied correctly, false otherwise
  */
-bool FilterSamplePlugin::applyFilter(QAction * action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterSamplePlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :

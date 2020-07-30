@@ -138,7 +138,7 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     return QString("");
 }
 
-bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & pars, vcg::CallBackPos *cb)
+bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, const RichParameterSet & pars, vcg::CallBackPos *cb)
 {
     MeshModel* mm = md.mm();
 

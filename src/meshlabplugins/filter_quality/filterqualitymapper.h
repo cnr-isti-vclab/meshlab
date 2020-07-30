@@ -74,7 +74,7 @@ public:
     int getPreConditions(QAction *) const;
     int postCondition( QAction* ) const;
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
     virtual FilterClass getClass(QAction *);
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };

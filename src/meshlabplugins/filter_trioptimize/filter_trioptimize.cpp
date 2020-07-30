@@ -257,7 +257,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     float limit = -std::numeric_limits<float>::epsilon();

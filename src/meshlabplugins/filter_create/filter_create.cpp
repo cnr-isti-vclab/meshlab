@@ -162,7 +162,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
+bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, CallBackPos * /*cb*/)
 {
 	MeshModel *currM = md.mm();
 	MeshModel *m = nullptr;
