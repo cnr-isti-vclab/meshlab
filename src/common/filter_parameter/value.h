@@ -30,6 +30,7 @@
 #include <vcg/space/color4.h>
 #include <vcg/math/shot.h>
 class MeshModel;
+class MeshDocument;
 
 class Value
 {
@@ -249,6 +250,7 @@ class MeshValue : public Value
 {
 public:
 	MeshValue(MeshModel* mesh) : pval(mesh) {}
+	MeshValue(MeshDocument* doc, int meshind);
 	inline MeshModel* getMesh() const { return pval; }
 	inline bool isMesh() const { return true; }
 	inline QString typeName() const { return QString("Mesh"); }

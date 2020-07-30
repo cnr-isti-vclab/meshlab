@@ -41,11 +41,11 @@ public:
 	QString fieldDesc;
 	QString tooltip;
 
-	RichParameter(const QString& nm, Value* v, const QString& desc = QString(), const QString& tltip = QString());
+	//RichParameter(const QString& nm, Value* v, const QString& desc = QString(), const QString& tltip = QString());
 	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
 	virtual void accept(Visitor& v) = 0;
-	virtual bool operator==(const RichParameter& rp) = 0;
 	//virtual RichParameter* clone() const = 0;
+	virtual bool operator==(const RichParameter& rp) = 0;
 	virtual ~RichParameter();
 };
 
@@ -56,6 +56,7 @@ public:
 	RichBool(const QString& nm, const bool defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichBool(const QString& nm, const bool val, const bool defval, const QString& desc, const QString& tltip);
 	void accept(Visitor& v);
+	//RichBool* clone() const;
 	bool operator==(const RichParameter& rb);
 
 	~RichBool();
@@ -173,6 +174,8 @@ public:
 
 	MeshDocument* meshdoc;
 	int meshindex;
+
+
 };
 
 //class RichFloatList : public RichParameter

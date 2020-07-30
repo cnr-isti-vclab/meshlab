@@ -65,6 +65,7 @@ SOURCES += \
     filter_parameter/filterparameter.cpp \
     filter_parameter/rich_parameter.cpp \
     filter_parameter/rich_parameter_set.cpp \
+    filter_parameter/value.cpp \
     filter_parameter/visitor.cpp \
     interfaces.cpp \
     filterscript.cpp \
