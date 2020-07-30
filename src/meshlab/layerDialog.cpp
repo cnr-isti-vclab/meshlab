@@ -1242,8 +1242,8 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 
             for(int jj = 0;jj < tmpSet.paramList.size();++jj)
             {
-                RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name);
-                tmpSet.setValue(tmpSet.paramList[jj]->name,*(par->val));
+                RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name());
+                tmpSet.setValue(tmpSet.paramList[jj]->name(),*(par->val));
             }
 
             dialoglayout = new QGridLayout();
@@ -1300,11 +1300,11 @@ void DecoratorParamsTreeWidget::save()
         p->accept(v);
         doc.appendChild(v.parElem);
         QString docstring =  doc.toString();
-        qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name), qUtf8Printable(docstring));
+        qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name()), qUtf8Printable(docstring));
         QSettings setting;
-        setting.setValue(p->name,QVariant(docstring));
+        setting.setValue(p->name(),QVariant(docstring));
         RichParameterSet& currSet = mainWin->currentGlobalPars();
-        RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name);
+        RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name());
         par->val->set(*(tmpSet.paramList[ii]->val));
     }
 }
@@ -1322,7 +1322,7 @@ void DecoratorParamsTreeWidget::apply()
     {
         frame->stdfieldwidgets[ii]->collectWidgetValue();
         RichParameter* r = frame->stdfieldwidgets[ii]->rp;
-        current.setValue(r->name,*(r->val));
+        current.setValue(r->name(),*(r->val));
     }
     mainWin->updateCustomSettings();
 	if (mainWin->GLA())
@@ -1333,7 +1333,7 @@ void DecoratorParamsTreeWidget::load()
 {
     for(int ii = 0;ii < tmpSet.paramList.size();++ii)
     {
-        const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name));
+        const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name()));
         tmpSet.paramList[ii]->val->set(*(defPar.val));
         frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
     }

@@ -99,7 +99,7 @@ void StdParFrame::readValues(RichParameterSet &curParSet)
     QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin();
     for(int i = 0; i < parList.count(); i++)
     {
-        QString sname = parList.at(i)->name;
+        QString sname = parList.at(i)->name();
         curParSet.setValue(sname,(*it)->getWidgetValue());
         ++it;
     }
@@ -244,7 +244,7 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
     //qDebug("Creating a Point3fWidget");
-    paramName = rpf->name;
+    paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
     descLab = new QLabel(rpf->fieldDesc,this);
     descLab->setToolTip(rpf->fieldDesc);
@@ -383,7 +383,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 {
     valid = false;
     m.SetIdentity();
-    paramName = rpf->name;
+    paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
 
     descLab = new QLabel(rpf->fieldDesc,this);
@@ -544,7 +544,7 @@ void Matrix44fWidget::invalidateMatrix(const QString& /*s*/)
 ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
 
-    paramName = rpf->name;
+    paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
 
     descLab = new QLabel(rpf->fieldDesc,p);

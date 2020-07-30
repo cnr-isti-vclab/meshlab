@@ -884,7 +884,7 @@ void MainWindow::loadMeshLabSettings()
 				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qUtf8Printable(docElem.attribute("name")), qUtf8Printable(docElem.attribute("value")));
 				continue;
 			}
-			if (!defaultGlobalParams.hasParameter(rpar->name))
+			if (!defaultGlobalParams.hasParameter(rpar->name()))
 			{
 				//  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
 				//         "It happens if you are running MeshLab with only a subset of the plugins. ", qUtf8Printable(rpar->name));
@@ -898,7 +898,7 @@ void MainWindow::loadMeshLabSettings()
 	for (int ii = 0; ii < defaultGlobalParams.paramList.size(); ++ii)
 	{
 		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
-		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
+		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name()))
 		{
 			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
 			RichParameterCopyConstructor v;
@@ -911,7 +911,7 @@ void MainWindow::loadMeshLabSettings()
 			doc.appendChild(vxml.parElem);
 			QString docstring = doc.toString();
 			QSettings setting;
-			setting.setValue(v.lastCreated->name, QVariant(docstring));
+			setting.setValue(v.lastCreated->name(), QVariant(docstring));
 		}
 	}
 

@@ -610,7 +610,7 @@ public:
             for(int i = 0; i < required.paramList.size(); i++)
             {
                 RichParameterCopyConstructor v;
-                if (!parameterSet.hasParameter(required.paramList[i]->name))
+                if (!parameterSet.hasParameter(required.paramList[i]->name()))
                 {
                     required.paramList[i]->accept(v);
                     parameterSet.addParam(v.lastCreated);
@@ -624,7 +624,7 @@ public:
                     if(	md->meshindex < meshDocument.size() &&
                             md->meshindex >= 0  )
                     {
-                        RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+                        RichMesh* rmesh = new RichMesh(parameter->name(),meshDocument.getMesh(md->meshindex),&meshDocument);
                         parameterSet.paramList.replace(i,rmesh);
                     } else
                     {

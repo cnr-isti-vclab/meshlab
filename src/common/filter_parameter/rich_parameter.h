@@ -33,20 +33,25 @@ class MeshDocument;
 class RichParameter
 {
 public:
-	const QString name;
-
-	Value* val;
-
-	//ParameterDecoration* pd;
-	QString fieldDesc;
-	QString tooltip;
-
-	//RichParameter(const QString& nm, Value* v, const QString& desc = QString(), const QString& tltip = QString());
+	RichParameter(const RichParameter& rp);
+	RichParameter(RichParameter&& rp);
 	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
+
+	const QString& name() const;
+
 	virtual void accept(Visitor& v) = 0;
-	//virtual RichParameter* clone() const = 0;
+	virtual RichParameter* clone() const = 0;
+	RichParameter& operator=(const RichParameter& rp);
+	RichParameter& operator=(RichParameter&& rp);
 	virtual bool operator==(const RichParameter& rp) = 0;
 	virtual ~RichParameter();
+protected:
+	QString pName;
+public:
+	Value* val;
+
+	QString fieldDesc;
+	QString tooltip;
 };
 
 
@@ -56,7 +61,7 @@ public:
 	RichBool(const QString& nm, const bool defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichBool(const QString& nm, const bool val, const bool defval, const QString& desc, const QString& tltip);
 	void accept(Visitor& v);
-	//RichBool* clone() const;
+	RichBool* clone() const;
 	bool operator==(const RichParameter& rb);
 
 	~RichBool();
@@ -68,6 +73,7 @@ public:
 	RichInt(const QString& nm, const int defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichInt(const QString& nm, const int val, const int defval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichInt* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichInt();
 };
@@ -78,6 +84,7 @@ public:
 	RichFloat(const QString& nm, const float defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichFloat(const QString& nm, const float val, const float defval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichFloat* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichFloat();
 };
@@ -88,6 +95,7 @@ public:
 	RichString(const QString& nm, const QString& defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichString(const QString& nm, const QString& val, const QString& defval, const QString& desc, const QString& tltip);
 	void accept(Visitor& v);
+	RichString* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichString();
 };
@@ -99,6 +107,7 @@ public:
 	RichMatrix44f(const QString& nm, const vcg::Matrix44d& defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichMatrix44f(const QString& nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichMatrix44f* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichMatrix44f();
 };
@@ -110,6 +119,7 @@ public:
 	RichPoint3f(const QString& nm, const vcg::Point3d& defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichPoint3f(const QString& nm, const vcg::Point3f& val, const vcg::Point3f& defval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichPoint3f* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichPoint3f();
 };
@@ -119,6 +129,7 @@ public:
 	RichShotf(const QString& nm, const vcg::Shotf& defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichShotf(const QString& nm, const vcg::Shotf& val, const vcg::Shotf& defval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichShotf* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichShotf();
 };
@@ -129,6 +140,7 @@ public:
 	RichColor(const QString& nm, const QColor& defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichColor(const QString& nm, const QColor& val, const QColor& defval, const QString& desc, const QString& tltip);
 	void accept(Visitor& v);
+	RichColor* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichColor();
 
@@ -140,6 +152,7 @@ public:
 	RichAbsPerc(const QString& nm, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
 	RichAbsPerc(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichAbsPerc* clone() const;
 	bool operator==(const RichParameter& rb);
 	float min;
 	float max;
@@ -152,6 +165,7 @@ public:
 	RichEnum(const QString& nm, const int defval, const QStringList& values, const QString& desc = QString(), const QString& tltip = QString());
 	RichEnum(const QString& nm, const int val, const int defval, const QStringList& values, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichEnum* clone() const;
 	bool operator==(const RichParameter& rb);
 	QStringList enumvalues;
 	~RichEnum();
@@ -169,6 +183,7 @@ public:
 	RichMesh(const QString& nm, int meshind, const QString& desc = QString(), const QString& tltip = QString());
 
 	void accept(Visitor& v);
+	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);
 	~RichMesh();
 
@@ -194,6 +209,7 @@ public:
 	RichDynamicFloat(const QString& nm, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
 	RichDynamicFloat(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichDynamicFloat* clone() const;
 	bool operator==(const RichParameter& rb);
 	float min;
 	float max;
@@ -206,6 +222,7 @@ class RichOpenFile : public RichParameter
 public:
 	RichOpenFile(const QString& nm, const QString& directorydefval, const QStringList& exts, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichOpenFile* clone() const;
 	bool operator==(const RichParameter& rb);
 	QStringList exts;
 	~RichOpenFile();
@@ -216,6 +233,7 @@ class RichSaveFile : public RichParameter
 public:
 	RichSaveFile(const QString& nm, const QString& filedefval, const QString& ext, const QString& desc = QString(), const QString& tltip = QString());
 	void accept(Visitor& v);
+	RichSaveFile* clone() const;
 	bool operator==(const RichParameter& rb);
 	QString ext;
 	~RichSaveFile();

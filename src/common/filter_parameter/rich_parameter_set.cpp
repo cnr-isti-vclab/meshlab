@@ -11,7 +11,7 @@ bool RichParameterSet::hasParameter(const QString& name) const
     QList<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
     {
-        if((*fpli != NULL) && (*fpli)->name==name)
+        if((*fpli != NULL) && (*fpli)->name()==name)
             return true;
     }
     return false;
@@ -22,7 +22,7 @@ RichParameter* RichParameterSet::findParameter(const QString& name) const
     QList<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
     {
-        if((*fpli != NULL) && (*fpli)->name==name)
+        if((*fpli != NULL) && (*fpli)->name()==name)
             return *fpli;
     }
     qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"

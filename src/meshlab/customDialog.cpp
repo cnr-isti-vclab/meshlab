@@ -49,7 +49,7 @@ CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defpar
 void CustomDialog::openSubDialog( QTableWidgetItem* itm )
 {
 	int rprow = tw->row(itm);
-	RichParameter *defPar = defParSet.findParameter(vrp[rprow]->name);
+	RichParameter *defPar = defParSet.findParameter(vrp[rprow]->name());
 	SettingDialog* setdial = new SettingDialog(vrp[rprow],defPar,this);
 	connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
 	connect(setdial,SIGNAL(applySettingSignal()),this,SLOT(updateSettings()));
@@ -80,7 +80,7 @@ void CustomDialog::updateSettings()
 	//int sz = tw->font().pointSize();
 	for(int ii = 0;ii < curParSet.paramList.size();++ii)
 	{
-		QTableWidgetItem* item = new QTableWidgetItem(curParSet.paramList.at(ii)->name);
+		QTableWidgetItem* item = new QTableWidgetItem(curParSet.paramList.at(ii)->name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
 		//if (maxlen[0] < item->text().size() * sz)
@@ -155,9 +155,9 @@ void SettingDialog::save()
 	tmppar->accept(v);
 	doc.appendChild(v.parElem);
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name), qUtf8Printable(docstring));
+	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name()), qUtf8Printable(docstring));
 	QSettings setting;
-	setting.setValue(tmppar->name,QVariant(docstring));
+	setting.setValue(tmppar->name(),QVariant(docstring));
 	curPar->val->set(*tmppar->val);
 }
 
@@ -171,7 +171,7 @@ void SettingDialog::apply()
 
 void SettingDialog::reset()
 {
-	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name));
+	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
 	tmppar->val->set(*defPar->val);
 	assert(frame.stdfieldwidgets.size() == 1);
 	frame.stdfieldwidgets.at(0)->setWidgetValue(*tmppar->val);

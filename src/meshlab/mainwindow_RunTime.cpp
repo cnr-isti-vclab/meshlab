@@ -802,7 +802,7 @@ void MainWindow::runFilterScript()
                 if( md->meshindex < meshDoc()->size() &&
                         md->meshindex >= 0  )
                 {
-                    RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
+                    RichMesh* rmesh = new RichMesh(parameter->name(),md->meshindex,meshDoc());
                     parameterSet.paramList.replace(i,rmesh);
                 } else
                 {

@@ -1,9 +1,48 @@
 #include "rich_parameter.h"
 #include "meshmodel.h"
 
-RichParameter::RichParameter(const QString& nm, const Value& v, const QString& desc, const QString& tltip) :
-    name(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
+RichParameter::RichParameter(const RichParameter& rp) :
+    pName(rp.pName), val(rp.val->clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
 {
+}
+
+RichParameter::RichParameter(RichParameter&& rp) :
+    pName(std::move(rp.pName)), fieldDesc(std::move(rp.fieldDesc)), tooltip(std::move(rp.tooltip))
+{
+     val = rp.val;
+     rp.val = nullptr;
+}
+
+RichParameter::RichParameter(const QString& nm, const Value& v, const QString& desc, const QString& tltip) :
+    pName(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
+{
+}
+
+const QString& RichParameter::name() const
+{
+    return pName;
+}
+
+RichParameter& RichParameter::operator=(const RichParameter& rp)
+{
+    if (&rp != this){
+        delete val;
+        val = rp.val->clone();
+        pName = rp.pName;
+        fieldDesc = rp.fieldDesc;
+        tooltip = rp.tooltip;
+    }
+    return *this;
+}
+
+RichParameter& RichParameter::operator=(RichParameter&& rp)
+{
+    assert(&rp != this);
+    val = rp.val;
+    rp.val = nullptr;
+    pName = std::move(rp.pName);
+    fieldDesc = std::move(rp.fieldDesc);
+    tooltip = std::move(rp.tooltip);
 }
 
 RichParameter::~RichParameter()
@@ -27,14 +66,14 @@ void RichBool::accept( Visitor& v )
     v.visit(*this);
 }
 
-//RichBool* RichBool::clone() const
-//{
-//    return new RichBool(*this);
-//}
+RichBool* RichBool::clone() const
+{
+    return new RichBool(*this);
+}
 
 bool RichBool::operator==( const RichParameter& rb )
 {
-    return (rb.val->isBool() && (name == rb.name) && (val->getBool() == rb.val->getBool()));
+    return (rb.val->isBool() && (pName == rb.name()) && (val->getBool() == rb.val->getBool()));
 }
 
 RichBool::~RichBool()
@@ -56,9 +95,14 @@ void RichInt::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichInt* RichInt::clone() const
+{
+    return new RichInt(*this);
+}
+
 bool RichInt::operator==( const RichParameter& rb )
 {
-    return (rb.val->isInt() &&(name == rb.name) && (val->getInt() == rb.val->getInt()));
+    return (rb.val->isInt() &&(pName == rb.name()) && (val->getInt() == rb.val->getInt()));
 }
 
 RichInt::~RichInt()
@@ -80,9 +124,14 @@ void RichFloat::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichFloat* RichFloat::clone() const
+{
+    return new RichFloat(*this);
+}
+
 bool RichFloat::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFloat() &&(name == rb.name) && (val->getFloat() == rb.val->getFloat()));
+    return (rb.val->isFloat() &&(pName == rb.name()) && (val->getFloat() == rb.val->getFloat()));
 }
 
 RichFloat::~RichFloat()
@@ -104,9 +153,14 @@ void RichString::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichString* RichString::clone() const
+{
+    return new RichString(*this);
+}
+
 bool RichString::operator==( const RichParameter& rb )
 {
-    return (rb.val->isString() &&(name == rb.name) && (val->getString() == rb.val->getString()));
+    return (rb.val->isString() &&(pName == rb.name()) && (val->getString() == rb.val->getString()));
 }
 
 RichString::~RichString()
@@ -127,9 +181,14 @@ void RichMatrix44f::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichMatrix44f* RichMatrix44f::clone() const
+{
+    return new RichMatrix44f(*this);
+}
+
 bool RichMatrix44f::operator==( const RichParameter& rb )
 {
-    return (rb.val->isMatrix44f() &&(name == rb.name) && (val->getMatrix44f() == rb.val->getMatrix44f()));
+    return (rb.val->isMatrix44f() &&(pName == rb.name()) && (val->getMatrix44f() == rb.val->getMatrix44f()));
 }
 
 RichMatrix44f::~RichMatrix44f()
@@ -153,9 +212,14 @@ void RichPoint3f::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichPoint3f* RichPoint3f::clone() const
+{
+    return new RichPoint3f(*this);
+}
+
 bool RichPoint3f::operator==( const RichParameter& rb )
 {
-    return (rb.val->isPoint3f() &&(name == rb.name) && (val->getPoint3f() == rb.val->getPoint3f()));
+    return (rb.val->isPoint3f() &&(pName == rb.name()) && (val->getPoint3f() == rb.val->getPoint3f()));
 }
 
 RichPoint3f::~RichPoint3f()
@@ -173,12 +237,17 @@ RichShotf::RichShotf(const QString& nm, const vcg::Shotf& val, const vcg::Shotf&
 
 void RichShotf::accept( Visitor& v )
 {
-  v.visit(*this);
+    v.visit(*this);
+}
+
+RichShotf* RichShotf::clone() const
+{
+    return new RichShotf(*this);
 }
 
 bool RichShotf::operator==( const RichParameter& rb )
 {
-  return (rb.val->isShotf() &&(name == rb.name) ); // TODO REAL TEST OF EQUALITY // && (val->getShotf() == rb.val->getShotf()));
+  return (rb.val->isShotf() &&(pName == rb.name()) ); // TODO REAL TEST OF EQUALITY // && (val->getShotf() == rb.val->getShotf()));
 }
 
 RichShotf::~RichShotf()
@@ -200,9 +269,14 @@ void RichColor::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichColor* RichColor::clone() const
+{
+    return new RichColor(*this);
+}
+
 bool RichColor::operator==( const RichParameter& rb )
 {
-    return (rb.val->isColor() &&(name == rb.name) && (val->getColor() == rb.val->getColor()));
+    return (rb.val->isColor() &&(pName == rb.name()) && (val->getColor() == rb.val->getColor()));
 }
 
 RichColor::~RichColor()
@@ -227,9 +301,14 @@ void RichAbsPerc::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichAbsPerc* RichAbsPerc::clone() const
+{
+    return new RichAbsPerc(*this);
+}
+
 bool RichAbsPerc::operator==( const RichParameter& rb )
 {
-    return (rb.val->isAbsPerc() &&(name == rb.name) && (val->getAbsPerc() == rb.val->getAbsPerc()));
+    return (rb.val->isAbsPerc() &&(pName == rb.name()) && (val->getAbsPerc() == rb.val->getAbsPerc()));
 }
 
 RichAbsPerc::~RichAbsPerc()
@@ -253,9 +332,14 @@ void RichEnum::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichEnum* RichEnum::clone() const
+{
+    return new RichEnum(*this);
+}
+
 bool RichEnum::operator==( const RichParameter& rb )
 {
-    return (rb.val->isEnum() &&(name == rb.name) && (val->getEnum() == rb.val->getEnum()));
+    return (rb.val->isEnum() &&(pName == rb.name()) && (val->getEnum() == rb.val->getEnum()));
 }
 
 RichEnum::~RichEnum()
@@ -303,9 +387,14 @@ void RichMesh::accept( Visitor& v )
 	v.visit(*this);
 }
 
+RichMesh* RichMesh::clone() const
+{
+	return new RichMesh(*this);
+}
+
 bool RichMesh::operator==( const RichParameter& rb )
 {
-	return (rb.val->isMesh() &&(name == rb.name) && (val->getMesh() == rb.val->getMesh()));
+	return (rb.val->isMesh() &&(pName == rb.name()) && (val->getMesh() == rb.val->getMesh()));
 }
 
 RichMesh::~RichMesh()
@@ -354,9 +443,14 @@ void RichDynamicFloat::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichDynamicFloat* RichDynamicFloat::clone() const
+{
+    return new RichDynamicFloat(*this);
+}
+
 bool RichDynamicFloat::operator==( const RichParameter& rb )
 {
-    return (rb.val->isDynamicFloat() &&(name == rb.name) && (val->getDynamicFloat() == rb.val->getDynamicFloat()));
+    return (rb.val->isDynamicFloat() &&(pName == rb.name()) && (val->getDynamicFloat() == rb.val->getDynamicFloat()));
 }
 
 RichDynamicFloat::~RichDynamicFloat()
@@ -374,9 +468,14 @@ void RichOpenFile::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichOpenFile* RichOpenFile::clone() const
+{
+    return new RichOpenFile(*this);
+}
+
 bool RichOpenFile::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));
+    return (rb.val->isFileName() &&(pName == rb.name()) && (val->getFileName() == rb.val->getFileName()));
 }
 
 RichOpenFile::~RichOpenFile()
@@ -394,9 +493,14 @@ void RichSaveFile::accept( Visitor& v )
     v.visit(*this);
 }
 
+RichSaveFile* RichSaveFile::clone() const
+{
+    return new RichSaveFile(*this);
+}
+
 bool RichSaveFile::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));
+    return (rb.val->isFileName() &&(pName == rb.name()) && (val->getFileName() == rb.val->getFileName()));
 }
 
 RichSaveFile::~RichSaveFile()
