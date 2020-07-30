@@ -1,406 +1,440 @@
 #include "rich_parameter.h"
 #include "meshmodel.h"
 
+/**** RichParameter Class ****/
+
 RichParameter::RichParameter(const RichParameter& rp) :
-    pName(rp.pName), val(rp.value().clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
+	pName(rp.pName), val(rp.value().clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
 {
 }
 
 RichParameter::RichParameter(RichParameter&& rp) :
-    pName(std::move(rp.pName)), fieldDesc(std::move(rp.fieldDesc)), tooltip(std::move(rp.tooltip))
+	pName(std::move(rp.pName)), fieldDesc(std::move(rp.fieldDesc)), tooltip(std::move(rp.tooltip))
 {
-     val = rp.val;
-     rp.val = nullptr;
+	val = rp.val;
+	rp.val = nullptr;
 }
 
-RichParameter::RichParameter(const QString& nm, const Value& v, const QString& desc, const QString& tltip) :
-    pName(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
+RichParameter::RichParameter(
+		const QString& nm,
+		const Value& v,
+		const QString& desc,
+		const QString& tltip) :
+	pName(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
 {
-}
-
-const QString& RichParameter::name() const
-{
-    return pName;
-}
-
-const Value& RichParameter::value() const
-{
-    return *val;
-}
-
-const QString& RichParameter::fieldDescription() const
-{
-    return fieldDesc;
-}
-
-const QString& RichParameter::toolTip() const
-{
-    return tooltip;
-}
-
-Value& RichParameter::value()
-{
-    return *val;
-}
-
-RichParameter& RichParameter::operator=(const RichParameter& rp)
-{
-    if (&rp != this){
-        delete val;
-        val = rp.value().clone();
-        pName = rp.pName;
-        fieldDesc = rp.fieldDesc;
-        tooltip = rp.tooltip;
-    }
-    return *this;
-}
-
-RichParameter& RichParameter::operator=(RichParameter&& rp)
-{
-    assert(&rp != this);
-    val = rp.val;
-    rp.val = nullptr;
-    pName = std::move(rp.pName);
-    fieldDesc = std::move(rp.fieldDesc);
-    tooltip = std::move(rp.tooltip);
-    return *this;
 }
 
 RichParameter::~RichParameter()
 {
-    delete val;
+	delete val;
 }
 
-RichBool::RichBool(const QString& nm,const bool defval,const QString& desc,const QString& tltip) :
-    RichParameter(nm, BoolValue(defval), desc, tltip)
+const QString& RichParameter::name() const
 {
+	return pName;
 }
 
-
-RichBool::RichBool(const QString& nm, const bool val, const bool defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, BoolValue(val), desc, tltip)
+const Value& RichParameter::value() const
 {
+	return *val;
 }
 
-void RichBool::accept( Visitor& v )
+const QString& RichParameter::fieldDescription() const
 {
-    v.visit(*this);
+	return fieldDesc;
 }
 
-RichBool* RichBool::clone() const
+const QString& RichParameter::toolTip() const
 {
-    return new RichBool(*this);
+	return tooltip;
 }
 
-bool RichBool::operator==( const RichParameter& rb )
+Value& RichParameter::value()
 {
-    return (rb.value().isBool() && (pName == rb.name()) && (value().getBool() == rb.value().getBool()));
+	return *val;
+}
+
+RichParameter& RichParameter::operator=(const RichParameter& rp)
+{
+	if (&rp != this){
+		delete val;
+		val = rp.value().clone();
+		pName = rp.pName;
+		fieldDesc = rp.fieldDesc;
+		tooltip = rp.tooltip;
+	}
+	return *this;
+}
+
+RichParameter& RichParameter::operator=(RichParameter&& rp)
+{
+	assert(&rp != this);
+	val = rp.val;
+	rp.val = nullptr;
+	pName = std::move(rp.pName);
+	fieldDesc = std::move(rp.fieldDesc);
+	tooltip = std::move(rp.tooltip);
+	return *this;
+}
+
+/**** RichBool Class ****/
+
+RichBool::RichBool(
+		const QString& nm,
+		const bool defval,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, BoolValue(defval), desc, tltip)
+{
 }
 
 RichBool::~RichBool()
 {
 }
 
-RichInt::RichInt( const QString& nm,const int defval,const QString& desc,const QString& tltip) :
-    RichParameter(nm, IntValue(defval),desc, tltip)
+void RichBool::accept( Visitor& v )
 {
+	v.visit(*this);
 }
 
-RichInt::RichInt(const QString& nm, const int val, const int defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, IntValue(val), desc, tltip)
+RichBool* RichBool::clone() const
 {
+	return new RichBool(*this);
 }
 
-void RichInt::accept( Visitor& v )
+bool RichBool::operator==( const RichParameter& rb )
 {
-    v.visit(*this);
+	return (rb.value().isBool() && (pName == rb.name()) && (value().getBool() == rb.value().getBool()));
 }
 
-RichInt* RichInt::clone() const
-{
-    return new RichInt(*this);
-}
+/**** RichInt Class ****/
 
-bool RichInt::operator==( const RichParameter& rb )
+RichInt::RichInt(
+		const QString& nm,
+		const int defval,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, IntValue(defval),desc, tltip)
 {
-    return (rb.value().isInt() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
 }
 
 RichInt::~RichInt()
 {
 }
 
-RichFloat::RichFloat( const QString& nm,const float defval,const QString& desc,const QString& tltip) :
-    RichParameter(nm, FloatValue(defval),desc, tltip)
+void RichInt::accept( Visitor& v )
 {
+	v.visit(*this);
 }
 
-RichFloat::RichFloat(const QString& nm, const float val, const float defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, FloatValue(val), desc, tltip)
+RichInt* RichInt::clone() const
 {
+	return new RichInt(*this);
 }
 
-void RichFloat::accept( Visitor& v )
+bool RichInt::operator==( const RichParameter& rb )
 {
-    v.visit(*this);
+	return (rb.value().isInt() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
 }
 
-RichFloat* RichFloat::clone() const
-{
-    return new RichFloat(*this);
-}
+/**** RichFloat Class ****/
 
-bool RichFloat::operator==( const RichParameter& rb )
+RichFloat::RichFloat(
+		const QString& nm,
+		const float defval,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, FloatValue(defval),desc, tltip)
 {
-    return (rb.value().isFloat() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }
 
 RichFloat::~RichFloat()
 {
 }
 
-RichString::RichString( const QString& nm,const QString& defval,const QString& desc,const QString& tltip) :
-    RichParameter(nm, StringValue(defval),desc,tltip)
+void RichFloat::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+RichFloat* RichFloat::clone() const
+{
+	return new RichFloat(*this);
+}
+
+bool RichFloat::operator==( const RichParameter& rb )
+{
+	return (rb.value().isFloat() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
+}
+
+/**** RichString Class ****/
+
+RichString::RichString(
+		const QString& nm,
+		const QString& defval,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, StringValue(defval),desc,tltip)
 {
 }
 
-RichString::RichString(const QString& nm, const QString& val, const QString& defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, StringValue(val),desc, tltip)
+RichString::~RichString()
 {
 }
 
 void RichString::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichString* RichString::clone() const
 {
-    return new RichString(*this);
+	return new RichString(*this);
 }
 
 bool RichString::operator==( const RichParameter& rb )
 {
-    return (rb.value().isString() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
+	return (rb.value().isString() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
 }
 
-RichString::~RichString()
-{
+/**** RichMatrix44f Class ****/
 
+RichMatrix44f::RichMatrix44f(
+		const QString& nm,
+		const vcg::Matrix44f& defval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, Matrix44fValue(defval),desc, tltip)
+{
 }
-
-RichMatrix44f::RichMatrix44f( const QString& nm,const vcg::Matrix44f& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, Matrix44fValue(defval),desc, tltip) { }
-RichMatrix44f::RichMatrix44f( const QString& nm,const vcg::Matrix44d& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, Matrix44fValue(defval),desc, tltip) { }
-
-RichMatrix44f::RichMatrix44f(const QString& nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString& desc /*= QString()*/, const QString& tltip /*= QString()*/)
-    : RichParameter(nm, Matrix44fValue(val),desc,tltip) { }
-
-void RichMatrix44f::accept( Visitor& v )
+RichMatrix44f::RichMatrix44f(
+		const QString& nm,
+		const vcg::Matrix44d& defval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, Matrix44fValue(defval),desc, tltip)
 {
-    v.visit(*this);
-}
-
-RichMatrix44f* RichMatrix44f::clone() const
-{
-    return new RichMatrix44f(*this);
-}
-
-bool RichMatrix44f::operator==( const RichParameter& rb )
-{
-    return (rb.value().isMatrix44f() &&(pName == rb.name()) && (value().getMatrix44f() == rb.value().getMatrix44f()));
 }
 
 RichMatrix44f::~RichMatrix44f()
 {
-
 }
 
-RichPoint3f::RichPoint3f( const QString& nm,const vcg::Point3f& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, Point3fValue(defval),desc, tltip){}
-RichPoint3f::RichPoint3f( const QString& nm,const vcg::Point3d& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, Point3fValue(defval),desc, tltip){}
-
-RichPoint3f::RichPoint3f(const QString& nm, const vcg::Point3f& val, const vcg::Point3f& defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, Point3fValue(val), desc, tltip)
+void RichMatrix44f::accept( Visitor& v )
 {
-
+	v.visit(*this);
 }
 
-void RichPoint3f::accept( Visitor& v )
+RichMatrix44f* RichMatrix44f::clone() const
 {
-    v.visit(*this);
+	return new RichMatrix44f(*this);
 }
 
-RichPoint3f* RichPoint3f::clone() const
+bool RichMatrix44f::operator==( const RichParameter& rb )
 {
-    return new RichPoint3f(*this);
+	return (rb.value().isMatrix44f() &&(pName == rb.name()) && (value().getMatrix44f() == rb.value().getMatrix44f()));
 }
 
-bool RichPoint3f::operator==( const RichParameter& rb )
+/**** RichPoint3f Class ****/
+
+RichPoint3f::RichPoint3f(
+		const QString& nm,
+		const vcg::Point3f& defval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, Point3fValue(defval),desc, tltip)
 {
-    return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
+}
+
+RichPoint3f::RichPoint3f(
+		const QString& nm,
+		const vcg::Point3d& defval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, Point3fValue(defval),desc, tltip)
+{
 }
 
 RichPoint3f::~RichPoint3f()
 {
-
 }
-//----
-RichShotf::RichShotf( const QString& nm,const vcg::Shotf& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, ShotfValue(defval),desc, tltip)
-{}
 
-RichShotf::RichShotf(const QString& nm, const vcg::Shotf& val, const vcg::Shotf& defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, ShotfValue(val), desc, tltip)
-{}
+void RichPoint3f::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+RichPoint3f* RichPoint3f::clone() const
+{
+	return new RichPoint3f(*this);
+}
+
+bool RichPoint3f::operator==( const RichParameter& rb )
+{
+	return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
+}
+
+/**** RichShotf Class ****/
+
+RichShotf::RichShotf( const QString& nm,const vcg::Shotf& defval,const QString& desc,const QString& tltip ) :
+	RichParameter(nm, ShotfValue(defval),desc, tltip)
+{
+}
+
+RichShotf::~RichShotf()
+{
+}
 
 void RichShotf::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichShotf* RichShotf::clone() const
 {
-    return new RichShotf(*this);
+	return new RichShotf(*this);
 }
 
 bool RichShotf::operator==( const RichParameter& rb )
 {
-  return (rb.value().isShotf() &&(pName == rb.name()) ); // TODO REAL TEST OF EQUALITY // && (value().getShotf() == rb.value().getShotf()));
+	return (rb.value().isShotf() &&(pName == rb.name()) );
+	// TODO REAL TEST OF EQUALITY // && (value().getShotf() == rb.value().getShotf()));
 }
 
-RichShotf::~RichShotf()
-{ }
-//----
-RichColor::RichColor( const QString& nm,const QColor& defval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, ColorValue(defval),desc, tltip)
+/**** RichColor Class ****/
+
+RichColor::RichColor(
+		const QString& nm,
+		const QColor& defval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, ColorValue(defval),desc, tltip)
 {
-
 }
 
-RichColor::RichColor(const QString& nm, const QColor& val, const QColor& defval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, ColorValue(val), desc, tltip)
+RichColor::~RichColor()
 {
 }
 
 void RichColor::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichColor* RichColor::clone() const
 {
-    return new RichColor(*this);
+	return new RichColor(*this);
 }
 
 bool RichColor::operator==( const RichParameter& rb )
 {
-    return (rb.value().isColor() &&(pName == rb.name()) && (value().getColor() == rb.value().getColor()));
+	return (rb.value().isColor() &&(pName == rb.name()) && (value().getColor() == rb.value().getColor()));
 }
 
-RichColor::~RichColor()
+/**** RichAbsPerc Class ****/
+
+RichAbsPerc::RichAbsPerc(
+		const QString& nm,
+		const float defval,
+		const float minval,
+		const float maxval,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, AbsPercValue(defval), desc, tltip), min(minval), max(maxval)
 {
-
-}
-
-RichAbsPerc::RichAbsPerc( const QString& nm,const float defval,const float minval,const float maxval,const QString& desc,const QString& tltip) :
-    RichParameter(nm, AbsPercValue(defval), desc, tltip), min(minval), max(maxval)
-{
-
-}
-
-RichAbsPerc::RichAbsPerc(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, AbsPercValue(val), desc, tltip), min(minval), max(maxval)
-{
-
-}
-
-void RichAbsPerc::accept( Visitor& v )
-{
-    v.visit(*this);
-}
-
-RichAbsPerc* RichAbsPerc::clone() const
-{
-    return new RichAbsPerc(*this);
-}
-
-bool RichAbsPerc::operator==( const RichParameter& rb )
-{
-    return (rb.value().isAbsPerc() &&(pName == rb.name()) && (value().getAbsPerc() == rb.value().getAbsPerc()));
 }
 
 RichAbsPerc::~RichAbsPerc()
 {
-
 }
 
-RichEnum::RichEnum( const QString& nm,const int defval,const QStringList& values,const QString& desc,const QString& tltip) :
-    RichParameter(nm, EnumValue(defval),desc, tltip), enumvalues(values)
+void RichAbsPerc::accept( Visitor& v )
 {
+	v.visit(*this);
 }
 
-RichEnum::RichEnum(const QString& nm, const int val, const int defval, const QStringList& values, const QString& desc, const QString& tltip) :
-    RichParameter(nm, EnumValue(val), desc, tltip), enumvalues(values)
+RichAbsPerc* RichAbsPerc::clone() const
 {
-
+	return new RichAbsPerc(*this);
 }
 
-void RichEnum::accept( Visitor& v )
+bool RichAbsPerc::operator==( const RichParameter& rb )
 {
-    v.visit(*this);
+	return (rb.value().isAbsPerc() &&(pName == rb.name()) && (value().getAbsPerc() == rb.value().getAbsPerc()));
 }
 
-RichEnum* RichEnum::clone() const
-{
-    return new RichEnum(*this);
-}
+/**** RichEnum Class ****/
 
-bool RichEnum::operator==( const RichParameter& rb )
+RichEnum::RichEnum(
+		const QString& nm,
+		const int defval,
+		const QStringList& values,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, EnumValue(defval),desc, tltip), enumvalues(values)
 {
-    return (rb.value().isEnum() &&(pName == rb.name()) && (value().getEnum() == rb.value().getEnum()));
 }
 
 RichEnum::~RichEnum()
 {
-
 }
 
-RichMesh::RichMesh( const QString& nm,MeshModel* defval,MeshDocument* doc,const QString& desc,const QString& tltip )
-    :RichParameter(nm, MeshValue(defval), desc, tltip), meshdoc(doc)
+void RichEnum::accept( Visitor& v )
 {
-    meshindex = -1;
-    if (meshdoc != nullptr)
-        meshindex = meshdoc->meshList.indexOf(defval);
-    assert((meshindex != -1) || (meshdoc == nullptr));
+	v.visit(*this);
 }
 
-RichMesh::RichMesh( const QString& nm,int meshind,MeshDocument* doc,const QString& desc,const QString& tltip )
-    :RichParameter(nm,MeshValue(doc, meshind), desc, tltip), meshdoc(doc)
+RichEnum* RichEnum::clone() const
 {
-    assert(meshind < meshdoc->size() && meshind >= 0);
-    meshindex = meshind;
-    if (meshdoc != nullptr)
-        val = new MeshValue(meshdoc->meshList.at(meshindex));
-    else
-        val = nullptr;
+	return new RichEnum(*this);
 }
 
-RichMesh::RichMesh(const QString& nm, MeshModel* val, MeshModel* defval, MeshDocument* doc, const QString& desc, const QString& tltip)
-    : RichParameter(nm, MeshValue(val), desc, tltip), meshdoc(doc)
+bool RichEnum::operator==( const RichParameter& rb )
 {
-    meshindex = -1;
-    if (meshdoc != nullptr)
-        meshindex = doc->meshList.indexOf(val);
+	return (rb.value().isEnum() &&(pName == rb.name()) && (value().getEnum() == rb.value().getEnum()));
 }
 
-RichMesh::RichMesh(const QString& nm, int meshind, const QString& desc /*= QString()*/, const QString& tltip /*= QString()*/)
-	: RichParameter(nm, MeshValue(nullptr), desc, tltip)
+/**** RichMesh Class ****/
+
+RichMesh::RichMesh(
+		const QString& nm,
+		MeshModel* defval,
+		MeshDocument* doc,
+		const QString& desc,
+		const QString& tltip ):
+	RichParameter(nm, MeshValue(defval), desc, tltip), meshdoc(doc)
+{
+	meshindex = -1;
+	if (meshdoc != nullptr)
+		meshindex = meshdoc->meshList.indexOf(defval);
+	assert((meshindex != -1) || (meshdoc == nullptr));
+}
+
+RichMesh::RichMesh(
+		const QString& nm,
+		int meshind,
+		MeshDocument* doc,
+		const QString& desc,
+		const QString& tltip ):
+	RichParameter(nm,MeshValue(doc, meshind), desc, tltip), meshdoc(doc)
+{
+	assert(meshind < meshdoc->size() && meshind >= 0);
+	meshindex = meshind;
+	if (meshdoc != nullptr)
+		val = new MeshValue(meshdoc->meshList.at(meshindex));
+	else
+		val = nullptr;
+}
+
+RichMesh::RichMesh(const QString& nm, int meshind, const QString& desc, const QString& tltip):
+	RichParameter(nm, MeshValue(nullptr), desc, tltip)
 {
 	meshdoc = nullptr;
 	meshindex = meshind;
+}
+
+RichMesh::~RichMesh()
+{
 }
 
 void RichMesh::accept( Visitor& v )
@@ -418,308 +452,273 @@ bool RichMesh::operator==( const RichParameter& rb )
 	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMesh() == rb.value().getMesh()));
 }
 
-RichMesh::~RichMesh()
-{
+/**** RichDynamicFloat Class ****/
 
-}
-
-//RichFloatList::RichFloatList( const QString& nm,FloatListValue* v,FloatListDecoration* prdec ) :
-//	RichParameter(nm,v,prdec)
-//{
-
-//}
-
-//RichFloatList::RichFloatList(const QString& nm, FloatListValue* /*val*/, FloatListValue* v, FloatListDecoration* prdec) : RichParameter(nm, v, prdec)
-//{
-
-//}
-
-//void RichFloatList::accept( Visitor& v )
-//{
-//    v.visit(*this);
-//}
-
-//bool RichFloatList::operator==( const RichParameter& rb )
-//{
-//    return (rb.value().isFloatList() &&(name == rb.name) && (value().getFloatList() == rb.value().getFloatList()));
-//}
-
-//RichFloatList::~RichFloatList()
-//{
-
-//}
-
-RichDynamicFloat::RichDynamicFloat( const QString& nm,const float defval,const float minval,const float maxval,const QString& desc,const QString& tltip ) :
-    RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
+RichDynamicFloat::RichDynamicFloat(
+		const QString& nm,
+		const float defval,
+		const float minval,
+		const float maxval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
 {
 }
 
-RichDynamicFloat::RichDynamicFloat(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc, const QString& tltip) :
-    RichParameter(nm, DynamicFloatValue(val), desc, tltip), min(minval), max(maxval)
+RichDynamicFloat::~RichDynamicFloat()
 {
 }
 
 void RichDynamicFloat::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichDynamicFloat* RichDynamicFloat::clone() const
 {
-    return new RichDynamicFloat(*this);
+	return new RichDynamicFloat(*this);
 }
 
 bool RichDynamicFloat::operator==( const RichParameter& rb )
 {
-    return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
+	return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
 }
 
-RichDynamicFloat::~RichDynamicFloat()
+/**** RichOpenFile Class ****/
+
+RichOpenFile::RichOpenFile(
+		const QString& nm,
+		const QString& directorydefval,
+		const QStringList& exts,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, FileValue(directorydefval), desc, tltip), exts(exts)
 {
-
 }
 
-RichOpenFile::RichOpenFile(const QString& nm, const QString& directorydefval, const QStringList& exts, const QString& desc, const QString& tltip) :
-    RichParameter(nm, FileValue(directorydefval), desc, tltip), exts(exts)
+RichOpenFile::~RichOpenFile()
 {
 }
 
 void RichOpenFile::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichOpenFile* RichOpenFile::clone() const
 {
-    return new RichOpenFile(*this);
+	return new RichOpenFile(*this);
 }
 
 bool RichOpenFile::operator==( const RichParameter& rb )
 {
-    return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
+	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
-RichOpenFile::~RichOpenFile()
+/**** RichSaveFile Class ****/
+
+RichSaveFile::RichSaveFile(
+		const QString& nm,
+		const QString& filedefval,
+		const QString& ext,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, FileValue(filedefval), desc, tltip), ext(ext)
 {
-
 }
 
-RichSaveFile::RichSaveFile(const QString& nm, const QString& filedefval, const QString& ext, const QString& desc, const QString& tltip) :
-    RichParameter(nm, FileValue(filedefval), desc, tltip), ext(ext)
+RichSaveFile::~RichSaveFile()
 {
 }
 
 void RichSaveFile::accept( Visitor& v )
 {
-    v.visit(*this);
+	v.visit(*this);
 }
 
 RichSaveFile* RichSaveFile::clone() const
 {
-    return new RichSaveFile(*this);
+	return new RichSaveFile(*this);
 }
 
 bool RichSaveFile::operator==( const RichParameter& rb )
 {
-    return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
+	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
-RichSaveFile::~RichSaveFile()
-{
-
-}
+/**** RichParameterAdapter Class ****/
 
 bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 {
-    QString name=np.attribute("name");
-    QString type=np.attribute("type");
-    QString desc=np.attribute("description");
-    QString tooltip=np.attribute("tooltip");
+	QString name=np.attribute("name");
+	QString type=np.attribute("type");
+	QString desc=np.attribute("description");
+	QString tooltip=np.attribute("tooltip");
 
-    // qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(type));
+	// qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(type));
 
-    bool corrconv = false;
-    if(type=="RichBool")
-    {
-        QString val = np.attribute("value").toLower();
-        if ((val != QString("true")) && (val != QString("false")))
-            return false;
-        *par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip);
-        return true;
-    }
+	bool corrconv = false;
+	if(type=="RichBool") {
+		QString val = np.attribute("value").toLower();
+		if ((val != QString("true")) && (val != QString("false")))
+			return false;
+		*par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichInt")
-    {
-        int val = np.attribute("value").toInt(&corrconv);
-        if (!corrconv)
-            return false;
-        *par = new RichInt(name,val,desc,tooltip);
-        return true;
-    }
+	if(type=="RichInt") {
+		int val = np.attribute("value").toInt(&corrconv);
+		if (!corrconv)
+			return false;
+		*par = new RichInt(name,val,desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichFloat")
-    {
-        float val = np.attribute("value").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        *par = new RichFloat(name,val,desc,tooltip);
-        return true;
-    }
+	if(type=="RichFloat") {
+		float val = np.attribute("value").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		*par = new RichFloat(name,val,desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichString")
-    {
-        *par = new RichString(name,np.attribute("value"),desc,tooltip);
-        return true;
-    }
+	if(type=="RichString") {
+		*par = new RichString(name,np.attribute("value"),desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichAbsPerc")
-    {
-        float val = np.attribute("value").toFloat(&corrconv);
-        if ((!corrconv) && (val >= 0.0f) && (val <= 100.0f))
-            return false;
-        float min = np.attribute("min").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        float max = np.attribute("max").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        *par = new RichAbsPerc(name,val,min,max,desc,tooltip);
-        return true;
-    }
+	if(type=="RichAbsPerc") {
+		float val = np.attribute("value").toFloat(&corrconv);
+		if ((!corrconv) && (val >= 0.0f) && (val <= 100.0f))
+			return false;
+		float min = np.attribute("min").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		float max = np.attribute("max").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		*par = new RichAbsPerc(name,val,min,max,desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichColor")
-    {
-        unsigned int r = np.attribute("r").toUInt(&corrconv);
-    if ((!corrconv) && (r <= 255))
-            return false;
-        unsigned int g = np.attribute("g").toUInt(&corrconv);
-    if ((!corrconv) && (g <= 255))
-            return false;
-        unsigned int b = np.attribute("b").toUInt(&corrconv);
-    if ((!corrconv) && (b <= 255))
-            return false;
-        unsigned int a = np.attribute("a").toUInt(&corrconv);
-    if ((!corrconv) && (a <= 255))
-            return false;
-        QColor col(r,g,b,a);
-        *par= new RichColor(name,col,desc,tooltip);
-        return true;
-    }
+	if(type=="RichColor") {
+		unsigned int r = np.attribute("r").toUInt(&corrconv);
+		if ((!corrconv) && (r <= 255))
+			return false;
+		unsigned int g = np.attribute("g").toUInt(&corrconv);
+		if ((!corrconv) && (g <= 255))
+			return false;
+		unsigned int b = np.attribute("b").toUInt(&corrconv);
+		if ((!corrconv) && (b <= 255))
+			return false;
+		unsigned int a = np.attribute("a").toUInt(&corrconv);
+		if ((!corrconv) && (a <= 255))
+			return false;
+		QColor col(r,g,b,a);
+		*par= new RichColor(name,col,desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichMatrix44f")
-    {
-        vcg::Matrix44f mm;
-        for(int i=0;i<16;++i)
-        {
-            float val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
-            if (!corrconv)
-                return false;
-            mm.V()[i]=val;
-        }
-        *par = new RichMatrix44f(name,mm,desc,tooltip);
-        return true;
-    }
+	if(type=="RichMatrix44f") {
+		vcg::Matrix44f mm;
+		for(int i=0;i<16;++i)
+		{
+			float val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
+			if (!corrconv)
+				return false;
+			mm.V()[i]=val;
+		}
+		*par = new RichMatrix44f(name,mm,desc,tooltip);
+		return true;
+	}
 
-    if(type=="RichEnum")
-    {
-    QStringList list;
-        int enum_card = np.attribute(QString("enum_cardinality")).toUInt(&corrconv);
-        if (!corrconv)
-            return false;
+	if(type=="RichEnum") {
+		QStringList list;
+		int enum_card = np.attribute(QString("enum_cardinality")).toUInt(&corrconv);
+		if (!corrconv)
+			return false;
 
-        for(int i=0;i<enum_card;++i)
-            list<<np.attribute(QString("enum_val")+QString::number(i));
+		for(int i=0;i<enum_card;++i)
+			list<<np.attribute(QString("enum_val")+QString::number(i));
 
-        int val = np.attribute("value").toInt(&corrconv);
-        if ((!corrconv) && (val >=0) && (val < enum_card))
-            return false;
-        *par = new RichEnum(name,val,list,desc,tooltip);
-        return true;
-    }
+		int val = np.attribute("value").toInt(&corrconv);
+		if ((!corrconv) && (val >=0) && (val < enum_card))
+			return false;
+		*par = new RichEnum(name,val,list,desc,tooltip);
+		return true;
+	}
 
-    if(type == "RichMesh")
-    {
-        int val = np.attribute("value").toInt(&corrconv);
+	if(type == "RichMesh") {
+		int val = np.attribute("value").toInt(&corrconv);
 
-        if (!corrconv)
-            return false;
+		if (!corrconv)
+			return false;
 
-        *par = new RichMesh(name, val,desc,tooltip);
-        return true;
-    }
+		*par = new RichMesh(name, val,desc,tooltip);
+		return true;
+	}
 
-    if(type == "RichFloatList")
-    {
-        //to be implemented
-        assert(0);
-    }
+	if(type == "RichDynamicFloat") {
+		float min = np.attribute("min").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		float max = np.attribute("max").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
 
-    if(type == "RichDynamicFloat")
-    {
-        float min = np.attribute("min").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        float max = np.attribute("max").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
+		float val = np.attribute("value").toFloat(&corrconv);
+		if ((!corrconv) && (val >= min) && (val <= max))
+			return false;
 
-        float val = np.attribute("value").toFloat(&corrconv);
-        if ((!corrconv) && (val >= min) && (val <= max))
-            return false;
+		*par = new RichDynamicFloat(name, val, min, max, desc, tooltip);
+		return true;
+	}
 
-        *par = new RichDynamicFloat(name, val, min, max, desc, tooltip);
-        return true;
-    }
+	if(type == "RichOpenFile") {
+		QStringList list;
+		int exts_card = np.attribute(QString("exts_cardinality")).toUInt(&corrconv);
+		if (!corrconv)
+			return false;
 
-    if(type == "RichOpenFile")
-    {
-        QStringList list;
-        int exts_card = np.attribute(QString("exts_cardinality")).toUInt(&corrconv);
-        if (!corrconv)
-            return false;
+		for(int i=0;i<exts_card;++i)
+			list<<np.attribute(QString("exts_val")+QString::number(i));
 
-        for(int i=0;i<exts_card;++i)
-            list<<np.attribute(QString("exts_val")+QString::number(i));
+		QString defdir = np.attribute("value");
 
-        QString defdir = np.attribute("value");
+		*par = new RichOpenFile(name,defdir,list,desc,tooltip);
+		return true;
+	}
 
-        *par = new RichOpenFile(name,defdir,list,desc,tooltip);
-        return true;
-    }
+	if(type == "RichSaveFile") {
+		QString deffile = np.attribute("value");
+		QString ext = np.attribute("ext");
+		*par = new RichSaveFile(name,deffile,ext,desc,tooltip);
+		return true;
+	}
 
-    if(type == "RichSaveFile")
-    {
-        QString deffile = np.attribute("value");
-        QString ext = np.attribute("ext");
-        *par = new RichSaveFile(name,deffile,ext,desc,tooltip);
-        return true;
-    }
+	if(type=="RichPoint3f") {
+		vcg::Point3f val;
+		val[0]=np.attribute("x").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[1]=np.attribute("y").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[2]=np.attribute("z").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
 
-    if(type=="RichPoint3f")
-    {
-        vcg::Point3f val;
-        val[0]=np.attribute("x").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        val[1]=np.attribute("y").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
-        val[2]=np.attribute("z").toFloat(&corrconv);
-        if (!corrconv)
-            return false;
+		*par = new RichPoint3f(name, val,desc,tooltip);
+		return true;
+	}
+	if(type=="RichShotf") {
+		vcg::Shotf val;
+		assert(0); //TODO!!!!
+		*par = new RichShotf(name, val,desc,tooltip);
+		return true;
+	}
 
-        *par = new RichPoint3f(name, val,desc,tooltip);
-        return true;
-    }
-  if(type=="RichShotf")
-  {
-    vcg::Shotf val;
-    assert(0); //TODO!!!!
-    *par = new RichShotf(name, val,desc,tooltip);
-    return true;
-  }
-
-    return false;
+	return false;
 }
 
 QString RichParameterAdapter::convertToStringValue(RichParameter& rp)

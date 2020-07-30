@@ -35,6 +35,8 @@ class MeshDocument;
 class Value
 {
 public:
+	virtual ~Value() {}
+
 	virtual bool getBool() const { assert(0); return bool(); }
 	virtual int getInt() const { assert(0); return int(); }
 	virtual float getFloat() const { assert(0); return float(); }
@@ -68,19 +70,20 @@ public:
 	virtual QString typeName() const = 0;
 	virtual void set(const Value& p) = 0;
 	virtual Value* clone() const = 0;
-	virtual ~Value() {}
 };
 
 class BoolValue : public Value
 {
 public:
 	BoolValue(const bool val) : pval(val) {};
+	~BoolValue() {}
+
 	inline bool getBool() const { return pval; }
 	inline bool isBool() const { return true; }
 	inline QString typeName() const { return QString("Bool"); }
 	inline void	set(const Value& p) { pval = p.getBool(); }
 	BoolValue* clone() const {return new BoolValue(*this);}
-	~BoolValue() {}
+
 private:
 	bool pval;
 };
@@ -89,12 +92,14 @@ class IntValue : public Value
 {
 public:
 	IntValue(const int val) : pval(val) {}
+	~IntValue() {}
+
 	inline int	getInt() const { return pval; }
 	inline bool isInt() const { return true; }
 	inline QString typeName() const { return QString("Int"); }
 	inline void	set(const Value& p) { pval = p.getInt(); }
 	IntValue* clone() const {return new IntValue(*this);}
-	~IntValue() {}
+
 private:
 	int pval;
 };
@@ -103,12 +108,14 @@ class FloatValue : public Value
 {
 public:
 	FloatValue(const float val) :pval(val) {}
+	~FloatValue() {}
+
 	inline float	getFloat() const { return pval; }
 	inline bool isFloat() const { return true; }
 	inline QString typeName() const { return QString("Float"); }
 	inline void	set(const Value& p) { pval = p.getFloat(); }
 	FloatValue* clone() const {return new FloatValue(*this);}
-	~FloatValue() {}
+
 private:
 	float pval;
 };
@@ -117,12 +124,14 @@ class StringValue : public Value
 {
 public:
 	StringValue(const QString& val) :pval(val) {}
+	~StringValue() {}
+
 	inline QString getString() const { return pval; }
 	inline bool isString() const { return true; }
 	inline QString typeName() const { return QString("String"); }
 	inline void	set(const Value& p) { pval = p.getString(); }
 	StringValue* clone() const {return new StringValue(*this);}
-	~StringValue() {}
+
 private:
 	QString pval;
 };
@@ -132,12 +141,14 @@ class Matrix44fValue : public Value
 public:
 	Matrix44fValue(const vcg::Matrix44f& val) :pval(val) {}
 	Matrix44fValue(const vcg::Matrix44d& val) :pval(vcg::Matrix44f::Construct(val)) {}
+	~Matrix44fValue() {}
+
 	inline vcg::Matrix44f getMatrix44f() const { return pval; }
 	inline bool isMatrix44f() const { return true; }
 	inline QString typeName() const { return QString("Matrix44f"); }
 	inline void	set(const Value& p) { pval = p.getMatrix44f(); }
 	Matrix44fValue* clone() const {return new Matrix44fValue(*this);}
-	~Matrix44fValue() {}
+
 private:
 	vcg::Matrix44f pval;
 };
@@ -147,12 +158,14 @@ class Point3fValue : public Value
 public:
 	Point3fValue(const vcg::Point3f& val) : pval(val) {}
 	Point3fValue(const vcg::Point3d& val) : pval(vcg::Point3f::Construct(val)) {}
+	~Point3fValue() {}
+
 	inline vcg::Point3f getPoint3f() const { return pval; }
 	inline bool isPoint3f() const { return true; }
 	inline QString typeName() const { return QString("Point3f"); }
 	inline void	set(const Value& p) { pval = p.getPoint3f(); }
 	Point3fValue* clone() const {return new Point3fValue(*this);}
-	~Point3fValue() {}
+
 private:
 	vcg::Point3f pval;
 };
@@ -161,12 +174,14 @@ class ShotfValue : public Value
 {
 public:
 	ShotfValue(const vcg::Shotf& val) : pval(val) {}
+	~ShotfValue() {}
+
 	inline vcg::Shotf getShotf() const { return pval; }
 	inline bool isShotf() const { return true; }
 	inline QString typeName() const { return QString("Shotf"); }
 	inline void	 set(const Value& p) { pval = p.getShotf(); }
 	ShotfValue* clone() const {return new ShotfValue(*this);}
-	~ShotfValue() {}
+
 private:
 	vcg::Shotf pval;
 };
@@ -175,12 +190,14 @@ class ColorValue : public Value
 {
 public:
 	ColorValue(QColor val) :pval(val) {}
+	~ColorValue() {}
+
 	inline QColor getColor() const { return pval; }
 	inline bool isColor() const { return true; }
 	inline QString typeName() const { return QString("Color"); }
 	inline void	set(const Value& p) { pval = p.getColor(); }
 	ColorValue* clone() const {return new ColorValue(*this);}
-	~ColorValue() {}
+
 private:
 	QColor pval;
 };
@@ -189,59 +206,52 @@ class AbsPercValue : public FloatValue
 {
 public:
 	AbsPercValue(const float val) :FloatValue(val) {}
+	~AbsPercValue() {}
+
 	inline float getAbsPerc() const { return getFloat(); }
 	inline QString typeName() const { return QString("AbsPerc"); }
 	inline bool isAbsPerc() const { return true; }
 	AbsPercValue* clone() const {return new AbsPercValue(*this);}
-	~AbsPercValue() {}
+
 };
 
 class EnumValue : public IntValue
 {
 public:
 	EnumValue(const int val) :IntValue(val) {}
+	~EnumValue() {}
+
 	inline int getEnum() const { return getInt(); }
 	inline bool isEnum() const { return true; }
 	inline QString typeName() const { return QString("Enum"); }
 	EnumValue* clone() const {return new EnumValue(*this);}
-	~EnumValue() {}
 };
-
-//class FloatListValue : public Value
-//{
-//public:
-//	FloatListValue(const QList<float>& val) :pval(val) {}
-//	inline QList<float> getFloatList() const { return pval; }
-//	inline void	set(const Value& p) { pval = p.getFloatList(); }
-//	inline QString typeName() const { return QString("FloatList"); }
-//	inline bool isFloatList() const { return true; }
-//	FloatListValue* clone() const {return new FloatListValue(*this);}
-//	~FloatListValue() {}
-//private:
-//	QList<float> pval;
-//};
 
 class DynamicFloatValue : public FloatValue
 {
 public:
 	DynamicFloatValue(const float val) :FloatValue(val) {}
+	~DynamicFloatValue() {}
+
 	inline float getDynamicFloat() const { return getFloat(); }
 	inline bool isDynamicFloat() const { return true; }
 	inline QString typeName() const { return QString("DynamicFloat"); }
 	DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
-	~DynamicFloatValue() {}
+
 };
 
 class FileValue : public Value
 {
 public:
 	FileValue(const QString& filename) :pval(filename) {}
+	~FileValue() {}
+
 	inline QString getFileName() const { return pval; }
 	inline bool isFileName() const { return true; }
 	inline QString typeName() const { return QString("FileName"); }
 	inline void	set(const Value& p) { pval = p.getFileName(); }
 	FileValue* clone() const {return new FileValue(*this);}
-	~FileValue() {}
+
 private:
 	QString pval;
 };
@@ -251,12 +261,13 @@ class MeshValue : public Value
 public:
 	MeshValue(MeshModel* mesh) : pval(mesh) {}
 	MeshValue(MeshDocument* doc, int meshind);
+	~MeshValue() {}
+
 	inline MeshModel* getMesh() const { return pval; }
 	inline bool isMesh() const { return true; }
 	inline QString typeName() const { return QString("Mesh"); }
 	inline void	set(const Value& p) { pval = p.getMesh(); }
 	MeshValue* clone() const {return new MeshValue(*this);}
-	~MeshValue() {}
 
 private:
 	MeshModel* pval;
