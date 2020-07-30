@@ -54,6 +54,15 @@ Value& RichParameter::value()
 	return *val;
 }
 
+//QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc) const
+//{
+//	QDomElement parElem = doc.createElement("Param");
+//	parElem.setAttribute("name", pName);
+//	parElem.setAttribute("type", stringType());
+//	parElem.setAttribute("description", fieldDesc);
+//	parElem.setAttribute("tooltip",tooltip);
+//}
+
 RichParameter& RichParameter::operator=(const RichParameter& rp)
 {
 	if (&rp != this){
@@ -92,6 +101,11 @@ RichBool::~RichBool()
 {
 }
 
+QString RichBool::stringType() const
+{
+	return "RichBool";
+}
+
 void RichBool::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -120,6 +134,11 @@ RichInt::RichInt(
 
 RichInt::~RichInt()
 {
+}
+
+QString RichInt::stringType() const
+{
+	return "RichInt";
 }
 
 void RichInt::accept( Visitor& v )
@@ -152,6 +171,11 @@ RichFloat::~RichFloat()
 {
 }
 
+QString RichFloat::stringType() const
+{
+	return "RichFloat";
+}
+
 void RichFloat::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -180,6 +204,11 @@ RichString::RichString(
 
 RichString::~RichString()
 {
+}
+
+QString RichString::stringType() const
+{
+	return "RichString";
 }
 
 void RichString::accept( Visitor& v )
@@ -218,6 +247,11 @@ RichMatrix44f::RichMatrix44f(
 
 RichMatrix44f::~RichMatrix44f()
 {
+}
+
+QString RichMatrix44f::stringType() const
+{
+	return "RichMatrix44f";
 }
 
 void RichMatrix44f::accept( Visitor& v )
@@ -259,6 +293,11 @@ RichPoint3f::~RichPoint3f()
 {
 }
 
+QString RichPoint3f::stringType() const
+{
+	return "RichPoint3f";
+}
+
 void RichPoint3f::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -283,6 +322,11 @@ RichShotf::RichShotf( const QString& nm,const vcg::Shotf& defval,const QString& 
 
 RichShotf::~RichShotf()
 {
+}
+
+QString RichShotf::stringType() const
+{
+	return "RichShotf";
 }
 
 void RichShotf::accept( Visitor& v )
@@ -314,6 +358,11 @@ RichColor::RichColor(
 
 RichColor::~RichColor()
 {
+}
+
+QString RichColor::stringType() const
+{
+	return "RichColor";
 }
 
 void RichColor::accept( Visitor& v )
@@ -348,6 +397,11 @@ RichAbsPerc::~RichAbsPerc()
 {
 }
 
+QString RichAbsPerc::stringType() const
+{
+	return "RichAbsPerc";
+}
+
 void RichAbsPerc::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -377,6 +431,11 @@ RichEnum::RichEnum(
 
 RichEnum::~RichEnum()
 {
+}
+
+QString RichEnum::stringType() const
+{
+	return "RichEnum";
 }
 
 void RichEnum::accept( Visitor& v )
@@ -437,6 +496,11 @@ RichMesh::~RichMesh()
 {
 }
 
+QString RichMesh::stringType() const
+{
+	return "RichMesh";
+}
+
 void RichMesh::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -467,6 +531,11 @@ RichDynamicFloat::RichDynamicFloat(
 
 RichDynamicFloat::~RichDynamicFloat()
 {
+}
+
+QString RichDynamicFloat::stringType() const
+{
+	return "RichDynamicFloat";
 }
 
 void RichDynamicFloat::accept( Visitor& v )
@@ -500,6 +569,11 @@ RichOpenFile::~RichOpenFile()
 {
 }
 
+QString RichOpenFile::stringType() const
+{
+	return "RichOpenFile";
+}
+
 void RichOpenFile::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -529,6 +603,11 @@ RichSaveFile::RichSaveFile(
 
 RichSaveFile::~RichSaveFile()
 {
+}
+
+QString RichSaveFile::stringType() const
+{
+	return "RichSaveFile";
 }
 
 void RichSaveFile::accept( Visitor& v )
@@ -719,11 +798,4 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 	}
 
 	return false;
-}
-
-QString RichParameterAdapter::convertToStringValue(RichParameter& rp)
-{
-	RichParameterValueToStringVisitor v;
-	rp.accept(v);
-	return v.stringvalue;
 }
