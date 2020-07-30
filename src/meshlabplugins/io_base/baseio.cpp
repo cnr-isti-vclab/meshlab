@@ -136,7 +136,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		}
 
 		RichParameter* stlunif = parlst.findParameter(stlUnifyParName());
-		if ((stlunif != NULL) && (stlunif->val->getBool()))
+		if ((stlunif != NULL) && (stlunif->value().getBool()))
 		{
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
@@ -302,7 +302,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	string ex = formatName.toUtf8().data();
 	bool binaryFlag = false;
 	if (formatName.toUpper() == tr("STL") || formatName.toUpper() == tr("PLY"))
-		binaryFlag = par.findParameter("Binary")->val->getBool();
+		binaryFlag = par.findParameter("Binary")->value().getBool();
 
 	if (formatName.toUpper() == tr("PLY"))
 	{
@@ -314,19 +314,19 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		{
 			QString pname = par.paramList[parI]->name();
 			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					pi.AddPerVertexFloatAttribute(qUtf8Printable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
 			}
 			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					pi.AddPerFaceFloatAttribute(qUtf8Printable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
-				//if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				//if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					//pi.add(m, qUtf8Printable(pname.mid(5)));
 			}
 		}
@@ -379,7 +379,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 		int result;
 
-		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.findParameter("poligonalize")->val->getBool()))
+		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.findParameter("poligonalize")->value().getBool()))
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
@@ -539,7 +539,7 @@ void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParamete
 //void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
 //{
 //    if(format.toUpper() == tr("STL"))
-//		if (par.findParameter(stlUnifyParName())->val->getBool())
+//		if (par.findParameter(stlUnifyParName())->value().getBool())
 //		{
 //			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 //			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);

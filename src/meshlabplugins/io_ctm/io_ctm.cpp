@@ -51,8 +51,8 @@ bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, Me
 
 bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
-    bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
-    float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();
+    bool lossLessFlag = par.findParameter("LossLess")->value().getBool();
+    float relativePrecisionParam = par.findParameter("relativePrecisionParam")->value().getFloat();
     int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
     if(result!=0)
     {

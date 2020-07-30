@@ -142,7 +142,7 @@ AbsPercWidget::AbsPercWidget(QWidget *p, RichAbsPerc* rabs):MeshLabWidget(p,rabs
     //qDebug("log range is %f ",log10(fabs(m_max-m_min)));
     absSB->setDecimals(decimals);
     absSB->setSingleStep((m_max-m_min)/100.0);
-    float initVal = rp->val->getAbsPerc();
+    float initVal = rp->value().getAbsPerc();
     absSB->setValue(initVal);
 
     percSB->setMinimum(-200);
@@ -209,14 +209,14 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 
 void AbsPercWidget::collectWidgetValue()
 {
-    rp->val->set(AbsPercValue(float(absSB->value())));
+    rp->value().set(AbsPercValue(float(absSB->value())));
 }
 
 void AbsPercWidget::resetWidgetValue()
 {
     //const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
     RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(rp);
-    setValue(rp->val->getAbsPerc(),ap->min,ap->max);
+    setValue(rp->value().getAbsPerc(),ap->min,ap->max);
 }
 
 void AbsPercWidget::setWidgetValue( const Value& nv )
@@ -266,7 +266,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
         vlay->addWidget(coordSB[i]);
         connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
     }
-    this->setValue(paramName,rp->val->getPoint3f());
+    this->setValue(paramName,rp->value().getPoint3f());
     if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
     {
         getPoint3Button = new QPushButton("Get",this);
@@ -349,13 +349,13 @@ vcg::Point3f Point3fWidget::getValue()
 
 void Point3fWidget::collectWidgetValue()
 {
-    rp->val->set(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
+    rp->value().set(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
 }
 
 void Point3fWidget::resetWidgetValue()
 {
     for(unsigned int ii = 0; ii < 3;++ii)
-        coordSB[ii]->setText(QString::number(rp->val->getPoint3f()[ii],'g',3));
+        coordSB[ii]->setText(QString::number(rp->value().getPoint3f()[ii],'g',3));
 }
 
 void Point3fWidget::setWidgetValue( const Value& nv )
@@ -411,7 +411,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
         lay44->addWidget(coordSB[i],i/4,i%4);
         connect(coordSB[i], SIGNAL(textChanged(const QString&)), this, SLOT(invalidateMatrix(const QString&)));
     }
-    this->setValue(paramName,rp->val->getMatrix44f());
+    this->setValue(paramName,rp->value().getMatrix44f());
 
 	QLabel* headerL = new QLabel("Matrix:", this);
 	vlay->addWidget(headerL, 0, Qt::AlignTop);
@@ -501,10 +501,10 @@ void Matrix44fWidget::collectWidgetValue()
   {
     vcg::Matrix44f  tempM;
     for (unsigned int i = 0; i < 16; ++i) tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
-    rp->val->set(Matrix44fValue(tempM));
+    rp->value().set(Matrix44fValue(tempM));
   }
   else
-    rp->val->set(Matrix44fValue(m));
+    rp->value().set(Matrix44fValue(m));
 }
 
 void Matrix44fWidget::resetWidgetValue()
@@ -512,7 +512,7 @@ void Matrix44fWidget::resetWidgetValue()
   valid = false;
     vcg::Matrix44f  m; m.SetIdentity();
     for(unsigned int ii = 0; ii < 16;++ii)
-        coordSB[ii]->setText(QString::number(rp->val->getMatrix44f()[ii/4][ii%4],'g',3));
+        coordSB[ii]->setText(QString::number(rp->value().getMatrix44f()[ii/4][ii%4],'g',3));
 }
 
 void Matrix44fWidget::setWidgetValue( const Value& nv )
@@ -554,7 +554,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
     hlay = new QHBoxLayout();
 
 
-    this->setShotValue(paramName,rp->val->getShotf());
+    this->setShotValue(paramName,rp->value().getShotf());
     if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
     {
         getShotButton = new QPushButton("Get shot",this);
@@ -633,12 +633,12 @@ vcg::Shotf ShotfWidget::getValue()
 
 void ShotfWidget::collectWidgetValue()
 {
-    rp->val->set(ShotfValue(curShot));
+    rp->value().set(ShotfValue(curShot));
 }
 
 void ShotfWidget::resetWidgetValue()
 {
-    curShot = rp->val->getShotf();
+    curShot = rp->value().getShotf();
 }
 
 void ShotfWidget::setWidgetValue( const Value& nv )
@@ -708,7 +708,7 @@ EnumWidget::EnumWidget(QWidget *p, RichEnum* rpar)
     :ComboWidget(p,rpar)
 {
     //you MUST call it!!!!
-    Init(p,rpar->val->getEnum(),rpar->enumvalues);
+    Init(p,rpar->value().getEnum(),rpar->enumvalues);
     //assert(enumCombo != NULL);
 }
 
@@ -720,13 +720,13 @@ int EnumWidget::getSize()
 
 void EnumWidget::collectWidgetValue()
 {
-    rp->val->set(EnumValue(enumCombo->currentIndex()));
+    rp->value().set(EnumValue(enumCombo->currentIndex()));
 }
 
 void EnumWidget::resetWidgetValue()
 {
-    //lned->setText(QString::number(rp->val->getFloat(),'g',3));
-    enumCombo->setCurrentIndex(rp->val->getEnum());
+    //lned->setText(QString::number(rp->value().getFloat(),'g',3));
+    enumCombo->setCurrentIndex(rp->value().getEnum());
 }
 
 void EnumWidget::setWidgetValue( const Value& nv )
@@ -754,9 +754,9 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
     {
         QString shortName = md->meshList.at(i)->label();
         meshNames.push_back(shortName);
-        /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh())
+        /*  if(md->meshList.at(i) == rp->pd->defvalue().getMesh())
         defaultMeshIndex = i;*/
-        if(md->meshList.at(i) == rp->val->getMesh())
+        if(md->meshList.at(i) == rp->value().getMesh())
         {
             currentmeshindex = i;
             rpar->meshindex = currentmeshindex;
@@ -799,7 +799,7 @@ void MeshWidget::collectWidgetValue()
     //MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(rp->pd);
     RichMesh* rm = reinterpret_cast<RichMesh*>(rp);
     rm->meshindex = enumCombo->currentIndex();
-    rp->val->set(MeshValue(md->meshList.at(rm->meshindex)));
+    rp->value().set(MeshValue(md->meshList.at(rm->meshindex)));
 }
 
 void MeshWidget::resetWidgetValue()
@@ -807,7 +807,7 @@ void MeshWidget::resetWidgetValue()
     int meshindex = -1;
     for(int i=0;i<md->meshList.size();++i)
     {
-        if(md->meshList.at(i) == rp->val->getMesh())
+        if(md->meshList.at(i) == rp->value().getMesh())
         {
             meshindex = i;
             //RichMesh* rm = reinterpret_cast<RichMesh*>(rp);
@@ -1044,13 +1044,13 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
     fieldDesc = new QLabel(rp->fieldDesc,this);
     valueSlider->setMinimum(0);
     valueSlider->setMaximum(100);
-    valueSlider->setValue(floatToInt(rp->val->getFloat()));
+    valueSlider->setValue(floatToInt(rp->value().getFloat()));
     RichDynamicFloat* dfd = reinterpret_cast<RichDynamicFloat*>(rp);
     //const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
     QFontMetrics fm(valueLE->font());
     QSize sz = fm.size(Qt::TextSingleLine,QString::number(0));
     valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, numbdecimaldigit, valueLE));
-    valueLE->setText(QString::number(rp->val->getFloat()));
+    valueLE->setText(QString::number(rp->value().getFloat()));
     valueLE->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
 
     //int row = gridLay->rowCount() - 1;
@@ -1113,12 +1113,12 @@ int DynamicFloatWidget::floatToInt(float val)
 
 void DynamicFloatWidget::collectWidgetValue()
 {
-    rp->val->set(DynamicFloatValue(valueLE->text().toFloat()));
+    rp->value().set(DynamicFloatValue(valueLE->text().toFloat()));
 }
 
 void DynamicFloatWidget::resetWidgetValue()
 {
-    valueLE->setText(QString::number(rp->val->getFloat()));
+    valueLE->setText(QString::number(rp->value().getFloat()));
 }
 
 void DynamicFloatWidget::setWidgetValue( const Value& nv )
@@ -1139,13 +1139,13 @@ void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 Value& MeshLabWidget::getWidgetValue()
 {
     collectWidgetValue();
-    return *(rp->val);
+    return rp->value();
 }
 
 
 void MeshLabWidget::resetValue()
 {
-    rp->val->set(*rp->val);
+    rp->value().set(rp->value());
     resetWidgetValue();
 }
 
@@ -1202,19 +1202,19 @@ BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
 {
     cb = new QCheckBox(rp->fieldDesc,this);
     cb->setToolTip(rp->tooltip);
-    cb->setChecked(rp->val->getBool());
+    cb->setChecked(rp->value().getBool());
 
     connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 }
 
 void BoolWidget::collectWidgetValue()
 {
-    rp->val->set(BoolValue(cb->isChecked()));
+    rp->value().set(BoolValue(cb->isChecked()));
 }
 
 void BoolWidget::resetWidgetValue()
 {
-    cb->setChecked(rp->val->getBool());
+    cb->setChecked(rp->value().getBool());
 }
 
 BoolWidget::~BoolWidget()
@@ -1280,17 +1280,17 @@ void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
     :LineEditWidget(p,rpar)
 {
-    lned->setText(QString::number(rp->val->getInt()));
+    lned->setText(QString::number(rp->value().getInt()));
 }
 
 void IntWidget::collectWidgetValue()
 {
-    rp->val->set(IntValue(lned->text().toInt()));
+    rp->value().set(IntValue(lned->text().toInt()));
 }
 
 void IntWidget::resetWidgetValue()
 {
-    lned->setText(QString::number(rp->val->getInt()));
+    lned->setText(QString::number(rp->value().getInt()));
 }
 
 void IntWidget::setWidgetValue( const Value& nv )
@@ -1301,17 +1301,17 @@ void IntWidget::setWidgetValue( const Value& nv )
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
     :LineEditWidget(p,rpar)
 {
-    lned->setText(QString::number(rp->val->getFloat(),'g',3));
+    lned->setText(QString::number(rp->value().getFloat(),'g',3));
 }
 
 void FloatWidget::collectWidgetValue()
 {
-    rp->val->set(FloatValue(lned->text().toFloat()));
+    rp->value().set(FloatValue(lned->text().toFloat()));
 }
 
 void FloatWidget::resetWidgetValue()
 {
-    lned->setText(QString::number(rp->val->getFloat(),'g',3));
+    lned->setText(QString::number(rp->value().getFloat(),'g',3));
 }
 
 void FloatWidget::setWidgetValue( const Value& nv )
@@ -1322,17 +1322,17 @@ void FloatWidget::setWidgetValue( const Value& nv )
 StringWidget::StringWidget( QWidget* p,RichString* rpar )
     :LineEditWidget(p,rpar)
 {
-    lned->setText(rp->val->getString());
+    lned->setText(rp->value().getString());
 }
 
 void StringWidget::collectWidgetValue()
 {
-    rp->val->set(StringValue(lned->text()));
+    rp->value().set(StringValue(lned->text()));
 }
 
 void StringWidget::resetWidgetValue()
 {
-    lned->setText(rp->val->getString());
+    lned->setText(rp->value().getString());
 }
 
 void StringWidget::setWidgetValue( const Value& nv )
@@ -1355,7 +1355,7 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
     colorButton->setAutoFillBackground(true);
     colorButton->setFlat(true);
     colorButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    //const QColor cl = rp->pd->defVal->getColor();
+    //const QColor cl = rp->pd->defvalue().getColor();
     //resetWidgetValue();
     initWidgetValue();
     //int row = gridLay->rowCount() - 1;
@@ -1373,7 +1373,7 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 
 
     //gridLay->addLayout(lay,row,1,Qt::AlignTop);
-    pickcol = rp->val->getColor();
+    pickcol = rp->value().getColor();
     connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
     connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
@@ -1399,21 +1399,21 @@ void ColorWidget::pickColor()
 
 void ColorWidget::initWidgetValue()
 {
-    QColor cl = rp->val->getColor();
+    QColor cl = rp->value().getColor();
     pickcol = cl;
     updateColorInfo(cl);
 }
 
 void ColorWidget::resetWidgetValue()
 {
-    QColor cl = rp->val->getColor();
+    QColor cl = rp->value().getColor();
     pickcol = cl;
     updateColorInfo(cl);
 }
 
 void ColorWidget::collectWidgetValue()
 {
-    rp->val->set(ColorValue(pickcol));
+    rp->value().set(ColorValue(pickcol));
 }
 
 ColorWidget::~ColorWidget()
@@ -1447,7 +1447,7 @@ void GetFileNameWidget::launchGetFileNameDialog()
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichBool& pd )
 {
-    if (pd.val->getBool())
+    if (pd.value().getBool())
         lastCreated = new QTableWidgetItem("true"/*,lst*/);
     else
         lastCreated = new QTableWidgetItem("false"/*,lst*/);
@@ -1456,22 +1456,22 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichBool& pd )
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichInt& pd )
 {
-    lastCreated = new QTableWidgetItem(QString::number(pd.val->getInt())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.value().getInt())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichFloat& pd )
 {
-    lastCreated = new QTableWidgetItem(QString::number(pd.val->getFloat())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.value().getFloat())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichString& pd )
 {
-    lastCreated = new QTableWidgetItem(pd.val->getString()/*,lst*/);
+    lastCreated = new QTableWidgetItem(pd.value().getString()/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 {
-    vcg::Point3f pp = pd.val->getPoint3f();
+    vcg::Point3f pp = pd.value().getPoint3f();
     QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
     lastCreated = new QTableWidgetItem(pst/*,lst*/);
 }
@@ -1484,43 +1484,43 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& /*pd*/ )
 
 void RichParameterToQTableWidgetItemConstructor::visit(RichOpenFile& pd)
 {
-    lastCreated = new QTableWidgetItem(pd.val->getFileName()/*,lst*/);
+    lastCreated = new QTableWidgetItem(pd.value().getFileName()/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichColor& pd )
 {
     QPixmap pix(10,10);
-    pix.fill(pd.val->getColor());
+    pix.fill(pd.value().getColor());
     QIcon ic(pix);
     lastCreated = new QTableWidgetItem(ic,""/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichAbsPerc& pd )
 {
-    lastCreated = new QTableWidgetItem(QString::number(pd.val->getAbsPerc())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.value().getAbsPerc())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichEnum& pd )
 {
-    lastCreated = new QTableWidgetItem(QString::number(pd.val->getEnum())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.value().getEnum())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 {
-    lastCreated = new QTableWidgetItem(QString::number(pd.val->getDynamicFloat())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.value().getDynamicFloat())/*,lst*/);
 }
 
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
     :MeshLabWidget(p,rpar),fl()
 {
 	if (rpar != NULL)
-		fl = rpar->val->getFileName();
+		fl = rpar->value().getFileName();
 	filename = new QLineEdit(this);
     filename->setText(tr(""));
     browse = new QPushButton(this);
     descLab = new QLabel(rp->fieldDesc,this);
     browse->setText("...");
-    //const QColor cl = rp->pd->defVal->getColor();
+    //const QColor cl = rp->pd->defvalue().getColor();
     //resetWidgetValue();
     //int row = gridLay->rowCount() - 1;
     //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
@@ -1541,12 +1541,12 @@ IOFileWidget::~IOFileWidget()
 
 void IOFileWidget::collectWidgetValue()
 {
-    rp->val->set(FileValue(fl));
+    rp->value().set(FileValue(fl));
 }
 
 void IOFileWidget::resetWidgetValue()
 {
-    QString fle = rp->val->getFileName();
+    QString fle = rp->value().getFileName();
     fl = fle;
     updateFileName(fle);
 }
@@ -1584,11 +1584,11 @@ void OpenFileWidget::selectFile()
     //OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
     RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(rp);
     QString ext;
-    fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->val->getFileName(), dec->exts.join(" "));
+    fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getFileName(), dec->exts.join(" "));
     collectWidgetValue();
     updateFileName(fl);
 	FileValue fileName(fl);
-	rp->val->set(fileName);
+	rp->value().set(fileName);
     emit dialogParamChanged();
 }
 
@@ -1601,8 +1601,8 @@ OpenFileWidget::~OpenFileWidget()
 SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
     :IOFileWidget(p,rpar)
 {
-    filename->setText(rpar->val->getFileName());
-	QString tmp = rp->val->getFileName();
+	filename->setText(rpar->value().getFileName());
+	QString tmp = rp->value().getFileName();
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -1614,10 +1614,10 @@ void SaveFileWidget::selectFile()
     //SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
     RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(rp);
     QString ext;
-    fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->val->getFileName(),dec->ext);
+    fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getFileName(),dec->ext);
     collectWidgetValue();
     updateFileName(fl);
 	FileValue fileName(fl);
-	rp->val->set(fileName);
+	rp->value().set(fileName);
     emit dialogParamChanged();
 }

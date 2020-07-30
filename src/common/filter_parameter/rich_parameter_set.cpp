@@ -46,29 +46,29 @@ RichParameterSet& RichParameterSet::addParam(RichParameter* pd )
 //--------------------------------------
 
 
-void RichParameterSet::setValue(const QString& name,const Value& newval){ findParameter(name)->val->set(newval); }
+void RichParameterSet::setValue(const QString& name,const Value& newval){ findParameter(name)->value().set(newval); }
 
 //- All the get<TYPE> are very similar. Nothing interesting here.
 
-        bool RichParameterSet::getBool(const QString& name)     const { return findParameter(name)->val->getBool(); }
-         int RichParameterSet::getInt(const QString& name)      const { return findParameter(name)->val->getInt();}
-       float RichParameterSet::getFloat(const QString& name)    const { return findParameter(name)->val->getFloat();}
-      QColor RichParameterSet::getColor(const QString& name)    const { return findParameter(name)->val->getColor();}
-     Color4b RichParameterSet::getColor4b(const QString& name)  const { return ColorConverter::ToColor4b(findParameter(name)->val->getColor());}
-     QString RichParameterSet::getString(const QString& name)   const { return findParameter(name)->val->getString();}
-   Matrix44f RichParameterSet::getMatrix44(const QString& name) const { return findParameter(name)->val->getMatrix44f();}
-   Matrix44<MESHLAB_SCALAR> RichParameterSet::getMatrix44m(const QString& name) const { return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getMatrix44f());}
-     Point3f RichParameterSet::getPoint3f(const QString& name)  const { return findParameter(name)->val->getPoint3f();}
-     Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(const QString& name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getPoint3f());}
-       Shotf RichParameterSet::getShotf(const QString& name)    const { return findParameter(name)->val->getShotf();}
-       Shot<MESHLAB_SCALAR> RichParameterSet::getShotm(const QString& name)    const { return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getShotf());}
-       float RichParameterSet::getAbsPerc(const QString& name)  const { return findParameter(name)->val->getAbsPerc();}
-         int RichParameterSet::getEnum(const QString& name)     const { return findParameter(name)->val->getEnum();}
-QList<float> RichParameterSet::getFloatList(const QString& name)    const { return findParameter(name)->val->getFloatList();}
- MeshModel * RichParameterSet::getMesh(const QString& name)         const { return findParameter(name)->val->getMesh();}
-       float RichParameterSet::getDynamicFloat(const QString& name) const { return findParameter(name)->val->getDynamicFloat();}
-     QString RichParameterSet::getOpenFileName(const QString& name) const { return findParameter(name)->val->getFileName();}
-     QString RichParameterSet::getSaveFileName(const QString& name) const { return findParameter(name)->val->getFileName(); }
+        bool RichParameterSet::getBool(const QString& name)     const { return findParameter(name)->value().getBool(); }
+         int RichParameterSet::getInt(const QString& name)      const { return findParameter(name)->value().getInt();}
+       float RichParameterSet::getFloat(const QString& name)    const { return findParameter(name)->value().getFloat();}
+      QColor RichParameterSet::getColor(const QString& name)    const { return findParameter(name)->value().getColor();}
+     Color4b RichParameterSet::getColor4b(const QString& name)  const { return ColorConverter::ToColor4b(findParameter(name)->value().getColor());}
+     QString RichParameterSet::getString(const QString& name)   const { return findParameter(name)->value().getString();}
+   Matrix44f RichParameterSet::getMatrix44(const QString& name) const { return findParameter(name)->value().getMatrix44f();}
+   Matrix44<MESHLAB_SCALAR> RichParameterSet::getMatrix44m(const QString& name) const { return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getMatrix44f());}
+     Point3f RichParameterSet::getPoint3f(const QString& name)  const { return findParameter(name)->value().getPoint3f();}
+     Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(const QString& name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getPoint3f());}
+       Shotf RichParameterSet::getShotf(const QString& name)    const { return findParameter(name)->value().getShotf();}
+       Shot<MESHLAB_SCALAR> RichParameterSet::getShotm(const QString& name)    const { return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getShotf());}
+       float RichParameterSet::getAbsPerc(const QString& name)  const { return findParameter(name)->value().getAbsPerc();}
+         int RichParameterSet::getEnum(const QString& name)     const { return findParameter(name)->value().getEnum();}
+QList<float> RichParameterSet::getFloatList(const QString& name)    const { return findParameter(name)->value().getFloatList();}
+ MeshModel * RichParameterSet::getMesh(const QString& name)         const { return findParameter(name)->value().getMesh();}
+       float RichParameterSet::getDynamicFloat(const QString& name) const { return findParameter(name)->value().getDynamicFloat();}
+     QString RichParameterSet::getOpenFileName(const QString& name) const { return findParameter(name)->value().getFileName();}
+     QString RichParameterSet::getSaveFileName(const QString& name) const { return findParameter(name)->value().getFileName(); }
 
 RichParameterSet& RichParameterSet::operator=( const RichParameterSet& rps )
 {

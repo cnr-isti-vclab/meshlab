@@ -228,7 +228,7 @@ void FilterScriptDialog::editOldParameters( const int row )
         for(int i = 0; i < newParameterSet.paramList.size(); i++)
         {
             oldParameterSet.paramList[i]->accept(cc);
-            newParameterSet.paramList[i]->val = cc.lastCreated->val;
+            newParameterSet.paramList[i]->value() = cc.lastCreated->value();
         }	
     } else
         qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";

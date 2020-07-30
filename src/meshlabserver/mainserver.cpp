@@ -120,7 +120,7 @@ public:
                     foreach(RichParameter* pp, FPM[filterAction->text()].paramList)
                     {
                         fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
-                            qUtf8Printable(pp->val->typeName()), qUtf8Printable(pp->fieldDesc), qUtf8Printable(pp->tooltip));
+                            qUtf8Printable(pp->value().typeName()), qUtf8Printable(pp->fieldDesc), qUtf8Printable(pp->tooltip));
                     }
                     fprintf(fp,"</TABLE>\n");
                 }
@@ -618,7 +618,7 @@ public:
                 assert(parameterSet.paramList.size() == required.paramList.size());
                 RichParameter* parameter = parameterSet.paramList[i];
                 //if this is a mesh parameter and the index is valid
-                if(parameter->val->isMesh())
+                if(parameter->value().isMesh())
                 {
                     RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
                     if(	md->meshindex < meshDocument.size() &&

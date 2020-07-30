@@ -158,30 +158,30 @@ void SettingDialog::save()
 	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name()), qUtf8Printable(docstring));
 	QSettings setting;
 	setting.setValue(tmppar->name(),QVariant(docstring));
-	curPar->val->set(*tmppar->val);
+	curPar->value().set(tmppar->value());
 }
 
 void SettingDialog::apply()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
 	frame.stdfieldwidgets.at(0)->collectWidgetValue();
-	curPar->val->set(*tmppar->val);
+	curPar->value().set(tmppar->value());
 	emit applySettingSignal();
 }
 
 void SettingDialog::reset()
 {
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
-	tmppar->val->set(*defPar->val);
+	tmppar->value().set(defPar->value());
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(*tmppar->val);
+	frame.stdfieldwidgets.at(0)->setWidgetValue(tmppar->value());
 	apply();
 }
 
 void SettingDialog::load()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(*(curPar->val));
+	frame.stdfieldwidgets.at(0)->setWidgetValue(curPar->value());
 }
 
 SettingDialog::~SettingDialog()

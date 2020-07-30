@@ -99,7 +99,7 @@ void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,con
 void RichParameterXMLVisitor::visit( RichBool& pd )
 {
     QString v;
-    if (pd.val->getBool())
+    if (pd.value().getBool())
         v = "true";
     else
         v = "false";
@@ -108,23 +108,23 @@ void RichParameterXMLVisitor::visit( RichBool& pd )
 
 void RichParameterXMLVisitor::visit( RichInt& pd )
 {
-    fillRichParameterAttribute("RichInt",pd.name(),QString::number(pd.val->getInt()),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichInt",pd.name(),QString::number(pd.value().getInt()),pd.fieldDesc,pd.tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichFloat& pd )
 {
-    fillRichParameterAttribute("RichFloat",pd.name(),QString::number(pd.val->getFloat()),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichFloat",pd.name(),QString::number(pd.value().getFloat()),pd.fieldDesc,pd.tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichString& pd )
 {
-    fillRichParameterAttribute("RichString",pd.name(),pd.val->getString(),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichString",pd.name(),pd.value().getString(),pd.fieldDesc,pd.tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichMatrix44f& pd )
 {
     fillRichParameterAttribute("RichMatrix44f",pd.name(),pd.fieldDesc,pd.tooltip);
-    vcg::Matrix44f mat = pd.val->getMatrix44f();
+    vcg::Matrix44f mat = pd.value().getMatrix44f();
     for(unsigned int ii = 0;ii < 16;++ii)
         parElem.setAttribute(QString("val")+QString::number(ii),QString::number(mat.V()[ii]));
 }
@@ -132,7 +132,7 @@ void RichParameterXMLVisitor::visit( RichMatrix44f& pd )
 void RichParameterXMLVisitor::visit( RichPoint3f& pd )
 {
     fillRichParameterAttribute("RichPoint3f",pd.name(),pd.fieldDesc,pd.tooltip);
-    vcg::Point3f p = pd.val->getPoint3f();
+    vcg::Point3f p = pd.value().getPoint3f();
     parElem.setAttribute("x",QString::number(p.X()));
     parElem.setAttribute("y",QString::number(p.Y()));
     parElem.setAttribute("z",QString::number(p.Z()));
@@ -148,7 +148,7 @@ void RichParameterXMLVisitor::visit( RichShotf& pd )
 void RichParameterXMLVisitor::visit( RichColor& pd )
 {
     fillRichParameterAttribute("RichColor",pd.name(),pd.fieldDesc,pd.tooltip);
-    QColor p = pd.val->getColor();
+    QColor p = pd.value().getColor();
     parElem.setAttribute("r",QString::number(p.red()));
     parElem.setAttribute("g",QString::number(p.green()));
     parElem.setAttribute("b",QString::number(p.blue()));
@@ -157,14 +157,14 @@ void RichParameterXMLVisitor::visit( RichColor& pd )
 
 void RichParameterXMLVisitor::visit( RichAbsPerc& pd )
 {
-    fillRichParameterAttribute("RichAbsPerc",pd.name(),QString::number(pd.val->getAbsPerc()),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichAbsPerc",pd.name(),QString::number(pd.value().getAbsPerc()),pd.fieldDesc,pd.tooltip);
     parElem.setAttribute("min",QString::number(pd.min));
     parElem.setAttribute("max",QString::number(pd.max));
 }
 
 void RichParameterXMLVisitor::visit( RichEnum& pd )
 {
-    fillRichParameterAttribute("RichEnum",pd.name(),QString::number(pd.val->getEnum()),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichEnum",pd.name(),QString::number(pd.value().getEnum()),pd.fieldDesc,pd.tooltip);
     parElem.setAttribute("enum_cardinality",pd.enumvalues.size());
     for(int ii = 0; ii < pd.enumvalues.size();++ii)
         parElem.setAttribute(QString("enum_val")+QString::number(ii),pd.enumvalues.at(ii));
@@ -178,14 +178,14 @@ void RichParameterXMLVisitor::visit( RichEnum& pd )
 
 void RichParameterXMLVisitor::visit(RichDynamicFloat& pd)
 {
-    fillRichParameterAttribute("RichDynamicFloat",pd.name(),QString::number(pd.val->getDynamicFloat()),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichDynamicFloat",pd.name(),QString::number(pd.value().getDynamicFloat()),pd.fieldDesc,pd.tooltip);
     parElem.setAttribute("min",QString::number(pd.min));
     parElem.setAttribute("max",QString::number(pd.max));
 }
 
 void RichParameterXMLVisitor::visit( RichOpenFile& pd )
 {
-    fillRichParameterAttribute("RichOpenFile",pd.name(),pd.val->getFileName(),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichOpenFile",pd.name(),pd.value().getFileName(),pd.fieldDesc,pd.tooltip);
     parElem.setAttribute("exts_cardinality",pd.exts.size());
     for(int ii = 0; ii < pd.exts.size();++ii)
         parElem.setAttribute(QString("ext_val")+QString::number(ii),pd.exts[ii]);
@@ -193,7 +193,7 @@ void RichParameterXMLVisitor::visit( RichOpenFile& pd )
 
 void RichParameterXMLVisitor::visit( RichSaveFile& pd )
 {
-    fillRichParameterAttribute("RichSaveFile",pd.name(),pd.val->getFileName(),pd.fieldDesc,pd.tooltip);
+    fillRichParameterAttribute("RichSaveFile",pd.name(),pd.value().getFileName(),pd.fieldDesc,pd.tooltip);
     parElem.setAttribute("ext",pd.ext);
 }
 
@@ -205,10 +205,10 @@ void RichParameterXMLVisitor::visit( RichMesh& pd )
 
 void RichParameterValueToStringVisitor::visit( RichBool& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
-    if (pd.val->getBool())
+    if (pd.value().getBool())
         stringvalue = "true";
     else
         stringvalue = "false";
@@ -216,35 +216,35 @@ void RichParameterValueToStringVisitor::visit( RichBool& pd )
 
 void RichParameterValueToStringVisitor::visit( RichInt& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
-    stringvalue = QString::number(pd.val->getInt());
+    stringvalue = QString::number(pd.value().getInt());
 }
 
 void RichParameterValueToStringVisitor::visit( RichFloat& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
-    stringvalue = QString::number(pd.val->getFloat());
+    stringvalue = QString::number(pd.value().getFloat());
 }
 
 void RichParameterValueToStringVisitor::visit( RichString& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
-    stringvalue = "\"" + pd.val->getString()+"\"";
+    stringvalue = "\"" + pd.value().getString()+"\"";
 }
 
 void RichParameterValueToStringVisitor::visit( RichMatrix44f& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
     QString tmp("[");
-    vcg::Matrix44f mat = pd.val->getMatrix44f();
+    vcg::Matrix44f mat = pd.value().getMatrix44f();
     for(int ii = 0;ii < 4;++ii)
     {
         for(int jj = 0;jj < 4;++jj)
@@ -256,11 +256,11 @@ void RichParameterValueToStringVisitor::visit( RichMatrix44f& pd )
 
 void RichParameterValueToStringVisitor::visit( RichPoint3f& pd )
 {
-    if (pd.val == NULL)
-        return;
+    //if (pd.val == NULL)
+    //    return;
     stringvalue.clear();
     QString tmp("[");
-    vcg::Point3f mat = pd.val->getPoint3f();
+    vcg::Point3f mat = pd.value().getPoint3f();
     for(int ii = 0;ii < 3;++ii)
     {
         tmp = tmp + QString::number(mat[ii]) + ",";
@@ -276,29 +276,29 @@ void RichParameterValueToStringVisitor::visit( RichShotf& /*pd*/ )
 
 void RichParameterValueToStringVisitor::visit( RichColor& pd )
 {
-    if (pd.val == NULL)
-        return;
+//    if (pd.val == NULL)
+//        return;
     stringvalue.clear();
     QString tmp("[");
-    QColor mat = pd.val->getColor();
+    QColor mat = pd.value().getColor();
     tmp = tmp + QString::number(mat.red()) + "," + QString::number(mat.green()) + "," + QString::number(mat.blue()) + "," + QString::number(mat.alpha()) + "]";
     stringvalue = tmp;
 }
 
 void RichParameterValueToStringVisitor::visit( RichAbsPerc& pd )
 {
-    if (pd.val == NULL)
-        return;
+//    if (pd.val == NULL)
+//        return;
     stringvalue.clear();
-    stringvalue = QString::number(pd.val->getAbsPerc());
+    stringvalue = QString::number(pd.value().getAbsPerc());
 }
 
 void RichParameterValueToStringVisitor::visit( RichEnum& pd )
 {
-    if (pd.val == NULL)
-        return;
+//    if (pd.val == NULL)
+//        return;
     stringvalue.clear();
-    stringvalue = QString::number(pd.val->getEnum());
+    stringvalue = QString::number(pd.value().getEnum());
 }
 
 //void RichParameterValueToStringVisitor::visit( RichFloatList& /*pd*/ )
@@ -308,10 +308,10 @@ void RichParameterValueToStringVisitor::visit( RichEnum& pd )
 
 void RichParameterValueToStringVisitor::visit( RichDynamicFloat& pd )
 {
-    if (pd.val == NULL)
-        return;
+//    if (pd.val == NULL)
+//        return;
     stringvalue.clear();
-    stringvalue = QString::number(pd.val->getDynamicFloat());
+    stringvalue = QString::number(pd.value().getDynamicFloat());
 }
 
 void RichParameterValueToStringVisitor::visit( RichOpenFile& /*pd*/ )

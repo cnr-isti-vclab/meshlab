@@ -1243,7 +1243,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
             for(int jj = 0;jj < tmpSet.paramList.size();++jj)
             {
                 RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name());
-                tmpSet.setValue(tmpSet.paramList[jj]->name(),*(par->val));
+                tmpSet.setValue(tmpSet.paramList[jj]->name(),par->value());
             }
 
             dialoglayout = new QGridLayout();
@@ -1305,7 +1305,7 @@ void DecoratorParamsTreeWidget::save()
         setting.setValue(p->name(),QVariant(docstring));
         RichParameterSet& currSet = mainWin->currentGlobalPars();
         RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name());
-        par->val->set(*(tmpSet.paramList[ii]->val));
+        par->value().set(tmpSet.paramList[ii]->value());
     }
 }
 
@@ -1322,7 +1322,7 @@ void DecoratorParamsTreeWidget::apply()
     {
         frame->stdfieldwidgets[ii]->collectWidgetValue();
         RichParameter* r = frame->stdfieldwidgets[ii]->rp;
-        current.setValue(r->name(),*(r->val));
+        current.setValue(r->name(),r->value());
     }
     mainWin->updateCustomSettings();
 	if (mainWin->GLA())
@@ -1334,8 +1334,8 @@ void DecoratorParamsTreeWidget::load()
     for(int ii = 0;ii < tmpSet.paramList.size();++ii)
     {
         const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name()));
-        tmpSet.paramList[ii]->val->set(*(defPar.val));
-        frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
+        tmpSet.paramList[ii]->value().set(defPar.value());
+        frame->stdfieldwidgets.at(ii)->setWidgetValue(tmpSet.paramList[ii]->value());
     }
     apply();
 }

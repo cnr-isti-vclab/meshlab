@@ -2,7 +2,7 @@
 #include "meshmodel.h"
 
 RichParameter::RichParameter(const RichParameter& rp) :
-    pName(rp.pName), val(rp.val->clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
+    pName(rp.pName), val(rp.value().clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
 {
 }
 
@@ -28,11 +28,16 @@ const Value& RichParameter::value() const
     return *val;
 }
 
+Value& RichParameter::value()
+{
+    return *val;
+}
+
 RichParameter& RichParameter::operator=(const RichParameter& rp)
 {
     if (&rp != this){
         delete val;
-        val = rp.val->clone();
+        val = rp.value().clone();
         pName = rp.pName;
         fieldDesc = rp.fieldDesc;
         tooltip = rp.tooltip;
@@ -48,6 +53,7 @@ RichParameter& RichParameter::operator=(RichParameter&& rp)
     pName = std::move(rp.pName);
     fieldDesc = std::move(rp.fieldDesc);
     tooltip = std::move(rp.tooltip);
+    return *this;
 }
 
 RichParameter::~RichParameter()
@@ -78,7 +84,7 @@ RichBool* RichBool::clone() const
 
 bool RichBool::operator==( const RichParameter& rb )
 {
-    return (rb.val->isBool() && (pName == rb.name()) && (val->getBool() == rb.val->getBool()));
+    return (rb.value().isBool() && (pName == rb.name()) && (value().getBool() == rb.value().getBool()));
 }
 
 RichBool::~RichBool()
@@ -107,7 +113,7 @@ RichInt* RichInt::clone() const
 
 bool RichInt::operator==( const RichParameter& rb )
 {
-    return (rb.val->isInt() &&(pName == rb.name()) && (val->getInt() == rb.val->getInt()));
+    return (rb.value().isInt() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
 }
 
 RichInt::~RichInt()
@@ -136,7 +142,7 @@ RichFloat* RichFloat::clone() const
 
 bool RichFloat::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFloat() &&(pName == rb.name()) && (val->getFloat() == rb.val->getFloat()));
+    return (rb.value().isFloat() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }
 
 RichFloat::~RichFloat()
@@ -165,7 +171,7 @@ RichString* RichString::clone() const
 
 bool RichString::operator==( const RichParameter& rb )
 {
-    return (rb.val->isString() &&(pName == rb.name()) && (val->getString() == rb.val->getString()));
+    return (rb.value().isString() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
 }
 
 RichString::~RichString()
@@ -193,7 +199,7 @@ RichMatrix44f* RichMatrix44f::clone() const
 
 bool RichMatrix44f::operator==( const RichParameter& rb )
 {
-    return (rb.val->isMatrix44f() &&(pName == rb.name()) && (val->getMatrix44f() == rb.val->getMatrix44f()));
+    return (rb.value().isMatrix44f() &&(pName == rb.name()) && (value().getMatrix44f() == rb.value().getMatrix44f()));
 }
 
 RichMatrix44f::~RichMatrix44f()
@@ -224,7 +230,7 @@ RichPoint3f* RichPoint3f::clone() const
 
 bool RichPoint3f::operator==( const RichParameter& rb )
 {
-    return (rb.val->isPoint3f() &&(pName == rb.name()) && (val->getPoint3f() == rb.val->getPoint3f()));
+    return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
 }
 
 RichPoint3f::~RichPoint3f()
@@ -252,7 +258,7 @@ RichShotf* RichShotf::clone() const
 
 bool RichShotf::operator==( const RichParameter& rb )
 {
-  return (rb.val->isShotf() &&(pName == rb.name()) ); // TODO REAL TEST OF EQUALITY // && (val->getShotf() == rb.val->getShotf()));
+  return (rb.value().isShotf() &&(pName == rb.name()) ); // TODO REAL TEST OF EQUALITY // && (value().getShotf() == rb.value().getShotf()));
 }
 
 RichShotf::~RichShotf()
@@ -281,7 +287,7 @@ RichColor* RichColor::clone() const
 
 bool RichColor::operator==( const RichParameter& rb )
 {
-    return (rb.val->isColor() &&(pName == rb.name()) && (val->getColor() == rb.val->getColor()));
+    return (rb.value().isColor() &&(pName == rb.name()) && (value().getColor() == rb.value().getColor()));
 }
 
 RichColor::~RichColor()
@@ -313,7 +319,7 @@ RichAbsPerc* RichAbsPerc::clone() const
 
 bool RichAbsPerc::operator==( const RichParameter& rb )
 {
-    return (rb.val->isAbsPerc() &&(pName == rb.name()) && (val->getAbsPerc() == rb.val->getAbsPerc()));
+    return (rb.value().isAbsPerc() &&(pName == rb.name()) && (value().getAbsPerc() == rb.value().getAbsPerc()));
 }
 
 RichAbsPerc::~RichAbsPerc()
@@ -344,7 +350,7 @@ RichEnum* RichEnum::clone() const
 
 bool RichEnum::operator==( const RichParameter& rb )
 {
-    return (rb.val->isEnum() &&(pName == rb.name()) && (val->getEnum() == rb.val->getEnum()));
+    return (rb.value().isEnum() &&(pName == rb.name()) && (value().getEnum() == rb.value().getEnum()));
 }
 
 RichEnum::~RichEnum()
@@ -399,7 +405,7 @@ RichMesh* RichMesh::clone() const
 
 bool RichMesh::operator==( const RichParameter& rb )
 {
-	return (rb.val->isMesh() &&(pName == rb.name()) && (val->getMesh() == rb.val->getMesh()));
+	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMesh() == rb.value().getMesh()));
 }
 
 RichMesh::~RichMesh()
@@ -425,7 +431,7 @@ RichMesh::~RichMesh()
 
 //bool RichFloatList::operator==( const RichParameter& rb )
 //{
-//    return (rb.val->isFloatList() &&(name == rb.name) && (val->getFloatList() == rb.val->getFloatList()));
+//    return (rb.value().isFloatList() &&(name == rb.name) && (value().getFloatList() == rb.value().getFloatList()));
 //}
 
 //RichFloatList::~RichFloatList()
@@ -455,7 +461,7 @@ RichDynamicFloat* RichDynamicFloat::clone() const
 
 bool RichDynamicFloat::operator==( const RichParameter& rb )
 {
-    return (rb.val->isDynamicFloat() &&(pName == rb.name()) && (val->getDynamicFloat() == rb.val->getDynamicFloat()));
+    return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
 }
 
 RichDynamicFloat::~RichDynamicFloat()
@@ -480,7 +486,7 @@ RichOpenFile* RichOpenFile::clone() const
 
 bool RichOpenFile::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFileName() &&(pName == rb.name()) && (val->getFileName() == rb.val->getFileName()));
+    return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
 RichOpenFile::~RichOpenFile()
@@ -505,7 +511,7 @@ RichSaveFile* RichSaveFile::clone() const
 
 bool RichSaveFile::operator==( const RichParameter& rb )
 {
-    return (rb.val->isFileName() &&(pName == rb.name()) && (val->getFileName() == rb.val->getFileName()));
+    return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
 RichSaveFile::~RichSaveFile()

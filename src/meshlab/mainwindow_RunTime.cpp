@@ -796,7 +796,7 @@ void MainWindow::runFilterScript()
             RichParameter* parameter = parameterSet.paramList[i];
 
             //if this is a mesh paramter and the index is valid
-            if(parameter->val->isMesh())
+            if(parameter->value().isMesh())
             {
                 RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
                 if( md->meshindex < meshDoc()->size() &&
@@ -1265,9 +1265,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             {
                 for(int ii = 0;ii < mergedenvironment.paramList.size();++ii)
                 {
-                    if (mergedenvironment.paramList[ii]->val->isMesh())
+                    if (mergedenvironment.paramList[ii]->value().isMesh())
                     {
-                        MeshModel* mm = mergedenvironment.paramList[ii]->val->getMesh();
+                        MeshModel* mm = mergedenvironment.paramList[ii]->value().getMesh();
                         if (mm != NULL)
                             tmp.push_back(mm);
                     }
