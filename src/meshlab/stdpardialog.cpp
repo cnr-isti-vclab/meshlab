@@ -128,8 +128,8 @@ AbsPercWidget::AbsPercWidget(QWidget *p, RichAbsPerc* rabs):MeshLabWidget(p,rabs
     m_min = rabs->min;
     m_max = rabs->max;
 
-    fieldDesc = new QLabel(rp->fieldDesc + " (abs and %)",this);
-    fieldDesc->setToolTip(rp->tooltip);
+    fieldDesc = new QLabel(rp->fieldDescription() + " (abs and %)",this);
+    fieldDesc->setToolTip(rp->toolTip());
     absSB = new QDoubleSpinBox(this);
     percSB = new QDoubleSpinBox(this);
 
@@ -246,8 +246,8 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
     //qDebug("Creating a Point3fWidget");
     paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
-    descLab = new QLabel(rpf->fieldDesc,this);
-    descLab->setToolTip(rpf->fieldDesc);
+    descLab = new QLabel(rpf->fieldDescription(),this);
+    descLab->setToolTip(rpf->fieldDescription());
     //gridLay->addWidget(descLab,row,0);
 
     vlay = new QHBoxLayout();
@@ -386,8 +386,8 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
     paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
 
-    descLab = new QLabel(rpf->fieldDesc,this);
-    descLab->setToolTip(rpf->fieldDesc);
+    descLab = new QLabel(rpf->fieldDescription(),this);
+    descLab->setToolTip(rpf->fieldDescription());
     //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
     vlay = new QVBoxLayout();
     lay44 = new QGridLayout();
@@ -547,8 +547,8 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
     paramName = rpf->name();
     //int row = gridLay->rowCount() - 1;
 
-    descLab = new QLabel(rpf->fieldDesc,p);
-    descLab->setToolTip(rpf->fieldDesc);
+    descLab = new QLabel(rpf->fieldDescription(),p);
+    descLab->setToolTip(rpf->fieldDescription());
     //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 
     hlay = new QHBoxLayout();
@@ -664,7 +664,7 @@ ComboWidget::ComboWidget(QWidget *p, RichParameter* rpar) :MeshLabWidget(p,rpar)
 void ComboWidget::Init(QWidget *p,int defaultEnum, QStringList values)
 {
     enumLabel = new QLabel(this);
-    enumLabel->setText(rp->fieldDesc);
+    enumLabel->setText(rp->fieldDescription());
     enumCombo = new QComboBox(this);
     enumCombo->addItems(values);
     setIndex(defaultEnum);
@@ -1041,7 +1041,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 
     valueSlider = new QSlider(Qt::Horizontal,this);
     valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    fieldDesc = new QLabel(rp->fieldDesc,this);
+    fieldDesc = new QLabel(rp->fieldDescription(),this);
     valueSlider->setMinimum(0);
     valueSlider->setMaximum(100);
     valueSlider->setValue(floatToInt(rp->value().getFloat()));
@@ -1156,7 +1156,7 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
     //setParent(p);
     if (rp!= NULL)
     {
-        helpLab = new QLabel("<small>"+rpar->tooltip +"</small>",this);
+        helpLab = new QLabel("<small>"+rpar->toolTip() +"</small>",this);
         helpLab->setTextFormat(Qt::RichText);
         helpLab->setWordWrap(true);
         helpLab->setVisible(false);
@@ -1200,8 +1200,8 @@ void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
     :MeshLabWidget(p,rb)
 {
-    cb = new QCheckBox(rp->fieldDesc,this);
-    cb->setToolTip(rp->tooltip);
+    cb = new QCheckBox(rp->fieldDescription(),this);
+    cb->setToolTip(rp->toolTip());
     cb->setChecked(rp->value().getBool());
 
     connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
@@ -1239,11 +1239,11 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
     :MeshLabWidget(p,rpar)
 {
-    lab = new QLabel(rp->fieldDesc,this);
+    lab = new QLabel(rp->fieldDescription(),this);
     lned = new QLineEdit(this);
     //int row = gridLay->rowCount() -1;
 
-    lab->setToolTip(rp->tooltip);
+    lab->setToolTip(rp->toolTip());
     //gridLay->addWidget(lab,row,0);
     //gridLay->addWidget(lned,row,1);
     connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
@@ -1350,7 +1350,7 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
     :MeshLabWidget(p,newColor),pickcol()
 {
     colorLabel = new QLabel(this);
-    descLabel = new QLabel(rp->fieldDesc,this);
+    descLabel = new QLabel(rp->fieldDescription(),this);
     colorButton = new QPushButton(this);
     colorButton->setAutoFillBackground(true);
     colorButton->setFlat(true);
@@ -1518,7 +1518,7 @@ IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
 	filename = new QLineEdit(this);
     filename->setText(tr(""));
     browse = new QPushButton(this);
-    descLab = new QLabel(rp->fieldDesc,this);
+    descLab = new QLabel(rp->fieldDescription(),this);
     browse->setText("...");
     //const QColor cl = rp->pd->defvalue().getColor();
     //resetWidgetValue();

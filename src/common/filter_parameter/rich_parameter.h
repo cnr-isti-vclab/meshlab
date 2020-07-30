@@ -39,6 +39,8 @@ public:
 
 	const QString& name() const;
 	const Value& value() const;
+	const QString& fieldDescription() const;
+	const QString& toolTip() const;
 	Value& value();
 	virtual void accept(Visitor& v) = 0;
 	virtual RichParameter* clone() const = 0;
@@ -50,7 +52,6 @@ protected:
 	QString pName;
 
 	Value* val;
-public:
 	QString fieldDesc;
 	QString tooltip;
 };

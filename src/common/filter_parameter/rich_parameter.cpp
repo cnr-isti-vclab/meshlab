@@ -28,6 +28,16 @@ const Value& RichParameter::value() const
     return *val;
 }
 
+const QString& RichParameter::fieldDescription() const
+{
+    return fieldDesc;
+}
+
+const QString& RichParameter::toolTip() const
+{
+    return tooltip;
+}
+
 Value& RichParameter::value()
 {
     return *val;
