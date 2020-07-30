@@ -10,11 +10,15 @@ RichParameter::RichParameter(
 {
 }
 
+RichParameter::RichParameter(const QString& nm, const Value& v, const QString& desc, const QString& tltip) :
+    name(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
+{
+}
+
 RichParameter::~RichParameter()
 {
     delete val;
 }
-
 
 RichBool::RichBool(const QString& nm,const bool defval,const QString& desc,const QString& tltip) :
     RichParameter(nm, new BoolValue(defval), desc, tltip)

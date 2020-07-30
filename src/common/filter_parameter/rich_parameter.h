@@ -42,8 +42,10 @@ public:
 	QString tooltip;
 
 	RichParameter(const QString& nm, Value* v, const QString& desc = QString(), const QString& tltip = QString());
+	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
 	virtual void accept(Visitor& v) = 0;
 	virtual bool operator==(const RichParameter& rp) = 0;
+	//virtual RichParameter* clone() const = 0;
 	virtual ~RichParameter();
 };
 
