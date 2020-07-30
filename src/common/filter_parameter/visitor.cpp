@@ -3,53 +3,53 @@
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
 {
-    lastCreated = new RichBool(pd.name(),pd.val->getBool(),pd.val->getBool(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichBool(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichInt& pd )
 {
-    lastCreated = new RichInt(pd.name(),pd.val->getInt(),pd.val->getInt(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichInt(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichFloat& pd )
 {
-    lastCreated = new RichFloat(pd.name(),pd.val->getFloat(),pd.val->getFloat(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichFloat(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichString& pd )
 {
-    lastCreated = new RichString(pd.name(),pd.val->getString(),pd.val->getString(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichString(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichMatrix44f& pd )
 {
-    lastCreated = new RichMatrix44f(pd.name(),pd.val->getMatrix44f(),pd.val->getMatrix44f(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichMatrix44f(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichPoint3f& pd )
 {
-    lastCreated = new RichPoint3f(pd.name(),pd.val->getPoint3f(),pd.val->getPoint3f(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichPoint3f(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichShotf& pd )
 {
-  lastCreated = new RichShotf(pd.name(),pd.val->getShotf(),pd.val->getShotf(),pd.fieldDesc,pd.tooltip);
+  lastCreated = new RichShotf(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichColor& pd )
 {
-    lastCreated = new RichColor(pd.name(),pd.val->getColor(),pd.val->getColor(),pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichColor(pd);
 }
 
 
 void RichParameterCopyConstructor::visit( RichAbsPerc& pd )
 {
-    lastCreated = new RichAbsPerc(pd.name(),pd.val->getAbsPerc(),pd.val->getAbsPerc(),pd.min,pd.max,pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichAbsPerc(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichEnum& pd )
 {
-    lastCreated = new RichEnum(pd.name(),pd.val->getEnum(),pd.val->getEnum(),pd.enumvalues,pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichEnum(pd);
 }
 
 //void RichParameterCopyConstructor::visit( RichFloatList& /*pd*/ )
@@ -59,25 +59,26 @@ void RichParameterCopyConstructor::visit( RichEnum& pd )
 
 void RichParameterCopyConstructor::visit( RichDynamicFloat& pd )
 {
-    lastCreated = new RichDynamicFloat(pd.name(),pd.val->getDynamicFloat(),pd.val->getDynamicFloat(),pd.min,pd.max,pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichDynamicFloat(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichOpenFile& pd )
 {
-    lastCreated = new RichOpenFile(pd.name(),pd.val->getFileName(),pd.exts,pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichOpenFile(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichSaveFile& pd )
 {
-    lastCreated = new RichSaveFile(pd.name(),pd.val->getFileName(),pd.ext,pd.fieldDesc,pd.tooltip);
+    lastCreated = new RichSaveFile(pd);
 }
 
 void RichParameterCopyConstructor::visit( RichMesh& pd )
 {
-    if (pd.val != NULL)
-        lastCreated = new RichMesh(pd.name(),pd.val->getMesh(),pd.val->getMesh(),pd.meshdoc,pd.fieldDesc,pd.tooltip);
-    else
-        lastCreated = new RichMesh(pd.name(),pd.meshindex);
+    lastCreated = new RichMesh(pd);
+//    if (pd.val != NULL)
+//        lastCreated = new RichMesh(pd.name(),pd.value().getMesh(),pd.value().getMesh(),pd.meshdoc,pd.fieldDesc,pd.tooltip);
+//    else
+//        lastCreated = new RichMesh(pd.name(),pd.meshindex);
 }
 
 void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type, const QString& name, const QString& desc, const QString& tooltip)

@@ -23,6 +23,11 @@ const QString& RichParameter::name() const
     return pName;
 }
 
+const Value& RichParameter::value() const
+{
+    return *val;
+}
+
 RichParameter& RichParameter::operator=(const RichParameter& rp)
 {
     if (&rp != this){

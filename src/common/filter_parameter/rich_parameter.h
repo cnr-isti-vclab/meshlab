@@ -38,7 +38,7 @@ public:
 	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
 
 	const QString& name() const;
-
+	const Value& value() const;
 	virtual void accept(Visitor& v) = 0;
 	virtual RichParameter* clone() const = 0;
 	RichParameter& operator=(const RichParameter& rp);
