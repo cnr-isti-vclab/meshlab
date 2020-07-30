@@ -1,3 +1,7 @@
-RichBool constructor - remove unused parameter
-RichInt        "          "      "      "
-RichFloat        "          "      "      "
+Flying pointers to remove:
+	meshlab/mainwindow_init.cpp
+	meshlab/customDialog.cpp
+	meshlab/filterScriptDialog.cpp
+	meshlabserver/mainserver.cpp
+	
+	

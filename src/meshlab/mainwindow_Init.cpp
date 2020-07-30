@@ -901,17 +901,16 @@ void MainWindow::loadMeshLabSettings()
 		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name()))
 		{
 			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-			RichParameterCopyConstructor v;
-			defaultGlobalParams.paramList.at(ii)->accept(v);
-			currentGlobalParams.paramList.push_back(v.lastCreated);
+			RichParameter* v = defaultGlobalParams.paramList.at(ii)->clone();
+			currentGlobalParams.paramList.push_back(v);
 
 			QDomDocument doc("MeshLabSettings");
 			RichParameterXMLVisitor vxml(doc);
-			v.lastCreated->accept(vxml);
+			v->accept(vxml);
 			doc.appendChild(vxml.parElem);
 			QString docstring = doc.toString();
 			QSettings setting;
-			setting.setValue(v.lastCreated->name(), QVariant(docstring));
+			setting.setValue(v->name(), QVariant(docstring));
 		}
 	}
 

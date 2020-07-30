@@ -106,11 +106,9 @@ RichParameterSet& RichParameterSet::copy( const RichParameterSet& rps )
     if (this != &rps) {
         clear();
 
-        RichParameterCopyConstructor copyvisitor;
         for(int ii = 0;ii < rps.paramList.size();++ii)
         {
-            rps.paramList.at(ii)->accept(copyvisitor);
-            paramList.push_back(copyvisitor.lastCreated);
+            paramList.push_back(rps.paramList.at(ii)->clone());
         }
     }
     return (*this);
@@ -121,11 +119,9 @@ RichParameterSet::RichParameterSet( const RichParameterSet& rps )
 {
     clear();
 
-    RichParameterCopyConstructor copyvisitor;
     for(int ii = 0;ii < rps.paramList.size();++ii)
     {
-        rps.paramList.at(ii)->accept(copyvisitor);
-        paramList.push_back(copyvisitor.lastCreated);
+        paramList.push_back(rps.paramList.at(ii)->clone());
     }
 }
 
@@ -148,11 +144,9 @@ void RichParameterSet::clear()
 
 RichParameterSet& RichParameterSet::join( const RichParameterSet& rps )
 {
-    RichParameterCopyConstructor copyvisitor;
     for(int ii = 0;ii < rps.paramList.size();++ii)
     {
-        rps.paramList.at(ii)->accept(copyvisitor);
-        paramList.push_back(copyvisitor.lastCreated);
+        paramList.push_back(rps.paramList.at(ii)->clone());
     }
     return (*this);
 }

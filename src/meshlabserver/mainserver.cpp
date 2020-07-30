@@ -609,11 +609,9 @@ public:
 
             for(int i = 0; i < required.paramList.size(); i++)
             {
-                RichParameterCopyConstructor v;
                 if (!parameterSet.hasParameter(required.paramList[i]->name()))
                 {
-                    required.paramList[i]->accept(v);
-                    parameterSet.addParam(v.lastCreated);
+                    parameterSet.addParam(required.paramList[i]->clone());
                 }
                 assert(parameterSet.paramList.size() == required.paramList.size());
                 RichParameter* parameter = parameterSet.paramList[i];

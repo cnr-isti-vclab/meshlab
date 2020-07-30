@@ -68,35 +68,6 @@ public:
 	virtual ~Visitor() {}
 };
 
-class RichParameterCopyConstructor : public Visitor
-{
-public:
-	RichParameterCopyConstructor() : lastCreated(nullptr){}
-
-	void visit(RichBool& pd);
-	void visit(RichInt& pd);
-	void visit(RichFloat& pd);
-	void visit(RichString& pd);
-	void visit(RichMatrix44f& pd);
-	void visit(RichPoint3f& pd);
-	void visit(RichShotf& pd);
-	void visit(RichColor& pd);
-	void visit(RichAbsPerc& pd);
-
-	void visit(RichEnum& pd);
-	//void visit(RichFloatList& pd);
-
-	void visit(RichDynamicFloat& pd);
-
-	void visit(RichOpenFile& pd);
-	void visit(RichSaveFile& pd);
-	void visit(RichMesh& pd);
-
-	~RichParameterCopyConstructor() {}
-
-	RichParameter* lastCreated;
-};
-
 class RichParameterValueToStringVisitor : public Visitor
 {
 public:
