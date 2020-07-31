@@ -103,7 +103,7 @@ int FilterGeodesic::getRequirements(QAction *action)
 	return 0;
 }
 
-bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	MeshModel &m=*(md.mm());
 	CMeshO::FaceIterator fi;
@@ -228,7 +228,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 	return true;
 }
 
-void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action))
 	{

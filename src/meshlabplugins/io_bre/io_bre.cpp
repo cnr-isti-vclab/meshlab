@@ -121,7 +121,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
   
 	if (formatName.toUpper() == tr("BRE"))
@@ -131,7 +131,7 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QStr
   
 }
 
-bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
   // initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
@@ -147,7 +147,7 @@ bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileNam
   return true;
 }
 
-bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos *, QWidget * /*parent*/)
+bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
 {
   return false;
 }
@@ -186,14 +186,14 @@ void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capabi
   }*/
 }
 
-void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
+void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par) 
 {
 	if(format.toUpper() == tr("BRE"))
 		par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
   
 }
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet &/*par*/)
+void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList &/*par*/)
 {
   /*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -202,7 +202,7 @@ void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*
   */
 }
 
-void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par) 
+void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par) 
 {
 	if(format.toUpper() == tr("BRE"))
   {

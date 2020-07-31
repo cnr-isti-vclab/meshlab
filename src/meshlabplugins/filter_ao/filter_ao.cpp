@@ -105,7 +105,7 @@ MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(QAction * /*fi
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 
-void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet &parlst)
+void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
 {
     switch(ID(action))
     {
@@ -125,7 +125,7 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel & /*m*/
 		default: break; // do not add any parameter for the other filters
     }
 }
-bool AmbientOcclusionPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool AmbientOcclusionPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 

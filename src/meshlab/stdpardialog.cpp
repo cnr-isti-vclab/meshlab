@@ -43,7 +43,7 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
     gla=curr_gla;
 }
 
-void StdParFrame::resetValues(RichParameterSet &curParSet)
+void StdParFrame::resetValues(RichParameterList &curParSet)
 {
     QList<RichParameter*> &parList =curParSet.paramList;
     assert(stdfieldwidgets.size() == parList.size());
@@ -56,7 +56,7 @@ void StdParFrame::resetValues(RichParameterSet &curParSet)
 }
 
 /* creates widgets for the standard parameters */
-void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
+void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /*_mdPt*/ )
 {
     if(layout()) delete layout();
     QGridLayout* glay = new QGridLayout();
@@ -91,7 +91,7 @@ void StdParFrame::toggleHelp()
 }
 
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
-void StdParFrame::readValues(RichParameterSet &curParSet)
+void StdParFrame::readValues(RichParameterList &curParSet)
 {
     QList<RichParameter*> &parList =curParSet.paramList;
     assert(parList.size() == stdfieldwidgets.size());
@@ -1011,7 +1011,7 @@ _fileName = newName;
 }
 */
 
-GenericParamDialog::GenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
+GenericParamDialog::GenericParamDialog(QWidget *p, RichParameterList *_curParSet, QString title, MeshDocument *_meshDocument)
     : QDialog(p) {
         stdParFrame=NULL;
         curParSet=_curParSet;

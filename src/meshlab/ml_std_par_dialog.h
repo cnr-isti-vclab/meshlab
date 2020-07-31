@@ -70,8 +70,8 @@ public:
     MeshFilterInterface *curmfi;
     MainWindow *curmwi;
     QWidget * curgla;
-    RichParameterSet curParSet;
-    RichParameterSet prevParSet;
+    RichParameterList curParSet;
+    RichParameterList prevParSet;
     bool validcache;
 
 };

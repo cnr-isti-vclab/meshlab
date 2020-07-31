@@ -81,7 +81,7 @@ QualityMapperFilter::QualityMapperFilter()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst) 
 {
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
@@ -120,7 +120,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 
 // The Real Core Function doing the actual mesh processing.
 // Apply color to mesh vertices
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 	m.updateDataMask(MeshModel::MM_VERTCOLOR);

@@ -22,13 +22,13 @@
 ****************************************************************************/
 
 #include "ui_customDialog.h"
-#include <common/filter_parameter/rich_parameter_set.h>
+#include <common/filter_parameter/rich_parameter_list.h>
 #include "customDialog.h"
 #include <QPalette>
  #include <QHeaderView>
 using namespace vcg;
 
-CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
+CustomDialog::CustomDialog(RichParameterList& curparset, RichParameterList& defparset, QWidget * parent)
 		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
 	setModal(false);
@@ -194,7 +194,7 @@ SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultP
 	dialoglayout->addWidget(applybut,1,3);
 	dialoglayout->addWidget(closebut,1,4);
 
-	RichParameterSet tmpParSet;
+	RichParameterList tmpParSet;
 	tmppar = curPar->clone();
 	tmpParSet.addParam(tmppar);
 	frame.loadFrameContent(tmpParSet);

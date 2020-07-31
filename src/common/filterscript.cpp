@@ -57,9 +57,9 @@ QDomDocument FilterScript::xmlDoc()
     {
         FilterNameParameterValuesPair* oldpv = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         QDomElement tag = doc.createElement("filter");
-        QPair<QString,RichParameterSet>& pair = oldpv->pair;
+        QPair<QString,RichParameterList>& pair = oldpv->pair;
         tag.setAttribute(QString("name"),pair.first);
-        RichParameterSet &par=pair.second;
+        RichParameterList &par=pair.second;
         QList<RichParameter*>::iterator jj;
         for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
         {
@@ -112,7 +112,7 @@ bool FilterScript::open(QString filename)
     {
         if (nf.tagName() == QString("filter"))
         {
-            RichParameterSet par;
+            RichParameterList par;
             QString name=nf.attribute("name");
             qDebug("Reading filter with name %s", qUtf8Printable(name));
             for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))

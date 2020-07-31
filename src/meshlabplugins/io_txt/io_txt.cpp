@@ -33,7 +33,7 @@ using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
-void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
+void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("TXT"))
 	{
@@ -62,7 +62,7 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
     }
 }
 
-bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
     bool result=false;
 
@@ -89,7 +89,7 @@ bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return result;
 }
 
-bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	assert(0);
 	return false;

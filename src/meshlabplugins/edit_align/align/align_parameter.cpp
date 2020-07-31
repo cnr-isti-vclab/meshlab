@@ -28,7 +28,7 @@ using namespace vcg;
 AlignParameter::AlignParameter(){}
 
 // given a RichParameterSet get back the alignment parameter  (dual of the buildParemeterSet)
-void AlignParameter::RichParameterSetToAlignPairParam(const RichParameterSet &rps , AlignPair::Param &app)
+void AlignParameter::RichParameterSetToAlignPairParam(const RichParameterList &rps , AlignPair::Param &app)
 {
   app.SampleNum       =rps.getInt(  "SampleNum");
   app.MinDistAbs      =rps.getFloat("MinDistAbs");
@@ -41,7 +41,7 @@ void AlignParameter::RichParameterSetToAlignPairParam(const RichParameterSet &rp
 }
 
 // given an alignment parameter builds the corresponding RichParameterSet (dual of the retrieveParemeterSet)
-void AlignParameter::AlignPairParamToRichParameterSet(const AlignPair::Param &app, RichParameterSet &rps)
+void AlignParameter::AlignPairParamToRichParameterSet(const AlignPair::Param &app, RichParameterList &rps)
 {
   rps.clear();
   rps.addParam(new RichInt("SampleNum",app.SampleNum,"Sample Number","Number of samples that we try to choose at each ICP iteration"));
@@ -57,14 +57,14 @@ void AlignParameter::AlignPairParamToRichParameterSet(const AlignPair::Param &ap
   rps.addParam(new RichBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is cosntrained to perform matching only through roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear)."));
 }
 
-void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterSet &fps , MeshTree::Param &mtp)
+void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterList &fps , MeshTree::Param &mtp)
 {
   mtp.arcThreshold=fps.getFloat("arcThreshold");
   mtp.OGSize = fps.getInt("OGSize");
   mtp.recalcThreshold = fps.getFloat("recalcThreshold");
 }
 
-void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterSet &rps)
+void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterList &rps)
 {
   rps.clear();
   rps.addParam(new RichInt("OGSize",mtp.OGSize,"Occupancy Grid Size","To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can "));

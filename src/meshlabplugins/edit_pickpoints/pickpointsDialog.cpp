@@ -656,7 +656,7 @@ void PickPointsDialog::renameHighlightedPoint() {
 
 		const QString newName = "newName";
 
-		RichParameterSet parameterSet;
+		RichParameterList parameterSet;
 		parameterSet.addParam(new RichString(newName, name, "New Name", "Enter the new name"));
 
 		GenericParamDialog getNameDialog(this, &parameterSet);

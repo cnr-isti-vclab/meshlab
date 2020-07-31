@@ -170,7 +170,7 @@ return QString("Filter Unknown");
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterSet& parlst)
+void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterList& parlst)
 {
     int id = ID(action);
     MeshModel *target = md.mm();
@@ -352,7 +352,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
     }
 }
 
-bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterSet& par, vcg::CallBackPos* cb)
+bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb)
 {
     int id = ID(filter);
 

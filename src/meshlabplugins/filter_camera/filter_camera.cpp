@@ -82,7 +82,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
+void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
     Shotf defShot;
     switch(ID(action))
@@ -179,7 +179,7 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel* mesh = md.mm();
     CMeshO* cm = NULL;

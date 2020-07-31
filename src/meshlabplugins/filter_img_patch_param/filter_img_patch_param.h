@@ -89,7 +89,7 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
                                                            int meshid,
                                                            CMeshO &mesh,
                                                            QList<RasterModel*> &rasterList,
-                                                           const RichParameterSet& par );
+                                                           const RichParameterList& par );
 
     float               computeTotalPatchArea( RasterPatchMap &patches );
     int                 computePatchCount( RasterPatchMap &patches );
@@ -106,14 +106,14 @@ public:
 
     virtual void        initParameterSet( QAction *act,
                                           MeshDocument &md,
-                                          RichParameterSet &par );
+                                          RichParameterList &par );
 
     virtual int         getRequirements( QAction *act );
     //virtual int         postCondition( QAction *act ) const;
 
     virtual bool        applyFilter( QAction *act,
                                      MeshDocument &md,
-                                     const RichParameterSet &par,
+                                     const RichParameterList &par,
                                      vcg::CallBackPos *cb );
 
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}

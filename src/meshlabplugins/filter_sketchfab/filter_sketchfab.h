@@ -45,8 +45,8 @@ public:
 	FILTER_ARITY filterArity(QAction *a) const;
 	int getPreConditions(QAction *) const;
 	int postCondition( QAction* ) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 
 public slots:
 	void finished();

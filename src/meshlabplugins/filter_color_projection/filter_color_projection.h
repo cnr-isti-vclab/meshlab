@@ -43,9 +43,9 @@ public:
     int postCondition( QAction* ) const;
 
     virtual FilterClass getClass(QAction *);
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 

@@ -67,7 +67,7 @@ class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>
 
 
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PTX"))
 	{
@@ -82,7 +82,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
     //bool normalsUpdated = false;
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
@@ -294,7 +294,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget * /*parent*/)
+bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();
@@ -488,7 +488,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 //                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 //}
 
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterSet &par)
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterList &par)
 {
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(new RichBool("Binary", true, "Binary encoding",
@@ -531,7 +531,7 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, Ri
 	}
 }
 
-void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParameterSet & globalparam)
+void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParameterList & globalparam)
 {
 	globalparam.addParam(new RichBool(stlUnifyParName(), true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 }

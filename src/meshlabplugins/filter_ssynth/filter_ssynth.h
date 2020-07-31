@@ -43,9 +43,9 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
     virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterSet &){};
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction*  filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb);
+    virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterList &){};
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
     virtual FilterClass getClass(QAction* filter);
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
     static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
@@ -54,9 +54,9 @@ public:
     QList<Format> exportFormats() const;
 
     virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
-    void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
-    bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-    bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
+    void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
+    bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
+    bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
     MeshFilterInterface::FILTER_ARITY filterArity(QAction *) const {return NONE;}
 private:
     QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);

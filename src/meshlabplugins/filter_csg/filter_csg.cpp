@@ -69,7 +69,7 @@ QString FilterCSG::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParameterSet & parlst)
+void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParameterList & parlst)
 {
     switch (ID(action)) {
     case FP_CSG:
@@ -111,7 +111,7 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
     }
 }
 
-bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     switch(ID(filter)) {
     case FP_CSG:

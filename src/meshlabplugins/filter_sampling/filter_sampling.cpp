@@ -455,7 +455,7 @@ int FilterDocSampling::getRequirements(QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, RichParameterSet & parlst)
+void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, RichParameterList & parlst)
 {
   switch(ID(action))	 {
   case FP_MONTECARLO_SAMPLING :
@@ -691,7 +691,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   }
 }
 
-bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 switch(ID(action))
 {

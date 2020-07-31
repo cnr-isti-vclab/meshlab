@@ -199,7 +199,7 @@ void FilterScriptDialog::editOldParameters( const int row )
     QString actionName = ui->scriptListWidget->currentItem()->text();
 
     FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
-     RichParameterSet oldParameterSet = old->pair.second;
+     RichParameterList oldParameterSet = old->pair.second;
     //get the main window
     MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
@@ -218,7 +218,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 
     //fill the parameter set with all the names and descriptions which are lost in the 
     //filter script
-    RichParameterSet newParameterSet;
+    RichParameterList newParameterSet;
     iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
 
     if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())

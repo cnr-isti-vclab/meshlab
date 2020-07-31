@@ -25,7 +25,7 @@
 #include <QDialog>
 #include <QDockWidget>
 #include <QColorDialog>
-#include <common/filter_parameter/rich_parameter_set.h>
+#include <common/filter_parameter/rich_parameter_list.h>
 #include "stdpardialog.h"
 
 
@@ -60,7 +60,7 @@ class CustomDialog : public QDialog
 {
 Q_OBJECT
 public:
-	CustomDialog(RichParameterSet& parset,RichParameterSet& defparset,QWidget *parent = 0);
+	CustomDialog(RichParameterList& parset,RichParameterList& defparset,QWidget *parent = 0);
 	~CustomDialog();
 	//void loadCurrentSetting(RichParameterSet& parset);
 
@@ -71,8 +71,8 @@ signals:
 	void applyCustomSetting();
 
 private:
-	RichParameterSet& curParSet;
-	RichParameterSet& defParSet;
+	RichParameterList& curParSet;
+	RichParameterList& defParSet;
 	QTableWidget* tw;
 	QVector<RichParameter*> vrp; 
 	void dispatch(const RichParameter& par);

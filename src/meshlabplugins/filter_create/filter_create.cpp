@@ -93,7 +93,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet & parlst)
+void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterList & parlst)
 {
   switch(ID(action))	 {
 
@@ -162,7 +162,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, CallBackPos * /*cb*/)
+bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, CallBackPos * /*cb*/)
 {
 	MeshModel *currM = md.mm();
 	MeshModel *m = nullptr;

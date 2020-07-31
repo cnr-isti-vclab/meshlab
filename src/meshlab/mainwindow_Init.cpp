@@ -1172,7 +1172,7 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
+void MainWindowSetting::initGlobalParameterSet(RichParameterList* glbset)
 {
 	glbset->addParam(new RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
 	glbset->addParam(new RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
@@ -1185,7 +1185,7 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 	glbset->addParam(new RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(RichParameterSet& rps)
+void MainWindowSetting::updateGlobalParameterSet(RichParameterList& rps)
 {
 	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
 	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());

@@ -64,8 +64,8 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterSet(RichParameterSet* gblset);
-	void updateGlobalParameterSet( RichParameterSet& rps );
+	static void initGlobalParameterSet(RichParameterList* gblset);
+	void updateGlobalParameterSet( RichParameterList& rps );
 
 	std::ptrdiff_t maxgpumem;
 	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
@@ -92,7 +92,7 @@ class MainWindow : public QMainWindow, public MainWindowInterface
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview = false);
+	void executeFilter(QAction *action, RichParameterList &srcpar, bool isPreview = false);
 
 	MainWindow();
 	~MainWindow();
@@ -101,7 +101,7 @@ public:
 	//const QString appVer() const {return tr("1.3.2"); }
 	MainWindowSetting mwsettings;
 signals:
-	void dispatchCustomSettings(RichParameterSet& rps);
+	void dispatchCustomSettings(RichParameterList& rps);
 	void filterExecuted();
 	void updateLayerTable();
 
@@ -146,7 +146,7 @@ private slots:
 public:
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
@@ -288,8 +288,8 @@ private:
 	At the start up the currentGlobalParams is filled with the values saved in the registry.
 	*/
 
-	RichParameterSet currentGlobalParams;
-	RichParameterSet defaultGlobalParams;
+	RichParameterList currentGlobalParams;
+	RichParameterList defaultGlobalParams;
 
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
@@ -305,9 +305,9 @@ public:
 	}
 
 	inline vcg::QtThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;}
-	const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
-	RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
-	const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
+	const RichParameterList& currentGlobalPars() const { return currentGlobalParams; }
+	RichParameterList& currentGlobalPars() { return currentGlobalParams; }
+	const RichParameterList& defaultGlobalPars() const { return defaultGlobalParams; }
 
 	GLArea *GLA() const {
 		//if(mdiarea->currentSubWindow()==0) return 0;

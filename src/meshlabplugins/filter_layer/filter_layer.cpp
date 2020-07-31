@@ -108,7 +108,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     MeshModel *mm=md.mm();
     RasterModel *rm=md.rm();
@@ -173,7 +173,7 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
  CMeshO::FaceIterator fi;
  int numFacesSel,numVertSel;

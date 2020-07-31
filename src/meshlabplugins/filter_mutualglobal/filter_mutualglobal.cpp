@@ -96,7 +96,7 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterSet & parlst)
+void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterList & parlst)
 {
 	QStringList rendList;
 	switch(ID(action))	 {
@@ -153,7 +153,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	QElapsedTimer filterTime;
 	filterTime.start();
@@ -331,7 +331,7 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 	return QString();
 }
 
-bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	Solver solver;
 	MutualInfo mutual;

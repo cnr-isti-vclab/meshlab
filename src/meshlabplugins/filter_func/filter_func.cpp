@@ -250,7 +250,7 @@ int FilterFunctionPlugin::getRequirements(QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
   Q_UNUSED(m);
   switch(ID(action))	 {
@@ -368,7 +368,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
   if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
     md.addNewMesh("",this->filterName(ID(filter)));

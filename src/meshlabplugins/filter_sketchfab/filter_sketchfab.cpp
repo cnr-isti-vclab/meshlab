@@ -95,7 +95,7 @@ int FilterSketchFabPlugin::postCondition(QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterSet& parlst)
+void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterList& parlst)
 {
 	switch(ID(action)) {
 	case FP_SKETCHFAB :
@@ -112,7 +112,7 @@ void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichPa
 	}
 }
 
-bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, const RichParameterSet& par, vcg::CallBackPos* cb)
+bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb)
 {
 	switch (ID(action)) {
 	case FP_SKETCHFAB:

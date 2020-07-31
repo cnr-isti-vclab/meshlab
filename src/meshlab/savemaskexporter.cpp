@@ -27,7 +27,7 @@
 
 #include <QFileInfo>
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *_parSet,GLArea* glar):
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterList *_parSet,GLArea* glar):
 QDialog(parent),m(m),mask(0),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
 {
     ui = new Ui::MaskExporterDialog();

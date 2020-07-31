@@ -34,7 +34,7 @@ SdfGpuPlugin::SdfGpuPlugin()
 
 }
 
-void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterSet &par)
+void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterList &par)
 {
     mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
@@ -138,7 +138,7 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     return QString("");
 }
 
-bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, const RichParameterSet & pars, vcg::CallBackPos *cb)
+bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, const RichParameterList & pars, vcg::CallBackPos *cb)
 {
     MeshModel* mm = md.mm();
 

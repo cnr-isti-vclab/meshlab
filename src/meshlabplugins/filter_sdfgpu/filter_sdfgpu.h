@@ -35,10 +35,10 @@ public:
     FILTER_ARITY filterArity(QAction *act) const;
 
     //Main plugin function
-    bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb);
+    bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
     //Parameters init for user interface
-    virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
+    virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
 
     //Draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);

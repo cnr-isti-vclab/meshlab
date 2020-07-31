@@ -1233,7 +1233,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
         decPlug->initGlobalParameterSet(act,tmpSet);
         if (tmpSet.paramList.size() != 0)
         {
-            const RichParameterSet& currSet = mw->currentGlobalPars();
+            const RichParameterList& currSet = mw->currentGlobalPars();
 
             /********************************************************************************************************************/
             //WARNING! The hardwired original value is maintained in the defValue contained inside the tmpSet's parameters
@@ -1301,7 +1301,7 @@ void DecoratorParamsTreeWidget::save()
         qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name()), qUtf8Printable(docstring));
         QSettings setting;
         setting.setValue(p->name(),QVariant(docstring));
-        RichParameterSet& currSet = mainWin->currentGlobalPars();
+        RichParameterList& currSet = mainWin->currentGlobalPars();
         RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name());
         par->value().set(tmpSet.paramList[ii]->value());
     }
@@ -1315,7 +1315,7 @@ void DecoratorParamsTreeWidget::reset()
 
 void DecoratorParamsTreeWidget::apply()
 {
-    RichParameterSet& current = mainWin->currentGlobalPars();
+    RichParameterList& current = mainWin->currentGlobalPars();
     for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
     {
         frame->stdfieldwidgets[ii]->collectWidgetValue();

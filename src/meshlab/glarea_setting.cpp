@@ -1,6 +1,6 @@
 #include "glarea_setting.h"
 
-void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
+void GLAreaSetting::initGlobalParameterSet( RichParameterList * defaultGlobalParamSet)
 {
 	defaultGlobalParamSet->addParam(new RichColor(backgroundBotColorParam(),QColor(128,128,255),"MeshLab Bottom BackGround Color","MeshLab GLarea's BackGround Color(bottom corner)"));
 	defaultGlobalParamSet->addParam(new RichColor(backgroundTopColorParam(),QColor(  0, 0,   0),"MeshLab Top BackGround Color","MeshLab GLarea's BackGround Color(top corner)"));
@@ -28,7 +28,7 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalPara
 }
 
 
-void GLAreaSetting::updateGlobalParameterSet( RichParameterSet& rps )
+void GLAreaSetting::updateGlobalParameterSet( RichParameterList& rps )
 {
 	logAreaColor = rps.getColor4b(logAreaColorParam());
 	backgroundBotColor =  rps.getColor4b(backgroundBotColorParam());

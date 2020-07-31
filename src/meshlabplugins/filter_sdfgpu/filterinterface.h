@@ -91,7 +91,7 @@ public:
       * parameter set according to your mesh document (data dependent parameters). A GUI will be
       * automatically designed according to this parameters.
       */
-  virtual void initParameterSet(MeshDocument &, RichParameterSet &){ qDebug() << "HERE2!"; }
+  virtual void initParameterSet(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
   
   /**
       * @brief The implementation of the filter algorithm
@@ -101,7 +101,7 @@ public:
       * and is used to understand what type of plugin is being developed. This information will be used
       * by meshlab to determine in which filter sub-folder insert this filter.
       */
-  virtual bool applyFilter(MeshDocument &md, const RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
+  virtual bool applyFilter(MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
   
   /**
       * @brief The pre-conditions required by the filter on the input mesh
@@ -153,10 +153,10 @@ private:
   int postCondition() const{
     return MeshModel::MM_NONE;
   }
-  bool applyFilter(QAction *, MeshDocument &md, const RichParameterSet& par, vcg::CallBackPos * cb){
+  bool applyFilter(QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
-  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterSet &par){
+  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterList &par){
     initParameterSet(md,par);
   }
 };

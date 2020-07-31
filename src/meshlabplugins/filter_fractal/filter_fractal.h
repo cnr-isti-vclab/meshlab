@@ -45,17 +45,17 @@ public:
     QString filterInfo(FilterIDType filter) const;
 
     int getRequirements(QAction *);
-    void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
-    void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
+    void initParameterSet(QAction*, MeshModel&, RichParameterList &){assert(0);}
+    void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
 
-    bool applyFilter (QAction*  filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb);
+    bool applyFilter (QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
     int postCondition(QAction *action) const;
     FilterClass getClass(QAction *);
     FILTER_ARITY filterArity(QAction* act) const;
 private:
-    void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
-    void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
+    void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterList &);
+    void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 };

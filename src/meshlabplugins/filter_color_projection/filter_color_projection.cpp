@@ -103,7 +103,7 @@ int FilterColorProjectionPlugin::getRequirements(QAction *action){
 
 
 // This function define the needed parameters for each filter.
-void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {
@@ -213,7 +213,7 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     //CMeshO::FaceIterator fi;
     CMeshO::VertexIterator vi;

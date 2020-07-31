@@ -25,7 +25,7 @@
 #define MESHLAB_INTERFACES_H
 //#include <GL/glew.h>
 
-#include "filter_parameter/rich_parameter_set.h"
+#include "filter_parameter/rich_parameter_list.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
 
@@ -59,7 +59,7 @@ It is used as base class of the MainWindow.
 class MainWindowInterface
 {
 public:
-	virtual void executeFilter(QAction *, RichParameterSet &, bool = false) {}
+	virtual void executeFilter(QAction *, RichParameterList &, bool = false) {}
 	//parexpval is a string map containing the parameter expression values set in the filter's dialog.
 	//These parameter expression values will be evaluated when the filter will start.
 };
@@ -196,7 +196,7 @@ public:
 	At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
 	If a filter wants to save some permanent stuff should set the permanent default values.
 	*/
-	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
+	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterList & /*globalparam*/) {}
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
 */
@@ -222,22 +222,22 @@ public:
 	// The instanced parameters are then passed to the open at the loading time.
 	// Typical example of use to decide what subportion of a mesh you have to load.
 	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
-	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterSet & /*par*/) {}
+	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/) {}
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require
 	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
 	// typical example: unifying vertices in stl models.
 	// If you do not need any additional processing do nothing.
-	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
+	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
 
 	// This is the corresponding function that is called after the mesh is loaded with the initialized parameters
-	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterSet &/*par*/) {}
+	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterList &/*par*/) {}
 
 	// This function is called to initialize the list of additional parameters that a SAVING filter could require
 	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
 	// typical example: ascii or binary format for ply or stl
 	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
+	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
 
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
@@ -248,7 +248,7 @@ public:
 		const QString &fileName,				/// The name of the file to be opened
 		MeshModel &m,										/// The mesh that is filled with the file content
 		int &mask,											/// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-		const RichParameterSet & par,	/// The parameters that have been set up in the initPreOpenParameter()
+		const RichParameterList & par,	/// The parameters that have been set up in the initPreOpenParameter()
 		vcg::CallBackPos *cb = 0,					/// standard callback for reporting progress in the loading
 		QWidget *parent = 0) = 0;						/// you should not use this...
 
@@ -257,7 +257,7 @@ public:
 		const QString &fileName,
 		MeshModel &m,
 		const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
-		const RichParameterSet & par,
+		const RichParameterList & par,
 		vcg::CallBackPos *cb = 0,
 		QWidget *parent = 0) = 0;
 
@@ -381,7 +381,7 @@ public:
 	* \sa errorMsg
 	* \sa initParameterSet
 	*/
-	virtual bool applyFilter(QAction *   filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb) = 0;
+	virtual bool applyFilter(QAction *   filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb) = 0;
 
 	/** \brief tests if a filter is applicable to a mesh.
 	This function is a handy wrapper used by the framework for the \a getPreConditions callback;
@@ -404,8 +404,8 @@ public:
 	// This function is called to initialized the list of parameters.
 	// it is always called. If a filter does not need parameter it leave it empty and the framework
 	// will not create a dialog (unless for previewing)
-	virtual void initParameterSet(QAction *, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
-	virtual void initParameterSet(QAction *filter, MeshDocument &md, RichParameterSet &par)
+	virtual void initParameterSet(QAction *, MeshModel &/*m*/, RichParameterList & /*par*/) {}
+	virtual void initParameterSet(QAction *filter, MeshDocument &md, RichParameterList &par)
 	{
 		initParameterSet(filter, *(md.mm()), par);
 	}
@@ -561,12 +561,12 @@ public:
 	virtual QString decorationInfo(QAction *a) const { return decorationInfo(ID(a)); }
 
 
-	virtual bool startDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) { return false; }
-	virtual bool startDecorate(QAction *, MeshModel &, RichParameterSet *, GLArea *) { return false; }
-	virtual void decorateMesh(QAction *, MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void decorateDoc(QAction *, MeshDocument &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void endDecorate(QAction *, MeshModel &, RichParameterSet *, GLArea *) {}
-	virtual void endDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) {}
+	virtual bool startDecorate(QAction *, MeshDocument &, RichParameterList *, GLArea *) { return false; }
+	virtual bool startDecorate(QAction *, MeshModel &, RichParameterList *, GLArea *) { return false; }
+	virtual void decorateMesh(QAction *, MeshModel &, RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void decorateDoc(QAction *, MeshDocument &, RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void endDecorate(QAction *, MeshModel &, RichParameterList *, GLArea *) {}
+	virtual void endDecorate(QAction *, MeshDocument &, RichParameterList *, GLArea *) {}
 
 	/** \brief tests if a decoration is applicable to a mesh.
 	* used only for PerMesh Decorators.

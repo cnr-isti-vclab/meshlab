@@ -130,7 +130,7 @@ QhullPlugin::~QhullPlugin()
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))	 {
         case FP_QHULL_CONVEX_HULL :
@@ -193,7 +193,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos */* cb*/)
+bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos */* cb*/)
 {
     switch(ID(filter))
     {

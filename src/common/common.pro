@@ -42,9 +42,9 @@ exists(../../ML_VERSION){
 # Input
 HEADERS += 	\
     GLExtensionsManager.h \
+    filter_parameter/rich_parameter_list.h \
     filter_parameter/value.h \
     filter_parameter/rich_parameter.h \
-    filter_parameter/rich_parameter_set.h \
     filterscript.h \
     GLLogStream.h \
     interfaces.h \
@@ -61,7 +61,7 @@ HEADERS += 	\
 SOURCES += \
     GLExtensionsManager.cpp \
     filter_parameter/rich_parameter.cpp \
-    filter_parameter/rich_parameter_set.cpp \
+    filter_parameter/rich_parameter_list.cpp \
     filter_parameter/value.cpp \
     interfaces.cpp \
     filterscript.cpp \

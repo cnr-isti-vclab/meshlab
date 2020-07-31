@@ -43,7 +43,7 @@ QString DecorateShadowPlugin::decorationName(FilterIDType id) const
 	}
 }
 
-void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW: {
@@ -74,7 +74,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 	}
 }
 
-bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/)
+bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterList* parset, GLArea* /*gla*/)
 {
 	bool result;
 
@@ -118,7 +118,7 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, R
 	return false;
 }
 
-void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, RichParameterSet * parset, GLArea * /*gla*/)
+void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, RichParameterList * parset, GLArea * /*gla*/)
 {
 	switch (ID(action))
 	{
@@ -165,7 +165,7 @@ void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, 
 }
 
 
-void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &)
+void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterList *, GLArea *gla, QPainter *, GLLogStream &)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW:

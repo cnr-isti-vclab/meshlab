@@ -66,7 +66,7 @@ GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(QAction
     return MeshFilterInterface::Generic;
 }
 
-void GlobalRegistrationPlugin::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
+void GlobalRegistrationPlugin::initParameterSet(QAction *action,MeshDocument &md, RichParameterList & parlst)
 {
 
      switch(ID(action))	 {
@@ -133,7 +133,7 @@ auto fillPointSet = [] (const CMeshO& m, std::vector<gr::Point3D<CMeshO::ScalarT
 
 template <typename MatcherType>
 float align ( CMeshO* refMesh, CMeshO* trgMesh,
-              const RichParameterSet & par,
+              const RichParameterList & par,
               MatrixType & mat,
               typename MatcherType::TransformVisitor & v) {
 
@@ -163,7 +163,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
 // Move Vertex of a random quantity
 bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
                                            MeshDocument &/*md*/,
-                                           const RichParameterSet & par,
+                                           const RichParameterList & par,
                                            vcg::CallBackPos */*cb*/)
 {
 

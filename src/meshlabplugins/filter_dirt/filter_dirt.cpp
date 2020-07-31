@@ -94,7 +94,7 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichParameterSet &par){
+void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
 
     switch(ID(filter)){
 
@@ -128,7 +128,7 @@ int FilterDirt::getRequirements(QAction * /*action*/)
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
-bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet &par, vcg::CallBackPos *cb){
+bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos *cb){
 
 
     switch(ID(filter)){

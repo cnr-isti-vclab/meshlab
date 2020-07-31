@@ -122,7 +122,7 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
 
 void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
     MeshDocument &/*md*/,
-    RichParameterSet &par )
+    RichParameterList &par )
 {
     switch( ID(act) )
     {
@@ -188,7 +188,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
 
 bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     MeshDocument &md,
-    const RichParameterSet &par,
+    const RichParameterList &par,
     vcg::CallBackPos * /*cb*/ )
 {
 
@@ -897,7 +897,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     int meshid,
     CMeshO &mesh,
     QList<RasterModel*> &rasterList,
-    const RichParameterSet &par )
+    const RichParameterList &par )
 {
     // Computes the visibility set for all mesh faces. It contains the set of all images
     // into which the face is visible, as well as a reference image, namely the one with

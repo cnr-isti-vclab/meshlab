@@ -180,7 +180,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
  return QString("Unknown filter");
 }
 
-void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
+void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst)
 {
  switch(ID(action))
  {
@@ -292,7 +292,7 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
  }
 }
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 if (md.mm() == NULL)
 	return false;

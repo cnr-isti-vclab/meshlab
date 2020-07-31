@@ -88,7 +88,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // when the user press apply the current stored state is updated. 
 // when the user press close the mesh state is restored to the one before the startup of the filter.
 
-void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterSet & parlst)
+void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterList & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
@@ -114,7 +114,7 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *)
+bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *)
 {
     MeshModel &m=*(md.mm());
     const Color4b baseColor = par.getColor4b("baseColor");

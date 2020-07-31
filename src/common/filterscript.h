@@ -24,7 +24,7 @@
 #ifndef FILTERSCRIPT_H
 #define FILTERSCRIPT_H
 
-#include "filter_parameter/rich_parameter_set.h"
+#include "filter_parameter/rich_parameter_list.h"
 
 #include <QObject>
 #include <QPair>
@@ -37,7 +37,7 @@ class FilterNameParameterValuesPair
 public:
 	virtual QString filterName() const { return pair.first; }
 	virtual ~FilterNameParameterValuesPair() {}
-	QPair< QString, RichParameterSet > pair;
+	QPair< QString, RichParameterList > pair;
 };
 
 /*

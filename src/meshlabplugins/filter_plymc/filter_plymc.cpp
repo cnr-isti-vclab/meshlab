@@ -95,7 +95,7 @@ PlyMCPlugin::PlyMCPlugin()
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))
      {
@@ -117,7 +117,7 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * cb)
+bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
 {
   switch(ID(filter))
   {

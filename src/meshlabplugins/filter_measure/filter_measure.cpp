@@ -146,7 +146,7 @@ int FilterMeasurePlugin::getPreConditions(QAction* action) const
 	}
 }
 
-void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst)
+void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList & parlst)
 {
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_HISTOGRAM:
@@ -166,7 +166,7 @@ void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 	}
 }
 
-bool FilterMeasurePlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterSet& parlst, vcg::CallBackPos*)
+bool FilterMeasurePlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& parlst, vcg::CallBackPos*)
 {
 	switch (ID(filter)) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:

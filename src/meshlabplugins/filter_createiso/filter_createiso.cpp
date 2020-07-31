@@ -93,7 +93,7 @@ FilterCreateIso::~FilterCreateIso() {
   return 0;
 }
 
- bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * cb)
+ bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
  {
    md.addNewMesh("",this->filterName(ID(filter)));
    MeshModel &m=*(md.mm());
@@ -121,7 +121,7 @@ FilterCreateIso::~FilterCreateIso() {
    }
    return true;
  }
- void FilterCreateIso::initParameterSet(QAction *action,MeshModel & /*m*/, RichParameterSet & parlst)
+ void FilterCreateIso::initParameterSet(QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
 {
     pair<float,float> qualityRange;
   switch(ID(action))

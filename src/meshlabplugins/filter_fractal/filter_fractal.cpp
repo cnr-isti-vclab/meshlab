@@ -86,7 +86,7 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
     return description;
 }
 
-void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par)
+void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterList &par)
 {
     switch(ID(filter))
     {
@@ -100,7 +100,7 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     }
 }
 
-void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterSet &par)
+void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterList &par)
 {
     bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
 
@@ -130,7 +130,7 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
     par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
 }
 
-void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterSet &par)
+void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterList &par)
 {
     int meshCount = md.meshList.size();
 
@@ -176,7 +176,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     return;
 }
 
-bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, const RichParameterSet &par, vcg::CallBackPos* cb)
+bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos* cb)
 {
   if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
        md.addNewMesh("",this->filterName(ID(filter)));

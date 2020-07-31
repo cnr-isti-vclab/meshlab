@@ -26,7 +26,7 @@
 
 #include<QString>
 #include <vcg/space/color4.h>
-#include <common/filter_parameter/rich_parameter_set.h>
+#include <common/filter_parameter/rich_parameter_list.h>
 
 class GLAreaSetting
 {
@@ -70,10 +70,10 @@ public:
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}
 
 
-	void updateGlobalParameterSet( RichParameterSet& rps );
-	static void initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet);
+	void updateGlobalParameterSet( RichParameterList& rps );
+	static void initGlobalParameterSet( RichParameterList * defaultGlobalParamSet);
 
-	RichParameterSet *currentGlobalParamSet;
+	RichParameterList *currentGlobalParamSet;
 };
 
 

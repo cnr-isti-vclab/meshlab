@@ -355,7 +355,7 @@ void EditAlignPlugin:: alignParamCurrent()
 {
     assert(currentArc());
 
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
     AlignParameter::AlignPairParamToRichParameterSet(currentArc()->ap, alignParamSet);
 
@@ -371,7 +371,7 @@ void EditAlignPlugin:: alignParamCurrent()
 
 void EditAlignPlugin:: meshTreeParam()
 {
-  RichParameterSet  meshTreeParamSet;
+  RichParameterList  meshTreeParamSet;
   AlignParameter::MeshTreeParamToRichParameterSet(defaultMTP, meshTreeParamSet);
   GenericParamDialog ad(alignDialog,&meshTreeParamSet,"Default Alignment Parameters");
   ad.setWindowFlags(Qt::Dialog);
@@ -385,7 +385,7 @@ void EditAlignPlugin:: meshTreeParam()
 
 void EditAlignPlugin:: alignParam()
 {
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     AlignParameter::AlignPairParamToRichParameterSet(defaultAP, alignParamSet);
     GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
     ad.setWindowFlags(Qt::Dialog);

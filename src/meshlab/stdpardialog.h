@@ -690,12 +690,12 @@ class StdParFrame : public QFrame
 public:
     StdParFrame(QWidget *p, QWidget *gla=0);
 
-    void loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt = 0);
+    void loadFrameContent(RichParameterList &curParSet,MeshDocument *mdPt = 0);
 
     // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
     // This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
-    void readValues(RichParameterSet &curParSet);
-    void resetValues(RichParameterSet &curParSet);
+    void readValues(RichParameterList &curParSet);
+    void resetValues(RichParameterList &curParSet);
 
     void toggleHelp();
 
@@ -722,10 +722,10 @@ class GenericParamDialog: public QDialog
 {
     Q_OBJECT
 public:
-  GenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
+  GenericParamDialog(QWidget *p, RichParameterList *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
     ~GenericParamDialog();
 
-    RichParameterSet *curParSet;
+    RichParameterList *curParSet;
     StdParFrame *stdParFrame;
 
     void createFrame();

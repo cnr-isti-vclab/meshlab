@@ -180,7 +180,7 @@ static QString extractFilenameWOExt(MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action)) {
     case FP_VORONOI_ATLAS :
@@ -337,7 +337,7 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet &par, CallBackPos *cb)
+bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))     {

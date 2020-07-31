@@ -43,7 +43,7 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PDB"))
 	{
@@ -67,7 +67,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString 
 	}
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	//bool normalsUpdated = false;
 
@@ -134,7 +134,7 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return true;
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
   assert(0); 
 	return false;
@@ -172,7 +172,7 @@ void PDBIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability,
 	return;
 }
 
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL"))
@@ -180,7 +180,7 @@ void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -188,7 +188,7 @@ void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
   */
 }
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterSet & /*par*/) 
+void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
 {
   /*
 	if(format.toUpper() == tr("STL"))
@@ -201,7 +201,7 @@ MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)
 
 
 //---------- PDB READER -----------//
-bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterSet &parlst, CallBackPos *cb) 
+bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, CallBackPos *cb) 
 {
 	size_t atomNumber=0;
 	bool surfacecreated = false;

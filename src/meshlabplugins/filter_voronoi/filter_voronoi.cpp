@@ -131,7 +131,7 @@ MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) c
 	}
 }
 
-void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterSet& par)
+void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterList& par)
 {
 	 switch(ID(action))	 {
 	 case VORONOI_SAMPLING :
@@ -211,7 +211,7 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

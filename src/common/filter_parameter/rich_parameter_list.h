@@ -26,29 +26,28 @@
 
 #include "rich_parameter.h"
 
-class RichParameterSet
+class RichParameterList
 {
 
 public:
-	RichParameterSet();
-	RichParameterSet(const RichParameterSet& rps);
-	// The data is just a list of Parameters
-	//QMap<QString, FilterParameter *> paramMap;
-	QList<RichParameter*> paramList;
+	RichParameterList();
+	RichParameterList(const RichParameterList& rps);
+	~RichParameterList();
+
 	bool isEmpty() const;
 	RichParameter* findParameter(const QString& name) const;
 	bool hasParameter(const QString& name) const;
 
 
-	RichParameterSet& operator=(const RichParameterSet& rps);
-	RichParameterSet& copy(const RichParameterSet& rps);
-	RichParameterSet& join(const RichParameterSet& rps);
-	bool operator==(const RichParameterSet& rps);
+	RichParameterList& operator=(const RichParameterList& rps);
+	RichParameterList& copy(const RichParameterList& rps);
+	RichParameterList& join(const RichParameterList& rps);
+	bool operator==(const RichParameterList& rps);
 
-	RichParameterSet& addParam(RichParameter* pd);
+	RichParameterList& addParam(RichParameter* pd);
 
 	//remove a parameter from the set by name
-	RichParameterSet& removeParameter(const QString& name);
+	RichParameterList& removeParameter(const QString& name);
 
 	void clear();
 
@@ -74,8 +73,7 @@ public:
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
 
-
-	~RichParameterSet();
+	QList<RichParameter*> paramList;
 };
 
 #endif // MESHLAB_RICH_PARAMETER_SET_H

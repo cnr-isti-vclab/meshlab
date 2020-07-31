@@ -52,7 +52,7 @@ QString FilterSSynth::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterSSynth::initParameterSet(QAction* /*filter*/,MeshDocument &/*md*/, RichParameterSet &par)
+void FilterSSynth::initParameterSet(QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
 {
     par.addParam(new RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
     par.addParam(new RichInt("seed",1,"seed for random construction","Seed needed to build the mesh"));
@@ -73,7 +73,7 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
     delete(info);
 }
 
-bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     md.addNewMesh("",this->filterName(ID(filter)));
     QWidget *  parent=(QWidget*)this->parent();
@@ -166,7 +166,7 @@ QList<MeshIOInterface::Format> FilterSSynth::exportFormats() const
     return formats ;
 }
 
-bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, CallBackPos *cb, QWidget *parent)
+bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, CallBackPos *cb, QWidget *parent)
 {
     this->seed=par.findParameter("seed")->value().getInt();
     int maxrec=par.findParameter("maxrec")->value().getInt();
@@ -195,14 +195,14 @@ bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, 
     else{ QMessageBox::critical(parent,"Error","Sphere resolution must be between 1 and 4"); return false;}
 }
 
-bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterSet &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
+bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
 {
     return true;
 }
 
 void FilterSSynth::GetExportMaskCapability(QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
-void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, const QString &/*filename*/, RichParameterSet &parlst){
+void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, const QString &/*filename*/, RichParameterList &parlst){
     parlst.addParam(new RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
     parlst.addParam(new RichInt("maxrec",0,"set the maximum recursion","the mesh is built recursively according to the productions of the grammar, so a limit is needed. If set to 0 meshlab will generate the mesh according to the maximum recursion set in the file"));
     parlst.addParam(new RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));

@@ -50,7 +50,7 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current)
+GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList *current)
     : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
 {
 	makeCurrent();
@@ -120,7 +120,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     //connecting the MainWindow Slots to GLArea signal (simple passthrough)
     if(mainwindow != NULL){
         connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
-        connect(mainwindow,SIGNAL(dispatchCustomSettings(RichParameterSet&)),this,SLOT(updateCustomSettingValues(RichParameterSet&)));
+        connect(mainwindow,SIGNAL(dispatchCustomSettings(RichParameterList&)),this,SLOT(updateCustomSettingValues(RichParameterList&)));
     }else{
         qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
     }
@@ -1752,7 +1752,7 @@ Point3f GLArea::getViewDir()
     return vcg::Inverse(rotM)*vcg::Point3f(0,0,1);
 }
 
-void GLArea::updateCustomSettingValues( RichParameterSet& rps )
+void GLArea::updateCustomSettingValues( RichParameterList& rps )
 {
 	makeCurrent();
     glas.updateGlobalParameterSet(rps);
@@ -1760,7 +1760,7 @@ void GLArea::updateCustomSettingValues( RichParameterSet& rps )
     this->update();
 }
 
-void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
+void GLArea::initGlobalParameterSet( RichParameterList * defaultGlobalParamSet)
 {
     GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
 }

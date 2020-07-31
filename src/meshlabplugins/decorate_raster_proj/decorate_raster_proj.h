@@ -92,11 +92,11 @@ public:
     // Member functions.
 private:
     void                    updateCurrentMesh( MeshDocument &m,
-                                               RichParameterSet &par );
+                                               RichParameterList &par );
     void                    updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
     void                    setPointParameters( MeshDrawer &md,
-                                                RichParameterSet *par );
+                                                RichParameterList *par );
     void                    drawScene();
     void                    drawSceneShadow();
     void                    updateShadowProjectionMatrix();
@@ -112,11 +112,11 @@ private:
 public:
     inline QList<QAction*>  actions() const                             { return actionList; }
 
-    bool  startDecorate(QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla );
-    void  decorateMesh( QAction  *   , MeshModel    & , RichParameterSet *   , GLArea *   , QPainter * , GLLogStream &  ) {}
-    void  decorateDoc(  QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla, QPainter *p, GLLogStream &  );
-    void  endDecorate(  QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla );
-    void  initGlobalParameterSet( QAction *act, RichParameterSet &par );
+    bool  startDecorate(QAction  *act, MeshDocument &m, RichParameterList *par, GLArea *gla );
+    void  decorateMesh( QAction  *   , MeshModel    & , RichParameterList *   , GLArea *   , QPainter * , GLLogStream &  ) {}
+    void  decorateDoc(  QAction  *act, MeshDocument &m, RichParameterList *par, GLArea *gla, QPainter *p, GLLogStream &  );
+    void  endDecorate(  QAction  *act, MeshDocument &m, RichParameterList *par, GLArea *gla );
+    void  initGlobalParameterSet( QAction *act, RichParameterList &par );
     int   getDecorationClass( QAction *act ) const;
 };
 

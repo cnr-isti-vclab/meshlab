@@ -85,7 +85,7 @@ MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(QAction*) 
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*md*/, RichParameterSet & parlst)
+void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*md*/, RichParameterList & parlst)
 {
 	QStringList rendList;
 	rendList.push_back("Combined");
@@ -110,7 +110,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*m
 	}
 }
 
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos* )
+bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos* )
 {
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :

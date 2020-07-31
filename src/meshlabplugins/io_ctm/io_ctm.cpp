@@ -37,7 +37,7 @@
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
     int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
@@ -49,7 +49,7 @@ bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, Me
     return true;
 }
 
-bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
+bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
     bool lossLessFlag = par.findParameter("LossLess")->value().getBool();
     float relativePrecisionParam = par.findParameter("relativePrecisionParam")->value().getFloat();
@@ -92,7 +92,7 @@ void IOMPlugin::GetExportMaskCapability(QString &/*format*/, int &capability, in
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
-void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & par)
+void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & par)
 {
   par.addParam(new RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));
