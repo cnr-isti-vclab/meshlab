@@ -11,9 +11,11 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 endif()
 
 set(SOURCES
+    filter_parameter/rich_parameter.cpp
+    filter_parameter/rich_parameter_list.cpp
+    filter_parameter/value.cpp
     GLExtensionsManager.cpp
     GLLogStream.cpp
-    filterparameter.cpp
     filterscript.cpp
     interfaces.cpp
     meshlabdocumentbundler.cpp
@@ -27,6 +29,9 @@ set(SOURCES
     searcher.cpp)
 
 set(HEADERS
+    filter_parameter/rich_parameter.h
+    filter_parameter/rich_parameter_list.h
+    filter_parameter/value.h
     GLExtensionsManager.h
     GLLogStream.h
     filterparameter.h
