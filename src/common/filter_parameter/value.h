@@ -222,7 +222,7 @@ public:
 	inline QString typeName() const { return QString("AbsPerc"); }
 	inline bool isAbsPerc() const { return true; }
 	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
+	using FloatValue::fillToXMLElement;
 
 };
 
@@ -236,7 +236,7 @@ public:
 	inline bool isEnum() const { return true; }
 	inline QString typeName() const { return QString("Enum"); }
 	inline EnumValue* clone() const {return new EnumValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
+	using IntValue::fillToXMLElement;
 };
 
 class DynamicFloatValue : public FloatValue
@@ -249,7 +249,7 @@ public:
 	inline bool isDynamicFloat() const { return true; }
 	inline QString typeName() const { return QString("DynamicFloat"); }
 	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
+	using FloatValue::fillToXMLElement;
 
 };
 
