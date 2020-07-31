@@ -1242,7 +1242,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 
             for(RichParameter* p : tmpSet)
             {
-                RichParameter* par = currSet.findParameter(p->name());
+                const RichParameter* par = currSet.findParameter(p->name());
                 tmpSet.setValue(p->name(),par->value());
             }
 

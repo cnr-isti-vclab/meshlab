@@ -34,7 +34,6 @@ set(HEADERS
     filter_parameter/value.h
     GLExtensionsManager.h
     GLLogStream.h
-    filterparameter.h
     filterscript.h
     interfaces.h
     meshlabdocumentbundler.h
