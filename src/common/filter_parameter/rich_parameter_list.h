@@ -32,6 +32,7 @@ class RichParameterList
 public:
 	RichParameterList();
 	RichParameterList(const RichParameterList& rps);
+	RichParameterList(RichParameterList&& rps);
 	~RichParameterList();
 
 	bool isEmpty() const;
@@ -39,8 +40,7 @@ public:
 	bool hasParameter(const QString& name) const;
 
 
-	RichParameterList& operator=(const RichParameterList& rps);
-	RichParameterList& copy(const RichParameterList& rps);
+	RichParameterList& operator=(RichParameterList rps);
 	RichParameterList& join(const RichParameterList& rps);
 	bool operator==(const RichParameterList& rps);
 
@@ -84,6 +84,8 @@ public:
 	iterator end();
 	const_iterator begin() const;
 	const_iterator end() const;
+
+	void swap(RichParameterList& oth);
 
 private:
 	std::list<RichParameter*> paramList;

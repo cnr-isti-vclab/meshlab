@@ -11,10 +11,16 @@ RichParameterList::RichParameterList()
 
 RichParameterList::RichParameterList( const RichParameterList& rps )
 {
-	clear();
-
 	for(auto p : rps.paramList) {
 		paramList.push_back(p->clone());
+	}
+}
+
+RichParameterList::RichParameterList(RichParameterList&& rps)
+{
+	for(auto& p : rps.paramList) {
+		paramList.push_back(p);
+		p = nullptr;
 	}
 }
 
@@ -133,9 +139,14 @@ RichParameterList::const_iterator RichParameterList::end() const
 	return paramList.end();
 }
 
-RichParameterList& RichParameterList::operator=( const RichParameterList& rps )
+void RichParameterList::swap(RichParameterList& oth)
 {
-	copy(rps);
+	std::swap(paramList, oth.paramList);
+}
+
+RichParameterList& RichParameterList::operator=(RichParameterList rps)
+{
+	swap(rps);
 	return *this;
 }
 
@@ -155,18 +166,6 @@ bool RichParameterList::operator==( const RichParameterList& rps )
 	}
 
 	return iseq;
-}
-
-RichParameterList& RichParameterList::copy( const RichParameterList& rps )
-{
-	if (this != &rps) {
-		clear();
-
-		for(const RichParameter* p : rps.paramList){
-			paramList.push_back(p->clone());
-		}
-	}
-	return (*this);
 }
 
 bool RichParameterList::isEmpty() const
