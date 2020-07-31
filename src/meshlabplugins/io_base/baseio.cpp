@@ -135,8 +135,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			return false;
 		}
 
-		const RichParameter* stlunif = parlst.findParameter(stlUnifyParName());
-		if ((stlunif != NULL) && (stlunif->value().getBool()))
+		bool stluinf = parlst.getBool(stlUnifyParName());
+		if (stluinf)
 		{
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
