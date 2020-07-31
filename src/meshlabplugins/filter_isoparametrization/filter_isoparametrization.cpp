@@ -102,13 +102,13 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
   {
   case ISOP_PARAM:
   {
-    par.addParam(new RichInt("targetAbstractMinFaceNum",150,"AM  Min Size",
+    par.addParam(RichInt("targetAbstractMinFaceNum",150,"AM  Min Size",
                              "This number and the following one indicate the range face number of the abstract mesh that is used for the parametrization process.<br>"
                              "The algorithm will choose the best abstract mesh with the number of triangles within the specified interval.<br>"
                              "If the mesh has a very simple structure this range can be very low and strict;"
                              "for a roughly spherical object if you can specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>"
                              "Large numbers (greater than 400) are usually not of practical use."));
-    par.addParam(new RichInt("targetAbstractMaxFaceNum",200,"AM Max Size", "Please notice that a large interval requires huge amount of memory to be allocated, in order save the intermediate results. <br>"
+    par.addParam(RichInt("targetAbstractMaxFaceNum",200,"AM Max Size", "Please notice that a large interval requires huge amount of memory to be allocated, in order save the intermediate results. <br>"
                                                                                       "An interval of 50 should be fine."));
     QStringList stopCriteriaList;
     stopCriteriaList.push_back("Best Heuristic");
@@ -116,7 +116,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
     stopCriteriaList.push_back("Regularity");
     stopCriteriaList.push_back("L2");
     
-    par.addParam(new RichEnum("stopCriteria", 1, stopCriteriaList, tr("Optimization Criteria"),
+    par.addParam(RichEnum("stopCriteria", 1, stopCriteriaList, tr("Optimization Criteria"),
                               tr(//"<p style=\'white-space:pre\'>"
                                  "Choose a metric to stop the parametrization within the interval<br>"
                                  "1: Best Heuristic : stop considering both isometry and number of faces of base domain<br>"
@@ -124,21 +124,21 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
                                  "3: Regularity : stop at minimum number of irregular vertices<br>"
                                  "4: L2 : stop at minimum OneWay L2 Stretch Eff")));
     
-    par.addParam(new RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slightly better results"));
-    par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust."
+    par.addParam(RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slightly better results"));
+    par.addParam(RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust."
                                                               "<br> Consider to disable this bool in case the object has topologycal noise or small handles."));
-    par.addParam(new RichString("AbsLoadName", "", "Load AM", "The filename of the abstract mesh that has to be loaded. If empty, the abstract mesh will be computed according to the above parameters (suggested extension '.abs')."));
-    par.addParam(new RichString("AbsSaveName", "", "Save AM", "The filename where the computed abstract mesh will be saved. If empty, nothing will be done."));    
+    par.addParam(RichString("AbsLoadName", "", "Load AM", "The filename of the abstract mesh that has to be loaded. If empty, the abstract mesh will be computed according to the above parameters (suggested extension '.abs')."));
+    par.addParam(RichString("AbsSaveName", "", "Save AM", "The filename where the computed abstract mesh will be saved. If empty, nothing will be done."));
     break;
   }
   case ISOP_REMESHING :
   {
-    par.addParam(new RichInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing. Must be greater than 2"));
+    par.addParam(RichInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing. Must be greater than 2"));
     break;
   }
   case ISOP_DIAMPARAM :
   {
-    par.addParam(new RichDynamicFloat("BorderSize",0.1f,0.01f,0.5f,"BorderSize ratio",
+    par.addParam(RichDynamicFloat("BorderSize",0.1f,0.01f,0.5f,"BorderSize ratio",
                                       "This parameter controls the amount of space that must be left between each diamond when building the atlas."
                                       "It directly affects how many triangle are split during this conversion. <br>"
                                       "In abstract parametrization mesh triangles can naturally cross the triangles of the abstract domain, so when converting "
@@ -149,8 +149,8 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
   }
   case ISOP_TRANSFER:
   {
-    par.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
-    par.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
+    par.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
+    par.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
   }
   }
 }

@@ -60,11 +60,12 @@ RichParameterList& RichParameterList::removeParameter(const QString& name){
     return (*this);
 }
 
-RichParameterList& RichParameterList::addParam(RichParameter* pd )
+RichParameter* RichParameterList::addParam(const RichParameter& pd )
 {
-    assert(!hasParameter(pd->name));
-    paramList.push_back(pd);
-    return (*this);
+    assert(!hasParameter(pd.name()));
+    RichParameter* rp = pd.clone();
+    paramList.push_back(rp);
+    return rp;
 }
 
 //--------------------------------------
@@ -102,8 +103,9 @@ unsigned int RichParameterList::size() const
 RichParameter* RichParameterList::pushFromQDomElement(QDomElement np)
 {
     RichParameter* rp = nullptr;
-    RichParameterAdapter::create(np, &rp);
-    paramList.push_back(rp);
+    bool b = RichParameterAdapter::create(np, &rp);
+    if (b)
+        paramList.push_back(rp);
     return rp;
 }
 

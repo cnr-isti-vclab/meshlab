@@ -92,17 +92,17 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
- 		  parlst.addParam(new RichColor ("baseColor",
+		  parlst.addParam(RichColor ("baseColor",
 											 Color4b::Black,
 											"BaseColor",
 											"The base color that is added to the mesh."));
 			
-			parlst.addParam(new RichDynamicFloat("percentage",
+			parlst.addParam(RichDynamicFloat("percentage",
 												 0.5, 0, 1,
 												"Alpha",
 												"The random color is blended with the current one with the specified alpha"));
 														
-			parlst.addParam(new RichDynamicFloat("frequency",
+			parlst.addParam(RichDynamicFloat("frequency",
 														 20, 1, 200,
 														 "Noisy Frequency",
 														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots."));

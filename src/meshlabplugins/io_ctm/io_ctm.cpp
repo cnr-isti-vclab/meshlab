@@ -94,9 +94,9 @@ void IOMPlugin::GetExportMaskCapability(QString &/*format*/, int &capability, in
 }
 void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & par)
 {
-  par.addParam(new RichBool("LossLess",false, "LossLess compression",
+  par.addParam(RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));
-  par.addParam(new RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
+  par.addParam(RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
                              "It is a number relative to the average edge length. (e.g. the default means that the error should be roughly 1/10000 of the average edge length)"));
 }

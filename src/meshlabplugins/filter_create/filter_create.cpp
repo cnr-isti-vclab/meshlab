@@ -98,24 +98,24 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
   switch(ID(action))	 {
 
   case CR_SPHERE :
-    parlst.addParam(new RichFloat("radius",1,"Radius","Radius of the sphere"));
-    parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+    parlst.addParam(RichFloat("radius",1,"Radius","Radius of the sphere"));
+    parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
     break;
 
   case CR_SPHERE_CAP :
-    parlst.addParam(new RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
-    parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+    parlst.addParam(RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
+    parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
     break;
   case CR_ANNULUS :
-    parlst.addParam(new RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
-    parlst.addParam(new RichFloat("externalRadius",1.0f,"External Radius","Externale Radius of the annulus"));
-    parlst.addParam(new RichInt("sides",32,"Sides","Number of the sides of the poligonal approximation of the annulus "));
+    parlst.addParam(RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
+    parlst.addParam(RichFloat("externalRadius",1.0f,"External Radius","Externale Radius of the annulus"));
+    parlst.addParam(RichInt("sides",32,"Sides","Number of the sides of the poligonal approximation of the annulus "));
     break;
   case CR_RANDOM_SPHERE :
-    parlst.addParam(new RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
-    parlst.addParam(new RichEnum("sphereGenTech", 3,
+    parlst.addParam(RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
+    parlst.addParam(RichEnum("sphereGenTech", 3,
                                  QStringList() << "Montecarlo" << "Poisson Sampling" << "DiscoBall" << "Octahedron" << "Fibonacci",
                                  tr("Generation Technique:"),
                                  tr("Generation Technique:"
@@ -128,27 +128,27 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 
     break;
   case CR_BOX :
-    parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
+    parlst.addParam(RichFloat("size",1,"Scale factor","Scales the new mesh"));
     break;
   case CR_CONE:
-    parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
-    parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
-    parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
-    parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
+    parlst.addParam(RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
+    parlst.addParam(RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
+    parlst.addParam(RichFloat("h",3,"Height","Height of the Cone"));
+    parlst.addParam(RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
     break;
 
   case CR_TORUS:
-    parlst.addParam(new RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
-    parlst.addParam(new RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
-    parlst.addParam(new RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
-    parlst.addParam(new RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
+    parlst.addParam(RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
+    parlst.addParam(RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
+    parlst.addParam(RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
+    parlst.addParam(RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
     break;
 
   case CR_FITPLANE:
-	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
-	  parlst.addParam(new RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
-	  parlst.addParam(new RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
-	  parlst.addParam(new RichEnum("orientation", 0,
+      parlst.addParam(RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
+      parlst.addParam(RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
+      parlst.addParam(RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
+      parlst.addParam(RichEnum("orientation", 0,
 		  QStringList() << "quasi-Straight Fit" << "Best Fit" << "XZ Parallel" << "YZ Parallel" << "YX Parallel",
 		  tr("Plane orientation"),
 		  tr("Orientation:"

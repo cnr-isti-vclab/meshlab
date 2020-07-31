@@ -223,42 +223,42 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
   switch(ID(action))
   {
     case FP_BALL_PIVOTING :
-          parlst.addParam(new RichAbsPerc("BallRadius",0.0f,0.0f,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
-          parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));
-          parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
-          parlst.addParam(new RichBool("DeleteFaces",false,"Delete initial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch. Otherwise the current faces are used as a starting point. Useful if you run the algorithm multiple times with an increasing ball radius."));
+          parlst.addParam(RichAbsPerc("BallRadius",0.0f,0.0f,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
+          parlst.addParam(RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));
+          parlst.addParam(RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
+          parlst.addParam(RichBool("DeleteFaces",false,"Delete initial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch. Otherwise the current faces are used as a starting point. Useful if you run the algorithm multiple times with an increasing ball radius."));
           break;
     case FP_REMOVE_ISOLATED_DIAMETER:
-          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0f,0.0f,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
-		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
+          parlst.addParam(RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0f,0.0f,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
+          parlst.addParam(RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
-          parlst.addParam(new RichInt("MinComponentSize",25,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
-		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
+          parlst.addParam(RichInt("MinComponentSize",25,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
+          parlst.addParam(RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_WRT_Q:
           qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-          parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)1.0, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
+          parlst.addParam(RichAbsPerc("MaxQualityThr",(float)1.0, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
           break;
     case  FP_MERGE_CLOSE_VERTEX:
-          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0f,0.0f,md.mm()->cm.bbox.Diag()/100.0f,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+          parlst.addParam(RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0f,0.0f,md.mm()->cm.bbox.Diag()/100.0f,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
           break;
     case FP_MERGE_WEDGE_TEX :
-          parlst.addParam(new RichFloat("MergeThr",1.0f/10000.0f,"Merging Threshold","All the per-wedge texture coords that are on the same vertex and are distant less then the given threshold are merged together. It can be used to remove the fake texture seams that arise from error. Distance is in texture space (the default, 1e-4, corresponds to one texel on a 10kx10x texture) "));
+          parlst.addParam(RichFloat("MergeThr",1.0f/10000.0f,"Merging Threshold","All the per-wedge texture coords that are on the same vertex and are distant less then the given threshold are merged together. It can be used to remove the fake texture seams that arise from error. Distance is in texture space (the default, 1e-4, corresponds to one texel on a 10kx10x texture) "));
           break;
     case FP_SNAP_MISMATCHED_BORDER:
-    parlst.addParam(new RichFloat("EdgeDistRatio",1/100.0f,"Edge Distance Ratio", "Collapse edge when the edge / distance ratio is greater than this value. E.g. for default value 1000 two straight border edges are collapsed if the central vertex dist from the straight line composed by the two edges less than a 1/1000 of the sum of the edges length. Larger values enforce that only vertices very close to the line are removed."));
-    parlst.addParam(new RichBool("UnifyVertices",true,"UnifyVertices","if true the snap vertices are weld together."));
+    parlst.addParam(RichFloat("EdgeDistRatio",1/100.0f,"Edge Distance Ratio", "Collapse edge when the edge / distance ratio is greater than this value. E.g. for default value 1000 two straight border edges are collapsed if the central vertex dist from the straight line composed by the two edges less than a 1/1000 of the sum of the edges length. Larger values enforce that only vertices very close to the line are removed."));
+    parlst.addParam(RichBool("UnifyVertices",true,"UnifyVertices","if true the snap vertices are weld together."));
       break;
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
-       parlst.addParam(new RichFloat(
+       parlst.addParam(RichFloat(
                "Threshold", 40, "Ratio", "Detects faces where the base/height ratio is lower than this value"));
-       parlst.addParam(new RichBool(
+       parlst.addParam(RichBool(
                "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence"));
        break;
     case FP_REMOVE_NON_MANIF_VERT :
-       parlst.addParam(new RichFloat("VertDispRatio", 0, "Vertex Displacement Ratio", "When a vertex is split it is moved along the average vector going from its position to the baricyenter of the FF connected faces sharing it"));
+       parlst.addParam(RichFloat("VertDispRatio", 0, "Vertex Displacement Ratio", "When a vertex is split it is moved along the average vector going from its position to the baricyenter of the FF connected faces sharing it"));
        break;
   default: break; // do not add any parameter for the other filters
   }

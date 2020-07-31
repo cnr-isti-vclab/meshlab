@@ -612,7 +612,7 @@ public:
             {
                 if (!parameterSet.hasParameter(rp->name()))
                 {
-                    parameterSet.addParam(rp->clone());
+                    parameterSet.addParam(*rp);
                 }
                 assert(parameterSet.paramList.size() == required.paramList.size());
                 RichParameterList::iterator it = parameterSet.begin();

@@ -99,22 +99,22 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichPar
     switch(ID(filter)){
 
     case FP_DIRT:{
-		par.addParam(new RichPoint3f("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
-		par.addParam(new RichInt("nparticles", 3, "max particles x face", "Max Number of Dust Particles to Generate Per Face"));
-		par.addParam(new RichFloat("slippiness", 1.0f, "s", "The surface slippines(large s means less sticky)"));
-		par.addParam(new RichFloat("adhesion", 0.2f, "k", "Factor to model the general adhesion"));
-		par.addParam(new RichBool("draw_texture", false, "Draw Dust", "create a new texture saved in dirt_texture.png"));
-		// par.addParam(new RichBool("colorize_mesh",false,"Map to Color","Color the mesh with colors based on the movement of the particle"));
+        par.addParam(RichPoint3f("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
+        par.addParam(RichInt("nparticles", 3, "max particles x face", "Max Number of Dust Particles to Generate Per Face"));
+        par.addParam(RichFloat("slippiness", 1.0f, "s", "The surface slippines(large s means less sticky)"));
+        par.addParam(RichFloat("adhesion", 0.2f, "k", "Factor to model the general adhesion"));
+        par.addParam(RichBool("draw_texture", false, "Draw Dust", "create a new texture saved in dirt_texture.png"));
+        // par.addParam(RichBool("colorize_mesh",false,"Map to Color","Color the mesh with colors based on the movement of the particle"));
         break;
     }
     case FP_CLOUD_MOVEMENT:{
-		par.addParam(new RichPoint3f("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
-		par.addParam(new RichPoint3f("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
-		par.addParam(new RichInt("steps", 1, "s", "Simulation Steps"));
-		par.addParam(new RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f, "adhesion", "Factor to model the general adhesion."));
-		par.addParam(new RichFloat("velocity", 0, "v", "Initial velocity of the particle"));
-		par.addParam(new RichFloat("mass", 1, "m", "Mass of the particle"));
-		par.addParam(new RichBool("colorize_mesh", false, "Map to Color", "Color the mesh with colors based on the movement of the particle"));
+        par.addParam(RichPoint3f("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
+        par.addParam(RichPoint3f("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
+        par.addParam(RichInt("steps", 1, "s", "Simulation Steps"));
+        par.addParam(RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f, "adhesion", "Factor to model the general adhesion."));
+        par.addParam(RichFloat("velocity", 0, "v", "Initial velocity of the particle"));
+        par.addParam(RichFloat("mass", 1, "m", "Mass of the particle"));
+        par.addParam(RichBool("colorize_mesh", false, "Map to Color", "Color the mesh with colors based on the movement of the particle"));
 		break;
     }
     default:{

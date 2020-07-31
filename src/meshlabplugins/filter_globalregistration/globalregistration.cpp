@@ -72,15 +72,15 @@ void GlobalRegistrationPlugin::initParameterSet(QAction *action,MeshDocument &md
      switch(ID(action))	 {
         case FP_GLOBAL_REGISTRATION :
 
-         parlst.addParam(new RichMesh ("refMesh",md.mm(),&md, "Reference Mesh",	"Reference point-cloud or mesh"));
-         parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"Point-cloud or mesh to be aligned to the reference"));
-         parlst.addParam(new RichAbsPerc("overlap", 50, 0, 100, "Overlap Ratio", "Overlap ratio between the two clouds (command line option: -o)"));
-         parlst.addParam(new RichFloat("delta",   0.1, "Registration tolerance", "Tolerance value for the congruent set exploration and LCP computation (command line option: -d)"));
-         parlst.addParam(new RichInt("nbSamples", 200, "Number of samples", "Number of samples used in each mesh (command line option: -n)"));
-         parlst.addParam(new RichFloat("norm_diff", -1, "Filter: difference of normal (degrees)", "Allowed difference of normals allowed between corresponding pairs of points(command line option: -a)"));
-         parlst.addParam(new RichFloat("color_diff", -1, "Filter: difference color", "Allowed difference of colors allowed between corresponding pairs of points(command line option: -c)"));
-         parlst.addParam(new RichInt("max_time_seconds", 10000, "Max. Computation time, in seconds", "Stop the computation before the end of the exploration (command line option: -t)"));
-         parlst.addParam(new RichBool("useSuper4PCS", true, "Use Super4PCS", "When disable, use 4PCS algorithm (command line option: -x"));
+         parlst.addParam(RichMesh ("refMesh",md.mm(),&md, "Reference Mesh",	"Reference point-cloud or mesh"));
+         parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"Point-cloud or mesh to be aligned to the reference"));
+         parlst.addParam(RichAbsPerc("overlap", 50, 0, 100, "Overlap Ratio", "Overlap ratio between the two clouds (command line option: -o)"));
+         parlst.addParam(RichFloat("delta",   0.1, "Registration tolerance", "Tolerance value for the congruent set exploration and LCP computation (command line option: -d)"));
+         parlst.addParam(RichInt("nbSamples", 200, "Number of samples", "Number of samples used in each mesh (command line option: -n)"));
+         parlst.addParam(RichFloat("norm_diff", -1, "Filter: difference of normal (degrees)", "Allowed difference of normals allowed between corresponding pairs of points(command line option: -a)"));
+         parlst.addParam(RichFloat("color_diff", -1, "Filter: difference color", "Allowed difference of colors allowed between corresponding pairs of points(command line option: -c)"));
+         parlst.addParam(RichInt("max_time_seconds", 10000, "Max. Computation time, in seconds", "Stop the computation before the end of the exploration (command line option: -t)"));
+         parlst.addParam(RichBool("useSuper4PCS", true, "Use Super4PCS", "When disable, use 4PCS algorithm (command line option: -x"));
 
          break;
      default : assert(0);

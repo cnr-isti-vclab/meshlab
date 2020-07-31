@@ -256,111 +256,111 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
   switch(ID(action))	 {
 
   case FF_VERT_SELECTION :
-    parlst.addParam(new RichString("condSelect","(q < 0)", "boolean function",
+    parlst.addParam(RichString("condSelect","(q < 0)", "boolean function",
                                    "type a boolean function that will be evaluated in order to select a subset of vertices<br>"
                                    "example: (y > 0) and (ny > 0)"));
     break;
 
   case FF_FACE_SELECTION :
-    parlst.addParam(new RichString("condSelect","(fi == 0)", "boolean function",
+    parlst.addParam(RichString("condSelect","(fi == 0)", "boolean function",
                                    "type a boolean function that will be evaluated in order to select a subset of faces<br>"));
     break;
 
   case FF_GEOM_FUNC:
-	  parlst.addParam(new RichString("x", "x", "func x = ", "insert function to generate new coord for x"));
-	  parlst.addParam(new RichString("y", "y", "func y = ", "insert function to generate new coord for y"));
-	  parlst.addParam(new RichString("z", "sin(x+y)", "func z = ", "insert function to generate new coord for z"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
+      parlst.addParam(RichString("x", "x", "func x = ", "insert function to generate new coord for x"));
+      parlst.addParam(RichString("y", "y", "func y = ", "insert function to generate new coord for y"));
+      parlst.addParam(RichString("z", "sin(x+y)", "func z = ", "insert function to generate new coord for z"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_NORMAL:
-	  parlst.addParam(new RichString("x", "-nx", "func nx = ", "insert function to generate new x for the normal"));
-	  parlst.addParam(new RichString("y", "-ny", "func ny = ", "insert function to generate new y for the normal"));
-	  parlst.addParam(new RichString("z", "-nz", "func nz = ", "insert function to generate new z for the normal"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
+      parlst.addParam(RichString("x", "-nx", "func nx = ", "insert function to generate new x for the normal"));
+      parlst.addParam(RichString("y", "-ny", "func ny = ", "insert function to generate new y for the normal"));
+      parlst.addParam(RichString("z", "-nz", "func nz = ", "insert function to generate new z for the normal"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_COLOR:
-	  parlst.addParam(new RichString("x", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("y", "255", "func g = ", "function to generate Green component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("z", "0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
+      parlst.addParam(RichString("x", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+      parlst.addParam(RichString("y", "255", "func g = ", "function to generate Green component. Expected Range 0-255"));
+      parlst.addParam(RichString("z", "0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
+      parlst.addParam(RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_TEXTURE_FUNC:
-	  parlst.addParam(new RichString("u", "x", "func u = ", "function to generate u texture coord. Expected Range 0-1"));
-	  parlst.addParam(new RichString("v", "y", "func v = ", "function to generate v texture coord. Expected Range 0-1"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
+      parlst.addParam(RichString("u", "x", "func u = ", "function to generate u texture coord. Expected Range 0-1"));
+      parlst.addParam(RichString("v", "y", "func v = ", "function to generate v texture coord. Expected Range 0-1"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_QUALITY:
-	  parlst.addParam(new RichString("q", "vi", "func q = ", "function to generate new Quality for every vertex"));
-	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
-	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
+      parlst.addParam(RichString("q", "vi", "func q = ", "function to generate new Quality for every vertex"));
+      parlst.addParam(RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
+      parlst.addParam(RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_FACE_COLOR:
-	  parlst.addParam(new RichString("r", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("g", "0", "func g = ", "function to generate Green component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("b", "255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
-	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
+      parlst.addParam(RichString("r", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+      parlst.addParam(RichString("g", "0", "func g = ", "function to generate Green component. Expected Range 0-255"));
+      parlst.addParam(RichString("b", "255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
+      parlst.addParam(RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
 	  break;
 
   case FF_FACE_QUALITY:
-	  parlst.addParam(new RichString("q", "x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
-	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
-	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
+      parlst.addParam(RichString("q", "x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
+      parlst.addParam(RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
+      parlst.addParam(RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
+      parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
 	  break;
 
   case FF_WEDGE_TEXTURE_FUNC:
-    parlst.addParam(new RichString("u0","x0", "func u0 = ", "function to generate u texture coord. of wedge 0. Expected Range 0-1"));
-    parlst.addParam(new RichString("v0","y0", "func v0 = ", "function to generate v texture coord. of wedge 0. Expected Range 0-1"));
-    parlst.addParam(new RichString("u1","x1", "func u1 = ", "function to generate u texture coord. of wedge 1. Expected Range 0-1"));
-    parlst.addParam(new RichString("v1","y1", "func v1 = ", "function to generate v texture coord. of wedge 1. Expected Range 0-1"));
-    parlst.addParam(new RichString("u2","x2", "func u2 = ", "function to generate u texture coord. of wedge 2. Expected Range 0-1"));
-    parlst.addParam(new RichString("v2","y2", "func v2 = ", "function to generate v texture coord. of wedge 2. Expected Range 0-1"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
+    parlst.addParam(RichString("u0","x0", "func u0 = ", "function to generate u texture coord. of wedge 0. Expected Range 0-1"));
+    parlst.addParam(RichString("v0","y0", "func v0 = ", "function to generate v texture coord. of wedge 0. Expected Range 0-1"));
+    parlst.addParam(RichString("u1","x1", "func u1 = ", "function to generate u texture coord. of wedge 1. Expected Range 0-1"));
+    parlst.addParam(RichString("v1","y1", "func v1 = ", "function to generate v texture coord. of wedge 1. Expected Range 0-1"));
+    parlst.addParam(RichString("u2","x2", "func u2 = ", "function to generate u texture coord. of wedge 2. Expected Range 0-1"));
+    parlst.addParam(RichString("v2","y2", "func v2 = ", "function to generate v texture coord. of wedge 2. Expected Range 0-1"));
+    parlst.addParam(RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
     break;
 
   case FF_DEF_VERT_ATTRIB:
-    parlst.addParam(new RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
-    parlst.addParam(new RichString("expr","x","Function =", "function to calculate custom attribute value for each vertex"));
+    parlst.addParam(RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
+    parlst.addParam(RichString("expr","x","Function =", "function to calculate custom attribute value for each vertex"));
     break;
 
   case FF_DEF_FACE_ATTRIB:
-    parlst.addParam(new RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
-    parlst.addParam(new RichString("expr","fi","Function =", "function to calculate custom attribute value for each face"));
+    parlst.addParam(RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
+    parlst.addParam(RichString("expr","fi","Function =", "function to calculate custom attribute value for each face"));
     break;
 
   case FF_GRID :
-    parlst.addParam(new RichInt("numVertX", 10, "num vertices on x", "number of vertices on x. it must be positive"));
-    parlst.addParam(new RichInt("numVertY", 10, "num vertices on y", "number of vertices on y. it must be positive"));
-    parlst.addParam(new RichFloat("absScaleX", 0.3f, "x scale", "absolute scale on x (float)"));
-    parlst.addParam(new RichFloat("absScaleY", 0.3f, "y scale", "absolute scale on y (float)"));
-    parlst.addParam(new RichBool("center",false,"centered on origin", "center grid generated by filter on origin.<br>"
+    parlst.addParam(RichInt("numVertX", 10, "num vertices on x", "number of vertices on x. it must be positive"));
+    parlst.addParam(RichInt("numVertY", 10, "num vertices on y", "number of vertices on y. it must be positive"));
+    parlst.addParam(RichFloat("absScaleX", 0.3f, "x scale", "absolute scale on x (float)"));
+    parlst.addParam(RichFloat("absScaleY", 0.3f, "y scale", "absolute scale on y (float)"));
+    parlst.addParam(RichBool("center",false,"centered on origin", "center grid generated by filter on origin.<br>"
                                  "Grid is first generated and than moved into origin (using muparser lib to perform fast calc on every vertex)"));
     break;
   case FF_ISOSURFACE :
-    parlst.addParam(new RichFloat("voxelSize", 0.05f, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times."));
-    parlst.addParam(new RichFloat("minX", -1.0f, "Min X", "Range where the field is sampled"));
-	parlst.addParam(new RichFloat("minY", -1.0f, "Min Y", "Range where the field is sampled"));
-	parlst.addParam(new RichFloat("minZ", -1.0f, "Min Z", "Range where the field is sampled"));
-	parlst.addParam(new RichFloat("maxX", 1.0f, "Max X", "Range where the field is sampled"));
-	parlst.addParam(new RichFloat("maxY", 1.0f, "Max Y", "Range where the field is sampled"));
-	parlst.addParam(new RichFloat("maxZ", 1.0f, "Max Z", "Range where the field is sampled"));
-    parlst.addParam(new RichString("expr","x*x+y*y+z*z-0.5","Function =", "This expression is evaluated for each voxel of the grid. The surface passing through the zero valued points of this field is then extracted using marching cube."));
+    parlst.addParam(RichFloat("voxelSize", 0.05f, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times."));
+    parlst.addParam(RichFloat("minX", -1.0f, "Min X", "Range where the field is sampled"));
+    parlst.addParam(RichFloat("minY", -1.0f, "Min Y", "Range where the field is sampled"));
+    parlst.addParam(RichFloat("minZ", -1.0f, "Min Z", "Range where the field is sampled"));
+    parlst.addParam(RichFloat("maxX", 1.0f, "Max X", "Range where the field is sampled"));
+    parlst.addParam(RichFloat("maxY", 1.0f, "Max Y", "Range where the field is sampled"));
+    parlst.addParam(RichFloat("maxZ", 1.0f, "Max Z", "Range where the field is sampled"));
+    parlst.addParam(RichString("expr","x*x+y*y+z*z-0.5","Function =", "This expression is evaluated for each voxel of the grid. The surface passing through the zero valued points of this field is then extracted using marching cube."));
 
     break;
 
   case FF_REFINE :
-    parlst.addParam(new RichString("condSelect","(q0 >= 0 && q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge"));
-    parlst.addParam(new RichString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2"));
-    parlst.addParam(new RichString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2"));
-    parlst.addParam(new RichString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2"));
+    parlst.addParam(RichString("condSelect","(q0 >= 0 && q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge"));
+    parlst.addParam(RichString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2"));
+    parlst.addParam(RichString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2"));
+    parlst.addParam(RichString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2"));
     break;
 
   default: break; // do not add any parameter for the other filters

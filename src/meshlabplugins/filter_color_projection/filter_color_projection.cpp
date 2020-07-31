@@ -109,55 +109,55 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
     {
     case FP_SINGLEIMAGEPROJ :
         {
-            parlst.addParam(new RichBool ("usedepth",
+            parlst.addParam(RichBool ("usedepth",
                 true,
                 "Use depth for projection",
                 "If true, depth is used to restrict projection on visible faces"));
-            parlst.addParam(new RichFloat ("deptheta",
+            parlst.addParam(RichFloat ("deptheta",
                 0.5,
                 "depth threshold",
                 "threshold value for depth buffer projection (shadow buffer)"));
-            parlst.addParam(new RichBool ("onselection",
+            parlst.addParam(RichBool ("onselection",
                 false,
                 "Only on selection",
                 "If true, projection is only done for selected vertices"));
 			QColor color1 = QColor(0, 0, 0, 255);
-            parlst.addParam(new RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
+			parlst.addParam(RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
     case FP_MULTIIMAGETRIVIALPROJ :
         {
-            parlst.addParam(new RichFloat ("deptheta",
+            parlst.addParam(RichFloat ("deptheta",
                 0.5,
                 "depth threshold",
                 "threshold value for depth buffer projection (shadow buffer)"));
-            parlst.addParam(new RichBool ("onselection",
+            parlst.addParam(RichBool ("onselection",
                 false,
                 "Only on selection",
                 "If true, projection is only done for selected vertices"));
-            parlst.addParam(new RichBool ("useangle",
+            parlst.addParam(RichBool ("useangle",
                 true,
                 "use angle weight",
                 "If true, color contribution is weighted by pixel view angle"));
-            parlst.addParam(new RichBool ("usedistance",
+            parlst.addParam(RichBool ("usedistance",
                 true,
                 "use distance weight",
                 "If true, color contribution is weighted by pixel view distance"));
-            parlst.addParam(new RichBool ("useborders",
+            parlst.addParam(RichBool ("useborders",
                 true,
                 "use image borders weight",
                 "If true, color contribution is weighted by pixel distance from image boundaries"));
-            parlst.addParam(new RichBool ("usesilhouettes",
+            parlst.addParam(RichBool ("usesilhouettes",
                 true,
                 "use depth discontinuities weight",
                 "If true, color contribution is weighted by pixel distance from depth discontinuities (external and internal silhouettes)"));
-            parlst.addParam(new RichBool ("usealpha",
+            parlst.addParam(RichBool ("usealpha",
                 false,
                 "use image alpha weight",
                 "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
 			QColor color1 = QColor(0, 0, 0, 255);
-			parlst.addParam(new RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
+			parlst.addParam(RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
@@ -165,43 +165,43 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
         {
             QString fileName = extractFilenameWOExt(md.mm());
             fileName = fileName.append("_color.png");
-            parlst.addParam(new RichString("textName",
+            parlst.addParam(RichString("textName",
                 fileName,
                 "Texture file",
                 "The texture file to be created"));
-            parlst.addParam(new RichInt ("texsize",
+            parlst.addParam(RichInt ("texsize",
                 1024,
                 "pixel size of texture image",
                 "pixel size of texture image, the image will be a square tsize X tsize, most applications do require that tsize is a power of 2"));
-            parlst.addParam(new RichBool ("dorefill",
+            parlst.addParam(RichBool ("dorefill",
                 true,
                 "fill atlas gaps",
                 "If true, unfilled areas of the mesh are interpolated, to avoid visible seams while mipmapping"));
-            parlst.addParam(new RichFloat ("deptheta",
+            parlst.addParam(RichFloat ("deptheta",
                 0.5,
                 "depth threshold",
                 "threshold value for depth buffer projection (shadow buffer)"));
-            parlst.addParam(new RichBool ("onselection",
+            parlst.addParam(RichBool ("onselection",
                 false,
                 "Only on selection",
                 "If true, projection is only done for selected vertices"));
-            parlst.addParam(new RichBool ("useangle",
+            parlst.addParam(RichBool ("useangle",
                 true,
                 "use angle weight",
                 "If true, color contribution is weighted by pixel view angle"));
-            parlst.addParam(new RichBool ("usedistance",
+            parlst.addParam(RichBool ("usedistance",
                 true,
                 "use distance weight",
                 "If true, color contribution is weighted by pixel view distance"));
-            parlst.addParam(new RichBool ("useborders",
+            parlst.addParam(RichBool ("useborders",
                 true,
                 "use image borders weight",
                 "If true, color contribution is weighted by pixel distance from image boundaries"));
-            parlst.addParam(new RichBool ("usesilhouettes",
+            parlst.addParam(RichBool ("usesilhouettes",
                 true,
                 "use depth discontinuities weight",
                 "If true, color contribution is weighted by pixel distance from depth discontinuities (external and internal silhouettes)"));
-            parlst.addParam(new RichBool ("usealpha",
+            parlst.addParam(RichBool ("usealpha",
                 false,
                 "use image alpha weight",
                 "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));

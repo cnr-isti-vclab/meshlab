@@ -82,24 +82,24 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
             CMeshO::ScalarType mindim = min(md.mm()->cm.bbox.Dim().V(md.mm()->cm.bbox.MinDim()),
                                             target->cm.bbox.Dim().V(target->cm.bbox.MinDim()));
 
-            parlst.addParam(new RichMesh("FirstMesh", md.mm(), &md, "First Mesh",
+            parlst.addParam(RichMesh("FirstMesh", md.mm(), &md, "First Mesh",
                                          "The first operand of the CSG operation"));
-            parlst.addParam(new RichMesh("SecondMesh", target, &md, "Second Mesh",
+            parlst.addParam(RichMesh("SecondMesh", target, &md, "Second Mesh",
                                          "The second operand of the CSG operation"));
-            parlst.addParam(new RichAbsPerc("Delta", mindim / 100.0, 0, mindim,
+            parlst.addParam(RichAbsPerc("Delta", mindim / 100.0, 0, mindim,
                                             "Spacing between sampling lines",
                                             "This parameter controls the accuracy of the result and the speed of the computation."
                                             "The time and memory needed to perform the operation usually scale as the reciprocal square of this value."
                                             "For optimal results, this value should be at most half the the smallest feature (i.e. the highest frequency) you want to reproduce."));
-            parlst.addParam(new RichInt("SubDelta", 32, "Discretization points per sample interval",
+            parlst.addParam(RichInt("SubDelta", 32, "Discretization points per sample interval",
                                         "This is the number of points between the sampling lines to which the vertices can be rounded."
                                         "Increasing this can marginally increase the precision and decrease the speed of the operation."));
-            parlst.addParam(new RichEnum("Operator", 0,
+            parlst.addParam(RichEnum("Operator", 0,
                                          QStringList() << "Intersection" << "Union" << "Difference", "Operator",
                                          "Intersection takes the volume shared between the two meshes; "
                                          "Union takes the volume included in at least one of the two meshes; "
                                          "Difference takes the volume included in the first mesh but not in the second one"));
-//            parlst.addParam(new RichBool("Extended", false, "Extended Marching Cubes",
+//            parlst.addParam(RichBool("Extended", false, "Extended Marching Cubes",
 //                                         "Use extended marching cubes for surface reconstruction. "
 //                                         "It tries to improve the quality of the mesh by reconstructing the sharp features "
 //                                         "using the information in vertex normals"));

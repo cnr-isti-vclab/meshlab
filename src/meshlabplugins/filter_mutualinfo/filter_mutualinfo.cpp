@@ -96,14 +96,14 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*m
 	rendList.push_back("Specular combined");
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO:
-		parlst.addParam(new RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
-		parlst.addParam(new RichShotf("Shot", vcg::Shotf(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
-		parlst.addParam(new RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
-		parlst.addParam(new RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
-		parlst.addParam(new RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));
-		parlst.addParam(new RichFloat("Tolerance", 0.1, "Tolerance", "Threshold to stop convergence"));
-		parlst.addParam(new RichFloat("ExpectedVariance", 2.0, "Expected Variance", "Expected Variance"));
-		parlst.addParam(new RichInt("BackgroundWeight", 2, "Background Weight", "Weight of background pixels (1, as all the other pixels; 2, one half of the other pixels etc etc)"));
+		parlst.addParam(RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
+		parlst.addParam(RichShotf("Shot", vcg::Shotf(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
+		parlst.addParam(RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
+		parlst.addParam(RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
+		parlst.addParam(RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));
+		parlst.addParam(RichFloat("Tolerance", 0.1, "Tolerance", "Threshold to stop convergence"));
+		parlst.addParam(RichFloat("ExpectedVariance", 2.0, "Expected Variance", "Expected Variance"));
+		parlst.addParam(RichInt("BackgroundWeight", 2, "Background Weight", "Weight of background pixels (1, as all the other pixels; 2, one half of the other pixels etc etc)"));
 		break;
 	default :
 		assert(0);

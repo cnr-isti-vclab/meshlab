@@ -44,7 +44,7 @@ public:
 	RichParameterList& join(const RichParameterList& rps);
 	bool operator==(const RichParameterList& rps);
 
-	RichParameterList& addParam(RichParameter* pd);
+	RichParameter* addParam(const RichParameter& pd);
 
 	//remove a parameter from the set by name
 	RichParameterList& removeParameter(const QString& name);

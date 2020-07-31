@@ -177,12 +177,12 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id == FP_SELECT_SMALL_COMPONENTS)
     {
-        parlst.addParam(new RichFloat("NbFaceRatio",
+        parlst.addParam(RichFloat("NbFaceRatio",
                                         0.1f,
                                         "Small component ratio",
                                         "This ratio (between 0 and 1) defines the meaning of <i>small</i> as the threshold ratio between the number of faces"
                                         "of the largest component and the other ones. A larger value will select more components."));
-        parlst.addParam(new RichBool( "NonClosedOnly",
+        parlst.addParam(RichBool( "NonClosedOnly",
                                         false,
                                         "Select only non closed components",
                                         ""));
@@ -190,7 +190,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
     else if (id == FP_RADIUS_FROM_DENSITY)
     {
-        parlst.addParam(new RichInt("NbNeighbors",
+        parlst.addParam(RichInt("NbNeighbors",
                                     16,
                                     "Number of neighbors",
                                     "Number of neighbors used to estimate the local density. Larger values lead to smoother variations."));
@@ -199,14 +199,14 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if ((id & _PROJECTION_))
     {
-        parlst.addParam(new RichMesh( "ControlMesh", target,&md, "Point set",
+        parlst.addParam(RichMesh( "ControlMesh", target,&md, "Point set",
                                         "The point set (or mesh) which defines the MLS surface."));
-        parlst.addParam(new RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
+        parlst.addParam(RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
                                         "The mesh that will be projected/resampled onto the MLS surface."));
     }
     if ((id & _PROJECTION_) || (id & _COLORIZE_))
     {
-        parlst.addParam(new RichBool( "SelectionOnly",
+        parlst.addParam(RichBool( "SelectionOnly",
                                         target->cm.sfn>0,
                                         "Selection only",
                                         "If checked, only selected vertices will be projected."));
@@ -214,17 +214,17 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if ( (id & _APSS_) || (id & _RIMLS_) )
     {
-        parlst.addParam(new RichFloat("FilterScale",
+        parlst.addParam(RichFloat("FilterScale",
                                         2.0,
                                         "MLS - Filter scale",
                                         "Scale of the spatial low pass filter.\n"
                                         "It is relative to the radius (local point spacing) of the vertices."));
-        parlst.addParam(new RichFloat("ProjectionAccuracy",
+        parlst.addParam(RichFloat("ProjectionAccuracy",
                                         1e-4f,
                                         "Projection - Accuracy (adv)",
                                         "Threshold value used to stop the projections.\n"
                                         "This value is scaled by the mean point spacing to get the actual threshold."));
-        parlst.addParam(new RichInt(  "MaxProjectionIters",
+        parlst.addParam(RichInt(  "MaxProjectionIters",
                                         15,
                                         "Projection - Max iterations (adv)",
                                         "Max number of iterations for the projection."));
@@ -232,7 +232,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _APSS_)
     {
-        parlst.addParam(new RichFloat("SphericalParameter",
+        parlst.addParam(RichFloat("SphericalParameter",
                                         1,
                                         "MLS - Spherical parameter",
                                         "Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
@@ -240,7 +240,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
                                         "while other real values might give interesting results, but take care with extreme"
                                         "settings !"));
         if (!(id & _COLORIZE_))
-            parlst.addParam(new RichBool( "AccurateNormal",
+            parlst.addParam(RichBool( "AccurateNormal",
                                         true,
                                         "Accurate normals",
                                         "If checked, use the accurate MLS gradient instead of the local approximation"
@@ -249,13 +249,13 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _RIMLS_)
     {
-        parlst.addParam(new RichFloat("SigmaN",
+        parlst.addParam(RichFloat("SigmaN",
                                         0.75,
                                         "MLS - Sharpness",
                                         "Width of the filter used by the normal refitting weight."
                                         "This weight function is a Gaussian on the distance between two unit vectors:"
                                         "the current gradient and the input normal. Therefore, typical value range between 0.5 (sharp) to 2 (smooth)."));
-        parlst.addParam(new RichInt(  "MaxRefittingIters",
+        parlst.addParam(RichInt(  "MaxRefittingIters",
                                         3,
                                         "MLS - Max fitting iterations",
                                         "Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)"));
@@ -263,11 +263,11 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _PROJECTION_)
     {
-        parlst.addParam(new RichInt(  "MaxSubdivisions",
+        parlst.addParam(RichInt(  "MaxSubdivisions",
                                         0,
                                         "Refinement - Max subdivisions",
                                         "Max number of subdivisions."));
-        parlst.addParam(new RichFloat("ThAngleInDegree",
+        parlst.addParam(RichFloat("ThAngleInDegree",
                                         2,
                                         "Refinement - Crease angle (degree)",
                                         "Threshold angle between two faces controlling the refinement."));
@@ -284,13 +284,13 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
         if (id & _APSS_)
             lst << "ApproxMean";
 
-        parlst.addParam(new RichEnum("CurvatureType", CT_MEAN,
+        parlst.addParam(RichEnum("CurvatureType", CT_MEAN,
             lst,
             "Curvature type",
             QString("The type of the curvature to plot.")
             + ((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature." : "")));
 // 		if ((id & _APSS_))
-// 			parlst.addParam(new RichBool( "ApproxCurvature",
+// 			parlst.addParam(RichBool( "ApproxCurvature",
 // 										false,
 // 										"Approx mean curvature",
 // 										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
@@ -298,7 +298,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _MCUBE_)
     {
-        parlst.addParam(new RichInt(  "Resolution",
+        parlst.addParam(RichInt(  "Resolution",
                                         200,
                                         "Grid Resolution",
                                         "The resolution of the grid on which we run the marching cubes."

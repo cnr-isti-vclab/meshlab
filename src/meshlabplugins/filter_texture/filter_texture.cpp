@@ -184,65 +184,65 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
 {
     switch(ID(action)) {
     case FP_VORONOI_ATLAS :
-      parlst.addParam(new RichInt("regionNum", 10, "Approx. Region Num", "An estimation of the number of regions that must be generated. Smaller regions could lead to parametrizations with smaller distortion."));
-      parlst.addParam(new RichBool("overlapFlag", false, "Overlap", "If checked the resulting parametrization will be composed by <i>overlapping</i> regions, e.g. the resulting mesh will have duplicated faces: each region will have a ring of ovelapping duplicate faces that will ensure that border regions will be parametrized in the atlas twice. This is quite useful for building mipmap robust atlases"));
+      parlst.addParam(RichInt("regionNum", 10, "Approx. Region Num", "An estimation of the number of regions that must be generated. Smaller regions could lead to parametrizations with smaller distortion."));
+      parlst.addParam(RichBool("overlapFlag", false, "Overlap", "If checked the resulting parametrization will be composed by <i>overlapping</i> regions, e.g. the resulting mesh will have duplicated faces: each region will have a ring of ovelapping duplicate faces that will ensure that border regions will be parametrized in the atlas twice. This is quite useful for building mipmap robust atlases"));
         break;
     case FP_UV_WEDGE_TO_VERTEX :
         break;
     case FP_PLANAR_MAPPING :
-      parlst.addParam(new RichEnum("projectionPlane", 0, QStringList("XY") << "XZ"<<"YZ","Projection plane","Choose the projection plane"));
-      parlst.addParam(new RichBool("aspectRatio", false, "Preserve Ratio", "If checked the resulting parametrization will preserve the original apsect ratio of the model otherwise it will fill up the whole 0..1 uv space"));
-	  parlst.addParam(new RichFloat("sideGutter", 0.0, "Side Gutter", "Leave an empty space around the parametrization area of the specified size (in texture space); accepted range [0.0 - 0.5]."));
+      parlst.addParam(RichEnum("projectionPlane", 0, QStringList("XY") << "XZ"<<"YZ","Projection plane","Choose the projection plane"));
+      parlst.addParam(RichBool("aspectRatio", false, "Preserve Ratio", "If checked the resulting parametrization will preserve the original apsect ratio of the model otherwise it will fill up the whole 0..1 uv space"));
+      parlst.addParam(RichFloat("sideGutter", 0.0, "Side Gutter", "Leave an empty space around the parametrization area of the specified size (in texture space); accepted range [0.0 - 0.5]."));
       break;
     case FP_BASIC_TRIANGLE_MAPPING :
-        parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
-        parlst.addParam(new RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
-        parlst.addParam(new RichInt("border", 2, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
-        parlst.addParam(new RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
+        parlst.addParam(RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
+        parlst.addParam(RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
+        parlst.addParam(RichInt("border", 2, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
+        parlst.addParam(RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
         break;
     case FP_SET_TEXTURE : {
             QString fileName = extractFilenameWOExt(md.mm());
             fileName = fileName.append(".png");
-            parlst.addParam(new RichString("textName", fileName, "Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
-            parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this size"));
+            parlst.addParam(RichString("textName", fileName, "Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
+            parlst.addParam(RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this size"));
         }
         break;
     case FP_COLOR_TO_TEXTURE : {
             QString fileName = extractFilenameWOExt(md.mm());
             fileName = fileName.append("_tex.png");
-            parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
-            parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
-            parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
-            parlst.addParam(new RichBool("overwrite", false, "Overwrite texture", "if current mesh has a texture will be overwritten (with provided texture dimension)"));
-            parlst.addParam(new RichBool("assign", false, "Assign texture", "assign the newly created texture"));
-            parlst.addParam(new RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
+            parlst.addParam(RichString("textName", fileName, "Texture file", "The texture file to be created"));
+            parlst.addParam(RichInt("textW", 1024, "Texture width (px)", "The texture width"));
+            parlst.addParam(RichInt("textH", 1024, "Texture height (px)", "The texture height"));
+            parlst.addParam(RichBool("overwrite", false, "Overwrite texture", "if current mesh has a texture will be overwritten (with provided texture dimension)"));
+            parlst.addParam(RichBool("assign", false, "Assign texture", "assign the newly created texture"));
+            parlst.addParam(RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
         }
         break;
     case FP_TRANSFER_TO_TEXTURE : {
             QString fileName = extractFilenameWOExt(md.mm());
             fileName = fileName.append("_tex.png");
-            parlst.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+            parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
                                           "The mesh that contains the source data that we want to transfer"));
-            parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+            parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
                                           "The mesh whose texture will be filled according to source mesh data"));
-            parlst.addParam(new RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
+            parlst.addParam(RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
                                          "Choose what attribute has to be transferred onto the target texture. You can choose bettween Per vertex attributes (clor,normal,quality) or to transfer color information from source mesh texture"));
-            parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+            parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                             tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering data")));
-            parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
-            parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
-            parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
-            parlst.addParam(new RichBool("overwrite", false, "Overwrite Target Mesh Texture", "if target mesh has a texture will be overwritten (with provided texture dimension)"));
-            parlst.addParam(new RichBool("assign", false, "Assign Texture", "assign the newly created texture to target mesh"));
-            parlst.addParam(new RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
+            parlst.addParam(RichString("textName", fileName, "Texture file", "The texture file to be created"));
+            parlst.addParam(RichInt("textW", 1024, "Texture width (px)", "The texture width"));
+            parlst.addParam(RichInt("textH", 1024, "Texture height (px)", "The texture height"));
+            parlst.addParam(RichBool("overwrite", false, "Overwrite Target Mesh Texture", "if target mesh has a texture will be overwritten (with provided texture dimension)"));
+            parlst.addParam(RichBool("assign", false, "Assign Texture", "assign the newly created texture to target mesh"));
+            parlst.addParam(RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
         }
         break;
     case FP_TEX_TO_VCOLOR_TRANSFER : {
-            parlst.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+            parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
                                           "The mesh with associated texture that we want to sample from"));
-            parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+            parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
                                           "The mesh whose vertex color will be filled according to source mesh texture"));
-            parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+            parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                             tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering color")));
         }
         break;

@@ -128,46 +128,46 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
     {
     case FP_PATCH_PARAM_AND_TEXTURING:
         {
-            par.addParam( new RichInt( "textureSize",
+            par.addParam( RichInt( "textureSize",
                 1024,
                 "Texture size",
                 "Specifies the dimension of the generated texture" ) );
-            par.addParam( new RichString( "textureName",
+            par.addParam( RichString( "textureName",
                 "texture.png",
                 "Texture name",
                 "Specifies the name of the file into which the texture image will be saved" ) );
-            par.addParam( new RichBool( "colorCorrection",
+            par.addParam( RichBool( "colorCorrection",
                 true,
                 "Color correction",
                 "If true, the final texture is corrected so as to ensure seamless transitions" ) );
-            par.addParam( new RichInt( "colorCorrectionFilterSize",
+            par.addParam( RichInt( "colorCorrectionFilterSize",
                 1,
                 "Color correction filter",
                 "It is the radius (in pixel) of the kernel that is used to compute the difference between corresponding texels in different rasters. Default is 1 that generate a 3x3 kernel. Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
         }
     case FP_PATCH_PARAM_ONLY:
         {
-            par.addParam( new RichBool( "useDistanceWeight",
+            par.addParam( RichBool( "useDistanceWeight",
                 true,
                 "Use distance weight",
                 "Includes a weight accounting for the distance to the camera during the computation of reference images" ) );
-            par.addParam( new RichBool( "useImgBorderWeight",
+            par.addParam( RichBool( "useImgBorderWeight",
                 true,
                 "Use image border weight",
                 "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
-            par.addParam( new RichBool( "useAlphaWeight",
+            par.addParam( RichBool( "useAlphaWeight",
                 false,
                 "Use image alpha weight",
                 "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
-            par.addParam( new RichBool( "cleanIsolatedTriangles",
+            par.addParam( RichBool( "cleanIsolatedTriangles",
                 true,
                 "Clean isolated triangles",
                 "Remove all patches compound of a single triangle by aggregating them to adjacent patches" ) );
-            par.addParam( new RichBool( "stretchingAllowed",
+            par.addParam( RichBool( "stretchingAllowed",
                 false,
                 "UV stretching",
                 "If true, texture coordinates are stretched so as to cover the full interval [0,1] for both directions" ) );
-            par.addParam( new RichInt( "textureGutter",
+            par.addParam( RichInt( "textureGutter",
                 4,
                 "Texture gutter",
                 "Extra boundary to add to each patch before packing in texture space (in pixels)" ) );
@@ -176,7 +176,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
     case FP_RASTER_VERT_COVERAGE:
     case FP_RASTER_FACE_COVERAGE:
         {
-            par.addParam( new RichBool( "normalizeQuality",
+            par.addParam( RichBool( "normalizeQuality",
                 false,
                 "Normalize",
                 "Rescale quality values to the range [0,1]" ) );

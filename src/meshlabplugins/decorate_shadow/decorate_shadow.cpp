@@ -50,13 +50,13 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 		assert(!(parset.hasParameter(this->DecorateShadowMethod())));
 		int method = SH_MAP_VSM_BLUR;
 		parset.addParam(
-			new RichEnum(
+			RichEnum(
 				this->DecorateShadowMethod(),
 				method,
 				getSHMethods(),
 				"Shader", "Shader used to perform shadow mapping decoration")
 		);
-		parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Intensity", "Shadow Intensity"));
+		parset.addParam(RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Intensity", "Shadow Intensity"));
 		break;
 	}
 
@@ -64,7 +64,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 		assert(!(parset.hasParameter(this->DecorateShadowSSAORadius())));
 		float radius = 0.25f;
 		parset.addParam(
-			new RichFloat(this->DecorateShadowSSAORadius(),
+			RichFloat(this->DecorateShadowSSAORadius(),
 				radius,"SSAO radius",
 				"Uniform parameter for SSAO shader"));
 		break;

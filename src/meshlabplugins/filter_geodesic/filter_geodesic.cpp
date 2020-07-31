@@ -233,11 +233,11 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 	switch(ID(action))
 	{
 	case FP_QUALITY_POINT_GEODESIC :
-		parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
-		parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
+		parlst.addParam(RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
+		parlst.addParam(RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
 		break;
 	case FP_QUALITY_SELECTED_GEODESIC :
-		parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
+		parlst.addParam(RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
 		break;
 	default: break; // do not add any parameter for the other filters
 	}

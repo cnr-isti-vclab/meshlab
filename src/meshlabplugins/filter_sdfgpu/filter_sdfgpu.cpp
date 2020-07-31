@@ -38,30 +38,30 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParam
 {
     mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
-    par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
+    par.addParam( RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
         "Choose whether to trace rays from faces or from vertices. " ));
-    par.addParam(  new RichInt("numberRays",128, "Number of rays: ",
+    par.addParam(  RichInt("numberRays",128, "Number of rays: ",
         "The number of rays that will be casted around "
         "the normals."));
-    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
+    par.addParam(RichInt("DepthTextureSize", 512, "Depth texture size",
         "Size of the depth texture for depth peeling. Higher resolutions provide better sampling of the mesh, with a small performance penalty."));
-    par.addParam(new RichInt("peelingIteration", 10, "Peeling Iteration",
+    par.addParam(RichInt("peelingIteration", 10, "Peeling Iteration",
         "Number of depth peeling iteration. Actually is the maximum number of layers that a ray can hit while traversing the mesh. "
         "For example, in the case of a sphere, you should specify 2 in this parameter. For a torus, specify 4. "
         "<b>For more complex geometry you should run the depth complexity filter to know the exact value</b>."));
-    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
+    par.addParam(RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
         "Depth tolerance used during depth peeling. This is the threshold used to differentiate layers between each others."
         "Two elements whose distance is below this value will be considered as belonging to the same layer."));
 
     if(mAction != SDF_DEPTH_COMPLEXITY)
-        par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
+        par.addParam(RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
 
 
 
     switch(mAction)
     {
     case SDF_OBSCURANCE:
-        par.addParam(new RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
+        par.addParam(RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
             "This parameter controls the spatial decay term in the obscurance formula. "
             "The greater the exponent, the greater the influence of distance; that is: "
             "even if a ray is blocked by an occluder its contribution to the obscurance term is non zero, but proportional to this parameter. "
@@ -77,14 +77,14 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParam
 
     if(mAction == SDF_SDF)
     {
-        par.addParam(new RichBool("removeFalse",true,"Remove false intersections","For each"
+        par.addParam(RichBool("removeFalse",true,"Remove false intersections","For each"
             "ray we check the normal at the point of intersection,"
             "and ignore intersections where the normal at the intersection"
             "points is in the same direction as the point-of-origin"
             "(the same direction is defined as an angle difference less"
             "than 90) "));
 
-        par.addParam(new RichBool("removeOutliers",false,"Remove outliers","The outliers removal is made on the fly with a supersampling of the depth buffer. "
+        par.addParam(RichBool("removeOutliers",false,"Remove outliers","The outliers removal is made on the fly with a supersampling of the depth buffer. "
             "For each ray that we trace, we take multiple depth values near the point of intersection and we output only the median of these values. "
             "Some mesh can benefit from this additional calculation. "));
     }

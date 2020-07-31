@@ -150,16 +150,16 @@ void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 {
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_HISTOGRAM:
-		parlst.addParam(new RichFloat("HistMin", vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm).first, "Hist Min", "The vertex are displaced of a vector whose norm is bounded by this value"));
-		parlst.addParam(new RichFloat("HistMax", vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm).second, "Hist Max", "The vertex are displaced of a vector whose norm is bounded by this value"));
-		parlst.addParam(new RichBool("areaWeighted", false, "Area Weighted", "If false, the histogram will report the number of vertices with quality values falling in each bin of the histogram. If true each bin of the histogram will report the approximate area of the mesh with that range of values. Area is computed by assigning to each vertex one third of the area all the incident triangles."));
-		parlst.addParam(new RichInt("binNum", 20, "Bin number", "The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into."));
+		parlst.addParam(RichFloat("HistMin", vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm).first, "Hist Min", "The vertex are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichFloat("HistMax", vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm).second, "Hist Max", "The vertex are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichBool("areaWeighted", false, "Area Weighted", "If false, the histogram will report the number of vertices with quality values falling in each bin of the histogram. If true each bin of the histogram will report the approximate area of the mesh with that range of values. Area is computed by assigning to each vertex one third of the area all the incident triangles."));
+		parlst.addParam(RichInt("binNum", 20, "Bin number", "The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into."));
 		break;
 	case PER_FACE_QUALITY_HISTOGRAM:
-		parlst.addParam(new RichFloat("HistMin", vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm).first, "Hist Min", "The faces are displaced of a vector whose norm is bounded by this value"));
-		parlst.addParam(new RichFloat("HistMax", vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm).second, "Hist Max", "The faces are displaced of a vector whose norm is bounded by this value"));
-		parlst.addParam(new RichBool("areaWeighted", false, "Area Weighted", "If false, the histogram will report the number of faces with quality values falling in each bin of the histogram. If true each bin of the histogram will report the approximate area of the mesh with that range of values."));
-		parlst.addParam(new RichInt("binNum", 20, "Bin number", "The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into."));
+		parlst.addParam(RichFloat("HistMin", vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm).first, "Hist Min", "The faces are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichFloat("HistMax", vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm).second, "Hist Max", "The faces are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichBool("areaWeighted", false, "Area Weighted", "If false, the histogram will report the number of faces with quality values falling in each bin of the histogram. If true each bin of the histogram will report the approximate area of the mesh with that range of values."));
+		parlst.addParam(RichInt("binNum", 20, "Bin number", "The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into."));
 		break;
 	default:
 		break;

@@ -196,8 +196,7 @@ SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultP
 	dialoglayout->addWidget(closebut,1,4);
 
 	RichParameterList tmpParSet;
-	tmppar = curPar->clone();
-	tmpParSet.addParam(tmppar);
+	tmppar = tmpParSet.addParam(*curPar);
 	frame.loadFrameContent(tmpParSet);
 	dialoglayout->addWidget(&frame,0,0,1,5);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);

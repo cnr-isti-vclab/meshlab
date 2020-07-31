@@ -200,27 +200,27 @@ void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParamet
     {
         case DP_PROJECT_RASTER:
         {
-            par.addParam( new RichDynamicFloat( "MeshLab::Decoration::ProjRasterAlpha",
+            par.addParam( RichDynamicFloat( "MeshLab::Decoration::ProjRasterAlpha",
                                                 1.0f,
                                                 0.0f,
                                                 1.0f,
                                                 "Transparency",
                                                 "Transparency" ) );
 
-            par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterLighting",
+            par.addParam( RichBool( "MeshLab::Decoration::ProjRasterLighting",
                                         true,
                                         "Apply lighting",
                                         "Apply lighting" ) );
 
-            par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterOnAllMeshes",
+            par.addParam( RichBool( "MeshLab::Decoration::ProjRasterOnAllMeshes",
                                         false,
                                         "Project on all meshes",
                                         "Project the current raster on all meshes instead of only on the current one" ) );
-            par.addParam( new RichBool( "MeshLab::Decoration::ShowAlpha",
+            par.addParam( RichBool( "MeshLab::Decoration::ShowAlpha",
                                         false,
                                         "Show Alpha Mask",
                                         "Show in purple the alpha value" ) );
-            par.addParam( new RichBool( "MeshLab::Decoration::EnableAlpha",
+            par.addParam( RichBool( "MeshLab::Decoration::EnableAlpha",
                                         false,
                                         "Enable Alpha",
                                         "If the current raster has an alpha channel use it during the rendering. It is multiplied with the 'global' transparency set in the above parameter." ) );

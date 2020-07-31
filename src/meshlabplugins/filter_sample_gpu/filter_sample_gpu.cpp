@@ -90,11 +90,11 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 	{
 		case FP_GPU_EXAMPLE :
 		{
-			parlst.addParam(new RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
-			parlst.addParam(new RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
-			parlst.addParam(new RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
+			parlst.addParam(RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
+			parlst.addParam(RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
+			parlst.addParam(RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
 			QString curr = QDir::currentPath();
-			parlst.addParam(new RichSaveFile ("ImageFileName",        curr + "/gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
+			parlst.addParam(RichSaveFile ("ImageFileName",        curr + "/gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0);

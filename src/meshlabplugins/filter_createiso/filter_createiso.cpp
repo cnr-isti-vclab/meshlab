@@ -127,7 +127,7 @@ FilterCreateIso::~FilterCreateIso() {
   switch(ID(action))
   {
     case FP_CREATEISO :
-          parlst.addParam(new RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
+          parlst.addParam(RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
           break;
   default: break; // do not add any parameter for the other filters
   }

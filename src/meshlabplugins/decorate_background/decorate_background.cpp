@@ -64,18 +64,18 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
         if(!parset.hasParameter(CubeMapPathParam()))
         {
             QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-            //parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
+            //parset.addParam(RichString(CubeMapPathParam(), cubemapDirPath,"",""));
         }
         break;
     case DP_SHOW_GRID :
-      parset.addParam(new RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
-      parset.addParam(new RichFloat(GridMajorParam(),10.0f,"Major Spacing",""));
-      parset.addParam(new RichFloat(GridMinorParam(),1.0f,"Minor Spacing",""));
-      parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
-      parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
-      parset.addParam(new RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
-      parset.addParam(new RichColor(GridColorFrontParam(),QColor(22,139,119,255),"Front grid Color",""));
-      parset.addParam(new RichFloat(GridBaseLineWidthParam(),1.0f,"Line Width","The width of the lines of the grid"));
+      parset.addParam(RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
+      parset.addParam(RichFloat(GridMajorParam(),10.0f,"Major Spacing",""));
+      parset.addParam(RichFloat(GridMinorParam(),1.0f,"Minor Spacing",""));
+      parset.addParam(RichBool(GridBackParam(),true,"Front grid culling",""));
+      parset.addParam(RichBool(ShowShadowParam(),false,"Show silhouette",""));
+      parset.addParam(RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
+      parset.addParam(RichColor(GridColorFrontParam(),QColor(22,139,119,255),"Front grid Color",""));
+      parset.addParam(RichFloat(GridBaseLineWidthParam(),1.0f,"Line Width","The width of the lines of the grid"));
         break;
     }
 }

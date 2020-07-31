@@ -126,7 +126,7 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QStr
   
 	if (formatName.toUpper() == tr("BRE"))
 	{
-		parlst.addParam(new RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
+		parlst.addParam(RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
 	}
   
 }
@@ -189,7 +189,7 @@ void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capabi
 void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par) 
 {
 	if(format.toUpper() == tr("BRE"))
-		par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
+		par.addParam(RichBool("Unify",true, "Unify Duplicated Vertices",
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
   
 }
