@@ -36,22 +36,8 @@ public:
 	~RichParameterList();
 
 	bool isEmpty() const;
-	RichParameter* findParameter(const QString& name) const;
-	bool hasParameter(const QString& name) const;
-
-
-	RichParameterList& operator=(RichParameterList rps);
-	RichParameterList& join(const RichParameterList& rps);
-	bool operator==(const RichParameterList& rps);
-
-	RichParameter* addParam(const RichParameter& pd);
-
-	//remove a parameter from the set by name
-	RichParameterList& removeParameter(const QString& name);
-
+	unsigned int size() const;
 	void clear();
-
-	void setValue(const QString& name, const Value& val);
 
 	bool getBool(const QString& name) const;
 	int getInt(const QString& name) const;
@@ -73,9 +59,20 @@ public:
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
 
-	unsigned int size() const;
+	bool hasParameter(const QString& name) const;
+	RichParameter* findParameter(const QString& name);
+	const RichParameter* findParameter(const QString& name) const;
+
+	void setValue(const QString& name, const Value& val);
+	RichParameter* addParam(const RichParameter& pd);
+	RichParameterList& join(const RichParameterList& rps);	
+
+
 	RichParameter* pushFromQDomElement(QDomElement np);
-	RichParameter* pushClone(const RichParameter* p);
+
+	void swap(RichParameterList& oth);
+	bool operator==(const RichParameterList& rps);
+	RichParameterList& operator=(RichParameterList rps);
 
 	typedef std::list<RichParameter*>::iterator iterator;
 	typedef std::list<RichParameter*>::const_iterator const_iterator;
@@ -84,8 +81,6 @@ public:
 	iterator end();
 	const_iterator begin() const;
 	const_iterator end() const;
-
-	void swap(RichParameterList& oth);
 
 private:
 	std::list<RichParameter*> paramList;

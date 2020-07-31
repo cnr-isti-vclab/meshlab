@@ -33,7 +33,7 @@ class SettingDialog : public QDialog
 {
 Q_OBJECT
 public:
-	SettingDialog(RichParameter* curPar,RichParameter* defPar,QWidget* parent = 0);
+	SettingDialog(RichParameter* curPar, const RichParameter* defPar,QWidget* parent = 0);
 	~SettingDialog();
 public slots:
 	void save();
@@ -47,7 +47,7 @@ signals:
 private:
 	StdParFrame frame;
 	RichParameter* curPar;
-	RichParameter* defPar;
+	const RichParameter* defPar;
 	RichParameter* tmppar;
 	QPushButton* savebut;
 	QPushButton* applybut;

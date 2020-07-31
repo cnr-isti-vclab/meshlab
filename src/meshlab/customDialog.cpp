@@ -177,7 +177,7 @@ QTableWidgetItem* CustomDialog::createQTableWidgetItemFromRichParameter(const Ri
 //in curPar->defVal the one in the sys reg
 /****************************************************************/
 
-SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
+SettingDialog::SettingDialog(RichParameter* currentPar, const RichParameter* defaultPar, QWidget* parent /*= 0*/ )
 :QDialog(parent),frame(this),curPar(currentPar),defPar(defaultPar),tmppar(NULL)
 {
 	setModal(true);
