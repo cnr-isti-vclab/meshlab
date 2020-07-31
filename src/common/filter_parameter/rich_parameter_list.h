@@ -73,6 +73,19 @@ public:
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
 
+	unsigned int size() const;
+	RichParameter* pushFromQDomElement(QDomElement np);
+	RichParameter* pushClone(const RichParameter* p);
+
+	typedef std::list<RichParameter*>::iterator iterator;
+	typedef std::list<RichParameter*>::const_iterator const_iterator;
+
+	iterator begin();
+	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
+
+private:
 	std::list<RichParameter*> paramList;
 };
 

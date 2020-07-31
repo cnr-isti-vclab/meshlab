@@ -36,7 +36,7 @@ CustomDialog::CustomDialog(RichParameterList& curparset, RichParameterList& defp
 	//QVBoxLayout* layout = new QVBoxLayout(parent);
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
-	tw = new QTableWidget(curParSet.paramList.size(),2,this);
+	tw = new QTableWidget(curParSet.size(),2,this);
 	updateSettings();
 	int totlen = tw->columnWidth(0) + tw->columnWidth(1) + this->frameSize().width();
 	setMinimumWidth(totlen);
@@ -79,7 +79,7 @@ void CustomDialog::updateSettings()
 	
 	//int sz = tw->font().pointSize();
 	int ii = 0;
-	for(RichParameter* p : curParSet.paramList)
+	for(RichParameter* p : curParSet)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem(p->name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);

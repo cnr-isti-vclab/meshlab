@@ -1231,7 +1231,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
     else
     {
         decPlug->initGlobalParameterSet(act,tmpSet);
-        if (tmpSet.paramList.size() != 0)
+        if (tmpSet.size() != 0)
         {
             const RichParameterList& currSet = mw->currentGlobalPars();
 
@@ -1240,7 +1240,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
             //the register system saved value instead is in the defValues of the params inside the current globalParameters set
             /********************************************************************************************************************/
 
-            for(RichParameter* p : tmpSet.paramList)
+            for(RichParameter* p : tmpSet)
             {
                 RichParameter* par = currSet.findParameter(p->name());
                 tmpSet.setValue(p->name(),par->value());
@@ -1292,7 +1292,7 @@ DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 void DecoratorParamsTreeWidget::save()
 {
     apply();
-    for(RichParameter* p : tmpSet.paramList)
+    for(RichParameter* p : tmpSet)
     {
         QDomDocument doc("MeshLabSettings");
         doc.appendChild(p->fillToXMLDocument(doc));
@@ -1329,7 +1329,7 @@ void DecoratorParamsTreeWidget::apply()
 void DecoratorParamsTreeWidget::load()
 {
     int ii = 0;
-    for(RichParameter* p : tmpSet.paramList)
+    for(RichParameter* p : tmpSet)
     {
         const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(p->name()));
         p->value().set(defPar.value());

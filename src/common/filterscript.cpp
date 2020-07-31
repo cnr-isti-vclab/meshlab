@@ -61,7 +61,7 @@ QDomDocument FilterScript::xmlDoc()
         tag.setAttribute(QString("name"),pair.first);
         RichParameterList &par=pair.second;
         std::list<RichParameter*>::iterator jj;
-        for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
+        for(jj=par.begin();jj!=par.end();++jj)
         {
             tag.appendChild((*jj)->fillToXMLDocument(doc));
         }
@@ -120,7 +120,7 @@ bool FilterScript::open(QString filename)
                 RichParameter* rp = NULL;
                 RichParameterAdapter::create(np,&rp);
                 //FilterParameter::addQDomElement(par,np);
-                par.paramList.push_back(rp);
+                par.pushFromQDomElement(np);
             }
             FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();
             tmp->pair = qMakePair(name,par);

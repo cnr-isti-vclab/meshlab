@@ -221,12 +221,12 @@ void FilterScriptDialog::editOldParameters( const int row )
     RichParameterList newParameterSet;
     iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
 
-    if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
+    if(newParameterSet.size() == oldParameterSet.size())
     {
-        std::list<RichParameter*>::iterator i = newParameterSet.paramList.begin();
-        std::list<RichParameter*>::iterator j = oldParameterSet.paramList.begin();
+        RichParameterList::iterator i = newParameterSet.begin();
+        RichParameterList::iterator j = oldParameterSet.begin();
         //now set values to be the old values
-        for (; i != newParameterSet.paramList.end(); ++i, ++j){
+        for (; i != newParameterSet.end(); ++i, ++j){
             (*i)->value().set((*j)->value());
         }	
     } else

@@ -45,10 +45,9 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
 
 void StdParFrame::resetValues(RichParameterList &curParSet)
 {
-    std::list<RichParameter*> &parList =curParSet.paramList;
     assert(stdfieldwidgets.size() == parList.size());
     unsigned int i  =0;
-    for(RichParameter* fpi : parList)
+    for(RichParameter* fpi : curParSet)
     {
         if (fpi != NULL)
             stdfieldwidgets[i++]->resetValue();
@@ -63,7 +62,7 @@ void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /
     // QGridLayout *vlayout = new QGridLayout(this);
     //    vLayout->setAlignment(Qt::AlignTop);
     int i = 0;
-    for(RichParameter* fpi : curParSet.paramList)
+    for(RichParameter* fpi : curParSet)
     {
         MeshLabWidget* wd = createWidgetFromRichParameter(this, *fpi);
         //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
@@ -93,10 +92,9 @@ void StdParFrame::toggleHelp()
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
 void StdParFrame::readValues(RichParameterList &curParSet)
 {
-    std::list<RichParameter*> &parList =curParSet.paramList;
-    assert(parList.size() == stdfieldwidgets.size());
+    assert(curParSet.size() == stdfieldwidgets.size());
     QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin();
-    for(RichParameter* p : parList)
+    for(RichParameter* p : curParSet)
     {
         QString sname = p->name();
         curParSet.setValue(sname,(*it)->getWidgetValue());

@@ -91,8 +91,48 @@ void RichParameterList::setValue(const QString& name,const Value& newval){ findP
 QList<float> RichParameterList::getFloatList(const QString& name)    const { return findParameter(name)->value().getFloatList();}
  MeshModel * RichParameterList::getMesh(const QString& name)         const { return findParameter(name)->value().getMesh();}
        float RichParameterList::getDynamicFloat(const QString& name) const { return findParameter(name)->value().getDynamicFloat();}
-     QString RichParameterList::getOpenFileName(const QString& name) const { return findParameter(name)->value().getFileName();}
-     QString RichParameterList::getSaveFileName(const QString& name) const { return findParameter(name)->value().getFileName(); }
+       QString RichParameterList::getOpenFileName(const QString& name) const { return findParameter(name)->value().getFileName();}
+QString RichParameterList::getSaveFileName(const QString& name) const { return findParameter(name)->value().getFileName(); }
+
+unsigned int RichParameterList::size() const
+{
+    return paramList.size();
+}
+
+RichParameter* RichParameterList::pushFromQDomElement(QDomElement np)
+{
+    RichParameter* rp = nullptr;
+    RichParameterAdapter::create(np, &rp);
+    paramList.push_back(rp);
+    return rp;
+}
+
+RichParameter* RichParameterList::pushClone(const RichParameter* p)
+{
+    RichParameter* np = p->clone();
+    paramList.push_back(np);
+    return np;
+}
+
+RichParameterList::iterator RichParameterList::begin()
+{
+    return paramList.begin();
+}
+
+RichParameterList::iterator RichParameterList::end()
+{
+    return paramList.end();
+}
+
+RichParameterList::const_iterator RichParameterList::begin() const
+{
+    return paramList.begin();
+}
+
+RichParameterList::const_iterator RichParameterList::end() const
+{
+    return paramList.end();
+}
 
 RichParameterList& RichParameterList::operator=( const RichParameterList& rps )
 {

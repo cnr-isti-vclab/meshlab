@@ -790,7 +790,7 @@ void MainWindow::runFilterScript()
         FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         RichParameterList &parameterSet = old->pair.second;
 
-        for(RichParameter*& parameter : parameterSet.paramList)
+        for(RichParameter*& parameter : parameterSet)
         {
             //if this is a mesh paramter and the index is valid
             if(parameter->value().isMesh())
@@ -1260,7 +1260,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
             }
         case (MeshFilterInterface::FIXED):
             {
-                for(const RichParameter* p : mergedenvironment.paramList)
+                for(const RichParameter* p : mergedenvironment)
                 {
                     if (p->value().isMesh())
                     {
