@@ -54,14 +54,16 @@ Value& RichParameter::value()
 	return *val;
 }
 
-//QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc) const
-//{
-//	QDomElement parElem = doc.createElement("Param");
-//	parElem.setAttribute("name", pName);
-//	parElem.setAttribute("type", stringType());
-//	parElem.setAttribute("description", fieldDesc);
-//	parElem.setAttribute("tooltip",tooltip);
-//}
+QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = doc.createElement("Param");
+	parElem.setAttribute("name", pName);
+	parElem.setAttribute("type", stringType());
+	parElem.setAttribute("description", fieldDesc);
+	parElem.setAttribute("tooltip",tooltip);
+	val->fillToXMLElement(parElem);
+	return parElem;
+}
 
 RichParameter& RichParameter::operator=(const RichParameter& rp)
 {
@@ -402,6 +404,14 @@ QString RichAbsPerc::stringType() const
 	return "RichAbsPerc";
 }
 
+QDomElement RichAbsPerc::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("min",QString::number(min));
+	parElem.setAttribute("max",QString::number(max));
+	return parElem;
+}
+
 void RichAbsPerc::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -438,6 +448,15 @@ QString RichEnum::stringType() const
 	return "RichEnum";
 }
 
+QDomElement RichEnum::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("enum_cardinality", enumvalues.size());
+	for(int ii = 0; ii < enumvalues.size(); ++ii)
+		parElem.setAttribute(QString("enum_val")+QString::number(ii), enumvalues.at(ii));
+	return parElem;
+}
+
 void RichEnum::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -451,6 +470,139 @@ RichEnum* RichEnum::clone() const
 bool RichEnum::operator==( const RichParameter& rb )
 {
 	return (rb.value().isEnum() &&(pName == rb.name()) && (value().getEnum() == rb.value().getEnum()));
+}
+
+/**** RichDynamicFloat Class ****/
+
+RichDynamicFloat::RichDynamicFloat(
+		const QString& nm,
+		const float defval,
+		const float minval,
+		const float maxval,
+		const QString& desc,
+		const QString& tltip ) :
+	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
+{
+}
+
+RichDynamicFloat::~RichDynamicFloat()
+{
+}
+
+QString RichDynamicFloat::stringType() const
+{
+	return "RichDynamicFloat";
+}
+
+QDomElement RichDynamicFloat::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("min",QString::number(min));
+	parElem.setAttribute("max",QString::number(max));
+	return parElem;
+}
+
+void RichDynamicFloat::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+RichDynamicFloat* RichDynamicFloat::clone() const
+{
+	return new RichDynamicFloat(*this);
+}
+
+bool RichDynamicFloat::operator==( const RichParameter& rb )
+{
+	return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
+}
+
+/**** RichOpenFile Class ****/
+
+RichOpenFile::RichOpenFile(
+		const QString& nm,
+		const QString& directorydefval,
+		const QStringList& exts,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, FileValue(directorydefval), desc, tltip), exts(exts)
+{
+}
+
+RichOpenFile::~RichOpenFile()
+{
+}
+
+QString RichOpenFile::stringType() const
+{
+	return "RichOpenFile";
+}
+
+QDomElement RichOpenFile::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("exts_cardinality", exts.size());
+	for(int ii = 0; ii < exts.size(); ++ii)
+		parElem.setAttribute(QString("ext_val")+QString::number(ii), exts[ii]);
+	return parElem;
+}
+
+void RichOpenFile::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+RichOpenFile* RichOpenFile::clone() const
+{
+	return new RichOpenFile(*this);
+}
+
+bool RichOpenFile::operator==( const RichParameter& rb )
+{
+	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
+}
+
+/**** RichSaveFile Class ****/
+
+RichSaveFile::RichSaveFile(
+		const QString& nm,
+		const QString& filedefval,
+		const QString& ext,
+		const QString& desc,
+		const QString& tltip) :
+	RichParameter(nm, FileValue(filedefval), desc, tltip), ext(ext)
+{
+}
+
+RichSaveFile::~RichSaveFile()
+{
+}
+
+QString RichSaveFile::stringType() const
+{
+	return "RichSaveFile";
+}
+
+QDomElement RichSaveFile::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("ext", ext);
+	return parElem;
+}
+
+void RichSaveFile::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+RichSaveFile* RichSaveFile::clone() const
+{
+	return new RichSaveFile(*this);
+}
+
+bool RichSaveFile::operator==( const RichParameter& rb )
+{
+	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
 /**** RichMesh Class ****/
@@ -501,6 +653,13 @@ QString RichMesh::stringType() const
 	return "RichMesh";
 }
 
+QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	parElem.setAttribute("value", QString::number(meshindex));
+	return parElem;
+}
+
 void RichMesh::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -514,115 +673,6 @@ RichMesh* RichMesh::clone() const
 bool RichMesh::operator==( const RichParameter& rb )
 {
 	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMesh() == rb.value().getMesh()));
-}
-
-/**** RichDynamicFloat Class ****/
-
-RichDynamicFloat::RichDynamicFloat(
-		const QString& nm,
-		const float defval,
-		const float minval,
-		const float maxval,
-		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
-{
-}
-
-RichDynamicFloat::~RichDynamicFloat()
-{
-}
-
-QString RichDynamicFloat::stringType() const
-{
-	return "RichDynamicFloat";
-}
-
-void RichDynamicFloat::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
-RichDynamicFloat* RichDynamicFloat::clone() const
-{
-	return new RichDynamicFloat(*this);
-}
-
-bool RichDynamicFloat::operator==( const RichParameter& rb )
-{
-	return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
-}
-
-/**** RichOpenFile Class ****/
-
-RichOpenFile::RichOpenFile(
-		const QString& nm,
-		const QString& directorydefval,
-		const QStringList& exts,
-		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, FileValue(directorydefval), desc, tltip), exts(exts)
-{
-}
-
-RichOpenFile::~RichOpenFile()
-{
-}
-
-QString RichOpenFile::stringType() const
-{
-	return "RichOpenFile";
-}
-
-void RichOpenFile::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
-RichOpenFile* RichOpenFile::clone() const
-{
-	return new RichOpenFile(*this);
-}
-
-bool RichOpenFile::operator==( const RichParameter& rb )
-{
-	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
-}
-
-/**** RichSaveFile Class ****/
-
-RichSaveFile::RichSaveFile(
-		const QString& nm,
-		const QString& filedefval,
-		const QString& ext,
-		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, FileValue(filedefval), desc, tltip), ext(ext)
-{
-}
-
-RichSaveFile::~RichSaveFile()
-{
-}
-
-QString RichSaveFile::stringType() const
-{
-	return "RichSaveFile";
-}
-
-void RichSaveFile::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
-RichSaveFile* RichSaveFile::clone() const
-{
-	return new RichSaveFile(*this);
-}
-
-bool RichSaveFile::operator==( const RichParameter& rb )
-{
-	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
 }
 
 /**** RichParameterAdapter Class ****/

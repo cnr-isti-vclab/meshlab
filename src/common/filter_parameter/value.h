@@ -31,6 +31,7 @@
 #include <vcg/math/shot.h>
 class MeshModel;
 class MeshDocument;
+class QDomElement;
 
 class Value
 {
@@ -70,6 +71,7 @@ public:
 	virtual QString typeName() const = 0;
 	virtual void set(const Value& p) = 0;
 	virtual Value* clone() const = 0;
+	virtual void fillToXMLElement(QDomElement& element) const = 0;
 };
 
 class BoolValue : public Value
@@ -82,7 +84,8 @@ public:
 	inline bool isBool() const { return true; }
 	inline QString typeName() const { return QString("Bool"); }
 	inline void	set(const Value& p) { pval = p.getBool(); }
-	BoolValue* clone() const {return new BoolValue(*this);}
+	inline BoolValue* clone() const {return new BoolValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	bool pval;
@@ -98,7 +101,8 @@ public:
 	inline bool isInt() const { return true; }
 	inline QString typeName() const { return QString("Int"); }
 	inline void	set(const Value& p) { pval = p.getInt(); }
-	IntValue* clone() const {return new IntValue(*this);}
+	inline IntValue* clone() const {return new IntValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	int pval;
@@ -114,7 +118,8 @@ public:
 	inline bool isFloat() const { return true; }
 	inline QString typeName() const { return QString("Float"); }
 	inline void	set(const Value& p) { pval = p.getFloat(); }
-	FloatValue* clone() const {return new FloatValue(*this);}
+	inline FloatValue* clone() const {return new FloatValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	float pval;
@@ -130,7 +135,8 @@ public:
 	inline bool isString() const { return true; }
 	inline QString typeName() const { return QString("String"); }
 	inline void	set(const Value& p) { pval = p.getString(); }
-	StringValue* clone() const {return new StringValue(*this);}
+	inline StringValue* clone() const {return new StringValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	QString pval;
@@ -147,7 +153,8 @@ public:
 	inline bool isMatrix44f() const { return true; }
 	inline QString typeName() const { return QString("Matrix44f"); }
 	inline void	set(const Value& p) { pval = p.getMatrix44f(); }
-	Matrix44fValue* clone() const {return new Matrix44fValue(*this);}
+	inline Matrix44fValue* clone() const {return new Matrix44fValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	vcg::Matrix44f pval;
@@ -164,7 +171,8 @@ public:
 	inline bool isPoint3f() const { return true; }
 	inline QString typeName() const { return QString("Point3f"); }
 	inline void	set(const Value& p) { pval = p.getPoint3f(); }
-	Point3fValue* clone() const {return new Point3fValue(*this);}
+	inline Point3fValue* clone() const {return new Point3fValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	vcg::Point3f pval;
@@ -180,7 +188,8 @@ public:
 	inline bool isShotf() const { return true; }
 	inline QString typeName() const { return QString("Shotf"); }
 	inline void	 set(const Value& p) { pval = p.getShotf(); }
-	ShotfValue* clone() const {return new ShotfValue(*this);}
+	inline ShotfValue* clone() const {return new ShotfValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	vcg::Shotf pval;
@@ -196,7 +205,8 @@ public:
 	inline bool isColor() const { return true; }
 	inline QString typeName() const { return QString("Color"); }
 	inline void	set(const Value& p) { pval = p.getColor(); }
-	ColorValue* clone() const {return new ColorValue(*this);}
+	inline ColorValue* clone() const {return new ColorValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	QColor pval;
@@ -211,7 +221,8 @@ public:
 	inline float getAbsPerc() const { return getFloat(); }
 	inline QString typeName() const { return QString("AbsPerc"); }
 	inline bool isAbsPerc() const { return true; }
-	AbsPercValue* clone() const {return new AbsPercValue(*this);}
+	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 };
 
@@ -224,7 +235,8 @@ public:
 	inline int getEnum() const { return getInt(); }
 	inline bool isEnum() const { return true; }
 	inline QString typeName() const { return QString("Enum"); }
-	EnumValue* clone() const {return new EnumValue(*this);}
+	inline EnumValue* clone() const {return new EnumValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 };
 
 class DynamicFloatValue : public FloatValue
@@ -236,7 +248,8 @@ public:
 	inline float getDynamicFloat() const { return getFloat(); }
 	inline bool isDynamicFloat() const { return true; }
 	inline QString typeName() const { return QString("DynamicFloat"); }
-	DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
+	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 };
 
@@ -250,7 +263,8 @@ public:
 	inline bool isFileName() const { return true; }
 	inline QString typeName() const { return QString("FileName"); }
 	inline void	set(const Value& p) { pval = p.getFileName(); }
-	FileValue* clone() const {return new FileValue(*this);}
+	inline FileValue* clone() const {return new FileValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	QString pval;
@@ -267,7 +281,8 @@ public:
 	inline bool isMesh() const { return true; }
 	inline QString typeName() const { return QString("Mesh"); }
 	inline void	set(const Value& p) { pval = p.getMesh(); }
-	MeshValue* clone() const {return new MeshValue(*this);}
+	inline MeshValue* clone() const {return new MeshValue(*this);}
+	void fillToXMLElement(QDomElement& element) const;
 
 private:
 	MeshModel* pval;

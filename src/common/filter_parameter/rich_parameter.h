@@ -45,7 +45,7 @@ public:
 	Value& value();
 	virtual QString stringType() const = 0;
 
-	//virtual QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	virtual QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	virtual void accept(Visitor& v) = 0;
 	virtual RichParameter* clone() const = 0;
@@ -140,6 +140,7 @@ public:
 	RichPoint3f* clone() const;
 	bool operator==(const RichParameter& rb);
 };
+
 class RichShotf : public RichParameter
 {
 public:
@@ -173,6 +174,7 @@ public:
 	~RichAbsPerc();
 
 	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	void accept(Visitor& v);
 	RichAbsPerc* clone() const;
@@ -188,29 +190,12 @@ public:
 	~RichEnum();
 
 	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	void accept(Visitor& v);
 	RichEnum* clone() const;
 	bool operator==(const RichParameter& rb);
 	QStringList enumvalues;
-};
-
-class RichMesh : public RichParameter
-{
-public:
-	RichMesh(const QString& nm, MeshModel* defval, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
-	RichMesh(const QString& nm, int meshindex, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
-	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString& nm, int meshind, const QString& desc = QString(), const QString& tltip = QString());
-	~RichMesh();
-
-	QString stringType() const;
-
-	void accept(Visitor& v);
-	RichMesh* clone() const;
-	bool operator==(const RichParameter& rb);
-	MeshDocument* meshdoc;
-	int meshindex;
 };
 
 class RichDynamicFloat : public RichParameter
@@ -220,6 +205,7 @@ public:
 	~RichDynamicFloat();
 
 	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	void accept(Visitor& v);
 	RichDynamicFloat* clone() const;
@@ -235,6 +221,7 @@ public:
 	~RichOpenFile();
 
 	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	void accept(Visitor& v);
 	RichOpenFile* clone() const;
@@ -249,11 +236,31 @@ public:
 	~RichSaveFile();
 
 	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
 	void accept(Visitor& v);
 	RichSaveFile* clone() const;
 	bool operator==(const RichParameter& rb);
 	QString ext;
+};
+
+class RichMesh : public RichParameter
+{
+public:
+	RichMesh(const QString& nm, MeshModel* defval, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
+	RichMesh(const QString& nm, int meshindex, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
+	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
+	RichMesh(const QString& nm, int meshind, const QString& desc = QString(), const QString& tltip = QString());
+	~RichMesh();
+
+	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+
+	void accept(Visitor& v);
+	RichMesh* clone() const;
+	bool operator==(const RichParameter& rb);
+	MeshDocument* meshdoc;
+	int meshindex;
 };
 
 class RichParameterAdapter
