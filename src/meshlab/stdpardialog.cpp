@@ -62,18 +62,17 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
     QGridLayout* glay = new QGridLayout();
     // QGridLayout *vlayout = new QGridLayout(this);
     //    vLayout->setAlignment(Qt::AlignTop);
-    RichWidgetInterfaceConstructor rwc(this);
     for(int i = 0; i < curParSet.paramList.count(); i++)
     {
         RichParameter* fpi=curParSet.paramList.at(i);
-        fpi->accept(rwc);
-        //vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
-        stdfieldwidgets.push_back(rwc.lastCreated);
-        helpList.push_back(rwc.lastCreated->helpLab);
-        //glay->addItem(rwc.lastCreated->leftItem(),i,0);
-        //glay->addItem(rwc.lastCreated->centralItem(),i,1);
-        //glay->addItem(rwc.lastCreated->rightItem(),i,2);
-        rwc.lastCreated->addWidgetToGridLayout(glay,i);
+        MeshLabWidget* wd = createWidgetFromRichParameter(this, *fpi);
+        //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
+        stdfieldwidgets.push_back(wd);
+        helpList.push_back(wd->helpLab);
+        //glay->addItem(wd->leftItem(),i,0);
+        //glay->addItem(wd->centralItem(),i,1);
+        //glay->addItem(wd->rightItem(),i,2);
+        wd->addWidgetToGridLayout(glay,i);
 
     } // end for each parameter
     setLayout(glay);
@@ -108,6 +107,57 @@ void StdParFrame::readValues(RichParameterSet &curParSet)
 StdParFrame::~StdParFrame()
 {
 
+}
+
+MeshLabWidget* StdParFrame::createWidgetFromRichParameter(QWidget* parent, RichParameter& pd)
+{
+    if (pd.value().isAbsPerc()){
+        return new AbsPercWidget(parent, (RichAbsPerc*)&pd);
+    }
+    else if (pd.value().isDynamicFloat()){
+        return new DynamicFloatWidget(parent, (RichDynamicFloat*)&pd);
+    }
+    else if (pd.value().isEnum()){
+        return new EnumWidget(parent, (RichEnum*)&pd);
+    }
+    else if (pd.value().isBool()){
+        return new BoolWidget(parent, (RichBool*)&pd);
+    }
+    else if (pd.value().isInt()){
+        return new IntWidget(parent, (RichInt*)&pd);
+    }
+    else if (pd.value().isFloat()){
+        return new FloatWidget(parent, (RichFloat*)&pd);
+    }
+    else if (pd.value().isString()){
+        return new StringWidget(parent, (RichString*)&pd);
+    }
+    else if (pd.value().isMatrix44f()){
+        return new Matrix44fWidget(parent, (RichMatrix44f*)&pd, reinterpret_cast<StdParFrame*>(parent)->gla);
+    }
+    else if (pd.value().isPoint3f()){
+        return new Point3fWidget(parent, (RichPoint3f*)&pd, reinterpret_cast<StdParFrame*>(parent)->gla);
+    }
+    else if (pd.value().isShotf()){
+        return new ShotfWidget(parent, (RichShotf*)&pd, reinterpret_cast<StdParFrame*>(parent)->gla);
+    }
+    else if (pd.value().isColor()){
+        return new ColorWidget(parent, (RichColor*)&pd);
+    }
+    else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+        return new OpenFileWidget(parent, (RichOpenFile*)&pd);
+    }
+    else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+        return new SaveFileWidget(parent, (RichSaveFile*)&pd);
+    }
+    else if (pd.value().isMesh()){
+        return new MeshWidget(parent, (RichMesh*)&pd);
+    }
+    else {
+        std::cerr << "RichParameter type not supported for widget creation.\n";
+        assert(0);
+        return nullptr;
+    }
 }
 
 /* click event for the apply button of the standard plugin window */
@@ -1444,71 +1494,6 @@ void GetFileNameWidget::launchGetFileNameDialog()
 {
 
 }*/
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichBool& pd )
-{
-    if (pd.value().getBool())
-        lastCreated = new QTableWidgetItem("true"/*,lst*/);
-    else
-        lastCreated = new QTableWidgetItem("false"/*,lst*/);
-
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichInt& pd )
-{
-    lastCreated = new QTableWidgetItem(QString::number(pd.value().getInt())/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichFloat& pd )
-{
-    lastCreated = new QTableWidgetItem(QString::number(pd.value().getFloat())/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichString& pd )
-{
-    lastCreated = new QTableWidgetItem(pd.value().getString()/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
-{
-    vcg::Point3f pp = pd.value().getPoint3f();
-    QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
-    lastCreated = new QTableWidgetItem(pst/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& /*pd*/ )
-{
-    assert(0); ///
-    lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit(RichOpenFile& pd)
-{
-    lastCreated = new QTableWidgetItem(pd.value().getFileName()/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichColor& pd )
-{
-    QPixmap pix(10,10);
-    pix.fill(pd.value().getColor());
-    QIcon ic(pix);
-    lastCreated = new QTableWidgetItem(ic,""/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichAbsPerc& pd )
-{
-    lastCreated = new QTableWidgetItem(QString::number(pd.value().getAbsPerc())/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichEnum& pd )
-{
-    lastCreated = new QTableWidgetItem(QString::number(pd.value().getEnum())/*,lst*/);
-}
-
-void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
-{
-    lastCreated = new QTableWidgetItem(QString::number(pd.value().getDynamicFloat())/*,lst*/);
-}
 
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
     :MeshLabWidget(p,rpar),fl()

@@ -704,9 +704,14 @@ public:
 
     QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
     ~StdParFrame();
+
 signals:
 
-        void parameterChanged();
+    void parameterChanged();
+
+private:
+    static MeshLabWidget* createWidgetFromRichParameter(QWidget* parent, RichParameter& pd);
+
 };
 
 
@@ -740,59 +745,59 @@ private:
 //QWidget* parent parameter says to the class who will destroy the MeshLabWidget object that it had created
 //RichWidgetConstructor shouldn't destroy anything
 
-class RichWidgetInterfaceConstructor : public Visitor
-{
-public:
-        RichWidgetInterfaceConstructor(QWidget* parent):lastCreated(NULL),par(parent){}
+//class RichWidgetInterfaceConstructor : public Visitor
+//{
+//public:
+//        RichWidgetInterfaceConstructor(QWidget* parent):lastCreated(NULL),par(parent){}
 
-    void visit(RichBool& pd) {lastCreated = new BoolWidget(par,&pd);};
-    void visit(RichInt& pd) {lastCreated = new IntWidget(par,&pd);};
-    void visit(RichFloat& pd){lastCreated = new FloatWidget(par,&pd);};
-    void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
-    void visit(RichMatrix44f&  pd ){  lastCreated = new Matrix44fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla); }
-    void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
-    void visit(RichShotf& pd){lastCreated = new ShotfWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
-    void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
-    void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
-    void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
-    //void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
-    void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
-    void visit(RichOpenFile& pd){lastCreated = new OpenFileWidget(par,&pd);};
-    void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
-    void visit(RichMesh& pd){lastCreated = new MeshWidget(par,&pd);};
+//    void visit(RichBool& pd) {lastCreated = new BoolWidget(par,&pd);};
+//    void visit(RichInt& pd) {lastCreated = new IntWidget(par,&pd);};
+//    void visit(RichFloat& pd){lastCreated = new FloatWidget(par,&pd);};
+//    void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
+//    void visit(RichMatrix44f&  pd ){  lastCreated = new Matrix44fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla); }
+//    void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
+//    void visit(RichShotf& pd){lastCreated = new ShotfWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
+//    void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
+//    void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
+//    void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
+//    //void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
+//    void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
+//    void visit(RichOpenFile& pd){lastCreated = new OpenFileWidget(par,&pd);};
+//    void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
+//    void visit(RichMesh& pd){lastCreated = new MeshWidget(par,&pd);};
 
-    ~RichWidgetInterfaceConstructor() {}
+//    ~RichWidgetInterfaceConstructor() {}
 
-    MeshLabWidget* lastCreated;
-private:
-    QWidget* par;
+//    MeshLabWidget* lastCreated;
+//private:
+//    QWidget* par;
 
-};
+//};
 
-class RichParameterToQTableWidgetItemConstructor : public Visitor
-{
-public:
-    RichParameterToQTableWidgetItemConstructor(/*QListWidget* widlst*/):/*lst(widlst),*/lastCreated(NULL){}
+//class RichParameterToQTableWidgetItemConstructor : public Visitor
+//{
+//public:
+//    RichParameterToQTableWidgetItemConstructor(/*QListWidget* widlst*/):/*lst(widlst),*/lastCreated(NULL){}
 
-    void visit(RichBool& pd);
-    void visit(RichInt& pd);
-    void visit(RichFloat& pd);
-    void visit(RichString& pd);
-    void visit(RichMatrix44f& /*pd*/){assert(0);};
-    void visit(RichPoint3f& pd);
-  void visit(RichShotf& pd);
-    void visit(RichColor& pd);
-    void visit(RichAbsPerc& pd);
-    void visit(RichEnum& pd);
-    //void visit(RichFloatList& /*pd*/){assert(0);};
-    void visit(RichDynamicFloat& pd);
-    void visit(RichOpenFile& pd);
-    void visit(RichSaveFile& /*pd*/){assert(0);};
-    void visit(RichMesh& /*pd*/){assert(0);};
+//    void visit(RichBool& pd);
+//    void visit(RichInt& pd);
+//    void visit(RichFloat& pd);
+//    void visit(RichString& pd);
+//    void visit(RichMatrix44f& /*pd*/){assert(0);};
+//    void visit(RichPoint3f& pd);
+//  void visit(RichShotf& pd);
+//    void visit(RichColor& pd);
+//    void visit(RichAbsPerc& pd);
+//    void visit(RichEnum& pd);
+//    //void visit(RichFloatList& /*pd*/){assert(0);};
+//    void visit(RichDynamicFloat& pd);
+//    void visit(RichOpenFile& pd);
+//    void visit(RichSaveFile& /*pd*/){assert(0);};
+//    void visit(RichMesh& /*pd*/){assert(0);};
 
-    /*QListWidget* lst;*/
-    QTableWidgetItem* lastCreated;
-};
+//    /*QListWidget* lst;*/
+//    QTableWidgetItem* lastCreated;
+//};
 
 
 

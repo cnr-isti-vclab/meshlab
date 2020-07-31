@@ -108,11 +108,6 @@ QString RichBool::stringType() const
 	return "RichBool";
 }
 
-void RichBool::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichBool* RichBool::clone() const
 {
 	return new RichBool(*this);
@@ -141,11 +136,6 @@ RichInt::~RichInt()
 QString RichInt::stringType() const
 {
 	return "RichInt";
-}
-
-void RichInt::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichInt* RichInt::clone() const
@@ -178,11 +168,6 @@ QString RichFloat::stringType() const
 	return "RichFloat";
 }
 
-void RichFloat::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichFloat* RichFloat::clone() const
 {
 	return new RichFloat(*this);
@@ -211,11 +196,6 @@ RichString::~RichString()
 QString RichString::stringType() const
 {
 	return "RichString";
-}
-
-void RichString::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichString* RichString::clone() const
@@ -254,11 +234,6 @@ RichMatrix44f::~RichMatrix44f()
 QString RichMatrix44f::stringType() const
 {
 	return "RichMatrix44f";
-}
-
-void RichMatrix44f::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichMatrix44f* RichMatrix44f::clone() const
@@ -300,11 +275,6 @@ QString RichPoint3f::stringType() const
 	return "RichPoint3f";
 }
 
-void RichPoint3f::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichPoint3f* RichPoint3f::clone() const
 {
 	return new RichPoint3f(*this);
@@ -329,11 +299,6 @@ RichShotf::~RichShotf()
 QString RichShotf::stringType() const
 {
 	return "RichShotf";
-}
-
-void RichShotf::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichShotf* RichShotf::clone() const
@@ -365,11 +330,6 @@ RichColor::~RichColor()
 QString RichColor::stringType() const
 {
 	return "RichColor";
-}
-
-void RichColor::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichColor* RichColor::clone() const
@@ -412,11 +372,6 @@ QDomElement RichAbsPerc::fillToXMLDocument(QDomDocument& doc) const
 	return parElem;
 }
 
-void RichAbsPerc::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichAbsPerc* RichAbsPerc::clone() const
 {
 	return new RichAbsPerc(*this);
@@ -455,11 +410,6 @@ QDomElement RichEnum::fillToXMLDocument(QDomDocument& doc) const
 	for(int ii = 0; ii < enumvalues.size(); ++ii)
 		parElem.setAttribute(QString("enum_val")+QString::number(ii), enumvalues.at(ii));
 	return parElem;
-}
-
-void RichEnum::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichEnum* RichEnum::clone() const
@@ -502,11 +452,6 @@ QDomElement RichDynamicFloat::fillToXMLDocument(QDomDocument& doc) const
 	return parElem;
 }
 
-void RichDynamicFloat::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichDynamicFloat* RichDynamicFloat::clone() const
 {
 	return new RichDynamicFloat(*this);
@@ -547,11 +492,6 @@ QDomElement RichOpenFile::fillToXMLDocument(QDomDocument& doc) const
 	return parElem;
 }
 
-void RichOpenFile::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
 RichOpenFile* RichOpenFile::clone() const
 {
 	return new RichOpenFile(*this);
@@ -588,11 +528,6 @@ QDomElement RichSaveFile::fillToXMLDocument(QDomDocument& doc) const
 	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
 	parElem.setAttribute("ext", ext);
 	return parElem;
-}
-
-void RichSaveFile::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichSaveFile* RichSaveFile::clone() const
@@ -658,11 +593,6 @@ QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc) const
 	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
 	parElem.setAttribute("value", QString::number(meshindex));
 	return parElem;
-}
-
-void RichMesh::accept( Visitor& v )
-{
-	v.visit(*this);
 }
 
 RichMesh* RichMesh::clone() const

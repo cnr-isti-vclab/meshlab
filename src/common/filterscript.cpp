@@ -58,11 +58,9 @@ QDomDocument FilterScript::xmlDoc()
         tag.setAttribute(QString("name"),pair.first);
         RichParameterSet &par=pair.second;
         QList<RichParameter*>::iterator jj;
-        RichParameterXMLVisitor v(doc);
         for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
         {
-            (*jj)->accept(v);
-            tag.appendChild(v.parElem);
+            tag.appendChild((*jj)->fillToXMLDocument(doc));
         }
         root.appendChild(tag);
     }

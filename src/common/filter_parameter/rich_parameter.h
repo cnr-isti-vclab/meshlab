@@ -25,7 +25,6 @@
 #define MESHLAB_RICH_PARAMETER_H
 
 #include "value.h"
-#include "visitor.h"
 #include <QDomElement>
 
 class MeshDocument;
@@ -47,7 +46,6 @@ public:
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	virtual void accept(Visitor& v) = 0;
 	virtual RichParameter* clone() const = 0;
 	RichParameter& operator=(const RichParameter& rp);
 	RichParameter& operator=(RichParameter&& rp);
@@ -69,7 +67,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichBool* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -82,7 +79,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichInt* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -95,7 +91,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichFloat* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -108,7 +103,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichString* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -122,7 +116,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichMatrix44f* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -136,7 +129,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichPoint3f* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -149,7 +141,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichShotf* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -162,7 +153,6 @@ public:
 
 	QString stringType() const;
 
-	void accept(Visitor& v);
 	RichColor* clone() const;
 	bool operator==(const RichParameter& rb);
 };
@@ -176,7 +166,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichAbsPerc* clone() const;
 	bool operator==(const RichParameter& rb);
 	float min;
@@ -192,7 +181,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichEnum* clone() const;
 	bool operator==(const RichParameter& rb);
 	QStringList enumvalues;
@@ -207,7 +195,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichDynamicFloat* clone() const;
 	bool operator==(const RichParameter& rb);
 	float min;
@@ -223,7 +210,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichOpenFile* clone() const;
 	bool operator==(const RichParameter& rb);
 	QStringList exts;
@@ -238,7 +224,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichSaveFile* clone() const;
 	bool operator==(const RichParameter& rb);
 	QString ext;
@@ -256,7 +241,6 @@ public:
 	QString stringType() const;
 	QDomElement fillToXMLDocument(QDomDocument& doc) const;
 
-	void accept(Visitor& v);
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);
 	MeshDocument* meshdoc;

@@ -63,7 +63,6 @@ CustomDialog::~CustomDialog()
 
 void CustomDialog::updateSettings()
 {
-	RichParameterToQTableWidgetItemConstructor v;
 	QStringList slst;
 	slst.push_back("Variable Name");
 	slst.push_back("Variable Value");
@@ -90,11 +89,11 @@ void CustomDialog::updateSettings()
 		tw->setItem(ii,0,item);
 		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
 
-		curParSet.paramList[ii]->accept(v);
-		v.lastCreated->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
-		tw->setItem(ii,1,v.lastCreated);
-		//if (maxlen[1] < v.lastCreated->text().size() * sz)
-		//	maxlen[1] = v.lastCreated->text().size() * sz;
+		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(*curParSet.paramList[ii]);
+		twi->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
+		tw->setItem(ii,1,twi);
+		//if (maxlen[1] < twi->text().size() * sz)
+		//	maxlen[1] = twi->text().size() * sz;
 		vrp.push_back(curParSet.paramList.at(ii));
 	}
 	tw->resizeColumnsToContents();
@@ -104,6 +103,69 @@ void CustomDialog::updateSettings()
 
 	/*emit tw->horizontalHeader()->sectionAutoResize( 0,QHeaderView::ResizeToContents);
 	emit tw->horizontalHeader()->sectionAutoResize( 1,QHeaderView::ResizeToContents);*/
+}
+
+QTableWidgetItem* CustomDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
+{
+    if (pd.value().isAbsPerc()){
+        return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
+    }
+    else if (pd.value().isDynamicFloat()){
+        return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));
+    }
+    else if (pd.value().isEnum()){
+        return new QTableWidgetItem(QString::number(pd.value().getEnum()));
+    }
+    else if (pd.value().isBool()){
+        if (pd.value().getBool())
+            return new QTableWidgetItem("true"/*,lst*/);
+        else
+            return new QTableWidgetItem("false"/*,lst*/);
+    }
+    else if (pd.value().isInt()){
+        return new QTableWidgetItem(QString::number(pd.value().getInt()));
+    }
+    else if (pd.value().isFloat()){
+        return new QTableWidgetItem(QString::number(pd.value().getFloat()));
+    }
+    else if (pd.value().isString()){
+        return new QTableWidgetItem(pd.value().getString());
+    }
+    else if (pd.value().isMatrix44f()){
+        assert(0);
+        return nullptr;
+    }
+    else if (pd.value().isPoint3f()){
+        vcg::Point3f pp = pd.value().getPoint3f();
+        QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
+        return new QTableWidgetItem(pst);
+    }
+    else if (pd.value().isShotf()){
+        assert(0); ///
+        return new QTableWidgetItem(QString("TODO"));
+    }
+    else if (pd.value().isColor()){
+        QPixmap pix(10,10);
+        pix.fill(pd.value().getColor());
+        QIcon ic(pix);
+        return new QTableWidgetItem(ic,"");
+    }
+    else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+        new QTableWidgetItem(pd.value().getFileName());
+    }
+    else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+        assert(0);
+        return nullptr;
+    }
+    else if (pd.value().isMesh()){
+        assert(0);
+        return nullptr;
+    }
+    else {
+        std::cerr << "RichParameter type not supported for QTableWidget creation.\n";
+        assert(0);
+        return nullptr;
+    }
 }
 
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
@@ -149,9 +211,7 @@ void SettingDialog::save()
 {
 	apply();
 	QDomDocument doc("MeshLabSettings");
-	RichParameterXMLVisitor v(doc);
-	tmppar->accept(v);
-	doc.appendChild(v.parElem);
+	doc.appendChild(tmppar->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
 	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name()), qUtf8Printable(docstring));
 	QSettings setting;

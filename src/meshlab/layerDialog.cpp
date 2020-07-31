@@ -1295,10 +1295,8 @@ void DecoratorParamsTreeWidget::save()
     for(int ii = 0;ii < tmpSet.paramList.size();++ii)
     {
         QDomDocument doc("MeshLabSettings");
-        RichParameterXMLVisitor v(doc);
         RichParameter* p = tmpSet.paramList[ii];
-        p->accept(v);
-        doc.appendChild(v.parElem);
+        doc.appendChild(p->fillToXMLDocument(doc));
         QString docstring =  doc.toString();
         qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name()), qUtf8Printable(docstring));
         QSettings setting;

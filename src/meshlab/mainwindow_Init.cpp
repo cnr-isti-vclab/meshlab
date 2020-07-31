@@ -905,9 +905,7 @@ void MainWindow::loadMeshLabSettings()
 			currentGlobalParams.paramList.push_back(v);
 
 			QDomDocument doc("MeshLabSettings");
-			RichParameterXMLVisitor vxml(doc);
-			v->accept(vxml);
-			doc.appendChild(vxml.parElem);
+			doc.appendChild(v->fillToXMLDocument(doc));
 			QString docstring = doc.toString();
 			QSettings setting;
 			setting.setValue(v->name(), QVariant(docstring));

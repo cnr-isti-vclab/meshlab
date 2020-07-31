@@ -77,4 +77,6 @@ private:
 	QVector<RichParameter*> vrp; 
 	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
+
+	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
 };
