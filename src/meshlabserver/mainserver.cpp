@@ -114,10 +114,10 @@ public:
                 fprintf(fp,  "<H2> Parameters </h2>\n");
                 //            fprintf(fp,  "\\paragraph fp%i Parameters\n",i);
 
-                if(! FPM[filterAction->text()].paramList.empty())
+                if(! FPM[filterAction->text()].isEmpty())
                 {
                     fprintf(fp,"<TABLE>\n");
-                    foreach(RichParameter* pp, FPM[filterAction->text()].paramList)
+                    for(RichParameter* pp : FPM[filterAction->text()])
                     {
                         fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
                             qUtf8Printable(pp->value().typeName()), qUtf8Printable(pp->fieldDescription()), qUtf8Printable(pp->toolTip()));
@@ -601,20 +601,23 @@ public:
             RichParameterList &parameterSet = pairold->pair.second;
 
             //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.
-            if (required.paramList.size() < parameterSet.paramList.size())
+            if (required.size() < parameterSet.size())
             {
                 fprintf(fp,"The parameters in the script file are more than the filter %s requires.\n", qUtf8Printable(fname));
                 return false;
             }
 
-            for(int i = 0; i < required.paramList.size(); i++)
+            int i = 0;
+            for(RichParameter* rp : required)
             {
-                if (!parameterSet.hasParameter(required.paramList[i]->name()))
+                if (!parameterSet.hasParameter(rp->name()))
                 {
-                    parameterSet.addParam(required.paramList[i]->clone());
+                    parameterSet.addParam(rp->clone());
                 }
                 assert(parameterSet.paramList.size() == required.paramList.size());
-                RichParameter* parameter = parameterSet.paramList[i];
+                RichParameterList::iterator it = parameterSet.begin();
+                std::advance(it, i);
+                RichParameter* parameter = *it;
                 //if this is a mesh parameter and the index is valid
                 if(parameter->value().isMesh())
                 {
@@ -623,7 +626,10 @@ public:
                             md->meshindex >= 0  )
                     {
                         RichMesh* rmesh = new RichMesh(parameter->name(),meshDocument.getMesh(md->meshindex),&meshDocument);
-                        parameterSet.paramList.replace(i,rmesh);
+                        //THIS IS VERY BAD (but it is better than before)
+                        delete *it;
+                        *it = rmesh;
+                        //parameterSet.paramList.replace(i,rmesh);
                     } else
                     {
                         fprintf(fp,"Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
@@ -632,6 +638,7 @@ public:
                     }
                     delete parameter;
                 }
+                i++;
             }
 
             QGLWidget* wid = NULL;
