@@ -895,13 +895,13 @@ void MainWindow::loadMeshLabSettings()
 	}
 
 	// 2) eventually fill missing values with the hardwired defaults
-	for (int ii = 0; ii < defaultGlobalParams.paramList.size(); ++ii)
+	for (const RichParameter* p : defaultGlobalParams.paramList)
 	{
 		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
-		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name()))
+		if (!currentGlobalParams.hasParameter(p->name()))
 		{
 			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-			RichParameter* v = defaultGlobalParams.paramList.at(ii)->clone();
+			RichParameter* v = p->clone();
 			currentGlobalParams.paramList.push_back(v);
 
 			QDomDocument doc("MeshLabSettings");

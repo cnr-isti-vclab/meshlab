@@ -13,9 +13,9 @@ RichParameterList::RichParameterList( const RichParameterList& rps )
 {
     clear();
 
-    for(int ii = 0;ii < rps.paramList.size();++ii)
+    for(auto p : rps.paramList)
     {
-        paramList.push_back(rps.paramList.at(ii)->clone());
+        paramList.push_back(p->clone());
     }
 }
 
@@ -30,7 +30,7 @@ RichParameterList::~RichParameterList()
 // Very similar to the findParameter but this one does not print out debugstuff.
 bool RichParameterList::hasParameter(const QString& name) const
 {
-    QList<RichParameter*>::const_iterator fpli;
+    std::list<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
     {
         if((*fpli != NULL) && (*fpli)->name()==name)
@@ -41,7 +41,7 @@ bool RichParameterList::hasParameter(const QString& name) const
 // You should never use this one to know if a given parameter is present.
 RichParameter* RichParameterList::findParameter(const QString& name) const
 {
-    QList<RichParameter*>::const_iterator fpli;
+    std::list<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
     {
         if((*fpli != NULL) && (*fpli)->name()==name)
@@ -54,7 +54,9 @@ RichParameter* RichParameterList::findParameter(const QString& name) const
 }
 
 RichParameterList& RichParameterList::removeParameter(const QString& name){
-    paramList.removeAll(findParameter(name));
+
+    paramList.remove_if([&name](const RichParameter* p){return name == p->name();});
+
     return (*this);
 }
 
@@ -104,12 +106,13 @@ bool RichParameterList::operator==( const RichParameterList& rps )
         return false;
 
     bool iseq = true;
-    int ii = 0;
-    while((ii < rps.paramList.size()) && iseq)
-    {
-        if (!(*rps.paramList.at(ii) == *paramList.at(ii)))
+
+    std::list<RichParameter*>::const_iterator i = paramList.begin();
+    std::list<RichParameter*>::const_iterator j = rps.paramList.begin();
+
+    for (; i != paramList.end() && iseq; ++i, ++j){
+        if (*i != *j)
             iseq = false;
-        ++ii;
     }
 
     return iseq;
@@ -120,9 +123,9 @@ RichParameterList& RichParameterList::copy( const RichParameterList& rps )
     if (this != &rps) {
         clear();
 
-        for(int ii = 0;ii < rps.paramList.size();++ii)
+        for(const RichParameter* p : rps.paramList)
         {
-            paramList.push_back(rps.paramList.at(ii)->clone());
+            paramList.push_back(p->clone());
         }
     }
     return (*this);
@@ -130,7 +133,7 @@ RichParameterList& RichParameterList::copy( const RichParameterList& rps )
 
 bool RichParameterList::isEmpty() const
 {
-    return paramList.isEmpty();
+    return paramList.size() == 0;
 }
 
 void RichParameterList::clear()
@@ -142,9 +145,9 @@ void RichParameterList::clear()
 
 RichParameterList& RichParameterList::join( const RichParameterList& rps )
 {
-    for(int ii = 0;ii < rps.paramList.size();++ii)
+    for(const RichParameter* p : rps.paramList)
     {
-        paramList.push_back(rps.paramList.at(ii)->clone());
+        paramList.push_back(p->clone());
     }
     return (*this);
 }

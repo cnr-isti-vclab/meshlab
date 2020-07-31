@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_RICH_PARAMETER_SET_H
-#define MESHLAB_RICH_PARAMETER_SET_H
+#ifndef MESHLAB_RICH_PARAMETER_LIST_H
+#define MESHLAB_RICH_PARAMETER_LIST_H
 
 #include "rich_parameter.h"
 
@@ -73,7 +73,7 @@ public:
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
 
-	QList<RichParameter*> paramList;
+	std::list<RichParameter*> paramList;
 };
 
-#endif // MESHLAB_RICH_PARAMETER_SET_H
+#endif // MESHLAB_RICH_PARAMETER_LIST_H

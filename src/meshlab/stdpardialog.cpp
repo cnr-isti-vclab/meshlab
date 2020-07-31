@@ -45,13 +45,13 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
 
 void StdParFrame::resetValues(RichParameterList &curParSet)
 {
-    QList<RichParameter*> &parList =curParSet.paramList;
+    std::list<RichParameter*> &parList =curParSet.paramList;
     assert(stdfieldwidgets.size() == parList.size());
-    for(int i = 0; i < parList.count(); i++)
+    unsigned int i  =0;
+    for(RichParameter* fpi : parList)
     {
-        RichParameter* fpi= parList.at(i);
         if (fpi != NULL)
-            stdfieldwidgets[i]->resetValue();
+            stdfieldwidgets[i++]->resetValue();
     }
 }
 
@@ -62,9 +62,9 @@ void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /
     QGridLayout* glay = new QGridLayout();
     // QGridLayout *vlayout = new QGridLayout(this);
     //    vLayout->setAlignment(Qt::AlignTop);
-    for(int i = 0; i < curParSet.paramList.count(); i++)
+    int i = 0;
+    for(RichParameter* fpi : curParSet.paramList)
     {
-        RichParameter* fpi=curParSet.paramList.at(i);
         MeshLabWidget* wd = createWidgetFromRichParameter(this, *fpi);
         //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
         stdfieldwidgets.push_back(wd);
@@ -72,7 +72,7 @@ void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /
         //glay->addItem(wd->leftItem(),i,0);
         //glay->addItem(wd->centralItem(),i,1);
         //glay->addItem(wd->rightItem(),i,2);
-        wd->addWidgetToGridLayout(glay,i);
+        wd->addWidgetToGridLayout(glay,i++);
 
     } // end for each parameter
     setLayout(glay);
@@ -93,12 +93,12 @@ void StdParFrame::toggleHelp()
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
 void StdParFrame::readValues(RichParameterList &curParSet)
 {
-    QList<RichParameter*> &parList =curParSet.paramList;
+    std::list<RichParameter*> &parList =curParSet.paramList;
     assert(parList.size() == stdfieldwidgets.size());
     QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin();
-    for(int i = 0; i < parList.count(); i++)
+    for(RichParameter* p : parList)
     {
-        QString sname = parList.at(i)->name();
+        QString sname = p->name();
         curParSet.setValue(sname,(*it)->getWidgetValue());
         ++it;
     }

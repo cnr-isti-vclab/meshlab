@@ -790,11 +790,8 @@ void MainWindow::runFilterScript()
         FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         RichParameterList &parameterSet = old->pair.second;
 
-        for(int i = 0; i < parameterSet.paramList.size(); i++)
+        for(RichParameter*& parameter : parameterSet.paramList)
         {
-            //get a modifieable reference
-            RichParameter* parameter = parameterSet.paramList[i];
-
             //if this is a mesh paramter and the index is valid
             if(parameter->value().isMesh())
             {
@@ -803,7 +800,7 @@ void MainWindow::runFilterScript()
                         md->meshindex >= 0  )
                 {
                     RichMesh* rmesh = new RichMesh(parameter->name(),md->meshindex,meshDoc());
-                    parameterSet.paramList.replace(i,rmesh);
+                    parameter = rmesh;
                 } else
                 {
                     printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
@@ -1263,11 +1260,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
             }
         case (MeshFilterInterface::FIXED):
             {
-                for(int ii = 0;ii < mergedenvironment.paramList.size();++ii)
+                for(const RichParameter* p : mergedenvironment.paramList)
                 {
-                    if (mergedenvironment.paramList[ii]->value().isMesh())
+                    if (p->value().isMesh())
                     {
-                        MeshModel* mm = mergedenvironment.paramList[ii]->value().getMesh();
+                        MeshModel* mm = p->value().getMesh();
                         if (mm != NULL)
                             tmp.push_back(mm);
                     }

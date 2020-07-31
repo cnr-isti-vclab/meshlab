@@ -78,9 +78,10 @@ void CustomDialog::updateSettings()
 	//tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
 	
 	//int sz = tw->font().pointSize();
-	for(int ii = 0;ii < curParSet.paramList.size();++ii)
+	int ii = 0;
+	for(RichParameter* p : curParSet.paramList)
 	{
-		QTableWidgetItem* item = new QTableWidgetItem(curParSet.paramList.at(ii)->name());
+		QTableWidgetItem* item = new QTableWidgetItem(p->name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
 		//if (maxlen[0] < item->text().size() * sz)
@@ -90,12 +91,12 @@ void CustomDialog::updateSettings()
 		tw->setItem(ii,0,item);
 		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
 
-		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(*curParSet.paramList[ii]);
+		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(*p);
 		twi->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
-		tw->setItem(ii,1,twi);
+		tw->setItem(ii++,1,twi);
 		//if (maxlen[1] < twi->text().size() * sz)
 		//	maxlen[1] = twi->text().size() * sz;
-		vrp.push_back(curParSet.paramList.at(ii));
+		vrp.push_back(p);
 	}
 	tw->resizeColumnsToContents();
 	tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);

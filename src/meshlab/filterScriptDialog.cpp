@@ -223,10 +223,11 @@ void FilterScriptDialog::editOldParameters( const int row )
 
     if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
     {
+        std::list<RichParameter*>::iterator i = newParameterSet.paramList.begin();
+        std::list<RichParameter*>::iterator j = oldParameterSet.paramList.begin();
         //now set values to be the old values
-        for(int i = 0; i < newParameterSet.paramList.size(); i++)
-        {
-            newParameterSet.paramList[i]->value().set(oldParameterSet.paramList[i]->value());
+        for (; i != newParameterSet.paramList.end(); ++i, ++j){
+            (*i)->value().set((*j)->value());
         }	
     } else
         qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";

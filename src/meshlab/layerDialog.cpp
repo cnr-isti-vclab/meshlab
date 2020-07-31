@@ -1240,10 +1240,10 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
             //the register system saved value instead is in the defValues of the params inside the current globalParameters set
             /********************************************************************************************************************/
 
-            for(int jj = 0;jj < tmpSet.paramList.size();++jj)
+            for(RichParameter* p : tmpSet.paramList)
             {
-                RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name());
-                tmpSet.setValue(tmpSet.paramList[jj]->name(),par->value());
+                RichParameter* par = currSet.findParameter(p->name());
+                tmpSet.setValue(p->name(),par->value());
             }
 
             dialoglayout = new QGridLayout();
@@ -1292,18 +1292,17 @@ DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 void DecoratorParamsTreeWidget::save()
 {
     apply();
-    for(int ii = 0;ii < tmpSet.paramList.size();++ii)
+    for(RichParameter* p : tmpSet.paramList)
     {
         QDomDocument doc("MeshLabSettings");
-        RichParameter* p = tmpSet.paramList[ii];
         doc.appendChild(p->fillToXMLDocument(doc));
         QString docstring =  doc.toString();
         qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name()), qUtf8Printable(docstring));
         QSettings setting;
         setting.setValue(p->name(),QVariant(docstring));
         RichParameterList& currSet = mainWin->currentGlobalPars();
-        RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name());
-        par->value().set(tmpSet.paramList[ii]->value());
+        RichParameter* par = currSet.findParameter(p->name());
+        par->value().set(p->value());
     }
 }
 
@@ -1329,11 +1328,12 @@ void DecoratorParamsTreeWidget::apply()
 
 void DecoratorParamsTreeWidget::load()
 {
-    for(int ii = 0;ii < tmpSet.paramList.size();++ii)
+    int ii = 0;
+    for(RichParameter* p : tmpSet.paramList)
     {
-        const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name()));
-        tmpSet.paramList[ii]->value().set(defPar.value());
-        frame->stdfieldwidgets.at(ii)->setWidgetValue(tmpSet.paramList[ii]->value());
+        const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(p->name()));
+        p->value().set(defPar.value());
+        frame->stdfieldwidgets.at(ii++)->setWidgetValue(p->value());
     }
     apply();
 }
