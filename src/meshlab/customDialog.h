@@ -25,7 +25,7 @@
 #include <QDialog>
 #include <QDockWidget>
 #include <QColorDialog>
-#include "common/filter_parameter/filterparameter.h"
+#include <common/filter_parameter/rich_parameter_set.h>
 #include "stdpardialog.h"
 
 

@@ -2,6 +2,7 @@
 #include "GLExtensionsManager.h"
 #include "mlexception.h"
 #include <vector>
+#include <QThread>
 
 #include "meshmodel.h"
 

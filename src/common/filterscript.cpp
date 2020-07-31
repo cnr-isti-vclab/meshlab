@@ -25,6 +25,9 @@
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
+#include <QFile>
+#include <QDir>
+#include <QTextStream>
 #include <QPair>
 
 #include "filterscript.h"

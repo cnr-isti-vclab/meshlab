@@ -25,7 +25,7 @@
 #define MESHLAB_INTERFACES_H
 //#include <GL/glew.h>
 
-#include "filter_parameter/filterparameter.h"
+#include "filter_parameter/rich_parameter_set.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
 

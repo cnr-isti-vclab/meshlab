@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "ui_customDialog.h"
+#include <common/filter_parameter/rich_parameter_set.h>
 #include "customDialog.h"
 #include <QPalette>
  #include <QHeaderView>
@@ -97,7 +98,7 @@ void CustomDialog::updateSettings()
 		vrp.push_back(curParSet.paramList.at(ii));
 	}
 	tw->resizeColumnsToContents();
-    tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 	//tw->setColumnWidth(0,tw->horizontalHeader()->width());
 	//tw->setColumnWidth(1,tw->horizontalHeader()->width());
 
@@ -107,65 +108,65 @@ void CustomDialog::updateSettings()
 
 QTableWidgetItem* CustomDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
 {
-    if (pd.value().isAbsPerc()){
-        return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
-    }
-    else if (pd.value().isDynamicFloat()){
-        return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));
-    }
-    else if (pd.value().isEnum()){
-        return new QTableWidgetItem(QString::number(pd.value().getEnum()));
-    }
-    else if (pd.value().isBool()){
-        if (pd.value().getBool())
-            return new QTableWidgetItem("true"/*,lst*/);
-        else
-            return new QTableWidgetItem("false"/*,lst*/);
-    }
-    else if (pd.value().isInt()){
-        return new QTableWidgetItem(QString::number(pd.value().getInt()));
-    }
-    else if (pd.value().isFloat()){
-        return new QTableWidgetItem(QString::number(pd.value().getFloat()));
-    }
-    else if (pd.value().isString()){
-        return new QTableWidgetItem(pd.value().getString());
-    }
-    else if (pd.value().isMatrix44f()){
-        assert(0);
-        return nullptr;
-    }
-    else if (pd.value().isPoint3f()){
-        vcg::Point3f pp = pd.value().getPoint3f();
-        QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
-        return new QTableWidgetItem(pst);
-    }
-    else if (pd.value().isShotf()){
-        assert(0); ///
-        return new QTableWidgetItem(QString("TODO"));
-    }
-    else if (pd.value().isColor()){
-        QPixmap pix(10,10);
-        pix.fill(pd.value().getColor());
-        QIcon ic(pix);
-        return new QTableWidgetItem(ic,"");
-    }
-    else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
-        new QTableWidgetItem(pd.value().getFileName());
-    }
-    else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
-        assert(0);
-        return nullptr;
-    }
-    else if (pd.value().isMesh()){
-        assert(0);
-        return nullptr;
-    }
-    else {
-        std::cerr << "RichParameter type not supported for QTableWidget creation.\n";
-        assert(0);
-        return nullptr;
-    }
+	if (pd.value().isAbsPerc()){
+		return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
+	}
+	else if (pd.value().isDynamicFloat()){
+		return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));
+	}
+	else if (pd.value().isEnum()){
+		return new QTableWidgetItem(QString::number(pd.value().getEnum()));
+	}
+	else if (pd.value().isBool()){
+		if (pd.value().getBool())
+			return new QTableWidgetItem("true"/*,lst*/);
+		else
+			return new QTableWidgetItem("false"/*,lst*/);
+	}
+	else if (pd.value().isInt()){
+		return new QTableWidgetItem(QString::number(pd.value().getInt()));
+	}
+	else if (pd.value().isFloat()){
+		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
+	}
+	else if (pd.value().isString()){
+		return new QTableWidgetItem(pd.value().getString());
+	}
+	else if (pd.value().isMatrix44f()){
+		assert(0);
+		return nullptr;
+	}
+	else if (pd.value().isPoint3f()){
+		vcg::Point3f pp = pd.value().getPoint3f();
+		QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
+		return new QTableWidgetItem(pst);
+	}
+	else if (pd.value().isShotf()){
+		assert(0); ///
+		return new QTableWidgetItem(QString("TODO"));
+	}
+	else if (pd.value().isColor()){
+		QPixmap pix(10,10);
+		pix.fill(pd.value().getColor());
+		QIcon ic(pix);
+		return new QTableWidgetItem(ic,"");
+	}
+	else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+		new QTableWidgetItem(pd.value().getFileName());
+	}
+	else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+		assert(0);
+		return nullptr;
+	}
+	else if (pd.value().isMesh()){
+		assert(0);
+		return nullptr;
+	}
+	else {
+		std::cerr << "RichParameter type not supported for QTableWidget creation.\n";
+		assert(0);
+		return nullptr;
+	}
 }
 
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
