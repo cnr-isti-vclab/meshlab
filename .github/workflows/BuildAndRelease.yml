@@ -231,16 +231,6 @@ jobs:
       id: envs
       run: |
         echo ::set-output name=date::"$(date +%Y.%m)"
-    - name: Publish Release
-      id: create_release
-      uses: actions/create-release@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: Meshlab-${{steps.envs.outputs.date}}
-        release_name: MeshLab-${{steps.envs.outputs.date}}
-        draft: false
-        prerelease: false
 
     #Linux Release
     - name: Download Linux ZIP
@@ -269,6 +259,41 @@ jobs:
     - name: Create MeshLab Portable Linux Archive
       run: |
         tar -cvzf MeshLab${{steps.envs.outputs.date}}-linux.tar.gz meshlab_linux_portable/
+    
+
+    #MacOS Release
+    - name: Download MacOS DMG
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_macos_dmg
+        
+
+    #Windows Release
+    - name: Download Windows ZIP
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_windows_portable
+    - name: Download Windows Installer
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_windows_installer
+    - name: Create MeshLab Portable Windows Archive
+      run: |
+        zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
+    
+    
+    #Create release and upload
+    - name: Publish Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: Meshlab-${{steps.envs.outputs.date}}
+        release_name: MeshLab-${{steps.envs.outputs.date}}
+        draft: false
+        prerelease: false
+    #Linux
     - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -309,12 +334,7 @@ jobs:
         asset_path: meshlab_linux_snap/MeshLab${{steps.envs.outputs.date}}-linux.snap
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.snap
         asset_content_type: MeshLab Snap for Linux
-
-    #MacOS Release
-    - name: Download MacOS DMG
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlab_macos_dmg
+    #MacOS
     - name: Upload ReleaseMacOSDMG
       id: upload-release-macos
       uses: actions/upload-release-asset@v1.0.1
@@ -325,19 +345,7 @@ jobs:
         asset_path: meshlab_macos_dmg/MeshLab${{steps.envs.outputs.date}}-macos.dmg
         asset_name: MeshLab${{steps.envs.outputs.date}}-macos.dmg
         asset_content_type: MeshLab for MacOS
-
-    #Windows Release
-    - name: Download Windows ZIP
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlab_windows_portable
-    - name: Download Windows Installer
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlab_windows_installer
-    - name: Create MeshLab Portable Windows Archive
-      run: |
-        zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
+    #Windows
     - name: Upload ReleaseWindowsPortable
       id: upload-release-windows-portable
       uses: actions/upload-release-asset@v1.0.1
