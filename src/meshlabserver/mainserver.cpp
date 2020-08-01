@@ -614,7 +614,7 @@ public:
                 {
                     parameterSet.addParam(*rp);
                 }
-                assert(parameterSet.paramList.size() == required.paramList.size());
+                assert(parameterSet.size() == required.size());
                 RichParameterList::iterator it = parameterSet.begin();
                 std::advance(it, i);
                 RichParameter* parameter = *it;
