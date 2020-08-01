@@ -28,7 +28,7 @@ $Log: meshedit.cpp,v $
 #include "edit_align.h"
 #include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
-#include <meshlab/stdpardialog.h>
+#include <meshlab/stdparframe/stdparframe.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"

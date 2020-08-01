@@ -1314,14 +1314,15 @@ void DecoratorParamsTreeWidget::reset()
 
 void DecoratorParamsTreeWidget::apply()
 {
-    RichParameterList& current = mainWin->currentGlobalPars();
-    for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
-    {
-        frame->stdfieldwidgets[ii]->collectWidgetValue();
-        RichParameter* r = frame->stdfieldwidgets[ii]->rp;
-        current.setValue(r->name(),r->value());
-    }
-    mainWin->updateCustomSettings();
+	RichParameterList& current = mainWin->currentGlobalPars();
+	for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
+	{
+		//frame->stdfieldwidgets[ii]->collectWidgetValue();
+		current.setValue(
+					frame->stdfieldwidgets[ii]->parameterName(),
+					frame->stdfieldwidgets[ii]->widgetValue());
+	}
+	mainWin->updateCustomSettings();
 	if (mainWin->GLA())
 		mainWin->GLA()->updateAllDecorators();
 }

@@ -30,7 +30,7 @@
 #include <math.h>
 
 #include <common/meshmodel.h>
-#include <meshlab/stdpardialog.h>
+#include <meshlab/stdparframe/stdparframe.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"

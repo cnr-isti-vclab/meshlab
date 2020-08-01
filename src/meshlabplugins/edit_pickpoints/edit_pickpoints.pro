@@ -6,7 +6,7 @@ HEADERS += \
     pickpointsDialog.h \
     pickedPoints.h \
     pickPointsTemplate.h \
-    ../../meshlab/stdpardialog.h
+	../../meshlab/stdparframe/stdparframe.h
 
 SOURCES += \
     edit_pickpoints_factory.cpp \
@@ -14,7 +14,7 @@ SOURCES += \
     pickpointsDialog.cpp \
     pickedPoints.cpp \
     pickPointsTemplate.cpp \
-    ../../meshlab/stdpardialog.cpp
+	../../meshlab/stdparframe/stdparframe.cpp
 
 RESOURCES += \
     editpickpoints.qrc

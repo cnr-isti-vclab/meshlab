@@ -26,7 +26,7 @@
 #include <QDockWidget>
 #include <QColorDialog>
 #include <common/filter_parameter/rich_parameter_list.h>
-#include "stdpardialog.h"
+#include "stdparframe/stdparframe.h"
 
 
 class SettingDialog : public QDialog
