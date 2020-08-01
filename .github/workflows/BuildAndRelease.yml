@@ -3,7 +3,7 @@ name: BuildAndRelease
 on:
   #[push, pull_request] #just for test release scripts
   schedule:
-    - cron:  '0 1 1 * *' #every first day of the month at 1am
+    - cron:  '0 10 1 * *' #every first day of the month at 1am
 
 jobs:
   update_ml_version:
@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         submodules: true
     - name: Setup env variables
       id: envs
@@ -44,7 +44,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -94,7 +94,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         submodules: true
     - name: Install dependencies
       run: |
@@ -126,7 +126,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         submodules: true
     - name: Install dependencies
       run: |
@@ -171,7 +171,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         submodules: true
     - name: Downlaod Jom
       run: |
