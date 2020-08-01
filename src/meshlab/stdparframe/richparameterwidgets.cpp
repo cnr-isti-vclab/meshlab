@@ -1,4 +1,4 @@
-#include "meshlabwidgets.h"
+#include "richparameterwidgets.h"
 
 #include <QColorDialog>
 #include <QClipboard>
@@ -7,7 +7,7 @@
 /******************************************/
 // MeshLabWidget Implementation
 /******************************************/
-MeshLabWidget::MeshLabWidget(QWidget* p, const RichParameter& rpar , const RichParameter& defaultParam):
+RichParameterWidget::RichParameterWidget(QWidget* p, const RichParameter& rpar , const RichParameter& defaultParam):
 	QWidget(p) , rp(rpar.clone()), defp(defaultParam.clone())
 {
 	if (rp!= NULL) {
@@ -21,33 +21,33 @@ MeshLabWidget::MeshLabWidget(QWidget* p, const RichParameter& rpar , const RichP
 	}
 }
 
-MeshLabWidget::~MeshLabWidget()
+RichParameterWidget::~RichParameterWidget()
 {
 	delete rp;
 	delete defp;
 	delete helpLab;
 }
 
-void MeshLabWidget::resetValue()
+void RichParameterWidget::resetValue()
 {
 	rp->value().set(defp->value());
 	resetWidgetValue();
 }
 
 
-const Value& MeshLabWidget::widgetValue()
+const Value& RichParameterWidget::widgetValue()
 {
 	collectWidgetValue();
 	return rp->value();
 }
 
-QString MeshLabWidget::parameterName() const
+QString RichParameterWidget::parameterName() const
 {
 	return rp->name();
 }
 
 
-void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
+void RichParameterWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 {
 	if (lay != NULL) {
 		lay->addWidget(helpLab, r, 2, 1, 1, Qt::AlignLeft);
@@ -59,7 +59,7 @@ void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 /******************************************/
 
 BoolWidget::BoolWidget(QWidget* p, const RichBool& rb , const RichBool& rdef) :
-	MeshLabWidget(p,rb, rdef)
+	RichParameterWidget(p,rb, rdef)
 {
 	cb = new QCheckBox(rp->fieldDescription(),this);
 	cb->setToolTip(rp->toolTip());
@@ -91,7 +91,7 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 {
 	if (lay !=NULL)
 		lay->addWidget(cb,r,0,1,2);
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -99,7 +99,7 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 /******************************************/
 
 LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& rpar , const RichParameter& rdef) :
-	MeshLabWidget(p,rpar, rdef)
+	RichParameterWidget(p,rpar, rdef)
 {
 	lab = new QLabel(rp->fieldDescription(),this);
 	lned = new QLineEdit(this);
@@ -131,7 +131,7 @@ void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(lab,r,0);
 		lay->addWidget(lned,r,1);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -215,7 +215,7 @@ void StringWidget::setWidgetValue( const Value& nv )
 
 
 ColorWidget::ColorWidget(QWidget *p, const RichColor& newColor, const RichColor& rdef)
-	:MeshLabWidget(p,newColor, rdef),pickcol()
+	:RichParameterWidget(p,newColor, rdef),pickcol()
 {
 	colorLabel = new QLabel(this);
 	descLabel = new QLabel(rp->fieldDescription(),this);
@@ -260,7 +260,7 @@ void ColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(descLabel,r,0);
 		lay->addLayout(vlay,r,1);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 void ColorWidget::collectWidgetValue()
@@ -314,7 +314,7 @@ void ColorWidget::pickColor()
 
 
 AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc& rabs, const RichAbsPerc& rdef):
-	MeshLabWidget(p,rabs, rdef)
+	RichParameterWidget(p,rabs, rdef)
 
 {
 	m_min = rabs.min;
@@ -420,7 +420,7 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(fieldDesc,r,0,Qt::AlignLeft);
 		lay->addLayout(vlay,r,1,Qt::AlignTop);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -428,7 +428,7 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 /******************************************/
 
 Point3fWidget::Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint3f& rdef, QWidget *gla_curr):
-	MeshLabWidget(p,rpf, rdef)
+	RichParameterWidget(p,rpf, rdef)
 {
 	//qDebug("Creating a Point3fWidget");
 	paramName = rpf.name();
@@ -559,7 +559,7 @@ void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(descLab,r,0);
 		lay->addLayout(vlay,r,1);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -567,7 +567,7 @@ void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 /******************************************/
 
 Matrix44fWidget::Matrix44fWidget(QWidget *p, const RichMatrix44f& rpf, const RichMatrix44f& rdef, QWidget *gla_curr):
-	MeshLabWidget(p,rpf, rdef)
+	RichParameterWidget(p,rpf, rdef)
 {
 	valid = false;
 	m.SetIdentity();
@@ -714,7 +714,7 @@ void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(descLab,r,0,Qt::AlignTop);
 		lay->addLayout(vlay,r,1,Qt::AlignTop);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 void Matrix44fWidget::invalidateMatrix(const QString& /*s*/)
@@ -727,7 +727,7 @@ void Matrix44fWidget::invalidateMatrix(const QString& /*s*/)
 /******************************************/
 
 ShotfWidget::ShotfWidget(QWidget *p, const RichShotf& rpf, const RichShotf& rdef, QWidget *gla_curr):
-	MeshLabWidget(p,rpf, rdef)
+	RichParameterWidget(p,rpf, rdef)
 {
 
 	paramName = rpf.name();
@@ -831,7 +831,7 @@ void ShotfWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addLayout(hlay,r,1);
 		lay->addWidget(descLab,r,0);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -839,7 +839,7 @@ void ShotfWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 /******************************************/
 
 DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat& rdf, const RichDynamicFloat& rdef):
-	MeshLabWidget(p,rdf, rdef)
+	RichParameterWidget(p,rdf, rdef)
 {
 	int numbdecimaldigit = 4;
 	minVal = rdf.min;
@@ -940,7 +940,7 @@ void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(fieldDesc,r,0);
 		lay->addLayout(hlay,r,1);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -948,7 +948,7 @@ void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 /******************************************/
 
 ComboWidget::ComboWidget(QWidget *p, const RichParameter& rpar, const RichParameter& rdef) :
-	MeshLabWidget(p,rpar, rdef) {
+	RichParameterWidget(p,rpar, rdef) {
 }
 
 void ComboWidget::Init(QWidget *p,int defaultEnum, QStringList values)
@@ -988,7 +988,7 @@ void ComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(enumLabel,r,0);
 		lay->addWidget(enumCombo,r,1);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/
@@ -1123,7 +1123,7 @@ void MeshWidget::setWidgetValue( const Value& nv )
 /******************************************/
 
 IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar , const RichParameter& rdef) :
-	MeshLabWidget(p,rpar, rdef), fl()
+	RichParameterWidget(p,rpar, rdef), fl()
 {
 	if (rp != NULL)
 		fl = rp->value().getFileName();
@@ -1182,7 +1182,7 @@ void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 		lay->addWidget(descLab,r,0,Qt::AlignTop);
 		lay->addLayout(hlay,r,1,Qt::AlignTop);
 	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
 /******************************************/

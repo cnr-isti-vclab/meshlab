@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 
-#include "stdparframe.h"
+#include "richparameterlistframe.h"
 
 #include <QLabel>
 #include <QPushButton>
@@ -37,13 +37,13 @@
 
 using namespace vcg;
 
-StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
+RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla )
     :QFrame(p)
 {
     gla=curr_gla;
 }
 
-void StdParFrame::resetValues(RichParameterList &curParSet)
+void RichParameterListFrame::resetValues(RichParameterList &curParSet)
 {
 	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
     unsigned int i  =0;
@@ -55,7 +55,7 @@ void StdParFrame::resetValues(RichParameterList &curParSet)
 }
 
 /* creates widgets for the standard parameters */
-void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /*_mdPt*/ )
+void RichParameterListFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /*_mdPt*/ )
 {
     if(layout()) delete layout();
     QGridLayout* glay = new QGridLayout();
@@ -64,7 +64,7 @@ void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /
     int i = 0;
     for(RichParameter* fpi : curParSet)
     {
-		MeshLabWidget* wd = createWidgetFromRichParameter(this, *fpi, *fpi);
+		RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, *fpi);
         //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
         stdfieldwidgets.push_back(wd);
         helpList.push_back(wd->helpLab);
@@ -81,7 +81,7 @@ void StdParFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /
     this->adjustSize();
 }
 
-void StdParFrame::toggleHelp()
+void RichParameterListFrame::toggleHelp()
 {
     for(int i = 0; i < helpList.count(); i++)
         helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
@@ -90,10 +90,10 @@ void StdParFrame::toggleHelp()
 }
 
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
-void StdParFrame::readValues(RichParameterList &curParSet)
+void RichParameterListFrame::readValues(RichParameterList &curParSet)
 {
 	assert(curParSet.size() == stdfieldwidgets.size());
-	QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin();
+	QVector<RichParameterWidget*>::iterator it = stdfieldwidgets.begin();
 	for(RichParameter* p : curParSet)
 	{
 		QString sname = p->name();
@@ -102,12 +102,12 @@ void StdParFrame::readValues(RichParameterList &curParSet)
 	}
 }
 
-StdParFrame::~StdParFrame()
+RichParameterListFrame::~RichParameterListFrame()
 {
 
 }
 
-MeshLabWidget* StdParFrame::createWidgetFromRichParameter(
+RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		QWidget* parent,
 		const RichParameter& pd,
 		const RichParameter& def)
@@ -134,13 +134,13 @@ MeshLabWidget* StdParFrame::createWidgetFromRichParameter(
 		return new StringWidget(parent, (const RichString&)pd, (const RichString&)def);
     }
     else if (pd.value().isMatrix44f()){
-		return new Matrix44fWidget(parent, (const RichMatrix44f&)pd, (const RichMatrix44f&)def, reinterpret_cast<StdParFrame*>(parent)->gla);
+		return new Matrix44fWidget(parent, (const RichMatrix44f&)pd, (const RichMatrix44f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
     }
     else if (pd.value().isPoint3f()){
-		return new Point3fWidget(parent, (const RichPoint3f&)pd, (const RichPoint3f&)def, reinterpret_cast<StdParFrame*>(parent)->gla);
+		return new Point3fWidget(parent, (const RichPoint3f&)pd, (const RichPoint3f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
     }
     else if (pd.value().isShotf()){
-		return new ShotfWidget(parent, (const RichShotf&)pd, (const RichShotf&)def, reinterpret_cast<StdParFrame*>(parent)->gla);
+		return new ShotfWidget(parent, (const RichShotf&)pd, (const RichShotf&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
     }
     else if (pd.value().isColor()){
 		return new ColorWidget(parent, (const RichColor&)pd, (const RichColor&)def);
@@ -160,83 +160,3 @@ MeshLabWidget* StdParFrame::createWidgetFromRichParameter(
         return nullptr;
     }
 }
-
-GenericParamDialog::GenericParamDialog(QWidget *p, RichParameterList *_curParSet, QString title, MeshDocument *_meshDocument)
-    : QDialog(p) {
-        stdParFrame=NULL;
-        curParSet=_curParSet;
-        meshDocument = _meshDocument;
-        createFrame();
-        if(!title.isEmpty())
-            setWindowTitle(title);
-}
-
-
-// update the values of the widgets with the values in the paramlist;
-void GenericParamDialog::resetValues()
-{
-    stdParFrame->resetValues(*curParSet);
-}
-
-void GenericParamDialog::toggleHelp()
-{
-    stdParFrame->toggleHelp();
-    this->updateGeometry();
-    this->adjustSize();
-}
-
-
-void GenericParamDialog::createFrame()
-{
-    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
-    setLayout(vboxLayout);
-
-    stdParFrame = new StdParFrame(this);
-    stdParFrame->loadFrameContent(*curParSet, meshDocument);
-    layout()->addWidget(stdParFrame);
-
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
-    //add the reset button so we can get its signals
-    QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
-    layout()->addWidget(buttonBox);
-
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
-
-    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-
-    //set the minimum size so it will shrink down to the right size	after the help is toggled
-    this->setMinimumSize(stdParFrame->sizeHint());
-    this->showNormal();
-    this->adjustSize();
-}
-
-
-void GenericParamDialog::getAccept()
-{
-    stdParFrame->readValues(*curParSet);
-    accept();
-}
-
-GenericParamDialog::~GenericParamDialog()
-{
-    delete stdParFrame;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

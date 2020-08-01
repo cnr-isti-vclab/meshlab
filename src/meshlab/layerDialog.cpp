@@ -1247,7 +1247,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
             }
 
             dialoglayout = new QGridLayout();
-            frame = new StdParFrame(parent,mw->GLA());
+            frame = new RichParameterListFrame(parent,mw->GLA());
             frame->loadFrameContent(tmpSet,mw->meshDoc());
             savebut = new QPushButton("Save",parent);
             resetbut = new QPushButton("Reset",parent);

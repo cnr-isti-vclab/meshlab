@@ -46,6 +46,8 @@
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
 
+#include "stdparframe/richparameterlistdialog.h"
+
 #include <wrap/io_trimesh/alnParser.h>
 
 
@@ -2304,7 +2306,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
         if(!prePar.isEmpty())
         {
-            GenericParamDialog preOpenDialog(this, &prePar, tr("Pre-Open Options"));
+            RichParameterListDialog preOpenDialog(this, &prePar, tr("Pre-Open Options"));
             preOpenDialog.setFocus();
             preOpenDialog.exec();
         }
@@ -2326,7 +2328,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
             pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
             if(!par.isEmpty())
             {
-                GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
+                RichParameterListDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
                 postOpenDialog.setFocus();
                 postOpenDialog.exec();
                 pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);

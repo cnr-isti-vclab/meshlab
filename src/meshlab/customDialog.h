@@ -26,7 +26,7 @@
 #include <QDockWidget>
 #include <QColorDialog>
 #include <common/filter_parameter/rich_parameter_list.h>
-#include "stdparframe/stdparframe.h"
+#include "stdparframe/richparameterlistframe.h"
 
 
 class SettingDialog : public QDialog
@@ -45,7 +45,7 @@ signals:
 	void applySettingSignal();
 
 private:
-	StdParFrame frame;
+	RichParameterListFrame frame;
 	RichParameter* curPar;
 	const RichParameter* defPar;
 	RichParameter* tmppar;

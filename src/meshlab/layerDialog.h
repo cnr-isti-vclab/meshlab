@@ -43,7 +43,7 @@ class MeshModel;
 class RasterModel;
 class MeshDocument;
 class MeshDecorateInterface;
-class StdParFrame;
+class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;
 
@@ -99,7 +99,7 @@ public slots:
 private:
     float osDependentButtonHeightScaleFactor();
     MainWindow* mainWin;
-    StdParFrame* frame;
+    RichParameterListFrame* frame;
     RichParameterList tmpSet;
     QPushButton* savebut;
     QPushButton* resetbut;

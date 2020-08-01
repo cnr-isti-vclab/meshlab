@@ -30,7 +30,8 @@
 #include <math.h>
 
 #include <common/meshmodel.h>
-#include <meshlab/stdparframe/stdparframe.h>
+#include <meshlab/stdparframe/richparameterlistframe.h>
+#include <meshlab/stdparframe/richparameterlistdialog.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"
@@ -659,7 +660,7 @@ void PickPointsDialog::renameHighlightedPoint() {
 		RichParameterList parameterSet;
 		parameterSet.addParam(RichString(newName, name, "New Name", "Enter the new name"));
 
-		GenericParamDialog getNameDialog(this, &parameterSet);
+		RichParameterListDialog getNameDialog(this, &parameterSet);
 		getNameDialog.setWindowModality(Qt::WindowModal);
 		getNameDialog.hide();
 

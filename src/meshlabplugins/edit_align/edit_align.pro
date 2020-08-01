@@ -13,7 +13,8 @@ HEADERS += \
     align/AlignGlobal.h \
     align/OccupancyGrid.h \
     align/align_parameter.h \
-	../../meshlab/stdparframe/stdparframe.h \
+	../../meshlab/stdparframe/richparameterlistframe.h \
+	../../meshlab/stdparframe/richparameterlistdialog.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h
@@ -28,7 +29,8 @@ SOURCES += \
     align/AlignGlobal.cpp \
     align/OccupancyGrid.cpp \
     align/align_parameter.cpp \
-	../../meshlab/stdparframe/stdparframe.cpp \
+	../../meshlab/stdparframe/richparameterlistframe.cpp \
+	../../meshlab/stdparframe/richparameterlistdialog.cpp \
     $$VCGDIR/wrap/ply/plylib.cpp\
     $$VCGDIR/wrap/gui/trackball.cpp\
     $$VCGDIR/wrap/gui/trackmode.cpp

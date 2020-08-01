@@ -25,7 +25,7 @@
 
 #include "../../common/interfaces.h"
 
-#include "meshlabwidgets.h"
+#include "richparameterwidgets.h"
 
 #include<QCheckBox>
 #include<QRadioButton>
@@ -43,11 +43,11 @@ it is used mostly for creating the main dialog of the filters, but it is used al
 in the creation of the additional saving options, post and pre opening processing
 and for general parameter setting in edit plugins (e.g. look at the alignment parameters)
 */
-class StdParFrame : public QFrame
+class RichParameterListFrame : public QFrame
 {
     Q_OBJECT
 public:
-    StdParFrame(QWidget *p, QWidget *gla=0);
+	RichParameterListFrame(QWidget *p, QWidget *gla=0);
 
     void loadFrameContent(RichParameterList &curParSet,MeshDocument *mdPt = 0);
 
@@ -58,49 +58,21 @@ public:
 
     void toggleHelp();
 
-    QVector<MeshLabWidget *> stdfieldwidgets;
+	QVector<RichParameterWidget *> stdfieldwidgets;
     QVector<QLabel *> helpList;
 
     QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
-    ~StdParFrame();
+	~RichParameterListFrame();
 
 signals:
 
     void parameterChanged();
 
 private:
-	static MeshLabWidget* createWidgetFromRichParameter(
+	static RichParameterWidget* createWidgetFromRichParameter(
 			QWidget* parent,
 			const RichParameter& pd,
 			const RichParameter& def);
-
-};
-
-
-
-// This class provide a modal dialog box for asking a generic parameter set
-// It can be used by anyone needing for some values in a structured form and having some integrated help
-class GenericParamDialog: public QDialog
-{
-    Q_OBJECT
-public:
-  GenericParamDialog(QWidget *p, RichParameterList *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
-    ~GenericParamDialog();
-
-    RichParameterList *curParSet;
-    StdParFrame *stdParFrame;
-
-    void createFrame();
-
-    public slots:
-    void getAccept();
-    void toggleHelp();
-
-    //reset the values on the gui back to the ones originally given to the dialog
-    void resetValues();
-
-private:
-    MeshDocument *meshDocument;
 
 };
 

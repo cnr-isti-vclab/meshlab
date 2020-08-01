@@ -1,5 +1,5 @@
-#ifndef MESHLABWIDGETS_H
-#define MESHLABWIDGETS_H
+#ifndef RICHPARAMETERLISTWIDGETS_H
+#define RICHPARAMETERLISTWIDGETS_H
 
 #include <QWidget>
 #include <QGridLayout>
@@ -14,18 +14,18 @@
 #include "common/interfaces.h"
 #include "common/filter_parameter/rich_parameter_list.h"
 
-class MeshLabWidget : public QWidget
+class RichParameterWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	MeshLabWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
+	RichParameterWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
 
 	// this one is called by resetValue to reset the values inside the widgets.
 	virtual void resetWidgetValue() = 0;
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
-	virtual ~MeshLabWidget();
+	virtual ~RichParameterWidget();
 
 	virtual void addWidgetToGridLayout(QGridLayout* lay,const int r) = 0;
 	// called when the user press the 'default' button to reset the parameter values to its default.
@@ -45,7 +45,7 @@ protected:
 	RichParameter* defp;
 };
 
-class BoolWidget : public MeshLabWidget
+class BoolWidget : public RichParameterWidget
 {
 public:
 	BoolWidget(QWidget* p, const RichBool& rb, const RichBool&rdef);
@@ -59,7 +59,7 @@ public:
 	QCheckBox* cb;
 };
 
-class LineEditWidget : public MeshLabWidget
+class LineEditWidget : public RichParameterWidget
 {
   Q_OBJECT
 protected:
@@ -110,7 +110,7 @@ public:
 	void setWidgetValue(const Value& nv);
 };
 
-class ColorWidget : public MeshLabWidget
+class ColorWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
@@ -140,7 +140,7 @@ private:
 	QColor pickcol;
 };
 
-class AbsPercWidget : public MeshLabWidget
+class AbsPercWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
@@ -171,7 +171,7 @@ protected:
 	QGridLayout* vlay;
 };
 
-class Point3fWidget : public MeshLabWidget
+class Point3fWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
@@ -204,7 +204,7 @@ protected:
 	QHBoxLayout* vlay;
 };
 
-class Matrix44fWidget : public MeshLabWidget
+class Matrix44fWidget : public RichParameterWidget
 {
 	Q_OBJECT
 
@@ -237,7 +237,7 @@ protected:
 	bool valid;
 };
 
-class ShotfWidget : public MeshLabWidget
+class ShotfWidget : public RichParameterWidget
 {
 	Q_OBJECT
 
@@ -269,7 +269,7 @@ protected:
 	QHBoxLayout* hlay;
 };
 
-class DynamicFloatWidget : public MeshLabWidget
+class DynamicFloatWidget : public RichParameterWidget
 {
 	Q_OBJECT
 
@@ -306,7 +306,7 @@ private :
 	int floatToInt(float val);
 };
 
-class ComboWidget : public MeshLabWidget
+class ComboWidget : public RichParameterWidget
 {
 	Q_OBJECT
 protected:
@@ -360,7 +360,7 @@ public:
 	void setMesh(MeshModel * newMesh);
 };
 
-class IOFileWidget : public MeshLabWidget
+class IOFileWidget : public RichParameterWidget
 {
 	Q_OBJECT
 
@@ -418,4 +418,4 @@ protected slots:
 	void selectFile();
 };
 
-#endif // MESHLABWIDGETS_H
+#endif // RICHPARAMETERLISTWIDGETS_H

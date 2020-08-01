@@ -127,7 +127,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
   ql->setOpenExternalLinks(true);
 	gridLayout->addWidget(ql, 0, 0, 1, 2, Qt::AlignTop); // this widgets spans over two columns.
 
-	stdParFrame = new StdParFrame(this, curgla);
+	stdParFrame = new RichParameterListFrame(this, curgla);
 	stdParFrame->loadFrameContent(curParSet, mdPt);
 	gridLayout->addWidget(stdParFrame, 1, 0, 1, 2);
 

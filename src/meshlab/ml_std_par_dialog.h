@@ -25,7 +25,7 @@
 #define ML_STD_PAR_DIALOG
 
 #include<QDockWidget>
-#include "stdparframe/stdparframe.h"
+#include "stdparframe/richparameterlistframe.h"
 
 class MainWindow;
 class MeshlabStdDialog : public QDockWidget
@@ -56,7 +56,7 @@ private slots:
 
 public:
     QFrame *qf;
-    StdParFrame *stdParFrame;
+    RichParameterListFrame *stdParFrame;
     QAction *curAction;
     MeshModelState meshState;
     MeshModelState meshCacheState;

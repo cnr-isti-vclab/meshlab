@@ -45,7 +45,7 @@ void SaveMaskExporterDialog::InitDialog()
     connect(ui->NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
     ui->renametextureButton->setDisabled(true);
 
-  stdParFrame = new StdParFrame(this,glar);
+  stdParFrame = new RichParameterListFrame(this,glar);
   stdParFrame->loadFrameContent(*parSet);
   QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(stdParFrame);

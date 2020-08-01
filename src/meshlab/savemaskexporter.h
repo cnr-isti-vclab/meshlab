@@ -26,7 +26,7 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "stdparframe/stdparframe.h"
+#include "stdparframe/richparameterlistframe.h"
 #include <common/filter_parameter/rich_parameter_list.h>
 #include "glarea.h"
 //
@@ -73,7 +73,7 @@ private:
 	int capability;
 	int defaultBits;
     RichParameterList *parSet;
-	StdParFrame *stdParFrame;
+	RichParameterListFrame *stdParFrame;
 	GLArea* glar;
 	
 	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);

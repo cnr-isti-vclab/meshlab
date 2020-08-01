@@ -49,8 +49,9 @@ HEADERS += \
 	$$VCGDIR/wrap/gui/trackball.h \
 	$$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
-	stdparframe/meshlabwidgets.h \
-	stdparframe/stdparframe.h
+	stdparframe/richparameterlistdialog.h \
+	stdparframe/richparameterlistframe.h \
+	stdparframe/richparameterwidgets.h
 
 SOURCES += \
 	main.cpp \
@@ -74,13 +75,13 @@ SOURCES += \
 	$$VCGDIR/wrap/gui/trackmode.cpp \
 	$$VCGDIR/wrap/gui/coordinateframe.cpp \
 	glarea_setting.cpp \
-	stdparframe/meshlabwidgets.cpp \
-	stdparframe/stdparframe.cpp
+	stdparframe/richparameterlistdialog.cpp \
+	stdparframe/richparameterlistframe.cpp \
+	stdparframe/richparameterwidgets.cpp
 
 FORMS += \
 	ui/layerDialog.ui \
 	ui/filterScriptDialog.ui \
-	ui/customDialog.ui \
 	ui/savesnapshotDialog.ui \
 	ui/aboutDialog.ui \
 	ui/renametexture.ui \
