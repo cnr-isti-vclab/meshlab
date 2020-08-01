@@ -43,6 +43,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0
         submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -92,6 +93,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0
         submodules: true
     - name: Install dependencies
       run: |
@@ -123,6 +125,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0
         submodules: true
     - name: Install dependencies
       run: |
@@ -167,6 +170,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0
         submodules: true
     - name: Downlaod Jom
       run: |
