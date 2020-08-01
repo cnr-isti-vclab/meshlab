@@ -44,7 +44,7 @@ public:
 	Value& value();
 	virtual QString stringType() const = 0;
 
-	virtual QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	virtual RichParameter* clone() const = 0;
 	RichParameter& operator=(const RichParameter& rp);
@@ -239,7 +239,7 @@ public:
 	~RichMesh();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);

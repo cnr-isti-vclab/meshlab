@@ -54,13 +54,15 @@ Value& RichParameter::value()
 	return *val;
 }
 
-QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
 	QDomElement parElem = doc.createElement("Param");
 	parElem.setAttribute("name", pName);
 	parElem.setAttribute("type", stringType());
-	parElem.setAttribute("description", fieldDesc);
-	parElem.setAttribute("tooltip",tooltip);
+	if (saveDescriptionAndTooltip) {
+		parElem.setAttribute("description", fieldDesc);
+		parElem.setAttribute("tooltip",tooltip);
+	}
 	val->fillToXMLElement(parElem);
 	return parElem;
 }
@@ -588,9 +590,9 @@ QString RichMesh::stringType() const
 	return "RichMesh";
 }
 
-QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("value", QString::number(meshindex));
 	return parElem;
 }
