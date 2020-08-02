@@ -60,8 +60,8 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(
 void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
 {
 	int rprow = tw->row(itm);
-	const RichParameter *defPar = defParSet.at(rprow);
 	RichParameter* curPar = curParSet.at(rprow);
+	const RichParameter *defPar = defParSet.findParameter(curPar->name());
 	SettingDialog* setdial = new SettingDialog(*curPar,*defPar,this);
 	connect(
 				setdial, SIGNAL(applySettingSignal(const RichParameter&)),

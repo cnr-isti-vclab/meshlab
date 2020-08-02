@@ -57,6 +57,13 @@ void RichParameterWidget::resetValue()
 	resetWidgetValue();
 }
 
+void RichParameterWidget::setValue(const Value& v)
+{
+	rp->setValue(v);
+	resetWidgetValue();
+}
+
+
 
 const Value& RichParameterWidget::widgetValue()
 {

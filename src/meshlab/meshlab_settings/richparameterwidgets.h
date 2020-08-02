@@ -54,6 +54,7 @@ public:
 	// called when the user press the 'default' button to reset the parameter values to its default.
 	// It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
 	void resetValue();
+	void setValue(const Value& v);
 	// update the parameter with the current widget values and return it.
 	const Value& widgetValue();
 	const RichParameter& richParameter() const;

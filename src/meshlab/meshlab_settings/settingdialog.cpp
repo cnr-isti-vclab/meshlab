@@ -94,7 +94,7 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
 
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->resetValue();
+	frame.stdfieldwidgets.at(0)->setValue(defPar->value());
 	apply();
 }
 

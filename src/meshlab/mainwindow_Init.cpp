@@ -877,7 +877,10 @@ void MainWindow::loadMeshLabSettings()
 
 		if (!docElem.isNull())
 		{
-			currentGlobalParams.pushFromQDomElement(docElem);
+			RichParameter* rp = nullptr;
+			bool b = RichParameterAdapter::create(docElem, &rp);
+			if (b && defaultGlobalParams.hasParameter(rp->name()))
+				currentGlobalParams.pushFromQDomElement(docElem);
 		}
 	}
 
@@ -897,6 +900,7 @@ void MainWindow::loadMeshLabSettings()
 			setting.setValue(v->name(), QVariant(docstring));
 		}
 	}
+	assert(currentGlobalParams.size() == defaultGlobalParams.size());
 
 }
 
