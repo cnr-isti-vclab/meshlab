@@ -1,14 +1,14 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,13 +21,16 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/filter_parameter/rich_parameter_list.h>
-#include "customDialog.h"
-#include <QPalette>
- #include <QHeaderView>
+#include "meshlabsettingsdialog.h"
+
+#include "settingdialog.h"
+
+#include <QHeaderView>
+
+
 using namespace vcg;
 
-CustomDialog::CustomDialog(RichParameterList& curparset, RichParameterList& defparset, QWidget * parent)
+MeshLabSettingsDialog::MeshLabSettingsDialog(RichParameterList& curparset, RichParameterList& defparset, QWidget * parent)
 		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
 	setModal(false);
@@ -46,7 +49,7 @@ CustomDialog::CustomDialog(RichParameterList& curparset, RichParameterList& defp
 	this->setWindowTitle(tr("Global Parameters Window"));
 }
 
-void CustomDialog::openSubDialog( QTableWidgetItem* itm )
+void MeshLabSettingsDialog::openSubDialog( QTableWidgetItem* itm )
 {
 	int rprow = tw->row(itm);
 	RichParameter *defPar = defParSet.findParameter(vrp[rprow]->name());
@@ -57,11 +60,11 @@ void CustomDialog::openSubDialog( QTableWidgetItem* itm )
 	delete setdial;
 }
 
-CustomDialog::~CustomDialog()
+MeshLabSettingsDialog::~MeshLabSettingsDialog()
 {
 }
 
-void CustomDialog::updateSettings()
+void MeshLabSettingsDialog::updateSettings()
 {
 	QStringList slst;
 	slst.push_back("Variable Name");
@@ -73,9 +76,9 @@ void CustomDialog::updateSettings()
 	tw->verticalHeader()->hide();
 
 	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
-	
+
 	//tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
-	
+
 	//int sz = tw->font().pointSize();
 	int ii = 0;
 	for(RichParameter* p : curParSet)
@@ -106,7 +109,7 @@ void CustomDialog::updateSettings()
 	emit tw->horizontalHeader()->sectionAutoResize( 1,QHeaderView::ResizeToContents);*/
 }
 
-QTableWidgetItem* CustomDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
+QTableWidgetItem* MeshLabSettingsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
 {
 	if (pd.value().isAbsPerc()){
 		return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
@@ -167,81 +170,4 @@ QTableWidgetItem* CustomDialog::createQTableWidgetItemFromRichParameter(const Ri
 		assert(0);
 		return nullptr;
 	}
-}
-
-//Maybe a MeshDocument parameter is needed. See loadFrameContent definition
-
-/*WARNING!*******************************************************/
-//In defPar->defVal the hardwired value is memorized
-//in curPar->defVal the one in the sys reg
-/****************************************************************/
-
-SettingDialog::SettingDialog(RichParameter* currentPar, const RichParameter* defaultPar, QWidget* parent /*= 0*/ )
-:QDialog(parent),frame(this),curPar(currentPar),defPar(defaultPar),tmppar(NULL)
-{
-	setModal(true);
-	savebut = new QPushButton("Save",this);
-	resetbut = new QPushButton("Reset",this);
-	applybut = new QPushButton("Apply",this);
-	loadbut = new QPushButton("Load",this);
-	closebut = new QPushButton("Close",this);
-
-	QGridLayout* dialoglayout = new QGridLayout(parent);
-	
-	dialoglayout->addWidget(savebut,1,0);
-	dialoglayout->addWidget(resetbut,1,1);
-	dialoglayout->addWidget(loadbut,1,2);
-	dialoglayout->addWidget(applybut,1,3);
-	dialoglayout->addWidget(closebut,1,4);
-
-	RichParameterList tmpParSet;
-	tmppar = tmpParSet.addParam(*curPar);
-	frame.loadFrameContent(tmpParSet);
-	dialoglayout->addWidget(&frame,0,0,1,5);
-	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
-	setLayout(dialoglayout);
-	connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
-	connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
-	connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
-	connect(loadbut,SIGNAL(clicked()),this,SLOT(load()));
-	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
-}
-
-void SettingDialog::save()
-{
-	apply();
-	QDomDocument doc("MeshLabSettings");
-	doc.appendChild(tmppar->fillToXMLDocument(doc));
-	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name()), qUtf8Printable(docstring));
-	QSettings setting;
-	setting.setValue(tmppar->name(),QVariant(docstring));
-	curPar->value().set(tmppar->value());
-}
-
-void SettingDialog::apply()
-{
-	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->collectWidgetValue();
-	curPar->value().set(tmppar->value());
-	emit applySettingSignal();
-}
-
-void SettingDialog::reset()
-{
-	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
-	tmppar->value().set(defPar->value());
-	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(tmppar->value());
-	apply();
-}
-
-void SettingDialog::load()
-{
-	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(curPar->value());
-}
-
-SettingDialog::~SettingDialog()
-{
 }

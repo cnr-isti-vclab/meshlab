@@ -31,10 +31,11 @@ HEADERS += \
 	../common/interfaces.h \
 	mainwindow.h \
 	glarea.h \
+	meshlab_settings/meshlabsettingsdialog.h \
+	meshlab_settings/settingdialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
 	plugindialog.h \
-	customDialog.h \
 	filterScriptDialog.h \
 	saveSnapshotDialog.h \
 	savemaskexporter.h \
@@ -58,9 +59,10 @@ SOURCES += \
 	mainwindow_Init.cpp \
 	mainwindow_RunTime.cpp \
 	glarea.cpp \
+	meshlab_settings/meshlabsettingsdialog.cpp \
+	meshlab_settings/settingdialog.cpp \
 	multiViewer_Container.cpp \
 	plugindialog.cpp \
-	customDialog.cpp \
 	filterScriptDialog.cpp \
 	saveSnapshotDialog.cpp \
 	layerDialog.cpp \

@@ -26,7 +26,7 @@
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
-#include "customDialog.h"
+#include "meshlab_settings/meshlabsettingsdialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
@@ -2686,7 +2686,7 @@ void MainWindow::showLayerDlg(bool visible)
 
 void MainWindow::setCustomize()
 {
-    CustomDialog dialog(currentGlobalParams,defaultGlobalParams, this);
+    MeshLabSettingsDialog dialog(currentGlobalParams,defaultGlobalParams, this);
     connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
     dialog.exec();
 }

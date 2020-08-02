@@ -41,7 +41,7 @@
 #include <QWidgetAction>
 #include "mainwindow.h"
 #include "plugindialog.h"
-#include "customDialog.h"
+#include "meshlab_settings/meshlabsettingsdialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
 

@@ -8,7 +8,6 @@
 set(SOURCES
 	additionalgui.cpp
 	changetexturename.cpp
-	customDialog.cpp
 	filterScriptDialog.cpp
 	glarea.cpp
 	glarea_setting.cpp
@@ -27,6 +26,8 @@ set(SOURCES
 	meshlab_settings/richparameterlistdialog.cpp
 	meshlab_settings/richparameterlistframe.cpp
 	meshlab_settings/richparameterwidgets.cpp
+	meshlab_settings/settingdialog.cpp
+	meshlab_settings/meshlabsettingsdialog.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
 	${VCGDIR}/wrap/gui/coordinateframe.cpp)
@@ -34,7 +35,6 @@ set(SOURCES
 set(HEADERS
 	additionalgui.h
 	changetexturename.h
-	customDialog.h
 	filterScriptDialog.h
 	glarea.h
 	glarea_setting.h
@@ -53,6 +53,8 @@ set(HEADERS
 	meshlab_settings/richparameterlistdialog.h
 	meshlab_settings/richparameterlistframe.h
 	meshlab_settings/richparameterwidgets.h
+	meshlab_settings/settingdialog.h
+	meshlab_settings/meshlabsettingsdialog.h
 	${VCGDIR}/wrap/gui/trackball.h
 	${VCGDIR}/wrap/gui/trackmode.h
 	${VCGDIR}/wrap/gl/trimesh.h)

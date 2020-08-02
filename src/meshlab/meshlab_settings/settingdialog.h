@@ -1,14 +1,14 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,13 +21,12 @@
 *                                                                           *
 ****************************************************************************/
 
+#ifndef SETTINGDIALOG_H
+#define SETTINGDIALOG_H
 
 #include <QDialog>
-#include <QDockWidget>
-#include <QColorDialog>
-#include <common/filter_parameter/rich_parameter_list.h>
-#include "meshlab_settings/richparameterlistframe.h"
-
+#include <common/filter_parameter/rich_parameter.h>
+#include "richparameterlistframe.h"
 
 class SettingDialog : public QDialog
 {
@@ -56,27 +55,4 @@ private:
 	QPushButton* loadbut;
 };
 
-class CustomDialog : public QDialog
-{
-Q_OBJECT
-public:
-	CustomDialog(RichParameterList& parset,RichParameterList& defparset,QWidget *parent = 0);
-	~CustomDialog();
-	//void loadCurrentSetting(RichParameterSet& parset);
-
-public slots:
-	void openSubDialog(QTableWidgetItem* itm);
-	void updateSettings();
-signals:
-	void applyCustomSetting();
-
-private:
-	RichParameterList& curParSet;
-	RichParameterList& defParSet;
-	QTableWidget* tw;
-	QVector<RichParameter*> vrp; 
-	void dispatch(const RichParameter& par);
-	QPushButton* closebut;
-
-	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
-};
+#endif // SETTINGDIALOG_H
