@@ -111,51 +111,51 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		const RichParameter& pd,
 		const RichParameter& def)
 {
-    if (pd.value().isAbsPerc()){
+	if (pd.value().isAbsPerc()){
 		return new AbsPercWidget(parent, (const RichAbsPerc&)pd, (const RichAbsPerc&)def);
-    }
-    else if (pd.value().isDynamicFloat()){
+	}
+	else if (pd.value().isDynamicFloat()){
 		return new DynamicFloatWidget(parent, (const RichDynamicFloat&)pd, (const RichDynamicFloat&)def);
-    }
-    else if (pd.value().isEnum()){
+	}
+	else if (pd.value().isEnum()){
 		return new EnumWidget(parent, (const RichEnum&)pd, (const RichEnum&)def);
-    }
-    else if (pd.value().isBool()){
+	}
+	else if (pd.value().isBool()){
 		return new BoolWidget(parent, (const RichBool&)pd, (const RichBool&)def);
-    }
-    else if (pd.value().isInt()){
+	}
+	else if (pd.value().isInt()){
 		return new IntWidget(parent, (const RichInt&)pd, (const RichInt&)def);
-    }
-    else if (pd.value().isFloat()){
+	}
+	else if (pd.value().isFloat()){
 		return new FloatWidget(parent, (const RichFloat&)pd, (const RichFloat&)def);
-    }
-    else if (pd.value().isString()){
+	}
+	else if (pd.value().isString()){
 		return new StringWidget(parent, (const RichString&)pd, (const RichString&)def);
-    }
-    else if (pd.value().isMatrix44f()){
+	}
+	else if (pd.value().isMatrix44f()){
 		return new Matrix44fWidget(parent, (const RichMatrix44f&)pd, (const RichMatrix44f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
-    }
-    else if (pd.value().isPoint3f()){
+	}
+	else if (pd.value().isPoint3f()){
 		return new Point3fWidget(parent, (const RichPoint3f&)pd, (const RichPoint3f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
-    }
-    else if (pd.value().isShotf()){
+	}
+	else if (pd.value().isShotf()){
 		return new ShotfWidget(parent, (const RichShotf&)pd, (const RichShotf&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
-    }
-    else if (pd.value().isColor()){
+	}
+	else if (pd.value().isColor()){
 		return new ColorWidget(parent, (const RichColor&)pd, (const RichColor&)def);
-    }
-    else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+	}
+	else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
 		return new OpenFileWidget(parent, (const RichOpenFile&)pd, (const RichOpenFile&)def);
-    }
-    else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+	}
+	else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
 		return new SaveFileWidget(parent, (const RichSaveFile&)pd, (const RichSaveFile&)def);
-    }
-    else if (pd.value().isMesh()){
+	}
+	else if (pd.value().isMesh()){
 		return new MeshWidget(parent, (const RichMesh&)pd, (const RichMesh&)def);
-    }
-    else {
-        std::cerr << "RichParameter type not supported for widget creation.\n";
-        assert(0);
-        return nullptr;
-    }
+	}
+	else {
+		std::cerr << "RichParameter type not supported for widget creation.\n";
+		assert(0);
+		return nullptr;
+	}
 }

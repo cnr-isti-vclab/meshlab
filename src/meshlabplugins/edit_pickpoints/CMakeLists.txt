@@ -12,6 +12,7 @@ set(SOURCES
 	pickPointsTemplate.cpp
 	pickedPoints.cpp
 	pickpointsDialog.cpp
+	../../meshlab/meshlab_settings/richparameterlistframe.cpp
 	../../meshlab/meshlab_settings/richparameterlistdialog.cpp)
 
 set(HEADERS

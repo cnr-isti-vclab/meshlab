@@ -29,6 +29,7 @@ SOURCES += \
 	align/AlignGlobal.cpp \
 	align/OccupancyGrid.cpp \
 	align/align_parameter.cpp \
+	../../meshlab/meshlab_settings/richparameterwidgets.cpp \
 	../../meshlab/meshlab_settings/richparameterlistframe.cpp \
 	../../meshlab/meshlab_settings/richparameterlistdialog.cpp \
 	$$VCGDIR/wrap/ply/plylib.cpp\
