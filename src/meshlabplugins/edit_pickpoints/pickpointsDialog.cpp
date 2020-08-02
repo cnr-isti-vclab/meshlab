@@ -30,8 +30,8 @@
 #include <math.h>
 
 #include <common/meshmodel.h>
-#include <meshlab/stdparframe/richparameterlistframe.h>
-#include <meshlab/stdparframe/richparameterlistdialog.h>
+#include <meshlab/meshlab_settings/richparameterlistframe.h>
+#include <meshlab/meshlab_settings/richparameterlistdialog.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"

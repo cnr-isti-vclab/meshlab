@@ -18,7 +18,7 @@ if(TARGET external-newuoa)
 		edit_align_factory.cpp
 		edit_align.cpp
 		meshtree.cpp
-		../../meshlab/stdparframe/richparameterlistdialog.cpp
+		../../meshlab/meshlab_settings/richparameterlistdialog.cpp
 		${VCGDIR}/wrap/gui/trackball.cpp
 		${VCGDIR}/wrap/gui/trackmode.cpp
 		${VCGDIR}/wrap/ply/plylib.cpp)
@@ -33,7 +33,7 @@ if(TARGET external-newuoa)
 		edit_align_factory.h
 		edit_align.h
 		meshtree.h
-		../../meshlab/stdparframe/richparameterlistdialog.h
+		../../meshlab/meshlab_settings/richparameterlistdialog.h
 		${VCGDIR}/wrap/gui/trackball.h
 		${VCGDIR}/wrap/gui/trackmode.h
 		${VCGDIR}/wrap/gl/trimesh.h)

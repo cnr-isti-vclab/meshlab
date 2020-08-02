@@ -26,7 +26,7 @@
 #include <QDockWidget>
 #include <QColorDialog>
 #include <common/filter_parameter/rich_parameter_list.h>
-#include "stdparframe/richparameterlistframe.h"
+#include "meshlab_settings/richparameterlistframe.h"
 
 
 class SettingDialog : public QDialog

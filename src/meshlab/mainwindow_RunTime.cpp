@@ -46,7 +46,7 @@
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
 
-#include "stdparframe/richparameterlistdialog.h"
+#include "meshlab_settings/richparameterlistdialog.h"
 
 #include <wrap/io_trimesh/alnParser.h>
 

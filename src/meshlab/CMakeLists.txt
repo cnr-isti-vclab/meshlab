@@ -24,9 +24,9 @@ set(SOURCES
 	plugindialog.cpp
 	saveSnapshotDialog.cpp
 	savemaskexporter.cpp
-	stdparframe/richparameterlistdialog.cpp
-	stdparframe/richparameterlistframe.cpp
-	stdparframe/richparameterwidgets.cpp
+	meshlab_settings/richparameterlistdialog.cpp
+	meshlab_settings/richparameterlistframe.cpp
+	meshlab_settings/richparameterwidgets.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
 	${VCGDIR}/wrap/gui/coordinateframe.cpp)
@@ -50,9 +50,9 @@ set(HEADERS
 	saveSnapshotDialog.h
 	savemaskexporter.h
 	snapshotsetting.h
-	stdparframe/richparameterlistdialog.h
-	stdparframe/richparameterlistframe.h
-	stdparframe/richparameterwidgets.h
+	meshlab_settings/richparameterlistdialog.h
+	meshlab_settings/richparameterlistframe.h
+	meshlab_settings/richparameterwidgets.h
 	${VCGDIR}/wrap/gui/trackball.h
 	${VCGDIR}/wrap/gui/trackmode.h
 	${VCGDIR}/wrap/gl/trimesh.h)

@@ -27,7 +27,7 @@
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
 #include "../common/mlexception.h"
-#include "stdparframe/richparameterlistdialog.h"
+#include "meshlab_settings/richparameterlistdialog.h"
 
 FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 		:QDialog(parent)

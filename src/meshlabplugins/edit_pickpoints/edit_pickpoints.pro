@@ -6,8 +6,8 @@ HEADERS += \
     pickpointsDialog.h \
     pickedPoints.h \
     pickPointsTemplate.h \
-	../../meshlab/stdparframe/richparameterlistframe.h \
-	../../meshlab/stdparframe/richparameterlistdialog.h
+	../../meshlab/meshlab_settings/richparameterlistframe.h \
+	../../meshlab/meshlab_settings/richparameterlistdialog.h
 
 SOURCES += \
     edit_pickpoints_factory.cpp \
@@ -15,8 +15,8 @@ SOURCES += \
     pickpointsDialog.cpp \
     pickedPoints.cpp \
     pickPointsTemplate.cpp \
-	../../meshlab/stdparframe/richparameterlistframe.cpp \
-	../../meshlab/stdparframe/richparameterlistdialog.cpp
+	../../meshlab/meshlab_settings/richparameterlistframe.cpp \
+	../../meshlab/meshlab_settings/richparameterlistdialog.cpp
 
 RESOURCES += \
     editpickpoints.qrc

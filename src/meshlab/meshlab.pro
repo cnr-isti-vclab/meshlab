@@ -49,9 +49,9 @@ HEADERS += \
 	$$VCGDIR/wrap/gui/trackball.h \
 	$$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
-	stdparframe/richparameterlistdialog.h \
-	stdparframe/richparameterlistframe.h \
-	stdparframe/richparameterwidgets.h
+	meshlab_settings/richparameterlistdialog.h \
+	meshlab_settings/richparameterlistframe.h \
+	meshlab_settings/richparameterwidgets.h
 
 SOURCES += \
 	main.cpp \
@@ -75,9 +75,9 @@ SOURCES += \
 	$$VCGDIR/wrap/gui/trackmode.cpp \
 	$$VCGDIR/wrap/gui/coordinateframe.cpp \
 	glarea_setting.cpp \
-	stdparframe/richparameterlistdialog.cpp \
-	stdparframe/richparameterlistframe.cpp \
-	stdparframe/richparameterwidgets.cpp
+	meshlab_settings/richparameterlistdialog.cpp \
+	meshlab_settings/richparameterlistframe.cpp \
+	meshlab_settings/richparameterwidgets.cpp
 
 FORMS += \
 	ui/layerDialog.ui \

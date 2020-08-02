@@ -1,8 +1,8 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005, 2006                                          \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,8 +20,9 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef MESHLAB_STDPARFRAME_H
-#define MESHLAB_STDPARFRAME_H
+
+#ifndef RICHPARAMETERLISTFRAME_H
+#define RICHPARAMETERLISTFRAME_H
 
 #include "../../common/interfaces.h"
 
@@ -76,5 +77,5 @@ private:
 
 };
 
-#endif
+#endif //RICHPARAMETERLISTFRAME_H
 
