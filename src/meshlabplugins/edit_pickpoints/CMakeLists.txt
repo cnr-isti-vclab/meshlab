@@ -7,11 +7,19 @@
 ### then re-run ./make-cmake.py
 
 set(SOURCES
-    edit_pickpoints_factory.cpp editpickpoints.cpp pickPointsTemplate.cpp
-    pickedPoints.cpp pickpointsDialog.cpp ../../meshlab/stdpardialog.cpp)
+	edit_pickpoints_factory.cpp
+	editpickpoints.cpp
+	pickPointsTemplate.cpp
+	pickedPoints.cpp
+	pickpointsDialog.cpp
+	../../meshlab/stdparframe/richparameterlistdialog.cpp)
 
-set(HEADERS edit_pickpoints_factory.h editpickpoints.h pickPointsTemplate.h
-            pickedPoints.h pickpointsDialog.h)
+set(HEADERS
+	edit_pickpoints_factory.h
+	editpickpoints.h
+	pickPointsTemplate.h
+	pickedPoints.h
+	pickpointsDialog.h)
 
 set(RESOURCES editpickpoints.qrc)
 
@@ -27,12 +35,12 @@ target_link_libraries(edit_pickpoints PRIVATE OpenGL::GLU)
 set_property(TARGET edit_pickpoints PROPERTY FOLDER Plugins)
 
 set_property(TARGET edit_pickpoints PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
+	${MESHLAB_PLUGIN_OUTPUT_DIR})
 
 set_property(TARGET edit_pickpoints PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
+	${MESHLAB_PLUGIN_OUTPUT_DIR})
 
 install(
-    TARGETS edit_pickpoints
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)
+	TARGETS edit_pickpoints
+	DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+	COMPONENT Plugins)

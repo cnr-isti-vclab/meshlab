@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "ui_customDialog.h"
 #include <common/filter_parameter/rich_parameter_list.h>
 #include "customDialog.h"
 #include <QPalette>
