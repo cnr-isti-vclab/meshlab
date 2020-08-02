@@ -6,6 +6,7 @@ HEADERS += \
 	pickpointsDialog.h \
 	pickedPoints.h \
 	pickPointsTemplate.h \
+	../../meshlab/meshlab_settings/richparameterwidgets.h \
 	../../meshlab/meshlab_settings/richparameterlistframe.h \
 	../../meshlab/meshlab_settings/richparameterlistdialog.h
 
@@ -15,6 +16,7 @@ SOURCES += \
 	pickpointsDialog.cpp \
 	pickedPoints.cpp \
 	pickPointsTemplate.cpp \
+	../../meshlab/meshlab_settings/richparameterwidgets.cpp \
 	../../meshlab/meshlab_settings/richparameterlistframe.cpp \
 	../../meshlab/meshlab_settings/richparameterlistdialog.cpp
 
