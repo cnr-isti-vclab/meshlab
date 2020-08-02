@@ -1,5 +1,6 @@
 #include "rich_parameter_list.h"
 
+#include "mlexception.h"
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
@@ -168,22 +169,22 @@ const RichParameter* RichParameterList::findParameter(const QString& name) const
 	return nullptr;
 }
 
-RichParameter* RichParameterList::at(unsigned int i)
+RichParameter& RichParameterList::at(unsigned int i)
 {
 	if (i >= size())
-		return nullptr;
+		throw MLException("Index out of bound at RichParameterList::at");
 	const_iterator it = begin();
 	std::advance(it, i);
-	return *it;
+	return **it;
 }
 
-const RichParameter* RichParameterList::at(unsigned int i) const
+const RichParameter& RichParameterList::at(unsigned int i) const
 {
 	if (i >= size())
-		return nullptr;
+		throw MLException("Index out of bound at RichParameterList::at");
 	const_iterator it = begin();
 	std::advance(it, i);
-	return *it;
+	return **it;
 }
 
 void RichParameterList::setValue(const QString& name,const Value& newval)
@@ -192,12 +193,12 @@ void RichParameterList::setValue(const QString& name,const Value& newval)
 	findParameter(name)->setValue(newval);
 }
 
-RichParameter* RichParameterList::addParam(const RichParameter& pd )
+RichParameter& RichParameterList::addParam(const RichParameter& pd )
 {
 	assert(!hasParameter(pd.name()));
 	RichParameter* rp = pd.clone();
 	paramList.push_back(rp);
-	return rp;
+	return *rp;
 }
 
 RichParameterList& RichParameterList::join( const RichParameterList& rps )

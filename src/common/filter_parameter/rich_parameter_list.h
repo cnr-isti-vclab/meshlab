@@ -62,11 +62,11 @@ public:
 	bool hasParameter(const QString& name) const;
 	RichParameter* findParameter(const QString& name);
 	const RichParameter* findParameter(const QString& name) const;
-	RichParameter* at(unsigned int i);
-	const RichParameter* at(unsigned int i) const;
+	RichParameter& at(unsigned int i);
+	const RichParameter& at(unsigned int i) const;
 
 	void setValue(const QString& name, const Value& val);
-	RichParameter* addParam(const RichParameter& pd);
+	RichParameter& addParam(const RichParameter& pd);
 	RichParameterList& join(const RichParameterList& rps);	
 
 
