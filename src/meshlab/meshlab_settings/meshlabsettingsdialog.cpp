@@ -30,12 +30,16 @@
 
 using namespace vcg;
 
-MeshLabSettingsDialog::MeshLabSettingsDialog(RichParameterList& curparset, RichParameterList& defparset, QWidget * parent)
-		:QDialog(parent),curParSet(curparset),defParSet(defparset)
+MeshLabSettingsDialog::MeshLabSettingsDialog(
+		RichParameterList& curparset,
+		const RichParameterList& defparset,
+		QWidget * parent) :
+	QDialog(parent),
+	curParSet(curparset),
+	defParSet(defparset)
 {
 	setModal(false);
 	closebut = new QPushButton("Close",this);
-	//QVBoxLayout* layout = new QVBoxLayout(parent);
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
 	tw = new QTableWidget(curParSet.size(),2,this);
@@ -44,18 +48,24 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(RichParameterList& curparset, RichP
 	setMinimumWidth(totlen);
 	layout->addWidget(tw,0,0,1,5);
 	layout->addWidget(closebut,1,4,1,1);
-	connect(tw,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),this,SLOT(openSubDialog(QTableWidgetItem*)));
-	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
+	connect(tw, SIGNAL(itemDoubleClicked(QTableWidgetItem* )), this, SLOT(openSubDialog(QTableWidgetItem*)));
+	connect(closebut, SIGNAL(clicked()), this, SLOT(close()));
 	this->setWindowTitle(tr("Global Parameters Window"));
 }
 
-void MeshLabSettingsDialog::openSubDialog( QTableWidgetItem* itm )
+/**
+ * @brief This slot is executed when a setting is double clicked
+ * @param itm
+ */
+void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
 {
 	int rprow = tw->row(itm);
-	RichParameter *defPar = defParSet.findParameter(vrp[rprow]->name());
-	SettingDialog* setdial = new SettingDialog(vrp[rprow],defPar,this);
-	connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
-	connect(setdial,SIGNAL(applySettingSignal()),this,SLOT(updateSettings()));
+	const RichParameter *defPar = defParSet.at(rprow);
+	RichParameter* curPar = curParSet.at(rprow);
+	SettingDialog* setdial = new SettingDialog(*curPar,*defPar,this);
+	connect(
+				setdial, SIGNAL(applySettingSignal(const RichParameter&)),
+				this,    SLOT(updateSingleSetting(const RichParameter&)));
 	setdial->exec();
 	delete setdial;
 }
@@ -72,41 +82,32 @@ void MeshLabSettingsDialog::updateSettings()
 	tw->setHorizontalHeaderLabels(slst);
 	tw->horizontalHeader()->setStretchLastSection(true);
 	tw->setShowGrid(true);
-	//tw->setWordWrap(false);
 	tw->verticalHeader()->hide();
 
 	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	//tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
-
-	//int sz = tw->font().pointSize();
 	int ii = 0;
-	for(RichParameter* p : curParSet)
-	{
+	for(RichParameter* p : curParSet) {
 		QTableWidgetItem* item = new QTableWidgetItem(p->name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
-		//if (maxlen[0] < item->text().size() * sz)
-		//	maxlen[0] = item->text().size() * sz;
-		//item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-
 		tw->setItem(ii,0,item);
-		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
 
 		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(*p);
 		twi->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 		tw->setItem(ii++,1,twi);
-		//if (maxlen[1] < twi->text().size() * sz)
-		//	maxlen[1] = twi->text().size() * sz;
-		vrp.push_back(p);
 	}
 	tw->resizeColumnsToContents();
 	tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-	//tw->setColumnWidth(0,tw->horizontalHeader()->width());
-	//tw->setColumnWidth(1,tw->horizontalHeader()->width());
+}
 
-	/*emit tw->horizontalHeader()->sectionAutoResize( 0,QHeaderView::ResizeToContents);
-	emit tw->horizontalHeader()->sectionAutoResize( 1,QHeaderView::ResizeToContents);*/
+void MeshLabSettingsDialog::updateSingleSetting(const RichParameter& rp)
+{
+	RichParameter* p = curParSet.findParameter(rp.name());
+	assert(p->stringType() == rp.stringType());
+	curParSet.setValue(rp.name(), rp.value());
+	updateSettings();
+	emit applyCustomSetting();
 }
 
 QTableWidgetItem* MeshLabSettingsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
@@ -170,4 +171,5 @@ QTableWidgetItem* MeshLabSettingsDialog::createQTableWidgetItemFromRichParameter
 		assert(0);
 		return nullptr;
 	}
+	return nullptr;
 }

@@ -228,7 +228,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 		RichParameterList::iterator j = oldParameterSet.begin();
 		//now set values to be the old values
 		for (; i != newParameterSet.end(); ++i, ++j){
-			(*i)->value().set((*j)->value());
+			(*i)->setValue((*j)->value());
 		}
 	} else
 		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";

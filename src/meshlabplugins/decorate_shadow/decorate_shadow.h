@@ -88,10 +88,10 @@ public:
 
 
 	QList<QAction *> actions () const {return actionList;}
-	bool startDecorate(QAction * /*mode*/, MeshDocument & /*m*/, RichParameterList  * /*parent*/ par, GLArea * /*parent*/);
-	void decorateMesh(QAction *, MeshModel &,  RichParameterList  *, GLArea *, QPainter *, GLLogStream &){}
-	void decorateDoc(QAction *a, MeshDocument &m,  RichParameterList  *, GLArea *gla, QPainter *p, GLLogStream &);
-    void endDecorate(QAction *,   MeshDocument &, RichParameterList *, GLArea *);
+	bool startDecorate(QAction * /*mode*/, MeshDocument & /*m*/, const RichParameterList  * /*parent*/ par, GLArea * /*parent*/);
+	void decorateMesh(QAction *, MeshModel &,  const RichParameterList  *, GLArea *, QPainter *, GLLogStream &){}
+	void decorateDoc(QAction *a, MeshDocument &m,  const RichParameterList*, GLArea *gla, QPainter *p, GLLogStream &);
+	void endDecorate(QAction *,   MeshDocument &, const RichParameterList *, GLArea *);
 	void initGlobalParameterSet(QAction *, RichParameterList  & globalparam);
 	int getDecorationClass(QAction * /*action*/) const { return MeshDecorateInterface::PerDocument; }
 

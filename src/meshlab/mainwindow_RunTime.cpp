@@ -2687,7 +2687,7 @@ void MainWindow::showLayerDlg(bool visible)
 void MainWindow::setCustomize()
 {
     MeshLabSettingsDialog dialog(currentGlobalParams,defaultGlobalParams, this);
-    connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
+	connect(&dialog, SIGNAL(applyCustomSetting()), this, SLOT(updateCustomSettings()));
     dialog.exec();
 }
 

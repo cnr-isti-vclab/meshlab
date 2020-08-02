@@ -23,24 +23,22 @@
 
 #include "settingdialog.h"
 
-//Maybe a MeshDocument parameter is needed. See loadFrameContent definition
-
-/*WARNING!*******************************************************/
-//In defPar->defVal the hardwired value is memorized
-//in curPar->defVal the one in the sys reg
-/****************************************************************/
-
 SettingDialog::SettingDialog(
-		RichParameter* currentPar,
-		const RichParameter* defaultPar,
+		const RichParameter& currentPar,
+		const RichParameter& defaultPar,
 		QWidget* parent) :
 	QDialog(parent),
 	frame(this),
-	curPar(currentPar),
-	defPar(defaultPar),
-	tmppar(NULL)
+	curPar(currentPar.clone()),
+	defPar(defaultPar.clone())
 {
+	tmpParSet = RichParameterList();
+	tmpParSet.addParam(*curPar);
+	frame.loadFrameContent(tmpParSet);
+
 	setModal(true);
+
+	//no need to delete these objects, thanks to qt's parent resource management
 	savebut = new QPushButton("Save",this);
 	resetbut = new QPushButton("Reset",this);
 	applybut = new QPushButton("Apply",this);
@@ -55,9 +53,7 @@ SettingDialog::SettingDialog(
 	dialoglayout->addWidget(applybut,1,3);
 	dialoglayout->addWidget(closebut,1,4);
 
-	RichParameterList tmpParSet;
-	tmppar = tmpParSet.addParam(*curPar);
-	frame.loadFrameContent(tmpParSet);
+
 	dialoglayout->addWidget(&frame,0,0,1,5);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
@@ -76,29 +72,29 @@ SettingDialog::~SettingDialog()
 void SettingDialog::save()
 {
 	apply();
+	const RichParameter& tmppar = frame.stdfieldwidgets.at(0)->richParameter();
 	QDomDocument doc("MeshLabSettings");
-	doc.appendChild(tmppar->fillToXMLDocument(doc));
+	doc.appendChild(tmppar.fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar->name()), qUtf8Printable(docstring));
+	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar.name()), qUtf8Printable(docstring));
 	QSettings setting;
-	setting.setValue(tmppar->name(),QVariant(docstring));
-	curPar->value().set(tmppar->value());
+	setting.setValue(tmppar.name(),QVariant(docstring));
+	curPar->setValue(tmppar.value());
 }
 
 void SettingDialog::apply()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->collectWidgetValue();
-	curPar->value().set(tmppar->value());
-	emit applySettingSignal();
+	curPar->setValue(frame.stdfieldwidgets.at(0)->widgetValue());
+	emit applySettingSignal(*curPar);
 }
 
 void SettingDialog::reset()
 {
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
-	tmppar->value().set(defPar->value());
+
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(tmppar->value());
+	frame.stdfieldwidgets.at(0)->resetValue();
 	apply();
 }
 

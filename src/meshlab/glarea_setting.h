@@ -70,10 +70,10 @@ public:
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}
 
 
-	void updateGlobalParameterSet( RichParameterList& rps );
+	void updateGlobalParameterSet(const RichParameterList& rps );
 	static void initGlobalParameterSet( RichParameterList * defaultGlobalParamSet);
 
-	RichParameterList *currentGlobalParamSet;
+	const RichParameterList *currentGlobalParamSet;
 };
 
 

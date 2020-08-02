@@ -49,9 +49,11 @@ const QString& RichParameter::toolTip() const
 	return tooltip;
 }
 
-Value& RichParameter::value()
+void RichParameter::setValue(const Value& ov)
 {
-	return *val;
+	assert(val->typeName() == ov.typeName());
+	delete val;
+	val = ov.clone();
 }
 
 QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
@@ -366,9 +368,9 @@ QString RichAbsPerc::stringType() const
 	return "RichAbsPerc";
 }
 
-QDomElement RichAbsPerc::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichAbsPerc::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("min",QString::number(min));
 	parElem.setAttribute("max",QString::number(max));
 	return parElem;
@@ -405,9 +407,9 @@ QString RichEnum::stringType() const
 	return "RichEnum";
 }
 
-QDomElement RichEnum::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichEnum::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("enum_cardinality", enumvalues.size());
 	for(int ii = 0; ii < enumvalues.size(); ++ii)
 		parElem.setAttribute(QString("enum_val")+QString::number(ii), enumvalues.at(ii));
@@ -446,9 +448,9 @@ QString RichDynamicFloat::stringType() const
 	return "RichDynamicFloat";
 }
 
-QDomElement RichDynamicFloat::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichDynamicFloat::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("min",QString::number(min));
 	parElem.setAttribute("max",QString::number(max));
 	return parElem;
@@ -485,9 +487,9 @@ QString RichOpenFile::stringType() const
 	return "RichOpenFile";
 }
 
-QDomElement RichOpenFile::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichOpenFile::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("exts_cardinality", exts.size());
 	for(int ii = 0; ii < exts.size(); ++ii)
 		parElem.setAttribute(QString("ext_val")+QString::number(ii), exts[ii]);
@@ -525,9 +527,9 @@ QString RichSaveFile::stringType() const
 	return "RichSaveFile";
 }
 
-QDomElement RichSaveFile::fillToXMLDocument(QDomDocument& doc) const
+QDomElement RichSaveFile::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc);
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
 	parElem.setAttribute("ext", ext);
 	return parElem;
 }

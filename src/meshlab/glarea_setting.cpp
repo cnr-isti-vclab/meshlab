@@ -28,7 +28,7 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterList * defaultGlobalPar
 }
 
 
-void GLAreaSetting::updateGlobalParameterSet( RichParameterList& rps )
+void GLAreaSetting::updateGlobalParameterSet( const RichParameterList& rps )
 {
 	logAreaColor = rps.getColor4b(logAreaColorParam());
 	backgroundBotColor =  rps.getColor4b(backgroundBotColorParam());

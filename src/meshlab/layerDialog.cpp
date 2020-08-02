@@ -1302,7 +1302,7 @@ void DecoratorParamsTreeWidget::save()
         setting.setValue(p->name(),QVariant(docstring));
         RichParameterList& currSet = mainWin->currentGlobalPars();
         RichParameter* par = currSet.findParameter(p->name());
-        par->value().set(p->value());
+		par->setValue(p->value());
     }
 }
 
@@ -1333,7 +1333,7 @@ void DecoratorParamsTreeWidget::load()
     for(RichParameter* p : tmpSet)
     {
         const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(p->name()));
-        p->value().set(defPar.value());
+		p->setValue(defPar.value());
         frame->stdfieldwidgets.at(ii++)->setWidgetValue(p->value());
     }
     apply();

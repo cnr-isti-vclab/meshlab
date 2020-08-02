@@ -56,6 +56,7 @@ public:
 	void resetValue();
 	// update the parameter with the current widget values and return it.
 	const Value& widgetValue();
+	const RichParameter& richParameter() const;
 
 	QString parameterName() const;
 

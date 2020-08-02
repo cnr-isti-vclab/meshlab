@@ -898,7 +898,6 @@ void MainWindow::loadMeshLabSettings()
 		}
 	}
 
-	//emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
@@ -1171,12 +1170,11 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterList* glbset)
 	glbset->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(RichParameterList& rps)
+void MainWindowSetting::updateGlobalParameterSet(const RichParameterList& rps)
 {
 	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
 	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
 	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
-//	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rps.getBool(highPrecisionRendering());

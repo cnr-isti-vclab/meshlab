@@ -561,12 +561,12 @@ public:
 	virtual QString decorationInfo(QAction *a) const { return decorationInfo(ID(a)); }
 
 
-	virtual bool startDecorate(QAction *, MeshDocument &, RichParameterList *, GLArea *) { return false; }
-	virtual bool startDecorate(QAction *, MeshModel &, RichParameterList *, GLArea *) { return false; }
-	virtual void decorateMesh(QAction *, MeshModel &, RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void decorateDoc(QAction *, MeshDocument &, RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void endDecorate(QAction *, MeshModel &, RichParameterList *, GLArea *) {}
-	virtual void endDecorate(QAction *, MeshDocument &, RichParameterList *, GLArea *) {}
+	virtual bool startDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) { return false; }
+	virtual bool startDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) { return false; }
+	virtual void decorateMesh(QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void decorateDoc(QAction *, MeshDocument &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void endDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) {}
+	virtual void endDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) {}
 
 	/** \brief tests if a decoration is applicable to a mesh.
 	* used only for PerMesh Decorators.

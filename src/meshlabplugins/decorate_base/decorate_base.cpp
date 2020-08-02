@@ -74,7 +74,7 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
     return QString("error!");
 }
 
-void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
+void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
 {
  QFont qf;
 
@@ -157,7 +157,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
  } // end switch
 }
 
-void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
+void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, const RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
 {
     this->setLog(&_log);
     QFont qf;
@@ -561,7 +561,7 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
     return true;
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichParameterList *, GLArea *)
+bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -578,7 +578,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichPar
 }
 
 
-void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, RichParameterList *, GLArea *)
+void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -593,7 +593,7 @@ void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, RichParamet
     }
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterList *rm, GLArea *gla)
+bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, const RichParameterList *rm, GLArea *gla)
 {
     switch(ID(action))
     {
@@ -815,7 +815,7 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
         focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
-void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterList *rm, QPainter * /*painter*/, QFont /*qf*/)
+void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, const RichParameterList *rm, QPainter * /*painter*/, QFont /*qf*/)
 {
     if(!ls.IsValid())  // no drawing if camera not valid
         return;
@@ -913,7 +913,7 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
     glPopAttrib();
 }
 
-void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterList *par, QFont qf)
+void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, const RichParameterList *par, QFont qf)
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -983,7 +983,7 @@ void DecorateBasePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
 }
 
 
-void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterList *rm, QFont qf)
+void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  const RichParameterList *rm, QFont qf)
 {
 	if ((gla == NULL) && (gla->getSceneGLSharedContext() == NULL))
 		return;

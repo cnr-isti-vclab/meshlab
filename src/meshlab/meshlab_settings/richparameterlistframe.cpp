@@ -54,15 +54,13 @@ void RichParameterListFrame::resetValues(RichParameterList &curParSet)
 }
 
 /* creates widgets for the standard parameters */
-void RichParameterListFrame::loadFrameContent(RichParameterList &curParSet,MeshDocument * /*_mdPt*/ )
+void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet, MeshDocument * /*_mdPt*/ )
 {
-    if(layout()) delete layout();
+	if(layout())
+		delete layout();
     QGridLayout* glay = new QGridLayout();
-    // QGridLayout *vlayout = new QGridLayout(this);
-    //    vLayout->setAlignment(Qt::AlignTop);
     int i = 0;
-    for(RichParameter* fpi : curParSet)
-    {
+	for(const RichParameter* fpi : curParSet) {
 		RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, *fpi);
         //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
         stdfieldwidgets.push_back(wd);

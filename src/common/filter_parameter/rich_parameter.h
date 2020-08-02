@@ -41,8 +41,9 @@ public:
 	const Value& value() const;
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
-	Value& value();
 	virtual QString stringType() const = 0;
+
+	void setValue(const Value& ov);
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
@@ -164,7 +165,7 @@ public:
 	~RichAbsPerc();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichAbsPerc* clone() const;
 	bool operator==(const RichParameter& rb);
@@ -179,7 +180,7 @@ public:
 	~RichEnum();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichEnum* clone() const;
 	bool operator==(const RichParameter& rb);
@@ -193,7 +194,7 @@ public:
 	~RichDynamicFloat();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichDynamicFloat* clone() const;
 	bool operator==(const RichParameter& rb);
@@ -208,7 +209,7 @@ public:
 	~RichOpenFile();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichOpenFile* clone() const;
 	bool operator==(const RichParameter& rb);
@@ -222,7 +223,7 @@ public:
 	~RichSaveFile();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc) const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichSaveFile* clone() const;
 	bool operator==(const RichParameter& rb);

@@ -33,21 +33,27 @@ class MeshLabSettingsDialog : public QDialog
 {
 Q_OBJECT
 public:
-	MeshLabSettingsDialog(RichParameterList& parset,RichParameterList& defparset,QWidget *parent = 0);
+	MeshLabSettingsDialog(
+			RichParameterList& parset,
+			const RichParameterList& defparset,
+			QWidget *parent = 0);
 	~MeshLabSettingsDialog();
 	//void loadCurrentSetting(RichParameterSet& parset);
 
-public slots:
-	void openSubDialog(QTableWidgetItem* itm);
-	void updateSettings();
 signals:
 	void applyCustomSetting();
 
+private slots:
+	void openSubDialog(QTableWidgetItem* itm);
+
+	void updateSingleSetting(const RichParameter& rp);
+
 private:
+	void updateSettings();
+
 	RichParameterList& curParSet;
-	RichParameterList& defParSet;
+	const RichParameterList& defParSet;
 	QTableWidget* tw;
-	QVector<RichParameter*> vrp;
 	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
 

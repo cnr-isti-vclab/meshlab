@@ -231,8 +231,8 @@ void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParamet
 }
 
 
-void DecorateRasterProjPlugin::updateCurrentMesh( MeshDocument &m,
-                                                  RichParameterList &par )
+void DecorateRasterProjPlugin::updateCurrentMesh(MeshDocument &m,
+												  const RichParameterList& par )
 {
     if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") )
     {
@@ -522,7 +522,7 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
 
 bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
                                               MeshDocument     & m,
-                                              RichParameterList * /*par*/,
+											  const RichParameterList * /*par*/,
                                               GLArea           * /*gla*/ )
 {
     switch( ID(act) )
@@ -569,7 +569,7 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
 
 void DecorateRasterProjPlugin::endDecorate( QAction          *act,
                                             MeshDocument     & /*m*/,
-                                            RichParameterList * /*par*/,
+											const RichParameterList * /*par*/,
                                             GLArea           * /*gla*/ )
 {
     switch( ID(act) )
@@ -594,7 +594,7 @@ void DecorateRasterProjPlugin::endDecorate( QAction          *act,
 
 
 void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
-                                                   RichParameterList *par )
+												   const RichParameterList *par )
 {
     if( par->getBool("MeshLab::Appearance::pointSmooth") )
         glEnable( GL_POINT_SMOOTH );
@@ -629,7 +629,7 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
 
 void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                                          MeshDocument      &m  ,
-                                         RichParameterList  *par,
+										 const RichParameterList  *par,
                                          GLArea            *gla,
                                          QPainter          *,
                                             GLLogStream &)

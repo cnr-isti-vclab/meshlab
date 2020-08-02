@@ -223,7 +223,7 @@ public slots:
     void setColorMode(RenderMode& rm,vcg::GLW::ColorMode mode);
     void setTextureMode(vcg::GLW::TextureMode mode);
     void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
-    void updateCustomSettingValues(RichParameterList& rps);
+	void updateCustomSettingValues(const RichParameterList& rps);
 
     void endEdit()
 	{

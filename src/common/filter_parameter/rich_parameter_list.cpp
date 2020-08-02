@@ -168,9 +168,28 @@ const RichParameter* RichParameterList::findParameter(const QString& name) const
 	return nullptr;
 }
 
+RichParameter* RichParameterList::at(unsigned int i)
+{
+	if (i >= size())
+		return nullptr;
+	const_iterator it = begin();
+	std::advance(it, i);
+	return *it;
+}
+
+const RichParameter* RichParameterList::at(unsigned int i) const
+{
+	if (i >= size())
+		return nullptr;
+	const_iterator it = begin();
+	std::advance(it, i);
+	return *it;
+}
+
 void RichParameterList::setValue(const QString& name,const Value& newval)
 {
-	findParameter(name)->value().set(newval);
+	assert(hasParameter(name));
+	findParameter(name)->setValue(newval);
 }
 
 RichParameter* RichParameterList::addParam(const RichParameter& pd )

@@ -53,7 +53,7 @@ RichParameterWidget::~RichParameterWidget()
 
 void RichParameterWidget::resetValue()
 {
-	rp->value().set(defp->value());
+	rp->setValue(defp->value());
 	resetWidgetValue();
 }
 
@@ -62,6 +62,11 @@ const Value& RichParameterWidget::widgetValue()
 {
 	collectWidgetValue();
 	return rp->value();
+}
+
+const RichParameter& RichParameterWidget::richParameter() const
+{
+	return *rp;
 }
 
 QString RichParameterWidget::parameterName() const
@@ -97,7 +102,7 @@ BoolWidget::~BoolWidget()
 
 void BoolWidget::collectWidgetValue()
 {
-	rp->value().set(BoolValue(cb->isChecked()));
+	rp->setValue(BoolValue(cb->isChecked()));
 }
 
 void BoolWidget::resetWidgetValue()
@@ -169,7 +174,7 @@ IntWidget::IntWidget( QWidget* p, const RichInt& rpar, const RichInt& rdef ) :
 
 void IntWidget::collectWidgetValue()
 {
-	rp->value().set(IntValue(lned->text().toInt()));
+	rp->setValue(IntValue(lned->text().toInt()));
 }
 
 void IntWidget::resetWidgetValue()
@@ -194,7 +199,7 @@ FloatWidget::FloatWidget(QWidget* p, const RichFloat& rpar , const RichFloat& rd
 
 void FloatWidget::collectWidgetValue()
 {
-	rp->value().set(FloatValue(lned->text().toFloat()));
+	rp->setValue(FloatValue(lned->text().toFloat()));
 }
 
 void FloatWidget::resetWidgetValue()
@@ -219,7 +224,7 @@ StringWidget::StringWidget(QWidget* p, const RichString& rpar , const RichString
 
 void StringWidget::collectWidgetValue()
 {
-	rp->value().set(StringValue(lned->text()));
+	rp->setValue(StringValue(lned->text()));
 }
 
 void StringWidget::resetWidgetValue()
@@ -288,7 +293,7 @@ void ColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 
 void ColorWidget::collectWidgetValue()
 {
-	rp->value().set(ColorValue(pickcol));
+	rp->setValue(ColorValue(pickcol));
 }
 
 void ColorWidget::resetWidgetValue()
@@ -419,7 +424,7 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 
 void AbsPercWidget::collectWidgetValue()
 {
-	rp->value().set(AbsPercValue(float(absSB->value())));
+	rp->setValue(AbsPercValue(float(absSB->value())));
 }
 
 void AbsPercWidget::resetWidgetValue()
@@ -560,7 +565,7 @@ vcg::Point3f Point3fWidget::getValue()
 
 void Point3fWidget::collectWidgetValue()
 {
-	rp->value().set(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
+	rp->setValue(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
 }
 
 void Point3fWidget::resetWidgetValue()
@@ -708,10 +713,10 @@ void Matrix44fWidget::collectWidgetValue()
 	if (!valid) {
 		vcg::Matrix44f  tempM;
 		for (unsigned int i = 0; i < 16; ++i) tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
-		rp->value().set(Matrix44fValue(tempM));
+		rp->setValue(Matrix44fValue(tempM));
 	}
 	else
-		rp->value().set(Matrix44fValue(m));
+		rp->setValue(Matrix44fValue(m));
 }
 
 void Matrix44fWidget::resetWidgetValue()
@@ -834,7 +839,7 @@ vcg::Shotf ShotfWidget::getValue()
 
 void ShotfWidget::collectWidgetValue()
 {
-	rp->value().set(ShotfValue(curShot));
+	rp->setValue(ShotfValue(curShot));
 }
 
 void ShotfWidget::resetWidgetValue()
@@ -943,7 +948,7 @@ int DynamicFloatWidget::floatToInt(float val)
 
 void DynamicFloatWidget::collectWidgetValue()
 {
-	rp->value().set(DynamicFloatValue(valueLE->text().toFloat()));
+	rp->setValue(DynamicFloatValue(valueLE->text().toFloat()));
 }
 
 void DynamicFloatWidget::resetWidgetValue()
@@ -1033,7 +1038,7 @@ int EnumWidget::getSize()
 
 void EnumWidget::collectWidgetValue()
 {
-	rp->value().set(EnumValue(enumCombo->currentIndex()));
+	rp->setValue(EnumValue(enumCombo->currentIndex()));
 }
 
 void EnumWidget::resetWidgetValue()
@@ -1105,7 +1110,7 @@ void MeshWidget::collectWidgetValue()
 	//MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(rp->pd);
 	RichMesh* rm = reinterpret_cast<RichMesh*>(rp);
 	rm->meshindex = enumCombo->currentIndex();
-	rp->value().set(MeshValue(md->meshList.at(rm->meshindex)));
+	rp->setValue(MeshValue(md->meshList.at(rm->meshindex)));
 }
 
 void MeshWidget::resetWidgetValue()
@@ -1176,7 +1181,7 @@ IOFileWidget::~IOFileWidget()
 
 void IOFileWidget::collectWidgetValue()
 {
-	rp->value().set(FileValue(fl));
+	rp->setValue(FileValue(fl));
 }
 
 void IOFileWidget::resetWidgetValue()
@@ -1232,7 +1237,7 @@ void SaveFileWidget::selectFile()
 	collectWidgetValue();
 	updateFileName(fl);
 	FileValue fileName(fl);
-	rp->value().set(fileName);
+	rp->setValue(fileName);
 	emit dialogParamChanged();
 }
 
@@ -1254,7 +1259,7 @@ void OpenFileWidget::selectFile()
 	collectWidgetValue();
 	updateFileName(fl);
 	FileValue fileName(fl);
-	rp->value().set(fileName);
+	rp->setValue(fileName);
 	emit dialogParamChanged();
 }
 

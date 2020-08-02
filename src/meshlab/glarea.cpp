@@ -120,7 +120,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     //connecting the MainWindow Slots to GLArea signal (simple passthrough)
     if(mainwindow != NULL){
         connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
-        connect(mainwindow,SIGNAL(dispatchCustomSettings(RichParameterList&)),this,SLOT(updateCustomSettingValues(RichParameterList&)));
+		connect(mainwindow,SIGNAL(dispatchCustomSettings(const RichParameterList&)),this,SLOT(updateCustomSettingValues(const RichParameterList&)));
     }else{
         qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
     }
@@ -1752,7 +1752,7 @@ Point3f GLArea::getViewDir()
     return vcg::Inverse(rotM)*vcg::Point3f(0,0,1);
 }
 
-void GLArea::updateCustomSettingValues( RichParameterList& rps )
+void GLArea::updateCustomSettingValues( const RichParameterList& rps )
 {
 	makeCurrent();
     glas.updateGlobalParameterSet(rps);
