@@ -13,6 +13,7 @@ HEADERS += \
 	align/AlignGlobal.h \
 	align/OccupancyGrid.h \
 	align/align_parameter.h \
+	../../meshlab/meshlab_settings/richparameterwidgets.h \
 	../../meshlab/meshlab_settings/richparameterlistframe.h \
 	../../meshlab/meshlab_settings/richparameterlistdialog.h \
 	$$VCGDIR/wrap/gui/trackball.h \

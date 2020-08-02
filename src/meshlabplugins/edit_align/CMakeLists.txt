@@ -18,7 +18,7 @@ if(TARGET external-newuoa)
 		edit_align_factory.cpp
 		edit_align.cpp
 		meshtree.cpp
-		../../meshlab/meshlab_settings/richparameterlistwidgets.cpp
+		../../meshlab/meshlab_settings/richparameterwidgets.cpp
 		../../meshlab/meshlab_settings/richparameterlistframe.cpp
 		../../meshlab/meshlab_settings/richparameterlistdialog.cpp
 		${VCGDIR}/wrap/gui/trackball.cpp
@@ -35,6 +35,8 @@ if(TARGET external-newuoa)
 		edit_align_factory.h
 		edit_align.h
 		meshtree.h
+		../../meshlab/meshlab_settings/richparameterwidgets.h
+		../../meshlab/meshlab_settings/richparameterlistframe.h
 		../../meshlab/meshlab_settings/richparameterlistdialog.h
 		${VCGDIR}/wrap/gui/trackball.h
 		${VCGDIR}/wrap/gui/trackmode.h
