@@ -46,7 +46,7 @@ void RichParameterListFrame::resetValues(RichParameterList &curParSet)
 {
 	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
 	for(unsigned int i  =0; i < curParSet.size(); ++i) {
-		stdfieldwidgets[i++]->resetValue();
+		stdfieldwidgets[i]->resetValue();
 	}
 }
 
