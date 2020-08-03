@@ -47,6 +47,7 @@ private:
 	RichParameterList tmpParSet;
 	RichParameterListFrame frame;
 	RichParameter* curPar;
+	RichParameter* tmpPar;
 	const RichParameter* defPar;
 	QPushButton* savebut;
 	QPushButton* applybut;

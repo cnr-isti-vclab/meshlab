@@ -30,6 +30,7 @@ SettingDialog::SettingDialog(
 	QDialog(parent),
 	frame(this),
 	curPar(currentPar.clone()),
+	tmpPar(currentPar.clone()),
 	defPar(defaultPar.clone())
 {
 	tmpParSet = RichParameterList();
@@ -67,19 +68,22 @@ SettingDialog::SettingDialog(
 
 SettingDialog::~SettingDialog()
 {
+	delete curPar;
+	delete tmpPar;
+	delete defPar;
 }
 
 void SettingDialog::save()
 {
 	apply();
-	const RichParameter& tmppar = frame.stdfieldwidgets.at(0)->richParameter();
+	delete tmpPar;
+	tmpPar = curPar->clone();
 	QDomDocument doc("MeshLabSettings");
-	doc.appendChild(tmppar.fillToXMLDocument(doc));
+	doc.appendChild(curPar->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(tmppar.name()), qUtf8Printable(docstring));
+	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(curPar->name()), qUtf8Printable(docstring));
 	QSettings setting;
-	setting.setValue(tmppar.name(),QVariant(docstring));
-	curPar->setValue(tmppar.value());
+	setting.setValue(curPar->name(),QVariant(docstring));
 }
 
 void SettingDialog::apply()
@@ -101,7 +105,8 @@ void SettingDialog::reset()
 void SettingDialog::load()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(curPar->value());
+	frame.stdfieldwidgets.at(0)->setWidgetValue(tmpPar->value());
+	apply();
 }
 
 
