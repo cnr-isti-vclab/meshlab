@@ -792,26 +792,20 @@ void MainWindow::runFilterScript()
         FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         RichParameterList &parameterSet = old->pair.second;
 
-        for(RichParameter*& parameter : parameterSet)
-        {
-            //if this is a mesh paramter and the index is valid
-            if(parameter->value().isMesh())
-            {
-                RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
-                if( md->meshindex < meshDoc()->size() &&
-                        md->meshindex >= 0  )
-                {
-                    RichMesh* rmesh = new RichMesh(parameter->name(),md->meshindex,meshDoc());
-                    parameter = rmesh;
-                } else
-                {
-                    printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
-                    printf("One of the filters in the script needs more meshes than you have loaded.\n");
-                    return;
-                }
-                delete parameter;
-            }
-        }
+		for(RichParameter& parameter : parameterSet) {
+			//if this is a mesh paramter and the index is valid
+			if(parameter.value().isMesh()) {
+				RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
+				if( md.meshindex < meshDoc()->size() && md.meshindex >= 0  ) {
+					parameterSet.setValue(md.name(), MeshValue(meshDoc(), md.meshindex));
+				}
+				else {
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.meshindex );
+					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+					return;
+				}
+			}
+		}
         //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
 
         bool created = false;
@@ -1262,11 +1256,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
             }
         case (MeshFilterInterface::FIXED):
             {
-                for(const RichParameter* p : mergedenvironment)
+				for(const RichParameter& p : mergedenvironment)
                 {
-                    if (p->value().isMesh())
+					if (p.value().isMesh())
                     {
-                        MeshModel* mm = p->value().getMesh();
+						MeshModel* mm = p.value().getMesh();
                         if (mm != NULL)
                             tmp.push_back(mm);
                     }

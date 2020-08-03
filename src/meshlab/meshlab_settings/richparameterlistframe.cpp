@@ -45,12 +45,9 @@ RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla )
 void RichParameterListFrame::resetValues(RichParameterList &curParSet)
 {
 	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
-    unsigned int i  =0;
-    for(RichParameter* fpi : curParSet)
-    {
-        if (fpi != NULL)
-            stdfieldwidgets[i++]->resetValue();
-    }
+	for(unsigned int i  =0; i < curParSet.size(); ++i) {
+		stdfieldwidgets[i++]->resetValue();
+	}
 }
 
 /* creates widgets for the standard parameters */
@@ -58,24 +55,20 @@ void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet
 {
 	if(layout())
 		delete layout();
-    QGridLayout* glay = new QGridLayout();
-    int i = 0;
-	for(const RichParameter* fpi : curParSet) {
-		RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, *fpi);
-        //vLayout->addWidget(wd,i,0,1,1,Qt::AlignTop);
-        stdfieldwidgets.push_back(wd);
-        helpList.push_back(wd->helpLab);
-        //glay->addItem(wd->leftItem(),i,0);
-        //glay->addItem(wd->centralItem(),i,1);
-        //glay->addItem(wd->rightItem(),i,2);
-        wd->addWidgetToGridLayout(glay,i++);
+	QGridLayout* glay = new QGridLayout();
+	int i = 0;
+	for(const RichParameter& fpi : curParSet) {
+		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, fpi);
+		stdfieldwidgets.push_back(wd);
+		helpList.push_back(wd->helpLab);
+		wd->addWidgetToGridLayout(glay,i++);
 
-    } // end for each parameter
-    setLayout(glay);
-    this->setMinimumSize(glay->sizeHint());
+	}
+	setLayout(glay);
+	this->setMinimumSize(glay->sizeHint());
 	glay->setSizeConstraint(QLayout::SetMinimumSize);
-    this->showNormal();
-    this->adjustSize();
+	this->showNormal();
+	this->adjustSize();
 }
 
 void RichParameterListFrame::toggleHelp()
@@ -91,10 +84,8 @@ void RichParameterListFrame::readValues(RichParameterList &curParSet)
 {
 	assert(curParSet.size() == stdfieldwidgets.size());
 	QVector<RichParameterWidget*>::iterator it = stdfieldwidgets.begin();
-	for(RichParameter* p : curParSet)
-	{
-		QString sname = p->name();
-		curParSet.setValue(sname,(*it)->widgetValue());
+	for(const RichParameter& p : curParSet) {
+		curParSet.setValue(p.name(),(*it)->widgetValue());
 		++it;
 	}
 }

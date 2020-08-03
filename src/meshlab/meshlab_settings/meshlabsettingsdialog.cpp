@@ -87,13 +87,13 @@ void MeshLabSettingsDialog::updateSettings()
 	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	int ii = 0;
-	for(RichParameter* p : curParSet) {
-		QTableWidgetItem* item = new QTableWidgetItem(p->name());
+	for(const RichParameter& p : curParSet) {
+		QTableWidgetItem* item = new QTableWidgetItem(p.name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
 		tw->setItem(ii,0,item);
 
-		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(*p);
+		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(p);
 		twi->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 		tw->setItem(ii++,1,twi);
 	}

@@ -60,10 +60,8 @@ QDomDocument FilterScript::xmlDoc()
         QPair<QString,RichParameterList>& pair = oldpv->pair;
         tag.setAttribute(QString("name"),pair.first);
         RichParameterList &par=pair.second;
-        std::list<RichParameter*>::iterator jj;
-        for(jj=par.begin();jj!=par.end();++jj)
-        {
-            tag.appendChild((*jj)->fillToXMLDocument(doc));
+		for(const RichParameter& rp : par) {
+			tag.appendChild(rp.fillToXMLDocument(doc));
         }
         root.appendChild(tag);
     }

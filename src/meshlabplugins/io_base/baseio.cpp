@@ -310,9 +310,8 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		pi.mask = mask;
 
 		// custom attributes
-		for (RichParameter* pr : par)
-		{
-			QString pname = pr->name();
+		for (const RichParameter& pr : par) {
+			QString pname = pr.name();
 			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
 				if (par.getBool(pname))	// if it is true, add to save list
 					pi.AddPerVertexFloatAttribute(qUtf8Printable(pname.mid(4)));

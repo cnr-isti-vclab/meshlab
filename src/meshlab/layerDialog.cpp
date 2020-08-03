@@ -1234,10 +1234,10 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			//the register system saved value instead is in the defValues of the params inside the current globalParameters set
 			/********************************************************************************************************************/
 
-			for(RichParameter* p : tmpSet)
+			for(RichParameter& p : tmpSet)
 			{
-				const RichParameter& par = currSet.getParameterByName(p->name());
-				tmpSet.setValue(p->name(),par.value());
+				const RichParameter& par = currSet.getParameterByName(p.name());
+				tmpSet.setValue(p.name(),par.value());
 			}
 
 			dialoglayout = new QGridLayout();
@@ -1285,17 +1285,16 @@ DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 void DecoratorParamsTreeWidget::save()
 {
 	apply();
-	for(RichParameter* p : tmpSet)
-	{
+	for(const RichParameter& p : tmpSet) {
 		QDomDocument doc("MeshLabSettings");
-		doc.appendChild(p->fillToXMLDocument(doc));
+		doc.appendChild(p.fillToXMLDocument(doc));
 		QString docstring =  doc.toString();
-		qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name()), qUtf8Printable(docstring));
+		qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p.name()), qUtf8Printable(docstring));
 		QSettings setting;
-		setting.setValue(p->name(),QVariant(docstring));
+		setting.setValue(p.name(),QVariant(docstring));
 		RichParameterList& currSet = mainWin->currentGlobalPars();
-		RichParameter& par = currSet.getParameterByName(p->name());
-		par.setValue(p->value());
+		RichParameter& par = currSet.getParameterByName(p.name());
+		par.setValue(p.value());
 	}
 }
 
@@ -1323,11 +1322,10 @@ void DecoratorParamsTreeWidget::apply()
 void DecoratorParamsTreeWidget::load()
 {
 	int ii = 0;
-	for(RichParameter* p : tmpSet)
-	{
-		const RichParameter& defPar = mainWin->currentGlobalPars().getParameterByName(p->name());
-		p->setValue(defPar.value());
-		frame->stdfieldwidgets.at(ii++)->setWidgetValue(p->value());
+	for(RichParameter& p : tmpSet) {
+		const RichParameter& defPar = mainWin->currentGlobalPars().getParameterByName(p.name());
+		p.setValue(defPar.value());
+		frame->stdfieldwidgets.at(ii++)->setWidgetValue(p.value());
 	}
 	apply();
 }
@@ -1344,6 +1342,6 @@ float DecoratorParamsTreeWidget::osDependentButtonHeightScaleFactor()
 }
 
 DecoratorParamItem::DecoratorParamItem( QAction* action):
-	QTreeWidgetItem(),act(action)
+	QTreeWidgetItem(), act(action)
 {
 }

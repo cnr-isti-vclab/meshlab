@@ -148,7 +148,7 @@ QString RichParameterList::getSaveFileName(const QString& name) const
 bool RichParameterList::hasParameter(const QString& name) const
 {
 	const_iterator it = findParameter(name);
-	return it != paramList.end();
+	return it != end();
 }
 
 RichParameter& RichParameterList::getParameterByName(const QString& name)
@@ -171,27 +171,27 @@ const RichParameter& RichParameterList::getParameterByName(const QString& name) 
 
 RichParameterList::iterator RichParameterList::findParameter(const QString& name)
 {
-	for(iterator it = paramList.begin(); it != paramList.end(); ++it) {
+	for(std::list<RichParameter*>::iterator it = paramList.begin(); it != paramList.end(); ++it) {
 		if((*it != nullptr) && (*it)->name()==name)
-			return it;
+			return iterator(it);
 	}
-	return paramList.end();
+	return iterator(paramList.end());
 }
 
 RichParameterList::const_iterator RichParameterList::findParameter(const QString& name) const
 {
-	for(const_iterator it = paramList.begin(); it != paramList.end(); ++it) {
+	for(std::list<RichParameter*>::const_iterator it = paramList.begin(); it != paramList.end(); ++it) {
 		if((*it != nullptr) && (*it)->name()==name)
-			return it;
+			return const_iterator(it);
 	}
-	return paramList.end();
+	return const_iterator(paramList.end());
 }
 
 RichParameter& RichParameterList::at(unsigned int i)
 {
 	if (i >= size())
 		throw MLException("Index out of bound at RichParameterList::at");
-	const_iterator it = begin();
+	std::list<RichParameter*>::iterator it = paramList.begin();
 	std::advance(it, i);
 	return **it;
 }
@@ -200,7 +200,7 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 {
 	if (i >= size())
 		throw MLException("Index out of bound at RichParameterList::at");
-	const_iterator it = begin();
+	std::list<RichParameter*>::const_iterator it = paramList.begin();
 	std::advance(it, i);
 	return **it;
 }
@@ -264,20 +264,20 @@ RichParameterList& RichParameterList::operator=(RichParameterList rps)
 
 RichParameterList::iterator RichParameterList::begin()
 {
-	return paramList.begin();
+	return iterator(paramList.begin());
 }
 
 RichParameterList::iterator RichParameterList::end()
 {
-	return paramList.end();
+	return iterator(paramList.end());
 }
 
 RichParameterList::const_iterator RichParameterList::begin() const
 {
-	return paramList.begin();
+	return const_iterator(paramList.begin());
 }
 
 RichParameterList::const_iterator RichParameterList::end() const
 {
-	return paramList.end();
+	return const_iterator(paramList.end());
 }

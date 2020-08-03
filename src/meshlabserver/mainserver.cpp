@@ -117,10 +117,10 @@ public:
                 if(! FPM[filterAction->text()].isEmpty())
                 {
                     fprintf(fp,"<TABLE>\n");
-                    for(RichParameter* pp : FPM[filterAction->text()])
+					for(RichParameter& pp : FPM[filterAction->text()])
                     {
                         fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
-                            qUtf8Printable(pp->value().typeName()), qUtf8Printable(pp->fieldDescription()), qUtf8Printable(pp->toolTip()));
+							qUtf8Printable(pp.value().typeName()), qUtf8Printable(pp.fieldDescription()), qUtf8Printable(pp.toolTip()));
                     }
                     fprintf(fp,"</TABLE>\n");
                 }
@@ -607,39 +607,27 @@ public:
                 return false;
             }
 
-            int i = 0;
-            for(RichParameter* rp : required)
-            {
-                if (!parameterSet.hasParameter(rp->name()))
-                {
-                    parameterSet.addParam(*rp);
-                }
-                assert(parameterSet.size() == required.size());
-                RichParameterList::iterator it = parameterSet.begin();
-                std::advance(it, i);
-                RichParameter* parameter = *it;
-                //if this is a mesh parameter and the index is valid
-                if(parameter->value().isMesh())
-                {
-                    RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
-                    if(	md->meshindex < meshDocument.size() &&
-                            md->meshindex >= 0  )
-                    {
-                        RichMesh* rmesh = new RichMesh(parameter->name(),meshDocument.getMesh(md->meshindex),&meshDocument);
-                        //THIS IS VERY BAD (but it is better than before)
-                        delete *it;
-                        *it = rmesh;
-                        //parameterSet.paramList.replace(i,rmesh);
-                    } else
-                    {
-                        fprintf(fp,"Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
-                        fprintf(fp,"One of the filters in the script needs more meshes than you have loaded.\n");
-                        exit(-1);
-                    }
-                    delete parameter;
-                }
-                i++;
-            }
+			int i = 0;
+			for(RichParameter& rp : required) {
+				if (!parameterSet.hasParameter(rp.name())) {
+					parameterSet.addParam(rp);
+				}
+				assert(parameterSet.size() == required.size());
+				RichParameter& parameter = parameterSet.at(i);
+				//if this is a mesh parameter and the index is valid
+				if(parameter.value().isMesh()) {
+					RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
+					if(md.meshindex < meshDocument.size() && md.meshindex >= 0) {
+						parameterSet.setValue(md.name(), MeshValue(&meshDocument, md.meshindex));
+					}
+					else {
+						fprintf(fp,"Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md.meshindex );
+						fprintf(fp,"One of the filters in the script needs more meshes than you have loaded.\n");
+						exit(-1);
+					}
+				}
+				i++;
+			}
 
             QGLWidget* wid = NULL;
             if (shared != NULL)

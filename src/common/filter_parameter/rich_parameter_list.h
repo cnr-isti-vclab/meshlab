@@ -30,15 +30,39 @@ class RichParameterList
 {
 
 public:
-//	class iterator : public std::list<RichParameter*>::iterator {
+	class iterator {
+	public:
+		iterator() : it() {}
+		friend class RichParameterList;
+		bool operator==(const iterator& ot) {return it == ot.it;}
+		bool operator!=(const iterator& ot) {return it != ot.it;}
+		iterator& operator++() {++it; return *this;}
+		iterator operator++(int) {auto tmp = it; ++it; return tmp;}
+		iterator& operator--() {--it; return *this;}
+		iterator operator--(int) {auto tmp = it; --it; return tmp;}
+		RichParameter& operator*() {return **it;}
+		RichParameter* operator->() {return *it;}
+	private:
+		iterator(std::list<RichParameter*>::iterator it) : it(it){}
+		std::list<RichParameter*>::iterator it;
+	};
 
-//	};
-//	class const_iterator : std::list<RichParameter*>::const_iterator {
-
-//	};
-
-	typedef std::list<RichParameter*>::iterator iterator;
-	typedef std::list<RichParameter*>::const_iterator const_iterator;
+	class const_iterator {
+	public:
+		const_iterator() : it() {}
+		friend class RichParameterList;
+		bool operator==(const const_iterator& ot) {return it == ot.it;}
+		bool operator!=(const const_iterator& ot) {return it != ot.it;}
+		const_iterator& operator++() {++it; return *this;}
+		const_iterator operator++(int) {auto tmp = it; ++it; return tmp;}
+		const_iterator& operator--() {--it; return *this;}
+		const_iterator operator--(int) {auto tmp = it; --it; return tmp;}
+		const RichParameter& operator*() {return **it;}
+		const RichParameter* operator->() {return *it;}
+	private:
+		const_iterator(std::list<RichParameter*>::const_iterator it) : it(it){}
+		std::list<RichParameter*>::const_iterator it;
+	};
 
 	RichParameterList();
 	RichParameterList(const RichParameterList& rps);
