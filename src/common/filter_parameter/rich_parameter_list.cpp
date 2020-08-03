@@ -1,6 +1,6 @@
 #include "rich_parameter_list.h"
 
-#include "mlexception.h"
+#include "../mlexception.h"
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
