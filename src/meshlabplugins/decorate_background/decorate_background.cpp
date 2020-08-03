@@ -88,7 +88,8 @@ bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*
     switch(ID(action))
     {
     case DP_SHOW_CUBEMAPPED_ENV :
-        if(parset->findParameter(CubeMapPathParam())== NULL) qDebug("CubeMapPath was not set!!!");
+		if(parset->hasParameter(CubeMapPathParam()) == false)
+			qDebug("CubeMapPath was not set!!!");
         cubemapFileName = parset->getString(CubeMapPathParam());
         break;
     case DP_SHOW_GRID:

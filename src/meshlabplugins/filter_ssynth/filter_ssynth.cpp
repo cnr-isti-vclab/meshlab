@@ -79,7 +79,7 @@ bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichPar
     QWidget *  parent=(QWidget*)this->parent();
     QString grammar = par.getString("grammar");
     int seed = par.getInt("seed");
-    int sphereres=par.findParameter("sphereres")->value().getInt();
+	int sphereres=par.getInt("sphereres");
     this->renderTemplate=GetTemplate(sphereres);
     if(this->renderTemplate!=QString::Null()){
         QString path=ssynth(grammar,-50,seed,cb);
@@ -168,10 +168,10 @@ QList<MeshIOInterface::Format> FilterSSynth::exportFormats() const
 
 bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, CallBackPos *cb, QWidget *parent)
 {
-    this->seed=par.findParameter("seed")->value().getInt();
-    int maxrec=par.findParameter("maxrec")->value().getInt();
-    int sphereres=par.findParameter("sphereres")->value().getInt();
-    int maxobj=par.findParameter("maxobj")->value().getInt();
+	this->seed=par.getInt("seed");
+	int maxrec=par.getInt("maxrec");
+	int sphereres=par.getInt("sphereres");
+	int maxobj=par.getInt("maxobj");
     this->renderTemplate=GetTemplate(sphereres);
     if(this->renderTemplate!=QString::Null()){
         QFile grammar(fileName);

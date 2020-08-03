@@ -30,6 +30,16 @@ class RichParameterList
 {
 
 public:
+//	class iterator : public std::list<RichParameter*>::iterator {
+
+//	};
+//	class const_iterator : std::list<RichParameter*>::const_iterator {
+
+//	};
+
+	typedef std::list<RichParameter*>::iterator iterator;
+	typedef std::list<RichParameter*>::const_iterator const_iterator;
+
 	RichParameterList();
 	RichParameterList(const RichParameterList& rps);
 	RichParameterList(RichParameterList&& rps);
@@ -60,24 +70,25 @@ public:
 	QString getSaveFileName(const QString& name) const;
 
 	bool hasParameter(const QString& name) const;
-	RichParameter* findParameter(const QString& name);
-	const RichParameter* findParameter(const QString& name) const;
+	RichParameter& getParameterByName(const QString& name);
+	const RichParameter& getParameterByName(const QString& name) const;
+	iterator findParameter(const QString& name);
+	const_iterator findParameter(const QString& name) const;
 	RichParameter& at(unsigned int i);
 	const RichParameter& at(unsigned int i) const;
 
 	void setValue(const QString& name, const Value& val);
 	RichParameter& addParam(const RichParameter& pd);
-	RichParameterList& join(const RichParameterList& rps);	
+	void join(const RichParameterList& rps);
 
 
-	RichParameter* pushFromQDomElement(QDomElement np);
+	void pushFromQDomElement(QDomElement np);
 
 	void swap(RichParameterList& oth);
 	bool operator==(const RichParameterList& rps);
 	RichParameterList& operator=(RichParameterList rps);
 
-	typedef std::list<RichParameter*>::iterator iterator;
-	typedef std::list<RichParameter*>::const_iterator const_iterator;
+
 
 	iterator begin();
 	iterator end();

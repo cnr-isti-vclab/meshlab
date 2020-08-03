@@ -2395,7 +2395,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
     {
         RichParameterList prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
-		prePar = prePar.join(currentGlobalParams);
+		prePar.join(currentGlobalParams);
         int mask = 0;
         QElapsedTimer t;t.start();
         bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);

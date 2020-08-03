@@ -206,7 +206,7 @@ void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, co
 {
 	if(format.toUpper() == tr("BRE"))
   {
-        if(par.findParameter("Unify")->value().getBool())
+		if(par.getBool("Unify"))
     {
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
     }

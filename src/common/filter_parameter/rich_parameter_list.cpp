@@ -52,121 +52,139 @@ void RichParameterList::clear()
 
 bool RichParameterList::getBool(const QString& name) const
 {
-	return findParameter(name)->value().getBool();
+	return getParameterByName(name).value().getBool();
 }
 
 int RichParameterList::getInt(const QString& name) const
 {
-	return findParameter(name)->value().getInt();
+	return getParameterByName(name).value().getInt();
 }
 
 float RichParameterList::getFloat(const QString& name) const
 {
-	return findParameter(name)->value().getFloat();
+	return getParameterByName(name).value().getFloat();
 }
 
 QColor RichParameterList::getColor(const QString& name) const
 {
-	return findParameter(name)->value().getColor();
+	return getParameterByName(name).value().getColor();
 }
 
 Color4b RichParameterList::getColor4b(const QString& name) const
 {
-	return ColorConverter::ToColor4b(findParameter(name)->value().getColor());
+	return ColorConverter::ToColor4b(getParameterByName(name).value().getColor());
 }
 
 QString RichParameterList::getString(const QString& name) const
 {
-	return findParameter(name)->value().getString();
+	return getParameterByName(name).value().getString();
 }
 
 Matrix44f RichParameterList::getMatrix44(const QString& name) const
 {
-	return findParameter(name)->value().getMatrix44f();
+	return getParameterByName(name).value().getMatrix44f();
 }
 
 Matrix44<MESHLAB_SCALAR> RichParameterList::getMatrix44m(const QString& name) const
 {
-	return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getMatrix44f());
+	return Matrix44<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getMatrix44f());
 }
 
 Point3f RichParameterList::getPoint3f(const QString& name) const
 {
-	return findParameter(name)->value().getPoint3f();
+	return getParameterByName(name).value().getPoint3f();
 }
 
 Point3<MESHLAB_SCALAR> RichParameterList::getPoint3m(const QString& name) const
 {
-	return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getPoint3f());
+	return Point3<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getPoint3f());
 }
 
 Shotf RichParameterList::getShotf(const QString& name) const
 {
-	return findParameter(name)->value().getShotf();
+	return getParameterByName(name).value().getShotf();
 }
 
 Shot<MESHLAB_SCALAR> RichParameterList::getShotm(const QString& name) const
 {
-	return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->value().getShotf());
+	return Shot<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getShotf());
 }
 
 float RichParameterList::getAbsPerc(const QString& name) const
 {
-	return findParameter(name)->value().getAbsPerc();
+	return getParameterByName(name).value().getAbsPerc();
 }
 
 int RichParameterList::getEnum(const QString& name) const
 {
-	return findParameter(name)->value().getEnum();
+	return getParameterByName(name).value().getEnum();
 }
 
 QList<float> RichParameterList::getFloatList(const QString& name) const
 {
-	return findParameter(name)->value().getFloatList();
+	return getParameterByName(name).value().getFloatList();
 }
 
 MeshModel * RichParameterList::getMesh(const QString& name) const
 {
-	return findParameter(name)->value().getMesh();
+	return getParameterByName(name).value().getMesh();
 }
 
 float RichParameterList::getDynamicFloat(const QString& name) const
 {
-	return findParameter(name)->value().getDynamicFloat();
+	return getParameterByName(name).value().getDynamicFloat();
 }
 
 QString RichParameterList::getOpenFileName(const QString& name) const
 {
-	return findParameter(name)->value().getFileName();
+	return getParameterByName(name).value().getFileName();
 }
 
 QString RichParameterList::getSaveFileName(const QString& name) const
 {
-	return findParameter(name)->value().getFileName();
+	return getParameterByName(name).value().getFileName();
 }
 
 bool RichParameterList::hasParameter(const QString& name) const
 {
-	const RichParameter* rp = findParameter(name);
-	return rp != nullptr;
+	const_iterator it = findParameter(name);
+	return it != paramList.end();
 }
 
-RichParameter* RichParameterList::findParameter(const QString& name)
+RichParameter& RichParameterList::getParameterByName(const QString& name)
 {
 	for(RichParameter* rp : paramList) {
 		if((rp != nullptr) && rp->name()==name)
-			return rp;
+			return *rp;
 	}
-	return nullptr;
+	throw MLException("No parameter with name " + name + " found in RichParameterList");
 }
 
-const RichParameter* RichParameterList::findParameter(const QString& name) const
+const RichParameter& RichParameterList::getParameterByName(const QString& name) const
 {
 	for(RichParameter* rp : paramList) {
 		if((rp != nullptr) && rp->name()==name)
-			return rp;
+			return *rp;
 	}
-	return nullptr;
+	throw MLException("No parameter with name " + name + " found in RichParameterList");
+}
+
+RichParameterList::iterator RichParameterList::findParameter(const QString& name)
+{
+	for(iterator it = paramList.begin(); it != paramList.end(); ++it) {
+		if((*it != nullptr) && (*it)->name()==name)
+			return it;
+	}
+	return paramList.end();
+}
+
+RichParameterList::const_iterator RichParameterList::findParameter(const QString& name) const
+{
+	for(const_iterator it = paramList.begin(); it != paramList.end(); ++it) {
+		if((*it != nullptr) && (*it)->name()==name)
+			return it;
+	}
+	return paramList.end();
 }
 
 RichParameter& RichParameterList::at(unsigned int i)
@@ -189,8 +207,7 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 
 void RichParameterList::setValue(const QString& name,const Value& newval)
 {
-	assert(hasParameter(name));
-	findParameter(name)->setValue(newval);
+	getParameterByName(name).setValue(newval);
 }
 
 RichParameter& RichParameterList::addParam(const RichParameter& pd )
@@ -201,12 +218,11 @@ RichParameter& RichParameterList::addParam(const RichParameter& pd )
 	return *rp;
 }
 
-RichParameterList& RichParameterList::join( const RichParameterList& rps )
+void RichParameterList::join( const RichParameterList& rps )
 {
 	for(const RichParameter* p : rps.paramList) {
 		paramList.push_back(p->clone());
 	}
-	return (*this);
 }
 
 RichParameter* RichParameterList::pushFromQDomElement(QDomElement np)

@@ -61,8 +61,8 @@ void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
 {
 	int rprow = tw->row(itm);
 	const RichParameter& curPar = curParSet.at(rprow);
-	const RichParameter *defPar = defParSet.findParameter(curPar.name());
-	SettingDialog* setdial = new SettingDialog(curPar,*defPar,this);
+	const RichParameter& defPar = defParSet.getParameterByName(curPar.name());
+	SettingDialog* setdial = new SettingDialog(curPar, defPar, this);
 	connect(
 				setdial, SIGNAL(applySettingSignal(const RichParameter&)),
 				this,    SLOT(updateSingleSetting(const RichParameter&)));
@@ -103,8 +103,7 @@ void MeshLabSettingsDialog::updateSettings()
 
 void MeshLabSettingsDialog::updateSingleSetting(const RichParameter& rp)
 {
-	RichParameter* p = curParSet.findParameter(rp.name());
-	assert(p->stringType() == rp.stringType());
+	assert(curParSet.getParameterByName(rp.name()).stringType() == rp.stringType());
 	curParSet.setValue(rp.name(), rp.value());
 	updateSettings();
 	emit applyCustomSetting();
