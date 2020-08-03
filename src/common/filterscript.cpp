@@ -115,9 +115,6 @@ bool FilterScript::open(QString filename)
             qDebug("Reading filter with name %s", qUtf8Printable(name));
             for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
             {
-                RichParameter* rp = NULL;
-                RichParameterAdapter::create(np,&rp);
-                //FilterParameter::addQDomElement(par,np);
                 par.pushFromQDomElement(np);
             }
             FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();

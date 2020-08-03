@@ -129,7 +129,6 @@ public:
 	RichParameter& addParam(const RichParameter& pd);
 	void join(const RichParameterList& rps);
 
-
 	void pushFromQDomElement(QDomElement np);
 
 	void swap(RichParameterList& oth);

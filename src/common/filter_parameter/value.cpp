@@ -70,8 +70,3 @@ void MeshValue::fillToXMLElement(QDomElement&) const
 	//could be a good idea.
 }
 
-
-
-
-
-

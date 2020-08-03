@@ -1,7 +1,0 @@
-Flying pointers to remove:
-	meshlab/mainwindow_init.cpp
-	meshlab/customDialog.cpp
-	meshlab/filterScriptDialog.cpp
-	meshlabserver/mainserver.cpp
-	
-	
