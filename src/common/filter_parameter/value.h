@@ -33,6 +33,13 @@ class MeshModel;
 class MeshDocument;
 class QDomElement;
 
+/**
+ * @brief The Value class
+ *
+ * Represents a generic parameter value for meshlab.
+ * Specializations inherit from this class, depending on the type of the
+ * value. Value class is an attribute of the RichParameter class.
+ */
 class Value
 {
 public:

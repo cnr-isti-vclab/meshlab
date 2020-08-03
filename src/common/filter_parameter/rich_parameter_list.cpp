@@ -6,10 +6,16 @@
 
 using namespace vcg;
 
+/**
+ * @brief Creates an empty RichParameterList
+ */
 RichParameterList::RichParameterList()
 {
 }
 
+/**
+ * @brief Creates a copy of the RichParameterList rps
+ */
 RichParameterList::RichParameterList( const RichParameterList& rps )
 {
 	for(auto p : rps.paramList) {
@@ -17,6 +23,9 @@ RichParameterList::RichParameterList( const RichParameterList& rps )
 	}
 }
 
+/**
+ * @brief Moves rps in this RichParameterList
+ */
 RichParameterList::RichParameterList(RichParameterList&& rps)
 {
 	for(auto& p : rps.paramList) {
@@ -25,24 +34,33 @@ RichParameterList::RichParameterList(RichParameterList&& rps)
 	}
 }
 
+/**
+ * @brief delete the RichParameterList
+ */
 RichParameterList::~RichParameterList()
 {
-	for(RichParameter* rp : paramList)
-		delete rp;
-	paramList.clear();
-
+	clear();
 }
 
+/**
+ * @return true if the number of RichParameters is zero, false otherwise
+ */
 bool RichParameterList::isEmpty() const
 {
 	return paramList.size() == 0;
 }
 
+/**
+ * @return the number of RichParameters contained on the list
+ */
 unsigned int RichParameterList::size() const
 {
 	return paramList.size();
 }
 
+/**
+ * @brief clears the RichParameterList
+ */
 void RichParameterList::clear()
 {
 	for(RichParameter* rp : paramList)
@@ -50,107 +68,190 @@ void RichParameterList::clear()
 	paramList.clear();
 }
 
+/**
+ * @return the bool of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 bool RichParameterList::getBool(const QString& name) const
 {
 	return getParameterByName(name).value().getBool();
 }
 
+/**
+ * @return the int of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 int RichParameterList::getInt(const QString& name) const
 {
 	return getParameterByName(name).value().getInt();
 }
 
+/**
+ * @return the float of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 float RichParameterList::getFloat(const QString& name) const
 {
 	return getParameterByName(name).value().getFloat();
 }
 
+/**
+ * @return the color of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 QColor RichParameterList::getColor(const QString& name) const
 {
 	return getParameterByName(name).value().getColor();
 }
 
+/**
+ * @return the color of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Color4b RichParameterList::getColor4b(const QString& name) const
 {
 	return ColorConverter::ToColor4b(getParameterByName(name).value().getColor());
 }
 
+/**
+ * @return the string of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 QString RichParameterList::getString(const QString& name) const
 {
 	return getParameterByName(name).value().getString();
 }
 
+/**
+ * @return the matrix of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Matrix44f RichParameterList::getMatrix44(const QString& name) const
 {
 	return getParameterByName(name).value().getMatrix44f();
 }
 
+/**
+ * @return the matrix of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Matrix44<MESHLAB_SCALAR> RichParameterList::getMatrix44m(const QString& name) const
 {
 	return Matrix44<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getMatrix44f());
 }
 
+/**
+ * @return the point of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Point3f RichParameterList::getPoint3f(const QString& name) const
 {
 	return getParameterByName(name).value().getPoint3f();
 }
 
+/**
+ * @return the point of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Point3<MESHLAB_SCALAR> RichParameterList::getPoint3m(const QString& name) const
 {
 	return Point3<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getPoint3f());
 }
 
+/**
+ * @return the shot of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Shotf RichParameterList::getShotf(const QString& name) const
 {
 	return getParameterByName(name).value().getShotf();
 }
 
+/**
+ * @return the shot of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 Shot<MESHLAB_SCALAR> RichParameterList::getShotm(const QString& name) const
 {
 	return Shot<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getShotf());
 }
 
+/**
+ * @return the float of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 float RichParameterList::getAbsPerc(const QString& name) const
 {
 	return getParameterByName(name).value().getAbsPerc();
 }
 
+/**
+ * @return the enum of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 int RichParameterList::getEnum(const QString& name) const
 {
 	return getParameterByName(name).value().getEnum();
 }
 
+/**
+ * @return the float list of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 QList<float> RichParameterList::getFloatList(const QString& name) const
 {
 	return getParameterByName(name).value().getFloatList();
 }
 
+/**
+ * @return the mesh of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 MeshModel * RichParameterList::getMesh(const QString& name) const
 {
 	return getParameterByName(name).value().getMesh();
 }
 
+/**
+ * @return the float of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 float RichParameterList::getDynamicFloat(const QString& name) const
 {
 	return getParameterByName(name).value().getDynamicFloat();
 }
 
+/**
+ * @return the filename of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 QString RichParameterList::getOpenFileName(const QString& name) const
 {
 	return getParameterByName(name).value().getFileName();
 }
 
+/**
+ * @return the filename of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 QString RichParameterList::getSaveFileName(const QString& name) const
 {
 	return getParameterByName(name).value().getFileName();
 }
 
+/**
+ * @return true if the RichParameter exists
+ */
 bool RichParameterList::hasParameter(const QString& name) const
 {
 	const_iterator it = findParameter(name);
 	return it != end();
 }
 
+/**
+ * @return the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 RichParameter& RichParameterList::getParameterByName(const QString& name)
 {
 	for(RichParameter* rp : paramList) {
@@ -160,6 +261,10 @@ RichParameter& RichParameterList::getParameterByName(const QString& name)
 	throw MLException("No parameter with name " + name + " found in RichParameterList");
 }
 
+/**
+ * @return the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 const RichParameter& RichParameterList::getParameterByName(const QString& name) const
 {
 	for(RichParameter* rp : paramList) {
@@ -169,6 +274,11 @@ const RichParameter& RichParameterList::getParameterByName(const QString& name) 
 	throw MLException("No parameter with name " + name + " found in RichParameterList");
 }
 
+/**
+ * @return the iterator pointing to the RichParameter having the given name.
+ * an iterator equal to RichParameter::end() is returned if a RichParameter with
+ * the given name is not found.
+ */
 RichParameterList::iterator RichParameterList::findParameter(const QString& name)
 {
 	for(std::list<RichParameter*>::iterator it = paramList.begin(); it != paramList.end(); ++it) {
@@ -178,6 +288,11 @@ RichParameterList::iterator RichParameterList::findParameter(const QString& name
 	return iterator(paramList.end());
 }
 
+/**
+ * @return the iterator pointing to the RichParameter having the given name.
+ * an iterator equal to RichParameter::end() is returned if a RichParameter with
+ * the given name is not found.
+ */
 RichParameterList::const_iterator RichParameterList::findParameter(const QString& name) const
 {
 	for(std::list<RichParameter*>::const_iterator it = paramList.begin(); it != paramList.end(); ++it) {
@@ -187,6 +302,10 @@ RichParameterList::const_iterator RichParameterList::findParameter(const QString
 	return const_iterator(paramList.end());
 }
 
+/**
+ * @return the RichParameter having the given position.
+ * @throws an MLException if the index exceeds the size of the list.
+ */
 RichParameter& RichParameterList::at(unsigned int i)
 {
 	if (i >= size())
@@ -196,6 +315,10 @@ RichParameter& RichParameterList::at(unsigned int i)
 	return **it;
 }
 
+/**
+ * @return the RichParameter having the given position.
+ * @throws an MLException if the index exceeds the size of the list.
+ */
 const RichParameter& RichParameterList::at(unsigned int i) const
 {
 	if (i >= size())
@@ -205,11 +328,19 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 	return **it;
 }
 
+/**
+ * @brief sets the value of the RichParameter having the given name.
+ * @throws an MLException if the name is not found in the list
+ */
 void RichParameterList::setValue(const QString& name,const Value& newval)
 {
 	getParameterByName(name).setValue(newval);
 }
 
+/**
+ * @brief adds a RichParameter to the list.
+ * @return a reference to the added parameter
+ */
 RichParameter& RichParameterList::addParam(const RichParameter& pd )
 {
 	assert(!hasParameter(pd.name()));
@@ -218,6 +349,9 @@ RichParameter& RichParameterList::addParam(const RichParameter& pd )
 	return *rp;
 }
 
+/**
+ * @brief joins this RichParameterList to rps
+ */
 void RichParameterList::join( const RichParameterList& rps )
 {
 	for(const RichParameter* p : rps.paramList) {
@@ -225,6 +359,10 @@ void RichParameterList::join( const RichParameterList& rps )
 	}
 }
 
+/**
+ * @brief extracts a RichParameter from the given QDomElement and
+ * pushes it in the list
+ */
 void RichParameterList::pushFromQDomElement(QDomElement np)
 {
 	RichParameter* rp = nullptr;
@@ -233,11 +371,19 @@ void RichParameterList::pushFromQDomElement(QDomElement np)
 		paramList.push_back(rp);
 }
 
+/**
+ * @brief swaps this RichParameterList with oth
+ * @param oth
+ */
 void RichParameterList::swap(RichParameterList& oth)
 {
 	std::swap(paramList, oth.paramList);
 }
 
+/**
+ * @return true if two RichParameterList are equal.
+ * @see operator== of RichParameter
+ */
 bool RichParameterList::operator==( const RichParameterList& rps )
 {
 	if (rps.paramList.size() != paramList.size())
@@ -256,27 +402,42 @@ bool RichParameterList::operator==( const RichParameterList& rps )
 	return iseq;
 }
 
+/**
+ * @brief Assignment operator
+ */
 RichParameterList& RichParameterList::operator=(RichParameterList rps)
 {
 	swap(rps);
 	return *this;
 }
 
+/**
+ * @return the begin iterator of the list
+ */
 RichParameterList::iterator RichParameterList::begin()
 {
 	return iterator(paramList.begin());
 }
 
+/**
+ * @return the end iterator of the list
+ */
 RichParameterList::iterator RichParameterList::end()
 {
 	return iterator(paramList.end());
 }
 
+/**
+ * @return the begin iterator of the list
+ */
 RichParameterList::const_iterator RichParameterList::begin() const
 {
 	return const_iterator(paramList.begin());
 }
 
+/**
+ * @return the end iterator of the list
+ */
 RichParameterList::const_iterator RichParameterList::end() const
 {
 	return const_iterator(paramList.end());

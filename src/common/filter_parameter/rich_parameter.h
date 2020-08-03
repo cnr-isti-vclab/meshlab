@@ -29,6 +29,21 @@
 
 class MeshDocument;
 
+/**
+ * @brief The RichParameter class
+ *
+ * The RichParameter class is a representation of a MeshLab parameter that contains
+ * a value of a certain type (see the Value class and its specializations) plus
+ * some other decorators, like a parameter description and a tooltip.
+ *
+ * All these decorators allow MeshLab to automatically design GUI interfaces for
+ * every RichParameter spcialization.
+ *
+ * Every specialization must implement the following member functions:
+ * - QString stringType() const : returns a string representation of the type of the RichParameter
+ * - RichParameter* clone() const : returns a *new* object which is a clone of the RichParameter
+ * - bool operator==(const RichParameter& rp): returns true if the two RichParameter are the same
+ */
 class RichParameter
 {
 public:
@@ -41,6 +56,7 @@ public:
 	const Value& value() const;
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
+
 	virtual QString stringType() const = 0;
 
 	void setValue(const Value& ov);

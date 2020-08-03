@@ -26,6 +26,30 @@
 
 #include "rich_parameter.h"
 
+/**
+ * @brief The RichParameterList class
+ *
+ * It is a list container of RichParameters.
+ * Since RichParameter is a base abstract class, you cannot have an
+ * instance of a RichParameter object, but you can reference a generic
+ * RichParameter object. Therefore, this container works with references.
+ *
+ * You can, for example, iterate along its RichParameters:
+ * \code{.cpp}
+ * for (const RichParameter& rp : list){
+ *     if (rp.value().isBool()){
+ *         //...
+ *     }
+ * }
+ * \endcode
+ *
+ * You can get a RichParameter by name:
+ * \code{.cpp}
+ * RichParameter& rp = list.getParameterByName("myFloat");
+ * \endcode
+ *
+ * See the documentation of every member function for details.
+ */
 class RichParameterList
 {
 
@@ -111,8 +135,6 @@ public:
 	void swap(RichParameterList& oth);
 	bool operator==(const RichParameterList& rps);
 	RichParameterList& operator=(RichParameterList rps);
-
-
 
 	iterator begin();
 	iterator end();
