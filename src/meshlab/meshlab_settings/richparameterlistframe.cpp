@@ -39,30 +39,24 @@ using namespace vcg;
 RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla )
     :QFrame(p)
 {
-    gla=curr_gla;
+	gla=curr_gla;
 }
 
-void RichParameterListFrame::resetValues(RichParameterList &curParSet)
-{
-	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
-	for(unsigned int i  =0; i < curParSet.size(); ++i) {
-		stdfieldwidgets[i]->resetValue();
-	}
-}
-
-/* creates widgets for the standard parameters */
-void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet, MeshDocument * /*_mdPt*/ )
+void RichParameterListFrame::loadFrameContent(
+		const RichParameterList& curParSet,
+		const RichParameterList& defParSet,
+		MeshDocument*)
 {
 	if(layout())
 		delete layout();
 	QGridLayout* glay = new QGridLayout();
 	int i = 0;
 	for(const RichParameter& fpi : curParSet) {
-		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, fpi);
+		const RichParameter& defrp = defParSet.getParameterByName(fpi.name());
+		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, defrp);
 		stdfieldwidgets.push_back(wd);
 		helpList.push_back(wd->helpLab);
 		wd->addWidgetToGridLayout(glay,i++);
-
 	}
 	setLayout(glay);
 	this->setMinimumSize(glay->sizeHint());
@@ -71,12 +65,12 @@ void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet
 	this->adjustSize();
 }
 
-void RichParameterListFrame::toggleHelp()
+
+
+/* creates widgets for the standard parameters */
+void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet, MeshDocument * /*_mdPt*/ )
 {
-    for(int i = 0; i < helpList.count(); i++)
-        helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
-    updateGeometry();
-    adjustSize();
+	loadFrameContent(curParSet, curParSet);
 }
 
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
@@ -88,6 +82,22 @@ void RichParameterListFrame::readValues(RichParameterList &curParSet)
 		curParSet.setValue(p.name(),(*it)->widgetValue());
 		++it;
 	}
+}
+
+void RichParameterListFrame::resetValues(RichParameterList &curParSet)
+{
+	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
+	for(unsigned int i  =0; i < curParSet.size(); ++i) {
+		stdfieldwidgets[i]->resetValue();
+	}
+}
+
+void RichParameterListFrame::toggleHelp()
+{
+	for(int i = 0; i < helpList.count(); i++)
+		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	updateGeometry();
+	adjustSize();
 }
 
 RichParameterListFrame::~RichParameterListFrame()

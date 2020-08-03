@@ -50,6 +50,7 @@ class RichParameterListFrame : public QFrame
 public:
 	RichParameterListFrame(QWidget *p, QWidget *gla=0);
 
+	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet, MeshDocument *mdPt = 0);
 	void loadFrameContent(const RichParameterList& curParSet, MeshDocument *mdPt = 0);
 
     // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
