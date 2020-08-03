@@ -225,13 +225,12 @@ void RichParameterList::join( const RichParameterList& rps )
 	}
 }
 
-RichParameter* RichParameterList::pushFromQDomElement(QDomElement np)
+void RichParameterList::pushFromQDomElement(QDomElement np)
 {
 	RichParameter* rp = nullptr;
 	bool b = RichParameterAdapter::create(np, &rp);
 	if (b)
 		paramList.push_back(rp);
-	return rp;
 }
 
 void RichParameterList::swap(RichParameterList& oth)
