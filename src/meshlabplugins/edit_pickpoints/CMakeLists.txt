@@ -12,9 +12,9 @@ set(SOURCES
 	pickPointsTemplate.cpp
 	pickedPoints.cpp
 	pickpointsDialog.cpp
-	../../meshlab/meshlab_settings/richparameterwidgets.cpp
-	../../meshlab/meshlab_settings/richparameterlistframe.cpp
-	../../meshlab/meshlab_settings/richparameterlistdialog.cpp)
+	../../meshlab/rich_parameter_gui/richparameterwidgets.cpp
+	../../meshlab/rich_parameter_gui/richparameterlistframe.cpp
+	../../meshlab/rich_parameter_gui/richparameterlistdialog.cpp)
 
 set(HEADERS
 	edit_pickpoints_factory.h

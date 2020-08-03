@@ -35,11 +35,8 @@ class RichParameterListDialog: public QDialog
 {
 	Q_OBJECT
 public:
-	RichParameterListDialog(QWidget *p, RichParameterList *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
+	RichParameterListDialog(QWidget *p, RichParameterList& curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
 	~RichParameterListDialog();
-
-	RichParameterList *curParSet;
-	RichParameterListFrame *stdParFrame;
 
 	void createFrame();
 
@@ -51,6 +48,8 @@ public:
 	void resetValues();
 
 private:
+	RichParameterList& curParSet;
+	RichParameterListFrame *stdParFrame;
 	MeshDocument *meshDocument;
 
 };

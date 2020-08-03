@@ -26,7 +26,7 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "meshlab_settings/richparameterlistframe.h"
+#include "rich_parameter_gui/richparameterlistframe.h"
 #include <common/filter_parameter/rich_parameter_list.h>
 #include "glarea.h"
 //

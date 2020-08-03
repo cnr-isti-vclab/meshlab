@@ -31,11 +31,9 @@ SettingDialog::SettingDialog(
 	frame(this),
 	curPar(currentPar.clone()),
 	tmpPar(currentPar.clone()),
-	defPar(defaultPar.clone())
+	defPar(defaultPar)
 {
-	tmpParSet = RichParameterList();
-	tmpParSet.addParam(*curPar);
-	frame.loadFrameContent(tmpParSet);
+	frame.loadFrameContent(*curPar, defPar);
 
 	setModal(true);
 
@@ -70,7 +68,6 @@ SettingDialog::~SettingDialog()
 {
 	delete curPar;
 	delete tmpPar;
-	delete defPar;
 }
 
 void SettingDialog::save()
@@ -98,7 +95,7 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
 
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setValue(defPar->value());
+	frame.stdfieldwidgets.at(0)->setValue(defPar.value());
 	apply();
 }
 

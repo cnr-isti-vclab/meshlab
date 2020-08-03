@@ -53,10 +53,12 @@ public:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet, MeshDocument *mdPt = 0);
 	void loadFrameContent(const RichParameterList& curParSet, MeshDocument *mdPt = 0);
 
+	void loadFrameContent(const RichParameter& curPar, const RichParameter& defPar);
+
     // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
     // This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
     void readValues(RichParameterList &curParSet);
-    void resetValues(RichParameterList &curParSet);
+	void resetValues();
 
     void toggleHelp();
 

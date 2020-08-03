@@ -26,7 +26,7 @@
 
 #include <QDialog>
 #include <common/filter_parameter/rich_parameter.h>
-#include "richparameterlistframe.h"
+#include "../rich_parameter_gui/richparameterlistframe.h"
 
 class SettingDialog : public QDialog
 {
@@ -44,11 +44,10 @@ signals:
 	void applySettingSignal(const RichParameter&);
 
 private:
-	RichParameterList tmpParSet;
 	RichParameterListFrame frame;
 	RichParameter* curPar;
 	RichParameter* tmpPar;
-	const RichParameter* defPar;
+	const RichParameter& defPar;
 	QPushButton* savebut;
 	QPushButton* applybut;
 	QPushButton* resetbut;

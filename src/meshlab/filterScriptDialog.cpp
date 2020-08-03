@@ -27,7 +27,7 @@
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
 #include "../common/mlexception.h"
-#include "meshlab_settings/richparameterlistdialog.h"
+#include "rich_parameter_gui/richparameterlistdialog.h"
 
 FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 		:QDialog(parent)
@@ -234,7 +234,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 	}
 
 	//launch the dialog
-	RichParameterListDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->meshDoc());
+	RichParameterListDialog parameterDialog(this, newParameterSet, "Edit Parameters", mainWindow->meshDoc());
 	int result = parameterDialog.exec();
 	if(result == QDialog::Accepted) {
 		//keep the changes

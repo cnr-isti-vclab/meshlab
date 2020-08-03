@@ -13,9 +13,9 @@ HEADERS += \
 	align/AlignGlobal.h \
 	align/OccupancyGrid.h \
 	align/align_parameter.h \
-	../../meshlab/meshlab_settings/richparameterwidgets.h \
-	../../meshlab/meshlab_settings/richparameterlistframe.h \
-	../../meshlab/meshlab_settings/richparameterlistdialog.h \
+	../../meshlab/rich_parameter_gui/richparameterwidgets.h \
+	../../meshlab/rich_parameter_gui/richparameterlistframe.h \
+	../../meshlab/rich_parameter_gui/richparameterlistdialog.h \
 	$$VCGDIR/wrap/gui/trackball.h \
 	$$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h
@@ -30,9 +30,9 @@ SOURCES += \
 	align/AlignGlobal.cpp \
 	align/OccupancyGrid.cpp \
 	align/align_parameter.cpp \
-	../../meshlab/meshlab_settings/richparameterwidgets.cpp \
-	../../meshlab/meshlab_settings/richparameterlistframe.cpp \
-	../../meshlab/meshlab_settings/richparameterlistdialog.cpp \
+	../../meshlab/rich_parameter_gui/richparameterwidgets.cpp \
+	../../meshlab/rich_parameter_gui/richparameterlistframe.cpp \
+	../../meshlab/rich_parameter_gui/richparameterlistdialog.cpp \
 	$$VCGDIR/wrap/ply/plylib.cpp\
 	$$VCGDIR/wrap/gui/trackball.cpp\
 	$$VCGDIR/wrap/gui/trackmode.cpp

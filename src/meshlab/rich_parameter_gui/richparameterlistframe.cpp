@@ -36,10 +36,9 @@
 
 using namespace vcg;
 
-RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla )
-    :QFrame(p)
+RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla ):
+	QFrame(p), gla(curr_gla)
 {
-	gla=curr_gla;
 }
 
 void RichParameterListFrame::loadFrameContent(
@@ -65,18 +64,29 @@ void RichParameterListFrame::loadFrameContent(
 	this->adjustSize();
 }
 
-
-
 /* creates widgets for the standard parameters */
 void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet, MeshDocument * /*_mdPt*/ )
 {
 	loadFrameContent(curParSet, curParSet);
 }
 
-//void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
+void RichParameterListFrame::loadFrameContent(const RichParameter& curPar, const RichParameter& defPar)
+{
+	RichParameterList crpl;
+	crpl.addParam(curPar);
+	RichParameterList drpl;
+	drpl.addParam(defPar);
+	loadFrameContent(crpl, drpl);
+}
+
+/**
+ * @brief RichParameterListFrame::readValues
+ * From GUI to RichParameterList
+ * @param curParSet
+ */
 void RichParameterListFrame::readValues(RichParameterList &curParSet)
 {
-	assert(curParSet.size() == stdfieldwidgets.size());
+	assert(curParSet.size() == (unsigned int)stdfieldwidgets.size());
 	QVector<RichParameterWidget*>::iterator it = stdfieldwidgets.begin();
 	for(const RichParameter& p : curParSet) {
 		curParSet.setValue(p.name(),(*it)->widgetValue());
@@ -84,10 +94,9 @@ void RichParameterListFrame::readValues(RichParameterList &curParSet)
 	}
 }
 
-void RichParameterListFrame::resetValues(RichParameterList &curParSet)
+void RichParameterListFrame::resetValues()
 {
-	assert((unsigned int)stdfieldwidgets.size() == curParSet.size());
-	for(unsigned int i  =0; i < curParSet.size(); ++i) {
+	for(unsigned int i  =0; i < (unsigned int)stdfieldwidgets.size(); ++i) {
 		stdfieldwidgets[i]->resetValue();
 	}
 }
@@ -102,7 +111,6 @@ void RichParameterListFrame::toggleHelp()
 
 RichParameterListFrame::~RichParameterListFrame()
 {
-
 }
 
 RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(

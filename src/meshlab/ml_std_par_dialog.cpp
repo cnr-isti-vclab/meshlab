@@ -110,7 +110,7 @@ void MeshlabStdDialog::resetValues()
 	assert(qf);
 	assert(qf->isVisible());
 	// assert(curParSet.paramList.count() == stdfieldwidgets.count());
-	stdParFrame->resetValues(curParSet);
+	stdParFrame->resetValues();
 }
 
 void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
