@@ -29,18 +29,25 @@
 #include "../../common/filter_parameter/rich_parameter_list.h"
 #include "richparameterlistframe.h"
 
-// This class provide a modal dialog box for asking a generic parameter set
-// It can be used by anyone needing for some values in a structured form and having some integrated help
+/**
+ * @brief This class provide a modal dialog box for asking a generic parameter list
+ * It can be used by anyone needing for some values in a structured form and having some integrated help
+ *
+ * When the user clicks ok, the dialog will apply the modified values in the RichParameterList given
+ * as input in the Dialog constructor.
+ * Used by some I/O and Edit plugins
+ *
+ */
 class RichParameterListDialog: public QDialog
 {
 	Q_OBJECT
 public:
-	RichParameterListDialog(QWidget *p, RichParameterList& curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
+	RichParameterListDialog(QWidget *p, RichParameterList& curParList, const QString& title=QString());
 	~RichParameterListDialog();
 
 	void createFrame();
 
-	public slots:
+public slots:
 	void getAccept();
 	void toggleHelp();
 
@@ -48,9 +55,8 @@ public:
 	void resetValues();
 
 private:
-	RichParameterList& curParSet;
+	RichParameterList& curParList;
 	RichParameterListFrame *stdParFrame;
-	MeshDocument *meshDocument;
 
 };
 

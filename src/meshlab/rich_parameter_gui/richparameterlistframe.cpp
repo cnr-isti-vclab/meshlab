@@ -36,47 +36,37 @@
 
 using namespace vcg;
 
-RichParameterListFrame::RichParameterListFrame(QWidget *p, QWidget *curr_gla ):
-	QFrame(p), gla(curr_gla)
-{
-}
-
-void RichParameterListFrame::loadFrameContent(
+RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		const RichParameterList& defParSet,
-		MeshDocument*)
+		QWidget* p,
+		QWidget* gla) :
+	QFrame(p), gla(gla)
 {
-	if(layout())
-		delete layout();
-	QGridLayout* glay = new QGridLayout();
-	int i = 0;
-	for(const RichParameter& fpi : curParSet) {
-		const RichParameter& defrp = defParSet.getParameterByName(fpi.name());
-		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, defrp);
-		stdfieldwidgets.push_back(wd);
-		helpList.push_back(wd->helpLab);
-		wd->addWidgetToGridLayout(glay,i++);
-	}
-	setLayout(glay);
-	this->setMinimumSize(glay->sizeHint());
-	glay->setSizeConstraint(QLayout::SetMinimumSize);
-	this->showNormal();
-	this->adjustSize();
+	loadFrameContent(curParSet, defParSet);
 }
 
-/* creates widgets for the standard parameters */
-void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet, MeshDocument * /*_mdPt*/ )
+RichParameterListFrame::RichParameterListFrame(
+		const RichParameterList& curParSet,
+		QWidget* p,
+		QWidget* gla) :
+	QFrame(p), gla(gla)
 {
-	loadFrameContent(curParSet, curParSet);
+	loadFrameContent(curParSet);
 }
 
-void RichParameterListFrame::loadFrameContent(const RichParameter& curPar, const RichParameter& defPar)
+RichParameterListFrame::RichParameterListFrame(
+		const RichParameter& curPar,
+		const RichParameter& defPar,
+		QWidget* p,
+		QWidget* gla) :
+	QFrame(p), gla(gla)
 {
-	RichParameterList crpl;
-	crpl.addParam(curPar);
-	RichParameterList drpl;
-	drpl.addParam(defPar);
-	loadFrameContent(crpl, drpl);
+	loadFrameContent(curPar, defPar);
+}
+
+RichParameterListFrame::~RichParameterListFrame()
+{
 }
 
 /**
@@ -84,7 +74,7 @@ void RichParameterListFrame::loadFrameContent(const RichParameter& curPar, const
  * From GUI to RichParameterList
  * @param curParSet
  */
-void RichParameterListFrame::readValues(RichParameterList &curParSet)
+void RichParameterListFrame::writeValuesOnParameterList(RichParameterList &curParSet)
 {
 	assert(curParSet.size() == (unsigned int)stdfieldwidgets.size());
 	QVector<RichParameterWidget*>::iterator it = stdfieldwidgets.begin();
@@ -109,8 +99,51 @@ void RichParameterListFrame::toggleHelp()
 	adjustSize();
 }
 
-RichParameterListFrame::~RichParameterListFrame()
+RichParameterWidget* RichParameterListFrame::at(unsigned int i)
 {
+	return stdfieldwidgets.at(i);
+}
+
+unsigned int RichParameterListFrame::size() const
+{
+	return stdfieldwidgets.size();
+}
+
+void RichParameterListFrame::loadFrameContent(
+		const RichParameterList& curParSet,
+		const RichParameterList& defParSet)
+{
+	if(layout())
+		delete layout();
+	QGridLayout* glay = new QGridLayout();
+	int i = 0;
+	for(const RichParameter& fpi : curParSet) {
+		const RichParameter& defrp = defParSet.getParameterByName(fpi.name());
+		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, defrp);
+		stdfieldwidgets.push_back(wd);
+		helpList.push_back(wd->helpLab);
+		wd->addWidgetToGridLayout(glay,i++);
+	}
+	setLayout(glay);
+	this->setMinimumSize(glay->sizeHint());
+	glay->setSizeConstraint(QLayout::SetMinimumSize);
+	this->showNormal();
+	this->adjustSize();
+}
+
+/* creates widgets for the standard parameters */
+void RichParameterListFrame::loadFrameContent(const RichParameterList &curParSet)
+{
+	loadFrameContent(curParSet, curParSet);
+}
+
+void RichParameterListFrame::loadFrameContent(const RichParameter& curPar, const RichParameter& defPar)
+{
+	RichParameterList crpl;
+	crpl.addParam(curPar);
+	RichParameterList drpl;
+	drpl.addParam(defPar);
+	loadFrameContent(crpl, drpl);
 }
 
 RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(

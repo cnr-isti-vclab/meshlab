@@ -38,46 +38,49 @@
 
 /*---------------------------------*/
 
-/*
-This class is used to automatically create a frame from a set of parameters.
-it is used mostly for creating the main dialog of the filters, but it is used also
-in the creation of the additional saving options, post and pre opening processing
-and for general parameter setting in edit plugins (e.g. look at the alignment parameters)
-*/
+/**
+ * This class is used to automatically create a frame from a set of parameters.
+ * it is used mostly for creating the main dialog of the filters, but it is used also
+ * in the creation of the additional saving options, post and pre opening processing
+ * and for general parameter setting in edit plugins (e.g. look at the alignment parameters)
+ */
 class RichParameterListFrame : public QFrame
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-	RichParameterListFrame(QWidget *p, QWidget *gla=0);
+	RichParameterListFrame(const RichParameterList& curParSet, const RichParameterList& defParSet, QWidget *p, QWidget *gla=0);
+	RichParameterListFrame(const RichParameterList& curParSet, QWidget *p, QWidget *gla=0);
+	RichParameterListFrame(const RichParameter& curPar, const RichParameter& defPar, QWidget *p, QWidget *gla=0);
+	~RichParameterListFrame();
 
-	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet, MeshDocument *mdPt = 0);
-	void loadFrameContent(const RichParameterList& curParSet, MeshDocument *mdPt = 0);
+	// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
+	// This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
+	void writeValuesOnParameterList(RichParameterList &curParSet);
+	void resetValues();
+
+	void toggleHelp();
+
+	RichParameterWidget* at(unsigned int i);
+	unsigned int size() const;
+
+signals:
+	void parameterChanged();
+
+private:
+	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
+	void loadFrameContent(const RichParameterList& curParSet);
 
 	void loadFrameContent(const RichParameter& curPar, const RichParameter& defPar);
 
-    // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
-    // This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
-    void readValues(RichParameterList &curParSet);
-	void resetValues();
-
-    void toggleHelp();
-
-	QVector<RichParameterWidget *> stdfieldwidgets;
-    QVector<QLabel *> helpList;
-
-    QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
-	~RichParameterListFrame();
-
-signals:
-
-    void parameterChanged();
-
-private:
 	static RichParameterWidget* createWidgetFromRichParameter(
 			QWidget* parent,
 			const RichParameter& pd,
 			const RichParameter& def);
 
+	QVector<RichParameterWidget *> stdfieldwidgets;
+	QVector<QLabel *> helpList;
+
+	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
 };
 
 #endif //RICHPARAMETERLISTFRAME_H

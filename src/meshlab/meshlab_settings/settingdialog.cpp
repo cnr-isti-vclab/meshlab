@@ -24,16 +24,15 @@
 #include "settingdialog.h"
 
 SettingDialog::SettingDialog(
-		const RichParameter& currentPar,
-		const RichParameter& defaultPar,
+		const RichParameter& currentParam,
+		const RichParameter& defaultParam,
 		QWidget* parent) :
 	QDialog(parent),
-	frame(this),
-	curPar(currentPar.clone()),
-	tmpPar(currentPar.clone()),
-	defPar(defaultPar)
+	currentParameter(currentParam.clone()),
+	savedParameter(currentParam.clone()),
+	defaultParameter(defaultParam),
+	frame(*currentParameter, defaultParameter, this)
 {
-	frame.loadFrameContent(*curPar, defPar);
 
 	setModal(true);
 
@@ -66,43 +65,43 @@ SettingDialog::SettingDialog(
 
 SettingDialog::~SettingDialog()
 {
-	delete curPar;
-	delete tmpPar;
+	delete currentParameter;
+	delete savedParameter;
 }
 
 void SettingDialog::save()
 {
 	apply();
-	delete tmpPar;
-	tmpPar = curPar->clone();
+	delete savedParameter;
+	savedParameter = currentParameter->clone();
 	QDomDocument doc("MeshLabSettings");
-	doc.appendChild(curPar->fillToXMLDocument(doc));
+	doc.appendChild(currentParameter->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(curPar->name()), qUtf8Printable(docstring));
+	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(currentParameter->name()), qUtf8Printable(docstring));
 	QSettings setting;
-	setting.setValue(curPar->name(),QVariant(docstring));
+	setting.setValue(currentParameter->name(),QVariant(docstring));
 }
 
 void SettingDialog::apply()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	curPar->setValue(frame.stdfieldwidgets.at(0)->widgetValue());
-	emit applySettingSignal(*curPar);
+	currentParameter->setValue(frame.at(0)->widgetValue());
+	emit applySettingSignal(*currentParameter);
 }
 
 void SettingDialog::reset()
 {
-	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(curPar->name()));
+	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(currentParameter->name()));
 
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setValue(defPar.value());
+	frame.at(0)->setValue(defaultParameter.value());
 	apply();
 }
 
 void SettingDialog::load()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->setWidgetValue(tmpPar->value());
+	frame.at(0)->setWidgetValue(savedParameter->value());
 	apply();
 }
 

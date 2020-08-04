@@ -35,14 +35,14 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(
 		const RichParameterList& defparset,
 		QWidget * parent) :
 	QDialog(parent),
-	curParSet(curparset),
-	defParSet(defparset)
+	currentParameterList(curparset),
+	defaultParameterList(defparset)
 {
 	setModal(false);
 	closebut = new QPushButton("Close",this);
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
-	tw = new QTableWidget(curParSet.size(),2,this);
+	tw = new QTableWidget(currentParameterList.size(),2,this);
 	updateSettings();
 	int totlen = tw->columnWidth(0) + tw->columnWidth(1) + this->frameSize().width();
 	setMinimumWidth(totlen);
@@ -53,6 +53,10 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(
 	this->setWindowTitle(tr("Global Parameters Window"));
 }
 
+MeshLabSettingsDialog::~MeshLabSettingsDialog()
+{
+}
+
 /**
  * @brief This slot is executed when a setting is double clicked
  * @param itm
@@ -60,18 +64,14 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(
 void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
 {
 	int rprow = tw->row(itm);
-	const RichParameter& curPar = curParSet.at(rprow);
-	const RichParameter& defPar = defParSet.getParameterByName(curPar.name());
+	const RichParameter& curPar = currentParameterList.at(rprow);
+	const RichParameter& defPar = defaultParameterList.getParameterByName(curPar.name());
 	SettingDialog* setdial = new SettingDialog(curPar, defPar, this);
 	connect(
 				setdial, SIGNAL(applySettingSignal(const RichParameter&)),
 				this,    SLOT(updateSingleSetting(const RichParameter&)));
 	setdial->exec();
 	delete setdial;
-}
-
-MeshLabSettingsDialog::~MeshLabSettingsDialog()
-{
 }
 
 void MeshLabSettingsDialog::updateSettings()
@@ -87,7 +87,7 @@ void MeshLabSettingsDialog::updateSettings()
 	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	int ii = 0;
-	for(const RichParameter& p : curParSet) {
+	for(const RichParameter& p : currentParameterList) {
 		QTableWidgetItem* item = new QTableWidgetItem(p.name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
@@ -103,8 +103,8 @@ void MeshLabSettingsDialog::updateSettings()
 
 void MeshLabSettingsDialog::updateSingleSetting(const RichParameter& rp)
 {
-	assert(curParSet.getParameterByName(rp.name()).stringType() == rp.stringType());
-	curParSet.setValue(rp.name(), rp.value());
+	assert(currentParameterList.getParameterByName(rp.name()).stringType() == rp.stringType());
+	currentParameterList.setValue(rp.name(), rp.value());
 	updateSettings();
 	emit applyCustomSetting();
 }

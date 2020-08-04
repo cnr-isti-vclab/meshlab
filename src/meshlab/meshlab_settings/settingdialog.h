@@ -28,11 +28,19 @@
 #include <common/filter_parameter/rich_parameter.h>
 #include "../rich_parameter_gui/richparameterlistframe.h"
 
+/**
+ * @brief This class describes a dialog to load, save, modify and reset a
+ * RichParameter. Every time that a RichParameter is modified, a signal called
+ * "applySettingSignal" is emitted, with the given RichParameter changed.
+ */
 class SettingDialog : public QDialog
 {
 Q_OBJECT
 public:
-	SettingDialog(const RichParameter& curPar, const RichParameter& defPar,QWidget* parent = 0);
+	SettingDialog(
+			const RichParameter& currentParameter,
+			const RichParameter& defaultParameter,
+			QWidget* parent = 0);
 	~SettingDialog();
 public slots:
 	void save();
@@ -44,10 +52,10 @@ signals:
 	void applySettingSignal(const RichParameter&);
 
 private:
+	RichParameter* currentParameter;
+	RichParameter* savedParameter; //used in case of load button pressed
+	const RichParameter& defaultParameter;
 	RichParameterListFrame frame;
-	RichParameter* curPar;
-	RichParameter* tmpPar;
-	const RichParameter& defPar;
 	QPushButton* savebut;
 	QPushButton* applybut;
 	QPushButton* resetbut;

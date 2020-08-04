@@ -234,7 +234,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 	}
 
 	//launch the dialog
-	RichParameterListDialog parameterDialog(this, newParameterSet, "Edit Parameters", mainWindow->meshDoc());
+	RichParameterListDialog parameterDialog(this, newParameterSet, "Edit Parameters");
 	int result = parameterDialog.exec();
 	if(result == QDialog::Accepted) {
 		//keep the changes

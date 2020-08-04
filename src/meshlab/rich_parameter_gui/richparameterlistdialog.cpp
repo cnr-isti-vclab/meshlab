@@ -25,15 +25,20 @@
 
 #include <QDialogButtonBox>
 
-RichParameterListDialog::RichParameterListDialog(QWidget *p, RichParameterList& curParSet, QString title, MeshDocument *_meshDocument)
-	: QDialog(p), curParSet(curParSet){
-		stdParFrame=NULL;
-		meshDocument = _meshDocument;
-		createFrame();
-		if(!title.isEmpty())
-			setWindowTitle(title);
+RichParameterListDialog::RichParameterListDialog(QWidget *p, RichParameterList& curParList, const QString& title) :
+	QDialog(p),
+	curParList(curParList),
+	stdParFrame(nullptr)
+{
+	createFrame();
+	if(!title.isEmpty())
+		setWindowTitle(title);
 }
 
+RichParameterListDialog::~RichParameterListDialog()
+{
+	delete stdParFrame;
+}
 
 // update the values of the widgets with the values in the paramlist;
 void RichParameterListDialog::resetValues()
@@ -48,14 +53,12 @@ void RichParameterListDialog::toggleHelp()
 	this->adjustSize();
 }
 
-
 void RichParameterListDialog::createFrame()
 {
 	QVBoxLayout *vboxLayout = new QVBoxLayout(this);
 	setLayout(vboxLayout);
 
-	stdParFrame = new RichParameterListFrame(this);
-	stdParFrame->loadFrameContent(curParSet, meshDocument);
+	stdParFrame = new RichParameterListFrame(curParList, this);
 	layout()->addWidget(stdParFrame);
 
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
@@ -79,13 +82,8 @@ void RichParameterListDialog::createFrame()
 
 void RichParameterListDialog::getAccept()
 {
-	stdParFrame->readValues(curParSet);
+	stdParFrame->writeValuesOnParameterList(curParList);
 	accept();
-}
-
-RichParameterListDialog::~RichParameterListDialog()
-{
-	delete stdParFrame;
 }
 
 

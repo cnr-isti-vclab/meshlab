@@ -28,17 +28,24 @@
 #include <QTableWidget>
 #include <common/filter_parameter/rich_parameter_list.h>
 
-
+/**
+ * @brief This class describes the dialog of the meshlab settings.
+ * It creates a QTableWidget starting from the given currentParameterList,
+ * and allows to reset to default values using defaulParameterList.
+ * Every time that the user selects a RichParameter list, a SettingDialog is
+ * created, allowing the user to load, save, modify and reset every option.
+ * Every time the user modifies a RichParameter, the given currentParameterList
+ * is modified, and a signal called applyCustomSetting is emitted.
+ */
 class MeshLabSettingsDialog : public QDialog
 {
 Q_OBJECT
 public:
 	MeshLabSettingsDialog(
-			RichParameterList& parset,
-			const RichParameterList& defparset,
+			RichParameterList& currentParameterList,
+			const RichParameterList& defaultPrameterList,
 			QWidget *parent = 0);
 	~MeshLabSettingsDialog();
-	//void loadCurrentSetting(RichParameterSet& parset);
 
 signals:
 	void applyCustomSetting();
@@ -51,10 +58,9 @@ private slots:
 private:
 	void updateSettings();
 
-	RichParameterList& curParSet;
-	const RichParameterList& defParSet;
+	RichParameterList& currentParameterList;
+	const RichParameterList& defaultParameterList;
 	QTableWidget* tw;
-	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
 
 	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
