@@ -58,9 +58,9 @@ class GLArea : public QGLWidget
     //typedef vcg::Shot<double> Shot;
 
 public:
-    GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterSet *current);
+    GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterList *current);
     ~GLArea();
-    static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
+    static void initGlobalParameterSet( RichParameterList * /*globalparam*/);
 
 private:
     int id;  //the very important unique id of each subwindow.
@@ -223,7 +223,7 @@ public slots:
     void setColorMode(RenderMode& rm,vcg::GLW::ColorMode mode);
     void setTextureMode(vcg::GLW::TextureMode mode);
     void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
-    void updateCustomSettingValues(RichParameterSet& rps);
+	void updateCustomSettingValues(const RichParameterList& rps);
 
     void endEdit()
 	{

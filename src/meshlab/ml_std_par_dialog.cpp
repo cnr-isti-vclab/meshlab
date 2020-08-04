@@ -110,7 +110,7 @@ void MeshlabStdDialog::resetValues()
 	assert(qf);
 	assert(qf->isVisible());
 	// assert(curParSet.paramList.count() == stdfieldwidgets.count());
-	stdParFrame->resetValues(curParSet);
+	stdParFrame->resetValues();
 }
 
 void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
@@ -124,11 +124,10 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QLabel *ql = new QLabel("<i>" + curmfi->filterInfo(curAction) + "</i>", qf);
 	ql->setTextFormat(Qt::RichText);
 	ql->setWordWrap(true);
-  ql->setOpenExternalLinks(true);
+	ql->setOpenExternalLinks(true);
 	gridLayout->addWidget(ql, 0, 0, 1, 2, Qt::AlignTop); // this widgets spans over two columns.
 
-	stdParFrame = new StdParFrame(this, curgla);
-	stdParFrame->loadFrameContent(curParSet, mdPt);
+	stdParFrame = new RichParameterListFrame(curParSet, this, curgla);
 	gridLayout->addWidget(stdParFrame, 1, 0, 1, 2);
 
 	int buttonRow = 2;  // the row where the line of buttons start
@@ -186,7 +185,7 @@ void MeshlabStdDialog::toggleHelp()
 void MeshlabStdDialog::applyClick()
 {
 	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
+	stdParFrame->writeValuesOnParameterList(curParSet);
 
 	// Note that curModel CAN BE NULL (for creation filters on empty docs...)
 	if (curmask && curModel)
@@ -225,12 +224,12 @@ void MeshlabStdDialog::applyDynamic()
 	if (!previewCB->isChecked())
 		return;
 	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
+	stdParFrame->writeValuesOnParameterList(curParSet);
 	//for cache mechanism
 	//needed to allocate the required memory space in prevParSet
 	//it called the operator=(RichParameterSet) function defined in RichParameterSet
 	prevParSet = curParSet;
-	stdParFrame->readValues(prevParSet);
+	stdParFrame->writeValuesOnParameterList(prevParSet);
 	// Restore the
 	meshState.apply(curModel);
 	curmwi->executeFilter(q, curParSet, true);
@@ -251,7 +250,7 @@ void MeshlabStdDialog::togglePreview()
 
 	if (previewCB->isChecked())
 	{
-		stdParFrame->readValues(curParSet);
+		stdParFrame->writeValuesOnParameterList(curParSet);
 		if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
 		{
 			meshCacheState.apply(curModel);

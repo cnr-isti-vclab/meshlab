@@ -133,12 +133,12 @@ int FilterSamplePlugin::postCondition(QAction*) const
  * @param m
  * @param parlst
  */
-void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst) 
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
-		parlst.addParam(new RichBool ("UpdateNormals", true, "Recompute normals", "Toggle the recomputation of the normals after the random displacement.\n\nIf disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-		parlst.addParam(new RichAbsPerc("Displacement", m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(), "Max displacement", "The vertex are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichBool ("UpdateNormals", true, "Recompute normals", "Toggle the recomputation of the normals after the random displacement.\n\nIf disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
+		parlst.addParam(RichAbsPerc("Displacement", m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(), "Max displacement", "The vertex are displaced of a vector whose norm is bounded by this value"));
 		break;
 	default :
 		assert(0);
@@ -153,7 +153,7 @@ void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichPara
  * @param cb: callback object to tell MeshLab the percentage of execution of the filter
  * @return true if the filter has been applied correctly, false otherwise
  */
-bool FilterSamplePlugin::applyFilter(QAction * action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterSamplePlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :

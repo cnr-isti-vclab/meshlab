@@ -95,24 +95,24 @@ int FilterSketchFabPlugin::postCondition(QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterSet& parlst)
+void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterList& parlst)
 {
 	switch(ID(action)) {
 	case FP_SKETCHFAB :
-		parlst.addParam(new RichString("sketchFabKeyCode", "00000000", "Sketch Fab Code", "Mandatory."));
-		parlst.addParam(new RichString("title", "MeshLabModel", "Title", "Mandatory."));
-		parlst.addParam(new RichString("description", "A model generated with meshlab", "Description", "Mandatory. A short description of the model that is uploaded."));
-		parlst.addParam(new RichString("tags", "meshlab", "Tags", "Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry."));
-		parlst.addParam(new RichBool("isPrivate", false, "Private", "This parameter can be true only for PRO account."));
-		parlst.addParam(new RichBool("isPublished", false, "Publish", "If true the model will be published immediately."));
-		parlst.addParam(new RichBool("autoRotate", true, "Auto Rotate", "If true the model rotated by 90 degree on the X axis to maintain similar default orientation."));
+		parlst.addParam(RichString("sketchFabKeyCode", "00000000", "Sketch Fab Code", "Mandatory."));
+		parlst.addParam(RichString("title", "MeshLabModel", "Title", "Mandatory."));
+		parlst.addParam(RichString("description", "A model generated with meshlab", "Description", "Mandatory. A short description of the model that is uploaded."));
+		parlst.addParam(RichString("tags", "meshlab", "Tags", "Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry."));
+		parlst.addParam(RichBool("isPrivate", false, "Private", "This parameter can be true only for PRO account."));
+		parlst.addParam(RichBool("isPublished", false, "Publish", "If true the model will be published immediately."));
+		parlst.addParam(RichBool("autoRotate", true, "Auto Rotate", "If true the model rotated by 90 degree on the X axis to maintain similar default orientation."));
 		break;
 	default :
 		assert(0);
 	}
 }
 
-bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb)
+bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb)
 {
 	switch (ID(action)) {
 	case FP_SKETCHFAB:

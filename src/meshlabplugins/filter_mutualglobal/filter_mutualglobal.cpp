@@ -96,14 +96,14 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterSet & parlst)
+void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterList & parlst)
 {
 	QStringList rendList;
 	switch(ID(action))	 {
 		case FP_IMAGE_GLOBALIGN :
-			//parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+			//parlst.addParam(RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
 				//								"The mesh on which the image must be aligned"));
-			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
+			/*parlst.addParam(RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
 												"The mesh on which the image must be aligned"));*/
 
 
@@ -115,30 +115,30 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 			rendList.push_back("Specular combined");
 
 			//rendList.push_back("ABS Curvature");
-			parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
+			parlst.addParam(RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
 								QString("Rendering modes")));
 
-			//parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			//parlst.addParam(RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 
-			parlst.addParam(new RichInt ("Max number of refinement steps",
+			parlst.addParam(RichInt ("Max number of refinement steps",
 				5,
 				"Maximum number of minimizations step",
 				"Maximum number of minimizations step on the global graph"));
-			parlst.addParam(new RichFloat ("Threshold for refinement convergence",
+			parlst.addParam(RichFloat ("Threshold for refinement convergence",
 				1.2,
 				"Threshold for refinement convergence (in pixels)",
 				"The threshold (average quadratic variation in the projection on image plane of some samples of the mesh before and after each step of refinement) that stops the refinement"));
 
-			parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
-			parlst.addParam(new RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
-			parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
+			parlst.addParam(RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
+			parlst.addParam(RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
+			parlst.addParam(RichBool("Fine",true,"Fine Alignment","Fine alignment"));
 
-		  /*parlst.addParam(new RichBool ("UpdateNormals",
+		  /*parlst.addParam(RichBool ("UpdateNormals",
 											true,
 											"Recompute normals",
 											"Toggle the recomputation of the normals after the random displacement.\n\n"
 											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-			parlst.addParam(new RichAbsPerc("Displacement",
+			parlst.addParam(RichAbsPerc("Displacement",
 												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
 												"Max displacement",
 												"The vertex are displaced of a vector whose norm is bounded by this value"));*/
@@ -153,7 +153,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	QElapsedTimer filterTime;
 	filterTime.start();
@@ -331,7 +331,7 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 	return QString();
 }
 
-bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	Solver solver;
 	MutualInfo mutual;

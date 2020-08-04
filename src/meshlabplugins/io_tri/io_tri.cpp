@@ -38,16 +38,16 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
+void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("ASC"))
 	{
-			parlst.addParam(new RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
-			parlst.addParam(new RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Length of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
+			parlst.addParam(RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
+			parlst.addParam(RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Length of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
 	}
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *)
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
 {
 	if(formatName.toUpper() == tr("TRI"))
 		{
@@ -73,7 +73,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return false;
 }
 
-bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterSet &, vcg::CallBackPos *, QWidget *)
+bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
 {
 	assert(0);
 	return false;

@@ -539,9 +539,13 @@ public:
       return 0;
     }
 
-    MeshModel *mm() {
-        return currentMesh;
-    }
+	MeshModel* mm() {
+		return currentMesh;
+	}
+
+	const MeshModel* mm() const {
+		return currentMesh;
+	}
 
     //Could return 0 if no raster has been selected
     RasterModel *rm(){

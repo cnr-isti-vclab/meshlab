@@ -43,20 +43,20 @@ QString DecorateShadowPlugin::decorationName(FilterIDType id) const
 	}
 }
 
-void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW: {
 		assert(!(parset.hasParameter(this->DecorateShadowMethod())));
 		int method = SH_MAP_VSM_BLUR;
 		parset.addParam(
-			new RichEnum(
+			RichEnum(
 				this->DecorateShadowMethod(),
 				method,
 				getSHMethods(),
 				"Shader", "Shader used to perform shadow mapping decoration")
 		);
-		parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Intensity", "Shadow Intensity"));
+		parset.addParam(RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Intensity", "Shadow Intensity"));
 		break;
 	}
 
@@ -64,7 +64,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 		assert(!(parset.hasParameter(this->DecorateShadowSSAORadius())));
 		float radius = 0.25f;
 		parset.addParam(
-			new RichFloat(this->DecorateShadowSSAORadius(),
+			RichFloat(this->DecorateShadowSSAORadius(),
 				radius,"SSAO radius",
 				"Uniform parameter for SSAO shader"));
 		break;
@@ -74,7 +74,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 	}
 }
 
-bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/)
+bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, const RichParameterList* parset, GLArea* /*gla*/)
 {
 	bool result;
 
@@ -118,7 +118,7 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, R
 	return false;
 }
 
-void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, RichParameterSet * parset, GLArea * /*gla*/)
+void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, const RichParameterList * parset, GLArea * /*gla*/)
 {
 	switch (ID(action))
 	{
@@ -165,7 +165,7 @@ void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, 
 }
 
 
-void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &)
+void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW:

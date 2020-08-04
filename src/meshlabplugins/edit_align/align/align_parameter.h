@@ -21,17 +21,17 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/filterparameter.h>
+#include <common/filter_parameter/rich_parameter_list.h>
 #include <meshlabplugins/edit_align/meshtree.h>
 
 class AlignParameter {
 
 public:
-	static void RichParameterSetToAlignPairParam(const RichParameterSet &rps, vcg::AlignPair::Param &app);
-	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterSet &rps);
+	static void RichParameterSetToAlignPairParam(const RichParameterList &rps, vcg::AlignPair::Param &app);
+	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterList &rps);
 
-	static void RichParameterSetToMeshTreeParam(const RichParameterSet &rps, MeshTree::Param &mtp);
-	static void MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterSet &rps);
+	static void RichParameterSetToMeshTreeParam(const RichParameterList &rps, MeshTree::Param &mtp);
+	static void MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterList &rps);
 
 private:
 	//no need to have an instance of this class

@@ -88,21 +88,21 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // when the user press apply the current stored state is updated. 
 // when the user press close the mesh state is restored to the one before the startup of the filter.
 
-void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterSet & parlst)
+void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterList & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
- 		  parlst.addParam(new RichColor ("baseColor",
+		  parlst.addParam(RichColor ("baseColor",
 											 Color4b::Black,
 											"BaseColor",
 											"The base color that is added to the mesh."));
 			
-			parlst.addParam(new RichDynamicFloat("percentage",
+			parlst.addParam(RichDynamicFloat("percentage",
 												 0.5, 0, 1,
 												"Alpha",
 												"The random color is blended with the current one with the specified alpha"));
 														
-			parlst.addParam(new RichDynamicFloat("frequency",
+			parlst.addParam(RichDynamicFloat("frequency",
 														 20, 1, 200,
 														 "Noisy Frequency",
 														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots."));
@@ -114,7 +114,7 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
+bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *)
 {
     MeshModel &m=*(md.mm());
     const Color4b baseColor = par.getColor4b("baseColor");

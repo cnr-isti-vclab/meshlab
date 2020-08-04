@@ -179,7 +179,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
 // Move Vertex of a random quantity
 bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
                                            MeshDocument &/*md*/,
-                                           RichParameterSet & par,
+                                           const RichParameterSet & par,
                                            vcg::CallBackPos */*cb*/)
 {
 

@@ -52,10 +52,10 @@ public:
 	static const QString MeshToMove;
 	
 	//make the default parameter set for this filter
-	static void buildParameterSet(MeshDocument &md,RichParameterSet & parlst);
+	static void buildParameterSet(MeshDocument &md,RichParameterList & parlst);
 
 	//setup all the parameters and then call align
-	static bool setupThenAlign(MeshModel &mm, RichParameterSet & par);
+	static bool setupThenAlign(MeshModel &mm, RichParameterList & par);
 
 	/*
 	 * stuckModel - the mesh one that stays put
@@ -69,7 +69,7 @@ public:
 	static bool align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 				MeshModel *modelToMove, PickedPoints *modelToMovePickedPoints,
 				GLArea *modelToMoveGLArea,
-				RichParameterSet &parameters,
+				RichParameterList &parameters,
 				QWidget *parentWidget = 0, bool confirm = false);
 
 	//returns the key applied if this transform is stored to perMeshAttribute

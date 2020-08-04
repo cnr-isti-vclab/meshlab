@@ -1,14 +1,14 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,61 +21,49 @@
 *                                                                           *
 ****************************************************************************/
 
+#ifndef MESHLABSETTINGSDIALOG_H
+#define MESHLABSETTINGSDIALOG_H
 
 #include <QDialog>
-#include <QDockWidget>
-#include <QColorDialog>
-#include "common/filterparameter.h"
-#include "stdpardialog.h"
+#include <QTableWidget>
+#include <common/filter_parameter/rich_parameter_list.h>
 
-
-class SettingDialog : public QDialog
+/**
+ * @brief This class describes the dialog of the meshlab settings.
+ * It creates a QTableWidget starting from the given currentParameterList,
+ * and allows to reset to default values using defaulParameterList.
+ * Every time that the user selects a RichParameter list, a SettingDialog is
+ * created, allowing the user to load, save, modify and reset every option.
+ * Every time the user modifies a RichParameter, the given currentParameterList
+ * is modified, and a signal called applyCustomSetting is emitted.
+ */
+class MeshLabSettingsDialog : public QDialog
 {
 Q_OBJECT
 public:
-	SettingDialog(RichParameter* curPar,RichParameter* defPar,QWidget* parent = 0);
-	~SettingDialog();
-public slots:
-	void save();
-	void reset();
-	void apply();
-	void load();
+	MeshLabSettingsDialog(
+			RichParameterList& currentParameterList,
+			const RichParameterList& defaultPrameterList,
+			QWidget *parent = 0);
+	~MeshLabSettingsDialog();
 
-signals:
-	void applySettingSignal();
-
-private:
-	StdParFrame frame;
-	RichParameter* curPar;
-	RichParameter* defPar;
-	RichParameter* tmppar;
-	RichParameterSet tmpParSet;
-	QPushButton* savebut;
-	QPushButton* applybut;
-	QPushButton* resetbut;
-	QPushButton* closebut;
-	QPushButton* loadbut;
-};
-
-class CustomDialog : public QDialog
-{
-Q_OBJECT
-public:
-	CustomDialog(RichParameterSet& parset,RichParameterSet& defparset,QWidget *parent = 0);
-	~CustomDialog();
-	//void loadCurrentSetting(RichParameterSet& parset);
-
-public slots:
-	void openSubDialog(QTableWidgetItem* itm);
-	void updateSettings();
 signals:
 	void applyCustomSetting();
 
+private slots:
+	void openSubDialog(QTableWidgetItem* itm);
+
+	void updateSingleSetting(const RichParameter& rp);
+
 private:
-	RichParameterSet& curParSet;
-	RichParameterSet& defParSet;
+	void updateSettings();
+
+	RichParameterList& currentParameterList;
+	const RichParameterList& defaultParameterList;
 	QTableWidget* tw;
-	QVector<RichParameter*> vrp; 
-	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
+
+	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
 };
+
+#endif // MESHLABSETTINGSDIALOG_H

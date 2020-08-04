@@ -27,7 +27,7 @@
 
 #include <QFileInfo>
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *_parSet,GLArea* glar):
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterList *_parSet,GLArea* glar):
 QDialog(parent),m(m),mask(0),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
 {
     ui = new Ui::MaskExporterDialog();
@@ -45,8 +45,7 @@ void SaveMaskExporterDialog::InitDialog()
     connect(ui->NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
     ui->renametextureButton->setDisabled(true);
 
-  stdParFrame = new StdParFrame(this,glar);
-  stdParFrame->loadFrameContent(*parSet);
+  stdParFrame = new RichParameterListFrame(*parSet, this,glar);
   QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(stdParFrame);
     ui->saveParBox->setLayout(vbox);
@@ -194,7 +193,7 @@ void SaveMaskExporterDialog::updateMask()
 void SaveMaskExporterDialog::SlotOkButton()
 {
     updateMask();
-    stdParFrame->readValues(*parSet);
+    stdParFrame->writeValuesOnParameterList(*parSet);
 }
 
 void SaveMaskExporterDialog::SlotCancelButton()

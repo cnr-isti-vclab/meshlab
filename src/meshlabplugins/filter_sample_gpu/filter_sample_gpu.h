@@ -51,11 +51,11 @@ public:
 
 	virtual QString pluginName(void) const { return "ExtraSampleGPUPlugin"; }
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
-	void initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst);
+	void initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst);
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(QAction *a);
 };
 

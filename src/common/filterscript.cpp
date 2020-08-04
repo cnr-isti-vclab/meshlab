@@ -25,6 +25,9 @@
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
+#include <QFile>
+#include <QDir>
+#include <QTextStream>
 #include <QPair>
 
 #include "filterscript.h"
@@ -54,15 +57,11 @@ QDomDocument FilterScript::xmlDoc()
     {
         FilterNameParameterValuesPair* oldpv = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         QDomElement tag = doc.createElement("filter");
-        QPair<QString,RichParameterSet>& pair = oldpv->pair;
+        QPair<QString,RichParameterList>& pair = oldpv->pair;
         tag.setAttribute(QString("name"),pair.first);
-        RichParameterSet &par=pair.second;
-        QList<RichParameter*>::iterator jj;
-        RichParameterXMLVisitor v(doc);
-        for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
-        {
-            (*jj)->accept(v);
-            tag.appendChild(v.parElem);
+        RichParameterList &par=pair.second;
+		for(const RichParameter& rp : par) {
+			tag.appendChild(rp.fillToXMLDocument(doc));
         }
         root.appendChild(tag);
     }
@@ -111,15 +110,12 @@ bool FilterScript::open(QString filename)
     {
         if (nf.tagName() == QString("filter"))
         {
-            RichParameterSet par;
+            RichParameterList par;
             QString name=nf.attribute("name");
             qDebug("Reading filter with name %s", qUtf8Printable(name));
             for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
             {
-                RichParameter* rp = NULL;
-                RichParameterAdapter::create(np,&rp);
-                //FilterParameter::addQDomElement(par,np);
-                par.paramList.push_back(rp);
+                par.pushFromQDomElement(np);
             }
             FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();
             tmp->pair = qMakePair(name,par);

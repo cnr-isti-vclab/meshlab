@@ -131,21 +131,21 @@ MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) c
 	}
 }
 
-void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterSet& par)
+void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterList& par)
 {
 	 switch(ID(action))	 {
 	 case VORONOI_SAMPLING :
-		 par.addParam(new RichInt("iterNum", 10, "Iteration", "number of iterations"));
-		 par.addParam(new RichInt("sampleNum", 10, "Sample Num.", "Number of samples"));
-		 par.addParam(new RichFloat("radiusVariance", 1, "Radius Variance", "The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality."));
-		 par.addParam(new RichEnum("colorStrategy", 1, {"None", "Seed Distance", "Border Distance", "Region Area"}, "Color Strategy"));
-		 par.addParam(new RichEnum("distanceType", 0, {"Euclidean", "Quality Weighted", "Anisotropic"}, "Distance Type"));
-		 par.addParam(new RichBool("preprocessFlag", false, "Preprocessing"));
-		 par.addParam(new RichInt("refineFactor", 10, "Refinement Factor", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
-		 par.addParam(new RichFloat("perturbProbability", 0, "Perturbation Probability", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
-		 par.addParam(new RichFloat("perturbAmount", 0.001, "Perturbation Amount", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
-		 par.addParam(new RichInt("randomSeed", 0, "Random seed", "To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock."));
-		 par.addParam(new RichEnum("relaxType", 1, {"Geodesic", "Squared Distance", "Restricted"}, "Relax Type",
+		 par.addParam(RichInt("iterNum", 10, "Iteration", "number of iterations"));
+		 par.addParam(RichInt("sampleNum", 10, "Sample Num.", "Number of samples"));
+		 par.addParam(RichFloat("radiusVariance", 1, "Radius Variance", "The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality."));
+		 par.addParam(RichEnum("colorStrategy", 1, {"None", "Seed Distance", "Border Distance", "Region Area"}, "Color Strategy"));
+		 par.addParam(RichEnum("distanceType", 0, {"Euclidean", "Quality Weighted", "Anisotropic"}, "Distance Type"));
+		 par.addParam(RichBool("preprocessFlag", false, "Preprocessing"));
+		 par.addParam(RichInt("refineFactor", 10, "Refinement Factor", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
+		 par.addParam(RichFloat("perturbProbability", 0, "Perturbation Probability", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
+		 par.addParam(RichFloat("perturbAmount", 0.001, "Perturbation Amount", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
+		 par.addParam(RichInt("randomSeed", 0, "Random seed", "To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock."));
+		 par.addParam(RichEnum("relaxType", 1, {"Geodesic", "Squared Distance", "Restricted"}, "Relax Type",
 									"At each relaxation step we search for each voronoi region the new position of the seed. "
 									"According to the classical LLoyd relaxation strategy it should have been placed onto the "
 									"barycenter of the region. Over a surface we have two different strategies: <ul>"
@@ -155,39 +155,39 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 									"</ul>"));
 		 break;
 	 case VOLUME_SAMPLING:
-		 par.addParam(new RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 500.0, 0, m.cm.bbox.Diag(),"Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
-		 par.addParam(new RichInt("sampleVolNum", 200000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
-		 par.addParam(new RichBool("poissonFiltering", true, "Poisson Filtering", "If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution."));
-		 par.addParam(new RichAbsPerc("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 500.0, 0, m.cm.bbox.Diag(),"Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		 par.addParam(RichInt("sampleVolNum", 200000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
+		 par.addParam(RichBool("poissonFiltering", true, "Poisson Filtering", "If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution."));
+		 par.addParam(RichAbsPerc("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
 		 break;
 	 case VORONOI_SCAFFOLDING:
-		 par.addParam(new RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
-		 par.addParam(new RichInt("sampleVolNum", 100000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
-		 par.addParam(new RichInt("voxelRes", 50, "Volume Side Resolution", "Number of voxel per side in the volumetric representation."));
-		 par.addParam(new RichFloat("isoThr", 1, "Width of the entity (in voxel)", "Number of voxel per side in the volumetric representation."));
-		 par.addParam(new RichInt("smoothStep", 3, "Smooth Step", "Number of voxel per side in the volumetric representation."));
-		 par.addParam(new RichInt("relaxStep", 5, "Lloyd Relax Step", "Number of Lloyd relaxation step to get a better distribution of the voronoi seeds."));
-		 par.addParam(new RichBool("surfFlag", true, "Add original surface", "Number of voxel per side in the volumetric representation."));
-		 par.addParam(new RichEnum("elemType", 1, {"Seed", "Edge", "Face"}, "Voronoi Element"));
+		 par.addParam(RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		 par.addParam(RichInt("sampleVolNum", 100000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
+		 par.addParam(RichInt("voxelRes", 50, "Volume Side Resolution", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(RichFloat("isoThr", 1, "Width of the entity (in voxel)", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(RichInt("smoothStep", 3, "Smooth Step", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(RichInt("relaxStep", 5, "Lloyd Relax Step", "Number of Lloyd relaxation step to get a better distribution of the voronoi seeds."));
+		 par.addParam(RichBool("surfFlag", true, "Add original surface", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(RichEnum("elemType", 1, {"Seed", "Edge", "Face"}, "Voronoi Element"));
 		 break;
 	 case BUILD_SHELL:
-		 par.addParam(new RichBool("edgeCylFlag", true, "Edge -> Cyl.", "If True all the edges are converted into cylinders."));
-		 par.addParam(new RichAbsPerc("edgeCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Edge Cylinder Rad.", "The radius of the cylinder replacing each edge."));
-		 par.addParam(new RichBool("vertCylFlag", false, "Vertex -> Cyl.", "If True all the vertices are converted into cylinders."));
-		 par.addParam(new RichAbsPerc("vertCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Cylinder Rad.", "The radius of the cylinder replacing each vertex."));
-		 par.addParam(new RichBool("vertSphFlag", true, "Vertex -> Sph.", "If True all the vertices are converted into sphere."));
-		 par.addParam(new RichAbsPerc("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
-		 par.addParam(new RichBool("faceExtFlag", true, "Face -> Prism", "If True all the faces are converted into prism."));
-		 par.addParam(new RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substitued with each face."));
-		 par.addParam(new RichAbsPerc("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
-		 par.addParam(new RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
-		 par.addParam(new RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
+		 par.addParam(RichBool("edgeCylFlag", true, "Edge -> Cyl.", "If True all the edges are converted into cylinders."));
+		 par.addParam(RichAbsPerc("edgeCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Edge Cylinder Rad.", "The radius of the cylinder replacing each edge."));
+		 par.addParam(RichBool("vertCylFlag", false, "Vertex -> Cyl.", "If True all the vertices are converted into cylinders."));
+		 par.addParam(RichAbsPerc("vertCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Cylinder Rad.", "The radius of the cylinder replacing each vertex."));
+		 par.addParam(RichBool("vertSphFlag", true, "Vertex -> Sph.", "If True all the vertices are converted into sphere."));
+		 par.addParam(RichAbsPerc("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
+		 par.addParam(RichBool("faceExtFlag", true, "Face -> Prism", "If True all the faces are converted into prism."));
+		 par.addParam(RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substitued with each face."));
+		 par.addParam(RichAbsPerc("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
+		 par.addParam(RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
+		 par.addParam(RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
 		 break;
 	 case CROSS_FIELD_CREATION:
-		 par.addParam(new RichEnum("crossType", 0, {"Linear Y", "Radial", "Curvature"}, "Cross Type", ""));
+		 par.addParam(RichEnum("crossType", 0, {"Linear Y", "Radial", "Curvature"}, "Cross Type", ""));
 		 break;
 //	 case CROSS_FIELD_SMOOTHING:
-//		 par.addParam(new RichBool("preprocessFlag", true, "Preprocessing"));
+//		 par.addParam(RichBool("preprocessFlag", true, "Preprocessing"));
 //		 break;
 	 default :
 		 assert(0);
@@ -211,7 +211,7 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

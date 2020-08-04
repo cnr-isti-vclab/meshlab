@@ -25,7 +25,7 @@
 #define ML_STD_PAR_DIALOG
 
 #include<QDockWidget>
-#include "stdpardialog.h"
+#include "rich_parameter_gui/richparameterlistframe.h"
 
 class MainWindow;
 class MeshlabStdDialog : public QDockWidget
@@ -56,7 +56,7 @@ private slots:
 
 public:
     QFrame *qf;
-    StdParFrame *stdParFrame;
+    RichParameterListFrame *stdParFrame;
     QAction *curAction;
     MeshModelState meshState;
     MeshModelState meshCacheState;
@@ -70,8 +70,8 @@ public:
     MeshFilterInterface *curmfi;
     MainWindow *curmwi;
     QWidget * curgla;
-    RichParameterSet curParSet;
-    RichParameterSet prevParSet;
+    RichParameterList curParSet;
+    RichParameterList prevParSet;
     bool validcache;
 
 };

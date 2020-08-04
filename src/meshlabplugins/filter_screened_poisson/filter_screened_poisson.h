@@ -49,10 +49,10 @@ public:
 	bool applyFilter(
 			QAction* filter,
 			MeshDocument& md,
-			RichParameterSet& params,
+			const RichParameterList& params,
 			vcg::CallBackPos* cb) ;
 
-	void initParameterSet(QAction* a, MeshModel&, RichParameterSet& parlist);
+	void initParameterSet(QAction* a, MeshModel&, RichParameterList& parlist);
 	int postCondition(QAction* filter) const;
 	FILTER_ARITY filterArity(QAction*) const;
 };

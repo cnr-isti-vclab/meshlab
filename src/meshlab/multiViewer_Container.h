@@ -36,7 +36,7 @@
 
 // Class list
 class GLArea;
-class RichParameterSet;
+class RichParameterList;
 class MultiViewer_Container;
 class MainWindow;
 

@@ -196,11 +196,11 @@ int TriOptimizePlugin::postCondition(QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst)
+void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList & parlst)
 {
 	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
-		parlst.addParam(new RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
-		parlst.addParam(new RichFloat("pthreshold", 1.0f,
+		parlst.addParam(RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
+		parlst.addParam(RichFloat("pthreshold", 1.0f,
 											tr("Angle Thr (deg)"),
 											tr("To avoid excessive flipping/swapping we consider only couple of faces with a significant diedral angle (e.g. greater than the indicated threshold). ")));
 
@@ -209,7 +209,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 		cmetrics.push_back("norm squared");
 		cmetrics.push_back("absolute");
 
-		parlst.addParam(new RichEnum("curvtype", 0, cmetrics, tr("Curvature metric"),
+		parlst.addParam(RichEnum("curvtype", 0, cmetrics, tr("Curvature metric"),
 				tr("<p style=\'white-space:pre\'>"
 					"Choose a metric to compute surface curvature on vertices<br>"
 					"H = mean curv, K = gaussian curv, A = area per vertex<br><br>"
@@ -221,9 +221,9 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 		}
 
 		if (ID(action) == FP_PLANAR_EDGE_FLIP) {
-			parlst.addParam(new RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
+			parlst.addParam(RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
 
-		parlst.addParam(new RichFloat("pthreshold", 1.0f,
+		parlst.addParam(RichFloat("pthreshold", 1.0f,
 											tr("Planar threshold (deg)"),
 											tr("angle threshold for planar faces (degrees)")));
 
@@ -233,7 +233,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 		pmetrics.push_back("mean ratio");
 		pmetrics.push_back("delaunay");
 		pmetrics.push_back("topology");
-		parlst.addParam(new RichEnum("planartype", 0, pmetrics, tr("Planar metric"),
+		parlst.addParam(RichEnum("planartype", 0, pmetrics, tr("Planar metric"),
 				tr("<p style=\'white-space:pre\'>"
 					"Choose a metric to define the planar flip operation<br><br>"
 					"Triangle quality based<br>"
@@ -244,20 +244,20 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 					"Others<br>"
 					"4: Fix the Delaunay condition between two faces<br>"
 					"5: Do the flip to improve local topology<br>")));
-		parlst.addParam(new RichInt("iterations", 1, "Post optimization relax iter", tr("number of a planar laplacian smooth iterations that have to be performed after every run")));
+		parlst.addParam(RichInt("iterations", 1, "Post optimization relax iter", tr("number of a planar laplacian smooth iterations that have to be performed after every run")));
 
 	}
 
 	if (ID(action) == FP_NEAR_LAPLACIAN_SMOOTH) {
-		parlst.addParam(new RichBool("selection", false, tr("Update selection"),	tr("Apply laplacian smooth on selected faces only")));
-		parlst.addParam(new RichFloat("AngleDeg", 0.5f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces")));
-		parlst.addParam(new RichInt("iterations", 1, "Iterations", tr("number of laplacian smooth iterations in every run")));
+		parlst.addParam(RichBool("selection", false, tr("Update selection"),	tr("Apply laplacian smooth on selected faces only")));
+		parlst.addParam(RichFloat("AngleDeg", 0.5f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces")));
+		parlst.addParam(RichInt("iterations", 1, "Iterations", tr("number of laplacian smooth iterations in every run")));
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     float limit = -std::numeric_limits<float>::epsilon();

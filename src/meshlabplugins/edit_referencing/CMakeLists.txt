@@ -5,15 +5,21 @@
 ### specifically src/templates/edit_referencing.cmake (custom for this directory),
 ### then re-run ./make-cmake.py
 
-set(SOURCES edit_referencing.cpp edit_referencingDialog.cpp
-            edit_referencing_factory.cpp)
+set(SOURCES
+	edit_referencing.cpp
+	edit_referencingDialog.cpp
+	edit_referencing_factory.cpp)
 
-set(HEADERS edit_referencing.h edit_referencingDialog.h
-            edit_referencing_factory.h)
+set(HEADERS
+	edit_referencing.h
+	edit_referencingDialog.h
+	edit_referencing_factory.h)
 
-set(RESOURCES edit_referencing.qrc)
+set(RESOURCES
+	edit_referencing.qrc)
 
-set(UI edit_referencingDialog.ui)
+set(UI
+	edit_referencingDialog.ui)
 
 add_library(edit_referencing MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 

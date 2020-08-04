@@ -60,8 +60,8 @@ public:
 	FILTER_ARITY filterArity(QAction *) const;
 	int getPreConditions(QAction *) const;
 	int postCondition( QAction* ) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *action, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+	bool applyFilter(QAction *action, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
 private:
 	bool vertexDisplacement(

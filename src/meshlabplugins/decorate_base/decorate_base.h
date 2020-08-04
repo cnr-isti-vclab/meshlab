@@ -100,24 +100,24 @@ public:
   void DrawEdgeLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
   void DisplayCamera(QString who, Shotm &ls, int cameraSourceId);
-  void DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, const RichParameterList *rm, QPainter *painter, QFont qf);
   void PlaceTexParam(int TexInd, int TexNum);
-  void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
-  void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
+  void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, const RichParameterList*, QFont qf);
+  void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, const RichParameterList*, QFont qf);
   void DrawLineVector(std::vector<PointPC> &EV);
   //void DrawTriVector(std::vector<PointPC> &EV);
   //void DrawDotVector(std::vector<PointPC> &EV, float basesize=4.0);
 
 
 
-  void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  void decorateMesh(QAction *a, MeshModel &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
-  void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+  void decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  void decorateMesh(QAction *a, MeshModel &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(QAction * /*action*/) const;
-  void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
+  void initGlobalParameterSet(QAction *, RichParameterList &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }

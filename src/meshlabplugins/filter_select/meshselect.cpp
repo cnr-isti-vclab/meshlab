@@ -180,40 +180,40 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
  return QString("Unknown filter");
 }
 
-void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
+void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst)
 {
  switch(ID(action))
  {
 	case FP_SELECT_FACES_BY_EDGE:
 	{
 		float maxVal = m.cm.bbox.Diag()/2.0f;
-		parlst.addParam(new RichDynamicFloat("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
+		parlst.addParam(RichDynamicFloat("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
 	} break;
         
 	case FP_SELECT_BORDER:
-      //parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
+	  //parlst.addParam(RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
 	break;
 
 	case FP_SELECTBYANGLE :
 	{
-		parlst.addParam(new RichDynamicFloat("anglelimit", 75.0f, 0.0f, 180.0f, "angle threshold (deg)", "faces with normal at higher angle w.r.t. the view direction are selected"));
-		parlst.addParam(new RichBool ("usecamera", false, "Use ViewPoint from Mesh Camera", "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
-		parlst.addParam(new RichPoint3f("viewpoint", Point3f(0.0f, 0.0f, 0.0f), "ViewPoint", "if UseCamera is true, this value is ignored"));
+		parlst.addParam(RichDynamicFloat("anglelimit", 75.0f, 0.0f, 180.0f, "angle threshold (deg)", "faces with normal at higher angle w.r.t. the view direction are selected"));
+		parlst.addParam(RichBool ("usecamera", false, "Use ViewPoint from Mesh Camera", "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
+		parlst.addParam(RichPoint3f("viewpoint", Point3f(0.0f, 0.0f, 0.0f), "ViewPoint", "if UseCamera is true, this value is ignored"));
 	} break;
 
 	case FP_SELECT_UGLY :
-		parlst.addParam(new RichBool("useAR", true, "select by Aspect Ratio", "if true, faces with aspect ratio below the limit will be selected"));
-		parlst.addParam(new RichDynamicFloat("ARatio", 0.02, 0.0, 1.0, tr("Aspect Ratio"), tr("Triangle face aspect ratio [1 (equilateral) - 0 (line)]: face will be selected if BELOW this threshold")));
-		parlst.addParam(new RichBool("useNF", false, "select by Normal Angle", "if true, adjacent faces with normals forming an angle above the limit will be selected"));
-		parlst.addParam(new RichDynamicFloat("NFRatio", 60, 0.0, 180.0, tr("Angle flip"), tr("angle between the adjacent faces: face will be selected if ABOVE this threshold")));
+		parlst.addParam(RichBool("useAR", true, "select by Aspect Ratio", "if true, faces with aspect ratio below the limit will be selected"));
+		parlst.addParam(RichDynamicFloat("ARatio", 0.02, 0.0, 1.0, tr("Aspect Ratio"), tr("Triangle face aspect ratio [1 (equilateral) - 0 (line)]: face will be selected if BELOW this threshold")));
+		parlst.addParam(RichBool("useNF", false, "select by Normal Angle", "if true, adjacent faces with normals forming an angle above the limit will be selected"));
+		parlst.addParam(RichDynamicFloat("NFRatio", 60, 0.0, 180.0, tr("Angle flip"), tr("angle between the adjacent faces: face will be selected if ABOVE this threshold")));
 	break;
 
 	case FP_SELECT_FACE_FROM_VERT:
-		parlst.addParam(new RichBool("Inclusive", true, "Strict Selection", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
+		parlst.addParam(RichBool("Inclusive", true, "Strict Selection", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
 	break;
 
     case FP_SELECT_VERT_FROM_FACE:
-		parlst.addParam(new RichBool("Inclusive", true, "Strict Selection", "If true only the vertices with <b>all</b> the incident face selected are selected. Otherwise any vertex with at least one incident selected face will be selected."));
+        parlst.addParam(RichBool("Inclusive", true, "Strict Selection", "If true only the vertices with <b>all</b> the incident face selected are selected. Otherwise any vertex with at least one incident selected face will be selected."));
 	break;
 
     case FP_SELECT_BY_VERT_QUALITY:
@@ -222,9 +222,9 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		float minq=minmax.first;
 		float maxq=minmax.second;
 
-		parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
-		parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
-		parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
+		parlst.addParam(RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
+		parlst.addParam(RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
+		parlst.addParam(RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
 	} break;
 
 	case FP_SELECT_BY_FACE_QUALITY:
@@ -233,36 +233,36 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		float minq=minmax.first;
 		float maxq=minmax.second;
 
-		parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
-		parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
-		parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the vertices with <b>all</b> the adjacent faces within the specified range are selected. Otherwise any vertex with at least one face within the range is selected."));
+		parlst.addParam(RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
+		parlst.addParam(RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
+		parlst.addParam(RichBool("Inclusive", true, "Inclusive Sel.", "If true only the vertices with <b>all</b> the adjacent faces within the specified range are selected. Otherwise any vertex with at least one face within the range is selected."));
 	} break;
       
 	case FP_SELECT_BY_COLOR:
 	{
-		parlst.addParam(new RichColor("Color",Color4b::Black, tr("Color To Select"), tr("Color that you want to be selected.") ));
+		parlst.addParam(RichColor("Color",Color4b::Black, tr("Color To Select"), tr("Color that you want to be selected.") ));
 
 		QStringList colorspace;
 		colorspace << "HSV" << "RGB";
-		parlst.addParam(new RichEnum("ColorSpace", 0, colorspace, tr("Pick Color Space"), tr("The color space that the sliders will manipulate.") ));
+		parlst.addParam(RichEnum("ColorSpace", 0, colorspace, tr("Pick Color Space"), tr("The color space that the sliders will manipulate.") ));
 
-		parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
+		parlst.addParam(RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
 
-		parlst.addParam(new RichDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
-		parlst.addParam(new RichDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
-		parlst.addParam(new RichDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
+		parlst.addParam(RichDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
+		parlst.addParam(RichDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
+		parlst.addParam(RichDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
 	} break;
 
 	case FP_SELECT_ALL:
 	{
-		parlst.addParam(new RichBool("allFaces", true, "Select all Faces", "If true the filter will select all the faces."));
-		parlst.addParam(new RichBool("allVerts", true, "Select all Vertices", "If true the filter will select all the vertices."));
+		parlst.addParam(RichBool("allFaces", true, "Select all Faces", "If true the filter will select all the faces."));
+		parlst.addParam(RichBool("allVerts", true, "Select all Vertices", "If true the filter will select all the vertices."));
 	} break;
 
 	case FP_SELECT_NONE:
 	{
-		parlst.addParam(new RichBool("allFaces", true, "De-select all Faces", "If true the filter will de-select all the faces."));
-		parlst.addParam(new RichBool("allVerts", true, "De-select all Vertices", "If true the filter will de-select all the vertices."));
+		parlst.addParam(RichBool("allFaces", true, "De-select all Faces", "If true the filter will de-select all the faces."));
+		parlst.addParam(RichBool("allVerts", true, "De-select all Vertices", "If true the filter will de-select all the vertices."));
 	} break;
 
 	case FP_SELECT_INVERT:
@@ -270,29 +270,29 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		bool defF = (m.cm.sfn > 0) ? true : false;
 		bool defV = (m.cm.svn > 0) ? true : false;
 
-		parlst.addParam(new RichBool("InvFaces", defF, "Invert Faces", "If true the filter will invert the set of selected faces."));
-		parlst.addParam(new RichBool("InvVerts", defV, "Invert Vertices", "If true the filter will invert the set of selected vertices."));
+		parlst.addParam(RichBool("InvFaces", defF, "Invert Faces", "If true the filter will invert the set of selected faces."));
+		parlst.addParam(RichBool("InvVerts", defV, "Invert Vertices", "If true the filter will invert the set of selected vertices."));
 	} break;
 
 	case FP_SELECT_FOLD_FACE:
 	{
-		parlst.addParam(new RichDynamicFloat("AngleThreshold", 160.0f, 90.0f, 180.0f, tr("Angle Threshold"), tr("Angle between the face and the best fitting plane of the neighbours vertices. If it is above the threshold the face is selected.")));
+		parlst.addParam(RichDynamicFloat("AngleThreshold", 160.0f, 90.0f, 180.0f, tr("Angle Threshold"), tr("Angle between the face and the best fitting plane of the neighbours vertices. If it is above the threshold the face is selected.")));
 	} break;
 
 	case FP_SELECT_OUTLIER:
 	{
-		parlst.addParam(new RichDynamicFloat("PropThreshold", 0.8, 0.0, 1.0, tr("Probability"), tr("Threshold to select the vertex. The vertex is selected if the LoOP value is above the threshold.")));
-		parlst.addParam(new RichInt("KNearest", 32, tr("Number of neighbors"), tr("Number of neighbours used to compute the LoOP")));
+		parlst.addParam(RichDynamicFloat("PropThreshold", 0.8, 0.0, 1.0, tr("Probability"), tr("Threshold to select the vertex. The vertex is selected if the LoOP value is above the threshold.")));
+		parlst.addParam(RichInt("KNearest", 32, tr("Number of neighbors"), tr("Number of neighbours used to compute the LoOP")));
 	} break;
 
 	case FP_SELECT_DELETE_ALL_FACE:
 	{
-		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected, the filter will be applied to all visible mesh Layers."));
+		parlst.addParam(RichBool("allLayers", false, "Apply to all visible Layers", "If selected, the filter will be applied to all visible mesh Layers."));
 	} break;
  }
 }
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 if (md.mm() == NULL)
 	return false;

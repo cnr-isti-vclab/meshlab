@@ -82,7 +82,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
+void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
     Shotf defShot;
     switch(ID(action))
@@ -92,23 +92,23 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
             QStringList rotMethod;
             rotMethod.push_back("X axis");
             rotMethod.push_back("Y axis");
             rotMethod.push_back("Z axis");
             rotMethod.push_back("custom axis");
-            parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+            parlst.addParam(RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
             QStringList rotCenter;
             rotCenter.push_back("origin");
             rotCenter.push_back("camera viewpoint");
             rotCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-            parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
-            parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+            parlst.addParam(RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
+            parlst.addParam(RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+            parlst.addParam(RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_SCALE :
@@ -116,16 +116,16 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
             QStringList scaleCenter;
             scaleCenter.push_back("origin");
             scaleCenter.push_back("camera viewpoint");
             scaleCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
+            parlst.addParam(RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
+            parlst.addParam(RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_TRANSLATE :
@@ -133,13 +133,13 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
-            parlst.addParam(new RichDynamicFloat("axisX",0,-1000,1000,"X Axis","Absolute translation amount along the X axis"));
-            parlst.addParam(new RichDynamicFloat("axisY",0,-1000,1000,"Y Axis","Absolute translation amount along the Y axis"));
-            parlst.addParam(new RichDynamicFloat("axisZ",0,-1000,1000,"Z Axis","Absolute translation amount along the Z axis"));
-            parlst.addParam(new RichBool("centerFlag",false,"translate viewpoint position to the origin","If selected, the camera viewpoint is translated to the origin"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichDynamicFloat("axisX",0,-1000,1000,"X Axis","Absolute translation amount along the X axis"));
+            parlst.addParam(RichDynamicFloat("axisY",0,-1000,1000,"Y Axis","Absolute translation amount along the Y axis"));
+            parlst.addParam(RichDynamicFloat("axisZ",0,-1000,1000,"Z Axis","Absolute translation amount along the Z axis"));
+            parlst.addParam(RichBool("centerFlag",false,"translate viewpoint position to the origin","If selected, the camera viewpoint is translated to the origin"));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
 
@@ -153,33 +153,33 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             behaviour.push_back("The matrix represent the new extrinsics");
 
             Matrix44m mat; mat.SetIdentity();
-            parlst.addParam(new RichMatrix44f("TransformMatrix",mat,""));
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
-            parlst.addParam(new RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichMatrix44f("TransformMatrix",mat,""));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
 
         }
         break;  case FP_SET_RASTER_CAMERA :
-        parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
+        parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
         break;
 
         case FP_SET_MESH_CAMERA :
-            parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
+            parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
             break;
         case FP_QUALITY_FROM_CAMERA :
-            parlst.addParam(new RichBool ("Depth", true, "Depth", "Use depth as a factor."));
-            parlst.addParam(new RichBool ("Facing", false, "ViewAngle", "Use cosine of viewing angle as a factor."));
-            parlst.addParam(new RichBool ("Clip", false,  "Clipping", "clip values outside the viewport to zero."));
-            parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
-            parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
+            parlst.addParam(RichBool ("Depth", true, "Depth", "Use depth as a factor."));
+            parlst.addParam(RichBool ("Facing", false, "ViewAngle", "Use cosine of viewing angle as a factor."));
+            parlst.addParam(RichBool ("Clip", false,  "Clipping", "clip values outside the viewport to zero."));
+            parlst.addParam(RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
+            parlst.addParam(RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
             break;
         default: break; // do not add any parameter for the other filters
     }
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel* mesh = md.mm();
     CMeshO* cm = NULL;

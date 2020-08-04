@@ -53,7 +53,7 @@ public:
 
     virtual int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);}
     virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &params);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &params, vcg::CallBackPos *cb);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet &params, vcg::CallBackPos *cb);
     virtual FilterClass getClass(QAction *);
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 

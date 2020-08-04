@@ -41,7 +41,7 @@
 #include <QWidgetAction>
 #include "mainwindow.h"
 #include "plugindialog.h"
-#include "customDialog.h"
+#include "meshlab_settings/meshlabsettingsdialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
 
@@ -875,47 +875,31 @@ void MainWindow::loadMeshLabSettings()
 		QString st = settings.value(klist.at(ii)).toString();
 		QDomElement docElem = doc.firstChild().toElement();
 
-		RichParameter* rpar = NULL;
 		if (!docElem.isNull())
 		{
-			bool ret = RichParameterAdapter::create(docElem, &rpar);
-			if (!ret)
-			{
-				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qUtf8Printable(docElem.attribute("name")), qUtf8Printable(docElem.attribute("value")));
-				continue;
-			}
-			if (!defaultGlobalParams.hasParameter(rpar->name))
-			{
-				//  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-				//         "It happens if you are running MeshLab with only a subset of the plugins. ", qUtf8Printable(rpar->name));
-			}
-			else
-				currentGlobalParams.addParam(rpar);
+			RichParameter* rp = nullptr;
+			bool b = RichParameterAdapter::create(docElem, &rp);
+			if (b && defaultGlobalParams.hasParameter(rp->name()))
+				currentGlobalParams.pushFromQDomElement(docElem);
 		}
 	}
 
 	// 2) eventually fill missing values with the hardwired defaults
-	for (int ii = 0; ii < defaultGlobalParams.paramList.size(); ++ii)
-	{
+	for (const RichParameter& p : defaultGlobalParams) {
 		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
-		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
-		{
-			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-			RichParameterCopyConstructor v;
-			defaultGlobalParams.paramList.at(ii)->accept(v);
-			currentGlobalParams.paramList.push_back(v.lastCreated);
+		if (!currentGlobalParams.hasParameter(p.name())) {
+			//qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
+			RichParameter& v = currentGlobalParams.addParam(p);
 
 			QDomDocument doc("MeshLabSettings");
-			RichParameterXMLVisitor vxml(doc);
-			v.lastCreated->accept(vxml);
-			doc.appendChild(vxml.parElem);
+			doc.appendChild(v.fillToXMLDocument(doc));
 			QString docstring = doc.toString();
 			QSettings setting;
-			setting.setValue(v.lastCreated->name, QVariant(docstring));
+			setting.setValue(v.name(), QVariant(docstring));
 		}
 	}
+	assert(currentGlobalParams.size() == defaultGlobalParams.size());
 
-	//emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
@@ -1175,25 +1159,24 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
+void MainWindowSetting::initGlobalParameterSet(RichParameterList* glbset)
 {
-	glbset->addParam(new RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
-	glbset->addParam(new RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	glbset->addParam(new RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	glbset->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+	glbset->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+	glbset->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
-//	glbset->addParam(new RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
+//	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		glbset->addParam(new RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
-	glbset->addParam(new RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+		glbset->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
+	glbset->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(RichParameterSet& rps)
+void MainWindowSetting::updateGlobalParameterSet(const RichParameterList& rps)
 {
 	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
 	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
 	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
-//	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rps.getBool(highPrecisionRendering());

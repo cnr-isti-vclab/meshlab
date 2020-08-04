@@ -39,8 +39,8 @@ public:
     PluginManager();
     ~PluginManager();
     enum TypeIO{IMPORT,EXPORT};
-	void loadPlugins(RichParameterSet& defaultGlobal);
-	void loadPlugins(RichParameterSet& defaultGlobal, const QDir& pluginsDirectory);
+	void loadPlugins(RichParameterList& defaultGlobal);
+	void loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory);
     QString pluginsCode() const;
 
     int numberIOPlugins() const;
@@ -52,7 +52,7 @@ public:
     static QString getDefaultPluginDirPath();
     static QString getBaseDirPath();
 
-    QMap<QString,RichParameterSet> generateFilterParameterMap();
+    QMap<QString,RichParameterList> generateFilterParameterMap();
 
     MeshDecorateInterface* getDecoratorInterfaceByName(const QString& name);
 

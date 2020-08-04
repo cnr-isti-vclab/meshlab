@@ -27,6 +27,7 @@
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
 #include "../common/mlexception.h"
+#include "rich_parameter_gui/richparameterlistdialog.h"
 
 FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 		:QDialog(parent)
@@ -194,51 +195,49 @@ FilterScriptDialog::~FilterScriptDialog()
 
 void FilterScriptDialog::editOldParameters( const int row )
 {
-    if(row == -1)
-        return;
-    QString actionName = ui->scriptListWidget->currentItem()->text();
+	if(row == -1)
+		return;
+	QString actionName = ui->scriptListWidget->currentItem()->text();
 
-    FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
-     RichParameterSet oldParameterSet = old->pair.second;
-    //get the main window
-    MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
+	FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
+	RichParameterList oldParameterSet = old->pair.second;
+	//get the main window
+	MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
-    if(NULL == mainWindow)
-        throw MLException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
+	if(NULL == mainWindow)
+		throw MLException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
 
-    //get a pointer to this action and filter from the main window so we can get the 
-    //description of the parameters from the filter
-    QAction *action = mainWindow->pluginManager().actionFilterMap[actionName];
-    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+	//get a pointer to this action and filter from the main window so we can get the
+	//description of the parameters from the filter
+	QAction *action = mainWindow->pluginManager().actionFilterMap[actionName];
+	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
-    if(NULL == iFilter){
-        qDebug() << "null filter";
-        return;
-    }
+	if(NULL == iFilter){
+		qDebug() << "null filter";
+		return;
+	}
 
-    //fill the parameter set with all the names and descriptions which are lost in the 
-    //filter script
-    RichParameterSet newParameterSet;
-    iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
+	//fill the parameter set with all the names and descriptions which are lost in the
+	//filter script
+	RichParameterList newParameterSet;
+	iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
 
-    if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
-    {
-        //now set values to be the old values
-        RichParameterCopyConstructor cc;
-        for(int i = 0; i < newParameterSet.paramList.size(); i++)
-        {
-            oldParameterSet.paramList[i]->accept(cc);
-            newParameterSet.paramList[i]->val = cc.lastCreated->val;
-        }	
-    } else
-        qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
+	if(newParameterSet.size() == oldParameterSet.size()) {
+		RichParameterList::iterator i = newParameterSet.begin();
+		RichParameterList::iterator j = oldParameterSet.begin();
+		//now set values to be the old values
+		for (; i != newParameterSet.end(); ++i, ++j){
+			i->setValue(j->value());
+		}
+	} else {
+		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
+	}
 
-    //launch the dialog
-    GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->meshDoc());
-    int result = parameterDialog.exec();
-    if(result == QDialog::Accepted)
-    {
-        //keep the changes	
-        old->pair.second = newParameterSet;
-    }
+	//launch the dialog
+	RichParameterListDialog parameterDialog(this, newParameterSet, "Edit Parameters");
+	int result = parameterDialog.exec();
+	if(result == QDialog::Accepted) {
+		//keep the changes
+		old->pair.second = newParameterSet;
+	}
 }

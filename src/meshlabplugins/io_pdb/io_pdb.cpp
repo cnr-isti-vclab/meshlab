@@ -43,31 +43,31 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PDB"))
 	{
-		parlst.addParam(new RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
-		parlst.addParam(new RichBool("justpoints",false,"SURFACE: Atoms as Points","Atoms are created as points, no surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("justspheres",true,"SURFACE: Atoms as Spheres","Atoms are created as intersecting spheres, no interpolation surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("interpspheres",false,"SURFACE: Atoms as Jointed Spheres","Atoms are created as spheres, joining surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("metaballs",false,"SURFACE: Atoms as Metaballs","Atoms are created as blobby interpolation surface, refer to BLINN Metaballs article. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichFloat("voxelsize",0.25,"Surface Resolution","is used by Jointed Spheres and Metaball"));
-		parlst.addParam(new RichFloat("blobby",2.0,"Blobbyness factor","is used by Metaball"));
+		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
+		parlst.addParam(RichBool("justpoints",false,"SURFACE: Atoms as Points","Atoms are created as points, no surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("justspheres",true,"SURFACE: Atoms as Spheres","Atoms are created as intersecting spheres, no interpolation surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("interpspheres",false,"SURFACE: Atoms as Jointed Spheres","Atoms are created as spheres, joining surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("metaballs",false,"SURFACE: Atoms as Metaballs","Atoms are created as blobby interpolation surface, refer to BLINN Metaballs article. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichFloat("voxelsize",0.25,"Surface Resolution","is used by Jointed Spheres and Metaball"));
+		parlst.addParam(RichFloat("blobby",2.0,"Blobbyness factor","is used by Metaball"));
 		/*
-		parlst.addParam(new RichInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
-		parlst.addParam(new RichBool("anglecull",true,"Cull faces by angle","short");
-		parlst.addParam(new RichFloat("angle",85.0,"Angle limit for face culling","short");
-		parlst.addParam(new RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
-		parlst.addParam(new RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
-		parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
-		parlst.addParam(new RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");		
-		parlst.addParam(new RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
+		parlst.addParam(RichInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
+		parlst.addParam(RichBool("anglecull",true,"Cull faces by angle","short");
+		parlst.addParam(RichFloat("angle",85.0,"Angle limit for face culling","short");
+		parlst.addParam(RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
+		parlst.addParam(RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
+		parlst.addParam(RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
+		parlst.addParam(RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");
+		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	//bool normalsUpdated = false;
 
@@ -134,7 +134,7 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return true;
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
   assert(0); 
 	return false;
@@ -172,7 +172,7 @@ void PDBIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability,
 	return;
 }
 
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL"))
@@ -180,7 +180,7 @@ void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -188,7 +188,7 @@ void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
   */
 }
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterSet & /*par*/) 
+void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
 {
   /*
 	if(format.toUpper() == tr("STL"))
@@ -201,7 +201,7 @@ MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)
 
 
 //---------- PDB READER -----------//
-bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterSet &parlst, CallBackPos *cb) 
+bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, CallBackPos *cb) 
 {
 	size_t atomNumber=0;
 	bool surfacecreated = false;

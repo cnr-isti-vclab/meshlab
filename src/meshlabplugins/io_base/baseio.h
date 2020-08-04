@@ -41,14 +41,14 @@ public:
 
 	void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
 	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
 	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
-	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
+	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
+	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
 
-	void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/);
+	void initGlobalParameterSet(QAction * /*format*/, RichParameterList & /*globalparam*/);
 private:
 	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
 };

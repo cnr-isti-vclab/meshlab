@@ -95,20 +95,20 @@ PlyMCPlugin::PlyMCPlugin()
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))
      {
         case FP_PLYMC :
-          parlst.addParam(new RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
-          parlst.addParam(    new RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. A value of '3' means that a 3x3x3 regular space subdivision is created and the reconstruction process generate 8 matching meshes. It is useful for reconsruction objects at a very high resolution. Default value (1) means no splitting."));
-          parlst.addParam(  new RichFloat("geodesic",2.0,"Geodesic Weighting","The influence of each range map is weighted with its geodesic distance from the borders. In this way when two (or more ) range maps overlaps their contribution blends smoothly hiding possible misalignments. "));
-          parlst.addParam(   new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
-          parlst.addParam(    new RichInt("smoothNum",1,"Volume Laplacian iter","How many volume smoothing step are performed to clean out the eventually noisy borders"));
-          parlst.addParam(    new RichInt("wideNum",3,"Widening" ," How many voxel the field is expanded. Larger this value more holes will be filled"));
-          parlst.addParam(   new RichBool("mergeColor",false,"Vertex Splatting","This option use a different way to build up the volume, instead of using rasterization of the triangular face it splat the vertices into the grids. It works under the assumption that you have at least one sample for each voxel of your reconstructed volume."));
-          parlst.addParam(   new RichBool("simplification",false,"Post Merge simplification","After the merging an automatic simplification step is performed."));
-          parlst.addParam(    new RichInt("normalSmooth",3,"PreSmooth iter" ,"How many times, before converting meshes into volume, the normal of the surface are smoothed. It is useful only to get more smooth expansion in case of noisy borders."));
+          parlst.addParam(RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
+          parlst.addParam(    RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. A value of '3' means that a 3x3x3 regular space subdivision is created and the reconstruction process generate 8 matching meshes. It is useful for reconsruction objects at a very high resolution. Default value (1) means no splitting."));
+          parlst.addParam(  RichFloat("geodesic",2.0,"Geodesic Weighting","The influence of each range map is weighted with its geodesic distance from the borders. In this way when two (or more ) range maps overlaps their contribution blends smoothly hiding possible misalignments. "));
+          parlst.addParam(   RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
+          parlst.addParam(    RichInt("smoothNum",1,"Volume Laplacian iter","How many volume smoothing step are performed to clean out the eventually noisy borders"));
+          parlst.addParam(    RichInt("wideNum",3,"Widening" ," How many voxel the field is expanded. Larger this value more holes will be filled"));
+          parlst.addParam(   RichBool("mergeColor",false,"Vertex Splatting","This option use a different way to build up the volume, instead of using rasterization of the triangular face it splat the vertices into the grids. It works under the assumption that you have at least one sample for each voxel of your reconstructed volume."));
+          parlst.addParam(   RichBool("simplification",false,"Post Merge simplification","After the merging an automatic simplification step is performed."));
+          parlst.addParam(    RichInt("normalSmooth",3,"PreSmooth iter" ,"How many times, before converting meshes into volume, the normal of the surface are smoothed. It is useful only to get more smooth expansion in case of noisy borders."));
         break;
      case FP_MC_SIMPLIFY :
         break;
@@ -117,7 +117,7 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
+bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
 {
   switch(ID(filter))
   {

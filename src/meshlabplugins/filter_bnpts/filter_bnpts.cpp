@@ -80,7 +80,7 @@ void FilterBnptsPlugin::initParameterSet(QAction *action, MeshDocument & /*md*/,
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
 	CMeshO::FaceIterator fi;
 

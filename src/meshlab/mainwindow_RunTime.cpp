@@ -26,7 +26,7 @@
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
-#include "customDialog.h"
+#include "meshlab_settings/meshlabsettingsdialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
@@ -45,6 +45,8 @@
 #include "../common/mlapplication.h"
 #include "../common/filterscript.h"
 #include "../common/mlexception.h"
+
+#include "rich_parameter_gui/richparameterlistdialog.h"
 
 #include <wrap/io_trimesh/alnParser.h>
 
@@ -788,31 +790,22 @@ void MainWindow::runFilterScript()
             meshDoc()->mm()->updateDataMask(req);
         iFilter->setLog(&meshDoc()->Log);
         FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
-        RichParameterSet &parameterSet = old->pair.second;
+        RichParameterList &parameterSet = old->pair.second;
 
-        for(int i = 0; i < parameterSet.paramList.size(); i++)
-        {
-            //get a modifieable reference
-            RichParameter* parameter = parameterSet.paramList[i];
-
-            //if this is a mesh paramter and the index is valid
-            if(parameter->val->isMesh())
-            {
-                RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
-                if( md->meshindex < meshDoc()->size() &&
-                        md->meshindex >= 0  )
-                {
-                    RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
-                    parameterSet.paramList.replace(i,rmesh);
-                } else
-                {
-                    printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
-                    printf("One of the filters in the script needs more meshes than you have loaded.\n");
-                    return;
-                }
-                delete parameter;
-            }
-        }
+		for(RichParameter& parameter : parameterSet) {
+			//if this is a mesh paramter and the index is valid
+			if(parameter.value().isMesh()) {
+				RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
+				if( md.meshindex < meshDoc()->size() && md.meshindex >= 0  ) {
+					parameterSet.setValue(md.name(), MeshValue(meshDoc(), md.meshindex));
+				}
+				else {
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.meshindex );
+					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+					return;
+				}
+			}
+		}
         //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
 
         bool created = false;
@@ -972,7 +965,7 @@ void MainWindow::startFilter()
         // if no dialog is created the filter must be executed immediately
         if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
         {
-            RichParameterSet dummyParSet;
+            RichParameterList dummyParSet;
             executeFilter(action, dummyParSet, false);
 
             //Insert the filter to filterHistory
@@ -1143,7 +1136,7 @@ from the user defined dialog
 */
 
 
-void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
+void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool isPreview)
 {
      MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
     qb->show();
@@ -1168,7 +1161,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     QElapsedTimer tt; tt.start();
     meshDoc()->setBusy(true);
-    RichParameterSet mergedenvironment(params);
+    RichParameterList mergedenvironment(params);
     mergedenvironment.join(currentGlobalParams);
 
     MLSceneGLSharedDataContext* shar = NULL;
@@ -1263,11 +1256,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             }
         case (MeshFilterInterface::FIXED):
             {
-                for(int ii = 0;ii < mergedenvironment.paramList.size();++ii)
+				for(const RichParameter& p : mergedenvironment)
                 {
-                    if (mergedenvironment.paramList[ii]->val->isMesh())
+					if (p.value().isMesh())
                     {
-                        MeshModel* mm = mergedenvironment.paramList[ii]->val->getMesh();
+						MeshModel* mm = p.value().getMesh();
                         if (mm != NULL)
                             tmp.push_back(mm);
                     }
@@ -2081,7 +2074,7 @@ bool MainWindow::importRaster(const QString& fileImg)
     return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
+bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
 {
     if ((GLA() == NULL) || (mm == NULL))
         return false;
@@ -2303,11 +2296,11 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
             return false;
         }
 
-        RichParameterSet prePar;
+        RichParameterList prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
         if(!prePar.isEmpty())
         {
-            GenericParamDialog preOpenDialog(this, &prePar, tr("Pre-Open Options"));
+			RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
             preOpenDialog.setFocus();
             preOpenDialog.exec();
         }
@@ -2325,11 +2318,11 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         if(open)
         {
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
-            RichParameterSet par;
+            RichParameterList par;
             pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
             if(!par.isEmpty())
             {
-                GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
+				RichParameterListDialog postOpenDialog(this, par, tr("Post-Open Processing"));
                 postOpenDialog.setFocus();
                 postOpenDialog.exec();
                 pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
@@ -2394,16 +2387,16 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
    
     if(pCurrentIOPlugin != NULL)
     {
-        RichParameterSet prePar;
+        RichParameterList prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
-		prePar = prePar.join(currentGlobalParams);
+		prePar.join(currentGlobalParams);
         int mask = 0;
         QElapsedTimer t;t.start();
         bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);
         if(open)
         {
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());
-            RichParameterSet par;
+            RichParameterList par;
             pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
             pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
             ret = true;
@@ -2542,7 +2535,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
 
         // optional saving parameters (like ascii/binary encoding)
-        RichParameterSet savePar;
+        RichParameterList savePar;
 
         pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 
@@ -2687,8 +2680,8 @@ void MainWindow::showLayerDlg(bool visible)
 
 void MainWindow::setCustomize()
 {
-    CustomDialog dialog(currentGlobalParams,defaultGlobalParams, this);
-    connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
+    MeshLabSettingsDialog dialog(currentGlobalParams,defaultGlobalParams, this);
+	connect(&dialog, SIGNAL(applyCustomSetting()), this, SLOT(updateCustomSettings()));
     dialog.exec();
 }
 

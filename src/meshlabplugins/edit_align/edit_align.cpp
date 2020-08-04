@@ -28,7 +28,8 @@ $Log: meshedit.cpp,v $
 #include "edit_align.h"
 #include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
-#include <meshlab/stdpardialog.h>
+#include <meshlab/rich_parameter_gui/richparameterlistframe.h>
+#include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
@@ -355,11 +356,11 @@ void EditAlignPlugin:: alignParamCurrent()
 {
     assert(currentArc());
 
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
     AlignParameter::AlignPairParamToRichParameterSet(currentArc()->ap, alignParamSet);
 
-    GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
+	RichParameterListDialog ad(alignDialog, alignParamSet, titleString);
     ad.setWindowFlags(Qt::Dialog);
     ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();
@@ -371,9 +372,9 @@ void EditAlignPlugin:: alignParamCurrent()
 
 void EditAlignPlugin:: meshTreeParam()
 {
-  RichParameterSet  meshTreeParamSet;
+  RichParameterList  meshTreeParamSet;
   AlignParameter::MeshTreeParamToRichParameterSet(defaultMTP, meshTreeParamSet);
-  GenericParamDialog ad(alignDialog,&meshTreeParamSet,"Default Alignment Parameters");
+  RichParameterListDialog ad(alignDialog, meshTreeParamSet, "Default Alignment Parameters");
   ad.setWindowFlags(Qt::Dialog);
   ad.setWindowModality(Qt::WindowModal);
   int result=ad.exec();
@@ -385,9 +386,9 @@ void EditAlignPlugin:: meshTreeParam()
 
 void EditAlignPlugin:: alignParam()
 {
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     AlignParameter::AlignPairParamToRichParameterSet(defaultAP, alignParamSet);
-    GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
+	RichParameterListDialog ad(alignDialog, alignParamSet, "Default Alignment Parameters");
     ad.setWindowFlags(Qt::Dialog);
     ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();

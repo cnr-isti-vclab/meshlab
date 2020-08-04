@@ -60,9 +60,9 @@ public:
 
     virtual FilterClass getClass(QAction *);
     virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FILTER_ARITY filterArity(QAction*) const {return NONE;}
 
 };

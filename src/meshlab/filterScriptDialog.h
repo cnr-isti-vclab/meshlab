@@ -45,9 +45,9 @@ private slots:
 	//specifically with the PARMESH type we need to to set the mesh pointer based on the int given
 	void applyScript();
 
-	void clearScript();	
-	void saveScript();	
-	void openScript();	
+	void clearScript();
+	void saveScript();
+	void openScript();
 	
 	//moves the filter selected in scriptListWidget up in the script
 	void moveSelectedFilterUp();
@@ -63,9 +63,9 @@ private slots:
 	
 private:
 	Ui::scriptDialog* ui;
-  FilterScript *scriptPtr;
+	FilterScript *scriptPtr;
 
-  void editOldParameters(const int row);
+	void editOldParameters(const int row);
 
 };
 

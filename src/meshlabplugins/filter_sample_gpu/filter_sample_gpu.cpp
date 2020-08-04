@@ -82,7 +82,7 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst)
+void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterList & parlst)
 {
 	(void)m;
 
@@ -90,11 +90,11 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 	{
 		case FP_GPU_EXAMPLE :
 		{
-			parlst.addParam(new RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
-			parlst.addParam(new RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
-			parlst.addParam(new RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
+			parlst.addParam(RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
+			parlst.addParam(RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
+			parlst.addParam(RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
 			QString curr = QDir::currentPath();
-			parlst.addParam(new RichSaveFile ("ImageFileName",        curr + "/gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
+			parlst.addParam(RichSaveFile ("ImageFileName",        curr + "/gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0);
@@ -103,7 +103,7 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	switch(ID(a))
 	{

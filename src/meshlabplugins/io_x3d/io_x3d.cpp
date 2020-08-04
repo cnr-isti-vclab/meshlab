@@ -35,7 +35,7 @@
 using namespace std;
 using namespace vcg;
 
-bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, CallBackPos *cb, QWidget *parent)
+bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget *parent)
 {
     // initializing mask
     mask = 0;
@@ -128,7 +128,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 }
 
 
-bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent)
 {
     QString errorMsgFormat = "Error encountered while exportering file:\n%1\n\nError details: %2";
     string filename = QFile::encodeName(fileName).constData ();

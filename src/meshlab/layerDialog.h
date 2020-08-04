@@ -30,7 +30,7 @@
 #include <QTabWidget>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <common/filterparameter.h>
+#include <common/filter_parameter/rich_parameter_list.h>
 #include <common/ml_shared_data_context.h>
 #include "ml_render_gui.h"
 
@@ -43,7 +43,7 @@ class MeshModel;
 class RasterModel;
 class MeshDocument;
 class MeshDecorateInterface;
-class StdParFrame;
+class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;
 
@@ -99,8 +99,8 @@ public slots:
 private:
     float osDependentButtonHeightScaleFactor();
     MainWindow* mainWin;
-    StdParFrame* frame;
-    RichParameterSet tmpSet;
+    RichParameterListFrame* frame;
+    RichParameterList tmpSet;
     QPushButton* savebut;
     QPushButton* resetbut;
     QPushButton* loadbut;

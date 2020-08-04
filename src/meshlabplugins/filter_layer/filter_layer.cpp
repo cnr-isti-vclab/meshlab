@@ -108,7 +108,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     MeshModel *mm=md.mm();
     RasterModel *rm=md.rm();
@@ -117,7 +117,7 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
     case FP_SPLITSELECTEDVERTICES:
     case FP_SPLITSELECTEDFACES :
         {
-            parlst.addParam(new RichBool ("DeleteOriginal",
+            parlst.addParam(RichBool ("DeleteOriginal",
                 true,
                 "Delete original selection",
                 "Deletes the original selected faces/vertices, thus splitting the mesh among layers. \n\n"
@@ -125,55 +125,55 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         }
         break;
     case FP_FLATTEN :
-        parlst.addParam(new RichBool ("MergeVisible", true, "Merge Only Visible Layers",
+        parlst.addParam(RichBool ("MergeVisible", true, "Merge Only Visible Layers",
             "If true, flatten only visible layers, otherwise, all layers are used"));
-        parlst.addParam(new RichBool ("DeleteLayer", true, "Delete Layers ",
+        parlst.addParam(RichBool ("DeleteLayer", true, "Delete Layers ",
             "Delete all the layers used as source in flattening. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
-        parlst.addParam(new RichBool ("MergeVertices", true,  "Merge duplicate vertices",
+        parlst.addParam(RichBool ("MergeVertices", true,  "Merge duplicate vertices",
             "Merge the vertices that are duplicated among different layers. \n\n"
             "Very useful when the layers are spliced portions of a single big mesh."));
-        parlst.addParam(new RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
+        parlst.addParam(RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
             "Do not discard unreferenced vertices from source layers\n\n"
             "Necessary for point-cloud layers"));
         break;
     case FP_RENAME_MESH :
-        parlst.addParam(new RichString ("newName",
+        parlst.addParam(RichString ("newName",
             mm->label(),
             "New Label",
             "New Label for the mesh"));
         break;
     case FP_RENAME_RASTER :
-        parlst.addParam(new RichString ("newName",
+        parlst.addParam(RichString ("newName",
             rm?rm->label():"",
             "New Label",
             "New Label for the raster"));
         break;
     case FP_SELECTCURRENT :
-        parlst.addParam(new RichMesh ("layer",md.mm(),&md, "Layer Name",
+        parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name",
             "The name of the current layer"));
         break;
     case FP_MESH_VISIBILITY :
-        parlst.addParam(new RichMesh ("layer",md.mm(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
-		parlst.addParam(new RichString("lName", "", "Substring match", "Apply visibility to all layers with name substring matching the entered string. If not empty, the first parameter is ignored."));
-        parlst.addParam(new RichBool ("isMeshVisible", true,  "Visible", "It makes the selected layer(s) visible or invisible."));
+        parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
+        parlst.addParam(RichString("lName", "", "Substring match", "Apply visibility to all layers with name substring matching the entered string. If not empty, the first parameter is ignored."));
+        parlst.addParam(RichBool ("isMeshVisible", true,  "Visible", "It makes the selected layer(s) visible or invisible."));
         break;
         
 	case FP_EXPORT_CAMERAS:
-		parlst.addParam(new RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format, The filter enables to export the cameras to both Bundler and Agisoft Photoscan."));
-		parlst.addParam(new RichString("newName",
+		parlst.addParam(RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format, The filter enables to export the cameras to both Bundler and Agisoft Photoscan."));
+		parlst.addParam(RichString("newName",
 			"cameras",
 			"Export file name (the right extension will be added at the end)",
 			"Name of the output file, it will be saved in the same folder as the project file"));
 		break;
 	case FP_IMPORT_CAMERAS:
-		parlst.addParam(new RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
+		parlst.addParam(RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
 		break;
     default: break; // do not add any parameter for the other filters
     }
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
  CMeshO::FaceIterator fi;
  int numFacesSel,numVertSel;

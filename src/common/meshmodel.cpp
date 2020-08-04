@@ -30,6 +30,7 @@
 #include "mlexception.h"
 #include "ml_shared_data_context.h"
 
+#include <QDir>
 #include <utility>
 
 using namespace vcg;
