@@ -1228,7 +1228,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
         {
             meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
             if (meshDoc()->mm() != NULL)
-                meshDoc()->mm()->meshModified() = true;
+				meshDoc()->mm()->setMeshModified();
             MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
             if(GLA())
             {
@@ -2467,7 +2467,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         defaultExt = "*.ply";
     if (mod == NULL)
         return false;
-    mod->meshModified() = false;
+	mod->setMeshModified(false);
     QString laylabel = "Save \"" + mod->label() + "\" Layer";
     QString ss = fi.absoluteFilePath();
     QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());

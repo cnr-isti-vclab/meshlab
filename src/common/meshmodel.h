@@ -208,7 +208,7 @@ public:
     void setLabel(QString newName) {_label=newName;}
 
     bool visible; // used in rendering; Needed for toggling on and off the meshes
-    bool isVisible() { return visible; }
+	bool isVisible() const { return visible; }
 
     // This function is roughly equivalent to the updateDataMask,
     // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
@@ -221,7 +221,8 @@ public:
     int dataMask() const;
 
 
-    bool& meshModified();
+	bool meshModified() const;
+	void setMeshModified(bool b = true);
     static int io2mm(int single_iobit);
 };// end class MeshModel
 

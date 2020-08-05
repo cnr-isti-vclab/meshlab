@@ -1129,7 +1129,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
     {
         Logf(GLLogStream::SYSTEM,"Started Mode %s", qUtf8Printable(currentEditor->text()));
 		if(mm()!=NULL)
-            mm()->meshModified() = true;
+			mm()->setMeshModified();
         else assert(!iEdit->isSingleMeshEdit());
 		update();
     }

@@ -143,7 +143,7 @@ public :
 
 	Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 
-    const Box3m &trBB()
+	const Box3m &trBB() const
     {
         static Box3m bb;
         bb.SetNull();

@@ -343,7 +343,7 @@ MeshDocument::MeshDocument()
 
 void MeshModel::Clear()
 {
-    meshModified() = false;
+	setMeshModified(false);
     // These data are always active on the mesh
     currentDataMask = MM_NONE;
     currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
@@ -764,9 +764,14 @@ void MeshModel::Enable(int openingFileMask)
     if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
 }
 
-bool& MeshModel::meshModified()
+bool MeshModel::meshModified() const
 {
-    return this->modified;
+	return modified;
+}
+
+void MeshModel::setMeshModified(bool b)
+{
+	modified = b;
 }
 
 int MeshModel::dataMask() const
