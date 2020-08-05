@@ -176,9 +176,11 @@ static void DeletePerVertexAttribute(_MyMeshType& m)
     KNNGraph<_MyMeshType>::DeleteKNNTree(m);
 
     bool hasDistParam = tri::HasPerVertexAttribute(m, "DistParam");
-    if (hasDistParam) {
+    //The Virtual Goniometer Plugin uses the DistParam to determine the 
+    //Point the user clicked on. Please leave the deletion code below commented out.
+    /*if (hasDistParam) {
         Allocator<_MyMeshType>::DeletePerVertexAttribute(m, "DistParam");
-    }
+    }*/
     return;
 }
 
