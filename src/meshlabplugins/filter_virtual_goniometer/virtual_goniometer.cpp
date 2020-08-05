@@ -155,7 +155,7 @@ int index_first_selected(MeshModel &m){
 }
 
 
-void VirtualGoniometerFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
+void VirtualGoniometerFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst)
 {
  switch(ID(action))
  {
@@ -172,11 +172,11 @@ void VirtualGoniometerFilterPlugin::initParameterSet(QAction *action, MeshModel 
             y = m.cm.vert[i].P()[1];
             z = m.cm.vert[i].P()[2];
          }
-         parlst.addParam(new RichPoint3f("Location", Point3f(x,y,z), "Location", "Location on mesh to run Virtual Goniometer."));
-         parlst.addParam(new RichFloat("Radius", 3.0, "Radius", "Radius of patch to use."));
-         parlst.addParam(new RichDynamicFloat("SegParam",SegParam,0.0,5.0,"Segmentation Parameter", "Parameter controlling how much influence the geometry has in segmentation."));
-         parlst.addParam(new RichBool("Automatic Radius", FALSE,"Burst measurements", "Use automatic radius selection and take multiple measurements."));
-         parlst.addParam(new RichBool("UpdateParam", FALSE, "Update Parameter Only", "Only update the segmentation parameter, and do not run the virtual goniometer."));
+         parlst.addParam(RichPoint3f("Location", Point3f(x,y,z), "Location", "Location on mesh to run Virtual Goniometer."));
+         parlst.addParam(RichFloat("Radius", 3.0, "Radius", "Radius of patch to use."));
+         parlst.addParam(RichDynamicFloat("SegParam",SegParam,0.0,5.0,"Segmentation Parameter", "Parameter controlling how much influence the geometry has in segmentation."));
+         parlst.addParam(RichBool("Automatic Radius", FALSE,"Burst measurements", "Use automatic radius selection and take multiple measurements."));
+         parlst.addParam(RichBool("UpdateParam", FALSE, "Update Parameter Only", "Only update the segmentation parameter, and do not run the virtual goniometer."));
       }
       break;
 
@@ -191,7 +191,7 @@ void VirtualGoniometerFilterPlugin::initParameterSet(QAction *action, MeshModel 
 	} 
 	case FP_QUALITY_VIRTUAL_GONIOMETER_RESET:
 	{
-      parlst.addParam(new RichBool("Load", FALSE, "Load from CSV file.", "Load measurements from CSV file."));
+      parlst.addParam(RichBool("Load", FALSE, "Load from CSV file.", "Load measurements from CSV file."));
 	} break;
 
  }
@@ -859,7 +859,8 @@ void get_date_time(char *dt){
 }
 
 //Main code here
-bool VirtualGoniometerFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+//bool VirtualGoniometerFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterList & par, vcg::CallBackPos * cb)
 {
    if (md.mm() == NULL)
       return false;
