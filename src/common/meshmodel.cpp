@@ -43,42 +43,60 @@ MeshDocument::~MeshDocument()
         delete mmp;
     foreach(RasterModel* rmp,rasterList)
         delete rmp;
-    delete filterHistory;
+	delete filterHistory;
+}
+
+const MeshModel* MeshDocument::getMesh(int id) const
+{
+	for (const MeshModel* m : meshList)
+		if (m->id() == id)
+			return m;
+	return nullptr;
 }
 
 //returns the mesh ata given position in the list
-MeshModel *MeshDocument::getMesh(int i)
+MeshModel* MeshDocument::getMesh(int id)
 {
-    foreach(MeshModel *mmp, meshList)
-    {
-        if(mmp->id() == i) return mmp;
-    }
-    //assert(0);
-    return 0;
+	for (MeshModel* m : meshList)
+		if (m->id() == id)
+			return m;
+	return nullptr;
 }
 
-MeshModel *MeshDocument::getMesh(const QString& name)
+const MeshModel* MeshDocument::getMesh(const QString& name) const
 {
-    foreach(MeshModel *mmp, meshList)
-    {
-        if(mmp->shortName() == name) return mmp;
-    }
-    //assert(0);
-    return 0;
+	for (const MeshModel* m : meshList)
+		if (m->shortName() == name)
+			return m;
+	return nullptr;
 }
 
-MeshModel *MeshDocument::getMeshByFullName(const QString& pathName)
+MeshModel* MeshDocument::getMesh(const QString& name)
 {
-    foreach(MeshModel *mmp, meshList)
-    {
-        if(mmp->fullName() == pathName) return mmp;
-    }
-    //assert(0);
-    return 0;
+	for (MeshModel* m : meshList)
+		if (m->shortName() == name)
+			return m;
+	return nullptr;
+}
+
+const MeshModel* MeshDocument::getMeshByFullName(const QString& pathName) const
+{
+	for (const MeshModel* m : meshList)
+		if (m->fullName() == pathName)
+			return m;
+	return nullptr;
+}
+
+MeshModel* MeshDocument::getMeshByFullName(const QString& pathName)
+{
+	for (MeshModel* m : meshList)
+		if (m->fullName() == pathName)
+			return m;
+	return nullptr;
 }
 
 
-void MeshDocument::setCurrentMesh( int new_curr_id)
+void MeshDocument::setCurrentMesh(int new_curr_id)
 {
     if(new_curr_id<0)
     {

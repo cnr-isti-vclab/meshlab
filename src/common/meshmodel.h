@@ -474,20 +474,22 @@ private:
 
 class MeshDocument : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    MeshDocument();
+	MeshDocument();
 
-    //deletes each meshModel
-    ~MeshDocument();
+	//deletes each meshModel
+	~MeshDocument();
 
-    /// returns the mesh with the given unique id
-    MeshModel *getMesh(int id);
-    MeshModel *getMesh(const QString& name);
-    MeshModel *getMeshByFullName(const QString& pathName);
-
+	///returns the mesh with the given unique id
+	const MeshModel* getMesh(int id) const;
+	MeshModel *getMesh(int id);
+	const MeshModel *getMesh(const QString& name) const;
+	MeshModel *getMesh(const QString& name);
+	const MeshModel *getMeshByFullName(const QString& pathName) const;
+	MeshModel *getMeshByFullName(const QString& pathName);
 
     //set the current mesh to be the one with the given ID
     void setCurrentMesh( int new_curr_id );
