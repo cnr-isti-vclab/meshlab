@@ -50,6 +50,7 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 	FilterGeodesic();
 	~FilterGeodesic();
 
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 

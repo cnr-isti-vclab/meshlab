@@ -58,6 +58,11 @@ QhullPlugin::~QhullPlugin()
         delete actionList.at(i);
 }
 
+QString QhullPlugin::pluginName() const
+{
+    return "FilterQHull";
+}
+
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
  QString QhullPlugin::filterName(FilterIDType filterId) const

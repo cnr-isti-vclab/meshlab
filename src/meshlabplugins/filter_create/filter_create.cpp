@@ -44,6 +44,11 @@ FilterCreate::FilterCreate()
       actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterCreate::pluginName() const
+{
+    return "FilterCreate";
+}
+
 QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
@@ -564,8 +569,8 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
 		case CR_FITPLANE:  return QString("fitplane");
 		default : assert(0);
     }
-	return NULL;
- }
+    return NULL;
+}
 
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterCreate)

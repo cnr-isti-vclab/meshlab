@@ -54,6 +54,11 @@ FilterCreateIso::~FilterCreateIso() {
         delete actionList.at(i);
 }
 
+QString FilterCreateIso::pluginName() const
+{
+    return "FilterCreateIso";
+}
+
  QString FilterCreateIso::filterName(FilterIDType filter) const
 {
     switch(filter)

@@ -56,8 +56,9 @@ class ColladaIOPlugin : public QObject, public MeshIOInterface
 	 //std::map<MeshModel*,typename vcg::tri::io::InfoDAE*> _mp;
 	 std::vector<MeshModel*> _mp;
 
+	QString pluginName() const;
 	QList<Format> importFormats() const;
-  QList<Format> exportFormats() const;
+	QList<Format> exportFormats() const;
 
 	void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 	void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/);

@@ -45,6 +45,11 @@ const QString EditPaintPlugin::Info() {
 	return tr("Improved Painting");
 }
 
+QString EditPaintPlugin::pluginName() const
+{
+	return "EditPaint";
+}
+
 void EditPaintPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
 {
 	if (m.cm.VN() == 0)

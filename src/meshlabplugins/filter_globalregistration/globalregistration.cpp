@@ -38,6 +38,11 @@ GlobalRegistrationPlugin::GlobalRegistrationPlugin()
       actionList << new QAction(filterName(tt), this);
 }
 
+QString GlobalRegistrationPlugin::pluginName() const
+{
+    return "FilterGlobalRegistration";
+}
+
 QString GlobalRegistrationPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {

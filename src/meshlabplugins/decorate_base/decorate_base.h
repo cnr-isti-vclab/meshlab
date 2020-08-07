@@ -40,6 +40,7 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
   Q_INTERFACES(MeshDecorateInterface)
   QString decorationName(FilterIDType filter) const;
   QString decorationInfo(FilterIDType filter) const;
+  QString pluginName() const;
 
   enum {
 	DP_SHOW_AXIS,

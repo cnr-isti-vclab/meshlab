@@ -37,7 +37,12 @@ ExtraSampleGPUPlugin::ExtraSampleGPUPlugin()
 	typeList << FP_GPU_EXAMPLE;
 
   foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
+}
+
+QString ExtraSampleGPUPlugin::pluginName() const
+{
+    return "FilterSampleGPU";
 }
 
 // ST() must return the very short string describing each filtering action

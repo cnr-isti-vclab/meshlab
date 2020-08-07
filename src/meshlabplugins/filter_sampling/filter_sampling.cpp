@@ -366,7 +366,12 @@ FilterDocSampling::FilterDocSampling()
          ;
 
   foreach(FilterIDType tt , types())
-    actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
+}
+
+QString FilterDocSampling::pluginName() const
+{
+    return "FilterSampling";
 }
 
 // ST() must return the very short string describing each filtering action

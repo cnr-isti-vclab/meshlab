@@ -41,6 +41,8 @@ class IOMPlugin : public QObject, public MeshIOInterface
 
   
 public:
+	QString pluginName() const;
+
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 

@@ -44,7 +44,7 @@ FilterMutualInfoPlugin::FilterMutualInfoPlugin()
 
 QString FilterMutualInfoPlugin::pluginName() const
 {
-	return "FilterMutualInfoPlugin";
+	return "FilterMutualInfo";
 }
 
 QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const

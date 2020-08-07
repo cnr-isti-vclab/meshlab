@@ -62,6 +62,7 @@ public:
 
 	MlsPlugin();
 
+	QString pluginName() const;
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
     FilterClass getClass(QAction *a);

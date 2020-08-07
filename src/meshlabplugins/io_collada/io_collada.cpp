@@ -212,6 +212,11 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 /*
 	returns the list of the file's type which can be imported
 */
+QString ColladaIOPlugin::pluginName() const
+{
+	return "IOCollada";
+}
+
 QList<MeshIOInterface::Format> ColladaIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

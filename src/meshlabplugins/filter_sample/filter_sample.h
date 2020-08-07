@@ -52,7 +52,7 @@ public:
 
 	FilterSamplePlugin();
 
-	virtual QString pluginName(void) const;
+	QString pluginName() const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;

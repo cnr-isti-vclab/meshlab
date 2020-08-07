@@ -49,7 +49,7 @@ FilterVoronoiPlugin::FilterVoronoiPlugin()
 
 QString FilterVoronoiPlugin::pluginName() const
 {
-	return "VoronoiTechniques";
+	return "FilterVoronoi";
 }
 
 QString FilterVoronoiPlugin::filterName(FilterIDType filterId) const

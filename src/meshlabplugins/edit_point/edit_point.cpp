@@ -46,6 +46,11 @@ const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 
+QString EditPointPlugin::pluginName() const
+{
+    return "EditPoint";
+}
+
 void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
 {
   this->RealTimeLog("Point Selection",m.shortName(),

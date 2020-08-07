@@ -120,6 +120,11 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 /*
 	returns the list of the file's type which can be imported
 */
+QString U3DIOPlugin::pluginName() const
+{
+	return "IOU3D";
+}
+
 QList<MeshIOInterface::Format> U3DIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

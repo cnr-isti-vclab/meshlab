@@ -52,7 +52,12 @@ FilterIsoParametrization::FilterIsoParametrization()
 FilterIsoParametrization::~FilterIsoParametrization()
 {
   for (int i = 0; i < actionList.count() ; i++ )
-    delete actionList.at(i);
+      delete actionList.at(i);
+}
+
+QString FilterIsoParametrization::pluginName() const
+{
+    return "FilterIsoParametrization";
 }
 
 QString FilterIsoParametrization::filterName(FilterIDType filter) const

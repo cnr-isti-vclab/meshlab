@@ -74,6 +74,11 @@ MlsPlugin::MlsPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString MlsPlugin::pluginName() const
+{
+    return "FilterMLS";
+}
+
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
  QString MlsPlugin::filterName(FilterIDType filterId) const

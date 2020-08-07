@@ -33,6 +33,11 @@
 using namespace std;
 using namespace vcg;
 
+QString MeshShaderRenderPlugin::pluginName() const
+{
+	return "RenderGDP";
+}
+
 void MeshShaderRenderPlugin::initActionList() {
 
 	/*QAction * qaNone = new QAction("None", this);

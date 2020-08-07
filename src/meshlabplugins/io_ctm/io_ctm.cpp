@@ -66,6 +66,11 @@ bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, Me
 /*
 	returns the list of the file's type which can be imported
 */
+QString IOMPlugin::pluginName() const
+{
+	return "IOCTM";
+}
+
 QList<MeshIOInterface::Format> IOMPlugin::importFormats() const
 {
 	QList<Format> formatList;

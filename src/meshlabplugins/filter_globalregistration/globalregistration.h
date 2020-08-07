@@ -37,7 +37,7 @@ public:
 
     GlobalRegistrationPlugin();
 
-    virtual QString pluginName(void) const { return "GlobalRegistrationPlugin"; }
+    QString pluginName() const;
 
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;

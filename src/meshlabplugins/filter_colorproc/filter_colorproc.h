@@ -67,6 +67,7 @@ public:
     FilterColorProc();
     ~FilterColorProc();
 
+    QString pluginName() const;
     virtual FilterClass getClass(QAction *);
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;

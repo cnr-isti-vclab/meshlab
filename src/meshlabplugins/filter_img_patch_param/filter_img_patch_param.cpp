@@ -52,6 +52,11 @@ FilterImgPatchParamPlugin::~FilterImgPatchParamPlugin()
     m_Context = NULL;
 }
 
+QString FilterImgPatchParamPlugin::pluginName() const
+{
+    return "FilterImagePatchParametrization";
+}
+
 
 QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
 {

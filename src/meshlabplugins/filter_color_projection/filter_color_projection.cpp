@@ -66,6 +66,11 @@ FilterColorProjectionPlugin::FilterColorProjectionPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterColorProjectionPlugin::pluginName() const
+{
+    return "FilterColorProjection";
+}
+
 // ST() return the very short string describing each filtering action
 QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 {

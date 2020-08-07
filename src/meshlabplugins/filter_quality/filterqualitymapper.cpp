@@ -39,7 +39,12 @@ QualityMapperFilter::QualityMapperFilter()
 	typeList << FP_QUALITY_MAPPER;
   
   foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
+}
+
+QString QualityMapperFilter::pluginName() const
+{
+    return "FilterQuality";
 }
 
 // ST() must return the very short string describing each filtering action 

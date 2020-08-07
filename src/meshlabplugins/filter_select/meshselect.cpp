@@ -109,7 +109,12 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 		  actionList.last()->setIcon(QIcon(":/images/sel_minus.png"));
 		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
-    }
+  }
+}
+
+QString SelectionFilterPlugin::pluginName() const
+{
+    return "FlterSelect";
 }
 
  QString SelectionFilterPlugin::filterName(FilterIDType filter) const

@@ -51,6 +51,11 @@ FilterTexturePlugin::FilterTexturePlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterTexturePlugin::pluginName() const
+{
+    return "FilterTexture";
+}
+
 QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 {
     switch(filterId)

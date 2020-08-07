@@ -56,6 +56,8 @@ public:
 		sDialog = 0;
 	}
 
+	QString pluginName() const;
+
 	QList<QAction *> actions() 
 	{
 		if (actionList.isEmpty()) initActionList();

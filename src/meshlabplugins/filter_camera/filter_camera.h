@@ -45,6 +45,7 @@ public:
         FP_ORIENT_NORMALS_WITH_CAMERAS};
 
 	FilterCameraPlugin();
+	QString pluginName() const;
 	int getPreConditions(QAction *) const;
 	int postCondition(QAction * filter) const;
 	virtual QString filterName(FilterIDType filter) const;

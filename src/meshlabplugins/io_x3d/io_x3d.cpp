@@ -150,6 +150,11 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 /*
     returns the list of the file's type which can be imported
 */
+QString IoX3DPlugin::pluginName() const
+{
+    return "IOX3D";
+}
+
 QList<MeshIOInterface::Format> IoX3DPlugin::importFormats() const
 {
     QList<Format> formatList;

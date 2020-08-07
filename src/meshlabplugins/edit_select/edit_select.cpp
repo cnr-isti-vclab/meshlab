@@ -41,6 +41,11 @@ QString EditSelectPlugin::Info()
 	return tr("Interactive selection inside a dragged rectangle in screen space");
 }
 
+QString EditSelectPlugin::pluginName() const
+{
+	return "EditSelect";
+}
+
 void EditSelectPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData & dt)
 {
 	MLPerViewGLOptions opts;

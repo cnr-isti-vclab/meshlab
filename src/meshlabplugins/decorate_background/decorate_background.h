@@ -44,6 +44,7 @@ class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
   Q_INTERFACES(MeshDecorateInterface)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;
+  QString pluginName() const;
 
   enum {
     DP_SHOW_CUBEMAPPED_ENV,

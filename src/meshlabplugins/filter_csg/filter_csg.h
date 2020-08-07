@@ -53,6 +53,7 @@ public:
     FilterCSG();
     ~FilterCSG() {};
 
+    QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 

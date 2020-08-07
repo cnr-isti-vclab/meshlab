@@ -38,7 +38,7 @@ public:
 
 	FilterSketchFabPlugin();
 
-	virtual QString pluginName(void) const;
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	FilterClass getClass(QAction *a);

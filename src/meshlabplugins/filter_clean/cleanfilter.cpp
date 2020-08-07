@@ -69,6 +69,11 @@ CleanFilter::~CleanFilter() {
         delete actionList.at(i);
 }
 
+QString CleanFilter::pluginName() const
+{
+    return "FilterClean";
+}
+
 QString CleanFilter::filterName(FilterIDType filter) const
 {
   switch(filter)

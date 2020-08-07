@@ -59,6 +59,11 @@ FilterLayerPlugin::FilterLayerPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterLayerPlugin::pluginName() const
+{
+    return "FilterLayer";
+}
+
 // ST() return the very short string describing each filtering action
 QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 {

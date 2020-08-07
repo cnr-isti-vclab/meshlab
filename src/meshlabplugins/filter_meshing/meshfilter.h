@@ -83,6 +83,7 @@ public:
 
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin(){}
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 

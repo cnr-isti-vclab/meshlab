@@ -63,6 +63,11 @@ FilterFunctionPlugin::~FilterFunctionPlugin()
         delete actionList.at(i);
 }
 
+QString FilterFunctionPlugin::pluginName() const
+{
+    return "FilterFunc";
+}
+
 // short string describing each filtering action
 QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
 {

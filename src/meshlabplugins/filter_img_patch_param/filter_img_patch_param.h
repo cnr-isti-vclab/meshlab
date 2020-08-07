@@ -99,6 +99,7 @@ public:
     FilterImgPatchParamPlugin();
     ~FilterImgPatchParamPlugin();
 
+    QString pluginName() const;
     virtual QString     filterName( FilterIDType id ) const;
     virtual QString     filterInfo( FilterIDType id ) const;
 

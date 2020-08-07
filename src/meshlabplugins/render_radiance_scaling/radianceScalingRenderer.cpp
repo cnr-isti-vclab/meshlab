@@ -54,6 +54,11 @@ RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
 
 }
 
+QString RadianceScalingRendererPlugin::pluginName() const
+{
+	return "RenderRadianceScaling";
+}
+
 void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla) {
 	if (_sDialog) {
 		_sDialog->close();

@@ -51,6 +51,7 @@ class FilterDocSampling : public QObject, public MeshFilterInterface
 
   FilterDocSampling();
 
+  QString pluginName() const;
   QString filterName(FilterIDType filter) const;
   QString filterInfo(FilterIDType filter) const;
   void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);

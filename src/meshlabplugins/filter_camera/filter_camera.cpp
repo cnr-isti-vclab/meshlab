@@ -47,6 +47,11 @@ FilterCameraPlugin::FilterCameraPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterCameraPlugin::pluginName() const
+{
+    return "FilterCamera";
+}
+
 // ST() return the very short string describing each filtering action
 QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 {

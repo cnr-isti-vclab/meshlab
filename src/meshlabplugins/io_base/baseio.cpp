@@ -421,6 +421,11 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	return false;
 }
 
+QString BaseMeshIOPlugin::pluginName() const
+{
+	return "IOBase";
+}
+
 /*
 	returns the list of the file's type which can be imported
 */

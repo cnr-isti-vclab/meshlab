@@ -66,6 +66,11 @@ FilterUnsharp::~FilterUnsharp() {
         delete actionList.at(i);
 }
 
+QString FilterUnsharp::pluginName() const
+{
+    return "FilterUnsharp";
+}
+
 QString FilterUnsharp::filterName(FilterIDType filter) const
 {
   switch(filter)

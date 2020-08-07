@@ -55,6 +55,11 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     return QString();
 }
 
+QString DecorateBasePlugin::pluginName() const
+{
+    return "DecorateBase";
+}
+
 QString DecorateBasePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)

@@ -119,6 +119,11 @@ TriOptimizePlugin::TriOptimizePlugin()
 		actionList << new QAction(filterName(tt), this);
 }
 
+QString TriOptimizePlugin::pluginName() const
+{
+	return "FilterTriOptimize";
+}
+
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)

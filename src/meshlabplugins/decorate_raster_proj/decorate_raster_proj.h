@@ -87,6 +87,7 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
 public:
     DecorateRasterProjPlugin();
     ~DecorateRasterProjPlugin();
+    QString pluginName() const;
 
 
     // Member functions.

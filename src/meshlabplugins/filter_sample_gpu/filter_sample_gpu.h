@@ -49,7 +49,7 @@ public:
 
 	ExtraSampleGPUPlugin();
 
-	virtual QString pluginName(void) const { return "ExtraSampleGPUPlugin"; }
+    QString pluginName() const;
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 	void initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst);
 

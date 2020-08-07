@@ -39,7 +39,12 @@ ExtraSampleDynPlugin::ExtraSampleDynPlugin()
 	typeList << FP_VERTEX_COLOR_NOISE;
   
   foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
+}
+
+QString ExtraSampleDynPlugin::pluginName() const
+{
+    return "FilterSampleDyn";
 }
 
 // ST() must return the very short string describing each filtering action 

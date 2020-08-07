@@ -38,7 +38,7 @@ FilterSamplePlugin::FilterSamplePlugin()
 
 QString FilterSamplePlugin::pluginName() const
 {
-	return "ExtraSamplePlugin";
+    return "FilterSample";
 }
 
 /**

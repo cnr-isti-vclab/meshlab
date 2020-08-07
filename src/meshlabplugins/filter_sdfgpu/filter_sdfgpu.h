@@ -23,6 +23,8 @@ public:
 
     SdfGpuPlugin();
 
+    QString pluginName() const;
+
     QString filterName(FilterIDType filterId) const;
 
     QString filterInfo(FilterIDType filterId) const;

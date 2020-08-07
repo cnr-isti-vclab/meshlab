@@ -250,6 +250,11 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 	return formatList;
 }
 
+QString ExtraMeshIOPlugin::pluginName() const
+{
+	return "IO3DS";
+}
+
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown

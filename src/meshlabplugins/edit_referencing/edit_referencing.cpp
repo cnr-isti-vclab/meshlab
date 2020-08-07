@@ -76,6 +76,11 @@ const QString EditReferencingPlugin::Info()
 {
     return tr("Reference layer(s) using fiducial points or scale layer(s) using reference distances.");
 }
+
+QString EditReferencingPlugin::pluginName() const
+{
+    return "EditReferencing";
+}
  
 void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {

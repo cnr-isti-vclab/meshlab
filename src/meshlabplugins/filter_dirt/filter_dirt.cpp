@@ -55,7 +55,12 @@ FilterDirt::FilterDirt()
 
     FilterIDType tt;
     foreach(tt , types())
-    actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(filterName(tt), this);
+}
+
+QString FilterDirt::pluginName() const
+{
+    return "FilterDirt";
 }
 
 QString FilterDirt::filterName(FilterIDType filterId) const

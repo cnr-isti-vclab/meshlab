@@ -67,6 +67,7 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	FilterUnsharp();
 	~FilterUnsharp();
 
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	FilterClass getClass(QAction *);

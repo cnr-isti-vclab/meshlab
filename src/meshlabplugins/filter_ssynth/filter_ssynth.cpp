@@ -26,6 +26,11 @@ FilterSSynth::FilterSSynth(){
         actionList << new QAction(filterName(tt), this);
     //num=0;
 }
+
+QString FilterSSynth::pluginName() const
+{
+    return "FilterSSynth";
+}
 //FilterSSynth::~FilterSSynth(){}
 QString FilterSSynth::filterName(FilterIDType filter) const
 {

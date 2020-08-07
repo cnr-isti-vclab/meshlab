@@ -55,6 +55,11 @@ FilterGeodesic::~FilterGeodesic() {
 		delete actionList.at(i);
 }
 
+QString FilterGeodesic::pluginName() const
+{
+	return "FilterGeodesic";
+}
+
 QString FilterGeodesic::filterName(FilterIDType filter) const
 {
 	switch(filter)

@@ -82,6 +82,11 @@ bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int,
 /*
 	returns the list of the file's type which can be imported
 */
+QString TriIOPlugin::pluginName() const
+{
+	return "IOTRI";
+}
+
 QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

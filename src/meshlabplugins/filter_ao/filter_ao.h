@@ -68,6 +68,7 @@ public:
     AmbientOcclusionPlugin();
     ~AmbientOcclusionPlugin();
 
+    QString pluginName() const;
     QString filterName(FilterIDType filter) const;
     QString	filterInfo(FilterIDType filterId) const;
 	FILTER_ARITY filterArity(QAction*) const;

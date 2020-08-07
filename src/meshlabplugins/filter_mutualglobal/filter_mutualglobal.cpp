@@ -46,7 +46,7 @@ AlignSet alignset;
 
 
 
-FilterMutualInfoPlugin::FilterMutualInfoPlugin()
+FilterMutualGlobal::FilterMutualGlobal()
 {
     typeList << FP_IMAGE_GLOBALIGN;
 
@@ -54,9 +54,14 @@ FilterMutualInfoPlugin::FilterMutualInfoPlugin()
       actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterMutualGlobal::pluginName() const
+{
+    return "FilterMutualGlobal";
+}
+
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
+QString FilterMutualGlobal::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
         case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information");
@@ -67,7 +72,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
+ QString FilterMutualGlobal::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
         case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!");
@@ -79,7 +84,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
-FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
+FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(QAction *a)
 {
   switch(ID(a))
     {
@@ -96,7 +101,7 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterList & parlst)
+void FilterMutualGlobal::initParameterSet(QAction *action,MeshDocument & md, RichParameterList & parlst)
 {
 	QStringList rendList;
 	switch(ID(action))	 {
@@ -153,7 +158,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterMutualGlobal::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	QElapsedTimer filterTime;
 	filterTime.start();
@@ -231,7 +236,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, cons
 
 }
 
-float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points)
+float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points)
 {
 	std::vector<float> distances;
 	for (int i=0; i<points.size(); i++)
@@ -257,7 +262,7 @@ float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<
 
 }
 
-void FilterMutualInfoPlugin::initGL()
+void FilterMutualGlobal::initGL()
 {
   Log(0, "GL Initialization");
   if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
@@ -322,7 +327,7 @@ void FilterMutualInfoPlugin::initGL()
 
 }
 
-QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID )
+QString FilterMutualGlobal::filterScriptFunctionName( FilterIDType filterID )
 {
 	switch(filterID) {
 		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment");
@@ -331,7 +336,7 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 	return QString();
 }
 
-bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	Solver solver;
 	MutualInfo mutual;
@@ -451,7 +456,7 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, const RichParameterL
 	return true;
 }
 
-std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md, bool globalign)
+std::vector<SubGraph> FilterMutualGlobal::buildGraph(MeshDocument &md, bool globalign)
 {
 
 	std::vector<AlignPair> allArcs;
@@ -462,7 +467,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md, bool 
 
 }
 
-std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool globalign)
+std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool globalign)
 {
 	Solver solver;
 	MutualInfo mutual;
@@ -663,7 +668,7 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 
 }
 
-std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs)
+std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs)
 {
 	std::vector<SubGraph> Gr;
 	SubGraph allNodes;
@@ -790,7 +795,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 	return Gr;
 }
 
-bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs)
+bool FilterMutualGlobal::AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs)
 {
 	for (int j=0; j<1; j++)
 	{
@@ -821,7 +826,7 @@ bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph>
 	return true;
 }
 
-int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
+int FilterMutualGlobal::getTheRightNode(SubGraph graph)
 {
 	int bestLinks=0; int bestActive=-1;
 	int cand;
@@ -853,7 +858,7 @@ int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
 
 }
 
-bool FilterMutualInfoPlugin::allActive(SubGraph graph)
+bool FilterMutualGlobal::allActive(SubGraph graph)
 {
 	for (int k=0; k<graph.nodes.size(); k++)
 	{
@@ -865,7 +870,7 @@ bool FilterMutualInfoPlugin::allActive(SubGraph graph)
 
 }
 
-bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
+bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 {
 	Solver solver;
 	MutualInfo mutual;
@@ -990,7 +995,7 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	return true;
 }
 
-bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
+bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 {
 	Solver solver;
 	MutualInfo mutual;

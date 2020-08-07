@@ -39,6 +39,7 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 	Q_INTERFACES(MeshIOInterface)
 
 public:
+	QString pluginName() const;
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 

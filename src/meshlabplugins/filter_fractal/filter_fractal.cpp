@@ -35,6 +35,11 @@ FilterFractal::FilterFractal()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterFractal::pluginName() const
+{
+    return "FilterFractal";
+}
+
 QString FilterFractal::filterName(FilterIDType filterId) const
 {
     switch (filterId) 

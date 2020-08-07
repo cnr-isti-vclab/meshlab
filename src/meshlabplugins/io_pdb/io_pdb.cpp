@@ -143,6 +143,11 @@ bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName
 /*
 	returns the list of the file's type which can be imported
 */
+QString PDBIOPlugin::pluginName() const
+{
+	return "IOPDB";
+}
+
 QList<MeshIOInterface::Format> PDBIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

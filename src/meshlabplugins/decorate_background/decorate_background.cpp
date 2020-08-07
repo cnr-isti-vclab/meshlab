@@ -56,6 +56,11 @@ QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
     return QString();
 }
 
+QString DecorateBackgroundPlugin::pluginName() const
+{
+    return "DecorateBackGround";
+}
+
 void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
 {
     switch(ID(action))

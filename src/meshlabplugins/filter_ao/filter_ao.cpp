@@ -64,6 +64,11 @@ AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
 {
 }
 
+QString AmbientOcclusionPlugin::pluginName() const
+{
+    return "FilterAmbientOcclusion";
+}
+
 QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 {
     switch(filterId)

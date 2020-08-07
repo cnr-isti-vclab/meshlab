@@ -46,7 +46,7 @@ public:
 
 	FilterMeasurePlugin();
 
-	virtual QString pluginName(void) const { return "FilterMeasure"; }
+	QString pluginName() const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;

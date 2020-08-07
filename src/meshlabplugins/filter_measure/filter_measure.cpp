@@ -54,6 +54,11 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 		actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterMeasurePlugin::pluginName() const
+{
+	return "FilterMeasure";
+}
+
 QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
 	switch (filterId) {

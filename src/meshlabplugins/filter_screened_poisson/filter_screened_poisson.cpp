@@ -45,6 +45,11 @@ FilterScreenedPoissonPlugin::~FilterScreenedPoissonPlugin()
 	}
 }
 
+QString FilterScreenedPoissonPlugin::pluginName() const
+{
+	return "FilterScreenedPoisson";
+}
+
 QString FilterScreenedPoissonPlugin::filterName(FilterIDType filter) const
 {
 	if (filter == FP_SCREENED_POISSON)

@@ -40,6 +40,7 @@ public:
 	FilterScreenedPoissonPlugin();
 	~FilterScreenedPoissonPlugin();
 
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 

@@ -145,6 +145,11 @@ bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, Mesh
 /*
 	returns the list of the file's type which can be imported
 */
+QString ExpeIOPlugin::pluginName() const
+{
+	return "IOExpe";
+}
+
 QList<MeshIOInterface::Format> ExpeIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

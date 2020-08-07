@@ -113,6 +113,11 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastisor_FeatureDeg          = 30.0f;
 }
 
+QString ExtraMeshFilterPlugin::pluginName() const
+{
+	return "FilterMeshing";
+}
+
 ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 {
 	switch (ID(a))

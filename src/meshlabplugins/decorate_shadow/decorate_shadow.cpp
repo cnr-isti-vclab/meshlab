@@ -43,6 +43,11 @@ QString DecorateShadowPlugin::decorationName(FilterIDType id) const
 	}
 }
 
+QString DecorateShadowPlugin::pluginName() const
+{
+	return "DecorateShadow";
+}
+
 void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
 {
 	switch (ID(action)) {

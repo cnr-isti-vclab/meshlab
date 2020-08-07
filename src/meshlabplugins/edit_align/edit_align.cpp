@@ -60,6 +60,11 @@ const QString EditAlignPlugin::Info()
     return tr("Allows one to align different layers together.");
 }
 
+QString EditAlignPlugin::pluginName() const
+{
+    return "EditAlign";
+}
+
 void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData& dt)
 {
 	MLPerViewGLOptions opts;

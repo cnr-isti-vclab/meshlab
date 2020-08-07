@@ -86,7 +86,7 @@ public:
         _decoratorSSAO = NULL;
     }
 
-
+	QString pluginName() const;
 	QList<QAction *> actions () const {return actionList;}
 	bool startDecorate(QAction * /*mode*/, MeshDocument & /*m*/, const RichParameterList  * /*parent*/ par, GLArea * /*parent*/);
 	void decorateMesh(QAction *, MeshModel &,  const RichParameterList  *, GLArea *, QPainter *, GLLogStream &){}

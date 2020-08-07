@@ -41,6 +41,11 @@ FilterCSG::FilterCSG()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterCSG::pluginName() const
+{
+    return "FilterCSG";
+}
+
 QString FilterCSG::filterName(FilterIDType filterId) const
 {
     switch (filterId) {

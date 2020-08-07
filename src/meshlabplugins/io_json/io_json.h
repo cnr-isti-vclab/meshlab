@@ -31,18 +31,20 @@ class JSONIOPlugin : public QObject, public MeshIOInterface
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
 	Q_INTERFACES(MeshIOInterface)
 
-	public:
+public:
 
-		JSONIOPlugin(void);
-		virtual ~JSONIOPlugin(void);
+	JSONIOPlugin(void);
+	virtual ~JSONIOPlugin(void);
 
-		QList<Format> importFormats(void) const;
-		QList<Format> exportFormats(void) const;
+	QString pluginName() const;
 
-		void GetExportMaskCapability(QString & format, int & capability, int & defaultBits) const;
+	QList<Format> importFormats(void) const;
+	QList<Format> exportFormats(void) const;
 
-		bool open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & par, vcg::CallBackPos * cb = 0, QWidget * parent = 0);
-		bool save(const QString & formatName, const QString & fileName, MeshModel & m, const int mask, const RichParameterList & par, vcg::CallBackPos * cb = 0, QWidget * parent = 0);
+	void GetExportMaskCapability(QString & format, int & capability, int & defaultBits) const;
+
+	bool open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & par, vcg::CallBackPos * cb = 0, QWidget * parent = 0);
+	bool save(const QString & formatName, const QString & fileName, MeshModel & m, const int mask, const RichParameterList & par, vcg::CallBackPos * cb = 0, QWidget * parent = 0);
 };
 
 #endif // JSONIOPLUGIN_H

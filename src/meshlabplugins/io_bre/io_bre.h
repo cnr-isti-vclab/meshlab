@@ -158,6 +158,7 @@ class BreMeshIOPlugin : public QObject, public MeshIOInterface
 public:
 	
   BreMeshIOPlugin() : MeshIOInterface() {}
+  QString pluginName() const;
 
   QList<Format> importFormats() const;
   QList<Format> exportFormats() const;

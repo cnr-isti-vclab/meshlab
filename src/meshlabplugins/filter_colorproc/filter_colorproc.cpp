@@ -82,6 +82,11 @@ FilterColorProc::~FilterColorProc()
         delete actionList.at(i);
 }
 
+QString FilterColorProc::pluginName() const
+{
+    return "FilterColorProc";
+}
+
  QString FilterColorProc::filterName(FilterIDType filter) const
 {
   switch(filter)

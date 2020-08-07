@@ -48,7 +48,12 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
 
 const QString EditManipulatorsPlugin::Info() 
 {
-	return tr("Provide tools for moving meshes around the space");
+    return tr("Provide tools for moving meshes around the space");
+}
+
+QString EditManipulatorsPlugin::pluginName() const
+{
+    return "EditManipulators";
 }
 
 void EditManipulatorsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * gla)

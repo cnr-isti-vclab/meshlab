@@ -69,6 +69,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 
 	SelectionFilterPlugin();
   //~SelectionFilterPlugin();
+    QString pluginName() const;
 	virtual QString filterInfo(FilterIDType filter) const;
   virtual QString filterName(FilterIDType filter) const;
   

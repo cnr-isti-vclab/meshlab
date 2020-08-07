@@ -40,6 +40,11 @@ JSONIOPlugin::~JSONIOPlugin(void)
 	;
 }
 
+QString JSONIOPlugin::pluginName() const
+{
+	return "IOJson";
+}
+
 bool JSONIOPlugin::open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & parlst, vcg::CallBackPos * cb, QWidget * parent)
 {
 	(void)formatName;

@@ -44,6 +44,7 @@ public:
 
 	TriOptimizePlugin();
 	
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);

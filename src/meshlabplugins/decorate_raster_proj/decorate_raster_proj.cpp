@@ -163,6 +163,11 @@ DecorateRasterProjPlugin::~DecorateRasterProjPlugin()
 {
 }
 
+QString DecorateRasterProjPlugin::pluginName() const
+{
+    return "DecorateRasterProj";
+}
+
 
 QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
 {

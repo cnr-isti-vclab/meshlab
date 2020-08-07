@@ -98,6 +98,11 @@ bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileNam
 /*
 	returns the list of the file's type which can be imported
 */
+QString TxtIOPlugin::pluginName() const
+{
+	return "IOTXT";
+}
+
 QList<MeshIOInterface::Format> TxtIOPlugin::importFormats() const
 {
 	QList<Format> formatList;

@@ -39,7 +39,7 @@ add sampleplugins
 #include <common/interfaces.h>
 #include "alignset.h"
 
-class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
+class FilterMutualGlobal : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
@@ -48,9 +48,9 @@ class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_IMAGE_GLOBALIGN} ;
 
-	FilterMutualInfoPlugin();
+	FilterMutualGlobal();
 
-	virtual QString pluginName(void) const { return "FilterMutualInfoPlugin"; }
+	QString pluginName() const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;

@@ -46,6 +46,7 @@ class RadianceScalingRendererPlugin : public QObject, public MeshRenderInterface
 
  public:
     RadianceScalingRendererPlugin();
+    QString pluginName() const;
     
     QList<QAction *> actions() {
       if(_actionList.isEmpty()) initActionList();

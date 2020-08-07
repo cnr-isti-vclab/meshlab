@@ -34,6 +34,11 @@ SdfGpuPlugin::SdfGpuPlugin()
 
 }
 
+QString SdfGpuPlugin::pluginName() const
+{
+    return "FilterSDFGPU";
+}
+
 void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterList &par)
 {
     mAction = ID(action);
