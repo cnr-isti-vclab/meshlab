@@ -37,79 +37,83 @@ using namespace vcg;
 
 SelectionFilterPlugin::SelectionFilterPlugin()
 {
-  typeList <<
-    FP_SELECT_ALL <<
-    FP_SELECT_NONE <<
-    FP_SELECTBYANGLE <<
-	FP_SELECT_UGLY <<
-    FP_SELECT_DELETE_VERT <<
-	FP_SELECT_DELETE_ALL_FACE <<
-    FP_SELECT_DELETE_FACE <<
-    FP_SELECT_DELETE_FACEVERT <<
-    FP_SELECT_FACE_FROM_VERT <<
-    FP_SELECT_VERT_FROM_FACE <<
-    FP_SELECT_ERODE <<
-    FP_SELECT_DILATE <<
-    FP_SELECT_BORDER <<
-    FP_SELECT_INVERT <<
-    FP_SELECT_CONNECTED <<
-    FP_SELECT_BY_VERT_QUALITY <<
-    FP_SELECT_BY_FACE_QUALITY <<
-    CP_SELFINTERSECT_SELECT <<
-    CP_SELECT_TEXBORDER <<
-    CP_SELECT_NON_MANIFOLD_FACE <<
-    CP_SELECT_NON_MANIFOLD_VERTEX <<
-    FP_SELECT_FACES_BY_EDGE <<            
-    FP_SELECT_BY_COLOR <<
-    FP_SELECT_FOLD_FACE << 
-    FP_SELECT_OUTLIER;
 
-  FilterIDType tt;
+    typeList <<
+                FP_SELECT_ALL <<
+                FP_SELECT_NONE <<
+                FP_SELECTBYANGLE <<
+                FP_SELECT_UGLY <<
+                FP_SELECT_DELETE_VERT <<
+                FP_SELECT_DELETE_ALL_FACE <<
+                FP_SELECT_DELETE_FACE <<
+                FP_SELECT_DELETE_FACEVERT <<
+                FP_SELECT_FACE_FROM_VERT <<
+                FP_SELECT_VERT_FROM_FACE <<
+                FP_SELECT_ERODE <<
+                FP_SELECT_DILATE <<
+                FP_SELECT_BORDER <<
+                FP_SELECT_INVERT <<
+                FP_SELECT_CONNECTED <<
+                FP_SELECT_BY_VERT_QUALITY <<
+                FP_SELECT_BY_FACE_QUALITY <<
+                CP_SELFINTERSECT_SELECT <<
+                CP_SELECT_TEXBORDER <<
+                CP_SELECT_NON_MANIFOLD_FACE <<
+                CP_SELECT_NON_MANIFOLD_VERTEX <<
+                FP_SELECT_FACES_BY_EDGE <<
+                FP_SELECT_BY_COLOR <<
+                FP_SELECT_FOLD_FACE <<
+                FP_SELECT_OUTLIER;
 
-  foreach(tt , types())
+    QCoreApplication* app = QCoreApplication::instance();
+
+    for(FilterIDType tt : types())
     {
-      actionList << new QAction(filterName(tt), this);
-      if(tt==FP_SELECT_DELETE_VERT){
-            actionList.last()->setShortcut(QKeySequence ("Ctrl+Del"));
-            actionList.last()->setIcon(QIcon(":/images/delete_vert.png"));
-			actionList.last()->setPriority(QAction::HighPriority);
-      }
-      if(tt==FP_SELECT_DELETE_FACE){
-            actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
-            actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
-			actionList.last()->setPriority(QAction::HighPriority);
-      }
-      if(tt==FP_SELECT_DELETE_FACEVERT){
-            actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
-            actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
-			actionList.last()->setPriority(QAction::HighPriority);
-      }
-	  if (tt == FP_SELECT_ALL){
-		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
-		  actionList.last()->setIcon(QIcon(":/images/sel_all.png"));
-		  actionList.last()->setPriority(QAction::LowPriority);
-	  }
-	  if (tt == FP_SELECT_NONE){
-		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
-		  actionList.last()->setIcon(QIcon(":/images/sel_none.png"));
-		  actionList.last()->setPriority(QAction::LowPriority);
-	  }
-	  if (tt == FP_SELECT_INVERT){
-		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
-		  actionList.last()->setIcon(QIcon(":/images/sel_inv.png"));
-		  actionList.last()->setPriority(QAction::LowPriority);
-	  }
-	  if (tt == FP_SELECT_DILATE){
-		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
-		  actionList.last()->setIcon(QIcon(":/images/sel_plus.png"));
-		  actionList.last()->setPriority(QAction::LowPriority);
-	  }
-	  if (tt == FP_SELECT_ERODE){
-		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
-		  actionList.last()->setIcon(QIcon(":/images/sel_minus.png"));
-		  actionList.last()->setPriority(QAction::LowPriority);
-	  }
-  }
+        actionList << new QAction(filterName(tt), this);
+
+        if (app != nullptr) {
+            if(tt==FP_SELECT_DELETE_VERT){
+                actionList.last()->setShortcut(QKeySequence ("Ctrl+Del"));
+                actionList.last()->setIcon(QIcon(":/images/delete_vert.png"));
+                actionList.last()->setPriority(QAction::HighPriority);
+            }
+            if(tt==FP_SELECT_DELETE_FACE){
+                actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
+                actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
+                actionList.last()->setPriority(QAction::HighPriority);
+            }
+            if(tt==FP_SELECT_DELETE_FACEVERT){
+                actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
+                actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
+                actionList.last()->setPriority(QAction::HighPriority);
+            }
+            if (tt == FP_SELECT_ALL){
+                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
+                actionList.last()->setIcon(QIcon(":/images/sel_all.png"));
+                actionList.last()->setPriority(QAction::LowPriority);
+            }
+            if (tt == FP_SELECT_NONE){
+                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
+                actionList.last()->setIcon(QIcon(":/images/sel_none.png"));
+                actionList.last()->setPriority(QAction::LowPriority);
+            }
+            if (tt == FP_SELECT_INVERT){
+                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
+                actionList.last()->setIcon(QIcon(":/images/sel_inv.png"));
+                actionList.last()->setPriority(QAction::LowPriority);
+            }
+            if (tt == FP_SELECT_DILATE){
+                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
+                actionList.last()->setIcon(QIcon(":/images/sel_plus.png"));
+                actionList.last()->setPriority(QAction::LowPriority);
+            }
+            if (tt == FP_SELECT_ERODE){
+                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
+                actionList.last()->setIcon(QIcon(":/images/sel_minus.png"));
+                actionList.last()->setPriority(QAction::LowPriority);
+            }
+        }
+    }
 }
 
 QString SelectionFilterPlugin::pluginName() const
@@ -299,15 +303,15 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
-if (md.mm() == NULL)
-	return false;
+	if (md.mm() == NULL)
+		return false;
 
-MeshModel &m=*(md.mm());
-CMeshO::FaceIterator fi;
-CMeshO::VertexIterator vi;
+	MeshModel &m=*(md.mm());
+	CMeshO::FaceIterator fi;
+	CMeshO::VertexIterator vi;
 
-switch(ID(action))
-{
+	switch(ID(action))
+	{
 	case FP_SELECT_DELETE_VERT:
 	{
 		if (m.cm.svn == 0) { Log("Nothing done: no vertex selected"); break; }
@@ -336,8 +340,8 @@ switch(ID(action))
 			{
 				int ffn = ml->cm.fn;
 				for (fi = ml->cm.face.begin(); fi != ml->cm.face.end(); ++fi)
-				if (!(*fi).IsD())
-					tri::Allocator<CMeshO>::DeleteFace(ml->cm, *fi);
+					if (!(*fi).IsD())
+						tri::Allocator<CMeshO>::DeleteFace(ml->cm, *fi);
 				ml->clearDataMask(MeshModel::MM_FACEFACETOPO);
 				ml->clearDataMask(MeshModel::MM_VERTFACETOPO);
 				ml->UpdateBoxAndNormals();
@@ -348,8 +352,8 @@ switch(ID(action))
 		{
 			int ffn = m.cm.fn;
 			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-			if (!(*fi).IsD())
-				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+				if (!(*fi).IsD())
+					tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 			m.UpdateBoxAndNormals();
@@ -391,7 +395,7 @@ switch(ID(action))
 
 	case FP_SELECT_CONNECTED:
 		tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
-	break;
+		break;
 
 	case FP_SELECTBYANGLE :
 	{
@@ -467,52 +471,52 @@ switch(ID(action))
 			tri::UpdateSelection<CMeshO>::VertexAll(m.cm);
 		if (par.getBool("allFaces"))
 			tri::UpdateSelection<CMeshO>::FaceAll(m.cm);
-	break;
+		break;
 
 	case FP_SELECT_NONE   :
 		if (par.getBool("allVerts"))
 			tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 		if (par.getBool("allFaces"))
-			tri::UpdateSelection<CMeshO>::FaceClear(m.cm);   
-	break;
+			tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
+		break;
 
 	case FP_SELECT_INVERT :
 		if (par.getBool("InvVerts"))
 			tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);
 		if (par.getBool("InvFaces"))
-			tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);  
-	break;
+			tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);
+		break;
 
 	case FP_SELECT_VERT_FROM_FACE:
 		if (par.getBool("Inclusive"))
 			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-		else 
+		else
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
-	break;
+		break;
 
 	case FP_SELECT_FACE_FROM_VERT:
 		if (par.getBool("Inclusive"))
 			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-		else 
+		else
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
-	break;
+		break;
 
-	case FP_SELECT_ERODE: 
+	case FP_SELECT_ERODE:
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-	break;
+		break;
 
-	case FP_SELECT_DILATE: 
+	case FP_SELECT_DILATE:
 		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
-	break;
+		break;
 
 	case FP_SELECT_BORDER:
 		tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 		tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
-	break;
+		break;
 
 	case FP_SELECT_BY_VERT_QUALITY:
 	{
@@ -520,9 +524,9 @@ switch(ID(action))
 		float maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);
-		if (inclusiveFlag) 
+		if (inclusiveFlag)
 			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-		else 
+		else
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 	} break;
 
@@ -532,9 +536,9 @@ switch(ID(action))
 		float maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::FaceFromQualityRange(m.cm, minQ, maxQ);
-		if (inclusiveFlag) 
+		if (inclusiveFlag)
 			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-		else 
+		else
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 	} break;
 
@@ -564,25 +568,25 @@ switch(ID(action))
 		{
 			if(!(*vi).IsD())
 			{
-                    Color4f colorv = Color4f::Construct((*vi).C());
-                    if(colorSpace == 0){
-                        colorv = ColorSpace<float>::RGBtoHSV(colorv);
-                        if( fabsf(colorv[0] - hue) <= valueRH &&
-                            fabsf(colorv[1] - saturation) <= valueGS &&
-                            fabsf(colorv[2] - value) <= valueBV  )
-                                   (*vi).SetS();
-                    }
-                    else    {
-                    if( fabsf(colorv[0] - red) <= valueRH &&
-                        fabsf(colorv[1] - green) <= valueGS &&
-                        fabsf(colorv[2] - blue) <= valueBV  )
-                                    (*vi).SetS();
-                    }
+				Color4f colorv = Color4f::Construct((*vi).C());
+				if(colorSpace == 0){
+					colorv = ColorSpace<float>::RGBtoHSV(colorv);
+					if( fabsf(colorv[0] - hue) <= valueRH &&
+							fabsf(colorv[1] - saturation) <= valueGS &&
+							fabsf(colorv[2] - value) <= valueBV  )
+						(*vi).SetS();
+				}
+				else    {
+					if( fabsf(colorv[0] - red) <= valueRH &&
+							fabsf(colorv[1] - green) <= valueGS &&
+							fabsf(colorv[2] - blue) <= valueBV  )
+						(*vi).SetS();
+				}
 			}
 		}
-		if(par.getBool("Inclusive")) 
+		if(par.getBool("Inclusive"))
 			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-		else 
+		else
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 	} break;
 
@@ -595,15 +599,15 @@ switch(ID(action))
 		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
-	break;
+		break;
 
 	case CP_SELECT_NON_MANIFOLD_FACE:
 		tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm,true);
-	break;
+		break;
 
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
 		tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.cm,true);
-	break;
+		break;
 
 	case CP_SELFINTERSECT_SELECT:
 	{
@@ -641,8 +645,8 @@ switch(ID(action))
 	} break;
 
 	default: assert(0);
-}
-return true;
+	}
+	return true;
 }
 
 MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action)
