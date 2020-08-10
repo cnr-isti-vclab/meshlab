@@ -3,7 +3,7 @@ name: BuildAndRelease
 on:
   #[push, pull_request] #just for test release scripts
   schedule:
-    - cron:  '0 10 1 * *' #every first day of the month at 1am
+    - cron:  '0 1 1 * *' #every first day of the month at 1am
 
 jobs:
   update_ml_version:
@@ -32,9 +32,6 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
         commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
-    - name: Sleep for 2 minutes
-      run: |
-        sleep 120
 
   ubuntu_build_appimage:
     needs: [update_ml_version]
@@ -42,10 +39,10 @@ jobs:
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-        submodules: true
+    - name: git clone
+      run: |
+        cd ..
+        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
@@ -92,10 +89,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-        submodules: true
+    - name: git clone
+      run: |
+        cd ..
+        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
     - name: Install dependencies
       run: |
         #needed for some reason...
@@ -169,10 +166,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-        submodules: true
+    - name: git clone
+      run: |
+        cd ..
+        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
     - name: Downlaod Jom
       run: |
         Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
