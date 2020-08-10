@@ -352,8 +352,8 @@ MeshDocument::MeshDocument()
 {
     meshIdCounter=0;
     rasterIdCounter=0;
-    currentMesh = 0;
-    currentRaster = 0;
+    currentMesh = nullptr;
+    currentRaster = nullptr;
     busy=false;
     filterHistory = new FilterScript();
 }
