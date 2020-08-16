@@ -2231,7 +2231,7 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
 
     float cameraDist = getCameraDistance();
 
-    //add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
+    //add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have the same view---------------
     //T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
     //Add translation S^(-1) R^(-1)(gl)
     //Shotd doesn't introduce scaling
@@ -2348,7 +2348,7 @@ void GLArea::createOrthoView(QString dir)
 
     float cameraDist = getCameraDistance();
 
-    //add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
+    //add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have the same view---------------
     //T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
     //Add translation S^(-1) R^(-1)(gl)
     //Shotd doesn't introduce scaling

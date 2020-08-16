@@ -771,7 +771,7 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Check wheter a token at a given position is a variable token. 
+  /** \brief Check whether a token at a given position is a variable token. 
       \param a_Tok [out] If a variable token has been found it will be placed here.
 	    \return true if a variable token has been found.
   */
@@ -835,7 +835,7 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Check wheter a token at a given position is an undefined variable. 
+  /** \brief Check whether a token at a given position is an undefined variable. 
 
       \param a_Tok [out] If a variable tom_pParser->m_vStringBufken has been found it will be placed here.
 	    \return true if a variable token has been found.
@@ -887,7 +887,7 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Check wheter a token at a given position is a string.
+  /** \brief Check whether a token at a given position is a string.
       \param a_Tok [out] If a variable token has been found it will be placed here.
   	  \return true if a string token has been found.
       \sa IsOprt, IsFunTok, IsStrFunTok, IsValTok, IsVarTok, IsEOF, IsInfixOpTok, IsPostOpTok
@@ -920,7 +920,7 @@ namespace mu
 		m_pParser->m_vStringBuf.push_back(strTok); // Store string in internal buffer
     a_Tok.SetString(strTok, m_pParser->m_vStringBuf.size());
 
-    m_iPos += (int)strTok.length() + 2 + (int)iSkip;  // +2 wg Anführungszeichen; +iSkip für entfernte escape zeichen
+    m_iPos += (int)strTok.length() + 2 + (int)iSkip;  // +2 wg Anfï¿½hrungszeichen; +iSkip fï¿½r entfernte escape zeichen
     m_iSynFlags = noANY ^ ( noARG_SEP | noBC | noOPT | noEND );
 
     return true;

@@ -4,7 +4,7 @@ In the `src` folder there are several folders containing all the source code and
 
 The source code of MeshLab is structured in the following folders:
 
- * [external](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/external): it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding systme library is not found and then linked; some other libraries are just included by some plugins.
+ * [external](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/external): it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding system library is not found and then linked; some other libraries are just included by some plugins.
  * [common](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/common): a series of utility functions used by MeshLab and its plugins.
  * [meshlab](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlab): GUI and core of MeshLab.
  * [meshlabserver](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabserver): a tool that allows to compute mesh operations through command line
@@ -47,7 +47,7 @@ You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
 1. Install QtCreator and Qt >= 5.9 with `xmlpatterns` as additional package;
 2. Open `meshlab.pro` inside `src`;
 3. Select your favourite shadow build directory;
-4. Before the build, deactive the `QtQuickCompiler` option from the qmake call in the project options;
+4. Before the build, deactivate the `QtQuickCompiler` option from the qmake call in the project options;
 5. Build meshlab.
 
 MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Don't worry, if a plugin fails to compile just remove it and you lose just that functionality. As a first step you should try to compile MeshLab with the configuration "meshlab_mini":

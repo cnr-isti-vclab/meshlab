@@ -1,6 +1,6 @@
 # this is the common include for anything compiled inside the meshlab pro
 # contains general preprocesser, compiler and linker settings,
-# paths for dependecies and so on
+# paths for dependencies and so on
 
 ######## GENERAL SETTINGS ##########
 

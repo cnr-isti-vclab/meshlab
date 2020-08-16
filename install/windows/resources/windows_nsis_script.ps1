@@ -9,7 +9,7 @@
 # After running this script, a meshlab_final.script can be found in the resources folder.
 # This script is ready to be run by makensis.exe
 
-#saving location where script has been runned
+#saving location where script has been run
 $DIR = Get-Location
 
 $INSTALL_PATH = Join-Path $PSScriptRoot ..\

@@ -294,7 +294,7 @@ edit_pickpoints.depends = common
 # this is just for project info
 # prints all the system libraries that meshlab is using instead of
 # the ones placed in the external folder.
-# The libraris are included effectively in general.pri and
+# The libraries are included effectively in general.pri and
 # in external.pro
 #
 include(find_system_libs.pri)

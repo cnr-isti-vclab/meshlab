@@ -793,7 +793,7 @@ void MainWindow::runFilterScript()
         RichParameterList &parameterSet = old->pair.second;
 
 		for(RichParameter& parameter : parameterSet) {
-			//if this is a mesh paramter and the index is valid
+			//if this is a mesh parameter and the index is valid
 			if(parameter.value().isMesh()) {
 				RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
 				if( md.meshindex < meshDoc()->size() && md.meshindex >= 0  ) {

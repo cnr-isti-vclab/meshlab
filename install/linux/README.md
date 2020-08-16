@@ -2,9 +2,9 @@
 
 This folder contains a series of scripts to build and deploy MeshLab under a Linux environment.
 
-The follwing scripts are provided:
+The following scripts are provided:
 
-* `linux_setup_env_ubuntu.sh`: this script installs all the required dependecies that are necessary to build MeshLab in an Ubuntu distro (tested in 16.04, 18.04). If you never installed Qt and other libraries, you should run it before any other script;
+* `linux_setup_env_ubuntu.sh`: this script installs all the required dependencies that are necessary to build MeshLab in an Ubuntu distro (tested in 16.04, 18.04). If you never installed Qt and other libraries, you should run it before any other script;
 * `linux_build.sh`: this script compiles MeshLab in a Linux environment:
 	* it requires a properly set Qt environment (see `linux_setup_env_ubuntu.sh`); 
 	* without given arguments, all the binaries will be placed in the `meshlab/distrib` folder. You can give as argument the `BUILD_PATH`, and meshlab binaries will be then placed inside `BUILD_PATH/distrib`;
