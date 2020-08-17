@@ -10,10 +10,10 @@
 #
 # After running this script, $DISTRIB_PATH will be a portable meshlab folder.
 #
-# To be runned in a windows environment without Visual Studio installed,
+# To be run in a windows environment without Visual Studio installed,
 # vc_redist.exe must be installed before.
 
-#saving location where script has been runned
+#saving location where script has been run
 
 write-host "N of arguments: $($args.count)"
 

@@ -2,9 +2,9 @@
 
 This folder contains a series of scripts to build and deploy MeshLab under a MacOS environment.
 
-The follwing scripts are provided:
+The following scripts are provided:
 
-* `macos_setup_env.sh`: this script installs all the required dependecies that are necessary to build MeshLab and create its DMG in a MacOS machine (tested in 10.15 Catalina). It requires [homebrew](https://brew.sh/) installed.
+* `macos_setup_env.sh`: this script installs all the required dependencies that are necessary to build MeshLab and create its DMG in a MacOS machine (tested in 10.15 Catalina). It requires [homebrew](https://brew.sh/) installed.
 * `macos_build.sh`: this script compiles MeshLab in a MacOS environment:
 	* it requires a properly set Qt environment (see `macos_setup_env.sh`); 
 	* without given arguments, all the binaries will be placed in the `meshlab/distrib` folder. You can give as argument the `BUILD_PATH`, and meshlab binaries will be then placed inside `BUILD_PATH/distrib`;

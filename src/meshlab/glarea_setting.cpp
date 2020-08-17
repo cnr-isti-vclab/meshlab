@@ -24,7 +24,7 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterList * defaultGlobalPar
 	defaultGlobalParamSet->addParam(RichBool(pointSmoothParam()	, false,"Antialiased Point","If true the points are drawn with small circles instead of fast squared dots."));
 	defaultGlobalParamSet->addParam(RichFloat(pointSizeParam()	, 2.0, "Point Size","The base size of points when drawn"));
 
-	defaultGlobalParamSet->addParam(RichBool(wheelDirectionParam(), false, "Wheel Directon", "If true, inverts the direction of the mouse wheel for zooming in/out in the MeshLab canvas."));
+	defaultGlobalParamSet->addParam(RichBool(wheelDirectionParam(), false, "Wheel Direction", "If true, inverts the direction of the mouse wheel for zooming in/out in the MeshLab canvas."));
 }
 
 

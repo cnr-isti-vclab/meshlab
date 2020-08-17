@@ -4,7 +4,7 @@
 
 This folder contains a series of scripts to build and deploy MeshLab under a Windows environment.
 
-The follwing scripts are provided:
+The following scripts are provided:
 
 * `windows_build.ps1`: this script compiles MeshLab in a Windows environment:
 	* it requires a properly set Visual Studio (>=2015) and MSVC compiler; 

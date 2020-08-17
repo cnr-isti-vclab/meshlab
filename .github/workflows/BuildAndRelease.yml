@@ -170,7 +170,7 @@ jobs:
       run: |
         cd ..
         git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-    - name: Downlaod Jom
+    - name: Download Jom
       run: |
         Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
         New-Item -Name "jom" -ItemType "directory"

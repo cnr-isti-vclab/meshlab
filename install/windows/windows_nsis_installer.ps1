@@ -9,7 +9,7 @@
 #
 # After running this script, the installer can be found inside the resources folder.
 
-#saving location where script has been runned
+#saving location where script has been run
 $DIR = Get-Location
 
 $INSTALL_PATH = $PSScriptRoot
