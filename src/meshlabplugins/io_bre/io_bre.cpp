@@ -605,7 +605,7 @@ int vcg::tri::io::ReadBreElementsInGrid( QFile &file, VertexGrid &grid, CMeshO &
   
   //creating mesh
   //going through the whole grid, testing if Valid. 
-  //Only Points that are valid and have enough valid neigbours to form a triangle will be added.
+  //Only Points that are valid and have enough valid neighbours to form a triangle will be added.
   
   float cbstep = ((float)(80)/(float)(num));//for the progress bar
   float cbvalue = 0.f;//for the progress bar

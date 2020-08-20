@@ -64,7 +64,7 @@ public:
   // initializes on current geometry 
   virtual void TargetCurrentGeometry()=0;
   
-  // performs an interation. Returns largest movement.
+  // performs an iteration. Returns largest movement.
   virtual ScalarType Iterate()=0;
   
   // performs an iteration (faster, but it does not tell how close it is to stopping)

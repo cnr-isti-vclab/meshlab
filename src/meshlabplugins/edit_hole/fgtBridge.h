@@ -98,8 +98,8 @@ protected:
 
 
 /** Bridge between different FgtHoles or into the same one.
- *  Bridges rapresent connection between two border edges of different faces.
- *  Connection consists in 2 face adjcent each other over an edge and adjcent
+ *  Bridges represent connection between two border edges of different faces.
+ *  Connection consists in 2 face adjacent each other over an edge and adjacent
  *  with a mesh face over another edge, so both faces have a border edge.
  *
  *  Bridge can connect 2 edge belong the same hole, result are 2 new holes.
@@ -903,7 +903,7 @@ public:
                     }while(p0.v != p1.v);
 
                     // p2 is used only in case face added close sub-hole, sub-hole distance is 2
-                    // p2 is half-edge adjcent to connect to patch edge which usually is border
+                    // p2 is half-edge adjacent to connect to patch edge which usually is border
                     PosType p2 = p0;
                     p2.FlipV();
                     p2.NextB();

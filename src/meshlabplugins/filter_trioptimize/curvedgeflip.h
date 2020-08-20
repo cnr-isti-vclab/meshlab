@@ -300,7 +300,7 @@ public:
         // The priority of an edge flip is **how much we lower the overall curvature**.
         // If after the flip the sum of the curvature is decreased it is a good move;
         // good flips have:    cafter < cbefore
-        // Since the local optimization is designed to make the miniumum cost move we put inside
+        // Since the local optimization is designed to make the minimum cost move we put inside
         // negative values (the more negative the better).
         this->_priority = (cafter - cbefore);
         //qDebug("computed curvature change, %f->%f (priority = %f)", cbefore,cafter,this->_priority);

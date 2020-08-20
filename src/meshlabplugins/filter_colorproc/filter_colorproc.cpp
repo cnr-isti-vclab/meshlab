@@ -127,7 +127,7 @@ QString FilterColorProc::pluginName() const
 {
   switch(filterId)
   {
-	case CP_FILLING: return QString("Fills the color of the vertices of the mesh  with a color choosed by the user.");
+	case CP_FILLING: return QString("Fills the color of the vertices of the mesh with a color chosen by the user.");
 	case CP_THRESHOLDING: return QString("Colors the vertices of the mesh using two colors according to a lightness threshold (on the original color).");
 	case CP_CONTR_BRIGHT: return QString("Change the color the vertices of the mesh adjusting brightness, contrast and gamma.");
 	case CP_INVERT: return QString("Inverts the colors of the vertices of the mesh.");

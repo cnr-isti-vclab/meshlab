@@ -56,7 +56,7 @@ public:
 	QRectF boundingRect () const;
 	virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	
-	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;}; // Size should be aleays odd
+	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;}; // Size should be always odd
 	void setBarHeight					(qreal height)				{_barHeight = height;};
 	void setType						(EQUALIZER_HANDLE_TYPE type){_type = type;};	
 	void setMidHandlePercentilePosition (qreal* pointer)			{_midHandlePercentilePosition = pointer;};	

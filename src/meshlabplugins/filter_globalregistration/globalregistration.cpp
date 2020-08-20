@@ -55,7 +55,7 @@ QString GlobalRegistrationPlugin::filterName(FilterIDType filterId) const
  QString GlobalRegistrationPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-        case FP_GLOBAL_REGISTRATION :  return QString("Compute the rigid transforation aligning two 3d objets.");
+        case FP_GLOBAL_REGISTRATION :  return QString("Compute the rigid transformation aligning two 3d objects.");
         default : assert(0);
     }
     return QString("Unknown Filter");
