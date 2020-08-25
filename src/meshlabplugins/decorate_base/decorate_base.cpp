@@ -1143,7 +1143,7 @@ switch(ID(action))
 		parset.addParam(RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
 		parset.addParam(RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
 		parset.addParam(RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
-		parset.addParam(RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the poistions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
+		parset.addParam(RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the positions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
 	} break;
 
     case DP_SHOW_QUALITY_CONTOUR :

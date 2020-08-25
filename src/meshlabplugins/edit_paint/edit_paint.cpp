@@ -834,7 +834,7 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 
 inline void EditPaintPlugin::computeNoiseColor(CVertexO * vert, vcg::Color4b & col)
 {
-	float scaler = noise_scale; //parameter TODO to be cahced
+	float scaler = noise_scale; //parameter TODO to be cached
 
 	double noise;
 	//if "veins on"

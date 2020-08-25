@@ -179,7 +179,7 @@ namespace io {
 				"Invalid save color options. You must choose one options among color per vertex, color per face and color per wedge",
 				"Invalid save normal options. You must choose one options among normal per vertex, normal per face and normal per wedge",
 				"Invalid save texture coordinate options. You must choose one options among texture coordinate per vertex and texture coordinate per wedge",
-				"Mesh whitout a geometry"
+				"Mesh without a geometry"
 			};
 
 			if(error > 31 || error < 0) return "Unknown error";

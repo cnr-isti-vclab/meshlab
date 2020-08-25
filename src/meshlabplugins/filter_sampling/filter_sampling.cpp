@@ -466,7 +466,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   case FP_MONTECARLO_SAMPLING :
     parlst.addParam(RichInt ("SampleNum", md.mm()->cm.vn,
                                  "Number of samples",
-                                 "The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+                                 "The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
     parlst.addParam(RichBool("Weighted",  false,
                                  "Quality Weighted Sampling",
                                  "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
@@ -485,7 +485,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   case FP_STRATIFIED_SAMPLING :
     parlst.addParam(RichInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
                                  "Number of samples",
-                                 "The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+                                 "The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
     parlst.addParam(RichEnum("Sampling", 0,
                                  QStringList() << "Similar Triangle" << "Dual Similar Triangle" << "Long Edge Subdiv" << "Sample Edges" << "Sample NonFaux Edges",
                                  tr("Element to sample:"),
@@ -579,7 +579,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 		parlst.addParam(RichBool("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
 		parlst.addParam(RichBool("SampleFace", false, "Sample Faces", "See the above comment."));
 		parlst.addParam(RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
-			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
 		parlst.addParam(RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
 			tr("Max Distance"), tr("Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max.")));
   } break;

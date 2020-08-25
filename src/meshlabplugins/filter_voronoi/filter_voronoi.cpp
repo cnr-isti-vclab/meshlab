@@ -151,7 +151,7 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 									"barycenter of the region. Over a surface we have two different strategies: <ul>"
 									"<li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>"
 									"<li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>"
-									"<li> Restricted: the seed is placed in the barycenter of current voronoi region. Even if it is outside the surface. During the relaxation process the seed is free to move off the surface in a continuos way. Re-association to vertex is done at the end..</li>"
+									"<li> Restricted: the seed is placed in the barycenter of current voronoi region. Even if it is outside the surface. During the relaxation process the seed is free to move off the surface in a continuous way. Re-association to vertex is done at the end..</li>"
 									"</ul>"));
 		 break;
 	 case VOLUME_SAMPLING:
