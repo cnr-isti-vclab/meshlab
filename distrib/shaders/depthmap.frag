@@ -39,5 +39,5 @@ void main()
 	vec4 v = vec4(vpos);
 	v /= v.w;
 	float gray = (v.z - zmin) / (zmax - zmin);
-	gl_FragColor = vec4(gray);
+	gl_FragColor = vec4(vec3(gray), 1.0);
 }
