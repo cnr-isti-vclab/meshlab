@@ -777,9 +777,9 @@ void MainWindow::runFilterScript()
 {
     if ((meshDoc() == nullptr) || (meshDoc()->filterHistory == nullptr))
         return;
-    for(FilterScript::iterator ii= meshDoc()->filterHistory->filtparlist.begin();ii!= meshDoc()->filterHistory->filtparlist.end();++ii)
+    for (FilterNameParameterValuesPair& pair : *meshDoc()->filterHistory)
     {
-        QString filtnm = (*ii)->filterName();
+        QString filtnm = pair.filterName();
         int classes = 0;
         int postCondMask = 0;
         QAction *action = PM.actionFilterMap[ filtnm];
@@ -789,8 +789,7 @@ void MainWindow::runFilterScript()
         if (meshDoc()->mm() != NULL)
             meshDoc()->mm()->updateDataMask(req);
         iFilter->setLog(&meshDoc()->Log);
-        FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
-        RichParameterList &parameterSet = old->pair.second;
+        RichParameterList &parameterSet = pair.second;
 
 		for(RichParameter& parameter : parameterSet) {
 			//if this is a mesh parameter and the index is valid
@@ -854,7 +853,7 @@ void MainWindow::runFilterScript()
         meshDoc()->setBusy(true);
         //WARNING!!!!!!!!!!!!
         /* to be changed */
-        iFilter->applyFilter( action, *meshDoc(), old->pair.second, QCallBack );
+        iFilter->applyFilter( action, *meshDoc(), pair.second, QCallBack );
         for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
             vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
         meshDoc()->setBusy(false);
@@ -893,7 +892,7 @@ void MainWindow::runFilterScript()
 
         qb->reset();
         GLA()->update();
-        GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable((*ii)->filterName()));
+        GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable(pair.filterName()));
         if (_currviewcontainer != NULL)
             _currviewcontainer->updateAllDecoratorsForAllViewers();
     }
@@ -969,9 +968,9 @@ void MainWindow::startFilter()
             executeFilter(action, dummyParSet, false);
 
             //Insert the filter to filterHistory
-            FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();
-            tmp->pair = qMakePair(action->text(), dummyParSet);
-            meshDoc()->filterHistory->filtparlist.append(tmp);
+            FilterNameParameterValuesPair tmp;
+            tmp.first = action->text(); tmp.second = dummyParSet;
+            meshDoc()->filterHistory->append(tmp);
         }
     }
 

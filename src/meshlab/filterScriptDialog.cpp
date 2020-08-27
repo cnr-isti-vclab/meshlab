@@ -50,8 +50,8 @@ void FilterScriptDialog::setScript(FilterScript *scr)
 	scriptPtr=scr;
   ui->scriptListWidget->clear();
   
-  for( FilterScript::iterator li=scr->filtparlist.begin();li!=scr->filtparlist.end() ;++li)
-     ui->scriptListWidget->addItem((*li)->filterName());
+  for (const FilterNameParameterValuesPair& pair : *scr)
+     ui->scriptListWidget->addItem(pair.filterName());
 }
 
 void FilterScriptDialog::applyScript()
@@ -68,7 +68,7 @@ void FilterScriptDialog::applyScript()
 void FilterScriptDialog::clearScript()
 {
   assert(scriptPtr);
-  scriptPtr->filtparlist.clear();
+  scriptPtr->clear();
   ui->scriptListWidget->clear();
 }
 
@@ -115,10 +115,10 @@ void FilterScriptDialog::moveSelectedFilterUp()
         return;
 
     //move item up in list
-    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    FilterNameParameterValuesPair pair = scriptPtr->takeAt(currentRow);
     QString filtername = ui->scriptListWidget->currentItem()->text();
-    if (pair->filterName() == filtername)
-        scriptPtr->filtparlist.insert(currentRow-1, pair);
+    if (pair.filterName() == filtername)
+        scriptPtr->insert(currentRow-1, pair);
     else
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 
@@ -133,14 +133,14 @@ void FilterScriptDialog::moveSelectedFilterUp()
 void FilterScriptDialog::moveSelectedFilterDown()
 {
     int currentRow = ui->scriptListWidget->currentRow();
-    if ((currentRow == -1) || (currentRow == scriptPtr->filtparlist.size() - 1))
+    if ((currentRow == -1) || (currentRow == scriptPtr->size() - 1))
         return;
 
     //move item up in list
-    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    FilterNameParameterValuesPair pair = scriptPtr->takeAt(currentRow);
     QString filtername = ui->scriptListWidget->currentItem()->text();
-    if (pair->filterName() == filtername)
-        scriptPtr->filtparlist.insert(currentRow+1, pair);
+    if (pair.filterName() == filtername)
+        scriptPtr->insert(currentRow+1, pair);
     else
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 
@@ -158,12 +158,12 @@ void FilterScriptDialog::removeSelectedFilter()
     if(currentRow == -1)
         return;
 
-    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist[currentRow];
+    const FilterNameParameterValuesPair& pair = (*scriptPtr)[currentRow];
     QString filtername = ui->scriptListWidget->currentItem()->text();
-    if (pair->filterName() == filtername)
+    if (pair.filterName() == filtername)
     {
         ui->scriptListWidget->takeItem(currentRow);
-        scriptPtr->filtparlist.removeAt(currentRow);
+        scriptPtr->removeAt(currentRow);
     }
     else
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
@@ -172,20 +172,20 @@ void FilterScriptDialog::removeSelectedFilter()
 void FilterScriptDialog::editSelectedFilterParameters()
 {
 	//get the selected item
-	int currentRow = ui->scriptListWidget->currentRow();	
+	int currentRow = ui->scriptListWidget->currentRow();
 	
 	//return if no row was selected
 	if(currentRow == -1)
 		return;
 	
 	QString filtername = ui->scriptListWidget->currentItem()->text();
-    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.at(currentRow);
-    if (pair->filterName() == filtername) {
-        editOldParameters(currentRow);
-    }
-    else {
-        throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
-    }
+	const FilterNameParameterValuesPair& pair = scriptPtr->at(currentRow);
+	if (pair.filterName() == filtername) {
+		editOldParameters(currentRow);
+	}
+	else {
+		throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+	}
 }
 
 FilterScriptDialog::~FilterScriptDialog()
@@ -199,8 +199,8 @@ void FilterScriptDialog::editOldParameters( const int row )
 		return;
 	QString actionName = ui->scriptListWidget->currentItem()->text();
 
-	FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
-	RichParameterList oldParameterSet = old->pair.second;
+	FilterNameParameterValuesPair& old = (*scriptPtr)[row];
+	RichParameterList oldParameterSet = old.second;
 	//get the main window
 	MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
@@ -238,6 +238,6 @@ void FilterScriptDialog::editOldParameters( const int row )
 	int result = parameterDialog.exec();
 	if(result == QDialog::Accepted) {
 		//keep the changes
-		old->pair.second = newParameterSet;
+		old.second = newParameterSet;
 	}
 }

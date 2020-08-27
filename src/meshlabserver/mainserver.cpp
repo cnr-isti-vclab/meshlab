@@ -570,13 +570,13 @@ public:
             printf("File %s was not found.\n", qUtf8Printable(scriptfile));
             return false;
         }
-        fprintf(fp,"Starting Script of %i actions",scriptPtr.filtparlist.size());
+        fprintf(fp,"Starting Script of %i actions",scriptPtr.size());
         GLLogStream log;
-        for(FilterScript::iterator ii = scriptPtr.filtparlist.begin();ii!= scriptPtr.filtparlist.end();++ii)
+        for (FilterNameParameterValuesPair& pair : scriptPtr)
         {
             bool ret = false;
             //RichParameterSet &par = (*ii).second;
-            QString fname = (*ii)->filterName();
+            QString fname = pair.filterName();
             fprintf(fp,"filter: %s\n", qUtf8Printable(fname));
             QAction *action = PM.actionFilterMap[ fname];
             if (action == NULL)
@@ -597,8 +597,7 @@ public:
             //defined in the script file.
             RichParameterList required;
             iFilter->initParameterSet(action,meshDocument,required);
-            FilterNameParameterValuesPair* pairold = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
-            RichParameterList &parameterSet = pairold->pair.second;
+            RichParameterList &parameterSet = pair.second;
 
             //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.
             if (required.size() < parameterSet.size())
@@ -682,7 +681,7 @@ public:
                 }
             }
             meshDocument.setBusy(true);
-            ret = iFilter->applyFilter( action, meshDocument, pairold->pair.second, filterCallBack);
+            ret = iFilter->applyFilter( action, meshDocument, pair.second, filterCallBack);
             meshDocument.setBusy(false);
             if (shared != NULL)
                 delete iFilter->glContext;
