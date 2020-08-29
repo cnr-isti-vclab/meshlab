@@ -53,13 +53,13 @@ public slots:
 	void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 private:
-	bool sketchfab(
-			MeshDocument &md,
+	bool sketchfab(MeshDocument &md,
 			vcg::CallBackPos* cb,
 			const QString& apiToken,
 			const QString&,
 			const QString&,
 			const QString&,
+			bool,
 			bool,
 			bool,
 			bool);
@@ -83,6 +83,7 @@ private:
 
 	bool uploadCompleteFlag;
 	vcg::CallBackPos * fcb;
+	const QString DEFAULT_API = "00000000";
 
 };
 
