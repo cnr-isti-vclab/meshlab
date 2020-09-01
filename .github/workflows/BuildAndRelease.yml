@@ -121,10 +121,10 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-        submodules: true
+    - name: git clone
+      run: |
+        cd ..
+        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
     - name: Install dependencies
       run: |
         brew install libomp
