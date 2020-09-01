@@ -2,7 +2,12 @@ name: BuildAndRelease
 
 on:
   #[push, pull_request] #just for test release scripts
-  workflow_dispatch #just for test release scripts
+  workflow_dispatch: #manual run
+    inputs:
+      version:
+        description: 'New MeshLab Version'
+        required: true
+        default: 'YYYY.MM'
   #schedule:
   #  - cron:  '0 1 1 * *' #every first day of the month at 1am
   
@@ -16,17 +21,17 @@ jobs:
       with:
         fetch-depth: 2
         submodules: true
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo  ::set-output name=date::"$(date +%Y.%m)"
+    #- name: Setup env variables
+    #  id: envs
+    #  run: |
+    #    echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} | tr -d '\n'> ML_VERSION
+        echo ${{ github.event.inputs.version }} | tr -d '\n'> ML_VERSION
     - name: Update Info.plist
       run: |
-        /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
-        /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+        /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{ github.event.inputs.version }}" src/meshlab/Info.plist
+        /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{ github.event.inputs.version }}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
         sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
@@ -41,10 +46,10 @@ jobs:
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
-    - name: git clone
-      run: |
-        cd ..
-        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
@@ -91,10 +96,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: git clone
-      run: |
-        cd ..
-        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        submodules: true
     - name: Install dependencies
       run: |
         #needed for some reason...
@@ -123,10 +128,10 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - name: git clone
-      run: |
-        cd ..
-        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        submodules: true
     - name: Install dependencies
       run: |
         brew install libomp
@@ -168,10 +173,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: git clone
-      run: |
-        cd ..
-        git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        submodules: true
     - name: Download Jom
       run: |
         Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
