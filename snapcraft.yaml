@@ -1,7 +1,7 @@
 # Known to build in Ubuntu 18.04
 name: meshlab
 base: core18
-version: '2020.08'
+version: '2020.09'
 summary: MeshLab
 description: |
   The open source system for processing and editing 3D triangular meshes.
