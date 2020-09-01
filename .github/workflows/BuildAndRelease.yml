@@ -231,10 +231,10 @@ jobs:
     needs: [ubuntu_build_appimage, ubuntu_build_snap, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo ::set-output name=date::"$(date +%Y.%m)"
+    #- name: Setup env variables
+    #  id: envs
+    #  run: |
+    #    echo ::set-output name=date::"$(date +%Y.%m)"
 
     #Linux Release
     - name: Download Linux ZIP
@@ -258,11 +258,11 @@ jobs:
         chmod +x meshlab_linux_portable/usr/bin/meshlab
         chmod +x meshlab_linux_portable/usr/bin/meshlabserver
         chmod +x meshlab_linux_portable/AppRun
-        chmod +x meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-        chmod +x meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        chmod +x meshlab_linux_appimage/MeshLab${{ github.event.inputs.version }}-linux.AppImage
+        chmod +x meshlabserver_linux_appimage/MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
     - name: Create MeshLab Portable Linux Archive
       run: |
-        tar -cvzf MeshLab${{steps.envs.outputs.date}}-linux.tar.gz meshlab_linux_portable/
+        tar -cvzf MeshLab${{ github.event.inputs.version }}-linux.tar.gz meshlab_linux_portable/
     
 
     #MacOS Release
@@ -283,7 +283,7 @@ jobs:
         name: meshlab_windows_installer
     - name: Create MeshLab Portable Windows Archive
       run: |
-        zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
+        zip -r MeshLab${{ github.event.inputs.version }}-windows.zip meshlab_windows_portable/
     
     
     #Create release and upload
@@ -293,8 +293,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: Meshlab-${{steps.envs.outputs.date}}
-        release_name: MeshLab-${{steps.envs.outputs.date}}
+        tag_name: Meshlab-${{ github.event.inputs.version }}
+        release_name: MeshLab-${{ github.event.inputs.version }}
         draft: false
         prerelease: false
     #Linux
@@ -305,8 +305,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{steps.envs.outputs.date}}-linux.tar.gz
-        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.tar.gz
+        asset_path: MeshLab${{ github.event.inputs.version }}-linux.tar.gz
+        asset_name: MeshLab${{ github.event.inputs.version }}-linux.tar.gz
         asset_content_type: MeshLab Portable for Linux
     - name: Upload ReleaseLinuxAppImage
       id: upload-release-linux-appimage
@@ -315,8 +315,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        asset_path: meshlab_linux_appimage/MeshLab${{ github.event.inputs.version }}-linux.AppImage
+        asset_name: MeshLab${{ github.event.inputs.version }}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
     - name: Upload ReleaseLinuxMeshLabServerAppImage
       id: upload-release-linux-meshlabserver-appimage
@@ -325,8 +325,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
-        asset_name: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        asset_path: meshlabserver_linux_appimage/MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
+        asset_name: MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
         asset_content_type: MeshLabServer AppImage for Linux
     - name: Upload ReleaseLinuxSnap
       id: upload-release-linux-snap
@@ -335,8 +335,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_linux_snap/MeshLab${{steps.envs.outputs.date}}-linux.snap
-        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.snap
+        asset_path: meshlab_linux_snap/MeshLab${{ github.event.inputs.version }}-linux.snap
+        asset_name: MeshLab${{ github.event.inputs.version }}-linux.snap
         asset_content_type: MeshLab Snap for Linux
     #MacOS
     - name: Upload ReleaseMacOSDMG
@@ -346,8 +346,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_macos_dmg/MeshLab${{steps.envs.outputs.date}}-macos.dmg
-        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        asset_path: meshlab_macos_dmg/MeshLab${{ github.event.inputs.version }}-macos.dmg
+        asset_name: MeshLab${{ github.event.inputs.version }}-macos.dmg
         asset_content_type: MeshLab for MacOS
     #Windows
     - name: Upload ReleaseWindowsPortable
@@ -357,8 +357,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{steps.envs.outputs.date}}-windows.zip
-        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.zip
+        asset_path: MeshLab${{ github.event.inputs.version }}-windows.zip
+        asset_name: MeshLab${{ github.event.inputs.version }}-windows.zip
         asset_content_type: MeshLab Portable for Windows
     - name: Upload ReleaseWindowsInstaller
       id: upload-release-windows-installer
@@ -367,6 +367,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_windows_installer/MeshLab${{steps.envs.outputs.date}}-windows.exe
-        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.exe
+        asset_path: meshlab_windows_installer/MeshLab${{ github.event.inputs.version }}-windows.exe
+        asset_name: MeshLab${{ github.event.inputs.version }}-windows.exe
         asset_content_type: MeshLab Portable for Windows
