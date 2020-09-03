@@ -45,12 +45,12 @@ void SaveMaskExporterDialog::InitDialog()
     connect(ui->NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
     ui->renametextureButton->setDisabled(true);
 
-  stdParFrame = new RichParameterListFrame(*parSet, this,glar);
-  QVBoxLayout *vbox = new QVBoxLayout(this);
+    stdParFrame = new RichParameterListFrame(*parSet, this,glar);
+    QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(stdParFrame);
     ui->saveParBox->setLayout(vbox);
     QFileInfo fi(m->fullName());
- this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
+    this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
     // Show the additional parameters only for formats that have some.
     if(parSet->isEmpty()) ui->saveParBox->hide();
                                 else ui->saveParBox->show();
