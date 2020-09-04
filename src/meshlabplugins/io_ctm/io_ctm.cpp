@@ -92,7 +92,7 @@ QList<MeshIOInterface::Format> IOMPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void IOMPlugin::GetExportMaskCapability(QString &/*format*/, int &capability, int &defaultBits) const
+void IOMPlugin::GetExportMaskCapability(const QString &/*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;

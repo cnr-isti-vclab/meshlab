@@ -447,7 +447,7 @@ QList<MeshIOInterface::Format> JSONIOPlugin::exportFormats(void) const
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void JSONIOPlugin::GetExportMaskCapability(QString & format, int & capability, int & defaultBits) const
+void JSONIOPlugin::GetExportMaskCapability(const QString & format, int & capability, int & defaultBits) const
 {
 	capability = 0;
 

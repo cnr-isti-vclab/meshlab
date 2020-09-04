@@ -178,7 +178,7 @@ QList<MeshIOInterface::Format> IoX3DPlugin::exportFormats() const
     returns the mask on the basis of the file's type.
     otherwise it returns 0 if the file format is unknown
 */
-void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void IoX3DPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
     if(format.toUpper() == tr("X3D")){
         capability = defaultBits = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
