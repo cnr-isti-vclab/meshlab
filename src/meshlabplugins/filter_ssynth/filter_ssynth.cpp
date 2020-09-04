@@ -205,7 +205,7 @@ bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName
     return true;
 }
 
-void FilterSSynth::GetExportMaskCapability(QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
+void FilterSSynth::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
 void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, const QString &/*filename*/, RichParameterList &parlst){
     parlst.addParam(RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
