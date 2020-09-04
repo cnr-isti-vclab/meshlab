@@ -60,7 +60,7 @@ class ColladaIOPlugin : public QObject, public MeshIOInterface
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 
-	void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
+	void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/);
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &par, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);

@@ -182,7 +182,7 @@ QList<MeshIOInterface::Format> BreMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
+void BreMeshIOPlugin::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
 	/*if(format.toUpper() == tr("BRE"))
   {
