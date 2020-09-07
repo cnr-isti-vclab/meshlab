@@ -195,15 +195,6 @@ int RichParameterList::getEnum(const QString& name) const
 }
 
 /**
- * @return the float list of the RichParameter having the given name.
- * @throws an MLException if the name is not found in the list
- */
-QList<float> RichParameterList::getFloatList(const QString& name) const
-{
-	return getParameterByName(name).value().getFloatList();
-}
-
-/**
  * @return the mesh of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */

@@ -112,7 +112,6 @@ public:
 	float getAbsPerc(const QString& name) const;
 	int getEnum(const QString& name) const;
 	MeshModel* getMesh(const QString& name) const;
-	QList<float> getFloatList(const QString& name) const;
 	float getDynamicFloat(const QString& name) const;
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
