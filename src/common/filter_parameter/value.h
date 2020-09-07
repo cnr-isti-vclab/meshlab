@@ -56,7 +56,6 @@ public:
 	virtual float getAbsPerc() const { assert(0); return float(); }
 	virtual int getEnum() const { assert(0); return int(); }
 	virtual MeshModel* getMesh() const { assert(0); return NULL; }
-	virtual QList<float> getFloatList() const { assert(0); return QList<float>(); }
 	virtual float getDynamicFloat() const { assert(0); return float(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
@@ -71,7 +70,6 @@ public:
 	virtual bool isAbsPerc() const { return false; }
 	virtual bool isEnum() const { return false; }
 	virtual bool isMesh() const { return false; }
-	virtual bool isFloatList() const { return false; }
 	virtual bool isDynamicFloat() const { return false; }
 	virtual bool isFileName() const { return false; }
 
