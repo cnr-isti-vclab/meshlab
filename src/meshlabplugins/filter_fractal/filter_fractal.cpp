@@ -68,20 +68,31 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
         filename = ":/ff_fractal_description.txt";
         break;
     case FP_CRATERS:
-        filename = ":/ff_craters_description.txt";
+        description =
+                "Generates craters onto a mesh using radial functions.<br />"
+                "There must be at least two layers to apply this filter:<br />"
+                "<ul>"
+                "    <li>the layer that contains the target mesh; we assume that this mesh is sufficiently refined;</li>"
+                "    <li>the layer that contains the samples which represent the central points of craters.</li>"
+                "</ul>"
+                "There are three radial functions available to generate craters, two of which are Gaussian and Multiquadric, "
+                "and the third is a variant of multiquadric. Blending functions are also provided to blend "
+                "the crater elevation towards the mesh surface. "
+                "If you want the preview to work, be sure to select the target mesh layer before launching the "
+                "filter. You can select this layer by clicking on it in the layer dialog.";
         break;
     default:
         assert(0); return QString("error");
         break;
     }
 
-    QFile f(filename);
-    if(f.open(QFile::ReadOnly))
-    {
-        QTextStream stream(&f);
-        description = stream.readAll();
-        f.close();
-    }
+//    QFile f(filename);
+//    if(f.open(QFile::ReadOnly))
+//    {
+//        QTextStream stream(&f);
+//        description = stream.readAll();
+//        f.close();
+//    }
 
     if(filterId == FP_FRACTAL_MESH)
     {

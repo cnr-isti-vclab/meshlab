@@ -324,22 +324,22 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
             break;
         case FP_UNSHARP_NORMAL:
             parlst.addParam(RichBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking")));
-            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)</i><br>")));
             parlst.addParam(RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation.<br> Usually you should not need to change the default 1.0 value.")));
             parlst.addParam(RichInt("iterations", 5, "Smooth Iterations", 	tr("number of laplacian face smooth iterations in every run")));
         break;
         case FP_UNSHARP_GEOMETRY:
-            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)</i><br>")));
             parlst.addParam(RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
             parlst.addParam(RichInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run")));
             break;
         case FP_UNSHARP_VERTEX_COLOR:
-            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)</i><br>")));
             parlst.addParam(RichFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
             parlst.addParam(RichInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run")));
             break;
         case FP_UNSHARP_QUALITY:
-            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+            parlst.addParam(RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)</i><br>")));
             parlst.addParam(RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
             parlst.addParam(RichInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run")));
             break;
