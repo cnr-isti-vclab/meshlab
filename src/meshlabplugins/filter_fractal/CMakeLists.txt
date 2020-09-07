@@ -10,9 +10,7 @@ set(SOURCES filter_fractal.cpp)
 
 set(HEADERS craters_utils.h filter_fractal.h filter_functors.h fractal_utils.h)
 
-set(RESOURCES ff_res.qrc)
-
-add_library(filter_fractal MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
+add_library(filter_fractal MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_fractal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(filter_fractal PUBLIC common)
