@@ -150,6 +150,30 @@ public :
         bb.Add(Tr,bbox);
         return bb;
     }
+
+    CMeshO() :
+        vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> >(),
+        sfn(0), svn(0), pvn(0), pfn(0)
+    {
+    }
+
+    CMeshO(CMeshO& oth) : CMeshO() {
+        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
+    }
+
+    //TODO need to change this
+    CMeshO(CMeshO&& oth) : CMeshO() {
+        //I could take everything from oth and place it in
+        //this mesh
+        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
+    }
+
+    //TODO should change also this and use the copy&swap idiom
+    CMeshO& operator=(CMeshO& oth) {
+        Clear();
+        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
+        return *this;
+    }
 };
 
 #endif
