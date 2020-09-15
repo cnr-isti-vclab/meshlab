@@ -1382,7 +1382,7 @@ int FilterDocSampling::postCondition( QAction* a ) const
 {
 	switch(ID(a)){
 		case FP_VORONOI_COLORING    :
-		case FP_DISK_COLORING       : return MeshModel::MM_VERTCOLOR;
+		case FP_DISK_COLORING       : return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 
 		case FP_ELEMENT_SUBSAMPLING       :
 		case FP_MONTECARLO_SAMPLING       :
