@@ -198,9 +198,7 @@ jobs:
         #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab
       run: |
-        cd src\
-        qmake
-        jom -j4 #Qt nmake for parallel build
+        .\install\windows\windows_build.ps1
     - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
