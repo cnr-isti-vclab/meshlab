@@ -54,7 +54,7 @@ public:
     FilterClass getClass(const QAction*) const;
     FILTER_ARITY filterArity(const QAction* act) const;
 private:
-    void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterList &);
+    void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};

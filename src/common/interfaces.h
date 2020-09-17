@@ -414,9 +414,9 @@ public:
 	* Filters \b must never use QMessageBox for reporting errors.
 	* Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
 	*/
-	const QString &errorMsg() { return this->errorMessage; }
-	virtual QString filterInfo(QAction *a) const { return this->filterInfo(ID(a)); }
-	virtual QString filterName(QAction *a) const { return this->filterName(ID(a)); }
+	const QString &errorMsg() const { return this->errorMessage; }
+	virtual QString filterInfo(const QAction *a) const { return this->filterInfo(ID(a)); }
+	virtual QString filterName(const QAction *a) const { return this->filterName(ID(a)); }
 	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
 
 	virtual FilterIDType ID(const QAction *a) const

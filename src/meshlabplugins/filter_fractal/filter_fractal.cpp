@@ -179,7 +179,7 @@ void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, Ri
     }
 }
 
-void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, MeshDocument &md, RichParameterList &par)
 {
     bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
 
