@@ -50,7 +50,7 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	FILTER_ARITY filterArity(QAction* a) const;
 	void initParameterSet(QAction* action, MeshModel& m, RichParameterList& par);
-	int getPreConditions(QAction* action) const;
+	int getPreConditions(const QAction* action) const;
 	bool applyFilter(const QAction* action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb) ;
 	int postCondition(const QAction* ) const;
 

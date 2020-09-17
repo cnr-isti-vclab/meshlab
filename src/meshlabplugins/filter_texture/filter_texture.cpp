@@ -97,7 +97,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
     return QString("Unknown Filter");
 }
 
-int FilterTexturePlugin::getPreConditions(QAction *a) const
+int FilterTexturePlugin::getPreConditions(const QAction *a) const
 {
     switch (ID(a))
     {

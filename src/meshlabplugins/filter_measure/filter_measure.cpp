@@ -135,7 +135,7 @@ MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(QAction*) con
 	return SINGLE_MESH;
 }
 
-int FilterMeasurePlugin::getPreConditions(QAction* action) const
+int FilterMeasurePlugin::getPreConditions(const QAction* action) const
 {
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_STAT:

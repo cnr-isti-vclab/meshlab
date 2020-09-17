@@ -85,7 +85,7 @@ MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(QAction* a)
 	}
 }
 
-int FilterSketchFabPlugin::getPreConditions(QAction*) const
+int FilterSketchFabPlugin::getPreConditions(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }

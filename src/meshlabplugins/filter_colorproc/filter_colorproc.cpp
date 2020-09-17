@@ -986,7 +986,7 @@ int FilterColorProc::postCondition( const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-int FilterColorProc::getPreConditions( QAction * filter ) const
+int FilterColorProc::getPreConditions(const QAction* filter ) const
 {
 	switch(ID(filter))
 	{

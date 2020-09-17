@@ -735,7 +735,7 @@ int SelectionFilterPlugin::postCondition(const QAction *action) const
   return MeshModel::MM_ALL;
 }
 
-int SelectionFilterPlugin::getPreConditions( QAction * action) const
+int SelectionFilterPlugin::getPreConditions(const QAction * action) const
 {
   switch(ID(action))
   {

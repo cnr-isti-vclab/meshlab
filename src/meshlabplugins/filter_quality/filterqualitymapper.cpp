@@ -179,7 +179,7 @@ bool QualityMapperFilter::applyFilter(const QAction *filter, MeshDocument &md, c
 	return true;
 }
 
-int QualityMapperFilter::getPreConditions( QAction * a) const
+int QualityMapperFilter::getPreConditions(const QAction* a) const
 {
 	switch(ID(a))
 	{

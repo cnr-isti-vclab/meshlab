@@ -107,7 +107,7 @@ MeshFilterInterface::FILTER_ARITY FilterSamplePlugin::filterArity(QAction*) cons
  * @brief FilterSamplePlugin::getPreConditions
  * @return
  */
-int FilterSamplePlugin::getPreConditions(QAction*) const
+int FilterSamplePlugin::getPreConditions(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }

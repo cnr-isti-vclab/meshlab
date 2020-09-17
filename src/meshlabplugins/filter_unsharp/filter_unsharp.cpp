@@ -216,7 +216,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
     default : return MeshFilterInterface::Generic;
   }
 }
-int FilterUnsharp::getPreConditions(QAction *a) const
+int FilterUnsharp::getPreConditions(const QAction *a) const
 {
   switch(ID(a))
   {

@@ -194,7 +194,7 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 	 }
 }
 
-int FilterVoronoiPlugin::getPreConditions(QAction* action) const
+int FilterVoronoiPlugin::getPreConditions(const QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

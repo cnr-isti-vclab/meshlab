@@ -728,7 +728,7 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(const QAction *a) c
 	return MeshFilterInterface::Camera;
 }
 
-int FilterCameraPlugin::getPreConditions( QAction * a) const
+int FilterCameraPlugin::getPreConditions(const QAction * a) const
 {
 	switch (ID(a))
 	{

@@ -362,7 +362,7 @@ public:
 	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
 	// They are also used to grayout menus un-appliable entries.
 	*/
-	virtual int getPreConditions(QAction *) const { return MeshModel::MM_NONE; }
+	virtual int getPreConditions(const QAction *) const { return MeshModel::MM_NONE; }
 
 	/** Function used by the framework to get info about the mesh properties changed by the filter.
 	// It is widely used by the meshlab's preview system.

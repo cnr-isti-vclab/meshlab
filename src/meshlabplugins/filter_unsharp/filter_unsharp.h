@@ -75,7 +75,7 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	void initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst);
 	int postCondition(const QAction* ) const;
-	int getPreConditions(QAction *) const;
+	int getPreConditions(const QAction*) const;
     FILTER_ARITY filterArity(QAction * filter) const;
 
 };

@@ -46,7 +46,7 @@ public:
 
 	FilterCameraPlugin();
 	QString pluginName() const;
-	int getPreConditions(QAction *) const;
+	int getPreConditions(const QAction*) const;
 	int postCondition(const QAction* filter) const;
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
