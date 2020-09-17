@@ -116,7 +116,7 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
     }
 }
 
-bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterCSG::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     switch(ID(filter)) {
     case FP_CSG:

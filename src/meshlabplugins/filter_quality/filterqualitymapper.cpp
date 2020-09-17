@@ -125,7 +125,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 
 // The Real Core Function doing the actual mesh processing.
 // Apply color to mesh vertices
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool QualityMapperFilter::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 	m.updateDataMask(MeshModel::MM_VERTCOLOR);

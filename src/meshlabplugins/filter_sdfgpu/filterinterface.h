@@ -153,7 +153,7 @@ private:
   int postCondition(const QAction*) const{
     return MeshModel::MM_NONE;
   }
-  bool applyFilter(QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
+  bool applyFilter(const QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
   virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterList &par){

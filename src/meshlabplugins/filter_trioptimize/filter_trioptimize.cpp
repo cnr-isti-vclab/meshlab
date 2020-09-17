@@ -171,7 +171,7 @@ QString TriOptimizePlugin::pluginName() const
 	return {};
 }
 
- TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action)
+ TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action)
 {
 	switch(ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
@@ -262,7 +262,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     float limit = -std::numeric_limits<float>::epsilon();

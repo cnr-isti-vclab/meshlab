@@ -47,8 +47,7 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	int getRequirements(QAction* a);
 
-	bool applyFilter(
-			QAction* filter,
+	bool applyFilter(const QAction* filter,
 			MeshDocument& md,
 			const RichParameterList& params,
 			vcg::CallBackPos* cb) ;

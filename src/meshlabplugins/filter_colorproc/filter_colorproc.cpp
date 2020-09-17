@@ -368,7 +368,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, RichParamet
 	}
 }
 
-bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos *cb)
+bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos *cb)
 {
 	MeshModel *m = md.mm();  //get current mesh from document
 

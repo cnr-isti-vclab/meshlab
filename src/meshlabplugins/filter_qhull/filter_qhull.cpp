@@ -198,7 +198,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterLi
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos */* cb*/)
+bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos */* cb*/)
 {
     switch(ID(filter))
     {

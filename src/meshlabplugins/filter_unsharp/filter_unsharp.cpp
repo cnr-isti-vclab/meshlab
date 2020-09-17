@@ -405,7 +405,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
   }
 }
 
-bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
+bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))

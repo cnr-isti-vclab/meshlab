@@ -674,7 +674,7 @@ void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool 
 }
 
 
-bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, const RichParameterList & par, vcg::CallBackPos * cb)
+bool ExtraMeshFilterPlugin::applyFilter(const QAction * filter, MeshDocument & md, const RichParameterList & par, vcg::CallBackPos * cb)
 {
 MeshModel & m = *md.mm();
 

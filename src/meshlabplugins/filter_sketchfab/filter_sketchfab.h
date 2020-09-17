@@ -46,7 +46,7 @@ public:
 	int getPreConditions(QAction *) const;
 	int postCondition(const QAction* ) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 
 public slots:
 	void finished();

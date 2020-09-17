@@ -99,7 +99,7 @@ int FilterScreenedPoissonPlugin::getRequirements(QAction* a)
 	}
 }
 
-bool FilterScreenedPoissonPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& params, vcg::CallBackPos* cb)
+bool FilterScreenedPoissonPlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichParameterList& params, vcg::CallBackPos* cb)
 {
 	bool currDirChanged=false;
 	QDir currDir = QDir::current();

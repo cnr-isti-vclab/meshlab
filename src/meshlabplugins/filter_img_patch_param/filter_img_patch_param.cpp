@@ -191,7 +191,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
 }
 
 
-bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
+bool FilterImgPatchParamPlugin::applyFilter(const QAction *act,
     MeshDocument &md,
     const RichParameterList &par,
     vcg::CallBackPos * /*cb*/ )

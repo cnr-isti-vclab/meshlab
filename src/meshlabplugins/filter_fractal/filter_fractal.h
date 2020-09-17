@@ -49,7 +49,7 @@ public:
     void initParameterSet(QAction*, MeshModel&, RichParameterList &){assert(0);}
     void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
 
-    bool applyFilter (QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
+    bool applyFilter (const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
     int postCondition(const QAction *action) const;
     FilterClass getClass(const QAction*) const;

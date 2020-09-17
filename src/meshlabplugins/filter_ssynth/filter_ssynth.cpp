@@ -78,7 +78,7 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
     delete(info);
 }
 
-bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterSSynth::applyFilter(const QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     md.addNewMesh("",this->filterName(ID(filter)));
     QWidget *  parent=(QWidget*)this->parent();

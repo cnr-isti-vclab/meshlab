@@ -166,7 +166,7 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
+bool GlobalRegistrationPlugin::applyFilter(const QAction */*filter*/,
                                            MeshDocument &/*md*/,
                                            const RichParameterList & par,
                                            vcg::CallBackPos */*cb*/)

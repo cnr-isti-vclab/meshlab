@@ -95,7 +95,7 @@ QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(QAction* a)
+FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
@@ -211,7 +211,7 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

@@ -112,7 +112,7 @@ public:
     virtual int         getRequirements( QAction *act );
     //virtual int         postCondition( QAction *act ) const;
 
-    virtual bool        applyFilter( QAction *act,
+    virtual bool        applyFilter(const QAction* act,
                                      MeshDocument &md,
                                      const RichParameterList &par,
                                      vcg::CallBackPos *cb );

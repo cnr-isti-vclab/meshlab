@@ -130,7 +130,7 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel & /*m*/
 		default: break; // do not add any parameter for the other filters
     }
 }
-bool AmbientOcclusionPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 
