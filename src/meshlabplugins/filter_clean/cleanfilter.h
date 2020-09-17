@@ -67,9 +67,9 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(const QAction*) const;
     virtual int getRequirements(QAction *);
-    int postCondition(QAction* ) const;
+    int postCondition(const QAction* ) const;
     int getPreConditions(QAction *) const {    return MeshModel::MM_NONE; } 
     virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;

@@ -836,7 +836,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, const Ric
  return true;
 }
 
-FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
+FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -886,7 +886,7 @@ MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filte
     return MeshFilterInterface::NONE;
 }
 
-int FilterLayerPlugin::postCondition(QAction* filter) const
+int FilterLayerPlugin::postCondition(const QAction* filter) const
 {
 	switch (ID(filter))
 	{

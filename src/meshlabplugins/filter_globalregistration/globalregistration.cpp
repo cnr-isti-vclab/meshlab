@@ -61,7 +61,7 @@ QString GlobalRegistrationPlugin::filterName(FilterIDType filterId) const
     return QString("Unknown Filter");
 }
 
-GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(QAction *a)
+GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
     {

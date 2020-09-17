@@ -690,7 +690,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, const Ri
     return true;
 }
 
-int FilterCameraPlugin::postCondition(QAction * filter) const
+int FilterCameraPlugin::postCondition(const QAction * filter) const
 {
     switch (ID(filter))
     {
@@ -707,7 +707,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     }
 }
 
-FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
+FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(const QAction *a) const
 {
     switch(ID(a))
     {

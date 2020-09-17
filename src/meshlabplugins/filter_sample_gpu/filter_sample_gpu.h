@@ -56,7 +56,7 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(QAction *a);
+	FilterClass getClass(const QAction* a) const;
 };
 
 

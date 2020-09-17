@@ -97,7 +97,7 @@ int FilterImgPatchParamPlugin::getRequirements( QAction *act )
 }
 
 
-MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *act )
+MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
 {
     switch( ID(act) )
     {

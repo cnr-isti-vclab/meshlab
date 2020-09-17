@@ -39,7 +39,7 @@ bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, Q
   return MissingItems.isEmpty();
 }
 
-int MeshFilterInterface::previewOnCreatedAttributes(QAction* act,const MeshModel& mm )
+int MeshFilterInterface::previewOnCreatedAttributes(const QAction* act, const MeshModel& mm ) const
 {
     int changedIfCalled = postCondition(act);
     int createdIfCalled = MeshModel::MM_NONE;

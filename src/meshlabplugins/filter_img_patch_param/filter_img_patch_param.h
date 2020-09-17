@@ -103,7 +103,7 @@ public:
     virtual QString     filterName( FilterIDType id ) const;
     virtual QString     filterInfo( FilterIDType id ) const;
 
-    virtual FilterClass getClass( QAction *act );
+    virtual FilterClass getClass(const QAction* act ) const;
 
     virtual void        initParameterSet( QAction *act,
                                           MeshDocument &md,

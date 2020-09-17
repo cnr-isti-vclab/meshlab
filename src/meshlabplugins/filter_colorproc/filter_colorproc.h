@@ -68,7 +68,7 @@ public:
     ~FilterColorProc();
 
     QString pluginName() const;
-    virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(const QAction*) const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
@@ -76,7 +76,7 @@ public:
 
     virtual void initParameterSet(QAction *,MeshDocument&, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument&, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-    int postCondition(QAction* filter) const;
+    int postCondition(const QAction* filter) const;
     int getPreConditions(QAction *) const;
     FILTER_ARITY filterArity(QAction *act) const;
 };

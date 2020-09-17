@@ -112,7 +112,7 @@ QString QhullPlugin::pluginName() const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
- QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
+ QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
     {

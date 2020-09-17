@@ -915,7 +915,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 	return false;
 }
 
- MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterColorProc::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -950,7 +950,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 	return MeshFilterInterface::Generic;
 }
 
-int FilterColorProc::postCondition( QAction* filter ) const
+int FilterColorProc::postCondition( const QAction* filter ) const
 {
 	switch(ID(filter))
 	{

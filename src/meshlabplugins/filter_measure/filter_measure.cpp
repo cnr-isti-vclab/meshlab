@@ -125,7 +125,7 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 	}
 }
 
-FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *)
+FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) const
 {
 	return MeshFilterInterface::Measure;
 }
@@ -204,7 +204,7 @@ bool FilterMeasurePlugin::applyFilter(QAction* filter, MeshDocument& md, const R
 	}
 }
 
-int FilterMeasurePlugin::postCondition(QAction*) const
+int FilterMeasurePlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }

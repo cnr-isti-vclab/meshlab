@@ -45,9 +45,9 @@ public:
     virtual QString filterInfo(FilterIDType filter) const;
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(QAction *a);
+    FilterClass getClass(const QAction* a) const;
     MeshFilterInterface::FILTER_ARITY filterArity(QAction * filter) const;
-	int postCondition(QAction *filter) const;
+    int postCondition(const QAction *filter) const;
 };
 
 #endif

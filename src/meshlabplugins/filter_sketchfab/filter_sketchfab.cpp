@@ -64,7 +64,7 @@ QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(QAction *a)
+FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
@@ -90,7 +90,7 @@ int FilterSketchFabPlugin::getPreConditions(QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-int FilterSketchFabPlugin::postCondition(QAction*) const
+int FilterSketchFabPlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }

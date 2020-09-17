@@ -41,10 +41,10 @@ public:
 	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
+	FilterClass getClass(const QAction* a) const;
 	FILTER_ARITY filterArity(QAction *a) const;
 	int getPreConditions(QAction *) const;
-	int postCondition( QAction* ) const;
+	int postCondition(const QAction* ) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 

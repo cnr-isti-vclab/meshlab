@@ -84,7 +84,7 @@ QString FilterMutualGlobal::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
-FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(QAction *a)
+FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(const QAction *a) const
 {
   switch(ID(a))
     {

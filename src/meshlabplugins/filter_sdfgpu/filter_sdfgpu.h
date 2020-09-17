@@ -29,7 +29,7 @@ public:
 
     QString filterInfo(FilterIDType filterId) const;
 
-    FilterClass getClass(QAction *)
+    FilterClass getClass(const QAction *) const
     {
       return MeshFilterInterface::VertexColoring;
     }

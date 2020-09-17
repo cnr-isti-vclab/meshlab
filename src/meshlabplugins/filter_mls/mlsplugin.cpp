@@ -99,7 +99,7 @@ QString MlsPlugin::pluginName() const
 return QString("Filter Unknown");
 }
 
- MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
+ MeshFilterInterface::FilterClass MlsPlugin::getClass(const QAction *a) const
 {
     int filterId = ID(a);
 

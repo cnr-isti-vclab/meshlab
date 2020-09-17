@@ -1356,7 +1356,7 @@ switch(ID(action))
  return true;
 }
 
-MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
+MeshFilterInterface::FilterClass FilterDocSampling::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
@@ -1378,7 +1378,7 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
   }
   return FilterClass(0);
 }
-int FilterDocSampling::postCondition( QAction* a ) const
+int FilterDocSampling::postCondition(const QAction* a ) const
 {
 	switch(ID(a)){
 		case FP_VORONOI_COLORING    :

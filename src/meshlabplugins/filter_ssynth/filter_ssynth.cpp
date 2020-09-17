@@ -148,12 +148,12 @@ QString FilterSSynth::ssynth(QString grammar,int maxdepth,int seed,CallBackPos *
     return path;
 }
 
-int FilterSSynth::postCondition(QAction* /*filter*/) const
+int FilterSSynth::postCondition(const QAction* /*filter*/) const
 {
     return MeshModel::MM_NONE;
 }
 
-MeshFilterInterface::FilterClass FilterSSynth::getClass(QAction */*filter*/)
+MeshFilterInterface::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
 {
     return MeshFilterInterface::MeshCreation;
 }

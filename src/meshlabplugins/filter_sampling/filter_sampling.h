@@ -57,8 +57,8 @@ class FilterDocSampling : public QObject, public MeshFilterInterface
   void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
   bool applyFilter(QAction *filter, MeshDocument &m, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
   int getRequirements(QAction *action);
-  int postCondition( QAction* ) const;
-  FilterClass getClass(QAction *);
+  int postCondition(const QAction* ) const;
+  FilterClass getClass(const QAction*) const;
   FILTER_ARITY filterArity(QAction * filter) const;
 };
 

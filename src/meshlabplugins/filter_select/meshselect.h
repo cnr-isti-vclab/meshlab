@@ -73,10 +73,10 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 	virtual QString filterInfo(FilterIDType filter) const;
   virtual QString filterName(FilterIDType filter) const;
   
-  virtual FilterClass getClass(QAction *);
+  virtual FilterClass getClass(const QAction*) const;
   void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
   int getPreConditions(QAction *) const;
-  int postCondition( QAction* ) const;
+  int postCondition(const QAction* ) const;
   int getRequirements(QAction *);
   bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
   FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}

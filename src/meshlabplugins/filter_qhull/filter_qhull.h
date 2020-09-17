@@ -60,7 +60,7 @@ public:
     virtual QString filterInfo(FilterIDType filter) const;
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &m, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(QAction *);	
+    virtual FilterClass getClass(const QAction*) const;
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 

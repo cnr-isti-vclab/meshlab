@@ -139,7 +139,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
- CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
+ CleanFilter::FilterClass CleanFilter::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -195,7 +195,7 @@ int CleanFilter::getRequirements(QAction *action)
 	return 0;
 }
  
-int CleanFilter::postCondition(QAction* action) const
+int CleanFilter::postCondition(const QAction* action) const
 {
 	switch (ID(action))
 	{

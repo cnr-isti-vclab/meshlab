@@ -527,7 +527,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, const RichPara
     return true;
 }
 
- MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterCreate::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{

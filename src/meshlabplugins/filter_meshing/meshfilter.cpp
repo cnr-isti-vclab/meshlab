@@ -118,7 +118,7 @@ QString ExtraMeshFilterPlugin::pluginName() const
 	return "FilterMeshing";
 }
 
-ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
+ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction * a) const
 {
 	switch (ID(a))
 	{
@@ -1762,7 +1762,7 @@ switch(ID(filter))
 return true;
 }
 
-int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
+int ExtraMeshFilterPlugin::postCondition(const QAction * filter) const
 {
 	switch (ID(filter))
 	{

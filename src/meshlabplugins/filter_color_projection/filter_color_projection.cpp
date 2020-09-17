@@ -919,7 +919,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
     return true;
 }
 
-FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(QAction *a)
+FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(const QAction *a) const
 {
     switch(ID(a)) {
     case FP_SINGLEIMAGEPROJ:
@@ -936,7 +936,7 @@ FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(Q
     }
 }
 
-int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
+int FilterColorProjectionPlugin::postCondition( const QAction* a ) const{
     switch(ID(a)) {
     case FP_SINGLEIMAGEPROJ:
         return MeshModel::MM_VERTCOLOR;

@@ -73,10 +73,10 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
     int getPreConditions(QAction *) const;
-    int postCondition( QAction* ) const;
+    int postCondition(const QAction* ) const;
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(const QAction*) const;
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 

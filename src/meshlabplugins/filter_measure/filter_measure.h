@@ -50,12 +50,12 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction*);
+	FilterClass getClass(const QAction*) const;
 	FILTER_ARITY filterArity(QAction*) const;
 	int getPreConditions(QAction *action) const;
 	void initParameterSet(QAction* , MeshModel& m, RichParameterList& parlst);
 	bool applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& parlst, vcg::CallBackPos*) ;
-	int postCondition( QAction* ) const;
+	int postCondition(const QAction* ) const;
 
 private:
 	bool computeTopologicalMeasures(MeshDocument& md);

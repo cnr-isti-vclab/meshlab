@@ -340,7 +340,7 @@ public:
 	// This choice affect the submenu in which each filter will be placed
 	// For example filters that perform an action only on the selection will be placed in the Selection Class
 	*/
-	virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
+	virtual FilterClass getClass(const QAction *) const { return MeshFilterInterface::Generic; }
 
 	/**
 	The filters can have some additional requirements on the mesh capabiliteis.
@@ -368,7 +368,7 @@ public:
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
 	*/
-	virtual int postCondition(QAction*) const { return MeshModel::MM_ALL; }
+	virtual int postCondition(const QAction*) const { return MeshModel::MM_ALL; }
 
 	/** \brief applies the selected filter with the already stabilished parameters
 	* This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet
@@ -419,7 +419,7 @@ public:
 	virtual QString filterName(QAction *a) const { return this->filterName(ID(a)); }
 	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
 
-	virtual FilterIDType ID(QAction *a) const
+	virtual FilterIDType ID(const QAction *a) const
 	{
 	QString aa=a->text();
 		foreach(FilterIDType tt, types())
@@ -439,13 +439,13 @@ public:
 		return AC(idName);
 	}
 
-	virtual QAction *AC(QString idName)
+	virtual QAction *AC(const QString& idName)
 	{
-	QString i=idName;
-		foreach(QAction *tt, actionList)
+		QString i=idName;
+		for(QAction *tt : actionList)
 			if (idName == tt->text()) return tt;
 		i.replace("&","");
-		foreach(QAction *tt, actionList)
+		for(QAction *tt : actionList)
 			if (i == tt->text()) return tt;
 		
 		qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
@@ -458,7 +458,7 @@ public:
 
 	/** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
 	BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
-	int previewOnCreatedAttributes(QAction* act, const MeshModel& mm);
+	int previewOnCreatedAttributes(const QAction* act, const MeshModel& mm) const;
 	QString generatedScriptCode;
 
 	MLPluginGLContext* glContext;

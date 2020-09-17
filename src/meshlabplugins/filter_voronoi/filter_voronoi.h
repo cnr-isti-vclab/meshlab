@@ -52,7 +52,7 @@ public:
 	void initParameterSet(QAction* action, MeshModel& m, RichParameterList& par);
 	int getPreConditions(QAction* action) const;
 	bool applyFilter(QAction* action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb) ;
-	int postCondition(QAction* ) const;
+	int postCondition(const QAction* ) const;
 
 private:
 	bool voronoiSampling(

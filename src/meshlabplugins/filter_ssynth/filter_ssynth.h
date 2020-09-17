@@ -47,10 +47,10 @@ public:
     virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterList &){};
     virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
-    virtual FilterClass getClass(QAction* filter);
+    virtual FilterClass getClass(const QAction* filter) const;
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
     static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
-    virtual int postCondition(QAction* filter) const;
+    virtual int postCondition(const QAction* filter) const;
     QList<Format> importFormats() const;
     QList<Format> exportFormats() const;
 

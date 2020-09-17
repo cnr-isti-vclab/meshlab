@@ -79,7 +79,7 @@ QString FilterCreateIso::pluginName() const
   return QString("error!");
 }
 
- FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
+ FilterCreateIso::FilterClass FilterCreateIso::getClass(const QAction *a) const
 {
   switch(ID(a))
   {

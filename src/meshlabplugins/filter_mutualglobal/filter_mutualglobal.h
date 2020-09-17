@@ -56,8 +56,8 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshDocument & md, RichParameterList & /*parent*/);
 	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
-	FilterClass getClass(QAction *a);
+	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
+	FilterClass getClass(const QAction* a) const;
 	QString filterScriptFunctionName(FilterIDType filterID);
 	bool preAlignment(MeshDocument &md, const RichParameterList& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);

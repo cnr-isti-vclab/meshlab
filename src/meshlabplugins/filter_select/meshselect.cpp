@@ -649,7 +649,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, const
 	return true;
 }
 
-MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action)
+MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
@@ -703,7 +703,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
   }
 }
 
-int SelectionFilterPlugin::postCondition(QAction *action) const
+int SelectionFilterPlugin::postCondition(const QAction *action) const
 {
 	switch(ID(action))
 	{

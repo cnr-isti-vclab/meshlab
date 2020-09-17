@@ -453,12 +453,12 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, co
   return false;
 }
 
-MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *)
+MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(const QAction *) const
 {
   return MeshFilterInterface::Remeshing;
 }
 
-int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
+int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 {
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }

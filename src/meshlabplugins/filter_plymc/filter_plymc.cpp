@@ -82,7 +82,7 @@ QString PlyMCPlugin::pluginName() const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
- PlyMCPlugin::FilterClass PlyMCPlugin::getClass(QAction *a)
+ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -256,7 +256,7 @@ MeshFilterInterface::FILTER_ARITY PlyMCPlugin::filterArity( QAction * filter ) c
 	}
 }
 
-int PlyMCPlugin::postCondition(QAction * filter) const
+int PlyMCPlugin::postCondition(const QAction * filter) const
 {
 	switch (ID(filter))
 	{

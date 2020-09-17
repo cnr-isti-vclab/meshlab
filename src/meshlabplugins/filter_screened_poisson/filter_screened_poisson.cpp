@@ -77,7 +77,7 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 	}
 }
 
-MeshFilterInterface::FilterClass FilterScreenedPoissonPlugin::getClass(QAction* a)
+MeshFilterInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
 {
 	if (ID(a) == FP_SCREENED_POISSON){
 		return FilterScreenedPoissonPlugin::FilterClass(MeshFilterInterface::Remeshing);
@@ -212,7 +212,7 @@ void FilterScreenedPoissonPlugin::initParameterSet(
 	}
 }
 
-int FilterScreenedPoissonPlugin::postCondition(QAction* filter) const
+int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 {
 	if (ID(filter) == FP_SCREENED_POISSON){
 		return MeshModel::MM_VERTNUMBER + MeshModel::MM_FACENUMBER;

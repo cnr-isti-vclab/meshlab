@@ -59,7 +59,7 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(const QAction*) const;
     virtual int getRequirements(QAction *);
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 

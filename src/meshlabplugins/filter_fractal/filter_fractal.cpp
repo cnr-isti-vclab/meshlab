@@ -338,7 +338,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, const RichPar
     return false;
 }
 
-MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
+MeshFilterInterface::FilterClass FilterFractal::getClass(const QAction* filter) const
 {
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -368,7 +368,7 @@ int FilterFractal::getRequirements(QAction *filter)
 	return MeshModel::MM_NONE;
 }
 
-int FilterFractal::postCondition(QAction *filter) const
+int FilterFractal::postCondition(const QAction *filter) const
 {
     switch(ID(filter))
     {

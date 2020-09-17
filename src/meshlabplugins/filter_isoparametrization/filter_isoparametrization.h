@@ -48,7 +48,7 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
   ~FilterIsoParametrization();
   
   QString pluginName() const;
-  virtual FilterClass getClass(QAction *);
+  virtual FilterClass getClass(const QAction*) const;
   virtual QString filterName(FilterIDType filter) const;
   virtual QString filterInfo(FilterIDType filter) const;
   
@@ -56,7 +56,7 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
   
   virtual void initParameterSet(QAction *,MeshDocument&, RichParameterList & /*parent*/);
   virtual bool applyFilter(QAction *filter, MeshDocument&, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-  int postCondition(QAction* filter) const;
+  int postCondition(const QAction* filter) const;
   void PrintStats(CMeshO *mesh);
   FILTER_ARITY filterArity(QAction*) const;
   

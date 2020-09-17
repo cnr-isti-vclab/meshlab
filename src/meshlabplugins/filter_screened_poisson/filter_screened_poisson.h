@@ -44,7 +44,7 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 
-	FilterClass getClass(QAction* a);
+	FilterClass getClass(const QAction* a) const;
 	int getRequirements(QAction* a);
 
 	bool applyFilter(
@@ -54,7 +54,7 @@ public:
 			vcg::CallBackPos* cb) ;
 
 	void initParameterSet(QAction* a, MeshModel&, RichParameterList& parlist);
-	int postCondition(QAction* filter) const;
+	int postCondition(const QAction* filter) const;
 	FILTER_ARITY filterArity(QAction*) const;
 };
 

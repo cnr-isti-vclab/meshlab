@@ -104,7 +104,7 @@ MeshFilterInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(QAction*) 
 
 int getRequirements(QAction *action);
 
-MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(QAction * /*filter*/)
+MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
 {
 	return MeshFilterInterface::VertexColoring;
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);

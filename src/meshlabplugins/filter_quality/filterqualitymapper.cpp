@@ -69,7 +69,7 @@ QString QualityMapperFilter::pluginName() const
   return QString("");
 }
 
- MeshFilterInterface::FilterClass QualityMapperFilter::getClass(QAction *a)
+ MeshFilterInterface::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
@@ -191,11 +191,11 @@ int QualityMapperFilter::getPreConditions( QAction * a) const
 	} 
 }
 
-int QualityMapperFilter::postCondition( QAction* a) const
+int QualityMapperFilter::postCondition(const QAction* a) const
 {
 	switch(ID(a))
 	{
-	case FP_QUALITY_MAPPER :           
+	case FP_QUALITY_MAPPER :
 		return MeshModel::MM_VERTCOLOR;
 	default :  
 		assert(0);			

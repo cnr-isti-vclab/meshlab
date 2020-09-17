@@ -161,7 +161,7 @@ QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
     return QString("filter not found!");
 }
 
-FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
+FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
@@ -185,7 +185,7 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
   }
 }
 
-int FilterFunctionPlugin::postCondition(QAction *action) const
+int FilterFunctionPlugin::postCondition(const QAction *action) const
 {
   switch(ID(action))
   {

@@ -253,7 +253,7 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const 
 	}
 }
 
-int FilterVoronoiPlugin::postCondition(QAction* action) const
+int FilterVoronoiPlugin::postCondition(const QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

@@ -51,8 +51,8 @@ public:
 
     bool applyFilter (QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
-    int postCondition(QAction *action) const;
-    FilterClass getClass(QAction *);
+    int postCondition(const QAction *action) const;
+    FilterClass getClass(const QAction*) const;
     FILTER_ARITY filterArity(QAction* act) const;
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterList &);

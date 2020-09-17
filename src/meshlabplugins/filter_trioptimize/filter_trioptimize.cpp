@@ -181,7 +181,7 @@ QString TriOptimizePlugin::pluginName() const
  return MeshFilterInterface::Generic;
 }
 
-int TriOptimizePlugin::postCondition(QAction *a) const
+int TriOptimizePlugin::postCondition(const QAction *a) const
 {
 	switch(ID(a))
 	{

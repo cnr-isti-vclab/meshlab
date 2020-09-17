@@ -243,7 +243,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, const RichParame
     return true;
 }//End applyFilter
 
-int FilterDirt::postCondition( QAction *a) const
+int FilterDirt::postCondition(const QAction *a) const
 {
 	switch (ID(a)){
 	case FP_DIRT: return MeshModel::MM_ALL;
@@ -253,7 +253,7 @@ int FilterDirt::postCondition( QAction *a) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
+MeshFilterInterface::FilterClass FilterDirt::getClass(const QAction *filter) const
 {
 	switch (ID(filter))	{
 	case FP_DIRT:return MeshFilterInterface::Sampling;

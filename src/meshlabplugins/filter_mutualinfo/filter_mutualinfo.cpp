@@ -69,7 +69,7 @@ QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
+FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_IMAGE_MUTUALINFO:
@@ -127,7 +127,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, cons
 	}
 }
 
-int FilterMutualInfoPlugin::postCondition(QAction*) const
+int FilterMutualInfoPlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }

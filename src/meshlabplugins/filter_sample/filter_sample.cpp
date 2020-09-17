@@ -83,7 +83,7 @@ QString FilterSamplePlugin::filterName(FilterIDType filterId) const
  * @param a: the action of the filter
  * @return the class od the filter
  */
-FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(QAction *a)
+FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_MOVE_VERTEX :
@@ -116,7 +116,7 @@ int FilterSamplePlugin::getPreConditions(QAction*) const
  * @brief FilterSamplePlugin::postCondition
  * @return
  */
-int FilterSamplePlugin::postCondition(QAction*) const
+int FilterSamplePlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;
 }

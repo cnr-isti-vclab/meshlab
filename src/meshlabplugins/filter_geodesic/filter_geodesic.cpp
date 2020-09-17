@@ -84,7 +84,7 @@ QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 	return QString("error!");
 }
 
-FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
+FilterGeodesic::FilterClass FilterGeodesic::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -249,7 +249,7 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 	return;
 }
 
-int FilterGeodesic::postCondition(QAction * filter) const
+int FilterGeodesic::postCondition(const QAction * filter) const
 {
 	switch (ID(filter))
 	{

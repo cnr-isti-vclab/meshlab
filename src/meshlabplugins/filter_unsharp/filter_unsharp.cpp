@@ -181,7 +181,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   return QString("Error on FilterUnsharp::filterInfo()!");
 }
 
- FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
+ FilterUnsharp::FilterClass FilterUnsharp::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
@@ -251,7 +251,7 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 }
 
 
-int FilterUnsharp::postCondition(QAction *a) const
+int FilterUnsharp::postCondition(const QAction *a) const
 {
 	switch(ID(a))
 	{

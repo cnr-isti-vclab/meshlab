@@ -79,7 +79,7 @@ public:
       * by meshlab to determine in which filter sub-menu-entry insert this filter. The default value adds the
       * plugin to the bottom of the list.
       */
-  virtual FilterClass getClass(){
+  virtual FilterClass getClass() const{
     return MeshFilterInterface::Generic;
   }
   
@@ -139,7 +139,7 @@ private:
   QString filterInfo(FilterIDType ) const{
     return filterInfo();
   }
-  FilterClass getClass(QAction *){
+  FilterClass getClass(const QAction *) const{
     return getClass();
   }
   // NOTE: Paolo informed that this will be killed sooner or later.
@@ -150,7 +150,7 @@ private:
   int getPreConditions(QAction* ) const{
     return getPreConditions();
   }
-  int postCondition() const{
+  int postCondition(const QAction*) const{
     return MeshModel::MM_NONE;
   }
   bool applyFilter(QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){

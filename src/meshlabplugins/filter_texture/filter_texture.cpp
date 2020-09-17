@@ -133,7 +133,7 @@ int FilterTexturePlugin::getRequirements(QAction *a)
     return MeshModel::MM_NONE;
 }
 
-int FilterTexturePlugin::postCondition( QAction *a) const
+int FilterTexturePlugin::postCondition(const QAction *a) const
 {
     switch (ID(a))
     {
@@ -154,7 +154,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
-FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
+FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a) const
 {
     switch(ID(a))
     {
