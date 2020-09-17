@@ -271,11 +271,6 @@ edit_quality.depends = common
 edit_select.depends = common
 edit_pickpoints.depends = common
 
-#no longer needed# meshlabplugins/filter_aging \
-#no longer needed# meshlabplugins/filter_bnpts \
-#no longer needed# meshlabplugins/filter_colorize \
-
-
 # if distrib folder is not in $$PWD/../distrib (shadow build case),
 # we need to copy all the files inside $$PWD/../distrib in the actual
 # distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
