@@ -353,7 +353,7 @@ MeshFilterInterface::FilterClass FilterFractal::getClass(const QAction* filter) 
     }
 }
 
-int FilterFractal::getRequirements(QAction *filter)
+int FilterFractal::getRequirements(const QAction *filter)
 {
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:

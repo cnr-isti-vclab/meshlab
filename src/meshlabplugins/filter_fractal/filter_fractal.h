@@ -45,7 +45,7 @@ public:
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;
 
-    int getRequirements(QAction *);
+    int getRequirements(const QAction*);
     void initParameterSet(QAction*, MeshModel&, RichParameterList &){assert(0);}
     void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
 

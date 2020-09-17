@@ -95,7 +95,7 @@ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-int FilterIsoParametrization::getRequirements(QAction *)
+int FilterIsoParametrization::getRequirements(const QAction *)
 {
 	return MeshModel::MM_NONE;
 }

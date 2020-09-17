@@ -115,7 +115,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
     return MeshModel::MM_NONE;
 }
 
-int FilterTexturePlugin::getRequirements(QAction *a)
+int FilterTexturePlugin::getRequirements(const QAction *a)
 {
     switch (ID(a))
     {

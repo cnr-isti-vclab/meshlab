@@ -72,7 +72,7 @@ public:
     QString filterName(FilterIDType filter) const;
     QString	filterInfo(FilterIDType filterId) const;
 	FILTER_ARITY filterArity(QAction*) const;
-    int getRequirements (QAction *action);
+	int getRequirements (const QAction* action);
     FilterClass getClass(const QAction* filter) const;
 
     void initParameterSet(QAction *,MeshModel &/*m*/,RichParameterList & /*parent*/);

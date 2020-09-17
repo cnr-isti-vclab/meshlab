@@ -352,7 +352,7 @@ public:
 	// outputs a never used before mesh property (e.g. face colors), it will be allocated by a call
 	// to MeshModel::updateDataMask(...)
 	*/
-	virtual int getRequirements(QAction *) { return MeshModel::MM_NONE; }
+	virtual int getRequirements(const QAction *) { return MeshModel::MM_NONE; }
 
 	/** The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
 	// For example algorithms that compute per face quality have as precondition the existence of faces

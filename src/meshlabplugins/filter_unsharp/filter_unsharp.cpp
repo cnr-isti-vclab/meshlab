@@ -280,7 +280,7 @@ int FilterUnsharp::postCondition(const QAction *a) const
 	}
 }
 
- int FilterUnsharp::getRequirements(QAction *action)
+ int FilterUnsharp::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {

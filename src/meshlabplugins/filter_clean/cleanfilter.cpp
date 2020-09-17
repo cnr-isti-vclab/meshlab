@@ -167,7 +167,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
 	return MeshFilterInterface::Generic;
 }
 
-int CleanFilter::getRequirements(QAction *action)
+int CleanFilter::getRequirements(const QAction *action)
 {
 	switch(ID(action))
 	{

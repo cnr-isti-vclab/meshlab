@@ -88,7 +88,7 @@ MeshFilterInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAc
 	}
 }
 
-int FilterScreenedPoissonPlugin::getRequirements(QAction* a)
+int FilterScreenedPoissonPlugin::getRequirements(const QAction* a)
 {
 	if (ID(a) == FP_SCREENED_POISSON) {
 		return MeshModel::MM_NONE;

@@ -144,7 +144,7 @@ private:
   }
   // NOTE: Paolo informed that this will be killed sooner or later.
   // any behavior defined therein should be moved to getPostConditions()
-  int getRequirements(QAction* ){
+  int getRequirements(const QAction* ){
     return postConditions();
   }
   int getPreConditions(QAction* ) const{

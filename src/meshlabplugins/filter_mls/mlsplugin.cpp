@@ -311,7 +311,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
 }
 
- int MlsPlugin::getRequirements(QAction *)
+ int MlsPlugin::getRequirements(const QAction *)
 {
     return 0;
 }

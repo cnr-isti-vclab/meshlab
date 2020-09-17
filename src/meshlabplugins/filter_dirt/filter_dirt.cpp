@@ -128,7 +128,7 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichPar
     }
 }
 
-int FilterDirt::getRequirements(QAction * /*action*/)
+int FilterDirt::getRequirements(const QAction * /*action*/)
 {
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }

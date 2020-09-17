@@ -84,7 +84,7 @@ QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
 }
 
 
-int FilterImgPatchParamPlugin::getRequirements( QAction *act )
+int FilterImgPatchParamPlugin::getRequirements(const QAction *act )
 {
     switch( ID(act) )
     {

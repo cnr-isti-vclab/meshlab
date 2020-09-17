@@ -96,7 +96,7 @@ QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // What "new" properties the plugin requires
-int FilterColorProjectionPlugin::getRequirements(QAction *action){
+int FilterColorProjectionPlugin::getRequirements(const QAction *action){
     switch(ID(action)){
     case FP_SINGLEIMAGEPROJ:  return MeshModel::MM_VERTCOLOR;
     case FP_MULTIIMAGETRIVIALPROJ:  return MeshModel::MM_VERTCOLOR;

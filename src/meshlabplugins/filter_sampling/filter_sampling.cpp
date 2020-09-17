@@ -427,7 +427,7 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 		default : assert(0); return QString("unknown filter!!!!");
   }
 }
-int FilterDocSampling::getRequirements(QAction *action)
+int FilterDocSampling::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {

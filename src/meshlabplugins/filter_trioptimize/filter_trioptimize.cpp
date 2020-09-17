@@ -138,7 +138,7 @@ QString TriOptimizePlugin::pluginName() const
 	return {};
 }
 
- int TriOptimizePlugin::getRequirements(QAction *action)
+ int TriOptimizePlugin::getRequirements(const QAction *action)
 {
 	switch (ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:

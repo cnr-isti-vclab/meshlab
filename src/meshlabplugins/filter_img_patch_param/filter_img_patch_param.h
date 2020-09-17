@@ -109,7 +109,7 @@ public:
                                           MeshDocument &md,
                                           RichParameterList &par );
 
-    virtual int         getRequirements( QAction *act );
+    virtual int         getRequirements(const QAction* act );
     //virtual int         postCondition( QAction *act ) const;
 
     virtual bool        applyFilter(const QAction* act,

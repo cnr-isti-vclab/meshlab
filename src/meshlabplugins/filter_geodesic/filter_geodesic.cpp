@@ -96,7 +96,7 @@ FilterGeodesic::FilterClass FilterGeodesic::getClass(const QAction *a) const
 	return MeshFilterInterface::Generic;
 }
 
-int FilterGeodesic::getRequirements(QAction *action)
+int FilterGeodesic::getRequirements(const QAction *action)
 {
 	switch(ID(action))
 	{

@@ -686,7 +686,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *
   return MeshFilterInterface::Selection;
 }
 
- int SelectionFilterPlugin::getRequirements(QAction *action)
+ int SelectionFilterPlugin::getRequirements(const QAction *action)
 {
  switch(ID(action))
   {

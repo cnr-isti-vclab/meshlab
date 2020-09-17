@@ -43,7 +43,7 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual int getRequirements(QAction *);
+    virtual int getRequirements(const QAction*);
     virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterList &){};
     virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);

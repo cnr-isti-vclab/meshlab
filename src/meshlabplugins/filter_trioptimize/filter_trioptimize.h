@@ -49,7 +49,7 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
-	int getRequirements(QAction *);
+	int getRequirements(const QAction*);
 	FilterClass getClass(const QAction *);
 	int postCondition(const QAction* ) const;
     FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}

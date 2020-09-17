@@ -45,7 +45,7 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 
 	FilterClass getClass(const QAction* a) const;
-	int getRequirements(QAction* a);
+	int getRequirements(const QAction* a);
 
 	bool applyFilter(const QAction* filter,
 			MeshDocument& md,

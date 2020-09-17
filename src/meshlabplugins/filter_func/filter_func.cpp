@@ -224,7 +224,7 @@ int FilterFunctionPlugin::postCondition(const QAction *action) const
   return MeshModel::MM_NONE;
 }
 
-int FilterFunctionPlugin::getRequirements(QAction *action)
+int FilterFunctionPlugin::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {

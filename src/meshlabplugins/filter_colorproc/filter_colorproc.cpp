@@ -170,7 +170,7 @@ QString FilterColorProc::pluginName() const
   return QString("error!");
 }
 
- int FilterColorProc::getRequirements(QAction *action)
+ int FilterColorProc::getRequirements(const QAction *action)
 {
     switch(ID(action))
     {

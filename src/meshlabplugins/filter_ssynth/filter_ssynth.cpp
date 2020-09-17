@@ -107,7 +107,7 @@ bool FilterSSynth::applyFilter(const QAction*  filter, MeshDocument &md, const R
     }
 }
 
-int FilterSSynth::getRequirements(QAction *)
+int FilterSSynth::getRequirements(const QAction *)
 {
     return MeshModel::MM_NONE;
 }

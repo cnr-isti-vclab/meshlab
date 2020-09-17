@@ -88,7 +88,7 @@ QString FilterCreateIso::pluginName() const
   }
 }
 
- int FilterCreateIso::getRequirements(QAction *action)
+ int FilterCreateIso::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {

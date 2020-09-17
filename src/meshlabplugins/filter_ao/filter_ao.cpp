@@ -91,7 +91,7 @@ QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
     return QString("");
 }
 
-int AmbientOcclusionPlugin::getRequirements(QAction * /*action*/)
+int AmbientOcclusionPlugin::getRequirements(const QAction * /*action*/)
 {
     //no requirements needed
     return 0;
