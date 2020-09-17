@@ -188,7 +188,7 @@ QMap<QString, RichParameterList> PluginManager::generateFilterParameterMap()
 		QString filterName = ai.key();//  ->filterName();
 									  //QAction act(filterName,NULL);
 		RichParameterList rp;
-		stringFilterMap[filterName]->initParameterSet(ai.value(), md, rp);
+		stringFilterMap[filterName]->initParameterList(ai.value(), md, rp);
 		FPM[filterName] = rp;
 	}
 	return FPM;

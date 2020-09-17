@@ -100,7 +100,7 @@ int FilterIsoParametrization::getRequirements(const QAction *)
 	return MeshModel::MM_NONE;
 }
 
-void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterIsoParametrization::initParameterList(QAction *a, MeshDocument& md, RichParameterList & par)
 {
   
   switch(ID(a))
@@ -463,7 +463,7 @@ int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity( QAction* filter) const
+MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {

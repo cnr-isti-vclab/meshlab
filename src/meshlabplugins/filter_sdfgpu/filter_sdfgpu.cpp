@@ -39,7 +39,7 @@ QString SdfGpuPlugin::pluginName() const
     return "FilterSDFGPU";
 }
 
-void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterList &par)
+void SdfGpuPlugin::initParameterList(QAction *action, MeshModel &/*m*/, RichParameterList &par)
 {
     mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
@@ -1095,7 +1095,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
     checkGLError::debugInfo("Error during depth peeling");
 }
 
-MeshFilterInterface::FILTER_ARITY SdfGpuPlugin::filterArity( QAction *) const
+MeshFilterInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
 {
     return MeshFilterInterface::SINGLE_MESH;
 }

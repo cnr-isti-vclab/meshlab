@@ -91,7 +91,7 @@ public:
       * parameter set according to your mesh document (data dependent parameters). A GUI will be
       * automatically designed according to this parameters.
       */
-  virtual void initParameterSet(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
+  virtual void initParameterList(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
   
   /**
       * @brief The implementation of the filter algorithm
@@ -156,8 +156,8 @@ private:
   bool applyFilter(const QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
-  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterList &par){
-    initParameterSet(md,par);
+  virtual void initParameterList(QAction *, MeshDocument &md, RichParameterList &par){
+    initParameterList(md,par);
   }
 };
 

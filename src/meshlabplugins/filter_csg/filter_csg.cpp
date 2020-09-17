@@ -74,7 +74,7 @@ QString FilterCSG::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParameterList & parlst)
+void FilterCSG::initParameterList(QAction *action, MeshDocument & md, RichParameterList & parlst)
 {
     switch (ID(action)) {
     case FP_CSG:

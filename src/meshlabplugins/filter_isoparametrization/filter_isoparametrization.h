@@ -54,11 +54,11 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
   
   virtual int getRequirements(const QAction*);
   
-  virtual void initParameterSet(QAction *,MeshDocument&, RichParameterList & /*parent*/);
+  virtual void initParameterList(QAction *,MeshDocument&, RichParameterList & /*parent*/);
   virtual bool applyFilter(const QAction* filter, MeshDocument&, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
   int postCondition(const QAction* filter) const;
   void PrintStats(CMeshO *mesh);
-  FILTER_ARITY filterArity(QAction*) const;
+  FILTER_ARITY filterArity(const QAction*) const;
   
 };
 #endif

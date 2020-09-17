@@ -44,8 +44,8 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
     virtual int getRequirements(const QAction*);
-    virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterList &){};
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(QAction* /*filter*/,MeshModel &,RichParameterList &){};
+    virtual void initParameterList(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
     virtual FilterClass getClass(const QAction* filter) const;
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
@@ -58,7 +58,7 @@ public:
     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
     bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
     bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
-    MeshFilterInterface::FILTER_ARITY filterArity(QAction *) const {return NONE;}
+    MeshFilterInterface::FILTER_ARITY filterArity(const QAction *) const {return NONE;}
 private:
     QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
     QString GetTemplate(int sphereres);

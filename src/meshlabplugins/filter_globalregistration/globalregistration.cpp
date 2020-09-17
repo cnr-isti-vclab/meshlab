@@ -71,7 +71,7 @@ GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(const Q
     return MeshFilterInterface::Generic;
 }
 
-void GlobalRegistrationPlugin::initParameterSet(QAction *action,MeshDocument &md, RichParameterList & parlst)
+void GlobalRegistrationPlugin::initParameterList(QAction *action,MeshDocument &md, RichParameterList & parlst)
 {
 
      switch(ID(action))	 {

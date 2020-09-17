@@ -100,7 +100,7 @@ QString PlyMCPlugin::pluginName() const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
+void PlyMCPlugin::initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))
      {
@@ -246,7 +246,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
    return true;
 }
 
-MeshFilterInterface::FILTER_ARITY PlyMCPlugin::filterArity( QAction * filter ) const
+MeshFilterInterface::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter)) 
 	{

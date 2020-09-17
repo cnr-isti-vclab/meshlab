@@ -180,7 +180,7 @@ QString FilterColorProc::pluginName() const
     assert(0);
 }
 
-void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterColorProc::initParameterList(QAction *a, MeshDocument& md, RichParameterList & par)
 {
 	switch(ID(a))
 	{
@@ -1022,7 +1022,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity( QAction *act ) const
+MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {

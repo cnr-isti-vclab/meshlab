@@ -88,11 +88,11 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 
 	FilterClass getClass(const QAction*) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+	void initParameterList(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(const QAction *filter) const;
 	int getPreCondition(QAction *filter) const;
-	FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 protected:
 

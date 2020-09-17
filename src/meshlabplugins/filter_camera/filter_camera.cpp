@@ -87,7 +87,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
+void FilterCameraPlugin::initParameterList(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
     Shotf defShot;
     switch(ID(action))
@@ -747,7 +747,7 @@ int FilterCameraPlugin::getPreConditions(const QAction * a) const
 	return 0;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity( QAction* act ) const
+MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity(const QAction* act ) const
 {
 	switch (ID(act))
 	{

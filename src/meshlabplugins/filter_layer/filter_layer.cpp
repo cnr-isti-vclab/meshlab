@@ -113,7 +113,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterLayerPlugin::initParameterList(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     MeshModel *mm=md.mm();
     RasterModel *rm=md.rm();
@@ -860,7 +860,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) con
 		return MeshFilterInterface::Generic;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filter) const
+MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {

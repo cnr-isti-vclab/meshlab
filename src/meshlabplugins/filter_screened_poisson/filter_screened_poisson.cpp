@@ -193,7 +193,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(const QAction* filter, MeshDocumen
 	return false;
 }
 
-void FilterScreenedPoissonPlugin::initParameterSet(
+void FilterScreenedPoissonPlugin::initParameterList(
 		QAction* filter,
 		MeshModel&,
 		RichParameterList& parlist)
@@ -223,7 +223,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-MeshFilterInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(QAction*) const
+MeshFilterInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

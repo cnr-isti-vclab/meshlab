@@ -130,7 +130,7 @@ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) 
 	return MeshFilterInterface::Measure;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(QAction*) const
+MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -151,7 +151,7 @@ int FilterMeasurePlugin::getPreConditions(const QAction* action) const
 	}
 }
 
-void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList & parlst)
+void FilterMeasurePlugin::initParameterList(QAction *action, MeshModel &m, RichParameterList & parlst)
 {
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_HISTOGRAM:

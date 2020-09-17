@@ -50,8 +50,8 @@ public:
 	ExtraSampleGPUPlugin();
 
     QString pluginName() const;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
-	void initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst);
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	void initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst);
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;

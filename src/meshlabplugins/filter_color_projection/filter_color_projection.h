@@ -44,11 +44,11 @@ public:
     int postCondition( const QAction* ) const;
 
     virtual FilterClass getClass(const QAction*) const;
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual int getRequirements(const QAction*);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 private:
 

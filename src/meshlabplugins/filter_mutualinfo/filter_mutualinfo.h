@@ -46,8 +46,8 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
-	FILTER_ARITY filterArity(QAction *) const;
-	void initParameterSet(QAction *, MeshDocument &, RichParameterList & /*parent*/);
+	FILTER_ARITY filterArity(const QAction*) const;
+	void initParameterList(QAction *, MeshDocument &, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(const QAction*) const;
 

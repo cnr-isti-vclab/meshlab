@@ -87,7 +87,7 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterList & parlst)
+void ExtraSampleGPUPlugin::initParameterList(QAction * action, MeshModel & m, RichParameterList & parlst)
 {
 	(void)m;
 

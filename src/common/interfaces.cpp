@@ -1,6 +1,6 @@
 #include "interfaces.h"
 
-bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const
+bool MeshFilterInterface::isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const
 {
   int preMask = getPreConditions(act);
   MissingItems.clear();

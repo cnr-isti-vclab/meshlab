@@ -98,7 +98,7 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
  * @brief FilterSamplePlugin::filterArity
  * @return
  */
-MeshFilterInterface::FILTER_ARITY FilterSamplePlugin::filterArity(QAction*) const
+MeshFilterInterface::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -133,7 +133,7 @@ int FilterSamplePlugin::postCondition(const QAction*) const
  * @param m
  * @param parlst
  */
-void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst) 
+void FilterSamplePlugin::initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst) 
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :

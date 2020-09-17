@@ -165,7 +165,7 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
     return description;
 }
 
-void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterList(QAction* filter,MeshDocument &md, RichParameterList &par)
 {
     switch(ID(filter))
     {
@@ -382,7 +382,7 @@ int FilterFractal::postCondition(const QAction *filter) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterFractal::filterArity( QAction* act ) const
+MeshFilterInterface::FILTER_ARITY FilterFractal::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {

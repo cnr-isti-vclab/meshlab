@@ -75,7 +75,7 @@ FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(QAction* a) const
+MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
@@ -95,7 +95,7 @@ int FilterSketchFabPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterList& parlst)
+void FilterSketchFabPlugin::initParameterList(QAction* action, MeshModel&, RichParameterList& parlst)
 {
 	QSettings settings;
 	QVariant v = settings.value("SketchFab Code");

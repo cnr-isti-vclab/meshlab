@@ -43,10 +43,10 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(const QAction* a) const;
-    MeshFilterInterface::FILTER_ARITY filterArity(QAction * filter) const;
+    MeshFilterInterface::FILTER_ARITY filterArity(const QAction* filter) const;
     int postCondition(const QAction *filter) const;
 };
 

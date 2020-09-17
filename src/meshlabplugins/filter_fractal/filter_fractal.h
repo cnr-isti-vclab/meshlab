@@ -46,14 +46,14 @@ public:
     QString filterInfo(FilterIDType filter) const;
 
     int getRequirements(const QAction*);
-    void initParameterSet(QAction*, MeshModel&, RichParameterList &){assert(0);}
-    void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
+    void initParameterList(QAction*, MeshModel&, RichParameterList &){assert(0);}
+    void initParameterList(QAction *, MeshDocument &, RichParameterList &);
 
     bool applyFilter (const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
     int postCondition(const QAction *action) const;
     FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(QAction* act) const;
+    FILTER_ARITY filterArity(const QAction* act) const;
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterList &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);

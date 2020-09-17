@@ -34,13 +34,13 @@ public:
       return MeshFilterInterface::VertexColoring;
     }
 
-    FILTER_ARITY filterArity(QAction *act) const;
+    FILTER_ARITY filterArity(const QAction* act) const;
 
     //Main plugin function
     bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
 
     //Parameters init for user interface
-    virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
+    virtual void initParameterList(QAction *action, MeshModel &m, RichParameterList &parlst);
 
     //Draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);

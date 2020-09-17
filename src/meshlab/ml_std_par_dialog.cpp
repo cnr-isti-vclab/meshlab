@@ -39,7 +39,7 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 	curMeshDoc = mdp;
 	curgla = gla;
 
-	mfi->initParameterSet(action, *mdp, curParSet);
+	mfi->initParameterList(action, *mdp, curParSet);
 	curmask = mfi->postCondition(action);
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
@@ -105,7 +105,7 @@ void MeshlabStdDialog::createFrame()
 void MeshlabStdDialog::resetValues()
 {
 	curParSet.clear();
-	curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
+	curmfi->initParameterList(curAction, *curMeshDoc, curParSet);
 
 	assert(qf);
 	assert(qf->isVisible());

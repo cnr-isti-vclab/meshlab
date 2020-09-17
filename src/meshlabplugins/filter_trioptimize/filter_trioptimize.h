@@ -47,12 +47,12 @@ public:
 	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+	void initParameterList(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
 	int getRequirements(const QAction*);
 	FilterClass getClass(const QAction *);
 	int postCondition(const QAction* ) const;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 };
 

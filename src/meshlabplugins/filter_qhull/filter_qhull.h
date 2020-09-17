@@ -58,10 +58,10 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &m, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     virtual FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

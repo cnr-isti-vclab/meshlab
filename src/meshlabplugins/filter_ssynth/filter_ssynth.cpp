@@ -57,7 +57,7 @@ QString FilterSSynth::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterSSynth::initParameterSet(QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
+void FilterSSynth::initParameterList(QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
 {
     par.addParam(RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
     par.addParam(RichInt("seed",1,"seed for random construction","Seed needed to build the mesh"));

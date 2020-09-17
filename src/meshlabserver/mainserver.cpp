@@ -596,7 +596,7 @@ public:
             //So we have to ask to the filter the default values for all the parameters and integrate them with the parameters' values
             //defined in the script file.
             RichParameterList required;
-            iFilter->initParameterSet(action,meshDocument,required);
+            iFilter->initParameterList(action,meshDocument,required);
             RichParameterList &parameterSet = pair.second;
 
             //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.

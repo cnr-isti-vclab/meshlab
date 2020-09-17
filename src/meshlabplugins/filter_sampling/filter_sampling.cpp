@@ -460,7 +460,7 @@ int FilterDocSampling::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, RichParameterList & parlst)
+void FilterDocSampling::initParameterList(QAction *action, MeshDocument & md, RichParameterList & parlst)
 {
   switch(ID(action))	 {
   case FP_MONTECARLO_SAMPLING :
@@ -1396,7 +1396,7 @@ int FilterDocSampling::postCondition(const QAction* a ) const
   return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity( QAction * filter ) const
+MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {

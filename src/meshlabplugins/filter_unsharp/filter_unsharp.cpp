@@ -312,7 +312,7 @@ int FilterUnsharp::postCondition(const QAction *a) const
   return MeshModel::MM_NONE;
 }
 
-void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterUnsharp::initParameterList(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {
@@ -785,7 +785,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
     return true;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity( QAction * filter ) const
+MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {

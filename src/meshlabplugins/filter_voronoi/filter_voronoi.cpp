@@ -114,7 +114,7 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a)
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) const
+MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
@@ -131,7 +131,7 @@ MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) c
 	}
 }
 
-void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterList& par)
+void FilterVoronoiPlugin::initParameterList(QAction* action, MeshModel& m, RichParameterList& par)
 {
 	 switch(ID(action))	 {
 	 case VORONOI_SAMPLING :

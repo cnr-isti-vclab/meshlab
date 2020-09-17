@@ -185,7 +185,7 @@ static QString extractFilenameWOExt(MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterTexturePlugin::initParameterList(QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action)) {
     case FP_VORONOI_ATLAS :
@@ -1109,7 +1109,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
     return true;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity( QAction * filter ) const
+MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {

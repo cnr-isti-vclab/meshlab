@@ -175,7 +175,7 @@ return QString("Filter Unknown");
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterList& parlst)
+void MlsPlugin::initParameterList(QAction* action, MeshDocument& md, RichParameterList& parlst)
 {
     int id = ID(action);
     MeshModel *target = md.mm();

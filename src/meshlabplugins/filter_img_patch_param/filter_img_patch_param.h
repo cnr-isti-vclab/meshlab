@@ -105,7 +105,7 @@ public:
 
     virtual FilterClass getClass(const QAction* act ) const;
 
-    virtual void        initParameterSet( QAction *act,
+    virtual void        initParameterList( QAction *act,
                                           MeshDocument &md,
                                           RichParameterList &par );
 
@@ -117,7 +117,7 @@ public:
                                      const RichParameterList &par,
                                      vcg::CallBackPos *cb );
 
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 

@@ -220,7 +220,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 	//fill the parameter set with all the names and descriptions which are lost in the
 	//filter script
 	RichParameterList newParameterSet;
-	iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
+	iFilter->initParameterList(action, *(mainWindow->meshDoc()), newParameterSet);
 
 	if(newParameterSet.size() == oldParameterSet.size()) {
 		RichParameterList::iterator i = newParameterSet.begin();

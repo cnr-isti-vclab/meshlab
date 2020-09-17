@@ -54,7 +54,7 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshDocument & md, RichParameterList & /*parent*/);
+	void initParameterList(QAction *,MeshDocument & md, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
 	FilterClass getClass(const QAction* a) const;
@@ -69,7 +69,7 @@ public:
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
-	FILTER_ARITY filterArity(QAction *) const { return SINGLE_MESH; }
+	FILTER_ARITY filterArity(const QAction *) const { return SINGLE_MESH; }
 
 
 

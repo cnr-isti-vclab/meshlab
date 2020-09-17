@@ -97,7 +97,7 @@ int AmbientOcclusionPlugin::getRequirements(const QAction * /*action*/)
     return 0;
 }
 
-MeshFilterInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(QAction*) const
+MeshFilterInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -110,7 +110,7 @@ MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction 
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 
-void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
+void AmbientOcclusionPlugin::initParameterList(QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
 {
     switch(ID(action))
     {

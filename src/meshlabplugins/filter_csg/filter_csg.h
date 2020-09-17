@@ -59,13 +59,13 @@ public:
 
     virtual bool autoDialog(QAction *) { return true; }
 
-    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
-    virtual void initParameterSet(QAction *, MeshModel &, RichParameterList &) { assert(0); }
+    virtual void initParameterList(QAction *, MeshDocument &, RichParameterList &);
+    virtual void initParameterList(QAction *, MeshModel &, RichParameterList &) { assert(0); }
 
     virtual bool applyFilter(const QAction*, MeshDocument &, const RichParameterList &, vcg::CallBackPos *);
 
     virtual FilterClass getClass(const QAction *) const { return MeshFilterInterface::FilterClass( MeshFilterInterface::Layer + MeshFilterInterface::Remeshing ); }
-    FILTER_ARITY filterArity(QAction*) const {return FIXED;}
+    FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
 };
 
 
