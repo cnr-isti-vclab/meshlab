@@ -39,7 +39,7 @@ QString SdfGpuPlugin::pluginName() const
     return "FilterSDFGPU";
 }
 
-void SdfGpuPlugin::initParameterList(QAction *action, MeshModel &/*m*/, RichParameterList &par)
+void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, RichParameterList &par)
 {
     mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");

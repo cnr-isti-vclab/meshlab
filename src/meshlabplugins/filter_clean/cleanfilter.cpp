@@ -222,7 +222,7 @@ int CleanFilter::postCondition(const QAction* action) const
 	return MeshModel::MM_ALL;
 }
 
-void CleanFilter::initParameterList(QAction *action,MeshDocument &md, RichParameterList & parlst)
+void CleanFilter::initParameterList(const QAction *action,MeshDocument &md, RichParameterList & parlst)
 {
     pair<float,float> qualityRange;
   switch(ID(action))

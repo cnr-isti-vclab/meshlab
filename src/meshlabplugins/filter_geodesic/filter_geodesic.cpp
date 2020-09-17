@@ -233,7 +233,7 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, const 
 	return true;
 }
 
-void FilterGeodesic::initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst)
+void FilterGeodesic::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action))
 	{

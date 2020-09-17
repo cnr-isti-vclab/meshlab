@@ -105,7 +105,7 @@ public:
 
     virtual FilterClass getClass(const QAction* act ) const;
 
-    virtual void        initParameterList( QAction *act,
+    virtual void        initParameterList(const QAction* act,
                                           MeshDocument &md,
                                           RichParameterList &par );
 

@@ -342,7 +342,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 // return
 //		true if has some parameters
 //		false is has no params
-void ExtraMeshFilterPlugin::initParameterList(QAction * action, MeshModel & m, RichParameterList & parlst)
+void ExtraMeshFilterPlugin::initParameterList(const QAction * action, MeshModel & m, RichParameterList & parlst)
 {
 	float maxVal;
 	QStringList curvCalcMethods;

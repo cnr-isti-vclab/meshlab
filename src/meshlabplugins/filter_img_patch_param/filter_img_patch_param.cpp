@@ -125,7 +125,7 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QActi
 //}
 
 
-void FilterImgPatchParamPlugin::initParameterList( QAction *act,
+void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
     MeshDocument &/*md*/,
     RichParameterList &par )
 {

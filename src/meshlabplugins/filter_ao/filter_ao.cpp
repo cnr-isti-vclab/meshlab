@@ -110,7 +110,7 @@ MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction 
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 
-void AmbientOcclusionPlugin::initParameterList(QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
+void AmbientOcclusionPlugin::initParameterList(const QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
 {
     switch(ID(action))
     {

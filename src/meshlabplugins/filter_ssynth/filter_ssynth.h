@@ -44,8 +44,8 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
     virtual int getRequirements(const QAction*);
-    virtual void initParameterList(QAction* /*filter*/,MeshModel &,RichParameterList &){};
-    virtual void initParameterList(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(const QAction* /*filter*/,MeshModel &,RichParameterList &){};
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
     virtual FilterClass getClass(const QAction* filter) const;
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);

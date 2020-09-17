@@ -180,7 +180,7 @@ QString FilterColorProc::pluginName() const
     assert(0);
 }
 
-void FilterColorProc::initParameterList(QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
 {
 	switch(ID(a))
 	{

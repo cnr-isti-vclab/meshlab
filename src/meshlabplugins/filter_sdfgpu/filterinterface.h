@@ -147,7 +147,7 @@ private:
   int getRequirements(const QAction* ){
     return postConditions();
   }
-  int getPreConditions(QAction* ) const{
+  int getPreConditions(const QAction* ) const{
     return getPreConditions();
   }
   int postCondition(const QAction*) const{
@@ -156,7 +156,7 @@ private:
   bool applyFilter(const QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
-  virtual void initParameterList(QAction *, MeshDocument &md, RichParameterList &par){
+  virtual void initParameterList(const QAction *, MeshDocument &md, RichParameterList &par){
     initParameterList(md,par);
   }
 };

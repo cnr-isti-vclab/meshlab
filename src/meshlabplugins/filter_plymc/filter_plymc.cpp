@@ -100,7 +100,7 @@ QString PlyMCPlugin::pluginName() const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst)
+void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))
      {

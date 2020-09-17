@@ -108,7 +108,7 @@ int FilterColorProjectionPlugin::getRequirements(const QAction *action){
 
 
 // This function define the needed parameters for each filter.
-void FilterColorProjectionPlugin::initParameterList(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterColorProjectionPlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {

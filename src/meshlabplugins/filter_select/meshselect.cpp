@@ -189,7 +189,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
  return QString("Unknown filter");
 }
 
-void SelectionFilterPlugin::initParameterList(QAction *action, MeshModel &m, RichParameterList &parlst)
+void SelectionFilterPlugin::initParameterList(const QAction *action, MeshModel &m, RichParameterList &parlst)
 {
  switch(ID(action))
  {

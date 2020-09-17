@@ -59,8 +59,7 @@ public:
 
     virtual bool autoDialog(QAction *) { return true; }
 
-    virtual void initParameterList(QAction *, MeshDocument &, RichParameterList &);
-    virtual void initParameterList(QAction *, MeshModel &, RichParameterList &) { assert(0); }
+    virtual void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
     virtual bool applyFilter(const QAction*, MeshDocument &, const RichParameterList &, vcg::CallBackPos *);
 

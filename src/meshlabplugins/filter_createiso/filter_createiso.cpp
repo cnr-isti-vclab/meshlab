@@ -126,7 +126,7 @@ QString FilterCreateIso::pluginName() const
    }
    return true;
  }
- void FilterCreateIso::initParameterList(QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
+ void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
 {
     pair<float,float> qualityRange;
   switch(ID(action))

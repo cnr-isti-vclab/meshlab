@@ -194,7 +194,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(const QAction* filter, MeshDocumen
 }
 
 void FilterScreenedPoissonPlugin::initParameterList(
-		QAction* filter,
+		const QAction* filter,
 		MeshModel&,
 		RichParameterList& parlist)
 {

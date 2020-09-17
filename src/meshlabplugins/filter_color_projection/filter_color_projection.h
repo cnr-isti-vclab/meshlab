@@ -44,7 +44,7 @@ public:
     int postCondition( const QAction* ) const;
 
     virtual FilterClass getClass(const QAction*) const;
-    virtual void initParameterList(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
     virtual int getRequirements(const QAction*);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 

@@ -255,7 +255,7 @@ int FilterFunctionPlugin::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterFunctionPlugin::initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst)
+void FilterFunctionPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
   Q_UNUSED(m);
   switch(ID(action))	 {

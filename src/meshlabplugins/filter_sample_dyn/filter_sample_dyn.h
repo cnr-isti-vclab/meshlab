@@ -42,7 +42,7 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterList(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
     virtual bool applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     virtual FilterClass getClass(const QAction*) const;

@@ -165,7 +165,7 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
     return description;
 }
 
-void FilterFractal::initParameterList(QAction* filter,MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, RichParameterList &par)
 {
     switch(ID(filter))
     {

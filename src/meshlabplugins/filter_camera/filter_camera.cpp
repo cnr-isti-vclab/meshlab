@@ -87,7 +87,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterCameraPlugin::initParameterList(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
+void FilterCameraPlugin::initParameterList(const QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
     Shotf defShot;
     switch(ID(action))

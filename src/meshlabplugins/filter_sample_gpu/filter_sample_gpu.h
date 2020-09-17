@@ -51,7 +51,7 @@ public:
 
     QString pluginName() const;
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
-	void initParameterList(QAction *action,MeshModel &m, RichParameterList & parlst);
+    void initParameterList(const QAction* action, MeshModel &m, RichParameterList & parlst);
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;

@@ -201,7 +201,7 @@ int TriOptimizePlugin::postCondition(const QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterList(QAction *action, MeshModel &m, RichParameterList & parlst)
+void TriOptimizePlugin::initParameterList(const QAction *action, MeshModel &m, RichParameterList & parlst)
 {
 	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
 		parlst.addParam(RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));

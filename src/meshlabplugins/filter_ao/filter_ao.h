@@ -75,7 +75,7 @@ public:
 	int getRequirements (const QAction* action);
     FilterClass getClass(const QAction* filter) const;
 
-    void initParameterList(QAction *,MeshModel &/*m*/,RichParameterList & /*parent*/);
+    void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
     bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     void initTextures(void);
     void initGL(vcg::CallBackPos *cb,unsigned int numVertices);
