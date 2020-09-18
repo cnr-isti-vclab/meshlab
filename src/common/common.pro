@@ -48,6 +48,7 @@ HEADERS += 	\
     filterscript.h \
     GLLogStream.h \
     interfaces.h \
+    interfaces/decorate_plugin_interface.h \
     interfaces/filter_plugin_interface.h \
     interfaces/io_plugin_interface.h \
     interfaces/mainwindow_interface.h \

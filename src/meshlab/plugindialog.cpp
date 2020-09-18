@@ -25,6 +25,9 @@
 #include <common/interfaces.h>
 #include <common/interfaces/filter_plugin_interface.h>
 #include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/interfaces/render_plugin_interface.h>
+
 
 #include <QLabel>
 #include <QTreeWidget>
@@ -133,7 +136,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                     }
                   addItems(pluginItem,Templist);
                                 }
-                MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+                DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
                                 if (iDecorate){
                                     QStringList Templist;
                                     foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
@@ -199,7 +202,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
                 if (actionName==formats) labelInfo->setText(f.description);
             }
         }
-        MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+        DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
         if (iDecorate)
         {
             foreach(QAction *a,iDecorate->actions())

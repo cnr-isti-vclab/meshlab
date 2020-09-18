@@ -1444,7 +1444,7 @@ void MainWindow::applyDecorateMode()
     if(GLA()->mm() == 0) return;
     QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 
-    MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
+    DecoratePluginInterface *iDecorateTemp = qobject_cast<DecoratePluginInterface *>(action->parent());
 
     GLA()->toggleDecorator(iDecorateTemp->decorationName(action));
 

@@ -115,7 +115,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				iIO->initGlobalParameterSet(NULL, defaultGlobal);
 			}
 
-			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
+			DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
 			if (iDecorator)
 			{
 				iCommon = iDecorator;
@@ -160,9 +160,9 @@ int PluginManager::numberIOPlugins() const
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
+DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
 {
-  foreach(MeshDecorateInterface *tt, this->meshDecoratePlugins())
+  foreach(DecoratePluginInterface *tt, this->meshDecoratePlugins())
   {
     foreach( QAction *ac, tt->actions())
       if( name == tt->decorationName(ac) ) return tt;

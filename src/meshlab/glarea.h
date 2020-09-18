@@ -37,6 +37,8 @@
 #include <QTime>
 
 #include <common/interfaces.h>
+#include <common/interfaces/render_plugin_interface.h>
+#include <common/interfaces/decorate_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
@@ -308,7 +310,7 @@ public slots:
 			MeshModel *m = md()->getMesh(i.key());
 			foreach(QAction *p, i.value())
 			{
-				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+				DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
 				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
 				decorInterface->setLog(&md()->Log);
 				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);

@@ -473,7 +473,7 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
+	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
@@ -818,7 +818,7 @@ void MainWindow::fillFilterMenu()
 
 void MainWindow::fillDecorateMenu()
 {
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
+	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{

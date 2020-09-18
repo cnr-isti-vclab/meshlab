@@ -484,7 +484,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
-                            MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+                            DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>((*it)->parent());
                             decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,this,&painter,md()->Log);
                         }
                         MLRenderingData meshdt;
@@ -546,7 +546,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                     for (QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end(); ++it)
                     {
-                        MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+                        DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>((*it)->parent());
                         decorInterface->decorateMesh(*it, *mp, this->glas.currentGlobalParamSet, this, &painter, md()->Log);
                     }
                 }
@@ -567,7 +567,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     foreach(QAction * p, iPerDocDecoratorlist)
     {
-        MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+        DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
         decorInterface->decorateDoc(p, *this->md(), this->glas.currentGlobalParamSet, this, &painter, md()->Log);
     }
 
@@ -1065,7 +1065,7 @@ void GLArea::updateAllDecorators()
 		return;
 	foreach(QAction * p, iPerDocDecoratorlist)
 	{
-		MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+		DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
 		decorInterface->endDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
 		decorInterface->setLog(&md()->Log);
 		decorInterface->startDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
@@ -1151,7 +1151,7 @@ bool GLArea::readyToClose()
     // Now manage the closing of the decorator set;
     foreach(QAction* act, iPerDocDecoratorlist)
     {
-        MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>(act->parent());
+        DecoratePluginInterface* mdec = qobject_cast<DecoratePluginInterface*>(act->parent());
         mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
         mdec->setLog(NULL);
     }
@@ -1165,7 +1165,7 @@ bool GLArea::readyToClose()
 
     for(QSet<QAction *>::iterator it = dectobeclose.begin();it != dectobeclose.end();++it)
     {
-        MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>((*it)->parent());
+        DecoratePluginInterface* mdec = qobject_cast<DecoratePluginInterface*>((*it)->parent());
         if (mdec != NULL)
         {
             mdec->endDecorate(*it,*md(),glas.currentGlobalParamSet,this);
@@ -1402,7 +1402,7 @@ void GLArea::toggleDecorator(QString name)
 void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 {
 	makeCurrent();
-    MeshDecorateInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
+    DecoratePluginInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
     if (!iDecorateTemp) {
         this->Logf(GLLogStream::SYSTEM,"Could not get Decorate interface %s", qUtf8Printable(name));
         this->Log(GLLogStream::SYSTEM,"Known decorate interfaces:");
@@ -1415,7 +1415,7 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
     }
     QAction *action = iDecorateTemp->action(name);
 
-    if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerDocument)
+    if(iDecorateTemp->getDecorationClass(action)== DecoratePluginInterface::PerDocument)
     {
         bool found=this->iPerDocDecoratorlist.removeOne(action);
         if(found)
@@ -1441,7 +1441,7 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
         }
     }
 
-    if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerMesh)
+    if(iDecorateTemp->getDecorationClass(action)== DecoratePluginInterface::PerMesh)
     {
         MeshModel &currentMeshModel = *mm();
         bool found=this->iCurPerMeshDecoratorList().removeOne(action);

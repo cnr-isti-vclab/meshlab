@@ -27,18 +27,19 @@
 
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
+#include <common/meshmodel.h>
 #include <wrap/glw/glw.h>
 
 
 
 
-class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
+class DecorateRasterProjPlugin : public QObject, public DecoratePluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
-    Q_INTERFACES( MeshDecorateInterface )
+    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES( DecoratePluginInterface )
 
 
     // Types.

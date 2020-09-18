@@ -24,7 +24,7 @@
 #define SAMPLE_DECORATE_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
 
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
@@ -32,11 +32,11 @@
 #include "variance_shadow_mapping_blur.h"
 #include "ssao.h"
 
-class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
+class DecorateShadowPlugin : public QObject, public DecoratePluginInterface
 {
   Q_OBJECT
-	  MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
-  Q_INTERFACES(MeshDecorateInterface)
+      MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(DecoratePluginInterface)
 
     enum {
         DP_SHOW_SHADOW,
@@ -93,7 +93,7 @@ public:
 	void decorateDoc(QAction *a, MeshDocument &m,  const RichParameterList*, GLArea *gla, QPainter *p, GLLogStream &);
 	void endDecorate(QAction *,   MeshDocument &, const RichParameterList *, GLArea *);
 	void initGlobalParameterSet(QAction *, RichParameterList  & globalparam);
-	int getDecorationClass(QAction * /*action*/) const { return MeshDecorateInterface::PerDocument; }
+	int getDecorationClass(QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
 
 private:
     DecorateShader* smShader, *vsmShader, *vsmbShader;

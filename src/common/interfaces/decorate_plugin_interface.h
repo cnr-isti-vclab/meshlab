@@ -1,0 +1,153 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2020                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+#ifndef MESHLAB_DECORATE_PLUGIN_INTERFACE_H
+#define MESHLAB_DECORATE_PLUGIN_INTERFACE_H
+
+#include "plugin_interface.h"
+
+class GLArea;
+
+/**
+MeshDecorateInterface is the base class of all <b> decorators </b>
+Decorators are 'read-only' visualization aids that helps to show some data about a document.
+Decorators can make some permesh precomputation but the rendering has to be efficient.
+Decorators should save the additional data into per-mesh attribute.
+
+
+There are two classes of Decorations
+- PerMesh
+- PerDocument
+
+PerMesh Decorators are associated to each mesh/view
+Some example of PerDocument Decorations
+- backgrounds
+- trackball icon
+- axis
+- shadows
+- screen space Ambient occlusion (think it as a generic 'darkner')
+
+Some example of PerMesh Decorations
+- coloring of selected vertex/face
+- displaying of normals/curvature directions
+- display of specific tagging
+*/
+
+class DecoratePluginInterface : public PluginInterface
+{
+public:
+
+	/** The DecorationClass enum represents the set of keywords that must be used to categorize a filter.
+	Each filter can belong to one or more filtering class, or-ed together.
+	*/
+	enum DecorationClass
+	{
+		Generic = 0x00000, /*!< Should be avoided if possible. */  //
+		PerMesh = 0x00001, /*!<  Decoration that are applied on a single mesh */
+		PerDocument = 0x00002, /*!<  Decoration that are applied on a single mesh */
+		PreRendering = 0x00004, /*!<  Decoration that are applied <i>before</i> the rendering of the document/mesh */
+		PostRendering = 0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
+	};
+
+	DecoratePluginInterface() : PluginInterface() {}
+	virtual ~DecoratePluginInterface() {}
+	/** The very short string (a few words) describing each filtering action
+	// This string is used also to define the menu entry
+	*/
+	virtual QString decorationName(FilterIDType) const = 0;
+	virtual QString decorationInfo(FilterIDType) const = 0;
+
+	virtual QString decorationName(QAction *a) const { return decorationName(ID(a)); }
+	virtual QString decorationInfo(QAction *a) const { return decorationInfo(ID(a)); }
+
+
+	virtual bool startDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) { return false; }
+	virtual bool startDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) { return false; }
+	virtual void decorateMesh(QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void decorateDoc(QAction *, MeshDocument &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void endDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) {}
+	virtual void endDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) {}
+
+	/** \brief tests if a decoration is applicable to a mesh.
+	* used only for PerMesh Decorators.
+	For instance curvature cannot be shown on a mesh without curvature.
+	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
+	It is invoked only for decoration of \i PerMesh class;
+	*/
+	virtual bool isDecorationApplicable(QAction *, const MeshModel&, QString&) const { return true; }
+
+	virtual int getDecorationClass(QAction *) const = 0;
+
+	virtual QList<QAction *> actions() const { return actionList; }
+	virtual QList<FilterIDType> types() const { return typeList; }
+protected:
+	QList <QAction *> actionList;
+	QList <FilterIDType> typeList;
+	virtual FilterIDType ID(QAction *a) const
+	{
+		QString aa=a->text();
+		foreach(FilterIDType tt, types())
+			if (a->text() == this->decorationName(tt)) return tt;
+		aa.replace("&","");
+		foreach(FilterIDType tt, types())
+			if (aa == this->decorationName(tt)) return tt;
+
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
+		assert(0);
+		return -1;
+	}
+	virtual FilterIDType ID(QString name) const
+	{
+		QString n = name;
+		foreach(FilterIDType tt, types())
+			if (name == this->decorationName(tt)) return tt;
+		n.replace("&","");
+		foreach(FilterIDType tt, types())
+			if (n == this->decorationName(tt)) return tt;
+
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
+		assert(0);
+		return -1;
+	}
+public:
+	virtual QAction *action(QString name) const
+	{
+		QString n = name;
+		foreach(QAction *tt, actions())
+			if (name == this->decorationName(ID(tt))) return tt;
+		n.replace("&","");
+		foreach(QAction *tt, actions())
+			if (n == this->decorationName(ID(tt))) return tt;
+
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
+		return 0;
+	}
+};
+
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
+
+#define DECORATE_PLUGIN_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
+Q_DECLARE_INTERFACE(DecoratePluginInterface, DECORATE_PLUGIN_INTERFACE_IID)
+
+#endif // MESHLAB_DECORATE_PLUGIN_INTERFACE_H
