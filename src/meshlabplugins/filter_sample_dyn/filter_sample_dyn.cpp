@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/interfaces.h>
 #include <vcg/math/perlin_noise.h>
 #include <wrap/qt/col_qt_convert.h>
 

@@ -26,8 +26,6 @@
 #include <time.h>
 #include <iostream>
 
-#include <common/interfaces.h>
-
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/refine.h>
 #include <vcg/complex/algorithms/refine_loop.h>

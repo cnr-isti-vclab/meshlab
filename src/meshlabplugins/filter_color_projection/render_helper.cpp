@@ -22,11 +22,11 @@
 ****************************************************************************/
 
 #include <common/GLExtensionsManager.h>
+#include <common/meshmodel.h>
 
 #include <QObject>
 #include <QGLContext>
 #include <QGLFramebufferObject>
-#include <common/interfaces.h>
 
 #include "render_helper.h"
 

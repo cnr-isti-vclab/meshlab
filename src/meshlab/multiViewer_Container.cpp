@@ -23,6 +23,7 @@
 #include "multiViewer_Container.h"
 #include "glarea.h"
 #include <QMouseEvent>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include <common/mlapplication.h>
 

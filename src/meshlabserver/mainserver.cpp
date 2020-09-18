@@ -24,7 +24,6 @@
 #include <common/GLExtensionsManager.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
-#include <common/interfaces.h>
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
@@ -38,6 +37,8 @@
 
 #include <QGLFormat>
 #include <QFileInfo>
+#include <QElapsedTimer>
+#include <QSettings>
 
 
 class FilterData

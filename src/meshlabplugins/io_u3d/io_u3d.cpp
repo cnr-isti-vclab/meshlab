@@ -34,6 +34,8 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QMessageBox>
+#include <qapplication.h>
+#include <QSettings>
 #include "Converter.h"
 
 using namespace std;

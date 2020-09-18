@@ -27,6 +27,7 @@
 #include <wrap/qt/device_to_logical.h>
 #include <meshlab/glarea.h>
 #include <vcg/space/intersection2.h>
+#include <QApplication>
 
 
 using namespace std;

@@ -47,7 +47,6 @@ HEADERS += 	\
     filter_parameter/rich_parameter.h \
     filterscript.h \
     GLLogStream.h \
-    interfaces.h \
     interfaces/decorate_plugin_interface.h \
     interfaces/edit_plugin_interface.h \
     interfaces/filter_plugin_interface.h \
@@ -70,7 +69,6 @@ SOURCES += \
     filter_parameter/rich_parameter.cpp \
     filter_parameter/rich_parameter_list.cpp \
     filter_parameter/value.cpp \
-    interfaces.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
     interfaces/filter_plugin_interface.cpp \

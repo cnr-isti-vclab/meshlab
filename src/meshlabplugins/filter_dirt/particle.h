@@ -25,7 +25,6 @@
 
 #include<vector>
 #include <common/meshmodel.h>
-#include <common/interfaces.h>
 #include<vcg/complex/complex.h>
 
 template <class MeshType>

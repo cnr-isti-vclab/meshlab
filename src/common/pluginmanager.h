@@ -24,7 +24,6 @@
 #ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
-#include "interfaces.h"
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/io_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
@@ -35,6 +34,7 @@
 
 #include<QMap>
 #include<QObject>
+#include <QDir>
 
 /**
 \brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.

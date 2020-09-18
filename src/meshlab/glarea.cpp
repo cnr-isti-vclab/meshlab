@@ -23,7 +23,6 @@
 
 
 
-#include <common/interfaces.h>
 #include <common/GLExtensionsManager.h>
 
 #include "glarea.h"
@@ -35,6 +34,8 @@
 #include <QClipboard>
 #include <QLocale>
 #include <QPainterPath>
+#include <QElapsedTimer>
+#include <QApplication>
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>

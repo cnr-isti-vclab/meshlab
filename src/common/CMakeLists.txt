@@ -19,7 +19,6 @@ set(SOURCES
     GLExtensionsManager.cpp
     GLLogStream.cpp
     filterscript.cpp
-    interfaces.cpp
     meshlabdocumentbundler.cpp
     meshlabdocumentxml.cpp
     meshmodel.cpp
@@ -43,7 +42,6 @@ set(HEADERS
     GLExtensionsManager.h
     GLLogStream.h
     filterscript.h
-    interfaces.h
     meshlabdocumentbundler.h
     meshlabdocumentxml.h
     meshmodel.h

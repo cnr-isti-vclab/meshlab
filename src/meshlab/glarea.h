@@ -36,7 +36,6 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/interfaces.h>
 #include <common/interfaces/render_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
 #include <common/interfaces/edit_plugin_interface.h>

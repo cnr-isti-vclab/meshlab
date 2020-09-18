@@ -1,6 +1,8 @@
 #ifndef SINGLEMESHFILTERINTERFACE_H
 #define SINGLEMESHFILTERINTERFACE_H
-#include "common/interfaces.h"
+#include "common/interfaces/filter_plugin_interface.h"
+
+#include <QDebug>
 
 /**
   * @brief The interface for a filter plugin which defines a *single* action

@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "plugindialog.h"
-#include <common/interfaces.h>
 #include <common/interfaces/filter_plugin_interface.h>
 #include <common/interfaces/io_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
@@ -32,6 +31,8 @@
 
 
 #include <QLabel>
+#include <QDir>
+#include <QPluginLoader>
 #include <QTreeWidget>
 #include <QGroupBox>
 #include <QPushButton>

@@ -32,6 +32,7 @@ $Log: stdpardialog.cpp,v $
 #include <QActionGroup>
 #include <QDebug>
 #include <QFontMetrics>
+#include <QSettings>
 
 #include "mainwindow.h"
 #include "ui_layerDialog.h"

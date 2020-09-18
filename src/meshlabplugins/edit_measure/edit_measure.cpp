@@ -29,6 +29,8 @@ $Log: editmeasure.cpp,v $
 #include "edit_measure.h"
 #include <wrap/qt/gl_label.h>
 
+#include <QTextStream>
+
 using namespace vcg;
 
 EditMeasurePlugin::EditMeasurePlugin()

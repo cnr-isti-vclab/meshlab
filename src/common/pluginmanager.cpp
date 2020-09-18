@@ -1,8 +1,12 @@
 #include "pluginmanager.h"
 #include <QObject>
+#include <qapplication.h>
+#include <QPluginLoader>
+#include <QDebug>
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
+
 
 
 static QString DLLExtension() {

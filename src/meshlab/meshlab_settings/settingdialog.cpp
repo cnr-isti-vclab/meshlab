@@ -23,6 +23,8 @@
 
 #include "settingdialog.h"
 
+#include <QSettings>
+
 SettingDialog::SettingDialog(
 		const RichParameter& currentParam,
 		const RichParameter& defaultParam,

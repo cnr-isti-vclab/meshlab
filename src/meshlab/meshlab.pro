@@ -28,7 +28,6 @@ DEPENDPATH += \
 	$$VCGDIR/wrap
 
 HEADERS += \
-	../common/interfaces.h \
 	mainwindow.h \
 	glarea.h \
 	meshlab_settings/meshlabsettingsdialog.h \

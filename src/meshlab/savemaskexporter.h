@@ -24,6 +24,8 @@
 #ifndef __VCGLIB_SAVEMASK_EXPORT
 #define __VCGLIB_SAVEMASK_EXPORT
 
+#include <QDialog>
+
 #include <wrap/io_trimesh/io_mask.h>
 
 #include "rich_parameter_gui/richparameterlistframe.h"

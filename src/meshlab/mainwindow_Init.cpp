@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 
-#include "../common/interfaces.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
 #include "../common/mlexception.h"
@@ -39,6 +38,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QWidgetAction>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "meshlab_settings/meshlabsettingsdialog.h"

@@ -30,6 +30,7 @@
 #include "edit_referencingDialog.h"
 
 #include <QFileDialog>
+#include <QTextStream>
 
 #define MAX_REFPOINTS 128
 

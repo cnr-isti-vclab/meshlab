@@ -24,7 +24,6 @@
 #define DUSTPARTICLE_H
 #include<vector>
 #include <common/meshmodel.h>
-#include <common/interfaces.h>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/complex.h>

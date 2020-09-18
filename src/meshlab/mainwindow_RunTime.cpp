@@ -39,6 +39,11 @@
 #include <QMenuBar>
 #include <QProgressBar>
 #include <QDesktopServices>
+#include <QSettings>
+#include <QSignalMapper>
+#include <QMessageBox>
+#include <QElapsedTimer>
+#include <QMimeData>
 
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
