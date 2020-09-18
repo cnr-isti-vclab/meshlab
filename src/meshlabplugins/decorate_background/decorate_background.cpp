@@ -85,7 +85,7 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
     }
 }
 
-bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*m*/, const RichParameterList * parset, GLArea * gla)
+bool DecorateBackgroundPlugin::startDecorate(const QAction * action, MeshDocument &/*m*/, const RichParameterList * parset, GLArea * gla)
 {
     if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
         return false;
@@ -105,7 +105,7 @@ bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*
     return true;
 }
 
-void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, const RichParameterList * parset,GLArea * gla, QPainter *, GLLogStream &)
+void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, const RichParameterList * parset, GLArea * gla, QPainter *, GLLogStream &)
 {
     static QString lastname("uninitialized");
     switch(ID(a))

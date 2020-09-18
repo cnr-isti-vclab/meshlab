@@ -113,13 +113,13 @@ public:
 
 
 
-  void decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  void decorateMesh(QAction *a, MeshModel &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
-  int getDecorationClass(QAction * /*action*/) const;
+  void decorateDoc(const QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  void decorateMesh(const QAction *a, MeshModel &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  bool startDecorate(const QAction* /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  void endDecorate(const QAction* /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  bool startDecorate(const QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  bool isDecorationApplicable(const QAction *action, const MeshModel& m, QString &ErrorMessage) const;
+  int getDecorationClass(const QAction* /*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterList &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }

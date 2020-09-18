@@ -85,11 +85,11 @@ DecorateBackgroundPlugin()
 
   QString cubemapFileName;
 
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList * /*parent*/ par, GLArea * /*parent*/);
-  void decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &_log);
-  void decorateMesh(QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &){}
+  bool startDecorate(const QAction* /*mode*/, MeshDocument &/*m*/, const RichParameterList * /*parent*/ par, GLArea * /*parent*/);
+  void decorateDoc(const QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &_log);
+  void decorateMesh(const QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &){}
   void initGlobalParameterSet(QAction *, RichParameterList &/*globalparam*/);
-  int getDecorationClass(QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
+  int getDecorationClass(const QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
 
 
 private:

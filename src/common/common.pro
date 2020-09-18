@@ -71,6 +71,7 @@ SOURCES += \
     filter_parameter/value.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
+    interfaces/decorate_plugin_interface.cpp \
     interfaces/filter_plugin_interface.cpp \
     interfaces/plugin_interface.cpp \
     meshmodel.cpp \

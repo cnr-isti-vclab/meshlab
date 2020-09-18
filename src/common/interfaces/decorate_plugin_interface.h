@@ -77,16 +77,16 @@ public:
 	virtual QString decorationName(FilterIDType) const = 0;
 	virtual QString decorationInfo(FilterIDType) const = 0;
 
-	virtual QString decorationName(QAction *a) const { return decorationName(ID(a)); }
-	virtual QString decorationInfo(QAction *a) const { return decorationInfo(ID(a)); }
+	virtual QString decorationName(const QAction *a) const { return decorationName(ID(a)); }
+	virtual QString decorationInfo(const QAction *a) const { return decorationInfo(ID(a)); }
 
 
-	virtual bool startDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) { return false; }
-	virtual bool startDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) { return false; }
-	virtual void decorateMesh(QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void decorateDoc(QAction *, MeshDocument &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
-	virtual void endDecorate(QAction *, MeshModel &, const RichParameterList *, GLArea *) {}
-	virtual void endDecorate(QAction *, MeshDocument &, const RichParameterList *, GLArea *) {}
+	virtual bool startDecorate(const QAction *, MeshDocument &, const RichParameterList *, GLArea *) { return false; }
+	virtual bool startDecorate(const QAction *, MeshModel &, const RichParameterList *, GLArea *) { return false; }
+	virtual void decorateMesh(const QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void decorateDoc(const QAction *, MeshDocument &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &) = 0;
+	virtual void endDecorate(const QAction *, MeshModel &, const RichParameterList *, GLArea *) {}
+	virtual void endDecorate(const QAction *, MeshDocument &, const RichParameterList *, GLArea *) {}
 
 	/** \brief tests if a decoration is applicable to a mesh.
 	* used only for PerMesh Decorators.
@@ -94,54 +94,20 @@ public:
 	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
 	It is invoked only for decoration of \i PerMesh class;
 	*/
-	virtual bool isDecorationApplicable(QAction *, const MeshModel&, QString&) const { return true; }
+	virtual bool isDecorationApplicable(const QAction *, const MeshModel&, QString&) const { return true; }
 
-	virtual int getDecorationClass(QAction *) const = 0;
+	virtual int getDecorationClass(const QAction *) const = 0;
 
 	virtual QList<QAction *> actions() const { return actionList; }
 	virtual QList<FilterIDType> types() const { return typeList; }
+
+	virtual QAction *action(QString name) const;
+
 protected:
 	QList <QAction *> actionList;
 	QList <FilterIDType> typeList;
-	virtual FilterIDType ID(QAction *a) const
-	{
-		QString aa=a->text();
-		foreach(FilterIDType tt, types())
-			if (a->text() == this->decorationName(tt)) return tt;
-		aa.replace("&","");
-		foreach(FilterIDType tt, types())
-			if (aa == this->decorationName(tt)) return tt;
-
-		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
-		assert(0);
-		return -1;
-	}
-	virtual FilterIDType ID(QString name) const
-	{
-		QString n = name;
-		foreach(FilterIDType tt, types())
-			if (name == this->decorationName(tt)) return tt;
-		n.replace("&","");
-		foreach(FilterIDType tt, types())
-			if (n == this->decorationName(tt)) return tt;
-
-		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
-		assert(0);
-		return -1;
-	}
-public:
-	virtual QAction *action(QString name) const
-	{
-		QString n = name;
-		foreach(QAction *tt, actions())
-			if (name == this->decorationName(ID(tt))) return tt;
-		n.replace("&","");
-		foreach(QAction *tt, actions())
-			if (n == this->decorationName(ID(tt))) return tt;
-
-		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
-		return 0;
-	}
+	virtual FilterIDType ID(const QAction *a) const;
+	virtual FilterIDType ID(QString name) const;
 };
 
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)

@@ -79,7 +79,7 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
     return QString("error!");
 }
 
-void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
+void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const RichParameterList *rm, GLArea *gla, QPainter *painter, GLLogStream &/*_log*/)
 {
  QFont qf;
 
@@ -162,7 +162,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, const RichPar
  } // end switch
 }
 
-void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, const RichParameterList *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
+void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const RichParameterList *rm, GLArea *gla, QPainter *painter, GLLogStream &_log)
 {
     this->setLog(&_log);
     QFont qf;
@@ -510,7 +510,7 @@ void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glPopAttrib();
 }
 
-int DecorateBasePlugin::getDecorationClass(QAction *action) const
+int DecorateBasePlugin::getDecorationClass(const QAction *action) const
 {
     switch(ID(action))
     {
@@ -529,7 +529,7 @@ int DecorateBasePlugin::getDecorationClass(QAction *action) const
     return 0;
 }
 
-bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
+bool DecorateBasePlugin::isDecorationApplicable(const QAction* action, const MeshModel& m, QString &ErrorMessage) const
 {
     if( ID(action) == DP_SHOW_LABEL )
     {
@@ -566,7 +566,7 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
     return true;
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, const RichParameterList *, GLArea *)
+bool DecorateBasePlugin::startDecorate(const QAction * action, MeshDocument &, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -583,7 +583,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, const R
 }
 
 
-void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, const RichParameterList *, GLArea *)
+void DecorateBasePlugin::endDecorate(const QAction * action, MeshModel &m, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -598,7 +598,7 @@ void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, const RichP
     }
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, const RichParameterList *rm, GLArea *gla)
+bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, const RichParameterList *rm, GLArea *gla)
 {
     switch(ID(action))
     {

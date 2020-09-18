@@ -189,7 +189,7 @@ QString DecorateRasterProjPlugin::decorationName( FilterIDType id ) const
 }
 
 
-int DecorateRasterProjPlugin::getDecorationClass( QAction *act ) const
+int DecorateRasterProjPlugin::getDecorationClass(const QAction *act ) const
 {
     switch( ID(act) )
     {
@@ -525,10 +525,11 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
 }
 
 
-bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
-                                              MeshDocument     & m,
-											  const RichParameterList * /*par*/,
-                                              GLArea           * /*gla*/ )
+bool DecorateRasterProjPlugin::startDecorate(
+		const QAction* act,
+		MeshDocument     & m,
+		const RichParameterList * /*par*/,
+		GLArea           * /*gla*/ )
 {
     switch( ID(act) )
     {
@@ -572,10 +573,11 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
 }
 
 
-void DecorateRasterProjPlugin::endDecorate( QAction          *act,
-                                            MeshDocument     & /*m*/,
-											const RichParameterList * /*par*/,
-                                            GLArea           * /*gla*/ )
+void DecorateRasterProjPlugin::endDecorate(
+		const QAction          *act,
+		MeshDocument     & /*m*/,
+		const RichParameterList * /*par*/,
+		GLArea           * /*gla*/ )
 {
     switch( ID(act) )
     {
@@ -632,12 +634,13 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
 }
 
 
-void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
-                                         MeshDocument      &m  ,
-										 const RichParameterList  *par,
-                                         GLArea            *gla,
-                                         QPainter          *,
-                                            GLLogStream &)
+void DecorateRasterProjPlugin::decorateDoc(
+		const QAction* act,
+		MeshDocument      &m  ,
+		const RichParameterList  *par,
+		GLArea            *gla,
+		QPainter          *,
+		GLLogStream &)
 {
     switch( ID(act) )
     {
