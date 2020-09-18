@@ -721,7 +721,7 @@ void MainWindow::fillFilterMenu()
 	for (msi = PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end(); ++msi)
 	{
 		FilterPluginInterface * iFilter = msi.value();
-		QAction *filterAction = iFilter->AC((msi.key()));
+		QAction *filterAction = iFilter->getFilterAction((msi.key()));
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
 		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
