@@ -88,12 +88,12 @@ public:
 
 	QString pluginName() const;
 	QList<QAction *> actions () const {return actionList;}
-	bool startDecorate(QAction * /*mode*/, MeshDocument & /*m*/, const RichParameterList  * /*parent*/ par, GLArea * /*parent*/);
-	void decorateMesh(QAction *, MeshModel &,  const RichParameterList  *, GLArea *, QPainter *, GLLogStream &){}
-	void decorateDoc(QAction *a, MeshDocument &m,  const RichParameterList*, GLArea *gla, QPainter *p, GLLogStream &);
-	void endDecorate(QAction *,   MeshDocument &, const RichParameterList *, GLArea *);
+	bool startDecorate(const QAction * /*mode*/, MeshDocument & /*m*/, const RichParameterList  * /*parent*/ par, GLArea * /*parent*/);
+	void decorateMesh(const QAction *, MeshModel &,  const RichParameterList  *, GLArea *, QPainter *, GLLogStream &){}
+	void decorateDoc(const QAction *a, MeshDocument &m,  const RichParameterList*, GLArea *gla, QPainter *p, GLLogStream &);
+	void endDecorate(const QAction *,   MeshDocument &, const RichParameterList *, GLArea *);
 	void initGlobalParameterSet(QAction *, RichParameterList  & globalparam);
-	int getDecorationClass(QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
+	int getDecorationClass(const QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
 
 private:
     DecorateShader* smShader, *vsmShader, *vsmbShader;
