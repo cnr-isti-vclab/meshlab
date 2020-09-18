@@ -9,7 +9,6 @@
 if(TARGET external-newuoa AND TARGET external-levmar)
 
     set(SOURCES
-        alignGlobal.cpp
         alignset.cpp
         filter_mutualglobal.cpp
         levmarmethods.cpp
@@ -19,7 +18,6 @@ if(TARGET external-newuoa AND TARGET external-levmar)
         solver.cpp)
 
     set(HEADERS
-        alignGlobal.h
         alignset.h
         filter_mutualglobal.h
         levmarmethods.h
