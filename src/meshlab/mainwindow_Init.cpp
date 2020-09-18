@@ -484,7 +484,7 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -844,7 +844,7 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{

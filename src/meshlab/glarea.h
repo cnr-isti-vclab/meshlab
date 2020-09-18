@@ -39,6 +39,7 @@
 #include <common/interfaces.h>
 #include <common/interfaces/render_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
@@ -352,13 +353,13 @@ public:
     QAction * getCurrentEditAction() { return currentEditor; }
 
     //get the currently active mesh editor
-    MeshEditInterface * getCurrentMeshEditor() { return iEdit; }
+    EditPluginInterface * getCurrentMeshEditor() { return iEdit; }
 
     //see if this glAarea has a MESHEditInterface for this action
     bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
 
     //add a MeshEditInterface for the given action
-    void addMeshEditor(QAction *editAction, MeshEditInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
+    void addMeshEditor(QAction *editAction, EditPluginInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
     bool readyToClose();
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
@@ -453,10 +454,10 @@ private:
     QFont	qFont;			//font settings
 
     // Editing support
-    MeshEditInterface *iEdit;
+    EditPluginInterface *iEdit;
     QAction *currentEditor;
     QAction *suspendedEditRef; // reference to last Editing Mode Used
-    QMap<QAction*, MeshEditInterface*> actionToMeshEditMap;
+    QMap<QAction*, EditPluginInterface*> actionToMeshEditMap;
 
     //the last model that start edit was called with
     MeshModel *lastModelEdited;

@@ -27,6 +27,8 @@
 #include <common/interfaces/io_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
 #include <common/interfaces/render_plugin_interface.h>
+#include <common/interfaces/edit_plugin_interface.h>
+
 
 
 #include <QLabel>
@@ -154,7 +156,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                     foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
                                         addItems(pluginItem,Templist);
                                 }
-                                MeshEditInterfaceFactory *iEdit = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+                                EditPluginInterfaceFactory *iEdit = qobject_cast<EditPluginInterfaceFactory *>(plugin);
                                 if (iEdit){
                                     QStringList Templist;
                                     foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
@@ -218,7 +220,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
         RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
         if (iRender){
         }
-        MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+        EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
         if (iEditFactory)
         {
             foreach(QAction *a, iEditFactory->actions())

@@ -1382,8 +1382,8 @@ void MainWindow::applyEditMode()
     //if this GLArea does not have an instance of this action's MeshEdit tool then give it one
     if(!GLA()->editorExistsForAction(action))
     {
-        MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(action->parent());
-        MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
+        EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(action->parent());
+        EditPluginInterface *iEdit = iEditFactory->getMeshEditInterface(action);
         GLA()->addMeshEditor(action, iEdit);
     }
 	meshDoc()->meshDocStateData().create(*meshDoc());

@@ -29,7 +29,7 @@
 #include <QDockWidget>
 
 #include <meshlab/glarea.h>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <wrap/gl/pick.h>
 
 #include "paintbox.h"
@@ -49,9 +49,9 @@ enum PaintOptions {
 /**
  * EditPaint plugin main class (MeshEditing plugin)
  */
-class EditPaintPlugin : public QObject, public MeshEditInterface {
+class EditPaintPlugin : public QObject, public EditPluginInterface {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+		Q_INTERFACES(EditPluginInterface)
 
 public:
 	EditPaintPlugin();

@@ -27,12 +27,12 @@
 #include <QStringList>
 #include <QList>
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class EditManipulatorsPlugin : public QObject, public MeshEditInterface
+class EditManipulatorsPlugin : public QObject, public EditPluginInterface
 {
   Q_OBJECT
-  Q_INTERFACES(MeshEditInterface)
+  Q_INTERFACES(EditPluginInterface)
 
 public:
 

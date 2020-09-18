@@ -32,7 +32,7 @@ $Log: editmeasure.h,v $
 #include <QStringList>
 #include <QList>
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <wrap/gui/rubberband.h>
 
 //--------------------------------------
@@ -47,10 +47,10 @@ public:
 //--------------------------------------
 
 
-class EditMeasurePlugin : public QObject, public MeshEditInterface
+class EditMeasurePlugin : public QObject, public EditPluginInterface
 {
   Q_OBJECT
-  Q_INTERFACES(MeshEditInterface)
+  Q_INTERFACES(EditPluginInterface)
 
 public:
   EditMeasurePlugin();

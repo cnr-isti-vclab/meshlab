@@ -134,7 +134,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				meshRenderPlug.push_back(iRender);
 			}
 
-			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+			EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
 			if (iEditFactory)
 			{
 				meshEditInterfacePlug.push_back(iEditFactory);

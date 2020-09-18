@@ -41,7 +41,7 @@ QList<QAction *> EditManipulatorsFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditManipulatorsFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditManipulatorsFactory::getMeshEditInterface(QAction *action)
 {
 	if(action == editManipulators)
 	{
