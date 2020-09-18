@@ -716,16 +716,16 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(const QAction *a) c
     case FP_CAMERA_TRANSLATE :
     case FP_CAMERA_TRANSFORM:
     case FP_SET_RASTER_CAMERA :
-        return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
+        return FilterClass (FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer) ;
 	case FP_QUALITY_FROM_CAMERA:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer + MeshFilterInterface::Quality);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer + FilterPluginInterface::Quality);
     case FP_ORIENT_NORMALS_WITH_CAMERAS:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Normal);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::Normal);
 	case FP_SET_MESH_CAMERA:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Layer);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::Layer);
     }
     assert(0);
-	return MeshFilterInterface::Camera;
+	return FilterPluginInterface::Camera;
 }
 
 int FilterCameraPlugin::getPreConditions(const QAction * a) const
@@ -747,7 +747,7 @@ int FilterCameraPlugin::getPreConditions(const QAction * a) const
 	return 0;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity(const QAction* act ) const
+FilterPluginInterface::FILTER_ARITY FilterCameraPlugin::filterArity(const QAction* act ) const
 {
 	switch (ID(act))
 	{

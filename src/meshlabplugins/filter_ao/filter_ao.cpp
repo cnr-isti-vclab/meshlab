@@ -24,6 +24,8 @@
 #include <common/GLExtensionsManager.h>
 #include "filter_ao.h"
 #include <QGLFramebufferObject>
+#include <QElapsedTimer>
+#include <QTextStream>
 #include <vcg/math/gen_normal.h>
 
 #include <wrap/qt/checkGLError.h>
@@ -97,16 +99,16 @@ int AmbientOcclusionPlugin::getRequirements(const QAction * /*action*/)
     return 0;
 }
 
-MeshFilterInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
+FilterPluginInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
 
 int getRequirements(QAction *action);
 
-MeshFilterInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
+FilterPluginInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
 {
-	return MeshFilterInterface::VertexColoring;
+	return FilterPluginInterface::VertexColoring;
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 

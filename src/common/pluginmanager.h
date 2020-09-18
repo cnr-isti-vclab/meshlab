@@ -25,6 +25,7 @@
 #define PLUGINMANAGER_H
 
 #include "interfaces.h"
+#include "interfaces/filter_plugin_interface.h"
 #include "interfaces/io_plugin_interface.h"
 //#include "scriptsyntax.h"
 
@@ -45,7 +46,7 @@ public:
     QString pluginsCode() const;
 
     int numberIOPlugins() const;
-    inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
+    inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
     inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
     inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
     inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
@@ -59,14 +60,14 @@ public:
 
 
     QMap<QString, QAction*> actionFilterMap;
-    QMap<QString, MeshFilterInterface*> stringFilterMap;
+    QMap<QString, FilterPluginInterface*> stringFilterMap;
     QMap<QString,IOPluginInterface*> allKnowInputFormats;
     QMap<QString,IOPluginInterface*> allKnowOutputFormats;
     QStringList inpFilters;
     QStringList outFilters;
 
     QVector<IOPluginInterface*> meshIOPlug;
-    QVector<MeshFilterInterface*> meshFilterPlug;
+    QVector<FilterPluginInterface*> meshFilterPlug;
     QVector<MeshRenderInterface*> meshRenderPlug;
     QVector<MeshDecorateInterface*> meshDecoratePlug;
     QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;

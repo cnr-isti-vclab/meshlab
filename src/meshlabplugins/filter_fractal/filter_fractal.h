@@ -28,14 +28,14 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include "craters_utils.h"
 
-class FilterFractal : public QObject, public MeshFilterInterface
+class FilterFractal : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     FilterFractal();

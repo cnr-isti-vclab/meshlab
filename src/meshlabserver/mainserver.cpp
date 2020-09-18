@@ -89,7 +89,7 @@ public:
     void dumpPluginInfoWiki(FILE *fp)
     {
         if(!fp) return;
-        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
             foreach(QAction *filterAction, iFilter->actions())
             fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
     }
@@ -102,7 +102,7 @@ public:
         fprintf(fp,"/*! \\mainpage MeshLab Filter Documentation\n");
         //fprintf(fp,"\\AtBeginDocument{\\setcounter{tocdepth}{1}}");
 
-        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
         {
             foreach(QAction *filterAction, iFilter->actions())
             {
@@ -585,7 +585,7 @@ public:
                 return false;
             }
 
-            MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+            FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
             iFilter->setLog(&log);
             int req = iFilter->getRequirements(action);
             if (mm != NULL)
@@ -644,7 +644,7 @@ public:
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-                if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+                if (iFilter->filterArity(action) == FilterPluginInterface::SINGLE_MESH)
                 {
                     MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDocument.mm());
                     if ((pm != MLRenderingData::PR_ARITY) && (meshDocument.mm() != NULL))

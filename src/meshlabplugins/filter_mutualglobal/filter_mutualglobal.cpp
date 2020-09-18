@@ -88,10 +88,10 @@ FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(const QAction *a) c
 {
   switch(ID(a))
     {
-        case FP_IMAGE_GLOBALIGN :  return MeshFilterInterface::Camera;
+        case FP_IMAGE_GLOBALIGN :  return FilterPluginInterface::Camera;
         default : assert(0);
     }
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters

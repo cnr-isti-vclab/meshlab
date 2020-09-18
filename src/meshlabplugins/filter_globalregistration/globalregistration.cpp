@@ -65,10 +65,10 @@ GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(const Q
 {
   switch(ID(a))
     {
-        case FP_GLOBAL_REGISTRATION :  return MeshFilterInterface::PointSet;
+        case FP_GLOBAL_REGISTRATION :  return FilterPluginInterface::PointSet;
         default : assert(0);
     }
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 void GlobalRegistrationPlugin::initParameterList(const QAction *action,MeshDocument &md, RichParameterList & parlst)

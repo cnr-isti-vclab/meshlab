@@ -26,6 +26,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJSEngine>
+#include <QSettings>
+#include <QApplication>
+#include <QDir>
 #include <wrap/io_trimesh/export_ply.h>
 #include "miniz.h"
 
@@ -68,14 +71,14 @@ FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
-		return MeshFilterInterface::Smoothing;
+		return FilterPluginInterface::Smoothing;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
+FilterPluginInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :

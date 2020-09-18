@@ -73,14 +73,14 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QActi
 {
 	switch(ID(a)) {
 	case FP_IMAGE_MUTUALINFO:
-		return MeshFilterInterface::Camera;
+		return FilterPluginInterface::Camera;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

@@ -24,13 +24,13 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
+class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-		Q_INTERFACES(MeshFilterInterface)
+	    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+		Q_INTERFACES(FilterPluginInterface)
 
 		enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 

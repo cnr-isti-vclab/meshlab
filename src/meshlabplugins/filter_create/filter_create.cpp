@@ -527,7 +527,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
     return true;
 }
 
- MeshFilterInterface::FilterClass FilterCreate::getClass(const QAction *a) const
+ FilterPluginInterface::FilterClass FilterCreate::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -543,11 +543,11 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 		case CR_CONE:
 		case CR_TORUS:
 		case CR_FITPLANE:
-			return MeshFilterInterface::MeshCreation;
+			return FilterPluginInterface::MeshCreation;
 			break;
 		default: 
 			assert(0);
-			return MeshFilterInterface::Generic;
+			return FilterPluginInterface::Generic;
   }
 }
 

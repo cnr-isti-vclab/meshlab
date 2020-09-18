@@ -133,7 +133,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 		case FP_FAUX_CREASE                      :
 		case FP_FAUX_EXTRACT                     :
 		case FP_VATTR_SEAM                       :
-		case FP_REFINE_LS3_LOOP	                 : return MeshFilterInterface::Remeshing;
+		case FP_REFINE_LS3_LOOP	                 : return FilterPluginInterface::Remeshing;
 		case FP_REFINE_CATMULL                   :
 		case FP_REFINE_HALF_CATMULL              :
 		case FP_QUAD_DOMINANT                    :
@@ -150,7 +150,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 		case FP_CENTER                           :
 		case FP_SCALE                            :
 		case FP_PRINCIPAL_AXIS                   :
-		case FP_FLIP_AND_SWAP                    : return MeshFilterInterface::Normal;
+		case FP_FLIP_AND_SWAP                    : return FilterPluginInterface::Normal;
 
 		case FP_COMPUTE_PRINC_CURV_DIR           : return FilterClass( Normal + VertexColoring );
 
@@ -162,12 +162,12 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 
 	case FP_PERIMETER_POLYLINE               :
 		case FP_SLICE_WITH_A_PLANE               :
-	case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Measure;
+	case FP_CYLINDER_UNWRAP                  : return FilterPluginInterface::Measure;
 
-		default                                  : assert(0); return MeshFilterInterface::Generic;
+		default                                  : assert(0); return FilterPluginInterface::Generic;
 	}
 
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const

@@ -29,6 +29,8 @@
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/point_outlier.h>
 
+#include <QCoreApplication>
+
 using namespace vcg;
 
 // ERROR CHECKING UTILITY
@@ -649,18 +651,18 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 	return true;
 }
 
-MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
+FilterPluginInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
-	case CP_SELFINTERSECT_SELECT:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);
+	case CP_SELFINTERSECT_SELECT:	return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Cleaning);
 
-	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
+	case CP_SELECT_TEXBORDER : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Texture);
 
 	case FP_SELECT_BY_FACE_QUALITY :
-	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Quality);
 
-	case FP_SELECTBYANGLE : return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);
+	case FP_SELECTBYANGLE : return FilterPluginInterface::FilterClass(FilterPluginInterface::RangeMap + FilterPluginInterface::Selection);
 
 	case FP_SELECT_ALL :
 	case FP_SELECT_NONE :
@@ -681,9 +683,9 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *
 	case FP_SELECT_OUTLIER:
 	case FP_SELECT_BY_COLOR: 
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
-	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(MeshFilterInterface::Selection);
+	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(FilterPluginInterface::Selection);
   }
-  return MeshFilterInterface::Selection;
+  return FilterPluginInterface::Selection;
 }
 
  int SelectionFilterPlugin::getRequirements(const QAction *action)

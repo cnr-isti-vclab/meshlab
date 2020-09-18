@@ -1095,9 +1095,9 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
     checkGLError::debugInfo("Error during depth peeling");
 }
 
-MeshFilterInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
+FilterPluginInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
 {
-    return MeshFilterInterface::SINGLE_MESH;
+    return FilterPluginInterface::SINGLE_MESH;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(SdfGpuPlugin)

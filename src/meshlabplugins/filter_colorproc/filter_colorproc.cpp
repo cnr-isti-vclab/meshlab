@@ -915,7 +915,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 	return false;
 }
 
- MeshFilterInterface::FilterClass FilterColorProc::getClass(const QAction *a) const
+ FilterPluginInterface::FilterClass FilterColorProc::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -933,10 +933,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 		case CP_MAP_VQUALITY_INTO_COLOR:
 		case CP_VERTEX_SMOOTH:
 		case CP_FACE_TO_VERTEX:
-		case CP_TEXTURE_TO_VERTEX:          return MeshFilterInterface::VertexColoring;
-		case CP_SCATTER_PER_MESH:           return MeshFilterInterface::MeshColoring;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::VertexColoring;
+		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::MeshColoring;
 		case CP_SATURATE_QUALITY:
-		case CP_CLAMP_QUALITY:              return MeshFilterInterface::Quality;
+		case CP_CLAMP_QUALITY:              return FilterPluginInterface::Quality;
 		case CP_DISCRETE_CURVATURE:         return FilterClass(Normal + VertexColoring);
 		case CP_TRIANGLE_QUALITY:           return FilterClass(Quality + FaceColoring);
 		case CP_RANDOM_FACE:
@@ -944,10 +944,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 		case CP_FACE_SMOOTH:
 		case CP_VERTEX_TO_FACE:
 		case CP_MESH_TO_FACE:
-		case CP_MAP_FQUALITY_INTO_COLOR:    return MeshFilterInterface::FaceColoring;
+		case CP_MAP_FQUALITY_INTO_COLOR:    return FilterPluginInterface::FaceColoring;
 		default: assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 int FilterColorProc::postCondition( const QAction* filter ) const
@@ -1022,7 +1022,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
+FilterPluginInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {
@@ -1050,12 +1050,12 @@ MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* ac
 		case CP_MAP_FQUALITY_INTO_COLOR:
 		case CP_FACE_TO_VERTEX:
 		case CP_FACE_SMOOTH:
-		case CP_TEXTURE_TO_VERTEX:          return MeshFilterInterface::SINGLE_MESH;
-		case CP_SCATTER_PER_MESH:           return MeshFilterInterface::VARIABLE;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::SINGLE_MESH;
+		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::VARIABLE;
 
 		default: assert(0);
     }
-	return MeshFilterInterface::SINGLE_MESH;
+	return FilterPluginInterface::SINGLE_MESH;
 }
 
 

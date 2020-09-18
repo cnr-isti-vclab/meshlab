@@ -28,18 +28,17 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
 //FILE _iob[] = { *stdin, *stdout, *stderr };
 //extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
 
-class FilterCSG : public QObject, public MeshFilterInterface
+class FilterCSG : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
     enum {
         CSG_OPERATION_INTERSECTION  = 0,
@@ -63,7 +62,7 @@ public:
 
     virtual bool applyFilter(const QAction*, MeshDocument &, const RichParameterList &, vcg::CallBackPos *);
 
-    virtual FilterClass getClass(const QAction *) const { return MeshFilterInterface::FilterClass( MeshFilterInterface::Layer + MeshFilterInterface::Remeshing ); }
+    virtual FilterClass getClass(const QAction *) const { return FilterPluginInterface::FilterClass( FilterPluginInterface::Layer + FilterPluginInterface::Remeshing ); }
     FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
 };
 

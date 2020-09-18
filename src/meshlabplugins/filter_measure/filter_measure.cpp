@@ -127,10 +127,10 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 
 FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) const
 {
-	return MeshFilterInterface::Measure;
+	return FilterPluginInterface::Measure;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

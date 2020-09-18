@@ -29,13 +29,13 @@
 #include <diamond_sampler.h>
 #include <diam_parametrization.h>
 #include <stat_remeshing.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterIsoParametrization : public QObject, public MeshFilterInterface
+class FilterIsoParametrization : public QObject, public FilterPluginInterface
 {
   Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-  Q_INTERFACES(MeshFilterInterface)
+  MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(FilterPluginInterface)
   
   public:
     enum {ISOP_PARAM,

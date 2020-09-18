@@ -159,12 +159,12 @@ QString CleanFilter::filterName(FilterIDType filter) const
 		case FP_REMOVE_UNREFERENCED_VERTEX:
 		case FP_REMOVE_DUPLICATED_VERTEX:
 		case FP_COMPACT_VERT:
-		case FP_COMPACT_FACE:                 return MeshFilterInterface::Cleaning;
-		case FP_BALL_PIVOTING: 	              return MeshFilterInterface::Remeshing;
-		case FP_MERGE_WEDGE_TEX: 	          return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Texture);    
+		case FP_COMPACT_FACE:                 return FilterPluginInterface::Cleaning;
+		case FP_BALL_PIVOTING: 	              return FilterPluginInterface::Remeshing;
+		case FP_MERGE_WEDGE_TEX: 	          return FilterPluginInterface::FilterClass(FilterPluginInterface::Cleaning + FilterPluginInterface::Texture);    
 		default : assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 int CleanFilter::getRequirements(const QAction *action)

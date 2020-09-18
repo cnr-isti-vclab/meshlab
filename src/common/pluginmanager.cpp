@@ -84,7 +84,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 		{
 			pluginsLoaded.push_back(fileName);
 			PluginInterface *iCommon = nullptr;
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
 			if (iFilter)
 			{
 				iCommon = iFilter;
@@ -95,7 +95,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					actionFilterMap.insert(filterAction->text(), filterAction);
 					stringFilterMap.insert(filterAction->text(), iFilter);
 					iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
-					if(iFilter->getClass(filterAction)==MeshFilterInterface::Generic)
+					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic)
 						throw MLException("Missing class for "        +fileName+filterAction->text());
 					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))
 						throw MLException("Missing requirements for " +fileName+filterAction->text());
@@ -103,7 +103,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 						throw MLException("Missing preconditions for "+fileName+filterAction->text());
 					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN ))
 						throw MLException("Missing postcondition for "+fileName+filterAction->text());
-					if(iFilter->filterArity(filterAction) == MeshFilterInterface::UNKNOWN_ARITY )
+					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY )
 						throw MLException("Missing Arity for "        +fileName+filterAction->text());
 				}
 			}

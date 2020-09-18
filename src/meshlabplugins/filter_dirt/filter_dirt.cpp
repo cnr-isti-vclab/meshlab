@@ -253,14 +253,14 @@ int FilterDirt::postCondition(const QAction *a) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FilterClass FilterDirt::getClass(const QAction *filter) const
+FilterPluginInterface::FilterClass FilterDirt::getClass(const QAction *filter) const
 {
 	switch (ID(filter))	{
-	case FP_DIRT:return MeshFilterInterface::Sampling;
-	case FP_CLOUD_MOVEMENT:return MeshFilterInterface::Remeshing;
+	case FP_DIRT:return FilterPluginInterface::Sampling;
+	case FP_CLOUD_MOVEMENT:return FilterPluginInterface::Remeshing;
 	default:assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDirt)

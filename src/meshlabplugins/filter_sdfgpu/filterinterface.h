@@ -36,7 +36,7 @@
   * Q_EXPORT_PLUGIN(SdfPlugin)
   * \endcode
   */
-class SingleMeshFilterInterface : public QObject, public MeshFilterInterface{
+class SingleMeshFilterInterface : public QObject, public FilterPluginInterface{
   
 public:
   /**
@@ -80,7 +80,7 @@ public:
       * plugin to the bottom of the list.
       */
   virtual FilterClass getClass() const{
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
   }
   
   /**

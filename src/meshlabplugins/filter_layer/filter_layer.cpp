@@ -29,6 +29,8 @@
 
 #include<vcg/complex/append.h>
 #include <QImageReader>
+#include <QDir>
+#include <QXmlStreamWriter>
 
 
 
@@ -849,18 +851,18 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) con
 		case FP_MESH_VISIBILITY :
 		case FP_SPLITCONNECTED :
 		case FP_DELETE_MESH :
-		case FP_DELETE_NON_VISIBLE_MESH :        return MeshFilterInterface::Layer;
+		case FP_DELETE_NON_VISIBLE_MESH :        return FilterPluginInterface::Layer;
 		case FP_RENAME_RASTER :
 		case FP_DELETE_RASTER :
 		case FP_DELETE_NON_SELECTED_RASTER :
-		case FP_EXPORT_CAMERAS:	                 return MeshFilterInterface::RasterLayer;
-		case FP_IMPORT_CAMERAS:                  return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer);
+		case FP_EXPORT_CAMERAS:	                 return FilterPluginInterface::RasterLayer;
+		case FP_IMPORT_CAMERAS:                  return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer);
 		default :  assert(0);
     }
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
+FilterPluginInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {
@@ -872,18 +874,18 @@ MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* 
     case FP_SELECTCURRENT :
     case FP_SPLITCONNECTED :
     case FP_DELETE_MESH :
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
 	case FP_EXPORT_CAMERAS:
 	case FP_IMPORT_CAMERAS:
-        return MeshFilterInterface::NONE;
+        return FilterPluginInterface::NONE;
     case FP_FLATTEN :
     case FP_DELETE_NON_VISIBLE_MESH :
-        return MeshFilterInterface::VARIABLE;
+        return FilterPluginInterface::VARIABLE;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 int FilterLayerPlugin::postCondition(const QAction* filter) const
@@ -909,7 +911,7 @@ int FilterLayerPlugin::postCondition(const QAction* filter) const
 
 		default:  assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterLayerPlugin)

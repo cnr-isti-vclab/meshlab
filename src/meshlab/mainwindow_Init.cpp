@@ -500,7 +500,7 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+	foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
 	{
 		foreach(QAction* filterAction, iFilter->actions())
 		{
@@ -717,10 +717,10 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuCamera);
 
 
-	QMap<QString, MeshFilterInterface *>::iterator msi;
+	QMap<QString, FilterPluginInterface *>::iterator msi;
 	for (msi = PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end(); ++msi)
 	{
-		MeshFilterInterface * iFilter = msi.value();
+		FilterPluginInterface * iFilter = msi.value();
 		QAction *filterAction = iFilter->AC((msi.key()));
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
@@ -728,79 +728,79 @@ void MainWindow::fillFilterMenu()
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if (filterClass & MeshFilterInterface::FaceColoring)
+		if (filterClass & FilterPluginInterface::FaceColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::VertexColoring)
+		if (filterClass & FilterPluginInterface::VertexColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshColoring)
+		if (filterClass & FilterPluginInterface::MeshColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Selection)
+		if (filterClass & FilterPluginInterface::Selection)
 		{
 			filterMenuSelect->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Cleaning)
+		if (filterClass & FilterPluginInterface::Cleaning)
 		{
 			filterMenuClean->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Remeshing)
+		if (filterClass & FilterPluginInterface::Remeshing)
 		{
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Smoothing)
+		if (filterClass & FilterPluginInterface::Smoothing)
 		{
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Normal)
+		if (filterClass & FilterPluginInterface::Normal)
 		{
 			filterMenuNormal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Quality)
+		if (filterClass & FilterPluginInterface::Quality)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Measure)
+		if (filterClass & FilterPluginInterface::Measure)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Layer)
+		if (filterClass & FilterPluginInterface::Layer)
 		{
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RasterLayer)
+		if (filterClass & FilterPluginInterface::RasterLayer)
 		{
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshCreation)
+		if (filterClass & FilterPluginInterface::MeshCreation)
 		{
 			filterMenuCreate->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RangeMap)
+		if (filterClass & FilterPluginInterface::RangeMap)
 		{
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::PointSet)
+		if (filterClass & FilterPluginInterface::PointSet)
 		{
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Sampling)
+		if (filterClass & FilterPluginInterface::Sampling)
 		{
 			filterMenuSampling->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Texture)
+		if (filterClass & FilterPluginInterface::Texture)
 		{
 			filterMenuTexture->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Polygonal)
+		if (filterClass & FilterPluginInterface::Polygonal)
 		{
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Camera)
+		if (filterClass & FilterPluginInterface::Camera)
 		{
 			filterMenuCamera->addAction(filterAction);
 		}

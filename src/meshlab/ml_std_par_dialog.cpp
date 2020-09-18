@@ -27,7 +27,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
 	validcache = false;
 	curAction = action;
@@ -69,7 +69,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != MeshFilterInterface::SINGLE_MESH))
+	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != FilterPluginInterface::SINGLE_MESH))
 		return false;
 
 	if ((curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE))

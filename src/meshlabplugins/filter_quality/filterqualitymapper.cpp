@@ -69,12 +69,12 @@ QString QualityMapperFilter::pluginName() const
   return QString("");
 }
 
- MeshFilterInterface::FilterClass QualityMapperFilter::getClass(const QAction *a) const
+ FilterPluginInterface::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
-    case FP_QUALITY_MAPPER :           return MeshFilterInterface::Quality;
-		default :  assert(0);			return MeshFilterInterface::Generic;
+    case FP_QUALITY_MAPPER :           return FilterPluginInterface::Quality;
+		default :  assert(0);			return FilterPluginInterface::Generic;
   }
 }
 

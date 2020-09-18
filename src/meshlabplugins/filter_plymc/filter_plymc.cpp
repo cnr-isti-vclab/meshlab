@@ -26,6 +26,7 @@
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/create/plymc/plymc.h>
 #include <vcg/complex/algorithms/create/plymc/simplemeshprovider.h>
+#include <QTemporaryFile>
 
 using namespace vcg;
 
@@ -86,11 +87,11 @@ QString PlyMCPlugin::pluginName() const
 {
 	switch(ID(a))
 	{
-		case FP_PLYMC :  return MeshFilterInterface::Remeshing;
-		case FP_MC_SIMPLIFY :  return MeshFilterInterface::Remeshing;
+		case FP_PLYMC :  return FilterPluginInterface::Remeshing;
+		case FP_MC_SIMPLIFY :  return FilterPluginInterface::Remeshing;
 		default : assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -246,13 +247,13 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
    return true;
 }
 
-MeshFilterInterface::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
+FilterPluginInterface::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter)) 
 	{
-		case FP_PLYMC :       return MeshFilterInterface::VARIABLE;
-		case FP_MC_SIMPLIFY : return MeshFilterInterface::SINGLE_MESH;
-		default:              return MeshFilterInterface::NONE;
+		case FP_PLYMC :       return FilterPluginInterface::VARIABLE;
+		case FP_MC_SIMPLIFY : return FilterPluginInterface::SINGLE_MESH;
+		default:              return FilterPluginInterface::NONE;
 	}
 }
 

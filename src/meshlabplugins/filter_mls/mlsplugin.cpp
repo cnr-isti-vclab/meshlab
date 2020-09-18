@@ -99,24 +99,24 @@ QString MlsPlugin::pluginName() const
 return QString("Filter Unknown");
 }
 
- MeshFilterInterface::FilterClass MlsPlugin::getClass(const QAction *a) const
+ FilterPluginInterface::FilterClass MlsPlugin::getClass(const QAction *a) const
 {
     int filterId = ID(a);
 
     switch(filterId) {
         case FP_APSS_PROJECTION         :
-        case FP_RIMLS_PROJECTION        : return FilterClass(MeshFilterInterface::PointSet + MeshFilterInterface::Smoothing);
+        case FP_RIMLS_PROJECTION        : return FilterClass(FilterPluginInterface::PointSet + FilterPluginInterface::Smoothing);
         case FP_APSS_AFRONT             :
         case FP_RIMLS_AFRONT            :
         case FP_APSS_MCUBE              :
-        case FP_RIMLS_MCUBE             : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::Remeshing);
+        case FP_RIMLS_MCUBE             : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::Remeshing);
         case FP_APSS_COLORIZE           :
-        case FP_RIMLS_COLORIZE          : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::VertexColoring);
-        case FP_RADIUS_FROM_DENSITY     : return MeshFilterInterface::PointSet;
-        case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
+        case FP_RIMLS_COLORIZE          : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::VertexColoring);
+        case FP_RADIUS_FROM_DENSITY     : return FilterPluginInterface::PointSet;
+        case FP_SELECT_SMALL_COMPONENTS : return FilterPluginInterface::Selection;
         }
     assert(0);
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 // Info() must return the longer string describing each filtering action

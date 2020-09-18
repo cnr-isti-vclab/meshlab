@@ -23,6 +23,7 @@
 
 #include "plugindialog.h"
 #include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include <common/interfaces/io_plugin_interface.h>
 
 #include <QLabel>
@@ -138,7 +139,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                     foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
                                     addItems(pluginItem,Templist);
                                 }
-                                MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+                                FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
                                 if (iFilter){
                                     QStringList Templist;
                                     foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
@@ -205,7 +206,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
                 if (actionName==a->text())
                     labelInfo->setText(iDecorate->decorationInfo(a));
         }
-        MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+        FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
         if (iFilter)
         {
             foreach(QAction *a,iFilter->actions())

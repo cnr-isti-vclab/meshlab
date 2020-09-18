@@ -40,6 +40,8 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/algorithms/geodesic.h>
 #include <vcg/complex/algorithms/voronoi_processing.h>
 
+#include <QElapsedTimer>
+
 using namespace vcg;
 using namespace std;
 
@@ -1356,7 +1358,7 @@ switch(ID(action))
  return true;
 }
 
-MeshFilterInterface::FilterClass FilterDocSampling::getClass(const QAction *action) const
+FilterPluginInterface::FilterClass FilterDocSampling::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
@@ -1372,8 +1374,8 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(const QAction *acti
   case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling;
   case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
   case FP_DISK_COLORING:
-  case FP_VORONOI_COLORING: return MeshFilterInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
-  case FP_POINTCLOUD_SIMPLIFICATION : return MeshFilterInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::PointSet);
+  case FP_VORONOI_COLORING: return FilterPluginInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
+  case FP_POINTCLOUD_SIMPLIFICATION : return FilterPluginInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::PointSet);
   default: assert(0);
   }
   return FilterClass(0);
@@ -1396,7 +1398,7 @@ int FilterDocSampling::postCondition(const QAction* a ) const
   return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction * filter ) const
+FilterPluginInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -1408,15 +1410,15 @@ MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction *
     case FP_REGULAR_RECURSIVE_SAMPLING :
     case FP_UNIFORM_MESH_RESAMPLING:
     case FP_POINTCLOUD_SIMPLIFICATION :
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_DISTANCE_REFERENCE :
     case FP_HAUSDORFF_DISTANCE :
     case FP_POISSONDISK_SAMPLING :
     case FP_DISK_COLORING :
     case FP_VORONOI_COLORING :
-        return MeshFilterInterface::FIXED;
+        return FilterPluginInterface::FIXED;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDocSampling)

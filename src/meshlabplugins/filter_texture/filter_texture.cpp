@@ -165,11 +165,11 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a)
     case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE :
     case FP_COLOR_TO_TEXTURE :
-    case FP_TRANSFER_TO_TEXTURE : return MeshFilterInterface::Texture;
-    case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
+    case FP_TRANSFER_TO_TEXTURE : return FilterPluginInterface::Texture;
+    case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(FilterPluginInterface::VertexColoring + FilterPluginInterface::Texture);
     default : assert(0);
     }
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 static QString extractFilenameWOExt(MeshModel* mm)
@@ -1109,7 +1109,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
     return true;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
+FilterPluginInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -1120,12 +1120,12 @@ MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction
     case FP_PLANAR_MAPPING : 
     case FP_SET_TEXTURE : 
     case FP_COLOR_TO_TEXTURE : 
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_TRANSFER_TO_TEXTURE : 
     case FP_TEX_TO_VCOLOR_TRANSFER : 
-        return MeshFilterInterface::FIXED;
+        return FilterPluginInterface::FIXED;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 

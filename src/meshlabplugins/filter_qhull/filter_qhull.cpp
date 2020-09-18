@@ -120,9 +120,9 @@ QString QhullPlugin::pluginName() const
         case FP_QHULL_DELAUNAY_TRIANGULATION :
         case FP_QHULL_VORONOI_FILTERING :
         case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            return FilterClass (MeshFilterInterface::Remeshing) ;
+            return FilterClass (FilterPluginInterface::Remeshing) ;
         case FP_QHULL_VISIBLE_POINTS:
-            return FilterClass (MeshFilterInterface::Selection + MeshFilterInterface::PointSet);
+            return FilterClass (FilterPluginInterface::Selection + FilterPluginInterface::PointSet);
         default : assert(0);
     }
   return FilterClass(0);

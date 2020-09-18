@@ -26,16 +26,16 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 #include "muParser.h"
 #include "filter_refine.h"
 
-class FilterFunctionPlugin : public QObject, public MeshFilterInterface
+class FilterFunctionPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 protected:
 	double x,y,z,nx,ny,nz,r,g,b,a,q,rad,vtu,vtv,vsel;

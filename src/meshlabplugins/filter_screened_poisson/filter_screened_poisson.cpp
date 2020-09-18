@@ -26,6 +26,10 @@
 #include <Psapi.h>
 #endif
 
+#include <QDir>
+#include <QTemporaryDir>
+#include <QTemporaryFile>
+
 #include "filter_screened_poisson.h"
 #include "poisson_utils.h"
 
@@ -77,14 +81,14 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 	}
 }
 
-MeshFilterInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
+FilterPluginInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
 {
 	if (ID(a) == FP_SCREENED_POISSON){
-		return FilterScreenedPoissonPlugin::FilterClass(MeshFilterInterface::Remeshing);
+		return FilterScreenedPoissonPlugin::FilterClass(FilterPluginInterface::Remeshing);
 	}
 	else {
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
@@ -223,7 +227,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-MeshFilterInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }
