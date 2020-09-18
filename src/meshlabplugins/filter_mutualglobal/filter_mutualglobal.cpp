@@ -178,7 +178,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, co
 		oldShots.push_back(md.rasterList[r]->shot);
 	}
 
-	Log(0,"Sampled has %i vertices",myVec.size());
+	log(0,"Sampled has %i vertices",myVec.size());
 
 	std::vector<SubGraph> Graphs;
 	/// Preliminary singular alignment using classic MI
@@ -187,7 +187,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, co
 			/// Building of the graph of images
 			if (md.rasterList.size()==0)
 			{
-				 Log(0, "You need a Raster Model to apply this filter!");
+				 log(0, "You need a Raster Model to apply this filter!");
 				 return false;
 
 			}
@@ -205,12 +205,12 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, co
 			{
 
 				Graphs=buildGraph(md);
-				Log(0, "BuildGraph completed");
+				log(0, "BuildGraph completed");
 				for (int i=0; i<par.getInt("Max number of refinement steps"); i++)
 				{
 					AlignGlobal(md, Graphs);
 					float diff=calcShotsDifference(md,oldShots,myVec);
-					Log(0, "AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
+					log(0, "AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
 					if (diff<thresDiff)
 						break;
 					oldShots.clear();
@@ -222,13 +222,13 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, co
 			}
 
 			this->glContext->doneCurrent();
-			Log(0, "Done!");
+			log(0, "Done!");
 			break;
 
 		default : assert(0);
 	}
 
-	Log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
+	log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
 
 		return true;
 
@@ -264,14 +264,14 @@ float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<vcg:
 
 void FilterMutualGlobal::initGL()
 {
-  Log(0, "GL Initialization");
+  log(0, "GL Initialization");
   if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-    Log(0, "GLEW initialization error!");
+    log(0, "GLEW initialization error!");
     exit(-1);
   }
 
   if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-    Log(0, "Graphics hardware does not support FBOs");
+    log(0, "Graphics hardware does not support FBOs");
     exit(0);
   }
   if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -281,11 +281,11 @@ void FilterMutualGlobal::initGL()
   }
 
   if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-    Log(0,"Graphics hardware does not support non-power-of-two textures");
+    log(0,"Graphics hardware does not support non-power-of-two textures");
     exit(0);
   }
   if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-    Log(0, "Graphics hardware does not support vertex buffer objects");
+    log(0, "Graphics hardware does not support vertex buffer objects");
     exit(0);
   }
 
@@ -323,7 +323,7 @@ void FilterMutualGlobal::initGL()
   //alignset.resize(800);
   assert(glGetError() == 0);
 
-  Log(0, "GL Initialization done");
+  log(0, "GL Initialization done");
 
 }
 
@@ -342,7 +342,7 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 	MutualInfo mutual;
 	if (md.rasterList.size()==0)
 	{
-		 Log(0, "You need a Raster Model to apply this filter!");
+		 log(0, "You need a Raster Model to apply this filter!");
 		 return false;
 	}
 	else {
@@ -433,7 +433,7 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 				else
 				{
 				solver.iterative(&alignset, &mutual, alignset.shot);
-				Log(0, "Vado di rough",r);
+				log(0, "Vado di rough",r);
 				}
 
 				md.rasterList[r]->shot=alignset.shot;
@@ -445,11 +445,11 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 				md.rasterList[r]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[0]/2.0);
 				md.rasterList[r]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[1]/2.0);
 
-				Log(0, "Image %d completed",r);
+				log(0, "Image %d completed",r);
 
 		}
 		else
-			Log(0, "Image %d skipped",r);
+			log(0, "Image %d skipped",r);
 		}
 	}
 
@@ -462,7 +462,7 @@ std::vector<SubGraph> FilterMutualGlobal::buildGraph(MeshDocument &md, bool glob
 	std::vector<AlignPair> allArcs;
 
 	allArcs=CalcPairs(md, globalign);
-	Log(0, "Calcpairs completed");
+	log(0, "Calcpairs completed");
 	return CreateGraphs(md, allArcs);
 
 }
@@ -585,12 +585,12 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 				}
 			}
 
-			Log(0, "Image %d completed",r);
+			log(0, "Image %d completed",r);
 			if (!globalign)
 			{
 				for (int i=0; i<weightList.size(); i++)
 				{
-					Log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
+					log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
 					list.push_back(weightList[i]);
 
 				}
@@ -649,7 +649,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 						pair.projId=p;
 						pair.weight=weightList[i].weight;
 						list.push_back(pair);
-						Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
+						log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
 					}
 			}
 
@@ -659,7 +659,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 
 
 
-	Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
+	log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
 
 
 		//emit md.rasterSetChanged();
@@ -673,7 +673,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 	std::vector<SubGraph> Gr;
 	SubGraph allNodes;
 	int numNodes=md.rasterList.size();
-	Log(0, "Tuttok1");
+	log(0, "Tuttok1");
 	for (int s=0; s<numNodes; s++)
 	{
 		Node n;
@@ -716,7 +716,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 		}
 	int involvedNodes=nod.size();
 	int totNodes=0;
-	Log(0, "Tuttok2");
+	log(0, "Tuttok2");
 	while (!done)
 	{
 		for (int i=0; i<arcs.size(); i++)
@@ -745,7 +745,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 			done=true;
 		else totGr++;
 	}
-	Log(0, "Tuttok3");
+	log(0, "Tuttok3");
 
 	for (int i=1; i<totGr+1; i++)
 	{
@@ -753,7 +753,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 		graph.id=i;
 		for (int j=0; j<numNodes; j++)
 		{
-			Log(0, "Node %d of %d",j,numNodes);
+			log(0, "Node %d of %d",j,numNodes);
 			if (allNodes.nodes[j].grNum==i)
 			{
 				Node n;
@@ -775,7 +775,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 				}
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
 				graph.nodes.push_back(n);
-				Log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
+				log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
 			}
 			else
 				{
@@ -784,13 +784,13 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 				n.id=j;
 				n.avMut=0.0;
 				graph.nodes.push_back(n);
-				Log(0, "Node %d of %d: not used",j,numNodes);
+				log(0, "Node %d of %d: not used",j,numNodes);
 			}
 		}
 		Gr.push_back(graph);
 	}
-	Log(0, "Tuttok5");
-	Log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
+	log(0, "Tuttok5");
+	log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
 
 	return Gr;
 }

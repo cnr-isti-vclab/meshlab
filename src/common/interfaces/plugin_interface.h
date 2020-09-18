@@ -24,7 +24,11 @@
 #ifndef MESHLAB_PLUGIN_INTERFACE_H
 #define MESHLAB_PLUGIN_INTERFACE_H
 
+#include <QAction>
+
+
 #include "../GLLogStream.h"
+#include "../filter_parameter/rich_parameter_list.h"
 
 /**
  * \brief The MeshLabInterface class is the base of all the plugin interfaces.
@@ -38,40 +42,52 @@
  *
  * \todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
  */
-class MeshLabInterface
+class PluginInterface
 {
 public:
+	typedef int FilterIDType;
+
 	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
 	\todo To be renamed as ActionIDType
 	*/
-	MeshLabInterface();
-	virtual ~MeshLabInterface() {}
+	PluginInterface();
+	virtual ~PluginInterface() {}
+
+	/**
+	 * @brief This functions returns the name of the current plugin.
+	 * Must be implemented in every plugin.
+	 * @return
+	 */
+	virtual QString pluginName() const = 0;
+
+	// See source file for documentation
+	virtual void initGlobalParameterSet(QAction* /*format*/, RichParameterList& /*globalparam*/);
 
 	/// Standard stuff that usually should not be redefined.
-	void setLog(GLLogStream *log);
+	void setLog(GLLogStream* log);
 
 	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
 	template <typename... Ts>
-	void Log(const char * f, Ts&&... ts );
+	void log(const char* f, Ts&&... ts);
 
-	void Log(const char * s);
-	void Log(const std::string& s);
-
-	template <typename... Ts>
-	void Log(GLLogStream::Levels Level, const char * f, Ts&&... ts );
-
-	void Log(GLLogStream::Levels level, const char * s);
-
-	void Log(GLLogStream::Levels  level, const std::string& s);
-
-	void RealTimeLog(QString Id, const QString &meshName, const char * f);
+	void log(const char* s);
+	void log(const std::string& s);
 
 	template <typename... Ts>
-	void RealTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts );
+	void log(GLLogStream::Levels Level, const char* f, Ts&&... ts);
+
+	void log(GLLogStream::Levels level, const char* s);
+
+	void log(GLLogStream::Levels  level, const std::string& s);
+
+	void realTimeLog(QString Id, const QString& meshName, const char* f);
+
+	template <typename... Ts>
+	void realTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts );
 
 private:
-	GLLogStream *log;
+	GLLogStream *logstream;
 };
 
 /************************
@@ -79,26 +95,26 @@ private:
  ************************/
 
 template<typename... Ts>
-void MeshLabInterface::Log(const char* f, Ts&&... ts)
+void PluginInterface::log(const char* f, Ts&&... ts)
 {
-	if(log != nullptr) {
-		log->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
+	if(logstream != nullptr) {
+		logstream->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
 	}
 }
 
 template <typename... Ts>
-void MeshLabInterface::Log(GLLogStream::Levels Level, const char * f, Ts&&... ts )
+void PluginInterface::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
 {
-	if(log != nullptr) {
-		log->Logf(Level, f, std::forward<Ts>(ts)...);
+	if(logstream != nullptr) {
+		logstream->Logf(Level, f, std::forward<Ts>(ts)...);
 	}
 }
 
 template <typename... Ts>
-void MeshLabInterface::RealTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts )
+void PluginInterface::realTimeLog(QString Id, const QString& meshName, const char* f, Ts&&... ts)
 {
-	if(log != nullptr) {
-		log->RealTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
+	if(logstream != nullptr) {
+		logstream->RealTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
 	}
 }
 

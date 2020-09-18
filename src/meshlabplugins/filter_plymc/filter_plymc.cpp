@@ -134,7 +134,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
 	QTemporaryFile file("./_tmp_XXXXXX.tmp");
 	if (!file.open()) 
 	{
-		Log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+		log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
 		errorMessage = "current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
 		return false;
 	}
@@ -181,11 +181,11 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
             {
                 qDebug("Failed to write vmi temp file %s",qUtf8Printable(mshTmpPath));
 				errorMessage = "Failed to write vmi temp file " + mshTmpPath;
-				Log("ERROR - Failed to write vmi temp file %s", qUtf8Printable(mshTmpPath));
+				log("ERROR - Failed to write vmi temp file %s", qUtf8Printable(mshTmpPath));
                 return false;
             }
             pmc.MP.AddSingleMesh(qUtf8Printable(mshTmpPath));
-            Log("Preprocessing mesh %s",qUtf8Printable(mm->shortName()));
+            log("Preprocessing mesh %s",qUtf8Printable(mm->shortName()));
         }
     }
 
@@ -220,7 +220,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
       MeshModel &mm=*md.mm();
 	  if (mm.cm.fn == 0)
 	  {
-		  Log("Cannot simplify: no faces.");
+		  log("Cannot simplify: no faces.");
 		  errorMessage = "Cannot simplify: no faces.";
 		  return false;
 	  }
@@ -228,7 +228,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
       int res = tri::MCSimplify<CMeshO>(mm.cm,0.0f,false);
 	  if (res !=1)
 	  {
-		  Log("Cannot simplify: this is not a Marching Cube -generated mesh. Mesh should have some of its edges 'straight' along axes.");
+		  log("Cannot simplify: this is not a Marching Cube -generated mesh. Mesh should have some of its edges 'straight' along axes.");
 		  errorMessage = "Cannot simplify: this is not a Marching Cube -generated mesh.";
 		  mm.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		  mm.clearDataMask(MeshModel::MM_FACEFACETOPO);

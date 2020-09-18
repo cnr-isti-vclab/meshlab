@@ -125,20 +125,20 @@ bool FilterCSG::applyFilter(const QAction *filter, MeshDocument &md, const RichP
             MeshModel *secondMesh = par.getMesh("SecondMesh");
 			if ((firstMesh == NULL) || (secondMesh == NULL))
 			{
-				Log("CSG filter: cannot compute, mesh does not exist");
+				log("CSG filter: cannot compute, mesh does not exist");
 				errorMessage = "cannot compute, mesh does not exist";
 				return false;
 			}
 
 			if ((firstMesh->cm.fn == 0) || (secondMesh->cm.fn == 0))
 			{
-				Log("CSG filter: cannot compute, mesh has no faces");
+				log("CSG filter: cannot compute, mesh has no faces");
 				errorMessage = "cannot compute, mesh has no faces";
 				return false;
 			}
 
 			if (firstMesh == secondMesh){
-				Log("CSG filter: cannot compute, it is the same mesh");
+				log("CSG filter: cannot compute, it is the same mesh");
 				errorMessage = "Cannot compute, it is the same mesh";
 				return false; // can't continue, mesh can't be processed
 			}
@@ -168,27 +168,27 @@ bool FilterCSG::applyFilter(const QAction *filter, MeshDocument &md, const RichP
             const Scalarm d = par.getFloat("Delta");
             const Point3m delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
-            Log(GLLogStream::SYSTEM, "Rasterizing first volume...");
+            log(GLLogStream::SYSTEM, "Rasterizing first volume...");
             InterceptVolume<intercept> v = InterceptSet3<intercept>(tmpfirstmesh.cm, delta, subFreq, cb);
-            Log(GLLogStream::SYSTEM, "Rasterizing second volume...");
+            log(GLLogStream::SYSTEM, "Rasterizing second volume...");
             InterceptVolume<intercept> tmp = InterceptSet3<intercept>(tmpsecondmesh.cm, delta, subFreq, cb);
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
             case CSG_OPERATION_INTERSECTION:
-                Log(GLLogStream::SYSTEM, "Intersection...");
+                log(GLLogStream::SYSTEM, "Intersection...");
                 v &= tmp;
                 mesh = md.addNewMesh("","intersection");
                 break;
 
             case CSG_OPERATION_UNION:
-                Log(GLLogStream::SYSTEM, "Union...");
+                log(GLLogStream::SYSTEM, "Union...");
                 v |= tmp;
                 mesh = md.addNewMesh("","union");
                 break;
 
             case CSG_OPERATION_DIFFERENCE:
-                Log(GLLogStream::SYSTEM, "Difference...");
+                log(GLLogStream::SYSTEM, "Difference...");
                 v -= tmp;
                 mesh = md.addNewMesh("","difference");
                 break;
@@ -198,13 +198,13 @@ bool FilterCSG::applyFilter(const QAction *filter, MeshDocument &md, const RichP
                 return true;
             }
 
-            Log(GLLogStream::SYSTEM, "Building mesh...");
+            log(GLLogStream::SYSTEM, "Building mesh...");
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
             typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
             MyWalker walker;
             MyMarchingCubes mc(mesh->cm, walker);
             walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc, cb);
-            Log(GLLogStream::SYSTEM, "Done");
+            log(GLLogStream::SYSTEM, "Done");
 
             vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
             vcg::tri::UpdateNormal<CMeshO>::PerFaceFromCurrentVertexNormal(mesh->cm);

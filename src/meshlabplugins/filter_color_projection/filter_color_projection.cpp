@@ -265,7 +265,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
                     delete rendermanager;
                     return false;
                 }
-                Log("init GL");
+                log("init GL");
                 //if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                 //    return false;
                 //Log("init Buffers");
@@ -364,7 +364,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
             tri::UpdateBounding<CMeshO>::Box(model->cm);
 
             // init accumulation buffers for colors and weights
-            Log("init color accumulation buffers");
+            log("init color accumulation buffers");
             weights = new double[model->cm.vn];
             acc_red = new double[model->cm.vn];
             acc_grn = new double[model->cm.vn];
@@ -423,7 +423,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
                         rendermanager = new RenderHelper();
                         if( rendermanager->initializeGL(cb) != 0 )
                             return false;
-                        Log("init GL");
+                        log("init GL");
                         /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                             return false;
                         Log("init Buffers");*/
@@ -738,7 +738,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
                         rendermanager = new RenderHelper();
                         if( rendermanager->initializeGL(cb) != 0 )
                             return false;
-                        Log("init GL");
+                        log("init GL");
                         /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                             return false;
                         Log("init Buffers");*/
@@ -899,7 +899,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
             // Save texture
             cb(90, "Saving texture ...");
             CheckError(!img.save(filePath), "Texture file cannot be saved");
-            Log( "Texture \"%s\" Created", filePath.toStdString().c_str());
+            log( "Texture \"%s\" Created", filePath.toStdString().c_str());
             assert(QFile(filePath).exists());
 
             // Assign texture

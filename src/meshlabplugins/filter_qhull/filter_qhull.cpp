@@ -272,7 +272,7 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
                     }
 
                     assert(pm.cm.fn == ridgeCount);
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
                     //m.cm.Clear();
 
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -309,7 +309,7 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
                     return true;
                 }
@@ -359,8 +359,8 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-                    Log("Alpha = %f ",alpha);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Alpha = %f ",alpha);
                     //m.cm.Clear();
 
                     return true;
@@ -411,7 +411,7 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, const Ric
                 if(!triangVP)
                     md.delMesh(&pm2);
                 if(result>=0){
-                    Log("Selected %i visible points", result);
+                    log("Selected %i visible points", result);
                     return true;
                 }
                 else return false;

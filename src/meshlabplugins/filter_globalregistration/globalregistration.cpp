@@ -195,7 +195,7 @@ bool GlobalRegistrationPlugin::applyFilter(const QAction */*filter*/,
     }
 
     // run
-    Log("Final LCP = %f", score);
+    log("Final LCP = %f", score);
     v.mesh->Tr.FromEigenMatrix(mat);
 
     return true;

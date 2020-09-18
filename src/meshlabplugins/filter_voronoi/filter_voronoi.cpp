@@ -403,7 +403,7 @@ bool FilterVoronoiPlugin::volumeSampling(
 	mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 	pSm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
-	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	log("Sampling Surface at a radius %f ",sampleSurfRadius);
 	cb(1, "Init");
 	vvs.Init(sampleSurfRadius);
 	cb(30, "Sampling Volume...");
@@ -442,12 +442,12 @@ bool FilterVoronoiPlugin::voronoiScaffolding(
 	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
 	VoronoiVolumeSampling<CMeshO>::Param par;
 
-	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	log("Sampling Surface at a radius %f ",sampleSurfRadius);
 	vvs.Init(sampleSurfRadius);
 	cb(30, "Sampling Volume...");
 	CMeshO::ScalarType poissonVolumeRadius=0;
 	vvs.BuildVolumeSampling(sampleVolNum,poissonVolumeRadius,0);
-	Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
+	log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
 	cb(40, "Relaxing Volume...");
 	vvs.BarycentricRelaxVoronoiSamples(relaxStep);

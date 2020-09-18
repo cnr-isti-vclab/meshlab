@@ -274,11 +274,11 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			Log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
+			log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
 		}
 		else								// keep original faces
 		{
-			Log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
+			log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 
@@ -319,11 +319,11 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 			tri::UpdateSelection<CMeshO>::FaceClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 		}
 		else								// keep original faces
 		{
-			Log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 		vcg::tri::UpdateFlags<CMeshO>::FaceClear(destModel->cm, CMeshO::FaceType::SELECTED);
@@ -342,7 +342,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 		destModel->updateDataMask(currentModel);
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm);
 
-		Log("Duplicated current model to layer %i", md.meshList.size());
+		log("Duplicated current model to layer %i", md.meshList.size());
 
 		// init new layer
 		destModel->UpdateBoxAndNormals();
@@ -385,7 +385,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
             
 		if( deleteLayer )
 		{
-			Log( "Deleted %d merged layers", toBeDeletedList.size());
+			log( "Deleted %d merged layers", toBeDeletedList.size());
 			foreach(MeshModel *mmp,toBeDeletedList)
 				md.delMesh(mmp);
 			md.setCurrent(destModel); // setting again newly created model as current
@@ -394,11 +394,11 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 		if( mergeVertices )
 		{
 			int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(destModel->cm);
-			Log( "Removed %d duplicated vertices", delvert);
+			log( "Removed %d duplicated vertices", delvert);
 		}
 
 		destModel->UpdateBoxAndNormals();
-		Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+		log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
 	} break;
 
     case FP_SPLITCONNECTED :
@@ -408,7 +408,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		std::vector< std::pair<int,CMeshO::FacePointer> > connectedCompVec;
 		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm,  connectedCompVec);
-		Log("Found %i Connected Components",numCC);
+		log("Found %i Connected Components",numCC);
 		
 		for(size_t i=0; i<connectedCompVec.size();++i)
 		{
@@ -747,7 +747,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, con
 								if (k1 != 0.0f)
 								{
 									this->errorMessage = "Distortion is not supported";
-									Log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
+									log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
 
 								}
 

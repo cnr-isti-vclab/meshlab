@@ -704,12 +704,12 @@ switch(ID(action))
 	{
 		MeshModel *curMM = md.mm();
 		if (par.getInt("SampleNum") == 0) {
-			Log("Mesh Element Sampling: Number of Samples is  0, cannot do anything");
+			log("Mesh Element Sampling: Number of Samples is  0, cannot do anything");
 			errorMessage = "Number of Samples is  0, cannot do anything";
 			return false; // can't continue, mesh can't be processed
 		}
 		if ((par.getEnum("Sampling")>0) && (curMM->cm.fn == 0)) {
-			Log("Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces");
+			log("Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces");
 			errorMessage = "Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -726,14 +726,14 @@ switch(ID(action))
 			case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 		}
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-		Log("Mesh Element Sampling created a new mesh of %i points",mm->cm.vn);
+		log("Mesh Element Sampling created a new mesh of %i points",mm->cm.vn);
 	} break;
 
 	case FP_TEXEL_SAMPLING :
 	{
 		MeshModel *curMM= md.mm();
 		if (!tri::HasPerWedgeTexCoord(curMM->cm)) {
-			Log("Texel Sampling requires a mesh with Per Wedge UV parametrization");
+			log("Texel Sampling requires a mesh with Per Wedge UV parametrization");
 			errorMessage = "Texel Sampling requires a mesh with Per Wedge UV parametrization";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -755,24 +755,24 @@ switch(ID(action))
 		tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,mps.texSamplingWidth,mps.texSamplingHeight);
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 		mm->updateDataMask(MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTCOLOR);
-		Log("Texel Sampling created a new mesh of %i points", mm->cm.vn);
+		log("Texel Sampling created a new mesh of %i points", mm->cm.vn);
 	} break;
 
 	case FP_MONTECARLO_SAMPLING :
 	{
 		MeshModel *curMM = md.mm();
 		if (curMM->cm.fn == 0) {
-			Log("Montecarlo Sampling requires a mesh with faces, it does not work on Point Clouds");
+			log("Montecarlo Sampling requires a mesh with faces, it does not work on Point Clouds");
 			errorMessage = "Montecarlo Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
 			return false; // can't continue, mesh can't be processed
 		}
 		if (par.getInt("SampleNum") == 0) {
-			Log("Montecarlo Sampling: Number of Samples is 0, cannot do anything");
+			log("Montecarlo Sampling: Number of Samples is 0, cannot do anything");
 			errorMessage = "Number of Samples is 0, cannot do anything";
 			return false; // can't continue, mesh can't be processed
 		}
 		if (par.getBool("Weighted") && !curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
-			Log("Montecarlo Sampling: cannot do weighted samplimg, layer has no Vertex Quality value");
+			log("Montecarlo Sampling: cannot do weighted samplimg, layer has no Vertex Quality value");
 			errorMessage = "Cannot do weighted samplimg, layer has no Vertex Quality value";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -798,19 +798,19 @@ switch(ID(action))
 		}
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-		Log("Sampling created a new mesh of %i points", mm->cm.vn);
+		log("Sampling created a new mesh of %i points", mm->cm.vn);
 	} break;
 
 	case FP_STRATIFIED_SAMPLING :
 	{
 		MeshModel *curMM = md.mm();
 		if (curMM->cm.fn == 0) {
-			Log("Stratified Sampling requires a mesh with faces, it does not work on Point Clouds");
+			log("Stratified Sampling requires a mesh with faces, it does not work on Point Clouds");
 			errorMessage = "Stratified Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
 			return false; // can't continue, mesh can't be processed
 		}
 		if (par.getInt("SampleNum") == 0) {
-			Log("Stratified Sampling: Number of Samples is  0, cannot do anything");
+			log("Stratified Sampling: Number of Samples is  0, cannot do anything");
 			errorMessage = "Number of Samples is  0, cannot do anything";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -823,23 +823,23 @@ switch(ID(action))
 		{
 			case 0:
 				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), false ,par.getBool("Random"));
-				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
 				break;
 			case 1:
 				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), true ,par.getBool("Random"));
-				Log("Dual Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Dual Similar Sampling created a new mesh of %i points", mm->cm.vn);
 				break;
 			case 2:	
 				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
-				Log("Subdivision Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Subdivision Sampling created a new mesh of %i points", mm->cm.vn);
 				break;
 			case 3:
 				tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), true);
-				Log("Edge Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Edge Sampling created a new mesh of %i points", mm->cm.vn);
 				break;
 			case 4:	
 				tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), false);
-				Log("Non Faux Edge Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Non Faux Edge Sampling created a new mesh of %i points", mm->cm.vn);
 				break;
 		}
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -854,7 +854,7 @@ switch(ID(action))
 
 		if (selected && curMM->cm.svn == 0 && curMM->cm.sfn == 0) // if no selection at all, fail
 		{
-			Log("Clustered Sampling: Cannot apply only on selection: there is no selection");
+			log("Clustered Sampling: Cannot apply only on selection: there is no selection");
 			errorMessage = "Cannot apply only on selection: there is no selection";
 			return false;
 		}
@@ -863,7 +863,7 @@ switch(ID(action))
 			tri::UpdateSelection<CMeshO>::VertexClear(curMM->cm);
 			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(curMM->cm);
 		}
-		Log("Using only %i selected vertices", curMM->cm.svn);
+		log("Using only %i selected vertices", curMM->cm.svn);
 
 		MeshModel *mm= md.addNewMesh("", "Cluster samples", true); // The new mesh is the current one
 
@@ -877,7 +877,7 @@ switch(ID(action))
 				ClusteringGrid.ExtractPointSet(mm->cm);
 				ClusteringGrid.SelectPointSet(curMM->cm);
 				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
-				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
 			} break;
 
 			case 1 :
@@ -888,7 +888,7 @@ switch(ID(action))
 				ClusteringGrid.SelectPointSet(curMM->cm);
 				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
 				ClusteringGrid.ExtractPointSet(mm->cm);
-				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
 			} break;
 		}
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -901,7 +901,7 @@ switch(ID(action))
 		int sampleNum = par.getInt("SampleNum");
 
 		if ((radius == 0.0) && (sampleNum == 0)){
-			Log("Point Cloud Simplification: Number of Samples AND Radius are both 0, cannot do anything");
+			log("Point Cloud Simplification: Number of Samples AND Radius are both 0, cannot do anything");
 			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -921,7 +921,7 @@ switch(ID(action))
 		else
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, curMM->cm, radius,pp);
 
-		Log("Point Cloud Simplification created a new mesh of %i points", mm->cm.vn);
+		log("Point Cloud Simplification created a new mesh of %i points", mm->cm.vn);
 		UpdateBounding<CMeshO>::Box(mm->cm);
 	} break;
 
@@ -935,7 +935,7 @@ switch(ID(action))
 		bool subsampleFlag = par.getBool("Subsample");
 
 		if ((radius == 0.0) && (sampleNum == 0)){
-			Log("Poisson disk Sampling: Number of Samples AND Radius are both 0, cannot do anything");
+			log("Poisson disk Sampling: Number of Samples AND Radius are both 0, cannot do anything");
 			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -948,17 +948,17 @@ switch(ID(action))
 		if (pp.radiusVariance != 1.0)
 		{
 			if (!curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
-				Log("Poisson disk Sampling: Variable radius requires per-Vertex quality for biasing the distribution");
+				log("Poisson disk Sampling: Variable radius requires per-Vertex quality for biasing the distribution");
 				errorMessage = "Variable radius requires per-Vertex Quality for biasing the distribution";
 				return false; // cannot continue
 			}
 			pp.adaptiveRadiusFlag = true;
-			Log("Variable Density variance is %f, radius can vary from %f to %f", pp.radiusVariance, radius / pp.radiusVariance, radius*pp.radiusVariance);
+			log("Variable Density variance is %f, radius can vary from %f to %f", pp.radiusVariance, radius / pp.radiusVariance, radius*pp.radiusVariance);
 		}
 
 		if (curMM->cm.fn == 0 && subsampleFlag == false)
 		{
-			Log("Poisson disk Sampling: Current mesh has no triangles. We cannot create a montecarlo sampling of the surface. Please select the Subsample flag");
+			log("Poisson disk Sampling: Current mesh has no triangles. We cannot create a montecarlo sampling of the surface. Please select the Subsample flag");
 			errorMessage = "Current mesh has no triangles. We cannot create a montecarlo sampling of the surface.<br> Please select the Subsample flag";
 			return false; // cannot continue
 		}
@@ -966,7 +966,7 @@ switch(ID(action))
 		MeshModel *mm= md.addNewMesh("","Poisson-disk Samples", true); // The new mesh is the current one
 		mm->updateDataMask(curMM);
 
-		Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
+		log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
 
 		// first of all generate montecarlo samples for fast lookup
 		CMeshO *presampledMesh=0;
@@ -993,7 +993,7 @@ switch(ID(action))
 			else
 				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
 			presampledMesh->bbox = curMM->cm.bbox; // we want the same bounding box
-			Log("Generated %i Montecarlo Samples (%i msec)",presampledMesh->vn,tt.elapsed());
+			log("Generated %i Montecarlo Samples (%i msec)",presampledMesh->vn,tt.elapsed());
 		}
 
 		BaseSampler mps(&(mm->cm));
@@ -1013,8 +1013,8 @@ switch(ID(action))
 		//tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 		Point3i &g=pp.pds.gridSize;
-		Log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds.gridCellNum, g[0]*g[1]*g[2]);
-		Log("Poisson Disk Sampling created a new mesh of %i points", mm->cm.vn);
+		log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds.gridCellNum, g[0]*g[1]*g[2]);
+		log("Poisson Disk Sampling created a new mesh of %i points", mm->cm.vn);
 	} break;
 
 	case FP_HAUSDORFF_DISTANCE :
@@ -1029,17 +1029,17 @@ switch(ID(action))
 		float distUpperBound = par.getAbsPerc("MaxDist");
 
 		if (mm0 == mm1){
-			Log("Hausdorff Distance: cannot compute, it is the same mesh");
+			log("Hausdorff Distance: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
 		}
 
 		if(sampleEdge && mm0->cm.fn==0) {
-			Log("Disabled edge sampling. Meaningless when sampling point clouds");
+			log("Disabled edge sampling. Meaningless when sampling point clouds");
 			sampleEdge=false;
 		}
 		if(sampleFace && mm0->cm.fn==0) {
-			Log("Disabled face sampling. Meaningless when sampling point clouds");
+			log("Disabled face sampling. Meaningless when sampling point clouds");
 			sampleFace=false;
 		}
 
@@ -1085,12 +1085,12 @@ switch(ID(action))
 		if (mm1->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
-		Log("Hausdorff Distance computed");
-		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qUtf8Printable(mm0->label()),qUtf8Printable(mm1->label()));
-		Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
+		log("Hausdorff Distance computed");
+		log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qUtf8Printable(mm0->label()),qUtf8Printable(mm1->label()));
+		log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
 		float d = mm0->cm.bbox.Diag();
-		Log("Values w.r.t. BBox Diag (%f)",d);
-		Log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
+		log("Values w.r.t. BBox Diag (%f)",d);
+		log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
 
 
 		if(saveSampleFlag)
@@ -1111,7 +1111,7 @@ switch(ID(action))
 		float maxDistABS = par.getAbsPerc("MaxDist");
 
 		if (mm0 == mm1){
-			Log("Distance from Reference: cannot compute, it is the same mesh");
+			log("Distance from Reference: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -1142,9 +1142,9 @@ switch(ID(action))
 		if (mm1->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
-		Log("Distance from Reference Mesh computed");
-		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qUtf8Printable(mm0->label()), qUtf8Printable(mm1->label()));
-		Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
+		log("Distance from Reference Mesh computed");
+		log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qUtf8Printable(mm0->label()), qUtf8Printable(mm1->label()));
+		log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
 
 	} break;
 
@@ -1162,20 +1162,20 @@ switch(ID(action))
 		bool distquality = par.getBool("QualityDistance");
 
 		if (srcMesh == trgMesh){
-			Log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
+			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
 		}
 		if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
 		{
-			Log("Vertex Attribute Transfer: you have to choose at least one attribute to be sampled");
+			log("Vertex Attribute Transfer: you have to choose at least one attribute to be sampled");
 			errorMessage = QString("You have to choose at least one attribute to be sampled");
 			return false;
 		}
 
 		if (onlySelected && trgMesh->cm.svn == 0 && trgMesh->cm.sfn == 0) // if no selection at all, fail
 		{
-			Log("Vertex Attribute Transfer: Cannot apply only on selection: there is no selection");
+			log("Vertex Attribute Transfer: Cannot apply only on selection: there is no selection");
 			errorMessage = "Cannot apply only on selection: there is no selection";
 			return false;
 		}
@@ -1226,7 +1226,7 @@ switch(ID(action))
 	case FP_UNIFORM_MESH_RESAMPLING :
 	{
 		if (md.mm()->cm.fn==0) {
-			Log("Uniform Mesh Resampling: requires a mesh with faces, it does not work on Point Clouds");
+			log("Uniform Mesh Resampling: requires a mesh with faces, it does not work on Point Clouds");
 			errorMessage = "Uniform Mesh Resampling requires a mesh with faces,<br> it does not work on Point Clouds";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -1247,9 +1247,9 @@ switch(ID(action))
 		volumeBox.Offset(volumeBox.Diag()/10.0f+abs(offsetThr));
 		BestDim(volumeBox , voxelSize, volumeDim );
 
-		Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
-		Log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
-		Log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
+		log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+		log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
+		log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
 
 		tri::Resampler<CMeshO,CMeshO>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
 		tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
@@ -1257,7 +1257,7 @@ switch(ID(action))
 		{
 			float mergeThr =offsetMesh->cm.bbox.Diag()/10000.0f;
 			int total = tri::Clean<CMeshO>::MergeCloseVertex(offsetMesh->cm,mergeThr);
-			Log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
+			log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
 		}
 		tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 	} break;
@@ -1279,7 +1279,7 @@ switch(ID(action))
 
 		vector<CMeshO::VertexPointer> vecV; // points to vertices of ColoredMesh;
 		tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
-		Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
+		log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
 		tri::EuclideanDistance<CMeshO> edFunc;
 		tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV,edFunc);
 
@@ -1330,7 +1330,7 @@ switch(ID(action))
 	case FP_REGULAR_RECURSIVE_SAMPLING :
 	{
 		if (md.mm()->cm.fn==0) {
-			Log("Regular Recursive Sampling: requires a mesh with faces, it does not work on Point Clouds");
+			log("Regular Recursive Sampling: requires a mesh with faces, it does not work on Point Clouds");
 			errorMessage = "Regular Recursive Sampling requires a mesh with  faces,<br> it does not work on Point Clouds";
 			return false; // can't continue, mesh can't be processed
 		}

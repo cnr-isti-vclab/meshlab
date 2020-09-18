@@ -355,7 +355,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 
       if(nonManifVertNum>0 || nonManifEdgeNum>0)
       {
-        Log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
+        log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
         this->errorMessage = "Mesh is not manifold. See Log for details";
         return false;
       }
@@ -378,11 +378,11 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 
       paraModel->UpdateBoxAndNormals();
       baseModel->clearDataMask(bitToBeCleared);
-      Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
-      Log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
-      Log("Unwrap Time   %6.3f s", float(pp.vas.unwrapTime) / CLOCKS_PER_SEC);
-      Log("Voronoi Time  %6.3f s", float(pp.vas.voronoiTime) / CLOCKS_PER_SEC);
-      Log("Sampling Time %6.3f s", float(pp.vas.samplingTime) / CLOCKS_PER_SEC);
+      log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
+      log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
+      log("Unwrap Time   %6.3f s", float(pp.vas.unwrapTime) / CLOCKS_PER_SEC);
+      log("Voronoi Time  %6.3f s", float(pp.vas.voronoiTime) / CLOCKS_PER_SEC);
+      log("Sampling Time %6.3f s", float(pp.vas.samplingTime) / CLOCKS_PER_SEC);
       }
       break;
 
@@ -571,8 +571,8 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
                 }
                 assert(face == faceNo);
                 assert(it == buckets[buckSize-1].end());
-                Log( "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
-                Log( "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
+                log( "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
+                log( "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 
             }
             else //BASIC
@@ -637,7 +637,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
                         }
                     }
                 }
-                Log( "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
+                log( "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
             }
         }
         break;
@@ -685,7 +685,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 
                 // Save texture
                 CheckError(!img.save(fileName, NULL), "Specified file cannot be saved");
-                Log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+                log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
                 assert(textFile.exists());
             }
 
@@ -732,7 +732,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 				
 				// Save texture
 				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
 				assert(textFile.exists());
 			}
 
@@ -813,7 +813,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!trgImgs[texInd].save(texFileNames[texInd]), "Texture file cannot be saved");
-			Log("Texture \"%s\" Created", texFileNames[texInd].toStdString().c_str());
+			log("Texture \"%s\" Created", texFileNames[texInd].toStdString().c_str());
 			assert(QFile(texFileNames[texInd]).exists());
 		}
 
@@ -896,7 +896,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 
 											   // Save texture
 				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
 				assert(textFile.exists());
 			}
 
@@ -1028,7 +1028,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, c
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!trgImgs[trgTexInd].save(trgTextureFileNames[trgTexInd]), "Texture file cannot be saved");
-			Log("Texture \"%s\" Created", trgTextureFileNames[trgTexInd].toStdString().c_str());
+			log("Texture \"%s\" Created", trgTextureFileNames[trgTexInd].toStdString().c_str());
 			assert(QFile(trgTextureFileNames[trgTexInd]).exists());
 		}
 

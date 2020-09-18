@@ -134,7 +134,7 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, const 
 			}
 
 
-		Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
+		log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 
 		// Now actually compute the geodesic distance from the closest point
 		float dist_thr = par.getAbsPerc("maxDistance");
@@ -151,7 +151,7 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, const 
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
 		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 
@@ -178,9 +178,9 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, const 
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
-		if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
+		if(!ret) log("Mesh Has no borders. No geodesic distance computed");
 		else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 	}
 
@@ -219,12 +219,12 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, const 
 			});
 
 			if(unreachedCnt >0 )
-				Log("Warning: %i vertices were unreachable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
+				log("Warning: %i vertices were unreachable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
 
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 		}
 		else
-			Log("Warning: no vertices are selected! aborting geodesic computation.");
+			log("Warning: no vertices are selected! aborting geodesic computation.");
 	}
 		break;
 	default: assert(0);

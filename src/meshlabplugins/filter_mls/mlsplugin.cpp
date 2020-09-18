@@ -384,7 +384,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichP
         { // if we start from a mesh, and it has unreferenced vertices
           // normals are undefined on that vertices.
             int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-            if(delvert) Log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+            if(delvert) log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
         }
         tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 
@@ -394,7 +394,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichP
             md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
             APSS<CMeshO> mls(md.mm()->cm);
             mls.computeVertexRaddi();
-            Log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+            log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
         }
 
         MeshModel* pPoints = 0;
@@ -486,7 +486,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichP
                 }
             }
 
-            Log( "Successfully projected %i vertices", mesh->cm.vn);
+            log( "Successfully projected %i vertices", mesh->cm.vn);
         }
         else if (id & _COLORIZE_)
         {
@@ -600,7 +600,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichP
                 mesh->clearDataMask(MeshModel::MM_FACEFACETOPO);
             }
 
-            Log( "Marching cubes MLS meshing done.");
+            log( "Marching cubes MLS meshing done.");
         }
 
         delete mls;

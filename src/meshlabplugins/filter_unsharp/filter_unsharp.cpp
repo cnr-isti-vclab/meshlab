@@ -445,7 +445,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
       if(!boundarySmooth) tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
-      Log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
+      log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
       m.UpdateBoxAndNormals();
       }
         break;
@@ -458,7 +458,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
             float delta = par.getAbsPerc("delta");
 			Point3m viewpoint = par.getPoint3m("viewPoint");
 			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm, viewpoint, delta, stepSmoothNum, Selected,true);
-			Log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
+			log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
         break;
@@ -481,7 +481,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
                     for(vi =m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
                         h[vi] = vi->cP();
 
-                    Log( "Stored Position %d vertices", m.cm.vn);
+                    log( "Stored Position %d vertices", m.cm.vn);
                     break;
                 }
                 case 1: // ***** Recovering and Projection Vertex Data *****
@@ -500,7 +500,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
                         (*vi).P() = h[vi] + d * (s*alpha);
                     }
                     m.UpdateBoxAndNormals();
-                    Log(  "Projected smoothed Position %d vertices", m.cm.vn);
+                    log(  "Projected smoothed Position %d vertices", m.cm.vn);
                 }
                     break;
             }
@@ -515,7 +515,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
             tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
             float delta = par.getAbsPerc("delta");
             tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
-            Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
         break;
@@ -557,7 +557,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, const R
 
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
-            Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
             break;

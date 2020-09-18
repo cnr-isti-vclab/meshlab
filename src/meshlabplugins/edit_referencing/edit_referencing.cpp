@@ -107,7 +107,7 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
     else
         status_line1.sprintf("Active Point: %s",pointID[cindex].toStdString().c_str());
 
-    this->RealTimeLog("Edit Referencing", m.shortName(),
+    this->realTimeLog("Edit Referencing", m.shortName(),
                       "Absolute Referencing<br>"
                       "%s<br>"
                       "%s<br>"
@@ -229,7 +229,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	else
 		status_line3.sprintf("NO VALID SCENE SCALE");
 
-	this->RealTimeLog("Edit Referencing", m.shortName(),
+	this->realTimeLog("Edit Referencing", m.shortName(),
 		"Scale Referencing<br>"
 		"%s<br>"
 		"%s<br><br>"
@@ -741,7 +741,7 @@ void EditReferencingPlugin::calculateMatrix()
 
     if(referencingDialog->ui->cbAllowScaling->checkState() == Qt::Checked)
     {
-        this->Log(GLLogStream::FILTER, "calculating NON RIGID transformation using %d reference points:", FixP.size());
+        this->log(GLLogStream::FILTER, "calculating NON RIGID transformation using %d reference points:", FixP.size());
         referencingResults.append(QString("NON RIGID transformation from %1 reference points:\n").arg(QString::number(FixP.size())));
         ComputeSimilarityMatchMatrix(FixP, MovP, transfMatrix);
         validMatrix=true;
@@ -749,7 +749,7 @@ void EditReferencingPlugin::calculateMatrix()
     }
     else
     {
-        this->Log(GLLogStream::FILTER, "calculating RIGID transformation using %d reference points:", FixP.size());
+        this->log(GLLogStream::FILTER, "calculating RIGID transformation using %d reference points:", FixP.size());
         referencingResults.append(QString("RIGID transformation from %1 reference points:\n").arg(QString::number(FixP.size())));
         ComputeRigidMatchMatrix(FixP, MovP, transfMatrix);
         validMatrix=true;
@@ -774,16 +774,16 @@ void EditReferencingPlugin::calculateMatrix()
 
 
     if(isMatrixRigid)
-        this->Log(GLLogStream::FILTER, "RIGID MATRIX:");
+        this->log(GLLogStream::FILTER, "RIGID MATRIX:");
     else
-        this->Log(GLLogStream::FILTER, "NON-RIGID MATRIX:");
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
+        this->log(GLLogStream::FILTER, "NON-RIGID MATRIX:");
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
 
-    this->Log(GLLogStream::FILTER, "  ");
-    this->Log(GLLogStream::FILTER, "Residual Errors:");
+    this->log(GLLogStream::FILTER, "  ");
+    this->log(GLLogStream::FILTER, "Residual Errors:");
 
     referencingResults.append("\n\nResidual Errors:\n\n");
 
@@ -792,7 +792,7 @@ void EditReferencingPlugin::calculateMatrix()
 		if (usePoint[pindex])
 		{
 			pointError[pindex] = (refPoints[pindex] - (transfMatrix * pickedPoints[pindex])).Norm();
-			this->Log(GLLogStream::FILTER, "%s: %f", pointID[pindex].toStdString().c_str(), pointError[pindex]);
+			this->log(GLLogStream::FILTER, "%s: %f", pointID[pindex].toStdString().c_str(), pointError[pindex]);
 			referencingResults.append(QString("Point %1: %2\n").arg(pointID[pindex]).arg(QString::number(pointError[pindex])));
 		}
 		else

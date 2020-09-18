@@ -314,7 +314,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 	{
 	case FP_SELECT_DELETE_VERT:
 	{
-		if (m.cm.svn == 0) { Log("Nothing done: no vertex selected"); break; }
+		if (m.cm.svn == 0) { log("Nothing done: no vertex selected"); break; }
 		tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 		int vvn = m.cm.vn;
@@ -328,7 +328,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
-		Log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
+		log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
 	} break;
 
 	case FP_SELECT_DELETE_ALL_FACE:
@@ -345,7 +345,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 				ml->clearDataMask(MeshModel::MM_FACEFACETOPO);
 				ml->clearDataMask(MeshModel::MM_VERTFACETOPO);
 				ml->UpdateBoxAndNormals();
-				Log("Layer %i: deleted all %i faces.", ml->id(), ffn - ml->cm.fn);
+				log("Layer %i: deleted all %i faces.", ml->id(), ffn - ml->cm.fn);
 			}
 		}
 		else
@@ -357,13 +357,13 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 			m.UpdateBoxAndNormals();
-			Log("Deleted all %i faces.", ffn - m.cm.fn);
+			log("Deleted all %i faces.", ffn - m.cm.fn);
 		}
 	} break;
 
 	case FP_SELECT_DELETE_FACE:
 	{
-		if (m.cm.sfn == 0) { Log("Nothing done: no faces selected"); break; }
+		if (m.cm.sfn == 0) { log("Nothing done: no faces selected"); break; }
 		int ffn = m.cm.fn;
 		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 			if (!(*fi).IsD() && (*fi).IsS())
@@ -371,12 +371,12 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
-		Log("Deleted %i faces.", ffn - m.cm.fn);
+		log("Deleted %i faces.", ffn - m.cm.fn);
 	} break;
 
 	case FP_SELECT_DELETE_FACEVERT:
 	{
-		if (m.cm.sfn == 0) { Log("Nothing done: no faces selected"); break; }
+		if (m.cm.sfn == 0) { log("Nothing done: no faces selected"); break; }
 		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		int vvn = m.cm.vn;
@@ -390,7 +390,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
-		Log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
+		log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
 	} break;
 
 	case FP_SELECT_CONNECTED:
@@ -623,7 +623,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 	{
 		float threshold = par.getDynamicFloat("Threshold");
 		int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
-		Log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
+		log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
 	} break;
 
 	case FP_SELECT_FOLD_FACE:
@@ -641,7 +641,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		VertexConstDataWrapper<CMeshO> wrapper(m.cm);
 		KdTree<typename CMeshO::ScalarType> kdTree(wrapper);
 		int selVertexNum = tri::OutlierRemoval<CMeshO>::SelectLoOPOutliers(m.cm, kdTree, kNearest, threshold);
-		Log("Selected %d outlier vertices", selVertexNum);
+		log("Selected %d outlier vertices", selVertexNum);
 	} break;
 
 	default: assert(0);

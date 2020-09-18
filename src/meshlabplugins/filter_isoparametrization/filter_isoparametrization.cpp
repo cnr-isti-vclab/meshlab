@@ -172,11 +172,11 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
   StatEdge<CMeshO>(*mesh,minE,maxE,avE,stdE);
   StatArea<CMeshO>(*mesh,minAr,maxAr,avAr,stdAr);
   StatAngle<CMeshO>(*mesh,minAn,maxAn,avAn,stdAn);
-  Log(" REMESHED ");
-  Log("Irregular Vertices:%d ",non_reg);
-  Log("stdDev Area:  %5.2f",stdAr/avAr);
-  Log("stdDev Angle: %5.2f",stdAn/avAn);
-  Log("stdDev Edge:  %5.2f",stdE/avE);
+  log(" REMESHED ");
+  log("Irregular Vertices:%d ",non_reg);
+  log("stdDev Area:  %5.2f",stdAr/avAr);
+  log("stdDev Angle: %5.2f",stdAn/avAn);
+  log("stdDev Edge:  %5.2f",stdE/avE);
 }
 
 bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& md, const RichParameterList & par, vcg::CallBackPos  *cb)
@@ -234,7 +234,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
         float aggregate,L2;
         int n_faces;
         Parametrizator.getValues(aggregate,L2,n_faces);
-        Log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
+        log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
       }
       else
       {
@@ -325,11 +325,11 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
     int n_diamonds,inFace,inEdge,inStar,n_merged;
     DiamSampl.getResData(n_diamonds,inFace,inEdge,inStar,n_merged);
     
-    Log("INTERPOLATION DOMAINS");
-    Log("In Face: %d \n",inFace);
-    Log("In Diamond: %d \n",inEdge);
-    Log("In Star: %d \n",inStar);
-    Log("Merged %d vertices\n",n_merged);
+    log("INTERPOLATION DOMAINS");
+    log("In Face: %d \n",inFace);
+    log("In Diamond: %d \n",inEdge);
+    log("In Star: %d \n",inStar);
+    log("Merged %d vertices\n",n_merged);
     mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
     mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
     PrintStats(rem);

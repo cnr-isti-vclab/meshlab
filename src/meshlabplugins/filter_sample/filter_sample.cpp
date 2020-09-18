@@ -185,7 +185,7 @@ bool FilterSamplePlugin::vertexDisplacement(
 	}
 
 	// Log function dump textual info in the lower part of the MeshLab screen.
-	Log("Successfully displaced %i vertices",m.vn);
+	log("Successfully displaced %i vertices",m.vn);
 
 	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 	if(updateNormals){

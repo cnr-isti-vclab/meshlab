@@ -550,7 +550,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 				m->updateDataMask(MeshModel::MM_VERTCOLOR);
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			}
-			Log("Saturated Vertex Quality");
+			log("Saturated Vertex Quality");
 			return true;
 		}
 
@@ -579,11 +579,11 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 			if (usePerc)
 			{
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
 			}
 			else {
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -611,11 +611,11 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 			if (usePerc)
 			{
 				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
 			}
 			else {
 				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -644,12 +644,12 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 
 			if (usePerc){
 				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
 					H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100 - perc);
 			}
 			else {
 				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -666,24 +666,24 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, const
 			}
 
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
-			if (delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
+			if (delvert) log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
 			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m->cm);
 			int curvType = par.getEnum("CurvatureType");
 
 			switch (curvType)
 			{
-				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        Log("Computed Mean Curvature");      break;
-				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    Log("Computed Gaussian Curvature"); break;
-				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         Log("Computed RMS Curvature"); break;
-				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    Log("Computed ABS Curvature"); break;
+				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        log("Computed Mean Curvature");      break;
+				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    log("Computed Gaussian Curvature"); break;
+				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         log("Computed RMS Curvature"); break;
+				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    log("Computed ABS Curvature"); break;
 				default: assert(0);
 			}
 
 			Histogramf H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
-			Log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
+			log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
 			return true;
 		}
 

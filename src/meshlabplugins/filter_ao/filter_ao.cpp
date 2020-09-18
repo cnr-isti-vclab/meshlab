@@ -344,7 +344,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
         }
     }
 
-    Log(GLLogStream::SYSTEM,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
+    log(GLLogStream::SYSTEM,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
     /********** Clean up the mess ************/
@@ -385,7 +385,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     cb(0, "Initializing: Glew and Hardware Capabilities");
     if (!GLExtensionsManager::initializeGLextensions_notThrowing())
     {
-        Log(GLLogStream::SYSTEM, "Error initializing OpenGL extensions");
+        log(GLLogStream::SYSTEM, "Error initializing OpenGL extensions");
         errInit = true;
         return;
     }
@@ -396,13 +396,13 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 
     if (depthTexSize < 16)
     {
-        Log(GLLogStream::SYSTEM, "Texture size is too small, 16x16 used instead");
+        log(GLLogStream::SYSTEM, "Texture size is too small, 16x16 used instead");
         depthTexSize = 16;
         depthTexArea = depthTexSize*depthTexSize;
     }
     if (depthTexSize > maxTexSize)
     {
-        Log(GLLogStream::SYSTEM, "Texture size is too large, %dx%d used instead",maxTexSize,maxTexSize);
+        log(GLLogStream::SYSTEM, "Texture size is too large, %dx%d used instead",maxTexSize,maxTexSize);
         depthTexSize = maxTexSize;
         depthTexArea = depthTexSize*depthTexSize;
     }
@@ -419,14 +419,14 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         {
             if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
             {
-                Log(GLLogStream::SYSTEM, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+                log(GLLogStream::SYSTEM, "Your hardware doesn't support Shaders, which are required for hw occlusion");
                 errInit = true;
                 return;
             }
         }
         if ( !glewIsSupported("GL_EXT_framebuffer_object") )
         {
-            Log(GLLogStream::SYSTEM, "Your hardware doesn't support FBOs, which are required for hw occlusion");
+            log(GLLogStream::SYSTEM, "Your hardware doesn't support FBOs, which are required for hw occlusion");
             errInit = true;
             return;
         }
@@ -438,7 +438,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
                 //colorFormat = GL_RGB16F_ARB;
                 //dataTypeFP = GL_HALF_FLOAT_ARB;
 
-                Log(GLLogStream::SYSTEM,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
+                log(GLLogStream::SYSTEM,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
                 errInit = true;
                 return;
             }
@@ -448,7 +448,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         }
         else
         {
-            Log(GLLogStream::SYSTEM,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
+            log(GLLogStream::SYSTEM,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
             errInit = true;
             return;
         }
@@ -459,7 +459,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         //******* CHECK MODEL SIZE ***********/
         if ((maxTexSize*maxTexSize*maxTexPages) < numVertices && useGPU)
         {
-            Log(GLLogStream::SYSTEM, "That's a really huge model, I can't handle it in hardware, sorry..");
+            log(GLLogStream::SYSTEM, "That's a really huge model, I can't handle it in hardware, sorry..");
             errInit = true;
             return;
         }
@@ -471,7 +471,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         if (smartTexSize > maxTexSize)
         {
             //should ever enter this point, just exit with error
-            Log(GLLogStream::SYSTEM,"There was an error while determining best texture size, unable to continue");
+            log(GLLogStream::SYSTEM,"There was an error while determining best texture size, unable to continue");
             errInit = true;
             return;
         }
@@ -621,25 +621,25 @@ bool AmbientOcclusionPlugin::checkFramebuffer()
         switch (fboStatus)
         {
         case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Attachment");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Attachment");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Missing Attachment");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Missing Attachment");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Dimensions");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Dimensions");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Formats");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Formats");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Draw Buffer");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Draw Buffer");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-            Log(GLLogStream::SYSTEM, "FBO Incomplete: Read Buffer");
+            log(GLLogStream::SYSTEM, "FBO Incomplete: Read Buffer");
             break;
         default:
-            Log(GLLogStream::SYSTEM, "Undefined FBO error");
+            log(GLLogStream::SYSTEM, "Undefined FBO error");
             assert(0);
         }
 

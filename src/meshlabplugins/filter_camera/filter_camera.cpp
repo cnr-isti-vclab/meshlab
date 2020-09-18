@@ -226,7 +226,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                     case 0:
                         if (rm == NULL)
                         {
-                            Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                             return false;
                         }
                         tranVec=rm->shot.Extrinsics.Tra();
@@ -234,7 +234,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                     case 1: 	
                         if (cm == NULL)
                         {
-                            Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                             return false;
                         }        
                         tranVec=cm->shot.Extrinsics.Tra();
@@ -290,7 +290,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (rm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(transf);
@@ -300,7 +300,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (cm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(transf);
@@ -331,7 +331,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                     case 0:
                         if (rm == NULL)
                         {
-                            Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                             return false;
                         }
                         tranVec=rm->shot.Extrinsics.Tra();
@@ -339,7 +339,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                     case 1:
                         if (cm == NULL)
                         {
-                            Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                             return false;
                         }
                         tranVec=cm->shot.Extrinsics.Tra();
@@ -400,7 +400,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (rm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(trTran);
@@ -412,7 +412,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (cm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(trTran);
@@ -440,7 +440,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 case 0:     
                     if (rm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     trTran.SetTranslate(-rm->shot.Extrinsics.Tra());
@@ -448,7 +448,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 case 1: 	
                     if (cm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     trTran.SetTranslate(-cm->shot.Extrinsics.Tra());
@@ -491,7 +491,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (rm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(trTran);
@@ -501,7 +501,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (cm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(trTran);
@@ -521,7 +521,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
             {
                 if (rm == NULL)
                 {
-                    Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                    log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                     return false;
                 }
                 inv = rm->shot.Extrinsics.Rot();
@@ -568,7 +568,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (rm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(mat);
@@ -578,7 +578,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
                 {
                     if (cm == NULL)
                     {
-                        Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(mat);
@@ -593,7 +593,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
         {
             if (rm == NULL)
             {
-                Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                 return false;
             }
             Shotm shotGot=par.getShotm("Shot");
@@ -610,7 +610,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
     case FP_SET_MESH_CAMERA :
         if (cm == NULL)
         {
-            Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
             return false;
         }
         cm->shot = par.getShotm("Shot");
@@ -619,7 +619,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
         {
             if (cm == NULL)
             {
-                Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                 return false;
             }
             if(!cm->shot.IsValid())
@@ -661,7 +661,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, co
         {
             if (cm == NULL)
             {
-                Log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                 return false;
             }
             struct Correspondence{unsigned int id_img;float padding[3];};

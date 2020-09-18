@@ -14,6 +14,7 @@ set(SOURCES
     filter_parameter/rich_parameter.cpp
     filter_parameter/rich_parameter_list.cpp
     filter_parameter/value.cpp
+    interfaces/plugin_interface.cpp
     GLExtensionsManager.cpp
     GLLogStream.cpp
     filterscript.cpp
@@ -32,6 +33,8 @@ set(HEADERS
     filter_parameter/rich_parameter.h
     filter_parameter/rich_parameter_list.h
     filter_parameter/value.h
+    interfaces/mainwindow_interface.h
+    interfaces/plugin_interface.h
     GLExtensionsManager.h
     GLLogStream.h
     filterscript.h

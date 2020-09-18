@@ -191,8 +191,8 @@ bool FilterSketchFabPlugin::sketchfab(
 		return false;
 	}
 
-	this->Log("Upload Completed; you can access the uploaded model at the following URL:\n");
-	this->Log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
+	this->log("Upload Completed; you can access the uploaded model at the following URL:\n");
+	this->log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
 	return true;
 }
 

@@ -240,7 +240,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 			selected_pts.push_back(p);
 			Naccum = Naccum + (*vi).N();
 		}
-		Log("Using %i vertices to build a fitting plane", int(selected_pts.size()));
+		log("Using %i vertices to build a fitting plane", int(selected_pts.size()));
 		Plane3m plane;
 		FitPlaneToPointSet(selected_pts, plane);
 		plane.Normalize();
@@ -253,9 +253,9 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 		float errorSum = 0;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
-		Log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
-		Log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
-		Log("Fitting Plane offset is %f", plane.Offset());
+		log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
+		log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		log("Fitting Plane offset is %f", plane.Offset());
 
 		// find center of selection on plane
 		Point3m centerP;
@@ -264,7 +264,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 			centerP += plane.Projection(selected_pts[i]);
 		}
 		centerP /= selected_pts.size();
-		Log("center [%f, %f, %f]", centerP.X(), centerP.Y(), centerP.Z());
+		log("center [%f, %f, %f]", centerP.X(), centerP.Y(), centerP.Z());
 
 		// find horizontal and vertical axis
 		Point3m dirH, dirV;
@@ -360,8 +360,8 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 			}
 		}
 
-		Log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
-		Log("V [%f, %f, %f]", dirV.X(), dirV.Y(), dirV.Z());
+		log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
+		log("V [%f, %f, %f]", dirV.X(), dirV.Y(), dirV.Z());
 
 
 		// find extent
@@ -381,7 +381,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, const Ri
 		float exScale = par.getFloat("extent");
 		dimV = dimV * exScale;
 		dimH = dimH * exScale;
-		Log("extent on plane [%f, %f]", dimV, dimH);
+		log("extent on plane [%f, %f]", dimV, dimH);
 
 		int vertNum = par.getInt("subdiv") + 1;
 		if (vertNum <= 1) vertNum = 2;

@@ -420,7 +420,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     }
 
     // if succeeded log stream contains number of vertices and time elapsed
-    Log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -465,7 +465,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     }
 
     // if succeeded log stream contains number of vertices and time elapsed
-    Log( "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -487,7 +487,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -555,7 +555,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     }
 
     // if succeeded log stream contains number of vertices processed and time elapsed
-    Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -568,7 +568,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -616,7 +616,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
         m.updateDataMask(MeshModel::MM_VERTCOLOR);
     }
     // if succeeded log stream contains number of vertices and time elapsed
-    Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -629,7 +629,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -675,7 +675,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			}
 		  }
 
-    Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
     return true;
   }
     break;
@@ -691,7 +691,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.sfn == 0) // if no selection, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -730,7 +730,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			}
 		  }
 
-    Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
     return true;
   }
     break;
@@ -744,7 +744,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.sfn == 0) // if no selection, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -793,7 +793,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			}
 
     // if succeeded log stream contains number of vertices processed and time elapsed
-    Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
 
@@ -807,7 +807,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 
 	if (onSelected && m.cm.sfn == 0) // if no selection, fail
 	{
-		Log("Cannot apply only on selection: there is no selection");
+		log("Cannot apply only on selection: there is no selection");
 		errorMessage = "Cannot apply only on selection: there is no selection";
 		return false;
 	}
@@ -852,7 +852,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     }
 
     // if succeeded log stream contains number of faces processed and time elapsed
-    Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -909,7 +909,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     v_handlers.push_back(h);
 
     // if succeeded log stream contains number of vertices processed and time elapsed
-    Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -963,7 +963,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     //				fhandlers.push_back(h);
 
     // if succeeded log stream contains number of vertices processed and time elapsed
-    Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+    log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
   }
@@ -1033,7 +1033,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
     p.DefineVar(conversion::fromStringToWString("z"), &z);
     std::string expr = par.getString("expr").toStdString();
     p.SetExpr(conversion::fromStringToWString(expr));
-    Log("Filling a Volume of %i %i %i",siz[0],siz[1],siz[2]);
+    log("Filling a Volume of %i %i %i",siz[0],siz[1],siz[2]);
     volume.Init(siz,RangeBBox);
     for(double i=0;i<siz[0];i++)
       for(double j=0;j<siz[1];j++)
@@ -1051,7 +1051,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
         }
 
     // MARCHING CUBES
-    Log("[MARCHING CUBES] Building mesh...");
+    log("[MARCHING CUBES] Building mesh...");
     MyMarchingCubes					mc(m.cm, walker);
     walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, 0);
 //    Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);

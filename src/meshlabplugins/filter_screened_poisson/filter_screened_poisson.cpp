@@ -109,11 +109,11 @@ bool FilterScreenedPoissonPlugin::applyFilter(const QAction* filter, MeshDocumen
 		QTemporaryDir tmpdir;
 		QTemporaryFile file(tmpdir.path());
 		if (!file.open()) { //if a file cannot be created in the tmp folder
-			Log("Warning - tmp folder is not writable.");
+			log("Warning - tmp folder is not writable.");
 
 			QTemporaryFile file2("./_tmp_XXXXXX.tmp"); //try to create a file in the meshlab folder
 			if (!file2.open()){ //if a file cannot be created in the tmp and in the meshlab folder, we cannot run the filter
-				Log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+				log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
 				errorMessage = "current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
 				return false;
 			}
