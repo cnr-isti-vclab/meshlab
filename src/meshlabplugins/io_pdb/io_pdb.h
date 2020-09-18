@@ -24,14 +24,14 @@
 #ifndef PDBIOPLUGIN_H
 #define PDBIOPLUGIN_H
 
+#include <common/interfaces/io_plugin_interface.h>
+#include <common/meshmodel.h>
 
-#include <common/interfaces.h>
-
-class PDBIOPlugin : public QObject, public MeshIOInterface
+class PDBIOPlugin : public QObject, public IOPluginInterface
 {
   Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
-  Q_INTERFACES(MeshIOInterface)
+  Q_INTERFACES(IOPluginInterface)
 
   
 public:

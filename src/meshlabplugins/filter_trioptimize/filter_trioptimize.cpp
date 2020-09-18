@@ -171,7 +171,7 @@ QString TriOptimizePlugin::pluginName() const
 	return {};
 }
 
- TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action)
+ TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action) const
 {
 	switch(ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:             return MeshFilterInterface::Remeshing;

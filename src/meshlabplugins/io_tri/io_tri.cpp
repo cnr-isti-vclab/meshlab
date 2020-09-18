@@ -87,7 +87,7 @@ QString TriIOPlugin::pluginName() const
 	return "IOTRI";
 }
 
-QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> TriIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList 
@@ -99,7 +99,7 @@ QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> TriIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> TriIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	return formatList;

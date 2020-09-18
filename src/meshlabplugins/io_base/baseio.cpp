@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "baseio.h"
+#include <QTextStream>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
@@ -429,7 +430,7 @@ QString BaseMeshIOPlugin::pluginName() const
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Stanford Polygon File Format", tr("PLY"));
@@ -447,7 +448,7 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> BaseMeshIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> BaseMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Stanford Polygon File Format", tr("PLY"));

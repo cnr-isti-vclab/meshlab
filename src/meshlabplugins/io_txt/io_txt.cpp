@@ -103,7 +103,7 @@ QString TxtIOPlugin::pluginName() const
 	return "IOTXT";
 }
 
-QList<MeshIOInterface::Format> TxtIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> TxtIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
     formatList << Format("TXT (Generic ASCII point list)", tr("TXT"));
@@ -114,7 +114,7 @@ QList<MeshIOInterface::Format> TxtIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> TxtIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> TxtIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	return formatList;

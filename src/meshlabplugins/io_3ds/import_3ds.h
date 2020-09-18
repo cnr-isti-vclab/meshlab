@@ -41,12 +41,14 @@
 #ifndef __VCGLIB_IMPORT_3DS
 #define __VCGLIB_IMPORT_3DS
 
-#include <wrap/callback.h>
 #include "io_3ds.h"
+
+#include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/complex.h>
 
 // lib3ds headers
-#include <lib3ds/file.h>                        
+#include <lib3ds/file.h>
 #include <lib3ds/camera.h>
 #include <lib3ds/mesh.h>
 #include <lib3ds/node.h>

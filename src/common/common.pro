@@ -48,6 +48,7 @@ HEADERS += 	\
     filterscript.h \
     GLLogStream.h \
     interfaces.h \
+    interfaces/io_plugin_interface.h \
     interfaces/mainwindow_interface.h \
     interfaces/plugin_interface.h \
     ml_mesh_type.h \

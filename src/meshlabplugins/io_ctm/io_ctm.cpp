@@ -71,7 +71,7 @@ QString IOMPlugin::pluginName() const
 	return "IOCTM";
 }
 
-QList<MeshIOInterface::Format> IOMPlugin::importFormats() const
+QList<IOPluginInterface::Format> IOMPlugin::importFormats() const
 {
 	QList<Format> formatList;
   formatList << Format("OpenCTM compressed format"	,tr("CTM"));
@@ -81,7 +81,7 @@ QList<MeshIOInterface::Format> IOMPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> IOMPlugin::exportFormats() const
+QList<IOPluginInterface::Format> IOMPlugin::exportFormats() const
 {
 	QList<Format> formatList;
     formatList << Format("OpenCTM compressed format"	,tr("CTM"));

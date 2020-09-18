@@ -35,6 +35,7 @@ set(HEADERS
     filter_parameter/value.h
     interfaces/mainwindow_interface.h
     interfaces/plugin_interface.h
+    interfaces/io_plugin_interface.h
     GLExtensionsManager.h
     GLLogStream.h
     filterscript.h

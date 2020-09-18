@@ -158,16 +158,16 @@ MeshFilterInterface::FilterClass FilterSSynth::getClass(const QAction */*filter*
     return MeshFilterInterface::MeshCreation;
 }
 
-QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
+QList<IOPluginInterface::Format> FilterSSynth::importFormats() const
 {
-    QList<MeshIOInterface::Format> formats;
-    formats<< MeshIOInterface::Format("Eisen Script File", tr("ES"));
+    QList<IOPluginInterface::Format> formats;
+    formats<< IOPluginInterface::Format("Eisen Script File", tr("ES"));
     return formats;
 }
 
-QList<MeshIOInterface::Format> FilterSSynth::exportFormats() const
+QList<IOPluginInterface::Format> FilterSSynth::exportFormats() const
 {
-    QList<MeshIOInterface::Format> formats;
+    QList<IOPluginInterface::Format> formats;
     return formats ;
 }
 

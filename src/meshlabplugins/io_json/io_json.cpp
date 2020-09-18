@@ -30,7 +30,7 @@
 #include <QString>
 #include <QFile>
 
-JSONIOPlugin::JSONIOPlugin(void) : MeshIOInterface()
+JSONIOPlugin::JSONIOPlugin(void) : IOPluginInterface()
 {
 	;
 }
@@ -426,7 +426,7 @@ bool JSONIOPlugin::save(const QString & formatName,const QString & fileName, Mes
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> JSONIOPlugin::importFormats(void) const
+QList<IOPluginInterface::Format> JSONIOPlugin::importFormats(void) const
 {
 	QList<Format> formatList;
 	//formatList << Format("JavaScript JSON", tr("JSON"));
@@ -436,7 +436,7 @@ QList<MeshIOInterface::Format> JSONIOPlugin::importFormats(void) const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> JSONIOPlugin::exportFormats(void) const
+QList<IOPluginInterface::Format> JSONIOPlugin::exportFormats(void) const
 {
 	QList<Format> formatList;
 	formatList << Format("JavaScript JSON", tr("JSON"));

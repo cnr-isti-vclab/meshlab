@@ -52,80 +52,6 @@ class GLAreaReg;
 
 class MeshModel;
 
-/** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
-*/
-class MeshIOInterface : public PluginInterface
-{
-public:
-	class Format
-	{
-	public:
-		Format(QString description, QString ex) : description(description) { extensions << ex; }
-		QString description;
-		QStringList extensions;
-	};
-
-	MeshIOInterface() : PluginInterface() {  }
-	virtual ~MeshIOInterface() {}
-
-	virtual QList<Format> importFormats() const = 0;
-	virtual QList<Format> exportFormats() const = 0;
-
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require
-	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
-	// The instanced parameters are then passed to the open at the loading time.
-	// Typical example of use to decide what subportion of a mesh you have to load.
-	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
-	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/) {}
-
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require
-	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
-	// typical example: unifying vertices in stl models.
-	// If you do not need any additional processing do nothing.
-	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
-
-	// This is the corresponding function that is called after the mesh is loaded with the initialized parameters
-	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterList &/*par*/) {}
-
-	// This function is called to initialize the list of additional parameters that a SAVING filter could require
-	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
-	// typical example: ascii or binary format for ply or stl
-	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
-
-
-	virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const = 0;
-
-	/// callback used to actually load a mesh from a file
-	virtual bool open(
-		const QString &format,					/// the extension of the format e.g. "PLY"
-		const QString &fileName,				/// The name of the file to be opened
-		MeshModel &m,										/// The mesh that is filled with the file content
-		int &mask,											/// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-		const RichParameterList & par,	/// The parameters that have been set up in the initPreOpenParameter()
-		vcg::CallBackPos *cb = 0,					/// standard callback for reporting progress in the loading
-		QWidget *parent = 0) = 0;						/// you should not use this...
-
-	virtual bool save(
-		const QString &format, // the extension of the format e.g. "PLY"
-		const QString &fileName,
-		MeshModel &m,
-		const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
-		const RichParameterList & par,
-		vcg::CallBackPos *cb = 0,
-		QWidget *parent = 0) = 0;
-
-	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
-	/// io plugins should avoid using QMessageBox for reporting errors.
-	/// Failure should put some meaningful information inside the errorMessage string.
-	virtual QString &errorMsg() { return this->errorMessage; }
-	void clearErrorString() { errorMessage.clear(); }
-
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	// NEVER EVER use a msgbox to say something to the user.
-	QString errorMessage;
-
-};
 
 /**
 \brief The MeshFilterInterface class provide the interface of the filter plugins.
@@ -564,7 +490,6 @@ public:
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
-#define MESH_IO_INTERFACE_IID "vcg.meshlab.MeshIOInterface/1.0"
 #define MESH_FILTER_INTERFACE_IID  "vcg.meshlab.MeshFilterInterface/1.0"
 #define MESHLAB_FILTER_INTERFACE_IID  "vcg.meshlab.MeshLabFilterInterface/1.0"
 #define MESH_RENDER_INTERFACE_IID  "vcg.meshlab.MeshRenderInterface/1.0"
@@ -572,7 +497,6 @@ public:
 #define MESH_EDIT_INTERFACE_IID  "vcg.meshlab.MeshEditInterface/1.0"
 #define MESH_EDIT_INTERFACE_FACTORY_IID  "vcg.meshlab.MeshEditInterfaceFactory/1.0"
 
-Q_DECLARE_INTERFACE(MeshIOInterface, MESH_IO_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshFilterInterface, MESH_FILTER_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshRenderInterface, MESH_RENDER_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshDecorateInterface, MESH_DECORATE_INTERFACE_IID)

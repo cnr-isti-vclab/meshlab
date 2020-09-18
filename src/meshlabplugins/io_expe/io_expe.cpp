@@ -150,7 +150,7 @@ QString ExpeIOPlugin::pluginName() const
 	return "IOExpe";
 }
 
-QList<MeshIOInterface::Format> ExpeIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> ExpeIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Expe's point set (binary)"		,tr("pts"));
@@ -162,7 +162,7 @@ QList<MeshIOInterface::Format> ExpeIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> ExpeIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> ExpeIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 // 	formatList << Format("Expe's point set (binary)"		,tr("pts"));

@@ -107,7 +107,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 						throw MLException("Missing Arity for "        +fileName+filterAction->text());
 				}
 			}
-			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			IOPluginInterface *iIO = qobject_cast<IOPluginInterface *>(plugin);
 			if (iIO)
 			{
 				iCommon = iIO;
@@ -271,11 +271,11 @@ void PluginManager::knownIOFormats()
 	{
 		QStringList* formatFilters = NULL;
 		QString allKnownFormatsFilter = QObject::tr("All known formats (");
-		for (QVector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
+		for (QVector<IOPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
 		{
-			MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
-			QList<MeshIOInterface::Format> format;
-			QMap<QString, MeshIOInterface*>* map = NULL;
+			IOPluginInterface* pMeshIOPlugin = *itIOPlugin;
+			QList<IOPluginInterface::Format> format;
+			QMap<QString, IOPluginInterface*>* map = NULL;
 			if (inpOut == int(IMPORT))
 			{
 				map = &allKnowInputFormats;
@@ -288,9 +288,9 @@ void PluginManager::knownIOFormats()
 				formatFilters = &outFilters;
 				format = pMeshIOPlugin->exportFormats();
 			}
-			for (QList<MeshIOInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
+			for (QList<IOPluginInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
 			{
-				MeshIOInterface::Format currentFormat = *itf;
+				IOPluginInterface::Format currentFormat = *itf;
 
 				QString currentFilterEntry = currentFormat.description + " (";
 

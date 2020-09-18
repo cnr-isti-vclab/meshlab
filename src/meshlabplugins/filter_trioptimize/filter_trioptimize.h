@@ -50,7 +50,7 @@ public:
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
 	int getRequirements(const QAction*);
-	FilterClass getClass(const QAction *);
+	FilterClass getClass(const QAction *) const;
 	int postCondition(const QAction* ) const;
 	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 

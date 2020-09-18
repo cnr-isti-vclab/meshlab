@@ -41,6 +41,8 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QMessageBox>
+#include <QFile>
+#include <common/meshmodel.h>
 
 using namespace std;
 using namespace vcg;
@@ -233,7 +235,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName,
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
@@ -243,7 +245,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));

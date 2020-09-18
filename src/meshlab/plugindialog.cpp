@@ -23,6 +23,7 @@
 
 #include "plugindialog.h"
 #include <common/interfaces.h>
+#include <common/interfaces/io_plugin_interface.h>
 
 #include <QLabel>
 #include <QTreeWidget>
@@ -116,15 +117,15 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
             pluginItem->setFont(0, boldFont);
 
             if (plugin) {
-                MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+                IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
                                 if (iMeshIO){
                                     QStringList Templist;
-                                    foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+                                    foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
                                         QString formats;
                                         foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
                                         Templist.push_back(formats);
                                     }
-                                    foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+                                    foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
                                         QString formats;
                                         foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
                                         Templist.push_back(formats);
@@ -184,14 +185,14 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
     qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
     QObject *plugin = loader.instance();
     if (plugin) {
-        MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+        IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
         if (iMeshIO){
-            foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+            foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
                 QString formats;
                 foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
                 if (actionName==formats) labelInfo->setText(f.description);
             }
-            foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+            foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
                 QString formats;
                 foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
                 if (actionName==formats) labelInfo->setText(f.description);
