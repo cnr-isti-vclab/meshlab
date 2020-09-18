@@ -52,6 +52,7 @@ HEADERS += 	\
     interfaces/io_plugin_interface.h \
     interfaces/mainwindow_interface.h \
     interfaces/plugin_interface.h \
+    interfaces/render_plugin_interface.h \
     ml_mesh_type.h \
     meshmodel.h \
     pluginmanager.h \

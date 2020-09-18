@@ -192,8 +192,8 @@ public:
     QList<QAction *> iPerDocDecoratorlist;
     QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
-    void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
-    MeshRenderInterface * getRenderer() { return iRenderer; }
+    void setRenderer(RenderPluginInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
+    RenderPluginInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
     
     
@@ -445,7 +445,7 @@ private:
     vcg::Point2i pointToPick;
 
     //shader support
-    MeshRenderInterface *iRenderer;
+    RenderPluginInterface *iRenderer;
     QAction *currentShader;
     QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings

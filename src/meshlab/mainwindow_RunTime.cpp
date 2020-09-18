@@ -1401,7 +1401,7 @@ void MainWindow::applyRenderMode()
         GLA()->setRenderer(NULL,NULL);
     }
     // Make the call to the plugin core
-    MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
+    RenderPluginInterface *iRenderTemp = qobject_cast<RenderPluginInterface *>(action->parent());
     bool initsupport = false;
 
 	if (currentViewContainer() == NULL)

@@ -53,37 +53,6 @@ class GLAreaReg;
 class MeshModel;
 
 /**
-Used to customized the rendering process.
-Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel.
-
-The Render function is called in with the ModelView and Projection Matrices already set up, screen cleared and background drawn.
-After the Render call the MeshLab frawework draw on the opengl context other decorations and the trackball, so it there is the
-requirement for a rendering plugin is that it should leave the z-buffer in a coherent state.
-
-The typical rendering loop of a Render plugin is something like, :
-
-<your own opengl setup>
-
-foreach(MeshModel * mp, meshDoc.meshList)
-{
-if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-}
-
-*/
-
-class MeshRenderInterface : public PluginInterface
-{
-public:
-	MeshRenderInterface() :PluginInterface() {}
-	virtual ~MeshRenderInterface() {}
-
-	virtual void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *) {}
-	virtual void Render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) = 0;
-	virtual void Finalize(QAction *, MeshDocument *, GLArea *) {}
-	virtual bool isSupported() = 0;
-	virtual QList<QAction *> actions() = 0;
-};
-/**
 MeshDecorateInterface is the base class of all <b> decorators </b>
 Decorators are 'read-only' visualization aids that helps to show some data about a document.
 Decorators can make some permesh precomputation but the rendering has to be efficient.
@@ -285,12 +254,10 @@ public:
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
-#define MESH_RENDER_INTERFACE_IID  "vcg.meshlab.MeshRenderInterface/1.0"
 #define MESH_DECORATE_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
 #define MESH_EDIT_INTERFACE_IID  "vcg.meshlab.MeshEditInterface/1.0"
 #define MESH_EDIT_INTERFACE_FACTORY_IID  "vcg.meshlab.MeshEditInterfaceFactory/1.0"
 
-Q_DECLARE_INTERFACE(MeshRenderInterface, MESH_RENDER_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshDecorateInterface, MESH_DECORATE_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshEditInterface, MESH_EDIT_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshEditInterfaceFactory, MESH_EDIT_INTERFACE_FACTORY_IID)

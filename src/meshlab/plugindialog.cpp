@@ -145,7 +145,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                     foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
                                     addItems(pluginItem,Templist);
                                 }
-                                MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+                                RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
                                 if (iRender){
                                     QStringList Templist;
                                     foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
@@ -212,7 +212,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
             foreach(QAction *a,iFilter->actions())
                             if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
         }
-        MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+        RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
         if (iRender){
         }
         MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);

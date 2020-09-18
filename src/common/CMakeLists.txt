@@ -38,6 +38,7 @@ set(HEADERS
     interfaces/plugin_interface.h
     interfaces/filter_plugin_interface.h
     interfaces/io_plugin_interface.h
+    interfaces/render_plugin_interface.h
     GLExtensionsManager.h
     GLLogStream.h
     filterscript.h

@@ -836,7 +836,7 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	foreach(MeshRenderInterface *iRender, PM.meshRenderPlugins())
+	foreach(RenderPluginInterface *iRender, PM.meshRenderPlugins())
 	{
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}

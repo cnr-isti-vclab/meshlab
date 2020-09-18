@@ -127,7 +127,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				}
 			}
 
-			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
 			if (iRender)
 			{
 				iCommon = iRender;

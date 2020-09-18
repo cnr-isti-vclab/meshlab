@@ -27,6 +27,7 @@
 #include "interfaces.h"
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/io_plugin_interface.h"
+#include "interfaces/render_plugin_interface.h"
 //#include "scriptsyntax.h"
 
 #include<QMap>
@@ -47,7 +48,7 @@ public:
 
     int numberIOPlugins() const;
     inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
-    inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
+    inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
     inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
     inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
 
@@ -68,7 +69,7 @@ public:
 
     QVector<IOPluginInterface*> meshIOPlug;
     QVector<FilterPluginInterface*> meshFilterPlug;
-    QVector<MeshRenderInterface*> meshRenderPlug;
+    QVector<RenderPluginInterface*> meshRenderPlug;
     QVector<MeshDecorateInterface*> meshDecoratePlug;
     QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
     QVector<QAction *> editActionList;
