@@ -61,7 +61,7 @@ CleanFilter::CleanFilter()
   FilterIDType tt;
   foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
-  AC(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
+  getFilterAction(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
 }
 
 CleanFilter::~CleanFilter() {

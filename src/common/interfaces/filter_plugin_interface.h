@@ -173,39 +173,10 @@ public:
 	virtual QString filterName(const QAction *a) const { return this->filterName(ID(a)); }
 	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
 
-	virtual FilterIDType ID(const QAction *a) const
-	{
-	QString aa=a->text();
-		foreach(FilterIDType tt, types())
-			if (a->text() == this->filterName(tt)) return tt;
-		aa.replace("&","");
-		foreach(FilterIDType tt, types())
-			if (aa == this->filterName(tt)) return tt;
+	virtual FilterIDType ID(const QAction *a) const;
 
-		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
-		assert(0);
-		return -1;
-	}
-
-	virtual QAction *AC(FilterIDType filterID)
-	{
-		QString idName = this->filterName(filterID);
-		return AC(idName);
-	}
-
-	virtual QAction *AC(const QString& idName)
-	{
-		QString i=idName;
-		for(QAction *tt : actionList)
-			if (idName == tt->text()) return tt;
-		i.replace("&","");
-		for(QAction *tt : actionList)
-			if (i == tt->text()) return tt;
-
-		qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
-		assert(0);
-		return 0;
-	}
+	virtual QAction* getFilterAction(FilterIDType filterID);
+	virtual QAction* getFilterAction(const QString& idName);
 
 	virtual QList<QAction *> actions() const { return actionList; }
 	virtual QList<FilterIDType> types() const { return typeList; }

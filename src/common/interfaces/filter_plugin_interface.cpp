@@ -39,6 +39,40 @@ bool FilterPluginInterface::isFilterApplicable(const QAction* act, const MeshMod
 	return MissingItems.isEmpty();
 }
 
+PluginInterface::FilterIDType FilterPluginInterface::ID(const QAction* a) const
+{
+	QString aa=a->text();
+	for(FilterIDType tt : types())
+		if (a->text() == this->filterName(tt)) return tt;
+	aa.replace("&","");
+	for(FilterIDType tt : types())
+		if (aa == this->filterName(tt)) return tt;
+
+	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
+	assert(0);
+	return -1;
+}
+
+QAction* FilterPluginInterface::getFilterAction(PluginInterface::FilterIDType filterID)
+{
+	QString idName = this->filterName(filterID);
+	return getFilterAction(idName);
+}
+
+QAction* FilterPluginInterface::getFilterAction(const QString& idName)
+{
+	QString i=idName;
+	for(QAction *tt : actionList)
+		if (idName == tt->text()) return tt;
+	i.replace("&","");
+	for(QAction *tt : actionList)
+		if (i == tt->text()) return tt;
+
+	qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
+	assert(0);
+	return 0;
+}
+
 int FilterPluginInterface::previewOnCreatedAttributes(const QAction* act, const MeshModel& mm ) const
 {
 	int changedIfCalled = postCondition(act);
