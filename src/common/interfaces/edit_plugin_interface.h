@@ -24,6 +24,8 @@
 #ifndef MESHLAB_EDIT_PLUGIN_INTERFACE_H
 #define MESHLAB_EDIT_PLUGIN_INTERFACE_H
 
+#include <QTabletEvent>
+
 #include "plugin_interface.h"
 #include "../meshmodel.h"
 
