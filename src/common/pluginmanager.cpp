@@ -43,7 +43,7 @@ PluginManager::~PluginManager()
 	meshFilterPlug.clear();
 	meshRenderPlug.clear();
 	meshDecoratePlug.clear();
-	for (MeshCommonInterface* plugin : ownerPlug)
+	for (PluginInterface* plugin : ownerPlug)
 		delete plugin;
 	ownerPlug.clear();
 
@@ -83,7 +83,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 		if (plugin)
 		{
 			pluginsLoaded.push_back(fileName);
-			MeshCommonInterface *iCommon = nullptr;
+			PluginInterface *iCommon = nullptr;
 			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
 			{

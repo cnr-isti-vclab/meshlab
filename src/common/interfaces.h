@@ -26,6 +26,7 @@
 //#include <GL/glew.h>
 
 #include "filter_parameter/rich_parameter_list.h"
+#include "interfaces/plugin_interface.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
 
@@ -52,122 +53,16 @@ class GLAreaReg;
 
 class MeshModel;
 
-/** The MainWindowInterface class defines just the executeFilter() callback function
-that is invoked by the standard parameter input dialog.
-It is used as base class of the MainWindow.
-*/
-class MainWindowInterface
-{
-public:
-	virtual void executeFilter(QAction *, RichParameterList &, bool = false) {}
-	//parexpval is a string map containing the parameter expression values set in the filter's dialog.
-	//These parameter expression values will be evaluated when the filter will start.
-};
 
-/** \brief The MeshLabInterface class is the base of all the plugin interfaces.
 
-The main idea common to all the framework is that each plugin export a set of actions,
-internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
 
-For coding easyness ID are more practical (you can use them in switches).
-Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
-Moreover ID are UNSAFE (different plugin can have same id) so they should be used only INTERNALLY
 
-\todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
-
-*/
-class MeshLabInterface
-{
-public:
-	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
-	\todo To be renamed as ActionIDType
-	*/
-
-	MeshLabInterface() :log(0) {}
-	virtual ~MeshLabInterface() {}
-private:
-	GLLogStream *log;
-public:
-
-	/// Standard stuff that usually should not be redefined.
-	void setLog(GLLogStream *log) { this->log = log; }
-
-	// This function must be used to communicate useful information collected in the parsing/saving of the files.
-	// NEVER EVER use a msgbox to say something to the user.
-	template <typename... Ts>
-	void Log(const char * f, Ts&&... ts )
-	{
-		if(log != nullptr)
-		{
-			log->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
-		}
-	}
-
-	void Log(const char * s)
-	{
-		if(log != nullptr)
-		{
-			log->Log(GLLogStream::FILTER, s);
-		}
-	}
-
-	void Log(const std::string& s)
-	{
-		if(log != nullptr)
-		{
-			log->Log(GLLogStream::FILTER, s);
-		}
-	}
-
-	template <typename... Ts>
-	void Log(GLLogStream::Levels Level, const char * f, Ts&&... ts )
-	{
-		if(log != nullptr)
-		{
-			log->Logf(Level, f, std::forward<Ts>(ts)...);
-		}
-	}
-
-	void Log(GLLogStream::Levels level, const char * s)
-	{
-		if(log != nullptr)
-		{
-			log->Log(level, s);
-		}
-	}
-
-	void Log(GLLogStream::Levels  level, const std::string& s)
-	{
-		if(log != nullptr)
-		{
-			log->Log(level, s);
-		}
-	}
-
-	void RealTimeLog(QString Id, const QString &meshName, const char * f)
-	{
-		if(log != nullptr)
-		{
-			log->RealTimeLog(Id, meshName, f);
-		}
-	}
-
-	template <typename... Ts>
-	void RealTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts )
-	{
-		if(log != nullptr)
-		{
-			log->RealTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
-		}
-	}
-};
-
-class MeshCommonInterface : public MeshLabInterface
+class PluginInterface : public MeshLabInterface
 {
 public:
 	typedef int FilterIDType;
-	MeshCommonInterface() {}
-	virtual ~MeshCommonInterface() {}
+	PluginInterface() {}
+	virtual ~PluginInterface() {}
 
 	virtual QString pluginName(void) const { return ""; }
 
@@ -200,7 +95,7 @@ public:
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
 */
-class MeshIOInterface : public MeshCommonInterface
+class MeshIOInterface : public PluginInterface
 {
 public:
 	class Format
@@ -211,7 +106,7 @@ public:
 		QStringList extensions;
 	};
 
-	MeshIOInterface() : MeshCommonInterface() {  }
+	MeshIOInterface() : PluginInterface() {  }
 	virtual ~MeshIOInterface() {}
 
 	virtual QList<Format> importFormats() const = 0;
@@ -277,7 +172,7 @@ public:
 \brief The MeshFilterInterface class provide the interface of the filter plugins.
 
 */
-class MeshFilterInterface : public MeshCommonInterface
+class MeshFilterInterface : public PluginInterface
 {
 public:
 	/** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
@@ -309,7 +204,7 @@ public:
 
 
 
-	MeshFilterInterface() : MeshCommonInterface(), glContext(NULL)
+	MeshFilterInterface() : PluginInterface(), glContext(NULL)
 	{
 	}
 	virtual ~MeshFilterInterface() {}
@@ -496,10 +391,10 @@ if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
 */
 
-class MeshRenderInterface : public MeshCommonInterface
+class MeshRenderInterface : public PluginInterface
 {
 public:
-	MeshRenderInterface() :MeshCommonInterface() {}
+	MeshRenderInterface() :PluginInterface() {}
 	virtual ~MeshRenderInterface() {}
 
 	virtual void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *) {}
@@ -533,7 +428,7 @@ Some example of PerMesh Decorations
 - display of specific tagging
 */
 
-class MeshDecorateInterface : public MeshCommonInterface
+class MeshDecorateInterface : public PluginInterface
 {
 public:
 
@@ -549,7 +444,7 @@ public:
 		PostRendering = 0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
 	};
 
-	MeshDecorateInterface() : MeshCommonInterface() {}
+	MeshDecorateInterface() : PluginInterface() {}
 	virtual ~MeshDecorateInterface() {}
 	/** The very short string (a few words) describing each filtering action
 	// This string is used also to define the menu entry
@@ -631,10 +526,10 @@ Used to provide tools that needs some kind of interaction with the mesh.
 Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
 */
 
-class MeshEditInterface : public MeshCommonInterface
+class MeshEditInterface : public PluginInterface
 {
 public:
-	MeshEditInterface() : MeshCommonInterface() {}
+	MeshEditInterface() : PluginInterface() {}
 	virtual ~MeshEditInterface() {}
 
 	//should return a sentence describing what the editing tool does

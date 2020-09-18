@@ -48,6 +48,8 @@ HEADERS += 	\
     filterscript.h \
     GLLogStream.h \
     interfaces.h \
+    interfaces/mainwindow_interface.h \
+    interfaces/plugin_interface.h \
     ml_mesh_type.h \
     meshmodel.h \
     pluginmanager.h \
@@ -66,6 +68,7 @@ SOURCES += \
     interfaces.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
+    interfaces/plugin_interface.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
     mlapplication.cpp \
