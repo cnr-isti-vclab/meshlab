@@ -1002,7 +1002,16 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 {
 	verboseCheckingFlag = verboseFlag;
 
+	bool checkForMonthlyAndBetasVal = false;
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
+
+	QString urlCheck = "https://www.meshlab.net/ML_VERSION";
 	QSettings settings;
+	if (settings.contains(checkForMonthlyAndBetasVar))
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();
+	if (checkForMonthlyAndBetasVal){
+		urlCheck = "https://github.com/cnr-isti-vclab/meshlab/blob/master/ML_VERSION";
+	}
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
 	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
@@ -1026,7 +1035,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
 	stats.get(statreq);
 
-	QNetworkRequest request(QString("http://www.meshlab.net/ML_VERSION"));
+	QNetworkRequest request(urlCheck);
 	httpReq.get(request);
 }
 
@@ -1037,6 +1046,8 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 
 	bool dontRemindMeAboutUpgradeVal = false;
 	const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
 
 	// Check if the user specified not to be reminded to upgrade
 	if (!verboseCheckingFlag) {
@@ -1071,6 +1082,9 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	QCheckBox dontShowCheckBox("Don't show this message again.");
 	dontShowCheckBox.blockSignals(true);
 	msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+	QCheckBox checkMonthlysCheckBox("Check for Monthly and Beta versions.");
+	checkMonthlysCheckBox.blockSignals(true);
+	msgBox.addButton(&checkMonthlysCheckBox, QMessageBox::ResetRole);
 
 	if (newVersionAvailable){
 		msgBox.setText(
@@ -1088,6 +1102,12 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 		int userReply = msgBox.exec();
 		if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
 			settings.setValue(dontRemindMeAboutUpgradeVar, true);
+		else if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(dontRemindMeAboutUpgradeVar, false);
+		if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Checked)
+			settings.setValue(checkForMonthlyAndBetasVar, true);
+		else if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(checkForMonthlyAndBetasVar, false);
 	}
 }
 

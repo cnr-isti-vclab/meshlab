@@ -107,10 +107,10 @@ public:
 	virtual QList<QAction *> actions() const = 0;
 
 	//get the edit tool for the given action
-	virtual EditPluginInterface* getMeshEditInterface(QAction *) = 0;
+	virtual EditPluginInterface* getMeshEditInterface(const QAction *) = 0;
 
 	//get the description for the given action
-	virtual QString getEditToolDescription(QAction *) = 0;
+	virtual QString getEditToolDescription(const QAction *) = 0;
 
 };
 

@@ -41,7 +41,7 @@ QList<QAction *> SampleEditFactory::actions() const
 }
 
 //get the edit tool for the given action
-EditPluginInterface* SampleEditFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* SampleEditFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editSample)
 	{
@@ -50,7 +50,7 @@ EditPluginInterface* SampleEditFactory::getMeshEditInterface(QAction *action)
 	return nullptr;
 }
 
-QString SampleEditFactory::getEditToolDescription(QAction *)
+QString SampleEditFactory::getEditToolDescription(const QAction *)
 {
 	return SampleEditPlugin::Info();
 }
