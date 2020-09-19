@@ -160,7 +160,7 @@ void FilterMutualGlobal::initParameterList(const QAction *action,MeshDocument & 
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	QElapsedTimer filterTime;
 	filterTime.start();

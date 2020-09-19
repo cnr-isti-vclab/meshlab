@@ -191,10 +191,12 @@ void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
 }
 
 
-bool FilterImgPatchParamPlugin::applyFilter(const QAction *act,
-    MeshDocument &md,
-    const RichParameterList &par,
-    vcg::CallBackPos * /*cb*/ )
+bool FilterImgPatchParamPlugin::applyFilter(
+        const QAction *act,
+        MeshDocument &md,
+        unsigned int& /*postConditionMask*/,
+        const RichParameterList &par,
+        vcg::CallBackPos * /*cb*/ )
 {
 
     

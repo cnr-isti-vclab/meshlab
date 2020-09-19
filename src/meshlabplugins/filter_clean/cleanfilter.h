@@ -72,7 +72,7 @@ public:
     int postCondition(const QAction* ) const;
     int getPreConditions(const QAction *) const {    return MeshModel::MM_NONE; }
     virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 

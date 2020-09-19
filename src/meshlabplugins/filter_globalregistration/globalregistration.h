@@ -42,7 +42,7 @@ public:
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;
     void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOORD; }
     FilterClass getClass(const QAction* a) const;
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}

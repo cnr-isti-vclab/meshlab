@@ -255,7 +255,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     return;
 }
 
-bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos* cb)
+bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos* cb)
 {
   if(this->getClass(filter) == FilterPluginInterface::MeshCreation)
        md.addNewMesh("",this->filterName(ID(filter)));

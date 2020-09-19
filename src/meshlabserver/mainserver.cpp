@@ -682,7 +682,8 @@ public:
                 }
             }
             meshDocument.setBusy(true);
-            ret = iFilter->applyFilter( action, meshDocument, pair.second, filterCallBack);
+            unsigned int postConditionMask = MeshModel::MM_UNKNOWN;
+            ret = iFilter->applyFilter( action, meshDocument, postConditionMask, pair.second, filterCallBack);
             meshDocument.setBusy(false);
             if (shared != NULL)
                 delete iFilter->glContext;

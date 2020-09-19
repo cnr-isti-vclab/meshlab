@@ -171,7 +171,7 @@ void FilterMeasurePlugin::initParameterList(const QAction *action, MeshModel &m,
 	}
 }
 
-bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, const RichParameterList& parlst, vcg::CallBackPos*)
+bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, unsigned int& /*postConditionMask*/, const RichParameterList& parlst, vcg::CallBackPos*)
 {
 	switch (ID(filter)) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:

@@ -184,7 +184,7 @@ void FilterCameraPlugin::initParameterList(const QAction *action, MeshDocument &
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel* mesh = md.mm();
     CMeshO* cm = NULL;

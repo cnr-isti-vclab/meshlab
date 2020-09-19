@@ -170,7 +170,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 	return FilterPluginInterface::Generic;
 }
 
-int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
+int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 {
 	switch (ID(filter))
 	{
@@ -674,7 +674,7 @@ void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool 
 }
 
 
-bool ExtraMeshFilterPlugin::applyFilter(const QAction * filter, MeshDocument & md, const RichParameterList & par, vcg::CallBackPos * cb)
+bool ExtraMeshFilterPlugin::applyFilter(const QAction * filter, MeshDocument & md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
 {
 MeshModel & m = *md.mm();
 

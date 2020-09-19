@@ -94,7 +94,7 @@ public:
 	// This choice affect the submenu in which each filter will be placed
 	// For example filters that perform an action only on the selection will be placed in the Selection Class
 	*/
-	virtual FilterClass getClass(const QAction *) const { return FilterPluginInterface::Generic; }
+	virtual FilterClass getClass(const QAction*) const { return FilterPluginInterface::Generic; }
 
 	/**
 	The filters can have some additional requirements on the mesh capabiliteis.
@@ -106,7 +106,7 @@ public:
 	// outputs a never used before mesh property (e.g. face colors), it will be allocated by a call
 	// to MeshModel::updateDataMask(...)
 	*/
-	virtual int getRequirements(const QAction *) { return MeshModel::MM_NONE; }
+	virtual int getRequirements(const QAction*) { return MeshModel::MM_NONE; }
 
 	/** The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
 	// For example algorithms that compute per face quality have as precondition the existence of faces
@@ -116,7 +116,7 @@ public:
 	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
 	// They are also used to grayout menus un-appliable entries.
 	*/
-	virtual int getPreConditions(const QAction *) const { return MeshModel::MM_NONE; }
+	virtual int getPreConditions(const QAction*) const { return MeshModel::MM_NONE; }
 
 	/** Function used by the framework to get info about the mesh properties changed by the filter.
 	// It is widely used by the meshlab's preview system.
@@ -135,14 +135,14 @@ public:
 	* \sa errorMsg
 	* \sa initParameterSet
 	*/
-	virtual bool applyFilter(const QAction* filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb) = 0;
+	virtual bool applyFilter(const QAction* filter, MeshDocument& md, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
 
 	/** \brief tests if a filter is applicable to a mesh.
 	This function is a handy wrapper used by the framework for the \a getPreConditions callback;
 	For instance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
 	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
 	*/
-	bool isFilterApplicable(const QAction *act, const MeshModel& m, QStringList &MissingItems) const;
+	bool isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const;
 
 
 	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
@@ -158,8 +158,8 @@ public:
 	// This function is called to initialized the list of parameters.
 	// it is always called. If a filter does not need parameter it leave it empty and the framework
 	// will not create a dialog (unless for previewing)
-	virtual void initParameterList(const QAction *, MeshModel &/*m*/, RichParameterList & /*par*/) {}
-	virtual void initParameterList(const QAction *filter, MeshDocument &md, RichParameterList &par)
+	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*par*/) {}
+	virtual void initParameterList(const QAction* filter, MeshDocument &md, RichParameterList &par)
 	{
 		initParameterList(filter, *(md.mm()), par);
 	}
@@ -168,9 +168,9 @@ public:
 	* Filters \b must never use QMessageBox for reporting errors.
 	* Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
 	*/
-	const QString &errorMsg() const { return this->errorMessage; }
-	virtual QString filterInfo(const QAction *a) const { return this->filterInfo(ID(a)); }
-	virtual QString filterName(const QAction *a) const { return this->filterName(ID(a)); }
+	const QString& errorMsg() const { return this->errorMessage; }
+	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
+	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }
 	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
 
 	virtual FilterIDType ID(const QAction *a) const;
@@ -178,7 +178,7 @@ public:
 	virtual QAction* getFilterAction(FilterIDType filterID);
 	virtual QAction* getFilterAction(const QString& idName);
 
-	virtual QList<QAction *> actions() const { return actionList; }
+	virtual QList<QAction*> actions() const { return actionList; }
 	virtual QList<FilterIDType> types() const { return typeList; }
 
 	/** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
@@ -193,7 +193,7 @@ protected:
 	//
 
 	// The list of actions exported by the plugin. Each actions strictly corresponds to
-	QList <QAction *> actionList;
+	QList <QAction*> actionList;
 
 	QList <FilterIDType> typeList;
 

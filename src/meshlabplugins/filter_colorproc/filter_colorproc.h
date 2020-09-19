@@ -75,7 +75,7 @@ public:
     virtual int getRequirements(const QAction*);
 
     virtual void initParameterList(const QAction*, MeshDocument&, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument&, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+    virtual bool applyFilter(const QAction* filter, MeshDocument&, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
     int postCondition(const QAction* filter) const;
     int getPreConditions(const QAction *) const;
     FILTER_ARITY filterArity(const QAction *act) const;

@@ -786,7 +786,7 @@ void MainWindow::runFilterScript()
     {
         QString filtnm = pair.filterName();
         int classes = 0;
-        int postCondMask = 0;
+        unsigned int postCondMask = MeshModel::MM_UNKNOWN;
         QAction *action = PM.actionFilterMap[ filtnm];
         FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
 
@@ -858,7 +858,9 @@ void MainWindow::runFilterScript()
         meshDoc()->setBusy(true);
         //WARNING!!!!!!!!!!!!
         /* to be changed */
-        iFilter->applyFilter( action, *meshDoc(), pair.second, QCallBack );
+        iFilter->applyFilter( action, *meshDoc(), postCondMask, pair.second, QCallBack);
+        if (postCondMask == MeshModel::MM_UNKNOWN)
+            postCondMask = iFilter->postCondition(action);
         for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
             vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
         meshDoc()->setBusy(false);
@@ -866,7 +868,7 @@ void MainWindow::runFilterScript()
             shar->removeView(iFilter->glContext);
         delete iFilter->glContext;
         classes = int(iFilter->getClass(action));
-        postCondMask = iFilter->postCondition(action);
+
         if (meshDoc()->mm() != NULL)
         {
             if(classes & FilterPluginInterface::FaceColoring )
@@ -1212,7 +1214,10 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
     {
         meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
-        ret=iFilter->applyFilter(action, *(meshDoc()), mergedenvironment, QCallBack);
+		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
+		ret=iFilter->applyFilter(action, *(meshDoc()), postCondMask,  mergedenvironment, QCallBack);
+		if (postCondMask == MeshModel::MM_UNKNOWN)
+			postCondMask = iFilter->postCondition(action);
 		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
 			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
 
@@ -1302,7 +1307,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
                 if(iFilter->getClass(action) & FilterPluginInterface::MeshColoring )
                     mm->updateDataMask(MeshModel::MM_COLOR);
 
-                if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+                if(postCondMask & MeshModel::MM_CAMERA)
                     mm->updateDataMask(MeshModel::MM_CAMERA);
 
                 if(iFilter->getClass(action) & FilterPluginInterface::Texture )
@@ -1312,7 +1317,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool 
         
         int fclasses =	iFilter->getClass(action);
         //MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
-        int postCondMask = iFilter->postCondition(action);
+
         updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
         meshDoc()->meshDocStateData().clear();
     }
@@ -2460,17 +2465,17 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-    QStringList& suffixList = PM.outFilters;
+	QStringList& suffixList = PM.outFilters;
 
-    //QHash<QString, MeshIOInterface*> allKnownFormats;
-    QFileInfo fi(fileName);
-    //PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
-    //QString defaultExt = "*." + mod->suffixName().toLower();
-    QString defaultExt = "*." + fi.suffix().toLower();
-    if(defaultExt == "*.")
-        defaultExt = "*.ply";
-    if (mod == NULL)
-        return false;
+	//QHash<QString, MeshIOInterface*> allKnownFormats;
+	QFileInfo fi(fileName);
+	//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
+	//QString defaultExt = "*." + mod->suffixName().toLower();
+	QString defaultExt = "*." + fi.suffix().toLower();
+	if(defaultExt == "*.")
+		defaultExt = "*.ply";
+	if (mod == NULL)
+		return false;
 	mod->setMeshModified(false);
     QString laylabel = "Save \"" + mod->label() + "\" Layer";
     QString ss = fi.absoluteFilePath();

@@ -211,7 +211,7 @@ int FilterVoronoiPlugin::getPreConditions(const QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :

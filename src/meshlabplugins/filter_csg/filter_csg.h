@@ -60,7 +60,7 @@ public:
 
     virtual void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    virtual bool applyFilter(const QAction*, MeshDocument &, const RichParameterList &, vcg::CallBackPos *);
+    virtual bool applyFilter(const QAction*, MeshDocument &, unsigned int& postConditionMask, const RichParameterList &, vcg::CallBackPos *);
 
     virtual FilterClass getClass(const QAction *) const { return FilterPluginInterface::FilterClass( FilterPluginInterface::Layer + FilterPluginInterface::Remeshing ); }
     FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
