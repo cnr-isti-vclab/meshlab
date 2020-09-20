@@ -49,12 +49,7 @@
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
 #include <wrap/io_trimesh/alnParser.h>
-
-
-extern "C" {
-#include "jhead.h"
-}
-
+#include "../external/easyexif/exif.h"
 
 using namespace std;
 using namespace vcg;
@@ -2015,12 +2010,34 @@ bool MainWindow::importRaster(const QString& fileImg)
             ///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
             /// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
 			
-            ::ResetJpgfile();
-			FILE * pFile = fopen(qUtf8Printable(fileName), "rb");
-
-            int ret = ::ReadJpegSections (pFile, READ_METADATA);
-            fclose(pFile);
-            if (!ret || (ImageInfo.CCDWidth==0.0f && ImageInfo.FocalLength35mmEquiv==0.0f))
+            // Read the JPEG file into a buffer
+            FILE *fp = fopen(qUtf8Printable(fileName), "rb");
+            if (fp) {
+              QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+              QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+              return false;
+            }
+            fseek(fp, 0, SEEK_END);
+            unsigned long fsize = ftell(fp);
+            rewind(fp);
+            unsigned char *buf = new unsigned char[fsize];
+            if (fread(buf, 1, fsize, fp) != fsize) {
+              QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
+              QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+              delete[] buf;
+              return false;
+            }
+            fclose(fp);
+          
+            // Parse EXIF
+            easyexif::EXIFInfo ImageInfo;
+            int code = ImageInfo.parseFrom(buf, fsize);
+            delete[] buf;
+            if (code) {
+              GLA()->Logf(0,"Warning unable to parse exif for file  %s",qPrintable(fileName) );
+            }            
+            
+            if (code || ImageInfo.FocalLengthIn35mm==0.0f)
             {
                 rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
                 rm->shot.Intrinsics.CenterPx   = Point2m(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
@@ -2028,26 +2045,13 @@ bool MainWindow::importRaster(const QString& fileImg)
                 rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
                 rm->shot.Intrinsics.FocalMm = 50.0f;
             }
-            else if (ImageInfo.CCDWidth!=0)
-            {
-                rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
-                float ratio;
-                if (ImageInfo.Width>ImageInfo.Height)
-                    ratio=(float)ImageInfo.Width/(float)ImageInfo.Height;
-                else
-                    ratio=(float)ImageInfo.Height/(float)ImageInfo.Width;
-                rm->shot.Intrinsics.PixelSizeMm[0]=ImageInfo.CCDWidth/(float)ImageInfo.Width;
-                rm->shot.Intrinsics.PixelSizeMm[1]=ImageInfo.CCDWidth/((float)ImageInfo.Height*ratio);
-                rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
-            }
             else
             {
-                rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
-                float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLength35mmEquiv;
-                rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.Width;
-                rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.Height;
+                rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
+                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
+                float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
+                rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
+                rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
                 rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
             }
 

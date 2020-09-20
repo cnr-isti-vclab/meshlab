@@ -8,7 +8,6 @@ QT += network
 
 #CONFIG += debug_and_release
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
-EXIF_DIR = ../external/jhead-3.04
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
 
@@ -17,8 +16,7 @@ INCLUDEPATH *= \
 	.. \
 	../.. \
 	$$VCGDIR \
-	$$EIGENDIR \
-	$$EXIF_DIR
+	$$EIGENDIR 
 
 !CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 
@@ -79,7 +77,8 @@ SOURCES += \
 	glarea_setting.cpp \
 	rich_parameter_gui/richparameterlistdialog.cpp \
 	rich_parameter_gui/richparameterlistframe.cpp \
-	rich_parameter_gui/richparameterwidgets.cpp
+	rich_parameter_gui/richparameterwidgets.cpp \
+	../external/easyexif/exif.cpp
 
 FORMS += \
 	ui/layerDialog.ui \
@@ -114,15 +113,15 @@ ICON = images/meshlab.icns
 CONFIG += stl
 
 win32-msvc:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc -ljhead \
+	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc \
 	-L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common -lopengl32 -lGLU32
 
 win32-g++:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -ljhead \
+	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc \
 	-L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common -lopengl32 -lGLU32
 
 macx:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -ljhead \
+	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 \
 	$$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 
 macx:QMAKE_POST_LINK += "\
@@ -133,7 +132,7 @@ macx:QMAKE_POST_LINK += "\
 
 linux:LIBS += \
 	-lmeshlab-common -lGLU \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
+	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux
 
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include
