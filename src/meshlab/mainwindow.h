@@ -49,7 +49,9 @@
 #include <QProgressBar>
 #include <QNetworkAccessManager>
 
-#define MAXRECENTFILES 4
+// Note the number of recent files is limited by the number of 
+// shortcuts for quick opening 1..9
+#define MAXRECENTFILES 9
 
 class QAction;
 class QActionGroup;
