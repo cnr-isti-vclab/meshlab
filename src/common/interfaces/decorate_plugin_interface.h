@@ -81,7 +81,7 @@ public:
 	virtual QString decorationInfo(const QAction *a) const { return decorationInfo(ID(a)); }
 
 	// See source file for documentation
-	virtual void initGlobalParameterList(QAction* format, RichParameterList& globalparam);
+	virtual void initGlobalParameterList(const QAction* format, RichParameterList& globalparam);
 
 	virtual bool startDecorate(const QAction *, MeshDocument &, const RichParameterList *, GLArea *) { return false; }
 	virtual bool startDecorate(const QAction *, MeshModel &, const RichParameterList *, GLArea *) { return false; }

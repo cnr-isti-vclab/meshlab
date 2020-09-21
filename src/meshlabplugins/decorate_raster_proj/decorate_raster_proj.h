@@ -118,7 +118,7 @@ public:
 	void  decorateMesh(const QAction  *   , MeshModel    & , const RichParameterList *   , GLArea *   , QPainter * , GLLogStream &  ) {}
 	void  decorateDoc(const QAction  *act, MeshDocument &m, const RichParameterList* par, GLArea *gla, QPainter *p, GLLogStream &  );
 	void  endDecorate(const QAction* act, MeshDocument &m, const RichParameterList *par, GLArea *gla );
-	void  initGlobalParameterList( QAction *act, RichParameterList &par );
+	void  initGlobalParameterList(const QAction *act, RichParameterList &par );
     int   getDecorationClass(const QAction* act ) const;
 };
 

@@ -48,7 +48,7 @@ QString DecorateShadowPlugin::pluginName() const
 	return "DecorateShadow";
 }
 
-void DecorateShadowPlugin::initGlobalParameterList(QAction *action, RichParameterList &parset)
+void DecorateShadowPlugin::initGlobalParameterList(const QAction* action, RichParameterList &parset)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW: {

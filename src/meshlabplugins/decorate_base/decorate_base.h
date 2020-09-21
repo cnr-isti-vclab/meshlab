@@ -120,7 +120,7 @@ public:
   bool startDecorate(const QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
   bool isDecorationApplicable(const QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(const QAction* /*action*/) const;
-  void initGlobalParameterList(QAction *, RichParameterList &/*globalparam*/);
+  void initGlobalParameterList(const QAction *, RichParameterList &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }

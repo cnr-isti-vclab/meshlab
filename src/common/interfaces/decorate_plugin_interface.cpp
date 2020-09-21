@@ -26,7 +26,7 @@
  * At the start up the initGlobalParameterList function is called with an empty RichParameterList (to collect the default values)
  * If a filter wants to save some permanent stuff should set the permanent default values.
  */
-void DecoratePluginInterface::initGlobalParameterList(QAction* /*format*/, RichParameterList& /*globalparam*/)
+void DecoratePluginInterface::initGlobalParameterList(const QAction* /*format*/, RichParameterList& /*globalparam*/)
 {
 }
 

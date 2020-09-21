@@ -199,7 +199,7 @@ int DecorateRasterProjPlugin::getDecorationClass(const QAction *act ) const
 }
 
 
-void DecorateRasterProjPlugin::initGlobalParameterList( QAction *act, RichParameterList &par )
+void DecorateRasterProjPlugin::initGlobalParameterList(const QAction* act, RichParameterList &par )
 {
     switch( ID(act) )
     {
