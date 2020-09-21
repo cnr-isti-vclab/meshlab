@@ -70,8 +70,7 @@ class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>
 // initialize importing parameters
 void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
-	if (formatName.toUpper() == tr("PTX"))
-	{
+	if (formatName.toUpper() == tr("PTX")) {
 		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",
 			"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
 		parlst.addParam(RichBool("pointsonly", true, "Keep only points", "Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
@@ -80,6 +79,9 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 		parlst.addParam(RichBool("pointcull", true, "delete unsampled points", "Deletes unsampled points in the grid that are normally located in [0,0,0]"));
 		parlst.addParam(RichBool("anglecull", true, "Cull faces by angle", "short"));
 		parlst.addParam(RichFloat("angle", 85.0, "Angle limit for face culling", "short"));
+	}
+	if (formatName.toUpper() == tr("STL")) {
+		parlst.addParam(RichBool(stlUnifyParName(), true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 	}
 }
 
@@ -534,11 +536,6 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, Ri
 			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
 		}
 	}
-}
-
-void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParameterList & globalparam)
-{
-	globalparam.addParam(RichBool(stlUnifyParName(), true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 }
 
 //void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)

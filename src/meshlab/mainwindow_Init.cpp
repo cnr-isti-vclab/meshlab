@@ -91,7 +91,7 @@ MainWindow::MainWindow()
 	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
-	mwsettings.updateGlobalParameterSet(currentGlobalParams);
+	mwsettings.updateGlobalParameterList(currentGlobalParams);
 	createActions();
 	createToolBars();
 	createMenus();
@@ -860,8 +860,8 @@ void MainWindow::loadMeshLabSettings()
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
-	MainWindowSetting::initGlobalParameterSet(&defaultGlobalParams);
-	GLArea::initGlobalParameterSet(&defaultGlobalParams);
+	MainWindowSetting::initGlobalParameterList(&defaultGlobalParams);
+	GLArea::initGlobalParameterList(&defaultGlobalParams);
 
 	QSettings settings;
 	QStringList klist = settings.allKeys();
@@ -1179,28 +1179,28 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterSet(RichParameterList* glbset)
+void MainWindowSetting::initGlobalParameterList(RichParameterList* gbllist)
 {
-	glbset->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
-	glbset->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	glbset->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+	gbllist->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+	gbllist->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 //	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		glbset->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
-	glbset->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+		gbllist->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
+	gbllist->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(const RichParameterList& rps)
+void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 {
-	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
-	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
-	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
+	maxgpumem = (std::ptrdiff_t)rpl.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
+	perbatchprimitives = (size_t)rpl.getInt(perBatchPrimitives());
+	minpolygonpersmoothrendering = (size_t)rpl.getInt(minPolygonNumberPerSmoothRendering());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		highprecision = rps.getBool(highPrecisionRendering());
-	maxTextureMemory = (std::ptrdiff_t) rps.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
+		highprecision = rpl.getBool(highPrecisionRendering());
+	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

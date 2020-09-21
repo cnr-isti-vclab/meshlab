@@ -1,6 +1,6 @@
 #include "glarea_setting.h"
 
-void GLAreaSetting::initGlobalParameterSet( RichParameterList * defaultGlobalParamSet)
+void GLAreaSetting::initGlobalParameterList( RichParameterList * defaultGlobalParamSet)
 {
 	defaultGlobalParamSet->addParam(RichColor(backgroundBotColorParam(),QColor(128,128,255),"MeshLab Bottom BackGround Color","MeshLab GLarea's BackGround Color(bottom corner)"));
 	defaultGlobalParamSet->addParam(RichColor(backgroundTopColorParam(),QColor(  0, 0,   0),"MeshLab Top BackGround Color","MeshLab GLarea's BackGround Color(top corner)"));

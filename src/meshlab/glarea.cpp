@@ -1761,9 +1761,9 @@ void GLArea::updateCustomSettingValues( const RichParameterList& rps )
     this->update();
 }
 
-void GLArea::initGlobalParameterSet( RichParameterList * defaultGlobalParamSet)
+void GLArea::initGlobalParameterList( RichParameterList * defaultGlobalParamList)
 {
-    GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
+    GLAreaSetting::initGlobalParameterList(defaultGlobalParamList);
 }
 
 //Don't alter the state of the other elements in the visibility map

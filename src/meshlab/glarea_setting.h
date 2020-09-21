@@ -71,7 +71,7 @@ public:
 
 
 	void updateGlobalParameterSet(const RichParameterList& rps );
-	static void initGlobalParameterSet( RichParameterList * defaultGlobalParamSet);
+	static void initGlobalParameterList( RichParameterList * defaultGlobalParamSet);
 
 	const RichParameterList *currentGlobalParamSet;
 };

@@ -65,8 +65,8 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterSet(RichParameterList* gblset);
-	void updateGlobalParameterSet(const RichParameterList& rps );
+	static void initGlobalParameterList(RichParameterList* gbllist);
+	void updateGlobalParameterList(const RichParameterList& rpl );
 
 	std::ptrdiff_t maxgpumem;
 	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
@@ -284,14 +284,14 @@ private:
 	Note this part should be detached from MainWindow just like the loading plugin part.
 
 	For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values.
-	At the start up the initGlobalParameterSet function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
+	At the start up the initGlobalParameterList function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
 	At the start up the currentGlobalParams is filled with the values saved in the registry.
 	*/
 
 	RichParameterList currentGlobalParams;
 	RichParameterList defaultGlobalParams;
 
-	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
+	QByteArray toolbarState; //toolbar and dockwidgets state
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 

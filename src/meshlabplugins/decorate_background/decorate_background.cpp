@@ -61,7 +61,7 @@ QString DecorateBackgroundPlugin::pluginName() const
     return "DecorateBackGround";
 }
 
-void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
+void DecorateBackgroundPlugin::initGlobalParameterList(QAction *action, RichParameterList &parset)
 {
     switch(ID(action))
     {

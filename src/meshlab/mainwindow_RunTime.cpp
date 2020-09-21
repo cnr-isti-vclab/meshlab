@@ -140,7 +140,7 @@ void MainWindow::updateStdDialog()
 
 void MainWindow::updateCustomSettings()
 {
-    mwsettings.updateGlobalParameterSet(currentGlobalParams);
+    mwsettings.updateGlobalParameterList(currentGlobalParams);
     emit dispatchCustomSettings(currentGlobalParams);
 }
 
@@ -753,7 +753,7 @@ void MainWindow::endEdit()
 	}
 	meshDoc()->meshDocStateData().clear();
 
-    GLA()->endEdit();
+	GLA()->endEdit();
 	updateLayerDialog();
 }
 

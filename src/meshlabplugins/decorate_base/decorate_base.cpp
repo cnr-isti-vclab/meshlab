@@ -1076,7 +1076,7 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
+void DecorateBasePlugin::initGlobalParameterList(QAction *action, RichParameterList &parset)
 {
 
 switch(ID(action))

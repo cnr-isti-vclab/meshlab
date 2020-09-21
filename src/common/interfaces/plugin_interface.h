@@ -60,9 +60,6 @@ public:
 	 */
 	virtual QString pluginName() const = 0;
 
-	// See source file for documentation
-	virtual void initGlobalParameterSet(QAction* /*format*/, RichParameterList& /*globalparam*/);
-
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);
 

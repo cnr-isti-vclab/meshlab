@@ -98,7 +98,6 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					filterAction->setData(QVariant(fileName));
 					actionFilterMap.insert(filterAction->text(), filterAction);
 					stringFilterMap.insert(filterAction->text(), iFilter);
-					iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
 					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic)
 						throw MLException("Missing class for "        +fileName+filterAction->text());
 					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))
@@ -116,7 +115,6 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			{
 				iCommon = iIO;
 				meshIOPlug.push_back(iIO);
-				iIO->initGlobalParameterSet(NULL, defaultGlobal);
 			}
 
 			DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
@@ -127,7 +125,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				foreach(QAction *decoratorAction, iDecorator->actions())
 				{
 					decoratorActionList.push_back(decoratorAction);
-					iDecorator->initGlobalParameterSet(decoratorAction, defaultGlobal);
+					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
 				}
 			}
 

@@ -1225,7 +1225,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 		mw->GLA()->Log(GLLogStream::SYSTEM, "MeshLab System Error: A Decorator Plugin has been expected.");
 	}
 	else {
-		decPlug->initGlobalParameterSet(act,tmpSet);
+		decPlug->initGlobalParameterList(act,tmpSet);
 		if (tmpSet.size() != 0) {
 			const RichParameterList& currSet = mw->currentGlobalPars();
 			RichParameterList defSet = tmpSet;
