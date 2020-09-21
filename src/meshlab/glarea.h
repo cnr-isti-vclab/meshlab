@@ -154,8 +154,8 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    QAction *getLastAppliedFilter()							{return lastFilterRef;}
-    void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
+    const QAction *getLastAppliedFilter() {return lastFilterRef;}
+    void setLastAppliedFilter(const QAction *qa) {lastFilterRef = qa;}
 
     ////RenderMode*  getCurrentRenderMode();
     //RenderMode* getCurrentRenderMode()
@@ -449,7 +449,7 @@ private:
     //shader support
     RenderPluginInterface *iRenderer;
     QAction *currentShader;
-    QAction *lastFilterRef; // reference to last filter applied
+    const QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings
 
     // Editing support

@@ -757,12 +757,6 @@ void MainWindow::endEdit()
 	updateLayerDialog();
 }
 
-void MainWindow::applyLastFilter()
-{
-    if(GLA()==nullptr) return;
-    GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
-}
-
 void MainWindow::showFilterScript()
 {
     if (meshDoc()->filterHistory != nullptr)
@@ -1142,7 +1136,7 @@ from the user defined dialog
 */
 
 
-void MainWindow::executeFilter(QAction *action, RichParameterList &params, bool isPreview)
+void MainWindow::executeFilter(const QAction* action, RichParameterList &params, bool isPreview)
 {
      FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
     qb->show();

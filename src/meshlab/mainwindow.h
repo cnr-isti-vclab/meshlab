@@ -93,7 +93,7 @@ class MainWindow : public QMainWindow, public MainWindowInterface
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, RichParameterList &srcpar, bool isPreview = false);
+	void executeFilter(const QAction *action, RichParameterList &srcpar, bool isPreview = false);
 
 	MainWindow();
 	~MainWindow();
@@ -178,7 +178,6 @@ private slots:
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	void startFilter();
-	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
 	void showTooltip(QAction*);

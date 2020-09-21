@@ -34,7 +34,7 @@ It is used as base class of the MainWindow.
 class MainWindowInterface
 {
 public:
-	virtual void executeFilter(QAction *, RichParameterList &, bool = false) {}
+	virtual void executeFilter(const QAction *, RichParameterList &, bool = false) {}
 	//parexpval is a string map containing the parameter expression values set in the filter's dialog.
 	//These parameter expression values will be evaluated when the filter will start.
 };
