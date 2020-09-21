@@ -30,7 +30,8 @@ set(SOURCES
 	meshlab_settings/meshlabsettingsdialog.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
-	${VCGDIR}/wrap/gui/coordinateframe.cpp)
+	${VCGDIR}/wrap/gui/coordinateframe.cpp
+	${EXTERNAL_DIR}/easyexif/exif.cpp)
 
 set(HEADERS
 	additionalgui.h
@@ -91,7 +92,7 @@ target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
 	meshlab
 	PUBLIC common OpenGL::GLU Qt5::Network
-	PRIVATE external-jhead)
+	)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)
 

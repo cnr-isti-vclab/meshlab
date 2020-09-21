@@ -1,26 +1,6 @@
 # Copyright 2019 Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-# jhead - required
-message(STATUS "- jhead - using bundled source")
-set(JHEAD_DIR ${EXTERNAL_DIR}/jhead-3.04)
-add_library(
-    external-jhead STATIC
-    "${JHEAD_DIR}/jpgfile.c"
-    "${JHEAD_DIR}/jpgqguess.c"
-    "${JHEAD_DIR}/jhead.c"
-    "${JHEAD_DIR}/paths.c"
-    "${JHEAD_DIR}/exif.c"
-    "${JHEAD_DIR}/iptc.c"
-    "${JHEAD_DIR}/gpsinfo.c"
-    "${JHEAD_DIR}/makernote.c")
-if(WIN32)
-    target_sources(external-jhead PRIVATE "${JHEAD_DIR}/myglob.c")
-endif()
-target_compile_definitions(external-jhead PRIVATE main=jhead_main)
-target_include_directories(external-jhead PUBLIC ${JHEAD_DIR})
-set_property(TARGET external-jhead PROPERTY FOLDER External)
-
 # GLEW - required
 set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
 if(ALLOW_SYSTEM_GLEW AND TARGET GLEW::GLEW)
