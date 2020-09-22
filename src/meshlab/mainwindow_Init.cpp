@@ -1020,7 +1020,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 		UID = QUuid::createUuid().toString();
 		settings.setValue("UID", UID);
 	}
-	QString BaseCommand("/~cignoni/meshlab_latest.php");
+	QString baseCommand("/~cignoni/meshlab_latest.php");
 
 	#ifdef Q_OS_WIN
 		QString OS = "Win";
@@ -1029,7 +1029,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	#else
 		QString OS = "Lin";
 	#endif
-	QString message = BaseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+	QString message = baseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
 
 	QNetworkAccessManager stats;
 	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
@@ -1045,16 +1045,20 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
 
 	bool dontRemindMeAboutUpgradeVal = false;
+	bool checkForMonthlyAndBetasVal = false;
 	const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
-
 	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
 
 	// Check if the user specified not to be reminded to upgrade
+	if (settings.contains(dontRemindMeAboutUpgradeVar))
+		dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
 	if (!verboseCheckingFlag) {
-		if (settings.contains(dontRemindMeAboutUpgradeVar))
-			dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
 		if (dontRemindMeAboutUpgradeVal)
 			return;
+	}
+	
+	if (settings.contains(checkForMonthlyAndBetasVar)){
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();;
 	}
 
 	QByteArray ddata = reply->readAll();
@@ -1073,6 +1077,12 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 		if (splitOnlineVersion[1].toInt() > splitThisVersion[1].toInt()) {
 			newVersionAvailable = true;
 		}
+		else if (splitOnlineVersion[1].toInt() == splitThisVersion[1].toInt() && splitOnlineVersion.size() > 2) {
+			//case of beta version or very important fixes
+			if (splitThisVersion.size() == 2 || (splitThisVersion.size() > 2 && splitOnlineVersion[2] > splitThisVersion[2])){
+				newVersionAvailable = true;
+			}
+		}
 	}
 
 	// Set up a message box for the user
@@ -1082,11 +1092,25 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	QCheckBox dontShowCheckBox("Don't show this message again.");
 	dontShowCheckBox.blockSignals(true);
 	msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+	dontShowCheckBox.setChecked(dontRemindMeAboutUpgradeVal);
 	QCheckBox checkMonthlysCheckBox("Check for Monthly and Beta versions.");
 	checkMonthlysCheckBox.blockSignals(true);
 	msgBox.addButton(&checkMonthlysCheckBox, QMessageBox::ResetRole);
+	checkMonthlysCheckBox.setChecked(checkForMonthlyAndBetasVal);
 
 	if (newVersionAvailable){
+		QString message =
+				"<center>You are using an old version of MeshLab.<br><br>"
+				"Please, upgrade to the new version!<br><br>";
+		if (checkForMonthlyAndBetasVal){
+			message +=
+					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>";
+		}
+		else {
+			message +=
+					"<big> <a href=\"https://www.meshlab.net/#download\">Download</a></big></center>";
+		}
+		
 		msgBox.setText(
 					"<center>You are using an old version of MeshLab.<br><br>"
 					"Please, upgrade to the new version!<br><br>"
@@ -1104,8 +1128,14 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 			settings.setValue(dontRemindMeAboutUpgradeVar, true);
 		else if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Unchecked)
 			settings.setValue(dontRemindMeAboutUpgradeVar, false);
-		if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Checked)
+		if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Checked) {
 			settings.setValue(checkForMonthlyAndBetasVar, true);
+			if (!checkForMonthlyAndBetasVal) {
+				//the user changed the states: he now wants to check for betas
+				//need to check again with properly set 
+				checkForUpdates(false);
+			}
+		}
 		else if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Unchecked)
 			settings.setValue(checkForMonthlyAndBetasVar, false);
 	}
