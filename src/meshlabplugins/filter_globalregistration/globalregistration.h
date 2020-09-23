@@ -24,13 +24,13 @@
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class GlobalRegistrationPlugin : public QObject, public MeshFilterInterface
+class GlobalRegistrationPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum { FP_GLOBAL_REGISTRATION  } ;
@@ -41,11 +41,11 @@ public:
 
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;
-    void initParameterSet(QAction *, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD; }
-    FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOORD; }
+    FilterClass getClass(const QAction* a) const;
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 

@@ -26,14 +26,14 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include "alignset.h"
 
-class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
+class FilterMutualInfoPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 
@@ -45,11 +45,11 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
-	FILTER_ARITY filterArity(QAction *) const;
-	void initParameterSet(QAction *, MeshDocument &, RichParameterList & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const;
+	FilterClass getClass(const QAction* a) const;
+	FILTER_ARITY filterArity(const QAction*) const;
+	void initParameterList(const QAction*, MeshDocument &, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(const QAction*) const;
 
 private:
 	AlignSet align;

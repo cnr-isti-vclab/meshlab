@@ -24,7 +24,6 @@
 #include <common/GLExtensionsManager.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
-#include <common/interfaces.h>
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
@@ -38,6 +37,8 @@
 
 #include <QGLFormat>
 #include <QFileInfo>
+#include <QElapsedTimer>
+#include <QSettings>
 
 
 class FilterData
@@ -89,7 +90,7 @@ public:
     void dumpPluginInfoWiki(FILE *fp)
     {
         if(!fp) return;
-        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
             foreach(QAction *filterAction, iFilter->actions())
             fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
     }
@@ -102,7 +103,7 @@ public:
         fprintf(fp,"/*! \\mainpage MeshLab Filter Documentation\n");
         //fprintf(fp,"\\AtBeginDocument{\\setcounter{tocdepth}{1}}");
 
-        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
         {
             foreach(QAction *filterAction, iFilter->actions())
             {
@@ -138,7 +139,7 @@ public:
 
         // HashTable storing all supported formats together with
         // the (1-based) index  of first plugin which is able to open it
-        QHash<QString, MeshIOInterface*> allKnownFormats;
+        QHash<QString, IOPluginInterface*> allKnownFormats;
 
         //PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 
@@ -150,7 +151,7 @@ public:
         QString extension = fi.suffix();
         qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
-        MeshIOInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+        IOPluginInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -215,7 +216,7 @@ public:
         QString extension = fi.suffix();
 
         // retrieving corresponding IO plugin
-        MeshIOInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
+        IOPluginInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -245,7 +246,7 @@ public:
         return true;
     }
 
-    bool loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
+    bool loadMesh(const QString& fileName, IOPluginInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
     {
         if (mm == NULL)
             return false;
@@ -380,7 +381,7 @@ public:
             mm->Clear();
         QFileInfo fi(fullPath);
         QString extension = fi.suffix();
-        MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+        IOPluginInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 
         if(pCurrentIOPlugin != NULL)
         {
@@ -585,7 +586,7 @@ public:
                 return false;
             }
 
-            MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+            FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
             iFilter->setLog(&log);
             int req = iFilter->getRequirements(action);
             if (mm != NULL)
@@ -596,7 +597,7 @@ public:
             //So we have to ask to the filter the default values for all the parameters and integrate them with the parameters' values
             //defined in the script file.
             RichParameterList required;
-            iFilter->initParameterSet(action,meshDocument,required);
+            iFilter->initParameterList(action,meshDocument,required);
             RichParameterList &parameterSet = pair.second;
 
             //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.
@@ -644,7 +645,7 @@ public:
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-                if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+                if (iFilter->filterArity(action) == FilterPluginInterface::SINGLE_MESH)
                 {
                     MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDocument.mm());
                     if ((pm != MLRenderingData::PR_ARITY) && (meshDocument.mm() != NULL))
@@ -681,7 +682,8 @@ public:
                 }
             }
             meshDocument.setBusy(true);
-            ret = iFilter->applyFilter( action, meshDocument, pair.second, filterCallBack);
+            unsigned int postConditionMask = MeshModel::MM_UNKNOWN;
+            ret = iFilter->applyFilter( action, meshDocument, postConditionMask, pair.second, filterCallBack);
             meshDocument.setBusy(false);
             if (shared != NULL)
                 delete iFilter->glContext;

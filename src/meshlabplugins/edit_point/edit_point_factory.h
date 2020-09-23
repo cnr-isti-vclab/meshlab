@@ -26,13 +26,13 @@
 #define EditPointFactoryPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class PointEditFactory : public QObject, public MeshEditInterfaceFactory
+class PointEditFactory : public QObject, public EditPluginInterfaceFactory
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_EDIT_INTERFACE_FACTORY_IID)
-	Q_INTERFACES(MeshEditInterfaceFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
+	Q_INTERFACES(EditPluginInterfaceFactory)
 
 public:
         PointEditFactory();
@@ -42,10 +42,10 @@ public:
 	virtual QList<QAction *> actions() const;
 	
 	//get the edit tool for the given action
-	virtual MeshEditInterface* getMeshEditInterface(QAction *);
+	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
     
 	//get the description for the given action
-        virtual QString getEditToolDescription(QAction *);
+		virtual QString getEditToolDescription(const QAction*);
 	
 private:
 	QList <QAction *> actionList;

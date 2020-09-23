@@ -28,18 +28,17 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
 //FILE _iob[] = { *stdin, *stdout, *stderr };
 //extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
 
-class FilterCSG : public QObject, public MeshFilterInterface
+class FilterCSG : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
     enum {
         CSG_OPERATION_INTERSECTION  = 0,
@@ -59,14 +58,12 @@ public:
 
     virtual bool autoDialog(QAction *) { return true; }
 
-    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
-    virtual void initParameterSet(QAction *, MeshModel &, RichParameterList &) { assert(0); }
+    virtual void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    virtual bool applyFilter(QAction *, MeshDocument &, const RichParameterList &, vcg::CallBackPos *);
-    virtual bool applyFilter(QAction *, MeshModel &, const RichParameterList &, vcg::CallBackPos *) { assert(0); return false; }
+    virtual bool applyFilter(const QAction*, MeshDocument &, unsigned int& postConditionMask, const RichParameterList &, vcg::CallBackPos *);
 
-    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::FilterClass( MeshFilterInterface::Layer + MeshFilterInterface::Remeshing ); }
-    FILTER_ARITY filterArity(QAction*) const {return FIXED;}
+    virtual FilterClass getClass(const QAction *) const { return FilterPluginInterface::FilterClass( FilterPluginInterface::Layer + FilterPluginInterface::Remeshing ); }
+    FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
 };
 
 

@@ -165,7 +165,7 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
     return description;
 }
 
-void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, RichParameterList &par)
 {
     switch(ID(filter))
     {
@@ -179,7 +179,7 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     }
 }
 
-void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, MeshDocument &md, RichParameterList &par)
 {
     bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
 
@@ -255,9 +255,9 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     return;
 }
 
-bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos* cb)
+bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos* cb)
 {
-  if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
+  if(this->getClass(filter) == FilterPluginInterface::MeshCreation)
        md.addNewMesh("",this->filterName(ID(filter)));
   switch(ID(filter))
     {
@@ -338,22 +338,22 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, const RichPar
     return false;
 }
 
-MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
+FilterPluginInterface::FilterClass FilterFractal::getClass(const QAction* filter) const
 {
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
-        return MeshFilterInterface::MeshCreation;
+        return FilterPluginInterface::MeshCreation;
         break;
     case FP_FRACTAL_MESH:
     case FP_CRATERS:
-        return MeshFilterInterface::Smoothing;
+        return FilterPluginInterface::Smoothing;
         break;
     default: assert(0);
-        return MeshFilterInterface::Generic;
+        return FilterPluginInterface::Generic;
     }
 }
 
-int FilterFractal::getRequirements(QAction *filter)
+int FilterFractal::getRequirements(const QAction *filter)
 {
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -368,7 +368,7 @@ int FilterFractal::getRequirements(QAction *filter)
 	return MeshModel::MM_NONE;
 }
 
-int FilterFractal::postCondition(QAction *filter) const
+int FilterFractal::postCondition(const QAction *filter) const
 {
     switch(ID(filter))
     {
@@ -382,18 +382,18 @@ int FilterFractal::postCondition(QAction *filter) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterFractal::filterArity( QAction* act ) const
+FilterPluginInterface::FILTER_ARITY FilterFractal::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {
     case FP_FRACTAL_MESH:
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case CR_FRACTAL_TERRAIN:
-        return MeshFilterInterface::NONE;
+        return FilterPluginInterface::NONE;
     case FP_CRATERS:
-        return MeshFilterInterface::VARIABLE;
+        return FilterPluginInterface::VARIABLE;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 // ----------------------------------------------------------------------

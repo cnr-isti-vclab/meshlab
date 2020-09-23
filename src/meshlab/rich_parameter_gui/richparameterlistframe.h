@@ -24,8 +24,6 @@
 #ifndef RICHPARAMETERLISTFRAME_H
 #define RICHPARAMETERLISTFRAME_H
 
-#include "../../common/interfaces.h"
-
 #include "richparameterwidgets.h"
 
 #include<QCheckBox>

@@ -25,12 +25,12 @@
 #define SAMPLEEDITPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class SampleEditPlugin : public QObject, public MeshEditInterface
+class SampleEditPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 		
 public:
     SampleEditPlugin();

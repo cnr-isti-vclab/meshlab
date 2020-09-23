@@ -26,6 +26,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJSEngine>
+#include <QSettings>
+#include <QApplication>
+#include <QDir>
 #include <wrap/io_trimesh/export_ply.h>
 #include "miniz.h"
 
@@ -64,18 +67,18 @@ QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(QAction *a)
+FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
-		return MeshFilterInterface::Smoothing;
+		return FilterPluginInterface::Smoothing;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(QAction* a) const
+FilterPluginInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
@@ -85,17 +88,17 @@ MeshFilterInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(QAction* a)
 	}
 }
 
-int FilterSketchFabPlugin::getPreConditions(QAction*) const
+int FilterSketchFabPlugin::getPreConditions(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }
 
-int FilterSketchFabPlugin::postCondition(QAction*) const
+int FilterSketchFabPlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichParameterList& parlst)
+void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&, RichParameterList& parlst)
 {
 	QSettings settings;
 	QVariant v = settings.value("SketchFab Code");
@@ -122,7 +125,7 @@ void FilterSketchFabPlugin::initParameterSet(QAction* action, MeshModel&, RichPa
 	}
 }
 
-bool FilterSketchFabPlugin::applyFilter(QAction * action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb)
+bool FilterSketchFabPlugin::applyFilter(const QAction * action, MeshDocument& md, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos* cb)
 {
 	switch (ID(action)) {
 	case FP_SKETCHFAB:
@@ -191,8 +194,8 @@ bool FilterSketchFabPlugin::sketchfab(
 		return false;
 	}
 
-	this->Log("Upload Completed; you can access the uploaded model at the following URL:\n");
-	this->Log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
+	this->log("Upload Completed; you can access the uploaded model at the following URL:\n");
+	this->log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
 	return true;
 }
 

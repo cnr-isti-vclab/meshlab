@@ -112,7 +112,7 @@ QString QhullPlugin::pluginName() const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
- QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
+ QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
     {
@@ -120,9 +120,9 @@ QString QhullPlugin::pluginName() const
         case FP_QHULL_DELAUNAY_TRIANGULATION :
         case FP_QHULL_VORONOI_FILTERING :
         case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            return FilterClass (MeshFilterInterface::Remeshing) ;
+            return FilterClass (FilterPluginInterface::Remeshing) ;
         case FP_QHULL_VISIBLE_POINTS:
-            return FilterClass (MeshFilterInterface::Selection + MeshFilterInterface::PointSet);
+            return FilterClass (FilterPluginInterface::Selection + FilterPluginInterface::PointSet);
         default : assert(0);
     }
   return FilterClass(0);
@@ -135,7 +135,7 @@ QString QhullPlugin::pluginName() const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
+void QhullPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))	 {
         case FP_QHULL_CONVEX_HULL :
@@ -198,7 +198,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterLi
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos */* cb*/)
+bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos */* cb*/)
 {
     switch(ID(filter))
     {
@@ -272,7 +272,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParam
                     }
 
                     assert(pm.cm.fn == ridgeCount);
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
                     //m.cm.Clear();
 
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -309,7 +309,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParam
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
                     return true;
                 }
@@ -359,8 +359,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParam
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-                    Log("Alpha = %f ",alpha);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Alpha = %f ",alpha);
                     //m.cm.Clear();
 
                     return true;
@@ -411,7 +411,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParam
                 if(!triangVP)
                     md.delMesh(&pm2);
                 if(result>=0){
-                    Log("Selected %i visible points", result);
+                    log("Selected %i visible points", result);
                     return true;
                 }
                 else return false;

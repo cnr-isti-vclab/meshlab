@@ -26,13 +26,13 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class ExtraSampleDynPlugin : public QObject, public MeshFilterInterface
+class ExtraSampleDynPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum { FP_VERTEX_COLOR_NOISE  } ;
@@ -42,11 +42,11 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOLOR;};
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(QAction *);	
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
+    virtual bool applyFilter(const QAction *filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual FilterClass getClass(const QAction*) const;
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

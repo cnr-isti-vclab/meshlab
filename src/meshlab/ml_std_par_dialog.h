@@ -26,6 +26,7 @@
 
 #include<QDockWidget>
 #include "rich_parameter_gui/richparameterlistframe.h"
+#include "../common/interfaces/filter_plugin_interface.h"
 
 class MainWindow;
 class MeshlabStdDialog : public QDockWidget
@@ -40,7 +41,7 @@ public:
     void createFrame();
     void loadFrameContent(MeshDocument *mdPt=0);
 
-    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
+    bool showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
     bool isPreviewable();
 
 public slots:
@@ -67,7 +68,7 @@ public:
     uint curmask;
     MeshModel *curModel;
     MeshDocument * curMeshDoc;
-    MeshFilterInterface *curmfi;
+    FilterPluginInterface *curmfi;
     MainWindow *curmwi;
     QWidget * curgla;
     RichParameterList curParSet;

@@ -61,17 +61,17 @@ QString GlobalRegistrationPlugin::filterName(FilterIDType filterId) const
     return QString("Unknown Filter");
 }
 
-GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(QAction *a)
+GlobalRegistrationPlugin::FilterClass GlobalRegistrationPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
     {
-        case FP_GLOBAL_REGISTRATION :  return MeshFilterInterface::PointSet;
+        case FP_GLOBAL_REGISTRATION :  return FilterPluginInterface::PointSet;
         default : assert(0);
     }
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
-void GlobalRegistrationPlugin::initParameterSet(QAction *action,MeshDocument &md, RichParameterList & parlst)
+void GlobalRegistrationPlugin::initParameterList(const QAction *action,MeshDocument &md, RichParameterList & parlst)
 {
 
      switch(ID(action))	 {
@@ -166,10 +166,11 @@ float align ( CMeshO* refMesh, CMeshO* trgMesh,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
-                                           MeshDocument &/*md*/,
-                                           const RichParameterList & par,
-                                           vcg::CallBackPos */*cb*/)
+bool GlobalRegistrationPlugin::applyFilter(const QAction* /*filter*/,
+                                           MeshDocument& /*md*/,
+                                           unsigned int& /*postConditionMask*/,
+                                           const RichParameterList& par,
+                                           vcg::CallBackPos* /*cb*/)
 {
 
     MeshModel *mmref = par.getMesh("refMesh");
@@ -195,7 +196,7 @@ bool GlobalRegistrationPlugin::applyFilter(QAction */*filter*/,
     }
 
     // run
-    Log("Final LCP = %f", score);
+    log("Final LCP = %f", score);
     v.mesh->Tr.FromEigenMatrix(mat);
 
     return true;

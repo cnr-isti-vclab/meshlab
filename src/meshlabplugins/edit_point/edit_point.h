@@ -25,12 +25,12 @@
 #define EDITPOINTPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class EditPointPlugin : public QObject, public MeshEditInterface
+class EditPointPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 		
 public:
     enum {SELECT_DEFAULT_MODE, SELECT_FITTING_PLANE_MODE};

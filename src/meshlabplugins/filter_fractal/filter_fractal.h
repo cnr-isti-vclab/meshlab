@@ -28,14 +28,14 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include "craters_utils.h"
 
-class FilterFractal : public QObject, public MeshFilterInterface
+class FilterFractal : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     FilterFractal();
@@ -45,17 +45,16 @@ public:
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;
 
-    int getRequirements(QAction *);
-    void initParameterSet(QAction*, MeshModel&, RichParameterList &){assert(0);}
-    void initParameterSet(QAction *, MeshDocument &, RichParameterList &);
+    int getRequirements(const QAction*);
+    void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    bool applyFilter (QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
+    bool applyFilter (const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
 
-    int postCondition(QAction *action) const;
-    FilterClass getClass(QAction *);
-    FILTER_ARITY filterArity(QAction* act) const;
+    int postCondition(const QAction *action) const;
+    FilterClass getClass(const QAction*) const;
+    FILTER_ARITY filterArity(const QAction* act) const;
 private:
-    void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterList &);
+    void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};

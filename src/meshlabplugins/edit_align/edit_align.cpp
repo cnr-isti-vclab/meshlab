@@ -37,6 +37,8 @@ $Log: meshedit.cpp,v $
 #include <vcg/space/point_matching.h>
 #include <vcg/complex/algorithms/point_matching_scale.h>
 
+#include <QMessageBox>
+
 using namespace vcg;
 
 //todo: remove these orrible defs from here

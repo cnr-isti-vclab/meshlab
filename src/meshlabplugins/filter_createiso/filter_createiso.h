@@ -33,14 +33,14 @@ Added the new sample filter plugin that removes border faces
 #define FILTERCREATEISO_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
-class FilterCreateIso : public QObject, public MeshFilterInterface
+class FilterCreateIso : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     /* naming convention :
@@ -59,12 +59,12 @@ public:
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual FilterClass getClass(QAction *);
-    virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual FilterClass getClass(const QAction*) const;
+    virtual int getRequirements(const QAction*);
+    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FILTER_ARITY filterArity(QAction*) const {return NONE;}
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(const QAction*) const {return NONE;}
 
 };
 

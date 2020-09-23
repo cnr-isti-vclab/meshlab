@@ -29,13 +29,13 @@
 #include <diamond_sampler.h>
 #include <diam_parametrization.h>
 #include <stat_remeshing.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterIsoParametrization : public QObject, public MeshFilterInterface
+class FilterIsoParametrization : public QObject, public FilterPluginInterface
 {
   Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-  Q_INTERFACES(MeshFilterInterface)
+  MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(FilterPluginInterface)
   
   public:
     enum {ISOP_PARAM,
@@ -48,17 +48,17 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
   ~FilterIsoParametrization();
   
   QString pluginName() const;
-  virtual FilterClass getClass(QAction *);
+  virtual FilterClass getClass(const QAction*) const;
   virtual QString filterName(FilterIDType filter) const;
   virtual QString filterInfo(FilterIDType filter) const;
   
-  virtual int getRequirements(QAction *);
+  virtual int getRequirements(const QAction*);
   
-  virtual void initParameterSet(QAction *,MeshDocument&, RichParameterList & /*parent*/);
-  virtual bool applyFilter(QAction *filter, MeshDocument&, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-  int postCondition(QAction* filter) const;
+  virtual void initParameterList(const QAction*, MeshDocument&, RichParameterList & /*parent*/);
+  virtual bool applyFilter(const QAction* filter, MeshDocument&, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+  int postCondition(const QAction* filter) const;
   void PrintStats(CMeshO *mesh);
-  FILTER_ARITY filterArity(QAction*) const;
+  FILTER_ARITY filterArity(const QAction*) const;
   
 };
 #endif

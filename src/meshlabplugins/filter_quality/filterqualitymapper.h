@@ -32,7 +32,7 @@ FIRST RELEASE
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 #include "../edit_quality/common/transferfunction.h"
 #include <vcg/complex/algorithms/stat.h> // for ComputePerVertexQualityMinMax
@@ -55,11 +55,11 @@ public:
 };
 
 
-class QualityMapperFilter : public QObject, public MeshFilterInterface
+class QualityMapperFilter : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 private:
     Frange _meshMinMaxQuality;
@@ -72,12 +72,12 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    int getPreConditions(QAction *) const;
-    int postCondition( QAction* ) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(QAction *);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    int getPreConditions(const QAction *) const;
+    int postCondition(const QAction* ) const;
+    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual FilterClass getClass(const QAction*) const;
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

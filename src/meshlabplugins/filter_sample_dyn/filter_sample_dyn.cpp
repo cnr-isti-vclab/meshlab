@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/interfaces.h>
 #include <vcg/math/perlin_noise.h>
 #include <wrap/qt/col_qt_convert.h>
 
@@ -72,7 +71,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // In this case this sample belong to the class of filters that change the vertex colors
- MeshFilterInterface::FilterClass ExtraSampleDynPlugin::getClass(QAction *) { return MeshFilterInterface::VertexColoring; }
+ FilterPluginInterface::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const { return FilterPluginInterface::VertexColoring; }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
@@ -93,7 +92,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // when the user press apply the current stored state is updated. 
 // when the user press close the mesh state is restored to the one before the startup of the filter.
 
-void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterList & parlst)
+void ExtraSampleDynPlugin::initParameterList(const QAction *action,MeshModel &/*m*/, RichParameterList & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
@@ -119,7 +118,7 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *)
+bool ExtraSampleDynPlugin::applyFilter(const QAction *, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *)
 {
     MeshModel &m=*(md.mm());
     const Color4b baseColor = par.getColor4b("baseColor");

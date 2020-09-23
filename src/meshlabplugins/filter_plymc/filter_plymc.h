@@ -24,13 +24,13 @@
 #ifndef _FILTER_PLYMC_H_
 #define _FILTER_PLYMC_H_
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class PlyMCPlugin : public QObject, public MeshFilterInterface
+class PlyMCPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum { 
@@ -43,11 +43,11 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(QAction *a);
-    MeshFilterInterface::FILTER_ARITY filterArity(QAction * filter) const;
-	int postCondition(QAction *filter) const;
+    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    FilterClass getClass(const QAction* a) const;
+    FilterPluginInterface::FILTER_ARITY filterArity(const QAction* filter) const;
+    int postCondition(const QAction *filter) const;
 };
 
 #endif

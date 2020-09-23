@@ -34,14 +34,14 @@ FIRST RELEASE
 #include <QAction>
 #include <QList>
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include "qualitymapperdialog.h"
 
 //This class defines the plugin interface
-class QualityMapperPlugin : public QObject, public MeshEditInterface
+class QualityMapperPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+		Q_INTERFACES(EditPluginInterface)
 
 private:
 	QualityMapperDialog *_qualityMapperDialog;

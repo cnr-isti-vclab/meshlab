@@ -27,14 +27,13 @@
 
 
 #include <QObject>
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include <meshlabplugins/io_x3d/io_x3d.h>
 
-class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInterface{
+class FilterSSynth : public QObject,public IOPluginInterface, public FilterPluginInterface{
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface MeshIOInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface IOPluginInterface)
 public:
     enum {CR_SSYNTH} ;
 
@@ -43,14 +42,14 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction* /*filter*/,MeshModel &,RichParameterList &){};
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
-    virtual FilterClass getClass(QAction* filter);
+    virtual int getRequirements(const QAction*);
+    virtual void initParameterList(const QAction* /*filter*/,MeshModel &,RichParameterList &){};
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+    virtual FilterClass getClass(const QAction* filter) const;
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
     static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
-    virtual int postCondition(QAction* filter) const;
+    virtual int postCondition(const QAction* filter) const;
     QList<Format> importFormats() const;
     QList<Format> exportFormats() const;
 
@@ -58,7 +57,7 @@ public:
     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
     bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
     bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
-    MeshFilterInterface::FILTER_ARITY filterArity(QAction *) const {return NONE;}
+    FilterPluginInterface::FILTER_ARITY filterArity(const QAction *) const {return NONE;}
 private:
     QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
     QString GetTemplate(int sphereres);

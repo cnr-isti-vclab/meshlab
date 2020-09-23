@@ -79,16 +79,16 @@ QString FilterCreateIso::pluginName() const
   return QString("error!");
 }
 
- FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
+ FilterCreateIso::FilterClass FilterCreateIso::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
-    case FP_CREATEISO : return MeshFilterInterface::MeshCreation;
-    default					  : return MeshFilterInterface::Generic;
+    case FP_CREATEISO : return FilterPluginInterface::MeshCreation;
+    default					  : return FilterPluginInterface::Generic;
   }
 }
 
- int FilterCreateIso::getRequirements(QAction *action)
+ int FilterCreateIso::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {
@@ -98,7 +98,7 @@ QString FilterCreateIso::pluginName() const
   return 0;
 }
 
- bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
+ bool FilterCreateIso::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
  {
    md.addNewMesh("",this->filterName(ID(filter)));
    MeshModel &m=*(md.mm());
@@ -126,7 +126,7 @@ QString FilterCreateIso::pluginName() const
    }
    return true;
  }
- void FilterCreateIso::initParameterSet(QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
+ void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
 {
     pair<float,float> qualityRange;
   switch(ID(action))

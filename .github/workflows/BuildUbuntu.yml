@@ -16,6 +16,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
+        version: '5.15.0'
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
@@ -51,36 +52,6 @@ jobs:
       with:
         name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-
-  ubuntu_build_snap:
-    name: Build MeshLab (Ubuntu - Snap)
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install dependencies
-      run: |
-        #needed for some reason...
-        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-        sudo apt update
-        sudo apt-get install -y snapcraft
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab Snap
-      run: |
-        snapcraft
-    - name: Rename Snap
-      run: |
-        mv ./meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
-    - name: Upload Meshlab Snap
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_linux_snap
-        path: MeshLab${{steps.envs.outputs.date}}-linux.snap
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)

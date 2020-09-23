@@ -84,7 +84,7 @@ QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
 }
 
 
-int FilterImgPatchParamPlugin::getRequirements( QAction *act )
+int FilterImgPatchParamPlugin::getRequirements(const QAction *act )
 {
     switch( ID(act) )
     {
@@ -97,7 +97,7 @@ int FilterImgPatchParamPlugin::getRequirements( QAction *act )
 }
 
 
-MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *act )
+FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
 {
     switch( ID(act) )
     {
@@ -105,7 +105,7 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
     case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
     case FP_RASTER_VERT_COVERAGE:
     case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
-    default:  assert(0); return MeshFilterInterface::Generic;
+    default:  assert(0); return FilterPluginInterface::Generic;
     }
 }
 
@@ -125,7 +125,7 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
 //}
 
 
-void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
+void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
     MeshDocument &/*md*/,
     RichParameterList &par )
 {
@@ -191,10 +191,12 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
 }
 
 
-bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
-    MeshDocument &md,
-    const RichParameterList &par,
-    vcg::CallBackPos * /*cb*/ )
+bool FilterImgPatchParamPlugin::applyFilter(
+        const QAction *act,
+        MeshDocument &md,
+        unsigned int& /*postConditionMask*/,
+        const RichParameterList &par,
+        vcg::CallBackPos * /*cb*/ )
 {
 
     
@@ -303,7 +305,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                     painter.paint( patches );
                     if( par.getBool("colorCorrection") )
                         painter.rectifyColor( patches, par.getInt("colorCorrectionFilterSize") );
-                    Log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
+                    log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
 
                     QImage tex = painter.getTexture();
                     if( tex.save(texName) )
@@ -916,14 +918,14 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     if( par.getBool("useAlphaWeight") )
         weightMask |= VisibleSet::W_IMG_ALPHA;
     VisibleSet faceVis( *m_Context,glContext,meshid, mesh, rasterList, weightMask );
-    Log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
+    log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Boundary optimization: the goal is to produce more regular boundaries between surface regions
     // associated to different reference images.
     t.start();
     boundaryOptimization( mesh, faceVis, true );
-    Log( "BOUNDARY OPTIMIZATION: %.3f sec.", 0.001f*t.elapsed() );
+    log( "BOUNDARY OPTIMIZATION: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Incorporates patches compounds of only one triangles to one of their neighbours.
@@ -931,8 +933,8 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     {
         t.start();
         int triCleaned = cleanIsolatedTriangles( mesh, faceVis );
-        Log( "CLEANING ISOLATED TRIANGLES: %.3f sec.", 0.001f*t.elapsed() );
-        Log( "  * %i triangles cleaned.", triCleaned );
+        log( "CLEANING ISOLATED TRIANGLES: %.3f sec.", 0.001f*t.elapsed() );
+        log( "  * %i triangles cleaned.", triCleaned );
     }
 
 
@@ -940,8 +942,8 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     t.start();
     float oldArea = computeTotalPatchArea( patches );
     int nbPatches = extractPatches( patches, nullPatches, mesh, faceVis, rasterList );
-    Log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
-    Log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
+    log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
+    log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
 
 
     // Extends each patch so as to include faces that belong to the other side of its boundary.
@@ -950,7 +952,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
             constructPatchBoundary( *p, faceVis );
-    Log( "PATCH EXTENSION: %.3f sec.", 0.001f*t.elapsed() );
+    log( "PATCH EXTENSION: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Compute the UV coordinates of all patches by projecting them onto their reference images.
@@ -959,7 +961,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         computePatchUV( mesh, rp.key(), rp.value() );
-    Log( "PATCHES UV COMPUTATION: %.3f sec.", 0.001f*t.elapsed() );
+    log( "PATCHES UV COMPUTATION: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Merge patches so as to reduce the occupied texture area when their bounding boxes overlap.
@@ -967,9 +969,9 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         mergeOverlappingPatches( *rp );
-    Log( "PATCH MERGING: %.3f sec.", 0.001f*t.elapsed() );
-    Log( "  * Area reduction: %.1f%%.", 100.0f*computeTotalPatchArea(patches)/oldArea );
-    Log( "  * Patches number reduced from %i to %i.", nbPatches, computePatchCount(patches) );
+    log( "PATCH MERGING: %.3f sec.", 0.001f*t.elapsed() );
+    log( "  * Area reduction: %.1f%%.", 100.0f*computeTotalPatchArea(patches)/oldArea );
+    log( "  * Patches number reduced from %i to %i.", nbPatches, computePatchCount(patches) );
 
 
     // Patches' bounding boxes are packed in texture space. After this operation, boxes are still defined
@@ -977,7 +979,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     // space, ranging from [0,0] to [1,1].
     t.start();
     patchPacking( patches, par.getInt("textureGutter"), par.getBool("stretchingAllowed") );
-    Log( "PATCH TEXTURE PACKING: %.3f sec.", 0.001f*t.elapsed() );
+    log( "PATCH TEXTURE PACKING: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Clear the UV coordinates for patches that are not visible in any image.

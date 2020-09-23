@@ -32,6 +32,7 @@ $Log: stdpardialog.cpp,v $
 #include <QActionGroup>
 #include <QDebug>
 #include <QFontMetrics>
+#include <QSettings>
 
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
@@ -893,7 +894,7 @@ void LayerDialog::updateDecoratorParsView()
 	ui->decParsTree->clear();
 	for(int ii = 0; ii < decList.size();++ii)
 	{
-		MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(decList[ii]->parent());
+		DecoratePluginInterface* decPlug =  qobject_cast<DecoratePluginInterface *>(decList[ii]->parent());
 		if (!decPlug)
 		{
 			mw->GLA()->Log(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
@@ -1219,12 +1220,12 @@ void RasterTreeWidgetItem::updateVisibilityIcon( bool isvisible )
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent) :
 	QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),loadbut(NULL),dialoglayout(NULL)
 {
-	MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(act->parent());
+	DecoratePluginInterface* decPlug =  qobject_cast<DecoratePluginInterface *>(act->parent());
 	if (!decPlug) {
 		mw->GLA()->Log(GLLogStream::SYSTEM, "MeshLab System Error: A Decorator Plugin has been expected.");
 	}
 	else {
-		decPlug->initGlobalParameterSet(act,tmpSet);
+		decPlug->initGlobalParameterList(act,tmpSet);
 		if (tmpSet.size() != 0) {
 			const RichParameterList& currSet = mw->currentGlobalPars();
 			RichParameterList defSet = tmpSet;

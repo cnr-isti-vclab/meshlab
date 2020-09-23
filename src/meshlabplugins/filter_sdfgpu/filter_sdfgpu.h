@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 #include <gpuProgram.h>
 #include <framebufferObject.h>
@@ -11,11 +11,11 @@
 
 enum ONPRIMITIVE{ON_VERTICES=0, ON_FACES=1};
 
-class SdfGpuPlugin : public QObject, public MeshFilterInterface
+class SdfGpuPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
 
@@ -29,18 +29,18 @@ public:
 
     QString filterInfo(FilterIDType filterId) const;
 
-    FilterClass getClass(QAction *)
+    FilterClass getClass(const QAction *) const
     {
-      return MeshFilterInterface::VertexColoring;
+      return FilterPluginInterface::VertexColoring;
     }
 
-    FILTER_ARITY filterArity(QAction *act) const;
+    FILTER_ARITY filterArity(const QAction* act) const;
 
     //Main plugin function
-    bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb);
+    bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
 
     //Parameters init for user interface
-    virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
+    virtual void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
 
     //Draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);

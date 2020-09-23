@@ -25,14 +25,14 @@
 #define FILTER_SELECT_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
-class SelectionFilterPlugin : public QObject, public MeshFilterInterface
+class SelectionFilterPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 		
 		public:
 	/* naming convention : 
@@ -73,13 +73,13 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 	virtual QString filterInfo(FilterIDType filter) const;
   virtual QString filterName(FilterIDType filter) const;
   
-  virtual FilterClass getClass(QAction *);
-  void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
-  int getPreConditions(QAction *) const;
-  int postCondition( QAction* ) const;
-  int getRequirements(QAction *);
-  bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-  FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+  virtual FilterClass getClass(const QAction*) const;
+  void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
+  int getPreConditions(const QAction*) const;
+  int postCondition(const QAction* ) const;
+  int getRequirements(const QAction*);
+  bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+  FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

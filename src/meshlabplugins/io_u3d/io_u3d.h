@@ -28,15 +28,16 @@
 #include <QList>
 #include <QString>
 
-#include <common/interfaces.h>
+#include <common/interfaces/io_plugin_interface.h>
+#include <common/meshmodel.h>
 #include <wrap/io_trimesh/export_u3d.h>
 #include <wrap/io_trimesh/export_idtf.h>
 
-class U3DIOPlugin : public QObject, public MeshIOInterface
+class U3DIOPlugin : public QObject, public IOPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
-	Q_INTERFACES(MeshIOInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(IOPluginInterface)
 
 public:
 	QString pluginName() const;

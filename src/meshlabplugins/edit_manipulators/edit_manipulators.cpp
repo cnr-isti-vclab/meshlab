@@ -1101,7 +1101,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
   }
 
-  this->RealTimeLog("Manipulator","",qUtf8Printable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
+  this->realTimeLog("Manipulator","",qUtf8Printable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
 
   // render original mesh BBox
   DrawMeshBox(model);

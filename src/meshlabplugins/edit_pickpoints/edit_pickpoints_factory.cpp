@@ -41,7 +41,7 @@ QList<QAction *> EditPickPointsFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditPickPointsFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditPickPointsFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editPickPoints) {
 		return new EditPickPointsPlugin();
@@ -51,7 +51,7 @@ MeshEditInterface* EditPickPointsFactory::getMeshEditInterface(QAction *action)
 	}
 }
 
-QString EditPickPointsFactory::getEditToolDescription(QAction *)
+QString EditPickPointsFactory::getEditToolDescription(const QAction *)
 {
 	return EditPickPointsPlugin::Info();
 }

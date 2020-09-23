@@ -24,15 +24,15 @@
 #define FILTERGEODESIC_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include <vcg/complex/algorithms/geodesic.h>
 
 
-class FilterGeodesic : public QObject, public MeshFilterInterface
+class FilterGeodesic : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 	public:
 	    /* naming convention :
@@ -54,12 +54,12 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 
-	FilterClass getClass(QAction *);
-	int getRequirements(QAction *);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-	int postCondition(QAction * filter) const;
-	FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
+	FilterClass getClass(const QAction*) const;
+	int getRequirements(const QAction*);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	int postCondition(const QAction * filter) const;
+	FILTER_ARITY filterArity(const QAction*) const {return SINGLE_MESH;}
 };
 
 

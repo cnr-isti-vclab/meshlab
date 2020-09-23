@@ -24,7 +24,7 @@
 #ifndef _RASTERING_H
 #define _RASTERING_H
 
-#include <common/interfaces.h>
+#include <common/meshmodel.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 
@@ -33,7 +33,6 @@ class VertexSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
 
-    CMeshO &srcMesh;
     vector <QImage> &srcImgs;
     float dist_upper_bound;
 
@@ -47,7 +46,7 @@ class VertexSampler
 
 public:
 	VertexSampler(CMeshO &_srcMesh, vector <QImage> &_srcImg, float upperBound) :
-    srcMesh(_srcMesh), srcImgs(_srcImg), dist_upper_bound(upperBound)
+	srcImgs(_srcImg), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);

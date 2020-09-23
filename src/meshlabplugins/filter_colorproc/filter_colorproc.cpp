@@ -170,7 +170,7 @@ QString FilterColorProc::pluginName() const
   return QString("error!");
 }
 
- int FilterColorProc::getRequirements(QAction *action)
+ int FilterColorProc::getRequirements(const QAction *action)
 {
     switch(ID(action))
     {
@@ -180,7 +180,7 @@ QString FilterColorProc::pluginName() const
     assert(0);
 }
 
-void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
 {
 	switch(ID(a))
 	{
@@ -368,7 +368,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, RichParamet
 	}
 }
 
-bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos *cb)
+bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb)
 {
 	MeshModel *m = md.mm();  //get current mesh from document
 
@@ -550,7 +550,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 				m->updateDataMask(MeshModel::MM_VERTCOLOR);
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			}
-			Log("Saturated Vertex Quality");
+			log("Saturated Vertex Quality");
 			return true;
 		}
 
@@ -579,11 +579,11 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 			if (usePerc)
 			{
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
 			}
 			else {
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -611,11 +611,11 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 			if (usePerc)
 			{
 				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
 			}
 			else {
 				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -644,12 +644,12 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 
 			if (usePerc){
 				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi);
-				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
+				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
 					H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100 - perc);
 			}
 			else {
 				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
-				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			return true;
 		}
@@ -666,24 +666,24 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 			}
 
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
-			if (delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
+			if (delvert) log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
 			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m->cm);
 			int curvType = par.getEnum("CurvatureType");
 
 			switch (curvType)
 			{
-				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        Log("Computed Mean Curvature");      break;
-				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    Log("Computed Gaussian Curvature"); break;
-				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         Log("Computed RMS Curvature"); break;
-				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    Log("Computed ABS Curvature"); break;
+				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        log("Computed Mean Curvature");      break;
+				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    log("Computed Gaussian Curvature"); break;
+				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         log("Computed RMS Curvature"); break;
+				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    log("Computed ABS Curvature"); break;
 				default: assert(0);
 			}
 
 			Histogramf H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
-			Log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
+			log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
 			return true;
 		}
 
@@ -915,7 +915,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 	return false;
 }
 
- MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
+ FilterPluginInterface::FilterClass FilterColorProc::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -933,10 +933,10 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 		case CP_MAP_VQUALITY_INTO_COLOR:
 		case CP_VERTEX_SMOOTH:
 		case CP_FACE_TO_VERTEX:
-		case CP_TEXTURE_TO_VERTEX:          return MeshFilterInterface::VertexColoring;
-		case CP_SCATTER_PER_MESH:           return MeshFilterInterface::MeshColoring;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::VertexColoring;
+		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::MeshColoring;
 		case CP_SATURATE_QUALITY:
-		case CP_CLAMP_QUALITY:              return MeshFilterInterface::Quality;
+		case CP_CLAMP_QUALITY:              return FilterPluginInterface::Quality;
 		case CP_DISCRETE_CURVATURE:         return FilterClass(Normal + VertexColoring);
 		case CP_TRIANGLE_QUALITY:           return FilterClass(Quality + FaceColoring);
 		case CP_RANDOM_FACE:
@@ -944,13 +944,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, const RichP
 		case CP_FACE_SMOOTH:
 		case CP_VERTEX_TO_FACE:
 		case CP_MESH_TO_FACE:
-		case CP_MAP_FQUALITY_INTO_COLOR:    return MeshFilterInterface::FaceColoring;
+		case CP_MAP_FQUALITY_INTO_COLOR:    return FilterPluginInterface::FaceColoring;
 		default: assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
-int FilterColorProc::postCondition( QAction* filter ) const
+int FilterColorProc::postCondition( const QAction* filter ) const
 {
 	switch(ID(filter))
 	{
@@ -986,7 +986,7 @@ int FilterColorProc::postCondition( QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-int FilterColorProc::getPreConditions( QAction * filter ) const
+int FilterColorProc::getPreConditions(const QAction* filter ) const
 {
 	switch(ID(filter))
 	{
@@ -1022,7 +1022,7 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 	return MeshModel::MM_NONE;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity( QAction *act ) const
+FilterPluginInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {
@@ -1050,12 +1050,12 @@ MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity( QAction *act ) c
 		case CP_MAP_FQUALITY_INTO_COLOR:
 		case CP_FACE_TO_VERTEX:
 		case CP_FACE_SMOOTH:
-		case CP_TEXTURE_TO_VERTEX:          return MeshFilterInterface::SINGLE_MESH;
-		case CP_SCATTER_PER_MESH:           return MeshFilterInterface::VARIABLE;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::SINGLE_MESH;
+		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::VARIABLE;
 
 		default: assert(0);
     }
-	return MeshFilterInterface::SINGLE_MESH;
+	return FilterPluginInterface::SINGLE_MESH;
 }
 
 

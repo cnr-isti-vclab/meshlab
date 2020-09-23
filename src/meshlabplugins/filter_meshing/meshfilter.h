@@ -24,13 +24,13 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
+class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-		Q_INTERFACES(MeshFilterInterface)
+	    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+		Q_INTERFACES(FilterPluginInterface)
 
 		enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 
@@ -87,12 +87,12 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 
-	FilterClass getClass(QAction *);
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction *filter) const;
-	int getPreCondition(QAction *filter) const;
-	FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	FilterClass getClass(const QAction*) const;
+	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(const QAction *filter) const;
+	int getPreConditions(const QAction *filter) const;
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 protected:
 

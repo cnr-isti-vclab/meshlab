@@ -181,12 +181,12 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   return QString("Error on FilterUnsharp::filterInfo()!");
 }
 
- FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
+ FilterUnsharp::FilterClass FilterUnsharp::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
             case FP_CREASE_CUT :
-            return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Normal | MeshFilterInterface::Remeshing);
+            return FilterPluginInterface::FilterClass( 	FilterPluginInterface::Normal | FilterPluginInterface::Remeshing);
             case FP_SD_LAPLACIAN_SMOOTH:
             case FP_HC_LAPLACIAN_SMOOTH:
             case FP_LAPLACIAN_SMOOTH:
@@ -200,23 +200,23 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
             case FP_UNSHARP_GEOMETRY:
             case FP_UNSHARP_QUALITY:
             case FP_LINEAR_MORPH :
-                    return 	MeshFilterInterface::Smoothing;
+                    return 	FilterPluginInterface::Smoothing;
 
             case FP_UNSHARP_VERTEX_COLOR:
-                    return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Smoothing | MeshFilterInterface::VertexColoring);
+                    return FilterPluginInterface::FilterClass( 	FilterPluginInterface::Smoothing | FilterPluginInterface::VertexColoring);
 
             case FP_RECOMPUTE_FACE_NORMAL :
             case FP_RECOMPUTE_QUADFACE_NORMAL :
             case FP_RECOMPUTE_VERTEX_NORMAL :
             case FP_FACE_NORMAL_NORMALIZE:
             case FP_VERTEX_NORMAL_NORMALIZE:
-                    return MeshFilterInterface::Normal;
-  case FP_SCALAR_HARMONIC_FIELD: return MeshFilterInterface::Remeshing;
+                    return FilterPluginInterface::Normal;
+  case FP_SCALAR_HARMONIC_FIELD: return FilterPluginInterface::Remeshing;
 
-    default : return MeshFilterInterface::Generic;
+    default : return FilterPluginInterface::Generic;
   }
 }
-int FilterUnsharp::getPreConditions(QAction *a) const
+int FilterUnsharp::getPreConditions(const QAction *a) const
 {
   switch(ID(a))
   {
@@ -251,7 +251,7 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 }
 
 
-int FilterUnsharp::postCondition(QAction *a) const
+int FilterUnsharp::postCondition(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -280,7 +280,7 @@ int FilterUnsharp::postCondition(QAction *a) const
 	}
 }
 
- int FilterUnsharp::getRequirements(QAction *action)
+ int FilterUnsharp::getRequirements(const QAction *action)
 {
   switch(ID(action))
   {
@@ -312,7 +312,7 @@ int FilterUnsharp::postCondition(QAction *a) const
   return MeshModel::MM_NONE;
 }
 
-void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {
@@ -405,7 +405,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
   }
 }
 
-bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * cb)
+bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))
@@ -445,7 +445,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
       if(!boundarySmooth) tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
-      Log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
+      log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
       m.UpdateBoxAndNormals();
       }
         break;
@@ -458,7 +458,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
             float delta = par.getAbsPerc("delta");
 			Point3m viewpoint = par.getPoint3m("viewPoint");
 			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm, viewpoint, delta, stepSmoothNum, Selected,true);
-			Log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
+			log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
         break;
@@ -481,7 +481,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
                     for(vi =m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
                         h[vi] = vi->cP();
 
-                    Log( "Stored Position %d vertices", m.cm.vn);
+                    log( "Stored Position %d vertices", m.cm.vn);
                     break;
                 }
                 case 1: // ***** Recovering and Projection Vertex Data *****
@@ -500,7 +500,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
                         (*vi).P() = h[vi] + d * (s*alpha);
                     }
                     m.UpdateBoxAndNormals();
-                    Log(  "Projected smoothed Position %d vertices", m.cm.vn);
+                    log(  "Projected smoothed Position %d vertices", m.cm.vn);
                 }
                     break;
             }
@@ -515,7 +515,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
             tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
             float delta = par.getAbsPerc("delta");
             tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
-            Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
         break;
@@ -557,7 +557,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
 
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
-            Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
             break;
@@ -785,7 +785,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, const RichPar
     return true;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity( QAction * filter ) const
+FilterPluginInterface::FILTER_ARITY FilterUnsharp::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -809,11 +809,11 @@ MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity( QAction * filter )
     case FP_RECOMPUTE_FACE_NORMAL:      
     case FP_RECOMPUTE_QUADFACE_NORMAL:
     case FP_SCALAR_HARMONIC_FIELD:
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_LINEAR_MORPH :	
-        return MeshFilterInterface::FIXED;
+        return FilterPluginInterface::FIXED;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 

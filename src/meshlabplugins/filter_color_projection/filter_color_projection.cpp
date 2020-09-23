@@ -96,7 +96,7 @@ QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // What "new" properties the plugin requires
-int FilterColorProjectionPlugin::getRequirements(QAction *action){
+int FilterColorProjectionPlugin::getRequirements(const QAction *action){
     switch(ID(action)){
     case FP_SINGLEIMAGEPROJ:  return MeshModel::MM_VERTCOLOR;
     case FP_MULTIIMAGETRIVIALPROJ:  return MeshModel::MM_VERTCOLOR;
@@ -108,7 +108,7 @@ int FilterColorProjectionPlugin::getRequirements(QAction *action){
 
 
 // This function define the needed parameters for each filter.
-void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterColorProjectionPlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {
@@ -218,7 +218,7 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     //CMeshO::FaceIterator fi;
     CMeshO::VertexIterator vi;
@@ -265,7 +265,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                     delete rendermanager;
                     return false;
                 }
-                Log("init GL");
+                log("init GL");
                 //if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                 //    return false;
                 //Log("init Buffers");
@@ -364,7 +364,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             tri::UpdateBounding<CMeshO>::Box(model->cm);
 
             // init accumulation buffers for colors and weights
-            Log("init color accumulation buffers");
+            log("init color accumulation buffers");
             weights = new double[model->cm.vn];
             acc_red = new double[model->cm.vn];
             acc_grn = new double[model->cm.vn];
@@ -423,7 +423,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                         rendermanager = new RenderHelper();
                         if( rendermanager->initializeGL(cb) != 0 )
                             return false;
-                        Log("init GL");
+                        log("init GL");
                         /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                             return false;
                         Log("init Buffers");*/
@@ -738,7 +738,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                         rendermanager = new RenderHelper();
                         if( rendermanager->initializeGL(cb) != 0 )
                             return false;
-                        Log("init GL");
+                        log("init GL");
                         /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                             return false;
                         Log("init Buffers");*/
@@ -899,7 +899,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             // Save texture
             cb(90, "Saving texture ...");
             CheckError(!img.save(filePath), "Texture file cannot be saved");
-            Log( "Texture \"%s\" Created", filePath.toStdString().c_str());
+            log( "Texture \"%s\" Created", filePath.toStdString().c_str());
             assert(QFile(filePath).exists());
 
             // Assign texture
@@ -919,7 +919,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
     return true;
 }
 
-FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(QAction *a)
+FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(const QAction *a) const
 {
     switch(ID(a)) {
     case FP_SINGLEIMAGEPROJ:
@@ -932,11 +932,11 @@ FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(Q
         return FilterClass(Camera + Texture);
         break;
     default :  assert(0);
-        return MeshFilterInterface::Generic;
+        return FilterPluginInterface::Generic;
     }
 }
 
-int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
+int FilterColorProjectionPlugin::postCondition( const QAction* a ) const{
     switch(ID(a)) {
     case FP_SINGLEIMAGEPROJ:
         return MeshModel::MM_VERTCOLOR;

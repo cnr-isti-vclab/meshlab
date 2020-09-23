@@ -36,7 +36,9 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/interfaces.h>
+#include <common/interfaces/render_plugin_interface.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
@@ -60,7 +62,7 @@ class GLArea : public QGLWidget
 public:
     GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterList *current);
     ~GLArea();
-    static void initGlobalParameterSet( RichParameterList * /*globalparam*/);
+    static void initGlobalParameterList( RichParameterList * /*globalparam*/);
 
 private:
     int id;  //the very important unique id of each subwindow.
@@ -152,8 +154,8 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    QAction *getLastAppliedFilter()							{return lastFilterRef;}
-    void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
+    const QAction *getLastAppliedFilter() {return lastFilterRef;}
+    void setLastAppliedFilter(const QAction *qa) {lastFilterRef = qa;}
 
     ////RenderMode*  getCurrentRenderMode();
     //RenderMode* getCurrentRenderMode()
@@ -192,8 +194,8 @@ public:
     QList<QAction *> iPerDocDecoratorlist;
     QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
-    void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
-    MeshRenderInterface * getRenderer() { return iRenderer; }
+    void setRenderer(RenderPluginInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
+    RenderPluginInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
     
     
@@ -308,7 +310,7 @@ public slots:
 			MeshModel *m = md()->getMesh(i.key());
 			foreach(QAction *p, i.value())
 			{
-				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+				DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
 				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
 				decorInterface->setLog(&md()->Log);
 				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);
@@ -350,13 +352,13 @@ public:
     QAction * getCurrentEditAction() { return currentEditor; }
 
     //get the currently active mesh editor
-    MeshEditInterface * getCurrentMeshEditor() { return iEdit; }
+    EditPluginInterface * getCurrentMeshEditor() { return iEdit; }
 
     //see if this glAarea has a MESHEditInterface for this action
     bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
 
     //add a MeshEditInterface for the given action
-    void addMeshEditor(QAction *editAction, MeshEditInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
+    void addMeshEditor(QAction *editAction, EditPluginInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
     bool readyToClose();
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
@@ -445,16 +447,16 @@ private:
     vcg::Point2i pointToPick;
 
     //shader support
-    MeshRenderInterface *iRenderer;
+    RenderPluginInterface *iRenderer;
     QAction *currentShader;
-    QAction *lastFilterRef; // reference to last filter applied
+    const QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings
 
     // Editing support
-    MeshEditInterface *iEdit;
+    EditPluginInterface *iEdit;
     QAction *currentEditor;
     QAction *suspendedEditRef; // reference to last Editing Mode Used
-    QMap<QAction*, MeshEditInterface*> actionToMeshEditMap;
+    QMap<QAction*, EditPluginInterface*> actionToMeshEditMap;
 
     //the last model that start edit was called with
     MeshModel *lastModelEdited;

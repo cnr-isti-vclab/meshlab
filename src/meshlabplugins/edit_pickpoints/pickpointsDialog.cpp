@@ -40,6 +40,8 @@
 #include <vcg/complex/algorithms/closest.h>
 
 #include <QGLWidget>
+#include <QDebug>
+#include <QMessageBox>
 
 using namespace vcg;
 

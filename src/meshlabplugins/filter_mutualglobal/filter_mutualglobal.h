@@ -36,14 +36,14 @@ add sampleplugins
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include "alignset.h"
 
-class FilterMutualGlobal : public QObject, public MeshFilterInterface
+class FilterMutualGlobal : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum { FP_IMAGE_GLOBALIGN} ;
@@ -54,10 +54,10 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshDocument & md, RichParameterList & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
-	FilterClass getClass(QAction *a);
+	void initParameterList(const QAction*, MeshDocument & md, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
+	FilterClass getClass(const QAction* a) const;
 	QString filterScriptFunctionName(FilterIDType filterID);
 	bool preAlignment(MeshDocument &md, const RichParameterList& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
@@ -69,7 +69,7 @@ public:
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
-	FILTER_ARITY filterArity(QAction *) const { return SINGLE_MESH; }
+	FILTER_ARITY filterArity(const QAction *) const { return SINGLE_MESH; }
 
 
 

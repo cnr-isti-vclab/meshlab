@@ -129,7 +129,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		}
 	}
 
-	this->RealTimeLog("Geometry Info", m.shortName(),
+	this->realTimeLog("Geometry Info", m.shortName(),
 		"%s %s %s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
 
 	// finally, the actual decoration
@@ -267,39 +267,39 @@ void SampleEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		// print on log
 		if (pickmode == 0)
 		{
-			this->Log(GLLogStream::FILTER, "------");
-			this->Log(GLLogStream::FILTER, "face# %i : vert# (%i %i %i)", tri::Index(m.cm, curFacePtr), tri::Index(m.cm, curFacePtr->V(0)), tri::Index(m.cm, curFacePtr->V(1)), tri::Index(m.cm, curFacePtr->V(2)));
+			this->log(GLLogStream::FILTER, "------");
+			this->log(GLLogStream::FILTER, "face# %i : vert# (%i %i %i)", tri::Index(m.cm, curFacePtr), tri::Index(m.cm, curFacePtr->V(0)), tri::Index(m.cm, curFacePtr->V(1)), tri::Index(m.cm, curFacePtr->V(2)));
 			if (m.hasDataMask(MeshModel::MM_FACECOLOR))
-				this->Log(GLLogStream::FILTER, "face color (%i %i %i %i)", curFacePtr->C()[0], curFacePtr->C()[1], curFacePtr->C()[2], curFacePtr->C()[3]);
+				this->log(GLLogStream::FILTER, "face color (%i %i %i %i)", curFacePtr->C()[0], curFacePtr->C()[1], curFacePtr->C()[2], curFacePtr->C()[3]);
 			for (int i = 0; i < 3; ++i)
 			{
-				this->Log(GLLogStream::FILTER, "face vert %i : vert# %i", i, tri::Index(m.cm, curFacePtr->V(i)));
-				this->Log(GLLogStream::FILTER, "position [%f %f %f]", curFacePtr->V(i)->P()[0], curFacePtr->V(i)->P()[1], curFacePtr->V(i)->P()[2]);
-				this->Log(GLLogStream::FILTER, "normal [%f %f %f]", curFacePtr->V(i)->N()[0], curFacePtr->V(i)->N()[1], curFacePtr->V(i)->N()[2]);
+				this->log(GLLogStream::FILTER, "face vert %i : vert# %i", i, tri::Index(m.cm, curFacePtr->V(i)));
+				this->log(GLLogStream::FILTER, "position [%f %f %f]", curFacePtr->V(i)->P()[0], curFacePtr->V(i)->P()[1], curFacePtr->V(i)->P()[2]);
+				this->log(GLLogStream::FILTER, "normal [%f %f %f]", curFacePtr->V(i)->N()[0], curFacePtr->V(i)->N()[1], curFacePtr->V(i)->N()[2]);
 				if (m.hasDataMask(MeshModel::MM_VERTQUALITY))
-					this->Log(GLLogStream::FILTER, "quality %f", curFacePtr->V(i)->Q());
+					this->log(GLLogStream::FILTER, "quality %f", curFacePtr->V(i)->Q());
 				if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
-					this->Log(GLLogStream::FILTER, "color (%f %f %f %f)", curFacePtr->V(i)->C()[0], curFacePtr->V(i)->C()[1], curFacePtr->V(i)->C()[2], curFacePtr->V(i)->C()[3]);
+					this->log(GLLogStream::FILTER, "color (%f %f %f %f)", curFacePtr->V(i)->C()[0], curFacePtr->V(i)->C()[1], curFacePtr->V(i)->C()[2], curFacePtr->V(i)->C()[3]);
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-					this->Log(GLLogStream::FILTER, "wedge UV (%f %f) texID %i)", curFacePtr->WT(i).U(), curFacePtr->WT(i).V(), curFacePtr->WT(i).N());
+					this->log(GLLogStream::FILTER, "wedge UV (%f %f) texID %i)", curFacePtr->WT(i).U(), curFacePtr->WT(i).V(), curFacePtr->WT(i).N());
 				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
-					this->Log(GLLogStream::FILTER, "vertex UV (%f %f) texID %i)", curFacePtr->V(i)->T().U(), curFacePtr->V(i)->T().U(), curFacePtr->V(i)->T().N());
+					this->log(GLLogStream::FILTER, "vertex UV (%f %f) texID %i)", curFacePtr->V(i)->T().U(), curFacePtr->V(i)->T().U(), curFacePtr->V(i)->T().N());
 			}
-			this->Log(GLLogStream::FILTER, "------");
+			this->log(GLLogStream::FILTER, "------");
 		}
 		else if (pickmode == 1)
 		{
-			this->Log(GLLogStream::FILTER, "------");
-			this->Log(GLLogStream::FILTER, "vertex# %i", tri::Index(m.cm, curVertPtr));
-			this->Log(GLLogStream::FILTER, "position [%f %f %f]", curVertPtr->P()[0], curVertPtr->P()[1], curVertPtr->P()[2]);
-			this->Log(GLLogStream::FILTER, "normal [%f %f %f]", curVertPtr->N()[0], curVertPtr->N()[1], curVertPtr->N()[2]);
+			this->log(GLLogStream::FILTER, "------");
+			this->log(GLLogStream::FILTER, "vertex# %i", tri::Index(m.cm, curVertPtr));
+			this->log(GLLogStream::FILTER, "position [%f %f %f]", curVertPtr->P()[0], curVertPtr->P()[1], curVertPtr->P()[2]);
+			this->log(GLLogStream::FILTER, "normal [%f %f %f]", curVertPtr->N()[0], curVertPtr->N()[1], curVertPtr->N()[2]);
 			if (m.hasDataMask(MeshModel::MM_VERTQUALITY))
-				this->Log(GLLogStream::FILTER, "quality %f", curVertPtr->Q());
+				this->log(GLLogStream::FILTER, "quality %f", curVertPtr->Q());
 			if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
-				this->Log(GLLogStream::FILTER, "color (%f %f %f %f)", curVertPtr->C()[0], curVertPtr->C()[1], curVertPtr->C()[2], curVertPtr->C()[3]);
+				this->log(GLLogStream::FILTER, "color (%f %f %f %f)", curVertPtr->C()[0], curVertPtr->C()[1], curVertPtr->C()[2], curVertPtr->C()[3]);
 			if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
-				this->Log(GLLogStream::FILTER, "vertex UV (%f %f) texID %i)", curVertPtr->T().U(), curVertPtr->T().U(), curVertPtr->T().N());
-			this->Log(GLLogStream::FILTER, "------");
+				this->log(GLLogStream::FILTER, "vertex UV (%f %f) texID %i)", curVertPtr->T().U(), curVertPtr->T().U(), curVertPtr->T().N());
+			this->log(GLLogStream::FILTER, "------");
 		}
 		gla->update();
 	}

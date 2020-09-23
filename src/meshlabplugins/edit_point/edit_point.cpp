@@ -53,7 +53,7 @@ QString EditPointPlugin::pluginName() const
 
 void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
 {
-  this->RealTimeLog("Point Selection",m.shortName(),
+  this->realTimeLog("Point Selection",m.shortName(),
                     "<table>"
                     "<tr><td width=50> Hop Thr:</td><td width=100 align=right><b >%8.3f </b></td><td><i> (Wheel to change it)</i> </td></tr>"
                     "<tr><td>          Radius: </td><td width=70 align=right><b> %8.3f </b></td><td><i> (Drag or Alt+Wheel to change it)</i></td></tr>"

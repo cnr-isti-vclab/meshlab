@@ -138,7 +138,7 @@ QString TriOptimizePlugin::pluginName() const
 	return {};
 }
 
- int TriOptimizePlugin::getRequirements(QAction *action)
+ int TriOptimizePlugin::getRequirements(const QAction *action)
 {
 	switch (ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:
@@ -171,17 +171,17 @@ QString TriOptimizePlugin::pluginName() const
 	return {};
 }
 
- TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action)
+ TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action) const
 {
 	switch(ID(action)) {
-		case FP_PLANAR_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
-		case FP_CURVATURE_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
-		case FP_NEAR_LAPLACIAN_SMOOTH: return MeshFilterInterface::Smoothing;
+		case FP_PLANAR_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
+		case FP_CURVATURE_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
+		case FP_NEAR_LAPLACIAN_SMOOTH: return FilterPluginInterface::Smoothing;
 	}
- return MeshFilterInterface::Generic;
+ return FilterPluginInterface::Generic;
 }
 
-int TriOptimizePlugin::postCondition(QAction *a) const
+int TriOptimizePlugin::postCondition(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -201,7 +201,7 @@ int TriOptimizePlugin::postCondition(QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterList & parlst)
+void TriOptimizePlugin::initParameterList(const QAction *action, MeshModel &m, RichParameterList & parlst)
 {
 	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
 		parlst.addParam(RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
@@ -262,7 +262,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, RichPara
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     float limit = -std::numeric_limits<float>::epsilon();
@@ -270,7 +270,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const Ric
 	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
-			Log(
+			log(
 				"Pre-Curvature Cleaning: Removed %d unreferenced vertices",
 				delvert);
 
@@ -324,7 +324,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const Ric
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
-			Log( "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+			log( "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
 	if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
 	  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
@@ -359,7 +359,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, const Ric
 	  optimiz.DoOptimization();
 	  optimiz.h.clear();
 
-	  Log( "%d planar edge flips performed in %.2f sec.", optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+	  log( "%d planar edge flips performed in %.2f sec.", optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 	  int iternum = par.getInt("iterations");
 
 	  tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(planarThrDeg), selection,cb);

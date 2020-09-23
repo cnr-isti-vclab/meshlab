@@ -26,8 +26,6 @@
 #include <time.h>
 #include <iostream>
 
-#include <common/interfaces.h>
-
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/refine.h>
 #include <vcg/complex/algorithms/refine_loop.h>
@@ -99,24 +97,24 @@ QString MlsPlugin::pluginName() const
 return QString("Filter Unknown");
 }
 
- MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
+ FilterPluginInterface::FilterClass MlsPlugin::getClass(const QAction *a) const
 {
     int filterId = ID(a);
 
     switch(filterId) {
         case FP_APSS_PROJECTION         :
-        case FP_RIMLS_PROJECTION        : return FilterClass(MeshFilterInterface::PointSet + MeshFilterInterface::Smoothing);
+        case FP_RIMLS_PROJECTION        : return FilterClass(FilterPluginInterface::PointSet + FilterPluginInterface::Smoothing);
         case FP_APSS_AFRONT             :
         case FP_RIMLS_AFRONT            :
         case FP_APSS_MCUBE              :
-        case FP_RIMLS_MCUBE             : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::Remeshing);
+        case FP_RIMLS_MCUBE             : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::Remeshing);
         case FP_APSS_COLORIZE           :
-        case FP_RIMLS_COLORIZE          : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::VertexColoring);
-        case FP_RADIUS_FROM_DENSITY     : return MeshFilterInterface::PointSet;
-        case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
+        case FP_RIMLS_COLORIZE          : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::VertexColoring);
+        case FP_RADIUS_FROM_DENSITY     : return FilterPluginInterface::PointSet;
+        case FP_SELECT_SMALL_COMPONENTS : return FilterPluginInterface::Selection;
         }
     assert(0);
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 // Info() must return the longer string describing each filtering action
@@ -175,7 +173,7 @@ return QString("Filter Unknown");
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterList& parlst)
+void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichParameterList& parlst)
 {
     int id = ID(action);
     MeshModel *target = md.mm();
@@ -311,7 +309,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
 }
 
- int MlsPlugin::getRequirements(QAction *)
+ int MlsPlugin::getRequirements(const QAction *)
 {
     return 0;
 }
@@ -357,7 +355,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
     }
 }
 
-bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb)
+bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos* cb)
 {
     int id = ID(filter);
 
@@ -384,7 +382,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParamet
         { // if we start from a mesh, and it has unreferenced vertices
           // normals are undefined on that vertices.
             int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-            if(delvert) Log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+            if(delvert) log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
         }
         tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 
@@ -394,7 +392,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParamet
             md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
             APSS<CMeshO> mls(md.mm()->cm);
             mls.computeVertexRaddi();
-            Log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+            log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
         }
 
         MeshModel* pPoints = 0;
@@ -486,7 +484,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParamet
                 }
             }
 
-            Log( "Successfully projected %i vertices", mesh->cm.vn);
+            log( "Successfully projected %i vertices", mesh->cm.vn);
         }
         else if (id & _COLORIZE_)
         {
@@ -600,7 +598,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParamet
                 mesh->clearDataMask(MeshModel::MM_FACEFACETOPO);
             }
 
-            Log( "Marching cubes MLS meshing done.");
+            log( "Marching cubes MLS meshing done.");
         }
 
         delete mls;

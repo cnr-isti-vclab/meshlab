@@ -97,7 +97,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
     return QString("Unknown Filter");
 }
 
-int FilterTexturePlugin::getPreConditions(QAction *a) const
+int FilterTexturePlugin::getPreConditions(const QAction *a) const
 {
     switch (ID(a))
     {
@@ -115,7 +115,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
     return MeshModel::MM_NONE;
 }
 
-int FilterTexturePlugin::getRequirements(QAction *a)
+int FilterTexturePlugin::getRequirements(const QAction *a)
 {
     switch (ID(a))
     {
@@ -133,7 +133,7 @@ int FilterTexturePlugin::getRequirements(QAction *a)
     return MeshModel::MM_NONE;
 }
 
-int FilterTexturePlugin::postCondition( QAction *a) const
+int FilterTexturePlugin::postCondition(const QAction *a) const
 {
     switch (ID(a))
     {
@@ -154,7 +154,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
-FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
+FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a) const
 {
     switch(ID(a))
     {
@@ -165,11 +165,11 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
     case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE :
     case FP_COLOR_TO_TEXTURE :
-    case FP_TRANSFER_TO_TEXTURE : return MeshFilterInterface::Texture;
-    case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
+    case FP_TRANSFER_TO_TEXTURE : return FilterPluginInterface::Texture;
+    case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(FilterPluginInterface::VertexColoring + FilterPluginInterface::Texture);
     default : assert(0);
     }
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 static QString extractFilenameWOExt(MeshModel* mm)
@@ -185,7 +185,7 @@ static QString extractFilenameWOExt(MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action)) {
     case FP_VORONOI_ATLAS :
@@ -342,7 +342,7 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, CallBackPos *cb)
+bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))     {
@@ -355,7 +355,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 
       if(nonManifVertNum>0 || nonManifEdgeNum>0)
       {
-        Log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
+        log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
         this->errorMessage = "Mesh is not manifold. See Log for details";
         return false;
       }
@@ -378,11 +378,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 
       paraModel->UpdateBoxAndNormals();
       baseModel->clearDataMask(bitToBeCleared);
-      Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
-      Log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
-      Log("Unwrap Time   %6.3f s", float(pp.vas.unwrapTime) / CLOCKS_PER_SEC);
-      Log("Voronoi Time  %6.3f s", float(pp.vas.voronoiTime) / CLOCKS_PER_SEC);
-      Log("Sampling Time %6.3f s", float(pp.vas.samplingTime) / CLOCKS_PER_SEC);
+      log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
+      log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
+      log("Unwrap Time   %6.3f s", float(pp.vas.unwrapTime) / CLOCKS_PER_SEC);
+      log("Voronoi Time  %6.3f s", float(pp.vas.voronoiTime) / CLOCKS_PER_SEC);
+      log("Sampling Time %6.3f s", float(pp.vas.samplingTime) / CLOCKS_PER_SEC);
       }
       break;
 
@@ -571,8 +571,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
                 }
                 assert(face == faceNo);
                 assert(it == buckets[buckSize-1].end());
-                Log( "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
-                Log( "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
+                log( "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
+                log( "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 
             }
             else //BASIC
@@ -637,7 +637,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
                         }
                     }
                 }
-                Log( "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
+                log( "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
             }
         }
         break;
@@ -685,7 +685,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 
                 // Save texture
                 CheckError(!img.save(fileName, NULL), "Specified file cannot be saved");
-                Log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+                log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
                 assert(textFile.exists());
             }
 
@@ -732,7 +732,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 				
 				// Save texture
 				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
 				assert(textFile.exists());
 			}
 
@@ -813,7 +813,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!trgImgs[texInd].save(texFileNames[texInd]), "Texture file cannot be saved");
-			Log("Texture \"%s\" Created", texFileNames[texInd].toStdString().c_str());
+			log("Texture \"%s\" Created", texFileNames[texInd].toStdString().c_str());
 			assert(QFile(texFileNames[texInd]).exists());
 		}
 
@@ -896,7 +896,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 
 											   // Save texture
 				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
 				assert(textFile.exists());
 			}
 
@@ -1028,7 +1028,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!trgImgs[trgTexInd].save(trgTextureFileNames[trgTexInd]), "Texture file cannot be saved");
-			Log("Texture \"%s\" Created", trgTextureFileNames[trgTexInd].toStdString().c_str());
+			log("Texture \"%s\" Created", trgTextureFileNames[trgTexInd].toStdString().c_str());
 			assert(QFile(trgTextureFileNames[trgTexInd]).exists());
 		}
 
@@ -1109,7 +1109,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, const R
     return true;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity( QAction * filter ) const
+FilterPluginInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -1120,12 +1120,12 @@ MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity( QAction * fi
     case FP_PLANAR_MAPPING : 
     case FP_SET_TEXTURE : 
     case FP_COLOR_TO_TEXTURE : 
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_TRANSFER_TO_TEXTURE : 
     case FP_TEX_TO_VCOLOR_TRANSFER : 
-        return MeshFilterInterface::FIXED;
+        return FilterPluginInterface::FIXED;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 

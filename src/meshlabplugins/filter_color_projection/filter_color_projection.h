@@ -25,13 +25,13 @@
 #define FILTER_COLORPROJ_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterColorProjectionPlugin : public QObject, public MeshFilterInterface
+class FilterColorProjectionPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
@@ -41,14 +41,14 @@ public:
     QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    int postCondition( QAction* ) const;
+    int postCondition( const QAction* ) const;
 
-    virtual FilterClass getClass(QAction *);
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+    virtual FilterClass getClass(const QAction*) const;
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual int getRequirements(const QAction*);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 private:
 

@@ -24,13 +24,13 @@
 #ifndef FILTER_VORONOI_H
 #define FILTER_VORONOI_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterVoronoiPlugin : public QObject, public MeshFilterInterface
+class FilterVoronoiPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum {
@@ -47,12 +47,12 @@ public:
 	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction* a);
-	FILTER_ARITY filterArity(QAction* a) const;
-	void initParameterSet(QAction* action, MeshModel& m, RichParameterList& par);
-	int getPreConditions(QAction* action) const;
-	bool applyFilter(QAction* action, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb) ;
-	int postCondition(QAction* ) const;
+	FilterClass getClass(const QAction* a) const;
+	FILTER_ARITY filterArity(const QAction* a) const;
+	void initParameterList(const QAction* action, MeshModel& m, RichParameterList& par);
+	int getPreConditions(const QAction* action) const;
+	bool applyFilter(const QAction* action, MeshDocument& md, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) ;
+	int postCondition(const QAction* ) const;
 
 private:
 	bool voronoiSampling(

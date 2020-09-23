@@ -70,14 +70,14 @@ QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
 // More than a single class can be chosen.
-ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
+ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE:  return MeshFilterInterface::RasterLayer;  //should be generic, but better avoid it
+		case FP_GPU_EXAMPLE:  return FilterPluginInterface::RasterLayer;  //should be generic, but better avoid it
 		default : assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -87,7 +87,7 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterList & parlst)
+void ExtraSampleGPUPlugin::initParameterList(const QAction * action, MeshModel & m, RichParameterList & parlst)
 {
 	(void)m;
 
@@ -108,7 +108,7 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	switch(ID(a))
 	{

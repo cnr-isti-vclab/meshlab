@@ -69,12 +69,12 @@ QString QualityMapperFilter::pluginName() const
   return QString("");
 }
 
- MeshFilterInterface::FilterClass QualityMapperFilter::getClass(QAction *a)
+ FilterPluginInterface::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
-    case FP_QUALITY_MAPPER :           return MeshFilterInterface::Quality;
-		default :  assert(0);			return MeshFilterInterface::Generic;
+    case FP_QUALITY_MAPPER :           return FilterPluginInterface::Quality;
+		default :  assert(0);			return FilterPluginInterface::Generic;
   }
 }
 
@@ -86,7 +86,7 @@ QString QualityMapperFilter::pluginName() const
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst) 
+void QualityMapperFilter::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
@@ -125,7 +125,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 
 // The Real Core Function doing the actual mesh processing.
 // Apply color to mesh vertices
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool QualityMapperFilter::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 	m.updateDataMask(MeshModel::MM_VERTCOLOR);
@@ -179,7 +179,7 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, const R
 	return true;
 }
 
-int QualityMapperFilter::getPreConditions( QAction * a) const
+int QualityMapperFilter::getPreConditions(const QAction* a) const
 {
 	switch(ID(a))
 	{
@@ -191,11 +191,11 @@ int QualityMapperFilter::getPreConditions( QAction * a) const
 	} 
 }
 
-int QualityMapperFilter::postCondition( QAction* a) const
+int QualityMapperFilter::postCondition(const QAction* a) const
 {
 	switch(ID(a))
 	{
-	case FP_QUALITY_MAPPER :           
+	case FP_QUALITY_MAPPER :
 		return MeshModel::MM_VERTCOLOR;
 	default :  
 		assert(0);			

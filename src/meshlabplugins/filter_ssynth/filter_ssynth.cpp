@@ -2,7 +2,6 @@
 #include "filter_ssynth.h"
 #include <meshlabplugins/io_x3d/import_x3d.h>
 #include <common/meshmodel.h>
-#include <common/interfaces.h>
 #include <StructureSynth/Model/RandomStreams.h>
 #include <StructureSynth/Parser/Preprocessor.h>
 #undef __GLEW_H__ //terrible workaround to avoid problem with #warning in visual studio
@@ -57,7 +56,7 @@ QString FilterSSynth::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterSSynth::initParameterSet(QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
+void FilterSSynth::initParameterList(const QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
 {
     par.addParam(RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
     par.addParam(RichInt("seed",1,"seed for random construction","Seed needed to build the mesh"));
@@ -78,7 +77,7 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
     delete(info);
 }
 
-bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterSSynth::applyFilter(const QAction*  filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     md.addNewMesh("",this->filterName(ID(filter)));
     QWidget *  parent=(QWidget*)this->parent();
@@ -107,7 +106,7 @@ bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, const RichPar
     }
 }
 
-int FilterSSynth::getRequirements(QAction *)
+int FilterSSynth::getRequirements(const QAction *)
 {
     return MeshModel::MM_NONE;
 }
@@ -148,26 +147,26 @@ QString FilterSSynth::ssynth(QString grammar,int maxdepth,int seed,CallBackPos *
     return path;
 }
 
-int FilterSSynth::postCondition(QAction* /*filter*/) const
+int FilterSSynth::postCondition(const QAction* /*filter*/) const
 {
     return MeshModel::MM_NONE;
 }
 
-MeshFilterInterface::FilterClass FilterSSynth::getClass(QAction */*filter*/)
+FilterPluginInterface::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
 {
-    return MeshFilterInterface::MeshCreation;
+    return FilterPluginInterface::MeshCreation;
 }
 
-QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
+QList<IOPluginInterface::Format> FilterSSynth::importFormats() const
 {
-    QList<MeshIOInterface::Format> formats;
-    formats<< MeshIOInterface::Format("Eisen Script File", tr("ES"));
+    QList<IOPluginInterface::Format> formats;
+    formats<< IOPluginInterface::Format("Eisen Script File", tr("ES"));
     return formats;
 }
 
-QList<MeshIOInterface::Format> FilterSSynth::exportFormats() const
+QList<IOPluginInterface::Format> FilterSSynth::exportFormats() const
 {
-    QList<MeshIOInterface::Format> formats;
+    QList<IOPluginInterface::Format> formats;
     return formats ;
 }
 

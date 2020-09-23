@@ -26,6 +26,8 @@
 #include <QColorDialog>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QApplication>
+#include <common/meshmodel.h>
 
 /******************************************/
 // MeshLabWidget Implementation

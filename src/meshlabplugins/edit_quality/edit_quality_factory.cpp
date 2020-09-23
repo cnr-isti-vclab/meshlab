@@ -42,7 +42,7 @@ QList<QAction *> QualityMapperFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* QualityMapperFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* QualityMapperFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editQuality)
 	{
@@ -51,7 +51,7 @@ MeshEditInterface* QualityMapperFactory::getMeshEditInterface(QAction *action)
 	return nullptr;
 }
 
-QString QualityMapperFactory::getEditToolDescription(QAction *)
+QString QualityMapperFactory::getEditToolDescription(const QAction *)
 {
 	return QualityMapperPlugin::Info();
 }

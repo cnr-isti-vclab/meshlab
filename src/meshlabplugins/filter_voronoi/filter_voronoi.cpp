@@ -95,26 +95,26 @@ QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(QAction* a)
+FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
 	case VOLUME_SAMPLING:
 	case VORONOI_SCAFFOLDING:
-		return MeshFilterInterface::Sampling;
+		return FilterPluginInterface::Sampling;
 	case BUILD_SHELL:
-		return MeshFilterInterface::Remeshing;
+		return FilterPluginInterface::Remeshing;
 	case CROSS_FIELD_CREATION:
-		return MeshFilterInterface::Normal;
+		return FilterPluginInterface::Normal;
 //	case CROSS_FIELD_SMOOTHING:
 //		return MeshFilterInterface::Smoothing;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) const
+FilterPluginInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
@@ -131,7 +131,7 @@ MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) c
 	}
 }
 
-void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichParameterList& par)
+void FilterVoronoiPlugin::initParameterList(const QAction* action, MeshModel& m, RichParameterList& par)
 {
 	 switch(ID(action))	 {
 	 case VORONOI_SAMPLING :
@@ -194,7 +194,7 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 	 }
 }
 
-int FilterVoronoiPlugin::getPreConditions(QAction* action) const
+int FilterVoronoiPlugin::getPreConditions(const QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
@@ -211,7 +211,7 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
@@ -253,7 +253,7 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, const 
 	}
 }
 
-int FilterVoronoiPlugin::postCondition(QAction* action) const
+int FilterVoronoiPlugin::postCondition(const QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
@@ -403,7 +403,7 @@ bool FilterVoronoiPlugin::volumeSampling(
 	mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 	pSm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
-	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	log("Sampling Surface at a radius %f ",sampleSurfRadius);
 	cb(1, "Init");
 	vvs.Init(sampleSurfRadius);
 	cb(30, "Sampling Volume...");
@@ -442,12 +442,12 @@ bool FilterVoronoiPlugin::voronoiScaffolding(
 	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
 	VoronoiVolumeSampling<CMeshO>::Param par;
 
-	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	log("Sampling Surface at a radius %f ",sampleSurfRadius);
 	vvs.Init(sampleSurfRadius);
 	cb(30, "Sampling Volume...");
 	CMeshO::ScalarType poissonVolumeRadius=0;
 	vvs.BuildVolumeSampling(sampleVolNum,poissonVolumeRadius,0);
-	Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
+	log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
 	cb(40, "Relaxing Volume...");
 	vvs.BarycentricRelaxVoronoiSamples(relaxStep);

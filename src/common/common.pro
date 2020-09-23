@@ -47,7 +47,13 @@ HEADERS += 	\
     filter_parameter/rich_parameter.h \
     filterscript.h \
     GLLogStream.h \
-    interfaces.h \
+    interfaces/decorate_plugin_interface.h \
+    interfaces/edit_plugin_interface.h \
+    interfaces/filter_plugin_interface.h \
+    interfaces/io_plugin_interface.h \
+    interfaces/mainwindow_interface.h \
+    interfaces/plugin_interface.h \
+    interfaces/render_plugin_interface.h \
     ml_mesh_type.h \
     meshmodel.h \
     pluginmanager.h \
@@ -63,9 +69,11 @@ SOURCES += \
     filter_parameter/rich_parameter.cpp \
     filter_parameter/rich_parameter_list.cpp \
     filter_parameter/value.cpp \
-    interfaces.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
+    interfaces/decorate_plugin_interface.cpp \
+    interfaces/filter_plugin_interface.cpp \
+    interfaces/plugin_interface.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
     mlapplication.cpp \

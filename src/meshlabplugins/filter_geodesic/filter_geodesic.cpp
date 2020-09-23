@@ -84,19 +84,19 @@ QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 	return QString("error!");
 }
 
-FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
+FilterGeodesic::FilterClass FilterGeodesic::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
 	case FP_QUALITY_BORDER_GEODESIC    :
 	case FP_QUALITY_SELECTED_GEODESIC  :
-	case FP_QUALITY_POINT_GEODESIC     : return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
+	case FP_QUALITY_POINT_GEODESIC     : return FilterGeodesic::FilterClass(FilterPluginInterface::VertexColoring + FilterPluginInterface::Quality);
 	default                          : assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
-int FilterGeodesic::getRequirements(QAction *action)
+int FilterGeodesic::getRequirements(const QAction *action)
 {
 	switch(ID(action))
 	{
@@ -108,7 +108,7 @@ int FilterGeodesic::getRequirements(QAction *action)
 	return 0;
 }
 
-bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	MeshModel &m=*(md.mm());
 	CMeshO::FaceIterator fi;
@@ -134,7 +134,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 			}
 
 
-		Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
+		log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 
 		// Now actually compute the geodesic distance from the closest point
 		float dist_thr = par.getAbsPerc("maxDistance");
@@ -151,7 +151,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
 		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 
@@ -178,9 +178,9 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
-		if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
+		if(!ret) log("Mesh Has no borders. No geodesic distance computed");
 		else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 	}
 
@@ -219,12 +219,12 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 			});
 
 			if(unreachedCnt >0 )
-				Log("Warning: %i vertices were unreachable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
+				log("Warning: %i vertices were unreachable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
 
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 		}
 		else
-			Log("Warning: no vertices are selected! aborting geodesic computation.");
+			log("Warning: no vertices are selected! aborting geodesic computation.");
 	}
 		break;
 	default: assert(0);
@@ -233,7 +233,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, const RichPa
 	return true;
 }
 
-void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst)
+void FilterGeodesic::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action))
 	{
@@ -249,7 +249,7 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 	return;
 }
 
-int FilterGeodesic::postCondition(QAction * filter) const
+int FilterGeodesic::postCondition(const QAction * filter) const
 {
 	switch (ID(filter))
 	{

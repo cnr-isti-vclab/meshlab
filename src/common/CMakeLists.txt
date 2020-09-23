@@ -14,10 +14,12 @@ set(SOURCES
     filter_parameter/rich_parameter.cpp
     filter_parameter/rich_parameter_list.cpp
     filter_parameter/value.cpp
+    interfaces/decorate_plugin_interface.cpp
+    interfaces/filter_plugin_interface.cpp
+    interfaces/plugin_interface.cpp
     GLExtensionsManager.cpp
     GLLogStream.cpp
     filterscript.cpp
-    interfaces.cpp
     meshlabdocumentbundler.cpp
     meshlabdocumentxml.cpp
     meshmodel.cpp
@@ -32,10 +34,16 @@ set(HEADERS
     filter_parameter/rich_parameter.h
     filter_parameter/rich_parameter_list.h
     filter_parameter/value.h
+    interfaces/decorate_plugin_interface.h
+    interfaces/edit_plugin_interface.h
+    interfaces/filter_plugin_interface.h
+    interfaces/io_plugin_interface.h
+    interfaces/mainwindow_interface.h
+    interfaces/plugin_interface.h
+    interfaces/render_plugin_interface.h
     GLExtensionsManager.h
     GLLogStream.h
     filterscript.h
-    interfaces.h
     meshlabdocumentbundler.h
     meshlabdocumentxml.h
     meshmodel.h

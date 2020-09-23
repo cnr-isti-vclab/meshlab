@@ -36,13 +36,13 @@ add sampleplugins
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class ExtraSampleGPUPlugin : public QObject, public MeshFilterInterface
+class ExtraSampleGPUPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum { FP_GPU_EXAMPLE  } ;
@@ -50,13 +50,13 @@ public:
 	ExtraSampleGPUPlugin();
 
     QString pluginName() const;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
-	void initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst);
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+    void initParameterList(const QAction* action, MeshModel &m, RichParameterList & parlst);
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(QAction *a);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	FilterClass getClass(const QAction* a) const;
 };
 
 

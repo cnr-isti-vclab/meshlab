@@ -33,8 +33,7 @@ add sampleplugins
 #ifndef ALIGNGLOBAL_H
 #define ALIGNGLOBAL_H
 
-#include <common/interfaces.h>
-
+#include <vector>
 
 class AlignPair
 {

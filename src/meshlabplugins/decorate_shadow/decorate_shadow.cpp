@@ -48,7 +48,7 @@ QString DecorateShadowPlugin::pluginName() const
 	return "DecorateShadow";
 }
 
-void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterList &parset)
+void DecorateShadowPlugin::initGlobalParameterList(const QAction* action, RichParameterList &parset)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW: {
@@ -79,7 +79,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 	}
 }
 
-bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, const RichParameterList* parset, GLArea* /*gla*/)
+bool DecorateShadowPlugin::startDecorate(const QAction* action, MeshDocument& /*m*/, const RichParameterList* parset, GLArea* /*gla*/)
 {
 	bool result;
 
@@ -123,7 +123,7 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, c
 	return false;
 }
 
-void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, const RichParameterList * parset, GLArea * /*gla*/)
+void DecorateShadowPlugin::endDecorate(const QAction* action, MeshDocument & /*md*/, const RichParameterList * parset, GLArea * /*gla*/)
 {
 	switch (ID(action))
 	{
@@ -170,7 +170,7 @@ void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, 
 }
 
 
-void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &)
+void DecorateShadowPlugin::decorateDoc(const QAction* action, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &)
 {
 	switch (ID(action)) {
 	case DP_SHOW_SHADOW:

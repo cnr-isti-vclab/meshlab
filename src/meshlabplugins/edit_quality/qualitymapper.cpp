@@ -32,6 +32,7 @@ FIRST RELEASE
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"
 #include <vcg/space/triangle3.h> //for quality
+#include <QMessageBox>
 
 using namespace vcg;
 

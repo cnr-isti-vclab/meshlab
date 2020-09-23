@@ -39,13 +39,13 @@ add sampleplugins
 #ifndef FILTERSAMPLE_PLUGIN_H
 #define FILTERSAMPLE_PLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterSamplePlugin : public QObject, public MeshFilterInterface
+class FilterSamplePlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum { FP_MOVE_VERTEX  } ;
@@ -56,12 +56,12 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
-	FILTER_ARITY filterArity(QAction *) const;
-	int getPreConditions(QAction *) const;
-	int postCondition( QAction* ) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(QAction *action, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+	FilterClass getClass(const QAction* a) const;
+	FILTER_ARITY filterArity(const QAction*) const;
+	int getPreConditions(const QAction *) const;
+	int postCondition(const QAction* ) const;
+	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction* action, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
 private:
 	bool vertexDisplacement(

@@ -27,18 +27,19 @@
 
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
+#include <common/meshmodel.h>
 #include <wrap/glw/glw.h>
 
 
 
 
-class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
+class DecorateRasterProjPlugin : public QObject, public DecoratePluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
-    Q_INTERFACES( MeshDecorateInterface )
+    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES( DecoratePluginInterface )
 
 
     // Types.
@@ -113,12 +114,12 @@ private:
 public:
     inline QList<QAction*>  actions() const                             { return actionList; }
 
-	bool  startDecorate(QAction  *act, MeshDocument &m, const RichParameterList *par, GLArea *gla );
-	void  decorateMesh( QAction  *   , MeshModel    & , const RichParameterList *   , GLArea *   , QPainter * , GLLogStream &  ) {}
-	void  decorateDoc(QAction  *act, MeshDocument &m, const RichParameterList* par, GLArea *gla, QPainter *p, GLLogStream &  );
-	void  endDecorate(  QAction  *act, MeshDocument &m, const RichParameterList *par, GLArea *gla );
-    void  initGlobalParameterSet( QAction *act, RichParameterList &par );
-    int   getDecorationClass( QAction *act ) const;
+	bool  startDecorate(const QAction  *act, MeshDocument &m, const RichParameterList *par, GLArea *gla );
+	void  decorateMesh(const QAction  *   , MeshModel    & , const RichParameterList *   , GLArea *   , QPainter * , GLLogStream &  ) {}
+	void  decorateDoc(const QAction  *act, MeshDocument &m, const RichParameterList* par, GLArea *gla, QPainter *p, GLLogStream &  );
+	void  endDecorate(const QAction* act, MeshDocument &m, const RichParameterList *par, GLArea *gla );
+	void  initGlobalParameterList(const QAction *act, RichParameterList &par );
+    int   getDecorationClass(const QAction* act ) const;
 };
 
 

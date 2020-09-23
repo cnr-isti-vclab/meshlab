@@ -148,7 +148,7 @@ QString PDBIOPlugin::pluginName() const
 	return "IOPDB";
 }
 
-QList<MeshIOInterface::Format> PDBIOPlugin::importFormats() const
+QList<IOPluginInterface::Format> PDBIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Protein Data Bank"	, tr("PDB"));
@@ -159,7 +159,7 @@ QList<MeshIOInterface::Format> PDBIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> PDBIOPlugin::exportFormats() const
+QList<IOPluginInterface::Format> PDBIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 //	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));

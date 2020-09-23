@@ -89,7 +89,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
     else
         status_line1.sprintf("Check the Info Tab if you need more details <br> Active Point: %s",pointID[cindex].toStdString().c_str());
 
-    this->RealTimeLog("Raster Alignment", m.shortName(),
+    this->realTimeLog("Raster Alignment", m.shortName(),
                       "%s<br>"
                       "%s<br>"
                       "%s<br>"
@@ -570,12 +570,12 @@ void EditMutualCorrsPlugin::applyMutual()
 
 	///// Initialize GLContext
 
-	Log("Initialize GL");
+	log("Initialize GL");
 	//glContext->makeCurrent();
 	if (this->initGL() == false)
 		return;
 
-	Log("Done");
+	log("Done");
 
 	for (int i = 0; i < align.mesh->fn; i++)
 	for (int k = 0; k < 3; k++)
@@ -634,7 +634,7 @@ void EditMutualCorrsPlugin::applyMutual()
 	int rounds = (int)(solver.maxiter / 30);
 	for (int i = 0; i<rounds; i++)
 	{
-		Log("Step %i of %i.", i + 1, rounds);
+		log("Step %i of %i.", i + 1, rounds);
 
 		solver.maxiter = 30;
 
@@ -704,14 +704,14 @@ Point2m EditMutualCorrsPlugin::fromImageToGL(Point2m picked)
 
 bool EditMutualCorrsPlugin::initGL()
 {
-    Log(GLLogStream::SYSTEM, "GL Initialization");
+    log(GLLogStream::SYSTEM, "GL Initialization");
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-        Log(GLLogStream::SYSTEM, "GLEW initialization error!");
+        log(GLLogStream::SYSTEM, "GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-        Log(GLLogStream::SYSTEM, "Graphics hardware does not support FBOs");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -721,11 +721,11 @@ bool EditMutualCorrsPlugin::initGL()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-        Log(GLLogStream::SYSTEM, "Graphics hardware does not support non-power-of-two textures");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-        Log(GLLogStream::SYSTEM, "Graphics hardware does not support vertex buffer objects");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -742,6 +742,6 @@ bool EditMutualCorrsPlugin::initGL()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-    Log(GLLogStream::SYSTEM, "GL Initialization done");
+    log(GLLogStream::SYSTEM, "GL Initialization done");
 	return true;
 }

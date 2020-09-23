@@ -27,7 +27,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
 	validcache = false;
 	curAction = action;
@@ -39,7 +39,7 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 	curMeshDoc = mdp;
 	curgla = gla;
 
-	mfi->initParameterSet(action, *mdp, curParSet);
+	mfi->initParameterList(action, *mdp, curParSet);
 	curmask = mfi->postCondition(action);
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
@@ -69,7 +69,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != MeshFilterInterface::SINGLE_MESH))
+	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != FilterPluginInterface::SINGLE_MESH))
 		return false;
 
 	if ((curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE))
@@ -105,7 +105,7 @@ void MeshlabStdDialog::createFrame()
 void MeshlabStdDialog::resetValues()
 {
 	curParSet.clear();
-	curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
+	curmfi->initParameterList(curAction, *curMeshDoc, curParSet);
 
 	assert(qf);
 	assert(qf->isVisible());

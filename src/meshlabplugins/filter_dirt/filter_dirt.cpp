@@ -99,7 +99,7 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
+void FilterDirt::initParameterList(const QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
 
     switch(ID(filter)){
 
@@ -128,12 +128,12 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichPar
     }
 }
 
-int FilterDirt::getRequirements(QAction * /*action*/)
+int FilterDirt::getRequirements(const QAction * /*action*/)
 {
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
-bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, const RichParameterList &par, vcg::CallBackPos *cb){
+bool FilterDirt::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb){
 
 
     switch(ID(filter)){
@@ -243,7 +243,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, const RichParame
     return true;
 }//End applyFilter
 
-int FilterDirt::postCondition( QAction *a) const
+int FilterDirt::postCondition(const QAction *a) const
 {
 	switch (ID(a)){
 	case FP_DIRT: return MeshModel::MM_ALL;
@@ -253,14 +253,14 @@ int FilterDirt::postCondition( QAction *a) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
+FilterPluginInterface::FilterClass FilterDirt::getClass(const QAction *filter) const
 {
 	switch (ID(filter))	{
-	case FP_DIRT:return MeshFilterInterface::Sampling;
-	case FP_CLOUD_MOVEMENT:return MeshFilterInterface::Remeshing;
+	case FP_DIRT:return FilterPluginInterface::Sampling;
+	case FP_CLOUD_MOVEMENT:return FilterPluginInterface::Remeshing;
 	default:assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDirt)

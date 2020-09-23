@@ -28,18 +28,18 @@
 
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include <vcg/math/similarity2.h>
 #include "Patch.h"
 #include <wrap/glw/glw.h>
 class VisibleSet;
 
 
-class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
+class FilterImgPatchParamPlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES( MeshFilterInterface )
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES( FilterPluginInterface )
 
     enum
     {
@@ -103,21 +103,22 @@ public:
     virtual QString     filterName( FilterIDType id ) const;
     virtual QString     filterInfo( FilterIDType id ) const;
 
-    virtual FilterClass getClass( QAction *act );
+    virtual FilterClass getClass(const QAction* act ) const;
 
-    virtual void        initParameterSet( QAction *act,
+    virtual void        initParameterList(const QAction* act,
                                           MeshDocument &md,
                                           RichParameterList &par );
 
-    virtual int         getRequirements( QAction *act );
+    virtual int         getRequirements(const QAction* act );
     //virtual int         postCondition( QAction *act ) const;
 
-    virtual bool        applyFilter( QAction *act,
+    virtual bool         applyFilter(const QAction* act,
                                      MeshDocument &md,
+                                     unsigned int& postConditionMask,
                                      const RichParameterList &par,
                                      vcg::CallBackPos *cb );
 
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 

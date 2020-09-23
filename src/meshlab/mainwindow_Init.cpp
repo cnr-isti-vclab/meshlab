@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 
-#include "../common/interfaces.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
 #include "../common/mlexception.h"
@@ -39,6 +38,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QWidgetAction>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "meshlab_settings/meshlabsettingsdialog.h"
@@ -91,7 +91,7 @@ MainWindow::MainWindow()
 	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
-	mwsettings.updateGlobalParameterSet(currentGlobalParams);
+	mwsettings.updateGlobalParameterList(currentGlobalParams);
 	createActions();
 	createToolBars();
 	createMenus();
@@ -473,7 +473,7 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
+	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
@@ -484,7 +484,7 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -500,7 +500,7 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+	foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
 	{
 		foreach(QAction* filterAction, iFilter->actions())
 		{
@@ -717,90 +717,90 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuCamera);
 
 
-	QMap<QString, MeshFilterInterface *>::iterator msi;
+	QMap<QString, FilterPluginInterface *>::iterator msi;
 	for (msi = PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end(); ++msi)
 	{
-		MeshFilterInterface * iFilter = msi.value();
-		QAction *filterAction = iFilter->AC((msi.key()));
+		FilterPluginInterface * iFilter = msi.value();
+		QAction *filterAction = iFilter->getFilterAction((msi.key()));
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
 		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if (filterClass & MeshFilterInterface::FaceColoring)
+		if (filterClass & FilterPluginInterface::FaceColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::VertexColoring)
+		if (filterClass & FilterPluginInterface::VertexColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshColoring)
+		if (filterClass & FilterPluginInterface::MeshColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Selection)
+		if (filterClass & FilterPluginInterface::Selection)
 		{
 			filterMenuSelect->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Cleaning)
+		if (filterClass & FilterPluginInterface::Cleaning)
 		{
 			filterMenuClean->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Remeshing)
+		if (filterClass & FilterPluginInterface::Remeshing)
 		{
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Smoothing)
+		if (filterClass & FilterPluginInterface::Smoothing)
 		{
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Normal)
+		if (filterClass & FilterPluginInterface::Normal)
 		{
 			filterMenuNormal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Quality)
+		if (filterClass & FilterPluginInterface::Quality)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Measure)
+		if (filterClass & FilterPluginInterface::Measure)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Layer)
+		if (filterClass & FilterPluginInterface::Layer)
 		{
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RasterLayer)
+		if (filterClass & FilterPluginInterface::RasterLayer)
 		{
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshCreation)
+		if (filterClass & FilterPluginInterface::MeshCreation)
 		{
 			filterMenuCreate->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RangeMap)
+		if (filterClass & FilterPluginInterface::RangeMap)
 		{
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::PointSet)
+		if (filterClass & FilterPluginInterface::PointSet)
 		{
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Sampling)
+		if (filterClass & FilterPluginInterface::Sampling)
 		{
 			filterMenuSampling->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Texture)
+		if (filterClass & FilterPluginInterface::Texture)
 		{
 			filterMenuTexture->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Polygonal)
+		if (filterClass & FilterPluginInterface::Polygonal)
 		{
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Camera)
+		if (filterClass & FilterPluginInterface::Camera)
 		{
 			filterMenuCamera->addAction(filterAction);
 		}
@@ -818,7 +818,7 @@ void MainWindow::fillFilterMenu()
 
 void MainWindow::fillDecorateMenu()
 {
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
+	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
@@ -836,7 +836,7 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	foreach(MeshRenderInterface *iRender, PM.meshRenderPlugins())
+	foreach(RenderPluginInterface *iRender, PM.meshRenderPlugins())
 	{
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
@@ -844,7 +844,7 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -860,8 +860,8 @@ void MainWindow::loadMeshLabSettings()
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
-	MainWindowSetting::initGlobalParameterSet(&defaultGlobalParams);
-	GLArea::initGlobalParameterSet(&defaultGlobalParams);
+	MainWindowSetting::initGlobalParameterList(&defaultGlobalParams);
+	GLArea::initGlobalParameterList(&defaultGlobalParams);
 
 	QSettings settings;
 	QStringList klist = settings.allKeys();
@@ -1002,7 +1002,16 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 {
 	verboseCheckingFlag = verboseFlag;
 
+	bool checkForMonthlyAndBetasVal = false;
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
+
+	QString urlCheck = "https://www.meshlab.net/ML_VERSION";
 	QSettings settings;
+	if (settings.contains(checkForMonthlyAndBetasVar))
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();
+	if (checkForMonthlyAndBetasVal){
+		urlCheck = "https://github.com/cnr-isti-vclab/meshlab/blob/master/ML_VERSION";
+	}
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
 	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
@@ -1011,7 +1020,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 		UID = QUuid::createUuid().toString();
 		settings.setValue("UID", UID);
 	}
-	QString BaseCommand("/~cignoni/meshlab_latest.php");
+	QString baseCommand("/~cignoni/meshlab_latest.php");
 
 	#ifdef Q_OS_WIN
 		QString OS = "Win";
@@ -1020,13 +1029,13 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	#else
 		QString OS = "Lin";
 	#endif
-	QString message = BaseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+	QString message = baseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
 
 	QNetworkAccessManager stats;
 	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
 	stats.get(statreq);
 
-	QNetworkRequest request(QString("http://www.meshlab.net/ML_VERSION"));
+	QNetworkRequest request(urlCheck);
 	httpReq.get(request);
 }
 
@@ -1036,14 +1045,20 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
 
 	bool dontRemindMeAboutUpgradeVal = false;
+	bool checkForMonthlyAndBetasVal = false;
 	const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
 
 	// Check if the user specified not to be reminded to upgrade
+	if (settings.contains(dontRemindMeAboutUpgradeVar))
+		dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
 	if (!verboseCheckingFlag) {
-		if (settings.contains(dontRemindMeAboutUpgradeVar))
-			dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
 		if (dontRemindMeAboutUpgradeVal)
 			return;
+	}
+	
+	if (settings.contains(checkForMonthlyAndBetasVar)){
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();;
 	}
 
 	QByteArray ddata = reply->readAll();
@@ -1062,6 +1077,12 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 		if (splitOnlineVersion[1].toInt() > splitThisVersion[1].toInt()) {
 			newVersionAvailable = true;
 		}
+		else if (splitOnlineVersion[1].toInt() == splitThisVersion[1].toInt() && splitOnlineVersion.size() > 2) {
+			//case of beta version or very important fixes
+			if (splitThisVersion.size() == 2 || (splitThisVersion.size() > 2 && splitOnlineVersion[2] > splitThisVersion[2])){
+				newVersionAvailable = true;
+			}
+		}
 	}
 
 	// Set up a message box for the user
@@ -1071,8 +1092,25 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	QCheckBox dontShowCheckBox("Don't show this message again.");
 	dontShowCheckBox.blockSignals(true);
 	msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+	dontShowCheckBox.setChecked(dontRemindMeAboutUpgradeVal);
+	QCheckBox checkMonthlysCheckBox("Check for Monthly and Beta versions.");
+	checkMonthlysCheckBox.blockSignals(true);
+	msgBox.addButton(&checkMonthlysCheckBox, QMessageBox::ResetRole);
+	checkMonthlysCheckBox.setChecked(checkForMonthlyAndBetasVal);
 
 	if (newVersionAvailable){
+		QString message =
+				"<center>You are using an old version of MeshLab.<br><br>"
+				"Please, upgrade to the new version!<br><br>";
+		if (checkForMonthlyAndBetasVal){
+			message +=
+					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>";
+		}
+		else {
+			message +=
+					"<big> <a href=\"https://www.meshlab.net/#download\">Download</a></big></center>";
+		}
+		
 		msgBox.setText(
 					"<center>You are using an old version of MeshLab.<br><br>"
 					"Please, upgrade to the new version!<br><br>"
@@ -1088,6 +1126,18 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 		int userReply = msgBox.exec();
 		if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
 			settings.setValue(dontRemindMeAboutUpgradeVar, true);
+		else if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(dontRemindMeAboutUpgradeVar, false);
+		if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Checked) {
+			settings.setValue(checkForMonthlyAndBetasVar, true);
+			if (!checkForMonthlyAndBetasVal) {
+				//the user changed the states: he now wants to check for betas
+				//need to check again with properly set 
+				checkForUpdates(false);
+			}
+		}
+		else if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(checkForMonthlyAndBetasVar, false);
 	}
 }
 
@@ -1159,28 +1209,28 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterSet(RichParameterList* glbset)
+void MainWindowSetting::initGlobalParameterList(RichParameterList* gbllist)
 {
-	glbset->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
-	glbset->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	glbset->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+	gbllist->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+	gbllist->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 //	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		glbset->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
-	glbset->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+		gbllist->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
+	gbllist->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(const RichParameterList& rps)
+void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 {
-	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
-	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
-	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
+	maxgpumem = (std::ptrdiff_t)rpl.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
+	perbatchprimitives = (size_t)rpl.getInt(perBatchPrimitives());
+	minpolygonpersmoothrendering = (size_t)rpl.getInt(minPolygonNumberPerSmoothRendering());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		highprecision = rps.getBool(highPrecisionRendering());
-	maxTextureMemory = (std::ptrdiff_t) rps.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
+		highprecision = rpl.getBool(highPrecisionRendering());
+	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

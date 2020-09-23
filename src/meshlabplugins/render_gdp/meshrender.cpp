@@ -28,6 +28,8 @@
 #include "meshrender.h"
 #include <QGLWidget>
 #include <QTextStream>
+#include <QDir>
+#include <QMessageBox>
 #include "../../meshlab/glarea.h"
 
 using namespace std;

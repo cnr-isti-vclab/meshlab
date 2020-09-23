@@ -47,7 +47,7 @@ QList<QAction *> EditSelectFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditSelectFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editSelect)
 		return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);
@@ -62,7 +62,7 @@ MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 	return nullptr;
 }
 
-QString EditSelectFactory::getEditToolDescription(QAction * /*a*/)
+QString EditSelectFactory::getEditToolDescription(const QAction * /*a*/)
 {
   return EditSelectPlugin::Info();
 }

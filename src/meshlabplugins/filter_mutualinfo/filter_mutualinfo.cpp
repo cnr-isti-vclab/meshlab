@@ -69,23 +69,23 @@ QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
 	}
 }
 
-FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
+FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_IMAGE_MUTUALINFO:
-		return MeshFilterInterface::Camera;
+		return FilterPluginInterface::Camera;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*md*/, RichParameterList & parlst)
+void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocument & /*md*/, RichParameterList & parlst)
 {
 	QStringList rendList;
 	rendList.push_back("Combined");
@@ -110,7 +110,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*m
 	}
 }
 
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos* )
+bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
 {
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :
@@ -127,7 +127,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, cons
 	}
 }
 
-int FilterMutualInfoPlugin::postCondition(QAction*) const
+int FilterMutualInfoPlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }
@@ -146,12 +146,12 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 	Solver solver;
 	MutualInfo mutual;
 	if (!shot.IsValid()){
-		Log(GLLogStream::FILTER, "Error: shot not valid. Press 'Get Shot' button before applying!");
+		log(GLLogStream::FILTER, "Error: shot not valid. Press 'Get Shot' button before applying!");
 		return false;
 	}
 
 	if (md.rasterList.size()==0) {
-		Log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
+		log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
 		return false;
 	}
 	else {
@@ -200,19 +200,19 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 
 	///// Initialize GLContext
 
-	Log( "Initialize GL");
+	log( "Initialize GL");
 	align.setGLContext(glContext);
 	glContext->makeCurrent();
 	if (initGLMutualInfo() == false)
 		return false;
 
-	Log( "Done");
+	log( "Done");
 
 	///// Mutual info calculation: every 30 iterations, the mail glarea is updated
 	int rounds=(int)(solver.maxiter/30);
 	for (int i=0; i<rounds; i++)
 	{
-		Log( "Step %i of %i.", i+1, rounds );
+		log( "Step %i of %i.", i+1, rounds );
 
 		solver.maxiter=30;
 
@@ -244,14 +244,14 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 
 bool FilterMutualInfoPlugin::initGLMutualInfo()
 {
-	Log(0, "GL Initialization");
+	log(0, "GL Initialization");
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-		Log(0, "GLEW initialization error!");
+		log(0, "GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-		Log(0, "Graphics hardware does not support FBOs");
+		log(0, "Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -261,11 +261,11 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-		Log(0,"Graphics hardware does not support non-power-of-two textures");
+		log(0,"Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-		Log(0, "Graphics hardware does not support vertex buffer objects");
+		log(0, "Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -282,7 +282,7 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-	Log(0, "GL Initialization done");
+	log(0, "GL Initialization done");
 	return true;
 }
 

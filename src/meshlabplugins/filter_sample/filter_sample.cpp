@@ -83,14 +83,14 @@ QString FilterSamplePlugin::filterName(FilterIDType filterId) const
  * @param a: the action of the filter
  * @return the class od the filter
  */
-FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(QAction *a)
+FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_MOVE_VERTEX :
-		return MeshFilterInterface::Smoothing;
+		return FilterPluginInterface::Smoothing;
 	default :
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
@@ -98,7 +98,7 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(QAction *a)
  * @brief FilterSamplePlugin::filterArity
  * @return
  */
-MeshFilterInterface::FILTER_ARITY FilterSamplePlugin::filterArity(QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -107,7 +107,7 @@ MeshFilterInterface::FILTER_ARITY FilterSamplePlugin::filterArity(QAction*) cons
  * @brief FilterSamplePlugin::getPreConditions
  * @return
  */
-int FilterSamplePlugin::getPreConditions(QAction*) const
+int FilterSamplePlugin::getPreConditions(const QAction*) const
 {
 	return MeshModel::MM_NONE;
 }
@@ -116,7 +116,7 @@ int FilterSamplePlugin::getPreConditions(QAction*) const
  * @brief FilterSamplePlugin::postCondition
  * @return
  */
-int FilterSamplePlugin::postCondition(QAction*) const
+int FilterSamplePlugin::postCondition(const QAction*) const
 {
 	return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;
 }
@@ -133,7 +133,7 @@ int FilterSamplePlugin::postCondition(QAction*) const
  * @param m
  * @param parlst
  */
-void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterList & parlst) 
+void FilterSamplePlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
@@ -153,7 +153,7 @@ void FilterSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichPara
  * @param cb: callback object to tell MeshLab the percentage of execution of the filter
  * @return true if the filter has been applied correctly, false otherwise
  */
-bool FilterSamplePlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterSamplePlugin::applyFilter(const QAction * action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
@@ -185,7 +185,7 @@ bool FilterSamplePlugin::vertexDisplacement(
 	}
 
 	// Log function dump textual info in the lower part of the MeshLab screen.
-	Log("Successfully displaced %i vertices",m.vn);
+	log("Successfully displaced %i vertices",m.vn);
 
 	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 	if(updateNormals){

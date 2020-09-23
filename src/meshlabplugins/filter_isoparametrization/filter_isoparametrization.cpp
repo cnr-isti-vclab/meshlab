@@ -95,12 +95,12 @@ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-int FilterIsoParametrization::getRequirements(QAction *)
+int FilterIsoParametrization::getRequirements(const QAction *)
 {
 	return MeshModel::MM_NONE;
 }
 
-void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterIsoParametrization::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
 {
   
   switch(ID(a))
@@ -172,14 +172,14 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
   StatEdge<CMeshO>(*mesh,minE,maxE,avE,stdE);
   StatArea<CMeshO>(*mesh,minAr,maxAr,avAr,stdAr);
   StatAngle<CMeshO>(*mesh,minAn,maxAn,avAn,stdAn);
-  Log(" REMESHED ");
-  Log("Irregular Vertices:%d ",non_reg);
-  Log("stdDev Area:  %5.2f",stdAr/avAr);
-  Log("stdDev Angle: %5.2f",stdAn/avAn);
-  Log("stdDev Edge:  %5.2f",stdE/avE);
+  log(" REMESHED ");
+  log("Irregular Vertices:%d ",non_reg);
+  log("stdDev Area:  %5.2f",stdAr/avAr);
+  log("stdDev Angle: %5.2f",stdAn/avAn);
+  log("stdDev Edge:  %5.2f",stdE/avE);
 }
 
-bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, const RichParameterList & par, vcg::CallBackPos  *cb)
+bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos  *cb)
 {
   MeshModel* m = md.mm();  //get current mesh from document
   CMeshO *mesh=&m->cm;
@@ -234,7 +234,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, co
         float aggregate,L2;
         int n_faces;
         Parametrizator.getValues(aggregate,L2,n_faces);
-        Log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
+        log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
       }
       else
       {
@@ -325,11 +325,11 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, co
     int n_diamonds,inFace,inEdge,inStar,n_merged;
     DiamSampl.getResData(n_diamonds,inFace,inEdge,inStar,n_merged);
     
-    Log("INTERPOLATION DOMAINS");
-    Log("In Face: %d \n",inFace);
-    Log("In Diamond: %d \n",inEdge);
-    Log("In Star: %d \n",inStar);
-    Log("Merged %d vertices\n",n_merged);
+    log("INTERPOLATION DOMAINS");
+    log("In Face: %d \n",inFace);
+    log("In Diamond: %d \n",inEdge);
+    log("In Star: %d \n",inStar);
+    log("Merged %d vertices\n",n_merged);
     mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
     mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
     PrintStats(rem);
@@ -453,28 +453,28 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, co
   return false;
 }
 
-MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *)
+FilterPluginInterface::FilterClass FilterIsoParametrization::getClass(const QAction *) const
 {
-  return MeshFilterInterface::Remeshing;
+  return FilterPluginInterface::Remeshing;
 }
 
-int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
+int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 {
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity( QAction* filter) const
+FilterPluginInterface::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {
     case ISOP_PARAM :	
     case ISOP_REMESHING :
     case ISOP_DIAMPARAM :
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case ISOP_TRANSFER:	
-        return MeshFilterInterface::FIXED;
+        return FilterPluginInterface::FIXED;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
 

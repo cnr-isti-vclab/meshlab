@@ -27,6 +27,7 @@
 #include <wrap/qt/device_to_logical.h>
 #include <meshlab/glarea.h>
 #include <vcg/space/intersection2.h>
+#include <QApplication>
 
 
 using namespace std;
@@ -519,7 +520,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 
 		line4 = "<br>A select all, D de-select all, I invert all";
 
-		this->RealTimeLog("Selection from Area", m.shortName(),
+		this->realTimeLog("Selection from Area", m.shortName(),
 			"%s<br>%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str(), line4.toStdString().c_str());
 
 		return;
@@ -535,7 +536,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 			line2 = "you may hold:<br>- CTRL to add<br>- SHIFT to subtract";
 		line3 = "<br>A select all, D de-select all, I invert all";
 
-		this->RealTimeLog("Interactive Selection", m.shortName(), "%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
+		this->realTimeLog("Interactive Selection", m.shortName(), "%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
 	}
 
 	if (isDragging)

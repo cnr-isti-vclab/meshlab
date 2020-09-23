@@ -24,7 +24,9 @@
 #ifndef EXTRADECORATEPLUGIN_H
 #define EXTRADECORATEPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/ml_shared_data_context.h>
+
 #include <wrap/gui/coordinateframe.h>
 #include "colorhistogram.h"
 
@@ -33,11 +35,11 @@ typedef vcg::ColorHistogram<float>  CHist;
 
 typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
-class DecorateBasePlugin : public QObject, public MeshDecorateInterface
+class DecorateBasePlugin : public QObject, public DecoratePluginInterface
 {
   Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
-  Q_INTERFACES(MeshDecorateInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(DecoratePluginInterface)
   QString decorationName(FilterIDType filter) const;
   QString decorationInfo(FilterIDType filter) const;
   QString pluginName() const;
@@ -111,14 +113,14 @@ public:
 
 
 
-  void decorateDoc(QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  void decorateMesh(QAction *a, MeshModel &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
-  bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
-  int getDecorationClass(QAction * /*action*/) const;
-  void initGlobalParameterSet(QAction *, RichParameterList &/*globalparam*/);
+  void decorateDoc(const QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  void decorateMesh(const QAction *a, MeshModel &md, const RichParameterList *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  bool startDecorate(const QAction* /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  void endDecorate(const QAction* /*mode*/, MeshModel &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  bool startDecorate(const QAction * /*mode*/, MeshDocument &/*m*/, const RichParameterList *, GLArea * /*parent*/);
+  bool isDecorationApplicable(const QAction *action, const MeshModel& m, QString &ErrorMessage) const;
+  int getDecorationClass(const QAction* /*action*/) const;
+  void initGlobalParameterList(const QAction *, RichParameterList &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }

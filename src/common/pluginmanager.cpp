@@ -1,8 +1,12 @@
 #include "pluginmanager.h"
 #include <QObject>
+#include <qapplication.h>
+#include <QPluginLoader>
+#include <QDebug>
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
+
 
 
 static QString DLLExtension() {
@@ -43,7 +47,7 @@ PluginManager::~PluginManager()
 	meshFilterPlug.clear();
 	meshRenderPlug.clear();
 	meshDecoratePlug.clear();
-	for (MeshCommonInterface* plugin : ownerPlug)
+	for (PluginInterface* plugin : ownerPlug)
 		delete plugin;
 	ownerPlug.clear();
 
@@ -83,8 +87,8 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 		if (plugin)
 		{
 			pluginsLoaded.push_back(fileName);
-			MeshCommonInterface *iCommon = nullptr;
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			PluginInterface *iCommon = nullptr;
+			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
 			if (iFilter)
 			{
 				iCommon = iFilter;
@@ -94,8 +98,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					filterAction->setData(QVariant(fileName));
 					actionFilterMap.insert(filterAction->text(), filterAction);
 					stringFilterMap.insert(filterAction->text(), iFilter);
-					iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
-					if(iFilter->getClass(filterAction)==MeshFilterInterface::Generic)
+					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic)
 						throw MLException("Missing class for "        +fileName+filterAction->text());
 					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))
 						throw MLException("Missing requirements for " +fileName+filterAction->text());
@@ -103,19 +106,18 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 						throw MLException("Missing preconditions for "+fileName+filterAction->text());
 					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN ))
 						throw MLException("Missing postcondition for "+fileName+filterAction->text());
-					if(iFilter->filterArity(filterAction) == MeshFilterInterface::UNKNOWN_ARITY )
+					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY )
 						throw MLException("Missing Arity for "        +fileName+filterAction->text());
 				}
 			}
-			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			IOPluginInterface *iIO = qobject_cast<IOPluginInterface *>(plugin);
 			if (iIO)
 			{
 				iCommon = iIO;
 				meshIOPlug.push_back(iIO);
-				iIO->initGlobalParameterSet(NULL, defaultGlobal);
 			}
 
-			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
+			DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
 			if (iDecorator)
 			{
 				iCommon = iDecorator;
@@ -123,18 +125,18 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				foreach(QAction *decoratorAction, iDecorator->actions())
 				{
 					decoratorActionList.push_back(decoratorAction);
-					iDecorator->initGlobalParameterSet(decoratorAction, defaultGlobal);
+					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
 				}
 			}
 
-			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
 			if (iRender)
 			{
 				iCommon = iRender;
 				meshRenderPlug.push_back(iRender);
 			}
 
-			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+			EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
 			if (iEditFactory)
 			{
 				meshEditInterfacePlug.push_back(iEditFactory);
@@ -160,9 +162,9 @@ int PluginManager::numberIOPlugins() const
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
+DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
 {
-  foreach(MeshDecorateInterface *tt, this->meshDecoratePlugins())
+  foreach(DecoratePluginInterface *tt, this->meshDecoratePlugins())
   {
     foreach( QAction *ac, tt->actions())
       if( name == tt->decorationName(ac) ) return tt;
@@ -188,7 +190,7 @@ QMap<QString, RichParameterList> PluginManager::generateFilterParameterMap()
 		QString filterName = ai.key();//  ->filterName();
 									  //QAction act(filterName,NULL);
 		RichParameterList rp;
-		stringFilterMap[filterName]->initParameterSet(ai.value(), md, rp);
+		stringFilterMap[filterName]->initParameterList(ai.value(), md, rp);
 		FPM[filterName] = rp;
 	}
 	return FPM;
@@ -271,11 +273,11 @@ void PluginManager::knownIOFormats()
 	{
 		QStringList* formatFilters = NULL;
 		QString allKnownFormatsFilter = QObject::tr("All known formats (");
-		for (QVector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
+		for (QVector<IOPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
 		{
-			MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
-			QList<MeshIOInterface::Format> format;
-			QMap<QString, MeshIOInterface*>* map = NULL;
+			IOPluginInterface* pMeshIOPlugin = *itIOPlugin;
+			QList<IOPluginInterface::Format> format;
+			QMap<QString, IOPluginInterface*>* map = NULL;
 			if (inpOut == int(IMPORT))
 			{
 				map = &allKnowInputFormats;
@@ -288,9 +290,9 @@ void PluginManager::knownIOFormats()
 				formatFilters = &outFilters;
 				format = pMeshIOPlugin->exportFormats();
 			}
-			for (QList<MeshIOInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
+			for (QList<IOPluginInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
 			{
-				MeshIOInterface::Format currentFormat = *itf;
+				IOPluginInterface::Format currentFormat = *itf;
 
 				QString currentFilterEntry = currentFormat.description + " (";
 

@@ -22,9 +22,17 @@
 ****************************************************************************/
 
 #include "plugindialog.h"
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
+#include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/interfaces/render_plugin_interface.h>
+#include <common/interfaces/edit_plugin_interface.h>
+
+
 
 #include <QLabel>
+#include <QDir>
+#include <QPluginLoader>
 #include <QTreeWidget>
 #include <QGroupBox>
 #include <QPushButton>
@@ -116,40 +124,40 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
             pluginItem->setFont(0, boldFont);
 
             if (plugin) {
-                MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+                IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
                                 if (iMeshIO){
                                     QStringList Templist;
-                                    foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+                                    foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
                                         QString formats;
                                         foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
                                         Templist.push_back(formats);
                                     }
-                                    foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+                                    foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
                                         QString formats;
                                         foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
                                         Templist.push_back(formats);
                                     }
                   addItems(pluginItem,Templist);
                                 }
-                MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+                DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
                                 if (iDecorate){
                                     QStringList Templist;
                                     foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
                                     addItems(pluginItem,Templist);
                                 }
-                                MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+                                FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
                                 if (iFilter){
                                     QStringList Templist;
                                     foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
                                     addItems(pluginItem,Templist);
                                 }
-                                MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+                                RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
                                 if (iRender){
                                     QStringList Templist;
                                     foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
                                         addItems(pluginItem,Templist);
                                 }
-                                MeshEditInterfaceFactory *iEdit = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+                                EditPluginInterfaceFactory *iEdit = qobject_cast<EditPluginInterfaceFactory *>(plugin);
                                 if (iEdit){
                                     QStringList Templist;
                                     foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
@@ -184,36 +192,36 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
     qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
     QObject *plugin = loader.instance();
     if (plugin) {
-        MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+        IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
         if (iMeshIO){
-            foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+            foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
                 QString formats;
                 foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
                 if (actionName==formats) labelInfo->setText(f.description);
             }
-            foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+            foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
                 QString formats;
                 foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
                 if (actionName==formats) labelInfo->setText(f.description);
             }
         }
-        MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+        DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
         if (iDecorate)
         {
             foreach(QAction *a,iDecorate->actions())
                 if (actionName==a->text())
                     labelInfo->setText(iDecorate->decorationInfo(a));
         }
-        MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+        FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
         if (iFilter)
         {
             foreach(QAction *a,iFilter->actions())
                             if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
         }
-        MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+        RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
         if (iRender){
         }
-        MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+        EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
         if (iEditFactory)
         {
             foreach(QAction *a, iEditFactory->actions())

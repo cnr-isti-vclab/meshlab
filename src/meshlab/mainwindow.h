@@ -29,6 +29,7 @@
 
 #include <GL/glew.h>
 
+#include "../common/interfaces/mainwindow_interface.h"
 #include "../common/pluginmanager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
@@ -66,8 +67,8 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterSet(RichParameterList* gblset);
-	void updateGlobalParameterSet(const RichParameterList& rps );
+	static void initGlobalParameterList(RichParameterList* gbllist);
+	void updateGlobalParameterList(const RichParameterList& rpl );
 
 	std::ptrdiff_t maxgpumem;
 	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
@@ -94,7 +95,7 @@ class MainWindow : public QMainWindow, public MainWindowInterface
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, RichParameterList &srcpar, bool isPreview = false);
+	void executeFilter(const QAction *action, RichParameterList &srcpar, bool isPreview = false);
 
 	MainWindow();
 	~MainWindow();
@@ -148,7 +149,7 @@ private slots:
 public:
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMesh(const QString& fileName,IOPluginInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
@@ -179,7 +180,6 @@ private slots:
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	void startFilter();
-	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
 	void showTooltip(QAction*);
@@ -286,14 +286,14 @@ private:
 	Note this part should be detached from MainWindow just like the loading plugin part.
 
 	For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values.
-	At the start up the initGlobalParameterSet function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
+	At the start up the initGlobalParameterList function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
 	At the start up the currentGlobalParams is filled with the values saved in the registry.
 	*/
 
 	RichParameterList currentGlobalParams;
 	RichParameterList defaultGlobalParams;
 
-	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
+	QByteArray toolbarState; //toolbar and dockwidgets state
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 

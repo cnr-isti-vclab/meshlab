@@ -24,17 +24,17 @@
 #ifndef EditAlignPLUGIN_H
 #define EditAlignPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <vcg/complex/algorithms/align_pair.h>
 #include "align/OccupancyGrid.h"
 #include "meshtree.h"
 #include <wrap/gui/trackball.h>
 #include "alignDialog.h"
 
-class EditAlignPlugin : public QObject, public MeshEditInterface
+class EditAlignPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+		Q_INTERFACES(EditPluginInterface)
 
 		enum
 	{

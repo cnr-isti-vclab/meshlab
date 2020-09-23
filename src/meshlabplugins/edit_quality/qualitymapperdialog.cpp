@@ -27,6 +27,7 @@
 #include <QBrush>
 #include <QGraphicsSceneMouseEvent>
 #include <QFileDialog>
+#include <QMessageBox>
 
 using namespace vcg;
 

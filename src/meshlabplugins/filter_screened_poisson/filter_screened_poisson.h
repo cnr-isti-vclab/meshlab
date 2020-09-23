@@ -24,13 +24,13 @@
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterScreenedPoissonPlugin : public QObject, public MeshFilterInterface
+class FilterScreenedPoissonPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 public:
 
 	enum {
@@ -44,18 +44,19 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 
-	FilterClass getClass(QAction* a);
-	int getRequirements(QAction* a);
+	FilterClass getClass(const QAction* a) const;
+	int getRequirements(const QAction* a);
 
 	bool applyFilter(
-			QAction* filter,
+			const QAction* filter,
 			MeshDocument& md,
+			unsigned int& postConditionMask,
 			const RichParameterList& params,
 			vcg::CallBackPos* cb) ;
 
-	void initParameterSet(QAction* a, MeshModel&, RichParameterList& parlist);
-	int postCondition(QAction* filter) const;
-	FILTER_ARITY filterArity(QAction*) const;
+	void initParameterList(const QAction* a, MeshModel&, RichParameterList& parlist);
+	int postCondition(const QAction* filter) const;
+	FILTER_ARITY filterArity(const QAction*) const;
 };
 
 

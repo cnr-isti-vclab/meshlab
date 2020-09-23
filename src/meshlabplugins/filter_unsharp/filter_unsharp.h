@@ -24,14 +24,14 @@
 #define FilterUnsharp_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
-class FilterUnsharp : public QObject, public MeshFilterInterface
+class FilterUnsharp : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 		public:
 	/* naming convention :
@@ -70,13 +70,13 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *);
-	int getRequirements(QAction *);
-	bool applyFilter(QAction *filter, MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	void initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterList & parlst);
-	int postCondition( QAction* ) const;
-	int getPreConditions(QAction *) const;
-    FILTER_ARITY filterArity(QAction * filter) const;
+	FilterClass getClass(const QAction*) const;
+	int getRequirements(const QAction*);
+	bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	void initParameterList(const QAction* action, MeshDocument &/*m*/, RichParameterList & parlst);
+	int postCondition(const QAction* ) const;
+	int getPreConditions(const QAction*) const;
+	FILTER_ARITY filterArity(const QAction* filter) const;
 
 };
 

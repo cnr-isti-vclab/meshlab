@@ -26,6 +26,10 @@
 #include <Psapi.h>
 #endif
 
+#include <QDir>
+#include <QTemporaryDir>
+#include <QTemporaryFile>
+
 #include "filter_screened_poisson.h"
 #include "poisson_utils.h"
 
@@ -77,18 +81,18 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 	}
 }
 
-MeshFilterInterface::FilterClass FilterScreenedPoissonPlugin::getClass(QAction* a)
+FilterPluginInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
 {
 	if (ID(a) == FP_SCREENED_POISSON){
-		return FilterScreenedPoissonPlugin::FilterClass(MeshFilterInterface::Remeshing);
+		return FilterScreenedPoissonPlugin::FilterClass(FilterPluginInterface::Remeshing);
 	}
 	else {
 		assert(0);
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 	}
 }
 
-int FilterScreenedPoissonPlugin::getRequirements(QAction* a)
+int FilterScreenedPoissonPlugin::getRequirements(const QAction* a)
 {
 	if (ID(a) == FP_SCREENED_POISSON) {
 		return MeshModel::MM_NONE;
@@ -99,7 +103,12 @@ int FilterScreenedPoissonPlugin::getRequirements(QAction* a)
 	}
 }
 
-bool FilterScreenedPoissonPlugin::applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& params, vcg::CallBackPos* cb)
+bool FilterScreenedPoissonPlugin::applyFilter(
+		const QAction* filter,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		const RichParameterList& params,
+		vcg::CallBackPos* cb)
 {
 	bool currDirChanged=false;
 	QDir currDir = QDir::current();
@@ -109,11 +118,11 @@ bool FilterScreenedPoissonPlugin::applyFilter(QAction* filter, MeshDocument& md,
 		QTemporaryDir tmpdir;
 		QTemporaryFile file(tmpdir.path());
 		if (!file.open()) { //if a file cannot be created in the tmp folder
-			Log("Warning - tmp folder is not writable.");
+			log("Warning - tmp folder is not writable.");
 
 			QTemporaryFile file2("./_tmp_XXXXXX.tmp"); //try to create a file in the meshlab folder
 			if (!file2.open()){ //if a file cannot be created in the tmp and in the meshlab folder, we cannot run the filter
-				Log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+				log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
 				errorMessage = "current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
 				return false;
 			}
@@ -193,8 +202,8 @@ bool FilterScreenedPoissonPlugin::applyFilter(QAction* filter, MeshDocument& md,
 	return false;
 }
 
-void FilterScreenedPoissonPlugin::initParameterSet(
-		QAction* filter,
+void FilterScreenedPoissonPlugin::initParameterList(
+		const QAction* filter,
 		MeshModel&,
 		RichParameterList& parlist)
 {
@@ -212,7 +221,7 @@ void FilterScreenedPoissonPlugin::initParameterSet(
 	}
 }
 
-int FilterScreenedPoissonPlugin::postCondition(QAction* filter) const
+int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 {
 	if (ID(filter) == FP_SCREENED_POISSON){
 		return MeshModel::MM_VERTNUMBER + MeshModel::MM_FACENUMBER;
@@ -223,7 +232,7 @@ int FilterScreenedPoissonPlugin::postCondition(QAction* filter) const
 }
 
 
-MeshFilterInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(QAction*) const
+FilterPluginInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

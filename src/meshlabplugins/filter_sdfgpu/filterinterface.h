@@ -1,6 +1,8 @@
 #ifndef SINGLEMESHFILTERINTERFACE_H
 #define SINGLEMESHFILTERINTERFACE_H
-#include "common/interfaces.h"
+#include "common/interfaces/filter_plugin_interface.h"
+
+#include <QDebug>
 
 /**
   * @brief The interface for a filter plugin which defines a *single* action
@@ -36,7 +38,7 @@
   * Q_EXPORT_PLUGIN(SdfPlugin)
   * \endcode
   */
-class SingleMeshFilterInterface : public QObject, public MeshFilterInterface{
+class SingleMeshFilterInterface : public QObject, public FilterPluginInterface{
   
 public:
   /**
@@ -79,8 +81,8 @@ public:
       * by meshlab to determine in which filter sub-menu-entry insert this filter. The default value adds the
       * plugin to the bottom of the list.
       */
-  virtual FilterClass getClass(){
-    return MeshFilterInterface::Generic;
+  virtual FilterClass getClass() const{
+    return FilterPluginInterface::Generic;
   }
   
   /**
@@ -91,7 +93,7 @@ public:
       * parameter set according to your mesh document (data dependent parameters). A GUI will be
       * automatically designed according to this parameters.
       */
-  virtual void initParameterSet(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
+  virtual void initParameterList(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
   
   /**
       * @brief The implementation of the filter algorithm
@@ -139,25 +141,25 @@ private:
   QString filterInfo(FilterIDType ) const{
     return filterInfo();
   }
-  FilterClass getClass(QAction *){
+  FilterClass getClass(const QAction *) const{
     return getClass();
   }
   // NOTE: Paolo informed that this will be killed sooner or later.
   // any behavior defined therein should be moved to getPostConditions()
-  int getRequirements(QAction* ){
+  int getRequirements(const QAction* ){
     return postConditions();
   }
-  int getPreConditions(QAction* ) const{
+  int getPreConditions(const QAction* ) const{
     return getPreConditions();
   }
-  int postCondition() const{
+  int postCondition(const QAction*) const{
     return MeshModel::MM_NONE;
   }
-  bool applyFilter(QAction *, MeshDocument &md, const RichParameterList& par, vcg::CallBackPos * cb){
+  bool applyFilter(const QAction *, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
-  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterList &par){
-    initParameterSet(md,par);
+  virtual void initParameterList(const QAction *, MeshDocument &md, RichParameterList &par){
+    initParameterList(md,par);
   }
 };
 
