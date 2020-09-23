@@ -683,7 +683,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
         Select the visible points in a point cloud, as viewed from a given viewpoint.
         It uses the Qhull library (http://www.qhull.org/.
         The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.
-        A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.
+        A point is considered visible if its transformed point lies on the convex hull of a transformed points cloud from the original mesh points.
 
     returns
         the number of visible points if no errors occurred;

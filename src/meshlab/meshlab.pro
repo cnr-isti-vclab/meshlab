@@ -15,6 +15,7 @@ INCLUDEPATH *= \
 	. \
 	.. \
 	../.. \
+	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif \
 	$$VCGDIR \
 	$$EIGENDIR 
 
@@ -76,8 +77,7 @@ SOURCES += \
 	glarea_setting.cpp \
 	rich_parameter_gui/richparameterlistdialog.cpp \
 	rich_parameter_gui/richparameterlistframe.cpp \
-	rich_parameter_gui/richparameterwidgets.cpp \
-	../external/easyexif/exif.cpp
+	rich_parameter_gui/richparameterwidgets.cpp 
 
 FORMS += \
 	ui/layerDialog.ui \

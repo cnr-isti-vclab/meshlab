@@ -103,7 +103,7 @@ QString QhullPlugin::pluginName() const
         case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
                                           "It uses the Qhull library (http://www.qhull.org/ <br><br>"
                                           "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-                                          "A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.");
+                                          "A point is considered visible if its transformed point lies on the convex hull of a transformed points cloud from the original mesh points.");
         default : assert(0);
     }
     return QString("Error: Unknown Filter");
