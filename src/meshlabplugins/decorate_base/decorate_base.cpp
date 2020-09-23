@@ -244,8 +244,8 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 
     case DP_SHOW_BOX_CORNERS:
         {
-			bool untrasformed = rm->getBool(this->BBAbsParam());
-            DrawBBoxCorner(m, untrasformed);
+			bool untransformed = rm->getBool(this->BBAbsParam());
+            DrawBBoxCorner(m, untransformed);
 
 			Point3m bmin, bmax;
 			bmin = m.cm.bbox.min;
@@ -1083,7 +1083,7 @@ switch(ID(action))
 {
     case DP_SHOW_BOX_CORNERS :
 	{
-		parset.addParam(RichBool(this->BBAbsParam(), false, "Draw Untrasformed","If true the bbox is drawn in the original, untrasformed position "
+		parset.addParam(RichBool(this->BBAbsParam(), false, "Draw Untransformed","If true the bbox is drawn in the original, untransformed position "
 			"(instead of the position obtained by transforming it using the matrix associated to the current Layer)"));
 	} break;
 

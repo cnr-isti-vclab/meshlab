@@ -452,7 +452,7 @@ public:
             {
                 QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
                 md.addNewMesh(relativeToProj,relativeToProj);
-                openRes = loadMeshWithStandardParams(relativeToProj,md.mm(),ir->trasformation, &md);
+                openRes = loadMeshWithStandardParams(relativeToProj,md.mm(),ir->transformation, &md);
                 if(!openRes)
                     md.delMesh(md.mm());
             }

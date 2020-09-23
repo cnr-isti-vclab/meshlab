@@ -2,10 +2,6 @@ config += debug_and_release
 
 TEMPLATE = subdirs
 
-#just jhead needs to be compiled if the config is meshlab_mini
-SUBDIRS	= \
-	jhead-3.04/jhead-3.04.pro
-
 !meshlab_mini {
 SUBDIRS	+= \
 	levmar-2.3/levmar-2.3.pro \

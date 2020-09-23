@@ -54,7 +54,7 @@
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
 #include <wrap/io_trimesh/alnParser.h>
-#include "../external/easyexif/exif.h"
+#include <exif.h>
 
 using namespace std;
 using namespace vcg;
@@ -327,10 +327,10 @@ void MainWindow::updateLayerDialog()
 		layerDialog->updateDecoratorParsView();
 		MLRenderingData dt;
 		if (meshDoc()->mm() != NULL)
-		{  
+		{
 			MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = dtf.find(meshDoc()->mm()->id());
 			if (it != dtf.end())
-				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
+				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);
 		}
 		if (globrendtoolbar != NULL)
 		{
@@ -943,7 +943,7 @@ void MainWindow::startFilter()
 		{
 			QString enstr = missingPreconditions.join(",");
 			QMessageBox::warning(this, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
-			                                                                                                                                        "Current mesh does not have <i>" + enstr + "</i>."));
+																																					"Current mesh does not have <i>" + enstr + "</i>."));
 			return;
 		}
 		
@@ -1012,25 +1012,25 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 					int updatemask = MeshModel::MM_NONE;
 					bool connectivitychanged = false;
 					if (((unsigned int)mm->cm.VN() != existit->_nvert) || ((unsigned int)mm->cm.FN() != existit->_nface) ||
-					        bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) || 
-					        bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
-					        bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
-					{    
+							bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) ||
+							bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
+							bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
+					{
 						updatemask = MeshModel::MM_ALL;
 						connectivitychanged = true;
 					}
 					else
 					{
 						//masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
-						//this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
+						//this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask
 						updatemask = (existit->_mask ^ mm->dataMask()) | postcondmask;
 						connectivitychanged = false;
 					}
 					
 					MLRenderingData::RendAtts dttoupdate;
-					//1) we convert the meshmodel updating mask to a RendAtts structure 
+					//1) we convert the meshmodel updating mask to a RendAtts structure
 					MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts(updatemask,dttoupdate);
-					//2) The correspondent bos to the updated rendering attributes are set to invalid 
+					//2) The correspondent bos to the updated rendering attributes are set to invalid
 					shared->meshAttributesUpdated(mm->id(),connectivitychanged,dttoupdate);
 					
 					//3) we took the current rendering modality for the mesh in the active gla
@@ -1095,7 +1095,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 					
 					shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
 				}
-				else 
+				else
 				{
 					//A new mesh has been created by the filter. I have to add it in the shared context data structure
 					newmeshcreated = true;
@@ -1287,7 +1287,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			if (mm != NULL)
 			{
 				// at the end for filters that change the color, or selection set the appropriate rendering mode
-				if(iFilter->getClass(action) & FilterPluginInterface::FaceColoring ) 
+				if(iFilter->getClass(action) & FilterPluginInterface::FaceColoring )
 					mm->updateDataMask(MeshModel::MM_FACECOLOR);
 				
 				if(iFilter->getClass(action) & FilterPluginInterface::VertexColoring )
@@ -1314,9 +1314,10 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	{
 		meshDoc()->setBusy(false);
 		qApp->restoreOverrideCursor();
-		QMessageBox::warning(this, tr("Filter Failure"),
-		                     QString("Operating system was not able to allocate the requested memory.<br><b>"
-		                             "Failure of filter <font color=red>: '%1'</font><br>").arg(action->text())+bdall.what()); // text
+		QMessageBox::warning(
+					this, tr("Filter Failure"),
+					QString("Operating system was not able to allocate the requested memory.<br><b>"
+					"Failure of filter <font color=red>: '%1'</font><br>").arg(action->text())+bdall.what()); // text
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 	}
 	qb->reset();
@@ -1626,7 +1627,7 @@ bool MainWindow::openProject(QString fileName)
 		{
 			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
 			meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-			openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),ir->trasformation);
+			openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),ir->transformation);
 			if(!openRes)
 				meshDoc()->delMesh(meshDoc()->mm());
 		}
@@ -1662,10 +1663,10 @@ bool MainWindow::openProject(QString fileName)
 		QString model_filename;
 		
 		image_list_filename = QFileDialog::getOpenFileName(
-		            this  ,  tr("Open image list file"),
-		            QFileInfo(fileName).absolutePath(),
-		            tr("Bundler images list file (*.txt)")
-		            );
+				this,
+				tr("Open image list file"),
+				QFileInfo(fileName).absolutePath(),
+				tr("Bundler images list file (*.txt)"));
 		if(image_list_filename.isEmpty())
 			return false;
 		
@@ -1767,7 +1768,7 @@ bool MainWindow::appendProject(QString fileName)
 			{
 				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
 				meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-				if(!loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),(*ir).trasformation))
+				if(!loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),(*ir).transformation))
 					meshDoc()->delMesh(meshDoc()->mm());
 			}
 		}
@@ -1802,10 +1803,10 @@ bool MainWindow::appendProject(QString fileName)
 			QString model_filename;
 			
 			image_list_filename = QFileDialog::getOpenFileName(
-			            this, tr("Open image list file"),
-			            QFileInfo(fileName).absolutePath(),
-			            tr("Bundler images list file (*.txt)")
-			            );
+					this, 
+					tr("Open image list file"),
+					QFileInfo(fileName).absolutePath(),
+					tr("Bundler images list file (*.txt)"));
 			if (image_list_filename.isEmpty())
 				return false;
 			
@@ -2014,50 +2015,51 @@ bool MainWindow::importRaster(const QString& fileImg)
 			///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
 			/// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
 			
-            // Read the JPEG file into a buffer
-            FILE *fp = fopen(qUtf8Printable(fileName), "rb");
-            if (fp) {
-              QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-              QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-              return false;
-            }
-            fseek(fp, 0, SEEK_END);
-            unsigned long fsize = ftell(fp);
-            rewind(fp);
-            unsigned char *buf = new unsigned char[fsize];
-            if (fread(buf, 1, fsize, fp) != fsize) {
-              QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
-              QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-              delete[] buf;
-              return false;
-            }
-            fclose(fp);
-          
-            // Parse EXIF
-            easyexif::EXIFInfo ImageInfo;
-            int code = ImageInfo.parseFrom(buf, fsize);
-            delete[] buf;
-            if (code) {
-              GLA()->Logf(0,"Warning unable to parse exif for file  %s",qPrintable(fileName) );
-            }            
-            
-            if (code || ImageInfo.FocalLengthIn35mm==0.0f)
-            {
-                rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
-                rm->shot.Intrinsics.CenterPx   = Point2m(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
-                rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
-                rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
-                rm->shot.Intrinsics.FocalMm = 50.0f;
-            }
-            else
-            {
-                rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
-                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
-                float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
-                rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
-                rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
-                rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
-            }
+			// Read the JPEG file into a buffer
+			FILE *fp = fopen(qUtf8Printable(fileName), "rb");
+			if (!fp) {
+				QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+				return false;
+			}
+			fseek(fp, 0, SEEK_END);
+			unsigned long fsize = ftell(fp);
+			rewind(fp);
+			unsigned char *buf = new unsigned char[fsize];
+			if (fread(buf, 1, fsize, fp) != fsize) {
+				QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
+				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+				delete[] buf;
+				fclose(fp);
+				return false;
+			}
+			fclose(fp);
+
+			// Parse EXIF
+			easyexif::EXIFInfo ImageInfo;
+			int code = ImageInfo.parseFrom(buf, fsize);
+			delete[] buf;
+			if (code) {
+				GLA()->Logf(0,"Warning unable to parse exif for file  %s",qPrintable(fileName) );
+			}
+
+			if (code || ImageInfo.FocalLengthIn35mm==0.0f)
+			{
+				rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
+				rm->shot.Intrinsics.CenterPx   = Point2m(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
+				rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
+				rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
+				rm->shot.Intrinsics.FocalMm = 50.0f;
+			}
+			else
+			{
+				rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
+				rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
+				float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
+				rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
+				rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
+				rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
+			}
 			// End of EXIF reading
 			
 			//// Since no extrinsic are available, the current trackball is reset (except for the FOV) and assigned to the raster
@@ -2761,7 +2763,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 void MainWindow::updateTexture(int meshid)
 {
 	MultiViewer_Container* mvc = currentViewContainer();
-	if ((mvc == NULL) || (meshDoc() == NULL)) 
+	if ((mvc == NULL) || (meshDoc() == NULL))
 		return;
 	
 	MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
@@ -3220,7 +3222,7 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 
 void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*> actlist)
 {
-	if (meshDoc() == NULL) 
+	if (meshDoc() == NULL)
 		return;
 	
 	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
@@ -3329,7 +3331,7 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 	if (_currviewcontainer != NULL)
 	{
 		updateLayerDialog();
-		updateMenus();		
+		updateMenus();
 		updateStdDialog();
 	}
 }

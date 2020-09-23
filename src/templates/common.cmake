@@ -30,9 +30,7 @@ target_link_libraries({{name}}
     Qt5::Widgets
     Qt5::Xml
     Qt5::XmlPatterns
-    external-glew
-    PRIVATE
-    external-jhead)
+    external-glew)
 {% endblock %}
 
 {% block output_dir %}{% endblock %}

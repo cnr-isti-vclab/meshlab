@@ -144,7 +144,7 @@ namespace io {
 			{
 				QDomElement lod = lodNodes.at(ln).toElement();
 				QDomNode parent = lod.parentNode();
-				//Create a traslation Trasform node from attribute 'center'
+				//Create a traslation Transform node from attribute 'center'
 				QString center = lod.attribute("center");
 				QDomElement transform = doc->createElement("Transform");
 				transform.setAttribute("traslation", center);
@@ -2023,7 +2023,7 @@ namespace io {
 		
 		
 		//Create the transformation matrix for texture coordinate from TextureTransform node
-		inline static vcg::Matrix33f createTextureTrasformMatrix(QDomElement elem)
+		inline static vcg::Matrix33f createTextureTransformMatrix(QDomElement elem)
 		{
 			vcg::Matrix33f matrix, tmp;
 			matrix.SetIdentity();
@@ -2073,7 +2073,7 @@ namespace io {
 		}
 		
 		
-		//Create the transformation matrix from Trasform node 
+		//Create the transformation matrix from Transform node 
 		inline static vcg::Matrix44<ScalarType> createTransformMatrix(QDomElement root, vcg::Matrix44<ScalarType> tMatrix)
 		{
 			vcg::Matrix44<ScalarType> t, tmp;
@@ -2396,7 +2396,7 @@ namespace io {
 				point = vcg::Point3f(0, 0, 1.0);
 				textCoord.N() = -1;
 			}
-			//Apply trasform
+			//Apply transform
 			point = textInfo.textureTransform * point;
 			//Apply clamb and repeat
 			if (!textInfo.repeatS)
@@ -2567,7 +2567,7 @@ namespace io {
 										textureInfo[j].isCoordGenerator = true;
 									}
 									if ( i < (size_t)textureTransformList.size())
-										textureInfo[j].textureTransform = createTextureTrasformMatrix(textureTransformList.at(i).toElement());
+										textureInfo[j].textureTransform = createTextureTransformMatrix(textureTransformList.at(i).toElement());
 									j++;
 								}
 								i++;
@@ -2582,7 +2582,7 @@ namespace io {
 								if (textureInfo[0].textureCoordList.isEmpty())
 									textureInfo[0].isValid = false;
 								if (textureTransformList.size() > 0)
-									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
+									textureInfo[0].textureTransform = createTextureTransformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
 						else if (textureCoord.tagName() == "TextureCoordinateGenerator")
@@ -2595,7 +2595,7 @@ namespace io {
 								textureInfo[0].isValid = (mode == "COORD") || (mode == "SPHERE");
 								textureInfo[0].isCoordGenerator = true;
 								if (textureTransformList.size() > 0)
-									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
+									textureInfo[0].textureTransform = createTextureTransformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
 						else if (validTexture.size() == 1 && validTexture.at(0))

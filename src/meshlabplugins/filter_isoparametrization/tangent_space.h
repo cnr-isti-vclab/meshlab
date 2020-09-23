@@ -84,7 +84,7 @@ public:
 			vcg::Point2<ScalarType> UVDiam;
 			///transform to diamond coordinates
 			isoParam->GE1(I0,dest,DiamIndex,UVDiam);
-			///trasform back to I,alpha,beta
+			///transform back to I,alpha,beta
 			isoParam->inv_GE1(DiamIndex,UVDiam,I1,bary1);
 			domain=1;
 			return true;
@@ -104,7 +104,7 @@ public:
 		vcg::Point2<ScalarType> UVHstar;
 		///transform to UV
 		bool found=isoParam->GE0(I0,dest,StarIndex,UVHstar);
-		///trasform back to I,alpha,beta
+		///transform back to I,alpha,beta
 		if (!found)
 			return false;
 		found=isoParam->inv_GE0(StarIndex,UVHstar,I1,bary1);
