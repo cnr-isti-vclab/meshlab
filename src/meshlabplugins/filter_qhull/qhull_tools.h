@@ -59,6 +59,7 @@ extern "C"
 #include "libqhull.h"
 #else
 #include "qhull.h"
+#include "qset.h"
 #endif
 #include "mem.h"
 #include "geom.h"
