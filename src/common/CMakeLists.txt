@@ -28,7 +28,8 @@ set(SOURCES
     ml_thread_safe_memory_info.cpp
     mlapplication.cpp
     pluginmanager.cpp
-    searcher.cpp)
+    searcher.cpp
+    ${EXTERNAL_DIR}/easyexif/exif.cpp)
 
 set(HEADERS
     filter_parameter/rich_parameter.h
@@ -65,6 +66,7 @@ endif()
 add_library(common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
 set_target_properties(common PROPERTIES OUTPUT_NAME meshlab-common)
+target_include_directories(common PRIVATE ${EXTERNAL_DIR}/easyexif/)
 target_link_libraries(
     common
     PUBLIC Qt5::Core
@@ -72,8 +74,7 @@ target_link_libraries(
            Qt5::Widgets
            Qt5::Xml
            Qt5::XmlPatterns
-           external-glew
-    PRIVATE external-jhead)
+           external-glew)
 
 set_property(TARGET common PROPERTY FOLDER Core)
 

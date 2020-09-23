@@ -1,5 +1,4 @@
 include (../general.pri)
-EXIF_DIR = ../external/jhead-3.04
 
 QT += opengl
 QT += xml
@@ -20,8 +19,7 @@ INCLUDEPATH *= \
 	../.. \
 	$$$$MESHLAB_EXTERNAL_DIRECTORY/easyexif \
 	$$VCGDIR \
-	$$EIGENDIR \
-	$$EXIF_DIR
+	$$EIGENDIR
 
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include

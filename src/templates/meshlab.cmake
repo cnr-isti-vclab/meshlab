@@ -42,9 +42,7 @@ target_link_libraries({{name}}
     PUBLIC
     common
     OpenGL::GLU
-    Qt5::Network
-    PRIVATE
-    external-jhead)
+    Qt5::Network)
 
 {% endblock %}
 {% block install %}
