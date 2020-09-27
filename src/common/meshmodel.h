@@ -482,6 +482,8 @@ public:
 
 	//deletes each meshModel
 	~MeshDocument();
+	
+	void clear();
 
 	///returns the mesh with the given unique id
 	const MeshModel* getMesh(int id) const;

@@ -35,15 +35,47 @@
 
 using namespace vcg;
 
+MeshDocument::MeshDocument() 
+{
+	meshIdCounter=0;
+	rasterIdCounter=0;
+	currentMesh = nullptr;
+	currentRaster = nullptr;
+	busy=false;
+	filterHistory = new FilterScript();
+}
 
 //deletes each meshModel
 MeshDocument::~MeshDocument()
 {
-    foreach(MeshModel *mmp, meshList)
-        delete mmp;
-    foreach(RasterModel* rmp,rasterList)
-        delete rmp;
+	foreach(MeshModel *mmp, meshList)
+		delete mmp;
+	foreach(RasterModel* rmp,rasterList)
+		delete rmp;
 	delete filterHistory;
+}
+
+void MeshDocument::clear()
+{
+	for(MeshModel *mmp : meshList)
+		delete mmp;
+	meshList.clear();
+	
+	for(RasterModel* rmp :rasterList)
+		delete rmp;
+	rasterList.clear();
+	
+	delete filterHistory;
+	
+	meshIdCounter=0;
+	rasterIdCounter=0;
+	currentMesh = nullptr;
+	currentRaster = nullptr;
+	busy=false;
+	filterHistory = new FilterScript();
+	fullPathFilename = "";
+	documentLabel = "";
+	meshDocStateData().clear();
 }
 
 const MeshModel* MeshDocument::getMesh(int id) const
@@ -347,16 +379,6 @@ bool MeshDocument::hasBeenModified()
 //        emit documentUpdated();
 //    currTime.start();
 //}
-
-MeshDocument::MeshDocument() 
-{
-    meshIdCounter=0;
-    rasterIdCounter=0;
-    currentMesh = nullptr;
-    currentRaster = nullptr;
-    busy=false;
-    filterHistory = new FilterScript();
-}
 
 
 void MeshModel::Clear()
