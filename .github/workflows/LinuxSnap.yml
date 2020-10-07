@@ -1,4 +1,4 @@
-name: BuildSnap
+name: LinuxSnap
 
 on:
   workflow_dispatch

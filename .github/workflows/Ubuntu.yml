@@ -1,4 +1,4 @@
-name: BuildUbuntu
+name: Ubuntu
 
 on:
   [push, pull_request]
