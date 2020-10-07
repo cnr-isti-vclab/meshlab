@@ -54,7 +54,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        version: '5.15.0'
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
@@ -141,7 +140,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        version: '5.15.0'
     - name: Setup env variables
       id: envs
       shell: bash
@@ -196,7 +194,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        version: '5.15.0'
     - name: Build MeshLab
       run: |
         .\install\windows\windows_build.ps1

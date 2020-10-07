@@ -28,7 +28,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        version: '5.15.0'
         #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab
       run: |
@@ -71,7 +70,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        version: '5.15.0'
         #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Setup env variables
       id: envs
