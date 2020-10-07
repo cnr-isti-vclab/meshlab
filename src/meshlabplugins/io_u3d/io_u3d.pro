@@ -10,22 +10,16 @@ SOURCES += \
 INCLUDEPATH += \
 	$$MESHLAB_EXTERNAL_DIRECTORY/u3d/src/IDTF
 
-win32-msvc {
+win32 {
 	LIBS += \
 		winmm.lib user32.lib \
-		-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc -lIDTFConverter -lIFXCoreStatic
+		-L$$MESHLAB_DISTRIB_EXT_DIRECTORY -lIDTFConverter -lIFXCoreStatic
 }
 
-win32-g++ {
-	LIBS += \
-		winmm.lib user32.lib \
-		-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -lIDTFConverter -lIFXCoreStatic
-}
+macx:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY \
+	-lIDTFConverter -lIFXCoreStatic -lIFXCore -lIFXExporting -lIFXScheduling -ldl
 
-macx:LIBS +=-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/ \
-    -lIDTFConverter -lIFXCoreStatic -lIFXCore -lIFXExporting -lIFXScheduling -ldl
-
-linux:LIBS += -lIDTFConverter -lIFXCoreStatic -ldl
+linux:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -lIDTFConverter -lIFXCoreStatic -ldl
 
 TARGET = io_u3d
 

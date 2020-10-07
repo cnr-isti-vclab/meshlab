@@ -26,5 +26,6 @@ fi
 cd "$(dirname "$(realpath "$0")")"; #move to script directory
 
 sh linux_build.sh $BUILD_PATH
+sh linux_make_bundle.sh $DISTRIB_PATH
 sh linux_deploy.sh $DISTRIB_PATH
 sh linux_appimages.sh $DISTRIB_PATH

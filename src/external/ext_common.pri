@@ -1,8 +1,3 @@
-linux:DESTDIR      = $$MESHLAB_DISTRIB_DIRECTORY/lib/linux
-macx:DESTDIR       = $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64
-win32-g++:DESTDIR  = $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc
-win32-msvc:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc
-
 unix:CONFIG(release, debug|release) {
 	DEFINES *= NDEBUG
 }
@@ -10,3 +5,6 @@ unix:CONFIG(release, debug|release) {
 #not showing warnings from external libraries
 QMAKE_CXXFLAGS+=-w
 QMAKE_CFLAGS+=-w
+
+DESTDIR = $$MESHLAB_DISTRIB_EXT_DIRECTORY
+

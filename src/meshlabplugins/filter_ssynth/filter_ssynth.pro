@@ -24,10 +24,10 @@ OTHER_FILES += \
     x3d3.rendertemplate \
     x3d4.rendertemplate
 
-win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/ssynth.lib
-win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libssynth.a
-macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libssynth.a
-linux:LIBS += -lssynth
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/ssynth.lib
+win32-g++:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libssynth.a
+macx:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libssynth.a
+linux:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -lssynth
 
 TARGET = filter_ssynth
 

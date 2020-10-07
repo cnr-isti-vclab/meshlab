@@ -65,9 +65,9 @@ jobs:
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Make MeshLab Boundle
+    - name: Make MeshLab Bundle
       run: |
-        sh install/linux/linux_make_boundle.sh
+        sh install/linux/linux_make_bundle.sh
     - name: Deploy MeshLab and MeshLabServer
       run : |
         sh install/linux/linux_deploy.sh

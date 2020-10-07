@@ -30,13 +30,6 @@ then
   exit 1
 fi
 
-rm -r lib/macx64/
-rm -r lib/win32-msvc/
-rm -r lib/win32-msvc2008/
-rm -r lib/win32-msvc2015/
-rm -r lib/readme.txt
-rm -r README.md
-
 mkdir -p usr/bin
 mkdir -p usr/lib/meshlab
 mkdir -p usr/share/applications
@@ -56,13 +49,10 @@ mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
 mv lib/libmeshlab-common* usr/lib/
 mv plugins/ usr/lib/meshlab/
-mv lib/linux/* usr/lib/meshlab/
+mv lib/meshlab/* usr/lib/meshlab/
 #patchelf --set-rpath '$ORIGIN/..' usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
 rm -r lib
 
-#tmp: moving libIXF to bin directory
-#mv usr/lib/meshlab/libIFX* .
-#mv libIFXCoreStatic.a usr/lib/meshlab
 patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlab
 patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver

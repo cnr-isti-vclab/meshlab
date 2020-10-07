@@ -17,9 +17,9 @@ INCLUDEPATH += \
     $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src
 }
 
-win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/qhull.lib
-win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libqhull.a
-macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libqhull.a
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/qhull.lib
+win32-g++:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
+macx:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
 linux:LIBS += -lqhull
 
 TARGET = filter_qhull

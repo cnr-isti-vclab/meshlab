@@ -15,7 +15,7 @@ DEFINES += _UNICODE
 # Note: we need static libs so when building muparser lib use 
 # ./configure --enable-shared=no
 
-win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/muparser.lib
-win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libmuparser.a
-macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libmuparser.a
-linux:LIBS += -lmuparser
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/muparser.lib
+win32-g++:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libmuparser.a
+macx:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libmuparser.a
+linux:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -lmuparser

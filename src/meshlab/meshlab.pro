@@ -111,16 +111,18 @@ ICON = images/meshlab.icns
 
 CONFIG += stl
 
+LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY
+
 win32-msvc:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc \
+	#-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc \
 	-L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common -lopengl32 -lGLU32
 
 win32-g++:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc \
+	#-L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc \
 	-L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common -lopengl32 -lGLU32
 
 macx:LIBS += \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 \
+	#-L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 \
 	$$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 
 macx:QMAKE_POST_LINK += "\
@@ -130,8 +132,8 @@ macx:QMAKE_POST_LINK += "\
 
 
 linux:LIBS += \
-	-lmeshlab-common -lGLU \
-	-L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux
+	-lmeshlab-common -lGLU #\
+	#-L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux
 
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include

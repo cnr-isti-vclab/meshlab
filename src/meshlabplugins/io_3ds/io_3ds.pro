@@ -24,9 +24,9 @@ TARGET = io_3ds
 # where XXX is the name of your system according to the QT naming style.
 # Linux users can rely on their own package managers and hope that it is installing the last version of lib3ds
 
-win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/3ds.lib
-win32-g++:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/lib3ds.a
-macx:LIBS       += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/lib3ds.a
-linux:LIBS  += -l3ds
+win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_EXT_DIRECTORY/3ds.lib
+win32-g++:LIBS	+= $$MESHLAB_DISTRIB_EXT_DIRECTORY/lib3ds.a
+macx:LIBS       += $$MESHLAB_DISTRIB_EXT_DIRECTORY/lib3ds.a
+linux:LIBS  += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -l3ds
 
 

@@ -15,7 +15,7 @@ TARGET = io_ctm
 win32-msvc:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
 win32-g++:DEFINES += OPENCTM_STATIC
 
-win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/openctm.lib
-win32-g++:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libopenctm.a
-macx:LIBS       += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libopenctm.a
-linux:LIBS  += -lopenctm
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/openctm.lib
+win32-g++:LIBS  += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libopenctm.a
+macx:LIBS       += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libopenctm.a
+linux:LIBS  += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -lopenctm

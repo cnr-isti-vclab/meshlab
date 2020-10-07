@@ -36,12 +36,10 @@ if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
 
 #Copy-Item (Join-Path $INSTALL_PATH ..\meshlab.png) .
 
-rm -r README.md
-
 windeployqt --no-translations meshlab.exe
 
-Move-Item .\lib\win32-msvc\IFX* .
-Copy-Item IFXCoreStatic.lib .\lib\win32-msvc\
+Move-Item .\lib\meshlab\IFX* .
+Copy-Item IFXCoreStatic.lib .\lib\meshlab\
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
