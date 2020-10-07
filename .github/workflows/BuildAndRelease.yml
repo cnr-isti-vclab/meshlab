@@ -144,12 +144,6 @@ jobs:
       id: envs
       shell: bash
       run: |
-        #sh install/macos/macos_setup_env.sh
-        #necessary here on github actions:
-        #echo '::set-env name=QTDIR::/usr/local/opt/qt'
-        #echo '::add-path::/usr/local/opt/qt/bin'
-        #echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
-        #echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
@@ -186,7 +180,8 @@ jobs:
     - name: Setup env variables
       id: envs
       run: |
-        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1

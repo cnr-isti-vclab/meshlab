@@ -20,7 +20,8 @@ jobs:
     - name: Setup env variables
       id: envs
       run: |
-        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
