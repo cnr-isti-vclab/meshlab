@@ -28,7 +28,7 @@ CONFIG(release,debug | release){
 #DEFINES += NDEBUG
  }
 
-DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/plugins
+DESTDIR = $$MESHLAB_DISTRIB_PLUGINS_DIRECTORY
 # uncomment in you local copy only in emergency cases.
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive
