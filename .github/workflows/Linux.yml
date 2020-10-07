@@ -1,4 +1,4 @@
-name: Ubuntu
+name: Linux
 
 on:
   [push, pull_request]
