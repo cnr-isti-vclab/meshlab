@@ -20,6 +20,7 @@ INCLUDEPATH += \
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/qhull.lib
 win32-g++:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
 macx:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
+!system_qhull:linux:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY
 linux:LIBS += -lqhull
 
 TARGET = filter_qhull
