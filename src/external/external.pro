@@ -16,7 +16,7 @@ TEMPLATE = subdirs
 	!CONFIG(system_openctm)  SUBDIRS += OpenCTM-1.0.3/openctm.pro
 	!CONFIG(system_lib3ds)   SUBDIRS += lib3ds-1.3.0/lib3ds.pro
 	
-	macx:BUILT_LIBS_DIR = $$PWD/../../distrib/lib/macx64
+    macx:BUILT_LIBS_DIR = $$PWD/../../distrib/lib/macx64/
 	win32-msvc:BUILT_LIBS_DIR = $$PWD/../../distrib/lib/win32-msvc
 	win32-g++:BUILT_LIBS_DIR = $$PWD/../../distrib/lib/win32-gcc
 	
