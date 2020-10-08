@@ -276,7 +276,8 @@ edit_pickpoints.depends = common
 # distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
 !equals(PWD, $$OUT_PWD) : !equals(PWD, $$OUT_PWD/src) {
 	#copying the "shaders" folder inside the $$OUT_PWD/distrib
-	copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders/)\" \"$$shell_path($$OUT_PWD/distrib/)\"
+	!win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders/)\" \"$$shell_path($$OUT_PWD/distrib/)\"
+	win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders)\" \"$$shell_path($$OUT_PWD/distrib/)\"
 	first.depends += $(first) copydir
 	export(first.depends)
 	export(copydir.commands)
