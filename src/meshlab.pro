@@ -22,14 +22,14 @@ message("DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
 
 #the following sub projects are compiled ALSO with MeshLab Mini
 SUBDIRS = \ #sub projects names
-    external \
-    common \
-    meshlab \
-    meshlabserver \
-    io_base \        # a few basic file formats (ply, obj, off), without this you cannot open anything
-    decorate_base \
-    filter_measure \
-    filter_meshing
+	external \
+	common \
+	meshlab \
+	meshlabserver \
+	io_base \ # a few basic file formats (ply, obj, off), without this you cannot open anything
+	decorate_base \
+	filter_measure \
+	filter_meshing
 
 !meshlab_mini {
 # Other sub project, compiled only when config is not MeshLab Mini
@@ -38,81 +38,81 @@ SUBDIRS = \ #sub projects names
 # meshlab_mini SUBDIRS
 SUBDIRS += \ #sub projects names
 # IO plugins
-    io_3ds \
-    io_bre \
-    io_collada \
-    io_ctm \
-    io_expe \
-    io_json \
-    io_tri \
-    io_x3d \
-    io_pdb \
-    io_txt \
-    io_u3d \
+	io_3ds \
+	io_bre \
+	io_collada \
+	io_ctm \
+	io_expe \
+	io_json \
+	io_tri \
+	io_x3d \
+	io_pdb \
+	io_txt \
+	io_u3d \
 # Filter samples
-    edit_sample \
-    filter_sample \
-    filter_sample_dyn \
-    filter_createiso \
-    filter_geodesic \
-    filter_sample_gpu \
+	edit_sample \
+	filter_sample \
+	filter_sample_dyn \
+	filter_createiso \
+	filter_geodesic \
+	filter_sample_gpu \
 # Filter plugins
-    filter_ao \
-    filter_camera \
-    filter_clean \
-    filter_color_projection \
-    filter_colorproc \
-    filter_create \
-    filter_csg \
-    filter_dirt \
-    filter_fractal \
-    filter_func \
-    filter_globalregistration \
-    filter_img_patch_param \
-    filter_isoparametrization \
-    filter_layer \
-    filter_mls \
-    filter_mutualglobal \
-    filter_mutualinfo \
-    filter_plymc \
-    filter_qhull \
-    filter_quality \
-    filter_sampling \
-    filter_screened_poisson \
-    filter_sdfgpu \
-    filter_select \
-    filter_sketchfab \
-    filter_ssynth \
-    filter_texture \
-    filter_trioptimize \
-    filter_unsharp \
-    filter_voronoi \
+	filter_ao \
+	filter_camera \
+	filter_clean \
+	filter_color_projection \
+	filter_colorproc \
+	filter_create \
+	filter_csg \
+	filter_dirt \
+	filter_fractal \
+	filter_func \
+	filter_globalregistration \
+	filter_img_patch_param \
+	filter_isoparametrization \
+	filter_layer \
+	filter_mls \
+	filter_mutualglobal \
+	filter_mutualinfo \
+	filter_plymc \
+	filter_qhull \
+	filter_quality \
+	filter_sampling \
+	filter_screened_poisson \
+	filter_sdfgpu \
+	filter_select \
+	filter_sketchfab \
+	filter_ssynth \
+	filter_texture \
+	filter_trioptimize \
+	filter_unsharp \
+	filter_voronoi \
 # Rendering and Decoration Plugins
-    decorate_background \
-    decorate_raster_proj \
-    decorate_shadow \
-    render_gdp \
-    render_radiance_scaling \
+	decorate_background \
+	decorate_raster_proj \
+	decorate_shadow \
+	render_gdp \
+	render_radiance_scaling \
 # Edit Plugins
-    edit_align \
-    edit_manipulators \
-    edit_measure \
-    edit_mutualcorrs \
-    edit_paint \
-    edit_point \
-    edit_referencing \
-    edit_quality \
-    edit_select \
-    edit_pickpoints
+	edit_align \
+	edit_manipulators \
+	edit_measure \
+	edit_mutualcorrs \
+	edit_paint \
+	edit_point \
+	edit_referencing \
+	edit_quality \
+	edit_select \
+	edit_pickpoints
 
 }
 meshlab_mini {
-    message(Compiling only MeshLab Mini!)
+	message(Compiling only MeshLab Mini!)
 }
 
 win32 {
-    SUBDIRS+= \
-        use_cpu_opengl
+	SUBDIRS+= \
+		use_cpu_opengl
 }
 
 ## where to find the sub projects - give the folders ##
@@ -275,13 +275,13 @@ edit_pickpoints.depends = common
 # we need to copy all the files inside $$PWD/../distrib in the actual
 # distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
 !equals(PWD, $$OUT_PWD) : !equals(PWD, $$OUT_PWD/src) {
-    #copying the "lib" folder inside the $$OUT_PWD/distrib
-    copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders)\" \"$$shell_path($$OUT_PWD/distrib/shaders)\"
-    first.depends += $(first) copydir
-    export(first.depends)
-    export(copydir.commands)
+	#copying the "lib" folder inside the $$OUT_PWD/distrib
+	copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders)\" \"$$shell_path($$OUT_PWD/distrib/shaders)\"
+	first.depends += $(first) copydir
+	export(first.depends)
+	export(copydir.commands)
 
-    QMAKE_EXTRA_TARGETS += first copydir
+	QMAKE_EXTRA_TARGETS += first copydir
 }
 
 #
@@ -293,20 +293,20 @@ edit_pickpoints.depends = common
 #
 include(find_system_libs.pri)
 system_eigen3 {
-    message("Using system eigen3")
+	message("Using system eigen3")
 }
 system_glew {
-    message("Using system glew")
+	message("Using system glew")
 }
 system_openctm {
-    message("Using system openctm")
+	message("Using system openctm")
 }
 system_lib3ds {
-    message("Using system lib3ds")
+	message("Using system lib3ds")
 }
 system_muparser {
-    message("Using system muparser")
+	message("Using system muparser")
 }
 system_qhull {
-    message("Using system qhull")
+	message("Using system qhull")
 }
