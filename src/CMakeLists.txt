@@ -58,6 +58,8 @@ find_package(OpenCTM)
 find_package(Qhull COMPONENTS libqhull)
 find_package(OpenMP)
 
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 if(WIN32)
 	option(INSTALL_TO_UNIX_LAYOUT
 		"Should the files be installed to a unix layout? If false, they will be installed more like the build tree."
@@ -189,7 +191,7 @@ else()
 	meshlabplugins/filter_dirt
 	meshlabplugins/filter_fractal
 	meshlabplugins/filter_func
-		meshlabplugins/filter_globalregistration
+	meshlabplugins/filter_globalregistration
 	meshlabplugins/filter_img_patch_param
 	meshlabplugins/filter_isoparametrization
 	meshlabplugins/filter_layer
