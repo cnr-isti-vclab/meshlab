@@ -42,10 +42,9 @@ using namespace std;
 using namespace vcg;
 
 
-U3DIOPlugin::U3DIOPlugin()
-:QObject(),IOPluginInterface(),_param()
+U3DIOPlugin::U3DIOPlugin() :
+	QObject(), IOPluginInterface(), _param()
 {
-
 }
 
 bool U3DIOPlugin::open(const QString &, const QString &, MeshModel &, int&, const RichParameterList &, CallBackPos *, QWidget *)
@@ -55,7 +54,7 @@ bool U3DIOPlugin::open(const QString &, const QString &, MeshModel &, int&, cons
 
 QString U3DIOPlugin::computePluginsPath()
 {
-    QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
+	QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
 		#if defined(Q_OS_WIN)
 			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
@@ -97,12 +96,12 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		//conversion from idtf to u3d
 		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
 
-        if(result==false) {
-            QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
-            return false;
-        }
-
-        //saving latex:
+		if(result==false) {
+			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
+			return false;
+		}
+		
+		//saving latex:
 		QDir::setCurrent(curr);
 		QString lat (fileName);
 		QStringList l = lat.split(".");
@@ -168,19 +167,6 @@ void U3DIOPlugin::GetExportMaskCapability(const QString &format, int &capability
 	assert(0);
 }
 
-//static float avoidExponentialNotation(const float n,const float bboxdiag)
-//{
-//	float val_min = std::min(1000.0f,floorf(bboxdiag * 1000.0f));
-//	return floorf(val_min * n ) / val_min;
-//}
-//
-//static vcg::Point3f avoidExponentialNotation(const vcg::Point3f& p,const float bboxdiag)
-//{
-//	return vcg::Point3f(avoidExponentialNotation(p.X(),bboxdiag),
-//		avoidExponentialNotation(p.Y(),bboxdiag),
-//		avoidExponentialNotation(p.Z(),bboxdiag));
-//}
-
 void U3DIOPlugin::initSaveParameter(const QString &, MeshModel &m, RichParameterList &par) 
 {
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
@@ -198,7 +184,7 @@ void U3DIOPlugin::initSaveParameter(const QString &, MeshModel &m, RichParameter
 
 void U3DIOPlugin::saveParameters(const RichParameterList &par)
 {
-    Point3m from_target_to_camera = Point3m(par.getPoint3m(QString("position_val")) - par.getPoint3m(QString("target_val")));
+	Point3m from_target_to_camera = Point3m(par.getPoint3m(QString("position_val")) - par.getPoint3m(QString("target_val")));
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters* sw = _param._campar;
 	//vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
 	Point3m p = sw->_obj_pos;
