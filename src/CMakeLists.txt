@@ -38,27 +38,6 @@ set(BUILD_ADDITIONAL_PLUGINS
         "A list of other plugin subdirectories to recurse into (e.g. select experimental or unsupported plugins) - relative to meshlab/src"
 )
 
-option(ALLOW_BUNDLED_EIGEN "Allow use of bundled Eigen source" ON)
-option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
-option(ALLOW_BUNDLED_NEWUOA "Allow use of bundled newuoa source" ON)
-option(ALLOW_BUNDLED_LEVMAR "Allow use of bundled levmar source" ON)
-option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
-# option(ALLOW_BUNDLED_MPIR "Allow use of bundled MPIR binaries" ON) # TODO
-option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
-option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
-option(ALLOW_BUNDLED_SSYNTH "Allow use of bundled structure-synth source" ON)
-option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
-option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
-option(ALLOW_BUNDLED_OPENGR "Allow use of bundled OpenGR source" ON)
-
-option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
-option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
-option(ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
-option(ALLOW_SYSTEM_GMP "Allow use of system-provided GMP" ON)
-option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
-option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
-option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
-
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "Searching for required components")
@@ -118,7 +97,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ### Bundled dependencies in the "external" directory
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-include("${CMAKE_CURRENT_SOURCE_DIR}/external.cmake")
+include("${EXTERNAL_DIR}/external.cmake")
 
 ### Install directories and build/staging directories
 include(GNUInstallDirs)
