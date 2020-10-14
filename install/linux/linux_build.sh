@@ -12,8 +12,9 @@
 # -b and -i arguments are also supported.
 
 #default paths wrt the script folder
-BUILD_PATH="../../src/build"
-INSTALL_PATH="../../src/install/usr/"
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+BUILD_PATH=$SCRIPTS_PATH/../../src/build
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install/usr/
 
 #check parameters
 for i in "$@"
@@ -49,7 +50,7 @@ BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 #move to script directory
-cd "$(dirname "$(realpath "$0")")"; 
+cd $SCRIPTS_PATH 
 
 #source path wrt script path
 SOURCE_PATH=$PWD/../../src
