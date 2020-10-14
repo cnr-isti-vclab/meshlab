@@ -3,8 +3,40 @@ name: Windows
 on: [push, pull_request]
 
 jobs:
-  windows_build:
-    name: Build MeshLab (Windows)
+  windows_build_cmake:
+    name: Build MeshLab (Windows - CMake)
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: xmlpatterns
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo "::set-output name=date::$(type ML_VERSION)"
+    - name: Configure
+      run: |
+        cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # -DBUILD_MINI=ON
+    - name: Build MeshLab
+      run: |
+        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
+        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
+    - name: Uploading MeshLab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_portable_cmake
+        path: install
+ 
+  windows_build_qmake:
+    name: Build MeshLab (Windows - QMake)
     runs-on: windows-latest
 
     steps:
@@ -29,7 +61,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab
       run: |
         .\install\windows\windows_build.ps1
@@ -49,43 +80,10 @@ jobs:
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_windows_portable
+        name: meshlab_windows_portable_qmake
         path: distrib
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
         path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
-
-  windows_build_cmake:
-    name: Build MeshLab (Windows, CMake)
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
-        #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo "::set-output name=date::$(type ML_VERSION)"
-    - name: Configure
-      run: |
-        cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-        # -DBUILD_MINI=ON
-    - name: Build MeshLab
-      run: |
-        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
-        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
-#    - name: Uploading MeshLab Portable
-#      uses: actions/upload-artifact@v1
-#      with:
-#        name: meshlab_portable_windows_cmake
-#        path: install
