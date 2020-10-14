@@ -1,4 +1,4 @@
-if(TARGET GLEW::GLEW AND ${GLEW_VERSION} VERSION_GREATER_EQUAL "2.0.0")
+if((TARGET GLEW::GLEW) AND (${GLEW_VERSION} VERSION_GREATER_EQUAL "2.0.0"))
     message(STATUS "- glew - using system-provided library")
     add_library(external-glew INTERFACE)
     target_link_libraries(external-glew INTERFACE GLEW::GLEW)
