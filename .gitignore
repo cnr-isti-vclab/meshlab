@@ -18,6 +18,7 @@
 *.AppImage
 .DS_Store
 distrib*
+src/install/*
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe

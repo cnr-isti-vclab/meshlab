@@ -45,11 +45,11 @@ then
     mkdir -p $INSTALL_PATH
 fi
 
-BUILD_PATH=$(realpath $BUILD_PATH)
-INSTALL_PATH=$(realpath $INSTALL_PATH)
-
 #move to script directory
 cd "$(dirname "$(realpath "$0")")"; 
+
+BUILD_PATH=$(realpath $BUILD_PATH)
+INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 #source path wrt script path
 SOURCE_PATH=$PWD/../../src
