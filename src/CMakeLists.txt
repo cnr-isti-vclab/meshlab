@@ -67,15 +67,7 @@ if(WIN32)
 		OFF)
 
 	get_target_property(Qt5_qmake_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
-	get_filename_component(Qt5_BIN_DIR "${Qt5_qmake_EXECUTABLE}" DIRECTORY)
-	find_program(
-	Qt5_windeployqt_EXECUTABLE
-	NAMES windeployqt
-	HINTS ${Qt5_BIN_DIR})
-	if(Qt5_windeployqt_EXECUTABLE)
-	option(BUILD_WITH_WINDEPLOYQT_POST_BUILD
-			"Should we run windeployqt after the build to copy the qt parts to the build tree?" ON)
-	endif()
+        get_filename_component(Qt5_BIN_DIR "${Qt5_qmake_EXECUTABLE}" DIRECTORY)
 else()
 	set(INSTALL_TO_UNIX_LAYOUT ON)
 endif()
@@ -136,7 +128,7 @@ endif()
 if(WIN32)
 	add_definitions(-DNOMINMAX)
 	if(MSVC)
-	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+        add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	endif()
 endif()
 
@@ -308,8 +300,4 @@ endif()
 if(NOT WIN32 AND NOT APPLE)
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../install/linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../install/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
-endif()
-
-if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)
-	install(CODE "execute_process(COMMAND \"${Qt5_windeployqt_EXECUTABLE}\" --no-translations meshlab.exe WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX})")
 endif()
