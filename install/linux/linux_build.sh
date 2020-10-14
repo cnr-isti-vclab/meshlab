@@ -13,7 +13,7 @@
 
 #default paths wrt the script folder
 BUILD_PATH="../../src/build"
-INSTALL_PATH=$BUILD_PATH/../install/usr/
+INSTALL_PATH="../../src/install/usr/"
 
 #check parameters
 for i in "$@"
@@ -39,17 +39,17 @@ then
     mkdir -p $BUILD_PATH
 fi
 
-#create build path if necessary
+#create install path if necessary
 if ! [ -d $INSTALL_PATH ]
 then
     mkdir -p $INSTALL_PATH
 fi
 
-#move to script directory
-cd "$(dirname "$(realpath "$0")")"; 
-
 BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
+
+#move to script directory
+cd "$(dirname "$(realpath "$0")")"; 
 
 #source path wrt script path
 SOURCE_PATH=$PWD/../../src
