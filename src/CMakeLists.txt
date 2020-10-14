@@ -58,6 +58,7 @@ find_package(OpenCTM)
 find_package(Qhull COMPONENTS libqhull)
 find_package(OpenMP)
 
+set (CMAKE_CXX_STANDARD 11)
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(WIN32)
