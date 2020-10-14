@@ -26,16 +26,16 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/linux/linux_build.sh
+        sh install/linux/qmake/linux_build.sh
     - name: Make MeshLab Bundle
       run: |
-        sh install/linux/linux_make_bundle.sh
+        sh install/linux/qmake/linux_make_bundle.sh
     - name: Deploy MeshLab and MeshLabServer
       run : |
-        sh install/linux/linux_deploy.sh
+        sh install/linux/qmake/linux_deploy.sh
     - name: Build MeshLab and MeshLabServer AppImages
       run : |
-        sh install/linux/linux_appimages.sh
+        sh install/linux/qmake/linux_appimages.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -62,18 +62,12 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-       sh install/linux/linux_setup_env_ubuntu.sh
-       sudo apt-get install cmake ninja-build
+        sh install/linux/linux_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Configure
+    - name: Configure and Build
       run: |
-        cmake src/ -G Ninja
-    - name: Build MeshLab
-      run: |
-        ninja -C .
-    - name: Install Meshlab
-      run: sudo ninja -C . install
+        sh install/linux/linux_build.sh
 

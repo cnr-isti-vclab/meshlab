@@ -21,10 +21,6 @@ jobs:
       with:
         fetch-depth: 2
         submodules: true
-    #- name: Setup env variables
-    #  id: envs
-    #  run: |
-    #    echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
         echo ${{ github.event.inputs.version }} | tr -d '\n'> ML_VERSION
@@ -64,16 +60,16 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/linux/linux_build.sh
+        sh install/linux/qmake/linux_build.sh
     - name: Make MeshLab Bundle
       run: |
-        sh install/linux/linux_make_bundle.sh
+        sh install/linux/qmake/linux_make_bundle.sh
     - name: Deploy MeshLab and MeshLabServer
       run : |
-        sh install/linux/linux_deploy.sh
+        sh install/linux/qmake/linux_deploy.sh
     - name: Build MeshLab and MeshLabServer AppImages
       run : |
-        sh install/linux/linux_appimages.sh
+        sh install/linux/qmake/linux_appimages.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
