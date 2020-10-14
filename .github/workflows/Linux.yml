@@ -34,12 +34,12 @@ jobs:
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_portable
+        name: meshlab_linux_portable_cmake
         path: src/install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_appimage
+        name: meshlab_linux_appimage_cmake
         path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
   ubuntu_build_qmake:
@@ -77,7 +77,7 @@ jobs:
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_portable
+        name: meshlab_linux_portable_qmake
         path: distrib/
     - name: Upload MeshlabServer AppImage
       uses: actions/upload-artifact@v1
