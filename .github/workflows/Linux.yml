@@ -54,7 +54,7 @@ jobs:
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
     - uses: actions/checkout@v2
@@ -70,4 +70,10 @@ jobs:
     - name: Configure and Build
       run: |
         sh install/linux/linux_build.sh
+    - name: Make bundle
+      run: |
+        sh install/linux/linux_make_bundle.sh
+    - name: Deploy
+      run: |
+        sh install/linux/linux_deploy.sh
 

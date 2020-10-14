@@ -13,7 +13,7 @@
 
 #default paths wrt the script folder
 BUILD_PATH="../../src/build"
-INSTALL_PATH=$BUILD_PATH/../install
+INSTALL_PATH=$BUILD_PATH/../install/usr/
 
 #check parameters
 for i in "$@"
@@ -24,7 +24,7 @@ case $i in
     shift # past argument=value
     ;;
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"
+    INSTALL_PATH="${i#*=}"/usr/
     shift # past argument=value
     ;;
     *)
@@ -32,9 +32,6 @@ case $i in
     ;;
 esac
 done
-
-echo "BUILD PATH  = ${BUILD_PATH}"
-echo "INSTALL PATH = ${INSTALL_PATH}"
 
 #create build path if necessary
 if ! [ -d $BUILD_PATH ]
