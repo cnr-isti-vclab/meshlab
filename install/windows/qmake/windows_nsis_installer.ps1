@@ -12,21 +12,21 @@
 #saving location where script has been run
 $DIR = Get-Location
 
-$INSTALL_PATH = $PSScriptRoot
+$SCRIPTS_PATH = Join-Path $PSScriptRoot ..\
 
 if ($args.Count -gt 0){
     $DISTRIB_PATH = $args[0]
 } else {
-    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\distrib #default distrib
+    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\..\distrib #default distrib
 }
 
-.\resources\windows_nsis_script.ps1 $DISTRIB_PATH
+.\..\resources\windows_nsis_script.ps1 $DISTRIB_PATH
 
-cd $INSTALL_PATH
+cd $SCRIPTS_PATH
 
-makensis.exe .\resources\meshlab_final.nsi
+makensis.exe .\..\resources\meshlab_final.nsi
 
-Remove-Item .\resources\meshlab_final.nsi
+Remove-Item .\..\resources\meshlab_final.nsi
 
 #going back to original location
 cd $DIR

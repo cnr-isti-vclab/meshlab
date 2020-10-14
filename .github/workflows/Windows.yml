@@ -63,10 +63,10 @@ jobs:
         modules: xmlpatterns
     - name: Build MeshLab
       run: |
-        .\install\windows\windows_build.ps1
+        .\install\windows\qmake\windows_build.ps1
     - name: Deploy MeshLab
       run: |
-        .\install\windows\windows_deploy.ps1
+        .\install\windows\qmake\windows_deploy.ps1
     - name: NSIS script
       run: |
         .\install\windows\resources\windows_nsis_script.ps1

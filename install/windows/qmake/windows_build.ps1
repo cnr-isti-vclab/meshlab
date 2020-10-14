@@ -14,8 +14,7 @@
 write-host "N of arguments: $($args.count)"
 
 $DIR = Get-Location
-$INSTALL_PATH = $PSScriptRoot
-$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\src
+$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\..\src
 
 if ($args.Count -gt 0){
     $BUILD_PATH = Resolve-Path -Path $args[0]
@@ -28,7 +27,7 @@ cd $BUILD_PATH
 
 write-host "Build path is: $($BUILD_PATH)"
 
-qmake $SOURCE_PATH\meshlab.pro CONFIG+=debug
+qmake $SOURCE_PATH\meshlab.pro
 jom -j4 #Qt nmake for parallel build
 
 #going back to original location

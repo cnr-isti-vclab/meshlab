@@ -18,23 +18,20 @@
 write-host "N of arguments: $($args.count)"
 
 $DIR = Get-Location
-$INSTALL_PATH = $PSScriptRoot
-$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\src
+$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\..\src
 
 if ($args.Count -gt 0){
     $DISTRIB_PATH = $args[0]
 } else {
-    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\distrib #default distrib
+    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\..\distrib #default distrib
 } 
 
 cd $DISTRIB_PATH
 
 if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
     cd $DIR
-	throw 'meshlab.exe not found in ' + ($DISTRIB_PATH) + '. Exiting.'
+    throw 'meshlab.exe not found in ' + ($DISTRIB_PATH) + '. Exiting.'
 }
-
-#Copy-Item (Join-Path $INSTALL_PATH ..\meshlab.png) .
 
 windeployqt --no-translations meshlab.exe
 
