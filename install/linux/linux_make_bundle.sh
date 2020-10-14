@@ -10,7 +10,7 @@
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    INSTALL_PATH="../../meshlab/src/install"
+    INSTALL_PATH="../../src/install"
 else
     INSTALL_PATH=$(realpath $1)
 fi
