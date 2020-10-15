@@ -25,6 +25,9 @@ jobs:
       shell: bash
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Configure and Build
+      run: |
+        sh install/macos/macos_build.sh
     
     
   macos_build_qmake:

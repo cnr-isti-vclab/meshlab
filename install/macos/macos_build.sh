@@ -1,20 +1,25 @@
 #!/bin/bash
-# this is a script shell for compiling meshlab in a Linux environment.
+# this is a script shell for compiling meshlab in a MacOS environment.
 # Requires a Qt environment which is set-up properly, and an accessible
 # cmake binary.
 #
 # Without given arguments, MeshLab will be built in the meshlab/src/build
 # directory, and installed in $BUILD_PATH/../install.
-# 
-# You can give as argument the BUILD_PATH and the INSTALL_PATH in the 
+#
+# You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
-# sh linux_build.sh --build_path=/path/to/build --install_path=/path/to/install
+# sh macos_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
 
+#realpath function
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
 #default paths wrt the script folder
-SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_PATH=$SCRIPTS_PATH/../../src/build
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install/usr/
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 
 #check parameters
 for i in "$@"
@@ -50,7 +55,7 @@ BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 #move to script directory
-cd $SCRIPTS_PATH 
+cd $SCRIPTS_PATH
 
 #source path wrt script path
 SOURCE_PATH=$PWD/../../src
@@ -58,4 +63,4 @@ SOURCE_PATH=$PWD/../../src
 cd $BUILD_PATH
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
 make -j4
-make install
+#make install
