@@ -105,8 +105,13 @@ else()
 endif()
 
 set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
-set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
-set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
+if (APPLE)
+	set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/PlugIns)
+	set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/shaders)
+else()
+	set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
+	set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
+endif()
 set(MESHLAB_SAMPLE_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/sample)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
@@ -119,16 +124,21 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 
 add_definitions(-DMESHLAB_SCALAR=float)
 
-if(BUILD_STRICT AND NOT MSVC)
+if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	# Make sure that our shared libraries were appropriately linked
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
+if (BUILD_STRICT AND APPLE)
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-undefined,error")
+endif()
+
 if(WIN32)
 	add_definitions(-DNOMINMAX)
 	if(MSVC)
-        add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	endif()
 endif()
 

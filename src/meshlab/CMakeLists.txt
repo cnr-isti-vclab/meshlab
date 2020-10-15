@@ -74,10 +74,6 @@ set(UI
 	ui/savesnapshotDialog.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
-#if(APPLE)
-#    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../install/macx/info.plist
-#                images/meshlab.icns)
-#endif()
 
 if(WIN32)
     list(APPEND SOURCES meshlab.rc)
@@ -95,6 +91,8 @@ target_link_libraries(
 	)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)
+set_target_properties(meshlab PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
 install(
 	TARGETS meshlab

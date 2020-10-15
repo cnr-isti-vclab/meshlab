@@ -78,6 +78,16 @@ target_link_libraries(
 
 set_property(TARGET common PROPERTY FOLDER Core)
 
+if (APPLE)
+	set_property(
+		TARGET common 
+		PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/Frameworks)
+	
+	set_property(
+		TARGET common 
+		PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/Frameworks)
+endif()
+
 if(NOT WIN32)
     install(TARGETS common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()

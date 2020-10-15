@@ -82,7 +82,6 @@ public:
 
     QStringList pluginsLoaded;
 
-    static QString osDependentFileBaseName(const QString& plname);
     static QString osIndependentPluginName(const QString& plname);
 
 private:
