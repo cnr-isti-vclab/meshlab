@@ -36,13 +36,13 @@ SOURCE_PATH=$DIR/../../../src
 
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
-sed "s%DISTRIB_PATH%$DISTRIB_PATH%g" resources/meshlab_dmg_latest.json > resources/meshlab_dmg_final.json
-sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" resources/meshlab_dmg_final.json
+sed "s%DISTRIB_PATH%$DISTRIB_PATH%g" ../resources/meshlab_dmg_latest.json > resources/meshlab_dmg_final.json
+sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" ../resources/meshlab_dmg_final.json
 
 rm -f $DISTRIB_PATH/*.dmg
 
 echo "Running appdmg"
-appdmg resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$(cat ../../../ML_VERSION).dmg
+appdmg ../resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$(cat ../../../ML_VERSION).dmg
 
 #at this point, distrib folder contains a DMG MeshLab file
 echo "distrib folder now contains a DMG file"
