@@ -15,6 +15,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 BUILD_PATH=$SCRIPTS_PATH/../../src/build
 INSTALL_PATH=$SCRIPTS_PATH/../../src/install/usr/
+CORES="-j4"
 
 #check parameters
 for i in "$@"
@@ -26,6 +27,10 @@ case $i in
     ;;
     -i=*|--install_path=*)
     INSTALL_PATH="${i#*=}"/usr/
+    shift # past argument=value
+    ;;
+    -j*)
+    CORES=$i
     shift # past argument=value
     ;;
     *)
@@ -57,5 +62,5 @@ SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
-make -j4
+make $CORES
 make install
