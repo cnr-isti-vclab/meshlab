@@ -30,7 +30,7 @@ case $i in
     shift # past argument=value
     ;;
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"/usr/
+    INSTALL_PATH="${i#*=}"
     shift # past argument=value
     ;;
     *)
