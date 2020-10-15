@@ -4,8 +4,31 @@ on:
   [push, pull_request]
 
 jobs:
-  macos_build:
-    name: Build MeshLab (MacOS)
+  macos_build_cmake:
+    name: Build MeshLab (MacOS - CMake)
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install dependencies
+      run: |
+        brew install libomp
+        npm install -g appdmg
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: xmlpatterns
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    
+    
+  macos_build_qmake:
+    name: Build MeshLab (MacOS - QMake)
     runs-on: macos-latest
 
     steps:
@@ -24,22 +47,16 @@ jobs:
       id: envs
       shell: bash
       run: |
-        #sh install/macos/macos_setup_env.sh
-        #necessary here on github actions:
-        #echo '::set-env name=QTDIR::/usr/local/opt/qt'
-        #echo '::add-path::/usr/local/opt/qt/bin'
-        #echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
-        #echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/macos/macos_build.sh
+        sh install/macos/qmake/macos_build.sh
     - name: Deploy MeshLab
       run: |
-        sh install/macos/macos_deploy.sh
+        sh install/macos/qmake/macos_deploy.sh
     - name: Create DMG
       run: |
-         sh install/macos/macos_dmg.sh
+         sh install/macos/qmake/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1

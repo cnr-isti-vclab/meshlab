@@ -17,7 +17,7 @@ realpath() {
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH="../../src"
+    BUILD_PATH="../../../src"
 else
     BUILD_PATH=$( realpath $1 )
 fi
@@ -31,8 +31,8 @@ then
 fi
 
 echo "Build path is: " $(realpath $BUILD_PATH)
-SOURCE_PATH=$PWD/../../src
+SOURCE_PATH=$PWD/../../../src
 
 cd $BUILD_PATH
-qmake $SOURCE_PATH/meshlab.pro
+qmake $SOURCE_PATH/meshlab.pro CONFIG+=debug
 make -j4

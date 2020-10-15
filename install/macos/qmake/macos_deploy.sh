@@ -16,7 +16,7 @@ realpath() {
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH="../../distrib"
+    DISTRIB_PATH="../../../distrib"
 else
     DISTRIB_PATH=$( realpath $1 )
 fi
@@ -24,7 +24,7 @@ fi
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR #move to script directory
 
-SOURCE_PATH=$PWD/../../src
+SOURCE_PATH=$PWD/../../../src
 
 APPNAME="meshlab.app"
 

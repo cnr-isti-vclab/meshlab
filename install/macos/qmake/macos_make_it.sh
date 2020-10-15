@@ -18,8 +18,8 @@ realpath() {
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH="../../src"
-    DISTRIB_PATH="../../distrib"
+    BUILD_PATH="../../../src"
+    DISTRIB_PATH="../../../distrib"
 else
     BUILD_PATH=$( realpath $1 )
     DISTRIB_PATH=$BUILD_PATH/distrib
