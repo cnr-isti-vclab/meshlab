@@ -14,7 +14,7 @@
 #default paths wrt the script folder
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 BUILD_PATH=$SCRIPTS_PATH/../../src/build
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install/usr/
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 CORES="-j4"
 
 #check parameters
@@ -26,7 +26,7 @@ case $i in
     shift # past argument=value
     ;;
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"/usr/
+    INSTALL_PATH="${i#*=}"
     shift # past argument=value
     ;;
     -j*)
@@ -65,9 +65,9 @@ cd $SCRIPTS_PATH
 SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
-cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
+cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
 echo "-----"
-ls -l src/build
+ls -l
 echo "-----"
 jom $CORES #Qt nmake for parallel build
 nmake install
