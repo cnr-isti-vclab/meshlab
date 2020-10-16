@@ -76,7 +76,7 @@ set(UI
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 if(WIN32)
-    list(APPEND SOURCES meshlab.rc)
+	list(APPEND SOURCES meshlab.rc)
 endif()
 
 add_executable(meshlab WIN32 MACOSX_BUNDLE
@@ -97,7 +97,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns PROP
 install(
 	TARGETS meshlab
 	DESTINATION ${MESHLAB_BIN_INSTALL_DIR}
-COMPONENT MeshLab)
+	COMPONENT MeshLab)
 
 if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)
 	add_custom_command(
