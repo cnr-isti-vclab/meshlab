@@ -27,10 +27,14 @@ jobs:
       id: envs
       run: |
         echo "::set-output name=date::$(type ML_VERSION)"
-    - name: Configure and build
+    - name: Configure and Build
       shell: bash
       run: |
         sh install/windows/windows_build.sh
+    - name: Deploy
+      shell: bash
+      run: |
+        sh install/windows/windows_deploy.sh
     #- name: Configure
     #  run: |
     #    cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON

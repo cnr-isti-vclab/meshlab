@@ -1,7 +1,7 @@
 #!/bin/bash
-# this is a script shell for compiling meshlab in a Linux environment.
-# Requires a Qt environment which is set-up properly, and an accessible
-# cmake binary.
+# this is a script shell for compiling meshlab in a windows environment.
+# Requires a VS >= 2017 and Qt environments which are set-up properly, 
+# and an accessible cmake binary.
 #
 # Without given arguments, MeshLab will be built in the meshlab/src/build
 # directory, and installed in $BUILD_PATH/../install.
