@@ -54,6 +54,10 @@ fi
 BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
+echo "BUILD PATH: "$BUILD_PATH
+echo "INSTALL PATH: "$INSTALL_PATH
+echo "SCRIPTS PATH: "$SCRIPTS_PATH
+
 #move to script directory
 cd $SCRIPTS_PATH 
 
@@ -62,5 +66,8 @@ SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
-nmake
+echo "-----"
+ls -l src/build
+echo "-----"
+jom $CORES #Qt nmake for parallel build
 nmake install
