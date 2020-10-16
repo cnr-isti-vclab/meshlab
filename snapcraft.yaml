@@ -83,7 +83,7 @@ parts:
       qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
       make -j4
       
-      sh install/linux/linux_make_boundle.sh distrib/
+      sh install/linux/qmake/linux_make_boundle.sh distrib/
       
       rsync -av distrib/* $SNAPCRAFT_PART_INSTALL/
       

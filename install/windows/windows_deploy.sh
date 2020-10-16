@@ -6,6 +6,9 @@
 # 
 # You can give as argument the path where meshlab is installed.
 
+#saving location where script has been run
+DIR = $PWD
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
@@ -26,3 +29,6 @@ cp IFXCoreStatic.lib lib/meshlab/
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "$BUNDLE_PATH is now a self contained meshlab application"
+
+#going back to original location
+cd $DIR
