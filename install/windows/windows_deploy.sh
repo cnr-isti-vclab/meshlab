@@ -19,7 +19,7 @@ SCRIPTS_PATH=$(pwd)
 
 cd $BUNDLE_PATH
 
-windeplotqt meshlab.exe
+windeployqt meshlab.exe
 
 mv lib/meshlab/IFX* .
 cp IFXCoreStatic.lib lib/meshlab/
