@@ -80,7 +80,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 {
 	assert(meshTree);
 
-	// First clear the backgrund of previously selected arc
+	// First clear the background of previously selected arc
 	MeshTreeWidgetItem *oldArcF = A2Tf[currentArc];
 	MeshTreeWidgetItem *oldArcB = A2Tb[currentArc];
 	if (oldArcF != NULL)

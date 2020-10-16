@@ -653,8 +653,8 @@ private:
 
     /*
     Given a shot "from" and a trackball "track", updates "track" with "from" extrinsics.
-    A traslation involving cameraDistance is included. This is necessary to compensate a transformation that OpenGL performs
-    at the end of the graphic pipeline.
+    A translation involving cameraDistance is included. This is necessary to compensate
+    a transformation that OpenGL performs at the end of the graphic pipeline.
     */
     template <class T>
     void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
