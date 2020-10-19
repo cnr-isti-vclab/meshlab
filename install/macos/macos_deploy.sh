@@ -21,6 +21,10 @@ else
     BUNDLE_PATH=$(realpath $1)
 fi
 
+SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $SCRIPTS_PATH
+BUNDLE_PATH=$(realpath $BUNDLE_PATH)
+
 APPNAME="meshlab.app"
 
 echo "Hopefully I should find " $BUNDLE_PATH/$APPNAME
