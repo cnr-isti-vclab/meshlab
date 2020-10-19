@@ -98,14 +98,3 @@ install(
 	TARGETS meshlab
 	DESTINATION ${MESHLAB_BIN_INSTALL_DIR}
 	COMPONENT MeshLab)
-
-if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)
-	add_custom_command(
-		TARGET meshlab
-		POST_BUILD
-		COMMAND "${Qt5_windeployqt_EXECUTABLE}" --no-translations
-			$<TARGET_FILE_NAME:meshlab>
-		WORKING_DIRECTORY $<TARGET_FILE_DIR:meshlab>
-		COMMENT "Deploying Qt to the build directory of meshlab"
-		VERBATIM USES_TERMINAL)
-endif()

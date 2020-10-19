@@ -64,11 +64,6 @@ if(WIN32 OR APPLE)
 	option(INSTALL_TO_UNIX_LAYOUT
 		"Should the files be installed to a unix layout? If false, they will be installed more like the build tree."
 		OFF)
-
-	if (WIN32)
-		get_target_property(Qt5_qmake_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
-		get_filename_component(Qt5_BIN_DIR "${Qt5_qmake_EXECUTABLE}" DIRECTORY)
-	endif()
 else()
 	set(INSTALL_TO_UNIX_LAYOUT ON)
 endif()
@@ -148,13 +143,17 @@ endif()
 ### Enter subdirectories
 add_subdirectory(common)
 
-set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
+if (NOT APPLE)
+	set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
+else()
+	SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
+endif()
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
+set(CMAKE_INSTALL_RPATH)
 if (WIN32)
 	add_subdirectory(use_cpu_opengl)
 endif()
-set(CMAKE_INSTALL_RPATH)
 
 ### Plugin subdirectories
 if(BUILD_MINI)

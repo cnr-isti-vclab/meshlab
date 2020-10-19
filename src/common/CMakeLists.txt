@@ -53,7 +53,7 @@ set(HEADERS
 set(RESOURCES common.qrc)
 
 set(TARGET_TYPE SHARED)
-if(WIN32)
+if(WIN32 OR APPLE)
 	set(TARGET_TYPE STATIC)
 endif()
 add_library(common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})

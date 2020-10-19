@@ -68,4 +68,4 @@ SOURCE_PATH=$PWD/../../src
 cd $BUILD_PATH
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
 make $CORES
-#make install
+make install
