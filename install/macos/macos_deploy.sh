@@ -13,23 +13,21 @@ realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 
+SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUNDLE_PATH="../../src/install"
+    INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 else
-    BUNDLE_PATH=$(realpath $1)
+    INSTALL_PATH=$(realpath $1)
 fi
-
-SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $SCRIPTS_PATH
-BUNDLE_PATH=$(realpath $BUNDLE_PATH)
 
 APPNAME="meshlab.app"
 
-echo "Hopefully I should find " $BUNDLE_PATH/$APPNAME
+echo "Hopefully I should find " $INSTALL_PATH/$APPNAME
 
-if ! [ -e $BUNDLE_PATH/$APPNAME -a -d $BUNDLE_PATH/$APPNAME ]
+if ! [ -e $INSTALL_PATH/$APPNAME -a -d $INSTALL_PATH/$APPNAME ]
 then
     echo "Started in the wrong dir: I have not found the meshlab.app"
     exit -1
@@ -44,7 +42,7 @@ fi
 
 if [ -e $QTDIR/bin/macdeployqt ]
 then
-    $QTDIR/bin/macdeployqt $BUNDLE_PATH/$APPNAME
+    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME
 else
-    macdeployqt $BUNDLE_PATH/$APPNAME
+    macdeployqt $INSTALL_PATH/$APPNAME
 fi
