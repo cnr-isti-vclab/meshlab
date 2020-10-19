@@ -35,19 +35,27 @@ jobs:
       shell: bash
       run: |
         sh install/windows/windows_deploy.sh
-    #- name: Configure
-    #  run: |
-    #    cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-        # -DBUILD_MINI=ON
-    #- name: Build MeshLab
-    #  run: |
-    #    cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
-    #    cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
+    - name: NSIS script
+      shell: bash
+      run: |
+        sh install/windows/resources/windows_nsis_script.sh
+    - name: Create Installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: "install/windows/resources/meshlab_final.nsi"
+    - name: Rename Installer
+      run: |
+        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable_cmake
         path: src/install
+    - name: Upload Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer_cmake
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
  
   windows_build_qmake:
     name: Build MeshLab (Windows - QMake)
@@ -90,7 +98,7 @@ jobs:
         script-file: "install/windows/resources/meshlab_final.nsi"
     - name: Rename Installer
       run: |
-        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
+        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows_qmake.exe
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -99,5 +107,5 @@ jobs:
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_windows_installer
-        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
+        name: meshlab_windows_installer_qmake
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows_qmake.exe

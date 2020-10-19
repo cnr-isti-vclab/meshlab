@@ -30,7 +30,7 @@ cd $BUNDLE_PATH
 #	throw 'meshlab.exe not found in ' + ($BUNDLE_PATH) + '. Exiting.'
 #}
 
-$VERSION = cat $SOURCE_PATH/../ML_VERSION
+VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
 
 cd $SCRIPTS_PATH
 
