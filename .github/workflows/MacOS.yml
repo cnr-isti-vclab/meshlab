@@ -28,6 +28,10 @@ jobs:
     - name: Configure and Build
       run: |
         sh install/macos/macos_build.sh
+    - name: Deploy
+      run: |
+        sh install/macos/macos_deploy.sh
+    
     
     
   macos_build_qmake:
@@ -60,9 +64,9 @@ jobs:
     - name: Create DMG
       run: |
          sh install/macos/qmake/macos_dmg.sh
-         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos_qmake.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg
-        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos_qmake.dmg
