@@ -65,7 +65,7 @@ cd $SCRIPTS_PATH
 SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
-cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
 echo "-----"
 ls -l
 echo "-----"
