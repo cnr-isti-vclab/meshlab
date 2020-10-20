@@ -38,7 +38,7 @@ jobs:
     - name: NSIS script
       #shell: bash
       run: |
-        .\scripts\windows\resources\windows_nsis_script.ps1
+        .\scripts\windows\resources\windows_nsis_script.ps1 src\install\
         #sh scripts/windows/resources/windows_nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
