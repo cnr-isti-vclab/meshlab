@@ -9,9 +9,6 @@
 # After running this script, a meshlab_final.script can be found in the resources folder.
 # This script is ready to be run by makensis.exe
 
-#saving location where script has been run
-DIR=$PWD
-
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 SOURCE_PATH=$SCRIPTS_PATH/../../src
 
@@ -23,8 +20,6 @@ else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-cd $BUNDLE_PATH
-
 #if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
 #    cd $DIR
 #	throw 'meshlab.exe not found in ' + ($BUNDLE_PATH) + '. Exiting.'
@@ -32,10 +27,5 @@ cd $BUNDLE_PATH
 
 VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
 
-cd $SCRIPTS_PATH
-
-sed "s%MESHLAB_VERSION%$VERSION%g" resources/meshlab.nsi > resources/meshlab_final.nsi
-sed -i '' "s%DISTRIB_PATH%$BUNDLE_PATH%g" resources/meshlab_final.nsi
-
-#going back to original location
-cd $DIR
+sed "s%MESHLAB_VERSION%$VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
+sed -i '' "s%DISTRIB_PATH%$BUNDLE_PATH%g" $SCRIPTS_PATH/resources/meshlab_final.nsi

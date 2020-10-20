@@ -1,20 +1,21 @@
 #!/bin/bash
 # this is a script shell for compiling meshlab in a windows environment.
-# Requires a VS >= 2017 and Qt environments which are set-up properly, 
+# Requires a VS >= 2017 and Qt environments which are set-up properly,
 # and an accessible cmake binary.
 #
 # Without given arguments, MeshLab will be built in the meshlab/src/build
 # directory, and installed in $BUILD_PATH/../install.
-# 
-# You can give as argument the BUILD_PATH and the INSTALL_PATH in the 
+#
+# You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
 # sh linux_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
 
 #default paths wrt the script folder
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
-BUILD_PATH=$SCRIPTS_PATH/../../src/build
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+SOURCE_PATH=$SCRIPTS_PATH/../../src
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"
 
 #check parameters
@@ -57,12 +58,6 @@ INSTALL_PATH=$(realpath $INSTALL_PATH)
 echo "BUILD PATH: "$BUILD_PATH
 echo "INSTALL PATH: "$INSTALL_PATH
 echo "SCRIPTS PATH: "$SCRIPTS_PATH
-
-#move to script directory
-cd $SCRIPTS_PATH 
-
-#source path wrt script path
-SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH

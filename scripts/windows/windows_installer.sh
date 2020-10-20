@@ -9,25 +9,18 @@
 #
 # After running this script, the installer can be found inside the resources folder.
 
-#saving location where script has been run
-DIR=$PWD
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUNDLE_PATH="../../src/install"
+    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
 else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-cd "$(dirname "$(realpath "$0")")"; #move to script directory
-SCRIPTS_PATH=$(pwd)
+sh $SCRIPTS_PATH/resources/windows_nsis_script.sh $BUNDLE_PATH
 
-sh resources/windows_nsis_script.sh $BUNDLE_PATH
+makensis.exe $SCRIPTS_PATH/resources/meshlab_final.nsi
 
-makensis.exe resources/meshlab_final.nsi
-
-rm resources/meshlab_final.nsi
-
-#going back to original location
-cd $DIR
+rm $SCRIPTS_PATH/resources/meshlab_final.nsi
