@@ -36,9 +36,10 @@ jobs:
       run: |
         sh scripts/windows/windows_deploy.sh
     - name: NSIS script
-      shell: bash
+      #shell: bash
       run: |
-        sh scripts/windows/resources/windows_nsis_script.sh
+        .\scripts\windows\resources\windows_nsis_script.ps1
+        #sh scripts/windows/resources/windows_nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
