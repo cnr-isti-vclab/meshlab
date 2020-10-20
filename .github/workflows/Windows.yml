@@ -36,17 +36,18 @@ jobs:
       run: |
         sh scripts/windows/windows_deploy.sh
     - name: NSIS script
-      #shell: bash
+      shell: bash
       run: |
-        .\scripts\windows\resources\windows_nsis_script.ps1 src\install\
-        #sh scripts/windows/resources/windows_nsis_script.sh
+        #.\scripts\windows\resources\windows_nsis_script.ps1 src\install\
+        sh scripts/windows/resources/windows_nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
-        script-file: "scripts/windows/resources/meshlab_final.nsi"
+        script-file: "src/install/meshlab_final.nsi"
     - name: Rename Installer
+      shell: bash
       run: |
-        Rename-Item -Path scripts\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.exe  src/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -56,7 +57,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer_cmake
-        path: scripts/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
+        path: src/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
 
   windows_build_qmake:
     name: Build MeshLab (Windows - QMake)
