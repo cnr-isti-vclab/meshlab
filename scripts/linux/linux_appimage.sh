@@ -9,27 +9,22 @@
 # You can give as argument the path of the bundle (default is src/install),
 # and the AppImage will be placed in the parent directory (src)
 
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUNDLE_PATH="../../src/install"
+    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
 else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-cd "$(dirname "$(realpath "$0")")"; #move to script directory
-SCRIPTS_PATH=$(pwd)
-
-cd $BUNDLE_PATH
 PARENT_NAME="$(basename $BUNDLE_PATH)"
 
 export VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
 
-cd ..
-
 $SCRIPTS_PATH/resources/appimagetool $PARENT_NAME
-mv MeshLab-$VERSION*.AppImage MeshLab$VERSION-linux.AppImage
-#chmod +x MeshLab$VERSION-linux.AppImage
+mv $PARENT_NAME/MeshLab-$VERSION*.AppImage $PARENT_NAME/MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo MeshLab$VERSION-linux.AppImage and MeshLabServer$VERSION-linux.AppImage generated
+echo MeshLab$VERSION-linux.AppImage generated

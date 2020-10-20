@@ -6,30 +6,27 @@
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
 #
 # Without given arguments, the folder that will be deployed is meshlab/src/install.
-# 
+#
 # You can give as argument the path of the bundle.
+
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUNDLE_PATH="../../src/install"
+    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
 else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-cd "$(dirname "$(realpath "$0")")"; #move to script directory
-SCRIPTS_PATH=$(pwd)
+$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop -bundle-non-qt-libs
 
-cd $BUNDLE_PATH
+chmod +x $BUNDLE_PATH/usr/bin/meshlab
+rm $BUNDLE_PATH/AppRun
 
-$SCRIPTS_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs
-
-chmod +x usr/bin/meshlab
-rm AppRun
-
-cp $SCRIPTS_PATH/resources/AppRunMeshLab .
-mv AppRunMeshLab AppRun
-chmod +x AppRun
+cp $SCRIPTS_PATH/resources/AppRunMeshLab $BUNDLE_PATH/
+mv $BUNDLE_PATH/AppRunMeshLab $BUNDLE_PATH/AppRun
+chmod +x $BUNDLE_PATH/AppRun
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "$BUNDLE_PATH is now a self contained meshlab application"
