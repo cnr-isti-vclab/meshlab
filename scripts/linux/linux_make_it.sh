@@ -9,23 +9,39 @@
 #
 # Without given arguments, MeshLab will be built in the meshlab/src
 # directory, and binaries and AppImage will be placed in meshlab/distrib.
-# 
+#
 # You can give as argument the BUILD_PATH, and meshlab binaries and
 # AppImage will be then placed inside BUILD_PATH/distrib.
 
-#checking for parameters
-if [ "$#" -eq 0 ]
-then
-    BUILD_PATH="../../src"
-    DISTRIB_PATH="../../distrib"
-else
-    BUILD_PATH=$(realpath $1)
-    BUILD_PATH=$BUILD_PATH/distrib
-fi
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+SOURCE_PATH=$SCRIPTS_PATH/../../src
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
+CORES="-j4"
 
-cd "$(dirname "$(realpath "$0")")"; #move to script directory
+#check parameters
+for i in "$@"
+do
+case $i in
+    -b=*|--build_path=*)
+    BUILD_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"/usr/
+    shift # past argument=value
+    ;;
+    -j*)
+    CORES=$i
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
-sh linux_build.sh $BUILD_PATH
-sh linux_make_bundle.sh $DISTRIB_PATH
-sh linux_deploy.sh $DISTRIB_PATH
-sh linux_appimages.sh $DISTRIB_PATH
+sh $SCRIPTS_PATH/linux_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $CORES
+sh $SCRIPTS_PATH/linux_make_bundle.sh $INSTALL_PATH
+sh $SCRIPTS_PATH/linux_deploy.sh $INSTALL_PATH
+sh $SCRIPTS_PATH/linux_appimages.sh $INSTALL_PATH

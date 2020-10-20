@@ -12,14 +12,15 @@
 # -b and -i arguments are also supported.
 
 #realpath function
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
+#realpath() {
+#    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+#}
 
 #default paths wrt the script folder
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-BUILD_PATH=$SCRIPTS_PATH/../../src/build
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+SOURCE_PATH=$SCRIPTS_PATH/../../src
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"
 
 #check parameters
@@ -55,15 +56,6 @@ if ! [ -d $INSTALL_PATH ]
 then
     mkdir -p $INSTALL_PATH
 fi
-
-BUILD_PATH=$(realpath $BUILD_PATH)
-INSTALL_PATH=$(realpath $INSTALL_PATH)
-
-#move to script directory
-cd $SCRIPTS_PATH
-
-#source path wrt script path
-SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
 cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
