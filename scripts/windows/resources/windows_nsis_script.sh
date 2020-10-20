@@ -28,4 +28,4 @@ fi
 VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
 
 sed "s%MESHLAB_VERSION%$VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
-sed -i '' "s%DISTRIB_PATH%$BUNDLE_PATH%g" $SCRIPTS_PATH/resources/meshlab_final.nsi
+sed -i "s%DISTRIB_PATH%$BUNDLE_PATH%g" $SCRIPTS_PATH/resources/meshlab_final.nsi

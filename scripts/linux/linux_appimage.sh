@@ -24,7 +24,7 @@ PARENT_NAME="$(basename $BUNDLE_PATH)"
 export VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
 
 $SCRIPTS_PATH/resources/appimagetool $PARENT_NAME
-mv $PARENT_NAME/MeshLab-$VERSION*.AppImage $PARENT_NAME/MeshLab$VERSION-linux.AppImage
+mv MeshLab-$VERSION*.AppImage $PARENT_NAME/MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo MeshLab$VERSION-linux.AppImage generated
