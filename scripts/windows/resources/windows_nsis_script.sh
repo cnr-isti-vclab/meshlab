@@ -31,3 +31,5 @@ sed "s%MESHLAB_VERSION%$VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPT
 sed -i "s%DISTRIB_PATH%.%g" $SCRIPTS_PATH/resources/meshlab_final.nsi
 
 mv $SCRIPTS_PATH/resources/meshlab_final.nsi $BUNDLE_PATH/
+cp $SCRIPTS_PATH/resources/ExecWaitJob.nsh $BUNDLE_PATH/
+cp $SCRIPTS_PATH/resources/FileAssociation.nsh $BUNDLE_PATH/
