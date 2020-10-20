@@ -34,10 +34,8 @@ VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
 
 cd $SCRIPTS_PATH
 
-cat resources/meshlab.nsi | %{$_ -replace "MESHLAB_VERSION",$VERSION} > resources/meshlab_tmp.nsi
-cat resources/meshlab_tmp.nsi | %{$_ -replace "DISTRIB_PATH",$BUNDLE_PATH} > resources/meshlab_final.nsi
-
-rm resources/meshlab_tmp.nsi
+sed "s%MESHLAB_VERSION%$VERSION%g" resources/meshlab.nsi > resources/meshlab_final.nsi
+sed -i '' "s%DISTRIB_PATH%$BUNDLE_PATH%g" esources/meshlab_final.nsi
 
 #going back to original location
 cd $DIR

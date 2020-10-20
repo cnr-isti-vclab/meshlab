@@ -1,5 +1,5 @@
 # This is a powershell script for computing an installer for MeshLab.
-# Requires: 
+# Requires:
 # - a properly deployed meshlab (see windows_deploy.ps1);
 # - the env variable PATH containing the NSIS folder (makensis.exe must be directly accessible)
 #
@@ -10,7 +10,7 @@
 # After running this script, the installer can be found inside the resources folder.
 
 #saving location where script has been run
-DIR = $PWD
+DIR=$PWD
 
 #checking for parameters
 if [ "$#" -eq 0 ]
