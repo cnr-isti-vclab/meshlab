@@ -1,4 +1,4 @@
-# install folder
+#scripts folder
 
 **Work in Progress**
 

@@ -14,23 +14,23 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-        sh install/linux/linux_setup_env_ubuntu.sh
+        sh scripts/linux/linux_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Configure and Build
       run: |
-        sh install/linux/linux_build.sh
+        sh scripts/linux/linux_build.sh
     - name: Make bundle
       run: |
-        sh install/linux/linux_make_bundle.sh
+        sh scripts/linux/linux_make_bundle.sh
     - name: Deploy
       run: |
-        sh install/linux/linux_deploy.sh
+        sh scripts/linux/linux_deploy.sh
     - name: Build MeshLab AppImage
       run : |
-        sh install/linux/linux_appimage.sh
+        sh scripts/linux/linux_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -64,16 +64,16 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/linux/qmake/linux_build.sh
+        sh scripts/linux/qmake/linux_build.sh
     - name: Make MeshLab Bundle
       run: |
-        sh install/linux/qmake/linux_make_bundle.sh
+        sh scripts/linux/qmake/linux_make_bundle.sh
     - name: Deploy MeshLab and MeshLabServer
       run : |
-        sh install/linux/qmake/linux_deploy.sh
+        sh scripts/linux/qmake/linux_deploy.sh
     - name: Build MeshLab and MeshLabServer AppImages
       run : |
-        sh install/linux/qmake/linux_appimages.sh
+        sh scripts/linux/qmake/linux_appimages.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -89,4 +89,3 @@ jobs:
       with:
         name: meshlab_linux_appimage_qmake
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-

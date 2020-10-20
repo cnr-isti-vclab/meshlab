@@ -7,7 +7,7 @@ jobs:
   macos_build_cmake:
     name: Build MeshLab (MacOS - CMake)
     runs-on: macos-latest
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -27,22 +27,22 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Configure and Build
       run: |
-        sh install/macos/macos_build.sh
+        sh scripts/macos/macos_build.sh
     - name: Deploy
       run: |
-        sh install/macos/macos_deploy.sh
+        sh scripts/macos/macos_deploy.sh
     - name: Create DMG
       run: |
-         sh install/macos/macos_dmg.sh
+         sh scripts/macos/macos_dmg.sh
          mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos_cmake.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg_cmake
         path: src/install/MeshLab${{steps.envs.outputs.date}}-macos_cmake.dmg
-    
-    
-    
+
+
+
   macos_build_qmake:
     name: Build MeshLab (MacOS - QMake)
     runs-on: macos-latest
@@ -66,13 +66,13 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
-        sh install/macos/qmake/macos_build.sh
+        sh scripts/macos/qmake/macos_build.sh
     - name: Deploy MeshLab
       run: |
-        sh install/macos/qmake/macos_deploy.sh
+        sh scripts/macos/qmake/macos_deploy.sh
     - name: Create DMG
       run: |
-         sh install/macos/qmake/macos_dmg.sh
+         sh scripts/macos/qmake/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos_qmake.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
