@@ -1,5 +1,5 @@
 # This is a powershell script for computing the meshlab_final.nsi script.
-# Requires: 
+# Requires:
 # - a properly deployed meshlab (see windows_deploy.ps1);
 #
 # Without given arguments, the folder that will be deployed is meshlab/distrib.
@@ -10,15 +10,15 @@
 # This script is ready to be run by makensis.exe
 
 #saving location where script has been run
-DIR = $PWD
+DIR=$PWD
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
-SOURCE_PATH = $SCRIPTS_PATH/../../src
+SOURCE_PATH=$SCRIPTS_PATH/../../src
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
+    BUNDLE_PATH=$SOURCE_PATH/install
 else
     BUNDLE_PATH=$(realpath $1)
 fi
