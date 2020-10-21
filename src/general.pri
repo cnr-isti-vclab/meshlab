@@ -9,7 +9,7 @@
 DEFINES += MESHLAB_SCALAR=float
 
 # VCG directory
-VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/../vcglib
+VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/vcglib
 
 include(find_system_libs.pri)
 

@@ -11,14 +11,13 @@ endif()
 
 ### vcglib
 if(NOT VCGDIR)
-	get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/../vcglib" ABSOLUTE)
+	get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/vcglib" ABSOLUTE)
 	if(NOT EXISTS ${VCGDIR})
-	set(VCGDIR NOTFOUND)
+		set(VCGDIR NOTFOUND)
 	endif()
 endif()
 set(VCGDIR
-	"${VCGDIR}"
-	CACHE PATH "The location of the vcglib source tree - defaults to sibling of meshlab directory.")
+	"${VCGDIR}")
 
 if(NOT VCGDIR)
 	message(
@@ -142,6 +141,7 @@ endif()
 
 
 ### Enter subdirectories
+add_subdirectory(${VCGDIR})
 add_subdirectory(common)
 
 if (NOT APPLE)
