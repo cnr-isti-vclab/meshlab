@@ -1,9 +1,6 @@
 name: Qmake builds
 
-on:
-  #[push, pull_request] #just for test release scripts
-  workflow_dispatch: #manual run
-
+on: [push, pull_request]
 
 jobs:
   ubuntu_build:

@@ -50,8 +50,6 @@ set(HEADERS
 	pluginmanager.h
 	searcher.h)
 
-set(RESOURCES common.qrc)
-
 set(TARGET_TYPE SHARED)
 if(WIN32 OR APPLE)
 	set(TARGET_TYPE STATIC)

@@ -9,7 +9,7 @@ set(SOURCES mainserver.cpp)
 
 set(RESOURCES meshlabserver.qrc)
 
-list(APPEND RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../meshlab/meshlab.qrc)
+#list(APPEND RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../meshlab/meshlab.qrc)
 if(WIN32)
     list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../meshlab/meshlab.rc)
 endif()

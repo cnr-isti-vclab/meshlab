@@ -7,7 +7,6 @@ INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR
 SOURCES = mainserver.cpp
 
 RESOURCES = \
-    ../meshlab/meshlab.qrc \
     meshlabserver.qrc
 
 # to add windows icon 

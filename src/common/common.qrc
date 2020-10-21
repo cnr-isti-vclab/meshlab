@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-		<file>script_system/meshlabfilterXMLspecificationformat.xsd</file>
-		<file>script_system/math.js</file>
-    </qresource>
-</RCC>
