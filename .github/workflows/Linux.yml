@@ -4,8 +4,8 @@ on:
   [push, pull_request]
 
 jobs:
-  ubuntu_build_cmake:
-    name: Build MeshLab (Ubuntu - CMake)
+  linux_build:
+    name: Build MeshLab (Linux)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
@@ -34,58 +34,10 @@ jobs:
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_portable_cmake
+        name: meshlab_linux_portable
         path: src/install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_appimage_cmake
+        name: meshlab_linux_appimage
         path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-
-  ubuntu_build_qmake:
-    name: Build MeshLab (Ubuntu - QMake)
-    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
-    - name: Install dependencies
-      run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
-       sudo apt-get install -y libxkbcommon-x11-0 patchelf
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
-      run: |
-        sh scripts/linux/qmake/linux_build.sh
-    - name: Make MeshLab Bundle
-      run: |
-        sh scripts/linux/qmake/linux_make_bundle.sh
-    - name: Deploy MeshLab and MeshLabServer
-      run : |
-        sh scripts/linux/qmake/linux_deploy.sh
-    - name: Build MeshLab and MeshLabServer AppImages
-      run : |
-        sh scripts/linux/qmake/linux_appimages.sh
-    - name: Upload Meshlab Portable
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_linux_portable_qmake
-        path: distrib/
-    - name: Upload MeshlabServer AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlabserver_linux_appimage_qmake
-        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
-    - name: Upload Meshlab AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_linux_appimage_qmake
-        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage

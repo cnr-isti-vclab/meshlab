@@ -3,8 +3,8 @@ name: Windows
 on: [push, pull_request]
 
 jobs:
-  windows_build_cmake:
-    name: Build MeshLab (Windows - CMake)
+  windows_build:
+    name: Build MeshLab (Windows)
     runs-on: windows-latest
 
     steps:
@@ -38,7 +38,6 @@ jobs:
     - name: NSIS script
       shell: bash
       run: |
-        #.\scripts\windows\resources\windows_nsis_script.ps1 src\install\
         sh scripts/windows/resources/windows_nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
@@ -58,56 +57,3 @@ jobs:
       with:
         name: meshlab_windows_installer_cmake
         path: src/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
-
-  windows_build_qmake:
-    name: Build MeshLab (Windows - QMake)
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Download Jom
-      run: |
-        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
-        New-Item -Name "jom" -ItemType "directory"
-        Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
-        echo "::add-path::$(Get-Location)\jom"
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
-        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-output name=date::$(type ML_VERSION)"
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
-    - name: Build MeshLab
-      run: |
-        .\scripts\windows\qmake\windows_build.ps1
-    - name: Deploy MeshLab
-      run: |
-        .\scripts\windows\qmake\windows_deploy.ps1
-    - name: NSIS script
-      run: |
-        .\scripts\windows\resources\windows_nsis_script.ps1
-    - name: Create Installer
-      uses: joncloud/makensis-action@v1
-      with:
-        script-file: "scripts/windows/resources/meshlab_final.nsi"
-    - name: Rename Installer
-      run: |
-        Rename-Item -Path scripts\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows_qmake.exe
-    - name: Upload Meshlab Portable
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_windows_portable_qmake
-        path: distrib
-    - name: Upload Meshlab Installer
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_windows_installer_qmake
-        path: scripts/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows_qmake.exe

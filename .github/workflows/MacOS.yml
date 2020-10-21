@@ -4,8 +4,8 @@ on:
   [push, pull_request]
 
 jobs:
-  macos_build_cmake:
-    name: Build MeshLab (MacOS - CMake)
+  macos_build:
+    name: Build MeshLab (MacOS)
     runs-on: macos-latest
 
     steps:
@@ -34,48 +34,9 @@ jobs:
     - name: Create DMG
       run: |
          sh scripts/macos/macos_dmg.sh
-         mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos_cmake.dmg
+         mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg_cmake
-        path: src/install/MeshLab${{steps.envs.outputs.date}}-macos_cmake.dmg
-
-
-
-  macos_build_qmake:
-    name: Build MeshLab (MacOS - QMake)
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install dependencies
-      run: |
-        brew install libomp
-        npm install -g appdmg
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
-    - name: Setup env variables
-      id: envs
-      shell: bash
-      run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
-      run: |
-        sh scripts/macos/qmake/macos_build.sh
-    - name: Deploy MeshLab
-      run: |
-        sh scripts/macos/qmake/macos_deploy.sh
-    - name: Create DMG
-      run: |
-         sh scripts/macos/qmake/macos_dmg.sh
-         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos_qmake.dmg
-    - name: Upload DMG
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_macos_dmg_qmake
-        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos_qmake.dmg
+        path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg

@@ -1,0 +1,145 @@
+name: Qmake builds
+
+on:
+  #[push, pull_request] #just for test release scripts
+  workflow_dispatch: #manual run
+
+
+jobs:
+  ubuntu_build:
+    name: Build MeshLab (Ubuntu - QMake)
+    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: xmlpatterns
+    - name: Install dependencies
+      run: |
+       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
+       sudo apt-get install -y libxkbcommon-x11-0 patchelf
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Build MeshLab
+      run: |
+        sh scripts/linux/qmake/linux_build.sh
+    - name: Make MeshLab Bundle
+      run: |
+        sh scripts/linux/qmake/linux_make_bundle.sh
+    - name: Deploy MeshLab and MeshLabServer
+      run : |
+        sh scripts/linux/qmake/linux_deploy.sh
+    - name: Build MeshLab and MeshLabServer AppImages
+      run : |
+        sh scripts/linux/qmake/linux_appimages.sh
+    - name: Upload Meshlab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_portable
+        path: distrib/
+    - name: Upload MeshlabServer AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlabserver_linux_appimage
+        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+    - name: Upload Meshlab AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_appimage
+        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+
+  macos_build_qmake:
+    name: Build MeshLab (MacOS - QMake)
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install dependencies
+      run: |
+        brew install libomp
+        npm install -g appdmg
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: xmlpatterns
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Build MeshLab
+      run: |
+        sh scripts/macos/qmake/macos_build.sh
+    - name: Deploy MeshLab
+      run: |
+        sh scripts/macos/qmake/macos_deploy.sh
+    - name: Create DMG
+      run: |
+         sh scripts/macos/qmake/macos_dmg.sh
+         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+    - name: Upload DMG
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_macos_dmg
+        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+
+  windows_build_qmake:
+    name: Build MeshLab (Windows - QMake)
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Download Jom
+      run: |
+        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
+        New-Item -Name "jom" -ItemType "directory"
+        Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
+        echo "::add-path::$(Get-Location)\jom"
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo "::set-output name=date::$(type ML_VERSION)"
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: xmlpatterns
+    - name: Build MeshLab
+      run: |
+        .\scripts\windows\qmake\windows_build.ps1
+    - name: Deploy MeshLab
+      run: |
+        .\scripts\windows\qmake\windows_deploy.ps1
+    - name: NSIS script
+      run: |
+        .\scripts\windows\resources\windows_nsis_script.ps1
+    - name: Create Installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: "scripts/windows/resources/meshlab_final.nsi"
+    - name: Rename Installer
+      run: |
+        Rename-Item -Path scripts\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
+    - name: Upload Meshlab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_portable
+        path: distrib
+    - name: Upload Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer
+        path: scripts/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
