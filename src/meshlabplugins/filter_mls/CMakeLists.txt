@@ -6,20 +6,29 @@
 ### or create a derived template in src/templates/filter_mls.cmake,
 ### then re-run ./make-cmake.py
 
-set(SOURCES apss.cpp balltree.cpp mlsplugin.cpp rimls.cpp)
+set(SOURCES 
+	apss.cpp 
+	balltree.cpp 
+	mlsplugin.cpp 
+	rimls.cpp)
 
 set(HEADERS
-    apss.h
-    balltree.h
-    implicits.h
-    mlsmarchingcube.h
-    mlsplugin.h
-    mlssurface.h
-    priorityqueue.h
-    rimls.h
-    smallcomponentselection.h)
+	apss.h
+	balltree.h
+	implicits.h
+	mlsmarchingcube.h
+	mlsplugin.h
+	mlssurface.h
+	priorityqueue.h
+	rimls.h
+	smallcomponentselection.h)
 
-add_library(filter_mls MODULE ${SOURCES} ${HEADERS})
+SET(TPP_HEADERS
+	apss.tpp
+	mlssurface.tpp
+	rimls.tpp)
+
+add_library(filter_mls MODULE ${SOURCES} ${HEADERS} ${TPP_HEADERS})
 
 target_include_directories(filter_mls PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(filter_mls PUBLIC common)
