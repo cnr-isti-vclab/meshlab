@@ -20,7 +20,7 @@ if(TARGET external-IDTFConverter)
 	
 	target_link_libraries(io_u3d PUBLIC common)
 
-	target_link_libraries(io_u3d PRIVATE external-IDTFConverter ${CMAKE_DL_LIBS})
+	target_link_libraries(io_u3d PUBLIC external-IDTFConverter ${CMAKE_DL_LIBS})
 
 	set_property(TARGET io_u3d PROPERTY FOLDER Plugins)
 

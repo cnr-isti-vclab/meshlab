@@ -16,23 +16,23 @@ IF(APPLE)
 #  SET( CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.6.sdk )
 #  SET( CMAKE_OSX_DEPLOYMENT_TARGET 10.6 )
 #----
-  ADD_DEFINITIONS( -DMAC32 -fno-strict-aliasing )
-  SET( U3D_PLATFORM Mac32 )
+	ADD_DEFINITIONS( -DMAC32 -fno-strict-aliasing )
+	SET( U3D_PLATFORM Mac32 )
 ENDIF(APPLE)
 
 IF(WIN32)
-  ADD_DEFINITIONS( -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE )
-  SET( U3D_PLATFORM Win32 )
-  LINK_LIBRARIES( winmm )
-  UNSET( CMAKE_SHARED_LIBRARY_PREFIX )
-  UNSET( CMAKE_SHARED_MODULE_PREFIX )
-  UNSET( CMAKE_STATIC_LIBRARY_PREFIX )
-  UNSET( CMAKE_IMPORT_LIBRARY_PREFIX )
+	ADD_DEFINITIONS( -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE )
+	SET( U3D_PLATFORM Win32 )
+	LINK_LIBRARIES( winmm )
+	UNSET( CMAKE_SHARED_LIBRARY_PREFIX )
+	UNSET( CMAKE_SHARED_MODULE_PREFIX )
+	UNSET( CMAKE_STATIC_LIBRARY_PREFIX )
+	UNSET( CMAKE_IMPORT_LIBRARY_PREFIX )
 ENDIF(WIN32)
 
 IF(UNIX AND NOT APPLE)
-  ADD_DEFINITIONS( -DLIN32 -fno-strict-aliasing )
-  SET( U3D_PLATFORM Lin32 )
+	ADD_DEFINITIONS( -DLIN32 -fno-strict-aliasing )
+	SET( U3D_PLATFORM Lin32 )
 ENDIF(UNIX AND NOT APPLE)
 
 #============================================================================
@@ -54,7 +54,7 @@ check_include_file(stddef.h    HAVE_STDDEF_H)
 set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE=1)
 check_type_size(off64_t OFF64_T)
 if(HAVE_OFF64_T)
-   add_definitions(-D_LARGEFILE64_SOURCE=1)
+	add_definitions(-D_LARGEFILE64_SOURCE=1)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 
@@ -122,17 +122,16 @@ set(ZLIB_SRCS
 #============================================================================
 
 if(NOT WIN32)
-  find_library(M_LIBRARY
-	NAMES m
-	PATHS /usr/lib /usr/local/lib
-  )
-  if(NOT M_LIBRARY)
+	find_library(M_LIBRARY
+		NAMES m
+		PATHS /usr/lib /usr/local/lib)
+	if(NOT M_LIBRARY)
 	message(STATUS
-	  "math library 'libm' not found - floating point support disabled")
-  endif()
+		"math library 'libm' not found - floating point support disabled")
+	endif()
 else()
-  # not needed on windows
-  set(M_LIBRARY "")
+	# not needed on windows
+	set(M_LIBRARY "")
 endif()
 
 set(PNG_SOURCE_DIR ${U3D_DIR}/src/RTL/Dependencies/png)
@@ -140,36 +139,36 @@ set(PNG_SOURCE_DIR ${U3D_DIR}/src/RTL/Dependencies/png)
 
 # OUR SOURCES
 set(libpng_public_hdrs
-  ${PNG_SOURCE_DIR}/png.h
-  ${PNG_SOURCE_DIR}/pngconf.h
-  ${PNG_SOURCE_DIR}/pnglibconf.h
+	${PNG_SOURCE_DIR}/png.h
+	${PNG_SOURCE_DIR}/pngconf.h
+	${PNG_SOURCE_DIR}/pnglibconf.h
 )
 set(libpng_sources
-  ${libpng_public_hdrs}
-  ${PNG_SOURCE_DIR}/pngdebug.h
-  ${PNG_SOURCE_DIR}/pnginfo.h
-  ${PNG_SOURCE_DIR}/pngpriv.h
-  ${PNG_SOURCE_DIR}/pngstruct.h
-  ${PNG_SOURCE_DIR}/png.c
-  ${PNG_SOURCE_DIR}/pngerror.c
-  ${PNG_SOURCE_DIR}/pngget.c
-  ${PNG_SOURCE_DIR}/pngmem.c
-  ${PNG_SOURCE_DIR}/pngpread.c
-  ${PNG_SOURCE_DIR}/pngread.c
-  ${PNG_SOURCE_DIR}/pngrio.c
-  ${PNG_SOURCE_DIR}/pngrtran.c
-  ${PNG_SOURCE_DIR}/pngrutil.c
-  ${PNG_SOURCE_DIR}/pngset.c
-  ${PNG_SOURCE_DIR}/pngtrans.c
-  ${PNG_SOURCE_DIR}/pngwio.c
-  ${PNG_SOURCE_DIR}/pngwrite.c
-  ${PNG_SOURCE_DIR}/pngwtran.c
-  ${PNG_SOURCE_DIR}/pngwutil.c
+	${libpng_public_hdrs}
+	${PNG_SOURCE_DIR}/pngdebug.h
+	${PNG_SOURCE_DIR}/pnginfo.h
+	${PNG_SOURCE_DIR}/pngpriv.h
+	${PNG_SOURCE_DIR}/pngstruct.h
+	${PNG_SOURCE_DIR}/png.c
+	${PNG_SOURCE_DIR}/pngerror.c
+	${PNG_SOURCE_DIR}/pngget.c
+	${PNG_SOURCE_DIR}/pngmem.c
+	${PNG_SOURCE_DIR}/pngpread.c
+	${PNG_SOURCE_DIR}/pngread.c
+	${PNG_SOURCE_DIR}/pngrio.c
+	${PNG_SOURCE_DIR}/pngrtran.c
+	${PNG_SOURCE_DIR}/pngrutil.c
+	${PNG_SOURCE_DIR}/pngset.c
+	${PNG_SOURCE_DIR}/pngtrans.c
+	${PNG_SOURCE_DIR}/pngwio.c
+	${PNG_SOURCE_DIR}/pngwrite.c
+	${PNG_SOURCE_DIR}/pngwtran.c
+	${PNG_SOURCE_DIR}/pngwutil.c
 )
 # SOME NEEDED DEFINITIONS
 
 if(MSVC)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 endif(MSVC)
 
 set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} ${M_LIBRARY})
@@ -623,7 +622,7 @@ SET( IFXCoreStatic_SRCS
 )
 ADD_LIBRARY( IFXCoreStatic STATIC ${IFXCoreStatic_SRCS} ${IFXCoreStatic_HDRS} )
 IF(UNIX)
-  target_link_libraries( IFXCoreStatic ${CMAKE_DL_LIBS} )
+	target_link_libraries( IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX)
 
 # Something Windows-only 
@@ -1078,19 +1077,19 @@ SET( IFXCore_HDRS
 	${U3D_DIR}/src/RTL/Dependencies/WildCards/wcmatch.h
 )
 IF(WIN32)
-  SET( CORE_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IFXCore )
-  ADD_LIBRARY( IFXCore SHARED ${IFXCore_SRCS} ${IFXCore_HDRS} ${CORE_DIR}/IFXCore.rc ${CORE_DIR}/IFXResource.h ${CORE_DIR}/IFXCore.def ${DEPENDENCIES_SRCS} )
+	SET( CORE_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IFXCore )
+	ADD_LIBRARY( IFXCore SHARED ${IFXCore_SRCS} ${IFXCore_HDRS} ${CORE_DIR}/IFXCore.rc ${CORE_DIR}/IFXResource.h ${CORE_DIR}/IFXCore.def ${DEPENDENCIES_SRCS} )
 ENDIF(WIN32)
 IF(APPLE)
-  ADD_LIBRARY( IFXCore MODULE ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
-  set_target_properties( IFXCore PROPERTIES
+	ADD_LIBRARY( IFXCore MODULE ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
+	set_target_properties( IFXCore PROPERTIES
 	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list ${U3D_DIR}/src/RTL/Platform/Mac32/IFXCore/IFXCore.def" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-  ADD_LIBRARY( IFXCore MODULE ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
-  set_target_properties( IFXCore PROPERTIES
+	ADD_LIBRARY( IFXCore MODULE ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
+	set_target_properties( IFXCore PROPERTIES
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXCore/IFXCore.list -Wl,--no-undefined" )
-  target_link_libraries( IFXCore ${CMAKE_DL_LIBS} )
+	target_link_libraries( IFXCore ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
 TARGET_LINK_LIBRARIES( IFXCore ${ADDITIONAL_LIBRARIES} )
 
@@ -1184,20 +1183,20 @@ SET( IFXExporting_SRCS
 	${U3D_DIR}/src/RTL/Kernel/Common/IFXDebug.cpp
 )
 IF(WIN32)
-  SET( EXPORT_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IFXExporting )
-  ADD_LIBRARY( IFXExporting  SHARED ${IFXExporting_SRCS} ${IFXExporting_HDRS} ${EXPORT_DIR}/IFXExporting.rc ${EXPORT_DIR}/IFXResource.h ${EXPORT_DIR}/IFXExporting.def )
-  TARGET_LINK_LIBRARIES( IFXExporting IFXCore )
+	SET( EXPORT_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IFXExporting )
+	ADD_LIBRARY( IFXExporting  SHARED ${IFXExporting_SRCS} ${IFXExporting_HDRS} ${EXPORT_DIR}/IFXExporting.rc ${EXPORT_DIR}/IFXResource.h ${EXPORT_DIR}/IFXExporting.def )
+	TARGET_LINK_LIBRARIES( IFXExporting IFXCore )
 ENDIF(WIN32)
 IF(APPLE)
-  ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
-  set_target_properties( IFXExporting  PROPERTIES
+	ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
+	set_target_properties( IFXExporting  PROPERTIES
 	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list ${U3D_DIR}/src/RTL/Platform/Mac32/IFXExporting/IFXExporting.def   -undefined dynamic_lookup" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-  ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
-  set_target_properties( IFXExporting  PROPERTIES
+	ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
+	set_target_properties( IFXExporting  PROPERTIES
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXExporting/IFXExporting.list" )
-  TARGET_LINK_LIBRARIES( IFXExporting IFXCoreStatic ${CMAKE_DL_LIBS} )
+	TARGET_LINK_LIBRARIES( IFXExporting IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
 
 #IFXScheduling
@@ -1473,16 +1472,16 @@ SET( IDTFConverter_HDRS
 	${U3D_DIR}/src/IDTF/Common/ViewResourceList.h
 )
 IF(WIN32)
-  SET( CORE_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IDTFConverter )
-  ADD_LIBRARY( external-IDTFConverter STATIC ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} ${U3D_DIR}/src/IDTF/IDTFConverter.rc ${U3D_DIR}/src/IDTF/IFXResource.h)
+	SET( CORE_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IDTFConverter )
+	ADD_LIBRARY( external-IDTFConverter STATIC ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} ${U3D_DIR}/src/IDTF/IDTFConverter.rc ${U3D_DIR}/src/IDTF/IFXResource.h)
 ENDIF(WIN32)
 IF(APPLE)
-  ADD_LIBRARY( external-IDTFConverter ${IDTFConverter_SRCS} ${IDTFConverter_HDRS})
-#  set_target_properties( external-IDTFConverter  PROPERTIES
+	ADD_LIBRARY( external-IDTFConverter ${IDTFConverter_SRCS} ${IDTFConverter_HDRS})
+#	set_target_properties( external-IDTFConverter  PROPERTIES
 #	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list /dev/null" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-  ADD_LIBRARY( external-IDTFConverter STATIC ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} )
+	ADD_LIBRARY( external-IDTFConverter SHARED ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} )
 ENDIF(UNIX AND NOT APPLE)
 TARGET_LINK_LIBRARIES( external-IDTFConverter IFXCoreStatic ${ADDITIONAL_LIBRARIES} ${CMAKE_DL_LIBS} )
 
