@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "cleanfilter.h"
-#include "align_tools.h"
 
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/create/platonic.h>
@@ -37,7 +36,7 @@ int SnapVertexBorder(CMeshO &m, float threshold,vcg::CallBackPos * cb);
 
 CleanFilter::CleanFilter()
 {
-  typeList
+	typeList
 	<< FP_BALL_PIVOTING
 	<< FP_REMOVE_WRT_Q
 	<< FP_REMOVE_ISOLATED_COMPLEXITY
@@ -54,14 +53,13 @@ CleanFilter::CleanFilter()
 	<< FP_REMOVE_DUPLICATED_VERTEX
 	<< FP_REMOVE_FACE_ZERO_AREA
 	<< FP_MERGE_CLOSE_VERTEX
-    << FP_MERGE_WEDGE_TEX
+	<< FP_MERGE_WEDGE_TEX
 	<< FP_COMPACT_FACE
 	<< FP_COMPACT_VERT;
 
-  FilterIDType tt;
-  foreach(tt , types())
-        actionList << new QAction(filterName(tt), this);
-  getFilterAction(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
+	for(FilterIDType tt : types())
+		actionList << new QAction(filterName(tt), this);
+	getFilterAction(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
 }
 
 CleanFilter::~CleanFilter() {
