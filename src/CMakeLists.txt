@@ -141,7 +141,6 @@ endif()
 
 
 ### Enter subdirectories
-add_subdirectory(${VCGDIR})
 add_subdirectory(common)
 
 if (NOT APPLE)
