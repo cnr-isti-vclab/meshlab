@@ -280,8 +280,6 @@ ENDIF(STDIO_HACK)
 
 #====
 
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX:         " ${CMAKE_INSTALL_PREFIX} )
-
 
 INCLUDE_DIRECTORIES(
 	${U3D_DIR}/src/RTL/Component/Include
@@ -1481,8 +1479,10 @@ IF(APPLE)
 #	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list /dev/null" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-	ADD_LIBRARY( external-IDTFConverter SHARED ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} )
+	ADD_LIBRARY( external-IDTFConverter STATIC ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} )
 ENDIF(UNIX AND NOT APPLE)
 TARGET_LINK_LIBRARIES( external-IDTFConverter IFXCoreStatic ${ADDITIONAL_LIBRARIES} ${CMAKE_DL_LIBS} )
 
 set_property(TARGET external-IDTFConverter PROPERTY FOLDER External)
+
+install(TARGETS IFXCore IFXCoreStatic IFXExporting IFXScheduling external-IDTFConverter DESTINATION ${MESHLAB_LIB_INSTALL_DIR})

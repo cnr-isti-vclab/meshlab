@@ -80,11 +80,8 @@ option(
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-### Bundled dependencies in the "external" directory
-set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-include(${EXTERNAL_DIR}/external.cmake)
-
 ### Install directories and build/staging directories
+MESSAGE( STATUS "CMAKE_INSTALL_PREFIX:         " ${CMAKE_INSTALL_PREFIX} )
 include(GNUInstallDirs)
 if(INSTALL_TO_UNIX_LAYOUT)
 	set(MESHLAB_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
@@ -112,6 +109,10 @@ set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
 set(MESHLAB_SAMPLE_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/sample)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
+
+### Bundled dependencies in the "external" directory
+set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
+include(${EXTERNAL_DIR}/external.cmake)
 
 ### Common build settings for internal code
 include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})
