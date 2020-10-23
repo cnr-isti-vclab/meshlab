@@ -11,7 +11,7 @@ linux{
 	U3D_PLATFORM=Lin32
 }
 macx {
-    DEFINES+=MAC32
+	DEFINES+=MAC32
 	U3D_PLATFORM=Mac32
 }
 
@@ -66,7 +66,7 @@ SOURCES += \
 	$${BASE_SRC_RTL}/Kernel/Common/IFXDebug.cpp
 
 macx {
-    QMAKE_LFLAGS += -exported_symbols_list $${BASE_SRC_RTL}/Platform/Mac32/IFXScheduling/IFXScheduling.def   -undefined dynamic_lookup
+	QMAKE_LFLAGS += -exported_symbols_list $${BASE_SRC_RTL}/Platform/Mac32/IFXScheduling/IFXScheduling.def   -undefined dynamic_lookup
 	QMAKE_LFLAGS_PLUGIN -= -dynamiclib
 	QMAKE_LFLAGS_PLUGIN += -bundle
 	QMAKE_EXTENSION_SHLIB = so

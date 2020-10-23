@@ -11,7 +11,7 @@ linux{
 	U3D_PLATFORM=Lin32
 }
 macx {
-    DEFINES+=MAC32
+	DEFINES+=MAC32
 	U3D_PLATFORM=Mac32
 }
 

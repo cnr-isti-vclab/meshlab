@@ -1084,7 +1084,7 @@ IF(APPLE)
 	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list ${U3D_DIR}/src/RTL/Platform/Mac32/IFXCore/IFXCore.def" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-	ADD_LIBRARY( IFXCore MODULE ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
+	ADD_LIBRARY( IFXCore SHARED ${IFXCore_SRCS} ${IFXCore_HDRS} ${DEPENDENCIES_SRCS} )
 	set_target_properties( IFXCore PROPERTIES
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXCore/IFXCore.list -Wl,--no-undefined" )
 	target_link_libraries( IFXCore ${CMAKE_DL_LIBS} )
@@ -1187,14 +1187,14 @@ IF(WIN32)
 ENDIF(WIN32)
 IF(APPLE)
 	ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
-	set_target_properties( IFXExporting  PROPERTIES
+	set_target_properties( IFXExporting IFXCore PROPERTIES
 	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list ${U3D_DIR}/src/RTL/Platform/Mac32/IFXExporting/IFXExporting.def   -undefined dynamic_lookup" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-	ADD_LIBRARY( IFXExporting  MODULE ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
+	ADD_LIBRARY( IFXExporting SHARED ${IFXExporting_SRCS} ${IFXExporting_HDRS} )
 	set_target_properties( IFXExporting  PROPERTIES
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXExporting/IFXExporting.list" )
-	TARGET_LINK_LIBRARIES( IFXExporting IFXCoreStatic ${CMAKE_DL_LIBS} )
+	TARGET_LINK_LIBRARIES( IFXExporting IFXCore IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
 
 #IFXScheduling
@@ -1300,19 +1300,19 @@ SET( IFXScheduling_SRCS
 	)
 IF(WIN32)
   SET( SCHED_DIR ${U3D_DIR}/src/RTL/Platform/Win32/IFXScheduling )
-  ADD_LIBRARY( IFXScheduling  SHARED ${IFXScheduling_SRCS} ${IFXScheduling_HDRS} ${SCHED_DIR}/IFXScheduling.rc ${SCHED_DIR}/IFXResource.h ${SCHED_DIR}/IFXScheduling.def )
+  ADD_LIBRARY( IFXScheduling SHARED ${IFXScheduling_SRCS} ${IFXScheduling_HDRS} ${SCHED_DIR}/IFXScheduling.rc ${SCHED_DIR}/IFXResource.h ${SCHED_DIR}/IFXScheduling.def )
   TARGET_LINK_LIBRARIES( IFXScheduling IFXCore )
 ENDIF(WIN32)
 IF(APPLE)
   ADD_LIBRARY( IFXScheduling  MODULE ${IFXScheduling_SRCS} ${IFXScheduling_HDRS} )
-  set_target_properties( IFXScheduling  PROPERTIES
+  set_target_properties( IFXScheduling IFXCore PROPERTIES
 	LINK_FLAGS "${MY_LINK_FLAGS} -exported_symbols_list ${U3D_DIR}/src/RTL/Platform/Mac32/IFXScheduling/IFXScheduling.def   -undefined dynamic_lookup" )
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
-  ADD_LIBRARY( IFXScheduling  MODULE ${IFXScheduling_SRCS} ${IFXScheduling_HDRS} )
+  ADD_LIBRARY( IFXScheduling SHARED ${IFXScheduling_SRCS} ${IFXScheduling_HDRS} )
   set_target_properties( IFXScheduling  PROPERTIES
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXScheduling/IFXScheduling.list" )
-  TARGET_LINK_LIBRARIES( IFXScheduling IFXCoreStatic ${CMAKE_DL_LIBS} )
+  TARGET_LINK_LIBRARIES( IFXScheduling IFXCore IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
 
 #external-IDTFConverter
