@@ -43,7 +43,12 @@ static const char* s_pCorePathEnvVar = "U3D_LIBDIR";
 static const char* s_pCorePathDefault = U3DCorePath;
 #else
 static const char* s_pCorePathDefault = ".";
-#endif
+#endif //U3DCorePath
+#ifdef U3DInstallPath
+static const char* s_pInstallPathDefault = U3DInstallPath;
+#else
+static const char* s_pInstallPathDefault = ".";
+#endif //U3DInstallPath
 #ifdef U3DPluginsPath
 #define IFXOSFI_SUBDIR U3DPluginsPath
 #else
@@ -94,6 +99,28 @@ IFXHANDLE IFXAPI IFXLoadLibrary( const IFXCHAR* pFileName )
           IFXTRACE_GENERIC(L"%s:%i \"%s/%s\" FileName lenth is more then %i\n",__FILE__, __LINE__, pCorePath, fileName, _MAXIMUM_FILENAME_LENGTH);
         }
     }
+	
+	//add for meshlab
+	if (!handle)
+	{
+		const char* pCorePath = s_pInstallPathDefault;
+		
+		char newFileName[_MAXIMUM_FILENAME_LENGTH];
+		size += strlen(pCorePath);
+		
+		if (size+1 < _MAXIMUM_FILENAME_LENGTH)
+		{
+			strcpy(newFileName, pCorePath);
+			strcat(newFileName, "/");
+			strcat(newFileName, fileName);
+			
+			handle = dlopen(newFileName, RTLD_LAZY );
+		}
+		else
+		{
+			IFXTRACE_GENERIC(L"%s:%i \"%s/%s\" FileName lenth is more then %i\n",__FILE__, __LINE__, pCorePath, fileName, _MAXIMUM_FILENAME_LENGTH);
+		}
+	}
 
     if (!handle)
     {
@@ -115,6 +142,27 @@ IFXHANDLE IFXAPI IFXLoadLibrary( const IFXCHAR* pFileName )
           IFXTRACE_GENERIC(L"%s:%i \"%s/" IFXOSFI_SUBDIR "/%s\" FileName lenth is more then %i\n",__FILE__, __LINE__, pCorePath, fileName, _MAXIMUM_FILENAME_LENGTH);
         }
     }
+	
+	//add for meshlab
+	if (!handle)
+	{
+		const char* pCorePath = s_pInstallPathDefault;
+		
+		char newFileName[_MAXIMUM_FILENAME_LENGTH];
+		
+		if (size+2+strlen(IFXOSFI_SUBDIR) < _MAXIMUM_FILENAME_LENGTH)
+		{
+			strcpy(newFileName, pCorePath);
+			strcat(newFileName, "/" IFXOSFI_SUBDIR "/");
+			strcat(newFileName, fileName);
+			
+			handle = dlopen(newFileName, RTLD_LAZY );
+		}
+		else
+		{
+			IFXTRACE_GENERIC(L"%s:%i \"%s/" IFXOSFI_SUBDIR "/%s\" FileName lenth is more then %i\n",__FILE__, __LINE__, pCorePath, fileName, _MAXIMUM_FILENAME_LENGTH);
+		}
+	}
 
     if (!handle)
     {
