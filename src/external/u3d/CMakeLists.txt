@@ -1473,10 +1473,10 @@ IF(UNIX AND NOT APPLE)
 	set(U3D_INSTALL_RELATIVE_PATH "../lib/meshlab/")
 ELSEIF(APPLE)
 	set(U3D_LIB_RELATIVE_PATH "../external/u3d/")
-	set(U3D_INSTALL_RELATIVE_PATH "") #TODO
+	set(U3D_INSTALL_RELATIVE_PATH "../Frameworks")
 elseif(WIN32)
 	set(U3D_LIB_RELATIVE_PATH "../external/u3d/")
-	set(U3D_INSTALL_RELATIVE_PATH "") #TODO
+	set(U3D_INSTALL_RELATIVE_PATH ".")
 endif()
 
 message(--U3D_OUT_PATH: ${OUT_PATH_LIB})
