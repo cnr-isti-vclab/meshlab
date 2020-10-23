@@ -19,7 +19,8 @@ else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop -bundle-non-qt-libs
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUNDLE_PATH/usr/lib/meshlab
+$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop -bundle-non-qt-libs -exclude-libs=
 
 chmod +x $BUNDLE_PATH/usr/bin/meshlab
 rm $BUNDLE_PATH/AppRun
