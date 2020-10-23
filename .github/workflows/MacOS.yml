@@ -38,5 +38,5 @@ jobs:
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_macos_dmg_cmake
+        name: meshlab_macos_dmg
         path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
