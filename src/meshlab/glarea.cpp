@@ -2278,7 +2278,7 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
     //Expressing the translation along Z with a scale factor k
     //Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
-    ////k is the ratio between the distances along z of two correspondent points (before and after the traslation)
+    ////k is the ratio between the distances along z of two correspondent points (before and after the translation)
     ////from the point of view
     //float k= abs(p2.Z()/p1.Z());
 

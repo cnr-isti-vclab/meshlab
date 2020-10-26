@@ -103,8 +103,8 @@ public:
         // other variables for scaling and normalization of points
         std::vector<PertPair> pertVector;
         ScalarType factor = args.scale/m.bbox.Diag(), min = 1000.0, max = -1000.0;
-        ScalarType seedTraslation = args.seed/factor, perturbation = .0;
-        Point3<ScalarType> seedPoint(seedTraslation, seedTraslation, seedTraslation);
+        ScalarType seedTranslation = args.seed/factor, perturbation = .0;
+        Point3<ScalarType> seedPoint(seedTranslation, seedTranslation, seedTranslation);
         Point3<ScalarType> center = m.bbox.Center(), p;
         Point3<ScalarType> trasl = seedPoint - center;
         PertPair* tmpPair;

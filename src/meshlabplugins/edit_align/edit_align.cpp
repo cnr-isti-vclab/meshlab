@@ -42,7 +42,7 @@ $Log: meshedit.cpp,v $
 using namespace vcg;
 
 //todo: remove these orrible defs from here
-//make vcg::PointMatchingScale indipendent
+//make vcg::PointMatchingScale independent
 std::vector<vcg::Point3d>* vcg::PointMatchingScale::fix;
 std::vector<vcg::Point3d>* vcg::PointMatchingScale::mov;
 vcg::Box3d vcg::PointMatchingScale::b;
@@ -134,7 +134,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     {
 
         // assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
-        // if above 50, truly unique color would geenrate too similar colors, so total number of unique color
+        // if above 50, truly unique color would generate too similar colors, so total number of unique color
         // is capped to 50 and the color reused, id that are close will have different color anyway
 		if (mm != NULL)
 		{

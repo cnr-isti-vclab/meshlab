@@ -144,10 +144,10 @@ namespace io {
 			{
 				QDomElement lod = lodNodes.at(ln).toElement();
 				QDomNode parent = lod.parentNode();
-				//Create a traslation Transform node from attribute 'center'
+				//Create a translation Transform node from attribute 'center'
 				QString center = lod.attribute("center");
 				QDomElement transform = doc->createElement("Transform");
-				transform.setAttribute("traslation", center);
+				transform.setAttribute("translation", center);
 				QDomElement firstChild = lod.firstChildElement();
 				if (!firstChild.isNull())
 				{
@@ -2061,7 +2061,7 @@ namespace io {
 				tmp[1][2] = center.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "traslation", "0 0");
+			findAndParseAttribute(coordList, elem, "translation", "0 0");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
