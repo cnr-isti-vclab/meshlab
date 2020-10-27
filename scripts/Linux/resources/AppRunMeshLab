@@ -1,0 +1,9 @@
+#!/bin/bash
+#this script is necessary only for the u3d exporter. 
+#libIFX has its own library loader, which does not consider 
+#the runpath set in the meshlab binary. It looks only the 
+#LD_LIBRARY_PATH variable.
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+export LD_LIBRARY_PATH=${HERE}/usr/lib/meshlab:$LD_LIBRARY_PATH
+exec "${HERE}/usr/bin/meshlab" "$@"
