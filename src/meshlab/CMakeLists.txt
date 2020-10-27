@@ -74,13 +74,9 @@ set(UI
 	ui/savesnapshotDialog.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
-#if(APPLE)
-#    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../install/macx/info.plist
-#                images/meshlab.icns)
-#endif()
 
 if(WIN32)
-    list(APPEND SOURCES meshlab.rc)
+	list(APPEND SOURCES meshlab.rc)
 endif()
 
 add_executable(meshlab WIN32 MACOSX_BUNDLE
@@ -95,19 +91,14 @@ target_link_libraries(
 	)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)
+if (APPLE)
+	set_target_properties(meshlab PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns DESTINATION "${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/Resources/")
+	set_target_properties(meshlab PROPERTIES MACOSX_BUNDLE_ICONFILE meshlab.icns)
+endif()
 
 install(
 	TARGETS meshlab
 	DESTINATION ${MESHLAB_BIN_INSTALL_DIR}
-COMPONENT MeshLab)
-
-if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)
-	add_custom_command(
-		TARGET meshlab
-		POST_BUILD
-		COMMAND "${Qt5_windeployqt_EXECUTABLE}" --no-translations
-			$<TARGET_FILE_NAME:meshlab>
-		WORKING_DIRECTORY $<TARGET_FILE_DIR:meshlab>
-		COMMENT "Deploying Qt to the build directory of meshlab"
-		VERBATIM USES_TERMINAL)
-endif()
+	COMPONENT MeshLab)

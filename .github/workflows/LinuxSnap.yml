@@ -2,10 +2,10 @@ name: LinuxSnap
 
 on:
   workflow_dispatch
-  
+
 jobs:
-  ubuntu_build_snap:
-    name: Build MeshLab (Ubuntu - Snap)
+  linux_build_snap:
+    name: Build MeshLab (Linux - Snap)
     runs-on: ubuntu-latest
 
     steps:

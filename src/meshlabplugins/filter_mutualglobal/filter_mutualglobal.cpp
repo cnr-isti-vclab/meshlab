@@ -878,7 +878,7 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	MutualInfo mutual;
 
 	alignset.mode=AlignSet::NODE;
-	alignset.node=&node;
+	//alignset.node=&node;
 
 	alignset.image=&md.rasterList[node.id]->currentPlane->image;
 	alignset.shot=md.rasterList[node.id]->shot;

@@ -42,7 +42,7 @@ class AlignSet {
   double error; //alignment error in px
   QImage rend;
   QImage comb;
-  Node* node;
+  //Node* node;
   std::vector<QImage*> arcImages;
   std::vector<vcg::Shot<float>*> arcShots;
   std::vector<float> arcMI;

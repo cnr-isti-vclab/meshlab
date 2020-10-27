@@ -12,13 +12,15 @@ if(TARGET external-IDTFConverter)
 	set(SOURCES io_u3d.cpp)
 
 	set(HEADERS io_u3d.h)
+	include_directories("${U3D_DIR}/src/IDTF")
 
 	add_library(io_u3d MODULE ${SOURCES} ${HEADERS})
 
 	target_include_directories(io_u3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+	
 	target_link_libraries(io_u3d PUBLIC common)
 
-	target_link_libraries(io_u3d PRIVATE external-IDTFConverter ${CMAKE_DL_LIBS})
+	target_link_libraries(io_u3d PUBLIC external-IDTFConverter IFXCoreStatic ${CMAKE_DL_LIBS})
 
 	set_property(TARGET io_u3d PROPERTY FOLDER Plugins)
 

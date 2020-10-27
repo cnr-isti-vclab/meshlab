@@ -24,25 +24,19 @@ jobs:
       id: envs
       shell: bash
       run: |
-        #sh install/macos/macos_setup_env.sh
-        #necessary here on github actions:
-        #echo '::set-env name=QTDIR::/usr/local/opt/qt'
-        #echo '::add-path::/usr/local/opt/qt/bin'
-        #echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
-        #echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
+    - name: Configure and Build
       run: |
-        sh install/macos/macos_build.sh
-    - name: Deploy MeshLab
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
       run: |
-        sh install/macos/macos_deploy.sh
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-         sh install/macos/macos_dmg.sh
-         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        sh scripts/${{ runner.os }}/3_dmg.sh
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg
-        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg

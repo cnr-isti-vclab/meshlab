@@ -4,76 +4,37 @@ on:
   [push, pull_request]
 
 jobs:
-  ubuntu_build_appimage:
-    name: Build MeshLab (Ubuntu - AppImage)
+  linux_build:
+    name: Build MeshLab (Linux)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
-       sudo apt-get install -y libxkbcommon-x11-0 patchelf
+        sh scripts/${{ runner.os }}/0_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
+    - name: Configure and Build
       run: |
-        sh install/linux/linux_build.sh
-    - name: Make MeshLab Bundle
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
       run: |
-        sh install/linux/linux_make_bundle.sh
-    - name: Deploy MeshLab and MeshLabServer
+        sh scripts/${{ runner.os }}/2_deploy.sh
+    - name: Build MeshLab AppImage
       run : |
-        sh install/linux/linux_deploy.sh
-    - name: Build MeshLab and MeshLabServer AppImages
-      run : |
-        sh install/linux/linux_appimages.sh
+        sh scripts/${{ runner.os }}/3_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable
-        path: distrib/
-    - name: Upload MeshlabServer AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlabserver_linux_appimage
-        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        path: src/install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
-        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-
-  ubuntu_build_cmake:
-    name: Build MeshLab (Ubuntu - CMake)
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install dependencies
-      run: |
-       sh install/linux/linux_setup_env_ubuntu.sh
-       sudo apt-get install cmake ninja-build
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Configure
-      run: |
-        cmake src/ -G Ninja
-    - name: Build MeshLab
-      run: |
-        ninja -C .
-    - name: Install Meshlab
-      run: sudo ninja -C . install
-
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage

@@ -1,4 +1,4 @@
-name: BuildAndRelease
+name: CreateRelease
 
 on:
   #[push, pull_request] #just for test release scripts
@@ -8,9 +8,7 @@ on:
         description: 'New MeshLab Version'
         required: true
         default: 'YYYY.MM'
-  #schedule:
-  #  - cron:  '0 1 1 * *' #every first day of the month at 1am
-  
+
 
 jobs:
   update_ml_version:
@@ -19,12 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 2
         submodules: true
-    #- name: Setup env variables
-    #  id: envs
-    #  run: |
-    #    echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
         echo ${{ github.event.inputs.version }} | tr -d '\n'> ML_VERSION
@@ -34,15 +27,15 @@ jobs:
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{ github.event.inputs.version }}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
-        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
+        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" scripts/Linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
     - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
         commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
 
-  ubuntu_build_appimage:
+  linux_build:
     needs: [update_ml_version]
-    name: Build MeshLab (Ubuntu - AppImage)
+    name: Build MeshLab (Linux)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
     steps:
@@ -50,47 +43,34 @@ jobs:
       with:
         ref: master
         submodules: true
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
-       sudo apt-get install -y libxkbcommon-x11-0 patchelf
+        sh scripts/${{ runner.os }}/0_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
+    - name: Configure and Build
       run: |
-        sh install/linux/linux_build.sh
-    - name: Make MeshLab Bundle
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
       run: |
-        sh install/linux/linux_make_bundle.sh
-    - name: Deploy MeshLab and MeshLabServer
+        sh scripts/${{ runner.os }}/2_deploy.sh
+    - name: Build MeshLab AppImage
       run : |
-        sh install/linux/linux_deploy.sh
-    - name: Build MeshLab and MeshLabServer AppImages
-      run : |
-        sh install/linux/linux_appimages.sh
+        sh scripts/${{ runner.os }}/3_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable
-        path: distrib/
-    - name: Upload MeshlabServer AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlabserver_linux_appimage
-        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        path: src/install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
-        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
-  ubuntu_build_snap:
+  linux_build_snap:
     needs: [update_ml_version]
     name: Build MeshLab (Ubuntu - Snap)
     runs-on: ubuntu-latest
@@ -145,21 +125,21 @@ jobs:
       shell: bash
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab
+    - name: Configure and Build
       run: |
-        sh install/macos/macos_build.sh
-    - name: Deploy MeshLab
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
       run: |
-        sh install/macos/macos_deploy.sh
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-         sh install/macos/macos_dmg.sh
-         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        sh scripts/${{ runner.os }}/3_dmg.sh
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg
-        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
 
   windows_build:
     needs: [update_ml_version]
@@ -177,57 +157,55 @@ jobs:
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         echo "::add-path::$(Get-Location)\jom"
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
-        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-    - name: Build MeshLab
+    - name: Setup env variables
+      id: envs
       run: |
-        .\install\windows\windows_build.ps1
-    - name: Deploy MeshLab
+        echo "::set-output name=date::$(type ML_VERSION)"
+    - name: Configure and Build
+      shell: bash
       run: |
-        .\install\windows\windows_deploy.ps1
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
+      shell: bash
+      run: |
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: NSIS script
+      shell: bash
       run: |
-        .\install\windows\resources\windows_nsis_script.ps1
+        sh scripts/${{ runner.os }}/resources/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
-        script-file: "install/windows/resources/meshlab_final.nsi"
+        script-file: "src/install/meshlab_final.nsi"
     - name: Rename Installer
+      shell: bash
       run: |
-        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
-    - name: Upload Meshlab Portable
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.exe  src/MeshLab${{steps.envs.outputs.date}}-windows.exe
+    - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
-        path: distrib
+        path: src/install
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
-        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
+        path: src/MeshLab${{steps.envs.outputs.date}}-windows.exe
 
-#after building MeshLab for the three platforms, we create a release in github
+  #after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
-    needs: [ubuntu_build_appimage, ubuntu_build_snap, macos_build, windows_build]
+    needs: [linux_build, linux_build_snap, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
-    #- name: Setup env variables
-    #  id: envs
-    #  run: |
-    #    echo ::set-output name=date::"$(date +%Y.%m)"
 
-    #Linux Release
+    #Download Linux Packages
     - name: Download Linux ZIP
       uses: actions/download-artifact@v1
       with:
@@ -236,10 +214,6 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_appimage
-    - name: Download Linux MeshLabServer AppImage
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlabserver_linux_appimage
     - name: Download Linux Snap
       uses: actions/download-artifact@v1
       with:
@@ -250,20 +224,19 @@ jobs:
         chmod +x meshlab_linux_portable/usr/bin/meshlabserver
         chmod +x meshlab_linux_portable/AppRun
         chmod +x meshlab_linux_appimage/MeshLab${{ github.event.inputs.version }}-linux.AppImage
-        chmod +x meshlabserver_linux_appimage/MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
     - name: Create MeshLab Portable Linux Archive
       run: |
         tar -cvzf MeshLab${{ github.event.inputs.version }}-linux.tar.gz meshlab_linux_portable/
-    
 
-    #MacOS Release
+
+    #Download MacOS Package
     - name: Download MacOS DMG
       uses: actions/download-artifact@v1
       with:
         name: meshlab_macos_dmg
-        
 
-    #Windows Release
+
+    #Download Windows Packages
     - name: Download Windows ZIP
       uses: actions/download-artifact@v1
       with:
@@ -275,8 +248,8 @@ jobs:
     - name: Create MeshLab Portable Windows Archive
       run: |
         zip -r MeshLab${{ github.event.inputs.version }}-windows.zip meshlab_windows_portable/
-    
-    
+
+
     #Create release and upload
     - name: Publish Release
       id: create_release
@@ -309,16 +282,6 @@ jobs:
         asset_path: meshlab_linux_appimage/MeshLab${{ github.event.inputs.version }}-linux.AppImage
         asset_name: MeshLab${{ github.event.inputs.version }}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
-    - name: Upload ReleaseLinuxMeshLabServerAppImage
-      id: upload-release-linux-meshlabserver-appimage
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlabserver_linux_appimage/MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
-        asset_name: MeshLabServer${{ github.event.inputs.version }}-linux.AppImage
-        asset_content_type: MeshLabServer AppImage for Linux
     - name: Upload ReleaseLinuxSnap
       id: upload-release-linux-snap
       uses: actions/upload-release-asset@v1.0.1

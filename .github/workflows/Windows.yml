@@ -17,75 +17,43 @@ jobs:
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         echo "::add-path::$(Get-Location)\jom"
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
-        #echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         modules: xmlpatterns
-        #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
-    - name: Build MeshLab
+    - name: Setup env variables
+      id: envs
       run: |
-        .\install\windows\windows_build.ps1
-    - name: Deploy MeshLab
+        echo "::set-output name=date::$(type ML_VERSION)"
+    - name: Configure and Build
+      shell: bash
       run: |
-        .\install\windows\windows_deploy.ps1
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
+      shell: bash
+      run: |
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: NSIS script
+      shell: bash
       run: |
-        .\install\windows\resources\windows_nsis_script.ps1
+        sh scripts/${{ runner.os }}/resources/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
-        script-file: "install/windows/resources/meshlab_final.nsi"
+        script-file: "src/install/meshlab_final.nsi"
     - name: Rename Installer
+      shell: bash
       run: |
-        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
-    - name: Upload Meshlab Portable
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.exe  src/MeshLab${{steps.envs.outputs.date}}-windows.exe
+    - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
-        path: distrib
+        path: src/install
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
-        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
-
-  windows_build_cmake:
-    name: Build MeshLab (Windows, CMake)
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
-        #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo "::set-output name=date::$(type ML_VERSION)"
-    - name: Configure
-      run: |
-        cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-        # -DBUILD_MINI=ON
-    - name: Build MeshLab
-      run: |
-        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
-        cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
-#    - name: Uploading MeshLab Portable
-#      uses: actions/upload-artifact@v1
-#      with:
-#        name: meshlab_portable_windows_cmake
-#        path: install
+        path: src/MeshLab${{steps.envs.outputs.date}}-windows.exe

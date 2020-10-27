@@ -42,20 +42,26 @@ using namespace std;
 using namespace vcg;
 
 
-U3DIOPlugin::U3DIOPlugin()
-:QObject(),IOPluginInterface(),_param()
+U3DIOPlugin::U3DIOPlugin() :
+	QObject(), IOPluginInterface(), _param()
 {
-
 }
 
-bool U3DIOPlugin::open(const QString &, const QString &, MeshModel &, int&, const RichParameterList &, CallBackPos *, QWidget *)
+bool U3DIOPlugin::open(
+		const QString &, 
+		const QString &, 
+		MeshModel &, 
+		int&, 
+		const RichParameterList &, 
+		CallBackPos *, 
+		QWidget *)
 {
 	return false;
 }
 
 QString U3DIOPlugin::computePluginsPath()
 {
-    QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
+	QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
 		#if defined(Q_OS_WIN)
 			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
@@ -68,7 +74,14 @@ QString U3DIOPlugin::computePluginsPath()
 }
 
 
-bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *, QWidget *parent)
+bool U3DIOPlugin::save(
+		const QString &formatName, 
+		const QString &fileName, 
+		MeshModel &m, 
+		const int mask, 
+		const RichParameterList & par, 
+		vcg::CallBackPos *, 
+		QWidget *parent)
 {
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -78,10 +91,12 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	std::string ex = formatName.toUtf8().data();
 
 	
-	QStringList textures_to_be_restored;	
-	QStringList lst = vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(m.cm,QDir::tempPath(),textures_to_be_restored);
+	QStringList textures_to_be_restored;
+	QStringList lst = 
+			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
+				m.cm, QDir::tempPath(), textures_to_be_restored);
 	if(formatName.toUpper() == tr("U3D")) {
-		qApp->restoreOverrideCursor();	
+		qApp->restoreOverrideCursor();
 		saveParameters(par);
 		QSettings settings;
 		
@@ -91,18 +106,22 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		QString out(fileName);
 		QStringList out_trim;
 		vcg::tri::io::QtUtilityFunctions::splitFilePath(fileName,out_trim);
-		tmp = tmp + "/" + vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(out_trim) + ".idtf";
+		tmp = tmp + "/" +
+				vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(out_trim) + ".idtf";
 		vcg::tri::io::ExporterIDTF<CMeshO>::Save(m.cm,qPrintable(tmp),mask);
 
 		//conversion from idtf to u3d
 		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
 
-        if(result==false) {
-            QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
-            return false;
-        }
-
-        //saving latex:
+		if(result==false) {
+			QMessageBox::warning(
+						parent, 
+						tr("Saving Error"), 
+						errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
+			return false;
+		}
+		
+		//saving latex:
 		QDir::setCurrent(curr);
 		QString lat (fileName);
 		QStringList l = lat.split(".");
@@ -114,8 +133,10 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	}
 	
 	if(formatName.toUpper() == tr("IDTF")) 
-		tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);		
-	vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(m.cm,textures_to_be_restored);	
+		tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);
+	vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
+				m.cm,
+				textures_to_be_restored);
 	return true;
 }
 
@@ -148,17 +169,22 @@ QList<IOPluginInterface::Format> U3DIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void U3DIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void U3DIOPlugin::GetExportMaskCapability(
+		const QString &format, 
+		int &capability, 
+		int &defaultBits) const
 {
 	if(format.toUpper() == tr("U3D")) {
-		capability = defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
+		capability = defaultBits =
+				vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_FACECOLOR);
 		return;
 	}
 	if(format.toUpper() == tr("IDTF")) {
-		capability=defaultBits = vcg::tri::io::ExporterIDTF<CMeshO>::GetExportMaskCapability();
+		capability = defaultBits =
+				vcg::tri::io::ExporterIDTF<CMeshO>::GetExportMaskCapability();
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
 		defaultBits &= (~vcg::tri::io::Mask::IOM_FACECOLOR);
@@ -168,39 +194,28 @@ void U3DIOPlugin::GetExportMaskCapability(const QString &format, int &capability
 	assert(0);
 }
 
-//static float avoidExponentialNotation(const float n,const float bboxdiag)
-//{
-//	float val_min = std::min(1000.0f,floorf(bboxdiag * 1000.0f));
-//	return floorf(val_min * n ) / val_min;
-//}
-//
-//static vcg::Point3f avoidExponentialNotation(const vcg::Point3f& p,const float bboxdiag)
-//{
-//	return vcg::Point3f(avoidExponentialNotation(p.X(),bboxdiag),
-//		avoidExponentialNotation(p.Y(),bboxdiag),
-//		avoidExponentialNotation(p.Z(),bboxdiag));
-//}
-
 void U3DIOPlugin::initSaveParameter(const QString &, MeshModel &m, RichParameterList &par) 
 {
-	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
-	//vcg::Point3f pos = avoidExponentialNotation(_param._campar->_obj_pos,_param._campar->_obj_bbox_diag);
+	_param._campar = 
+			new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(
+				m.cm.bbox.Center(),m.cm.bbox.Diag());
 	Point3m pos = _param._campar->_obj_pos;
 	Point3m dir(0.0f,0.0f,-1.0f * _param._campar->_obj_bbox_diag);
 	par.addParam(RichPoint3f("position_val",dir, "Camera Position",
-		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box."));		
-	//vcg::Point3f dir(0.0f,0.0f,avoidExponentialNotation(-1.0f * _param._campar->_obj_bbox_diag,_param._campar->_obj_bbox_diag));
+		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box."));
 	par.addParam(RichPoint3f("target_val",pos, "Camera target point",
 		"The point towards the camera is seeing. The default value is derived by the 3d mesh's bounding box."));
-	par.addParam(RichFloat("fov_val",60.0f,"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));
-	par.addParam(RichInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500."));
+	par.addParam(RichFloat("fov_val",60.0f,
+		"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));
+	par.addParam(RichInt("compression_val",500,"U3D quality 0..1000",
+		"U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500."));
 }
 
 void U3DIOPlugin::saveParameters(const RichParameterList &par)
 {
-    Point3m from_target_to_camera = Point3m(par.getPoint3m(QString("position_val")) - par.getPoint3m(QString("target_val")));
+	Point3m from_target_to_camera = 
+			Point3m(par.getPoint3m(QString("position_val")) - par.getPoint3m(QString("target_val")));
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters* sw = _param._campar;
-	//vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
 	Point3m p = sw->_obj_pos;
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(
 		par.getFloat(QString("fov_val")),0.0,from_target_to_camera,from_target_to_camera.Norm(),sw->_obj_bbox_diag,p);
@@ -215,7 +230,8 @@ void U3DIOPlugin::saveLatex(const QString& file,const vcg::tri::io::u3dparameter
 	QString u3df = file + ".u3d";
 	QStringList file_trim;
 	vcg::tri::io::QtUtilityFunctions::splitFilePath(u3df,file_trim);
-	std::string u3d_final = vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(file_trim).toStdString();
+	std::string u3d_final = 
+			vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(file_trim).toStdString();
 	latex.write(0,"\\documentclass[a4paper]{article}");
 	latex.write(0,"\\usepackage[3D]{movie15}");
 	latex.write(0,"\\usepackage{hyperref}");
@@ -232,8 +248,7 @@ void U3DIOPlugin::saveLatex(const QString& file,const vcg::tri::io::u3dparameter
 	latex.write(1,"text=(" + u3d_text.toStdString() + "),");
 	std::string cam_string;
 	typename vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters* cam = mov_par._campar;
-	if (cam != NULL)
-	{
+	if (cam != NULL) {
 		cam_string = cam_string + "3Daac=" + TextUtility::nmbToStr(cam->_cam_fov_angle) +
 				", 3Droll=" + TextUtility::nmbToStr(cam->_cam_roll_angle) +
 				", 3Dc2c=" + TextUtility::nmbToStr(cam->_obj_to_cam_dir.X()) + " " + TextUtility::nmbToStr(cam->_obj_to_cam_dir.Z()) + " " + TextUtility::nmbToStr(cam->_obj_to_cam_dir.Y()) +
