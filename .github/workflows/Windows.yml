@@ -46,14 +46,14 @@ jobs:
     - name: Rename Installer
       shell: bash
       run: |
-        mv src/install/MeshLab${{steps.envs.outputs.date}}.exe  src/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.exe  src/MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_windows_portable_cmake
+        name: meshlab_windows_portable
         path: src/install
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_windows_installer_cmake
-        path: src/MeshLab${{steps.envs.outputs.date}}-windows_cmake.exe
+        name: meshlab_windows_installer
+        path: src/MeshLab${{steps.envs.outputs.date}}-windows.exe
