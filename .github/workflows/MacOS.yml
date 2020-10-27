@@ -27,13 +27,13 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Configure and Build
       run: |
-        sh scripts/${{ runner.os }}/macos_build.sh
+        sh scripts/${{ runner.os }}/1_build.sh
     - name: Deploy
       run: |
-        sh scripts/${{ runner.os }}/macos_deploy.sh
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-         sh scripts/${{ runner.os }}/macos_dmg.sh
+         sh scripts/${{ runner.os }}/3_dmg.sh
          mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1

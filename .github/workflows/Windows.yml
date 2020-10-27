@@ -30,15 +30,15 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
-        sh scripts/${{ runner.os }}/windows_build.sh
+        sh scripts/${{ runner.os }}/1_build.sh
     - name: Deploy
       shell: bash
       run: |
-        sh scripts/${{ runner.os }}/windows_deploy.sh
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: NSIS script
       shell: bash
       run: |
-        sh scripts/${{ runner.os }}/resources/windows_nsis_script.sh
+        sh scripts/${{ runner.os }}/resources/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:

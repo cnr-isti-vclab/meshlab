@@ -19,7 +19,7 @@ else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-sh $SCRIPTS_PATH/resources/windows_nsis_script.sh $BUNDLE_PATH
+sh $SCRIPTS_PATH/resources/nsis_script.sh $BUNDLE_PATH
 
 makensis.exe $SCRIPTS_PATH/resources/meshlab_final.nsi
 

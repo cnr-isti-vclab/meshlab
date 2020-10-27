@@ -310,6 +310,6 @@ if(INSTALL_SAMPLE_RANGEMAPS)
 endif()
 
 if(NOT WIN32 AND NOT APPLE)
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/Linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
 endif()
