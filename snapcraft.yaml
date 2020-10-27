@@ -53,7 +53,7 @@ parts:
     after: [desktop-qt5]
     plugin: qmake
     qt-version: qt5
-    source: https://github.com/alemuntoni/meshlab.git
+    source: https://github.com/cnr-isti-vclab/meshlab.git
     build-packages:
       - qt5-default
       - qttools5-dev-tools
