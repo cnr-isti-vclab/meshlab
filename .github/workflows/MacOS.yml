@@ -33,8 +33,8 @@ jobs:
         sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-         sh scripts/${{ runner.os }}/3_dmg.sh
-         mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        sh scripts/${{ runner.os }}/3_dmg.sh
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:

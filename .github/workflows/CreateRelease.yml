@@ -1,4 +1,4 @@
-name: BuildAndRelease
+name: CreateRelease
 
 on:
   #[push, pull_request] #just for test release scripts
@@ -34,42 +34,41 @@ jobs:
       with:
         commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
 
-  jobs:
-    linux_build:
-      needs: [update_ml_version]
-      name: Build MeshLab (Linux)
-      runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+  linux_build:
+    needs: [update_ml_version]
+    name: Build MeshLab (Linux)
+    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
-      steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Install dependencies
-        run: |
-          sh scripts/${{ runner.os }}/0_setup_env_ubuntu.sh
-      - name: Setup env variables
-        id: envs
-        run: |
-          echo  ::set-output name=date::"$(cat ML_VERSION)"
-      - name: Configure and Build
-        run: |
-          sh scripts/${{ runner.os }}/1_build.sh
-      - name: Deploy
-        run: |
-          sh scripts/${{ runner.os }}/2_deploy.sh
-      - name: Build MeshLab AppImage
-        run : |
-          sh scripts/${{ runner.os }}/3_appimage.sh
-      - name: Upload Meshlab Portable
-        uses: actions/upload-artifact@v1
-        with:
-          name: meshlab_linux_portable
-          path: src/install/
-      - name: Upload Meshlab AppImage
-        uses: actions/upload-artifact@v1
-        with:
-          name: meshlab_linux_appimage
-          path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install dependencies
+      run: |
+        sh scripts/${{ runner.os }}/0_setup_env_ubuntu.sh
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Configure and Build
+      run: |
+        sh scripts/${{ runner.os }}/1_build.sh
+    - name: Deploy
+      run: |
+        sh scripts/${{ runner.os }}/2_deploy.sh
+    - name: Build MeshLab AppImage
+      run : |
+        sh scripts/${{ runner.os }}/3_appimage.sh
+    - name: Upload Meshlab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_portable
+        path: src/install/
+    - name: Upload Meshlab AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_appimage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
   linux_build_snap:
     needs: [update_ml_version]
@@ -133,8 +132,8 @@ jobs:
         sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-         sh scripts/${{ runner.os }}/3_dmg.sh
-         mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        sh scripts/${{ runner.os }}/3_dmg.sh
+        mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
@@ -197,7 +196,7 @@ jobs:
         name: meshlab_windows_installer
         path: src/MeshLab${{steps.envs.outputs.date}}-windows.exe
 
-#after building MeshLab for the three platforms, we create a release in github
+  #after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
     needs: [linux_build, linux_build_snap, macos_build, windows_build]
