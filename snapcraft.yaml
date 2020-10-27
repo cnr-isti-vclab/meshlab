@@ -44,6 +44,7 @@ parts:
       - gnome-themes-standard
       - shared-mime-info
       - libqt5gui5
+      - libqt5qml5
       - libgdk-pixbuf2.0-0
       - libqt5svg5
       - try:
@@ -77,6 +78,7 @@ parts:
       - libqhull7
       - libglew-dev
       - libqt5opengl5-dev
+      - qtdeclarative5-dev
       - libqt5xmlpatterns5-dev
       - libqt5gui5
     override-build: |
