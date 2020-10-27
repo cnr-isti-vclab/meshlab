@@ -17,7 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 2
         submodules: true
     - name: Update MeshLab version
       run : |
@@ -28,7 +27,7 @@ jobs:
         /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{ github.event.inputs.version }}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
-        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" install/linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
+        sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" scripts/Linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
     - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
@@ -42,6 +41,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        ref: master
         submodules: true
     - name: Install dependencies
       run: |
@@ -110,6 +110,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        ref: master
         submodules: true
     - name: Install dependencies
       run: |
@@ -148,6 +149,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        ref: master
         submodules: true
     - name: Download Jom
       run: |
