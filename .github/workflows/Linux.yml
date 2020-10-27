@@ -14,23 +14,20 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-        sh scripts/linux/linux_setup_env_ubuntu.sh
+        sh scripts/${{ runner.os }}/0_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Configure and Build
       run: |
-        sh scripts/linux/linux_build.sh
-    - name: Make bundle
-      run: |
-        sh scripts/linux/linux_make_bundle.sh
+        sh scripts/${{ runner.os }}/1_build.sh
     - name: Deploy
       run: |
-        sh scripts/linux/linux_deploy.sh
+        sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Build MeshLab AppImage
       run : |
-        sh scripts/linux/linux_appimage.sh
+        sh scripts/${{ runner.os }}/3_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
