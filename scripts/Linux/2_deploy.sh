@@ -20,7 +20,7 @@ else
     BUNDLE_PATH=$(realpath $1)
 fi
 
-bash resources/make_bundle.sh $BUNDLE_PATH
+bash $SCRIPTS_PATH/resources/make_bundle.sh $BUNDLE_PATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUNDLE_PATH/usr/lib/meshlab
 $SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop -bundle-non-qt-libs
