@@ -1,4 +1,4 @@
-# Known to build in Ubuntu 18.04
+# Known to build in Ubuntu 18.04, 20.04
 name: meshlab
 base: core18
 version: 'MESHLAB_VERSION'
@@ -19,9 +19,6 @@ apps:
     command: desktop-launch $SNAP/AppRun
     plugs: [home, x11, mir, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
-  meshlabserver:
-    command: desktop-launch meshlabserver
-    plugs: [home, x11, opengl, removable-media]
 
 
 parts:
@@ -44,6 +41,7 @@ parts:
       - gnome-themes-standard
       - shared-mime-info
       - libqt5gui5
+      - libqt5qml5
       - libgdk-pixbuf2.0-0
       - libqt5svg5
       - try:
@@ -55,7 +53,7 @@ parts:
     after: [desktop-qt5]
     plugin: qmake
     qt-version: qt5
-    source: https://github.com/cnr-isti-vclab/meshlab.git
+    source: https://github.com/alemuntoni/meshlab.git
     build-packages:
       - qt5-default
       - qttools5-dev-tools
@@ -65,9 +63,9 @@ parts:
       - libglu1-mesa-dev
       - lib3ds-dev
       - libglew-dev
-      - libeigen3-dev 
-      - libopenctm-dev 
-      - libgmp-dev 
+      - libeigen3-dev
+      - libopenctm-dev
+      - libgmp-dev
       - libqhull-dev
       - chrpath
     stage-packages:
@@ -77,19 +75,17 @@ parts:
       - libqhull7
       - libglew-dev
       - libqt5opengl5-dev
+      - qtdeclarative5-dev
       - libqt5xmlpatterns5-dev
       - libqt5gui5
-    override-build: |          
-      qmake src/meshlab.pro "CONFIG+= system_eigen3 system_glew system_bzip2 system_openctm system_lib3ds"
-      make -j4
-      
-      sh install/linux/qmake/linux_make_boundle.sh distrib/
-      
-      rsync -av distrib/* $SNAPCRAFT_PART_INSTALL/
-      
-      rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab_server.desktop
+    override-build: |
+      sh scripts/Linux/1_build.sh
+      sh scripts/Linux/resources/make_bundle.sh
+
+      rsync -av src/install/* $SNAPCRAFT_PART_INSTALL/
+
       rm $SNAPCRAFT_PART_INSTALL/usr/share/applications/meshlab.desktop
-      cp install/linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-      cp install/linux/resources/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/
+      cp scripts/Linux/resources/snap/meshlab.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+      cp scripts/Linux/resources/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/
       mv $SNAPCRAFT_PART_INSTALL/AppRunMeshLab $SNAPCRAFT_PART_INSTALL/AppRun
       chmod +x $SNAPCRAFT_PART_INSTALL/AppRun

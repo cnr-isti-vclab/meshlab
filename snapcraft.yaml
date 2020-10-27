@@ -19,9 +19,6 @@ apps:
     command: desktop-launch $SNAP/AppRun
     plugs: [home, x11, mir, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
-  meshlabserver:
-    command: desktop-launch meshlabserver
-    plugs: [home, x11, opengl, removable-media]
 
 
 parts:
