@@ -44,31 +44,6 @@ set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
 set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
 
-### Install directories
-if(WIN32 OR APPLE)
-	set(INSTALL_TO_UNIX_LAYOUT OFF)
-else()
-	set(INSTALL_TO_UNIX_LAYOUT ON)
-endif()
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
-include(GNUInstallDirs)
-if(INSTALL_TO_UNIX_LAYOUT)
-	set(MESHLAB_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
-	set(MESHLAB_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/meshlab)
-	set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_LIB_INSTALL_DIR}/plugins)
-	set(MESHLAB_SHADER_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/meshlab/shaders)
-elseif(APPLE)
-	set(MESHLAB_BIN_INSTALL_DIR .)
-	set(MESHLAB_LIB_INSTALL_DIR meshlab.app/Contents/Frameworks)
-	set(MESHLAB_PLUGIN_INSTALL_DIR meshlab.app/Contents/PlugIns)
-	set(MESHLAB_SHADER_INSTALL_DIR meshlab.app/Contents/shaders)
-else()
-	set(MESHLAB_BIN_INSTALL_DIR .)
-	set(MESHLAB_LIB_INSTALL_DIR .)
-	set(MESHLAB_PLUGIN_INSTALL_DIR plugins)
-	set(MESHLAB_SHADER_INSTALL_DIR shaders)
-endif()
-
 ### Build settings
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -92,6 +67,32 @@ if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
+### Install directories
+MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
+
+if(WIN32 OR APPLE)
+	set(INSTALL_TO_UNIX_LAYOUT OFF)
+else()
+	set(INSTALL_TO_UNIX_LAYOUT ON)
+endif()
+include(GNUInstallDirs)
+if(INSTALL_TO_UNIX_LAYOUT)
+	set(MESHLAB_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+	set(MESHLAB_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/meshlab)
+	set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_LIB_INSTALL_DIR}/plugins)
+	set(MESHLAB_SHADER_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/meshlab/shaders)
+elseif(APPLE)
+	set(MESHLAB_BIN_INSTALL_DIR .)
+	set(MESHLAB_LIB_INSTALL_DIR meshlab.app/Contents/Frameworks)
+	set(MESHLAB_PLUGIN_INSTALL_DIR meshlab.app/Contents/PlugIns)
+	set(MESHLAB_SHADER_INSTALL_DIR meshlab.app/Contents/shaders)
+else()
+	set(MESHLAB_BIN_INSTALL_DIR .)
+	set(MESHLAB_LIB_INSTALL_DIR .)
+	set(MESHLAB_PLUGIN_INSTALL_DIR plugins)
+	set(MESHLAB_SHADER_INSTALL_DIR shaders)
+endif()
+
 ### Install Settings
 if (NOT APPLE)
 	set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
@@ -99,21 +100,15 @@ else()
 	SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
 endif()
 
-### Bundled dependencies in the "external" directory
+### Enter subdirectories
+
+#external
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
-
 if (NOT BUILD_MINI)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
 
-#if (BUILD_STRICT AND APPLE)
-#	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
-#	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-undefined,error")
-#endif()
-
-
-### Enter subdirectories
 add_subdirectory(common)
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
