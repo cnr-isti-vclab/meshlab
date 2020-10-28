@@ -9,23 +9,6 @@ if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
 
-### vcglib
-if(NOT VCGDIR)
-	get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/vcglib" ABSOLUTE)
-	if(NOT EXISTS ${VCGDIR})
-		set(VCGDIR NOTFOUND)
-	endif()
-endif()
-set(VCGDIR
-	"${VCGDIR}")
-
-if(NOT VCGDIR)
-	message(
-	FATAL_ERROR
-		"vcglib is required to build MeshLab. Please get the source and set VCGDIR to its location: default location is as a sibling to the meshlab directory above this directory."
-	)
-endif()
-
 ### Build options
 
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
@@ -119,11 +102,6 @@ if (NOT BUILD_MINI)
 endif()
 
 ### Common build settings for internal code
-include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
-# This gets set to system or local, as appropriate, by external.cmake
-include_directories(${EIGEN_INCLUDE_DIRS})
-
 add_definitions(-DMESHLAB_SCALAR=float)
 
 if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
