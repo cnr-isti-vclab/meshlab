@@ -44,20 +44,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(WIN32 OR APPLE)
-	option(INSTALL_TO_UNIX_LAYOUT
-		"Should the files be installed to a unix layout? If false, they will be installed more like the build tree."
-		OFF)
+	set(INSTALL_TO_UNIX_LAYOUT OFF)
 else()
 	set(INSTALL_TO_UNIX_LAYOUT ON)
 endif()
-
-option(INSTALL_SAMPLE_MESHES
-		"Should the sample meshes in src/distrib/samples be installed? It will increase the installed size by 14 MiB."
-		OFF)
-option(
-	INSTALL_SAMPLE_RANGEMAPS
-	"Should the sample rangemaps in src/distrib/samples/rangemaps be installed? It will increase the installed size by 67 MiB."
-	OFF)
 
 ### Settings needed for both "external" and internal code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -71,25 +61,21 @@ if(INSTALL_TO_UNIX_LAYOUT)
 	set(MESHLAB_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/meshlab)
 	set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_LIB_INSTALL_DIR}/plugins)
 	set(MESHLAB_SHADER_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/meshlab/shaders)
-	set(MESHLAB_SAMPLE_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/meshlab)
 elseif(APPLE)
 	set(MESHLAB_BIN_INSTALL_DIR .)
 	set(MESHLAB_LIB_INSTALL_DIR meshlab.app/Contents/Frameworks)
 	set(MESHLAB_PLUGIN_INSTALL_DIR meshlab.app/Contents/PlugIns)
 	set(MESHLAB_SHADER_INSTALL_DIR meshlab.app/Contents/shaders)
-	set(MESHLAB_SAMPLE_INSTALL_DIR .)
 else()
 	set(MESHLAB_BIN_INSTALL_DIR .)
 	set(MESHLAB_LIB_INSTALL_DIR .)
 	set(MESHLAB_PLUGIN_INSTALL_DIR plugins)
 	set(MESHLAB_SHADER_INSTALL_DIR shaders)
-	set(MESHLAB_SAMPLE_INSTALL_DIR .)
 endif()
 
 set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
 set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
 set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
-set(MESHLAB_SAMPLE_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/sample)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
 
@@ -274,22 +260,6 @@ endforeach()
 # Custom target - to trigger the execution of the custom commands above.
 add_custom_target(copy-distrib-files ALL DEPENDS ${COPIED_FILES})
 set_property(TARGET copy-distrib-files PROPERTY FOLDER Core)
-
-if(INSTALL_SAMPLE_MESHES)
-	# Install sample files from distrib/sample directory (except for the rangemaps)
-	install(
-	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../sample
-	DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
-	COMPONENT Samples
-	PATTERN "*/rangemaps" EXCLUDE)
-endif()
-if(INSTALL_SAMPLE_RANGEMAPS)
-	# Install sample rangemaps
-	install(
-	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../sample/rangemaps
-	DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}/sample
-	COMPONENT Samples)
-endif()
 
 if(NOT WIN32 AND NOT APPLE)
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/Linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
