@@ -77,6 +77,22 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+### Build Settings
+add_definitions(-DMESHLAB_SCALAR=float)
+if(WIN32)
+	add_definitions(-DNOMINMAX)
+	if(MSVC)
+		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+	endif()
+endif()
+
+### Install Settings
+if (NOT APPLE)
+	set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
+else()
+	SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
+endif()
+
 ### Bundled dependencies in the "external" directory
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
@@ -84,9 +100,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
 if (NOT BUILD_MINI)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
-
-### Common build settings for internal code
-add_definitions(-DMESHLAB_SCALAR=float)
 
 if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	# Make sure that our shared libraries were appropriately linked
@@ -99,22 +112,9 @@ if (BUILD_STRICT AND APPLE)
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-undefined,error")
 endif()
 
-if(WIN32)
-	add_definitions(-DNOMINMAX)
-	if(MSVC)
-		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-	endif()
-endif()
-
 
 ### Enter subdirectories
 add_subdirectory(common)
-
-if (NOT APPLE)
-	set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
-else()
-	SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
-endif()
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
 set(CMAKE_INSTALL_RPATH)
@@ -233,7 +233,6 @@ endforeach()
 set(COPIED_FILES)
 
 # shaders
-# TODO subdirs?
 file(
 	GLOB SHADERS
 	LIST_DIRECTORIES false
