@@ -86,6 +86,12 @@ if(WIN32)
 	endif()
 endif()
 
+if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
+	# Make sure that our shared libraries were appropriately linked
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
+endif()
+
 ### Install Settings
 if (NOT APPLE)
 	set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
@@ -101,16 +107,10 @@ if (NOT BUILD_MINI)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
 
-if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
-	# Make sure that our shared libraries were appropriately linked
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
-endif()
-
-if (BUILD_STRICT AND APPLE)
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-undefined,error")
-endif()
+#if (BUILD_STRICT AND APPLE)
+#	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
+#	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-undefined,error")
+#endif()
 
 
 ### Enter subdirectories
