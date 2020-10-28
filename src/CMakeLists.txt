@@ -112,7 +112,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
 
 ### Bundled dependencies in the "external" directory
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-include(${EXTERNAL_DIR}/external.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
+
+if (NOT BUILD_MINI)
+	include(${EXTERNAL_DIR}/external.cmake)
+endif()
 
 ### Common build settings for internal code
 include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,20 +1,3 @@
-# Copyright 2019 Collabora, Ltd.
-# SPDX-License-Identifier: BSL-1.0
-
-# GLEW - required
-set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
-add_subdirectory(${GLEW_DIR})
-
-# Eigen3 - required
-set(EIGEN_DIR ${VCGDIR}/eigenlib)
-if(EIGEN3_INCLUDE_DIR)
-    message(STATUS "- Eigen - using system-provided library")
-    set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
-else()
-    message(STATUS "- Eigen - using bundled source")
-    set(EIGEN_INCLUDE_DIRS ${EIGEN_DIR})
-endif()
-
 # newuoa - optional and header-only, for several plugins including all that use levmar
 set(NEWUOA_DIR ${VCGDIR}/wrap/newuoa)
 message(STATUS "- newuoa - using bundled source")
