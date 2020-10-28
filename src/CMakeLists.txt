@@ -10,7 +10,6 @@ if(POLICY CMP0072)
 endif()
 
 ### Build options
-
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 
@@ -26,6 +25,7 @@ find_package(
 	Qt5
 	COMPONENTS OpenGL Xml XmlPatterns
 	REQUIRED)
+find_package(OpenMP)
 
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
@@ -36,25 +36,21 @@ find_package(Lib3ds)
 find_package(GMP)
 find_package(muparser)
 find_package(OpenCTM)
-# TODO dynamic qhull that isn't qhull_r is deprecated: port to qhull_r
 find_package(Qhull COMPONENTS libqhull)
-find_package(OpenMP)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+### Build directories
+set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
+set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
+set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
 
+### Install directories
 if(WIN32 OR APPLE)
 	set(INSTALL_TO_UNIX_LAYOUT OFF)
 else()
 	set(INSTALL_TO_UNIX_LAYOUT ON)
 endif()
-
-### Settings needed for both "external" and internal code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-### Install directories and build/staging directories
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX:         " ${CMAKE_INSTALL_PREFIX} )
+MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
 include(GNUInstallDirs)
 if(INSTALL_TO_UNIX_LAYOUT)
 	set(MESHLAB_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
@@ -73,11 +69,13 @@ else()
 	set(MESHLAB_SHADER_INSTALL_DIR shaders)
 endif()
 
-set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
-set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
-set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
+### Build settings
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
+### Settings needed for both "external" and internal code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ### Bundled dependencies in the "external" directory
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
