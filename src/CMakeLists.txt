@@ -124,108 +124,100 @@ endif()
 
 ### Plugin subdirectories
 if(BUILD_MINI)
-	# mini
-	set(POSSIBLE_PLUGINS
-	meshlabplugins/io_base
-	meshlabplugins/filter_meshing
-	meshlabplugins/decorate_base
-	meshlabplugins/filter_measure)
+	set(MESHLAB_PLUGINS
+		meshlabplugins/io_base
+		meshlabplugins/filter_meshing
+		meshlabplugins/decorate_base
+		meshlabplugins/filter_measure
+	)
 else()
-	# full
+	set(MESHLAB_PLUGINS
+		# IO plugins
+		meshlabplugins/io_3ds
+		meshlabplugins/io_base
+		meshlabplugins/io_bre
+		meshlabplugins/io_collada
+		meshlabplugins/io_ctm
+		meshlabplugins/io_expe
+		meshlabplugins/io_json
+		meshlabplugins/io_pdb
+		meshlabplugins/io_tri
+		meshlabplugins/io_txt
+		meshlabplugins/io_u3d
+		meshlabplugins/io_x3d
 
-	set(POSSIBLE_PLUGINS
-	# IO plugins
-	meshlabplugins/io_3ds
-	meshlabplugins/io_base
-	meshlabplugins/io_bre
-	meshlabplugins/io_collada
-	meshlabplugins/io_ctm
-	meshlabplugins/io_expe
-	meshlabplugins/io_json
-	meshlabplugins/io_pdb
-	meshlabplugins/io_tri
-	meshlabplugins/io_txt
-	meshlabplugins/io_u3d
-	meshlabplugins/io_x3d
+		# Filter plugins
+		meshlabplugins/filter_sample
+		meshlabplugins/filter_sample_dyn
+		meshlabplugins/filter_createiso
+		meshlabplugins/filter_geodesic
+		meshlabplugins/filter_sample_gpu
+		meshlabplugins/filter_ao
+		meshlabplugins/filter_camera
+		meshlabplugins/filter_clean
+		meshlabplugins/filter_color_projection
+		meshlabplugins/filter_colorproc
+		meshlabplugins/filter_create
+		meshlabplugins/filter_csg
+		meshlabplugins/filter_dirt
+		meshlabplugins/filter_fractal
+		meshlabplugins/filter_func
+		meshlabplugins/filter_globalregistration
+		meshlabplugins/filter_img_patch_param
+		meshlabplugins/filter_isoparametrization
+		meshlabplugins/filter_layer
+		meshlabplugins/filter_measure
+		meshlabplugins/filter_meshing
+		meshlabplugins/filter_mls
+		meshlabplugins/filter_mutualglobal
+		meshlabplugins/filter_mutualinfo
+		meshlabplugins/filter_plymc
+		meshlabplugins/filter_qhull
+		meshlabplugins/filter_quality
+		meshlabplugins/filter_sampling
+		meshlabplugins/filter_screened_poisson
+		meshlabplugins/filter_sdfgpu
+		meshlabplugins/filter_select
+		meshlabplugins/filter_sketchfab
+		meshlabplugins/filter_ssynth
+		meshlabplugins/filter_texture
+		meshlabplugins/filter_trioptimize
+		meshlabplugins/filter_unsharp
+		meshlabplugins/filter_voronoi
 
-
-	# Filter plugins
-	# meshlabplugins/filter_aging # not in qmake file?
-	# meshlabplugins/filter_bnpts # not in qmake file?
-	meshlabplugins/filter_ao
-	meshlabplugins/filter_camera
-	meshlabplugins/filter_clean
-	meshlabplugins/filter_color_projection
-	meshlabplugins/filter_colorproc
-	meshlabplugins/filter_create
-	meshlabplugins/filter_csg
-	meshlabplugins/filter_dirt
-	meshlabplugins/filter_fractal
-	meshlabplugins/filter_func
-	meshlabplugins/filter_globalregistration
-	meshlabplugins/filter_img_patch_param
-	meshlabplugins/filter_isoparametrization
-	meshlabplugins/filter_layer
-	meshlabplugins/filter_measure
-	meshlabplugins/filter_meshing
-	meshlabplugins/filter_mls
-	meshlabplugins/filter_mutualglobal
-	meshlabplugins/filter_mutualinfo
-	meshlabplugins/filter_plymc
-	meshlabplugins/filter_qhull
-	meshlabplugins/filter_quality
-	meshlabplugins/filter_sampling
-	meshlabplugins/filter_screened_poisson
-	meshlabplugins/filter_sdfgpu
-	meshlabplugins/filter_select
-	meshlabplugins/filter_sketchfab
-	meshlabplugins/filter_ssynth
-	meshlabplugins/filter_texture
-	meshlabplugins/filter_trioptimize
-	meshlabplugins/filter_unsharp
-	meshlabplugins/filter_voronoi
-
-	# Rendering and Decoration Plugins
-	meshlabplugins/render_gdp
-	meshlabplugins/render_radiance_scaling
-	meshlabplugins/decorate_base
-	meshlabplugins/decorate_background
-	meshlabplugins/decorate_raster_proj
-	meshlabplugins/decorate_shadow
-
-	# Edit Plugins
-	meshlabplugins/edit_align
-	# meshlabplugins/edit_hole # not in qmake file?
-	meshlabplugins/edit_manipulators
-	meshlabplugins/edit_measure
-	meshlabplugins/edit_mutualcorrs
-	meshlabplugins/edit_paint
-	meshlabplugins/edit_pickpoints
-	meshlabplugins/edit_point
-	meshlabplugins/edit_referencing
-	meshlabplugins/edit_quality
-	meshlabplugins/edit_select
-	# meshlabplugins/edit_slice # not in qmake file?
-	# meshlabplugins/edit_texture # not in qmake file?
-
-	# Sample Plugins
-	meshlabplugins/edit_sample
-	meshlabplugins/filter_sample
-	meshlabplugins/filter_sample_dyn
-	meshlabplugins/filter_createiso
-	meshlabplugins/filter_geodesic
-	meshlabplugins/filter_sample_gpu)
+		# Rendering and Decoration Plugins
+		meshlabplugins/render_gdp
+		meshlabplugins/render_radiance_scaling
+		meshlabplugins/decorate_base
+		meshlabplugins/decorate_background
+		meshlabplugins/decorate_raster_proj
+		meshlabplugins/decorate_shadow
+	
+		# Edit Plugins
+		meshlabplugins/edit_sample
+		meshlabplugins/edit_align
+		meshlabplugins/edit_manipulators
+		meshlabplugins/edit_measure
+		meshlabplugins/edit_mutualcorrs
+		meshlabplugins/edit_paint
+		meshlabplugins/edit_pickpoints
+		meshlabplugins/edit_point
+		meshlabplugins/edit_referencing
+		meshlabplugins/edit_quality
+		meshlabplugins/edit_select
+	)
 endif()
 
 message(STATUS "\nConfiguring plugins")
-foreach(PLUGIN ${POSSIBLE_PLUGINS})
+foreach(PLUGIN ${MESHLAB_PLUGINS})
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN}/CMakeLists.txt)
-	message(STATUS "- ${PLUGIN}")
-	add_subdirectory(${PLUGIN})
+		message(STATUS "- ${PLUGIN}")
+		add_subdirectory(${PLUGIN})
 	else()
-	message(STATUS "  - ${PLUGIN} - Skipping, plugin or build system not found.")
+		message(STATUS "  - ${PLUGIN} - Skipping, plugin or build system not found.")
 	endif()
 endforeach()
+
 
 ### Copy/install other files
 
@@ -242,15 +234,17 @@ foreach(FN ${SHADERS})
 	get_filename_component(NAME_ONLY ${FN} NAME)
 	set(OUTFN ${MESHLAB_SHADER_OUTPUT_DIR}/${NAME_ONLY})
 	add_custom_command(
-	OUTPUT ${OUTFN}
-	COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_SHADER_OUTPUT_DIR}"
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FN}" "${OUTFN}"
-	COMMENT "Copying ${NAME_ONLY} to shader build directory"
-	VERBATIM)
+		OUTPUT ${OUTFN}
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_SHADER_OUTPUT_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FN}" "${OUTFN}"
+		COMMENT "Copying ${NAME_ONLY} to shader build directory"
+		VERBATIM
+	)
 	install(
-	FILES ${FN}
-	DESTINATION ${MESHLAB_SHADER_INSTALL_DIR}
-	COMPONENT Shaders)
+		FILES ${FN}
+		DESTINATION ${MESHLAB_SHADER_INSTALL_DIR}
+		COMPONENT Shaders
+	)
 	list(APPEND COPIED_FILES "${OUTFN}")
 endforeach()
 
