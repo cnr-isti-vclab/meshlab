@@ -27,7 +27,7 @@ if(TARGET external-ssynth)
 
     target_include_directories(filter_ssynth
                                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_ssynth PUBLIC common)
+    target_link_libraries(filter_ssynth PUBLIC meshlab-common)
 
     target_link_libraries(filter_ssynth PRIVATE external-ssynth)
 

@@ -16,7 +16,7 @@ add_library(decorate_background MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(decorate_background
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(decorate_background PUBLIC common)
+target_link_libraries(decorate_background PUBLIC meshlab-common)
 
 set_property(TARGET decorate_background PROPERTY FOLDER Plugins)
 

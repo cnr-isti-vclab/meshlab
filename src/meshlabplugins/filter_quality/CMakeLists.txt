@@ -17,7 +17,7 @@ set(HEADERS
 add_library(filter_quality MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_quality PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_quality PUBLIC common)
+target_link_libraries(filter_quality PUBLIC meshlab-common)
 
 set_property(TARGET filter_quality PROPERTY FOLDER Plugins)
 

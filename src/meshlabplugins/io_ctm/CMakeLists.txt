@@ -15,7 +15,7 @@ if(TARGET external-openctm)
     add_library(io_ctm MODULE ${SOURCES} ${HEADERS})
 
     target_include_directories(io_ctm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(io_ctm PUBLIC common)
+    target_link_libraries(io_ctm PUBLIC meshlab-common)
 
     target_link_libraries(io_ctm PRIVATE external-openctm)
 

@@ -18,7 +18,7 @@ set(HEADERS
 add_library(io_collada MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(io_collada PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_collada PUBLIC common)
+target_link_libraries(io_collada PUBLIC meshlab-common)
 
 set_property(TARGET io_collada PROPERTY FOLDER Plugins)
 

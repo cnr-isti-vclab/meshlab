@@ -12,7 +12,7 @@ set(HEADERS meshfilter.h quadric_simp.h)
 add_library(filter_meshing MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_meshing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_meshing PUBLIC common)
+target_link_libraries(filter_meshing PUBLIC meshlab-common)
 
 target_link_libraries(filter_meshing PRIVATE OpenGL::GLU)
 

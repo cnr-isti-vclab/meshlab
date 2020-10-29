@@ -15,7 +15,7 @@ if(TARGET external-gmp OR TARGET external-mpir)
     add_library(filter_csg MODULE ${SOURCES} ${HEADERS})
 
     target_include_directories(filter_csg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_csg PUBLIC common)
+    target_link_libraries(filter_csg PUBLIC meshlab-common)
 
     if(TARGET external-gmp)
         target_compile_definitions(filter_csg PRIVATE BUILD_WITH_GMP)

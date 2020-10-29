@@ -13,7 +13,7 @@ set(HEADERS dirt_utils.h dustparticle.h dustsampler.h filter_dirt.h particle.h)
 add_library(filter_dirt MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_dirt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_dirt PUBLIC common)
+target_link_libraries(filter_dirt PUBLIC meshlab-common)
 
 set_property(TARGET filter_dirt PROPERTY FOLDER Plugins)
 

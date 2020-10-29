@@ -15,7 +15,7 @@ if(TARGET external-lib3ds)
     add_library(io_3ds MODULE ${SOURCES} ${HEADERS})
 
     target_include_directories(io_3ds PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(io_3ds PUBLIC common)
+    target_link_libraries(io_3ds PUBLIC meshlab-common)
 
     target_link_libraries(io_3ds PRIVATE external-lib3ds)
 

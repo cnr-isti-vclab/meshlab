@@ -14,7 +14,7 @@ set(RESOURCES filter_ao.qrc)
 add_library(filter_ao MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(filter_ao PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_ao PUBLIC common)
+target_link_libraries(filter_ao PUBLIC meshlab-common)
 
 target_link_libraries(filter_ao PRIVATE OpenGL::GLU)
 

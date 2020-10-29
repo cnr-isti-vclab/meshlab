@@ -14,7 +14,7 @@ add_library(decorate_raster_proj MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(decorate_raster_proj
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(decorate_raster_proj PUBLIC common)
+target_link_libraries(decorate_raster_proj PUBLIC meshlab-common)
 
 set_property(TARGET decorate_raster_proj PROPERTY FOLDER Plugins)
 

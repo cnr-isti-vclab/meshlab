@@ -33,7 +33,7 @@ add_library(render_radiance_scaling MODULE ${SOURCES} ${HEADERS} ${RESOURCES}
 
 target_include_directories(render_radiance_scaling
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(render_radiance_scaling PUBLIC common)
+target_link_libraries(render_radiance_scaling PUBLIC meshlab-common)
 
 target_link_libraries(render_radiance_scaling PRIVATE OpenGL::GLU)
 

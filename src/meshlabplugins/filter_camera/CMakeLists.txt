@@ -13,7 +13,7 @@ set(HEADERS filter_camera.h)
 add_library(filter_camera MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_camera PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_camera PUBLIC common)
+target_link_libraries(filter_camera PUBLIC meshlab-common)
 
 set_property(TARGET filter_camera PROPERTY FOLDER Plugins)
 

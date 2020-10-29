@@ -54,12 +54,11 @@ set(TARGET_TYPE SHARED)
 if(WIN32 OR APPLE)
 	set(TARGET_TYPE STATIC)
 endif()
-add_library(common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
-set_target_properties(common PROPERTIES OUTPUT_NAME meshlab-common)
-target_include_directories(common PRIVATE ${EXTERNAL_DIR}/easyexif/)
+target_include_directories(meshlab-common PRIVATE ${EXTERNAL_DIR}/easyexif/)
 target_link_libraries(
-	common
+	meshlab-common
 	PUBLIC 
 		Qt5::Core
 		Qt5::OpenGL
@@ -69,8 +68,8 @@ target_link_libraries(
 		external-glew
 )
 
-set_property(TARGET common PROPERTY FOLDER Core)
+set_property(TARGET meshlab-common PROPERTY FOLDER Core)
 
 if(NOT WIN32)
-	install(TARGETS common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()

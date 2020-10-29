@@ -13,7 +13,7 @@ set(HEADERS io_bre.h)
 add_library(io_bre MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(io_bre PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_bre PUBLIC common)
+target_link_libraries(io_bre PUBLIC meshlab-common)
 
 set_property(TARGET io_bre PROPERTY FOLDER Plugins)
 

@@ -87,7 +87,7 @@ target_compile_definitions(meshlab PUBLIC QT_DISABLE_DEPRECATED_BEFORE=0x000000)
 target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${EXTERNAL_DIR}/easyexif/)
 target_link_libraries(
 	meshlab
-	PUBLIC common OpenGL::GLU Qt5::Network
+	PUBLIC meshlab-common OpenGL::GLU Qt5::Network
 	)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)

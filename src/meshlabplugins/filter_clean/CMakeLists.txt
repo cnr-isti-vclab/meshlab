@@ -12,7 +12,7 @@ set(HEADERS cleanfilter.h)
 add_library(filter_clean MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_clean PUBLIC common)
+target_link_libraries(filter_clean PUBLIC meshlab-common)
 
 set_property(TARGET filter_clean PROPERTY FOLDER Plugins)
 

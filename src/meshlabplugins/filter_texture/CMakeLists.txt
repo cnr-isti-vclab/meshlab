@@ -14,7 +14,7 @@ set(HEADERS rastering.h filter_texture.h pushpull.h
 add_library(filter_texture MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_texture PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_texture PUBLIC common)
+target_link_libraries(filter_texture PUBLIC meshlab-common)
 
 if(MSVC)
     target_compile_definitions(filter_texture PRIVATE _USE_MATH_DEFINES)

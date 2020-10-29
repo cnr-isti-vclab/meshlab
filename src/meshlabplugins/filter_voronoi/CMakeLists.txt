@@ -13,7 +13,7 @@ set(HEADERS filter_voronoi.h)
 add_library(filter_voronoi MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_voronoi PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_voronoi PUBLIC common)
+target_link_libraries(filter_voronoi PUBLIC meshlab-common)
 
 set_property(TARGET filter_voronoi PROPERTY FOLDER Plugins)
 

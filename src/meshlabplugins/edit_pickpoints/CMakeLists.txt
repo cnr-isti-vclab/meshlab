@@ -30,7 +30,7 @@ set(UI pickpointsDialog.ui)
 add_library(edit_pickpoints MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 target_include_directories(edit_pickpoints PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_pickpoints PUBLIC common)
+target_link_libraries(edit_pickpoints PUBLIC meshlab-common)
 
 target_link_libraries(edit_pickpoints PRIVATE OpenGL::GLU)
 

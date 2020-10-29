@@ -14,7 +14,7 @@ add_library(filter_color_projection MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_color_projection
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_color_projection PUBLIC common)
+target_link_libraries(filter_color_projection PUBLIC meshlab-common)
 
 set_property(TARGET filter_color_projection PROPERTY FOLDER Plugins)
 

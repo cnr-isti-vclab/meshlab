@@ -13,7 +13,7 @@ set(HEADERS filter_sample.h)
 add_library(filter_sample MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_sample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_sample PUBLIC common)
+target_link_libraries(filter_sample PUBLIC meshlab-common)
 
 set_property(TARGET filter_sample PROPERTY FOLDER Plugins)
 

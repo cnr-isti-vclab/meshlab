@@ -49,7 +49,7 @@ if(TARGET external-newuoa)
 	add_library(edit_align MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 	target_include_directories(edit_align PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(edit_align PUBLIC common)
+	target_link_libraries(edit_align PUBLIC meshlab-common)
 
 	target_link_libraries(edit_align PRIVATE external-newuoa OpenGL::GLU)
 	if(OpenMP_CXX_FOUND)

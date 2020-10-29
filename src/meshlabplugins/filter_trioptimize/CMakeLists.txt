@@ -14,7 +14,7 @@ add_library(filter_trioptimize MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_trioptimize
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_trioptimize PUBLIC common)
+target_link_libraries(filter_trioptimize PUBLIC meshlab-common)
 
 set_property(TARGET filter_trioptimize PROPERTY FOLDER Plugins)
 

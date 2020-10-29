@@ -14,7 +14,7 @@ add_library(filter_sample_dyn MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_sample_dyn
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_sample_dyn PUBLIC common)
+target_link_libraries(filter_sample_dyn PUBLIC meshlab-common)
 
 set_property(TARGET filter_sample_dyn PROPERTY FOLDER Plugins)
 

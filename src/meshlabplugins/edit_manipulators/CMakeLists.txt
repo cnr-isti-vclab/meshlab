@@ -15,7 +15,7 @@ add_library(edit_manipulators MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(edit_manipulators
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_manipulators PUBLIC common)
+target_link_libraries(edit_manipulators PUBLIC meshlab-common)
 
 target_link_libraries(edit_manipulators PRIVATE OpenGL::GLU)
 

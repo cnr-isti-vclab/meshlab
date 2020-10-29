@@ -28,7 +28,7 @@ set(RESOURCES noise.qrc)
 add_library(decorate_shadow MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(decorate_shadow PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(decorate_shadow PUBLIC common)
+target_link_libraries(decorate_shadow PUBLIC meshlab-common)
 
 target_link_libraries(decorate_shadow PRIVATE OpenGL::GLU)
 

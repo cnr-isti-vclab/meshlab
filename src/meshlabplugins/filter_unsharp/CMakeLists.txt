@@ -13,7 +13,7 @@ set(HEADERS filter_unsharp.h)
 add_library(filter_unsharp MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_unsharp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_unsharp PUBLIC common)
+target_link_libraries(filter_unsharp PUBLIC meshlab-common)
 
 set_property(TARGET filter_unsharp PROPERTY FOLDER Plugins)
 

@@ -13,7 +13,7 @@ set(HEADERS filter_geodesic.h)
 add_library(filter_geodesic MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_geodesic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_geodesic PUBLIC common)
+target_link_libraries(filter_geodesic PUBLIC meshlab-common)
 
 set_property(TARGET filter_geodesic PROPERTY FOLDER Plugins)
 

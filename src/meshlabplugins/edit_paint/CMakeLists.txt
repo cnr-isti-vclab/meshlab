@@ -17,7 +17,7 @@ set(UI paintbox.ui)
 add_library(edit_paint MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 target_include_directories(edit_paint PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_paint PUBLIC common)
+target_link_libraries(edit_paint PUBLIC meshlab-common)
 
 target_link_libraries(edit_paint PRIVATE OpenGL::GLU)
 

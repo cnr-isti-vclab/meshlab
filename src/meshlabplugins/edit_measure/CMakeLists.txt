@@ -15,7 +15,7 @@ set(RESOURCES edit_measure.qrc)
 add_library(edit_measure MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(edit_measure PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_measure PUBLIC common)
+target_link_libraries(edit_measure PUBLIC meshlab-common)
 
 target_link_libraries(edit_measure PRIVATE OpenGL::GLU)
 

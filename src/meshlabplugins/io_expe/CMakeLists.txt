@@ -13,7 +13,7 @@ set(HEADERS export_xyz.h import_expe.h import_xyz.h io_expe.h)
 add_library(io_expe MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(io_expe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_expe PUBLIC common)
+target_link_libraries(io_expe PUBLIC meshlab-common)
 
 set_property(TARGET io_expe PROPERTY FOLDER Plugins)
 

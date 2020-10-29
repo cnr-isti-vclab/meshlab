@@ -14,7 +14,7 @@ set(RESOURCES decorate_base.qrc)
 add_library(decorate_base MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(decorate_base PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(decorate_base PUBLIC common)
+target_link_libraries(decorate_base PUBLIC meshlab-common)
 
 target_link_libraries(decorate_base PRIVATE OpenGL::GLU)
 

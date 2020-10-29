@@ -25,7 +25,7 @@ set(HEADERS
 add_library(io_base MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(io_base PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_base PUBLIC common)
+target_link_libraries(io_base PUBLIC meshlab-common)
 
 target_link_libraries(io_base PRIVATE OpenGL::GLU)
 

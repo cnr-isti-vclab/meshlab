@@ -14,7 +14,7 @@ set(RESOURCES edit_sample.qrc)
 add_library(edit_sample MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(edit_sample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_sample PUBLIC common)
+target_link_libraries(edit_sample PUBLIC meshlab-common)
 
 target_link_libraries(edit_sample PRIVATE OpenGL::GLU)
 

@@ -15,7 +15,7 @@ set(UI shaderDialog.ui)
 add_library(render_gdp MODULE ${SOURCES} ${HEADERS} ${UI})
 
 target_include_directories(render_gdp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(render_gdp PUBLIC common)
+target_link_libraries(render_gdp PUBLIC meshlab-common)
 
 set_property(TARGET render_gdp PROPERTY FOLDER Plugins)
 

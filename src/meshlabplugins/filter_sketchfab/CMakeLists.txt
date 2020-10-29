@@ -14,7 +14,7 @@ set(HEADERS filter_sketchfab.h miniz.h)
 add_library(filter_sketchfab MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_sketchfab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_sketchfab PUBLIC Qt5::Qml common)
+target_link_libraries(filter_sketchfab PUBLIC Qt5::Qml meshlab-common)
 
 set_property(TARGET filter_sketchfab PROPERTY FOLDER Plugins)
 

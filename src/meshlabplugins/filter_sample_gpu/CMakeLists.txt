@@ -13,7 +13,7 @@ add_library(filter_sample_gpu MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_sample_gpu
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_sample_gpu PUBLIC common)
+target_link_libraries(filter_sample_gpu PUBLIC meshlab-common)
 
 target_link_libraries(filter_sample_gpu PRIVATE OpenGL::GLU)
 

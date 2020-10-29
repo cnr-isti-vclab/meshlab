@@ -15,7 +15,7 @@ set(RESOURCES edit_select.qrc)
 add_library(edit_select MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(edit_select PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_select PUBLIC common)
+target_link_libraries(edit_select PUBLIC meshlab-common)
 
 set_property(TARGET edit_select PROPERTY FOLDER Plugins)
 

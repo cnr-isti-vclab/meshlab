@@ -33,7 +33,7 @@ if(TARGET external-newuoa AND TARGET external-levmar)
 
 	target_include_directories(filter_mutualglobal
 							   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(filter_mutualglobal PUBLIC common)
+	target_link_libraries(filter_mutualglobal PUBLIC meshlab-common)
 
 	target_link_libraries(filter_mutualglobal PRIVATE external-newuoa
 													  external-levmar)

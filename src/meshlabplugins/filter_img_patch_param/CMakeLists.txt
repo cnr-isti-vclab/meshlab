@@ -16,7 +16,7 @@ add_library(filter_img_patch_param MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_img_patch_param
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_img_patch_param PUBLIC common)
+target_link_libraries(filter_img_patch_param PUBLIC meshlab-common)
 
 set_property(TARGET filter_img_patch_param PROPERTY FOLDER Plugins)
 

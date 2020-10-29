@@ -18,7 +18,7 @@ if(TARGET external-IDTFConverter)
 
 	target_include_directories(io_u3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 	
-	target_link_libraries(io_u3d PUBLIC common)
+	target_link_libraries(io_u3d PUBLIC meshlab-common)
 
 	target_link_libraries(io_u3d PUBLIC external-IDTFConverter IFXCoreStatic ${CMAKE_DL_LIBS})
 

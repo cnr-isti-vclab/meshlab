@@ -37,7 +37,7 @@ if(TARGET external-levmar)
 
     target_include_directories(filter_isoparametrization
                                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_isoparametrization PUBLIC common)
+    target_link_libraries(filter_isoparametrization PUBLIC meshlab-common)
 
     target_link_libraries(filter_isoparametrization PRIVATE external-newuoa
                                                             external-levmar)

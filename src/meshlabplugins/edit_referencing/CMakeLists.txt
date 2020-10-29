@@ -24,7 +24,7 @@ set(UI
 add_library(edit_referencing MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 target_include_directories(edit_referencing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_referencing PUBLIC common)
+target_link_libraries(edit_referencing PUBLIC meshlab-common)
 
 target_link_libraries(edit_referencing PRIVATE OpenGL::GLU)
 

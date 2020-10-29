@@ -13,7 +13,7 @@ set(HEADERS filter_colorproc.h)
 add_library(filter_colorproc MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_colorproc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_colorproc PUBLIC common)
+target_link_libraries(filter_colorproc PUBLIC meshlab-common)
 
 set_property(TARGET filter_colorproc PROPERTY FOLDER Plugins)
 

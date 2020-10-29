@@ -13,7 +13,7 @@ if(TARGET external-opengr)
     add_library(globalregistration MODULE ${SOURCES} ${HEADERS})
 
     target_include_directories(globalregistration PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(globalregistration PUBLIC common)
+    target_link_libraries(globalregistration PUBLIC meshlab-common)
 
     target_link_libraries(globalregistration PRIVATE external-opengr)
     if(OpenMP_CXX_FOUND)

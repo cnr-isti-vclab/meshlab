@@ -67,7 +67,7 @@ endif()
 
 target_include_directories(filter_screened_poisson
 						   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_screened_poisson PUBLIC common)
+target_link_libraries(filter_screened_poisson PUBLIC meshlab-common)
 
 set_property(TARGET filter_screened_poisson PROPERTY FOLDER Plugins)
 

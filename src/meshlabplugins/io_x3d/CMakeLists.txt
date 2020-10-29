@@ -13,7 +13,7 @@ set(HEADERS export_x3d.h import_x3d.h io_x3d.h util_x3d.h vrml/Parser.h
 add_library(io_x3d MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(io_x3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(io_x3d PUBLIC common)
+target_link_libraries(io_x3d PUBLIC meshlab-common)
 
 target_link_libraries(io_x3d PRIVATE OpenGL::GLU)
 

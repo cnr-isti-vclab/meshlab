@@ -31,7 +31,7 @@ SET(TPP_HEADERS
 add_library(filter_mls MODULE ${SOURCES} ${HEADERS} ${TPP_HEADERS})
 
 target_include_directories(filter_mls PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_mls PUBLIC common)
+target_link_libraries(filter_mls PUBLIC meshlab-common)
 
 set_property(TARGET filter_mls PROPERTY FOLDER Plugins)
 

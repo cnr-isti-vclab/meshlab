@@ -15,7 +15,7 @@ if(TARGET external-qhull)
     add_library(filter_qhull MODULE ${SOURCES} ${HEADERS})
 
     target_include_directories(filter_qhull PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_qhull PUBLIC common)
+    target_link_libraries(filter_qhull PUBLIC meshlab-common)
 
     target_link_libraries(filter_qhull PRIVATE external-qhull)
 
