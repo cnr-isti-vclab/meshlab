@@ -70,6 +70,6 @@ target_link_libraries(
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)
 
-if(NOT WIN32)
-	install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
-endif()
+
+install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+
