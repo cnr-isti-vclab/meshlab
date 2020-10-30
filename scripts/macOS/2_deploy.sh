@@ -42,7 +42,7 @@ fi
 
 if [ -e $QTDIR/bin/macdeployqt ]
 then
-    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME
+    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
 else
-    macdeployqt $INSTALL_PATH/$APPNAME
+    macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
 fi
