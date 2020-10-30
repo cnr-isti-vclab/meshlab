@@ -19,6 +19,8 @@ fi
 
 windeployqt $BUNDLE_PATH/meshlab.exe
 
+windeployqt $BUNDLE_PATH/plugins/filter_sketchfab.dll
+
 mv $BUNDLE_PATH/lib/meshlab/IFX* $BUNDLE_PATH
 cp $BUNDLE_PATH/IFXCoreStatic.lib $BUNDLE_PATH/lib/meshlab/
 cp $DISTRIB_PATH/LICENSE.txt $BUNDLE_PATH/
