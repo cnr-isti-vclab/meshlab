@@ -23,7 +23,12 @@ fi
 bash $SCRIPTS_PATH/resources/make_bundle.sh $BUNDLE_PATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUNDLE_PATH/usr/lib/meshlab
-$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop -bundle-non-qt-libs
+$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop \
+  -bundle-non-qt-libs \
+  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libfilter_sketchfab.so \
+  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libio_3ds.so \
+  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libio_ctm.so
+  
 
 chmod +x $BUNDLE_PATH/usr/bin/meshlab
 rm $BUNDLE_PATH/AppRun
