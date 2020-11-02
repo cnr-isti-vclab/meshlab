@@ -15,6 +15,9 @@
 #elif defined(_MSC_VER)
 #define ML_COMPILER "MSVC"
 #define ML_COMPILER_VER std::to_string(_MSC_VER)
+#else
+#define ML_COMPILER "Unknown Compiler"
+#define ML_COMPILER_VER std::string()
 #endif
 
 #define xstr(a) stringify(a)
