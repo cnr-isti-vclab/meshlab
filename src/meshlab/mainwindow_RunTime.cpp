@@ -2646,8 +2646,10 @@ void MainWindow::about()
 	QDialog *about_dialog = new QDialog();
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
-	temp.labelMLName->setText(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize))+"   (built on "+__DATE__+")");
-	//about_dialog->setFixedSize(566,580);
+	temp.labelMLName->setText(
+		MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)) + "\n" +
+		"built on "+__DATE__+" with " + MeshLabApplication::compilerVersion() +
+		" and Qt " + MeshLabApplication::qtVersion() + ".");
 	about_dialog->show();
 }
 

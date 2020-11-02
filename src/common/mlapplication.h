@@ -7,32 +7,33 @@
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_mesh_type.h"
 
-#ifndef MESHLAB_VERSION
-#define MESHLAB_VERSION 2020.02
-#endif
-
 class MeshLabApplication : public QApplication
 {
 public:
-    enum HW_ARCHITECTURE {HW_32BIT = 32,HW_64BIT = 64};
-    MeshLabApplication(int &argc, char *argv[]):QApplication(argc,argv){}
-    ~MeshLabApplication(){}
+	enum HW_ARCHITECTURE {HW_32BIT = 32,HW_64BIT = 64};
+	MeshLabApplication(int &argc, char *argv[]):QApplication(argc,argv){}
+	~MeshLabApplication(){}
 	bool notify(QObject * rec, QEvent * ev);
-    static const QString appName(){return tr("MeshLab"); }
-    static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
-    static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
+	static const QString appName(){return tr("MeshLab"); }
+	static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
+	static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
 	static const QString appVer();
-
-    static const QString shortName() { return appName() + " " + appVer(); }
-    static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
-    static const QString organization(){return tr("VCG");}
-    static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}
-    static const QString webSite() {return tr("http://www.meshlab.net/");}
-    static const QString downloadSite() {return tr("http://www.meshlab.net/#download");}
-
-    static const QString pluginsPathRegisterKeyName() {return tr("pluginsPath");}
-    static const QString versionRegisterKeyName() {return tr("version");}
-    static const QString wordSizeKeyName() {return tr("wordSize");}
+	static const QString compilerVersion();
+	static const QString qtVersion();
+	
+	static const QString shortName() { return appName() + " " + appVer(); }
+	static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
+	static const QString organization(){return tr("VCG");}
+	static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}
+	static const QString webSite() {return tr("http://www.meshlab.net/");}
+	static const QString downloadSite() {return tr("http://www.meshlab.net/#download");}
+	
+	static const QString pluginsPathRegisterKeyName() {return tr("pluginsPath");}
+	static const QString versionRegisterKeyName() {return tr("version");}
+	static const QString wordSizeKeyName() {return tr("wordSize");}
+	
+private:
+	static std::string versionString(int a, int b, int c);
 };
 
 #endif
