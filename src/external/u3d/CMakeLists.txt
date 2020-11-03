@@ -1482,8 +1482,6 @@ elseif(WIN32)
 	set(U3D_INSTALL_RELATIVE_PATH ".")
 endif()
 
-message(--U3D_OUT_PATH: ${OUT_PATH_LIB})
-
 TARGET_LINK_LIBRARIES( external-IDTFConverter IFXCoreStatic ${ADDITIONAL_LIBRARIES} ${CMAKE_DL_LIBS} )
 
 set_property(TARGET external-IDTFConverter PROPERTY FOLDER External)

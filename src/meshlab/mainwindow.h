@@ -126,6 +126,7 @@ public slots:
 	bool appendProject(QString fileName=QString());
 	void updateCustomSettings();
 	void updateLayerDialog();
+	void applyLastFilter();
 	bool addRenderingDataIfNewlyGeneratedMesh(int meshid);
 
 	void updateRenderingDataAccordingToActions(int meshid, const QList<MLRenderingAction*>& acts);

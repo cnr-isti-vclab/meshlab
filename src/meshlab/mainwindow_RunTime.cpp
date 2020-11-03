@@ -752,6 +752,14 @@ void MainWindow::endEdit()
 	updateLayerDialog();
 }
 
+void MainWindow::applyLastFilter()
+{
+	if(GLA() != nullptr && GLA()->getLastAppliedFilter() != nullptr){
+		//TODO
+		//GLA()->getLastAppliedFilter()->trigger();
+	}
+}
+
 void MainWindow::showFilterScript()
 {
 	if (meshDoc()->filterHistory != nullptr)
