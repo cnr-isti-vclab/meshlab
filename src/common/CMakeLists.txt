@@ -70,11 +70,16 @@ target_link_libraries(
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)
 
-set_property(TARGET meshlab-common 
+set_property(TARGET meshlab-common
 	PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 
-set_property(TARGET meshlab-common 
+set_property(TARGET meshlab-common
 	PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+
+if (WIN32)
+	set_property(TARGET meshlab-common
+		PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+endif()
 
 install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 
