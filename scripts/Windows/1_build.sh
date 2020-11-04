@@ -61,8 +61,5 @@ echo "SCRIPTS PATH: "$SCRIPTS_PATH
 
 cd $BUILD_PATH
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
-echo "-----"
-ls -l
-echo "-----"
 jom $CORES #Qt nmake for parallel build
 nmake install
