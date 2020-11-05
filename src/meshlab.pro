@@ -63,7 +63,6 @@ SUBDIRS += \ #sub projects names
 	filter_color_projection \
 	filter_colorproc \
 	filter_create \
-	filter_csg \
 	filter_dirt \
 	filter_fractal \
 	filter_func \
@@ -105,6 +104,10 @@ SUBDIRS += \ #sub projects names
 	edit_select \
 	edit_pickpoints
 
+}
+linux{
+	SUBDIRS += \
+		filter_csg #filter_csg is supported only on linux with qmake
 }
 meshlab_mini {
 	message(Compiling only MeshLab Mini!)
