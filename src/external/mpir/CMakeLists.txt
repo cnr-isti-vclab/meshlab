@@ -9,10 +9,10 @@ else()
 		file(
 			COPY ${MPIR_DIR}/win32-msvc/mpir.lib ${MPIR_DIR}/win32-msvc/mpirxx.lib
 			DESTINATION ${MESHLAB_BUILD_DISTRIB_DIR})
-		target_include_directories(mpir INTERFACE ${EXTERNAL_DIR}/inc/win32-msvc/mpir-2.2.1_x64)
 		add_library(external-mpir SHARED IMPORTED GLOBAL)
 		add_library(external-mpirxx SHARED IMPORTED GLOBAL)
 		set_property(TARGET external-mpir PROPERTY IMPORTED_IMPLIB_RELEASE "${MESHLAB_BUILD_DISTRIB_DIR}/mpir.lib")
 		set_property(TARGET external-mpirxx PROPERTY IMPORTED_IMPLIB_RELEASE "${MESHLAB_BUILD_DISTRIB_DIR}/mpirxx.lib")
+		target_include_directories(external-mpir INTERFACE ${EXTERNAL_DIR}/inc/win32-msvc/mpir-2.2.1_x64)
 	endif()
 endif()
