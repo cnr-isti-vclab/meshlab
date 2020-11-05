@@ -13,14 +13,8 @@ set(LIB3DS_DIR ${EXTERNAL_DIR}/lib3ds-1.3.0)
 add_subdirectory(${LIB3DS_DIR})
 
 # gmp or mpir - optional, for filter_csg
-if(GMP_FOUND)
-    message(STATUS "- GMP/MPIR - using system-provided GMP library")
-    add_library(external-gmp INTERFACE)
-    target_include_directories(external-gmp SYSTEM INTERFACE ${GMP_INCLUDE_DIRS})
-    target_link_libraries(external-gmp INTERFACE ${GMP_LIBRARIES})
-else()
-    # TODO set up external-mpir per-os for bundled mpir
-endif()
+set(MPIR_DIR ${EXTERNAL_DIR}/mpir)
+add_subdirectory(${MPIR_DIR})
 
 # muparser - optional, for filter_func
 set(MUPARSER_DIR ${EXTERNAL_DIR}/muparser_v225)

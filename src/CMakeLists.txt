@@ -224,7 +224,8 @@ set(COPIED_FILES)
 file(
 	GLOB SHADERS
 	LIST_DIRECTORIES false
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.vert" "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.frag"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.vert"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.frag"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.gdp")
 foreach(FN ${SHADERS})
 	get_filename_component(NAME_ONLY ${FN} NAME)

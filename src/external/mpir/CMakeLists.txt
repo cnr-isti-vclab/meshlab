@@ -1,0 +1,18 @@
+if(GMP_FOUND)
+	message(STATUS "- GMP/MPIR - using system-provided GMP library")
+	add_library(external-gmp INTERFACE)
+	target_include_directories(external-gmp SYSTEM INTERFACE ${GMP_INCLUDE_DIRS})
+	target_link_libraries(external-gmp INTERFACE ${GMP_LIBRARIES})
+else()
+	if (WIN32 AND MSVC)
+		message(STATUS "- Using already built MPIR library.")
+		file(
+			COPY ${MPIR_DIR}/win32-msvc/mpir.lib ${MPIR_DIR}/win32-msvc/mpirxx.lib
+			DESTINATION ${MESHLAB_BUILD_DISTRIB_DIR})
+		add_library(mpir SHARED IMPORTED GLOBAL)
+		add_library(mpirxx SHARED IMPORTED GLOBAL)
+		target_include_directories(mpir INTERFACE ${EXTERNAL_DIR}/inc/win32-msvc/mpir-2.2.1_x64)
+		set_property(TARGET mpir PROPERTY IMPORTED_IMPLIB_RELEASE "${MESHLAB_BUILD_DISTRIB_DIR}/mpir.lib")
+		set_property(TARGET mpirxx PROPERTY IMPORTED_IMPLIB_RELEASE "${MESHLAB_BUILD_DISTRIB_DIR}/mpirxx.lib")
+	endif()
+endif()

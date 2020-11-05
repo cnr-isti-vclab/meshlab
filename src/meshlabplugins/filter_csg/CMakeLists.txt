@@ -6,7 +6,8 @@
 ### then re-run ./make-cmake.py
 
 # Only build if we have gmp/gmpxx or mpir
-if(TARGET external-gmp OR TARGET external-mpir)
+if(TARGET external-gmp OR
+		(TARGET mpir AND TARGET mpirxx))
 
     set(SOURCES filter_csg.cpp)
 
@@ -21,7 +22,8 @@ if(TARGET external-gmp OR TARGET external-mpir)
         target_compile_definitions(filter_csg PRIVATE BUILD_WITH_GMP)
         target_link_libraries(filter_csg PRIVATE external-gmp)
     else()
-        target_link_libraries(filter_csg PRIVATE external-mpir)
+		target_link_libraries(filter_csg PRIVATE mpir)
+		target_link_libraries(filter_csg PRIVATE mpirxx)
     endif()
 
     set_property(TARGET filter_csg PROPERTY FOLDER Plugins)
