@@ -51,7 +51,7 @@ set(HEADERS
 	searcher.h)
 
 set(TARGET_TYPE SHARED)
-if(WIN32 OR APPLE)
+if(WIN32)
 	set(TARGET_TYPE STATIC)
 endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})

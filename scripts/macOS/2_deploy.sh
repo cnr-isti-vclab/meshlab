@@ -33,12 +33,11 @@ then
     exit -1
 fi
 
-#copy libIFX libraries and change rpath u3d plugin
-#cp -a $DISTRIB_PATH/lib/meshlab/libIFX* $DISTRIB_PATH/$APPNAME/Contents/Frameworks
-#rm $DISTRIB_PATH/$APPNAME/Contents/Frameworks/libIFXCoreStatic.a
-#install_name_tool -change libIFXCore.1.so @rpath/libIFXCore.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
-#install_name_tool -change libIFXExporting.1.so @rpath/libIFXExporting.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
-#install_name_tool -change libIFXScheduling.1.so @rpath/libIFXScheduling.1.so $DISTRIB_PATH/$APPNAME/Contents/PlugIns/libio_u3d.dylib
+install_name_tool -change @rpath/libmeshlab-common.dylib @executable_path/../Frameworks/libmeshlab-common.dylib $INSTALL_PATH/$APPNAME/Contents/MacOS/meshlab
+
+#install_name_tool -change libIFXCore.so @rpath/libIFXCore.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
+#install_name_tool -change libIFXExporting.so @rpath/libIFXExporting.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
+#install_name_tool -change libIFXScheduling.so @rpath/libIFXScheduling.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
 
 if [ -e $QTDIR/bin/macdeployqt ]
 then
