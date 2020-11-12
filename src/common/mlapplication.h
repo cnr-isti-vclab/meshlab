@@ -13,7 +13,9 @@ public:
 	enum HW_ARCHITECTURE {HW_32BIT = 32,HW_64BIT = 64};
 	MeshLabApplication(int &argc, char *argv[]):QApplication(argc,argv){}
 	~MeshLabApplication(){}
+#ifdef NDEBUG
 	bool notify(QObject * rec, QEvent * ev);
+#endif	
 	static const QString appName(){return tr("MeshLab"); }
 	static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
 	static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}

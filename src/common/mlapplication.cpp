@@ -23,6 +23,7 @@
 #define xstr(a) stringify(a)
 #define stringify(a) #a
 
+#ifdef NDEBUG
 bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 {
 	try {
@@ -41,6 +42,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 	}
 	return false;
 }
+#endif
 
 const QString MeshLabApplication::appVer()
 {

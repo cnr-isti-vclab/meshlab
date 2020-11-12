@@ -178,7 +178,7 @@ int CleanFilter::getRequirements(const QAction *action)
 		case FP_REMOVE_TVERTEX_COLLAPSE:      return MeshModel::MM_VERTMARK;
 		case FP_REMOVE_TVERTEX_FLIP:          return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_REMOVE_NON_MANIF_EDGE:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-		case FP_REMOVE_NON_MANIF_EDGE_SPLIT:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_REMOVE_NON_MANIF_EDGE_SPLIT:  return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_REMOVE_NON_MANIF_VERT:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_SNAP_MISMATCHED_BORDER:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK| MeshModel::MM_FACEMARK;
 		case FP_REMOVE_FOLD_FACE:             return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
