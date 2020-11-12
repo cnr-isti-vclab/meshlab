@@ -935,35 +935,19 @@ void LayerDialog::updateDecoratorParsView()
 void LayerDialog::updatePerMeshItemSelectionStatus()
 {
 	MeshDocument* md = mw->meshDoc();
-	if (md == NULL)
+	if (md == nullptr)
 		return;
-	for(int ii = 0; ii < ui->meshTreeWidget->topLevelItemCount();++ii)
-	{
-		MeshTreeWidgetItem* item = dynamic_cast<MeshTreeWidgetItem*>(ui->meshTreeWidget->topLevelItem(ii));
-		MeshModel* mm = md->mm();
-		if ((item != NULL) && (mm != NULL))
-		{
-			if(item->_meshid == mm->id())
-			{
-				//item->setBackground(1,QBrush(Qt::yellow));
-				//item->setForeground(1,QBrush(Qt::blue));
-				//item->setBackground(2,QBrush(Qt::yellow));
-				//item->setForeground(2,QBrush(Qt::blue));
-				//item->setBackground(3,QBrush(Qt::yellow));
-				//item->setForeground(3,QBrush(Qt::blue));
-				ui->meshTreeWidget->setCurrentItem(item);
-				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
-				_renderingtabcontainer->setTitle(mm->label());
-				updateDecoratorParsView();
-			}
-			else
-			{
-				//item->setBackground(1,QBrush());
-				//item->setForeground(1,QBrush());
-				//item->setBackground(2,QBrush());
-				//item->setForeground(2,QBrush());
-				//item->setBackground(3,QBrush());
-				//item->setForeground(3,QBrush());
+	MeshModel* mm = md->mm();
+	if (mm != nullptr) {
+		for(int ii = 0; ii < ui->meshTreeWidget->topLevelItemCount();++ii) {
+			MeshTreeWidgetItem* item = dynamic_cast<MeshTreeWidgetItem*>(ui->meshTreeWidget->topLevelItem(ii));
+			if ((item != NULL)) {
+				if(item->_meshid == mm->id()) {
+					ui->meshTreeWidget->setCurrentItem(item);
+					_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
+					_renderingtabcontainer->setTitle(mm->label());
+					updateDecoratorParsView();
+				}
 			}
 		}
 	}
