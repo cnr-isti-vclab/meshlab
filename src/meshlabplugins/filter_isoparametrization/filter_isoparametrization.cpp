@@ -318,8 +318,9 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		CMeshO *rem=&mm->cm;
 		DiamSampler DiamSampl;
 		DiamSampl.Init(&isoPHandle());
-		DiamSampl.SamplePos(SamplingRate);
-		assert(done);
+		bool done = DiamSampl.SamplePos(SamplingRate);
+		if (!done) 
+			return false;
 		DiamSampl.GetMesh<CMeshO>(*rem);
 		
 		int n_diamonds,inFace,inEdge,inStar,n_merged;
