@@ -582,9 +582,18 @@ void LayerDialog::updateLog(const GLLogStream &log)
 	//ui->logPlainTextEdit->setFont(QFont("Courier",10));
 
 	pair<int,QString> logElem;
-	QString preWarn    = "<font face=\"courier\" size=3 color=\"red\"> Warning: " ;
-	QString preSystem  = "<font face=\"courier\" size=2 color=\"grey\">" ;
-	QString preFilter  = "<font face=\"courier\" size=2 color=\"black\">" ;
+#ifdef __APPLE__
+	QString warningColor = this->palette().color(QPalette::HighlightedText).name();
+	QString presystemColor = this->palette().color(QPalette::HighlightedText).name();
+	QString prefilterColor = this->palette().color(QPalette::Text).name();
+#else
+	QString warningColor = "red";
+	QString presystemColor = "grey";
+	QString prefilterColor = "black";
+#endif
+	QString preWarn    = "<font face=\"courier\" size=3 color=\"" + warningColor +"\"> Warning: " ;
+	QString preSystem  = "<font face=\"courier\" size=2 color=\"" + presystemColor +"\">" ;
+	QString preFilter  = "<font face=\"courier\" size=2 color=\"" + prefilterColor + "\">" ;
 
 	QString post   = "</font>";
 	QString logText;
