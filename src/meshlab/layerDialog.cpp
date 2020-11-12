@@ -657,7 +657,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	updateProjectName(md->docLabel());
 
 	QList<QTreeWidgetItem*> itms;
-	foreach(MeshModel* mmd, md->meshList)
+	for (MeshModel* mmd : md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
@@ -945,12 +945,12 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 		{
 			if(item->_meshid == mm->id())
 			{
-				item->setBackground(1,QBrush(Qt::yellow));
-				item->setForeground(1,QBrush(Qt::blue));
-				item->setBackground(2,QBrush(Qt::yellow));
-				item->setForeground(2,QBrush(Qt::blue));
-				item->setBackground(3,QBrush(Qt::yellow));
-				item->setForeground(3,QBrush(Qt::blue));
+				//item->setBackground(1,QBrush(Qt::yellow));
+				//item->setForeground(1,QBrush(Qt::blue));
+				//item->setBackground(2,QBrush(Qt::yellow));
+				//item->setForeground(2,QBrush(Qt::blue));
+				//item->setBackground(3,QBrush(Qt::yellow));
+				//item->setForeground(3,QBrush(Qt::blue));
 				ui->meshTreeWidget->setCurrentItem(item);
 				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
 				_renderingtabcontainer->setTitle(mm->label());
@@ -958,12 +958,12 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 			}
 			else
 			{
-				item->setBackground(1,QBrush());
-				item->setForeground(1,QBrush());
-				item->setBackground(2,QBrush());
-				item->setForeground(2,QBrush());
-				item->setBackground(3,QBrush());
-				item->setForeground(3,QBrush());
+				//item->setBackground(1,QBrush());
+				//item->setForeground(1,QBrush());
+				//item->setBackground(2,QBrush());
+				//item->setForeground(2,QBrush());
+				//item->setBackground(3,QBrush());
+				//item->setForeground(3,QBrush());
 			}
 		}
 	}
