@@ -76,7 +76,7 @@ public:
     FilterClass getClass(const QAction* filter) const;
 
     void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+    bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     void initTextures(void);
     void initGL(vcg::CallBackPos *cb,unsigned int numVertices);
     bool processGL(MeshModel &m, std::vector<vcg::Point3f> &posVect);

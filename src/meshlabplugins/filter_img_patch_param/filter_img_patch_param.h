@@ -112,11 +112,13 @@ public:
     virtual int         getRequirements(const QAction* act );
     //virtual int         postCondition( QAction *act ) const;
 
-    virtual bool         applyFilter(const QAction* act,
-                                     MeshDocument &md,
-                                     unsigned int& postConditionMask,
-                                     const RichParameterList &par,
-                                     vcg::CallBackPos *cb );
+	virtual bool applyFilter(
+			const QAction* act,
+			MeshDocument &md,
+			std::map<std::string, QVariant>& outputValues,
+			unsigned int& postConditionMask,
+			const RichParameterList &par,
+			vcg::CallBackPos *cb );
 
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };

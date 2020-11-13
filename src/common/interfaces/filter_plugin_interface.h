@@ -135,7 +135,7 @@ public:
 	* \sa errorMsg
 	* \sa initParameterSet
 	*/
-	virtual bool applyFilter(const QAction* filter, MeshDocument& md, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
+	virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
 
 	/** \brief tests if a filter is applicable to a mesh.
 	This function is a handy wrapper used by the framework for the \a getPreConditions callback;

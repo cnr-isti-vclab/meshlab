@@ -855,7 +855,8 @@ void MainWindow::runFilterScript()
 		meshDoc()->setBusy(true);
 		//WARNING!!!!!!!!!!!!
 		/* to be changed */
-		iFilter->applyFilter( action, *meshDoc(), postCondMask, pair.second, QCallBack);
+		std::map<std::string, QVariant> outputValues;
+		iFilter->applyFilter( action, *meshDoc(), outputValues, postCondMask, pair.second, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)
 			postCondMask = iFilter->postCondition(action);
 		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
@@ -1212,7 +1213,8 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		ret=iFilter->applyFilter(action, *(meshDoc()), postCondMask,  mergedenvironment, QCallBack);
+		std::map<std::string, QVariant> outputValues;
+		ret=iFilter->applyFilter(action, *(meshDoc()), outputValues, postCondMask,  mergedenvironment, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)
 			postCondMask = iFilter->postCondition(action);
 		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))

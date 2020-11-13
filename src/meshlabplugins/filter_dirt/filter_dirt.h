@@ -65,7 +65,7 @@ public:
     virtual bool autoDialog(QAction *) {return true;}
     //      virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
     virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
     virtual int postCondition(const QAction*) const;
     virtual FilterClass getClass (const QAction *) const;
     FILTER_ARITY filterArity(const QAction*) const {return SINGLE_MESH;}

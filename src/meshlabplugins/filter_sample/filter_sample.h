@@ -61,7 +61,7 @@ public:
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* action, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+	bool applyFilter(const QAction* action, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
 
 private:
 	bool vertexDisplacement(

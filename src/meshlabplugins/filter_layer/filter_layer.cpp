@@ -180,7 +180,7 @@ void FilterLayerPlugin::initParameterList(const QAction *action, MeshDocument &m
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
  CMeshO::FaceIterator fi;
  int numFacesSel,numVertSel;

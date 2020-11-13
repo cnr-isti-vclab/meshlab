@@ -78,7 +78,7 @@ class SelectionFilterPlugin : public QObject, public FilterPluginInterface
   int getPreConditions(const QAction*) const;
   int postCondition(const QAction* ) const;
   int getRequirements(const QAction*);
-  bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+  bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
   FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 

@@ -698,7 +698,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
   }
 }
 
-bool FilterDocSampling::applyFilter(const QAction *action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+bool FilterDocSampling::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 switch(ID(action))
 {

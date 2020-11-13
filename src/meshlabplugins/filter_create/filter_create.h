@@ -54,7 +54,7 @@ class FilterCreate : public QObject, public FilterPluginInterface
   QString filterInfo(FilterIDType filter) const;
   FilterClass getClass(const QAction*) const;
   void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-  bool applyFilter(const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+  bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
   QString filterScriptFunctionName(FilterIDType filterID);
   FILTER_ARITY filterArity(const QAction *) const {return NONE;}
 };

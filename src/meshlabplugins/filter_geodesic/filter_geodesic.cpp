@@ -108,7 +108,7 @@ int FilterGeodesic::getRequirements(const QAction *action)
 	return 0;
 }
 
-bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	MeshModel &m=*(md.mm());
 	CMeshO::FaceIterator fi;

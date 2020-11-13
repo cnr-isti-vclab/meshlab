@@ -48,7 +48,7 @@ public:
     int getRequirements(const QAction*);
     void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    bool applyFilter (const QAction* filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+    bool applyFilter (const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
 
     int postCondition(const QAction *action) const;
     FilterClass getClass(const QAction*) const;

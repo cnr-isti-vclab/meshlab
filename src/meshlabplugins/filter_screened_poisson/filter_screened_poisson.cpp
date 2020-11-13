@@ -106,6 +106,7 @@ int FilterScreenedPoissonPlugin::getRequirements(const QAction* a)
 bool FilterScreenedPoissonPlugin::applyFilter(
 		const QAction* filter,
 		MeshDocument& md,
+		std::map<std::string, QVariant>&,
 		unsigned int& /*postConditionMask*/,
 		const RichParameterList& params,
 		vcg::CallBackPos* cb)

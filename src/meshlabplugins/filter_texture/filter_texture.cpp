@@ -342,7 +342,7 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, CallBackPos *cb)
+bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))     {

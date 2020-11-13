@@ -133,7 +133,7 @@ int FilterDirt::getRequirements(const QAction * /*action*/)
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
-bool FilterDirt::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb){
+bool FilterDirt::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb){
 
 
     switch(ID(filter)){

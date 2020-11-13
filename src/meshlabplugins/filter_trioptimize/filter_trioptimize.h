@@ -48,7 +48,7 @@ public:
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction *filter, MeshDocument &md, unsigned int& postConditionMask, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
+	bool applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
 	int getRequirements(const QAction*);
 	FilterClass getClass(const QAction *) const;
 	int postCondition(const QAction* ) const;

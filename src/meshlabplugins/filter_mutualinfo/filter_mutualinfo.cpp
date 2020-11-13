@@ -110,7 +110,7 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	}
 }
 
-bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
+bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
 {
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :

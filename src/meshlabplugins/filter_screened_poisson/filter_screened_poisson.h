@@ -50,6 +50,7 @@ public:
 	bool applyFilter(
 			const QAction* filter,
 			MeshDocument& md,
+			std::map<std::string, QVariant>& outputValues,
 			unsigned int& postConditionMask,
 			const RichParameterList& params,
 			vcg::CallBackPos* cb) ;

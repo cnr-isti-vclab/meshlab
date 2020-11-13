@@ -123,7 +123,7 @@ void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
+bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
 {
 	switch(ID(filter))
 	{
