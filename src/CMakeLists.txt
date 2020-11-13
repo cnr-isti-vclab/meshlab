@@ -112,7 +112,7 @@ endif()
 
 add_subdirectory(common)
 add_subdirectory(meshlab)
-add_subdirectory(meshlabserver)
+#add_subdirectory(meshlabserver)
 set(CMAKE_INSTALL_RPATH)
 if (WIN32)
 	add_subdirectory(use_cpu_opengl)
