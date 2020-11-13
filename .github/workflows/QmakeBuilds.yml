@@ -101,7 +101,7 @@ jobs:
         Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
-        echo "::add-path::$(Get-Location)\jom"
+        echo "$(Get-Location)\jom" >> GITHUB_PATH
     - name: Setup env variables
       id: envs
       run: |
