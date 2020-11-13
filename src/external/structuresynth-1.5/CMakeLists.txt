@@ -98,3 +98,4 @@ add_library(
 target_include_directories(external-ssynth SYSTEM PUBLIC "${SSYNTH_DIR}/ssynth")
 target_link_libraries(external-ssynth PRIVATE Qt5::Core Qt5::Xml Qt5::OpenGL OpenGL::GLU)
 set_property(TARGET external-ssynth PROPERTY FOLDER External)
+target_compile_options(external-ssynth PRIVATE -w)

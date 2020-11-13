@@ -12,3 +12,4 @@ add_library(
 	"${LEVMAR_DIR}/misc.c")
 target_include_directories(external-levmar PUBLIC ${LEVMAR_DIR})
 set_property(TARGET external-levmar PROPERTY FOLDER External)
+target_compile_options(external-levmar PRIVATE -w)

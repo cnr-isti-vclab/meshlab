@@ -45,7 +45,6 @@
 #include <wrap/qt/gl_label.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/import_ply.h>
-#include<QOpenGLContext>
 
 
 using namespace std;

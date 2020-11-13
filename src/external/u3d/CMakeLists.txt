@@ -608,6 +608,7 @@ ADD_LIBRARY( IFXCoreStatic STATIC ${IFXCoreStatic_SRCS} ${IFXCoreStatic_HDRS} )
 IF(UNIX)
 	target_link_libraries( IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX)
+target_compile_options(IFXCoreStatic PRIVATE -w)
 
 # Something Windows-only 
 # INCLUDE_DIRECTORIES( RTL/Component/Include RTL/Kernel/Include RTL/Platform/Include )
@@ -1077,6 +1078,7 @@ IF(UNIX AND NOT APPLE)
 	target_link_libraries( IFXCore ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
 TARGET_LINK_LIBRARIES( IFXCore ${ADDITIONAL_LIBRARIES} )
+target_compile_options(IFXCore PRIVATE -w)
 
 
 #IFXExporting
@@ -1184,6 +1186,7 @@ IF(UNIX AND NOT APPLE)
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXExporting/IFXExporting.list" )
 	TARGET_LINK_LIBRARIES( IFXExporting IFXCore IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
+target_compile_options(IFXExporting PRIVATE -w)
 
 #IFXScheduling
 INCLUDE_DIRECTORIES(
@@ -1303,6 +1306,7 @@ IF(UNIX AND NOT APPLE)
 	LINK_FLAGS "-Wl,--version-script=${U3D_DIR}/src/RTL/Platform/Lin32/IFXScheduling/IFXScheduling.list" )
 	TARGET_LINK_LIBRARIES( IFXScheduling IFXCore IFXCoreStatic ${CMAKE_DL_LIBS} )
 ENDIF(UNIX AND NOT APPLE)
+target_compile_options(IFXScheduling PRIVATE -w)
 
 #external-IDTFConverter
 INCLUDE_DIRECTORIES(
