@@ -28,7 +28,8 @@ Building and generating AppImage on a clean Ubuntu 16.04 (last supported distro)
 * install directory: `./meshlab-install`
 * AppImage path: `./`
 
-
-	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	bash meshlab/scripts/Linux/0_setup_env_ubuntu.sh
-	bash meshlab/scripts/Linux/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+bash meshlab/scripts/Linux/0_setup_env_ubuntu.sh
+bash meshlab/scripts/Linux/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
+```
