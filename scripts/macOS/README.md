@@ -26,7 +26,8 @@ Building and generating a DMG on a clean MacOS environment:
 * install directory: `./meshlab-install`
 * DMG path: `./`
 
-
-	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	sh meshlab/scripts/macOS/0_setup_env.sh
-	sh meshlab/scripts/macOS/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+sh meshlab/scripts/macOS/0_setup_env.sh
+sh meshlab/scripts/macOS/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
+```
