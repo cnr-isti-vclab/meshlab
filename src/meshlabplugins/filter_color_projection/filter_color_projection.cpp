@@ -20,9 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include "filter_color_projection.h"
-
-#include "pushpull.h"
 
 #include <QFileDialog>
 
@@ -32,11 +29,13 @@
 
 #include <vcg/space/colorspace.h>
 
+#include "filter_color_projection.h"
 
 #include "floatbuffer.cpp"
 
 #include "render_helper.cpp"
 
+#include "pushpull.h"
 #include "rastering.h"
 #include <vcg/complex/algorithms/update/texture.h>
 
