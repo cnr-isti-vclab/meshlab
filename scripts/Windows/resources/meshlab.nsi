@@ -8,7 +8,7 @@
 !define PRODUCT_PUBLISHER "Paolo Cignoni - VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
-!define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
+;!define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define DISTRIB_FOLDER "DISTRIB_PATH"
@@ -56,16 +56,16 @@ ShowUnInstDetails show
 !include ExecWaitJob.nsh
 !include FileAssociation.nsh
 
-Function .onInit 
+Function .onInit
   ReadRegStr $0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   ${If} $0 != "" ;2020.0x...
-    MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..." 
+    MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
 	StrCpy $8 '"$0"'
 	!insertmacro ExecWaitJob r8
   ${Else}
     ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MeshLab_64b" "UninstallString"
-    ${If} $0 != "" ;2016.12 
-	  MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..." 
+    ${If} $0 != "" ;2016.12
+	  MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
    	  StrCpy $8 '"$0"'
 	  !insertmacro ExecWaitJob r8
     ${EndIf}
@@ -77,31 +77,31 @@ Section "MainSection" SEC01
   ;Let's delete all the dangerous stuff from previous releases.
   ;Shortcuts for currentuser shell context
   RMDir /r "$SMPROGRAMS\MeshLab"
-  Delete "$DESKTOP\MeshLab.lnk" 
+  Delete "$DESKTOP\MeshLab.lnk"
 
   ;Shortcuts for allusers
   SetShellVarContext all ;Set alluser context. Icons created later are in allusers
   RMDir /r "$SMPROGRAMS\MeshLab"
-  Delete "$DESKTOP\MeshLab.lnk" 
+  Delete "$DESKTOP\MeshLab.lnk"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}" 
+  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY_S}"
-   
+
   Delete "$INSTDIR\*"
-  
+
   SetOverwrite on
   File "${DISTRIB_FOLDER}\meshlab.exe"
-  File "${DISTRIB_FOLDER}\meshlabserver.exe"
+  ;File "${DISTRIB_FOLDER}\meshlabserver.exe"
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
-  CreateShortCut '$SMPROGRAMS\MeshLab\MeshLabServer.lnk' 'powershell.exe -noexit -command "cd $INSTDIR\ " '
-  
+  ;CreateShortCut '$SMPROGRAMS\MeshLab\MeshLabServer.lnk' 'powershell.exe -noexit -command "cd $INSTDIR\ " '
+
   ;Copy everything inside DISTRIB
   SetOutPath "$INSTDIR"
-  File /nonfatal /a /r "${DISTRIB_FOLDER}\" 
-  
+  File /nonfatal /a /r "${DISTRIB_FOLDER}\"
+
   ;Association to extensions:
   ${registerExtension} "$INSTDIR\meshlab.exe" ".obj" "OBJ File"
   ${registerExtension} "$INSTDIR\meshlab.exe" ".ply" "PLY File"
@@ -111,7 +111,7 @@ Section "MainSection" SEC01
   ${registerExtension} "$INSTDIR\meshlab.exe" ".ptx" "PTX File"
   ${registerExtension} "$INSTDIR\meshlab.exe" ".vmi" "VMI File"
   ${registerExtension} "$INSTDIR\meshlab.exe" ".fbx" "FBX File"
-  
+
 SectionEnd
 
 Section -Prerequisites
@@ -128,7 +128,7 @@ SectionEnd
 Section -Post
   WriteUninstaller "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\meshlab.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY_S}" "" "$INSTDIR\meshlabserver.exe"
+  ;WriteRegStr HKLM "${PRODUCT_DIR_REGKEY_S}" "" "$INSTDIR\meshlabserver.exe"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
@@ -157,20 +157,20 @@ FunctionEnd
 
 Section Uninstall ;uninstall instructions
   RMDir /r "$INSTDIR"
-  
+
   ;Remove shortcuts in currentuser profile
   RMDir /r "$SMPROGRAMS\MeshLab"
-  Delete "$DESKTOP\MeshLab.lnk" 
-  
+  Delete "$DESKTOP\MeshLab.lnk"
+
   ;Remove shortcuts in allusers profile
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\MeshLab"
-  Delete "$DESKTOP\MeshLab.lnk" 
+  Delete "$DESKTOP\MeshLab.lnk"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}" 
+  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY_S}"
-  
+
   ;Unregistering file association
   ${unregisterExtension} ".obj" "OBJ File"
   ${unregisterExtension} ".ply" "PLY File"
@@ -180,7 +180,7 @@ Section Uninstall ;uninstall instructions
   ${unregisterExtension} ".ptx" "PTX File"
   ${unregisterExtension} ".vmi" "VMI File"
   ${unregisterExtension} ".fbx" "FBX File"
-  
+
   SetAutoClose true
 SectionEnd
 
@@ -192,4 +192,3 @@ Function un.onUninstSuccess ;after uninstall
     MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
   ${EndIf}
 FunctionEnd
-
