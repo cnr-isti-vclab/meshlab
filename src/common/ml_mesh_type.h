@@ -157,8 +157,8 @@ public :
     {
     }
 
-    CMeshO(CMeshO& oth) : CMeshO() {
-        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
+    CMeshO(const CMeshO& oth) : CMeshO() {
+        vcg::tri::Append<CMeshO, CMeshO>::MeshAppendConst(*this, oth);
     }
 
     //TODO need to change this
@@ -169,9 +169,9 @@ public :
     }
 
     //TODO should change also this and use the copy&swap idiom
-    CMeshO& operator=(CMeshO& oth) {
+    CMeshO& operator=(const CMeshO& oth) {
         Clear();
-        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
+        vcg::tri::Append<CMeshO, CMeshO>::MeshCopyConst(*this, oth);
         return *this;
     }
 };
