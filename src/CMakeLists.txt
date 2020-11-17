@@ -23,7 +23,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 find_package(
 	Qt5
-	COMPONENTS OpenGL Xml XmlPatterns
+	COMPONENTS OpenGL Xml Network# XmlPatterns
 	REQUIRED)
 find_package(OpenMP)
 

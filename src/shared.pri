@@ -6,7 +6,7 @@ TEMPLATE = lib
 CONFIG += plugin
 QT += opengl
 QT += xml
-QT += xmlpatterns
+#QT += xmlpatterns
 
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/meshlab-common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -lmeshlab-common -lopengl32 -lGLU32

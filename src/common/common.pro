@@ -2,7 +2,7 @@ include (../general.pri)
 
 QT += opengl
 QT += xml
-QT += xmlpatterns
+QT += network
 
 TEMPLATE = lib
 TARGET = meshlab-common
@@ -106,4 +106,3 @@ macx:QMAKE_POST_LINK = "\
 #		echo "linked shader dir"; \
 #	fi;\
 	"
-

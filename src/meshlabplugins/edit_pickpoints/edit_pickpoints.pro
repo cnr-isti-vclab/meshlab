@@ -1,5 +1,7 @@
 include (../../shared.pri)
 
+QT += network
+
 HEADERS += \
 	edit_pickpoints_factory.h \
 	editpickpoints.h \
@@ -27,4 +29,3 @@ FORMS += \
 	pickpointsDialog.ui
 
 TARGET = edit_pickpoints
-

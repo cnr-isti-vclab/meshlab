@@ -29,7 +29,7 @@ target_link_libraries({{name}}
     Qt5::Script
     Qt5::Widgets
     Qt5::Xml
-    Qt5::XmlPatterns
+    #Qt5::XmlPatterns
     external-glew)
 {% endblock %}
 

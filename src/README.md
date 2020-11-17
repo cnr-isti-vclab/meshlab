@@ -32,7 +32,7 @@ After setting up the Qt environment:
 
 You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
 
-1. Install QtCreator and Qt >= 5.12 with `xmlpatterns` as additional package;
+1. Install QtCreator and Qt >= 5.12;
 2. Open `CMakeLists.txt` inside `src`;
 3. Select your favourite shadow build directory;
 4. Build meshlab.
