@@ -55,6 +55,7 @@ parts:
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
     build-packages:
+      - cmake
       - qt5-default
       - qttools5-dev-tools
       - qtdeclarative5-dev
