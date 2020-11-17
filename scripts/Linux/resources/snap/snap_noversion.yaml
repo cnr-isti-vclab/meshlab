@@ -68,6 +68,7 @@ parts:
       - libgmp-dev
       - libqhull-dev
       - patchelf
+      - rsync
     stage-packages:
       - lib3ds-1-3
       - libgomp1
