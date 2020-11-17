@@ -1303,20 +1303,21 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	{
 
 		const int WHEEL_STEP = 120;
-		float notch = e->angleDelta().x()/ float(WHEEL_STEP);
+		float notchX = e->angleDelta().x()/ float(WHEEL_STEP);
+		float notchY = e->angleDelta().y()/ float(WHEEL_STEP);
 		if (glas.wheelDirection)
-			notch *= -1;
+			notchY *= -1;
 		switch(e->modifiers())
 		{
 		case Qt::ControlModifier:
-			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f);
+			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f,500.0f);
 			break;
 		case Qt::ShiftModifier:
-			fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f);
+			fov = math::Clamp(fov+1.2f*notchY,5.0f,90.0f);
 			break;
 		case Qt::AltModifier:
 		{
-			glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
+			glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notchX), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
 			MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
 			if (cont != NULL)
 			{
@@ -1338,9 +1339,9 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		}
 		default:
 			if(isRaster())
-				this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
+				this->opacity = math::Clamp( opacity*powf(1.2f, notchY),0.1f,1.0f);
 			else {
-				trackball.MouseWheel(notch);
+				trackball.MouseWheel(notchY);
 			}
 			break;
 		}
