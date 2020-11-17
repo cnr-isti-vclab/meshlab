@@ -28,7 +28,7 @@
 #include <gr/algorithms/PointPairFilter.h>
 //#include <QtScript>
 
-using PointType = gr::Point3D<float>;
+using PointType = gr::Point3D<MESHLAB_SCALAR>;
 
 GlobalRegistrationPlugin::GlobalRegistrationPlugin()
 {
