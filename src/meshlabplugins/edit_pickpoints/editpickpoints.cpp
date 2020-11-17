@@ -28,9 +28,10 @@
  */
 
 #include <GL/glew.h>
+#include <qdebug.h>
 
 #include "editpickpoints.h"
-#include <meshlab/mainwindow.h>
+#include <meshlab/glarea.h>
 
 #include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>

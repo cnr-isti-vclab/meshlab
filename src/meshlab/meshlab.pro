@@ -3,7 +3,6 @@ include (../general.pri)
 QT += gui
 QT += opengl
 QT += xml
-#QT += xmlpatterns
 QT += network
 
 #CONFIG += debug_and_release

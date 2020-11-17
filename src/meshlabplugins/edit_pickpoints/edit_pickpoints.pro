@@ -1,7 +1,5 @@
 include (../../shared.pri)
 
-QT += network
-
 HEADERS += \
 	edit_pickpoints_factory.h \
 	editpickpoints.h \

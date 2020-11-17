@@ -45,8 +45,6 @@ jobs:
         submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev
@@ -122,8 +120,6 @@ jobs:
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Setup env variables
       id: envs
       shell: bash
@@ -165,8 +161,6 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Setup env variables
       id: envs
       run: |

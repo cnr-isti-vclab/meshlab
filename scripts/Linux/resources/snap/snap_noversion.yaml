@@ -58,7 +58,6 @@ parts:
       - qt5-default
       - qttools5-dev-tools
       - qtdeclarative5-dev
-      - libqt5xmlpatterns5-dev
       - mesa-common-dev
       - libglu1-mesa-dev
       - lib3ds-dev
@@ -76,7 +75,6 @@ parts:
       - libglew-dev
       - libqt5opengl5-dev
       - qtdeclarative5-dev
-      - libqt5xmlpatterns5-dev
       - libqt5gui5
     override-build: |
       sh scripts/Linux/1_build.sh

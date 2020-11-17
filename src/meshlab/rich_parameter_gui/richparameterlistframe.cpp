@@ -31,7 +31,6 @@
 #include <QClipboard>
 #include <QColorDialog>
 #include <QToolBar>
-#include "../mainwindow.h"
 
 
 using namespace vcg;

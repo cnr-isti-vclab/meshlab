@@ -19,7 +19,7 @@ The following folders are used by `cmake`:
 
 ## Build MeshLab
 
-MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.12, with `xmlpatterns` as additional package.
+MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.12.
 
 After setting up the Qt environment:
 

@@ -21,8 +21,6 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Setup env variables
       id: envs
       run: |

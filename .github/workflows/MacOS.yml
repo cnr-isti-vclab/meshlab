@@ -18,8 +18,6 @@ jobs:
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Setup env variables
       id: envs
       shell: bash

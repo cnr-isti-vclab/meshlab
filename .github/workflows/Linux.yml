@@ -14,8 +14,6 @@ jobs:
         submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        modules: xmlpatterns
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev

@@ -32,7 +32,7 @@ add_library(edit_pickpoints MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 target_include_directories(edit_pickpoints PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(edit_pickpoints PUBLIC meshlab-common)
 
-target_link_libraries(edit_pickpoints PRIVATE OpenGL::GLU Qt5::Network)
+target_link_libraries(edit_pickpoints PRIVATE OpenGL::GLU)
 
 set_property(TARGET edit_pickpoints PROPERTY FOLDER Plugins)
 
