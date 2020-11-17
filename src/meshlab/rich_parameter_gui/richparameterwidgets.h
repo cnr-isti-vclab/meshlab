@@ -237,7 +237,7 @@ public:
 	Matrix44fWidget(QWidget *p, const RichMatrix44f& rpf, const RichMatrix44f& rdef, QWidget *gla_curr);
 	~Matrix44fWidget();
 	QString paramName;
-	vcg::Matrix44f getValue();
+	Matrix44m getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 	void collectWidgetValue();
@@ -258,7 +258,7 @@ protected:
 	QLabel* descLab;
 	QGridLayout* lay44;
 	QVBoxLayout* vlay;
-	vcg::Matrix44f m;
+	Matrix44m m;
 	bool valid;
 };
 
@@ -270,7 +270,7 @@ public:
 	ShotfWidget(QWidget *p, const RichShotf& rpf, const RichShotf& rdef,  QWidget *gla);
 	~ShotfWidget();
 	QString paramName;
-	vcg::Shotf getValue();
+	Shotm getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 	void collectWidgetValue();
@@ -286,7 +286,7 @@ signals:
 	void askViewerShot(QString);
 
 protected:
-	vcg::Shotf curShot;
+	Shotm curShot;
 	QLineEdit * shotLE;
 	QPushButton *getShotButton;
 	QComboBox *getShotCombo;

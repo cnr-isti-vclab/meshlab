@@ -8,16 +8,16 @@
 #endif
 
 typedef MESHLAB_SCALAR Scalarm;
-typedef vcg::Point2<MESHLAB_SCALAR>   Point2m;
-typedef vcg::Point3<MESHLAB_SCALAR>   Point3m;
-typedef vcg::Point4<MESHLAB_SCALAR>   Point4m;
-typedef vcg::Plane3<MESHLAB_SCALAR>   Plane3m;
-typedef vcg::Segment2<MESHLAB_SCALAR> Segment2m;
-typedef vcg::Segment3<MESHLAB_SCALAR> Segment3m;
-typedef vcg::Box3<MESHLAB_SCALAR>     Box3m;
-typedef vcg::Matrix44<MESHLAB_SCALAR> Matrix44m;
-typedef vcg::Matrix33<MESHLAB_SCALAR> Matrix33m;
-typedef vcg::Shot<MESHLAB_SCALAR>     Shotm;
+typedef vcg::Point2<MESHLAB_SCALAR>     Point2m;
+typedef vcg::Point3<MESHLAB_SCALAR>     Point3m;
+typedef vcg::Point4<MESHLAB_SCALAR>     Point4m;
+typedef vcg::Plane3<MESHLAB_SCALAR>     Plane3m;
+typedef vcg::Segment2<MESHLAB_SCALAR>   Segment2m;
+typedef vcg::Segment3<MESHLAB_SCALAR>   Segment3m;
+typedef vcg::Box3<MESHLAB_SCALAR>       Box3m;
+typedef vcg::Matrix44<MESHLAB_SCALAR>   Matrix44m;
+typedef vcg::Matrix33<MESHLAB_SCALAR>   Matrix33m;
+typedef vcg::Shot<MESHLAB_SCALAR>       Shotm;
 typedef vcg::Similarity<MESHLAB_SCALAR> Similaritym;
 
 template<typename T>

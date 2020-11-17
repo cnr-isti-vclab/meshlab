@@ -126,18 +126,9 @@ QString RichParameterList::getString(const QString& name) const
  * @return the matrix of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-Matrix44f RichParameterList::getMatrix44(const QString& name) const
+Matrix44m RichParameterList::getMatrix44(const QString& name) const
 {
 	return getParameterByName(name).value().getMatrix44f();
-}
-
-/**
- * @return the matrix of the RichParameter having the given name.
- * @throws an MLException if the name is not found in the list
- */
-Matrix44<MESHLAB_SCALAR> RichParameterList::getMatrix44m(const QString& name) const
-{
-	return Matrix44<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getMatrix44f());
 }
 
 /**
@@ -162,16 +153,7 @@ Point3<MESHLAB_SCALAR> RichParameterList::getPoint3m(const QString& name) const
  * @return the shot of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-Shotf RichParameterList::getShotf(const QString& name) const
-{
-	return getParameterByName(name).value().getShotf();
-}
-
-/**
- * @return the shot of the RichParameter having the given name.
- * @throws an MLException if the name is not found in the list
- */
-Shot<MESHLAB_SCALAR> RichParameterList::getShotm(const QString& name) const
+Shot<MESHLAB_SCALAR> RichParameterList::getShotf(const QString& name) const
 {
 	return Shot<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getShotf());
 }

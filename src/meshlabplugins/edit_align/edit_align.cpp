@@ -282,15 +282,15 @@ void EditAlignPlugin::glueByPicking()
 
     // i picked points sono in due sistemi di riferimento.
 
-    std::vector<vcg::Point3f>freePnt = dd->aa->freePickedPointVec;
-    std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec;
+    std::vector<Point3m>freePnt = dd->aa->freePickedPointVec;
+    std::vector<Point3m>gluedPnt= dd->aa->gluedPickedPointVec;
 
     if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
         QMessageBox::warning(0,"Align tool", "ERROR: alignment requires the same number of chosen points");
         return;
     }
 
-    Matrix44f res;
+    Matrix44m res;
     if ((dd != NULL) && (dd->aa != NULL) && (dd->aa->allowscaling))
         ComputeSimilarityMatchMatrix(gluedPnt,freePnt,res);
     else

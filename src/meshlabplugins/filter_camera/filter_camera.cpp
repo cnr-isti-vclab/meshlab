@@ -89,7 +89,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 // This function define the needed parameters for each filter.
 void FilterCameraPlugin::initParameterList(const QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
-    Shotf defShot;
+    Shotm defShot;
     switch(ID(action))
     {
     case FP_CAMERA_ROTATE :
@@ -516,7 +516,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
             Matrix44m mat,inv;
             inv.SetIdentity();
             Point3m tra;
-            mat = par.getMatrix44m("TransformMatrix");
+            mat = par.getMatrix44("TransformMatrix");
             if(par.getEnum("behaviour") == 1)
             {
                 if (rm == NULL)
@@ -596,7 +596,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
                 log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                 return false;
             }
-            Shotm shotGot=par.getShotm("Shot");
+            Shotm shotGot=par.getShotf("Shot");
             rm->shot = shotGot;
             float ratio=(float)rm->currentPlane->image.height()/(float)shotGot.Intrinsics.ViewportPx[1];
             rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
@@ -613,7 +613,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
             log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
             return false;
         }
-        cm->shot = par.getShotm("Shot");
+        cm->shot = par.getShotf("Shot");
         break;
     case FP_QUALITY_FROM_CAMERA :
         {

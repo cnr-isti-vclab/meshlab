@@ -47,11 +47,11 @@ class Frange
 {
 public:
     Frange(){}
-    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
-    Frange(float _min,float _max):minV(_min),maxV(_max){}
+    Frange(std::pair<MESHLAB_SCALAR,MESHLAB_SCALAR> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(MESHLAB_SCALAR _min,MESHLAB_SCALAR _max):minV(_min),maxV(_max){}
 
-    float minV;
-    float maxV;
+    MESHLAB_SCALAR minV;
+    MESHLAB_SCALAR maxV;
 };
 
 

@@ -22,7 +22,7 @@ class AlignSet;
 class MutualInfo;
 
 class Solver {
-  typedef vcg::Shot<float> Shot;
+  typedef vcg::Shot<MESHLAB_SCALAR> Shot;
   typedef vcg::Box3<float> Box;
 
  public:

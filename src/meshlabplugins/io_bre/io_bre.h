@@ -70,7 +70,7 @@ namespace io  {
 	  float SpacingY() const;
   	bool  Transformed() const;
   	// Abfrage, ob Matrix() schon auf die 3D Daten angewendet wurde.
-	  Matrix44f Matrix() const;
+	  Matrix44m Matrix() const;
 
 
     int DataType() const;

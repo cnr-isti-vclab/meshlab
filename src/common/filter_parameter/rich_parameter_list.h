@@ -101,12 +101,10 @@ public:
 	int getInt(const QString& name) const;
 	float getFloat(const QString& name) const;
 	QString getString(const QString& name) const;
-	vcg::Matrix44f getMatrix44(const QString& name) const;
-	vcg::Matrix44<MESHLAB_SCALAR> getMatrix44m(const QString& name) const;
+	Matrix44m getMatrix44(const QString& name) const;
 	vcg::Point3f getPoint3f(const QString& name) const;
 	vcg::Point3<MESHLAB_SCALAR> getPoint3m(const QString& name) const;
-	vcg::Shotf getShotf(const QString& name) const;
-	vcg::Shot<MESHLAB_SCALAR> getShotm(const QString& name) const;
+	Shotm getShotf(const QString& name) const;
 	QColor getColor(const QString& name) const;
 	vcg::Color4b getColor4b(const QString& name) const;
 	float getAbsPerc(const QString& name) const;

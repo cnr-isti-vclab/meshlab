@@ -41,6 +41,8 @@
 using namespace std;
 using namespace vcg;
 
+typedef Histogram<MESHLAB_SCALAR> Histogramm;
+
 FilterColorProc::FilterColorProc()
 {
   typeList << CP_FILLING
@@ -545,7 +547,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			tri::UpdateQuality<CMeshO>::VertexSaturate(m->cm, par.getFloat("gradientThr"));
 			if (par.getBool("updateColor"))
 			{
-				Histogramf H;
+				Histogramm H;
 				tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 				m->updateDataMask(MeshModel::MM_VERTCOLOR);
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
@@ -562,7 +564,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			float RangeMax = par.getFloat("maxVal");
 			bool usePerc = par.getDynamicFloat("perc")>0;
 
-			Histogramf H;
+			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 
 			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
@@ -594,7 +596,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			float RangeMax = par.getFloat("maxVal");
 			bool usePerc = par.getDynamicFloat("perc")>0;
 
-			Histogramf H;
+			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 
 			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
@@ -628,7 +630,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			float perc = par.getDynamicFloat("perc");
 			bool usePerc = perc>0;
 
-			Histogramf H;
+			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m->cm, H);
 			float PercLo = H.Percentile(perc / 100.f);
 			float PercHi = H.Percentile(1.0 - perc / 100.f);
@@ -680,7 +682,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 				default: assert(0);
 			}
 
-			Histogramf H;
+			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
@@ -691,9 +693,9 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		{
 			m->updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
 			CMeshO::FaceIterator fi;
-			Distribution<float> distrib;
-			float minV = 0;
-			float maxV = 1.0;
+			Distribution<MESHLAB_SCALAR> distrib;
+			MESHLAB_SCALAR minV = 0;
+			MESHLAB_SCALAR maxV = 1.0;
 			int metric = par.getEnum("Metric");
 			if (metric == 4 || metric == 5)
 			{

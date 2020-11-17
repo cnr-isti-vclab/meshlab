@@ -99,7 +99,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
     if ((result == 0) && (header.Transformed() == true))
     {
       //if transformed before, undo transformation (will be changed soon)
-      Matrix44f inverse = vcg::Inverse(header.Matrix());
+      Matrix44m inverse = vcg::Inverse(header.Matrix());
       m.Tr = inverse;
       return result;
     }
@@ -318,9 +318,9 @@ int vcg::tri::io::BreHeader::Size() const
 }
 
 
-Matrix44f vcg::tri::io::BreHeader::Matrix() const 
+Matrix44m vcg::tri::io::BreHeader::Matrix() const 
 {
-  Matrix44f matrix;
+  Matrix44m matrix;
   float *ptr = (float*) (m_data.data() + 128);
 
   for ( int i=0; i<4; i++) 
