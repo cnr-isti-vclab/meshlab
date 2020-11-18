@@ -820,7 +820,7 @@ switch(ID(filter))
 	break;
 
 	case FP_SET_TRANSFORM_MATRIX:
-		ApplyTransform(md, par.getMatrix44m("TransformMatrix"), par.getBool("allLayers"), par.getBool("Freeze"), false, par.getBool("compose"));
+		ApplyTransform(md, par.getMatrix44("TransformMatrix"), par.getBool("allLayers"), par.getBool("Freeze"), false, par.getBool("compose"));
 	break;
 
 	case FP_SET_TRANSFORM_PARAMS:
@@ -1337,7 +1337,7 @@ switch(ID(filter))
 			case 6: tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0); break;
 		}
 
-		Histogramf H;
+		Histogram<MESHLAB_SCALAR> H;
 		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
 		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
 

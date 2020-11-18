@@ -45,6 +45,8 @@
 using namespace GaelMls;
 using namespace vcg;
 
+typedef Histogram<MESHLAB_SCALAR> Histogramm;
+
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
@@ -552,9 +554,9 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<st
             minc += 0.05*d;
             maxc -= 0.05*d;
 
-            vcg::Histogramf H;
-      vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
-      vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
+            Histogramm H;
+            vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
+            vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
         }
     // 	else if (id & _AFRONT_)
     // 	{

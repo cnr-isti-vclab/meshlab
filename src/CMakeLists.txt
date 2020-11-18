@@ -12,6 +12,7 @@ endif()
 ### Build options
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
+option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -54,7 +55,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ### Build Settings
-add_definitions(-DMESHLAB_SCALAR=float)
+if (BUILD_WITH_DOUBLE_SCALAR)
+	message(STATUS "Building with double precision")
+	add_definitions(-DMESHLAB_SCALAR=double)
+else()
+	message(STATUS "Building with single precision")
+	add_definitions(-DMESHLAB_SCALAR=float)
+endif()
+
 if(WIN32)
 	add_definitions(-DNOMINMAX)
 	if(MSVC)
@@ -69,8 +77,6 @@ if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 endif()
 
 ### Install directories
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
-
 if(WIN32 OR APPLE)
 	set(INSTALL_TO_UNIX_LAYOUT OFF)
 else()

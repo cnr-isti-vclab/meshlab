@@ -642,7 +642,7 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
         corrs->push_back(*corrLevmar);
     }
 
-    vcg::Camera<float> &cam = shot.Intrinsics;
+    vcg::Camera<MESHLAB_SCALAR> &cam = shot.Intrinsics;
 
     //DEBUG
     qDebug("\n TEST BEFORE CALIBRATION \n");

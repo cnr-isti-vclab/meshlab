@@ -28,7 +28,7 @@
 #include <gr/algorithms/PointPairFilter.h>
 //#include <QtScript>
 
-using PointType = gr::Point3D<float>;
+using PointType = gr::Point3D<MESHLAB_SCALAR>;
 
 GlobalRegistrationPlugin::GlobalRegistrationPlugin()
 {
@@ -93,7 +93,7 @@ void GlobalRegistrationPlugin::initParameterList(const QAction *action,MeshDocum
 }
 
 
-using MatrixType = Eigen::Matrix<float, 4, 4>;
+using MatrixType = Eigen::Matrix<MESHLAB_SCALAR, 4, 4>;
 
 struct RealTimeTransformVisitor {
     CMeshO* mesh = nullptr;

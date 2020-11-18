@@ -317,7 +317,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 						// ---------------------
 						// we do not have to multiply normal for current matrix (as we did for vertices)
 						// since translation operations do not affect normals
-						(*fi).N() = f->normal;
+						(*fi).N() = Point3f(f->normal);
 					}
 					
 					for (int i=0; i<3; ++i)
@@ -326,7 +326,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 						{
 							// assigning per wedge normal
 							// --------------------------
-							(*fi).WN(i) = normalL[3*p+i];
+							(*fi).WN(i) = Point3f(normalL[3*p+i]);
 						}
 
 						// assigning face vertices

@@ -216,15 +216,7 @@ bool RichString::operator==( const RichParameter& rb )
 
 RichMatrix44f::RichMatrix44f(
 		const QString& nm,
-		const vcg::Matrix44f& defval,
-		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, Matrix44fValue(defval),desc, tltip)
-{
-}
-RichMatrix44f::RichMatrix44f(
-		const QString& nm,
-		const vcg::Matrix44d& defval,
+		const Matrix44m& defval,
 		const QString& desc,
 		const QString& tltip ) :
 	RichParameter(nm, Matrix44fValue(defval),desc, tltip)
@@ -291,7 +283,7 @@ bool RichPoint3f::operator==( const RichParameter& rb )
 
 /**** RichShotf Class ****/
 
-RichShotf::RichShotf( const QString& nm,const vcg::Shotf& defval,const QString& desc,const QString& tltip ) :
+RichShotf::RichShotf( const QString& nm,const Shotm& defval,const QString& desc,const QString& tltip ) :
 	RichParameter(nm, ShotfValue(defval),desc, tltip)
 {
 }
@@ -683,10 +675,10 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 	}
 
 	if(type=="RichMatrix44f") {
-		vcg::Matrix44f mm;
+		Matrix44m mm;
 		for(int i=0;i<16;++i)
 		{
-			float val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
+			MESHLAB_SCALAR val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
 			if (!corrconv)
 				return false;
 			mm.V()[i]=val;
@@ -775,7 +767,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		return true;
 	}
 	if(type=="RichShotf") {
-		vcg::Shotf val;
+		Shotm val;
 		assert(0); //TODO!!!!
 		*par = new RichShotf(name, val,desc,tooltip);
 		return true;

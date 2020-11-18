@@ -461,9 +461,9 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 				{
 					fprintf(outfile, "%f %d %d\n", md.rasterList[i]->shot.Intrinsics.FocalMm / md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0], 0, 0);
 
-					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+					Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 
-					Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+					Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 				
 					Point3f pos = Rt * md.rasterList[i]->shot.Extrinsics.Tra();
 					Rt.Transpose();
@@ -574,7 +574,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 					xmlWriter.writeAttribute("label", md.rasterList[i]->currentPlane->shortName());
 					xmlWriter.writeAttribute("sensor_id", QString::number(i));
 					xmlWriter.writeAttribute("enabled", "true");
-					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+					Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 					Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
 					QString transform= QString::number(mat[0][0]);
 					transform.append(" " + QString::number(-mat[1][0]));
@@ -649,7 +649,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 			for (uint i = 0; i < num_cams; ++i)
 			{
 				float f, k1, k2;
-				float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+				MESHLAB_SCALAR R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 				vcg::Point3f t;
 
 				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &f, &k1, &k2);
@@ -660,9 +660,9 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 
 				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(t[0]), &(t[1]), &(t[2]));
 
-				Matrix44f mat = Matrix44f::Construct(Matrix44f(R));
+				Matrix44m mat(R);
 
-				Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+				Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 				Rt.Transpose();
 
 				Point3f pos = Rt * Point3f(t[0], t[1], t[2]);
@@ -803,7 +803,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 						md.rasterList[rasterId]->shot.Intrinsics.PixelSizeMm[1] = shots[sensor_id].Intrinsics.PixelSizeMm[1];
 
 						QStringList values = node.toElement().text().split(" ", QString::SkipEmptyParts);
-						Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+						Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 						Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
 						
 						mat[0][0] = values[0].toFloat();

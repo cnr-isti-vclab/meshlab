@@ -9,8 +9,12 @@ This folder contains a series of scripts to build and deploy MeshLab under a Lin
 		* the build directory (default: `src/build`): `--build_path=path/to/build`
 		* the install directory (default: `src/install`): `--install_path=path/to/install`
 		* the number of cores used to build MeshLab (default: `-j4`)`
-* `2_deploy.sh`: this script makes the given path a portable version of MeshLab. Takes as argument the path where the output install path of the `1_build.sh` script is placed (default: `src/install`);
-* `3_appimage.sh`: this script computes, starting from the portable folder of MeshLab, an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies. Takes as argument the path where the output install path of the `2_deploy.sh` script is placed (default: `src/install`);
+		* the possibility to build MeshLab with double precision scalar: `--double_precision`
+* `2_deploy.sh`: this script makes the given path a portable version of MeshLab. Takes as arguments:
+    *  the path where the output install path of the `1_build.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
+* `3_appimage.sh`: this script computes, starting from the portable folder of MeshLab, an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies. Takes as arguments:
+    * the path where the output install path of the `2_deploy.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
+    * if MeshLab has been built with double precision scalar, add: `--double_precision`
 * `make_it.sh`: this script builds, deploys and generates an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies. Arguments are the same of the `1_build.sh` script.
 
 __NOTE__: `linux_deploy.sh`and `linux_make_it.sh` use [LinuxDeployQt](https://github.com/probonopd/linuxdeployqt), which allows to deploy applications **only running the oldest supported linux distro** (see [this](https://github.com/probonopd/linuxdeployqt/issues/340)) in order to guarantee the largest support possible. Therefore, before running these scripts, be sure that your Linux distribution is the oldest supported one.

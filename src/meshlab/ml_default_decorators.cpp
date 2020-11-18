@@ -859,7 +859,7 @@ void MLDefaultMeshDecorators::cleanBoundaryTextDecoratorData( MeshModel& m)
 	}
 }
 
-void MLDefaultMeshDecorators::drawLineVector(const vcg::Matrix44f& tr, std::vector<PointPC> &EV)
+void MLDefaultMeshDecorators::drawLineVector(const Matrix44m& tr, std::vector<PointPC> &EV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -887,7 +887,7 @@ void MLDefaultMeshDecorators::drawLineVector(const vcg::Matrix44f& tr, std::vect
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawTriVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV)
+void MLDefaultMeshDecorators::drawTriVector(const Matrix44m& tr,std::vector<PointPC> &TV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -914,7 +914,7 @@ void MLDefaultMeshDecorators::drawTriVector(const vcg::Matrix44f& tr,std::vector
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawDotVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV, float baseSize)
+void MLDefaultMeshDecorators::drawDotVector(const Matrix44m& tr,std::vector<PointPC> &TV, float baseSize)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);

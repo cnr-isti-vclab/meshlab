@@ -174,7 +174,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, st
 	{
 		myVec.push_back(md.mm()->cm.vert[i].P());
 	}
-	std::vector<vcg::Shotf> oldShots;
+	std::vector<Shotm> oldShots;
 	for (int r=0; r<md.rasterList.size();r++)
 	{
 		oldShots.push_back(md.rasterList[r]->shot);
@@ -238,7 +238,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, st
 
 }
 
-float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points)
+float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points)
 {
 	std::vector<float> distances;
 	for (int i=0; i<points.size(); i++)

@@ -64,7 +64,7 @@ private:
 			float tolerance,
 			int numIterations,
 			int backGroundWeight,
-			vcg::Shotf shot);
+			Shotm shot);
 
 	bool initGLMutualInfo();
 };

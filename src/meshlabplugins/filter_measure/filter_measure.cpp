@@ -387,7 +387,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 		log("Mesh Surface Area is %f", Area);
 
 		// edges
-		Distribution<float> eDist;
+		Distribution<MESHLAB_SCALAR> eDist;
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
 		log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
@@ -506,7 +506,7 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
 {
 	CMeshO &m = md.mm()->cm;
-	Distribution<float> DD;
+	Distribution<MESHLAB_SCALAR> DD;
 	tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
 
 	log("   Min %f Max %f", DD.Min(), DD.Max());
@@ -519,7 +519,7 @@ bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
 bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
 {
 	CMeshO &m = md.mm()->cm;
-	Distribution<float> DD;
+	Distribution<MESHLAB_SCALAR> DD;
 	tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
 
 	log("   Min %f Max %f", DD.Min(), DD.Max());

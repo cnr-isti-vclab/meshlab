@@ -9,8 +9,12 @@ This folder contains a series of scripts to build and deploy MeshLab under a Mac
 		* the build directory (default: `src/build`): `--build_path=path/to/build`
 		* the install directory (default: `src/install`): `--install_path=path/to/install`
 		* the number of cores used to build MeshLab (default: `-j4`)`
-* `2_deploy.sh`: this script makes portable a `meshlab.app` appdir. Takes as argument the path where the output install path of the `1_build.sh` script is placed (default: `src/install`);
-* `3_dmg.sh`: this script generates a [DMG](https://en.wikipedia.org/wiki/Apple_Disk_Image) that can be used to install MeshLab. Takes as argument the path where the install path of the `2_deploy.sh` script is placed (default: `src/install`);
+		* the possibility to build MeshLab with double precision scalar: `--double_precision`
+* `2_deploy.sh`: this script makes portable a `meshlab.app` appdir. Takes as arguments:
+    * the path where the output install path of the `1_build.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
+* `3_dmg.sh`: this script generates a [DMG](https://en.wikipedia.org/wiki/Apple_Disk_Image) that can be used to install MeshLab. Takes as arguments:
+    * the path where the install path of the `2_deploy.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
+    * if MeshLab has been built with double precision scalar, add: `--double_precision`
 * `make_it.sh`: this script builds, deploys and generates a [DMG](https://en.wikipedia.org/wiki/Apple_Disk_Image) that can be used to install MeshLab. Arguments are the same of the `1_build.sh` script.
 
 ## Examples

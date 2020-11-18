@@ -127,8 +127,7 @@ public:
 class RichMatrix44f : public RichParameter
 {
 public:
-	RichMatrix44f(const QString& nm, const vcg::Matrix44f& defval, const QString& desc = QString(), const QString& tltip = QString());
-	RichMatrix44f(const QString& nm, const vcg::Matrix44d& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichMatrix44f(const QString& nm, const Matrix44m& defval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichMatrix44f();
 
 	QString stringType() const;
@@ -153,7 +152,7 @@ public:
 class RichShotf : public RichParameter
 {
 public:
-	RichShotf(const QString& nm, const vcg::Shotf& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichShotf(const QString& nm, const Shotm& defval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichShotf();
 
 	QString stringType() const;

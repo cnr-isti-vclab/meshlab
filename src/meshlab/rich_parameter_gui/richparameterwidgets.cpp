@@ -561,7 +561,7 @@ void Point3fWidget::setValue(QString name,Point3m newVal)
 	}
 }
 
-void Point3fWidget::setShotValue(QString name, vcg::Shotf newValShot)
+void Point3fWidget::setShotValue(QString name, Shotm newValShot)
 {
 	vcg::Point3f p = newValShot.GetViewPoint();
 	setValue(name,p);
@@ -660,7 +660,7 @@ Matrix44fWidget::~Matrix44fWidget()
 {
 }
 
-void Matrix44fWidget::setValue(QString name,Matrix44m newVal)
+void Matrix44fWidget::setValue(QString name, Matrix44m newVal)
 {
 	if(name==paramName)
 	{
@@ -672,13 +672,13 @@ void Matrix44fWidget::setValue(QString name,Matrix44m newVal)
 }
 
 
-vcg::Matrix44f Matrix44fWidget::getValue()
+Matrix44m Matrix44fWidget::getValue()
 {
 	if (!valid) {
-		float val[16];
+		MESHLAB_SCALAR val[16];
 		for (unsigned int i = 0; i < 16; ++i)
 			val[i] = coordSB[i]->text().toFloat();
-		return vcg::Matrix44f(val);
+		return Matrix44m(val);
 	}
 	return m;
 }
@@ -720,7 +720,7 @@ void Matrix44fWidget::pasteMatrix()
 void Matrix44fWidget::collectWidgetValue()
 {
 	if (!valid) {
-		vcg::Matrix44f  tempM;
+		Matrix44m  tempM;
 		for (unsigned int i = 0; i < 16; ++i) tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
 		rp->setValue(Matrix44fValue(tempM));
 	}
@@ -841,7 +841,7 @@ void ShotfWidget::setShotValue(QString name,Shotm newVal)
 	}
 }
 
-vcg::Shotf ShotfWidget::getValue()
+Shotm ShotfWidget::getValue()
 {
 	return curShot;
 }

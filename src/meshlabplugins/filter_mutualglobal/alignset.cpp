@@ -469,11 +469,11 @@ bool AlignSet::RenderShadowMap(void)
 	glUseProgram(depthPrg);
 	
 	assert(glGetError() == 0);
-	float _near, _far;
+	MESHLAB_SCALAR _near, _far;
   _near=0.1;
   _far=10000;
 
-  GlShot< vcg::Shot<float> >::GetNearFarPlanes(shotPro, mesh->bbox, _near, _far);
+  GlShot< vcg::Shot<MESHLAB_SCALAR> >::GetNearFarPlanes(shotPro, mesh->bbox, _near, _far);
   //assert(_near <= _far);
   if(_near <= 0) _near = 0.1;
   if(_far < _near) _far = 1000;
@@ -487,7 +487,7 @@ bool AlignSet::RenderShadowMap(void)
 
   //glViewport(0, 0, wt, ht);
   //glClear(GL_DEPTH_BUFFER_BIT);
-  GlShot< vcg::Shot<float> >::SetView(shotPro, 0.5*_near, 2*_far);
+  GlShot< vcg::Shot<MESHLAB_SCALAR> >::SetView(shotPro, 0.5*_near, 2*_far);
 
   vcg::Matrix44f proj_matrix;
   glGetFloatv(GL_PROJECTION_MATRIX , proj_matrix.V());
@@ -575,11 +575,11 @@ bool AlignSet::RenderMultiShadowMap(void)
 	glUseProgram(depthPrg);
 
 	assert(glGetError() == 0);
-	float _near, _far;
+	MESHLAB_SCALAR _near, _far;
 	_near=0.1;
 	_far=10000;
 
-	GlShot< vcg::Shot<float> >::GetNearFarPlanes(*arcShots[0], mesh->bbox, _near, _far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::GetNearFarPlanes(*arcShots[0], mesh->bbox, _near, _far);
 	//assert(_near <= _far);
 	if(_near <= 0) _near = 0.1;
 	if(_far < _near) _far = 1000;
@@ -593,7 +593,7 @@ bool AlignSet::RenderMultiShadowMap(void)
 
 	//glViewport(0, 0, wt, ht);
 	//glClear(GL_DEPTH_BUFFER_BIT);
-	GlShot< vcg::Shot<float> >::SetView(*arcShots[0], 0.5*_near, 2*_far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::SetView(*arcShots[0], 0.5*_near, 2*_far);
 
 	vcg::Matrix44f proj_matrix;
 	glGetFloatv(GL_PROJECTION_MATRIX , proj_matrix.V());
@@ -678,7 +678,7 @@ bool AlignSet::RenderMultiShadowMap(void)
 	_near=0.1;
 	_far=10000;
 
-	GlShot< vcg::Shot<float> >::GetNearFarPlanes(*arcShots[1], mesh->bbox, _near, _far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::GetNearFarPlanes(*arcShots[1], mesh->bbox, _near, _far);
 	//assert(_near <= _far);
 	if(_near <= 0) _near = 0.1;
 	if(_far < _near) _far = 1000;
@@ -692,7 +692,7 @@ bool AlignSet::RenderMultiShadowMap(void)
 
 	//glViewport(0, 0, wt, ht);
 	//glClear(GL_DEPTH_BUFFER_BIT);
-	GlShot< vcg::Shot<float> >::SetView(*arcShots[1], 0.5*_near, 2*_far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::SetView(*arcShots[1], 0.5*_near, 2*_far);
 
 	glGetFloatv(GL_PROJECTION_MATRIX , proj_matrix.V());
 	proj_matrix.transposeInPlace();
@@ -774,7 +774,7 @@ bool AlignSet::RenderMultiShadowMap(void)
 	_near=0.1;
 	_far=10000;
 
-	GlShot< vcg::Shot<float> >::GetNearFarPlanes(*arcShots[2], mesh->bbox, _near, _far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::GetNearFarPlanes(*arcShots[2], mesh->bbox, _near, _far);
 	//assert(_near <= _far);
 	if(_near <= 0) _near = 0.1;
 	if(_far < _near) _far = 1000;
@@ -788,7 +788,7 @@ bool AlignSet::RenderMultiShadowMap(void)
 
 	//glViewport(0, 0, wt, ht);
 	//glClear(GL_DEPTH_BUFFER_BIT);
-	GlShot< vcg::Shot<float> >::SetView(*arcShots[2], 0.5*_near, 2*_far);
+	GlShot< vcg::Shot<MESHLAB_SCALAR> >::SetView(*arcShots[2], 0.5*_near, 2*_far);
 
 
 	glGetFloatv(GL_PROJECTION_MATRIX , proj_matrix.V());
@@ -942,18 +942,18 @@ void AlignSet::resize(int max_side) {
 #endif
 }
 
-void AlignSet::renderScene(vcg::Shot<float> &view, int component, bool save) {
+void AlignSet::renderScene(vcg::Shot<MESHLAB_SCALAR> &view, int component, bool save) {
   QSize fbosize(wt,ht);
   QGLFramebufferObjectFormat frmt;
   frmt.setInternalTextureFormat(GL_RGBA);
   frmt.setAttachment(QGLFramebufferObject::Depth);
   QGLFramebufferObject fbo(fbosize,frmt);
 
-  float _near, _far;
+  MESHLAB_SCALAR _near, _far;
   _near=0.1;
   _far=10000;
 
-  GlShot< vcg::Shot<float> >::GetNearFarPlanes(view, mesh->bbox, _near, _far);
+  GlShot< vcg::Shot<MESHLAB_SCALAR> >::GetNearFarPlanes(view, mesh->bbox, _near, _far);
   //assert(_near <= _far);
   if(_near <= 0) _near = 0.1;
   if(_far < _near) _far = 1000;
@@ -966,7 +966,7 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component, bool save) {
 
   glViewport(0, 0, wt, ht);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  GlShot< vcg::Shot<float> >::SetView(view, 0.5*_near, 2*_far);
+  GlShot< vcg::Shot<MESHLAB_SCALAR> >::SetView(view, 0.5*_near, 2*_far);
 
 //	err = glGetError();
 

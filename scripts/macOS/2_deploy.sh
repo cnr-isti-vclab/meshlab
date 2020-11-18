@@ -14,16 +14,22 @@ realpath() {
 }
 
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+APPNAME="meshlab.app"
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-else
-    INSTALL_PATH=$(realpath $1)
-fi
-
-APPNAME="meshlab.app"
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
 echo "Hopefully I should find " $INSTALL_PATH/$APPNAME
 
@@ -32,12 +38,6 @@ then
     echo "Started in the wrong dir: I have not found the meshlab.app"
     exit -1
 fi
-
-install_name_tool -change @rpath/libmeshlab-common.dylib @executable_path/../Frameworks/libmeshlab-common.dylib $INSTALL_PATH/$APPNAME/Contents/MacOS/meshlab
-
-#install_name_tool -change libIFXCore.so @rpath/libIFXCore.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
-#install_name_tool -change libIFXExporting.so @rpath/libIFXExporting.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
-#install_name_tool -change libIFXScheduling.so @rpath/libIFXScheduling.so $INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_u3d.so
 
 if [ -e $QTDIR/bin/macdeployqt ]
 then

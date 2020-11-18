@@ -10,16 +10,29 @@
 # After running this script, the installer can be found inside the resources folder.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+DOUBLE_PRECISION_OPTION=""
+
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
-else
-    BUNDLE_PATH=$(realpath $1)
-fi
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    --double_precision)
+    DOUBLE_PRECISION_OPTION="--double_precision"
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
-sh $SCRIPTS_PATH/resources/nsis_script.sh $BUNDLE_PATH
+sh $SCRIPTS_PATH/resources/nsis_script.sh -i=$INSTALL_PATH $DOUBLE_PRECISION_OPTION 
 
 makensis.exe $SCRIPTS_PATH/resources/meshlab_final.nsi
 

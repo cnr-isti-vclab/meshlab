@@ -26,9 +26,7 @@
 
 #include <QString>
 #include <QColor>
-#include <vcg/math/matrix44.h>
-#include <vcg/space/color4.h>
-#include <vcg/math/shot.h>
+#include "../ml_mesh_type.h"
 class MeshModel;
 class MeshDocument;
 class QDomElement;
@@ -49,9 +47,9 @@ public:
 	virtual int getInt() const { assert(0); return int(); }
 	virtual float getFloat() const { assert(0); return float(); }
 	virtual QString getString() const { assert(0); return QString(); }
-	virtual vcg::Matrix44f getMatrix44f() const { assert(0); return vcg::Matrix44f(); }
+	virtual Matrix44m getMatrix44f() const { assert(0); return Matrix44m(); }
 	virtual vcg::Point3f getPoint3f() const { assert(0); return vcg::Point3f(); }
-	virtual vcg::Shotf getShotf() const { assert(0); return vcg::Shotf(); }
+	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
 	virtual float getAbsPerc() const { assert(0); return float(); }
 	virtual int getEnum() const { assert(0); return int(); }
@@ -150,11 +148,11 @@ private:
 class Matrix44fValue : public Value
 {
 public:
-	Matrix44fValue(const vcg::Matrix44f& val) :pval(val) {}
-	Matrix44fValue(const vcg::Matrix44d& val) :pval(vcg::Matrix44f::Construct(val)) {}
+	Matrix44fValue(const Matrix44m& val) :pval(val) {}
+	//Matrix44fValue(const vcg::Matrix44d& val) :pval(vcg::Matrix44f::Construct(val)) {}
 	~Matrix44fValue() {}
 
-	inline vcg::Matrix44f getMatrix44f() const { return pval; }
+	inline Matrix44m getMatrix44f() const { return pval; }
 	inline bool isMatrix44f() const { return true; }
 	inline QString typeName() const { return QString("Matrix44f"); }
 	inline void	set(const Value& p) { pval = p.getMatrix44f(); }
@@ -162,7 +160,7 @@ public:
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	vcg::Matrix44f pval;
+	Matrix44m pval;
 };
 
 class Point3fValue : public Value
@@ -186,10 +184,10 @@ private:
 class ShotfValue : public Value
 {
 public:
-	ShotfValue(const vcg::Shotf& val) : pval(val) {}
+	ShotfValue(const Shotm& val) : pval(val) {}
 	~ShotfValue() {}
 
-	inline vcg::Shotf getShotf() const { return pval; }
+	inline Shotm getShotf() const { return pval; }
 	inline bool isShotf() const { return true; }
 	inline QString typeName() const { return QString("Shotf"); }
 	inline void	 set(const Value& p) { pval = p.getShotf(); }
@@ -197,7 +195,7 @@ public:
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	vcg::Shotf pval;
+	Shotm pval;
 };
 
 class ColorValue : public Value

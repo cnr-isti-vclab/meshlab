@@ -97,7 +97,7 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO:
 		parlst.addParam(RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
-		parlst.addParam(RichShotf("Shot", vcg::Shotf(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
+		parlst.addParam(RichShotf("Shot", Shotm(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
 		parlst.addParam(RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
 		parlst.addParam(RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
 		parlst.addParam(RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));
@@ -141,7 +141,7 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		float tolerance,
 		int numIterations,
 		int backGroundWeight,
-		vcg::Shotf shot)
+		Shotm shot)
 {
 	Solver solver;
 	MutualInfo mutual;
@@ -193,7 +193,7 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		break;
 	}
 
-	align.shot = vcg::Shotf::Construct(shot);
+	align.shot = Shotm::Construct(shot);
 
 	align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
 	align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);

@@ -17,6 +17,7 @@ SOURCE_PATH=$SCRIPTS_PATH/../../src
 BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install/usr/
 CORES="-j4"
+DOUBLE_PRECISION_OPTION=""
 
 #check parameters
 for i in "$@"
@@ -32,6 +33,10 @@ case $i in
     ;;
     -j*)
     CORES=$i
+    shift # past argument=value
+    ;;
+    --double_precision)
+    DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
     shift # past argument=value
     ;;
     *)
@@ -56,6 +61,6 @@ BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 cd $BUILD_PATH
-cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $SOURCE_PATH
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $SOURCE_PATH
 make $CORES
 make install
