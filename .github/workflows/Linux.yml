@@ -22,9 +22,10 @@ jobs:
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev
     - name: Setup env variables
       id: envs
+      shell: bash
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-        if ["${{matrix.precision}}" == "double_precision"]; then
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
           echo  ::set-output name=artifact_suffix::"_double"
         else
           echo  ::set-output name=artifact_suffix::""
