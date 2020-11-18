@@ -20,6 +20,7 @@ case $i in
     -i=*|--install_path=*)
     INSTALL_PATH="${i#*=}"
     shift # past argument=value
+    ;;
     *)
           # unknown option
     ;;

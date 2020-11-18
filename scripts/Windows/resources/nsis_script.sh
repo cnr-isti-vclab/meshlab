@@ -11,25 +11,30 @@
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 SOURCE_PATH=$SCRIPTS_PATH/../../src
-
-#checking for parameters
-if [ "$#" -eq 0 ]
-then
-    BUNDLE_PATH=$SOURCE_PATH/install
-else
-    BUNDLE_PATH=$(realpath $1)
-fi
-
-#if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
-#    cd $DIR
-#	throw 'meshlab.exe not found in ' + ($BUNDLE_PATH) + '. Exiting.'
-#}
-
 VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
+INSTALL_PATH=$SOURCE_PATH/install
+
+#check parameters
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    --double_precision)
+    VERSION=$VERSIONd
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
 sed "s%MESHLAB_VERSION%$VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
 sed -i "s%DISTRIB_PATH%.%g" $SCRIPTS_PATH/resources/meshlab_final.nsi
 
-mv $SCRIPTS_PATH/resources/meshlab_final.nsi $BUNDLE_PATH/
-cp $SCRIPTS_PATH/resources/ExecWaitJob.nsh $BUNDLE_PATH/
-cp $SCRIPTS_PATH/resources/FileAssociation.nsh $BUNDLE_PATH/
+mv $SCRIPTS_PATH/resources/meshlab_final.nsi $INSTALL_PATH/
+cp $SCRIPTS_PATH/resources/ExecWaitJob.nsh $INSTALL_PATH/
+cp $SCRIPTS_PATH/resources/FileAssociation.nsh $INSTALL_PATH/
