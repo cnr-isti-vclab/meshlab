@@ -353,6 +353,11 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
 	case FP_REMOVE_TVERTEX_FLIP :
     {
+		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0 || 
+				vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.cm) > 0){
+			errorMessage = "Non manifold mesh. Please clean the mesh first.";
+			return false;
+		}
 		float threshold = par.getFloat("Threshold");
 		bool repeat = par.getBool("Repeat");
 		int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
