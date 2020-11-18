@@ -10,20 +10,33 @@
 # and the AppImage will be placed in the parent directory (src)
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+ML_VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
+
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
-else
-    BUNDLE_PATH=$(realpath $1)
-fi
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    --double_precision)
+    ML_VERSION=$ML_VERSIONd
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
-PARENT_NAME="$(dirname $BUNDLE_PATH)"
+PARENT_NAME="$(dirname $INSTALL_PATH)"
 
-export VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
+export VERSION=$ML_VERSION
 
-$SCRIPTS_PATH/resources/appimagetool $BUNDLE_PATH
+$SCRIPTS_PATH/resources/appimagetool $INSTALL_PATH
 mv MeshLab-$VERSION*.AppImage $PARENT_NAME/MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab

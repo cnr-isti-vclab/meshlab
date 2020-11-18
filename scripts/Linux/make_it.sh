@@ -24,6 +24,7 @@ SOURCE_PATH=$SCRIPTS_PATH/../../src
 BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"
+DOUBLE_PRECISION_OPTION=""
 
 #check parameters
 for i in "$@"
@@ -41,6 +42,10 @@ case $i in
     CORES=$i
     shift # past argument=value
     ;;
+    --double_precision)
+    DOUBLE_PRECISION_OPTION="--double_precision"
+    shift # past argument=value
+    ;;
     *)
           # unknown option
     ;;
@@ -48,5 +53,5 @@ esac
 done
 
 sh $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $CORES
-sh $SCRIPTS_PATH/2_deploy.sh $INSTALL_PATH
-sh $SCRIPTS_PATH/3_appimages.sh $INSTALL_PATH
+sh $SCRIPTS_PATH/2_deploy.sh -i=$INSTALL_PATH
+sh $SCRIPTS_PATH/3_appimages.sh -i=$INSTALL_PATH $DOUBLE_PRECISION_OPTION

@@ -11,31 +11,37 @@
 # You can give as argument the path where you installed MeshLab.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    BUNDLE_PATH=$SCRIPTS_PATH/../../src/install
-else
-    BUNDLE_PATH=$(realpath $1)
-fi
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    *)
+          # unknown option
+    ;;
+esac
+done
 
-bash $SCRIPTS_PATH/resources/make_bundle.sh $BUNDLE_PATH
+bash $SCRIPTS_PATH/resources/make_bundle.sh $INSTALL_PATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUNDLE_PATH/usr/lib/meshlab
-$SCRIPTS_PATH/resources/linuxdeployqt $BUNDLE_PATH/usr/share/applications/meshlab.desktop \
+$SCRIPTS_PATH/resources/linuxdeployqt $INSTALL_PATH/usr/share/applications/meshlab.desktop \
   -bundle-non-qt-libs \
-  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libfilter_sketchfab.so \
-  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libio_3ds.so \
-  -executable=$BUNDLE_PATH/usr/lib/meshlab/plugins/libio_ctm.so
-  
+  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libfilter_sketchfab.so \
+  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_3ds.so \
+  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_ctm.so
 
-chmod +x $BUNDLE_PATH/usr/bin/meshlab
-rm $BUNDLE_PATH/AppRun
 
-cp $SCRIPTS_PATH/resources/AppRunMeshLab $BUNDLE_PATH/
-mv $BUNDLE_PATH/AppRunMeshLab $BUNDLE_PATH/AppRun
-chmod +x $BUNDLE_PATH/AppRun
+chmod +x $INSTALL_PATH/usr/bin/meshlab
+rm $INSTALL_PATH/AppRun
+
+cp $SCRIPTS_PATH/resources/AppRunMeshLab $INSTALL_PATH/
+mv $INSTALL_PATH/AppRunMeshLab $INSTALL_PATH/AppRun
+chmod +x $INSTALL_PATH/AppRun
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$BUNDLE_PATH is now a self contained meshlab application"
+echo "$INSTALL_PATH is now a self contained meshlab application"

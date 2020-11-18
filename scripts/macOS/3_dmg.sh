@@ -5,7 +5,7 @@
 #
 # Without given arguments, meshlab.app will be looked for in meshlab/distrib
 # folder. MeshLab DMG will be placed in the same directory of meshlab.app.
-# 
+#
 # You can give as argument the DISTRIB_PATH containing meshlab.app.
 
 #realpath function
@@ -13,15 +13,27 @@ realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 
-SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+SCRIPTS_PATH=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+ML_VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-else
-    INSTALL_PATH=$( realpath $1 )
-fi
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    --double_precision)
+    ML_VERSION=$ML_VERSIONd
+    shift # past argument=value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
 
 if ! [ -e $INSTALL_PATH/meshlab.app -a -d $INSTALL_PATH/meshlab.app ]
 then
@@ -39,7 +51,7 @@ sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" $SCRIPTS_PATH/resources/meshlab_dmg_fin
 rm -f $INSTALL_PATH/*.dmg
 
 echo "Running appdmg"
-appdmg $SCRIPTS_PATH/resources/meshlab_dmg_final.json $INSTALL_PATH/MeshLab$(cat $SCRIPTS_PATH/../../ML_VERSION).dmg
+appdmg $SCRIPTS_PATH/resources/meshlab_dmg_final.json $INSTALL_PATH/MeshLab$ML_VERSION.dmg
 
 rm $SCRIPTS_PATH/resources/meshlab_dmg_final.json
 

@@ -14,16 +14,21 @@ realpath() {
 }
 
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+APPNAME="meshlab.app"
 
 #checking for parameters
-if [ "$#" -eq 0 ]
-then
-    INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-else
-    INSTALL_PATH=$(realpath $1)
-fi
-
-APPNAME="meshlab.app"
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+    INSTALL_PATH="${i#*=}"
+    shift # past argument=value
+    *)
+          # unknown option
+    ;;
+esac
+done
 
 echo "Hopefully I should find " $INSTALL_PATH/$APPNAME
 

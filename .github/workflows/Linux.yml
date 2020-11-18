@@ -39,7 +39,7 @@ jobs:
         sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Build MeshLab AppImage
       run : |
-        sh scripts/${{ runner.os }}/3_appimage.sh
+        sh scripts/${{ runner.os }}/3_appimage.sh --${{ matrix.precision }}
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:

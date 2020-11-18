@@ -26,10 +26,10 @@ jobs:
       shell: bash
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=date::"$(cat ML_VERSION)d"
+          echo  ::set-output name=version::"$(cat ML_VERSION)d"
           echo  ::set-output name=artifact_suffix::"_double"
         else
-          echo  ::set-output name=date::"$(cat ML_VERSION)"
+          echo  ::set-output name=version::"$(cat ML_VERSION)"
           echo  ::set-output name=artifact_suffix::""
         fi
     - name: Configure and Build
@@ -40,10 +40,10 @@ jobs:
         sh scripts/${{ runner.os }}/2_deploy.sh
     - name: Create DMG
       run: |
-        sh scripts/${{ runner.os }}/3_dmg.sh
-        mv src/install/MeshLab${{steps.envs.outputs.date}}.dmg src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        sh scripts/${{ runner.os }}/3_dmg.sh --${{ matrix.precision }}
+        mv src/install/MeshLab${{steps.envs.outputs.version}}.dmg src/install/MeshLab${{steps.envs.outputs.version}}-macos.dmg
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        path: src/install/MeshLab${{steps.envs.outputs.version}}-macos.dmg
