@@ -35,7 +35,7 @@ case $i in
     CORES=$i
     shift # past argument=value
     ;;
-    --double_precision*)
+    --double_precision)
     DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
     shift # past argument=value
     ;;

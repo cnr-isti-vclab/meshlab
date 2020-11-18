@@ -11,10 +11,12 @@ This folder contains a series of scripts to build and deploy MeshLab under a Win
 		* the build directory (default: `src/build`): `--build_path=path/to/build`
 		* the install directory (default: `src/install`): `--install_path=path/to/install`
 		* the number of cores used to build MeshLab (default: `-j4`)`
+		* the possibility to build MeshLab with double precision scalar: `--double_precision`
 * `2_deploy.sh`: this script makes the given path a portable version of MeshLab. Takes as arguments:
     * the path where the output install path of the `1_build.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
 * `3_installer.sh`: this script computes, starting from the portable folder of MeshLab, an NSIS installer. Takes as arguments:
     * the path where the output install path of the `2_deploy.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
+    * if MeshLab has been built with double precision scalar, add: `--double_precision`
     * it requires `makensis.exe` in the PATH env variable.
 
 
