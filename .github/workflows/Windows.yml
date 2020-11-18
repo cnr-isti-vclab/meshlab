@@ -46,7 +46,7 @@ jobs:
     - name: NSIS script
       shell: bash
       run: |
-        sh scripts/${{ runner.os }}/resources/nsis_script.sh
+        sh scripts/${{ runner.os }}/resources/nsis_script.sh --${{ matrix.precision }}
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
