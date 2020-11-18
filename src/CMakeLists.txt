@@ -56,6 +56,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ### Build Settings
 if (BUILD_WITH_DOUBLE_SCALAR)
+	message(STATUS "Building with double precision")
 	add_definitions(-DMESHLAB_SCALAR=double)
 else()
 	add_definitions(-DMESHLAB_SCALAR=float)
@@ -75,8 +76,6 @@ if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 endif()
 
 ### Install directories
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
-
 if(WIN32 OR APPLE)
 	set(INSTALL_TO_UNIX_LAYOUT OFF)
 else()
