@@ -26,7 +26,7 @@ case $i in
     shift # past argument=value
     ;;
     --double_precision)
-    ML_VERSION=$ML_VERSIONd
+    ML_VERSION=${ML_VERSION}d
     shift # past argument=value
     ;;
     *)

@@ -11,7 +11,7 @@
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 SOURCE_PATH=$SCRIPTS_PATH/../../src
-VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
+ML_VERSION=$(cat $SOURCE_PATH/../ML_VERSION)
 INSTALL_PATH=$SOURCE_PATH/install
 
 #check parameters
@@ -23,7 +23,7 @@ case $i in
     shift # past argument=value
     ;;
     --double_precision)
-    VERSION=$VERSIONd
+    ML_VERSION=${ML_VERSION}d
     shift # past argument=value
     ;;
     *)
@@ -32,7 +32,7 @@ case $i in
 esac
 done
 
-sed "s%MESHLAB_VERSION%$VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
+sed "s%MESHLAB_VERSION%$ML_VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
 sed -i "s%DISTRIB_PATH%.%g" $SCRIPTS_PATH/resources/meshlab_final.nsi
 
 mv $SCRIPTS_PATH/resources/meshlab_final.nsi $INSTALL_PATH/
