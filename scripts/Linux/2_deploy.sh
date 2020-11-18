@@ -29,7 +29,7 @@ done
 
 bash $SCRIPTS_PATH/resources/make_bundle.sh $INSTALL_PATH
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUNDLE_PATH/usr/lib/meshlab
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
 $SCRIPTS_PATH/resources/linuxdeployqt $INSTALL_PATH/usr/share/applications/meshlab.desktop \
   -bundle-non-qt-libs \
   -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libfilter_sketchfab.so \
