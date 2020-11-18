@@ -41,10 +41,10 @@ jobs:
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_portable${{seps.env.outputs.artifact_suffix}}
+        name: meshlab_linux_portable${{steps.env.outputs.artifact_suffix}}
         path: src/install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_appimage${{seps.env.outputs.artifact_suffix}}
+        name: meshlab_linux_appimage${{steps.env.outputs.artifact_suffix}}
         path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
