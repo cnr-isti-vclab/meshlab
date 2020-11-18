@@ -7,6 +7,9 @@ jobs:
   linux_build:
     name: Build MeshLab (Linux)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+    strategy:
+      matrix:
+        precision: [--single_precision, --double_precision]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +26,7 @@ jobs:
         echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Configure and Build
       run: |
-        sh scripts/${{ runner.os }}/1_build.sh
+        sh scripts/${{ runner.os }}/1_build.sh ${{ matrix.precision }}
     - name: Deploy
       run: |
         sh scripts/${{ runner.os }}/2_deploy.sh
@@ -31,12 +34,26 @@ jobs:
       run : |
         sh scripts/${{ runner.os }}/3_appimage.sh
     - name: Upload Meshlab Portable
+      if: matrix.precision == '--single_precision'
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable
         path: src/install/
+    - name: Upload Meshlab Portable
+      if: matrix.precision == '--double_precision'
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_portable_double
+        path: src/install/
     - name: Upload Meshlab AppImage
+      if: matrix.precision == '--single_precision'
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+    - name: Upload Meshlab AppImage
+      if: matrix.precision == '--double_precision'
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_appimage_double
         path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
