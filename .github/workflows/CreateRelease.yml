@@ -82,38 +82,6 @@ jobs:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
         path: src/MeshLab${{steps.envs.outputs.version}}-linux.AppImage
 
-  linux_build_snap:
-    needs: [update_ml_version]
-    name: Build MeshLab (Ubuntu - Snap)
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: master
-        submodules: true
-    - name: Install dependencies
-      run: |
-        #needed for some reason...
-        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-        sudo apt update
-        sudo apt-get install -y snapcraft
-    - name: Setup env variables
-      id: envs
-      run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
-    - name: Build MeshLab Snap
-      run: |
-        snapcraft
-    - name: Rename Snap
-      run: |
-        mv ./meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
-    - name: Upload Meshlab Snap
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_linux_snap
-        path: MeshLab${{steps.envs.outputs.date}}-linux.snap
-
   macos_build:
     needs: [update_ml_version]
     name: Build MeshLab (MacOS)
@@ -228,7 +196,7 @@ jobs:
   #after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
-    needs: [linux_build, linux_build_snap, macos_build, windows_build]
+    needs: [linux_build, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
 
@@ -249,10 +217,6 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_appimage_double
-    - name: Download Linux Snap
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlab_linux_snap
     - name: Change Permissions
       run: |
         chmod +x meshlab_linux_portable/usr/bin/meshlab
@@ -351,16 +315,6 @@ jobs:
         asset_path: meshlab_linux_appimage_double/MeshLab${{ github.event.inputs.version }}d-linux.AppImage
         asset_name: MeshLab${{ github.event.inputs.version }}d-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
-    - name: Upload ReleaseLinuxSnap
-      id: upload-release-linux-snap
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_linux_snap/MeshLab${{ github.event.inputs.version }}-linux.snap
-        asset_name: MeshLab${{ github.event.inputs.version }}-linux.snap
-        asset_content_type: MeshLab Snap for Linux
     #MacOS
     - name: Upload ReleaseMacOSDMG
       id: upload-release-macos
