@@ -24,7 +24,7 @@ jobs:
       id: envs
       run: |
         echo  ::set-output name=date::"$(cat ML_VERSION)"
-        if ["${{matrix.precision}}" == "double_precision"]
+        if ["${{matrix.precision}}" == "double_precision"]; then
           echo  ::set-output name=artifact_suffix::"_double"
         else
           echo  ::set-output name=artifact_suffix::""
