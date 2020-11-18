@@ -7,6 +7,9 @@ jobs:
   macos_build:
     name: Build MeshLab (MacOS)
     runs-on: macos-latest
+    strategy:
+      matrix:
+        precision: [single_precision, double_precision]
 
     steps:
     - uses: actions/checkout@v2
@@ -22,10 +25,16 @@ jobs:
       id: envs
       shell: bash
       run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo  ::set-output name=date::"$(cat ML_VERSION)d"
+          echo  ::set-output name=artifact_suffix::"_double"
+        else
+          echo  ::set-output name=date::"$(cat ML_VERSION)"
+          echo  ::set-output name=artifact_suffix::""
+        fi
     - name: Configure and Build
       run: |
-        sh scripts/${{ runner.os }}/1_build.sh
+        sh scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Deploy
       run: |
         sh scripts/${{ runner.os }}/2_deploy.sh
@@ -36,5 +45,5 @@ jobs:
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_macos_dmg
+        name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
         path: src/install/MeshLab${{steps.envs.outputs.date}}-macos.dmg

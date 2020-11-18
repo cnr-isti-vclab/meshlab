@@ -24,10 +24,11 @@ jobs:
       id: envs
       shell: bash
       run: |
-        echo  ::set-output name=date::"$(cat ML_VERSION)"
         if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo  ::set-output name=date::"$(cat ML_VERSION)d"
           echo  ::set-output name=artifact_suffix::"_double"
         else
+          echo  ::set-output name=date::"$(cat ML_VERSION)"
           echo  ::set-output name=artifact_suffix::""
         fi
     - name: Configure and Build
