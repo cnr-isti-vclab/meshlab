@@ -49,6 +49,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
 ### Build settings
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum OS X deployment version")
 
 ### Settings needed for both "external" and internal code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
