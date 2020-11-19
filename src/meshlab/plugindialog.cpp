@@ -92,16 +92,6 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
 	pathDirectory=path;
 }
 
-static QString computeXmlFilename(const QDir & dir, const QString & filename)
-{
-	QFileInfo f(dir.absoluteFilePath(filename));
-	QString tmp = f.baseName() + ".xml";
-	if (tmp.startsWith("lib")) {
-		tmp.replace("lib", "");
-	}
-	return dir.absoluteFilePath(tmp);
-}
-
 void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
 {
 	if (fileNames.isEmpty()) {
@@ -111,7 +101,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 	else {
 		int nPlugins = 0;
 		QDir dir(path);
-		foreach (QString fileName, fileNames) {
+		for (const QString& fileName : fileNames) {
 			QPluginLoader loader(dir.absoluteFilePath(fileName));
 			QObject *plugin = loader.instance();
 			
@@ -129,14 +119,16 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 				if (iMeshIO){
 					nPlugins++;
 					QStringList Templist;
-					foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
+					for(const IOPluginInterface::Format& f: iMeshIO->importFormats()){
 						QString formats;
-						foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+						for(const QString& s : f.extensions)
+							formats+="Importer_"+s+" ";
 						Templist.push_back(formats);
 					}
-					foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
+					for(const IOPluginInterface::Format& f: iMeshIO->exportFormats()){
 						QString formats;
-						foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+						for(const QString& s: f.extensions)
+							formats+="Exporter_"+s+" ";
 						Templist.push_back(formats);
 					}
 					addItems(pluginItem,Templist);
@@ -145,28 +137,32 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 				if (iDecorate){
 					nPlugins++;
 					QStringList Templist;
-					foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
+					for(QAction *a: iDecorate->actions())
+						Templist.push_back(a->text());
 					addItems(pluginItem,Templist);
 				}
 				FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
 				if (iFilter){
 					nPlugins++;
 					QStringList Templist;
-					foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
+					for(QAction *a: iFilter->actions())
+						Templist.push_back(a->text());
 					addItems(pluginItem,Templist);
 				}
 				RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
 				if (iRender){
 					nPlugins++;
 					QStringList Templist;
-					foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
+					for(QAction *a: iRender->actions())
+						Templist.push_back(a->text());
 					addItems(pluginItem,Templist);
 				}
 				EditPluginInterfaceFactory *iEdit = qobject_cast<EditPluginInterfaceFactory *>(plugin);
 				if (iEdit){
 					nPlugins++;
 					QStringList Templist;
-					foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
+					for(QAction *a: iEdit->actions())
+						Templist.push_back(a->text());
 					addItems(pluginItem,Templist);
 				}
 			}
@@ -179,7 +175,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 
 void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &features){
 	
-	foreach (QString feature, features) {
+	for (const QString& feature: features) {
 		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
 		featureItem->setText(0, feature);
 		featureItem->setIcon(0, featureIcon);
@@ -192,7 +188,10 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	QString parent;
 	QString actionName;
 	if(item==NULL) return;
-	if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
+	if (item->parent()!=NULL){
+		parent=item->parent()->text(0);
+		actionName=item->text(0);
+	}
 	else parent=item->text(0);
 	QString fileName=pathDirectory+"/"+parent;
 	QDir dir(pathDirectory);
@@ -202,40 +201,39 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	if (plugin) {
 		IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
 		if (iMeshIO){
-			foreach(const IOPluginInterface::Format f,iMeshIO->importFormats()){
+			for(const IOPluginInterface::Format& f: iMeshIO->importFormats()){
 				QString formats;
-				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+				for(const QString& s: f.extensions)
+					formats+="Importer_"+s+" ";
 				if (actionName==formats) labelInfo->setText(f.description);
 			}
-			foreach(const IOPluginInterface::Format f,iMeshIO->exportFormats()){
+			for(const IOPluginInterface::Format& f: iMeshIO->exportFormats()){
 				QString formats;
-				foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+				for(const QString& s: f.extensions)
+					formats+="Exporter_"+s+" ";
 				if (actionName==formats) labelInfo->setText(f.description);
 			}
 		}
 		DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
-		if (iDecorate)
-		{
-			foreach(QAction *a,iDecorate->actions())
+		if (iDecorate) {
+			for(QAction *a: iDecorate->actions())
 				if (actionName==a->text())
 					labelInfo->setText(iDecorate->decorationInfo(a));
 		}
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-		if (iFilter)
-		{
-			foreach(QAction *a,iFilter->actions())
-				if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
+		if (iFilter) {
+			for(QAction *a: iFilter->actions())
+				if (actionName==a->text()) 
+					labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
 		}
-		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-		if (iRender){
-		}
+//		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
+//		if (iRender){
+//		}
 		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (iEditFactory)
-		{
-			foreach(QAction *a, iEditFactory->actions())
-			{
-				if(iEditFactory) labelInfo->setText(iEditFactory->getEditToolDescription(a));
-			}
+		if (iEditFactory) {
+			for(QAction *a: iEditFactory->actions())
+				if(iEditFactory)
+					labelInfo->setText(iEditFactory->getEditToolDescription(a));
 		}
 	}
 }

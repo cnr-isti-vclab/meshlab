@@ -411,7 +411,6 @@ signals:
 protected:
 	QLineEdit* filename;
 	QPushButton* browse;
-	QString fl;
 	QLabel* descLab;
 	QHBoxLayout* hlay;
 };

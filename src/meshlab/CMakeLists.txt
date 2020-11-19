@@ -41,7 +41,6 @@ set(HEADERS
 	glarea_setting.h
 	layerDialog.h
 	mainwindow.h
-	meshlabeditdockwidget.h
 	ml_default_decorators.h
 	ml_render_gui.h
 	ml_rendering_actions.h

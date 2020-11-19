@@ -1160,10 +1160,8 @@ void MeshWidget::setWidgetValue( const Value& nv )
 /******************************************/
 
 IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar , const RichParameter& rdef) :
-	RichParameterWidget(p,rpar, rdef), fl()
+	RichParameterWidget(p,rpar, rdef)
 {
-	if (rp != NULL)
-		fl = rp->value().getFileName();
 	filename = new QLineEdit(this);
 	filename->setText(tr(""));
 	browse = new QPushButton(this);
@@ -1190,21 +1188,19 @@ IOFileWidget::~IOFileWidget()
 
 void IOFileWidget::collectWidgetValue()
 {
-	rp->setValue(FileValue(fl));
+	rp->setValue(FileValue(filename->text()));
 }
 
 void IOFileWidget::resetWidgetValue()
 {
 	QString fle = rp->value().getFileName();
-	fl = fle;
 	updateFileName(fle);
 }
 
 void IOFileWidget::setWidgetValue(const Value& nv)
 {
 	QString fle = nv.getFileName();
-	fl = fle;
-	updateFileName(QString());
+	updateFileName(fle);
 }
 
 void IOFileWidget::updateFileName( const FileValue& file )
@@ -1242,7 +1238,7 @@ void SaveFileWidget::selectFile()
 	//SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(rp);
 	QString ext;
-	fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getFileName(),dec->ext);
+	QString fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getFileName(),dec->ext);
 	collectWidgetValue();
 	updateFileName(fl);
 	FileValue fileName(fl);
@@ -1264,7 +1260,7 @@ void OpenFileWidget::selectFile()
 	//OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(rp);
 	QString ext;
-	fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getFileName(), dec->exts.join(" "));
+	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getFileName(), dec->exts.join(" "));
 	collectWidgetValue();
 	updateFileName(fl);
 	FileValue fileName(fl);
