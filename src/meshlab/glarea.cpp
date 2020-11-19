@@ -78,7 +78,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     //lastEditRef = NULL;
     setAttribute(Qt::WA_DeleteOnClose,true);
     fov = fovDefault();
-    clipRatioFar = 5;
+    clipRatioFar = clipRatioFarDefault();
     clipRatioNear = clipRatioNearDefault();
     nearPlane = .2f;
     farPlane = 5.f;
@@ -832,10 +832,12 @@ void GLArea::displayInfo(QPainter *painter)
         if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
 
-        col0Text += renderfacility;
+        col0Text += renderfacility + QString("\n");
 
         if (clipRatioNear!=clipRatioNearDefault())
-            col0Text += QString("\nClipping Near:%1\n").arg(clipRatioNear,7,'f',2);
+            col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
+        if (clipRatioFar!=clipRatioFarDefault())
+            col0Text += QString("Clipping Far:%1\n").arg(clipRatioFar,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
         painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
         if(mm()->cm.Tr != Matrix44m::Identity() ) displayMatrix(painter, Column_2);
@@ -1310,7 +1312,10 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		switch(e->modifiers())
 		{
 		case Qt::ControlModifier:
-			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f,500.0f);
+			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f, 500.0f);
+			break;
+		case Qt::ControlModifier | Qt::ShiftModifier:
+			clipRatioFar = math::Clamp(clipRatioFar*powf(1.1f, notchY),0.01f, 500.0f);
 			break;
 		case Qt::ShiftModifier:
 			fov = math::Clamp(fov+1.2f*notchY,5.0f,90.0f);
@@ -1593,8 +1598,21 @@ void GLArea::setView()
 
     if(fov<=5) cameraDist = 8.0f; // small hack for orthographic projection where camera distance is rather meaningless...
 
-    nearPlane = cameraDist*clipRatioNear;
-    farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
+    nearPlane = cameraDist * clipRatioNear;
+
+    float maxFarPlane = cameraDist + max(viewRatio(), float(-bb.min[2])); // is this guaranteed to be the largest interesting view?
+    farPlane = cameraDist * clipRatioFar;
+    if (maxFarPlane < farPlane)
+    {
+      farPlane = maxFarPlane;
+      // here we do not set clipRatioFar since the maxFarPlane changes as you zoom
+    }
+    // make sure far plane is always behind nearplane and avoid unnecessary wheel scrolling by changing clip ratio
+    if (farPlane < nearPlane)
+    {
+      farPlane = nearPlane+0.01f; // avoids the object completely disappearing
+      clipRatioFar = farPlane / cameraDist;
+    }
 
     //    qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
     //    qDebug("camera dist %f far  %f",cameraDist, farPlane);
@@ -1669,6 +1687,7 @@ void GLArea::resetTrackBall()
     trackball.track.sca = newScale;
     trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
+    clipRatioFar = clipRatioFarDefault();
     if (!isRaster())
         fov=fovDefault();
     update();
@@ -2150,7 +2169,7 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
             trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
             nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
             farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
-			fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+            fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
             clipRatioNear = nearPlane/getCameraDistance();
             clipRatioFar = farPlane/getCameraDistance();
         }
