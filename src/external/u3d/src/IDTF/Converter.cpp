@@ -70,6 +70,7 @@ bool IDTFToU3d(
 		int& resCode,
 		int positionQuality)
 {
+	std::string pq(std::to_string(positionQuality));
 	const char* argv[] = {
 	#ifndef WIN32
 		"IDTFConverter",
@@ -81,7 +82,7 @@ bool IDTFToU3d(
 		"-rzf",
 		"0",
 		"-pq",
-		std::to_string(positionQuality).c_str(),
+		pq.c_str(),
 		"-input",
 		inputFileName.c_str(),
 		"-output",
