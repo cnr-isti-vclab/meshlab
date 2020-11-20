@@ -22,9 +22,9 @@
 
 namespace IDTFConverter {
 
-bool IDTFToU3d(
-		const std::string &inputFileName,
+bool IDTFToU3d(const std::string &inputFileName,
 		const std::string &outputFileName,
+		int &resCode,
 		int positionQuality = 500);
 
 }

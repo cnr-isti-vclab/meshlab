@@ -111,13 +111,11 @@ bool U3DIOPlugin::save(
 		vcg::tri::io::ExporterIDTF<CMeshO>::Save(m.cm,qPrintable(tmp),mask);
 
 		//conversion from idtf to u3d
-		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
+		int resCode = 0;
+		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, resCode, _param.positionQuality);
 
 		if(result==false) {
-			QMessageBox::warning(
-						parent, 
-						tr("Saving Error"), 
-						errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
+			errorMessage = "Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")";
 			return false;
 		}
 		
