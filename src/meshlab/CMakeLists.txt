@@ -23,6 +23,7 @@ set(SOURCES
 	plugindialog.cpp
 	saveSnapshotDialog.cpp
 	savemaskexporter.cpp
+	dialogs/congrats_dialog.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
 	rich_parameter_gui/richparameterlistframe.cpp
 	rich_parameter_gui/richparameterwidgets.cpp
@@ -50,6 +51,7 @@ set(HEADERS
 	saveSnapshotDialog.h
 	savemaskexporter.h
 	snapshotsetting.h
+	dialogs/congrats_dialog.h
 	rich_parameter_gui/richparameterlistdialog.h
 	rich_parameter_gui/richparameterlistframe.h
 	rich_parameter_gui/richparameterwidgets.h
@@ -62,8 +64,8 @@ set(HEADERS
 set(RESOURCES meshlab.qrc)
 
 set(UI
+	dialogs/congrats_dialog.ui
 	ui/aboutDialog.ui
-	ui/congratsDialog.ui
 	ui/filterScriptDialog.ui
 	ui/filtercreatortab.ui
 	ui/filtergui.ui
