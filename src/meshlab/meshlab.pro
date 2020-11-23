@@ -28,6 +28,7 @@ DEPENDPATH += \
 HEADERS += \
 	mainwindow.h \
 	glarea.h \
+	dialogs/about_dialog.h \
 	dialogs/congrats_dialog.h \
 	meshlab_settings/meshlabsettingsdialog.h \
 	meshlab_settings/settingdialog.h \
@@ -57,6 +58,7 @@ SOURCES += \
 	mainwindow_Init.cpp \
 	mainwindow_RunTime.cpp \
 	glarea.cpp \
+	dialogs/about_dialog.cpp \
 	dialogs/congrats_dialog.cpp \
 	meshlab_settings/meshlabsettingsdialog.cpp \
 	meshlab_settings/settingdialog.cpp \
@@ -81,11 +83,11 @@ SOURCES += \
 	rich_parameter_gui/richparameterwidgets.cpp
 
 FORMS += \
+  dialogs/about_dialog.ui \
   dialogs/congrats_dialog.ui \
 	ui/layerDialog.ui \
 	ui/filterScriptDialog.ui \
 	ui/savesnapshotDialog.ui \
-	ui/aboutDialog.ui \
 	ui/renametexture.ui \
 	ui/savemaskexporter.ui \
 	ui/filtergui.ui
