@@ -30,9 +30,9 @@ HEADERS += \
 	glarea.h \
 	dialogs/about_dialog.h \
 	dialogs/congrats_dialog.h \
+	dialogs/options_dialog.h \
 	dialogs/savesnapshot_dialog.h \
 	dialogs/setting_dialog.h \
-	meshlab_settings/meshlabsettingsdialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
 	plugindialog.h \
@@ -60,9 +60,9 @@ SOURCES += \
 	glarea.cpp \
 	dialogs/about_dialog.cpp \
 	dialogs/congrats_dialog.cpp \
+	dialogs/options_dialog.cpp \
 	dialogs/savesnapshot_dialog.cpp \
 	dialogs/setting_dialog.cpp \
-	meshlab_settings/meshlabsettingsdialog.cpp \
 	multiViewer_Container.cpp \
 	plugindialog.cpp \
 	filterScriptDialog.cpp \

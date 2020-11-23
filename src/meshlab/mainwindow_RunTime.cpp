@@ -26,7 +26,6 @@
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
-#include "meshlab_settings/meshlabsettingsdialog.h"
 #include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
@@ -54,6 +53,7 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <exif.h>
 #include "dialogs/about_dialog.h"
+#include "dialogs/options_dialog.h"
 #include "dialogs/savesnapshot_dialog.h"
 
 using namespace std;
@@ -2695,7 +2695,7 @@ void MainWindow::showLayerDlg(bool visible)
 
 void MainWindow::setCustomize()
 {
-	MeshLabSettingsDialog dialog(currentGlobalParams,defaultGlobalParams, this);
+	MeshLabOptionsDialog dialog(currentGlobalParams,defaultGlobalParams, this);
 	connect(&dialog, SIGNAL(applyCustomSetting()), this, SLOT(updateCustomSettings()));
 	dialog.exec();
 }

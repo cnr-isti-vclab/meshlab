@@ -21,16 +21,16 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "meshlabsettingsdialog.h"
+#include "options_dialog.h"
 
-#include "dialogs/setting_dialog.h"
+#include "setting_dialog.h"
 
 #include <QHeaderView>
 
 
 using namespace vcg;
 
-MeshLabSettingsDialog::MeshLabSettingsDialog(
+MeshLabOptionsDialog::MeshLabOptionsDialog(
 		RichParameterList& curparset,
 		const RichParameterList& defparset,
 		QWidget * parent) :
@@ -53,7 +53,7 @@ MeshLabSettingsDialog::MeshLabSettingsDialog(
 	this->setWindowTitle(tr("Global Parameters Window"));
 }
 
-MeshLabSettingsDialog::~MeshLabSettingsDialog()
+MeshLabOptionsDialog::~MeshLabOptionsDialog()
 {
 }
 
@@ -61,7 +61,7 @@ MeshLabSettingsDialog::~MeshLabSettingsDialog()
  * @brief This slot is executed when a setting is double clicked
  * @param itm
  */
-void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
+void MeshLabOptionsDialog::openSubDialog(QTableWidgetItem* itm)
 {
 	int rprow = tw->row(itm);
 	const RichParameter& curPar = currentParameterList.at(rprow);
@@ -74,7 +74,7 @@ void MeshLabSettingsDialog::openSubDialog(QTableWidgetItem* itm)
 	delete setdial;
 }
 
-void MeshLabSettingsDialog::updateSettings()
+void MeshLabOptionsDialog::updateSettings()
 {
 	QStringList slst;
 	slst.push_back("Variable Name");
@@ -101,7 +101,7 @@ void MeshLabSettingsDialog::updateSettings()
 	tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 }
 
-void MeshLabSettingsDialog::updateSingleSetting(const RichParameter& rp)
+void MeshLabOptionsDialog::updateSingleSetting(const RichParameter& rp)
 {
 	assert(currentParameterList.getParameterByName(rp.name()).stringType() == rp.stringType());
 	currentParameterList.setValue(rp.name(), rp.value());
@@ -109,7 +109,7 @@ void MeshLabSettingsDialog::updateSingleSetting(const RichParameter& rp)
 	emit applyCustomSetting();
 }
 
-QTableWidgetItem* MeshLabSettingsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
+QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
 {
 	if (pd.value().isAbsPerc()){
 		return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
