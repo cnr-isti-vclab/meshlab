@@ -20,18 +20,18 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include "ui_savesnapshotDialog.h"
-#include "saveSnapshotDialog.h"
+#include "ui_savesnapshot_dialog.h"
+#include "savesnapshot_dialog.h"
+#include <QDialogButtonBox>
 
-SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent):QDialog(parent)
+SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent): 
+	QDialog(parent),
+	ui(new Ui::SaveSnapShotDialog)
 {
-	ui = new Ui::SSDialog();
-	SaveSnapshotDialog::ui->setupUi(this);
-	connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(accept()));
-	connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-	connect(ui->browseDir, SIGNAL(clicked()),this, SLOT(browseDir()));
-	ui->outDirLineEdit->setReadOnly(true);
-//	setFixedSize(250,130);
+	ui->setupUi(this);
+	//connect(
+	//	ui->buttonBox->button(QDialogButtonBox::Save), SIGNAL(clicked()), 
+	//	this, SLOT(accept()));
 }
 
 void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
@@ -60,7 +60,14 @@ SnapshotSetting SaveSnapshotDialog::getValues()
 	return settings;
 }
 
-void SaveSnapshotDialog::browseDir()
+
+
+SaveSnapshotDialog::~SaveSnapshotDialog()
+{
+	delete ui;
+}
+
+void SaveSnapshotDialog::on_browseDir_clicked()
 {
 	QFileDialog fd(0,"Choose output directory");
 	fd.setFileMode(QFileDialog::DirectoryOnly);
@@ -71,10 +78,4 @@ void SaveSnapshotDialog::browseDir()
 		selection = fd.selectedFiles();
 		ui->outDirLineEdit->setText(selection.at(0));	
 	}
-
-}
-
-SaveSnapshotDialog::~SaveSnapshotDialog()
-{
-	delete ui;
 }

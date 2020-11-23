@@ -30,13 +30,13 @@ HEADERS += \
 	glarea.h \
 	dialogs/about_dialog.h \
 	dialogs/congrats_dialog.h \
+	dialogs/savesnapshot_dialog.h \
 	meshlab_settings/meshlabsettingsdialog.h \
 	meshlab_settings/settingdialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
 	plugindialog.h \
 	filterScriptDialog.h \
-	saveSnapshotDialog.h \
 	savemaskexporter.h \
 	changetexturename.h \
 	layerDialog.h \
@@ -60,12 +60,12 @@ SOURCES += \
 	glarea.cpp \
 	dialogs/about_dialog.cpp \
 	dialogs/congrats_dialog.cpp \
+	dialogs/savesnapshot_dialog.cpp \
 	meshlab_settings/meshlabsettingsdialog.cpp \
 	meshlab_settings/settingdialog.cpp \
 	multiViewer_Container.cpp \
 	plugindialog.cpp \
 	filterScriptDialog.cpp \
-	saveSnapshotDialog.cpp \
 	layerDialog.cpp \
 	savemaskexporter.cpp \
 	changetexturename.cpp \
@@ -85,9 +85,9 @@ SOURCES += \
 FORMS += \
   dialogs/about_dialog.ui \
   dialogs/congrats_dialog.ui \
+	dialogs/savesnapshot_dialog.ui \
 	ui/layerDialog.ui \
 	ui/filterScriptDialog.ui \
-	ui/savesnapshotDialog.ui \
 	ui/renametexture.ui \
 	ui/savemaskexporter.ui \
 	ui/filtergui.ui

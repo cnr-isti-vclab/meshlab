@@ -27,7 +27,6 @@
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
 #include "meshlab_settings/meshlabsettingsdialog.h"
-#include "saveSnapshotDialog.h"
 #include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
@@ -55,6 +54,7 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <exif.h>
 #include "dialogs/about_dialog.h"
+#include "dialogs/savesnapshot_dialog.h"
 
 using namespace std;
 using namespace vcg;
@@ -2639,12 +2639,13 @@ bool MainWindow::saveSnapshot()
 	if (!GLA()) return false;
 	if (meshDoc()->isBusy()) return false;
 	
-	SaveSnapshotDialog dialog(this);
-	dialog.setValues(GLA()->ss);
+	SaveSnapshotDialog* dialog = new SaveSnapshotDialog(this);
+	//dialog->setModal(true);
+	dialog->setValues(GLA()->ss);
+	int res = dialog->exec();
 	
-	if (dialog.exec()==QDialog::Accepted)
-	{
-		GLA()->ss=dialog.getValues();
+	if (res == QDialog::Accepted) {
+		GLA()->ss=dialog->getValues();
 		GLA()->saveSnapshot();
 		return true;
 	}

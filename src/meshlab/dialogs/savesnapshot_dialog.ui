@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SSDialog</class>
- <widget class="QDialog" name="SSDialog">
+ <class>SaveSnapShotDialog</class>
+ <widget class="QDialog" name="SaveSnapShotDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
+    <width>726</width>
     <height>225</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Save snapshot</string>
+   <string>Save Snapshot</string>
   </property>
   <layout class="QVBoxLayout">
    <item>
-    <layout class="QHBoxLayout">
+    <layout class="QHBoxLayout" name="hlayout1">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -24,7 +24,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="outDirLineEdit"/>
+      <widget class="QLineEdit" name="outDirLineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="browseDir">
@@ -61,7 +65,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout">
+    <layout class="QHBoxLayout" name="hlayout2">
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -148,7 +152,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout">
+    <layout class="QHBoxLayout" name="hlayout3">
      <item>
       <spacer>
        <property name="orientation">
@@ -249,66 +253,48 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout">
-     <item>
-      <spacer>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>51</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cancelButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="saveButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Save</string>
-       </property>
-       <property name="default">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SaveSnapShotDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>362</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SaveSnapShotDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>362</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

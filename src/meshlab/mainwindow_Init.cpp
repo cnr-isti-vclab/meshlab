@@ -42,7 +42,7 @@
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "meshlab_settings/meshlabsettingsdialog.h"
-#include "saveSnapshotDialog.h"
+#include "dialogs/savesnapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
 
 

@@ -27,7 +27,7 @@
 
 namespace Ui 
 {
-	class SSDialog;
+	class SaveSnapShotDialog;
 } 
 
 class SaveSnapshotDialog: public QDialog
@@ -41,9 +41,8 @@ public:
 	SnapshotSetting getValues();
 	
 private slots:
-	void browseDir();
-
+	void on_browseDir_clicked();
 private:
-	Ui::SSDialog* ui;
+	Ui::SaveSnapShotDialog* ui;
 	SnapshotSetting settings;
 };
