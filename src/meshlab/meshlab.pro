@@ -31,8 +31,8 @@ HEADERS += \
 	dialogs/about_dialog.h \
 	dialogs/congrats_dialog.h \
 	dialogs/savesnapshot_dialog.h \
+	dialogs/setting_dialog.h \
 	meshlab_settings/meshlabsettingsdialog.h \
-	meshlab_settings/settingdialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
 	plugindialog.h \
@@ -61,8 +61,8 @@ SOURCES += \
 	dialogs/about_dialog.cpp \
 	dialogs/congrats_dialog.cpp \
 	dialogs/savesnapshot_dialog.cpp \
+	dialogs/setting_dialog.cpp \
 	meshlab_settings/meshlabsettingsdialog.cpp \
-	meshlab_settings/settingdialog.cpp \
 	multiViewer_Container.cpp \
 	plugindialog.cpp \
 	filterScriptDialog.cpp \

@@ -23,7 +23,7 @@
 
 #include "meshlabsettingsdialog.h"
 
-#include "settingdialog.h"
+#include "dialogs/setting_dialog.h"
 
 #include <QHeaderView>
 

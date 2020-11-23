@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "settingdialog.h"
+#include "setting_dialog.h"
 
 #include <QSettings>
 
@@ -106,5 +106,3 @@ void SettingDialog::load()
 	frame.at(0)->setWidgetValue(savedParameter->value());
 	apply();
 }
-
-

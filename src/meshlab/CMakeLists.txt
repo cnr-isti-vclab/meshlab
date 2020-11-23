@@ -25,10 +25,10 @@ set(SOURCES
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
 	dialogs/savesnapshot_dialog.cpp
+	dialogs/setting_dialog.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
 	rich_parameter_gui/richparameterlistframe.cpp
 	rich_parameter_gui/richparameterwidgets.cpp
-	meshlab_settings/settingdialog.cpp
 	meshlab_settings/meshlabsettingsdialog.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
@@ -54,10 +54,10 @@ set(HEADERS
 	dialogs/about_dialog.h
 	dialogs/congrats_dialog.h
 	dialogs/savesnapshot_dialog.h
+	dialogs/setting_dialog.h
 	rich_parameter_gui/richparameterlistdialog.h
 	rich_parameter_gui/richparameterlistframe.h
 	rich_parameter_gui/richparameterwidgets.h
-	meshlab_settings/settingdialog.h
 	meshlab_settings/meshlabsettingsdialog.h
 	${VCGDIR}/wrap/gui/trackball.h
 	${VCGDIR}/wrap/gui/trackmode.h
