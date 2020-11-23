@@ -6,98 +6,66 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1040</width>
-    <height>595</height>
+    <width>879</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About MeshLab</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="labelMLLogo">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../meshlab.qrc">:/images/meshlabLogo_256x256.png</pixmap>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelMLName">
-         <property name="text">
-          <string>MESHLAB VERSION BUILT ON XXX</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="spacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>13</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>300</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>&lt;p&gt;&lt;strong&gt;General Info:&amp;nbsp;&lt;a href=&quot;http://www.meshlab.net&quot;&gt;www.meshlab.net&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;MeshLab is the most used open source system for processing and editing 3D triangular meshes. It provides a set of tools for editing, cleaning, healing, inspecting, rendering, texturing and converting meshes. It offers features for processing raw data produced by 3D digitization tools/devices and for preparing models for 3D printing. The system is heavily based on the &lt;a href=&quot;http://www.vcglib.net&quot;&gt;VCG library&lt;/a&gt;. &lt;br /&gt;Source code is available on &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab&quot;&gt;GitHub &lt;/a&gt;(protected by GPL).&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;br /&gt;Remember that the simplest way to show your appreciation of the MeshLab system is to remember citing it whenever you have used some of its functionalities. Please check the &lt;a href=&quot;http://www.meshlab.net/#references&quot;&gt;list of the many publications&lt;/a&gt; related with MeshLab.&lt;/p&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-       <property name="margin">
-        <number>3</number>
-       </property>
-       <property name="openExternalLinks">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="3" column="0">
+    <widget class="QLabel" name="labelVCGDescription">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>&lt;p&gt;Copyright(C) 2005-2020&lt;/p&gt;
+&lt;p&gt;Paolo Cignoni&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Visual Computing Lab&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;http://vcg.isti.cnr.it&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;ISTI - CNR&lt;br /&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;http://www.isti.cnr.it&lt;/a&gt;&lt;/p&gt;</string>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelMLLogo">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../meshlab.qrc">:/images/meshlabLogo_256x256.png</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -107,77 +75,99 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="labelVCGLogo_4">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>186</width>
+       <height>150</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../meshlab.qrc">:/images/logo.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="labelVCGLogo_4">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>186</width>
-         <height>150</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="../meshlab.qrc">:/images/logo.png</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelVCGDescription">
-       <property name="text">
-        <string>&lt;p&gt;Copyright(C) 2005-2020&lt;/p&gt;
-&lt;p&gt;Paolo Cignoni&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Visual Computing Lab&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;http://vcg.isti.cnr.it&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;ISTI - CNR&lt;br /&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;http://www.isti.cnr.it&lt;/a&gt;&lt;/p&gt;</string>
-       </property>
-       <property name="openExternalLinks">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="spacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>13</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="labelVCGDescription_2">
-         <property name="text">
-          <string>&lt;p&gt;&lt;strong&gt;Contacts&lt;/strong&gt;&lt;br /&gt;For detailed bug reports, meaningful feature requests and grounded technical issues please use the &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/issues&quot;&gt;GitHub services&lt;/a&gt;.&lt;br /&gt;For any other high-level question about MeshLab (&lt;em&gt;no bugs or feature requests, please&lt;/em&gt;) contact:&lt;br /&gt;- Paolo Cignoni (&lt;a href=&quot;mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request&quot;&gt;paolo.cignoni@isti.cnr.it&lt;/a&gt;)&lt;br /&gt;The complete list of contributors is available &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/graphs/contributors&quot;&gt;here&lt;/a&gt;.&lt;br /&gt;Some of the contributors of MeshLab have received financial support from various projects, acknowledged &lt;a href=&quot;http://vcg.isti.cnr.it/projects.php&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-         <property name="openExternalLinks">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
+    <widget class="QLabel" name="labelMLName">
+     <property name="text">
+      <string>MESHLAB VERSION BUILT ON XXX</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QLabel" name="labelVCGDescription_2">
+     <property name="text">
+      <string>&lt;p&gt;&lt;strong&gt;Contacts&lt;/strong&gt;&lt;br /&gt;For detailed bug reports, meaningful feature requests and grounded technical issues please use the &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/issues&quot;&gt;GitHub services&lt;/a&gt;.&lt;br /&gt;For any other high-level question about MeshLab (&lt;em&gt;no bugs or feature requests, please&lt;/em&gt;) contact:&lt;br /&gt;- Paolo Cignoni (&lt;a href=&quot;mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request&quot;&gt;paolo.cignoni@isti.cnr.it&lt;/a&gt;)&lt;br /&gt;The complete list of contributors is available &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/graphs/contributors&quot;&gt;here&lt;/a&gt;.&lt;br /&gt;Some of the contributors of MeshLab have received financial support from various projects, acknowledged &lt;a href=&quot;http://vcg.isti.cnr.it/projects.php&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" rowspan="3" colspan="3">
+    <widget class="QLabel" name="label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>300</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&lt;p&gt;&lt;strong&gt;General Info:&amp;nbsp;&lt;a href=&quot;http://www.meshlab.net&quot;&gt;www.meshlab.net&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;MeshLab is the most used open source system for processing and editing 3D triangular meshes. It provides a set of tools for editing, cleaning, healing, inspecting, rendering, texturing and converting meshes. It offers features for processing raw data produced by 3D digitization tools/devices and for preparing models for 3D printing. The system is heavily based on the &lt;a href=&quot;http://www.vcglib.net&quot;&gt;VCG library&lt;/a&gt;. &lt;br /&gt;Source code is available on &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab&quot;&gt;GitHub &lt;/a&gt;(protected by GPL).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;br /&gt;Remember that the simplest way to show your appreciation of the MeshLab system is to remember citing it whenever you have used some of its functionalities. Please check the &lt;a href=&quot;http://www.meshlab.net/#references&quot;&gt;list of the many publications&lt;/a&gt; related with MeshLab.&lt;/p&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="margin">
+      <number>3</number>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
