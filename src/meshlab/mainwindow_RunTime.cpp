@@ -28,7 +28,6 @@
 #include "filterScriptDialog.h"
 #include "meshlab_settings/meshlabsettingsdialog.h"
 #include "saveSnapshotDialog.h"
-#include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
@@ -2656,14 +2655,6 @@ void MainWindow::about()
 {
 	AboutDialog* aboutDialog = new AboutDialog(this);
 	aboutDialog->show();
-//	QDialog *about_dialog = new QDialog();
-//	Ui::aboutDialog temp;
-//	temp.setupUi(about_dialog);
-//	temp.labelMLName->setText(
-//		MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)) + "\n" +
-//		"built on "+__DATE__+" with " + MeshLabApplication::compilerVersion() +
-//		" and Qt " + MeshLabApplication::qtVersion() + ".");
-//	about_dialog->show();
 }
 
 void MainWindow::aboutPlugins()
