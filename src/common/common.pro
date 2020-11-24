@@ -41,9 +41,9 @@ exists(../../ML_VERSION){
 # Input
 HEADERS += 	\
 	GLExtensionsManager.h \
-	filter_parameter/rich_parameter_list.h \
-	filter_parameter/value.h \
-	filter_parameter/rich_parameter.h \
+	parameters/rich_parameter_list.h \
+	parameters/value.h \
+	parameters/rich_parameter.h \
 	filterscript.h \
 	GLLogStream.h \
 	interfaces/decorate_plugin_interface.h \
@@ -53,11 +53,11 @@ HEADERS += 	\
 	interfaces/mainwindow_interface.h \
 	interfaces/plugin_interface.h \
 	interfaces/render_plugin_interface.h \
-	mesh_data_structures/cmesh.h \
-	mesh_data_structures/mesh_model.h \
-	mesh_data_structures/mesh_document.h \
-	mesh_data_structures/raster_model.h \
-	mesh_data_structures/render_raster.h \
+	ml_document/cmesh.h \
+	ml_document/mesh_model.h \
+	ml_document/mesh_document.h \
+	ml_document/raster_model.h \
+	ml_document/render_raster.h \
 	pluginmanager.h \
 	mlexception.h \
 	mlapplication.h \
@@ -68,19 +68,19 @@ HEADERS += 	\
 
 SOURCES += \
 	GLExtensionsManager.cpp \
-	filter_parameter/rich_parameter.cpp \
-	filter_parameter/rich_parameter_list.cpp \
-	filter_parameter/value.cpp \
+	parameters/rich_parameter.cpp \
+	parameters/rich_parameter_list.cpp \
+	parameters/value.cpp \
 	filterscript.cpp \
 	GLLogStream.cpp \
 	interfaces/decorate_plugin_interface.cpp \
 	interfaces/filter_plugin_interface.cpp \
 	interfaces/plugin_interface.cpp \
-	mesh_data_structures/cmesh.cpp \
-	mesh_data_structures/mesh_model.cpp \
-	mesh_data_structures/mesh_document.cpp \
-	mesh_data_structures/raster_model.cpp \
-	mesh_data_structures/render_raster.cpp \
+	ml_document/cmesh.cpp \
+	ml_document/mesh_model.cpp \
+	ml_document/mesh_document.cpp \
+	ml_document/raster_model.cpp \
+	ml_document/render_raster.cpp \
 	pluginmanager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \

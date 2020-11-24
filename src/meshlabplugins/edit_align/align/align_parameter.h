@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/filter_parameter/rich_parameter_list.h>
+#include <common/parameters/rich_parameter_list.h>
 #include <meshlabplugins/edit_align/meshtree.h>
 
 class AlignParameter {

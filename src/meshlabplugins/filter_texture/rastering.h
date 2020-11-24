@@ -24,7 +24,7 @@
 #ifndef _RASTERING_H
 #define _RASTERING_H
 
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/ml_document/mesh_model.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 

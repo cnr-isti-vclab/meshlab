@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/ml_document/mesh_model.h>
 #include "parameters.h"
 
 using namespace std;

@@ -34,8 +34,8 @@
 #include <QComboBox>
 #include <QSlider>
 
-#include <common/filter_parameter/rich_parameter_list.h>
-#include <common/mesh_data_structures/cmesh.h>
+#include <common/parameters/rich_parameter_list.h>
+#include <common/ml_document/cmesh.h>
 
 class RichParameterWidget : public QWidget
 {

@@ -25,7 +25,7 @@
 #define ML_DEFAULT_DECORATORS_H
 
 #include <common/ml_shared_data_context.h>
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/ml_document/mesh_model.h>
 #include <common/GLLogStream.h>
 
 class MainWindow;

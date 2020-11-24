@@ -27,7 +27,7 @@
 
 
 
-#include <common/mesh_data_structures/raster_model.h>
+#include <common/ml_document/raster_model.h>
 #include <common/ml_shared_data_context.h>
 #include <wrap/glw/glw.h>
 

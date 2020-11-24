@@ -29,7 +29,7 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include "rich_parameter_gui/richparameterlistframe.h"
-#include <common/filter_parameter/rich_parameter_list.h>
+#include <common/parameters/rich_parameter_list.h>
 #include "glarea.h"
 //
 // Each file format exposes:

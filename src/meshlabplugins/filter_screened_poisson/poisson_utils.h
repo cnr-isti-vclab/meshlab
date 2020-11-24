@@ -39,8 +39,8 @@
 #include "Src/MultiGridOctreeData.h"
 
 #include <vcg/space/box3.h>
-#include <common/mesh_data_structures/cmesh.h>
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/ml_document/cmesh.h>
+#include <common/ml_document/mesh_model.h>
 
 inline void DumpOutput( const char* format , ... )
 {

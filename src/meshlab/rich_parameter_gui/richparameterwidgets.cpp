@@ -27,7 +27,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QApplication>
-#include <common/mesh_data_structures/mesh_document.h>
+#include <common/ml_document/mesh_document.h>
 
 /******************************************/
 // MeshLabWidget Implementation

@@ -5,7 +5,7 @@
 #include <QDate>
 #include <QString>
 #include <wrap/gl/gl_mesh_attributes_info.h>
-#include "mesh_data_structures/cmesh.h"
+#include "ml_document/cmesh.h"
 
 class MeshLabApplication : public QApplication
 {

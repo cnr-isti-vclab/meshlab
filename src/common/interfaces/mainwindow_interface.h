@@ -25,7 +25,7 @@
 #define MESHLAB_MAINWINDOW_INTERFACE_H
 
 #include <QAction>
-#include "../filter_parameter/rich_parameter_list.h"
+#include "../parameters/rich_parameter_list.h"
 
 /** The MainWindowInterface class defines just the executeFilter() callback function
 that is invoked by the standard parameter input dialog.

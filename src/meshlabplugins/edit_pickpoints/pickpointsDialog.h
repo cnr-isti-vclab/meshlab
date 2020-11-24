@@ -32,7 +32,7 @@
 #include <QDockWidget>
 
 
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/ml_document/mesh_model.h>
 
 #include "pickedPoints.h"
 #include "ui_pickpointsDialog.h"

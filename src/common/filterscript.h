@@ -24,7 +24,7 @@
 #ifndef FILTERSCRIPT_H
 #define FILTERSCRIPT_H
 
-#include "filter_parameter/rich_parameter_list.h"
+#include "parameters/rich_parameter_list.h"
 
 #include <QObject>
 #include <QPair>

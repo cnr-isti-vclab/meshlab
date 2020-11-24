@@ -25,7 +25,7 @@
 #define SETTINGDIALOG_H
 
 #include <QDialog>
-#include <common/filter_parameter/rich_parameter.h>
+#include <common/parameters/rich_parameter.h>
 #include "../rich_parameter_gui/richparameterlistframe.h"
 
 /**

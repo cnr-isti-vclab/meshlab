@@ -4,7 +4,7 @@
 #include <vector>
 #include <QThread>
 
-#include "mesh_data_structures/mesh_document.h"
+#include "ml_document/mesh_document.h"
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
     :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)

@@ -26,7 +26,7 @@
 
 #include <QDialog>
 #include <QTableWidget>
-#include <common/filter_parameter/rich_parameter_list.h>
+#include <common/parameters/rich_parameter_list.h>
 
 /**
  * @brief This class describes the dialog of the meshlab general options.
