@@ -25,7 +25,7 @@
 #define MESHLAB_FILTER_PLUGIN_INTERFACE_H
 
 #include "plugin_interface.h"
-#include "../mesh_data_structures/mesh_model.h"
+#include "../mesh_data_structures/mesh_document.h"
 
 /**
 \brief The MeshFilterInterface class provide the interface of the filter plugins.
