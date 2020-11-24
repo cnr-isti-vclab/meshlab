@@ -30,9 +30,9 @@ HEADERS += \
 	glarea.h \
 	dialogs/about_dialog.h \
 	dialogs/congrats_dialog.h \
-	dialogs/filterscript_dialog.h \
+	dialogs/filter_script_dialog.h \
 	dialogs/options_dialog.h \
-	dialogs/savesnapshot_dialog.h \
+	dialogs/save_snapshot_dialog.h \
 	dialogs/setting_dialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
@@ -60,9 +60,9 @@ SOURCES += \
 	glarea.cpp \
 	dialogs/about_dialog.cpp \
 	dialogs/congrats_dialog.cpp \
-	dialogs/filterscript_dialog.cpp \
+	dialogs/filter_script_dialog.cpp \
 	dialogs/options_dialog.cpp \
-	dialogs/savesnapshot_dialog.cpp \
+	dialogs/save_snapshot_dialog.cpp \
 	dialogs/setting_dialog.cpp \
 	multiViewer_Container.cpp \
 	plugindialog.cpp \
@@ -85,8 +85,8 @@ SOURCES += \
 FORMS += \
   dialogs/about_dialog.ui \
   dialogs/congrats_dialog.ui \
-	dialogs/filterscript_dialog.ui \
-	dialogs/savesnapshot_dialog.ui \
+	dialogs/filter_script_dialog.ui \
+	dialogs/save_snapshot_dialog.ui \
 	ui/layerDialog.ui \
 	ui/renametexture.ui \
 	ui/savemaskexporter.ui

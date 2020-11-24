@@ -52,9 +52,9 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <exif.h>
 #include "dialogs/about_dialog.h"
-#include "dialogs/filterscript_dialog.h"
+#include "dialogs/filter_script_dialog.h"
 #include "dialogs/options_dialog.h"
-#include "dialogs/savesnapshot_dialog.h"
+#include "dialogs/save_snapshot_dialog.h"
 
 using namespace std;
 using namespace vcg;

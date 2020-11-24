@@ -42,16 +42,17 @@
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "dialogs/options_dialog.h"
-#include "dialogs/savesnapshot_dialog.h"
+#include "dialogs/save_snapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
 
 
 QProgressBar *MainWindow::qb;
 
-MainWindow::MainWindow()
-	:mwsettings(), httpReq(this), gpumeminfo(NULL), wama()
+MainWindow::MainWindow(): 
+	httpReq(this), 
+	gpumeminfo(NULL),
+	_currviewcontainer(NULL)
 {
-	_currviewcontainer = NULL;
 	setContextMenuPolicy(Qt::NoContextMenu);
 
 	//workspace = new QWorkspace(this);

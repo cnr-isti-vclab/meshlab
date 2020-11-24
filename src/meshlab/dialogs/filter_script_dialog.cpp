@@ -23,8 +23,8 @@
 
 #include <QFileDialog>
 
-#include "ui_filterscript_dialog.h"
-#include "filterscript_dialog.h"
+#include "ui_filter_script_dialog.h"
+#include "filter_script_dialog.h"
 #include "mainwindow.h"
 #include "../common/mlexception.h"
 #include "rich_parameter_gui/richparameterlistdialog.h"

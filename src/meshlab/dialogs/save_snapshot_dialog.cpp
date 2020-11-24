@@ -20,8 +20,8 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include "ui_savesnapshot_dialog.h"
-#include "savesnapshot_dialog.h"
+#include "ui_save_snapshot_dialog.h"
+#include "save_snapshot_dialog.h"
 #include <QDialogButtonBox>
 
 SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent): 
