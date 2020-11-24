@@ -56,6 +56,8 @@ HEADERS += 	\
 	mesh_data_structures/cmesh.h \
 	mesh_data_structures/mesh_model.h \
 	mesh_data_structures/mesh_document.h \
+	mesh_data_structures/raster_model.h \
+	mesh_data_structures/render_raster.h \
 	pluginmanager.h \
 	mlexception.h \
 	mlapplication.h \
@@ -77,6 +79,8 @@ SOURCES += \
 	mesh_data_structures/cmesh.cpp \
 	mesh_data_structures/mesh_model.cpp \
 	mesh_data_structures/mesh_document.cpp \
+	mesh_data_structures/raster_model.cpp \
+	mesh_data_structures/render_raster.cpp \
 	pluginmanager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \

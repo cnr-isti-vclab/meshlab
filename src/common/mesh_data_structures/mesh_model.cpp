@@ -132,63 +132,12 @@ int MeshModel::io2mm(int single_iobit)
     } ;
 }
 
-Plane::Plane(const Plane& pl)
-{
-    semantic = pl.semantic;
-    fullPathFileName = pl.fullPathFileName;
-    image = QImage(pl.image);
-}
-
-Plane::Plane(const QString& pathName, const int _semantic)
-{
-    semantic =_semantic;
-    fullPathFileName = pathName;
-
-    image = QImage(pathName);
-}
-
-RasterModel::RasterModel(MeshDocument *parent, QString _rasterName)
-{
-    _id=parent->newRasterId();
-    par = parent;
-    this->_label= std::move(_rasterName);
-    visible=true;
-}
-
-RasterModel::RasterModel()
-{
-
-}
 
 
-MeshLabRenderRaster::MeshLabRenderRaster()
-{
 
-}
 
-MeshLabRenderRaster::MeshLabRenderRaster( const MeshLabRenderRaster& rm )
-    :shot(rm.shot)
-{
-    for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)
-    {
-        planeList.push_back(new Plane(**it));
-        if (rm.currentPlane == *it)
-            currentPlane = planeList[planeList.size() - 1];
-    }
-}
 
-void MeshLabRenderRaster::addPlane(Plane *plane)
-{
-    planeList.append(plane);
-    currentPlane = plane;
-}
 
-MeshLabRenderRaster::~MeshLabRenderRaster()
-{
-    currentPlane = NULL;
-    for(int ii = 0;ii < planeList.size();++ii)
-        delete planeList[ii];
-}
 
 void MeshModelState::create(int _mask, MeshModel* _m)
 {
@@ -472,57 +421,4 @@ void MeshModel::setMeshModified(bool b)
 int MeshModel::dataMask() const
 {
     return currentDataMask;
-}
-
-MeshDocumentStateData::MeshDocumentStateData()
-	:_lock(QReadWriteLock::Recursive)
-{
-
-}
-
-MeshDocumentStateData::~MeshDocumentStateData()
-{
-	QWriteLocker locker(&_lock);
-	_existingmeshesbeforeoperation.clear();
-}
-
-void MeshDocumentStateData::create(MeshDocument& md)
-{
-	QWriteLocker locker(&_lock);
-	for (int ii = 0; ii < md.meshList.size(); ++ii)
-	{
-		MeshModel* mm = md.meshList[ii];
-		if (mm != NULL)
-			insert(mm->id(), MeshModelStateData(mm->dataMask(), mm->cm.VN(), mm->cm.FN(), mm->cm.EN()));
-	}
-}
-
-QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::insert(const int key, const MeshModelStateData & value)
-{
-	QWriteLocker locker(&_lock);
-	return _existingmeshesbeforeoperation.insert(key,value);
-}
-
-QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::find(const int key)
-{
-	QReadLocker locker(&_lock);
-	return _existingmeshesbeforeoperation.find(key);
-}
-
-QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::begin()
-{
-	QReadLocker locker(&_lock);
-	return _existingmeshesbeforeoperation.begin();
-}
-
-QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::end()
-{
-	QReadLocker locker(&_lock);
-	return _existingmeshesbeforeoperation.end();
-}
-
-void MeshDocumentStateData::clear()
-{
-	QWriteLocker locker(&_lock);
-	_existingmeshesbeforeoperation.clear();
 }

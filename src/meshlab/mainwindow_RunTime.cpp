@@ -2014,7 +2014,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			this->meshDoc()->setBusy(true);
 			RasterModel *rm= meshDoc()->addNewRaster();
 			rm->setLabel(fileImg);
-			rm->addPlane(new Plane(fileName,Plane::RGBA));
+			rm->addPlane(new RasterPlane(fileName,RasterPlane::RGBA));
 			meshDoc()->setBusy(false);
 			showLayerDlg(true);
 			

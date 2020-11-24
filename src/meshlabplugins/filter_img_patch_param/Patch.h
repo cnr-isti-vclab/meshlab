@@ -27,7 +27,7 @@
 
 
 
-#include <common/mesh_data_structures/mesh_model.h>
+#include <common/mesh_data_structures/raster_model.h>
 
 
 struct TriangleUV

@@ -25,6 +25,25 @@
 #define MESH_DOCUMENT_H
 
 #include "mesh_model.h"
+#include "raster_model.h"
+
+class MeshDocumentStateData
+{
+public:
+	MeshDocumentStateData();
+	~MeshDocumentStateData();
+
+	void create(MeshDocument& md);
+	QMap<int, MeshModelStateData>::iterator insert(const int key, const MeshModelStateData & value);
+	QMap<int, MeshModelStateData>::iterator find(const int key);
+	QMap<int, MeshModelStateData>::iterator begin();
+	QMap<int, MeshModelStateData>::iterator end();
+	void clear();
+
+private:
+	mutable QReadWriteLock _lock;
+	QMap<int, MeshModelStateData> _existingmeshesbeforeoperation;
+};
 
 class MeshDocument : public QObject
 {

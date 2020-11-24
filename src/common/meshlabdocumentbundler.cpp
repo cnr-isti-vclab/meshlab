@@ -45,7 +45,7 @@ bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString imag
     {
         md.addNewRaster();
         const QString fullpath_image_filename = image_filenames_q[int(i)];
-        md.rm()->addPlane(new Plane(fullpath_image_filename,Plane::RGBA));
+        md.rm()->addPlane(new RasterPlane(fullpath_image_filename,RasterPlane::RGBA));
         int count=fullpath_image_filename.count('\\');
         if (count==0)
         {
@@ -83,7 +83,7 @@ bool MeshDocumentFromNvm(MeshDocument &md, QString filename_nvm, QString model_f
     for(size_t i=0 ; i<shots.size() ; i++){
         md.addNewRaster();
         const QString fullpath_image_filename = image_filenames_q[int(i)];
-        md.rm()->addPlane(new Plane(fullpath_image_filename,Plane::RGBA));
+        md.rm()->addPlane(new RasterPlane(fullpath_image_filename,RasterPlane::RGBA));
         md.rm()->setLabel(image_filenames_q[int(i)].section('/',1,2));
         md.rm()->shot = shots[int(i)];
         /*md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();

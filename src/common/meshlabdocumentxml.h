@@ -12,5 +12,5 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers, bool saveViewState, bool binary, const std::map<int, MLRenderingData>& rendOpt = std::map<int, MLRenderingData>());
 bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::map<int, MLRenderingData>& rendOpt);
 QDomElement RasterModelToXML(RasterModel *mp,QDomDocument &doc, bool binary);
-QDomElement PlaneToXML(Plane* pl,const QString& basePath,QDomDocument& doc);
+QDomElement PlaneToXML(RasterPlane* pl,const QString& basePath,QDomDocument& doc);
 #endif // __MESHLABDOC_XML_H
