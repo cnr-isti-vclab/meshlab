@@ -26,19 +26,17 @@
 #include <QDialog>
 #include "../common/filterscript.h"
 
-namespace Ui 
-{
-	class scriptDialog;
-	class scriptEditor;
+namespace Ui {
+class FilterScriptDialog;
 } 
 
 class FilterScriptDialog : public QDialog
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	FilterScriptDialog(QWidget *parent = 0);
 	~FilterScriptDialog();
-  void setScript(FilterScript *scr);
+	void setScript(FilterScript *scr);
 
 private slots:
 	//will do all things that need to be done before the script runs then trigger the running of the script
@@ -62,7 +60,7 @@ private slots:
 	void editSelectedFilterParameters();
 	
 private:
-	Ui::scriptDialog* ui;
+	Ui::FilterScriptDialog* ui;
 	FilterScript *scriptPtr;
 
 	void editOldParameters(const int row);

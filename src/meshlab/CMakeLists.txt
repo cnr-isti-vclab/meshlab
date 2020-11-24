@@ -8,7 +8,6 @@
 set(SOURCES
 	additionalgui.cpp
 	changetexturename.cpp
-	filterScriptDialog.cpp
 	glarea.cpp
 	glarea_setting.cpp
 	layerDialog.cpp
@@ -24,6 +23,7 @@ set(SOURCES
 	savemaskexporter.cpp
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
+	dialogs/filterscript_dialog.cpp
 	dialogs/options_dialog.cpp
 	dialogs/savesnapshot_dialog.cpp
 	dialogs/setting_dialog.cpp
@@ -38,7 +38,6 @@ set(SOURCES
 set(HEADERS
 	additionalgui.h
 	changetexturename.h
-	filterScriptDialog.h
 	glarea.h
 	glarea_setting.h
 	layerDialog.h
@@ -53,6 +52,7 @@ set(HEADERS
 	snapshotsetting.h
 	dialogs/about_dialog.h
 	dialogs/congrats_dialog.h
+	dialogs/filterscript_dialog.h
 	dialogs/options_dialog.h
 	dialogs/savesnapshot_dialog.h
 	dialogs/setting_dialog.h
@@ -68,10 +68,8 @@ set(RESOURCES meshlab.qrc)
 set(UI
 	dialogs/about_dialog.ui
 	dialogs/congrats_dialog.ui
+	dialogs/filterscript_dialog.ui
 	dialogs/savesnapshot_dialog.ui
-	ui/filterScriptDialog.ui
-	ui/filtercreatortab.ui
-	ui/filtergui.ui
 	ui/layerDialog.ui
 	ui/renametexture.ui
 	ui/savemaskexporter.ui)

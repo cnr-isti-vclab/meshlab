@@ -25,7 +25,6 @@
 
 #include "mainwindow.h"
 #include "plugindialog.h"
-#include "filterScriptDialog.h"
 #include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
@@ -53,6 +52,7 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <exif.h>
 #include "dialogs/about_dialog.h"
+#include "dialogs/filterscript_dialog.h"
 #include "dialogs/options_dialog.h"
 #include "dialogs/savesnapshot_dialog.h"
 
