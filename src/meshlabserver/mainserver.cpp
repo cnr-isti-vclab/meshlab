@@ -139,7 +139,7 @@ public:
 
         // HashTable storing all supported formats together with
         // the (1-based) index  of first plugin which is able to open it
-        QHash<QString, IOPluginInterface*> allKnownFormats;
+        QHash<QString, IOMeshPluginInterface*> allKnownFormats;
 
         //PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 
@@ -151,7 +151,7 @@ public:
         QString extension = fi.suffix();
         qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
-        IOPluginInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+        IOMeshPluginInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -216,7 +216,7 @@ public:
         QString extension = fi.suffix();
 
         // retrieving corresponding IO plugin
-        IOPluginInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
+        IOMeshPluginInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -246,7 +246,7 @@ public:
         return true;
     }
 
-    bool loadMesh(const QString& fileName, IOPluginInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
+    bool loadMesh(const QString& fileName, IOMeshPluginInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
     {
         if (mm == NULL)
             return false;
@@ -381,7 +381,7 @@ public:
             mm->Clear();
         QFileInfo fi(fullPath);
         QString extension = fi.suffix();
-        IOPluginInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+        IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 
         if(pCurrentIOPlugin != NULL)
         {
