@@ -23,7 +23,7 @@
 #ifndef IOBREPLUGIN_H
 #define IOBREPLUGIN_H
 
-#include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/iomesh_plugin_interface.h>
 #include <common/mesh_data_structures/mesh_model.h>
 
 namespace vcg {
@@ -150,15 +150,15 @@ namespace io  {
 }//namespace tri
 }//namespace vcg
 
-class BreMeshIOPlugin : public QObject, public IOPluginInterface
+class BreMeshIOPlugin : public QObject, public IOMeshPluginInterface
 {
   Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(IOMeshPluginInterface)
   
 public:
 	
-  BreMeshIOPlugin() : IOPluginInterface() {}
+  BreMeshIOPlugin() : IOMeshPluginInterface() {}
   QString pluginName() const;
 
   QList<Format> importFormats() const;

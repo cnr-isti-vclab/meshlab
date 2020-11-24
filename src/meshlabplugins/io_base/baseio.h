@@ -24,18 +24,18 @@
 #define BASEIOPLUGIN_H
 
 #include <common/mesh_data_structures/mesh_model.h>
-#include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/iomesh_plugin_interface.h>
 
-class BaseMeshIOPlugin : public QObject, public IOPluginInterface
+class BaseMeshIOPlugin : public QObject, public IOMeshPluginInterface
 {
 	Q_OBJECT
-		MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(IOPluginInterface)
+		MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
+		Q_INTERFACES(IOMeshPluginInterface)
 
 
 public:
 
-	BaseMeshIOPlugin() : IOPluginInterface() {}
+	BaseMeshIOPlugin() : IOMeshPluginInterface() {}
 	QString pluginName() const;
 
 	QList<Format> importFormats() const;

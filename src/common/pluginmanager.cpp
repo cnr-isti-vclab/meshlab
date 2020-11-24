@@ -120,7 +120,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					meshFilterPlug.push_back(iFilter);
 				}
 			}
-			IOPluginInterface *iIO = qobject_cast<IOPluginInterface *>(plugin);
+			IOMeshPluginInterface *iIO = qobject_cast<IOMeshPluginInterface *>(plugin);
 			if (iIO)
 			{
 				iCommon = iIO;
@@ -278,11 +278,11 @@ void PluginManager::knownIOFormats()
 	{
 		QStringList* formatFilters = NULL;
 		QString allKnownFormatsFilter = QObject::tr("All known formats (");
-		for (QVector<IOPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
+		for (QVector<IOMeshPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
 		{
-			IOPluginInterface* pMeshIOPlugin = *itIOPlugin;
-			QList<IOPluginInterface::Format> format;
-			QMap<QString, IOPluginInterface*>* map = NULL;
+			IOMeshPluginInterface* pMeshIOPlugin = *itIOPlugin;
+			QList<IOMeshPluginInterface::Format> format;
+			QMap<QString, IOMeshPluginInterface*>* map = NULL;
 			if (inpOut == int(IMPORT))
 			{
 				map = &allKnowInputFormats;
@@ -295,9 +295,9 @@ void PluginManager::knownIOFormats()
 				formatFilters = &outFilters;
 				format = pMeshIOPlugin->exportFormats();
 			}
-			for (QList<IOPluginInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
+			for (QList<IOMeshPluginInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
 			{
-				IOPluginInterface::Format currentFormat = *itf;
+				IOMeshPluginInterface::Format currentFormat = *itf;
 				
 				QString currentFilterEntry = currentFormat.description + " (";
 				

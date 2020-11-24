@@ -25,7 +25,7 @@
 #define PLUGINMANAGER_H
 
 #include "interfaces/filter_plugin_interface.h"
-#include "interfaces/io_plugin_interface.h"
+#include "interfaces/iomesh_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
 #include "interfaces/decorate_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
@@ -65,12 +65,12 @@ public:
 
     QMap<QString, QAction*> actionFilterMap;
     QMap<QString, FilterPluginInterface*> stringFilterMap;
-    QMap<QString,IOPluginInterface*> allKnowInputFormats;
-    QMap<QString,IOPluginInterface*> allKnowOutputFormats;
+    QMap<QString,IOMeshPluginInterface*> allKnowInputFormats;
+    QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
     QStringList inpFilters;
     QStringList outFilters;
 
-    QVector<IOPluginInterface*> meshIOPlug;
+    QVector<IOMeshPluginInterface*> meshIOPlug;
     QVector<FilterPluginInterface*> meshFilterPlug;
     QVector<RenderPluginInterface*> meshRenderPlug;
     QVector<DecoratePluginInterface*> meshDecoratePlug;

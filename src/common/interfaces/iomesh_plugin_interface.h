@@ -28,9 +28,9 @@
 
 #include "plugin_interface.h"
 
-/** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
+/** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
 */
-class IOPluginInterface : public PluginInterface
+class IOMeshPluginInterface : public PluginInterface
 {
 public:
 	class Format
@@ -41,8 +41,8 @@ public:
 		QStringList extensions;
 	};
 
-	IOPluginInterface() : PluginInterface() {  }
-	virtual ~IOPluginInterface() {}
+	IOMeshPluginInterface() : PluginInterface() {  }
+	virtual ~IOMeshPluginInterface() {}
 
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
@@ -106,7 +106,7 @@ public:
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
-#define IO_PLUGIN_INTERFACE_IID "vcg.meshlab.IOPluginInterface/1.0"
-Q_DECLARE_INTERFACE(IOPluginInterface, IO_PLUGIN_INTERFACE_IID)
+#define IOMESH_PLUGIN_INTERFACE_IID "vcg.meshlab.IOMeshPluginInterface/1.0"
+Q_DECLARE_INTERFACE(IOMeshPluginInterface, IOMESH_PLUGIN_INTERFACE_IID)
 
 #endif // MESHLAB_IO_PLUGIN_INTERFACE_H

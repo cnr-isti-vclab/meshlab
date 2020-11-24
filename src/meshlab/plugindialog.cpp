@@ -23,7 +23,7 @@
 
 #include "plugindialog.h"
 #include <common/interfaces/filter_plugin_interface.h>
-#include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/iomesh_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
 #include <common/interfaces/render_plugin_interface.h>
 #include <common/interfaces/edit_plugin_interface.h>
@@ -115,17 +115,17 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 			pluginItem->setFont(0, boldFont);
 			
 			if (plugin) {
-				IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
+				IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
 				if (iMeshIO){
 					nPlugins++;
 					QStringList Templist;
-					for(const IOPluginInterface::Format& f: iMeshIO->importFormats()){
+					for(const IOMeshPluginInterface::Format& f: iMeshIO->importFormats()){
 						QString formats;
 						for(const QString& s : f.extensions)
 							formats+="Importer_"+s+" ";
 						Templist.push_back(formats);
 					}
-					for(const IOPluginInterface::Format& f: iMeshIO->exportFormats()){
+					for(const IOMeshPluginInterface::Format& f: iMeshIO->exportFormats()){
 						QString formats;
 						for(const QString& s: f.extensions)
 							formats+="Exporter_"+s+" ";
@@ -199,15 +199,15 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
 	QObject *plugin = loader.instance();
 	if (plugin) {
-		IOPluginInterface *iMeshIO = qobject_cast<IOPluginInterface *>(plugin);
+		IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
 		if (iMeshIO){
-			for(const IOPluginInterface::Format& f: iMeshIO->importFormats()){
+			for(const IOMeshPluginInterface::Format& f: iMeshIO->importFormats()){
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Importer_"+s+" ";
 				if (actionName==formats) labelInfo->setText(f.description);
 			}
-			for(const IOPluginInterface::Format& f: iMeshIO->exportFormats()){
+			for(const IOMeshPluginInterface::Format& f: iMeshIO->exportFormats()){
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Exporter_"+s+" ";

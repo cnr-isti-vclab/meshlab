@@ -157,16 +157,16 @@ FilterPluginInterface::FilterClass FilterSSynth::getClass(const QAction */*filte
     return FilterPluginInterface::MeshCreation;
 }
 
-QList<IOPluginInterface::Format> FilterSSynth::importFormats() const
+QList<IOMeshPluginInterface::Format> FilterSSynth::importFormats() const
 {
-    QList<IOPluginInterface::Format> formats;
-    formats<< IOPluginInterface::Format("Eisen Script File", tr("ES"));
+    QList<IOMeshPluginInterface::Format> formats;
+    formats<< IOMeshPluginInterface::Format("Eisen Script File", tr("ES"));
     return formats;
 }
 
-QList<IOPluginInterface::Format> FilterSSynth::exportFormats() const
+QList<IOMeshPluginInterface::Format> FilterSSynth::exportFormats() const
 {
-    QList<IOPluginInterface::Format> formats;
+    QList<IOMeshPluginInterface::Format> formats;
     return formats ;
 }
 

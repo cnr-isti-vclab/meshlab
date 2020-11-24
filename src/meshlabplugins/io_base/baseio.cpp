@@ -432,7 +432,7 @@ QString BaseMeshIOPlugin::pluginName() const
 /*
 	returns the list of the file's type which can be imported
 */
-QList<IOPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
+QList<IOMeshPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Stanford Polygon File Format", tr("PLY"));
@@ -450,7 +450,7 @@ QList<IOPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> BaseMeshIOPlugin::exportFormats() const
+QList<IOMeshPluginInterface::Format> BaseMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Stanford Polygon File Format", tr("PLY"));

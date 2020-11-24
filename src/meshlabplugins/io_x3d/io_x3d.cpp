@@ -155,7 +155,7 @@ QString IoX3DPlugin::pluginName() const
     return "IOX3D";
 }
 
-QList<IOPluginInterface::Format> IoX3DPlugin::importFormats() const
+QList<IOMeshPluginInterface::Format> IoX3DPlugin::importFormats() const
 {
     QList<Format> formatList;
     formatList << Format("X3D File Format - XML encoding", tr("X3D"));
@@ -167,7 +167,7 @@ QList<IOPluginInterface::Format> IoX3DPlugin::importFormats() const
 /*
     returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> IoX3DPlugin::exportFormats() const
+QList<IOMeshPluginInterface::Format> IoX3DPlugin::exportFormats() const
 {
     QList<Format> formatList;
     formatList << Format("X3D File Format", tr("X3D"));

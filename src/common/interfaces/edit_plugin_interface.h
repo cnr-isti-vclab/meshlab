@@ -33,7 +33,7 @@
 class GLArea;
 
 /*
-Editing Interface
+EditPluginInterface
 Used to provide tools that needs some kind of interaction with the mesh.
 Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
 */

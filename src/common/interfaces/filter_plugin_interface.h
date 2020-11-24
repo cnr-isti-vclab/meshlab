@@ -28,7 +28,7 @@
 #include "../mesh_data_structures/mesh_document.h"
 
 /**
-\brief The MeshFilterInterface class provide the interface of the filter plugins.
+\brief The FilterPluginInterface class provide the interface of the filter plugins.
 
 */
 class FilterPluginInterface : public PluginInterface

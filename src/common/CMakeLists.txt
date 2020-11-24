@@ -39,7 +39,7 @@ set(HEADERS
 	interfaces/decorate_plugin_interface.h
 	interfaces/edit_plugin_interface.h
 	interfaces/filter_plugin_interface.h
-	interfaces/io_plugin_interface.h
+	interfaces/iomesh_plugin_interface.h
 	interfaces/mainwindow_interface.h
 	interfaces/plugin_interface.h
 	interfaces/render_plugin_interface.h

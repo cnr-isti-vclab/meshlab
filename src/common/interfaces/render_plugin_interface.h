@@ -28,6 +28,7 @@
 #include "../ml_shared_data_context.h"
 
 /**
+RenderPluginInterface
 Used to customized the rendering process.
 Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel.
 

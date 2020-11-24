@@ -25,14 +25,14 @@
 
 #include <QObject>
 
-#include <common/interfaces/io_plugin_interface.h>
+#include <common/interfaces/iomesh_plugin_interface.h>
 #include <common/mesh_data_structures/mesh_model.h>
 
-class TxtIOPlugin : public QObject, public IOPluginInterface
+class TxtIOPlugin : public QObject, public IOMeshPluginInterface
 {
   Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(IOMeshPluginInterface)
 
   
 public:

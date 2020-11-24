@@ -31,7 +31,7 @@
 #include "../filter_parameter/rich_parameter_list.h"
 
 /**
- * \brief The MeshLabInterface class is the base of all the plugin interfaces.
+ * \brief The PluginInterface class is the base of all the plugin interfaces.
  *
  * The main idea common to all the framework is that each plugin export a set of actions,
  * internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.

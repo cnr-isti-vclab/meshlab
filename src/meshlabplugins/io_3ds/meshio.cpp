@@ -235,7 +235,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName,
 /*
 	returns the list of the file's type which can be imported
 */
-QList<IOPluginInterface::Format> ExtraMeshIOPlugin::importFormats() const
+QList<IOMeshPluginInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
@@ -245,7 +245,7 @@ QList<IOPluginInterface::Format> ExtraMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> ExtraMeshIOPlugin::exportFormats() const
+QList<IOMeshPluginInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));

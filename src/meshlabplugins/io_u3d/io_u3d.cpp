@@ -43,7 +43,7 @@ using namespace vcg;
 
 
 U3DIOPlugin::U3DIOPlugin() :
-	QObject(), IOPluginInterface(), _param()
+	QObject(), IOMeshPluginInterface(), _param()
 {
 }
 
@@ -146,7 +146,7 @@ QString U3DIOPlugin::pluginName() const
 	return "IOU3D";
 }
 
-QList<IOPluginInterface::Format> U3DIOPlugin::importFormats() const
+QList<IOMeshPluginInterface::Format> U3DIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	return formatList;
@@ -155,7 +155,7 @@ QList<IOPluginInterface::Format> U3DIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> U3DIOPlugin::exportFormats() const
+QList<IOMeshPluginInterface::Format> U3DIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("U3D File Format"	,tr("U3D"));
