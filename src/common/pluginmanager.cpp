@@ -87,22 +87,37 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iFilter)
 			{
 				iCommon = iFilter;
-				meshFilterPlug.push_back(iFilter);
-				for(QAction *filterAction : iFilter->actions())
-				{
-					filterAction->setData(QVariant(fileName));
-					actionFilterMap.insert(filterAction->text(), filterAction);
-					stringFilterMap.insert(filterAction->text(), iFilter);
-					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic)
-						throw MLException("Missing class for "        +fileName+filterAction->text());
-					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN))
-						throw MLException("Missing requirements for " +fileName+filterAction->text());
-					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN))
-						throw MLException("Missing preconditions for "+fileName+filterAction->text());
-					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN ))
-						throw MLException("Missing postcondition for "+fileName+filterAction->text());
-					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY )
-						throw MLException("Missing Arity for "        +fileName+filterAction->text());
+				bool loadFilterOK = true;
+				for(QAction *filterAction : iFilter->actions()) {
+					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
+						qDebug() << "Missing class for " +fileName + " " + filterAction->text();
+						loadFilterOK = false;
+					}
+					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
+						qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
+						loadFilterOK = false;
+					}
+					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
+						qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
+						loadFilterOK = false;
+					}
+					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
+						qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
+						loadFilterOK = false;
+					}
+					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
+						qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
+						loadFilterOK = false;
+					}
+					
+				}
+				if (loadFilterOK) {
+					for(QAction *filterAction : iFilter->actions()) {
+						filterAction->setData(QVariant(fileName));
+						actionFilterMap.insert(filterAction->text(), filterAction);
+						stringFilterMap.insert(filterAction->text(), iFilter);
+					}
+					meshFilterPlug.push_back(iFilter);
 				}
 			}
 			IOPluginInterface *iIO = qobject_cast<IOPluginInterface *>(plugin);
@@ -117,7 +132,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			{
 				iCommon = iDecorator;
 				meshDecoratePlug.push_back(iDecorator);
-				foreach(QAction *decoratorAction, iDecorator->actions())
+				for(QAction *decoratorAction : iDecorator->actions())
 				{
 					decoratorActionList.push_back(decoratorAction);
 					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
