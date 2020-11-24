@@ -762,24 +762,21 @@ void MainWindow::applyLastFilter()
 
 void MainWindow::showFilterScript()
 {
-	if (meshDoc()->filterHistory != nullptr)
+
+	FilterScriptDialog dialog(meshDoc()->filterHistory, this);
+	
+	if (dialog.exec()==QDialog::Accepted)
 	{
-		FilterScriptDialog dialog(this);
-		
-		dialog.setScript(meshDoc()->filterHistory);
-		if (dialog.exec()==QDialog::Accepted)
-		{
-			runFilterScript();
-			return ;
-		}
+		runFilterScript();
+		return ;
 	}
 }
 
 void MainWindow::runFilterScript()
 {
-	if ((meshDoc() == nullptr) || (meshDoc()->filterHistory == nullptr))
+	if (meshDoc() == nullptr)
 		return;
-	for (FilterNameParameterValuesPair& pair : *meshDoc()->filterHistory)
+	for (FilterNameParameterValuesPair& pair : meshDoc()->filterHistory)
 	{
 		QString filtnm = pair.filterName();
 		int classes = 0;
@@ -975,7 +972,7 @@ void MainWindow::startFilter()
 			//Insert the filter to filterHistory
 			FilterNameParameterValuesPair tmp;
 			tmp.first = action->text(); tmp.second = dummyParSet;
-			meshDoc()->filterHistory->append(tmp);
+			meshDoc()->filterHistory.append(tmp);
 		}
 	}
 	

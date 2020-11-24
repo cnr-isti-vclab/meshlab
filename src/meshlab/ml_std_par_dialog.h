@@ -39,7 +39,7 @@ public:
 
     void clearValues();
     void createFrame();
-    void loadFrameContent(MeshDocument *mdPt=0);
+    void loadFrameContent();
 
     bool showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
     bool isPreviewable();

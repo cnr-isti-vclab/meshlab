@@ -596,7 +596,7 @@ public:
     QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
     void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
     GLLogStream Log;
-    FilterScript* filterHistory;
+    FilterScript filterHistory;
     QStringList xmlhistory;
 
     int size() const {return meshList.size();}

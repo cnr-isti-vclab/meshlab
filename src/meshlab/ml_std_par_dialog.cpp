@@ -44,7 +44,7 @@ bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm,
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
 	createFrame();
-	loadFrameContent(mdp);
+	loadFrameContent();
 	if (isPreviewable())
 	{
 		meshState.create(curmask, curModel);
@@ -113,7 +113,7 @@ void MeshlabStdDialog::resetValues()
 	stdParFrame->resetValues();
 }
 
-void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
+void MeshlabStdDialog::loadFrameContent()
 {
 	assert(qf);
 	qf->hide();
@@ -196,11 +196,11 @@ void MeshlabStdDialog::applyClick()
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
-	if ((q != nullptr) && (curMeshDoc != nullptr) && (curMeshDoc->filterHistory != nullptr))
+	if ((q != nullptr) && (curMeshDoc != nullptr))
 	{
 		FilterNameParameterValuesPair oldpair;
 		oldpair.first = q->text(); oldpair.second = curParSet;
-		curMeshDoc->filterHistory->append(oldpair);
+		curMeshDoc->filterHistory.append(oldpair);
 	}
 
 	bool isEqual = (curParSet == prevParSet);

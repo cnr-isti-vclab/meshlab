@@ -42,7 +42,6 @@ MeshDocument::MeshDocument()
 	currentMesh = nullptr;
 	currentRaster = nullptr;
 	busy=false;
-	filterHistory = new FilterScript();
 }
 
 //deletes each meshModel
@@ -52,7 +51,6 @@ MeshDocument::~MeshDocument()
 		delete mmp;
 	foreach(RasterModel* rmp,rasterList)
 		delete rmp;
-	delete filterHistory;
 }
 
 void MeshDocument::clear()
@@ -65,14 +63,12 @@ void MeshDocument::clear()
 		delete rmp;
 	rasterList.clear();
 	
-	delete filterHistory;
-	
 	meshIdCounter=0;
 	rasterIdCounter=0;
 	currentMesh = nullptr;
 	currentRaster = nullptr;
 	busy=false;
-	filterHistory = new FilterScript();
+	filterHistory.clear();
 	fullPathFilename = "";
 	documentLabel = "";
 	meshDocStateData().clear();

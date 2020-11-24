@@ -34,37 +34,36 @@ class FilterScriptDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	FilterScriptDialog(QWidget *parent = 0);
+	FilterScriptDialog(FilterScript& fs, QWidget *parent = 0);
 	~FilterScriptDialog();
-	void setScript(FilterScript *scr);
 
 private slots:
-	//will do all things that need to be done before the script runs then trigger the running of the script
-	//specifically with the PARMESH type we need to to set the mesh pointer based on the int given
-	void applyScript();
-
-	void clearScript();
-	void saveScript();
-	void openScript();
+	void on_saveScriptButton_clicked();
+	
+	void on_openScriptButton_clicked();
+	
+	void on_clearScriptButton_clicked();
+	
+	void on_okButton_clicked();
 	
 	//moves the filter selected in scriptListWidget up in the script
-	void moveSelectedFilterUp();
+	void on_moveUpButton_clicked();
 	
 	//moves the filter selected in scriptListWidget down in the script
-	void moveSelectedFilterDown();
+	void on_moveDownButton_clicked();
 	
 	//removes the selected filter from the script
-	void removeSelectedFilter();
+	void on_removeFilterButton_clicked();
 	
 	//edit the parameters of the selected filter
-	void editSelectedFilterParameters();
+	void on_editParameterButton_clicked();
 	
 private:
-	Ui::FilterScriptDialog* ui;
-	FilterScript *scriptPtr;
-
 	void editOldParameters(const int row);
-
+	void updateGui();
+	
+	Ui::FilterScriptDialog* ui;
+	FilterScript& script;
 };
 
 #endif
