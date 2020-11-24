@@ -27,7 +27,7 @@
 #include "const_types.h"
 #include "transferfunction.h"
 #include <vcg/math/histogram.h>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 #include <cassert>
 #include <utility> // for pair<T,T>
 

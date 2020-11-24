@@ -1,5 +1,5 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
+* MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
 * Copyright(C) 2004-2020                                           \/)\/    *
@@ -27,7 +27,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QApplication>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 /******************************************/
 // MeshLabWidget Implementation

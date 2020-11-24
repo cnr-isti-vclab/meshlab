@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <math.h>
 
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 #include <meshlab/rich_parameter_gui/richparameterlistframe.h>
 #include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
 

@@ -45,7 +45,7 @@
 
 #include <QObject>
 #include <common/interfaces/io_plugin_interface.h>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 class ColladaIOPlugin : public QObject, public IOPluginInterface
 {

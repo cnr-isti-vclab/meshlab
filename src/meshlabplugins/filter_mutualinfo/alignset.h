@@ -7,7 +7,7 @@
 #include <QGLFramebufferObject>
 
 // local headers
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 // VCG headers
 #include <vcg/math/shot.h>

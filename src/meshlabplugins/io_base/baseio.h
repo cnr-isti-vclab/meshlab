@@ -23,7 +23,7 @@
 #ifndef BASEIOPLUGIN_H
 #define BASEIOPLUGIN_H
 
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 #include <common/interfaces/io_plugin_interface.h>
 
 class BaseMeshIOPlugin : public QObject, public IOPluginInterface

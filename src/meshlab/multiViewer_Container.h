@@ -31,7 +31,7 @@
 #include <QSplitter>
 #include <QSplitterHandle>
 
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 #include <common/ml_shared_data_context.h>
 
 // Class list

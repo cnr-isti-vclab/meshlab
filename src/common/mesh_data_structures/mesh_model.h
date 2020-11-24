@@ -1,8 +1,8 @@
 /****************************************************************************
 * MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -29,7 +29,7 @@
 #include <time.h>
 #include <map>
 
-#include "ml_mesh_type.h"
+#include "cmesh.h"
 
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/color.h>

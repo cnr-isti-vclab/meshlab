@@ -32,7 +32,7 @@
 #ifndef PICKED_POINTS_H
 #define PICKED_POINTS_H
 
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 //our points
 class PickedPoint

@@ -24,7 +24,7 @@
 #define IOBREPLUGIN_H
 
 #include <common/interfaces/io_plugin_interface.h>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 namespace vcg {
 namespace tri {

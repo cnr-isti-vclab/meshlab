@@ -1,8 +1,8 @@
 /****************************************************************************
 * MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -25,7 +25,9 @@
 #include <QString>
 #include <QtGlobal>
 #include <QFileInfo>
-#include "meshmodel.h"
+
+#include "mesh_model.h"
+
 #include <wrap/gl/math.h>
 
 #include <QDir>

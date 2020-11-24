@@ -42,7 +42,7 @@
 
 #include <QMessageBox>
 #include <QFile>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 
 using namespace std;
 using namespace vcg;

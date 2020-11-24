@@ -14,7 +14,9 @@ set(SOURCES
 	interfaces/decorate_plugin_interface.cpp
 	interfaces/filter_plugin_interface.cpp
 	interfaces/plugin_interface.cpp
-	mesh_data_structures/meshmodel.cpp
+	mesh_data_structures/cmesh.cpp
+	mesh_data_structures/mesh_document.cpp
+	mesh_data_structures/mesh_model.cpp
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
@@ -39,8 +41,9 @@ set(HEADERS
 	interfaces/mainwindow_interface.h
 	interfaces/plugin_interface.h
 	interfaces/render_plugin_interface.h
-	mesh_data_structures/meshmodel.h
-	mesh_data_structures/ml_mesh_type.h
+	mesh_data_structures/cmesh.h
+	mesh_data_structures/mesh_document.h
+	mesh_data_structures/mesh_model.h
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h

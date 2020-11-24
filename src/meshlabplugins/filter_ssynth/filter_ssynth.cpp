@@ -1,7 +1,7 @@
 #include <Qt>
 #include "filter_ssynth.h"
 #include <meshlabplugins/io_x3d/import_x3d.h>
-#include <common/mesh_data_structures/meshmodel.h>
+#include <common/mesh_data_structures/mesh_model.h>
 #include <StructureSynth/Model/RandomStreams.h>
 #include <StructureSynth/Parser/Preprocessor.h>
 #undef __GLEW_H__ //terrible workaround to avoid problem with #warning in visual studio

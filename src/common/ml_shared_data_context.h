@@ -27,7 +27,7 @@
 #include <GL/glew.h>
 #include <QTimer>
 
-#include "mesh_data_structures/ml_mesh_type.h"
+#include "mesh_data_structures/cmesh.h"
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
 
 
