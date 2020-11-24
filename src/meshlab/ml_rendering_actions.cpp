@@ -25,7 +25,7 @@
 #include <wrap/qt/col_qt_convert.h>
 #include <QObject>
 #include <QString>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 
 MLRenderingAction::MLRenderingAction( QObject* parent )
     :QAction(parent)

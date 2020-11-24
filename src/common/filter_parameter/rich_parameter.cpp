@@ -1,5 +1,5 @@
 #include "rich_parameter.h"
-#include "../meshmodel.h"
+#include "../mesh_data_structures/meshmodel.h"
 
 /**** RichParameter Class ****/
 

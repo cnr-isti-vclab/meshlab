@@ -27,7 +27,7 @@
 #include <QTabletEvent>
 
 #include "plugin_interface.h"
-#include "../meshmodel.h"
+#include "../mesh_data_structures/meshmodel.h"
 
 
 class GLArea;

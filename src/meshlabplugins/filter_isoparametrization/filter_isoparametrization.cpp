@@ -26,7 +26,7 @@
 #include <QFileInfo>
 #include "defines.h"
 
-#include "../../common/meshmodel.h"
+#include <common/mesh_data_structures/meshmodel.h>
 #include <iso_transfer.h>
 
 

@@ -26,7 +26,7 @@
 
 #include <QString>
 #include <QColor>
-#include "../ml_mesh_type.h"
+#include "../mesh_data_structures/ml_mesh_type.h"
 class MeshModel;
 class MeshDocument;
 class QDomElement;

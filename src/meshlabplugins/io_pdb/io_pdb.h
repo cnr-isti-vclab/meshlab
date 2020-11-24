@@ -25,7 +25,7 @@
 #define PDBIOPLUGIN_H
 
 #include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 
 class PDBIOPlugin : public QObject, public IOPluginInterface
 {

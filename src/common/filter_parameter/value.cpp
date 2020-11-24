@@ -1,6 +1,6 @@
 #include "value.h"
 
-#include "../meshmodel.h"
+#include "../mesh_data_structures/meshmodel.h"
 
 void BoolValue::fillToXMLElement(QDomElement& element) const
 {

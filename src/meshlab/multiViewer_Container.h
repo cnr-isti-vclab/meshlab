@@ -31,8 +31,8 @@
 #include <QSplitter>
 #include <QSplitterHandle>
 
-#include "../common/meshmodel.h"
-#include "../common/ml_shared_data_context.h"
+#include <common/mesh_data_structures/meshmodel.h>
+#include <common/ml_shared_data_context.h>
 
 // Class list
 class GLArea;

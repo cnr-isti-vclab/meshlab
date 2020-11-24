@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include "particle.h"
 
 using namespace vcg;

@@ -26,7 +26,7 @@
 
 #include <QObject>
 
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include <vcg/complex/algorithms/align_pair.h>
 #include "align/AlignGlobal.h"
 #include "align/OccupancyGrid.h"

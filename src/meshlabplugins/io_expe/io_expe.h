@@ -27,7 +27,7 @@
 #include <QObject>
 
 #include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 
 class ExpeIOPlugin : public QObject, public IOPluginInterface
 {

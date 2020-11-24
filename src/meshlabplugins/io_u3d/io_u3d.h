@@ -29,7 +29,7 @@
 #include <QString>
 
 #include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include <wrap/io_trimesh/export_u3d.h>
 #include <wrap/io_trimesh/export_idtf.h>
 

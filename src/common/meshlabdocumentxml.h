@@ -4,7 +4,7 @@
 #include <QDomDocument>
 
 #include "ml_shared_data_context.h"
-#include "meshmodel.h"
+#include "mesh_data_structures/meshmodel.h"
 #include<map>
 
 

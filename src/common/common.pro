@@ -53,8 +53,8 @@ HEADERS += 	\
 	interfaces/mainwindow_interface.h \
 	interfaces/plugin_interface.h \
 	interfaces/render_plugin_interface.h \
-	ml_mesh_type.h \
-	meshmodel.h \
+	mesh_data_structures/ml_mesh_type.h \
+	mesh_data_structures/meshmodel.h \
 	pluginmanager.h \
 	mlexception.h \
 	mlapplication.h \
@@ -73,7 +73,7 @@ SOURCES += \
 	interfaces/decorate_plugin_interface.cpp \
 	interfaces/filter_plugin_interface.cpp \
 	interfaces/plugin_interface.cpp \
-	meshmodel.cpp \
+	mesh_data_structures/meshmodel.cpp \
 	pluginmanager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \

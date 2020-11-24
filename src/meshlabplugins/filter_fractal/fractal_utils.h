@@ -2,7 +2,7 @@
 #define FRACTAL_UTILS_H
 
 #include <vcg/math/perlin_noise.h>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include "filter_functors.h"
 #include <vector>

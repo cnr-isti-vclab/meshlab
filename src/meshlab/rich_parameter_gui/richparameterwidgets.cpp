@@ -27,7 +27,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QApplication>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 
 /******************************************/
 // MeshLabWidget Implementation

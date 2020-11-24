@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QtXml>
 
-#include "meshmodel.h"
+#include "mesh_data_structures/meshmodel.h"
 #include<QImageReader>
 #include "meshlabdocumentbundler.h"
 

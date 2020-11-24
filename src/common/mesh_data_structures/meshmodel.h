@@ -56,9 +56,9 @@
 #include <QReadWriteLock>
 #include <QImage>
 #include <QAction>
-#include "GLLogStream.h"
-#include "filterscript.h"
-#include "ml_shared_data_context.h"
+#include "../GLLogStream.h"
+#include "../filterscript.h"
+#include "../ml_shared_data_context.h"
 
 
 /*

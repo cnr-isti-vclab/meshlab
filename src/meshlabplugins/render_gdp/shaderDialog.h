@@ -26,7 +26,7 @@
 
 #include <map>
 #include <GL/glew.h>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include <QLabel>
 #include <QDockWidget>
 #include "shaderStructs.h"

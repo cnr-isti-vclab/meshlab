@@ -24,7 +24,7 @@
 #define PARTICLE_H
 
 #include<vector>
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include<vcg/complex/complex.h>
 
 template <class MeshType>

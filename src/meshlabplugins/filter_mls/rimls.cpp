@@ -24,7 +24,7 @@
 #include <qglobal.h>
 #include "rimls.h"
 #include "rimls.tpp"
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 
 namespace GaelMls {
 

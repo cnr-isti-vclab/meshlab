@@ -14,12 +14,12 @@ set(SOURCES
 	interfaces/decorate_plugin_interface.cpp
 	interfaces/filter_plugin_interface.cpp
 	interfaces/plugin_interface.cpp
+	mesh_data_structures/meshmodel.cpp
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
 	meshlabdocumentbundler.cpp
 	meshlabdocumentxml.cpp
-	meshmodel.cpp
 	ml_selection_buffers.cpp
 	ml_shared_data_context.cpp
 	ml_thread_safe_memory_info.cpp
@@ -39,13 +39,13 @@ set(HEADERS
 	interfaces/mainwindow_interface.h
 	interfaces/plugin_interface.h
 	interfaces/render_plugin_interface.h
+	mesh_data_structures/meshmodel.h
+	mesh_data_structures/ml_mesh_type.h
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
 	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
-	meshmodel.h
-	ml_mesh_type.h
 	ml_selection_buffers.h
 	ml_shared_data_context.h
 	ml_thread_safe_memory_info.h

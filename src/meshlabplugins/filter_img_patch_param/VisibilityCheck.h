@@ -27,7 +27,7 @@
 
 
 
-#include <common/meshmodel.h>
+#include <common/mesh_data_structures/meshmodel.h>
 #include <wrap/glw/glw.h>
 
 #define USE_VBO

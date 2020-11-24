@@ -27,8 +27,6 @@
 #include <QFileInfo>
 #include "meshmodel.h"
 #include <wrap/gl/math.h>
-#include "mlexception.h"
-#include "ml_shared_data_context.h"
 
 #include <QDir>
 #include <utility>
