@@ -125,39 +125,6 @@ MeshModel* MeshDocument::getMesh(int id)
 	return nullptr;
 }
 
-const MeshModel* MeshDocument::getMesh(const QString& name) const
-{
-	for (const MeshModel* m : meshList)
-		if (m->shortName() == name)
-			return m;
-	return nullptr;
-}
-
-MeshModel* MeshDocument::getMesh(const QString& name)
-{
-	for (MeshModel* m : meshList)
-		if (m->shortName() == name)
-			return m;
-	return nullptr;
-}
-
-const MeshModel* MeshDocument::getMeshByFullName(const QString& pathName) const
-{
-	for (const MeshModel* m : meshList)
-		if (m->fullName() == pathName)
-			return m;
-	return nullptr;
-}
-
-MeshModel* MeshDocument::getMeshByFullName(const QString& pathName)
-{
-	for (MeshModel* m : meshList)
-		if (m->fullName() == pathName)
-			return m;
-	return nullptr;
-}
-
-
 void MeshDocument::setCurrentMesh(int new_curr_id)
 {
 	if(new_curr_id<0)
@@ -199,6 +166,16 @@ void MeshDocument::setCurrentRaster( int new_curr_id)
 		}
 	}
 	assert(0);
+}
+
+void MeshDocument::setCurrent(MeshModel* newCur)
+{
+	setCurrentMesh(newCur->id());
+}
+
+void MeshDocument::setCurrent(RasterModel* newCur)
+{
+	setCurrentRaster(newCur->id());
 }
 
 MeshModel* MeshDocument::nextVisibleMesh(MeshModel* _m)
@@ -253,9 +230,60 @@ RasterModel* MeshDocument::rm()
 	return currentRaster;
 }
 
+int MeshDocument::newMeshId()
+{
+	return meshIdCounter++;
+}
+
+int MeshDocument::newRasterId()
+{
+	return rasterIdCounter++;
+}
+
 void MeshDocument::requestUpdatingPerMeshDecorators(int mesh_id)
 {	
 	emit updateDecorators(mesh_id);
+}
+
+MeshDocumentStateData& MeshDocument::meshDocStateData()
+{
+	return mdstate;
+}
+
+void MeshDocument::setDocLabel(const QString& docLb)
+{
+	documentLabel = docLb;
+}
+
+QString MeshDocument::docLabel() const
+{
+	return documentLabel;
+}
+
+QString MeshDocument::pathName() const
+{
+	QFileInfo fi(fullPathFilename);
+	return fi.absolutePath();
+}
+
+void MeshDocument::setFileName(const QString& newFileName)
+{
+	fullPathFilename = newFileName;
+}
+
+int MeshDocument::size() const
+{
+	return meshList.size();
+}
+
+bool MeshDocument::isBusy()
+{
+	return busy;
+}
+
+void MeshDocument::setBusy(bool _busy)
+{
+	busy=_busy;
 }
 
 MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
@@ -281,7 +309,10 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
 MeshModel * MeshDocument::addOrGetMesh(QString fullPath, const QString& label, bool setAsCurrent)
 {
-	MeshModel *newMesh = getMesh(label);
+	MeshModel *newMesh = nullptr;
+	for (MeshModel* m : meshList)
+		if (m->shortName() == label)
+			newMesh = m;
 	if(newMesh) {
 		if(setAsCurrent)
 			this->setCurrentMesh(newMesh->id());
@@ -351,6 +382,30 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 	emit rasterSetChanged();
 	
 	return true;
+}
+
+int MeshDocument::vn()
+{
+	int tot=0;
+	for(MeshModel* mmp : meshList)
+		tot+= mmp->cm.vn;
+	return tot;
+}
+
+int MeshDocument::fn()
+{
+	int tot=0;
+	for(MeshModel *mmp : meshList)
+		tot+= mmp->cm.fn;
+	return tot;
+}
+
+Box3m MeshDocument::bbox()
+{
+	Box3m FullBBox;
+	for(MeshModel * mp : meshList)
+		FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
+	return FullBBox;
 }
 
 bool MeshDocument::hasBeenModified()

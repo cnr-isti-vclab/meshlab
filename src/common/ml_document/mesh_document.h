@@ -43,11 +43,7 @@ public:
 	
 	///returns the mesh with the given unique id
 	const MeshModel* getMesh(int id) const;
-	MeshModel *getMesh(int id);
-	const MeshModel *getMesh(const QString& name) const;
-	MeshModel *getMesh(const QString& name);
-	const MeshModel *getMeshByFullName(const QString& pathName) const;
-	MeshModel *getMeshByFullName(const QString& pathName);
+	MeshModel* getMesh(int id);
 	
 	//set the current mesh to be the one with the given ID
 	void setCurrentMesh( int new_curr_id );
@@ -59,8 +55,8 @@ public:
 	
 	//set the current raster to be the one with the given ID
 	void setCurrentRaster( int new_curr_id );
-	void setCurrent(MeshModel   *newCur)  { setCurrentMesh(newCur->id());}
-	void setCurrent(RasterModel *newCur)  { setCurrentRaster(newCur->id());}
+	void setCurrent(MeshModel   *newCur);
+	void setCurrent(RasterModel *newCur);
 	
 	/// methods to access the set of Meshes in a ordered fashion.
 	MeshModel   *nextVisibleMesh(MeshModel *_m = nullptr);
@@ -76,8 +72,8 @@ public:
 	//Could return 0 if no raster has been selected
 	RasterModel *rm();
 	
-	int newMeshId() {return meshIdCounter++;}
-	int newRasterId() {return rasterIdCounter++;}
+	int newMeshId();
+	int newRasterId();
 	
 	//functions to update the document entities (meshes and/or rasters) during the filters execution
 	//WARNING! please note that if you have to update both meshes and rasters calling updateRenderState function it's far more efficient
@@ -88,21 +84,16 @@ public:
 	void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);*/
 	void requestUpdatingPerMeshDecorators(int mesh_id);
 	
-	inline MeshDocumentStateData& meshDocStateData() { return mdstate; }
-	void setDocLabel(const QString& docLb) {documentLabel = docLb;}
-	QString docLabel() const {return documentLabel;}
-	QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
-	void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
-	GLLogStream Log;
-	FilterScript filterHistory;
-	QStringList xmlhistory;
+	MeshDocumentStateData& meshDocStateData();
+	void setDocLabel(const QString& docLb);
+	QString docLabel() const;
+	QString pathName() const;
+	void setFileName(const QString& newFileName);
 	
-	int size() const {return meshList.size();}
-	bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
-	void setBusy(bool _busy)
-	{
-		busy=_busy;
-	}
+	
+	int size() const;
+	bool isBusy();  // used in processing. To disable access to the mesh by the rendering thread
+	void setBusy(bool _busy);
 
 	///add a new mesh with the given name
 	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
@@ -118,29 +109,16 @@ public:
 	///remove the raster from the list and delete it from memory
 	bool delRaster(RasterModel *rasterToDel);
 	
-	int vn() /// Sum of all the vertices of all the meshes
-	{
-		int tot=0;
-		foreach(MeshModel *mmp, meshList)
-			tot+= mmp->cm.vn;
-		return tot;
-	}
-	int fn() {
-		int tot=0;
-		foreach(MeshModel *mmp, meshList)
-			tot+= mmp->cm.fn;
-		return tot;
-	}
+	int vn(); /// Sum of all the vertices of all the meshes
+
+	int fn();
 	
-	Box3m bbox()
-	{
-		Box3m FullBBox;
-		foreach(MeshModel * mp, meshList)
-			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
-		return FullBBox;
-	}
+	Box3m bbox();
 	
 	bool hasBeenModified();
+	
+	GLLogStream Log;
+	FilterScript filterHistory;
 	
 	/// The very important member:
 	/// The list of MeshModels.
@@ -163,7 +141,7 @@ private:
 	
 	MeshDocumentStateData mdstate;
 	
-	bool  busy;
+	bool busy;
 	
 	MeshModel *currentMesh;
 	//the current raster model
