@@ -21,26 +21,19 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IO_PLUGIN_INTERFACE_H
-#define MESHLAB_IO_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_IOMESH_PLUGIN_INTERFACE_H
+#define MESHLAB_IOMESH_PLUGIN_INTERFACE_H
 
 #include <wrap/callback.h>
 
 #include "plugin_interface.h"
+#include "../utilities/file_format.h"
 
 /** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
 */
 class IOMeshPluginInterface : public PluginInterface
 {
 public:
-	class Format
-	{
-	public:
-		Format(QString description, QString ex) : description(description) { extensions << ex; }
-		QString description;
-		QStringList extensions;
-	};
-
 	IOMeshPluginInterface() : PluginInterface() {  }
 	virtual ~IOMeshPluginInterface() {}
 
@@ -79,8 +72,8 @@ public:
 		MeshModel &m, /// The mesh that is filled with the file content
 		int &mask, /// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
 		const RichParameterList & par, /// The parameters that have been set up in the initPreOpenParameter()
-		vcg::CallBackPos *cb = 0, /// standard callback for reporting progress in the loading
-		QWidget *parent = 0) = 0; /// you should not use this...
+		vcg::CallBackPos *cb = nullptr, /// standard callback for reporting progress in the loading
+		QWidget *parent = nullptr) = 0; /// you should not use this...
 
 	virtual bool save(
 		const QString &format, // the extension of the format e.g. "PLY"
@@ -109,4 +102,4 @@ public:
 #define IOMESH_PLUGIN_INTERFACE_IID "vcg.meshlab.IOMeshPluginInterface/1.0"
 Q_DECLARE_INTERFACE(IOMeshPluginInterface, IOMESH_PLUGIN_INTERFACE_IID)
 
-#endif // MESHLAB_IO_PLUGIN_INTERFACE_H
+#endif // MESHLAB_IOMESH_PLUGIN_INTERFACE_H

@@ -58,6 +58,7 @@ HEADERS += 	\
 	ml_document/mesh_document.h \
 	ml_document/raster_model.h \
 	ml_document/render_raster.h \
+	utilities/file_format.h \
 	pluginmanager.h \
 	mlexception.h \
 	mlapplication.h \

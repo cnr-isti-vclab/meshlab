@@ -48,6 +48,7 @@ set(HEADERS
 	ml_document/mesh_model.h
 	ml_document/raster_model.h
 	ml_document/render_raster.h
+	utilities/file_format.h
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
