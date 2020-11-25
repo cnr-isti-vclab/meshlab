@@ -53,8 +53,11 @@ HEADERS += 	\
 	interfaces/mainwindow_interface.h \
 	interfaces/plugin_interface.h \
 	interfaces/render_plugin_interface.h \
+	ml_document/helpers/mesh_document_state_data.h \
+	ml_document/helpers/mesh_model_state_data.h \
 	ml_document/cmesh.h \
 	ml_document/mesh_model.h \
+	ml_document/mesh_model_state.h \
 	ml_document/mesh_document.h \
 	ml_document/raster_model.h \
 	ml_document/render_raster.h \
@@ -77,8 +80,10 @@ SOURCES += \
 	interfaces/decorate_plugin_interface.cpp \
 	interfaces/filter_plugin_interface.cpp \
 	interfaces/plugin_interface.cpp \
+	ml_document/helpers/mesh_document_state_data.cpp \
 	ml_document/cmesh.cpp \
 	ml_document/mesh_model.cpp \
+	ml_document/mesh_model_state.cpp \
 	ml_document/mesh_document.cpp \
 	ml_document/raster_model.cpp \
 	ml_document/render_raster.cpp \

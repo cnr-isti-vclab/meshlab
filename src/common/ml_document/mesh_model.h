@@ -60,7 +60,6 @@
 #include "../filterscript.h"
 #include "../ml_shared_data_context.h"
 
-
 /*
 MeshModel Class
 The base class for representing a single mesh.
@@ -227,48 +226,6 @@ public:
 };// end class MeshModel
 
 
-struct MeshModelStateData
-{
-	int _mask;
-	size_t _nvert;
-	size_t _nface;
-	size_t _nedge;
-
-	MeshModelStateData(int mask, size_t nvert, size_t nface, size_t nedge)
-		:_mask(mask), _nvert(nvert), _nface(nface), _nedge(nedge)
-	{}
-};
-
-
-/*
-A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
-and then be able to restore them later.
-This is a fundamental part for the dynamic filters framework.
-
-Note: not all the MeshElements are supported!!
-*/
-class MeshModelState
-{
-private:
-    int changeMask; // a bit mask indicating what have been changed. Composed of MeshModel::MeshElement (e.g. stuff like MeshModel::MM_VERTCOLOR)
-    MeshModel *m; // the mesh which the changes refers to.
-    std::vector<float> vertQuality;
-    std::vector<vcg::Color4b> vertColor;
-    std::vector<vcg::Color4b> faceColor;
-    std::vector<Point3m> vertCoord;
-    std::vector<Point3m> vertNormal;
-    std::vector<Point3m> faceNormal;
-    std::vector<bool> faceSelection;
-    std::vector<bool> vertSelection;
-    Matrix44m Tr;
-    Shotm shot;
-public:
-    // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
-    void create(int _mask, MeshModel* _m);
-    bool apply(MeshModel *_m);
-    bool isValid(MeshModel *m);
-    int maskChangedAtts() const {return changeMask;}
-};
 
 
 

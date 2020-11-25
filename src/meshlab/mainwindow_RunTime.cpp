@@ -1993,7 +1993,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	else
 		fileNameList.push_back(fileImg);
 	
-	foreach(QString fileName,fileNameList)
+	for(const QString& fileName : fileNameList)
 	{
 		QFileInfo fi(fileName);
 		if( fi.suffix().toLower()=="png" || fi.suffix().toLower()=="xpm" || fi.suffix().toLower()=="jpg")
@@ -2588,7 +2588,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		else
 		{
 			GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
-			QMessageBox::critical(this, tr("Meshlab Saving Error"),  pCurrentIOPlugin->errorMessage);
+			QMessageBox::critical(this, tr("Meshlab Saving Error"),  pCurrentIOPlugin->errorMsg());
 		}
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();

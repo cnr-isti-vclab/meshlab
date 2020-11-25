@@ -7,31 +7,6 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 endif()
 
-set(SOURCES
-	parameters/rich_parameter.cpp
-	parameters/rich_parameter_list.cpp
-	parameters/value.cpp
-	interfaces/decorate_plugin_interface.cpp
-	interfaces/filter_plugin_interface.cpp
-	interfaces/plugin_interface.cpp
-	ml_document/cmesh.cpp
-	ml_document/mesh_document.cpp
-	ml_document/mesh_model.cpp
-	ml_document/raster_model.cpp
-	ml_document/render_raster.cpp
-	GLExtensionsManager.cpp
-	GLLogStream.cpp
-	filterscript.cpp
-	meshlabdocumentbundler.cpp
-	meshlabdocumentxml.cpp
-	ml_selection_buffers.cpp
-	ml_shared_data_context.cpp
-	ml_thread_safe_memory_info.cpp
-	mlapplication.cpp
-	pluginmanager.cpp
-	searcher.cpp
-	${EXTERNAL_DIR}/easyexif/exif.cpp)
-
 set(HEADERS
 	parameters/rich_parameter.h
 	parameters/rich_parameter_list.h
@@ -43,9 +18,12 @@ set(HEADERS
 	interfaces/mainwindow_interface.h
 	interfaces/plugin_interface.h
 	interfaces/render_plugin_interface.h
+	ml_document/helpers/mesh_document_state_data.h
+	ml_document/helpers/mesh_model_state_data.h
 	ml_document/cmesh.h
 	ml_document/mesh_document.h
 	ml_document/mesh_model.h
+	ml_document/mesh_model_state.h
 	ml_document/raster_model.h
 	ml_document/render_raster.h
 	utilities/file_format.h
@@ -61,6 +39,33 @@ set(HEADERS
 	mlexception.h
 	pluginmanager.h
 	searcher.h)
+
+set(SOURCES
+	parameters/rich_parameter.cpp
+	parameters/rich_parameter_list.cpp
+	parameters/value.cpp
+	interfaces/decorate_plugin_interface.cpp
+	interfaces/filter_plugin_interface.cpp
+	interfaces/plugin_interface.cpp
+	ml_document/helpers/mesh_document_state_data.cpp
+	ml_document/cmesh.cpp
+	ml_document/mesh_document.cpp
+	ml_document/mesh_model.cpp
+	ml_document/mesh_model_state.cpp
+	ml_document/raster_model.cpp
+	ml_document/render_raster.cpp
+	GLExtensionsManager.cpp
+	GLLogStream.cpp
+	filterscript.cpp
+	meshlabdocumentbundler.cpp
+	meshlabdocumentxml.cpp
+	ml_selection_buffers.cpp
+	ml_shared_data_context.cpp
+	ml_thread_safe_memory_info.cpp
+	mlapplication.cpp
+	pluginmanager.cpp
+	searcher.cpp
+	${EXTERNAL_DIR}/easyexif/exif.cpp)
 
 set(TARGET_TYPE SHARED)
 if(WIN32)

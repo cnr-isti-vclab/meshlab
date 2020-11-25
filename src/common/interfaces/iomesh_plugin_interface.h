@@ -87,9 +87,10 @@ public:
 	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
 	/// io plugins should avoid using QMessageBox for reporting errors.
 	/// Failure should put some meaningful information inside the errorMessage string.
-	virtual QString &errorMsg() { return this->errorMessage; }
+	const QString& errorMsg() { return this->errorMessage; }
 	void clearErrorString() { errorMessage.clear(); }
 
+protected:
 	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
 	// NEVER EVER use a msgbox to say something to the user.
 	QString errorMessage;
