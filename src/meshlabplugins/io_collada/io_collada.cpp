@@ -219,20 +219,20 @@ QString ColladaIOPlugin::pluginName() const
 	return "IOCollada";
 }
 
-QList<IOMeshPluginInterface::Format> ColladaIOPlugin::importFormats() const
+QList<FileFormat> ColladaIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Collada File Format"	,tr("DAE"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> ColladaIOPlugin::exportFormats() const
+QList<FileFormat> ColladaIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Collada File Format"	,tr("DAE"));
 	return formatList;
 }
 

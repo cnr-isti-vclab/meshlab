@@ -71,20 +71,20 @@ QString IOMPlugin::pluginName() const
 	return "IOCTM";
 }
 
-QList<IOMeshPluginInterface::Format> IOMPlugin::importFormats() const
+QList<FileFormat> IOMPlugin::importFormats() const
 {
-	QList<Format> formatList;
-  formatList << Format("OpenCTM compressed format"	,tr("CTM"));
+	QList<FileFormat> formatList;
+  formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> IOMPlugin::exportFormats() const
+QList<FileFormat> IOMPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-    formatList << Format("OpenCTM compressed format"	,tr("CTM"));
+	QList<FileFormat> formatList;
+    formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
 	return formatList;
 }
 

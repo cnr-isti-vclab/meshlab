@@ -281,7 +281,7 @@ void PluginManager::knownIOFormats()
 		for (QVector<IOMeshPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
 		{
 			IOMeshPluginInterface* pMeshIOPlugin = *itIOPlugin;
-			QList<IOMeshPluginInterface::Format> format;
+			QList<FileFormat> format;
 			QMap<QString, IOMeshPluginInterface*>* map = NULL;
 			if (inpOut == int(IMPORT))
 			{
@@ -295,9 +295,9 @@ void PluginManager::knownIOFormats()
 				formatFilters = &outFilters;
 				format = pMeshIOPlugin->exportFormats();
 			}
-			for (QList<IOMeshPluginInterface::Format>::iterator itf = format.begin(); itf != format.end(); ++itf)
+			for (QList<FileFormat>::iterator itf = format.begin(); itf != format.end(); ++itf)
 			{
-				IOMeshPluginInterface::Format currentFormat = *itf;
+				FileFormat currentFormat = *itf;
 				
 				QString currentFilterEntry = currentFormat.description + " (";
 				

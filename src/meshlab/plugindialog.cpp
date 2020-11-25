@@ -119,13 +119,13 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 				if (iMeshIO){
 					nPlugins++;
 					QStringList Templist;
-					for(const IOMeshPluginInterface::Format& f: iMeshIO->importFormats()){
+					for(const FileFormat& f: iMeshIO->importFormats()){
 						QString formats;
 						for(const QString& s : f.extensions)
 							formats+="Importer_"+s+" ";
 						Templist.push_back(formats);
 					}
-					for(const IOMeshPluginInterface::Format& f: iMeshIO->exportFormats()){
+					for(const FileFormat& f: iMeshIO->exportFormats()){
 						QString formats;
 						for(const QString& s: f.extensions)
 							formats+="Exporter_"+s+" ";
@@ -201,13 +201,13 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	if (plugin) {
 		IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
 		if (iMeshIO){
-			for(const IOMeshPluginInterface::Format& f: iMeshIO->importFormats()){
+			for(const FileFormat& f: iMeshIO->importFormats()){
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Importer_"+s+" ";
 				if (actionName==formats) labelInfo->setText(f.description);
 			}
-			for(const IOMeshPluginInterface::Format& f: iMeshIO->exportFormats()){
+			for(const FileFormat& f: iMeshIO->exportFormats()){
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Exporter_"+s+" ";

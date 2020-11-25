@@ -50,8 +50,8 @@ public:
     void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
     static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
     virtual int postCondition(const QAction* filter) const;
-    QList<Format> importFormats() const;
-    QList<Format> exportFormats() const;
+    QList<FileFormat> importFormats() const;
+    QList<FileFormat> exportFormats() const;
 
     virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);

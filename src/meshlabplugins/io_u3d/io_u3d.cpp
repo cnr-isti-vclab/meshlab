@@ -146,20 +146,20 @@ QString U3DIOPlugin::pluginName() const
 	return "IOU3D";
 }
 
-QList<IOMeshPluginInterface::Format> U3DIOPlugin::importFormats() const
+QList<FileFormat> U3DIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> U3DIOPlugin::exportFormats() const
+QList<FileFormat> U3DIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("U3D File Format"	,tr("U3D"));
-	formatList << Format("IDTF File Format"	,tr("IDTF"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("U3D File Format"	,tr("U3D"));
+	formatList << FileFormat("IDTF File Format"	,tr("IDTF"));
 	return formatList;
 }
 

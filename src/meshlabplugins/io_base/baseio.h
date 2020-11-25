@@ -38,8 +38,8 @@ public:
 	BaseMeshIOPlugin() : IOMeshPluginInterface() {}
 	QString pluginName() const;
 
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
+	QList<FileFormat> importFormats() const;
+	QList<FileFormat> exportFormats() const;
 
 	void GetExportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
 

@@ -35,7 +35,7 @@
 using namespace std;
 using namespace vcg;
 
-bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget *parent)
+bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget */*parent*/)
 {
     // initializing mask
     mask = 0;
@@ -56,7 +56,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
             result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMaskVrml(filename.c_str(), info);
         if ( result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
         {
-            QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
             delete info;
             return false;
         }
@@ -78,14 +78,14 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
             QString fileError = info->filenameStack[info->filenameStack.size()-1];
             QString lineError;
             lineError.setNum(info->lineNumberError);
-            QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
             delete info;
             return false;
         }
         if (m.cm.vert.size() == 0)
         {
             errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: File without a geometry";
-            QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName));
+			errorMessage = errorMsgFormat.arg(fileName);
             delete info;
             return false;
         }
@@ -113,7 +113,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 
         if (someTextureNotFound)
-            QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+			errorMessage = missingTextureFilesMsg;
 
         vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
         if (!normalsUpdated)
@@ -155,22 +155,22 @@ QString IoX3DPlugin::pluginName() const
     return "IOX3D";
 }
 
-QList<IOMeshPluginInterface::Format> IoX3DPlugin::importFormats() const
+QList<FileFormat> IoX3DPlugin::importFormats() const
 {
-    QList<Format> formatList;
-    formatList << Format("X3D File Format - XML encoding", tr("X3D"));
-    formatList << Format("X3D File Format - VRML encoding", tr("X3DV"));
-    formatList << Format("VRML 2.0 File Format", tr("WRL"));
+    QList<FileFormat> formatList;
+    formatList << FileFormat("X3D File Format - XML encoding", tr("X3D"));
+    formatList << FileFormat("X3D File Format - VRML encoding", tr("X3DV"));
+    formatList << FileFormat("VRML 2.0 File Format", tr("WRL"));
     return formatList;
 }
 
 /*
     returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> IoX3DPlugin::exportFormats() const
+QList<FileFormat> IoX3DPlugin::exportFormats() const
 {
-    QList<Format> formatList;
-    formatList << Format("X3D File Format", tr("X3D"));
+    QList<FileFormat> formatList;
+    formatList << FileFormat("X3D File Format", tr("X3D"));
     return formatList;
 }
 

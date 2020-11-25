@@ -45,7 +45,7 @@ QString JSONIOPlugin::pluginName() const
 	return "IOJson";
 }
 
-bool JSONIOPlugin::open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & parlst, vcg::CallBackPos * cb, QWidget * parent)
+bool JSONIOPlugin::open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & parlst, vcg::CallBackPos * cb, QWidget * /*parent*/)
 {
 	(void)formatName;
 	(void)fileName;
@@ -53,7 +53,6 @@ bool JSONIOPlugin::open(const QString & formatName, const QString & fileName, Me
 	(void)mask;
 	(void)parlst;
 	(void)cb;
-	(void)parent;
 
 	return false;
 }
@@ -426,9 +425,9 @@ bool JSONIOPlugin::save(const QString & formatName,const QString & fileName, Mes
 /*
 	returns the list of the file's type which can be imported
 */
-QList<IOMeshPluginInterface::Format> JSONIOPlugin::importFormats(void) const
+QList<FileFormat> JSONIOPlugin::importFormats(void) const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	//formatList << Format("JavaScript JSON", tr("JSON"));
 	return formatList;
 }
@@ -436,10 +435,10 @@ QList<IOMeshPluginInterface::Format> JSONIOPlugin::importFormats(void) const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> JSONIOPlugin::exportFormats(void) const
+QList<FileFormat> JSONIOPlugin::exportFormats(void) const
 {
-	QList<Format> formatList;
-	formatList << Format("JavaScript JSON", tr("JSON"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("JavaScript JSON", tr("JSON"));
 	return formatList;
 }
 

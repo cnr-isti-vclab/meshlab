@@ -87,21 +87,21 @@ QString TriIOPlugin::pluginName() const
 	return "IOTRI";
 }
 
-QList<IOMeshPluginInterface::Format> TriIOPlugin::importFormats() const
+QList<FileFormat> TriIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	formatList 
-		<< Format("TRI (photogrammetric reconstructions)", tr("TRI")) 
-	  << Format("ASC (ascii triplets of points)", tr("ASC"));
+		<< FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) 
+	  << FileFormat("ASC (ascii triplets of points)", tr("ASC"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> TriIOPlugin::exportFormats() const
+QList<FileFormat> TriIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	return formatList;
 }
 

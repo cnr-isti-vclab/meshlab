@@ -160,10 +160,10 @@ QString BreMeshIOPlugin::pluginName() const
 	return "IOBRE";
 }
 
-QList<IOMeshPluginInterface::Format> BreMeshIOPlugin::importFormats() const
+QList<FileFormat> BreMeshIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Breuckmann File Format"	, tr("BRE"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Breuckmann File Format"	, tr("BRE"));
 
 	return formatList;
 }
@@ -171,9 +171,9 @@ QList<IOMeshPluginInterface::Format> BreMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> BreMeshIOPlugin::exportFormats() const
+QList<FileFormat> BreMeshIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	//formatList << Format("Breuckmann File Format"	, tr("BRE"));
 	return formatList;
 }

@@ -26,10 +26,10 @@
 
 #include <QStringList>
 
-class Format
+class FileFormat
 {
 public:
-	Format(QString description, QString ex) : description(description), extensions(ex){}
+	FileFormat(QString description, QString ex) : description(description), extensions(ex){}
 	QString description;
 	QStringList extensions;
 };

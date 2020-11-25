@@ -103,10 +103,10 @@ QString TxtIOPlugin::pluginName() const
 	return "IOTXT";
 }
 
-QList<IOMeshPluginInterface::Format> TxtIOPlugin::importFormats() const
+QList<FileFormat> TxtIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-    formatList << Format("TXT (Generic ASCII point list)", tr("TXT"));
+	QList<FileFormat> formatList;
+    formatList << FileFormat("TXT (Generic ASCII point list)", tr("TXT"));
 
 	return formatList;
 }
@@ -114,9 +114,9 @@ QList<IOMeshPluginInterface::Format> TxtIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> TxtIOPlugin::exportFormats() const
+QList<FileFormat> TxtIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	return formatList;
 }
 
@@ -126,7 +126,7 @@ QList<IOMeshPluginInterface::Format> TxtIOPlugin::exportFormats() const
 */
 void TxtIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
+	capability=defaultBits=0;
 	return;
 }
  

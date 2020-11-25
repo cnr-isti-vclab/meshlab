@@ -37,8 +37,8 @@ public:
 	IOMeshPluginInterface() : PluginInterface() {  }
 	virtual ~IOMeshPluginInterface() {}
 
-	virtual QList<Format> importFormats() const = 0;
-	virtual QList<Format> exportFormats() const = 0;
+	virtual QList<FileFormat> importFormats() const = 0;
+	virtual QList<FileFormat> exportFormats() const = 0;
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require
 	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file

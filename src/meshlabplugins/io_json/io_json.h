@@ -39,8 +39,8 @@ public:
 
 	QString pluginName() const;
 
-	QList<Format> importFormats(void) const;
-	QList<Format> exportFormats(void) const;
+	QList<FileFormat> importFormats(void) const;
+	QList<FileFormat> exportFormats(void) const;
 
 	void GetExportMaskCapability(const QString & format, int & capability, int & defaultBits) const;
 

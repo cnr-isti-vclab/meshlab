@@ -432,17 +432,17 @@ QString BaseMeshIOPlugin::pluginName() const
 /*
 	returns the list of the file's type which can be imported
 */
-QList<IOMeshPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
+QList<FileFormat> BaseMeshIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Quad Object", tr("QOBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("PTX File Format", tr("PTX"));
-	formatList << Format("VCG Dump File Format", tr("VMI"));
-    formatList << Format("FBX Autodesk Interchange Format", tr("FBX"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
+	formatList << FileFormat("STL File Format", tr("STL"));
+	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
+	formatList << FileFormat("Quad Object", tr("QOBJ"));
+	formatList << FileFormat("Object File Format", tr("OFF"));
+	formatList << FileFormat("PTX File Format", tr("PTX"));
+	formatList << FileFormat("VCG Dump File Format", tr("VMI"));
+    formatList << FileFormat("FBX Autodesk Interchange Format", tr("FBX"));
 
 	return formatList;
 }
@@ -450,15 +450,15 @@ QList<IOMeshPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOMeshPluginInterface::Format> BaseMeshIOPlugin::exportFormats() const
+QList<FileFormat> BaseMeshIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("VRML File Format", tr("WRL"));
-	formatList << Format("DXF File Format", tr("DXF"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
+	formatList << FileFormat("STL File Format", tr("STL"));
+	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
+	formatList << FileFormat("Object File Format", tr("OFF"));
+	formatList << FileFormat("VRML File Format", tr("WRL"));
+	formatList << FileFormat("DXF File Format", tr("DXF"));
 	return formatList;
 }
 

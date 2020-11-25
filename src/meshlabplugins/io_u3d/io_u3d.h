@@ -41,8 +41,8 @@ class U3DIOPlugin : public QObject, public IOMeshPluginInterface
 
 public:
 	QString pluginName() const;
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
+	QList<FileFormat> importFormats() const;
+	QList<FileFormat> exportFormats() const;
 
 	U3DIOPlugin();
 
