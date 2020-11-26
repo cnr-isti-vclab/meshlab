@@ -120,6 +120,16 @@ typedef vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_
 class CMeshO    : public vcgTriMesh
 {
 public :
+	CMeshO();
+	
+	CMeshO(const CMeshO& oth);
+	
+	CMeshO(CMeshO&& oth);
+	
+	CMeshO& operator=(const CMeshO& oth);
+	
+	Box3m trBB() const;
+	
 	int sfn;    //The number of selected faces.
 	int svn;    //The number of selected vertices.
 	
@@ -127,50 +137,6 @@ public :
 	int pfn; //the number of the polygonal faces 
 	
 	Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
-	
-	const Box3m &trBB() const
-	{
-		static Box3m bb;
-		bb.SetNull();
-		bb.Add(Tr,bbox);
-		return bb;
-	}
-	
-	CMeshO() :
-		vcgTriMesh(),
-		sfn(0), svn(0), pvn(0), pfn(0)
-	{
-	}
-	
-	CMeshO(const CMeshO& oth) :
-		vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
-		pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
-	{
-		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
-	}
-	
-	//TODO need to change this
-	CMeshO(CMeshO&& oth) : 
-		vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
-		pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
-	{
-		//I could take everything from oth and place it in
-		//this mesh
-		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
-	}
-	
-	//TODO should change also this and use the copy&swap idiom
-	CMeshO& operator=(const CMeshO& oth) 
-	{
-		Clear();
-		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshCopyConst(*this, oth);
-		sfn = oth.sfn;
-		svn = oth.svn;
-		pvn = oth.pvn;
-		pfn = oth.pfn;
-		Tr = oth.Tr;
-		return *this;
-	}
 };
 
 #endif //CMESH_H
