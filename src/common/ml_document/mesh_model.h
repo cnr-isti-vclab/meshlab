@@ -128,7 +128,6 @@ public:
     };
 
     MeshModel(MeshDocument *parent, unsigned int id, const QString& fullFileName, const QString& labelName);
-	//MeshModel(MeshModel* cp);
     ~MeshModel()
     {
     }

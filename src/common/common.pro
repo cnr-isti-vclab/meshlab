@@ -55,6 +55,7 @@ HEADERS += 	\
 	interfaces/render_plugin_interface.h \
 	ml_document/helpers/mesh_document_state_data.h \
 	ml_document/helpers/mesh_model_state_data.h \
+	ml_document/base_types.h \
 	ml_document/cmesh.h \
 	ml_document/mesh_model.h \
 	ml_document/mesh_model_state.h \
