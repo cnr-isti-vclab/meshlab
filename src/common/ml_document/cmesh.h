@@ -46,7 +46,7 @@ typedef vcg::Similarity<MESHLAB_SCALAR> Similaritym;
 template<typename T>
 struct MeshLabScalarTest
 {
-
+	
 };
 
 template<>
@@ -67,36 +67,36 @@ struct MeshLabScalarTest<double>
 
 namespace vcg
 {
-    namespace vertex
-    {
-        template <class T> class Coord3m: public Coord<vcg::Point3<MESHLAB_SCALAR>, T> {
-        public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Coord3m"));T::Name(name);}
-        };
+namespace vertex
+{
+template <class T> class Coord3m: public Coord<vcg::Point3<MESHLAB_SCALAR>, T> {
+public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Coord3m"));T::Name(name);}
+};
 
-        template <class T> class Normal3m: public Normal<vcg::Point3<MESHLAB_SCALAR>, T> {
-        public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
-        };
+template <class T> class Normal3m: public Normal<vcg::Point3<MESHLAB_SCALAR>, T> {
+public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
+};
 
-        template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
-        public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
-        };
+template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
+public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
+};
 
-        template <class T> class RadiusmOcf: public RadiusOcf<MESHLAB_SCALAR, T> {
-        public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("RadiusmOcf"));T::Name(name);}
-        };
+template <class T> class RadiusmOcf: public RadiusOcf<MESHLAB_SCALAR, T> {
+public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("RadiusmOcf"));T::Name(name);}
+};
 
-    }//end namespace vertex
-    namespace face
-    {
-        template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
-        public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
-        };
+}//end namespace vertex
+namespace face
+{
+template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
+public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
+};
 
-        template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirOcfBaseType<MESHLAB_SCALAR>, T> {
-        public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirdOcf"));T::Name(name);}
-        };
+template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirOcfBaseType<MESHLAB_SCALAR>, T> {
+public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirdOcf"));T::Name(name);}
+};
 
-    }//end namespace face
+}//end namespace face
 }//end namespace vcg
 
 // Forward declarations needed for creating the used types
@@ -106,8 +106,8 @@ class CFaceO;
 
 // Declaration of the semantic of the used types
 class CUsedTypesO: public vcg::UsedTypes < vcg::Use<CVertexO>::AsVertexType,
-    vcg::Use<CEdgeO   >::AsEdgeType,
-    vcg::Use<CFaceO  >::AsFaceType >{};
+		vcg::Use<CEdgeO   >::AsEdgeType,
+		vcg::Use<CFaceO  >::AsFaceType >{};
 
 
 // The Main Vertex Class
@@ -115,88 +115,102 @@ class CUsedTypesO: public vcg::UsedTypes < vcg::Use<CVertexO>::AsVertexType,
 // Each vertex needs 40 byte, on 32bit arch. and 44 byte on 64bit arch.
 
 class CVertexO  : public vcg::Vertex< CUsedTypesO,
-    vcg::vertex::InfoOcf,           /*  4b */
-    vcg::vertex::Coord3m,           /* 12b */
-    vcg::vertex::BitFlags,          /*  4b */
-    vcg::vertex::Normal3m,          /* 12b */
-    vcg::vertex::Qualityf,          /*  4b */
-    vcg::vertex::Color4b,           /*  4b */
-    vcg::vertex::VFAdjOcf,          /*  0b */
-    vcg::vertex::MarkOcf,           /*  0b */
-    vcg::vertex::TexCoordfOcf,      /*  0b */
-    vcg::vertex::CurvaturefOcf,     /*  0b */
-    vcg::vertex::CurvatureDirmOcf,  /*  0b */
-    vcg::vertex::RadiusmOcf         /*  0b */
->{
+		vcg::vertex::InfoOcf,           /*  4b */
+		vcg::vertex::Coord3m,           /* 12b */
+		vcg::vertex::BitFlags,          /*  4b */
+		vcg::vertex::Normal3m,          /* 12b */
+		vcg::vertex::Qualityf,          /*  4b */
+		vcg::vertex::Color4b,           /*  4b */
+		vcg::vertex::VFAdjOcf,          /*  0b */
+		vcg::vertex::MarkOcf,           /*  0b */
+		vcg::vertex::TexCoordfOcf,      /*  0b */
+		vcg::vertex::CurvaturefOcf,     /*  0b */
+		vcg::vertex::CurvatureDirmOcf,  /*  0b */
+		vcg::vertex::RadiusmOcf         /*  0b */
+		>{
 };
 
 
 // The Main Edge Class
 class CEdgeO : public vcg::Edge<CUsedTypesO,
-    vcg::edge::BitFlags,          /*  4b */
-    vcg::edge::EVAdj,
-    vcg::edge::EEAdj
->{
+		vcg::edge::BitFlags,          /*  4b */
+		vcg::edge::EVAdj,
+		vcg::edge::EEAdj
+		>{
 };
 
 // Each face needs 32 byte, on 32bit arch. and 48 byte on 64bit arch.
 class CFaceO    : public vcg::Face<  CUsedTypesO,
-    vcg::face::InfoOcf,              /* 4b */
-    vcg::face::VertexRef,            /*12b */
-    vcg::face::BitFlags,             /* 4b */
-    vcg::face::Normal3m,             /*12b */
-    vcg::face::QualityfOcf,          /* 0b */
-    vcg::face::MarkOcf,              /* 0b */
-    vcg::face::Color4bOcf,           /* 0b */
-    vcg::face::FFAdjOcf,             /* 0b */
-    vcg::face::VFAdjOcf,             /* 0b */
-    vcg::face::CurvatureDirmOcf,     /* 0b */
-    vcg::face::WedgeTexCoordfOcf     /* 0b */
-> {};
+		vcg::face::InfoOcf,              /* 4b */
+		vcg::face::VertexRef,            /*12b */
+		vcg::face::BitFlags,             /* 4b */
+		vcg::face::Normal3m,             /*12b */
+		vcg::face::QualityfOcf,          /* 0b */
+		vcg::face::MarkOcf,              /* 0b */
+		vcg::face::Color4bOcf,           /* 0b */
+		vcg::face::FFAdjOcf,             /* 0b */
+		vcg::face::VFAdjOcf,             /* 0b */
+		vcg::face::CurvatureDirmOcf,     /* 0b */
+		vcg::face::WedgeTexCoordfOcf     /* 0b */
+		> {};
 
+typedef vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > vcgTriMesh;
 
-class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> >
+class CMeshO    : public vcgTriMesh
 {
 public :
-    int sfn;    //The number of selected faces.
-    int svn;    //The number of selected vertices.
-
+	int sfn;    //The number of selected faces.
+	int svn;    //The number of selected vertices.
+	
 	int pvn; //the number of the polygonal vertices
 	int pfn; //the number of the polygonal faces 
-
+	
 	Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
-
+	
 	const Box3m &trBB() const
-    {
-        static Box3m bb;
-        bb.SetNull();
-        bb.Add(Tr,bbox);
-        return bb;
-    }
-
-    CMeshO() :
-        vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> >(),
-        sfn(0), svn(0), pvn(0), pfn(0)
-    {
-    }
-
-    CMeshO(const CMeshO& oth) : CMeshO() {
-        vcg::tri::Append<CMeshO, CMeshO>::MeshAppendConst(*this, oth);
-    }
-
-    //TODO need to change this
-    CMeshO(CMeshO&& oth) : CMeshO() {
-        //I could take everything from oth and place it in
-        //this mesh
-        vcg::tri::Append<CMeshO, CMeshO>::Mesh(*this, oth);
-    }
-
-    //TODO should change also this and use the copy&swap idiom
-    CMeshO& operator=(const CMeshO& oth) {
-        Clear();
-        vcg::tri::Append<CMeshO, CMeshO>::MeshCopyConst(*this, oth);
-        return *this;
-    }
+	{
+		static Box3m bb;
+		bb.SetNull();
+		bb.Add(Tr,bbox);
+		return bb;
+	}
+	
+	CMeshO() :
+		vcgTriMesh(),
+		sfn(0), svn(0), pvn(0), pfn(0)
+	{
+	}
+	
+	CMeshO(const CMeshO& oth) :
+		vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
+		pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
+	{
+		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
+	}
+	
+	//TODO need to change this
+	CMeshO(CMeshO&& oth) : 
+		vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
+		pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
+	{
+		//I could take everything from oth and place it in
+		//this mesh
+		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
+		bbox = oth.bbox;
+	}
+	
+	//TODO should change also this and use the copy&swap idiom
+	CMeshO& operator=(const CMeshO& oth) 
+	{
+		Clear();
+		vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshCopyConst(*this, oth);
+		sfn = oth.sfn;
+		svn = oth.svn;
+		pvn = oth.pvn;
+		pfn = oth.pfn;
+		Tr = oth.Tr;
+		return *this;
+	}
 };
 
 #endif //CMESH_H

@@ -230,12 +230,12 @@ RasterModel* MeshDocument::rm()
 	return currentRaster;
 }
 
-int MeshDocument::newMeshId()
+unsigned int MeshDocument::newMeshId()
 {
 	return meshIdCounter++;
 }
 
-int MeshDocument::newRasterId()
+unsigned int MeshDocument::newRasterId()
 {
 	return rasterIdCounter++;
 }
@@ -296,7 +296,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 		fullPath = fi.absoluteFilePath();
 	}
 	
-	MeshModel *newMesh = new MeshModel(this,fullPath,newlabel);
+	MeshModel *newMesh = new MeshModel(this, newMeshId(), fullPath,newlabel);
 	meshList.push_back(newMesh);
 	
 	if(setAsCurrent)
@@ -344,7 +344,7 @@ RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 	QString newLabel=info.fileName();
 	QString newName = NameDisambiguator(this->rasterList, newLabel);
 	
-	RasterModel *newRaster=new RasterModel(this, newLabel);
+	RasterModel *newRaster=new RasterModel(this, newRasterId(), newLabel);
 	rasterList.push_back(newRaster);
 	
 	//Add new plane
@@ -410,7 +410,7 @@ Box3m MeshDocument::bbox()
 
 bool MeshDocument::hasBeenModified()
 {
-	foreach(MeshModel *m, meshList)
+	for(MeshModel *m : meshList)
 		if(m->meshModified()) return true;
 	return false;
 }

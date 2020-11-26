@@ -59,29 +59,14 @@ void MeshModel::UpdateBoxAndNormals()
     }
 }
 
-MeshModel::MeshModel(MeshDocument *_parent, const QString& fullFileName, const QString& labelName)
+MeshModel::MeshModel(MeshDocument *_parent, unsigned int id, const QString& fullFileName, const QString& labelName)
 {
     /*glw.m = &(cm);*/
     Clear();
     parent=_parent;
-    _id=parent->newMeshId();
+    _id=id;
     if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
     if(!labelName.isEmpty())     this->_label=labelName;
-}
-
-MeshModel::MeshModel(MeshModel* cp)
-{
-	if (cp == NULL)
-		return;
-	parent = cp->parent;
-	if (parent != NULL)
-		_id = parent->newMeshId();
-	cm.Tr = cp->cm.Tr;
-	cm.sfn = cp->cm.sfn;
-	cm.svn = cp->cm.svn;
-	visible = cp->visible;
-	updateDataMask(cp->currentDataMask);
-	vcg::tri::Append<CMeshO, CMeshO>::MeshCopy(cm, cp->cm);
 }
 
 QString MeshModel::relativePathName() const

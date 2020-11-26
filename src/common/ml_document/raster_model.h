@@ -49,7 +49,7 @@ public:
     bool visible;
     inline int id() const {return _id;}
 
-    RasterModel(MeshDocument *parent, QString _rasterName=QString());
+    RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName=QString());
 
     void setLabel(QString newLabel) {_label = newLabel;}
 

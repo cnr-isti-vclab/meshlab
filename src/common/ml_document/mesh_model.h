@@ -127,8 +127,8 @@ public:
         MM_ALL				= 0xffffffff
     };
 
-    MeshModel(MeshDocument *parent, const QString& fullFileName, const QString& labelName);
-	MeshModel(MeshModel* cp);
+    MeshModel(MeshDocument *parent, unsigned int id, const QString& fullFileName, const QString& labelName);
+	//MeshModel(MeshModel* cp);
     ~MeshModel()
     {
     }
@@ -163,7 +163,7 @@ private:
     int currentDataMask;
     QString fullPathFileName;
     QString _label;
-    int _id;
+    unsigned int _id;
     bool modified;
 
 public:

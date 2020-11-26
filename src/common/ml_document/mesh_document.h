@@ -71,17 +71,7 @@ public:
 	
 	//Could return 0 if no raster has been selected
 	RasterModel *rm();
-	
-	int newMeshId();
-	int newRasterId();
-	
-	//functions to update the document entities (meshes and/or rasters) during the filters execution
-	//WARNING! please note that if you have to update both meshes and rasters calling updateRenderState function it's far more efficient
-	//than calling in sequence updateRenderRasterStateMeshes and updateRenderStateRasters. Use them only if you have to update only rasters or only meshes.
-	/*void updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask);
-	  
-	void updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask);
-	void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);*/
+
 	void requestUpdatingPerMeshDecorators(int mesh_id);
 	
 	MeshDocumentStateData& meshDocStateData();
@@ -146,6 +136,9 @@ private:
 	MeshModel *currentMesh;
 	//the current raster model
 	RasterModel* currentRaster;
+	
+	unsigned int newMeshId();
+	unsigned int newRasterId();
 	
 signals:
 	///whenever the current mesh is changed (e.g. the user click on a different mesh)
