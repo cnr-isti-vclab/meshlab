@@ -26,8 +26,9 @@
 
 #include "plugin_interface.h"
 #include "../utilities/file_format.h"
+#include "../ml_document/raster_model.h"
 
-class IORasterPluginInterface : PluginInterface
+class IORasterPluginInterface : public PluginInterface
 {
 public:
 	IORasterPluginInterface() : PluginInterface() {}
@@ -38,6 +39,7 @@ public:
 	virtual bool open(
 		const QString& format,
 		const QString& filename,
+		RasterModel& rm,
 		vcg::CallBackPos* cb = nullptr) = 0;
 
 	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure

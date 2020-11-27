@@ -42,7 +42,8 @@ public:
 	
 	bool open(
 			const QString& format,
-			const QString& filename,
+			const QString& filename, 
+			RasterModel& rm,
 			vcg::CallBackPos* cb = nullptr);
 };
 
