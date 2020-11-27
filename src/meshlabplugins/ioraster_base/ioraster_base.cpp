@@ -33,7 +33,7 @@ QString IORasterBasePlugin::pluginName() const
 	return "IORasterBase";
 }
 
-QList<FileFormat> IORasterBasePlugin::exportFormats() const
+QList<FileFormat> IORasterBasePlugin::importFormats() const
 {
 	QList<FileFormat> formatList {
 		FileFormat("JPEG", tr("JPEG")),

@@ -34,7 +34,7 @@ public:
 	IORasterPluginInterface() : PluginInterface() {}
 	virtual ~IORasterPluginInterface() {}
 	
-	virtual QList<FileFormat> exportFormats() const = 0;
+	virtual QList<FileFormat> importFormats() const = 0;
 	
 	virtual bool open(
 		const QString& format,

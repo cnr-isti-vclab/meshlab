@@ -38,7 +38,7 @@ public:
 	IORasterBasePlugin() : IORasterPluginInterface() {}
 	QString pluginName() const;
 	
-	QList<FileFormat> exportFormats() const;
+	QList<FileFormat> importFormats() const;
 	
 	bool open(
 			const QString& format,
