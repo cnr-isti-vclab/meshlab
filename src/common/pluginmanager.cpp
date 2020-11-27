@@ -40,7 +40,7 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-	meshIOPlug.clear();
+	ioMeshPlugins.clear();
 	meshFilterPlug.clear();
 	meshRenderPlug.clear();
 	meshDecoratePlug.clear();
@@ -120,11 +120,17 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					meshFilterPlug.push_back(iFilter);
 				}
 			}
-			IOMeshPluginInterface *iIO = qobject_cast<IOMeshPluginInterface *>(plugin);
-			if (iIO)
+			IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
+			if (iIOMesh)
 			{
-				iCommon = iIO;
-				meshIOPlug.push_back(iIO);
+				iCommon = iIOMesh;
+				ioMeshPlugins.push_back(iIOMesh);
+			}
+			
+			IORasterPluginInterface* iIORaster = qobject_cast<IORasterPluginInterface*>(plugin);
+			if (iIORaster){
+				iCommon = iIORaster;
+				ioRasterPlugins.push_back(iIORaster);
 			}
 			
 			DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
@@ -163,12 +169,12 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 		else
 			qDebug() << loader.errorString();
 	}
-	knownIOFormats();
+	fillKnownIOFormats();
 }
 
 int PluginManager::numberIOPlugins() const
 {
-	return meshIOPlug.size();
+	return ioMeshPlugins.size();
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
@@ -272,58 +278,51 @@ QString PluginManager::getDefaultPluginDirPath()
 
 
 
-void PluginManager::knownIOFormats()
+void PluginManager::fillKnownIOFormats()
 {
-	for (int inpOut = 0; inpOut < 2; ++inpOut)
-	{
-		QStringList* formatFilters = NULL;
-		QString allKnownFormatsFilter = QObject::tr("All known formats (");
-		for (QVector<IOMeshPluginInterface*>::iterator itIOPlugin = meshIOPlug.begin(); itIOPlugin != meshIOPlug.end(); ++itIOPlugin)
-		{
-			IOMeshPluginInterface* pMeshIOPlugin = *itIOPlugin;
-			QList<FileFormat> format;
-			QMap<QString, IOMeshPluginInterface*>* map = NULL;
-			if (inpOut == int(IMPORT))
-			{
-				map = &allKnowInputFormats;
-				formatFilters = &inpFilters;
-				format = pMeshIOPlugin->importFormats();
-			}
-			else
-			{
-				map = &allKnowOutputFormats;
-				formatFilters = &outFilters;
-				format = pMeshIOPlugin->exportFormats();
-			}
-			for (QList<FileFormat>::iterator itf = format.begin(); itf != format.end(); ++itf)
-			{
-				FileFormat currentFormat = *itf;
-				
-				QString currentFilterEntry = currentFormat.description + " (";
-				
-				//a particular file format could be associated with more than one file extension
-				QStringListIterator itExtension(currentFormat.extensions);
-				while (itExtension.hasNext())
-				{
-					QString currentExtension = itExtension.next().toLower();
-					if (!map->contains(currentExtension))
-					{
-						map->insert(currentExtension, pMeshIOPlugin);
-						allKnownFormatsFilter.append(QObject::tr(" *."));
-						allKnownFormatsFilter.append(currentExtension);
-					}
-					currentFilterEntry.append(QObject::tr(" *."));
-					currentFilterEntry.append(currentExtension);
-				}
-				currentFilterEntry.append(')');
-				formatFilters->append(currentFilterEntry);
-			}
-			
-		}
-		allKnownFormatsFilter.append(')');
-		if (formatFilters != NULL)
-			formatFilters->push_front(allKnownFormatsFilter);
+	QString allKnownFormatsFilter = QObject::tr("All known formats (");
+	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
+		allKnownFormatsFilter += addPluginFormats(allKnowInputMeshFormats, inpMeshFilters, pMeshIOPlugin, pMeshIOPlugin->importFormats());
 	}
+	allKnownFormatsFilter.append(')');
+	inpMeshFilters.push_front(allKnownFormatsFilter);
+	
+	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
+		allKnownFormatsFilter += addPluginFormats(allKnowOutputFormats, outFilters, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
+	}
+}
+
+QString PluginManager::addPluginFormats(
+		QMap<QString, IOMeshPluginInterface*>& map, 
+		QStringList& formatFilters, 
+		IOMeshPluginInterface* pMeshIOPlugin,
+		const QList<FileFormat>& format)
+{
+	QString allKnownFormatsFilter;
+	for (QList<FileFormat>::const_iterator itf = format.begin(); itf != format.end(); ++itf)
+	{
+		FileFormat currentFormat = *itf;
+		
+		QString currentFilterEntry = currentFormat.description + " (";
+		
+		//a particular file format could be associated with more than one file extension
+		QStringListIterator itExtension(currentFormat.extensions);
+		while (itExtension.hasNext())
+		{
+			QString currentExtension = itExtension.next().toLower();
+			if (!map.contains(currentExtension))
+			{
+				map.insert(currentExtension, pMeshIOPlugin);
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+			}
+			currentFilterEntry.append(QObject::tr(" *."));
+			currentFilterEntry.append(currentExtension);
+		}
+		currentFilterEntry.append(')');
+		formatFilters.append(currentFilterEntry);
+	}
+	return allKnownFormatsFilter;
 }
 
 QString PluginManager::osIndependentPluginName(const QString& plname)

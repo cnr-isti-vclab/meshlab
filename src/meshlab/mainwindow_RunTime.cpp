@@ -2283,7 +2283,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpFilters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpMeshFilters.join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
@@ -2302,7 +2302,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
 		//pCurrentIOPlugin->setLog(gla->log);
 		if (pCurrentIOPlugin == NULL)
 		{
@@ -2398,7 +2398,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+	IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
 	
 	if(pCurrentIOPlugin != NULL)
 	{

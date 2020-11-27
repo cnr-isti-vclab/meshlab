@@ -26,6 +26,7 @@
 
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/iomesh_plugin_interface.h"
+#include "interfaces/ioraster_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
 #include "interfaces/decorate_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
@@ -65,12 +66,14 @@ public:
 
     QMap<QString, QAction*> actionFilterMap;
     QMap<QString, FilterPluginInterface*> stringFilterMap;
-    QMap<QString,IOMeshPluginInterface*> allKnowInputFormats;
+    QMap<QString,IOMeshPluginInterface*> allKnowInputMeshFormats;
     QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
-    QStringList inpFilters;
+	QMap<QString, IORasterPluginInterface*> allKnownInputRasterFormats;
+    QStringList inpMeshFilters;
+	QStringList inpRasterFilters;
     QStringList outFilters;
 
-    QVector<IOMeshPluginInterface*> meshIOPlug;
+    
     QVector<FilterPluginInterface*> meshFilterPlug;
     QVector<RenderPluginInterface*> meshRenderPlug;
     QVector<DecoratePluginInterface*> meshDecoratePlug;
@@ -85,10 +88,17 @@ public:
     static QString osIndependentPluginName(const QString& plname);
 
 private:
+	QVector<IOMeshPluginInterface*> ioMeshPlugins;
+	QVector<IORasterPluginInterface*> ioRasterPlugins;
     QDir pluginsDir;
 
 
-    void knownIOFormats();
+    void fillKnownIOFormats();
+	QString addPluginFormats(
+			QMap<QString, IOMeshPluginInterface*>& map, 
+			QStringList& formatFilters, 
+			IOMeshPluginInterface* pMeshIOPlugin,
+			const QList<FileFormat>& format);
 };
 
 #endif // PLUGINMANAGER_H
