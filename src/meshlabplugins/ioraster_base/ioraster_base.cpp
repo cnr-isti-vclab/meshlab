@@ -21,46 +21,25 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IORASTER_PLUGIN_INTERFACE_H
-#define MESHLAB_IORASTER_PLUGIN_INTERFACE_H
+#include "ioraster_base.h"
 
-#include "plugin_interface.h"
-#include "../utilities/file_format.h"
 
-class IORasterPluginInterface : PluginInterface
+QString IORasterBasePlugin::pluginName() const
 {
-public:
-	IORasterPluginInterface() : PluginInterface() {}
-	virtual ~IORasterPluginInterface() {}
 	
-	virtual QList<FileFormat> exportFormats() const = 0;
+}
+
+QList<FileFormat> IORasterBasePlugin::exportFormats() const
+{
 	
-	virtual bool open(
+}
+
+bool IORasterBasePlugin::open(
 		const QString& format,
 		const QString& filename,
-		vcg::CallBackPos* cb = nullptr) = 0;
+		vcg::CallBackPos* cb)
+{
+	
+}
 
-	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
-	/// io plugins should avoid using QMessageBox for reporting errors.
-	/// Failure should put some meaningful information inside the errorMessage string.
-	const QString& errorMsg() const
-	{
-		return errorMessage;
-	}
-	void clearErrorString() 
-	{
-		errorMessage.clear();
-	}
-protected:
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	// NEVER EVER use a msgbox to say something to the user.
-	QString errorMessage;
-};
-
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
-
-#define IORASTER_PLUGIN_INTERFACE_IID "vcg.meshlab.IORasterPluginInterface/1.0"
-Q_DECLARE_INTERFACE(IORasterPluginInterface, IORASTER_PLUGIN_INTERFACE_IID)
-
-#endif // MESHLAB_IORASTER_PLUGIN_INTERFACE_H
+MESHLAB_PLUGIN_NAME_EXPORTER(IORasterBasePlugin)

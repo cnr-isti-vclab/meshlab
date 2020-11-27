@@ -20,47 +20,30 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#ifndef MESHLAB_IORASTER_BASE_H
+#define MESHLAB_IORASTER_BASE_H
 
-#ifndef MESHLAB_IORASTER_PLUGIN_INTERFACE_H
-#define MESHLAB_IORASTER_PLUGIN_INTERFACE_H
 
-#include "plugin_interface.h"
-#include "../utilities/file_format.h"
+#include <common/interfaces/ioraster_plugin_interface.h>
 
-class IORasterPluginInterface : PluginInterface
+class IORasterBasePlugin : public QObject, public IORasterPluginInterface
 {
-public:
-	IORasterPluginInterface() : PluginInterface() {}
-	virtual ~IORasterPluginInterface() {}
-	
-	virtual QList<FileFormat> exportFormats() const = 0;
-	
-	virtual bool open(
-		const QString& format,
-		const QString& filename,
-		vcg::CallBackPos* cb = nullptr) = 0;
+	Q_OBJECT
+		MESHLAB_PLUGIN_IID_EXPORTER(IORASTER_PLUGIN_INTERFACE_IID)
+		Q_INTERFACES(IORasterPluginInterface)
 
-	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
-	/// io plugins should avoid using QMessageBox for reporting errors.
-	/// Failure should put some meaningful information inside the errorMessage string.
-	const QString& errorMsg() const
-	{
-		return errorMessage;
-	}
-	void clearErrorString() 
-	{
-		errorMessage.clear();
-	}
-protected:
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	// NEVER EVER use a msgbox to say something to the user.
-	QString errorMessage;
+
+public:
+
+	IORasterBasePlugin() : IORasterPluginInterface() {}
+	QString pluginName() const;
+	
+	QList<FileFormat> exportFormats() const;
+	
+	bool open(
+			const QString& format,
+			const QString& filename,
+			vcg::CallBackPos* cb = nullptr);
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
-
-#define IORASTER_PLUGIN_INTERFACE_IID "vcg.meshlab.IORasterPluginInterface/1.0"
-Q_DECLARE_INTERFACE(IORasterPluginInterface, IORASTER_PLUGIN_INTERFACE_IID)
-
-#endif // MESHLAB_IORASTER_PLUGIN_INTERFACE_H
+#endif //MESHLAB_IORASTER_BASE_H
