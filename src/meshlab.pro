@@ -49,6 +49,7 @@ SUBDIRS += \ #sub projects names
 	io_pdb \
 	io_txt \
 	io_u3d \
+	ioraster_base \
 # Filter samples
 	edit_sample \
 	filter_sample \
@@ -141,6 +142,7 @@ io_x3d.subdir = meshlabplugins/io_x3d
 io_pdb.subdir = meshlabplugins/io_pdb
 io_txt.subdir = meshlabplugins/io_txt
 io_u3d.subdir = meshlabplugins/io_u3d
+ioraster_base.subdir = meshlabplugins/ioraster_base
 # Filter samples
 edit_sample.subdir = meshlabplugins/edit_sample
 filter_sample.subdir = meshlabplugins/filter_sample
@@ -218,6 +220,7 @@ io_tri.depends = common
 io_txt.depends = common
 io_u3d.depends = common external
 io_x3d.depends = common
+ioraster_base.depends = common
 # Filter samples
 edit_sample.depends = common
 filter_sample.depends = common

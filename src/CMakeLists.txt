@@ -135,7 +135,7 @@ if(BUILD_MINI)
 	)
 else()
 	set(MESHLAB_PLUGINS
-		# IO plugins
+		# IOMesh plugins
 		meshlabplugins/io_3ds
 		meshlabplugins/io_base
 		meshlabplugins/io_bre
@@ -149,6 +149,9 @@ else()
 		meshlabplugins/io_u3d
 		meshlabplugins/io_x3d
 
+		#IORaster plugins
+		meshlabplugins/ioraster_base
+		
 		# Filter plugins
 		meshlabplugins/filter_sample
 		meshlabplugins/filter_sample_dyn

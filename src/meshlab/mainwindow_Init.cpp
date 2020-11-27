@@ -473,10 +473,8 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
-	{
-		foreach(QAction *decorateAction, iDecorate->actions())
-		{
+	for(DecoratePluginInterface *iDecorate: PM.meshDecoratePlugins()) {
+		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);
 		}
@@ -484,12 +482,9 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
-	{
-		foreach(QAction* editAction, iEditFactory->actions())
-		{
-			if (!editAction->icon().isNull())
-			{
+	for(EditPluginInterfaceFactory *iEditFactory: PM.meshEditFactoryPlugins()) {
+		for(QAction* editAction: iEditFactory->actions()){
+			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
 			}
 			else qDebug() << "action was null";
@@ -500,12 +495,9 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
-	{
-		foreach(QAction* filterAction, iFilter->actions())
-		{
-			if (!filterAction->icon().isNull())
-			{
+	for(FilterPluginInterface *iFilter: PM.meshFilterPlugins()) {
+		for(QAction* filterAction: iFilter->actions()) {
+			if (!filterAction->icon().isNull()) {
 				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 				if (filterAction->priority() != QAction::LowPriority)
 					filterToolBar->addAction(filterAction);

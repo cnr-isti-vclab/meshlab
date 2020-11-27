@@ -26,6 +26,7 @@
 
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/iomesh_plugin_interface.h"
+#include "interfaces/ioraster_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
 #include "interfaces/decorate_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
@@ -42,53 +43,68 @@
 class PluginManager
 {
 public:
-    PluginManager();
-    ~PluginManager();
-    enum TypeIO{IMPORT,EXPORT};
+	PluginManager();
+	~PluginManager();
 	void loadPlugins(RichParameterList& defaultGlobal);
 	void loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory);
-    QString pluginsCode() const;
-
-    int numberIOPlugins() const;
-    inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
-    inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
-    inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
-    inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
-
-    static QString getDefaultPluginDirPath();
-    static QString getBaseDirPath();
-
-    QMap<QString,RichParameterList> generateFilterParameterMap();
-
-    DecoratePluginInterface* getDecoratorInterfaceByName(const QString& name);
-
-
-    QMap<QString, QAction*> actionFilterMap;
-    QMap<QString, FilterPluginInterface*> stringFilterMap;
-    QMap<QString,IOMeshPluginInterface*> allKnowInputFormats;
-    QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
-    QStringList inpFilters;
-    QStringList outFilters;
-
-    QVector<IOMeshPluginInterface*> meshIOPlug;
-    QVector<FilterPluginInterface*> meshFilterPlug;
-    QVector<RenderPluginInterface*> meshRenderPlug;
-    QVector<DecoratePluginInterface*> meshDecoratePlug;
-    QVector<EditPluginInterfaceFactory*> meshEditInterfacePlug;
-    QVector<QAction *> editActionList;
-    QVector<QAction *> decoratorActionList;
-    // Used for unique destruction - this "owns" all IO, Filter, Render, and Decorate plugins
-    QVector<PluginInterface *> ownerPlug;
-
-    QStringList pluginsLoaded;
-
-    static QString osIndependentPluginName(const QString& plname);
-
+	QString pluginsCode() const;
+	
+	int numberIOPlugins() const;
+	inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
+	inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
+	inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
+	inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
+	
+	static QString getDefaultPluginDirPath();
+	static QString getBaseDirPath();
+	
+	QMap<QString,RichParameterList> generateFilterParameterMap();
+	
+	DecoratePluginInterface* getDecoratorInterfaceByName(const QString& name);
+	
+	
+	QMap<QString, QAction*> actionFilterMap;
+	QMap<QString, FilterPluginInterface*> stringFilterMap;
+	QMap<QString,IOMeshPluginInterface*> allKnowInputMeshFormats;
+	QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
+	QMap<QString, IORasterPluginInterface*> allKnownInputRasterFormats;
+	QStringList inpMeshFilters;
+	QStringList inpRasterFilters;
+	QStringList outFilters;
+	
+	
+	QVector<FilterPluginInterface*> meshFilterPlug;
+	QVector<RenderPluginInterface*> meshRenderPlug;
+	QVector<DecoratePluginInterface*> meshDecoratePlug;
+	QVector<EditPluginInterfaceFactory*> meshEditInterfacePlug;
+	QVector<QAction *> editActionList;
+	QVector<QAction *> decoratorActionList;
+	// Used for unique destruction - this "owns" all IO, Filter, Render, and Decorate plugins
+	
+	QStringList pluginsLoaded;
+	
+	static QString osIndependentPluginName(const QString& plname);
+	
 private:
-    QDir pluginsDir;
-
-
-    void knownIOFormats();
+	QVector<PluginInterface *> ownerPlug;
+	QVector<IOMeshPluginInterface*> ioMeshPlugins;
+	QVector<IORasterPluginInterface*> ioRasterPlugins;
+	QDir pluginsDir;
+	
+	
+	void fillKnownIOFormats();
+	
+	QString addPluginRasterFormats(
+			QMap<QString, IORasterPluginInterface*>& map, 
+			QStringList& formatFilters, 
+			IORasterPluginInterface* pRasterIOPlugin,
+			const QList<FileFormat>& format);
+	
+	QString addPluginMeshFormats(
+			QMap<QString, IOMeshPluginInterface*>& map, 
+			QStringList& formatFilters, 
+			IOMeshPluginInterface* pMeshIOPlugin,
+			const QList<FileFormat>& format);
 };
 
 #endif // PLUGINMANAGER_H
