@@ -14,7 +14,6 @@ INCLUDEPATH *= \
 	. \
 	.. \
 	../.. \
-	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif \
 	$$VCGDIR \
 	$$EIGENDIR
 

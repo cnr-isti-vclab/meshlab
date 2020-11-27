@@ -294,7 +294,7 @@ void PluginManager::fillKnownIOFormats()
 	allKnownFormatsFilter = QObject::tr("All known formats (");
 	
 	for (IORasterPluginInterface* pRasterIOPlugin : ioRasterPlugins){
-		addPluginRasterFormats(allKnownInputRasterFormats, inpRasterFilters, pRasterIOPlugin, pRasterIOPlugin->importFormats());
+		allKnownFormatsFilter += addPluginRasterFormats(allKnownInputRasterFormats, inpRasterFilters, pRasterIOPlugin, pRasterIOPlugin->importFormats());
 	}
 	
 	allKnownFormatsFilter.append(')');

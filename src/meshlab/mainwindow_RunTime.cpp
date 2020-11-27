@@ -50,7 +50,6 @@
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
 #include <wrap/io_trimesh/alnParser.h>
-#include <exif.h>
 #include "dialogs/about_dialog.h"
 #include "dialogs/filter_script_dialog.h"
 #include "dialogs/options_dialog.h"
@@ -1981,111 +1980,66 @@ bool MainWindow::importRaster(const QString& fileImg)
 			return false;
 	}
 	
-	QStringList filters;
-	filters.push_back("Images (*.jpg *.png *.xpm)");
-	filters.push_back("*.jpg");
-	filters.push_back("*.png");
-	filters.push_back("*.xpm");
-	
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpRasterFilters.join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 	
-	for(const QString& fileName : fileNameList)
+	if (fileNameList.isEmpty())	return false;
+	else
 	{
+		//save path away so we can use it again
+		QString path = fileNameList.first();
+		path.truncate(path.lastIndexOf("/"));
+		lastUsedDirectory.setPath(path);
+	}
+	
+	QElapsedTimer allFileTime;
+	allFileTime.start();
+	
+	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
-		if( fi.suffix().toLower()=="png" || fi.suffix().toLower()=="xpm" || fi.suffix().toLower()=="jpg")
+		QString extension = fi.suffix();
+		IORasterPluginInterface *pCurrentIOPlugin = PM.allKnownInputRasterFormats[extension.toLower()];
+		//pCurrentIOPlugin->setLog(gla->log);
+		if (pCurrentIOPlugin == NULL)
 		{
-			qb->show();
-			
-			if(!fi.exists()) 	{
-				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				return false;
-			}
-			if(!fi.isReadable()) 	{
-				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				return false;
-			}
-			
-			this->meshDoc()->setBusy(true);
-			RasterModel *rm= meshDoc()->addNewRaster();
-			rm->setLabel(fileImg);
-			rm->addPlane(new RasterPlane(fileName,RasterPlane::RGBA));
-			meshDoc()->setBusy(false);
-			showLayerDlg(true);
-			
-			/// Intrinsics extraction from EXIF
-			///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
-			/// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
-			
-			// Read the JPEG file into a buffer
-			FILE *fp = fopen(qUtf8Printable(fileName), "rb");
-			if (!fp) {
-				QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				return false;
-			}
-			fseek(fp, 0, SEEK_END);
-			unsigned long fsize = ftell(fp);
-			rewind(fp);
-			unsigned char *buf = new unsigned char[fsize];
-			if (fread(buf, 1, fsize, fp) != fsize) {
-				QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				delete[] buf;
-				fclose(fp);
-				return false;
-			}
-			fclose(fp);
-
-			// Parse EXIF
-			easyexif::EXIFInfo ImageInfo;
-			int code = ImageInfo.parseFrom(buf, fsize);
-			delete[] buf;
-			if (code) {
-				GLA()->Logf(0,"Warning unable to parse exif for file  %s",qPrintable(fileName) );
-			}
-
-			if (code || ImageInfo.FocalLengthIn35mm==0.0f)
-			{
-				rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
-				rm->shot.Intrinsics.CenterPx   = Point2m(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
-				rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
-				rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
-				rm->shot.Intrinsics.FocalMm = 50.0f;
-			}
-			else
-			{
-				rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
-				rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
-				float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
-				rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
-				rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
-				rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
-			}
-			// End of EXIF reading
-			
-			//// Since no extrinsic are available, the current trackball is reset (except for the FOV) and assigned to the raster
+			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+			return false;
+		}
+		
+		
+		QFileInfo info(fileName);
+		RasterModel *rm = meshDoc()->addNewRaster();
+		qb->show();
+		QElapsedTimer t;
+		t.start();
+		bool open = pCurrentIOPlugin->open(extension, fileName, *rm, QCallBack);
+		if(open) {
+			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
 			GLA()->fov = rm->shot.GetFovFromFocal();
 			rm->shot = GLA()->shotFromTrackball().first;
 			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
-			
-			if (_currviewcontainer != NULL)
-				_currviewcontainer->updateAllDecoratorsForAllViewers();
-			
-			//			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
-			updateMenus();
-			updateLayerDialog();
-			
+			if (!layerDialog->isVisible())
+				layerDialog->setVisible(true);
 		}
-		else
-			return false;
-	}
+		else {
+			meshDoc()->delRaster(rm);
+			GLA()->Logf(0, "Warning: Raster %s has not been opened", qUtf8Printable(fileName));
+		}
+	}// end foreach file of the input list
+	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
+	
+	if (_currviewcontainer != NULL)
+		_currviewcontainer->updateAllDecoratorsForAllViewers();
+	
+	updateMenus();
+	updateLayerDialog();
+
+	qb->reset();
 	return true;
 }
 
@@ -2298,7 +2252,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	
 	QElapsedTimer allFileTime;
 	allFileTime.start();
-	foreach(fileName,fileNameList)
+	for(const QString& fileName : fileNameList)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
