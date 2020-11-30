@@ -29,11 +29,16 @@ class PluginManager;
 
 namespace meshlab {
 
+/**
+ * @brief The MeshLabSingletons class
+ * This class contains all the singleton instances used on MeshLab.
+ * - pluginManager
+ * - defaultGlobalParameterList
+ */
 class MeshLabSingletons
 {
 public:
 	/** Singleton Instances **/
-	static RichParameterList& globalRPLInstance();
 	static PluginManager& pluginManagerInstance();
 
 	MeshLabSingletons(MeshLabSingletons const&) = delete;
