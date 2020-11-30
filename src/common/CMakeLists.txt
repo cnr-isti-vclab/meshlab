@@ -32,6 +32,7 @@ set(HEADERS
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
+	meshlab_singletons.h
 	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
 	ml_selection_buffers.h
@@ -39,7 +40,7 @@ set(HEADERS
 	ml_thread_safe_memory_info.h
 	mlapplication.h
 	mlexception.h
-	pluginmanager.h
+	plugin_manager.h
 	searcher.h)
 
 set(SOURCES
@@ -59,13 +60,14 @@ set(SOURCES
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
+	meshlab_singletons.cpp
 	meshlabdocumentbundler.cpp
 	meshlabdocumentxml.cpp
 	ml_selection_buffers.cpp
 	ml_shared_data_context.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
-	pluginmanager.cpp
+	plugin_manager.cpp
 	searcher.cpp
 	${EXTERNAL_DIR}/easyexif/exif.cpp)
 

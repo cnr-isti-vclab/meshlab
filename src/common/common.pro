@@ -63,7 +63,8 @@ HEADERS += 	\
 	ml_document/raster_model.h \
 	ml_document/render_raster.h \
 	utilities/file_format.h \
-	pluginmanager.h \
+	meshlab_singletons.h \
+	plugin_manager.h \
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
@@ -88,7 +89,8 @@ SOURCES += \
 	ml_document/mesh_document.cpp \
 	ml_document/raster_model.cpp \
 	ml_document/render_raster.cpp \
-	pluginmanager.cpp \
+	meshlab_singletons.cpp \
+	plugin_manager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \
