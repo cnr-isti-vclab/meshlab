@@ -1,8 +1,8 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2005-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef SETTINGDIALOG_H
-#define SETTINGDIALOG_H
+#ifndef MESHLAB_SETTING_DIALOG_H
+#define MESHLAB_SETTING_DIALOG_H
 
 #include <QDialog>
 #include <common/parameters/rich_parameter.h>
@@ -63,4 +63,4 @@ private:
 	QPushButton* loadbut;
 };
 
-#endif // SETTINGDIALOG_H
+#endif // MESHLAB_SETTING_DIALOG_H

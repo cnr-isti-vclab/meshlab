@@ -1,8 +1,8 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2005-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLABSETTINGSDIALOG_H
-#define MESHLABSETTINGSDIALOG_H
+#ifndef MESHLAB_OPTIONS_DIALOG_H
+#define MESHLAB_OPTIONS_DIALOG_H
 
 #include <QDialog>
 #include <QTableWidget>
@@ -66,4 +66,4 @@ private:
 	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
 };
 
-#endif // MESHLABSETTINGSDIALOG_H
+#endif // MESHLAB_OPTIONS_DIALOG_H
