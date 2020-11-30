@@ -24,7 +24,6 @@
 
 
 #include "mainwindow.h"
-#include "plugindialog.h"
 #include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
@@ -53,6 +52,7 @@
 #include "dialogs/about_dialog.h"
 #include "dialogs/filter_script_dialog.h"
 #include "dialogs/options_dialog.h"
+#include "dialogs/plugin_info_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 
 using namespace std;
@@ -2612,7 +2612,7 @@ void MainWindow::about()
 void MainWindow::aboutPlugins()
 {
 	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qUtf8Printable(pluginManager().getDefaultPluginDirPath()));
-	PluginDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
+	PluginInfoDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
 	dialog.exec();
 }
 

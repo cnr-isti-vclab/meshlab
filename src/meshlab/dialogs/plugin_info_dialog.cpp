@@ -1,102 +1,46 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+#include "plugin_info_dialog.h"
+#include "ui_plugin_info_dialog.h"
 
-#include "plugindialog.h"
+#include <QDir>
+#include <QPluginLoader>
+
 #include <common/interfaces/filter_plugin_interface.h>
 #include <common/interfaces/iomesh_plugin_interface.h>
 #include <common/interfaces/decorate_plugin_interface.h>
 #include <common/interfaces/render_plugin_interface.h>
 #include <common/interfaces/edit_plugin_interface.h>
 
-
-
-#include <QLabel>
-#include <QDir>
-#include <QPluginLoader>
-#include <QTreeWidget>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QHeaderView>
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QStringList>
-
-PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWidget *parent): QDialog(parent)
+PluginInfoDialog::PluginInfoDialog(QWidget *parent) :
+	QDialog(parent),
+	ui(new Ui::PluginInfoDialog)
 {
-	label = new QLabel;
-	label->setWordWrap(true);
-	QStringList headerLabels;
-	headerLabels << tr("Components");
-	
-	treeWidget = new QTreeWidget;
-	treeWidget->setAlternatingRowColors(false);
-	treeWidget->setHeaderLabels(headerLabels);
-	treeWidget->header()->hide();
-	
-	groupBox=new QGroupBox(tr("Info Plugin"));
-	
-	okButton = new QPushButton(tr("OK"));
-	okButton->setDefault(true);
-	
-	spacerItem = new QSpacerItem(363, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	
-	labelInfo=new QLabel(groupBox);
-	labelInfo->setWordWrap(true);
-	//tedit->hide();
-	
-	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
-	connect(treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(displayInfo(QTreeWidgetItem*,int)));
-	
-	QGridLayout *mainLayout = new QGridLayout;
-	QHBoxLayout *gboxLayout = new QHBoxLayout(groupBox);
-	gboxLayout->addWidget(labelInfo);
-	//mainLayout->setColumnStretch(0, 1);
-	//mainLayout->setColumnStretch(2, 1);
-	mainLayout->addWidget(label, 0, 0, 1, 2);
-	mainLayout->addWidget(treeWidget, 1, 0, 4, 2);
-	mainLayout->addWidget(groupBox,5,0,1,2);
-	mainLayout->addItem(spacerItem, 6, 0, 1, 1);
-	mainLayout->addWidget(okButton,6,1,1,1);
-	
-	
-	//mainLayout->addWidget(okButton, 3, 1,Qt::AlignHCenter);
-	//mainLayout->addLayout(buttonLayout,3,1);
-	setLayout(mainLayout);
+	ui->setupUi(this);
+}
+
+PluginInfoDialog::PluginInfoDialog(const QString& path, const QStringList& fileNames, QWidget* parent) :
+	QDialog(parent),
+	ui(new Ui::PluginInfoDialog),
+	pathDirectory(path)
+{
+	ui->setupUi(this);
 	
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
 	featureIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
 	
-	setWindowTitle(tr("Plugin Information"));
 	populateTreeWidget(path, fileNames);
-	pathDirectory=path;
 }
 
-void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
+PluginInfoDialog::~PluginInfoDialog()
+{
+	delete ui;
+}
+
+void PluginInfoDialog::populateTreeWidget(const QString& path, const QStringList& fileNames)
 {
 	if (fileNames.isEmpty()) {
-		label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::toNativeSeparators(path)));
-		treeWidget->hide();
+		ui->label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::toNativeSeparators(path)));
+		ui->treeWidget->hide();
 	}
 	else {
 		int nPlugins = 0;
@@ -105,10 +49,10 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 			QPluginLoader loader(dir.absoluteFilePath(fileName));
 			QObject *plugin = loader.instance();
 			
-			QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
+			QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
 			pluginItem->setText(0, fileName);
 			pluginItem->setIcon(0, interfaceIcon);
-			treeWidget->setItemExpanded(pluginItem, false);
+			ui->treeWidget->setItemExpanded(pluginItem, false);
 			
 			QFont boldFont = pluginItem->font(0);
 			boldFont.setBold(true);
@@ -168,13 +112,12 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 			}
 		}
 		std::string lbl = "Found the following " + std::to_string(nPlugins) + " plugins in the %1 " "directory:";
-		label->setText(tr(lbl.c_str()).arg(QDir::toNativeSeparators(path)));
+		ui->label->setText(tr(lbl.c_str()).arg(QDir::toNativeSeparators(path)));
 	}
 }
 
-
-void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &features){
-	
+void PluginInfoDialog::addItems(QTreeWidgetItem* pluginItem, const QStringList& features)
+{
 	for (const QString& feature: features) {
 		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
 		featureItem->setText(0, feature);
@@ -182,8 +125,7 @@ void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &featu
 	}
 }
 
-
-void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
+void PluginInfoDialog::on_treeWidget_itemClicked(QTreeWidgetItem *item, int)
 {
 	QString parent;
 	QString actionName;
@@ -205,26 +147,26 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Importer_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
+				if (actionName==formats) ui->labelInfo->setText(f.description);
 			}
 			for(const FileFormat& f: iMeshIO->exportFormats()){
 				QString formats;
 				for(const QString& s: f.extensions)
 					formats+="Exporter_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
+				if (actionName==formats) ui->labelInfo->setText(f.description);
 			}
 		}
 		DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
 		if (iDecorate) {
 			for(QAction *a: iDecorate->actions())
 				if (actionName==a->text())
-					labelInfo->setText(iDecorate->decorationInfo(a));
+					ui->labelInfo->setText(iDecorate->decorationInfo(a));
 		}
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
 		if (iFilter) {
 			for(QAction *a: iFilter->actions())
 				if (actionName==a->text()) 
-					labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
+					ui->labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
 		}
 //		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
 //		if (iRender){
@@ -233,7 +175,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 		if (iEditFactory) {
 			for(QAction *a: iEditFactory->actions())
 				if(iEditFactory)
-					labelInfo->setText(iEditFactory->getEditToolDescription(a));
+					ui->labelInfo->setText(iEditFactory->getEditToolDescription(a));
 		}
 	}
 }

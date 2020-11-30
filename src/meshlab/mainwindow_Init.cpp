@@ -40,7 +40,6 @@
 #include <QWidgetAction>
 #include <QMessageBox>
 #include "mainwindow.h"
-#include "plugindialog.h"
 #include "dialogs/options_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
