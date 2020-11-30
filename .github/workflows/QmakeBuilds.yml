@@ -13,6 +13,9 @@ jobs:
         submodules: true
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        aqtversion: '==0.9.5'
+        py7zrversion: '==0.10.1'
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
