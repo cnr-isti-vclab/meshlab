@@ -46,6 +46,9 @@ jobs:
       with:
         ref: master
         submodules: true
+    - name: Update pip
+      run: |
+        pip3 install --upgrade pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
