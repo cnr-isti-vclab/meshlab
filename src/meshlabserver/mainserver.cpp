@@ -24,7 +24,7 @@
 #include <common/GLExtensionsManager.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
-#include <common/pluginmanager.h>
+#include <common/plugin_manager.h>
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
 #include <common/meshlabdocumentbundler.h>
