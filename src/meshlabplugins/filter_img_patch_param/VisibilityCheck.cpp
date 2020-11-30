@@ -23,10 +23,6 @@
 #include <cmath>
 #include "VisibilityCheck.h"
 #include <wrap/gl/shot.h>
-#include <common/pluginmanager.h>
-
-
-
 
 VisibilityCheck* VisibilityCheck::s_Instance = NULL;
 

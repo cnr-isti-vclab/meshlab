@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "ssao.h"
 
-#include <common/pluginmanager.h>
+#include <common/plugin_manager.h>
 
 SSAO::SSAO(float radius):DecorateShader()
 {

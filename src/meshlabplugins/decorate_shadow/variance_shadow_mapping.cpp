@@ -23,7 +23,7 @@
 
 #include "decorate_shader.h"
 #include "variance_shadow_mapping.h"
-#include <common/pluginmanager.h>
+#include <common/plugin_manager.h>
 #include <meshlab/glarea.h>
 
 
