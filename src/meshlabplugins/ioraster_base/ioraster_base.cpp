@@ -24,7 +24,7 @@
 #include "ioraster_base.h"
 
 #include <QFileInfo>
-#include <exif.h>
+#include "exif.h"
 
 
 
