@@ -1,17 +1,12 @@
-#include "meshlab_singletons.h"
+#include "singletons.h"
 
-#include "plugin_manager.h"
+#include "../plugin_manager.h"
+#include "globals.h"
 
 namespace meshlab {
 
 MeshLabSingletons::MeshLabSingletons()
 {
-}
-
-RichParameterList& MeshLabSingletons::globalRPLInstance()
-{
-	static RichParameterList globalRPS;
-	return globalRPS;
 }
 
 PluginManager& MeshLabSingletons::pluginManagerInstance()
@@ -20,7 +15,7 @@ PluginManager& MeshLabSingletons::pluginManagerInstance()
 	static PluginManager pm;
 	if (!initialized){
 		initialized = true;
-		RichParameterList& globalRPS = globalRPLInstance();
+		RichParameterList& globalRPS = defaultGlobalParameterList();
 		pm.loadPlugins(globalRPS);
 	}
 	return pm;
