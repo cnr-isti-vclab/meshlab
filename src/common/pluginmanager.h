@@ -50,6 +50,7 @@ public:
 	QString pluginsCode() const;
 	
 	int numberIOPlugins() const;
+	unsigned int size() const;
 	inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
 	inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
 	inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
@@ -62,6 +63,20 @@ public:
 	
 	DecoratePluginInterface* getDecoratorInterfaceByName(const QString& name);
 	
+	class PluginRangeIterator 
+	{
+		friend class PluginManager;
+	public:
+		QVector<PluginInterface*>::iterator begin() {return pm->ownerPlug.begin();}
+		QVector<PluginInterface*>::iterator end() {return pm->ownerPlug.end();}
+	private:
+		PluginRangeIterator(PluginManager* pm) : pm(pm) {}
+		PluginManager* pm;
+	};
+	
+	PluginRangeIterator pluginIterator();
+	
+	static QString osIndependentPluginName(const QString& plname);
 	
 	QMap<QString, QAction*> actionFilterMap;
 	QMap<QString, FilterPluginInterface*> stringFilterMap;
@@ -83,7 +98,7 @@ public:
 	
 	QStringList pluginsLoaded;
 	
-	static QString osIndependentPluginName(const QString& plname);
+	
 	
 private:
 	QVector<PluginInterface *> ownerPlug;

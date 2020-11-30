@@ -177,6 +177,11 @@ int PluginManager::numberIOPlugins() const
 	return ioMeshPlugins.size();
 }
 
+unsigned int PluginManager::size() const
+{
+	return ownerPlug.size();
+}
+
 // Search among all the decorator plugins the one that contains a decoration with the given name
 DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
 {
@@ -187,6 +192,11 @@ DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QStrin
 	}
 	assert(0);
 	return 0;
+}
+
+PluginManager::PluginRangeIterator PluginManager::pluginIterator()
+{
+	return PluginRangeIterator(this);
 }
 
 /*
