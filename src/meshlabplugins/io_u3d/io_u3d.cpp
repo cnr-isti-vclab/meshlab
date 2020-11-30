@@ -27,7 +27,6 @@
 #include <Qt>
 
 #include "io_u3d.h"
-#include <common/pluginmanager.h>
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/export_idtf.h>
@@ -58,22 +57,6 @@ bool U3DIOPlugin::open(
 {
 	return false;
 }
-
-QString U3DIOPlugin::computePluginsPath()
-{
-	QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
-		#if defined(Q_OS_WIN)
-			pluginsDir.cd("U3D_W32");
-		#elif defined(Q_OS_MAC)
-				pluginsDir.cd("U3D_OSX");
-		#elif defined(Q_OS_LINUX)
-				pluginsDir.cd("U3D_LINUX");
-		#endif
-		qDebug("U3D plugins dir %s", qUtf8Printable(pluginsDir.absolutePath()));
-		return pluginsDir.absolutePath();
-}
-
-
 bool U3DIOPlugin::save(
 		const QString &formatName, 
 		const QString &fileName, 

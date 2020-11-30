@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef PLUGINMANAGER_H
-#define PLUGINMANAGER_H
+#ifndef MESHLAB_PLUGIN_MANAGER_H
+#define MESHLAB_PLUGIN_MANAGER_H
 
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/iomesh_plugin_interface.h"
@@ -30,8 +30,6 @@
 #include "interfaces/render_plugin_interface.h"
 #include "interfaces/decorate_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
-
-//#include "scriptsyntax.h"
 
 #include<QMap>
 #include<QObject>
@@ -122,4 +120,4 @@ private:
 			const QList<FileFormat>& format);
 };
 
-#endif // PLUGINMANAGER_H
+#endif // MESHLAB_PLUGIN_MANAGER_H
