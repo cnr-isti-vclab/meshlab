@@ -32,6 +32,7 @@ namespace meshlab {
 
 RichParameterList& defaultGlobalParameterList();
 QString defaultPluginPath();
+QString defaultShadersPath();
 
 }
 
