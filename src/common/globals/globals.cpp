@@ -97,3 +97,8 @@ QString meshlab::defaultPluginPath()
 	qDebug("Meshlab Initialization: Serious error. Unable to find the plugins directory.");
 	return {};
 }
+
+QString meshlab::defaultShadersPath()
+{
+	return basePath() + "/shaders";
+}
