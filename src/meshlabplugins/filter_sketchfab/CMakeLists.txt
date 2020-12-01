@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/filter_sketchfab.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 # Only build if we have Qt5Qml
 if(TARGET Qt5::Qml)

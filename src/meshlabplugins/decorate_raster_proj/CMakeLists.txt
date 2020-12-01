@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/decorate_raster_proj.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 set(SOURCES decorate_raster_proj.cpp ${VCGDIR}/wrap/gui/trackball.cpp
             ${VCGDIR}/wrap/gui/trackmode.cpp)

@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/edit_paint.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 set(SOURCES edit_paint.cpp edit_paint_factory.cpp paintbox.cpp)
 

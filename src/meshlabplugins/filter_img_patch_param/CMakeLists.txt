@@ -1,10 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
-### or create a derived template in src/templates/filter_img_patch_param.cmake,
-### then re-run ./make-cmake.py
 
 set(SOURCES TexturePainter.cpp VisibilityCheck.cpp VisibleSet.cpp
             filter_img_patch_param.cpp)
