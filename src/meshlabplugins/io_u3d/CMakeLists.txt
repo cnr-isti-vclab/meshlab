@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: BSL-1.0
 
 ### Generated file! Edit the templates in src/templates,
-### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
-### or create a derived template in src/templates/io_u3d.cmake,
+### specifically src/templates/io_u3d.cmake (custom for this directory),
 ### then re-run ./make-cmake.py
 
 # Only build if we have u3d
@@ -36,5 +35,5 @@ if(TARGET external-IDTFConverter)
 		COMPONENT Plugins)
 
 else()
-	message(STATUS "Skipping io_u3d - missing u3d")
+	message(STATUS "Skipping io_u3d - missing u3d in external directory.")
 endif()

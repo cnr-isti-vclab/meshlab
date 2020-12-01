@@ -3,16 +3,12 @@
 
 ### Generated file! Edit the templates in src/templates,
 ### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
-### or create a derived template in src/templates/filter_measure.cmake,
+### or create a derived template in src/templates/filter_measure_xml.cmake,
 ### then re-run ./make-cmake.py
 
 set(SOURCES filter_measure_xml.cpp)
 
 set(HEADERS filter_measure_xml.h)
-
-set(XML filter_measure_xml.xml)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
 
 add_library(filter_measure_xml MODULE ${SOURCES} ${HEADERS})
 
