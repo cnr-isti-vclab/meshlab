@@ -1039,6 +1039,9 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 
 
 	QString thisVersion = MeshLabApplication::appVer();
+	if (thisVersion.endsWith("d")){
+		thisVersion.chop(1);
+	}
 	QStringList splitThisVersion = thisVersion.split(".");
 
 	bool newVersionAvailable = false;
