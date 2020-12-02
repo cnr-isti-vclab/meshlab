@@ -3,8 +3,7 @@
 
 
 # Only build if we have gmp/gmpxx or mpir
-if(TARGET external-gmp OR
-		(TARGET external-mpir AND TARGET external-mpirxx))
+if(TARGET external-gmp OR TARGET external-mpir)
 
 	set(SOURCES filter_csg.cpp)
 
