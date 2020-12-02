@@ -55,7 +55,5 @@ elseif(ALLOW_BUNDLED_LIB3DS AND EXISTS "${LIB3DS_DIR}/lib3ds/types.h")
 	target_include_directories(external-lib3ds SYSTEM PUBLIC "${LIB3DS_DIR}")
 	target_compile_definitions(external-lib3ds PUBLIC LIB3DS_STATIC)
 	set_property(TARGET external-lib3ds PROPERTY FOLDER External)
-	# TODO not sure what this was for, but it's almost certainly wrong on at least one compiler
-	# since it's not in a compiler conditional.
-	# target_compile_options(external-glew PRIVATE -w)
+	target_link_libraries(external-lib3ds PRIVATE external-disable-warnings)
 endif()

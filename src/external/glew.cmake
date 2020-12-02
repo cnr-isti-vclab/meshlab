@@ -40,9 +40,7 @@ elseif(ALLOW_BUNDLED_GLEW AND EXISTS "${GLEW_DIR}/src/glew.c")
 	endif()
 	set_property(TARGET external-glew PROPERTY FOLDER External)
 
-	# TODO not sure what this was for, but it's almost certainly wrong on at least one compiler
-	# since it's not in a compiler conditional.
-	# target_compile_options(external-glew PRIVATE -w)
+	target_link_libraries(external-glew PRIVATE external-disable-warnings)
 else()
 	message(
 		FATAL_ERROR
