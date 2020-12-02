@@ -19,7 +19,6 @@ if(TARGET external-gmp OR TARGET external-mpir)
 		target_link_libraries(filter_csg PRIVATE external-gmp)
 	else()
 		target_link_libraries(filter_csg PRIVATE external-mpir)
-		target_link_libraries(filter_csg PRIVATE external-mpirxx)
 	endif()
 
 	set_property(TARGET filter_csg PROPERTY FOLDER Plugins)
