@@ -1,8 +1,8 @@
-if(TARGET muparser::muparser)
+if(ALLOW_SYSTEM_LIBS AND TARGET muparser::muparser)
 	message(STATUS "- muparser - using system-provided library")
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser::muparser)
-else()
+elseif(ALLOW_BUNDLED_LIBS)
 	message(STATUS "- muparser - using bundled source")
 	add_library(
 		external-muparser STATIC

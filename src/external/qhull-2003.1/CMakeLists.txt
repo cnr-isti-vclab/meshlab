@@ -1,10 +1,10 @@
-if(TARGET Qhull::libqhull)
+if(ALLOW_SYSTEM_LIBS AND TARGET Qhull::libqhull)
 	message(STATUS "- qhull - using system-provided library")
 	add_library(external-qhull INTERFACE)
 	target_link_libraries(external-qhull INTERFACE Qhull::libqhull)
 	target_compile_definitions(external-qhull INTERFACE SYSTEM_QHULL)
 	target_include_directories(external-qhull INTERFACE ${QHULL_libqhull_INCLUDE_DIR}/libqhull)
-else()
+elseif(ALLOW_BUNDLED_LIBS)
 	message(STATUS "- qhull - using bundled source")
 	add_library(
 		external-qhull STATIC

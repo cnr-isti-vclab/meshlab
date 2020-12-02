@@ -1,8 +1,8 @@
-if(TARGET OpenCTM::OpenCTM)
+if(ALLOW_SYSTEM_LIBS AND TARGET OpenCTM::OpenCTM)
 	message(STATUS "- OpenCTM - using system-provided library")
 	add_library(external-openctm INTERFACE)
 	target_link_libraries(external-openctm INTERFACE OpenCTM::OpenCTM)
-else()
+elseif(ALLOW_BUNDLED_LIBS)
 	message(STATUS "- OpenCTM - using bundled source")
 	# Modified liblzma included - can't build against system version
 	add_library(

@@ -1,8 +1,8 @@
-if(TARGET Lib3ds::Lib3ds)
+if(ALLOW_SYSTEM_LIBS AND TARGET Lib3ds::Lib3ds)
 	message(STATUS "- lib3ds - using system-provided library")
 	add_library(external-lib3ds INTERFACE)
 	target_link_libraries(external-lib3ds INTERFACE Lib3ds::Lib3ds)
-else()
+elseif(ALLOW_BUNDLED_LIBS)
 	message(STATUS "- lib3ds - using bundled source")
 	add_library(
 		external-lib3ds STATIC
