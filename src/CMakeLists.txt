@@ -110,10 +110,10 @@ endif()
 
 ### Enter subdirectories
 
-#external
+# External
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
-if (NOT BUILD_MINI)
+if(NOT BUILD_MINI)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
 
@@ -125,10 +125,12 @@ set(CMAKE_AUTORCC ON)
 add_subdirectory(common)
 add_subdirectory(meshlab)
 #add_subdirectory(meshlabserver)
-set(CMAKE_INSTALL_RPATH)
-if (WIN32)
+if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/use_cpu_opengl")
 	add_subdirectory(use_cpu_opengl)
 endif()
+
+# Clear RPATH before adding plugins
+set(CMAKE_INSTALL_RPATH)
 
 ### Plugin subdirectories
 if(BUILD_MINI)
@@ -154,9 +156,9 @@ else()
 		meshlabplugins/io_u3d
 		meshlabplugins/io_x3d
 
-		#IORaster plugins
+		# IORaster plugins
 		meshlabplugins/ioraster_base
-		
+
 		# Filter plugins
 		meshlabplugins/filter_sample
 		meshlabplugins/filter_sample_dyn
@@ -203,7 +205,7 @@ else()
 		meshlabplugins/decorate_background
 		meshlabplugins/decorate_raster_proj
 		meshlabplugins/decorate_shadow
-	
+
 		# Edit Plugins
 		meshlabplugins/edit_sample
 		meshlabplugins/edit_align
@@ -218,6 +220,7 @@ else()
 		meshlabplugins/edit_select
 	)
 endif()
+
 
 message(STATUS "\nConfiguring plugins")
 foreach(PLUGIN ${MESHLAB_PLUGINS})
