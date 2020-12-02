@@ -13,7 +13,7 @@ if(TARGET Qt5::Qml)
 
     target_include_directories(filter_sketchfab
                                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_sketchfab PUBLIC common)
+    target_link_libraries(filter_sketchfab PUBLIC meshlab-common)
 
     target_link_libraries(filter_sketchfab PUBLIC Qt5::Qml)
 
