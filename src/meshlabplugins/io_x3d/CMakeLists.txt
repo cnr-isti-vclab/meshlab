@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/io_x3d.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 set(SOURCES io_x3d.cpp vrml/Parser.cpp vrml/Scanner.cpp)
 
