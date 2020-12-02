@@ -105,4 +105,5 @@ if(ALLOW_BUNDLED_SSYNTH AND EXISTS "${SSYNTH_DIR}/ssynth/StructureSynth/Model/Ac
 	target_include_directories(external-ssynth SYSTEM PUBLIC "${SSYNTH_DIR}/ssynth")
 	target_link_libraries(external-ssynth PRIVATE Qt5::Core Qt5::Xml Qt5::OpenGL OpenGL::GLU)
 	set_property(TARGET external-ssynth PROPERTY FOLDER External)
+	set_property(TARGET external-ssynth PROPERTY AUTOMOC TRUE)
 endif()

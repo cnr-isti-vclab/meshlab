@@ -1,5 +1,5 @@
 # Copyright 2019, 2020, Collabora, Ltd.
-# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council 
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
 cmake_minimum_required(VERSION 3.9)
@@ -20,9 +20,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 find_package(
 	Qt5
 	COMPONENTS OpenGL Xml Network
@@ -119,6 +116,11 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
 if (NOT BUILD_MINI)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
+
+# Start automoc/autouic/autorcc
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 add_subdirectory(common)
 add_subdirectory(meshlab)
