@@ -75,7 +75,14 @@ if(WIN32)
 endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_include_directories(meshlab-common PRIVATE ${EXTERNAL_DIR}/easyexif/)
+target_include_directories(meshlab-common
+	PRIVATE
+		${EXTERNAL_DIR}/easyexif/
+	PUBLIC
+		${VCGDIR}
+		${EIGEN_INCLUDE_DIRS}
+		${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 target_link_libraries(
 	meshlab-common
 	PUBLIC 

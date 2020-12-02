@@ -19,10 +19,8 @@ set(VCGDIR "${VCGDIR}")
 if(NOT VCGDIR)
 	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
 endif()
-include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Eigen3 - required
 set(EIGEN_DIR ${VCGDIR}/eigenlib)
 include(${EXTERNAL_DIR}/eigen.cmake)
-include_directories(${EIGEN_INCLUDE_DIRS})
