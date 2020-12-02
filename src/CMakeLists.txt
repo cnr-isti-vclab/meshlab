@@ -11,6 +11,10 @@ if(POLICY CMP0072)
 endif()
 
 ### Build options
+option(ALLOW_SYSTEM_REQUIRED_LIBS "Allow use of system-provided required libraries (Eigen and Glew)" ON)
+option(ALLOW_BUNDLED_REQUIRED_LIBS "Allow use of bundled required libraries (Eigen and Glew)" ON)
+option(ALLOW_SYSTEM_LIBS "Allow use of bundled external libraries source" ON)
+option(ALLOW_BUNDLED_LIBS "Allow use of system-provided external libraries" ON)
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
