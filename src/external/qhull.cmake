@@ -1,10 +1,17 @@
-if(TARGET Qhull::libqhull)
+# Copyright 2019, 2020, Collabora, Ltd.
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# SPDX-License-Identifier: BSL-1.0
+
+option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
+option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
+
+if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::libqhull)
 	message(STATUS "- qhull - using system-provided library")
 	add_library(external-qhull INTERFACE)
 	target_link_libraries(external-qhull INTERFACE Qhull::libqhull)
 	target_compile_definitions(external-qhull INTERFACE SYSTEM_QHULL)
 	target_include_directories(external-qhull INTERFACE ${QHULL_libqhull_INCLUDE_DIR}/libqhull)
-else()
+elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/src/qhull.h")
 	message(STATUS "- qhull - using bundled source")
 	add_library(
 		external-qhull STATIC
@@ -32,5 +39,4 @@ else()
 		"${QHULL_DIR}/src/user.h")
 	target_include_directories(external-qhull INTERFACE "${QHULL_DIR}/src")
 	set_property(TARGET external-qhull PROPERTY FOLDER External)
-	target_compile_options(external-qhull PRIVATE -w)
 endif()

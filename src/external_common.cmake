@@ -1,17 +1,20 @@
+# Copyright 2019, 2020, Collabora, Ltd.
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# SPDX-License-Identifier: BSL-1.0
+
 # GLEW - required
 set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
-add_subdirectory(${GLEW_DIR})
+include(${EXTERNAL_DIR}/glew.cmake)
 
 
-# VCGLIb -- required
+# VCGLib -- required
 if(NOT VCGDIR)
 	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
 	if(NOT EXISTS ${VCGDIR})
 		set(VCGDIR NOTFOUND)
 	endif()
 endif()
-set(VCGDIR
-	"${VCGDIR}")
+set(VCGDIR "${VCGDIR}")
 
 if(NOT VCGDIR)
 	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
@@ -21,11 +24,5 @@ include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Eigen3 - required
 set(EIGEN_DIR ${VCGDIR}/eigenlib)
-if(EIGEN3_INCLUDE_DIR)
-	message(STATUS "- Eigen - using system-provided library")
-	set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
-else()
-	message(STATUS "- Eigen - using bundled source")
-	set(EIGEN_INCLUDE_DIRS ${EIGEN_DIR})
-endif()
+include(${EXTERNAL_DIR}/eigen.cmake)
 include_directories(${EIGEN_INCLUDE_DIRS})
