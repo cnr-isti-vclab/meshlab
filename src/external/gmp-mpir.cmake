@@ -25,24 +25,15 @@ if(ALLOW_SYSTEM_GMP AND GMP_FOUND)
 
 elseif(ALLOW_BUNDLED_MPIR AND HAVE_BUNDLED_MPIR)
 	message(STATUS "- GMP/MPIR - using already built MPIR library")
-	add_library(external-mpir SHARED IMPORTED GLOBAL)
-	add_library(external-mpirxx SHARED IMPORTED GLOBAL)
-	# TODO why are we copying these? They're static libraries, not needed at runtime.
+	add_library(external-mpir STATIC IMPORTED GLOBAL)
+	add_library(external-mpirxx STATIC IMPORTED GLOBAL)
 	if (HAVE_BUNDLED_MPIR STREQUAL "WIN-x64")
-		file(
-			COPY ${MPIR_DIR}/win32-msvc/mpir.lib ${MPIR_DIR}/win32-msvc/mpirxx.lib
-			DESTINATION ${MESHLAB_LIB_OUTPUT_DIR})
-		set_property(TARGET external-mpir PROPERTY IMPORTED_IMPLIB "${MESHLAB_LIB_OUTPUT_DIR}/mpir.lib")
-		set_property(TARGET external-mpir PROPERTY IMPORTED_LOCATION "${MESHLAB_LIB_OUTPUT_DIR}/mpir.lib")
-		set_property(TARGET external-mpirxx PROPERTY IMPORTED_IMPLIB "${MESHLAB_LIB_OUTPUT_DIR}/mpirxx.lib")
-		set_property(TARGET external-mpirxx PROPERTY IMPORTED_LOCATION "${MESHLAB_LIB_OUTPUT_DIR}/mpirxx.lib")
+		set_property(TARGET external-mpir PROPERTY IMPORTED_LOCATION "${MPIR_DIR}/win32-msvc/mpir.lib")
+		set_property(TARGET external-mpirxx PROPERTY IMPORTED_LOCATION "${MPIR_DIR}/win32-msvc/mpirxx.lib")
 		target_include_directories(external-mpir INTERFACE ${EXTERNAL_DIR}/inc/win32-msvc/mpir-2.2.1_x64)
 	elseif(HAVE_BUNDLED_MPIR STREQUAL "APPLE-x64")
-		file(
-			COPY ${MPIR_DIR}/macx64/libmpir.a ${MPIR_DIR}/macx64/libmpirxx.a
-			DESTINATION ${MESHLAB_LIB_OUTPUT_DIR})
-		set_property(TARGET external-mpir PROPERTY IMPORTED_LOCATION "${MESHLAB_LIB_OUTPUT_DIR}/libmpir.a")
-		set_property(TARGET external-mpirxx PROPERTY IMPORTED_LOCATION "${MESHLAB_LIB_OUTPUT_DIR}/libmpirxx.a")
+		set_property(TARGET external-mpir PROPERTY IMPORTED_LOCATION "${MPIR_DIR}/macx64/libmpir.a")
+		set_property(TARGET external-mpirxx PROPERTY IMPORTED_LOCATION "${MPIR_DIR}/macx64/libmpirxx.a")
 		target_include_directories(external-mpir INTERFACE ${EXTERNAL_DIR}/inc/macx64/mpir-2.4.0)
 	endif()
 endif()
