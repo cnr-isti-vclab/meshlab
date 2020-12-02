@@ -5,6 +5,8 @@
 option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
 option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 
+find_package(muparser)
+
 if(ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
 	message(STATUS "- muparser - using system-provided library")
 	add_library(external-muparser INTERFACE)

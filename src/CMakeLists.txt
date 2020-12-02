@@ -31,14 +31,6 @@ message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
 find_package(Eigen3)
 
-message(STATUS "Searching for optional components")
-find_package(Lib3ds)
-find_package(GMP)
-find_package(muparser)
-find_package(OpenCTM)
-find_package(Qhull COMPONENTS libqhull)
-find_package(Qt5Qml)
-
 ### Build directories
 set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
 set(MESHLAB_LIB_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR})
@@ -115,6 +107,8 @@ endif()
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
 if(NOT BUILD_MINI)
+	message(STATUS "Searching for optional components")
+	find_package(Qt5Qml)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
 

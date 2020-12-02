@@ -6,6 +6,8 @@
 option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
 option(ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
 
+find_package(Lib3ds)
+
 if(ALLOW_SYSTEM_LIB3DS AND TARGET Lib3ds::Lib3ds)
 	message(STATUS "- lib3ds - using system-provided library")
 	add_library(external-lib3ds INTERFACE)

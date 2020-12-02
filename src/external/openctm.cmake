@@ -5,6 +5,8 @@
 option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
 option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 
+find_package(OpenCTM)
+
 if(ALLOW_SYSTEM_OPENCTM AND TARGET OpenCTM::OpenCTM)
 	message(STATUS "- OpenCTM - using system-provided library")
 	add_library(external-openctm INTERFACE)

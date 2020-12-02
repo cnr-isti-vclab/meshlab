@@ -5,6 +5,8 @@
 option(ALLOW_SYSTEM_GMP "Allow use of system-provided GMP" ON)
 option(ALLOW_BUNDLED_MPIR "Allow use of bundled MPIR binaries" ON)
 
+find_package(GMP)
+
 unset(HAVE_BUNDLED_MPIR)
 if (APPLE AND EXISTS "${MPIR_DIR}/macx64/libmpir.a" AND CMAKE_SIZEOF_VOID_P EQUAL 8)
 	# We have mac binaries for x64
