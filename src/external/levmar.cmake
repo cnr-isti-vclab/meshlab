@@ -4,6 +4,8 @@
 
 option(ALLOW_BUNDLED_LEVMAR "Allow use of bundled levmar source" ON)
 
+set(LEVMAR_DIR ${EXTERNAL_DIR}/levmar-2.3)
+
 if(ALLOW_BUNDLED_LEVMAR AND EXISTS "${LEVMAR_DIR}/lm.h")
 	message(STATUS "- levmar - using bundled source")
 	add_library(

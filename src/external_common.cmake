@@ -13,7 +13,6 @@ if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
 endif()
 
 # GLEW - required
-set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
 include(${EXTERNAL_DIR}/glew.cmake)
 
 
@@ -32,5 +31,4 @@ endif()
 
 
 # Eigen3 - required
-set(EIGEN_DIR ${VCGDIR}/eigenlib)
 include(${EXTERNAL_DIR}/eigen.cmake)

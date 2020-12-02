@@ -4,6 +4,8 @@
 
 option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
 
+set(U3D_DIR ${EXTERNAL_DIR}/u3d)
+
 if(ALLOW_BUNDLED_U3D AND EXISTS "${U3D_DIR}/CMakeLists.txt")
 	message(STATUS "- u3d - using bundled source")
 	add_subdirectory(${U3D_DIR})

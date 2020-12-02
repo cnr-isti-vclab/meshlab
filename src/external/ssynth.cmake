@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSL-1.0
 
 option(ALLOW_BUNDLED_SSYNTH "Allow use of bundled structure-synth source" ON)
+set(SSYNTH_DIR ${EXTERNAL_DIR}/structuresynth-1.5)
 
 if(ALLOW_BUNDLED_SSYNTH AND EXISTS "${SSYNTH_DIR}/ssynth/StructureSynth/Model/Action.h")
 	message(STATUS "- structure-synth - using bundled source")

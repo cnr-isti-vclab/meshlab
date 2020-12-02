@@ -4,6 +4,8 @@
 
 option(ALLOW_BUNDLED_OPENGR "Allow use of bundled OpenGR source" ON)
 
+set(OPENGR_DIR ${EXTERNAL_DIR}/OpenGR)
+
 if(ALLOW_BUNDLED_OPENGR AND EXISTS "${OPENGR_DIR}/src/gr/algorithms/match4pcsBase.h")
 	message(STATUS "- OpenGR - using bundled source")
 	add_library(external-opengr INTERFACE)

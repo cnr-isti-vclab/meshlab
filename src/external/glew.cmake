@@ -5,6 +5,8 @@
 option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
 
+set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
+
 unset(HAVE_SYSTEM_GLEW)
 if(DEFINED GLEW_VERSION)
 	if((TARGET GLEW::GLEW) AND (${GLEW_VERSION} VERSION_GREATER_EQUAL "2.0.0"))

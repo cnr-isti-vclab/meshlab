@@ -5,6 +5,8 @@
 option(ALLOW_BUNDLED_EIGEN "Allow use of bundled Eigen source" ON)
 option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
 
+set(EIGEN_DIR ${VCGDIR}/eigenlib)
+
 if(ALLOW_SYSTEM_EIGEN AND EIGEN3_INCLUDE_DIR)
 	message(STATUS "- Eigen - using system-provided library")
 	set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})

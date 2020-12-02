@@ -4,6 +4,8 @@
 
 option(ALLOW_BUNDLED_NEWUOA "Allow use of bundled newuoa source" ON)
 
+set(NEWUOA_DIR ${VCGDIR}/wrap/newuoa)
+
 if(ALLOW_BUNDLED_NEWUOA AND EXISTS "${NEWUOA_DIR}/include/newuoa.h")
     message(STATUS "- newuoa - using bundled source")
     add_library(external-newuoa INTERFACE)

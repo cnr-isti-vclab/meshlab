@@ -6,6 +6,7 @@ option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
 
 find_package(Qhull COMPONENTS libqhull)
+set(QHULL_DIR ${EXTERNAL_DIR}/qhull-2003.1)
 
 if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::libqhull)
 	message(STATUS "- qhull - using system-provided library")
