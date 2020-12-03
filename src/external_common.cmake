@@ -1,31 +1,34 @@
+# Copyright 2019, 2020, Collabora, Ltd.
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# SPDX-License-Identifier: BSL-1.0
+
+option(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS "Should warnings be disabled on bundled source code?" ON)
+add_library(external-disable-warnings INTERFACE)
+if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
+	if(MSVC)
+		# TODO
+	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+		target_compile_options(external-disable-warnings INTERFACE -w)
+	endif()
+endif()
+
 # GLEW - required
-set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
-add_subdirectory(${GLEW_DIR})
+include(${EXTERNAL_DIR}/glew.cmake)
 
 
-# VCGLIb -- required
+# VCGLib -- required
 if(NOT VCGDIR)
 	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
 	if(NOT EXISTS ${VCGDIR})
 		set(VCGDIR NOTFOUND)
 	endif()
 endif()
-set(VCGDIR
-	"${VCGDIR}")
+set(VCGDIR "${VCGDIR}")
 
 if(NOT VCGDIR)
 	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
 endif()
-include_directories(${VCGDIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Eigen3 - required
-set(EIGEN_DIR ${VCGDIR}/eigenlib)
-if(EIGEN3_INCLUDE_DIR)
-	message(STATUS "- Eigen - using system-provided library")
-	set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
-else()
-	message(STATUS "- Eigen - using bundled source")
-	set(EIGEN_INCLUDE_DIRS ${EIGEN_DIR})
-endif()
-include_directories(${EIGEN_INCLUDE_DIRS})
+include(${EXTERNAL_DIR}/eigen.cmake)

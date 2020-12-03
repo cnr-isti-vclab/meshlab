@@ -1,5 +1,5 @@
 # Copyright 2019, 2020, Collabora, Ltd.
-# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council 
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
 cmake_minimum_required(VERSION 3.9)
@@ -12,6 +12,7 @@ endif()
 
 ### Build options
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
+option(BUILD_SERVER "Build a command-line server application" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
@@ -20,9 +21,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 find_package(
 	Qt5
 	COMPONENTS OpenGL Xml Network
@@ -32,14 +30,6 @@ find_package(OpenMP)
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
 find_package(Eigen3)
-
-message(STATUS "Searching for optional components")
-find_package(Lib3ds)
-find_package(GMP)
-find_package(muparser)
-find_package(OpenCTM)
-find_package(Qhull COMPONENTS libqhull)
-find_package(Qt5Qml)
 
 ### Build directories
 set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
@@ -113,20 +103,31 @@ endif()
 
 ### Enter subdirectories
 
-#external
+# External
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
-if (NOT BUILD_MINI)
+if(NOT BUILD_MINI)
+	message(STATUS "Searching for optional components")
+	find_package(Qt5Qml)
 	include(${EXTERNAL_DIR}/external.cmake)
 endif()
 
+# Start automoc/autouic/autorcc
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 add_subdirectory(common)
 add_subdirectory(meshlab)
-#add_subdirectory(meshlabserver)
-set(CMAKE_INSTALL_RPATH)
-if (WIN32)
+if(BUILD_SERVER)
+	add_subdirectory(meshlabserver)
+endif()
+if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/use_cpu_opengl")
 	add_subdirectory(use_cpu_opengl)
 endif()
+
+# Clear RPATH before adding plugins
+set(CMAKE_INSTALL_RPATH)
 
 ### Plugin subdirectories
 if(BUILD_MINI)
@@ -152,9 +153,9 @@ else()
 		meshlabplugins/io_u3d
 		meshlabplugins/io_x3d
 
-		#IORaster plugins
+		# IORaster plugins
 		meshlabplugins/ioraster_base
-		
+
 		# Filter plugins
 		meshlabplugins/filter_sample
 		meshlabplugins/filter_sample_dyn
@@ -201,7 +202,7 @@ else()
 		meshlabplugins/decorate_background
 		meshlabplugins/decorate_raster_proj
 		meshlabplugins/decorate_shadow
-	
+
 		# Edit Plugins
 		meshlabplugins/edit_sample
 		meshlabplugins/edit_align
@@ -216,6 +217,7 @@ else()
 		meshlabplugins/edit_select
 	)
 endif()
+
 
 message(STATUS "\nConfiguring plugins")
 foreach(PLUGIN ${MESHLAB_PLUGINS})

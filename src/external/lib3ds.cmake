@@ -1,8 +1,19 @@
-if(TARGET Lib3ds::Lib3ds)
+# Copyright 2019, 2020, Collabora, Ltd.
+# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# SPDX-License-Identifier: BSL-1.0
+
+
+option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
+option(ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
+
+find_package(Lib3ds)
+set(LIB3DS_DIR ${EXTERNAL_DIR}/lib3ds-1.3.0)
+
+if(ALLOW_SYSTEM_LIB3DS AND TARGET Lib3ds::Lib3ds)
 	message(STATUS "- lib3ds - using system-provided library")
 	add_library(external-lib3ds INTERFACE)
 	target_link_libraries(external-lib3ds INTERFACE Lib3ds::Lib3ds)
-else()
+elseif(ALLOW_BUNDLED_LIB3DS AND EXISTS "${LIB3DS_DIR}/lib3ds/types.h")
 	message(STATUS "- lib3ds - using bundled source")
 	add_library(
 		external-lib3ds STATIC
@@ -47,5 +58,5 @@ else()
 	target_include_directories(external-lib3ds SYSTEM PUBLIC "${LIB3DS_DIR}")
 	target_compile_definitions(external-lib3ds PUBLIC LIB3DS_STATIC)
 	set_property(TARGET external-lib3ds PROPERTY FOLDER External)
-	target_compile_options(external-lib3ds PRIVATE -w)
+	target_link_libraries(external-lib3ds PRIVATE external-disable-warnings)
 endif()

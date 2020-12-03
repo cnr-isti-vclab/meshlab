@@ -1,4 +1,3 @@
-message(STATUS "- u3d - using bundled source")
 
 IF(APPLE)
 # Tiger build

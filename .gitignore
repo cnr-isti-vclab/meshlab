@@ -26,6 +26,7 @@ install/windows/resources/MeshLab*.exe
 #install/snap20????/parts
 #install/snap20????/stage
 #install/snap20????/*.snap
+src/common/generated_version_header.h
 
 ##Standard cmake gitignore##
 CMakeLists.txt.user
@@ -101,4 +102,4 @@ compile_commands.json
 *creator.user*
 
 
-© 2019 GitHub, Inc.
+# © 2019 GitHub, Inc.
