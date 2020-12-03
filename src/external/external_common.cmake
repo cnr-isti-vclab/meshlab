@@ -12,23 +12,5 @@ if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
 	endif()
 endif()
 
-# GLEW - required
-include(${EXTERNAL_DIR}/glew.cmake)
-
-
-# VCGLib -- required
-if(NOT VCGDIR)
-	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
-	if(NOT EXISTS ${VCGDIR})
-		set(VCGDIR NOTFOUND)
-	endif()
-endif()
-set(VCGDIR "${VCGDIR}")
-
-if(NOT VCGDIR)
-	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
-endif()
-
-
 # Eigen3 - required
 include(${EXTERNAL_DIR}/eigen.cmake)
