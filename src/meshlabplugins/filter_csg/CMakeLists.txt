@@ -3,8 +3,7 @@
 
 
 # Only build if we have gmp/gmpxx or mpir
-if(TARGET external-gmp OR
-		(TARGET external-mpir AND TARGET external-mpirxx))
+if(TARGET external-gmp OR external-mpir)
 
 	set(SOURCES filter_csg.cpp)
 
@@ -20,7 +19,6 @@ if(TARGET external-gmp OR
 		target_link_libraries(filter_csg PRIVATE external-gmp)
 	else()
 		target_link_libraries(filter_csg PRIVATE external-mpir)
-		target_link_libraries(filter_csg PRIVATE external-mpirxx)
 	endif()
 
 	set_property(TARGET filter_csg PROPERTY FOLDER Plugins)
