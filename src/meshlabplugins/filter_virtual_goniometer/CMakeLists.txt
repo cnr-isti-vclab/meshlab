@@ -12,7 +12,7 @@ set(RESOURCES meshlab.qrc)
 add_library(filter_virtual_goniometer MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(filter_virtual_goniometer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_virtual_goniometer PUBLIC common)
+target_link_libraries(filter_virtual_goniometer PUBLIC meshlab-common)
 
 set_property(TARGET filter_virtual_goniometer PROPERTY FOLDER Plugins)
 

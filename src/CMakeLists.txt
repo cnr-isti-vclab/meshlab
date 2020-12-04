@@ -206,6 +206,7 @@ else()
 		meshlabplugins/filter_texture
 		meshlabplugins/filter_trioptimize
 		meshlabplugins/filter_unsharp
+		meshlabplugins/filter_virtual_goniometer
 		meshlabplugins/filter_voronoi
 
 		# Rendering and Decoration Plugins

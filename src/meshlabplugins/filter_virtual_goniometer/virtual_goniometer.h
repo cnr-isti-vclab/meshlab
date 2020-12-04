@@ -21,18 +21,17 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTER_SELECT_H
-#define FILTER_SELECT_H
+#ifndef VIRTUAL_GONIOMETER_FILLTER_H
+#define VIRTUAL_GONIOMETER_FILLTER_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-
-class VirtualGoniometerFilterPlugin : public QObject, public MeshFilterInterface
+class VirtualGoniometerFilterPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 		
 		public:
 	/* naming convention : 
@@ -48,16 +47,19 @@ class VirtualGoniometerFilterPlugin : public QObject, public MeshFilterInterface
 
 	VirtualGoniometerFilterPlugin();
   //~VirtualGoniometerFilterPlugin();
+	
+	QString pluginName() const;
+	
 	QString filterInfo(FilterIDType filter) const;
    QString filterName(FilterIDType filter) const;
-   FilterClass getClass(QAction *);
+   FilterClass getClass(const QAction *) const;
 
    void initParameterSet(QAction *action, MeshModel &m, RichParameterList &parlst);
-   int getPreConditions(QAction *) const;
-   int postCondition( QAction* ) const;
-   int getRequirements(QAction *);
-   bool applyFilter(QAction* filter, MeshDocument& md, const RichParameterList& par, vcg::CallBackPos* cb) ;
-   FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+   int getPreConditions(const QAction *) const;
+   int postCondition(const QAction* ) const;
+   int getRequirements(const QAction *);
+   bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int&, const RichParameterList& par, vcg::CallBackPos* cb) ;
+   FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
-#endif
+#endif //VIRTUAL_GONIOMETER_FILLTER_H
