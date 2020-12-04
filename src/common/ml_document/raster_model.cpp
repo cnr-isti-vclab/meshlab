@@ -25,15 +25,14 @@
 
 #include "mesh_document.h"
 
-RasterModel::RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName)
-{
-    _id=id;
-    par = parent;
-    this->_label= std::move(_rasterName);
-    visible=true;
-}
-
 RasterModel::RasterModel()
 {
+}
 
+RasterModel::RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName)
+{
+	_id=id;
+	par = parent;
+	this->_label= std::move(_rasterName);
+	visible=true;
 }

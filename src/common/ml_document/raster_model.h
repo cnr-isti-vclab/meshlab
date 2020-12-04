@@ -38,32 +38,30 @@ and with all the images sharing the same shot.
 class RasterModel : public MeshLabRenderRaster
 {
 public:
-    RasterModel();
-    MeshDocument* par;
-
+	RasterModel();
+	RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName=QString());
+	
+	MeshDocument* par;
+	bool visible;
+	inline int id() const {return _id;}
+	
+	void setLabel(QString newLabel) {_label = newLabel;}
+	
+	const QString label() const {
+		if(!_label.isEmpty())  return _label;
+		if(!planeList.empty()) return planeList.first()->shortName();
+		return "Error!";
+	}
+	
+	enum RasterElement
+	{
+		RM_NONE		= 0x00000000,
+		RM_ALL		= 0xffffffff
+	};
+	
 private:
-    int _id;
-    QString _label;
-
-public:
-    bool visible;
-    inline int id() const {return _id;}
-
-    RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName=QString());
-
-    void setLabel(QString newLabel) {_label = newLabel;}
-
-    const QString label() const {
-        if(!_label.isEmpty())  return _label;
-        if(!planeList.empty()) return planeList.first()->shortName();
-        return "Error!";
-    }
-
-    enum RasterElement
-    {
-        RM_NONE		= 0x00000000,
-        RM_ALL		= 0xffffffff
-    };
+	int _id;
+	QString _label;
 };// end class RasterModel
 
 #endif // RASTER_MODEL_H
