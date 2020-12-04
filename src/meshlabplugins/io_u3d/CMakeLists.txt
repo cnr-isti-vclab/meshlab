@@ -8,7 +8,7 @@ if(TARGET external-IDTFConverter)
 	set(SOURCES io_u3d.cpp)
 
 	set(HEADERS io_u3d.h)
-	include_directories("${U3D_DIR}/src/IDTF")
+	include_directories("${EXTERNAL_DIR}/u3d/src/IDTF")
 
 	add_library(io_u3d MODULE ${SOURCES} ${HEADERS})
 

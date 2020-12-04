@@ -81,7 +81,7 @@ bool U3DIOPlugin::save(
 		const int mask, 
 		const RichParameterList & par, 
 		vcg::CallBackPos *, 
-		QWidget *parent)
+		QWidget *)
 {
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);

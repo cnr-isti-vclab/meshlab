@@ -26,6 +26,9 @@ find_package(
 	COMPONENTS OpenGL Xml Network
 	REQUIRED)
 find_package(OpenMP)
+if (NOT BUILD_MINI)
+	find_package(Qt5Qml)
+endif()
 
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
@@ -103,14 +106,24 @@ endif()
 
 ### Enter subdirectories
 
+# VCGLib -- required
+if(NOT VCGDIR)
+	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
+	if(NOT EXISTS ${VCGDIR})
+		set(VCGDIR NOTFOUND)
+	endif()
+endif()
+set(VCGDIR "${VCGDIR}")
+
+if(NOT VCGDIR)
+	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
+endif()
+
+
 # External
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-include(${CMAKE_CURRENT_SOURCE_DIR}/external_common.cmake)
-if(NOT BUILD_MINI)
-	message(STATUS "Searching for optional components")
-	find_package(Qt5Qml)
-	include(${EXTERNAL_DIR}/external.cmake)
-endif()
+include(${EXTERNAL_DIR}/external_common.cmake)
+add_subdirectory(${EXTERNAL_DIR})
 
 # Start automoc/autouic/autorcc
 set(CMAKE_AUTOMOC ON)
