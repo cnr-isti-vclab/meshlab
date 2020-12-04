@@ -82,6 +82,7 @@ public:
 	
 	
 	int size() const;
+	int sizeRasters() const;
 	bool isBusy();  // used in processing. To disable access to the mesh by the rendering thread
 	void setBusy(bool _busy);
 

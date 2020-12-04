@@ -276,6 +276,11 @@ int MeshDocument::size() const
 	return meshList.size();
 }
 
+int MeshDocument::sizeRasters() const
+{
+	return rasterList.size();
+}
+
 bool MeshDocument::isBusy()
 {
 	return busy;
