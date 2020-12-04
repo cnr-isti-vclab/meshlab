@@ -108,6 +108,11 @@ VirtualGoniometerFilterPlugin::VirtualGoniometerFilterPlugin()
    }
 }
 
+QString VirtualGoniometerFilterPlugin::pluginName() const
+{
+	return "FilterVirtualGoniometer";
+}
+
 QString VirtualGoniometerFilterPlugin::filterName(FilterIDType filter) const
 {
  switch(filter)
@@ -859,7 +864,7 @@ void get_date_time(char *dt){
 }
 
 //Main code here
-bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
+bool VirtualGoniometerFilterPlugin::applyFilter(const QAction* action, MeshDocument &md, std::map<string, QVariant>&, unsigned int&, const RichParameterList & par, vcg::CallBackPos *)
 //bool VirtualGoniometerFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterList & par, vcg::CallBackPos * cb)
 {
    if (md.mm() == NULL)
@@ -969,7 +974,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
    {
       case FP_QUALITY_VIRTUAL_GONIOMETER_RESET:
       {
-         Log("Reseting Virtual Goniometer.\n");
+         log("Reseting Virtual Goniometer.\n");
          break_number = 1;
          measurement_number = 1;
 
@@ -1024,10 +1029,10 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
                myFile.close();
 
                if(num_matching == 0){
-                  Log("Found no measurements for this mesh in the CSV file.\n");
+                  log("Found no measurements for this mesh in the CSV file.\n");
                   break;
                }
-               Log("Loading %d measurements from CSV file...\n",num_matching);
+               log("Loading %d measurements from CSV file...\n",num_matching);
 
                //Reorganize csv file so matching measurements are at the end
                ofstream fout;
@@ -1061,7 +1066,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
                      float y = stof(csv_line[10]);
                      float z = stof(csv_line[11]);
 
-                     Log("Break #%d, Radius=%.1f, Angle = %.0f\n", break_number, radius, angle);
+                     log("Break #%d, Radius=%.1f, Angle = %.0f\n", break_number, radius, angle);
 
                      int ind = 0;
                      float min_dist = 0.0;
@@ -1129,8 +1134,8 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
          break_number++;
 
          //Print message to log
-         Log("Moving to Break Edge #%d\n",break_number);
-         this->RealTimeLog(QString("Virtual Goniometer"),m.shortName(),"Moving to Break Edge #%d\n",break_number);
+         log("Moving to Break Edge #%d\n",break_number);
+         this->realTimeLog(QString("Virtual Goniometer"),m.shortName(),"Moving to Break Edge #%d\n",break_number);
 
          //Gray out old measurements
          change_contrast_patch(m, subset_indices(past_selection_break,break_number-1), 0.4);
@@ -1140,13 +1145,13 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
       {
          if(measurement_number >=1 && break_number != past_break_numbers[measurement_number-1]){
 
-            Log("Reverting back to break #%d\n",break_number-1);
+            log("Reverting back to break #%d\n",break_number-1);
             break_number--;
             change_contrast_patch(m, subset_indices(past_selection_break,break_number), 1.0/0.4);
 
          }else if(measurement_number > 1){
 
-            Log("Undoing virtual goniometer measurement.\n");
+            log("Undoing virtual goniometer measurement.\n");
             measurement_number--;
             indices = subset_indices(past_selection, measurement_number);
             color_patch(m, indices, Color4b::LightGray);
@@ -1157,7 +1162,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
             remove_last_lines(out_file,num_lines[measurement_number]);
 
          }else{
-            Log("No measurements to undo!\n");
+            log("No measurements to undo!\n");
          }
 
          break;
@@ -1215,7 +1220,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
                //tree.doQueryDist(m.cm.vert[ind].cP(),radius,points,dists);
 
                if(ComponentVector.size() <= 10){
-                  Log("Radius too small.");
+                  log("Radius too small.");
                   break;
                }else{
                   num_selected_pts = ComponentVector.size();
@@ -1295,7 +1300,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
                   color_patch(m, subset_indices(points,C,2), Color2[(break_number-1)%num_color_combos]);
                }
 
-               Log("Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, rad, theta[0], fit);
+               log("Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, rad, theta[0], fit);
                //this->RealTimeLog(QString("Virtual Goniometer"),m.shortName(),"Break #%d, Radius=%.1f, Angle = %.0f\n", break_number, radius, theta[0]);
 
                float frac_measurement_number = measurement_number + (float)j/(float)num_radii;
@@ -1341,8 +1346,8 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
          color_patch(m, subset_indices(indices,C,2), Color2[(break_number-1)%num_color_combos]);
 
          //Print angle to log
-         Log("Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, radius, theta[0], fit);
-         this->RealTimeLog(QString("Virtual Goniometer"),m.shortName(),"Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, radius, theta[0], fit);
+         log("Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, radius, theta[0], fit);
+         this->realTimeLog(QString("Virtual Goniometer"),m.shortName(),"Break #%d, Radius=%.1f, Angle = %.0f, Fit = %.4f\n", break_number, radius, theta[0], fit);
 
          //Output to csv file 
          pFile = fopen(out_file,"a");
@@ -1361,19 +1366,19 @@ bool VirtualGoniometerFilterPlugin::applyFilter(QAction * action, MeshDocument &
    return true;
 }
 
-MeshFilterInterface::FilterClass VirtualGoniometerFilterPlugin::getClass(QAction *action)
+FilterPluginInterface::FilterClass VirtualGoniometerFilterPlugin::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
-	   case FP_QUALITY_VIRTUAL_GONIOMETER: return FilterClass(MeshFilterInterface::Quality);
-	   case FP_QUALITY_VIRTUAL_GONIOMETER_NEXT: return FilterClass(MeshFilterInterface::Quality);
-	   case FP_QUALITY_VIRTUAL_GONIOMETER_UNDO: return FilterClass(MeshFilterInterface::Quality);
-	   case FP_QUALITY_VIRTUAL_GONIOMETER_RESET: return FilterClass(MeshFilterInterface::Quality);
+	   case FP_QUALITY_VIRTUAL_GONIOMETER: return FilterClass(Quality);
+	   case FP_QUALITY_VIRTUAL_GONIOMETER_NEXT: return FilterClass(Quality);
+	   case FP_QUALITY_VIRTUAL_GONIOMETER_UNDO: return FilterClass(Quality);
+	   case FP_QUALITY_VIRTUAL_GONIOMETER_RESET: return FilterClass(Quality);
   }
-  return MeshFilterInterface::Selection;
+  return Selection;
 }
 
- int VirtualGoniometerFilterPlugin::getRequirements(QAction *action)
+ int VirtualGoniometerFilterPlugin::getRequirements(const QAction* action)
 {
  switch(ID(action))
   {
@@ -1386,7 +1391,7 @@ MeshFilterInterface::FilterClass VirtualGoniometerFilterPlugin::getClass(QAction
   }
 }
 
-int VirtualGoniometerFilterPlugin::postCondition(QAction *action) const
+int VirtualGoniometerFilterPlugin::postCondition(const QAction* action) const
 {
 	switch(ID(action))
 	{
@@ -1394,7 +1399,7 @@ int VirtualGoniometerFilterPlugin::postCondition(QAction *action) const
   return MeshModel::MM_ALL;
 }
 
-int VirtualGoniometerFilterPlugin::getPreConditions( QAction * action) const
+int VirtualGoniometerFilterPlugin::getPreConditions(const QAction* action) const
 {
   switch(ID(action))
   {
