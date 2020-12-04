@@ -41,7 +41,8 @@ fi
 
 if [ -e $QTDIR/bin/macdeployqt ]
 then
-    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_globalregistration.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+    
 else
-    macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+    macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_globalregistration.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
 fi
