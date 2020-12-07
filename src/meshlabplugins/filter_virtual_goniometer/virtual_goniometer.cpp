@@ -931,13 +931,13 @@ bool VirtualGoniometerFilterPlugin::applyFilter(const QAction* action, MeshDocum
 
    //Colors used in VG
    vector<Color4b> VGcolors{Color4b::Red,Color4b::Blue,Color4b::Green,Color4b::Magenta,Color4b::Yellow,Color4b::Cyan,Color4b::Black};
-   vector<char*> ColorNames{"Red","Blue","Green","Magenta","Yellow","Cyan","Black"};
+   vector<std::string> ColorNames{"Red","Blue","Green","Magenta","Yellow","Cyan","Black"};
    int num_colors = VGcolors.size();
    static int num_color_combos;
    static vector<Color4b> Color1;
    static vector<Color4b> Color2;
-   static vector<char*> Color1_name;
-   static vector<char*> Color2_name;
+   static vector<std::string> Color1_name;
+   static vector<std::string> Color2_name;
 
    //Runs first time VG called
    if(first_VG){           
@@ -1307,7 +1307,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(const QAction* action, MeshDocum
 
                //Output to csv file 
                pFile = fopen(out_file,"a");
-               fprintf(pFile,"%s,%s,%.2f,%d,%s/%s, ,%f,%d,%f,%f,%f,%f,%f,%f\n",plyfile,date_time,frac_measurement_number,break_number,Color1_name[(break_number-1)%num_color_combos],Color2_name[(break_number-1)%num_color_combos],theta[0],points.size(),rad,m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],fit,SegParam);
+               fprintf(pFile,"%s,%s,%.2f,%d,%s/%s, ,%f,%d,%f,%f,%f,%f,%f,%f\n",plyfile,date_time,frac_measurement_number,break_number,Color1_name[(break_number-1)%num_color_combos].c_str(),Color2_name[(break_number-1)%num_color_combos].c_str(),theta[0],points.size(),rad,m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],fit,SegParam);
                fclose(pFile);
 
                rad+=change;
@@ -1351,7 +1351,7 @@ bool VirtualGoniometerFilterPlugin::applyFilter(const QAction* action, MeshDocum
 
          //Output to csv file 
          pFile = fopen(out_file,"a");
-         fprintf(pFile,"%s,%s,%d,%d,%s/%s, ,%f,%d,%f,%f,%f,%f,%f,%f\n",plyfile,date_time,measurement_number,break_number,Color1_name[(break_number-1)%num_color_combos],Color2_name[(break_number-1)%num_color_combos],theta[0],num_selected_pts,radius,surf_meanx,surf_meany,surf_meanz,fit,SegParam);
+         fprintf(pFile,"%s,%s,%d,%d,%s/%s, ,%f,%d,%f,%f,%f,%f,%f,%f\n",plyfile,date_time,measurement_number,break_number,Color1_name[(break_number-1)%num_color_combos].c_str(),Color2_name[(break_number-1)%num_color_combos].c_str(),theta[0],num_selected_pts,radius,surf_meanx,surf_meany,surf_meanz,fit,SegParam);
          fclose(pFile);
 
          //Increment measurement number
