@@ -57,8 +57,6 @@ public:
 	inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return decoratePlugins;}
 	inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return editPlugins;}
 
-	QMap<QString,RichParameterList> generateFilterParameterMap();
-
 	DecoratePluginInterface* getDecoratorInterfaceByName(const QString& name);
 
 	class PluginRangeIterator 
