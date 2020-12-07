@@ -40,11 +40,12 @@
 #include <QElapsedTimer>
 #include <QMimeData>
 
-#include "../common/meshlabdocumentxml.h"
-#include "../common/meshlabdocumentbundler.h"
-#include "../common/mlapplication.h"
-#include "../common/filterscript.h"
-#include "../common/mlexception.h"
+#include <common/meshlabdocumentxml.h>
+#include <common/meshlabdocumentbundler.h>
+#include <common/mlapplication.h>
+#include <common/filterscript.h>
+#include <common/mlexception.h>
+#include <common/globals/globals.h>
 
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
@@ -2611,8 +2612,8 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qUtf8Printable(pluginManager().getDefaultPluginDirPath()));
-	PluginInfoDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ", qUtf8Printable(meshlab::defaultPluginPath()));
+	PluginInfoDialog dialog(meshlab::defaultPluginPath(), PM.pluginsLoaded, this);
 	dialog.exec();
 }
 

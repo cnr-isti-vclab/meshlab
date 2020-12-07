@@ -292,14 +292,14 @@ private:
 	*/
 
 	RichParameterList currentGlobalParams;
-	RichParameterList defaultGlobalParams;
+	RichParameterList& defaultGlobalParams;
 
 	QByteArray toolbarState; //toolbar and dockwidgets state
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 public:
-	PluginManager PM;
+	PluginManager& PM;
 
 	MeshDocument *meshDoc() {
 		if (currentViewContainer() != NULL)

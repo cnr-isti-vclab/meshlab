@@ -29,6 +29,7 @@
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
+#include "globals/globals.h"
 
 static QStringList fileNamePluginDLLs() {
 	QStringList l;
@@ -55,40 +56,47 @@ static QString fileNamePrefixPluginDLLs() {
 
 PluginManager::PluginManager()
 {
-	//pluginsDir=QDir(getPluginDirPath());
-	//without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	//qApp->addLibraryPath(getPluginDirPath());
-	//qApp->addLibraryPath(getBaseDirPath());
+}
+
+PluginManager::PluginManager(RichParameterList& defaultGlobal)
+{
+	loadPlugins(defaultGlobal);
+}
+
+PluginManager::PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
+{
+	loadPlugins(defaultGlobal, pluginsDirectory);
 }
 
 PluginManager::~PluginManager()
 {
 	ioMeshPlugins.clear();
-	meshFilterPlug.clear();
-	meshRenderPlug.clear();
-	meshDecoratePlug.clear();
+	filterPlugins.clear();
+	renderPlugins.clear();
+	decoratePlugins.clear();
 	for (PluginInterface* plugin : ownerPlug)
 		delete plugin;
 	ownerPlug.clear();
 	
-	for (int ii = 0; ii < meshEditInterfacePlug.size(); ++ii)
-		delete meshEditInterfacePlug[ii];
-	meshEditInterfacePlug.clear();
+	for (int ii = 0; ii < editPlugins.size(); ++ii)
+		delete editPlugins[ii];
+	editPlugins.clear();
 }
 
 
 
 void PluginManager::loadPlugins(RichParameterList& defaultGlobal)
 {
-	loadPlugins(defaultGlobal, QDir(getDefaultPluginDirPath()));
+	loadPlugins(defaultGlobal, QDir(meshlab::defaultPluginPath()));
 }
 
 void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
 {
 	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	qApp->addLibraryPath(getDefaultPluginDirPath());
-	qApp->addLibraryPath(getBaseDirPath());
+	// ToDo: get rid of any qApp here
+	qApp->addLibraryPath(meshlab::defaultPluginPath());
+	//qApp->addLibraryPath(getBaseDirPath());
 	QStringList nameFiltersPlugins = fileNamePluginDLLs();
 	
 	//only the file with extension pluginfilters will be listed by function entryList()
@@ -140,7 +148,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 						actionFilterMap.insert(filterAction->text(), filterAction);
 						stringFilterMap.insert(filterAction->text(), iFilter);
 					}
-					meshFilterPlug.push_back(iFilter);
+					filterPlugins.push_back(iFilter);
 				}
 			}
 			IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
@@ -160,7 +168,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iDecorator)
 			{
 				iCommon = iDecorator;
-				meshDecoratePlug.push_back(iDecorator);
+				decoratePlugins.push_back(iDecorator);
 				for(QAction *decoratorAction : iDecorator->actions())
 				{
 					decoratorActionList.push_back(decoratorAction);
@@ -172,13 +180,13 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iRender)
 			{
 				iCommon = iRender;
-				meshRenderPlug.push_back(iRender);
+				renderPlugins.push_back(iRender);
 			}
 			
 			EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
 			if (iEditFactory)
 			{
-				meshEditInterfacePlug.push_back(iEditFactory);
+				editPlugins.push_back(iEditFactory);
 				foreach(QAction* editAction, iEditFactory->actions())
 					editActionList.push_back(editAction);
 			}
@@ -244,72 +252,6 @@ QMap<QString, RichParameterList> PluginManager::generateFilterParameterMap()
 	}
 	return FPM;
 }
-
-QString PluginManager::getBaseDirPath()
-{
-	QDir baseDir(qApp->applicationDirPath());
-	
-#if defined(Q_OS_WIN)
-	// Windows:
-	// during development with visual studio binary could be in the debug/release subdir.
-	// once deployed plugins dir is in the application directory, so
-	if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp(); 
-#endif
-	
-#if defined(Q_OS_MAC)
-	// Mac: during developmentwith xcode  and well deployed the binary is well buried.
-	for(int i=0;i<6;++i){
-		if(baseDir.exists("plugins")) break;
-		baseDir.cdUp();
-	}
-	qDebug("The base dir is %s", qUtf8Printable(baseDir.absolutePath()));
-#endif
-	return baseDir.absolutePath();
-}
-
-QString PluginManager::getDefaultPluginDirPath()
-{
-	QDir pluginsDir(getBaseDirPath());
-#if defined(Q_OS_WIN)
-	QString d = pluginsDir.dirName();
-	QString dLower = d.toLower();
-	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
-			dLower == "minsizerel") {
-		// This is a configuration directory for MS Visual Studio.
-		pluginsDir.cdUp();
-	} else {
-		d.clear();
-	}
-#endif
-	if (pluginsDir.exists("plugins")) {
-		pluginsDir.cd("plugins");
-		
-#if defined(Q_OS_WIN)
-		// Re-apply the configuration dir, if any.
-		if (!d.isEmpty() && pluginsDir.exists(d)) {
-			pluginsDir.cd(d);
-		}
-#endif
-		
-		return pluginsDir.absolutePath();
-	}
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
-	else if (pluginsDir.dirName() == "bin") {
-		pluginsDir.cdUp();
-		pluginsDir.cd("lib");
-		pluginsDir.cd("meshlab");
-		if (pluginsDir.exists("plugins")) {
-			pluginsDir.cd("plugins");
-			return pluginsDir.absolutePath();
-		}
-	}
-#endif
-	//QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
-	qDebug("Meshlab Initialization: Serious error. Unable to find the plugins directory.");
-	return {};
-}
-
-
 
 void PluginManager::fillKnownIOFormats()
 {

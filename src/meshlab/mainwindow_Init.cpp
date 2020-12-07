@@ -22,10 +22,6 @@
 ****************************************************************************/
 
 
-#include "../common/searcher.h"
-#include "../common/mlapplication.h"
-#include "../common/mlexception.h"
-
 #include <QToolBar>
 #include <QProgressBar>
 #include <QNetworkRequest>
@@ -40,6 +36,11 @@
 #include <QWidgetAction>
 #include <QMessageBox>
 #include "mainwindow.h"
+#include <common/searcher.h>
+#include <common/mlapplication.h>
+#include <common/mlexception.h>
+#include <common/globals/globals.h>
+#include <common/globals/singletons.h>
 #include "dialogs/options_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
@@ -50,6 +51,8 @@ QProgressBar *MainWindow::qb;
 MainWindow::MainWindow(): 
 	httpReq(this), 
 	gpumeminfo(NULL),
+	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
+	PM(meshlab::MeshLabSingletons::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {
 	setContextMenuPolicy(Qt::NoContextMenu);
@@ -82,7 +85,7 @@ MainWindow::MainWindow():
 	//should update those values only after I run MeshLab for the very first time or after I installed a new version
 	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
 	{
-		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(), PluginManager::getDefaultPluginDirPath());
+		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(), meshlab::defaultPluginPath());
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(), MeshLabApplication::appVer());
 		settings.setValue(MeshLabApplication::wordSizeKeyName(), QSysInfo::WordSize);
 		foreach(QString plfile, PM.pluginsLoaded)
