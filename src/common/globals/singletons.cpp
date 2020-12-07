@@ -11,13 +11,7 @@ MeshLabSingletons::MeshLabSingletons()
 
 PluginManager& MeshLabSingletons::pluginManagerInstance()
 {
-	static bool initialized = false;
-	static PluginManager pm;
-	if (!initialized){
-		initialized = true;
-		RichParameterList& globalRPS = defaultGlobalParameterList();
-		pm.loadPlugins(globalRPS);
-	}
+	static PluginManager pm(defaultGlobalParameterList());
 	return pm;
 }
 

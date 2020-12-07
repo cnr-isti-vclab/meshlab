@@ -48,7 +48,7 @@ QString basePath()
 #if defined(Q_OS_MAC)
 	// Mac: during developmentwith xcode  and well deployed the binary is well buried.
 	for(int i=0;i<6;++i){
-		if(baseDir.exists("plugins")) break;
+		if(baseDir.exists("plugins") || baseDir.exists("PlugIns")) break;
 		baseDir.cdUp();
 	}
 	qDebug("The base dir is %s", qUtf8Printable(baseDir.absolutePath()));
@@ -70,6 +70,11 @@ QString meshlab::defaultPluginPath()
 		d.clear();
 	}
 #endif
+	if (pluginsDir.exists("PlugIns")){
+		pluginsDir.cd("PlugIns");
+		return pluginsDir.absolutePath();
+	}
+	
 	if (pluginsDir.exists("plugins")) {
 		pluginsDir.cd("plugins");
 		
