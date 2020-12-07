@@ -230,29 +230,6 @@ PluginManager::PluginRangeIterator PluginManager::pluginIterator()
 	return PluginRangeIterator(this);
 }
 
-/*
-This function create a map from filtername to dummy RichParameterSet.
-containing for each filtername the set of parameter that it uses.
-*/
-QMap<QString, RichParameterList> PluginManager::generateFilterParameterMap()
-{
-	QMap<QString, RichParameterList> FPM;
-	MeshDocument md;
-	MeshModel* mm = md.addNewMesh("", "dummy", true);
-	vcg::tri::Tetrahedron<CMeshO>(mm->cm);
-	mm->updateDataMask(MeshModel::MM_ALL);
-	QMap<QString, QAction*>::iterator ai;
-	for (ai = this->actionFilterMap.begin(); ai != this->actionFilterMap.end(); ++ai)
-	{
-		QString filterName = ai.key();//  ->filterName();
-		//QAction act(filterName,NULL);
-		RichParameterList rp;
-		stringFilterMap[filterName]->initParameterList(ai.value(), md, rp);
-		FPM[filterName] = rp;
-	}
-	return FPM;
-}
-
 void PluginManager::fillKnownIOFormats()
 {
 	QString allKnownFormatsFilter = QObject::tr("All known formats (");
