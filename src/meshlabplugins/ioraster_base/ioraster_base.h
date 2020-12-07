@@ -35,7 +35,7 @@ class IORasterBasePlugin : public QObject, public IORasterPluginInterface
 
 public:
 
-	IORasterBasePlugin() : IORasterPluginInterface() {}
+	IORasterBasePlugin();
 	QString pluginName() const;
 	
 	QList<FileFormat> importFormats() const;
@@ -45,6 +45,9 @@ public:
 			const QString& filename, 
 			RasterModel& rm,
 			vcg::CallBackPos* cb = nullptr);
+	
+private:
+	QList<FileFormat> formatList;
 };
 
 #endif //MESHLAB_IORASTER_BASE_H

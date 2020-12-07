@@ -28,6 +28,15 @@
 
 
 
+IORasterBasePlugin::IORasterBasePlugin() :
+	IORasterPluginInterface(),
+	formatList({FileFormat("JPEG", tr("JPEG")),
+				FileFormat("JPG", tr("JPG")),
+				FileFormat("PNG", tr("PNG")),
+				FileFormat("XPM", tr("XPM"))})
+{
+}
+
 QString IORasterBasePlugin::pluginName() const
 {
 	return "IORasterBase";
@@ -35,11 +44,6 @@ QString IORasterBasePlugin::pluginName() const
 
 QList<FileFormat> IORasterBasePlugin::importFormats() const
 {
-	QList<FileFormat> formatList {
-		FileFormat("JPEG", tr("JPEG")),
-		FileFormat("PNG", tr("PNG")),
-		FileFormat("XPM", tr("XPM"))
-	};
 	return formatList;
 }
 
@@ -49,7 +53,13 @@ bool IORasterBasePlugin::open(
 		RasterModel& rm,
 		vcg::CallBackPos*)
 {
-	if (format.toUpper() == tr("JPEG") || format.toUpper() == tr("PNG") || format.toUpper() == tr("XPM")) {
+	bool supportedFormat = false;
+	for (const FileFormat& f : formatList){
+		if (f.extensions.first().toUpper() == format.toUpper())
+			supportedFormat = true;
+	}
+	
+	if (supportedFormat) {
 		QFileInfo fi(filename);
 		
 		if(!fi.exists()) 	{
