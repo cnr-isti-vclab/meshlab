@@ -162,6 +162,7 @@ jobs:
           echo  ::set-output name=version::"$(cat ML_VERSION)"
           echo  ::set-output name=artifact_suffix::""
         fi
+        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
     - name: Configure and Build
       shell: bash
       run: |
