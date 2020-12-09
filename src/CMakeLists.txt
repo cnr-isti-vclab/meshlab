@@ -272,6 +272,16 @@ foreach(FN ${SHADERS})
 	)
 	list(APPEND COPIED_FILES "${OUTFN}")
 endforeach()
+#shaderdirs
+set(SHADER_DIRS
+	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/decorate_shadow"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/shadersrm"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/splatpyramid")
+foreach(SD ${SHADER_DIRS})
+	file(COPY ${SD} DESTINATION ${MESHLAB_SHADER_OUTPUT_DIR})
+	install(DIRECTORY ${SD} DESTINATION ${MESHLAB_SHADER_INSTALL_DIR})
+endforeach()
+
 
 # Custom target - to trigger the execution of the custom commands above.
 add_custom_target(copy-distrib-files ALL DEPENDS ${COPIED_FILES})
