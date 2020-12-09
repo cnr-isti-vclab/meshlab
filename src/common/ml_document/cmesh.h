@@ -38,6 +38,10 @@ template <class T> class Normal3m: public Normal<vcg::Point3<MESHLAB_SCALAR>, T>
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
 };
 
+template <class T> class Qualitym: public Quality<MESHLAB_SCALAR, T> {
+public: static void Name(std::vector<std::string> & name){name.push_back(std::string("Qualitym"));T::Name(name);}
+};
+
 template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
 };
@@ -80,7 +84,7 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 		vcg::vertex::Coord3m,           /* 12b */
 		vcg::vertex::BitFlags,          /*  4b */
 		vcg::vertex::Normal3m,          /* 12b */
-		vcg::vertex::Qualityf,          /*  4b */
+		vcg::vertex::Qualitym,          /*  4b */
 		vcg::vertex::Color4b,           /*  4b */
 		vcg::vertex::VFAdjOcf,          /*  0b */
 		vcg::vertex::MarkOcf,           /*  0b */
