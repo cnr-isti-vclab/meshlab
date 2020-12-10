@@ -139,7 +139,7 @@ return QString("Filter Unknown");
 
     if (filterId & _COLORIZE_)
     {
-        str += "Colorize the vertices of a mesh or point set using the curfvature of the underlying surface.<br>";
+        str += "Colorize the vertices of a mesh or point set using the curvature of the underlying surface.<br>";
     }
 
     if (filterId & _APSS_)
