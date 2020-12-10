@@ -11,7 +11,7 @@ set(RESOURCES edit_point.qrc)
 add_library(edit_point MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_include_directories(edit_point PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_point PUBLIC meshlab-common)
+target_link_libraries(edit_point PUBLIC meshlab-common OpenGL::GLU)
 
 set_property(TARGET edit_point PROPERTY FOLDER Plugins)
 
