@@ -26,7 +26,7 @@
 #include <meshlab/glarea.h>
 #include "edit_point.h"
 
-#include <wrap/gl/picking.h> //new
+#include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
 #include <vcg/space/fitting3.h>
@@ -54,7 +54,7 @@ QString EditPointPlugin::pluginName() const
     return "EditPoint";
 }
 
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
+void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
 {
   this->realTimeLog("Point Selection",m.shortName(),
                     "<table>"
