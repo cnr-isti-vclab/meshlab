@@ -25,9 +25,12 @@
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include "edit_point.h"
+
+#include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
 #include <vcg/space/fitting3.h>
+#include <wrap/qt/trackball.h>
 
 #include <vcg/complex/algorithms/create/platonic.h>
 
@@ -51,7 +54,7 @@ QString EditPointPlugin::pluginName() const
     return "EditPoint";
 }
 
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
+void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
 {
   this->realTimeLog("Point Selection",m.shortName(),
                     "<table>"
@@ -68,6 +71,23 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
         glMultMatrix(m.cm.Tr);
         CMeshO::VertexPointer newStartingVertex=0;
         GLPickTri<CMeshO>::PickClosestVert(cur.x(), gla->height() - cur.y(), m.cm, newStartingVertex);
+	     Point3m pp;
+		  bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pp);
+
+        //Find closest vertex to point clicked
+        float a = Distance(m.cm.vert[0].cP(),pp);
+        int ind = 0;
+        for(int j=0; j < m.cm.vert.size(); j++){
+            float dist = Distance(m.cm.vert[j].cP(),pp);
+            if(dist < a){
+                a = dist;
+                ind = j;
+            }
+        }
+        newStartingVertex = &m.cm.vert[ind];
+        //printf("(%d,%d)\n",cur.x(), gla->height() - cur.y());
+        //printf("(%f,%f,%f)\n",pp[0],pp[1],pp[2]);
+        //newStartingVertex = &m.cm.vert[0];
         if(newStartingVertex)
         {
             startingVertex = newStartingVertex;
@@ -207,9 +227,10 @@ void EditPointPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData 
 	dt.set(opts);
 }
 
-void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea * /*gla*/) {
+void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
 
     cur = ev->pos();
+	 currentMousePosition =  QPoint(QT2VCG_X(gla, ev), QT2VCG_Y(gla, ev));        
 
     this->isMousePressed = true;
     if(!(ev->modifiers() & Qt::AltModifier) || startingVertex == NULL)

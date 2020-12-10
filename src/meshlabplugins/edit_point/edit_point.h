@@ -86,6 +86,7 @@ private:
         std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
+        QPoint currentMousePosition; 
 };
 
 #endif
