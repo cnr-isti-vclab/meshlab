@@ -42,6 +42,11 @@ template <class T> class Qualitym: public Quality<MESHLAB_SCALAR, T> {
 public: static void Name(std::vector<std::string> & name){name.push_back(std::string("Qualitym"));T::Name(name);}
 };
 
+template <class T> class CurvaturemOcf: public CurvatureOcf<MESHLAB_SCALAR, T> {
+public: static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvaturemOcf"));T::Name(name);}
+};
+
+
 template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
 };
@@ -51,6 +56,7 @@ public:	static void Name(std::vector<std::string> & name){name.push_back(std::st
 };
 
 }//end namespace vertex
+
 namespace face
 {
 template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
@@ -89,7 +95,7 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 		vcg::vertex::VFAdjOcf,          /*  0b */
 		vcg::vertex::MarkOcf,           /*  0b */
 		vcg::vertex::TexCoordfOcf,      /*  0b */
-		vcg::vertex::CurvaturefOcf,     /*  0b */
+		vcg::vertex::CurvaturemOcf,     /*  0b */
 		vcg::vertex::CurvatureDirmOcf,  /*  0b */
 		vcg::vertex::RadiusmOcf         /*  0b */
 		>{
