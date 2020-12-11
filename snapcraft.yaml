@@ -69,15 +69,18 @@ parts:
       - libqhull-dev
       - patchelf
       - rsync
+      - libqt5opengl5-dev
     stage-packages:
       - lib3ds-1-3
       - libgomp1
       - libopenctm1
       - libqhull7
-      - libglew-dev
-      - libqt5opengl5-dev
-      - qtdeclarative5-dev
       - libqt5gui5
+      - qtwayland5
+      - libglu1-mesa
+      - libopengl0
+      - libqt5opengl5
+      - libqt5xml5
     override-build: |
       sh scripts/Linux/1_build.sh
       sh scripts/Linux/resources/make_bundle.sh
