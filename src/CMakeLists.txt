@@ -249,37 +249,36 @@ endforeach()
 set(COPIED_FILES)
 
 # shaders
+set(SHADER_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders")
 file(
-	GLOB SHADERS
+	GLOB_RECURSE SHADERS
 	LIST_DIRECTORIES false
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.vert"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.frag"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.gdp")
+	"${SHADER_BASE_DIR}/*.vert"
+	"${SHADER_BASE_DIR}/*.frag"
+	"${SHADER_BASE_DIR}/*.gdp")
 foreach(FN ${SHADERS})
+	get_filename_component(SRC_PATH ${FN} DIRECTORY)
 	get_filename_component(NAME_ONLY ${FN} NAME)
-	set(OUTFN ${MESHLAB_SHADER_OUTPUT_DIR}/${NAME_ONLY})
+	file(RELATIVE_PATH REL_DIR "${SHADER_BASE_DIR}" "${SRC_PATH}")
+	set(OUTFN "${MESHLAB_SHADER_OUTPUT_DIR}/${REL_DIR}/${NAME_ONLY}")
+	if(REL_DIR)
+		set(REL_DIR_MESSAGE "${REL_DIR} in ")
+	else()
+		set(REL_DIR_MESSAGE "")
+	endif()
 	add_custom_command(
 		OUTPUT ${OUTFN}
-		COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_SHADER_OUTPUT_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${MESHLAB_SHADER_OUTPUT_DIR}/${REL_DIR}"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FN}" "${OUTFN}"
-		COMMENT "Copying ${NAME_ONLY} to shader build directory"
+		COMMENT "Copying ${NAME_ONLY} to ${REL_DIR_MESSAGE}shader build directory"
 		VERBATIM
 	)
 	install(
 		FILES ${FN}
-		DESTINATION ${MESHLAB_SHADER_INSTALL_DIR}
+		DESTINATION ${MESHLAB_SHADER_INSTALL_DIR}/${REL_DIR}
 		COMPONENT Shaders
 	)
 	list(APPEND COPIED_FILES "${OUTFN}")
-endforeach()
-#shaderdirs
-set(SHADER_DIRS
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/decorate_shadow"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/shadersrm"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/splatpyramid")
-foreach(SD ${SHADER_DIRS})
-	file(COPY ${SD} DESTINATION ${MESHLAB_SHADER_OUTPUT_DIR})
-	install(DIRECTORY ${SD} DESTINATION ${MESHLAB_SHADER_INSTALL_DIR})
 endforeach()
 
 
