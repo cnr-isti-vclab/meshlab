@@ -16,8 +16,8 @@ confinement: strict
 
 apps:
   meshlab:
-    command: desktop-launch $SNAP/AppRun
-    plugs: [home, x11, mir, opengl, removable-media]
+    command: bin/desktop-launch $SNAP/AppRun
+    plugs: [home, desktop, wayland, x11, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
 
 
