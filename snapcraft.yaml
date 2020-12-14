@@ -16,41 +16,14 @@ confinement: strict
 
 apps:
   meshlab:
-    command: bin/desktop-launch $SNAP/AppRun
-    plugs: [home, desktop, wayland, x11, opengl, removable-media]
+    command: AppRun
+    extensions: [kde-neon]
+    plugs: [home, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
 
 
 parts:
-  desktop-qt5:
-    build-packages:
-      - build-essential
-      - qtbase5-dev
-      - dpkg-dev
-    make-parameters:
-      - FLAVOR=qt5
-    plugin: make
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: qt
-    stage-packages:
-      - libxkbcommon0
-      - ttf-ubuntu-font-family
-      - dmz-cursor-theme
-      - light-themes
-      - adwaita-icon-theme
-      - gnome-themes-standard
-      - shared-mime-info
-      - libqt5gui5
-      - libqt5qml5
-      - libgdk-pixbuf2.0-0
-      - libqt5svg5
-      - try:
-        - appmenu-qt5
-      - locales-all
-      - xdg-user-dirs
-      - fcitx-frontend-qt5
   meshlab:
-    after: [desktop-qt5]
     plugin: qmake
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
