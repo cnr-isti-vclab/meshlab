@@ -41,11 +41,6 @@ linux {
     exists(/usr/include/eigen3){
         CONFIG += system_eigen3
     }
-
-    #glew
-    exists(/usr/include/GL/glew.h){
-        CONFIG += system_glew
-    }
 }
 
 }
