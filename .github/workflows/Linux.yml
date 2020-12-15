@@ -19,7 +19,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev libxcb-icccm4 libxcb-image
+       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev libxcb-icccm4 libxcb-image0
     - name: Setup env variables
       id: envs
       shell: bash
