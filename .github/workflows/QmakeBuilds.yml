@@ -11,18 +11,14 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    - name: Update pip
-      run: |
-        pip3 install --upgrade pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        aqtversion: '==0.9.5'
-        py7zrversion: '==0.10.1'
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
        sudo apt-get install -y libxkbcommon-x11-0 patchelf
+       #needed by qt 5.15 on linux
+       sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
       id: envs
       run: |
