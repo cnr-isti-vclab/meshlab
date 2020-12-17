@@ -485,7 +485,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capab
 	}
 	if (format.toUpper() == tr("OFF")) { capability = defaultBits = tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability(); }
 	if (format.toUpper() == tr("WRL")) { capability = defaultBits = tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability(); }
-	if (format.toUpper() == tr("DXF")) { capability = defaultBits = tri::io::Mask::IOM_VERTCOORD & tri::io::Mask::IOM_FACEINDEX;}
+	if (format.toUpper() == tr("DXF")) { capability = defaultBits = tri::io::Mask::IOM_VERTCOORD | tri::io::Mask::IOM_FACEINDEX;}
 
 }
 
