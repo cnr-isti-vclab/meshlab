@@ -71,11 +71,7 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 				"The filter uses the original code of Michael Kazhdan and Matthew Bolitho "
 				"implementing the algorithm described in the following paper:<br>"
 				"<i>Michael Kazhdan, Hugues Hoppe</i>,<br>"
-				"<b>\"Screened Poisson surface reconstruction\"</b><br>"
-				"ACM Trans. Graphics, 32(3), 2013<br><br>"
-				"<b>WARNING:</b> this filter saves intermediate cache files in the \"working\" "
-				"folder (last folder used when loading/saving). Be sure you are not working in "
-				"a READ-ONLY location.<br>";
+				"<b>\"Screened Poisson surface reconstruction\"</b><br>";
 	else {
 		return "Error!";
 	}
