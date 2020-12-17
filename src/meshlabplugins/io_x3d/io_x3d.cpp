@@ -177,10 +177,44 @@ QList<FileFormat> IoX3DPlugin::exportFormats() const
 void IoX3DPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("X3D")){
-		capability = defaultBits = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
-		return;
+		capability = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
+		bool bHasPerWedgeTexCoord = capability & vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		bool bHasPerWedgeNormal = capability & vcg::tri::io::Mask::Mask::IOM_WEDGNORMAL;
+		bool bHasPerWedgeColor = capability & vcg::tri::io::Mask::Mask::IOM_WEDGCOLOR;
+		bool bHasPerVertexColor	= capability & vcg::tri::io::Mask::Mask::IOM_VERTCOLOR;
+		bool bHasPerVertexNormal = capability & vcg::tri::io::Mask::Mask::IOM_VERTNORMAL;
+		bool bHasPerVertexTexCoord = capability & vcg::tri::io::Mask::Mask::IOM_VERTTEXCOORD;
+		bool bHasPerFaceColor = capability & vcg::tri::io::Mask::Mask::IOM_FACECOLOR;
+		bool bHasPerFaceNormal = capability & vcg::tri::io::Mask::Mask::IOM_FACENORMAL;
+		
+		defaultBits = capability;
+		//texcoord
+		if (bHasPerWedgeTexCoord && bHasPerVertexTexCoord)
+			defaultBits &= ~vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		//colors
+		if (bHasPerVertexColor){
+			if (bHasPerFaceColor || bHasPerWedgeColor) {
+				defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_WEDGCOLOR;
+				defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_FACECOLOR;
+			}
+		}
+		else if (bHasPerFaceColor && bHasPerWedgeColor){
+			defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_WEDGCOLOR;
+		}
+		//normals
+		if (bHasPerVertexNormal){
+			if (bHasPerFaceNormal || bHasPerWedgeNormal) {
+				defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_WEDGNORMAL;
+				defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_FACENORMAL;
+			}
+		}
+		else if (bHasPerFaceNormal && bHasPerWedgeNormal){
+			defaultBits &= ~vcg::tri::io::Mask::Mask::IOM_WEDGNORMAL;
+		}
 	}
-	assert(0);
+	else {
+		assert(0);
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(IoX3DPlugin)
