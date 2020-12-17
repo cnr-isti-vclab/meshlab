@@ -152,7 +152,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 			goodColor = md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR);
 		}
 		else {
-			MeshModel *_mm=md.nextVisibleMesh(_mm);
+			MeshModel *_mm=md.nextVisibleMesh();
 			while(_mm != nullptr) {
 				PoissonClean(_mm->cm,  pp.ConfidenceFlag, pp.CleanFlag);
 				goodNormal &= HasGoodNormal(_mm->cm);
@@ -180,7 +180,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 
 		if(params.getBool("visibleLayer")) {
 			Box3m bb;
-			MeshModel *_mm=md.nextVisibleMesh(_mm);
+			MeshModel *_mm=md.nextVisibleMesh();
 			while(_mm != nullptr){
 				bb.Add(_mm->cm.Tr,_mm->cm.bbox);
 				_mm=md.nextVisibleMesh(_mm);
