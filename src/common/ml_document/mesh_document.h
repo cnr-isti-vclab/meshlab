@@ -108,6 +108,19 @@ public:
 	
 	bool hasBeenModified();
 	
+	class MeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		QList<MeshModel*>::iterator begin() {return md->meshList.begin();}
+		QList<MeshModel*>::iterator end() {return md->meshList.end();}
+	private:
+		MeshRangeIterator(MeshDocument* md) : md(md){}
+		MeshDocument* md;
+	};
+	
+	MeshRangeIterator meshIterator();
+	
 	GLLogStream Log;
 	FilterScript filterHistory;
 	

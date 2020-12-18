@@ -420,3 +420,8 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
+MeshDocument::MeshRangeIterator MeshDocument::meshIterator()
+{
+	return MeshRangeIterator(this);
+}
+
