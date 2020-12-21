@@ -256,8 +256,11 @@ jobs:
         name: meshlab_macos_portable_double
     - name: Create MeshLab Portable MacOS
       run: |
-        zip -r MeshLab${{ github.event.inputs.version }}-macos.zip meshlab_macos_portable/
-        zip -r MeshLab${{ github.event.inputs.version }}d-macos.zip meshlab_macos_portable_double/
+        mv meshlab_macos_portable meshlab.app
+        zip -r MeshLab${{ github.event.inputs.version }}-macos.zip meshlab.app/
+        rm -r meshlab.app
+        mv meshlab_macos_portable_double meshlab.app
+        zip -r MeshLab${{ github.event.inputs.version }}d-macos.zip meshlab.app/
 
     #Download Windows Packages
     - name: Download Windows ZIP
