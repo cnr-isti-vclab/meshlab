@@ -120,10 +120,15 @@ jobs:
     - name: Deploy
       run: |
         sh scripts/${{ runner.os }}/2_deploy.sh
-    - name: Create DMG
+    - name: Create MeshLab DMG
       run: |
         sh scripts/${{ runner.os }}/3_dmg.sh --${{ matrix.precision }}
         mv src/install/MeshLab${{steps.envs.outputs.version}}.dmg src/install/MeshLab${{steps.envs.outputs.version}}-macos.dmg
+    - name: Upload MeshLab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
+        path: src/install/meshlab.app
     - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
@@ -241,7 +246,18 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_macos_dmg_double
-
+    - name: Download MacOS Portable
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_macos_portable
+    - name: Download MacOS Portable-d
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_macos_portable_double
+    - name: Create MeshLab Portable MacOS
+      run: |
+        zip -r MeshLab${{ github.event.inputs.version }}-macos.zip meshlab_macos_portable/
+        zip -r MeshLab${{ github.event.inputs.version }}d-macos.zip meshlab_macos_portable_double/
 
     #Download Windows Packages
     - name: Download Windows ZIP
@@ -328,7 +344,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_macos_dmg/MeshLab${{ github.event.inputs.version }}-macos.dmg
         asset_name: MeshLab${{ github.event.inputs.version }}-macos.dmg
-        asset_content_type: MeshLab for MacOS
+        asset_content_type: MeshLab DMG for MacOS
     - name: Upload ReleaseMacOSDMG-d
       id: upload-release-macos-d
       uses: actions/upload-release-asset@v1.0.1
@@ -338,7 +354,27 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_macos_dmg_double/MeshLab${{ github.event.inputs.version }}d-macos.dmg
         asset_name: MeshLab${{ github.event.inputs.version }}d-macos.dmg
-        asset_content_type: MeshLab for MacOS
+        asset_content_type: MeshLab DMG for MacOS
+    - name: Upload ReleaseMacOSPortable
+      id: upload-release-macos-portable
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: MeshLab${{ github.event.inputs.version }}-macos.zip
+        asset_name: MeshLab${{ github.event.inputs.version }}-macos.zip
+        asset_content_type: MeshLab Portable for MacOS
+    - name: Upload ReleaseMacOSPortable-d
+      id: upload-release-macos-portable-d
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: MeshLab${{ github.event.inputs.version }}d-macos.zip
+        asset_name: MeshLab${{ github.event.inputs.version }}d-macos.zip
+        asset_content_type: MeshLab Portable for MacOS
     #Windows
     - name: Upload ReleaseWindowsPortable
       id: upload-release-windows-portable
