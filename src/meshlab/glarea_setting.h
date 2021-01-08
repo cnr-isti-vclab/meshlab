@@ -64,7 +64,7 @@ public:
 	inline static QString pointDistanceAttenuationParam() {return "MeshLab::Appearance::pointDistanceAttenuation";}
 	bool pointSmooth;
 	inline static QString pointSmoothParam() {return "MeshLab::Appearance::pointSmooth";}
-	float pointSize;
+	MESHLAB_SCALAR pointSize;
 	inline static QString pointSizeParam() {return "MeshLab::Appearance::pointSize";}
 	bool wheelDirection;
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}

@@ -389,7 +389,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_THRESHOLDING:
 		{
-			float threshold = math::Clamp<float>(par.getDynamicFloat("threshold"), 0.0f, 255.0f);
+			MESHLAB_SCALAR threshold = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("threshold"), 0.0, 255.0);
 			QColor temp = par.getColor("color1");
 			Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
 			temp = par.getColor("color2");
@@ -402,13 +402,13 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_CONTR_BRIGHT:
 		{
-			float brightness = par.getDynamicFloat("brightness");
-			float contrast = par.getDynamicFloat("contrast");
-			float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1, 5.0);
+			MESHLAB_SCALAR brightness = par.getDynamicFloat("brightness");
+			MESHLAB_SCALAR contrast = par.getDynamicFloat("contrast");
+			MESHLAB_SCALAR gamma = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("gamma"), 0.1, 5.0);
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
-			vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0f,contrast/256.0f , selected);
+			vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0,contrast/256.0 , selected);
 			return true;
 		}
 
@@ -454,10 +454,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_COLOURISATION:
 		{
 			//reads parameters and normalizes their values in [0,1]
-			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0, 1.0);
-			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0, 1.0);
-			float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0, 1.0);
-			float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0, 1.0);
+			MESHLAB_SCALAR luminance = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("luminance")/100, 0.0, 1.0);
+			MESHLAB_SCALAR saturation = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("saturation")/100, 0.0, 1.0);
+			MESHLAB_SCALAR hue = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("hue")/360, 0.0, 1.0);
+			MESHLAB_SCALAR intensity = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("intensity")/100, 0.0, 1.0);
 			bool selected = par.getBool("onSelected");
 
 			double r, g, b;   //converts color from HSL to RGB....

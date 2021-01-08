@@ -124,7 +124,7 @@ bool ExtraSampleDynPlugin::applyFilter(const QAction *, MeshDocument &md, std::m
     const Color4b baseColor = par.getColor4b("baseColor");
 	const MESHLAB_SCALAR percentage  = par.getDynamicFloat("percentage");
 	const MESHLAB_SCALAR freq = par.getDynamicFloat("frequency");
-	const float frequency   = math::Clamp(freq,1.0,1000.0);
+	const MESHLAB_SCALAR frequency   = math::Clamp<MESHLAB_SCALAR>(freq, 1.0, 1000.0);
 
 	CMeshO::VertexIterator vi;
 	

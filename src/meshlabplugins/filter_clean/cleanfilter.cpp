@@ -32,7 +32,7 @@
 using namespace std;
 using namespace vcg;
 
-int SnapVertexBorder(CMeshO &m, float threshold,vcg::CallBackPos * cb);
+int SnapVertexBorder(CMeshO &m, MESHLAB_SCALAR threshold,vcg::CallBackPos * cb);
 
 CleanFilter::CleanFilter()
 {
@@ -274,9 +274,9 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
  {
 	case FP_BALL_PIVOTING:
 	{
-		float Radius = par.getAbsPerc("BallRadius");
-		float Clustering = par.getFloat("Clustering") / 100.0f;
-		float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
+		MESHLAB_SCALAR Radius = par.getAbsPerc("BallRadius");
+		MESHLAB_SCALAR Clustering = par.getFloat("Clustering") / 100.0f;
+		MESHLAB_SCALAR CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
 		bool DeleteFaces = par.getBool("DeleteFaces");
 		if(DeleteFaces) 
 		{
@@ -294,7 +294,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
 	case FP_REMOVE_ISOLATED_DIAMETER:
 	{
-		float minCC= par.getAbsPerc("MinComponentDiag");
+		MESHLAB_SCALAR minCC= par.getAbsPerc("MinComponentDiag");
 		std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
 		log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
 		if (par.getBool("removeUnref"))
@@ -306,7 +306,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
     }break;
 	case FP_REMOVE_ISOLATED_COMPLEXITY:
 	{
-		float minCC= par.getInt("MinComponentSize");
+		int minCC= par.getInt("MinComponentSize");
 		std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
 		log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
 		if (par.getBool("removeUnref"))
@@ -321,7 +321,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 	{
 		int deletedFN=0;
 		int deletedVN=0;
-		float val=par.getAbsPerc("MaxQualityThr");
+		MESHLAB_SCALAR val=par.getAbsPerc("MaxQualityThr");
 		CMeshO::VertexIterator vi;
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
 			if(!(*vi).IsD() && (*vi).Q()<val)
@@ -345,7 +345,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
     case FP_REMOVE_TVERTEX_COLLAPSE :
     {
-		float threshold = par.getFloat("Threshold");
+		MESHLAB_SCALAR threshold = par.getFloat("Threshold");
 		bool repeat = par.getBool("Repeat");
 		int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
 		log("Successfully removed %d t-vertices", total);
@@ -358,7 +358,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 			errorMessage = "Non manifold mesh. Please clean the mesh first.";
 			return false;
 		}
-		float threshold = par.getFloat("Threshold");
+		MESHLAB_SCALAR threshold = par.getFloat("Threshold");
 		bool repeat = par.getBool("Repeat");
 		int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
 		log("Successfully removed %d t-vertices", total);
@@ -366,7 +366,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
 	case FP_MERGE_WEDGE_TEX :
     {
-      float threshold = par.getFloat("MergeThr");
+      MESHLAB_SCALAR threshold = par.getFloat("MergeThr");
       tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
       int total = tri::UpdateTexture<CMeshO>::WedgeTexMergeClose(m.cm, threshold);
       log("Successfully merged %d wedge tex coord distant less than %f", total,threshold);
@@ -409,7 +409,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
 	case FP_REMOVE_NON_MANIF_VERT :
 	{
-		float threshold = par.getFloat("VertDispRatio");
+		MESHLAB_SCALAR threshold = par.getFloat("VertDispRatio");
 		int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
 		log("Successfully split %d non manifold vertices faces", total);
 		m.UpdateBoxAndNormals();
@@ -440,7 +440,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
 	case FP_SNAP_MISMATCHED_BORDER :
 	{
-		float threshold = par.getFloat("EdgeDistRatio");
+		MESHLAB_SCALAR threshold = par.getFloat("EdgeDistRatio");
 		int total = SnapVertexBorder(m.cm, threshold,cb);
 		log("Successfully Split %d faces to snap", total);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
@@ -463,7 +463,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 }
 
 
-int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
+int SnapVertexBorder(CMeshO &m, MESHLAB_SCALAR threshold, vcg::CallBackPos * cb)
 {
   tri::Allocator<CMeshO>::CompactEveryVector(m);
 
