@@ -45,16 +45,16 @@ public:
 
 	virtual bool getBool() const { assert(0); return bool(); }
 	virtual int getInt() const { assert(0); return int(); }
-	virtual float getFloat() const { assert(0); return float(); }
+	virtual MESHLAB_SCALAR getFloat() const { assert(0); return MESHLAB_SCALAR(); }
 	virtual QString getString() const { assert(0); return QString(); }
 	virtual Matrix44m getMatrix44f() const { assert(0); return Matrix44m(); }
-	virtual vcg::Point3f getPoint3f() const { assert(0); return vcg::Point3f(); }
+	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual float getAbsPerc() const { assert(0); return float(); }
+	virtual MESHLAB_SCALAR getAbsPerc() const { assert(0); return MESHLAB_SCALAR(); }
 	virtual int getEnum() const { assert(0); return int(); }
 	virtual MeshModel* getMesh() const { assert(0); return NULL; }
-	virtual float getDynamicFloat() const { assert(0); return float(); }
+	virtual MESHLAB_SCALAR getDynamicFloat() const { assert(0); return MESHLAB_SCALAR(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
@@ -117,7 +117,7 @@ public:
 	FloatValue(const float val) :pval(val) {}
 	~FloatValue() {}
 
-	inline float	getFloat() const { return pval; }
+	inline MESHLAB_SCALAR getFloat() const { return pval; }
 	inline bool isFloat() const { return true; }
 	inline QString typeName() const { return QString("Float"); }
 	inline void	set(const Value& p) { pval = p.getFloat(); }
@@ -125,7 +125,7 @@ public:
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	float pval;
+	MESHLAB_SCALAR pval;
 };
 
 class StringValue : public Value
@@ -166,11 +166,10 @@ private:
 class Point3fValue : public Value
 {
 public:
-	Point3fValue(const vcg::Point3f& val) : pval(val) {}
-	Point3fValue(const vcg::Point3d& val) : pval(vcg::Point3f::Construct(val)) {}
+	Point3fValue(const Point3m& val) : pval(val) {}
 	~Point3fValue() {}
 
-	inline vcg::Point3f getPoint3f() const { return pval; }
+	inline Point3m getPoint3f() const { return pval; }
 	inline bool isPoint3f() const { return true; }
 	inline QString typeName() const { return QString("Point3f"); }
 	inline void	set(const Value& p) { pval = p.getPoint3f(); }
@@ -178,7 +177,7 @@ public:
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	vcg::Point3f pval;
+	Point3m pval;
 };
 
 class ShotfValue : public Value
@@ -221,7 +220,7 @@ public:
 	AbsPercValue(const float val) :FloatValue(val) {}
 	~AbsPercValue() {}
 
-	inline float getAbsPerc() const { return getFloat(); }
+	inline MESHLAB_SCALAR getAbsPerc() const { return getFloat(); }
 	inline QString typeName() const { return QString("AbsPerc"); }
 	inline bool isAbsPerc() const { return true; }
 	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
@@ -248,7 +247,7 @@ public:
 	DynamicFloatValue(const float val) :FloatValue(val) {}
 	~DynamicFloatValue() {}
 
-	inline float getDynamicFloat() const { return getFloat(); }
+	inline MESHLAB_SCALAR getDynamicFloat() const { return getFloat(); }
 	inline bool isDynamicFloat() const { return true; }
 	inline QString typeName() const { return QString("DynamicFloat"); }
 	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}

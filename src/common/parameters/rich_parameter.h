@@ -103,7 +103,7 @@ public:
 class RichFloat : public RichParameter
 {
 public:
-	RichFloat(const QString& nm, const float defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichFloat(const QString& nm, const MESHLAB_SCALAR defval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichFloat();
 
 	QString stringType() const;
@@ -139,8 +139,7 @@ public:
 class RichPoint3f : public RichParameter
 {
 public:
-	RichPoint3f(const QString& nm, const vcg::Point3f& defval, const QString& desc = QString(), const QString& tltip = QString());
-	RichPoint3f(const QString& nm, const vcg::Point3d& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichPoint3f(const QString& nm, const Point3m& defval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichPoint3f();
 
 	QString stringType() const;
@@ -176,7 +175,7 @@ public:
 class RichAbsPerc : public RichParameter
 {
 public:
-	RichAbsPerc(const QString& nm, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
+	RichAbsPerc(const QString& nm, const MESHLAB_SCALAR defval, const MESHLAB_SCALAR minval, const MESHLAB_SCALAR maxval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichAbsPerc();
 
 	QString stringType() const;
@@ -184,8 +183,8 @@ public:
 
 	RichAbsPerc* clone() const;
 	bool operator==(const RichParameter& rb);
-	float min;
-	float max;
+	MESHLAB_SCALAR min;
+	MESHLAB_SCALAR max;
 };
 
 class RichEnum : public RichParameter
@@ -205,7 +204,7 @@ public:
 class RichDynamicFloat : public RichParameter
 {
 public:
-	RichDynamicFloat(const QString& nm, const float defval, const float minval, const float maxval, const QString& desc = QString(), const QString& tltip = QString());
+	RichDynamicFloat(const QString& nm, const MESHLAB_SCALAR defval, const MESHLAB_SCALAR minval, const MESHLAB_SCALAR maxval, const QString& desc = QString(), const QString& tltip = QString());
 	~RichDynamicFloat();
 
 	QString stringType() const;
@@ -213,8 +212,8 @@ public:
 
 	RichDynamicFloat* clone() const;
 	bool operator==(const RichParameter& rb);
-	float min;
-	float max;
+	MESHLAB_SCALAR min;
+	MESHLAB_SCALAR max;
 };
 
 class RichOpenFile : public RichParameter

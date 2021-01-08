@@ -92,7 +92,7 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 	}
 }
 
- QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch (filterId) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
@@ -171,32 +171,32 @@ void FilterMeasurePlugin::initParameterList(const QAction *action, MeshModel &m,
 	}
 }
 
-bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList& parlst, vcg::CallBackPos*)
+bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& /*postConditionMask*/, const RichParameterList& parlst, vcg::CallBackPos*)
 {
 	switch (ID(filter)) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
-		return computeTopologicalMeasures(md);
+		return computeTopologicalMeasures(md, outputValues);
 		break;
 	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
-		return computeTopologicalMeasuresForQuadMeshes(md);
+		return computeTopologicalMeasuresForQuadMeshes(md, outputValues);
 		break;
 	case COMPUTE_GEOMETRIC_MEASURES:
-		return computeGeometricMeasures(md);
+		return computeGeometricMeasures(md, outputValues);
 		break;
 	case COMPUTE_AREA_PERIMETER_SELECTION:
-		return computeAreaPerimeterOfSelection(md);
+		return computeAreaPerimeterOfSelection(md, outputValues);
 		break;
 	case PER_VERTEX_QUALITY_STAT:
-		return perVertexQualityStat(md);
+		return perVertexQualityStat(md, outputValues);
 		break;
 	case PER_FACE_QUALITY_STAT:
-		return perFaceQualityStat(md);
+		return perFaceQualityStat(md, outputValues);
 		break;
 	case PER_VERTEX_QUALITY_HISTOGRAM:
-		return perVertexQualityHistogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
+		return perVertexQualityHistogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"), outputValues);
 		break;
 	case PER_FACE_QUALITY_HISTOGRAM:
-		return perFaceQualityHostogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
+		return perFaceQualityHostogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"), outputValues);
 		break;
 	default:
 		assert(0);
@@ -209,7 +209,7 @@ int FilterMeasurePlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
+bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactFaceVector(m);
@@ -230,37 +230,54 @@ bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
 	assert(edgeNonManifFFNum == edgeNonManifNum);
 	int holeNum;
 	log("V: %6i E: %6i F:%6i", m.vn, edgeNum, m.fn);
+	outputValues["vertices_number"] = m.vn;
+	outputValues["edges_number"] = edgeNum;
+	outputValues["faces_number"] = m.fn;
 	int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
 	log("Unreferenced Vertices %i", unrefVertNum);
 	log("Boundary Edges %i", edgeBorderNum);
+	outputValues["unreferenced_vertices"] = unrefVertNum;
+	outputValues["boundary_edges"] = edgeBorderNum;
 
 	int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
 	log("Mesh is composed by %i connected component(s)\n", connectedComponentsNum);
+	outputValues["connected_components_number"] = connectedComponentsNum;
 
-	if (edgeNonManifFFNum == 0 && vertManifNum == 0){
+	bool isTwoManifold = edgeNonManifFFNum == 0 && vertManifNum == 0;
+	if (isTwoManifold){
 		log("Mesh is two-manifold ");
 	}
+	outputValues["is_mesh_two_manifold"] = isTwoManifold;
 
 	if (edgeNonManifFFNum != 0) log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n", edgeNonManifFFNum, faceEdgeManif);
 	if (vertManifNum != 0) log("Mesh has %i non two manifold vertices and %i faces are incident on these vertices\n", vertManifNum, faceVertManif);
+	
+	outputValues["non_two_manifold_edges"] = edgeNonManifFFNum;
+	outputValues["incident_faces_on_non_two_manifold_edges"] = faceEdgeManif;
+	outputValues["non_two_manifold_vertices"] = vertManifNum;
+	outputValues["incident_faces_on_non_two_manifold_vertices"] = faceVertManif;
 
 	// For Manifold meshes compute some other stuff
 	if (vertManifNum == 0 && edgeNonManifFFNum == 0) {
 		holeNum = tri::Clean<CMeshO>::CountHoles(m);
 		log("Mesh has %i holes", holeNum);
+		outputValues["number_holes"] = holeNum;
 
 		int genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
 		log("Genus is %i", genus);
+		outputValues["genus"] = genus;
 	}
 	else {
 		log("Mesh has a undefined number of holes (non 2-manifold mesh)");
 		log("Genus is undefined (non 2-manifold mesh)");
+		outputValues["number_holes"] = -1;
+		outputValues["genus"] = -1;
 	}
 
 	return true;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md)
+bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -338,7 +355,7 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	return true;
 }
 
-bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
+bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	bool watertight = false;
@@ -457,7 +474,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 	return true;
 }
 
-bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
+bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	if (m.sfn == 0) {// no face selected, fail
@@ -503,7 +520,7 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 	return true;
 }
 
-bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
+bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	Distribution<MESHLAB_SCALAR> DD;
@@ -516,7 +533,7 @@ bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
 	return true;
 }
 
-bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
+bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	Distribution<MESHLAB_SCALAR> DD;
@@ -529,7 +546,7 @@ bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
 	return true;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag)
+bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
@@ -577,7 +594,7 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float Rang
 	return true;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag)
+bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);

@@ -150,7 +150,7 @@ bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocumen
     numViews = par.getInt("reqViews");
     errInit = false;
     float dirBias = par.getFloat("dirBias");
-    Point3f coneDir = par.getPoint3f("coneDir");
+    Point3m coneDir = par.getPoint3m("coneDir");
     float coneAngle = par.getFloat("coneAngle");
 
     if(perFace)

@@ -58,14 +58,14 @@ public:
 	int postCondition(const QAction* ) const;
 
 private:
-	bool computeTopologicalMeasures(MeshDocument& md);
-	bool computeTopologicalMeasuresForQuadMeshes(MeshDocument& md);
-	bool computeGeometricMeasures(MeshDocument& md);
-	bool computeAreaPerimeterOfSelection(MeshDocument& md);
-	bool perVertexQualityStat(MeshDocument& md);
-	bool perFaceQualityStat(MeshDocument& md);
-	bool perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
-	bool perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
+	bool computeTopologicalMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool computeTopologicalMeasuresForQuadMeshes(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool computeGeometricMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool computeAreaPerimeterOfSelection(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool perVertexQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool perFaceQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
+	bool perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
+	bool perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
 
 
 	Matrix33m computePrincipalAxisCloud(CMeshO & m);

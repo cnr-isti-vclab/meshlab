@@ -404,7 +404,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		{
 			float brightness = par.getDynamicFloat("brightness");
 			float contrast = par.getDynamicFloat("contrast");
-			float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
+			float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1, 5.0);
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
@@ -454,10 +454,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_COLOURISATION:
 		{
 			//reads parameters and normalizes their values in [0,1]
-			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
-			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
-			float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
-			float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
+			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0, 1.0);
+			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0, 1.0);
+			float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0, 1.0);
+			float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0, 1.0);
 			bool selected = par.getBool("onSelected");
 
 			double r, g, b;   //converts color from HSL to RGB....

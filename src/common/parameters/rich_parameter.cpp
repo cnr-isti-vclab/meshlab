@@ -156,7 +156,7 @@ bool RichInt::operator==( const RichParameter& rb )
 
 RichFloat::RichFloat(
 		const QString& nm,
-		const float defval,
+		const MESHLAB_SCALAR defval,
 		const QString& desc,
 		const QString& tltip) :
 	RichParameter(nm, FloatValue(defval),desc, tltip)
@@ -246,16 +246,7 @@ bool RichMatrix44f::operator==( const RichParameter& rb )
 
 RichPoint3f::RichPoint3f(
 		const QString& nm,
-		const vcg::Point3f& defval,
-		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, Point3fValue(defval),desc, tltip)
-{
-}
-
-RichPoint3f::RichPoint3f(
-		const QString& nm,
-		const vcg::Point3d& defval,
+		const Point3m& defval,
 		const QString& desc,
 		const QString& tltip ) :
 	RichParameter(nm, Point3fValue(defval),desc, tltip)
@@ -342,9 +333,9 @@ bool RichColor::operator==( const RichParameter& rb )
 
 RichAbsPerc::RichAbsPerc(
 		const QString& nm,
-		const float defval,
-		const float minval,
-		const float maxval,
+		const MESHLAB_SCALAR defval,
+		const MESHLAB_SCALAR minval,
+		const MESHLAB_SCALAR maxval,
 		const QString& desc,
 		const QString& tltip) :
 	RichParameter(nm, AbsPercValue(defval), desc, tltip), min(minval), max(maxval)
@@ -422,9 +413,9 @@ bool RichEnum::operator==( const RichParameter& rb )
 
 RichDynamicFloat::RichDynamicFloat(
 		const QString& nm,
-		const float defval,
-		const float minval,
-		const float maxval,
+		const MESHLAB_SCALAR defval,
+		const MESHLAB_SCALAR minval,
+		const MESHLAB_SCALAR maxval,
 		const QString& desc,
 		const QString& tltip ) :
 	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)

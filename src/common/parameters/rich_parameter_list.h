@@ -99,18 +99,17 @@ public:
 
 	bool getBool(const QString& name) const;
 	int getInt(const QString& name) const;
-	float getFloat(const QString& name) const;
+	MESHLAB_SCALAR getFloat(const QString& name) const;
 	QString getString(const QString& name) const;
 	Matrix44m getMatrix44(const QString& name) const;
-	vcg::Point3f getPoint3f(const QString& name) const;
-	vcg::Point3<MESHLAB_SCALAR> getPoint3m(const QString& name) const;
+	Point3m getPoint3m(const QString& name) const;
 	Shotm getShotf(const QString& name) const;
 	QColor getColor(const QString& name) const;
 	vcg::Color4b getColor4b(const QString& name) const;
-	float getAbsPerc(const QString& name) const;
+	MESHLAB_SCALAR getAbsPerc(const QString& name) const;
 	int getEnum(const QString& name) const;
 	MeshModel* getMesh(const QString& name) const;
-	float getDynamicFloat(const QString& name) const;
+	MESHLAB_SCALAR getDynamicFloat(const QString& name) const;
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
 

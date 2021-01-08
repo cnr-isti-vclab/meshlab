@@ -712,7 +712,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
     } break;
     case FP_SCALAR_HARMONIC_FIELD:
     {      
-      typedef double FieldScalar;
+      typedef MESHLAB_SCALAR FieldScalar;
       md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
       
       cb(1, "Computing harmonic field...");
@@ -743,8 +743,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
       mv.UnMarkAll();
       Point3m  closestP;
       Scalarm minDist = 0;
-      CVertexO * vp0 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point1"), m.bbox.Diag(), minDist, closestP);
-      CVertexO * vp1 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point2"), m.bbox.Diag(), minDist, closestP);
+      CVertexO * vp0 = vcg::GridClosest(vg, pd, mv, par.getPoint3m("point1"), m.bbox.Diag(), minDist, closestP);
+      CVertexO * vp1 = vcg::GridClosest(vg, pd, mv, par.getPoint3m("point2"), m.bbox.Diag(), minDist, closestP);
       if (vp0 == NULL || vp1 == NULL || vp0 == vp1)
       {
         this->errorMessage = "Error occurred for selected points.";
