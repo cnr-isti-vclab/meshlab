@@ -708,7 +708,7 @@ void DecorateRasterProjPlugin::decorateDoc(
             shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
             vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
             shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
-            shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
+            shader->setUniform( "u_AlphaValue", (float)par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
             shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
 			shader->setUniform("u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
             shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
