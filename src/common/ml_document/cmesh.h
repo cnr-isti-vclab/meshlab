@@ -30,28 +30,28 @@ namespace vcg
 {
 namespace vertex
 {
-template <class T> class Coord3m: public Coord<vcg::Point3<MESHLAB_SCALAR>, T> {
+template <class T> class Coord3m: public Coord<vcg::Point3<Scalarm>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Coord3m"));T::Name(name);}
 };
 
-template <class T> class Normal3m: public Normal<vcg::Point3<MESHLAB_SCALAR>, T> {
+template <class T> class Normal3m: public Normal<vcg::Point3<Scalarm>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
 };
 
-template <class T> class Qualitym: public Quality<MESHLAB_SCALAR, T> {
+template <class T> class Qualitym: public Quality<Scalarm, T> {
 public: static void Name(std::vector<std::string> & name){name.push_back(std::string("Qualitym"));T::Name(name);}
 };
 
-template <class T> class CurvaturemOcf: public CurvatureOcf<MESHLAB_SCALAR, T> {
+template <class T> class CurvaturemOcf: public CurvatureOcf<Scalarm, T> {
 public: static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvaturemOcf"));T::Name(name);}
 };
 
 
-template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
+template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<Scalarm>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
 };
 
-template <class T> class RadiusmOcf: public RadiusOcf<MESHLAB_SCALAR, T> {
+template <class T> class RadiusmOcf: public RadiusOcf<Scalarm, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("RadiusmOcf"));T::Name(name);}
 };
 
@@ -59,15 +59,15 @@ public:	static void Name(std::vector<std::string> & name){name.push_back(std::st
 
 namespace face
 {
-template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
+template <class T> class Normal3m: public NormalAbs<vcg::Point3<Scalarm>, T> {
 public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
 };
 
-template <class T> class QualitymOcf: public QualityOcf<MESHLAB_SCALAR, T> {
+template <class T> class QualitymOcf: public QualityOcf<Scalarm, T> {
 public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("QualitymOcf"));T::Name(name);}
 };
 
-template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirOcfBaseType<MESHLAB_SCALAR>, T> {
+template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirOcfBaseType<Scalarm>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirdOcf"));T::Name(name);}
 };
 

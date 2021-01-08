@@ -198,8 +198,8 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 	case CR_TORUS:
 		{
 			m = md.addNewMesh("", this->filterName(ID(filter)));
-			float hRadius=par.getFloat("hRadius");
-			float vRadius=par.getFloat("vRadius");
+			Scalarm hRadius=par.getFloat("hRadius");
+			Scalarm vRadius=par.getFloat("vRadius");
 			int hSubdiv=par.getInt("hSubdiv");
 			int vSubdiv=par.getInt("vSubdiv");
 			tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
@@ -365,20 +365,20 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 
 
 		// find extent
-		float dimH = -1000000;
-		float dimV = -1000000;
+		Scalarm dimH = -1000000;
+		Scalarm dimV = -1000000;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 		{
 			Point3m pp = plane.Projection(selected_pts[i]);
-			float distH = fabs(((pp - centerP) * dirH));
-			float distV = fabs(((pp - centerP) * dirV));
+			Scalarm distH = fabs(((pp - centerP) * dirH));
+			Scalarm distV = fabs(((pp - centerP) * dirV));
 
 			if (distH > dimH)
 				dimH = distH;
 			if (distV > dimV)
 				dimV = distV;
 		}
-		float exScale = par.getFloat("extent");
+		Scalarm exScale = par.getFloat("extent");
 		dimV = dimV * exScale;
 		dimH = dimH * exScale;
 		log("extent on plane [%f, %f]", dimV, dimH);
@@ -482,7 +482,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 	case CR_SPHERE_CAP:
 	{
 		int rec = par.getInt("subdiv");
-		const float angleDeg = par.getFloat("angle");
+		const Scalarm angleDeg = par.getFloat("angle");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
@@ -492,7 +492,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 	case CR_SPHERE:
     {
 		int rec = par.getInt("subdiv");
-		float radius = par.getFloat("radius");
+		Scalarm radius = par.getFloat("radius");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		m->cm.face.EnableFFAdjacency();
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -503,7 +503,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 
     case CR_BOX:
     {
-      float sz=par.getFloat("size");
+      Scalarm sz=par.getFloat("size");
       Box3m b(Point3m(1,1,1)*(-sz/2),Point3m(1,1,1)*(sz/2));
 	  m = md.addNewMesh("", this->filterName(ID(filter)));
       tri::Box<CMeshO>(m->cm,b);
@@ -512,9 +512,9 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
 
 	case CR_CONE:
 	{
-		float r0 = par.getFloat("r0");
-		float r1 = par.getFloat("r1");
-		float h = par.getFloat("h");
+		Scalarm r0 = par.getFloat("r0");
+		Scalarm r1 = par.getFloat("r1");
+		Scalarm h = par.getFloat("h");
 		int subdiv = par.getInt("subdiv");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Cone<CMeshO>(m->cm, r0, r1, h, subdiv);

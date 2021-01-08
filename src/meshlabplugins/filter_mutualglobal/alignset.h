@@ -33,9 +33,9 @@ class AlignSet {
   CMeshO* mesh;
   QImage* image;
   double imageRatio;
-  vcg::Shot<MESHLAB_SCALAR> shot;
+  vcg::Shot<Scalarm> shot;
   vcg::Box3<float> box;
-  vcg::Shot<MESHLAB_SCALAR> shotPro;
+  vcg::Shot<Scalarm> shotPro;
   QImage* imagePro;
   vcg::Matrix44<float> shadPro;
   QList<PointCorrespondence*> *correspList; //List that includes corresponces involving the model
@@ -44,7 +44,7 @@ class AlignSet {
   QImage comb;
   //Node* node;
   std::vector<QImage*> arcImages;
-  std::vector<vcg::Shot<MESHLAB_SCALAR>*> arcShots;
+  std::vector<vcg::Shot<Scalarm>*> arcShots;
   std::vector<float> arcMI;
   std::vector<vcg::Matrix44<float>> prjMats;
   
@@ -83,7 +83,7 @@ class AlignSet {
   bool setFocal(double f); //return false if unchanged
   void setPixelSizeMm(double ccdWidth);
 
-  void renderScene(vcg::Shot<MESHLAB_SCALAR>& shot, int component, bool save=false);
+  void renderScene(vcg::Shot<Scalarm>& shot, int component, bool save=false);
   void readRender(int component);
 
   void drawMeshPoints();

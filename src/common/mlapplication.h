@@ -18,7 +18,7 @@ public:
 #endif	
 	static const QString appName(){return tr("MeshLab"); }
 	static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
-	static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
+	static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<Scalarm>::floatingPointPrecision();}
 	static const QString appVer();
 	static const QString compilerVersion();
 	static const QString qtVersion();

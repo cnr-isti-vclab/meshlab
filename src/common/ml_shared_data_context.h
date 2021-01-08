@@ -200,17 +200,17 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     _perpoint_pointattenuation_enabled = bset[31];
   }
 
-	static MESHLAB_SCALAR minPointSize()
+	static Scalarm minPointSize()
 	{
 		return 1.0;
 	}
 
-	static MESHLAB_SCALAR maxPointSize()
+	static Scalarm maxPointSize()
 	{
 		return 15.0;
 	}
 
-	static MESHLAB_SCALAR maxLineWidth()
+	static Scalarm maxLineWidth()
 	{
 		return 5.0;
 	}

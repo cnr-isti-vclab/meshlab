@@ -316,7 +316,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
             Point3m tranVec(0,0,0);
             Matrix44m trTran,trTranInv;
 
-            MESHLAB_SCALAR Scale= par.getFloat("scale");
+            Scalarm Scale= par.getFloat("scale");
             trScale.SetScale(Scale,Scale,Scale);
 
             switch(par.getEnum("scaleCenter"))

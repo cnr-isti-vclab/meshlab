@@ -41,7 +41,7 @@
 using namespace std;
 using namespace vcg;
 
-typedef Histogram<MESHLAB_SCALAR> Histogramm;
+typedef Histogram<Scalarm> Histogramm;
 
 FilterColorProc::FilterColorProc()
 {
@@ -389,7 +389,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_THRESHOLDING:
 		{
-			MESHLAB_SCALAR threshold = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("threshold"), 0.0, 255.0);
+			Scalarm threshold = math::Clamp<Scalarm>(par.getDynamicFloat("threshold"), 0.0, 255.0);
 			QColor temp = par.getColor("color1");
 			Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
 			temp = par.getColor("color2");
@@ -402,9 +402,9 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_CONTR_BRIGHT:
 		{
-			MESHLAB_SCALAR brightness = par.getDynamicFloat("brightness");
-			MESHLAB_SCALAR contrast = par.getDynamicFloat("contrast");
-			MESHLAB_SCALAR gamma = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("gamma"), 0.1, 5.0);
+			Scalarm brightness = par.getDynamicFloat("brightness");
+			Scalarm contrast = par.getDynamicFloat("contrast");
+			Scalarm gamma = math::Clamp<Scalarm>(par.getDynamicFloat("gamma"), 0.1, 5.0);
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
@@ -454,10 +454,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_COLOURISATION:
 		{
 			//reads parameters and normalizes their values in [0,1]
-			MESHLAB_SCALAR luminance = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("luminance")/100, 0.0, 1.0);
-			MESHLAB_SCALAR saturation = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("saturation")/100, 0.0, 1.0);
-			MESHLAB_SCALAR hue = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("hue")/360, 0.0, 1.0);
-			MESHLAB_SCALAR intensity = math::Clamp<MESHLAB_SCALAR>(par.getDynamicFloat("intensity")/100, 0.0, 1.0);
+			Scalarm luminance = math::Clamp<Scalarm>(par.getDynamicFloat("luminance")/100, 0.0, 1.0);
+			Scalarm saturation = math::Clamp<Scalarm>(par.getDynamicFloat("saturation")/100, 0.0, 1.0);
+			Scalarm hue = math::Clamp<Scalarm>(par.getDynamicFloat("hue")/360, 0.0, 1.0);
+			Scalarm intensity = math::Clamp<Scalarm>(par.getDynamicFloat("intensity")/100, 0.0, 1.0);
 			bool selected = par.getBool("onSelected");
 
 			double r, g, b;   //converts color from HSL to RGB....
@@ -560,15 +560,15 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		{
 			m->updateDataMask(MeshModel::MM_VERTCOLOR);
 
-			float RangeMin = par.getFloat("minVal");
-			float RangeMax = par.getFloat("maxVal");
+			Scalarm RangeMin = par.getFloat("minVal");
+			Scalarm RangeMax = par.getFloat("maxVal");
 			bool usePerc = par.getDynamicFloat("perc")>0;
 
 			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 
-			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
-			float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
+			Scalarm PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.0);
+			Scalarm PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.0);
 
 			if (par.getBool("zeroSym"))
 			{
@@ -592,15 +592,15 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_CLAMP_QUALITY:
 		{
-			float RangeMin = par.getFloat("minVal");
-			float RangeMax = par.getFloat("maxVal");
+			Scalarm RangeMin = par.getFloat("minVal");
+			Scalarm RangeMax = par.getFloat("maxVal");
 			bool usePerc = par.getDynamicFloat("perc")>0;
 
 			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 
-			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
-			float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
+			Scalarm PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.0);
+			Scalarm PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.0);
 
 			if (par.getBool("zeroSym"))
 			{
@@ -625,15 +625,15 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_MAP_FQUALITY_INTO_COLOR:
 		{
 			m->updateDataMask(MeshModel::MM_FACECOLOR);
-			float RangeMin = par.getFloat("minVal");
-			float RangeMax = par.getFloat("maxVal");
-			float perc = par.getDynamicFloat("perc");
+			Scalarm RangeMin = par.getFloat("minVal");
+			Scalarm RangeMax = par.getFloat("maxVal");
+			Scalarm perc = par.getDynamicFloat("perc");
 			bool usePerc = perc>0;
 
 			Histogramm H;
 			tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m->cm, H);
-			float PercLo = H.Percentile(perc / 100.f);
-			float PercHi = H.Percentile(1.0 - perc / 100.f);
+			Scalarm PercLo = H.Percentile(perc / 100.0);
+			Scalarm PercHi = H.Percentile(1.0 - perc / 100.0);
 
 			// Make the range and percentile symmetric w.r.t. zero, so that
 			// the value zero is always colored in yellow
@@ -693,9 +693,9 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		{
 			m->updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
 			CMeshO::FaceIterator fi;
-			Distribution<MESHLAB_SCALAR> distrib;
-			MESHLAB_SCALAR minV = 0;
-			MESHLAB_SCALAR maxV = 1.0;
+			Distribution<Scalarm> distrib;
+			Scalarm minV = 0;
+			Scalarm maxV = 1.0;
 			int metric = par.getEnum("Metric");
 			if (metric == 4 || metric == 5)
 			{

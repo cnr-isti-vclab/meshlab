@@ -90,7 +90,7 @@ int RichParameterList::getInt(const QString& name) const
  * @return the float of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MESHLAB_SCALAR RichParameterList::getFloat(const QString& name) const
+Scalarm RichParameterList::getFloat(const QString& name) const
 {
 	return getParameterByName(name).value().getFloat();
 }
@@ -144,16 +144,16 @@ Point3m RichParameterList::getPoint3m(const QString& name) const
  * @return the shot of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-Shot<MESHLAB_SCALAR> RichParameterList::getShotf(const QString& name) const
+Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
 {
-	return Shot<MESHLAB_SCALAR>::Construct(getParameterByName(name).value().getShotf());
+	return Shot<Scalarm>::Construct(getParameterByName(name).value().getShotf());
 }
 
 /**
  * @return the float of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MESHLAB_SCALAR RichParameterList::getAbsPerc(const QString& name) const
+Scalarm RichParameterList::getAbsPerc(const QString& name) const
 {
 	return getParameterByName(name).value().getAbsPerc();
 }
@@ -180,7 +180,7 @@ MeshModel * RichParameterList::getMesh(const QString& name) const
  * @return the float of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MESHLAB_SCALAR RichParameterList::getDynamicFloat(const QString& name) const
+Scalarm RichParameterList::getDynamicFloat(const QString& name) const
 {
 	return getParameterByName(name).value().getDynamicFloat();
 }

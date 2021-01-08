@@ -675,7 +675,7 @@ void Matrix44fWidget::setValue(QString name, Matrix44m newVal)
 Matrix44m Matrix44fWidget::getValue()
 {
 	if (!valid) {
-		MESHLAB_SCALAR val[16];
+		Scalarm val[16];
 		for (unsigned int i = 0; i < 16; ++i)
 			val[i] = coordSB[i]->text().toFloat();
 		return Matrix44m(val);

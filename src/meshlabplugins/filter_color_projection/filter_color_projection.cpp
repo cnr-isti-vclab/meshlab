@@ -234,12 +234,12 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
         {
             bool use_depth = par.getBool("usedepth");
             bool onselection = par.getBool("onselection");
-            float eta = par.getFloat("deptheta");
+            Scalarm eta = par.getFloat("deptheta");
             QColor blank = par.getColor("blankColor");
 
 
-            float depth=0;     // depth of point (distance from camera)
-            float pdepth=0;    // depth value of projected point (from depth map)
+            Scalarm depth=0;     // depth of point (distance from camera)
+            Scalarm pdepth=0;    // depth value of projected point (from depth map)
 
             // get current raster and model
             RasterModel *raster   = md.rm();
@@ -327,7 +327,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
     case FP_MULTIIMAGETRIVIALPROJ :
         {
             bool onselection = par.getBool("onselection");
-            float eta = par.getFloat("deptheta");
+            Scalarm eta = par.getFloat("deptheta");
             bool  useangle = par.getBool("useangle");
             bool  usedistance = par.getBool("usedistance");
             bool  useborders = par.getBool("useborders");
@@ -335,8 +335,8 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
             bool  usealphamask =  par.getBool("usealpha");
             QColor blank = par.getColor("blankColor");
 
-            float  depth=0;     // depth of point (distance from camera)
-            float  pdepth=0;    // depth value of projected point (from depth map)
+            Scalarm  depth=0;     // depth of point (distance from camera)
+            Scalarm  pdepth=0;    // depth value of projected point (from depth map)
             double pweight;     // pixel weight
             MeshModel *model;
             bool do_project;
@@ -605,7 +605,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
             //bool onselection = par.getBool("onselection");
             int texsize = par.getInt("texsize");
             bool  dorefill = par.getBool("dorefill");
-            float eta = par.getFloat("deptheta");
+            Scalarm eta = par.getFloat("deptheta");
             bool  useangle = par.getBool("useangle");
             bool  usedistance = par.getBool("usedistance");
             bool  useborders = par.getBool("useborders");
@@ -616,8 +616,8 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
             int textW = texsize;
             int textH = texsize;
 
-            float  depth=0;     // depth of point (distance from camera)
-            float  pdepth=0;    // depth value of projected point (from depth map)
+            Scalarm  depth=0;     // depth of point (distance from camera)
+            Scalarm  pdepth=0;    // depth value of projected point (from depth map)
             double pweight;     // pixel weight
             MeshModel *model;
             bool do_project;

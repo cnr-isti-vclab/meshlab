@@ -149,9 +149,9 @@ bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocumen
     depthTexArea = depthTexSize*depthTexSize;
     numViews = par.getInt("reqViews");
     errInit = false;
-    MESHLAB_SCALAR dirBias = par.getFloat("dirBias");
+    Scalarm dirBias = par.getFloat("dirBias");
     Point3m coneDir = par.getPoint3m("coneDir");
-    MESHLAB_SCALAR coneAngle = par.getFloat("coneAngle");
+    Scalarm coneAngle = par.getFloat("coneAngle");
 
     if(perFace)
         m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
@@ -159,10 +159,10 @@ bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocumen
         m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
 
     std::vector<Point3m> unifDirVec;
-    GenNormal<MESHLAB_SCALAR>::Fibonacci(numViews,unifDirVec);
+    GenNormal<Scalarm>::Fibonacci(numViews,unifDirVec);
 
     std::vector<Point3m> coneDirVec;
-    GenNormal<MESHLAB_SCALAR>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
+    GenNormal<Scalarm>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
 
     std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
     std::random_shuffle(coneDirVec.begin(),coneDirVec.end());

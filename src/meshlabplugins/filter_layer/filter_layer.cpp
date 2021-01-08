@@ -649,7 +649,7 @@ bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 			for (uint i = 0; i < num_cams; ++i)
 			{
 				float f, k1, k2;
-				MESHLAB_SCALAR R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+				Scalarm R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 				vcg::Point3f t;
 
 				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &f, &k1, &k2);

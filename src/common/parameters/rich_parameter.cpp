@@ -156,7 +156,7 @@ bool RichInt::operator==( const RichParameter& rb )
 
 RichFloat::RichFloat(
 		const QString& nm,
-		const MESHLAB_SCALAR defval,
+		const Scalarm defval,
 		const QString& desc,
 		const QString& tltip) :
 	RichParameter(nm, FloatValue(defval),desc, tltip)
@@ -333,9 +333,9 @@ bool RichColor::operator==( const RichParameter& rb )
 
 RichAbsPerc::RichAbsPerc(
 		const QString& nm,
-		const MESHLAB_SCALAR defval,
-		const MESHLAB_SCALAR minval,
-		const MESHLAB_SCALAR maxval,
+		const Scalarm defval,
+		const Scalarm minval,
+		const Scalarm maxval,
 		const QString& desc,
 		const QString& tltip) :
 	RichParameter(nm, AbsPercValue(defval), desc, tltip), min(minval), max(maxval)
@@ -413,9 +413,9 @@ bool RichEnum::operator==( const RichParameter& rb )
 
 RichDynamicFloat::RichDynamicFloat(
 		const QString& nm,
-		const MESHLAB_SCALAR defval,
-		const MESHLAB_SCALAR minval,
-		const MESHLAB_SCALAR maxval,
+		const Scalarm defval,
+		const Scalarm minval,
+		const Scalarm maxval,
 		const QString& desc,
 		const QString& tltip ) :
 	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
@@ -669,7 +669,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		Matrix44m mm;
 		for(int i=0;i<16;++i)
 		{
-			MESHLAB_SCALAR val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
+			Scalarm val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
 			if (!corrconv)
 				return false;
 			mm.V()[i]=val;

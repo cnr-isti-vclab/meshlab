@@ -149,16 +149,16 @@ void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, co
         {
             emit this->askViewerShot("backGrid");
 
-            MESHLAB_SCALAR scaleBB = parset->getFloat(BoxRatioParam());
-            MESHLAB_SCALAR majorTick = fabs(parset->getFloat(GridMajorParam()));
-            MESHLAB_SCALAR minorTick = fabs(parset->getFloat(GridMinorParam()));
+            Scalarm scaleBB = parset->getFloat(BoxRatioParam());
+            Scalarm majorTick = fabs(parset->getFloat(GridMajorParam()));
+            Scalarm minorTick = fabs(parset->getFloat(GridMinorParam()));
             bool backFlag = parset->getBool(GridBackParam());
             bool shadowFlag = parset->getBool(ShowShadowParam());
             Color4b backColor = parset->getColor4b(GridColorBackParam());
             Color4b frontColor = parset->getColor4b(GridColorFrontParam());
-            MESHLAB_SCALAR baseLineWidth = parset->getFloat(GridBaseLineWidthParam());
+            Scalarm baseLineWidth = parset->getFloat(GridBaseLineWidthParam());
             Box3m bb = m.bbox();
-            MESHLAB_SCALAR scalefactor = std::max(0.1, (scaleBB - 1.0));
+            Scalarm scalefactor = std::max(0.1, (scaleBB - 1.0));
             bb.Offset((bb.max - bb.min)*(scalefactor/2.0));
 
 			// minortick should never be more than majortick

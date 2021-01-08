@@ -45,16 +45,16 @@ public:
 
 	virtual bool getBool() const { assert(0); return bool(); }
 	virtual int getInt() const { assert(0); return int(); }
-	virtual MESHLAB_SCALAR getFloat() const { assert(0); return MESHLAB_SCALAR(); }
+	virtual Scalarm getFloat() const { assert(0); return Scalarm(); }
 	virtual QString getString() const { assert(0); return QString(); }
 	virtual Matrix44m getMatrix44f() const { assert(0); return Matrix44m(); }
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual MESHLAB_SCALAR getAbsPerc() const { assert(0); return MESHLAB_SCALAR(); }
+	virtual Scalarm getAbsPerc() const { assert(0); return Scalarm(); }
 	virtual int getEnum() const { assert(0); return int(); }
 	virtual MeshModel* getMesh() const { assert(0); return NULL; }
-	virtual MESHLAB_SCALAR getDynamicFloat() const { assert(0); return MESHLAB_SCALAR(); }
+	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
@@ -117,7 +117,7 @@ public:
 	FloatValue(const float val) :pval(val) {}
 	~FloatValue() {}
 
-	inline MESHLAB_SCALAR getFloat() const { return pval; }
+	inline Scalarm getFloat() const { return pval; }
 	inline bool isFloat() const { return true; }
 	inline QString typeName() const { return QString("Float"); }
 	inline void	set(const Value& p) { pval = p.getFloat(); }
@@ -125,7 +125,7 @@ public:
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	MESHLAB_SCALAR pval;
+	Scalarm pval;
 };
 
 class StringValue : public Value
@@ -220,7 +220,7 @@ public:
 	AbsPercValue(const float val) :FloatValue(val) {}
 	~AbsPercValue() {}
 
-	inline MESHLAB_SCALAR getAbsPerc() const { return getFloat(); }
+	inline Scalarm getAbsPerc() const { return getFloat(); }
 	inline QString typeName() const { return QString("AbsPerc"); }
 	inline bool isAbsPerc() const { return true; }
 	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
@@ -247,7 +247,7 @@ public:
 	DynamicFloatValue(const float val) :FloatValue(val) {}
 	~DynamicFloatValue() {}
 
-	inline MESHLAB_SCALAR getDynamicFloat() const { return getFloat(); }
+	inline Scalarm getDynamicFloat() const { return getFloat(); }
 	inline bool isDynamicFloat() const { return true; }
 	inline QString typeName() const { return QString("DynamicFloat"); }
 	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}

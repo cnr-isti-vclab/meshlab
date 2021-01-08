@@ -45,7 +45,7 @@
 using namespace GaelMls;
 using namespace vcg;
 
-typedef Histogram<MESHLAB_SCALAR> Histogramm;
+typedef Histogram<Scalarm> Histogramm;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions

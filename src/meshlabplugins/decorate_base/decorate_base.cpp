@@ -184,13 +184,13 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
     case DP_SHOW_NORMALS:
         {
             glPushAttrib(GL_ENABLE_BIT );
-			MESHLAB_SCALAR NormalLen=rm->getFloat(NormalLength());
-			MESHLAB_SCALAR NormalWid = rm->getFloat(NormalWidth());
+			Scalarm NormalLen=rm->getFloat(NormalLength());
+			Scalarm NormalWid = rm->getFloat(NormalWidth());
 			vcg::Color4b VertNormalColor = rm->getColor4b(NormalVertColor());
 			vcg::Color4b FaceNormalColor = rm->getColor4b(NormalFaceColor());
 			bool showselection = rm->getBool(NormalSelection());
 
-			MESHLAB_SCALAR LineLen = m.cm.bbox.Diag()*NormalLen;
+			Scalarm LineLen = m.cm.bbox.Diag()*NormalLen;
 
 			//query line width range
 			GLfloat widthRange[2];

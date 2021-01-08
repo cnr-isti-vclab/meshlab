@@ -1337,7 +1337,7 @@ switch(ID(filter))
 			case 6: tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0); break;
 		}
 
-		Histogram<MESHLAB_SCALAR> H;
+		Histogram<Scalarm> H;
 		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
 		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
 
