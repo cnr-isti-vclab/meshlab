@@ -299,9 +299,13 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	if (nLargePolys>0) nQuads = 0;
 
 	log("Mesh has %8i triangles \n", nTris);
+	outputValues["triangles_number"]=nTris;
 	log("         %8i quads \n", nQuads);
+	outputValues["quads_number"]=nQuads;
 	log("         %8i polygons \n", nPolys);
+	outputValues["polys_number"]=nPolys;
 	log("         %8i large polygons (with internal faux vertices)", nLargePolys);
+	outputValues["large_polys_number"]=nLargePolys;
 
 	if (!tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
 		this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
@@ -349,9 +353,18 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	}
 
 	log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-		AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05f), AngleD.Percentile(0.95f));
+		AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05), AngleD.Percentile(0.95));
+	outputValues["right_angle_discrepancy_avg"] = AngleD.Avg();
+	outputValues["right_angle_discrepancy_min"] = AngleD.Min();
+	outputValues["right_angle_discrepancy_max"] = AngleD.Max();
+	outputValues["right_angle_discrepancy_stddev"] = AngleD.StandardDeviation();
+	outputValues["right_angle_discrepancy_perc0.05"] = AngleD.Percentile(0.05);
+	outputValues["right_angle_discrepancy_perc95"] = AngleD.Percentile(0.95);
 
 	log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
+	outputValues["quad_ratio_avg"] = RatioD.Avg();
+	outputValues["quad_ratio_min"] = RatioD.Min();
+	outputValues["quad_ratio_max"] = RatioD.Max();
 	return true;
 }
 
@@ -402,14 +415,19 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 		// area
 		float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 		log("Mesh Surface Area is %f", Area);
+		outputValues["surface_area"] = Area;
 
 		// edges
 		Distribution<Scalarm> eDist;
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
 		log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
+		outputValues["total_edge_length"] = eDist.Sum();
+		outputValues["avg_edge_length"] = eDist.Avg();
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
 		log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
-
+		outputValues["total_edge_inc_faux_length"] = eDist.Sum();
+		outputValues["avg_edge_inc_faux_length"] = eDist.Avg();
+		
 		// Thin shell barycenter
 		Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
 		log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
@@ -426,8 +444,9 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 			tri::Inertia<CMeshO> I(m);
 
 			// volume
-			float Volume = I.Mass();
+			Scalarm Volume = I.Mass();
 			log("Mesh Volume  is %f", Volume);
+			outputValues["mesh_volume"] = Volume;
 
 			// center of mass
 			log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
@@ -484,6 +503,7 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std:
 	}
 
 	log("Selection is %i triangles", m.sfn);
+	outputValues["seleced_triangles_number"] = m.sfn;
 	if (m.Tr != Matrix44m::Identity())
 		log("BEWARE: Area and Perimeter are calculated considering the current transformation matrix");
 
@@ -497,6 +517,7 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std:
 		sArea += fArea / 2.0;
 	}
 	log("Selection Surface Area is %f", sArea);
+	outputValues["selected_surface_area"] = sArea;
 
 	int ePerimeter = 0;
 	double sPerimeter = 0.0;
@@ -516,6 +537,8 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std:
 
 	log("Selection border is %i edges", ePerimeter);
 	log("Perimeter is %f", sPerimeter);
+	outputValues["border_edge_number"] = ePerimeter;
+	outputValues["perimeter"] = sPerimeter;
 
 	return true;
 }
@@ -530,6 +553,12 @@ bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md, std::map<std::s
 	log("   Avg %f Med %f", DD.Avg(), DD.Percentile(0.5f));
 	log("   StdDev     %f", DD.StandardDeviation());
 	log("   Variance   %f", DD.Variance());
+	outputValues["min"] = DD.Min();
+	outputValues["max"] = DD.Max();
+	outputValues["avg"] = DD.Avg();
+	outputValues["med"] = DD.Percentile(0.5);
+	outputValues["stddev"] = DD.StandardDeviation();
+	outputValues["variance"] = DD.Variance();
 	return true;
 }
 
@@ -543,10 +572,16 @@ bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::str
 	log("   Avg %f Med %f", DD.Avg(), DD.Percentile(0.5f));
 	log("   StdDev     %f", DD.StandardDeviation());
 	log("   Variance   %f", DD.Variance());
+	outputValues["min"] = DD.Min();
+	outputValues["max"] = DD.Max();
+	outputValues["avg"] = DD.Avg();
+	outputValues["med"] = DD.Percentile(0.5);
+	outputValues["stddev"] = DD.StandardDeviation();
+	outputValues["variance"] = DD.Variance();
 	return true;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues)
+bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
@@ -594,7 +629,7 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float Rang
 	return true;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues)
+bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
