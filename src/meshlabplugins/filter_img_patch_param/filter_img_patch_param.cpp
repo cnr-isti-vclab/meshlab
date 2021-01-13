@@ -96,6 +96,20 @@ int FilterImgPatchParamPlugin::getRequirements(const QAction *act )
 	}
 }
 
+bool FilterImgPatchParamPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)){
+	case FP_PATCH_PARAM_ONLY:
+	case FP_PATCH_PARAM_AND_TEXTURING:
+	case FP_RASTER_VERT_COVERAGE:
+	case FP_RASTER_FACE_COVERAGE:
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
+}
+
 
 FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
 {
@@ -199,97 +213,66 @@ bool FilterImgPatchParamPlugin::applyFilter(
 		const RichParameterList &par,
 		vcg::CallBackPos * /*cb*/ )
 {
-	
-	
-	glContext->makeCurrent();
-	if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
-	{
-		this->errorMessage="Failed GLEW initialization";
-		return false;
-	}
-	
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	
-	delete m_Context;
-	m_Context = new glw::Context();
-	m_Context->acquire();
-	
-	if( !VisibilityCheck::GetInstance(*m_Context) )
-	{
-		this->errorMessage="VisibilityCheck failed";
-		return false;
-	}
-	VisibilityCheck::ReleaseInstance();
-	
-	
-	bool retValue = true;
-	
-	CMeshO &mesh = md.mm()->cm;
-	
-	std::list<Shotm> initialShots;
-	QList<RasterModel*> activeRasters;
-	foreach( RasterModel *rm, md.rasterList )
-	{
-		initialShots.push_back( rm->shot );
-		rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
-		if( rm->visible )
-			activeRasters.push_back( rm );
-	}
-	
-	if( activeRasters.empty() )    {
-		this->errorMessage="No active Raster";
+	if (glContext != nullptr){
+		glContext->makeCurrent();
+		if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
 		{
-			glContext->doneCurrent();
-			errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
+			this->errorMessage="Failed GLEW initialization";
 			return false;
 		}
-	}
-	
-	switch( ID(act) )
-	{
-	case FP_PATCH_PARAM_ONLY:
-	{
-		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-		{
-			glContext->doneCurrent();
-			errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-			return false; // can't continue, mesh can't be processed
-		}
-		vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-		vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
-		vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
-		glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
-		RasterPatchMap patches;
-		PatchVec nullPatches;
-		patchBasedTextureParameterization( patches,
-										   nullPatches,
-										   md.mm()->id(),
-										   mesh,
-										   activeRasters,
-										   par );
 		
-		break;
-	}
-	case FP_PATCH_PARAM_AND_TEXTURING:
-	{
-		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-		{
-			glContext->doneCurrent();
-			errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-			return false; // can't continue, mesh can't be processed
-		}
-		vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
-		vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
-		glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
-		QString texName = par.getString( "textureName" ).simplified();
-		int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
-		if( pathEnd != -1 )
-			texName = texName.right( texName.size()-pathEnd-1 );
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		
-		if( (retValue = texName.size()!=0) )
+		delete m_Context;
+		m_Context = new glw::Context();
+		m_Context->acquire();
+		
+		if( !VisibilityCheck::GetInstance(*m_Context) )
 		{
+			this->errorMessage="VisibilityCheck failed";
+			return false;
+		}
+		VisibilityCheck::ReleaseInstance();
+		
+		
+		bool retValue = true;
+		
+		CMeshO &mesh = md.mm()->cm;
+		
+		std::list<Shotm> initialShots;
+		QList<RasterModel*> activeRasters;
+		foreach( RasterModel *rm, md.rasterList )
+		{
+			initialShots.push_back( rm->shot );
+			rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
+			if( rm->visible )
+				activeRasters.push_back( rm );
+		}
+		
+		if( activeRasters.empty() )    {
+			this->errorMessage="No active Raster";
+			{
+				glContext->doneCurrent();
+				errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
+				return false;
+			}
+		}
+		
+		switch( ID(act) )
+		{
+		case FP_PATCH_PARAM_ONLY:
+		{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
+			{
+				glContext->doneCurrent();
+				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+			glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
 			RasterPatchMap patches;
 			PatchVec nullPatches;
 			patchBasedTextureParameterization( patches,
@@ -299,99 +282,134 @@ bool FilterImgPatchParamPlugin::applyFilter(
 											   activeRasters,
 											   par );
 			
-			TexturePainter painter( *m_Context, par.getInt("textureSize") );
-			if( (retValue = painter.isInitialized()) )
+			break;
+		}
+		case FP_PATCH_PARAM_AND_TEXTURING:
+		{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
 			{
-				QElapsedTimer t; t.start();
-				painter.paint( patches );
-				if( par.getBool("colorCorrection") )
-					painter.rectifyColor( patches, par.getInt("colorCorrectionFilterSize") );
-				log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
+				glContext->doneCurrent();
+				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+			vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+			glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
+			QString texName = par.getString( "textureName" ).simplified();
+			int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
+			if( pathEnd != -1 )
+				texName = texName.right( texName.size()-pathEnd-1 );
+			
+			if( (retValue = texName.size()!=0) )
+			{
+				RasterPatchMap patches;
+				PatchVec nullPatches;
+				patchBasedTextureParameterization( patches,
+												   nullPatches,
+												   md.mm()->id(),
+												   mesh,
+												   activeRasters,
+												   par );
 				
-				QImage tex = painter.getTexture();
-				if( tex.save(texName) )
+				TexturePainter painter( *m_Context, par.getInt("textureSize") );
+				if( (retValue = painter.isInitialized()) )
 				{
-					mesh.textures.clear();
-					mesh.textures.push_back( texName.toStdString() );
+					QElapsedTimer t; t.start();
+					painter.paint( patches );
+					if( par.getBool("colorCorrection") )
+						painter.rectifyColor( patches, par.getInt("colorCorrectionFilterSize") );
+					log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
+					
+					QImage tex = painter.getTexture();
+					if( tex.save(texName) )
+					{
+						mesh.textures.clear();
+						mesh.textures.push_back( texName.toStdString() );
+					}
 				}
 			}
+			
+			break;
 		}
-		
-		break;
-	}
-	case FP_RASTER_VERT_COVERAGE:
-	{
-		VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-		visibility.setMesh(md.mm()->id(),&mesh );
-		visibility.m_plugcontext = glContext;
-		for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
-			vi->Q() = 0.0f;
-		
-		foreach( RasterModel *rm, activeRasters )
+		case FP_RASTER_VERT_COVERAGE:
 		{
-			visibility.setRaster( rm );
-			visibility.checkVisibility();
+			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
+			visibility.setMesh(md.mm()->id(),&mesh );
+			visibility.m_plugcontext = glContext;
 			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
-				if( visibility.isVertVisible(vi) )
-					vi->Q() += 1.0f;
+				vi->Q() = 0.0f;
+			
+			foreach( RasterModel *rm, activeRasters )
+			{
+				visibility.setRaster( rm );
+				visibility.checkVisibility();
+				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
+					if( visibility.isVertVisible(vi) )
+						vi->Q() += 1.0f;
+			}
+			
+			if( par.getBool("normalizeQuality") )
+			{
+				const float normFactor = 1.0f / md.rasterList.size();
+				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
+					vi->Q() *= normFactor;
+			}
+			
+			break;
 		}
-		
-		if( par.getBool("normalizeQuality") )
+		case FP_RASTER_FACE_COVERAGE:
 		{
-			const float normFactor = 1.0f / md.rasterList.size();
-			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
-				vi->Q() *= normFactor;
-		}
-		
-		break;
-	}
-	case FP_RASTER_FACE_COVERAGE:
-	{
-		VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-		visibility.setMesh(md.mm()->id(),&mesh );
-		visibility.m_plugcontext = glContext;
-		
-		for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
-			fi->Q() = 0.0f;
-		
-		foreach( RasterModel *rm, activeRasters )
-		{
-			visibility.setRaster( rm );
-			visibility.checkVisibility();
+			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
+			visibility.setMesh(md.mm()->id(),&mesh );
+			visibility.m_plugcontext = glContext;
+			
 			for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
-				if( visibility.isFaceVisible(fi) )
-					fi->Q() += 1.0f;
+				fi->Q() = 0.0f;
+			
+			foreach( RasterModel *rm, activeRasters )
+			{
+				visibility.setRaster( rm );
+				visibility.checkVisibility();
+				for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
+					if( visibility.isFaceVisible(fi) )
+						fi->Q() += 1.0f;
+			}
+			
+			if( par.getBool("normalizeQuality") )
+			{
+				const float normFactor = 1.0f / md.rasterList.size();
+				for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
+					fi->Q() *= normFactor;
+			}
+			
+			break;
+		}
 		}
 		
-		if( par.getBool("normalizeQuality") )
+		
+		foreach( RasterModel *rm, md.rasterList )
 		{
-			const float normFactor = 1.0f / md.rasterList.size();
-			for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
-				fi->Q() *= normFactor;
+			rm->shot = *initialShots.begin();
+			initialShots.erase( initialShots.begin() );
 		}
 		
-		break;
+		VisibilityCheck::ReleaseInstance();
+		
+		
+		delete m_Context;
+		m_Context = NULL;
+		
+		glPopAttrib();
+		glContext->doneCurrent();
+		
+		
+		return retValue;
 	}
+	else {
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
 	}
-	
-	
-	foreach( RasterModel *rm, md.rasterList )
-	{
-		rm->shot = *initialShots.begin();
-		initialShots.erase( initialShots.begin() );
-	}
-	
-	VisibilityCheck::ReleaseInstance();
-	
-	
-	delete m_Context;
-	m_Context = NULL;
-	
-	glPopAttrib();
-	glContext->doneCurrent();
-	
-	
-	return retValue;
 }
 
 

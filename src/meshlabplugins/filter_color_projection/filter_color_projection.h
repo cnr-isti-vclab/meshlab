@@ -29,31 +29,30 @@
 
 class FilterColorProjectionPlugin : public QObject, public FilterPluginInterface
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
-
-public:
-    enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
-
-    FilterColorProjectionPlugin();
-
-    QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
-    int postCondition( const QAction* ) const;
-
-    virtual FilterClass getClass(const QAction*) const;
-    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual int getRequirements(const QAction*);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
-
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
+	
+	public:
+		enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
+	
+	FilterColorProjectionPlugin();
+	
+	QString pluginName() const;
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	int postCondition( const QAction* ) const;
+	
+	FilterClass getClass(const QAction*) const;
+	void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	int getRequirements(const QAction*);
+	bool requiresGLContext(const QAction* action) const;
+	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+	
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	
 private:
-
-    int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
-
+	int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
 };
 
 #endif

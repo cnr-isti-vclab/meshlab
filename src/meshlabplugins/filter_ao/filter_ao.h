@@ -73,6 +73,7 @@ public:
     QString	filterInfo(FilterIDType filterId) const;
     FILTER_ARITY filterArity(const QAction*) const;
 	int getRequirements (const QAction* action);
+	bool requiresGLContext(const QAction* action) const;
     FilterClass getClass(const QAction* filter) const;
 
     void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);

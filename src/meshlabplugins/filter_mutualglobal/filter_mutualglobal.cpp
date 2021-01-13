@@ -93,7 +93,18 @@ FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(const QAction *a) c
         case FP_IMAGE_GLOBALIGN :  return FilterPluginInterface::Camera;
         default : assert(0);
     }
-    return FilterPluginInterface::Generic;
+  return FilterPluginInterface::Generic;
+}
+
+bool FilterMutualGlobal::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)) {
+	case FP_IMAGE_GLOBALIGN:
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -162,6 +173,10 @@ void FilterMutualGlobal::initParameterList(const QAction *action,MeshDocument & 
 // Move Vertex of a random quantity
 bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
 	QElapsedTimer filterTime;
 	filterTime.start();
 

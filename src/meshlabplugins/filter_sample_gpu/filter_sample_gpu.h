@@ -55,6 +55,7 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
+	bool requiresGLContext(const QAction* action) const;
 	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	FilterClass getClass(const QAction* a) const;
 };

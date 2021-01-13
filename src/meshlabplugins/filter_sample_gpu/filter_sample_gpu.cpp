@@ -58,13 +58,26 @@ QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString ExtraSampleGPUPlugin::filterInfo(FilterIDType filterId) const
+QString ExtraSampleGPUPlugin::filterInfo(FilterIDType filterId) const
 {
-  switch(filterId) {
-		case FP_GPU_EXAMPLE :  return QString("Small useless filter added only to show how to work with a gl render context inside a filter.");
-		default : assert(0);
+	switch(filterId) {
+	case FP_GPU_EXAMPLE : 
+		return QString("Small useless filter added only to show how to work with a gl render context inside a filter.");
+	default:
+		assert(0);
 	}
 	return QString("Unknown Filter");
+}
+ 
+bool ExtraSampleGPUPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)){
+	case FP_GPU_EXAMPLE :
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
 }
 
 // The FilterClass describes in which generic class of filters it fits.
@@ -110,6 +123,10 @@ void ExtraSampleGPUPlugin::initParameterList(const QAction * action, MeshModel &
 // Move Vertex of a random quantity
 bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
 	switch(ID(a))
 	{
 		case FP_GPU_EXAMPLE:

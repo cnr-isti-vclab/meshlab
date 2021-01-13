@@ -80,6 +80,17 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QActi
 	}
 }
 
+bool FilterMutualInfoPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)) {
+	case FP_IMAGE_MUTUALINFO:
+		return true;
+	default :
+		assert(0);
+	}
+	return false;
+}
+
 FilterPluginInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
@@ -112,6 +123,10 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 
 bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
 {
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :
 		return imageMutualInfoAlign(

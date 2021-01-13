@@ -110,6 +110,7 @@ public:
                                           RichParameterList &par );
 
     virtual int         getRequirements(const QAction* act );
+	bool requiresGLContext(const QAction* action) const;
     //virtual int         postCondition( QAction *act ) const;
 
 	virtual bool applyFilter(

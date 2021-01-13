@@ -41,7 +41,6 @@ QString SdfGpuPlugin::pluginName() const
 
 void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, RichParameterList &par)
 {
-    mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
     par.addParam( RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
         "Choose whether to trace rays from faces or from vertices. " ));
@@ -58,12 +57,12 @@ void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, Ri
         "Depth tolerance used during depth peeling. This is the threshold used to differentiate layers between each others."
         "Two elements whose distance is below this value will be considered as belonging to the same layer."));
 
-    if(mAction != SDF_DEPTH_COMPLEXITY)
+    if(ID(action) != SDF_DEPTH_COMPLEXITY)
         par.addParam(RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
 
 
 
-    switch(mAction)
+    switch(ID(action))
     {
     case SDF_OBSCURANCE:
         par.addParam(RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
@@ -80,7 +79,7 @@ void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, Ri
         }
     }
 
-    if(mAction == SDF_SDF)
+    if(ID(action) == SDF_SDF)
     {
         par.addParam(RichBool("removeFalse",true,"Remove false intersections","For each"
             "ray we check the normal at the point of intersection,"
@@ -143,8 +142,12 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     return QString("");
 }
 
-bool SdfGpuPlugin::applyFilter(const QAction */*filter*/, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & pars, vcg::CallBackPos *cb)
+bool SdfGpuPlugin::applyFilter(const QAction* action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & pars, vcg::CallBackPos *cb)
 {
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
     MeshModel* mm = md.mm();
 
     //RETRIEVE PARAMETERS
@@ -155,14 +158,14 @@ bool SdfGpuPlugin::applyFilter(const QAction */*filter*/, MeshDocument &md, std:
     mTolerance                = pars.getFloat("peelingTolerance");
     mPeelingTextureSize       = pars.getInt("DepthTextureSize");
 
-    if(mAction != SDF_DEPTH_COMPLEXITY)
+    if(ID(action) != SDF_DEPTH_COMPLEXITY)
         mMinCos                 = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
 
     std::vector<Point3f> coneDirVec;
 
-    if(mAction == SDF_OBSCURANCE)
+    if(ID(action) == SDF_OBSCURANCE)
         mTau = pars.getFloat("obscuranceExponent");
-    else if(mAction==SDF_SDF)
+    else if(ID(action)==SDF_SDF)
     {
         mRemoveFalse     = pars.getBool("removeFalse");
         mRemoveOutliers  = pars.getBool("removeOutliers");
@@ -195,7 +198,7 @@ bool SdfGpuPlugin::applyFilter(const QAction */*filter*/, MeshDocument &md, std:
     for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
     {
         (*vi).Normalize();
-        TraceRay(peel, (*vi), md.mm());
+        TraceRay(action, peel, (*vi), md.mm());
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
 
         glContext->makeCurrent();
@@ -208,14 +211,14 @@ bool SdfGpuPlugin::applyFilter(const QAction */*filter*/, MeshDocument &md, std:
     }
 
     //read back the result texture and store result in the mesh
-    if(mAction == SDF_OBSCURANCE)
+    if(ID(action) == SDF_OBSCURANCE)
     {
         if(mOnPrimitive == ON_VERTICES)
             applyObscurancePerVertex(*mm,unifDirVec.size());
         else
             applyObscurancePerFace(*mm,unifDirVec.size());
     }
-    else if(mAction == SDF_SDF)
+    else if(ID(action) == SDF_SDF)
     {
         if(mOnPrimitive == ON_VERTICES)
             applySdfPerVertex(*mm);
@@ -1012,7 +1015,7 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
     return true;
 }
 
-void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* mm )
+void SdfGpuPlugin::TraceRay(const QAction* action, int peelingIteration,const Point3f& dir, MeshModel* mm )
 {
     unsigned int j = 0;
 
@@ -1048,7 +1051,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
         if(i%2)
         {
             //we use the same method as in sdf, see below
-            if(mAction==SDF_OBSCURANCE )
+            if(ID(action)==SDF_OBSCURANCE )
             {
                 if(i>1)
                 {
@@ -1063,7 +1066,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
                 }
             }
-            else if(mAction == SDF_SDF)
+            else if(ID(action) == SDF_SDF)
             {
                 if(i>1)
                 {
@@ -1097,7 +1100,20 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
 FilterPluginInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
 {
-    return FilterPluginInterface::SINGLE_MESH;
+	return FilterPluginInterface::SINGLE_MESH;
+}
+
+bool SdfGpuPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)){
+	case SDF_SDF: 
+	case SDF_DEPTH_COMPLEXITY:
+	case SDF_OBSCURANCE:
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(SdfGpuPlugin)
