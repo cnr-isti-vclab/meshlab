@@ -9,8 +9,8 @@
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
     :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)
 {
-    if (md.size() != 0)
-        throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
+    //if (md.size() != 0)
+    //    throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
     
     _timer = new QTimer(this);
     connect(_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
