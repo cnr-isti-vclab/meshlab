@@ -857,7 +857,7 @@ bool FilterDocSampling::applyFilter(
 	{
 		MeshModel *curMM= md.mm();
 		int samplingMethod = par.getEnum("Sampling");
-		float threshold = par.getAbsPerc("Threshold");
+		Scalarm threshold = par.getAbsPerc("Threshold");
 		bool selected = par.getBool("Selected");
 		
 		if (selected && curMM->cm.svn == 0 && curMM->cm.sfn == 0) // if no selection at all, fail
@@ -1034,7 +1034,7 @@ bool FilterDocSampling::applyFilter(
 		bool sampleEdge=par.getBool("SampleEdge");
 		bool sampleFauxEdge=par.getBool("SampleFauxEdge");
 		bool sampleFace=par.getBool("SampleFace");
-		float distUpperBound = par.getAbsPerc("MaxDist");
+		Scalarm distUpperBound = par.getAbsPerc("MaxDist");
 		
 		if (mm0 == mm1){
 			log("Hausdorff Distance: cannot compute, it is the same mesh");
@@ -1124,7 +1124,7 @@ bool FilterDocSampling::applyFilter(
 		MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
 		MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
 		bool useSigned = par.getBool("SignedDist");
-		float maxDistABS = par.getAbsPerc("MaxDist");
+		Scalarm maxDistABS = par.getAbsPerc("MaxDist");
 		
 		if (mm0 == mm1){
 			log("Distance from Reference: cannot compute, it is the same mesh");
@@ -1168,7 +1168,7 @@ bool FilterDocSampling::applyFilter(
 	{
 		MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
 		MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
-		float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 		bool onlySelected = par.getBool("onSelected");
 		bool colorT = par.getBool("ColorTransfer");
 		bool geomT = par.getBool("GeomTransfer");
@@ -1248,7 +1248,7 @@ bool FilterDocSampling::applyFilter(
 		}
 		
 		CMeshO::ScalarType voxelSize = par.getAbsPerc("CellSize");
-		float offsetThr = par.getAbsPerc("Offset");
+		Scalarm offsetThr = par.getAbsPerc("Offset");
 		bool discretizeFlag = par.getBool("discretize");
 		bool multiSampleFlag = par.getBool("multisample");
 		bool absDistFlag = par.getBool("absDist");
@@ -1317,7 +1317,7 @@ bool FilterDocSampling::applyFilter(
 		bool sampleRadiusFlag = par.getBool("SampleRadius");
 		sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());
 		std::vector<CMeshO::VertexType*> closests;
-		float radius = par.getDynamicFloat("Radius");
+		Scalarm radius = par.getDynamicFloat("Radius");
 		
 		for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
 		{
@@ -1350,8 +1350,8 @@ bool FilterDocSampling::applyFilter(
 			errorMessage = "Regular Recursive Sampling requires a mesh with  faces,<br> it does not work on Point Clouds";
 			return false; // can't continue, mesh can't be processed
 		}
-		float CellSize = par.getAbsPerc("CellSize");
-		float offset=par.getAbsPerc("Offset");
+		Scalarm CellSize = par.getAbsPerc("CellSize");
+		Scalarm offset=par.getAbsPerc("Offset");
 		
 		MeshModel *mmM= md.mm();
 		MeshModel *mm= md.addNewMesh("","Recursive Samples",true); // the new mesh is the current one

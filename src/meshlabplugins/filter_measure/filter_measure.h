@@ -64,8 +64,8 @@ private:
 	bool computeAreaPerimeterOfSelection(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
 	bool perVertexQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
 	bool perFaceQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
-	bool perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
+	bool perVertexQualityHistogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
+	bool perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
 
 
 	Matrix33m computePrincipalAxisCloud(CMeshO & m);

@@ -973,8 +973,8 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		// obtain parameters to generate 2D Grid
 		int w = par.getInt("numVertX");
 		int h = par.getInt("numVertY");
-		float wl = par.getFloat("absScaleX");
-		float hl = par.getFloat("absScaleY");
+		Scalarm wl = par.getFloat("absScaleX");
+		Scalarm hl = par.getFloat("absScaleY");
 		
 		if(w <= 0 || h <= 0) {
 			errorMessage = "number of vertices must be positive";

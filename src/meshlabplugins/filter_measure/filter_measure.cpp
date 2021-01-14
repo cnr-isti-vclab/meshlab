@@ -581,7 +581,7 @@ bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::str
 	return true;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
+bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
@@ -629,7 +629,7 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float Rang
 	return true;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
+bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);

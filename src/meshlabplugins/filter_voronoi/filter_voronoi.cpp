@@ -277,14 +277,14 @@ bool FilterVoronoiPlugin::voronoiSampling(
 		vcg::CallBackPos* cb,
 		int iterNum,
 		int sampleNum,
-		float radiusVariance,
+		Scalarm radiusVariance,
 		int distanceType,
 		int randomSeed,
 		int relaxType,
 		int colorStrategy,
 		int refineFactor,
-		float perturbProbability,
-		float perturbAmount,
+		Scalarm perturbProbability,
+		Scalarm perturbAmount,
 		bool preprocessingFlag)
 {
 	MeshModel *om=md.addOrGetMesh("voro", "voro", false);
@@ -386,10 +386,10 @@ bool FilterVoronoiPlugin::voronoiSampling(
 bool FilterVoronoiPlugin::volumeSampling(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
-		float sampleSurfRadius,
+		Scalarm sampleSurfRadius,
 		int sampleVolNum,
 		bool poissonFiltering,
-		float poissonRadius)
+		Scalarm poissonRadius)
 {
 	MeshModel* m= md.mm();
 	m->updateDataMask(MeshModel::MM_FACEMARK);
@@ -420,10 +420,10 @@ bool FilterVoronoiPlugin::volumeSampling(
 bool FilterVoronoiPlugin::voronoiScaffolding(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
-		float sampleSurfRadius,
+		Scalarm sampleSurfRadius,
 		int sampleVolNum,
 		int voxelRes,
-		float isoThr,
+		Scalarm isoThr,
 		int smoothStep,
 		int relaxStep,
 		bool surfFlag,
@@ -469,14 +469,14 @@ bool FilterVoronoiPlugin::voronoiScaffolding(
 bool FilterVoronoiPlugin::createSolidWireframe(
 		MeshDocument& md,
 		bool edgeCylFlag,
-		float edgeCylRadius,
+		Scalarm edgeCylRadius,
 		bool vertCylFlag,
-		float vertCylRadius,
+		Scalarm vertCylRadius,
 		bool vertSphFlag,
-		float vertSphRadius,
+		Scalarm vertSphRadius,
 		bool faceExtFlag,
-		float faceExtHeight,
-		float faceExtInset,
+		Scalarm faceExtHeight,
+		Scalarm faceExtInset,
 		bool /*edgeFauxFlag*/,
 		int cylinderSideNum)
 {

@@ -152,8 +152,8 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		int rendmode,
 		bool estimateFocal,
 		bool fine,
-		float expectedVariance,
-		float tolerance,
+		Scalarm expectedVariance,
+		Scalarm tolerance,
 		int numIterations,
 		int backGroundWeight,
 		Shotm shot)

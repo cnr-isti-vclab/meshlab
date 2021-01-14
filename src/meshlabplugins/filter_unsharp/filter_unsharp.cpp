@@ -417,7 +417,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
           return false; // can't continue, mesh can't be processed
         }
 
-                float angleDeg = par.getFloat("angleDeg");
+                Scalarm angleDeg = par.getFloat("angleDeg");
                 tri::CreaseCut(m.cm, math::ToRad(angleDeg));
                 m.clearDataMask(MeshModel::MM_FACEFACETOPO);
     }
@@ -455,7 +455,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
 			bool Selected = par.getBool("Selected");
 			if (Selected && m.cm.svn == 0)
 				m.cm.svn = tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-            float delta = par.getAbsPerc("delta");
+            Scalarm delta = par.getAbsPerc("delta");
 			Point3m viewpoint = par.getPoint3m("viewPoint");
 			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm, viewpoint, delta, stepSmoothNum, Selected,true);
 			log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
@@ -513,7 +513,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
             // Small hack
             tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
-            float delta = par.getAbsPerc("delta");
+            Scalarm delta = par.getAbsPerc("delta");
             tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
             log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
@@ -534,7 +534,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
       int stepSmoothNum = par.getInt("stepSmoothNum");
       // sigma==0 all is smoothed
       // sigma==1 nothing is smoothed
-      float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
+      Scalarm sigma   = cos(math::ToRad(par.getFloat("normalThr")));
       if(sigma<0) sigma=0;
 
       int stepNormalNum = par.getInt("stepNormalNum");
@@ -552,8 +552,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
       {
       tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
             int stepSmoothNum = par.getInt("stepSmoothNum");
-            float lambda=par.getFloat("lambda");
-            float mu=par.getFloat("mu");
+            Scalarm lambda=par.getFloat("lambda");
+            Scalarm mu=par.getFloat("mu");
 
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
@@ -601,8 +601,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
     case FP_UNSHARP_NORMAL:
             {
                 tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-                float alpha=par.getFloat("weight");
-                float alphaorig=par.getFloat("weightOrig");
+                Scalarm alpha=par.getFloat("weight");
+                Scalarm alphaorig=par.getFloat("weightOrig");
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -625,8 +625,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
             {
       tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
                 tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-                float alpha=par.getFloat("weight");
-                float alphaorig=par.getFloat("weightOrig");
+                Scalarm alpha=par.getFloat("weight");
+                Scalarm alphaorig=par.getFloat("weightOrig");
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
@@ -645,8 +645,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
     case FP_UNSHARP_VERTEX_COLOR:
             {
                 tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-                float alpha=par.getFloat("weight");
-                float alphaorig=par.getFloat("weightOrig");
+                Scalarm alpha=par.getFloat("weight");
+                Scalarm alphaorig=par.getFloat("weightOrig");
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
@@ -667,8 +667,8 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
     case FP_UNSHARP_QUALITY:
     {
                 tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-                float alpha=par.getFloat("weight");
-                float alphaorig=par.getFloat("weightOrig");
+                Scalarm alpha=par.getFloat("weight");
+                Scalarm alphaorig=par.getFloat("weightOrig");
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
@@ -698,7 +698,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
 
         vcg::tri::Allocator<CMeshO>::CompactEveryVector(sourceMesh);
         vcg::tri::Allocator<CMeshO>::CompactEveryVector(targetMesh);
-        float percentage = par.getDynamicFloat("PercentMorph")/100.f;
+        Scalarm percentage = par.getDynamicFloat("PercentMorph")/100.f;
 
         int i;
         for(i=0;i<targetMesh.vn;++i)

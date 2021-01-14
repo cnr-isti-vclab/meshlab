@@ -301,7 +301,7 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
                 int dim= 3;				/* dimension of points */
                 int numpoints= m.cm.vn;	/* number of mesh vertices */
 
-                float threshold = par.getDynamicFloat("threshold");
+                Scalarm threshold = par.getDynamicFloat("threshold");
 
                 bool result = compute_voronoi(dim,numpoints,m,pm,threshold);
 
@@ -382,7 +382,7 @@ bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 
                 bool usecam = par.getBool("usecamera");
                 Point3m viewpoint = par.getPoint3m("viewpoint");
-                float threshold = par.getDynamicFloat("radiusThreshold");
+                Scalarm threshold = par.getDynamicFloat("radiusThreshold");
 
                 // if usecamera but mesh does not have one
                 if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )

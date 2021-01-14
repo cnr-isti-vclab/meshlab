@@ -168,7 +168,7 @@ bool FilterSamplePlugin::vertexDisplacement(
 		MeshDocument &md,
 		vcg::CallBackPos *cb,
 		bool updateNormals,
-		float max_displacement)
+		Scalarm max_displacement)
 {
 	CMeshO &m = md.mm()->cm;
 	srand(time(NULL));

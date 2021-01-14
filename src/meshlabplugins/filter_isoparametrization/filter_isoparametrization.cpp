@@ -348,7 +348,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 			return false;
 		}
 		
-		float border_size=par.getDynamicFloat("BorderSize");
+		Scalarm border_size=par.getDynamicFloat("BorderSize");
 		MeshModel* mm=md.addNewMesh("","Diam-Parameterized");
 		mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 		mm->updateDataMask(MeshModel::MM_VERTCOLOR);

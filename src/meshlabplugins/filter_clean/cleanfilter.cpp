@@ -374,7 +374,7 @@ bool CleanFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<
    
     case FP_MERGE_CLOSE_VERTEX :
 	{
-		float threshold = par.getAbsPerc("Threshold");
+		Scalarm threshold = par.getAbsPerc("Threshold");
 		int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
 		log("Successfully merged %d vertices", total);
 	} break;

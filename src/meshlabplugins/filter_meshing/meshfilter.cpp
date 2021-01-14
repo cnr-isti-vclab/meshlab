@@ -697,7 +697,7 @@ switch(ID(filter))
 		}
 
 		bool  selected  = par.getBool("Selected");
-		float threshold = par.getAbsPerc("Threshold");
+		Scalarm threshold = par.getAbsPerc("Threshold");
 		int iterations = par.getInt("Iterations");
 
 		for(int i=0; i<iterations; ++i)
@@ -781,7 +781,7 @@ switch(ID(filter))
 
 	case FP_CLUSTERING:
 	{
-		float threshold = par.getAbsPerc("Threshold");
+		Scalarm threshold = par.getAbsPerc("Threshold");
 		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
 		ClusteringGrid.Init(m.cm.bbox,100000,threshold);
 		if(m.cm.FN() ==0)
@@ -825,15 +825,15 @@ switch(ID(filter))
 
 	case FP_SET_TRANSFORM_PARAMS:
 	{
-		float tX = par.getFloat("translationX");
-		float tY = par.getFloat("translationY");
-		float tZ = par.getFloat("translationZ");
-		float rX = par.getFloat("rotationX");
-		float rY = par.getFloat("rotationY");
-		float rZ = par.getFloat("rotationZ");
-		float sX = par.getFloat("scaleX");
-		float sY = par.getFloat("scaleY");
-		float sZ = par.getFloat("scaleZ");
+		Scalarm tX = par.getFloat("translationX");
+		Scalarm tY = par.getFloat("translationY");
+		Scalarm tZ = par.getFloat("translationZ");
+		Scalarm rX = par.getFloat("rotationX");
+		Scalarm rY = par.getFloat("rotationY");
+		Scalarm rZ = par.getFloat("rotationZ");
+		Scalarm sX = par.getFloat("scaleX");
+		Scalarm sY = par.getFloat("scaleY");
+		Scalarm sZ = par.getFloat("scaleZ");
 
 		Matrix44m newTransform = Matrix44m::Identity();
 		Matrix44m tt;
@@ -1113,8 +1113,8 @@ switch(ID(filter))
 			case 2: tranVec=par.getPoint3m("customCenter");break;
 		}
 
-		float angleDeg= par.getDynamicFloat("angle");
-		float snapAngle = par.getFloat("snapAngle");
+		Scalarm angleDeg= par.getDynamicFloat("angle");
+		Scalarm snapAngle = par.getFloat("snapAngle");
 		if(par.getBool("snapFlag"))
 		{
 			angleDeg = floor(angleDeg / snapAngle)*snapAngle;
@@ -1235,9 +1235,9 @@ switch(ID(filter))
 		else
 			scalebb=md.mm()->cm.trBB();
 
-		float xScale = par.getFloat("axisX");
-		float yScale = par.getFloat("axisY");
-		float zScale = par.getFloat("axisZ");
+		Scalarm xScale = par.getFloat("axisX");
+		Scalarm yScale = par.getFloat("axisY");
+		Scalarm zScale = par.getFloat("axisZ");
 
 		if (par.getBool("uniformFlag"))
 			scaleTran.SetScale(xScale, xScale, xScale);
@@ -1377,9 +1377,9 @@ switch(ID(filter))
 
 	case FP_CYLINDER_UNWRAP:
 	{
-		float startAngleDeg = par.getFloat("startAngle");
-		float endAngleDeg = par.getFloat("endAngle");
-		float radius = par.getFloat("radius");
+		Scalarm startAngleDeg = par.getFloat("startAngle");
+		Scalarm endAngleDeg = par.getFloat("endAngle");
+		Scalarm radius = par.getFloat("radius");
 
 		// Number of unrolling. (e.g. if the user set start=-15 end=375 there are two loops)
 		int numLoop =	int(1+(endAngleDeg-startAngleDeg)/360.0);
@@ -1537,8 +1537,8 @@ switch(ID(filter))
 	case FP_FAUX_CREASE :
 	{
 		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-		float AngleDegNeg = par.getFloat("AngleDegNeg");
-		float AngleDegPos = par.getFloat("AngleDegPos");
+		Scalarm AngleDegNeg = par.getFloat("AngleDegNeg");
+		Scalarm AngleDegPos = par.getFloat("AngleDegPos");
 //		tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
 		tri::UpdateFlags<CMeshO>::FaceEdgeSelSignedCrease(m.cm, math::ToRad(AngleDegNeg), math::ToRad(AngleDegPos));
 		m.updateDataMask(MeshModel::MM_POLYGONAL);
@@ -1659,7 +1659,7 @@ switch(ID(filter))
 
 		planeAxis.Normalize();
 
-		float planeOffset = par.getFloat("planeOffset");
+		Scalarm planeOffset = par.getFloat("planeOffset");
 		Point3m planeCenter;
 		Plane3m slicingPlane;
 

@@ -265,14 +265,14 @@ bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, std::ma
     case FP_FRACTAL_MESH:
         {
             MeshModel* mm = md.mm();
-            float maxHeight = .0;
+            Scalarm maxHeight = .0;
             int smoothingSteps = 0;
 
             if(ID(filter) == CR_FRACTAL_TERRAIN)
             {
                 int steps = par.getInt("steps");
                 steps = ((steps<2)? 2: steps);
-                float gridSide = .0;
+                Scalarm gridSide = .0;
                 FractalUtils<CMeshO>::GenerateGrid(mm->cm, steps, gridSide);
                 maxHeight = par.getDynamicFloat("maxHeight") * gridSide;
             } else {
@@ -309,15 +309,15 @@ bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, std::ma
                 return false;
             }
 
-            float minRadius = par.getDynamicFloat("min_radius");
-            float maxRadius = par.getDynamicFloat("max_radius");
+            Scalarm minRadius = par.getDynamicFloat("min_radius");
+            Scalarm maxRadius = par.getDynamicFloat("max_radius");
             if (maxRadius <= minRadius)  {
                 errorMessage =  "Min radius is greater than max radius.";
                 return false;
             }
 
-            float minDepth = par.getDynamicFloat("min_depth");
-            float maxDepth = par.getDynamicFloat("max_depth");
+            Scalarm minDepth = par.getDynamicFloat("min_depth");
+            Scalarm maxDepth = par.getDynamicFloat("max_depth");
             if (maxDepth <= minDepth) {
                 errorMessage = "Min depth is greater than max depth.";
                 return false;

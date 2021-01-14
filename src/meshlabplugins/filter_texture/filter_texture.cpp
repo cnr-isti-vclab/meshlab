@@ -415,7 +415,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		
 		int sideDim = par.getEnum("projectionPlane");
 		bool aspectRatio = par.getBool("aspectRatio");
-		float sideGutter = par.getFloat("sideGutter");
+		Scalarm sideGutter = par.getFloat("sideGutter");
 		
 		// the mesh has to be correctly transformed
 		if (m.cm.Tr != Matrix44m::Identity())
@@ -842,7 +842,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		case 3: textureSampling = true; break;
 		default: assert(0);
 		}
-		float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		QString textName = par.getString("textName");
 		int textW = par.getInt("textW");
 		int textH = par.getInt("textH");
@@ -1046,7 +1046,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 	{
 		MeshModel *srcMesh = par.getMesh("sourceMesh");
 		MeshModel *trgMesh = par.getMesh("targetMesh");
-		float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		
 		assert(srcMesh!=NULL);
 		assert(trgMesh!=NULL);

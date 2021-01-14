@@ -373,7 +373,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<st
         MeshModel* mesh = md.mm();
         mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
         bool nonClosedOnly = par.getBool("NonClosedOnly");
-        float ratio = par.getFloat("NbFaceRatio");
+        Scalarm ratio = par.getFloat("NbFaceRatio");
         vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
         return true;
     }

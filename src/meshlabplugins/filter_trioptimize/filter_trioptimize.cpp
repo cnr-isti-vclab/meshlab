@@ -391,7 +391,7 @@ bool TriOptimizePlugin::applyFilter(const QAction *filter, MeshDocument &md, std
 			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 
 		int iternum = par.getInt("iterations");
-		float dthreshold = par.getFloat("AngleDeg");
+		Scalarm dthreshold = par.getFloat("AngleDeg");
 		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(dthreshold), selection,cb);
 		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}

@@ -417,7 +417,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		}
 
 		// angle threshold in radians
-		float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
+		Scalarm limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
 		Point3m viewray;
 
 		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
@@ -522,8 +522,8 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_BY_VERT_QUALITY:
 	{
-		float minQ = par.getDynamicFloat("minQ");
-		float maxQ = par.getDynamicFloat("maxQ");
+		Scalarm minQ = par.getDynamicFloat("minQ");
+		Scalarm maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);
 		if (inclusiveFlag)
@@ -534,8 +534,8 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_BY_FACE_QUALITY:
 	{
-		float minQ = par.getDynamicFloat("minQ");
-		float maxQ = par.getDynamicFloat("maxQ");
+		Scalarm minQ = par.getDynamicFloat("minQ");
+		Scalarm maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::FaceFromQualityRange(m.cm, minQ, maxQ);
 		if (inclusiveFlag)
@@ -623,14 +623,14 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_FACES_BY_EDGE:
 	{
-		float threshold = par.getDynamicFloat("Threshold");
+		Scalarm threshold = par.getDynamicFloat("Threshold");
 		int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
 		log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
 	} break;
 
 	case FP_SELECT_FOLD_FACE:
 	{
-		float angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
+		Scalarm angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
 		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 		tri::Clean<CMeshO>::SelectFoldedFaceFromOneRingFaces(m.cm, cos(angle));
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
@@ -638,7 +638,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_OUTLIER:
 	{
-		float threshold = par.getDynamicFloat("PropThreshold");
+		Scalarm threshold = par.getDynamicFloat("PropThreshold");
 		int kNearest = par.getInt("KNearest");
 		VertexConstDataWrapper<CMeshO> wrapper(m.cm);
 		KdTree<typename CMeshO::ScalarType> kdTree(wrapper);

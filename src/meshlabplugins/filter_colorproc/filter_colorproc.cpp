@@ -422,11 +422,11 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 		case CP_LEVELS:
 		{
-			float gamma = par.getDynamicFloat("gamma");
-			float  in_min = par.getDynamicFloat("in_min")/255;
-			float  in_max = par.getDynamicFloat("in_max")/255;
-			float  out_min = par.getDynamicFloat("out_min")/255;
-			float  out_max = par.getDynamicFloat("out_max")/255;
+			Scalarm gamma = par.getDynamicFloat("gamma");
+			Scalarm  in_min = par.getDynamicFloat("in_min")/255;
+			Scalarm  in_max = par.getDynamicFloat("in_max")/255;
+			Scalarm  out_min = par.getDynamicFloat("out_min")/255;
+			Scalarm  out_max = par.getDynamicFloat("out_max")/255;
 			bool all_levels = par.getBool("apply_to_all");
 			bool selected = par.getBool("onSelected");
 
@@ -523,8 +523,8 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
 			temp = par.getColor("color2");
 			Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-			float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document
-			float period = md.bbox().Diag() / freq;
+			Scalarm freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document
+			Scalarm period = md.bbox().Diag() / freq;
 			Point3m offset = par.getPoint3m("offset");
 			bool selected = par.getBool("onSelected");
 

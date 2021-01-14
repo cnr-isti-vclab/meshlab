@@ -247,7 +247,7 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
                 break;
             }
 
-            float angleDeg= par.getDynamicFloat("angle");
+            Scalarm angleDeg= par.getDynamicFloat("angle");
 
             trRot.SetRotateDeg(angleDeg,axis);
             trTran.SetTranslate(tranVec);
@@ -428,9 +428,9 @@ bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, st
         {
             Matrix44m trTran; trTran.SetIdentity();
 
-            float xScale= par.getDynamicFloat("axisX");
-            float yScale= par.getDynamicFloat("axisY");
-            float zScale= par.getDynamicFloat("axisZ");
+            Scalarm xScale= par.getDynamicFloat("axisX");
+            Scalarm yScale= par.getDynamicFloat("axisY");
+            Scalarm zScale= par.getDynamicFloat("axisZ");
 
             trTran.SetTranslate(xScale,yScale,zScale);
             if(par.getBool("centerFlag"))

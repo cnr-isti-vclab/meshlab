@@ -68,7 +68,7 @@ private:
 			MeshDocument &md,
 			vcg::CallBackPos *cb,
 			bool updateNormals,
-			float max_displacement);
+			Scalarm max_displacement);
 };
 
 #endif

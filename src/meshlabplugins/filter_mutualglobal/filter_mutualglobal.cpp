@@ -180,7 +180,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, st
 	QElapsedTimer filterTime;
 	filterTime.start();
 
-	float thresDiff=par.getFloat("Threshold for refinement convergence");
+	Scalarm thresDiff=par.getFloat("Threshold for refinement convergence");
 
 	std::vector<vcg::Point3f> myVec;
 	int leap=(int)((float)md.mm()->cm.vn/1000.0f);

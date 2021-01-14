@@ -142,8 +142,8 @@ bool FilterDirt::applyFilter(const QAction *filter, MeshDocument &md, std::map<s
         /*Get Parameters*/
 
         Point3m dir=par.getPoint3m("dust_dir");
-        float s=par.getFloat("slippiness");
-        float k=par.getFloat("adhesion");
+        Scalarm s=par.getFloat("slippiness");
+        Scalarm k=par.getFloat("adhesion");
         bool draw=par.getBool("draw_texture");
         //bool colorize=par.getBool("colorize_mesh");
         int n_p=par.getInt("nparticles");

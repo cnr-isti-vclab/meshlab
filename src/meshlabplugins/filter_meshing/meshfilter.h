@@ -111,8 +111,8 @@ protected:
 	float lastqtex_extratw;
 
 	int lastisor_Iterations;
-	float lastisor_MaxSurfDist;
-	float lastisor_FeatureDeg;
+	Scalarm lastisor_MaxSurfDist;
+	Scalarm lastisor_FeatureDeg;
 	bool lastisor_CheckSurfDist;
 	bool lastisor_RemeshingAdaptivity;
 	bool lastisor_SelectedOnly;
