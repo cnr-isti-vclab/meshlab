@@ -111,7 +111,6 @@ int FilterGeodesic::getRequirements(const QAction *action)
 bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
 	MeshModel &m=*(md.mm());
-	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	switch (ID(filter)) {
 	case FP_QUALITY_POINT_GEODESIC:
@@ -125,7 +124,7 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::m
 		Point3m startPoint = par.getPoint3m("startPoint");
 		// first search the closest point on the surface;
 		CMeshO::VertexPointer startVertex=0;
-		float minDist= std::numeric_limits<float>::max();
+		Scalarm minDist= std::numeric_limits<Scalarm>::max();
 
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 			if(SquaredDistance(startPoint,(*vi).P()) < minDist) {
@@ -137,14 +136,14 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::m
 		log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 
 		// Now actually compute the geodesic distance from the closest point
-		float dist_thr = par.getAbsPerc("maxDistance");
+		Scalarm dist_thr = par.getAbsPerc("maxDistance");
 		tri::EuclideanDistance<CMeshO> dd;
 		tri::Geodesic<CMeshO>::Compute(m.cm, vector<CVertexO*>(1,startVertex),dd,dist_thr);
 
 		// Cleaning Quality value of the unreferenced vertices
 		// Unreached vertices has a quality that is maxfloat
 		int unreachedCnt=0;
-		float unreached  = std::numeric_limits<float>::max();
+		Scalarm unreached  = std::numeric_limits<Scalarm>::max();
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 			if((*vi).Q() == unreached) {
 				unreachedCnt++;
@@ -171,7 +170,7 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::m
 		// Cleaning Quality value of the unreferenced vertices
 		// Unreached vertices has a quality that is maxfloat
 		int unreachedCnt=0;
-		float unreached  = std::numeric_limits<float>::max();
+		Scalarm unreached  = std::numeric_limits<Scalarm>::max();
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 			if((*vi).Q() == unreached) {
 				unreachedCnt++;
@@ -202,14 +201,14 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::m
 
 		if (seedVec.size() > 0)
 		{
-			float dist_thr = par.getAbsPerc("maxDistance");
+			Scalarm dist_thr = par.getAbsPerc("maxDistance");
 			tri::EuclideanDistance<CMeshO> dd;
 			tri::Geodesic<CMeshO>::Compute(m.cm, seedVec, dd, dist_thr);
 
 			// Cleaning Quality value of the unreferenced vertices
 			// Unreached vertices has a quality that is maxfloat
 			int unreachedCnt=0;
-			float unreached  = std::numeric_limits<float>::max();
+			Scalarm unreached  = std::numeric_limits<Scalarm>::max();
 			ForEachVertex(m.cm, [&] (CMeshO::VertexType & v){
 				if (v.Q() == unreached)
 				{
