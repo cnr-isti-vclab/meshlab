@@ -80,17 +80,30 @@ LayerDialog::LayerDialog(QWidget *parent )
 	// The following connection is used to associate the click with the switch between raster and mesh view.
 	connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
-	// state buttons
+	// state and animation buttons
 	isRecording = false;
 	viewState[0] = viewState[1] = viewState[2] = viewState[3] = "";
 	connect(ui->bW1, SIGNAL(clicked()), this, SLOT(clickW1()));
 	connect(ui->bW2, SIGNAL(clicked()), this, SLOT(clickW2()));
 	connect(ui->bW3, SIGNAL(clicked()), this, SLOT(clickW3()));
 	connect(ui->bW4, SIGNAL(clicked()), this, SLOT(clickW4()));
+	connect(ui->animSlower, SIGNAL(clicked()), this, SLOT(clickAnimSlower()));
+	connect(ui->animStepBackward, SIGNAL(clicked()), this, SLOT(clickAnimStepBackward()));
+	connect(ui->animPlay, SIGNAL(clicked()), this, SLOT(clickAnimPlay()));
+	connect(ui->animStepForward, SIGNAL(clicked()), this, SLOT(clickAnimStepForward()));
+	connect(ui->animFaster, SIGNAL(clicked()), this, SLOT(clickAnimFaster()));
 	connect(ui->bV1, SIGNAL(clicked()), this, SLOT(clickV1()));
 	connect(ui->bV2, SIGNAL(clicked()), this, SLOT(clickV2()));
 	connect(ui->bV3, SIGNAL(clicked()), this, SLOT(clickV3()));
 	connect(ui->bV4, SIGNAL(clicked()), this, SLOT(clickV4()));
+
+	animIndex = -1;
+	animMsecDelay = 500;
+	animTimer = new QTimer(this);
+	resetAnim();
+	connect(animTimer, SIGNAL(timeout()), this, SLOT(updateAnim()));
+	// Make wide enough to accommodate alternate text ("||") from clickAnimPlay()
+	ui->animPlay->setMinimumSize(ui->animPlay->size().width() + 6, ui->animPlay->size().height());
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -215,6 +228,61 @@ void LayerDialog::clickW4()
 	}
 	else
 		mw->meshDoc()->Log.Log(0, "No View to Restore");
+}
+
+void LayerDialog::clickAnimSlower()
+{
+	if (animMsecDelay < 3000)
+	{
+		animMsecDelay = int(animMsecDelay * 1.2);
+	}
+}
+
+void LayerDialog::clickAnimStepBackward()
+{
+	pauseAnim();
+	stepAnim(-1);
+}
+
+void LayerDialog::clickAnimPlay()
+{
+	if (!animTimer->isActive() && startAnim())
+	{
+		ui->animPlay->setText(tr("||"));
+		ui->animPlay->setToolTip(tr("Pause animation"));
+		stepAnim(1);
+		animTimer->start(animMsecDelay);
+	}
+	else
+	{
+		pauseAnim();
+	}
+}
+
+void LayerDialog::clickAnimStepForward()
+{
+	pauseAnim();
+	stepAnim(1);
+}
+
+void LayerDialog::clickAnimFaster()
+{
+	if (animMsecDelay > 10)
+	{
+		animMsecDelay = int(animMsecDelay / 1.2f);
+	}
+}
+
+void LayerDialog::updateAnim()
+{
+	if (stepAnim(1) > 1)
+	{
+		animTimer->start(animMsecDelay);  // Restart in case animMsecDelay changed
+	}
+	else
+	{
+		pauseAnim();
+	}
 }
 
 void LayerDialog::clickV1()
@@ -406,6 +474,13 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			if (mItem != NULL)
 				mw->meshDoc()->setCurrentMesh(clickedId);
 			updatePerMeshItemVisibility();
+
+			// If not animating, or a mesh in the animation set was clicked, reset the animation
+			if (!ui->animPlay->isChecked() ||
+				std::find(animMeshIDs.begin(), animMeshIDs.end(), clickedId) != animMeshIDs.end())
+			{
+				resetAnim();
+			}
 		} break;
 		case 1 :
 
@@ -691,6 +766,28 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	}
 	_docitem->addChildren(itms);
 
+	// Delete any animation IDs no longer in the layer dialog
+	for (auto animIter = animMeshIDs.begin(); animIter != animMeshIDs.end(); )
+	{
+		bool foundInMeshList = false;
+		foreach(MeshModel *mp, md->meshList)
+		{
+			if (mp->id() == *animIter)
+			{
+				foundInMeshList = true;
+				break;
+			}
+		}
+		if (foundInMeshList)
+		{
+			++animIter;
+		}
+		else
+		{
+			animIter = animMeshIDs.erase(animIter);
+		}
+	}
+
 	int wid = 0;
 	for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
 	{
@@ -864,6 +961,114 @@ void LayerDialog::actionActivated(MLRenderingAction* ract)
 {
 	if (ract != NULL)
 		_tabw->switchTab(ract->meshId(),ract->text());
+}
+
+bool LayerDialog::startAnim()
+{
+	if (animMeshIDs.size() > 1)
+	{
+		return true;
+	}
+
+	MeshDocument *md = mw->meshDoc();
+	bool canAnimate = md->meshList.size() > 1;
+
+	if (canAnimate)
+	{
+		int visibleCount = 0;
+		foreach(MeshModel *mp, md->meshList)
+		{
+			if (mp->isVisible())
+			{
+				++visibleCount;
+			}
+		}
+		// If fewer than two meshes were visible select all meshes, else select only the visible ones
+		animIndex = -1;
+		animMeshIDs.clear();
+		foreach(MeshModel *mp, md->meshList)
+		{
+			if (mp->isVisible() && animIndex < 0)
+			{
+				animIndex = animMeshIDs.size();  // Remember first visible mesh
+			}
+			if (mp->isVisible() || visibleCount < 2)
+			{
+				animMeshIDs.push_back(mp->id());
+			}
+		}
+		if (animIndex >= 0)
+		{
+			--animIndex;
+		}
+		ui->animStepBackward->setEnabled(true);
+		ui->animStepForward->setEnabled(true);
+	}
+	return canAnimate;
+}
+
+// Advance the animation by the specified offset (1 = forward, -1 = backward)
+int LayerDialog::stepAnim(int offset)
+{
+	bool foundVisible = false;
+	int animatingCount = 0;
+	MeshDocument *md = mw->meshDoc();
+
+	if (md->meshList.size() > 1)
+	{
+		MeshModel* lastMP = NULL;
+
+		while (!foundVisible && animMeshIDs.size() > 1)
+		{
+			animIndex = (animMeshIDs.size() + animIndex + offset) % animMeshIDs.size();
+			animatingCount = 0;
+			for (auto& id : animMeshIDs)
+			{
+				foreach(MeshModel *mp, md->meshList)
+				{
+					if (mp->id() == id)
+					{
+						bool makeVisible = mp->id() == animMeshIDs[animIndex];
+						mw->GLA()->meshSetVisibility(mp, makeVisible);
+						foundVisible |= makeVisible;
+						++animatingCount;
+						lastMP = mp;
+					}
+				}
+			}
+			if (!foundVisible)
+			{
+				// The mesh being animated to was deleted; remove it from the list and try again
+				animMeshIDs.erase(animMeshIDs.begin() + animIndex);
+				animIndex -= offset;
+			}
+		}
+		if (animMeshIDs.size() == 1 && lastMP != NULL)
+		{
+			mw->GLA()->meshSetVisibility(lastMP, true);
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+	}
+	return animatingCount;
+}
+
+void LayerDialog::pauseAnim()
+{
+	animTimer->stop();
+	ui->animPlay->setChecked(false);
+	ui->animPlay->setText(tr(">"));
+	ui->animPlay->setToolTip(tr("Resume animation"));
+}
+
+void LayerDialog::resetAnim()
+{
+	pauseAnim();
+	animMeshIDs.clear();
+	ui->animStepBackward->setEnabled(false);
+	ui->animStepForward->setEnabled(false);
+	ui->animPlay->setToolTip(tr("Animate visible meshes, or all if < 2 are visible"));
 }
 
 LayerDialog::~LayerDialog()
