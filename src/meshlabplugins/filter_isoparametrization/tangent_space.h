@@ -48,7 +48,7 @@ public:
 	
 	///given an initial position in parametric space (I0,bary0)
 	///and a 2D vector (vect) expressed in parametric space modify the final 
-	///position (I1,bary1) abd return true if everithing was ok, false otherwise
+	///position (I1,bary1) and return true if everything was ok, false otherwise
 	bool Sum(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const vcg::Point2<ScalarType> &vect,
 			 int &I1,vcg::Point2<ScalarType> &bary1,int &domain) const
@@ -84,7 +84,7 @@ public:
 			vcg::Point2<ScalarType> UVDiam;
 			///transform to diamond coordinates
 			isoParam->GE1(I0,dest,DiamIndex,UVDiam);
-			///trasform back to I,alpha,beta
+			///transform back to I,alpha,beta
 			isoParam->inv_GE1(DiamIndex,UVDiam,I1,bary1);
 			domain=1;
 			return true;
@@ -104,7 +104,7 @@ public:
 		vcg::Point2<ScalarType> UVHstar;
 		///transform to UV
 		bool found=isoParam->GE0(I0,dest,StarIndex,UVHstar);
-		///trasform back to I,alpha,beta
+		///transform back to I,alpha,beta
 		if (!found)
 			return false;
 		found=isoParam->inv_GE0(StarIndex,UVHstar,I1,bary1);
@@ -121,7 +121,7 @@ public:
 	}
 	
 	///given two positions in parametric space (I0,bary0) and (I1,bary1)
-	///modify the 2D vector (vect) and return true if everithing was ok, false otherwise
+	///modify the 2D vector (vect) and return true if everything was ok, false otherwise
 	bool Sub(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const int &I1,const vcg::Point2<ScalarType> &bary1,
 			 vcg::Point2<ScalarType> &vect,int &num) const
@@ -141,10 +141,10 @@ public:
 		if (num==1)
 		{
 			//printf("D");
-			///tranform in UV space
+			///transform in UV space
 			vcg::Point2<ScalarType> UVDiam;
 			isoParam->GE1(I1,bary1,IndexDomain,UVDiam);
-			///then find bary coords wich respect to the first face
+			///then find bary coords which respect to the first face
 			vcg::Point2<ScalarType> bary2;
 			isoParam->inv_GE1_fixedI(IndexDomain,UVDiam,I0,bary2);
 			vect=bary0-bary2;
@@ -155,10 +155,10 @@ public:
 		if (num==2)
 		{
 			//printf("S");
-			///tranform in UV space
+			///transform in UV space
 			vcg::Point2<ScalarType> UVStar;
 			isoParam->GE0(I1,bary1,IndexDomain,UVStar);
-			///then find bary coords wich respect to the first face
+			///then find bary coords which respect to the first face
 			vcg::Point2<ScalarType> bary2;
 			isoParam->inv_GE0_fixedI(IndexDomain,UVStar,I0,bary2);
 			vect=bary0-bary2;

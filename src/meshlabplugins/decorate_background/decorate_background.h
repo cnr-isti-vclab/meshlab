@@ -34,16 +34,18 @@ New small samples
 #include <QAction>
 #include <QList>
 
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/ml_shared_data_context.h>
 #include "cubemap.h"
 
-class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
+class DecorateBackgroundPlugin : public QObject, public DecoratePluginInterface
 {
   Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
-  Q_INTERFACES(MeshDecorateInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(DecoratePluginInterface)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;
+  QString pluginName() const;
 
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
@@ -61,6 +63,7 @@ inline QString BoxRatioParam() const { return  "MeshLab::Decoration::BoxRatio" ;
 inline QString ShowShadowParam() const { return  "MeshLab::Decoration::ShowShadow" ; }
 inline QString GridColorBackParam() const { return  "MeshLab::Decoration::GridColorBack" ; }
 inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridColorFront" ; }
+inline QString GridBaseLineWidthParam() const { return  "MeshLab::Decoration::GridBaseLineWidth" ; }
 
 public:
 
@@ -70,7 +73,7 @@ DecorateBackgroundPlugin()
       /*<< DP_SHOW_CUBEMAPPED_ENV*/
       << DP_SHOW_GRID;
 
-  foreach(FilterIDType tt , types()){
+  for(FilterIDType tt : types()){
     actionList << new QAction(decorationName(tt), this);
     if(tt==DP_SHOW_GRID)
       actionList.last()->setIcon(QIcon(":/images/show_background_grid.png"));
@@ -82,15 +85,15 @@ DecorateBackgroundPlugin()
 
   QString cubemapFileName;
 
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
-  void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &_log);
-  void decorateMesh(QAction *, MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &){}
-  void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  int getDecorationClass(QAction * /*action*/) const { return MeshDecorateInterface::PerDocument; }
+  bool startDecorate(const QAction* /*mode*/, MeshDocument &/*m*/, const RichParameterList * /*parent*/ par, GLArea * /*parent*/);
+  void decorateDoc(const QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &_log);
+  void decorateMesh(const QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &){}
+  void initGlobalParameterList(const QAction *, RichParameterList &/*globalparam*/);
+  int getDecorationClass(const QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
 
 
 private:
-  void DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
+  void DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, float baseLineWidth);
   Shotm curShot;
 
 signals:

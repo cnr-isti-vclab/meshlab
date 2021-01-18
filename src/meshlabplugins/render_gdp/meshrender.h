@@ -25,17 +25,17 @@
 #define SHADERRENDERPLUGIN_H
 
 #include <GL/glew.h>
-#include <common/interfaces.h>
+#include <common/interfaces/render_plugin_interface.h>
 #include "textfile.h"
 #include "shaderStructs.h"
 #include "shaderDialog.h"
 
 
-class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
+class MeshShaderRenderPlugin : public QObject, public RenderPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_RENDER_INTERFACE_IID)
-	Q_INTERFACES(MeshRenderInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(RenderPluginInterface)
 
 	GLhandleARB v;
 	GLhandleARB f;
@@ -55,6 +55,8 @@ public:
 		supported = false;
 		sDialog = 0;
 	}
+
+	QString pluginName() const;
 
 	QList<QAction *> actions() 
 	{

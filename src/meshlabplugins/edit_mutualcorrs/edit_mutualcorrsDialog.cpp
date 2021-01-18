@@ -38,8 +38,7 @@ void edit_mutualcorrsDialog::updateTable()
     this->ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    int pindex =0;
-    for(pindex=0; pindex < this->mutualcorrsPlugin->usePoint.size(); pindex++)
+    for(size_t pindex=0; pindex < this->mutualcorrsPlugin->usePoint.size(); pindex++)
     {
         QTableWidgetItem* useIt = new QTableWidgetItem();
         if(this->mutualcorrsPlugin->usePoint[pindex])
@@ -194,7 +193,7 @@ void edit_mutualcorrsDialog::on_tableWidget_itemChanged(QTableWidgetItem *item)
 void edit_mutualcorrsDialog::on_tableWidget_cellDoubleClicked(int row, int column)
 {
     this->mutualcorrsPlugin->status_error = "";
-    // only significative for forst column, to toggle between active<->inactive
+    // only significative for first column, to toggle between active<->inactive
     if(column == 0)
     {
         this->mutualcorrsPlugin->usePoint[row] = !(this->mutualcorrsPlugin->usePoint[row]);

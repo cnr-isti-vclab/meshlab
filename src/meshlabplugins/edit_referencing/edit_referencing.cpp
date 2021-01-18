@@ -30,6 +30,7 @@
 #include "edit_referencingDialog.h"
 
 #include <QFileDialog>
+#include <QTextStream>
 
 #define MAX_REFPOINTS 128
 
@@ -76,6 +77,11 @@ const QString EditReferencingPlugin::Info()
 {
     return tr("Reference layer(s) using fiducial points or scale layer(s) using reference distances.");
 }
+
+QString EditReferencingPlugin::pluginName() const
+{
+    return "EditReferencing";
+}
  
 void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
@@ -102,7 +108,7 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
     else
         status_line1.sprintf("Active Point: %s",pointID[cindex].toStdString().c_str());
 
-    this->RealTimeLog("Edit Referencing", m.shortName(),
+    this->realTimeLog("Edit Referencing", m.shortName(),
                       "Absolute Referencing<br>"
                       "%s<br>"
                       "%s<br>"
@@ -116,7 +122,6 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
     // draw picked & reference points
     if(true)
     {
-        int pindex;
         vcg::Point3d currpoint;
         QString buf;
         float lineLen = m.cm.bbox.Diag() / 50.0;
@@ -126,9 +131,9 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
 
         glDisable(GL_LIGHTING);
 
-        for(pindex=0; pindex<usePoint.size(); pindex++)
+        for(size_t pindex=0; pindex<usePoint.size(); pindex++)
         {
-            if(pindex == cindex)            //if current
+            if(pindex == (size_t)cindex)            //if current
                 glColor3ub(255, 255, 0);
             else if(usePoint[pindex])       //if active
                 glColor3ub(150, 150, 0);
@@ -149,7 +154,7 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
             vcg::glLabel::render(p,currpoint,buf);
 
 
-            if(pindex == cindex)            //if current
+            if(pindex == (size_t)cindex)            //if current
                 glColor3ub(0, 255, 255);
             else if(usePoint[pindex])       //if active
                 glColor3ub(0, 150, 150);
@@ -173,7 +178,7 @@ void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPa
             {
                 if(usePoint[pindex])    //if active
                 {
-                    if(pindex == cindex)            //if current
+                    if(pindex == (size_t)cindex)            //if current
                         glColor3ub(0, 255, 0);
                     else
                         glColor3ub(75, 150, 75);
@@ -225,7 +230,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	else
 		status_line3.sprintf("NO VALID SCENE SCALE");
 
-	this->RealTimeLog("Edit Referencing", m.shortName(),
+	this->realTimeLog("Edit Referencing", m.shortName(),
 		"Scale Referencing<br>"
 		"%s<br>"
 		"%s<br><br>"
@@ -239,7 +244,6 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	// draw picked distances
 	if (true)
 	{
-		int pindex;
 		vcg::Point3d currPointA, currPointB;
 		QString buf;
 		float lineLen = m.cm.bbox.Diag() / 50.0;
@@ -249,9 +253,9 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 
 		glDisable(GL_LIGHTING);
 
-		for (pindex = 0; pindex<useDistance.size(); pindex++)
+		for (size_t pindex = 0; pindex<useDistance.size(); pindex++)
 		{
-			if (pindex == cindex)            //if current
+			if (pindex == (size_t)cindex)            //if current
 				glColor3ub(200, 200, 0);
 			else if (useDistance[pindex])    //if active
 				glColor3ub(100, 100, 0);
@@ -284,7 +288,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 			buf = distanceID[pindex] + " (B)";
 			vcg::glLabel::render(p, currPointB, buf);
 
-			if (pindex == cindex)            //if current
+			if (pindex == (size_t)cindex)            //if current
 				glColor3ub(255, 255, 0);
 			else if (useDistance[pindex])    //if active
 				glColor3ub(155, 155, 0);
@@ -384,10 +388,10 @@ void EditReferencingPlugin::receivedSurfacePoint(QString name,Point3m pPoint)
 {
     status_error = "";
 
-    int pindex;
+    int pindex = 0;
     if(lastAskedPick == EditReferencingPlugin::REF_ABSOLUTE)
         pindex = referencingDialog->ui->tableWidget->currentRow();
-    else if(lastAskedPick == EditReferencingPlugin::REF_SCALE)
+    else// if(lastAskedPick == EditReferencingPlugin::REF_SCALE)
         pindex = referencingDialog->ui->tableWidgetDist->currentRow();
 
     if(name=="currentMOV")
@@ -416,7 +420,6 @@ void EditReferencingPlugin::receivedSurfacePoint(QString name,Point3m pPoint)
 void EditReferencingPlugin::addNewPoint()
 {
     status_error = "";
-    int pindex;
     bool alreadyThere;
     QString newname;
 
@@ -434,7 +437,7 @@ void EditReferencingPlugin::addNewPoint()
     {
         alreadyThere = false;
         newname = "PP" + QString::number(lastname++);
-        for(pindex=0; pindex<pointID.size(); pindex++)
+        for(size_t pindex=0; pindex<pointID.size(); pindex++)
         {
             if(pointID[pindex] == newname)
                alreadyThere=true;
@@ -554,7 +557,7 @@ void EditReferencingPlugin::loadFromFile()  //import reference list
 			// discovering the separator 
 			vector <QString> possible_separators = { QString(" "), QString(","), QString(";") };
 
-			int sind = 0;
+			size_t sind = 0;
 			while ((!found) || (sind<possible_separators.size()))
 			{
 				tokenizedLine = firstline.split(possible_separators[sind], QString::SkipEmptyParts);
@@ -633,7 +636,6 @@ void EditReferencingPlugin::saveToFile() // export reference list + picked point
 {
     status_error = "";
     // saving
-    int pindex;
 
     QString openFileName = "";
     openFileName = QFileDialog::getSaveFileName(NULL, "Save Referencing Process", QDir::currentPath(), "Text file (*.txt)");
@@ -651,7 +653,7 @@ void EditReferencingPlugin::saveToFile() // export reference list + picked point
 
             // writing reference
             openFileTS << "Reference points:" << "\n";
-            for(pindex=0; pindex<usePoint.size(); pindex++)
+            for(size_t pindex=0; pindex<usePoint.size(); pindex++)
             {
                 if(usePoint[pindex] == true)
                 {
@@ -663,7 +665,7 @@ void EditReferencingPlugin::saveToFile() // export reference list + picked point
 
             // writing picked
             openFileTS << "Picked points:" << "\n";
-            for(pindex=0; pindex<usePoint.size(); pindex++)
+            for(size_t pindex=0; pindex<usePoint.size(); pindex++)
             {
                 if(usePoint[pindex] == true)
                 {
@@ -691,8 +693,6 @@ void EditReferencingPlugin::calculateMatrix()
     vector<vcg::Point3d> FixP;
     vector<vcg::Point3d> MovP;
 
-    int pindex = 0;
-
     // constructing a vector of only ACTIVE points, plus indices and names, just for convenience
     // matrix calculation function uses all points in the vector, while in the filter we keep
     // a larger lint, in order to turn on and off points when we need, which is more flexible
@@ -708,7 +708,7 @@ void EditReferencingPlugin::calculateMatrix()
     status_line3 = "NO MATRIX";
 
     //filling
-    for(pindex=0; pindex<usePoint.size(); pindex++)
+    for(size_t pindex=0; pindex<usePoint.size(); pindex++)
     {
         if(usePoint[pindex] == true)
         {
@@ -742,7 +742,7 @@ void EditReferencingPlugin::calculateMatrix()
 
     if(referencingDialog->ui->cbAllowScaling->checkState() == Qt::Checked)
     {
-        this->Log(GLLogStream::FILTER, "calculating NON RIGID transformation using %d reference points:", FixP.size());
+        this->log(GLLogStream::FILTER, "calculating NON RIGID transformation using %d reference points:", FixP.size());
         referencingResults.append(QString("NON RIGID transformation from %1 reference points:\n").arg(QString::number(FixP.size())));
         ComputeSimilarityMatchMatrix(FixP, MovP, transfMatrix);
         validMatrix=true;
@@ -750,7 +750,7 @@ void EditReferencingPlugin::calculateMatrix()
     }
     else
     {
-        this->Log(GLLogStream::FILTER, "calculating RIGID transformation using %d reference points:", FixP.size());
+        this->log(GLLogStream::FILTER, "calculating RIGID transformation using %d reference points:", FixP.size());
         referencingResults.append(QString("RIGID transformation from %1 reference points:\n").arg(QString::number(FixP.size())));
         ComputeRigidMatchMatrix(FixP, MovP, transfMatrix);
         validMatrix=true;
@@ -775,25 +775,25 @@ void EditReferencingPlugin::calculateMatrix()
 
 
     if(isMatrixRigid)
-        this->Log(GLLogStream::FILTER, "RIGID MATRIX:");
+        this->log(GLLogStream::FILTER, "RIGID MATRIX:");
     else
-        this->Log(GLLogStream::FILTER, "NON-RIGID MATRIX:");
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3]);
-    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
+        this->log(GLLogStream::FILTER, "NON-RIGID MATRIX:");
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3]);
+    this->log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
 
-    this->Log(GLLogStream::FILTER, "  ");
-    this->Log(GLLogStream::FILTER, "Residual Errors:");
+    this->log(GLLogStream::FILTER, "  ");
+    this->log(GLLogStream::FILTER, "Residual Errors:");
 
     referencingResults.append("\n\nResidual Errors:\n\n");
 
-	for (pindex = 0; pindex<usePoint.size(); pindex++)
+    for (size_t pindex = 0; pindex<usePoint.size(); pindex++)
     {
 		if (usePoint[pindex])
 		{
 			pointError[pindex] = (refPoints[pindex] - (transfMatrix * pickedPoints[pindex])).Norm();
-			this->Log(GLLogStream::FILTER, "%s: %f", pointID[pindex].toStdString().c_str(), pointError[pindex]);
+			this->log(GLLogStream::FILTER, "%s: %f", pointID[pindex].toStdString().c_str(), pointError[pindex]);
 			referencingResults.append(QString("Point %1: %2\n").arg(pointID[pindex]).arg(QString::number(pointError[pindex])));
 		}
 		else
@@ -842,10 +842,9 @@ void EditReferencingPlugin::applyMatrix()
 void EditReferencingPlugin::updateDistances()
 {
 	// recalculate all current distances
-	int dindex;
 	Point3d currPA, currPB;
 
-	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	for (size_t dindex = 0; dindex < useDistance.size(); dindex++)
 	{
 		currPA = distPointA[dindex];
 		currPB = distPointB[dindex];
@@ -856,7 +855,7 @@ void EditReferencingPlugin::updateDistances()
 	// now update scale
 	double curr_scale = 0;
 	int numValid = 0;
-	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	for (size_t dindex = 0; dindex < useDistance.size(); dindex++)
 	{
 		if (currDist[dindex] == 0.0)
 		{
@@ -866,7 +865,7 @@ void EditReferencingPlugin::updateDistances()
 		{
 			scaleFact[dindex] = targDist[dindex] / currDist[dindex];
 
-			if ((useDistance[dindex]) && (!scaleFact[dindex] == 0.0))
+			if ((useDistance[dindex]) && (scaleFact[dindex] != 0.0))
 			{
 				curr_scale += scaleFact[dindex];
 				numValid++;
@@ -882,7 +881,7 @@ void EditReferencingPlugin::updateDistances()
 		this->referencingDialog->ui->bttApplyScale->setEnabled(true);
 
 	// finally update error
-	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	for (size_t dindex = 0; dindex < useDistance.size(); dindex++)
 	{
 		distError[dindex] = (currDist[dindex] * globalScale) - targDist[dindex];
 	}
@@ -894,7 +893,6 @@ void EditReferencingPlugin::updateDistances()
 void EditReferencingPlugin::addNewDistance()
 {
     status_error = "";
-    int pindex;
     bool alreadyThere;
     QString newname;
 
@@ -910,7 +908,7 @@ void EditReferencingPlugin::addNewDistance()
     {
         alreadyThere = false;
         newname = "DD" + QString::number(lastname++);
-        for(pindex=0; pindex<distanceID.size(); pindex++)
+        for(size_t pindex=0; pindex<distanceID.size(); pindex++)
         {
             if(distanceID[pindex] == newname)
                alreadyThere=true;
@@ -1064,7 +1062,7 @@ void EditReferencingPlugin::loadDistances()
 			// discovering the separator 
 			vector <QString> possible_separators = { QString(" "), QString(","), QString(";") };
 
-			int sind = 0;
+			size_t sind = 0;
 			while ((!found) || (sind<possible_separators.size()))
 			{
 				tokenizedLine = firstline.split(possible_separators[sind], QString::SkipEmptyParts);
@@ -1161,7 +1159,6 @@ void EditReferencingPlugin::exportScaling()
 	// saving to file
 	status_error = "";
 	// saving
-	int pindex;
 
 	QString openFileName = "";
 	openFileName = QFileDialog::getSaveFileName(NULL, "Save Scaling Process", QDir::currentPath(), "Text file (*.txt)");
@@ -1181,7 +1178,7 @@ void EditReferencingPlugin::exportScaling()
 			openFileTS << "-------------------------------------------------------\n";
 			openFileTS << "[active][ID][Xa][Ya][Za][Xb][Yb][Zb][CurrD][TargD][Err]\n";
 			openFileTS << "-------------------------------------------------------\n";
-			for (pindex = 0; pindex<useDistance.size(); pindex++)
+			for (size_t pindex = 0; pindex<useDistance.size(); pindex++)
 			{
 				openFileTS << (useDistance[pindex] ? "Active" : "Inactive") << " " << distanceID[pindex] << " " <<
 					distPointA[pindex][0] << " " << distPointA[pindex][1] << " " << distPointA[pindex][2] << " " <<
@@ -1199,7 +1196,7 @@ void EditReferencingPlugin::exportScaling()
 
 			openFileTS << "\n" << "SCALE FACTOR: " << globalScale << "\n";
 
-			for (pindex = 0; pindex<useDistance.size(); pindex++)
+			for (size_t pindex = 0; pindex<useDistance.size(); pindex++)
 			{
 				if ((useDistance[pindex] == true)&&(scaleFact[pindex]!=0.0))
 				{

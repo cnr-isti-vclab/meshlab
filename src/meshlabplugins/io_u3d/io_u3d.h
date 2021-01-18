@@ -28,36 +28,40 @@
 #include <QList>
 #include <QString>
 
-#include <common/interfaces.h>
+#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/ml_document/mesh_model.h>
 #include <wrap/io_trimesh/export_u3d.h>
 #include <wrap/io_trimesh/export_idtf.h>
 
-class U3DIOPlugin : public QObject, public MeshIOInterface
+class U3DIOPlugin : public QObject, public IOMeshPluginInterface
 {
-  Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
-  Q_INTERFACES(MeshIOInterface)
-  
- public:
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(IOMeshPluginInterface)
+
+public:
+	QString pluginName() const;
+	QList<FileFormat> importFormats() const;
+	QList<FileFormat> exportFormats() const;
 
 	U3DIOPlugin();
 
-	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
+	virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par);
+	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par);
 
-	private:
+private:
 	QString computePluginsPath();
 
+	void saveParameters(const RichParameterList &par);
 
-	void saveParameters(const RichParameterSet &par);
+	void saveLatex(const QString& file,const vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& mov_par);
+	void substituteChar(QString& st, const QChar& ch_remove, const QString& sub);
+
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
-	
 };
 
 #endif

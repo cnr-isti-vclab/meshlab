@@ -60,7 +60,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
   if(Selected)
     TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
   DeciSession.SetTargetSimplices(TargetFaceNum);
-  DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
+  DeciSession.SetTimeBudget(0.1f); // this allows updating the progress bar 10 time for sec...
   //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
   //int startFn=m.fn;
   int faceToDel=m.fn-TargetFaceNum;
@@ -79,6 +79,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
       if ((*vi).IsS()) (*vi).ClearS();
     }
   }
+  tri::QHelper::TDp()=nullptr;
 }
 
 
@@ -139,5 +140,7 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::
 	}
   }
 	
+  tri::QuadricTexHelper<CMeshO>::TDp3()=nullptr;
+  tri::QuadricTexHelper<CMeshO>::TDp()=nullptr;
 
 }

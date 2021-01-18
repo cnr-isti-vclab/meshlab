@@ -2,7 +2,11 @@
 #define GMPFRAC_H
 
 #include <iostream>
+#ifdef BUILD_WITH_GMP
+#include <gmpxx.h>
+#else
 #include <mpirxx.h>
+#endif
 
 inline long floor(const mpq_class &x) {
     mpz_class q;

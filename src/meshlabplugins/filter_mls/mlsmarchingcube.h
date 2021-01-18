@@ -26,6 +26,7 @@
 
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
+#include <common/ml_document/mesh_model.h>
 #include <map>
 #include "mlssurface.h"
 
@@ -121,9 +122,9 @@ public:
         extractor.Initialize();
         // for each macro block
         vcg::Point3i bi; // block id
-        for (bi[2]=0 ; bi[2]<nofBlocks[2] ; ++bi[2])
-        for (bi[1]=0 ; bi[1]<nofBlocks[1] ; ++bi[1])
-        for (bi[0]=0 ; bi[0]<nofBlocks[0] ; ++bi[0])
+        for (bi[2]=0 ; (unsigned int)bi[2]<nofBlocks[2] ; ++bi[2])
+        for (bi[1]=0 ; (unsigned int)bi[1]<nofBlocks[1] ; ++bi[1])
+        for (bi[0]=0 ; (unsigned int)bi[0]<nofBlocks[0] ; ++bi[0])
         {
             mBlockOrigin = bi * (mMaxBlockSize-1);
 

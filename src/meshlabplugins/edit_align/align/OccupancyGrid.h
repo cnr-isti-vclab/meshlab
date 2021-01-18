@@ -23,7 +23,7 @@
 #ifndef ALIGN_OCCUPANCY_GRID_H
 #define ALIGN_OCCUPANCY_GRID_H
 
-#include "AlignPair.h"
+#include <vcg/complex/algorithms/align_pair.h>
 #include <bitset>
 #include <vcg/space/index/grid_static_obj.h>
 
@@ -112,7 +112,7 @@ public:
 
 
 
-  void Clear();
+  void Clear() {};
   bool Init(int _mn, Box3d bb, int size);
 
   void Add(const char *MeshName, Matrix44d &Tr, int id);

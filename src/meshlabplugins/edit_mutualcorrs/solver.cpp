@@ -2,7 +2,7 @@
 #include <QTextStream>
 #include "edit_mutualcorrs.h"
 #include <vcg/math/shot.h>
-#include "../../external/newuoa/include/newuoa.h"
+#include "newuoa.h"
 
 
 #include "solver.h"
@@ -315,7 +315,7 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 //			corrTsai->point2d = currentPoint2d;
 //		}
 //        qDebug("Point3d %f %f %f",(float)corrTsai->point3d.X(),(float)corrTsai->point3d.Y(),(float)(float)corrTsai->point3d.Z());
-//        qDebug("Point2d %f %f %f",(float)corrTsai->point2d.X(),(float)corrTsai->point2d.Y());
+//        qDebug("Point2d %f %f",(float)corrTsai->point2d.X(),(float)corrTsai->point2d.Y());
 //
 //        corrs->push_back(*corrTsai);
 //    }
@@ -426,11 +426,11 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 
 double Solver::calculateError2( Shot &shot){
     //E' una pezza, andrebbe meglio pensato. Va a beccare direttamente le strutture dati PointCorrespondence di base.
-    //align già è sicuramente settato perchè lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
+    //align giï¿½ ï¿½ sicuramente settato perchï¿½ lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
     std::vector<Correspondence> correspList = align->correspList;
     double error = 0;
    
-    for( int i=0; i<correspList.size(); i++){
+    for( size_t i=0; i<correspList.size(); i++){
         Correspondence corr = correspList[i];
         vcg::Point2f projected = shot.Project(corr.Point3D);
         
@@ -450,7 +450,7 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
    // QList<PointCorrespondence*> *correspList = align->correspList;
 
     std::list<LevmarCorrelation> *corrs = new std::list<LevmarCorrelation>();
-	for (int i = 0; i<align->correspList.size(); i++){
+    for (size_t i = 0; i<align->correspList.size(); i++){
         //PointCorrespondence *corr = correspList->at(i);
         //PointOnLayer currentPointOnLayer1= corr->getPointAt(0);
         //PointOnLayer currentPointOnLayer2= corr->getPointAt(1);
@@ -460,12 +460,12 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
 		corrLevmar->point2d = vcg::Point2d(align->correspList[i].Point2D.X(), align->correspList[i].Point2D.Y());
 
         qDebug("Point3d %f %f %f",(float)corrLevmar->point3d.X(),(float)corrLevmar->point3d.Y(),(float)(float)corrLevmar->point3d.Z());
-        qDebug("Point2d %f %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
+        qDebug("Point2d %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
 
         corrs->push_back(*corrLevmar);
     }
 
-	vcg::Camera<float> &cam = shot.Intrinsics;
+	vcg::Camera<MESHLAB_SCALAR> &cam = shot.Intrinsics;
 
 	//DEBUG
 	qDebug("\n TEST BEFORE CALIBRATION \n");

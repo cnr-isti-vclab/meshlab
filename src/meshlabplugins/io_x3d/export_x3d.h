@@ -104,7 +104,7 @@ namespace io {
 	
 	/*If separator is true create the following string:
 			list[0] + " " + list[1] + " " + list[2] + " -1 " + ...+ " -1 " +list[i] + " " + list[i+1] + " " + list[i+2] + " -1"
-		othewise:
+		otherwise:
 			list[0] + " " + list[1] + " " + ... + list[i]
 	*/
 	inline static void getString(const std::vector<QString>& list, QString& ret, bool separator = true)
@@ -166,9 +166,6 @@ namespace io {
 
 		static int Save(SaveMeshType& m, const char * filename, const int mask, CallBackPos *cb=0)
 		{
-			QFile file(filename);
-			if (!file.open(QIODevice::WriteOnly))
-				return E_CANTOPEN;
 			int nFace = 0;
 			bool bHasPerWedgeTexCoord = (mask & Mask::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
 			bool bHasPerWedgeNormal = (mask & Mask::IOM_WEDGNORMAL) && HasPerWedgeNormal(m);
@@ -186,6 +183,9 @@ namespace io {
 				return E_INVALIDSAVENORMAL;
 			if (m.vert.size() == 0)
 				return E_NOGEOMETRY;
+			QFile file(filename);
+			if (!file.open(QIODevice::WriteOnly))
+				return E_CANTOPEN;
 			QDomDocument doc("X3D PUBLIC \"ISO//Web3D//DTD X3D 3.1//EN\" \"http://www.web3d.org/specifications/x3d-3.1.dtd\"");
 			QDomElement scene = createHeader(doc, filename);
 			int indexTexture = -2;

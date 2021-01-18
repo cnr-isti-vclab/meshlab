@@ -39,7 +39,12 @@ QualityMapperFilter::QualityMapperFilter()
 	typeList << FP_QUALITY_MAPPER;
   
   foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
+}
+
+QString QualityMapperFilter::pluginName() const
+{
+    return "FilterQuality";
 }
 
 // ST() must return the very short string describing each filtering action 
@@ -58,18 +63,18 @@ QualityMapperFilter::QualityMapperFilter()
  QString QualityMapperFilter::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_QUALITY_MAPPER :  return QString("The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertexes. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping");
+		case FP_QUALITY_MAPPER :  return QString("The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertices. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping");
 		default : assert(0); 
 	}
   return QString("");
 }
 
- MeshFilterInterface::FilterClass QualityMapperFilter::getClass(QAction *a)
+ FilterPluginInterface::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 {
   switch(ID(a))
   {
-    case FP_QUALITY_MAPPER :           return MeshFilterInterface::Quality;
-		default :  assert(0);			return MeshFilterInterface::Generic;
+    case FP_QUALITY_MAPPER :           return FilterPluginInterface::Quality;
+		default :  assert(0);			return FilterPluginInterface::Generic;
   }
 }
 
@@ -81,17 +86,17 @@ QualityMapperFilter::QualityMapperFilter()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void QualityMapperFilter::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
 			{
 				_meshMinMaxQuality = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 
-				parlst.addParam(new RichFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality","The specified quality value is mapped in the <b>lower</b> end of the choosen color scale. Default value: the minumum quality value found on the mesh."  ));
-				parlst.addParam(new RichFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality","The specified quality value is mapped in the <b>upper</b> end of the choosen color scale. Default value: the maximum quality value found on the mesh." ));
-				parlst.addParam(new RichFloat("midHandlePos", 50, "Gamma biasing (0..100)", "Defines a gamma compression of the quality values, by setting the position of the middle of the color scale. Value is defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping." ));
-				parlst.addParam(new RichFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with original colors, 2 represents a completely bright mesh"));
+				parlst.addParam(RichFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality","The specified quality value is mapped in the <b>lower</b> end of the chosen color scale. Default value: the minimum quality value found on the mesh."  ));
+				parlst.addParam(RichFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality","The specified quality value is mapped in the <b>upper</b> end of the chosen color scale. Default value: the maximum quality value found on the mesh." ));
+				parlst.addParam(RichFloat("midHandlePos", 50, "Gamma biasing (0..100)", "Defines a gamma compression of the quality values, by setting the position of the middle of the color scale. Value is defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping." ));
+				parlst.addParam(RichFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with original colors, 2 represents a completely bright mesh"));
 				//setting default transfer functions names
 				TransferFunction::defaultTFs[GREY_SCALE_TF] = "Grey Scale";
 				TransferFunction::defaultTFs[MESHLAB_RGB_TF] = "Meshlab RGB";
@@ -110,8 +115,8 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 					//fetching and adding default TFs to TFList
 					tfList << TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
 				
-				parlst.addParam(new RichEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "Choose the Transfer Function to apply to the filter" ));
-				parlst.addParam(new RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function. Write the full path of the qmap file, or save the file in the same folder of the current mesh, and write only the name of the qmap file. Only the RGB mapping will be imported from the qmap file" ));
+				parlst.addParam(RichEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "Choose the Transfer Function to apply to the filter" ));
+				parlst.addParam(RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function. Write the full path of the qmap file, or save the file in the same folder of the current mesh, and write only the name of the qmap file. Only the RGB mapping will be imported from the qmap file" ));
 			}
 			break;
    default: break; // do not add any parameter for the other filters
@@ -119,8 +124,8 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Apply color to mesh vertexes
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+// Apply color to mesh vertices
+bool QualityMapperFilter::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
 	m.updateDataMask(MeshModel::MM_VERTCOLOR);
@@ -174,7 +179,7 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichPar
 	return true;
 }
 
-int QualityMapperFilter::getPreConditions( QAction * a) const
+int QualityMapperFilter::getPreConditions(const QAction* a) const
 {
 	switch(ID(a))
 	{
@@ -186,11 +191,11 @@ int QualityMapperFilter::getPreConditions( QAction * a) const
 	} 
 }
 
-int QualityMapperFilter::postCondition( QAction* a) const
+int QualityMapperFilter::postCondition(const QAction* a) const
 {
 	switch(ID(a))
 	{
-	case FP_QUALITY_MAPPER :           
+	case FP_QUALITY_MAPPER :
 		return MeshModel::MM_VERTCOLOR;
 	default :  
 		assert(0);			

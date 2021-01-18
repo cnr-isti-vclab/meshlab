@@ -164,6 +164,8 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				}
 			}
 			break;
+		case NUMBER_OF_EQHANDLES:
+			break;
 		}
 	}
 }
@@ -256,6 +258,8 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 
 			emit positionChanged();  // for redrawing transferFunctionScene and moving midHandle
 		}
+		break;
+	case NUMBER_OF_EQHANDLES:
 		break;
 	}
 }

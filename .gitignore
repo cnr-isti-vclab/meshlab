@@ -1,8 +1,5 @@
-
-.qmake.stash
+## MeshLab GitIgnore ##
 *.ipch
-*.pro.user
-build-*/
 *.pdb
 *.sdf
 *.opensdf
@@ -18,22 +15,91 @@ build-*/
 *.opendb
 *.db-shm
 *.db-wal
+*.AppImage
+.DS_Store
+distrib*
+src/install/*
+install/macos/resources/meshlab_dmg_final.json
+install/windows/resources/meshlab_final.nsi
+install/windows/resources/MeshLab*.exe
+#install/snap20????/prime
+#install/snap20????/parts
+#install/snap20????/stage
+#install/snap20????/*.snap
+src/common/generated_version_header.h
+
+##Standard cmake gitignore##
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+##standard Qt and C++ gitignore##
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+*.lib
+*.exe
+*.obj
+*.res
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
 moc_*.cpp
-ui_*.h
+mocs_*.cpp
+moc_*.h
 qrc_*.cpp
-Debug/
-Release/
-src/external/lib/win32-msvc2013/*.lib
-src/external/lib/win32-msvc2015/*.lib
-src/external/lib/win32-msvc/*.lib
-src/distrib/plugins/*.lib
-src/distrib/plugins/*.dll
-src/distrib/plugins/*.xml
-src/distrib/common.lib
-src/distrib/meshlab.exe
-src/distrib/meshlabserver.exe
-src/distrib/MeshLabBundle
-src/install/snap20????/prime
-src/install/snap20????/parts
-src/install/snap20????/stage
-src/install/snap20????/*.snap
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.qm
+*.prl
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCreator CMake
+CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database 
+compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+*creator.user*
+
+
+# © 2019 GitHub, Inc.

@@ -27,7 +27,7 @@
 #include "balltree.h"
 #include <vcg/space/box3.h>
 #include <vcg/math/matrix33.h>
-#include <eigenlib/Eigen/Dense>
+#include <Eigen/Dense>
 #include <iostream>
 
 namespace GaelMls {
@@ -78,6 +78,8 @@ class MlsSurface
             mDomainNormalScale = 1.;
         }
 
+        virtual ~MlsSurface() {}
+
         /** \returns the value of the reconstructed scalar field at point \a x */
         virtual Scalar potential(const VectorType& x, int* errorMask = 0) const = 0;
 
@@ -94,7 +96,7 @@ class MlsSurface
         virtual MatrixType hessian(const VectorType& x, int* errorMask = 0) const
         { if (errorMask) *errorMask = MLS_NOT_SUPPORTED; return MatrixType(); }
 
-        /** \returns the projection of point x onto the MLS surface, and optionnaly returns the normal in \a pNormal */
+        /** \returns the projection of point x onto the MLS surface, and optionally returns the normal in \a pNormal */
         virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const = 0;
 
         /** \returns whether \a x is inside the restricted surface definition domain */

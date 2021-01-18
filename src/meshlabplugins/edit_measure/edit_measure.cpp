@@ -29,6 +29,8 @@ $Log: editmeasure.cpp,v $
 #include "edit_measure.h"
 #include <wrap/qt/gl_label.h>
 
+#include <QTextStream>
+
 using namespace vcg;
 
 EditMeasurePlugin::EditMeasurePlugin()
@@ -40,7 +42,12 @@ EditMeasurePlugin::EditMeasurePlugin()
 
 const QString EditMeasurePlugin::Info()
 {
-    return tr("Allow to measure distances between points of a model");
+	return tr("Allows one to measure distances between points of a model");
+}
+
+QString EditMeasurePlugin::pluginName() const
+{
+	return "EditMeasure";
 }
 
 void EditMeasurePlugin::mousePressEvent(QMouseEvent *, MeshModel &, GLArea * gla)
@@ -86,10 +93,10 @@ void EditMeasurePlugin::Decorate(MeshModel & m, GLArea * gla,QPainter* p)
 	newM.length = measuredDistance;
 	measures.push_back(newM);
 
-	this->Log(GLLogStream::FILTER, "Distance %s: %f", newM.ID.toStdString().c_str(), measuredDistance);
+	this->log(GLLogStream::FILTER, "Distance %s: %f", newM.ID.toStdString().c_str(), measuredDistance);
   }
 
-  for (int mind = 0; mind<measures.size(); mind++)
+  for (size_t mind = 0; mind<measures.size(); mind++)
   {
 	  rubberband.RenderLine(gla, measures[mind].startP, measures[mind].endP);
 	  vcg::glLabel::render(p, measures[mind].endP, QString("%1: %2").arg(measures[mind].ID).arg(measures[mind].length));
@@ -99,17 +106,17 @@ void EditMeasurePlugin::Decorate(MeshModel & m, GLArea * gla,QPainter* p)
   instructions = "C to clear, P to print, S to save";
 
   QString savedmeasure = "<br>";
-  for (int mind = 0; mind<measures.size(); mind++)
+  for (size_t mind = 0; mind<measures.size(); mind++)
   {
 	  savedmeasure.append(QString("%1 - %2<br>").arg(measures[mind].ID).arg(measures[mind].length));
   }
 
   if (measures.size() == 0)
-	this->RealTimeLog("Point to Point Measure", m.shortName(),
+	this->realTimeLog("Point to Point Measure", m.shortName(),
 		" -- "
 		);
   else
-	this->RealTimeLog("Point to Point Measure", m.shortName(),
+	this->realTimeLog("Point to Point Measure", m.shortName(),
 		(instructions + savedmeasure).toStdString().c_str()
 		);
 
@@ -127,14 +134,14 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 
 	if (e->key() == Qt::Key_P) // print
 	{
-		this->Log(GLLogStream::FILTER, "------- Distances -------");
-		this->Log(GLLogStream::FILTER, "ID: Dist [pointA][pointB]");
-		for (int mind = 0; mind<measures.size(); mind++)
+		this->log(GLLogStream::FILTER, "------- Distances -------");
+		this->log(GLLogStream::FILTER, "ID: Dist [pointA][pointB]");
+		for (size_t mind = 0; mind<measures.size(); mind++)
 		{
-			this->Log(GLLogStream::FILTER, "%s: %f [%f,%f,%f][%f,%f,%f]", measures[mind].ID.toStdString().c_str(), measures[mind].length,
+			this->log(GLLogStream::FILTER, "%s: %f [%f,%f,%f][%f,%f,%f]", measures[mind].ID.toStdString().c_str(), measures[mind].length,
 				measures[mind].startP[0], measures[mind].startP[1], measures[mind].startP[2], measures[mind].endP[0], measures[mind].endP[1], measures[mind].endP[2]);
 		}
-		this->Log(GLLogStream::FILTER, "-------------------------");
+		this->log(GLLogStream::FILTER, "-------------------------");
 	}
 
 	if (e->key() == Qt::Key_S) // save
@@ -154,7 +161,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 			openFileTS << mod.shortName().toStdString().c_str() << "\n\n";
 
 			openFileTS << "ID : Dist [pointA][pointB]" << "\n";
-			for (int mind = 0; mind<measures.size(); mind++)
+			for (size_t mind = 0; mind<measures.size(); mind++)
 			{
 				openFileTS << measures[mind].ID.toStdString().c_str() << " : " << measures[mind].length << " [" <<	
 					measures[mind].startP[0] << ", " << measures[mind].startP[1] << ", " << measures[mind].startP[2] << "] [" << 
@@ -165,7 +172,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 		}
 		else
 		{
-			this->Log(GLLogStream::WARNING, "- cannot save measures to file -");
+			this->log(GLLogStream::WARNING, "- cannot save measures to file -");
 		}
 	}
 }

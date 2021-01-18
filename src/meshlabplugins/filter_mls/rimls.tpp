@@ -181,9 +181,9 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
         VectorType sumN; sumN.SetZero();
         Scalar potential      = 0.;
         Scalar invSigma2      = Scalar(1) / (mSigmaN*mSigmaN);
-        Scalar invSigmaR2     = 0;
-        if (mSigmaR>0)
-            invSigmaR2 = Scalar(1) / (mSigmaR*mSigmaR);
+//        Scalar invSigmaR2     = 0;
+//        if (mSigmaR>0)
+//            invSigmaR2 = Scalar(1) / (mSigmaR*mSigmaR);
         VectorType sumGradWeight;
         VectorType sumGradWeightPotential;
         Scalar sumW;
@@ -261,8 +261,8 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
     uint nofSamples = mNeighborhood.size();
 
     const VectorType& sumGradWeight = mCachedSumGradWeight;
-    const VectorType& sumGradWeightPotential = mCachedSumGradPotential ;
-    const VectorType& sumN = mCachedSumN;
+//    const VectorType& sumGradWeightPotential = mCachedSumGradPotential ;
+//    const VectorType& sumN = mCachedSumN;
     const Scalar& sumW = mCachedSumW;
     const Scalar invW = 1.f/sumW;
 

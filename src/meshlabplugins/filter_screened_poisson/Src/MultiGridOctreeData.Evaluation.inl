@@ -26,6 +26,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#include "MultiGridOctreeData.h"
+
 template< class Real >
 template< int FEMDegree , BoundaryType BType>
 void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
@@ -55,11 +57,11 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The face stencil
-		for( int f=0 ; f<Cube::FACES ; f++ )
+		for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 		{
 			int dir , off;
 			Cube::FactorFaceIndex( f , dir , off );
-			double vv[3] , dv[3];
+			double vv[3] = {0,0,0} , dv[3]={0,0,0};
 			switch( dir )
 			{
 			case 0:
@@ -92,11 +94,11 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The edge stencil
-		for( int e=0 ; e<Cube::EDGES ; e++ )
+		for( unsigned int e=0 ; e<Cube::EDGES ; e++ )
 		{
 			int orientation , i1 , i2;
 			Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-			double vv[3] , dv[3];
+			double vv[3] = {0,0,0}, dv[3] = {0,0,0};
 			switch( orientation )
 			{
 			case 0:
@@ -129,7 +131,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The corner stencil
-		for( int c=0 ; c<Cube::CORNERS ; c++ )
+		for( unsigned int c=0 ; c<Cube::CORNERS ; c++ )
 		{
 			int cx , cy  ,cz;
 			Cube::FactorCornerIndex( c , cx , cy , cz );
@@ -168,11 +170,11 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The face stencil
-			for( int f=0 ; f<Cube::FACES ; f++ )
+			for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 			{
 				int dir , off;
 				Cube::FactorFaceIndex( f , dir , off );
-				double vv[3] , dv[3];
+				double vv[3] = {0,0,0}, dv[3] = {0,0,0};
 				switch( dir )
 				{
 				case 0:
@@ -205,11 +207,11 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The edge stencil
-			for( int e=0 ; e<Cube::EDGES ; e++ )
+			for( unsigned int e=0 ; e<Cube::EDGES ; e++ )
 			{
 				int orientation , i1 , i2;
 				Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-				double vv[3] , dv[3];
+				double vv[3] = {0,0,0} , dv[3]={0,0,0};
 				switch( orientation )
 				{
 				case 0:
@@ -242,7 +244,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The corner stencil
-			for( int c=0 ; c<Cube::CORNERS ; c++ )
+			for( unsigned int c=0 ; c<Cube::CORNERS ; c++ )
 			{
 				int cx , cy  ,cz;
 				Cube::FactorCornerIndex( c , cx , cy , cz );
@@ -267,7 +269,7 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 {
 	static const int SupportSize = BSplineSupportSizes< FEMDegree >::SupportSize;
 	static const int  LeftSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int  LeftPointSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
 
@@ -306,12 +308,37 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 	LocalDepth d = _localDepth( node );
 
 	for( int dd=0 ; dd<3 ; dd++ )
-		if     ( p[dd]==0 ) p[dd] = (Real)(0.+1e-6);
-		else if( p[dd]==1 ) p[dd] = (Real)(1.-1e-6);
+		if     ( p[dd]==0 )
+			p[dd] = (Real)(0.+1e-6);
+		else if( p[dd]==1 )
+			p[dd] = (Real)(1.-1e-6);
+	{
+		const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node );
 
+		for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
 		{
-			const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node );
-
+			const TreeOctNode* _n = neighbors.neighbors[i][j][k];
+			if( _isValidFEMNode( _n ) )
+			{
+				int _pIdx[3];
+				Point3D< Real > _s ; Real _w;
+				_startAndWidth( _n , _s , _w );
+				int _fIdx[3];
+				functionIndex< FEMDegree , BType >( _n , _fIdx );
+				for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
+				value +=
+				        solution[ _n->nodeData.nodeIndex ] *
+				        (Real)
+				        (
+				            evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) *
+				        evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) *
+				        evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+				        );
+			}
+		}
+		if( d>0 )
+		{
+			const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node->parent );
 			for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
 			{
 				const TreeOctNode* _n = neighbors.neighbors[i][j][k];
@@ -323,43 +350,19 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 					int _fIdx[3];
 					functionIndex< FEMDegree , BType >( _n , _fIdx );
 					for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
-					value += 
-						solution[ _n->nodeData.nodeIndex ] *
-						(Real)
-						(
-							evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) *
-							evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) *
-							evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-							);
-				}
-			}
-			if( d>0 )
-			{
-				const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node->parent );
-				for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
-				{
-					const TreeOctNode* _n = neighbors.neighbors[i][j][k];
-					if( _isValidFEMNode( _n ) )
-					{
-						int _pIdx[3];
-						Point3D< Real > _s ; Real _w;
-						_startAndWidth( _n , _s , _w );
-						int _fIdx[3];
-						functionIndex< FEMDegree , BType >( _n , _fIdx );
-						for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
-						value += 
-							coarseSolution[ _n->nodeData.nodeIndex ] *
-							(Real)
-							(
-								evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) *
-								evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) *
-								evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-								);
-					}
+					value +=
+					        coarseSolution[ _n->nodeData.nodeIndex ] *
+					        (Real)
+					        (
+					            evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) *
+					        evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) *
+					        evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+					        );
 				}
 			}
 		}
-		return value;
+	}
+	return value;
 }
 template< class Real >
 template< int FEMDegree , BoundaryType BType >
@@ -413,12 +416,44 @@ std::pair< Real , Point3D< Real > > Octree< Real >::_getValueAndGradient( const 
 	LocalDepth d = _localDepth( node );
 
 	for( int dd=0 ; dd<3 ; dd++ )
-		if     ( p[dd]==0 ) p[dd] = (Real)(0.+1e-6);
-		else if( p[dd]==1 ) p[dd] = (Real)(1.-1e-6);
+		if     ( p[dd]==0 )
+			p[dd] = (Real)(0.+1e-6);
+		else if( p[dd]==1 )
+			p[dd] = (Real)(1.-1e-6);
 
+	{
+		const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node );
+
+		for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
 		{
-			const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node );
+			const TreeOctNode* _n = neighbors.neighbors[i][j][k];
 
+			if( _isValidFEMNode( _n ) )
+			{
+				int _pIdx[3];
+				Point3D< Real > _s ; Real _w;
+				_startAndWidth( _n , _s , _w );
+				int _fIdx[3];
+				functionIndex< FEMDegree , BType >( _n , _fIdx );
+				for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
+				value +=
+				        solution[ _n->nodeData.nodeIndex ] *
+				        (Real)
+				        (
+				            evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+				        );
+				gradient +=
+				        Point3D< Real >
+				        (
+				            evaluator._bsData->dBaseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
+				        evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->dBaseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
+				        evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->dBaseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+				        ) * solution[ _n->nodeData.nodeIndex ];
+			}
+		}
+		if( d>0 )
+		{
+			const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node->parent );
 			for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
 			{
 				const TreeOctNode* _n = neighbors.neighbors[i][j][k];
@@ -431,54 +466,24 @@ std::pair< Real , Point3D< Real > > Octree< Real >::_getValueAndGradient( const 
 					int _fIdx[3];
 					functionIndex< FEMDegree , BType >( _n , _fIdx );
 					for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
-					value += 
-						solution[ _n->nodeData.nodeIndex ] *
-						(Real)
-						(
-							evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-						);
-					gradient += 
-						Point3D< Real >
-						(
-							evaluator._bsData->dBaseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
-							evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->dBaseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
-							evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->dBaseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-						) * solution[ _n->nodeData.nodeIndex ];
-				}
-			}
-			if( d>0 )
-			{
-				const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node->parent );
-				for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
-				{
-					const TreeOctNode* _n = neighbors.neighbors[i][j][k];
-
-					if( _isValidFEMNode( _n ) )
-					{
-						int _pIdx[3];
-						Point3D< Real > _s ; Real _w;
-						_startAndWidth( _n , _s , _w );
-						int _fIdx[3];
-						functionIndex< FEMDegree , BType >( _n , _fIdx );
-						for( int dd=0 ; dd<3 ; dd++ ) _pIdx[dd] = std::max< int >( 0 , std::min< int >( SupportSize-1 , LeftSupportRadius + (int)floor( ( p[dd]-_s[dd] ) / _w ) ) );
-						value += 
-							coarseSolution[ _n->nodeData.nodeIndex ] *
-							(Real)
-							(
-								evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-							);
-						gradient += 
-							Point3D< Real >
-							(
-								evaluator._bsData->dBaseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
-								evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->dBaseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
-								evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->dBaseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
-							) * coarseSolution[ _n->nodeData.nodeIndex ];
-					}
+					value +=
+					        coarseSolution[ _n->nodeData.nodeIndex ] *
+					        (Real)
+					        (
+					            evaluator._bsData->baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+					        );
+					gradient +=
+					        Point3D< Real >
+					        (
+					            evaluator._bsData->dBaseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
+					        evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData->dBaseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData-> baseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] ) ,
+					        evaluator._bsData-> baseBSplines[ _fIdx[0] ][ _pIdx[0] ]( p[0] ) * evaluator._bsData-> baseBSplines[ _fIdx[1] ][ _pIdx[1] ]( p[1] ) * evaluator._bsData->dBaseBSplines[ _fIdx[2] ][ _pIdx[2] ]( p[2] )
+					        ) * coarseSolution[ _n->nodeData.nodeIndex ];
 				}
 			}
 		}
-		return std::pair< Real , Point3D< Real > >( value , gradient );
+	}
+	return std::pair< Real , Point3D< Real > >( value , gradient );
 }
 template< class Real >
 template< class V , int FEMDegree , BoundaryType BType >
@@ -1123,7 +1128,7 @@ std::pair< Real , Point3D< Real > > Octree< Real >::_getCornerValueAndGradient( 
 }
 template< class Real >
 template< int Degree , BoundaryType BType >
-Octree< Real >::MultiThreadedEvaluator< Degree , BType >::MultiThreadedEvaluator( const Octree< Real >* tree , const DenseNodeData< Real , Degree >& coefficients , int threads ) : _coefficients( coefficients ) , _tree( tree )
+Octree< Real >::MultiThreadedEvaluator< Degree , BType >::MultiThreadedEvaluator( const Octree< Real >* tree , const DenseNodeData< Real , Degree >& coefficients , int threads ) : _tree( tree ), _coefficients( coefficients )
 {
 	_threads = std::max< int >( 1 , threads );
 	_neighborKeys.resize( _threads );

@@ -30,7 +30,7 @@ EditPickPointsFactory::EditPickPointsFactory()
 		
 	actionList << editPickPoints;
 	
-	foreach(QAction *editAction, actionList)
+	for(QAction *editAction : actionList)
 		editAction->setCheckable(true); 	
 }
 	
@@ -41,15 +41,17 @@ QList<QAction *> EditPickPointsFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditPickPointsFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditPickPointsFactory::getMeshEditInterface(const QAction *action)
 {
-	if(action == editPickPoints)
-	{
+	if(action == editPickPoints) {
 		return new EditPickPointsPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else {
+		assert(0); //should never be asked for an action that isn't here
+		return nullptr;
+	}
 }
 
-QString EditPickPointsFactory::getEditToolDescription(QAction *)
+QString EditPickPointsFactory::getEditToolDescription(const QAction *)
 {
 	return EditPickPointsPlugin::Info();
 }

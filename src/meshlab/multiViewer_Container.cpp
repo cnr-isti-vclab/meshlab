@@ -23,6 +23,7 @@
 #include "multiViewer_Container.h"
 #include "glarea.h"
 #include <QMouseEvent>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include <common/mlapplication.h>
 
@@ -119,7 +120,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	        /   \
 	      View2  View3
 
-	In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
+	In the GUI, when a viewer is split, the new one appears on its right (the space is split in two equal portions).
 	*/
 	//CASE 0: only when the first viewer is opened, just add it and return;
 	if (viewerCounter()==0)

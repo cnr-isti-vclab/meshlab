@@ -25,7 +25,7 @@
 #define ML_DEFAULT_DECORATORS_H
 
 #include <common/ml_shared_data_context.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <common/GLLogStream.h>
 
 class MainWindow;
@@ -77,9 +77,9 @@ private:
 
 
 
-    static void drawLineVector(const vcg::Matrix44f& tr,std::vector<PointPC> &EV);
-    static void drawTriVector(const vcg::Matrix44f& tr, std::vector<PointPC> &TV);
-    static void drawDotVector(const vcg::Matrix44f& tr, std::vector<PointPC> &TV, float baseSize=4.0f);
+    static void drawLineVector(const Matrix44m& tr,std::vector<PointPC> &EV);
+    static void drawTriVector(const Matrix44m& tr, std::vector<PointPC> &TV);
+    static void drawDotVector(const Matrix44m& tr, std::vector<PointPC> &TV, float baseSize=4.0f);
     static void drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf);
     static void drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont& qf,float angle = 0,bool rightAlign = false);
     static void chooseX(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &x1,vcg::Point3d &x2);

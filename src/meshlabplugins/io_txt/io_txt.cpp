@@ -33,7 +33,7 @@ using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
-void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
+void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("TXT"))
 	{
@@ -54,15 +54,15 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
             QStringList rgbmode = (QStringList() << "[0-255]" << "[0.0-1.0]");
 			QStringList onerror = (QStringList() << "skip" << "stop");
 
-            parlst.addParam(new RichInt("rowToSkip", 0, "Header Row to be skipped", "The number of lines that must be skipped at the beginning of the file. Generally, these files have one or more 'header' lines, before the point list"));
-            parlst.addParam(new RichEnum("strformat", 0, strformat,"Point format","Which values are specified for each point, and in which order."));
-            parlst.addParam(new RichEnum("separator", 0, separator,"Separator","The separator between individual values in the point(s) description."));
-            parlst.addParam(new RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
-			parlst.addParam(new RichEnum("onerror", 0, onerror, "On Parsing Error", "When a line is not properly parsed, it is possible to 'skip' it and continue with the following lines, or 'stop' importing at that point"));
+            parlst.addParam(RichInt("rowToSkip", 0, "Header Row to be skipped", "The number of lines that must be skipped at the beginning of the file. Generally, these files have one or more 'header' lines, before the point list"));
+            parlst.addParam(RichEnum("strformat", 0, strformat,"Point format","Which values are specified for each point, and in which order."));
+            parlst.addParam(RichEnum("separator", 0, separator,"Separator","The separator between individual values in the point(s) description."));
+            parlst.addParam(RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
+            parlst.addParam(RichEnum("onerror", 0, onerror, "On Parsing Error", "When a line is not properly parsed, it is possible to 'skip' it and continue with the following lines, or 'stop' importing at that point"));
     }
 }
 
-bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
     bool result=false;
 
@@ -89,7 +89,7 @@ bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return result;
 }
 
-bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	assert(0);
 	return false;
@@ -98,10 +98,15 @@ bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileNam
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> TxtIOPlugin::importFormats() const
+QString TxtIOPlugin::pluginName() const
 {
-	QList<Format> formatList;
-    formatList << Format("TXT (Generic ASCII point list)", tr("TXT"));
+	return "IOTXT";
+}
+
+QList<FileFormat> TxtIOPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
+    formatList << FileFormat("TXT (Generic ASCII point list)", tr("TXT"));
 
 	return formatList;
 }
@@ -109,9 +114,9 @@ QList<MeshIOInterface::Format> TxtIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> TxtIOPlugin::exportFormats() const
+QList<FileFormat> TxtIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	return formatList;
 }
 
@@ -119,9 +124,9 @@ QList<MeshIOInterface::Format> TxtIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TxtIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability, int &defaultBits) const
+void TxtIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
+	capability=defaultBits=0;
 	return;
 }
  

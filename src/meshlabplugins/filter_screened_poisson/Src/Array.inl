@@ -185,7 +185,7 @@ public:
 		}
 		else
 		{
-			// [WARNING] Chaning szC and szD to size_t causes some really strange behavior.
+			// [WARNING] Changing szC and szD to size_t causes some really strange behavior.
 			long long szC = sizeof( C );
 			long long szD = sizeof( D );
 			data = (C*)a.data;
@@ -398,7 +398,7 @@ public:
 	template< class D >
 	inline ConstArray( const ConstArray< D >& a )
 	{
-		// [WARNING] Chaning szC and szD to size_t causes some really strange behavior.
+		// [WARNING] Changing szC and szD to size_t causes some really strange behavior.
 		long long szC = sizeof( C );
 		long long szD = sizeof( D );
 		data = ( const C*)a.pointer( );

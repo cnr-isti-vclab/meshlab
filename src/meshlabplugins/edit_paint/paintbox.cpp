@@ -78,11 +78,13 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 
 void Paintbox::setUndoStack(QWidget * parent)
 {
-	if (stack_association.contains(parent))
+	if (stack_association.contains(parent)) {
 		stacks->setActiveStack(stack_association[parent]);
-	else
+	}
+	else {
 		stack_association.insert(parent, new QUndoStack(parent));
 		stacks->setActiveStack(stack_association[parent]);
+	}
 }
 
 void Paintbox::on_default_colors_clicked()
@@ -193,16 +195,17 @@ void Paintbox::restorePreviousType()
 
 void Paintbox::refreshBrushPreview()
 {
-	if ((item != NULL) && (brush_viewer->scene()->items().contains(item))) 
+	if ((item != NULL) && (brush_viewer->scene()->items().contains(item))) {
 		brush_viewer->scene()->removeItem(item);
 		
 		item = brush_viewer->scene()->addPixmap(QPixmap::fromImage(
-				raster(getBrush(), (int) ((brush_viewer->width()-2) * size_slider->value() / 100.0), 
-						(int)((brush_viewer->height()-2) * size_slider->value() / 100.0), getHardness())
+				raster(getBrush(), (int)((brush_viewer->width()-2) * size_slider->value() / 100.0),
+					   (int)((brush_viewer->height()-2) * size_slider->value() / 100.0), getHardness())
 				)
 		);
 		
 		brush_viewer->setSceneRect(item->boundingRect());
+	}
 }
 
 void Paintbox::setForegroundColor(QColor & c)

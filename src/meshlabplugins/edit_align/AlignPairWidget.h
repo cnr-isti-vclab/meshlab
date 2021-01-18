@@ -62,7 +62,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent*e);
     void wheelEvent(QWheelEvent*e);
     void mouseDoubleClickEvent(QMouseEvent * e);
-    void drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &, vcg::Color4b color);
+    void drawPickedPoints(QPainter *qp, std::vector<Point3m>&, vcg::Color4b color);
 
 
 private:
@@ -80,8 +80,8 @@ private:
 
 	void createRenderingData(MeshModel* mm, MLRenderingData& dt);
 public:
-    std::vector<vcg::Point3f> freePickedPointVec;
-    std::vector<vcg::Point3f> gluedPickedPointVec;
+    std::vector<Point3m> freePickedPointVec;
+    std::vector<Point3m> gluedPickedPointVec;
 
     /// mesh data structure initializer
     bool hasToPick;

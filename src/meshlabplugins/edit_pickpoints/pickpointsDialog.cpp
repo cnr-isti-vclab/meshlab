@@ -29,8 +29,9 @@
 #include <QFileDialog>
 #include <math.h>
 
-#include <common/meshmodel.h>
-#include <meshlab/stdpardialog.h>
+#include <common/ml_document/mesh_model.h>
+#include <meshlab/rich_parameter_gui/richparameterlistframe.h>
+#include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"
@@ -39,6 +40,8 @@
 #include <vcg/complex/algorithms/closest.h>
 
 #include <QGLWidget>
+#include <QDebug>
+#include <QMessageBox>
 
 using namespace vcg;
 
@@ -432,7 +435,7 @@ PickedPointTreeWidgetItem * PickPointsDialog::addTreeWidgetItemForPoint(Point3m 
 	checkBox->setChecked(present);
 
 	//now connect the box to its slot that chanches the checked value of the 
-	//PickedPointTreeWidgetItem and draws all the points.  dont do this before
+	//PickedPointTreeWidgetItem and draws all the points.  don't do this before
 	//set checked or you will have all points that should be drawn, not drawn
 	connect(checkBox, SIGNAL(toggled(bool)), checkBox, SLOT(toggleAndDraw(bool)));
 
@@ -656,10 +659,10 @@ void PickPointsDialog::renameHighlightedPoint() {
 
 		const QString newName = "newName";
 
-		RichParameterSet parameterSet;
-		parameterSet.addParam(new RichString(newName, name, "New Name", "Enter the new name"));
+		RichParameterList parameterSet;
+		parameterSet.addParam(RichString(newName, name, "New Name", "Enter the new name"));
 
-		GenericParamDialog getNameDialog(this, &parameterSet);
+		RichParameterListDialog getNameDialog(this, parameterSet);
 		getNameDialog.setWindowModality(Qt::WindowModal);
 		getNameDialog.hide();
 
@@ -836,7 +839,7 @@ void PickPointsDialog::savePointTemplate() {
 	{
 		filename = QFileDialog::getSaveFileName(this, tr("Save File"), templateWorkingDirectory, "*" + PickPointsTemplate::fileExtension);
 
-		//if the user pushes cancel dont do anything
+		//if the user pushes cancel don't do anything
 		if ("" == filename) return;
 		else templateWorkingDirectory = filename;
 	}

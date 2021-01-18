@@ -55,7 +55,12 @@ FilterDirt::FilterDirt()
 
     FilterIDType tt;
     foreach(tt , types())
-    actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(filterName(tt), this);
+}
+
+QString FilterDirt::pluginName() const
+{
+    return "FilterDirt";
 }
 
 QString FilterDirt::filterName(FilterIDType filterId) const
@@ -94,27 +99,27 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
     }
 }
 
-void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichParameterSet &par){
+void FilterDirt::initParameterList(const QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
 
     switch(ID(filter)){
 
     case FP_DIRT:{
-		par.addParam(new RichPoint3f("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
-		par.addParam(new RichInt("nparticles", 3, "max particles x face", "Max Number of Dust Particles to Generate Per Face"));
-		par.addParam(new RichFloat("slippiness", 1.0f, "s", "The surface slippines(large s means less sticky)"));
-		par.addParam(new RichFloat("adhesion", 0.2f, "k", "Factor to model the general adhesion"));
-		par.addParam(new RichBool("draw_texture", false, "Draw Dust", "create a new texture saved in dirt_texture.png"));
-		// par.addParam(new RichBool("colorize_mesh",false,"Map to Color","Color the mesh with colors based on the movement of the particle"));
+        par.addParam(RichPoint3f("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
+        par.addParam(RichInt("nparticles", 3, "max particles x face", "Max Number of Dust Particles to Generate Per Face"));
+        par.addParam(RichFloat("slippiness", 1.0f, "s", "The surface slippines(large s means less sticky)"));
+        par.addParam(RichFloat("adhesion", 0.2f, "k", "Factor to model the general adhesion"));
+        par.addParam(RichBool("draw_texture", false, "Draw Dust", "create a new texture saved in dirt_texture.png"));
+        // par.addParam(RichBool("colorize_mesh",false,"Map to Color","Color the mesh with colors based on the movement of the particle"));
         break;
     }
     case FP_CLOUD_MOVEMENT:{
-		par.addParam(new RichPoint3f("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
-		par.addParam(new RichPoint3f("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
-		par.addParam(new RichInt("steps", 1, "s", "Simulation Steps"));
-		par.addParam(new RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f, "adhesion", "Factor to model the general adhesion."));
-		par.addParam(new RichFloat("velocity", 0, "v", "Initial velocity of the particle"));
-		par.addParam(new RichFloat("mass", 1, "m", "Mass of the particle"));
-		par.addParam(new RichBool("colorize_mesh", false, "Map to Color", "Color the mesh with colors based on the movement of the particle"));
+        par.addParam(RichPoint3f("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
+        par.addParam(RichPoint3f("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
+        par.addParam(RichInt("steps", 1, "s", "Simulation Steps"));
+        par.addParam(RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f, "adhesion", "Factor to model the general adhesion."));
+        par.addParam(RichFloat("velocity", 0, "v", "Initial velocity of the particle"));
+        par.addParam(RichFloat("mass", 1, "m", "Mass of the particle"));
+        par.addParam(RichBool("colorize_mesh", false, "Map to Color", "Color the mesh with colors based on the movement of the particle"));
 		break;
     }
     default:{
@@ -123,12 +128,12 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument & /*md*/, RichPar
     }
 }
 
-int FilterDirt::getRequirements(QAction * /*action*/)
+int FilterDirt::getRequirements(const QAction * /*action*/)
 {
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
-bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb){
+bool FilterDirt::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb){
 
 
     switch(ID(filter)){
@@ -137,8 +142,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         /*Get Parameters*/
 
         Point3m dir=par.getPoint3m("dust_dir");
-        float s=par.getFloat("slippiness");
-        float k=par.getFloat("adhesion");
+        Scalarm s=par.getFloat("slippiness");
+        Scalarm k=par.getFloat("adhesion");
         bool draw=par.getBool("draw_texture");
         //bool colorize=par.getBool("colorize_mesh");
         int n_p=par.getInt("nparticles");
@@ -238,7 +243,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
     return true;
 }//End applyFilter
 
-int FilterDirt::postCondition( QAction *a) const
+int FilterDirt::postCondition(const QAction *a) const
 {
 	switch (ID(a)){
 	case FP_DIRT: return MeshModel::MM_ALL;
@@ -248,14 +253,14 @@ int FilterDirt::postCondition( QAction *a) const
 	return MeshModel::MM_ALL;
 }
 
-MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
+FilterPluginInterface::FilterClass FilterDirt::getClass(const QAction *filter) const
 {
 	switch (ID(filter))	{
-	case FP_DIRT:return MeshFilterInterface::Sampling;
-	case FP_CLOUD_MOVEMENT:return MeshFilterInterface::Remeshing;
+	case FP_DIRT:return FilterPluginInterface::Sampling;
+	case FP_CLOUD_MOVEMENT:return FilterPluginInterface::Remeshing;
 	default:assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDirt)

@@ -1,7 +1,9 @@
 include (../../shared.pri)
 
-HEADERS       += io_bre.h \
+HEADERS += \
+    io_bre.h
 				
-SOURCES       += io_bre.cpp \
+SOURCES += \
+    io_bre.cpp
 
-TARGET        = io_bre
+TARGET = io_bre

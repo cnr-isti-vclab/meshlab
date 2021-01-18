@@ -26,7 +26,7 @@
 
 #include <map>
 #include <GL/glew.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <QLabel>
 #include <QDockWidget>
 #include "shaderStructs.h"
@@ -34,6 +34,7 @@
 #include <QMap>
 #include <QLineEdit>
 #include <QSlider>
+#include <QSignalMapper>
 
 class QGLWidget;
 
@@ -42,22 +43,22 @@ class ShaderDialog : public QDockWidget
     Q_OBJECT
 
 public:
-    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent = 0);
-    ~ShaderDialog();
+	ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent = 0);
+	~ShaderDialog();
 
 private:
-		QGLWidget* glarea;
-		bool usevertexcolor;
-		ShaderInfo * shaderInfo;
-		QSignalMapper *colorSignalMapper;
-		QSignalMapper *valueSignalMapper;
-		QSignalMapper *textLineSignalMapper;
-		QSignalMapper *textButtonSignalMapper;
-    std::map<QString, QLabel*> labels;
-		std::map<QString, QSlider*> sliders;
-		std::vector<QLineEdit*> textLineEdits;
-		std::map<QString, QLineEdit*> lineEdits;
-    Ui::ShaderDialogClass ui;
+	QGLWidget* glarea;
+	bool usevertexcolor;
+	ShaderInfo * shaderInfo;
+	QSignalMapper *colorSignalMapper;
+	QSignalMapper *valueSignalMapper;
+	QSignalMapper *textLineSignalMapper;
+	QSignalMapper *textButtonSignalMapper;
+	std::map<QString, QLabel*> labels;
+	std::map<QString, QSlider*> sliders;
+	std::vector<QLineEdit*> textLineEdits;
+	std::map<QString, QLineEdit*> lineEdits;
+	Ui::ShaderDialogClass ui;
 
 private slots:
 	void valuesChanged(const QString &);

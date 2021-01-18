@@ -22,13 +22,13 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <GL/glew.h>
+#include <common/GLExtensionsManager.h>
 #include <QFile>
 #include <QImage>
 #include <cassert>
 
 //#include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/decorate_plugin_interface.h>
 //#include <meshlab/glarea.h>
 
 
@@ -39,7 +39,7 @@ class GLArea;
 /**
   * Base abstract class for all the four decorator methods(shadow mapping, VSM shadow mapping, VSM shadow mapping
   * with blur and Screen Space Ambient Occlusion). It defines the method that should be implemented in the derived
-  * class(init(), runShader() and setup()). It defines a set of methods in common beetwen all the derived class too.
+  * class(init(), runShader() and setup()). It defines a set of methods in common between all the derived class too.
   */
 class DecorateShader
 {
@@ -101,9 +101,8 @@ protected:
       * @return true if no errors happened during the setup, false otherwise.
       */
     bool initGlew()
-	{
-        GLenum err = glewInit();
-		return (err == GLEW_OK);
+    {
+      return GLExtensionsManager::initializeGLextensions_notThrowing();
     }
 
     /**
@@ -305,9 +304,9 @@ protected:
 
     /**
       * Generates a texture color for the handler <b>tex</b> and attaches it to the FBO
-      * at the attachement target defined by <b>attachment</b>. The FBO should be binded before the method is called.
+      * at the attachment target defined by <b>attachment</b>. The FBO should be binded before the method is called.
       * @param tex the texture handler
-      * @param attachement the FBO attachment target.
+      * @param attachment the FBO attachment target.
       */
     void genColorTextureEXT(GLuint& tex, GLenum attachment){
         glGenTextures(1, &tex);

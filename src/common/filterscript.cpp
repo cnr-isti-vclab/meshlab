@@ -25,6 +25,9 @@
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
+#include <QFile>
+#include <QDir>
+#include <QTextStream>
 #include <QPair>
 
 #include "filterscript.h"
@@ -32,140 +35,81 @@
 using namespace vcg;
 
 
-FilterScript::FilterScript() :QObject()
+FilterScript::FilterScript() : QObject(), QList< FilterNameParameterValuesPair >()
 {
-
 }
 
 FilterScript::~FilterScript()
 {
-    for(FilterScript::iterator it = filtparlist.begin();it != filtparlist.end();++it)
-        delete *it;
-    filtparlist.clear();
 }
 
-QDomDocument FilterScript::xmlDoc()
+QDomDocument FilterScript::xmlDoc() const
 {
-    QDomDocument doc("FilterScript");
-    QDomElement root = doc.createElement("FilterScript");
-    doc.appendChild(root);
+	QDomDocument doc("FilterScript");
+	QDomElement root = doc.createElement("FilterScript");
+	doc.appendChild(root);
 
-    for(FilterScript::iterator ii=filtparlist.begin();ii!= filtparlist.end();++ii)
-    {
-        if (!(*ii)->isXMLFilter())
-        {
-            OldFilterNameParameterValuesPair* oldpv = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
-            QDomElement tag = doc.createElement("filter");
-            QPair<QString,RichParameterSet>& pair = oldpv->pair;
-            tag.setAttribute(QString("name"),pair.first);
-            RichParameterSet &par=pair.second;
-            QList<RichParameter*>::iterator jj;
-            RichParameterXMLVisitor v(doc);
-            for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
-            {
-                (*jj)->accept(v);
-                tag.appendChild(v.parElem);
-            }
-            root.appendChild(tag);
-        }
-        else
-        {   
-            XMLFilterNameParameterValuesPair* xmlpv = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
-            QDomElement tag = doc.createElement("xmlfilter");
-            QPair<QString, QMap<QString,QString> >& pair = xmlpv->pair;
-            tag.setAttribute(QString("name"),pair.first);
-            QMap<QString,QString>& tmpmap = pair.second;
-            for(QMap<QString,QString>::const_iterator itm = tmpmap.constBegin();itm != tmpmap.constEnd();++itm)
-            {
-                QDomElement partag = doc.createElement("xmlparam");
-                partag.setAttribute("name",itm.key());
-                partag.setAttribute("value",itm.value());
-                tag.appendChild(partag);
-            }
-            root.appendChild(tag);
-        }
-    }
-    return doc;
+	for(const FilterNameParameterValuesPair& oldpv : *this) {
+		QDomElement tag = doc.createElement("filter");
+		const QPair<QString,RichParameterList>& pair = oldpv;
+		tag.setAttribute(QString("name"),pair.first);
+		const RichParameterList &par=pair.second;
+		for(const RichParameter& rp : par) {
+			tag.appendChild(rp.fillToXMLDocument(doc));
+		}
+		root.appendChild(tag);
+	}
+	return doc;
 }
 
-bool FilterScript::save(QString filename)
+bool FilterScript::save(QString filename) const
 {
-    QDomDocument doc = xmlDoc();
-    QFile file(filename);
-    file.open(QIODevice::WriteOnly);
-    QTextStream qstream(&file);
-    doc.save(qstream,1);
-    file.close();
-    return true;
+	QDomDocument doc = xmlDoc();
+	QFile file(filename);
+	file.open(QIODevice::WriteOnly);
+	QTextStream qstream(&file);
+	doc.save(qstream,1);
+	file.close();
+	return true;
 }
 
 bool FilterScript::open(QString filename)
 {
-    QDomDocument doc;
-    filtparlist.clear();
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug("Failure in opening Script %s", qUtf8Printable(filename));
-        qDebug("Current dir is %s", qUtf8Printable(QDir::currentPath()));
-        return false;
-    }
-    QString errorMsg; int errorLine,errorColumn;
-    if(!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn))
-    {
-        qDebug("Failure in setting Content line %i column %i \nError'%s'",errorLine,errorColumn, qUtf8Printable(errorMsg));
-        return false;
-    }
-    file.close();
-    QDomElement root = doc.documentElement();
-    if(root.nodeName() != "FilterScript")
-    {
-        qDebug("Failure in parsing script %s\nNo root node with name FilterScript\n", qUtf8Printable(filename));
-        qDebug("Current rootname is %s", qUtf8Printable(root.nodeName()));
-        return false;
-    }
+	QDomDocument doc;
+	clear();
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly)) {
+		qDebug("Failure in opening Script %s", qUtf8Printable(filename));
+		qDebug("Current dir is %s", qUtf8Printable(QDir::currentPath()));
+		return false;
+	}
+	QString errorMsg; int errorLine,errorColumn;
+	if(!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
+		qDebug("Failure in setting Content line %i column %i \nError'%s'",errorLine,errorColumn, qUtf8Printable(errorMsg));
+		return false;
+	}
+	file.close();
+	QDomElement root = doc.documentElement();
+	if(root.nodeName() != "FilterScript") {
+		qDebug("Failure in parsing script %s\nNo root node with name FilterScript\n", qUtf8Printable(filename));
+		qDebug("Current rootname is %s", qUtf8Printable(root.nodeName()));
+		return false;
+	}
 
-    qDebug("FilterScript");
-    for(QDomElement nf = root.firstChildElement(); !nf.isNull(); nf = nf.nextSiblingElement())
-    {
-        if (nf.tagName() == QString("filter"))
-        {
-            RichParameterSet par;
-            QString name=nf.attribute("name");
-            qDebug("Reading filter with name %s", qUtf8Printable(name));
-            for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
-            {
-                RichParameter* rp = NULL;
-                RichParameterAdapter::create(np,&rp);
-                //FilterParameter::addQDomElement(par,np);
-                par.paramList.push_back(rp);
-            }
-            OldFilterNameParameterValuesPair* tmp = new OldFilterNameParameterValuesPair();
-            tmp->pair = qMakePair(name,par);
-            filtparlist.append(tmp);
-        }        
-        else
-        {
-            QString name=nf.attribute("name");
-            qDebug("Reading filter with name %s", qUtf8Printable(name));
-            QMap<QString,QString> map;
-            for(QDomElement np = nf.firstChildElement("xmlparam"); !np.isNull(); np = np.nextSiblingElement("xmlparam"))
-                map[np.attribute("name")] = np.attribute("value");
-            XMLFilterNameParameterValuesPair* tmp = new XMLFilterNameParameterValuesPair();
-            tmp->pair = qMakePair(name,map);
-            filtparlist.append(tmp);
-        }
-    }
+	qDebug("FilterScript");
+	for(QDomElement nf = root.firstChildElement(); !nf.isNull(); nf = nf.nextSiblingElement()) {
+		if (nf.tagName() == QString("filter")) {
+			RichParameterList par;
+			QString name=nf.attribute("name");
+			qDebug("Reading filter with name %s", qUtf8Printable(name));
+			for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param")) {
+				par.pushFromQDomElement(np);
+			}
+			FilterNameParameterValuesPair tmp;
+			tmp.first = name; tmp.second = par;
+			append(tmp);
+		}
+	}
 
-    return true;
+	return true;
 }
-
-void FilterScript::addExecutedXMLFilter( const QString& name,const QMap<QString,QString>& parvalue )
-{
-    XMLFilterNameParameterValuesPair* tmp = new XMLFilterNameParameterValuesPair();
-    tmp->pair = qMakePair(name,parvalue);
-    filtparlist.append(tmp);
-}
-
-
-

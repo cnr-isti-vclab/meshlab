@@ -1,39 +1,32 @@
 include (../../shared.pri)
 
-HEADERS		= meshio.h \
-			$$VCGDIR/wrap/ply/plylib.h \
-			$$VCGDIR/wrap/io_trimesh/export_obj.h \
-			$$VCGDIR/wrap/io_trimesh/export_3ds.h \
-			$$VCGDIR/wrap/io_trimesh/io_material.h \
-			import_3ds.h \
-			io_3ds.h 
+HEADERS = \
+    meshio.h \
+    $$VCGDIR/wrap/ply/plylib.h \
+    $$VCGDIR/wrap/io_trimesh/export_obj.h \
+    $$VCGDIR/wrap/io_trimesh/export_3ds.h \
+    $$VCGDIR/wrap/io_trimesh/io_material.h \
+    import_3ds.h \
+    io_3ds.h
 				
-SOURCES       += 	meshio.cpp \
-			
-DEFINES += LIB3DS_STATIC
+SOURCES += \
+    meshio.cpp
 
-TARGET        = io_3ds
+TARGET = io_3ds
 
-INCLUDEPATH += ../../external/lib3ds-1.3.0/
+!CONFIG(system_lib3ds) {
+    INCLUDEPATH *= $$MESHLAB_EXTERNAL_DIRECTORY/lib3ds-1.3.0/
+	DEFINES += LIB3DS_STATIC
+}
 
 # Notes on the paths of lib3ds files.
 # Once you have compiled the library put the lib files in a dir named lib/XXX/ 
 # where XXX is the name of your system according to the QT naming style.
 # Linux users can rely on their own package managers and hope that it is installing the last version of lib3ds
 
-win32-msvc:LIBS	+= ../../external/lib/win32-msvc/3ds.lib
-win32-msvc2015:LIBS += ../../external/lib/win32-msvc2015/3ds.lib
-win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/3ds.lib
-win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/3ds.lib
-win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
-linux-g++:LIBS += $$PWD/../../external/lib/linux-g++/lib3ds.a
-linux-g++-32:LIBS += $$PWD/../../external/lib/linux-g++-32/lib3ds.a
-linux-g++-64:LIBS += $$PWD/../../external/lib/linux-g++-64/lib3ds.a
+win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_EXT_DIRECTORY/3ds.lib
+win32-g++:LIBS	+= $$MESHLAB_DISTRIB_EXT_DIRECTORY/lib3ds.a
+macx:LIBS       += $$MESHLAB_DISTRIB_EXT_DIRECTORY/lib3ds.a
+linux:LIBS  += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY -l3ds
 
-# unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
-
-# mac:LIBS -= -l3ds 
-# mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib/mac/lib3ds.a
-
-macx:LIBS += $$MACLIBDIR/lib3ds.a
 

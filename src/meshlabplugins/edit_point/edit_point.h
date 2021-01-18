@@ -25,12 +25,12 @@
 #define EDITPOINTPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class EditPointPlugin : public QObject, public MeshEditInterface
+class EditPointPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 		
 public:
     enum {SELECT_DEFAULT_MODE, SELECT_FITTING_PLANE_MODE};
@@ -39,6 +39,7 @@ public:
     virtual ~EditPointPlugin() {}
 
     static const QString Info();
+    QString pluginName() const;
 
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
@@ -49,9 +50,6 @@ public:
     void mouseReleaseEvent(QMouseEvent *, MeshModel &/*m*/, GLArea * );
     void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
     void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * );
-
-signals:
-    void setSelectionRendering(bool);
 
 private:
         // How the selections are composed
@@ -88,6 +86,7 @@ private:
         std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
+        QPoint currentMousePosition; 
 };
 
 #endif

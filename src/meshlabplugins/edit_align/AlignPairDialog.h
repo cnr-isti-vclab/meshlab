@@ -25,7 +25,6 @@
 
 class QCheckBox;
 
-#include <common/interfaces.h>
 #include "AlignPairWidget.h"
 
 #include <QCheckBox>

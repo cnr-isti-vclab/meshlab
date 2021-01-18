@@ -1,48 +1,37 @@
 include (../general.pri)
 
-INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR $$GLEWDIR/include
+INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR
 
-HEADERS        = 
+!CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 
-SOURCES        = mainserver.cpp \
+SOURCES = mainserver.cpp
 
-RESOURCES = ../meshlab/meshlab.qrc \
-			meshlabserver.qrc
+RESOURCES = \
+    meshlabserver.qrc
 
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
 
-QT += xml opengl
-QT += xmlpatterns
-QT += script
-#QT -= gui # Only the core module is used.
-DESTDIR = ../distrib
-macx:DESTDIR = ../distrib/meshlab.app/Contents/MacOS/
-macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlabserver"
+QT += \
+    xml \
+    opengl 
 
-mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
+DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
 
-win32-msvc:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc2005:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc2008:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc2010:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc2012:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc2015:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
-win32-g++:  LIBS += -L../distrib -lcommon      
-linux:  LIBS += -L../distrib -lcommon
-linux:QMAKE_RPATHDIR += ../distrib
-#CONFIG (release,debug | release) {
-#	win32-msvc2005:release:  LIBS += -L../common/release -lcommon
-#	win32-msvc2008:release:  LIBS += -L../common/release -lcommon
-#	win32-g++:release:LIBS += -L../common/release -lcommon
-#}
+
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
+macx:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/
+macx:QMAKE_POST_LINK = " \
+    install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
+"
+
+win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common
+win32-g++:LIBS += -lmeshlab-common
+linux:LIBS += -lmeshlab-common
 
 win32-msvc:DEFINES += GLEW_STATIC
-win32-msvc2005:DEFINES += GLEW_STATIC
-win32-msvc2008:DEFINES += GLEW_STATIC
-win32-msvc2010:DEFINES += GLEW_STATIC 
-win32-msvc2012:DEFINES += GLEW_STATIC
-win32-msvc2015:DEFINES += GLEW_STATIC
+
+CONFIG(system_glew):LIBS += -lGLEW
 
 #DEFINES += GLEW_STATIC
 

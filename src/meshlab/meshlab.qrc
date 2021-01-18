@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="script_system/meshlabfilterXMLspecificationformat.xsd">../common/script_system/meshlabfilterXMLspecificationformat.xsd</file>
-        <file alias="script_system/math.js">../common/script_system/math.js</file>
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
         <file>images/cursors/plain.png</file>
@@ -34,7 +32,6 @@
         <file>images/layer_eye_close.png</file>
         <file>images/layer_edit_locked.png</file>
         <file>images/layer_edit_unlocked.png</file>
-        <file>images/100mesh.html</file>
         <file>images/facebook.gif</file>
         <file>images/onscreenHelp.txt</file>
         <file>images/splitV.png</file>
@@ -53,5 +50,7 @@
         <file>images/search.png</file>
         <file>images/dummy.png</file>
         <file>images/meshlabLogo_256x256.png</file>
+        <file>images/email-icon.png</file>
+        <file>images/github-icon.png</file>
     </qresource>
 </RCC>

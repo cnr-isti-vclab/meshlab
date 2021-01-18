@@ -97,12 +97,12 @@ void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFuncti
 				if (vertexQuality > maxQuality)
 					percentageQuality = 1.0f;
 				else
-					// calcultating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
+					// calculating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
 					percentageQuality = pow( ((*vi).Q() - minQuality) / (maxQuality - minQuality) , (float)(2.0f*midHandlePercentilePosition));
 
 			currentColor = transferFunction->getColorByQuality(percentageQuality);
 			
-			if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normale brightness, 0=white, 2=black
+			if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normal brightness, 0=white, 2=black
 				if (brightness<1.0f)
 					for (int i=0; i<NUMBER_OF_CHANNELS; i++) 
 						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);

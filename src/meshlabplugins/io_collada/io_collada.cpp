@@ -88,6 +88,8 @@
 #include <algorithm>
 
 #include <Qt>
+#include <QDebug>
+#include <QElapsedTimer>
 
 #include "io_collada.h"
 
@@ -100,7 +102,7 @@
 using namespace std;
 using namespace vcg;
 
-bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, CallBackPos *cb, QWidget * /*parent*/)
+bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget * /*parent*/)
 {
 	// initializing mask
   mask = 0;
@@ -149,9 +151,9 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 	return true;
 }
 
-void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, RichParameterSet & parlst)
+void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, RichParameterList & parlst)
 {
-	QTime t;
+	QElapsedTimer t;
 	t.start();
 	
 	QDomDocument* doc = new QDomDocument(filename);
@@ -174,13 +176,13 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 		idList.push_back(idVal);
 		qDebug("Node %i geom id = '%s'",i,qUtf8Printable(idVal));
 	}
-	parlst.addParam(new RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
-	qDebug("Time elapsed: %d ms", t.elapsed());
+	parlst.addParam(RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
+	qDebug("Time elapsed: %llu ms", t.elapsed());
 }
 
 
 
-bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -212,20 +214,25 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> ColladaIOPlugin::importFormats() const
+QString ColladaIOPlugin::pluginName() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
+	return "IOCollada";
+}
+
+QList<FileFormat> ColladaIOPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Collada File Format"	,tr("DAE"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> ColladaIOPlugin::exportFormats() const
+QList<FileFormat> ColladaIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Collada File Format"	,tr("DAE"));
 	return formatList;
 }
 
@@ -233,7 +240,7 @@ QList<MeshIOInterface::Format> ColladaIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void ColladaIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits)  const 
+void ColladaIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits)  const
 {
 	if(format.toUpper() == tr("DAE")){
 		capability = defaultBits = vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();

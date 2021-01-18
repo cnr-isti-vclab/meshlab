@@ -1,4 +1,5 @@
 #include "filter_sdfgpu.h"
+#include <common/GLExtensionsManager.h>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
@@ -33,34 +34,38 @@ SdfGpuPlugin::SdfGpuPlugin()
 
 }
 
-void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterSet &par)
+QString SdfGpuPlugin::pluginName() const
 {
-    mAction = ID(action);
+    return "FilterSDFGPU";
+}
+
+void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, RichParameterList &par)
+{
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
-    par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
+    par.addParam( RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
         "Choose whether to trace rays from faces or from vertices. " ));
-    par.addParam(  new RichInt("numberRays",128, "Number of rays: ",
+    par.addParam(  RichInt("numberRays",128, "Number of rays: ",
         "The number of rays that will be casted around "
         "the normals."));
-    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
+    par.addParam(RichInt("DepthTextureSize", 512, "Depth texture size",
         "Size of the depth texture for depth peeling. Higher resolutions provide better sampling of the mesh, with a small performance penalty."));
-    par.addParam(new RichInt("peelingIteration", 10, "Peeling Iteration",
+    par.addParam(RichInt("peelingIteration", 10, "Peeling Iteration",
         "Number of depth peeling iteration. Actually is the maximum number of layers that a ray can hit while traversing the mesh. "
         "For example, in the case of a sphere, you should specify 2 in this parameter. For a torus, specify 4. "
         "<b>For more complex geometry you should run the depth complexity filter to know the exact value</b>."));
-    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
+    par.addParam(RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
         "Depth tolerance used during depth peeling. This is the threshold used to differentiate layers between each others."
         "Two elements whose distance is below this value will be considered as belonging to the same layer."));
 
-    if(mAction != SDF_DEPTH_COMPLEXITY)
-        par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
+    if(ID(action) != SDF_DEPTH_COMPLEXITY)
+        par.addParam(RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
 
 
 
-    switch(mAction)
+    switch(ID(action))
     {
     case SDF_OBSCURANCE:
-        par.addParam(new RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
+        par.addParam(RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
             "This parameter controls the spatial decay term in the obscurance formula. "
             "The greater the exponent, the greater the influence of distance; that is: "
             "even if a ray is blocked by an occluder its contribution to the obscurance term is non zero, but proportional to this parameter. "
@@ -74,16 +79,16 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParam
         }
     }
 
-    if(mAction == SDF_SDF)
+    if(ID(action) == SDF_SDF)
     {
-        par.addParam(new RichBool("removeFalse",true,"Remove false intersections","For each"
+        par.addParam(RichBool("removeFalse",true,"Remove false intersections","For each"
             "ray we check the normal at the point of intersection,"
             "and ignore intersections where the normal at the intersection"
             "points is in the same direction as the point-of-origin"
             "(the same direction is defined as an angle difference less"
             "than 90) "));
 
-        par.addParam(new RichBool("removeOutliers",false,"Remove outliers","The outliers removal is made on the fly with a supersampling of the depth buffer. "
+        par.addParam(RichBool("removeOutliers",false,"Remove outliers","The outliers removal is made on the fly with a supersampling of the depth buffer. "
             "For each ray that we trace, we take multiple depth values near the point of intersection and we output only the median of these values. "
             "Some mesh can benefit from this additional calculation. "));
     }
@@ -110,14 +115,14 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     case SDF_SDF                   :  return QString("Calculate the SDF (<b>shape diameter function</b>) on the mesh, you can visualize the result colorizing the mesh. "
                                           "The SDF is a scalar function on the mesh surface and represents the neighborhood diameter of the object at each point. "
                                           "Given a point on the mesh surface,"
-                                          "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lenghts. "
+                                          "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lengths. "
                                           "For further details, see the reference paper:<br>"
                                           "<b>Shapira Shamir Cohen-Or,<br>"
                                           "Consistent Mesh Partitioning and Skeletonisation using the shaper diamter function, Visual Comput. J. (2008)</b> ");
-    case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration paramater. "
-                                          "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration paramater. After having calulated the correct value,"
+    case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration parameter. "
+                                          "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration parameter. After having calculated the correct value,"
                                           "you can ignore further warnings that you may get using that value.</b>. ");
-    case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficents for the mesh. Obscurance is introduced to avoid the "
+    case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficients for the mesh. Obscurance is introduced to avoid the "
                                           "disadvantages of both classical ambient term and ambient occlusion. "
                                           "In ambient occlusion, totally occluded parts of the mesh are black. "
                                           "Instead obscurance, despite still based on a perfectly diffuse light coming "
@@ -137,8 +142,12 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     return QString("");
 }
 
-bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & pars, vcg::CallBackPos *cb)
+bool SdfGpuPlugin::applyFilter(const QAction* action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & pars, vcg::CallBackPos *cb)
 {
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
     MeshModel* mm = md.mm();
 
     //RETRIEVE PARAMETERS
@@ -149,14 +158,14 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
     mTolerance                = pars.getFloat("peelingTolerance");
     mPeelingTextureSize       = pars.getInt("DepthTextureSize");
 
-    if(mAction != SDF_DEPTH_COMPLEXITY)
+    if(ID(action) != SDF_DEPTH_COMPLEXITY)
         mMinCos                 = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
 
     std::vector<Point3f> coneDirVec;
 
-    if(mAction == SDF_OBSCURANCE)
+    if(ID(action) == SDF_OBSCURANCE)
         mTau = pars.getFloat("obscuranceExponent");
-    else if(mAction==SDF_SDF)
+    else if(ID(action)==SDF_SDF)
     {
         mRemoveFalse     = pars.getBool("removeFalse");
         mRemoveOutliers  = pars.getBool("removeOutliers");
@@ -178,8 +187,8 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
     std::vector<Point3f> unifDirVec;
     GenNormal<float>::Fibonacci(numViews,unifDirVec);
 
-    Log(0, "Number of rays: %i ", unifDirVec.size() );
-    Log(0, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
+    log(GLLogStream::SYSTEM, "Number of rays: %i ", unifDirVec.size() );
+    log(GLLogStream::SYSTEM, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
 
     coneDirVec.clear();
 
@@ -189,7 +198,7 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
     for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
     {
         (*vi).Normalize();
-        TraceRay(peel, (*vi), md.mm());
+        TraceRay(action, peel, (*vi), md.mm());
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
 
         glContext->makeCurrent();
@@ -202,14 +211,14 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
     }
 
     //read back the result texture and store result in the mesh
-    if(mAction == SDF_OBSCURANCE)
+    if(ID(action) == SDF_OBSCURANCE)
     {
         if(mOnPrimitive == ON_VERTICES)
             applyObscurancePerVertex(*mm,unifDirVec.size());
         else
             applyObscurancePerFace(*mm,unifDirVec.size());
     }
-    else if(mAction == SDF_SDF)
+    else if(ID(action) == SDF_SDF)
     {
         if(mOnPrimitive == ON_VERTICES)
             applySdfPerVertex(*mm);
@@ -220,14 +229,14 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
 
 
 
-    Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
+    log(GLLogStream::SYSTEM, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
         " the peeling iteration parameter)\n", mDepthComplexity );
 
     //Depth complexity distribution log. Useful to know which is the probability to find a number of layers looking at the mesh or scene.
-    Log(0, "Depth complexity             NumberOfViews\n", mDepthComplexity );
+    log(GLLogStream::SYSTEM, "Depth complexity             NumberOfViews\n", mDepthComplexity );
     for(int j = 0; j < peel; j++)
     {
-        Log(0, "   %i                             %i\n", j, mDepthDistrib[j] );
+        log(GLLogStream::SYSTEM, "   %i                             %i\n", j, mDepthDistrib[j] );
     }
 
     //Clean & Exit
@@ -262,10 +271,9 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glClearColor(0,0,0,0);
     glClearDepth(1.0);
 
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
+    if (!GLExtensionsManager::initializeGLextensions_notThrowing())
     {
-        Log(0,(const char*)glewGetErrorString(err));
+        log(GLLogStream::SYSTEM, "Error initializing OpenGL extensions.");
         return false;
     }
 
@@ -274,13 +282,13 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     {
         if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
         {
-            Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+            log(GLLogStream::SYSTEM, "Your hardware doesn't support Shaders, which are required for hw occlusion");
             return false;
         }
     }
     if ( !glewIsSupported("GL_EXT_framebuffer_object") )
     {
-        Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
+        log(GLLogStream::SYSTEM, "Your hardware doesn't support FBOs, which are required for hw occlusion");
         return false;
     }
 
@@ -288,13 +296,13 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     {
         if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
         {
-            Log(0,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
+            log(GLLogStream::SYSTEM,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
             return false;
         }
     }
     else
     {
-        Log(0,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
+        log(GLLogStream::SYSTEM,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
         return false;
     }
 
@@ -313,12 +321,12 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     unsigned int maxTexSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
-    Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
+    log(GLLogStream::SYSTEM, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
 
     //CHECK MODEL SIZE
     if ((maxTexSize*maxTexSize) < numElems)
     {
-        Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
+        log(GLLogStream::SYSTEM, "That's a really huge model, I can't handle it in hardware, sorry..");
         return false;
     }
 
@@ -326,10 +334,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     mNumberOfTexRows = ceil( ((float)numElems) / ((float)mResTextureDim));
 
-    Log(0, "Mesh has %i vertices\n", numVertices );
-    Log(0, "Mesh has %i faces\n", numFaces);
-    Log(0, "Number of tex rows used %i",mNumberOfTexRows);
-    Log(0, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
+    log(GLLogStream::SYSTEM, "Mesh has %i vertices\n", numVertices );
+    log(GLLogStream::SYSTEM, "Mesh has %i faces\n", numFaces);
+    log(GLLogStream::SYSTEM, "Number of tex rows used %i",mNumberOfTexRows);
+    log(GLLogStream::SYSTEM, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
 
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
@@ -497,7 +505,7 @@ void SdfGpuPlugin::vertexDataToTexture(MeshModel &m)
     delete [] vertexPosition;
 }
 
-void SdfGpuPlugin::releaseGL(MeshModel &m)
+void SdfGpuPlugin::releaseGL(MeshModel &/*m*/)
 {
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -559,7 +567,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     {
         int dup = tri::Clean<CMeshO>::RemoveDuplicateVertex(m);
         int unref =  tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
-        if (dup > 0 || unref > 0) Log("Removed %i duplicate and %i unreferenced vertices\n",dup,unref);
+        if (dup > 0 || unref > 0) log("Removed %i duplicate and %i unreferenced vertices\n",dup,unref);
     }
 
     //Updating mesh metadata
@@ -1007,7 +1015,7 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
     return true;
 }
 
-void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* mm )
+void SdfGpuPlugin::TraceRay(const QAction* action, int peelingIteration,const Point3f& dir, MeshModel* mm )
 {
     unsigned int j = 0;
 
@@ -1036,14 +1044,14 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
             return;
         else
             if(i==(peelingIteration-1))
-                Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+                log(GLLogStream::SYSTEM,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
 
         mFboArray[j]->unbind();
         //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
         if(i%2)
         {
             //we use the same method as in sdf, see below
-            if(mAction==SDF_OBSCURANCE )
+            if(ID(action)==SDF_OBSCURANCE )
             {
                 if(i>1)
                 {
@@ -1058,7 +1066,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
                 }
             }
-            else if(mAction == SDF_SDF)
+            else if(ID(action) == SDF_SDF)
             {
                 if(i>1)
                 {
@@ -1090,9 +1098,22 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
     checkGLError::debugInfo("Error during depth peeling");
 }
 
-MeshFilterInterface::FILTER_ARITY SdfGpuPlugin::filterArity( QAction *) const
+FilterPluginInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
 {
-    return MeshFilterInterface::SINGLE_MESH;
+	return FilterPluginInterface::SINGLE_MESH;
+}
+
+bool SdfGpuPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)){
+	case SDF_SDF: 
+	case SDF_DEPTH_COMPLEXITY:
+	case SDF_OBSCURANCE:
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(SdfGpuPlugin)

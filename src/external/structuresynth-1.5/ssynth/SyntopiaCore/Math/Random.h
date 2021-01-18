@@ -4,8 +4,9 @@
 #include <QVector>
 #include <QStringList>
 #include <cmath>
+#include <random>
+#include <memory>
 
-#include "../../ThirdPartyCode/MersenneTwister/MersenneTwister.h"
 #include "Vector3.h"
 
 namespace SyntopiaCore {
@@ -16,15 +17,14 @@ namespace SyntopiaCore {
 		/// If set to useStdLib, the CStdLib 'rand' and 'srand' functions are used - these are not independent - not even with multiple instances of this class.
 		class RandomNumberGenerator {
 		public:
-			RandomNumberGenerator(bool useOldLibrary = false) : uniformCounter2D(0), uniformCounter3D(0) { if (useOldLibrary) { rng = 0; } else { rng = new MTRand(); } setSeed(0); };
-			~RandomNumberGenerator() { delete rng; };
+			RandomNumberGenerator(bool useOldLibrary = false) : uniformCounter2D(0), uniformCounter3D(0) { if (!useOldLibrary) { rng.reset(new std::mt19937()); } setSeed(0); };
 
 			// This is only useful for backward compatibility.
 			// The Mersenne Twister is much better since it allows multiple independent streams.
-			void useStdLib(bool useOldLibrary) { 
-				delete rng; rng = 0;
+			void useStdLib(bool useOldLibrary) {
+				rng.reset();
 				if (!useOldLibrary) {
-					rng = new MTRand();
+					rng.reset(new std::mt19937());
 				}
 				setSeed(lastSeed);
 			};
@@ -41,12 +41,14 @@ namespace SyntopiaCore {
 			}
 		
 
-			bool isUsingStdLib() { return (rng == 0); }
+			bool isUsingStdLib() { return (rng == nullptr); }
 
 			// Returns a double in the interval [0;1]
 			double getDouble() { 
 				if (rng) {
-					return rng->rand();
+					std::uniform_real_distribution<> d{0.0, 1.0};
+					return d(*rng);
+					//return static_cast<double>((*rng)()) / static_cast<double>(std::numeric_limits<uint_fast32_t>::max());
 				} else {
 					return rand()/(double)RAND_MAX;
 					/*
@@ -59,10 +61,15 @@ namespace SyntopiaCore {
 			// Normal distributed number with mean zero.
 			double getNormal(double variance) {
 				/// Note: requires MT RNG!
-				return rng->randNorm(0,variance); 
+				std::normal_distribution<> d{0, std::sqrt(variance)};
+				return d(*rng);
 			}
 
 			double getDouble(double min, double max) {
+				if (rng) {
+					std::uniform_real_distribution<> d{min, max};
+					return d(*rng);
+				}
 				return getDouble()*(max-min)+min;
 			}
 			
@@ -70,7 +77,8 @@ namespace SyntopiaCore {
 			// Returns an integer between 0 and max (both inclusive).
 			int getInt(int max) { 
 				if (rng) {
-					return rng->randInt(max);
+					std::uniform_int_distribution<> d{0, max};
+					return d(*rng);
 				} else {
 					return rand() % (max+1); // Probably not very good, use mersenne instead
 				}
@@ -78,7 +86,8 @@ namespace SyntopiaCore {
 
 			int getInt() { 
 				if (rng) {
-					return rng->randInt();
+					std::uniform_int_distribution<> d;
+					return d(*rng);
 				} else {
 					return rand();
 				}
@@ -107,7 +116,7 @@ namespace SyntopiaCore {
 			void setUniformCounter3D(int value) { uniformCounter3D = value; }
 		private:
 			int lastSeed;
-			MTRand* rng;
+			std::unique_ptr<std::mt19937> rng;
 			int uniformCounter2D;
 			int uniformCounter3D;
 			

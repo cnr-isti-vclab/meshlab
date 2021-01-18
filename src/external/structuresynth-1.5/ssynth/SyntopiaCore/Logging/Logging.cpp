@@ -21,7 +21,7 @@ namespace SyntopiaCore {
 			
 			// On Windows this allows us to see debug in the Output::Debug window while running.
 			#ifdef WIN32
-				OutputDebugString((LPCWSTR) (message+"\r\n").utf16());
+				OutputDebugStringW((LPCWSTR) (message+"\r\n").utf16());
 			#endif
 
 			for (int i = 0; i < Logger::loggers.size(); i++) {

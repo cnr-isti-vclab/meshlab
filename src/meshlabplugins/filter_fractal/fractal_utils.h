@@ -2,7 +2,7 @@
 #define FRACTAL_UTILS_H
 
 #include <vcg/math/perlin_noise.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include "filter_functors.h"
 #include <vector>
@@ -103,8 +103,8 @@ public:
         // other variables for scaling and normalization of points
         std::vector<PertPair> pertVector;
         ScalarType factor = args.scale/m.bbox.Diag(), min = 1000.0, max = -1000.0;
-        ScalarType seedTraslation = args.seed/factor, perturbation = .0;
-        Point3<ScalarType> seedPoint(seedTraslation, seedTraslation, seedTraslation);
+        ScalarType seedTranslation = args.seed/factor, perturbation = .0;
+        Point3<ScalarType> seedPoint(seedTranslation, seedTranslation, seedTranslation);
         Point3<ScalarType> center = m.bbox.Center(), p;
         Point3<ScalarType> trasl = seedPoint - center;
         PertPair* tmpPair;
@@ -161,7 +161,7 @@ public:
     /* Generates a squared grid of triangles whose side will be passed back in the
        gridSide parameter. The subSteps parameter represents the number of subdivision
        steps during the grid generation. */
-    static void GenerateGrid(MeshType& m, int subSteps, float& gridSide)
+    static void GenerateGrid(MeshType& m, int subSteps, ScalarType& gridSide)
     {
         m.Clear();
         int k = (int)(pow(2.0f, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
@@ -182,7 +182,7 @@ public:
             ivp[i++] = &*vi;
         }
 
-        // defines the vertexes of each face
+        // defines the vertices of each face
         FaceIterator fi = m.face.begin();
         int evenFace[3] = {0, 1, k2}, oddFace[3] = {1, k2+1, k2};
         for(i=0; i<k; i++)

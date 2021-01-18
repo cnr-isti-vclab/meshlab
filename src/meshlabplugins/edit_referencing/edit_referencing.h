@@ -25,17 +25,17 @@
 #define EDITREFERENCINGPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include "edit_referencingDialog.h"
 
 // function to calculate rototranslaton and rototranslaton+scale matrices from series of points
 #include <vcg/space/point_matching.h>
 
 
-class EditReferencingPlugin : public QObject, public MeshEditInterface
+class EditReferencingPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 		
 public:
 
@@ -45,6 +45,7 @@ public:
     virtual ~EditReferencingPlugin() {}
 
     static const QString Info();
+    QString pluginName() const;
 
 	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

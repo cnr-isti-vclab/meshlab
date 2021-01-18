@@ -26,6 +26,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#include "MultiGridOctreeData.h"
+
 // evaluate the result of splatting along a plane and then evaluating at a point on the plane.
 template< int Degree > double GetScaleValue( void )
 {
@@ -163,7 +165,6 @@ Real Octree< Real >::_splatPointData( const DensityEstimator< WeightDegree >& de
 	double dx;
 	V _v;
 	TreeOctNode* temp;
-	int cnt=0;
 	double width;
 	Point3D< Real > myCenter( (Real)0.5 , (Real)0.5 , (Real)0.5 );
 	Real myWidth = (Real)1.;

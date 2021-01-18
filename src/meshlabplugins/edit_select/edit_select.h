@@ -23,12 +23,12 @@
 #ifndef EDITPLUGIN_H
 #define EDITPLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 
-class EditSelectPlugin : public QObject, public MeshEditInterface
+class EditSelectPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+		Q_INTERFACES(EditPluginInterface)
 
 
 public:
@@ -39,6 +39,7 @@ public:
 	virtual ~EditSelectPlugin() {}
 
 	static QString Info();
+	QString pluginName() const;
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
 	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}

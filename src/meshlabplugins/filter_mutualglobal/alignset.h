@@ -7,7 +7,7 @@
 #include <QGLFramebufferObject>
 
 // local headers
-#include "common/meshmodel.h"
+#include <common/ml_document/mesh_model.h>
 #include "alignGlobal.h"
 
 // VCG headers
@@ -33,18 +33,18 @@ class AlignSet {
   CMeshO* mesh;
   QImage* image;
   double imageRatio;
-  vcg::Shot<float> shot;
+  vcg::Shot<Scalarm> shot;
   vcg::Box3<float> box;
-  vcg::Shot<float> shotPro;
+  vcg::Shot<Scalarm> shotPro;
   QImage* imagePro;
   vcg::Matrix44<float> shadPro;
   QList<PointCorrespondence*> *correspList; //List that includes corresponces involving the model
   double error; //alignment error in px
   QImage rend;
   QImage comb;
-  Node* node;
+  //Node* node;
   std::vector<QImage*> arcImages;
-  std::vector<vcg::Shot<float>*> arcShots;
+  std::vector<vcg::Shot<Scalarm>*> arcShots;
   std::vector<float> arcMI;
   std::vector<vcg::Matrix44<float>> prjMats;
   
@@ -83,7 +83,7 @@ class AlignSet {
   bool setFocal(double f); //return false if unchanged
   void setPixelSizeMm(double ccdWidth);
 
-  void renderScene(vcg::Shot<float> &shot, int component, bool save=false);
+  void renderScene(vcg::Shot<Scalarm>& shot, int component, bool save=false);
   void readRender(int component);
 
   void drawMeshPoints();

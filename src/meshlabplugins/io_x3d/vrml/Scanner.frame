@@ -188,7 +188,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------------
-// StartStates  -- maps charactes to start states of tokens
+// StartStates  -- maps characters to start states of tokens
 //-----------------------------------------------------------------------------------
 class StartStates {
 private:

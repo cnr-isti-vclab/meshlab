@@ -27,8 +27,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QString>
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include<vector>
 #include<vcg/complex/complex.h>
 //#include "muParser.h"
@@ -37,11 +36,11 @@ using namespace vcg;
 //using namespace mu;
 
 
-class FilterDirt : public QObject, public MeshFilterInterface
+class FilterDirt : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 protected:
     double x,y,z,nx,ny,nz,r,g,b,q,rad;
     //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
@@ -59,17 +58,17 @@ public:
     FilterDirt();
     ~FilterDirt(){};
 
+    QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual int getRequirements(QAction *);
+    virtual int getRequirements(const QAction*);
     virtual bool autoDialog(QAction *) {return true;}
     //      virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-    virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-    virtual int postCondition(QAction*) const;
-    virtual FilterClass getClass(QAction *);
-    FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+    virtual int postCondition(const QAction*) const;
+    virtual FilterClass getClass (const QAction *) const;
+    FILTER_ARITY filterArity(const QAction*) const {return SINGLE_MESH;}
 };
 
 

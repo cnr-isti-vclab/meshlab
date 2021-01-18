@@ -20,12 +20,13 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include <GL/glew.h>
+
+#include <common/GLExtensionsManager.h>
+#include <common/ml_document/mesh_model.h>
 
 #include <QObject>
 #include <QGLContext>
 #include <QGLFramebufferObject>
-#include <common/interfaces.h>
 
 #include "render_helper.h"
 
@@ -57,10 +58,9 @@ RenderHelper::~RenderHelper()
 
 int RenderHelper::initializeGL(vcg::CallBackPos *cb)
 {
-  GLenum err = glewInit();
   if(cb) cb( 0, "GL Initialization");
 
-  if (GLEW_OK != err)
+  if (!GLExtensionsManager::initializeGLextensions_notThrowing())
   {
     //Log(0, "GLEW initialization error!");
     return -1;
@@ -219,7 +219,7 @@ void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode,
 
   assert(_near <= _far);
 
-  GLenum err = glGetError();
+  GLenum err = glGetError(); (void) err;
 
   //render to FBO
   fbo.bind();

@@ -97,7 +97,7 @@ namespace StructureSynth {
 				}
 			}
 
-			if (!symbol.type == Symbol::LeftBracket) {
+			if (symbol.type != Symbol::LeftBracket) {
 				throw (ParseError("After rule modifier list: expected a left bracket. Found: " + symbol.text, symbol.pos));
 			}
 		}

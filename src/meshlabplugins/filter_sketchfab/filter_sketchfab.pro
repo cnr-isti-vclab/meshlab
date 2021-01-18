@@ -1,7 +1,13 @@
 include (../../shared.pri)
 
-HEADERS += filter_sketchfab.h
-SOURCES += filter_sketchfab.cpp $$VCGDIR//wrap/ply/plylib.cpp
-TARGET   = filter_sketchfab
+QT += qml
 
-include (../../shared_post.pri)
+HEADERS += \
+    filter_sketchfab.h \
+    miniz.h
+
+SOURCES += \
+    filter_sketchfab.cpp \
+    $$VCGDIR//wrap/ply/plylib.cpp
+
+TARGET = filter_sketchfab

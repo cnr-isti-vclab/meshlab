@@ -163,7 +163,7 @@ namespace io {
 				"There isn't an ExternProtoDeclare or ProtoDeclare for the ProtoInstance",
 				"Invalid ProtoDeclare. There isn't a ProtoInterface or a ProtoBody",
 				"Invalid field declaration in ProtoInterface element",
-				"Invalid IS element in ProtoBody elment",
+				"Invalid IS element in ProtoBody element",
 				"Invalid DEF in ProtoInstance field", 
 				"There are more ProroDeclare and ExternProtoDeclare elements with the same name",
 				"Distint type between DEF and USE",
@@ -171,7 +171,7 @@ namespace io {
 				"There are more sources texture without a MultiTexture element",
 				"Invalid TriangleFanSet or TriangleStripSet element. It contains fan or strip with less than three vertex",
 				"Invalid vertex index in the index field", 
-				"Invalid IndexedTriangleFanSet or IndexedTriangleStripSet element. It contais fan or strip with less than three vertex",
+				"Invalid IndexedTriangleFanSet or IndexedTriangleStripSet element. It contains fan or strip with less than three vertex",
 				"Invalid ElevationGrid element. There isn't enough height value",
 				"Invalid IndexedFaceSet element. There are face with less than three vertex",
 				"Invalid vertex index in the coordIndex field",
@@ -179,7 +179,7 @@ namespace io {
 				"Invalid save color options. You must choose one options among color per vertex, color per face and color per wedge",
 				"Invalid save normal options. You must choose one options among normal per vertex, normal per face and normal per wedge",
 				"Invalid save texture coordinate options. You must choose one options among texture coordinate per vertex and texture coordinate per wedge",
-				"Mesh whitout a geometry"
+				"Mesh without a geometry"
 			};
 
 			if(error > 31 || error < 0) return "Unknown error";

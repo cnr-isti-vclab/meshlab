@@ -417,6 +417,7 @@ Scanner::Scanner(const wchar_t* fileName) {
 	if ((stream = fopen(chFileName, "rb")) == NULL) {
 		char msg[50];
 		sprintf(msg, "Can not open file: %s", chFileName);
+		coco_string_delete(chFileName);
 		throw msg;
 	}
 	coco_string_delete(chFileName);
@@ -603,16 +604,16 @@ void Scanner::AddCh() {
 
 
 bool Scanner::Comment0() {
-	int level = 1, pos0 = pos, line0 = line, col0 = col;
+	int level = 1, line0 = line/*, pos0 = pos, col0 = col*/;
 	NextCh();
-		for(;;) {
-			if (ch == 10) {
-				level--;
-				if (level == 0) { oldEols = line - line0; NextCh(); return true; }
-				NextCh();
-			} else if (ch == buffer->EoF) return false;
-			else NextCh();
-		}
+	for(;;) {
+		if (ch == 10) {
+			level--;
+			if (level == 0) { oldEols = line - line0; NextCh(); return true; }
+			NextCh();
+		} else if (ch == buffer->EoF) return false;
+		else NextCh();
+	}
 }
 
 

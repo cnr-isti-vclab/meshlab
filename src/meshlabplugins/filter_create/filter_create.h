@@ -23,13 +23,13 @@
 
 #ifndef FILTER_CREATE_H
 #define FILTER_CREATE_H
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class FilterCreate : public QObject, public MeshFilterInterface
+class FilterCreate : public QObject, public FilterPluginInterface
 {
   Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-  Q_INTERFACES(MeshFilterInterface)
+  MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+  Q_INTERFACES(FilterPluginInterface)
 
   public:
     enum {
@@ -48,15 +48,15 @@ class FilterCreate : public QObject, public MeshFilterInterface
   } ;
 
   FilterCreate();
+  QString pluginName() const;
 
   QString filterName(FilterIDType filter) const;
   QString filterInfo(FilterIDType filter) const;
-  FilterClass getClass(QAction *);
-  void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-  bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  FilterClass getClass(const QAction*) const;
+  void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+  bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
   QString filterScriptFunctionName(FilterIDType filterID);
-  QString pluginName(void) const { return "FilterCreate"; }
-  FILTER_ARITY filterArity(QAction *) const {return NONE;}
+  FILTER_ARITY filterArity(const QAction *) const {return NONE;}
 };
 
 #endif

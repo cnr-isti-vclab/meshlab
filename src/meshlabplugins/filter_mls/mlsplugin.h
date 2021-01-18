@@ -26,13 +26,13 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class MlsPlugin : public QObject, public MeshFilterInterface
+class MlsPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 
@@ -62,13 +62,14 @@ public:
 
 	MlsPlugin();
 
+	QString pluginName() const;
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
-    FilterClass getClass(QAction *a);
-    virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
-	virtual int getRequirements(QAction *action);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parent, vcg::CallBackPos *cb) ;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	FilterClass getClass(const QAction *a) const;
+	virtual void initParameterList(const QAction*, MeshDocument &md, RichParameterList &parent);
+    virtual int getRequirements(const QAction* action);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &m, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &parent, vcg::CallBackPos *cb) ;
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

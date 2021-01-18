@@ -25,14 +25,14 @@
 #define FILTERCOLORPROCPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
 
-class FilterColorProc : public QObject, public MeshFilterInterface
+class FilterColorProc : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum { CP_FILLING,
@@ -67,16 +67,17 @@ public:
     FilterColorProc();
     ~FilterColorProc();
 
-    virtual FilterClass getClass(QAction *);
+    QString pluginName() const;
+    virtual FilterClass getClass(const QAction*) const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual int getRequirements(QAction *);
+    virtual int getRequirements(const QAction*);
 
-    virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-    int postCondition(QAction* filter) const;
-    int getPreConditions(QAction *) const;
-    FILTER_ARITY filterArity(QAction *act) const;
+    virtual void initParameterList(const QAction*, MeshDocument&, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument&, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+    int postCondition(const QAction* filter) const;
+    int getPreConditions(const QAction *) const;
+    FILTER_ARITY filterArity(const QAction *act) const;
 };
 #endif

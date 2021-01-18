@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/dll">
+        <file>opengl32.dll</file>
+    </qresource>
+</RCC>

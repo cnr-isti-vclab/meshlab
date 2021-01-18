@@ -28,9 +28,11 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include <limits>
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"
 #include <vcg/space/triangle3.h> //for quality
+#include <QMessageBox>
 
 using namespace vcg;
 
@@ -42,13 +44,17 @@ QualityMapperPlugin::QualityMapperPlugin()
 
 const QString QualityMapperPlugin::Info() 
 {
-	return tr("Colorize mesh vertexes by Quality");
+	return tr("Colorize mesh vertices by Quality");
+}
+
+QString QualityMapperPlugin::pluginName() const
+{
+	return "EditQuality";
 }
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
 { 
-	GLenum err = glewInit();
-	if (err != GLEW_NO_ERROR)
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
 	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
 	{

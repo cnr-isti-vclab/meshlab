@@ -144,10 +144,10 @@ namespace io {
 			{
 				QDomElement lod = lodNodes.at(ln).toElement();
 				QDomNode parent = lod.parentNode();
-				//Create a traslation Trasform node from attribute 'center'
+				//Create a translation Transform node from attribute 'center'
 				QString center = lod.attribute("center");
 				QDomElement transform = doc->createElement("Transform");
-				transform.setAttribute("traslation", center);
+				transform.setAttribute("translation", center);
 				QDomElement firstChild = lod.firstChildElement();
 				if (!firstChild.isNull())
 				{
@@ -783,7 +783,7 @@ namespace io {
 					QString coorTag[] = {"Coordinate", "CoordinateDouble"};
 					QDomElement coordinate = findNode(coorTag, 2, geometry);
 					//If geometry node is supported, get info on color, normal and texture coordinate (per vertex, per color, or per wedge)
-					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid") || (tagName == "Cylinder"))
+					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid") || (tagName == "Cylinder") || (tagName == "Sphere"))
 					{
 						bool copyTextureFile = true;
 						QStringList colorList, normalList, textureList;
@@ -909,6 +909,9 @@ namespace io {
 							for (size_t i = 0; i < textureFile.size(); i++)
 								info->textureFile.push_back(textureFile.at(i));
 						//}
+						if (!copyTextureFile){
+							qDebug() << "Warning: Some error occurred on saving texture file\n";
+						}
 					}
 					geometry = geometry.nextSiblingElement();
 				}
@@ -1162,7 +1165,7 @@ namespace io {
 				std::vector<std::vector<int> > faceVect;
 				for (int ff = 0; ff < nFace; ff++)
 				{
-					//Tesselate the quadrangular face
+					//Tessellate the quadrangular face
 					std::vector<std::vector<CoordType> > polygonVect;
 					std::vector<CoordType> polygon;
 					for (int tt = 0; tt < 4; tt++)
@@ -1641,7 +1644,7 @@ namespace io {
 						return E_INVALIDINDEXFACESET;
 					}
 					ci++;
-					//Tesselate polygon
+					//Tessellate polygon
 					polygonVect.push_back(polygon);
 					std::vector<int> indexVect;
 					if (polygon.size() == 3)
@@ -1891,6 +1894,32 @@ namespace io {
 			return E_NOERROR;
 		}
 
+		static int LoadSphere(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44<ScalarType>& tMatrix,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb)
+		{
+			vcg::Matrix44<ScalarType> t, tmp;
+			t.SetIdentity();
+
+			QStringList radiusList;
+			findAndParseAttribute(radiusList, geometry, "radius", "1");
+			float radius = radiusList[0].toFloat();
+			tmp.SetScale(radius,radius,radius);
+			t *= tmp;
+			tmp = tMatrix * t;
+			OpenMeshType newSphere;
+			vcg::tri::Sphere<OpenMeshType>(newSphere, 3);
+			if (info->meshColor)
+				vcg::tri::UpdateColor<OpenMeshType>::PerVertexConstant(newSphere, info->color, false);
+//			vcg::tri::UpdatePosition<OpenMeshType>::Matrix(newSphere, tMatrix, false);
+			vcg::tri::UpdatePosition<OpenMeshType>::Matrix(newSphere, tmp, false);
+			vcg::tri::Append<OpenMeshType, OpenMeshType>::Mesh(m, newSphere);			
+			info->numvert++;
+			if (cb !=NULL) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
+			return E_NOERROR;
+		}
 
 		
 		//Load texture info from Appearance node.
@@ -1994,7 +2023,7 @@ namespace io {
 		
 		
 		//Create the transformation matrix for texture coordinate from TextureTransform node
-		inline static vcg::Matrix33f createTextureTrasformMatrix(QDomElement elem)
+		inline static vcg::Matrix33f createTextureTransformMatrix(QDomElement elem)
 		{
 			vcg::Matrix33f matrix, tmp;
 			matrix.SetIdentity();
@@ -2032,7 +2061,7 @@ namespace io {
 				tmp[1][2] = center.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "traslation", "0 0");
+			findAndParseAttribute(coordList, elem, "translation", "0 0");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
@@ -2044,7 +2073,7 @@ namespace io {
 		}
 		
 		
-		//Create the transformation matrix from Trasform node 
+		//Create the transformation matrix from Transform node 
 		inline static vcg::Matrix44<ScalarType> createTransformMatrix(QDomElement root, vcg::Matrix44<ScalarType> tMatrix)
 		{
 			vcg::Matrix44<ScalarType> t, tmp;
@@ -2367,7 +2396,7 @@ namespace io {
 				point = vcg::Point3f(0, 0, 1.0);
 				textCoord.N() = -1;
 			}
-			//Apply trasform
+			//Apply transform
 			point = textInfo.textureTransform * point;
 			//Apply clamb and repeat
 			if (!textInfo.repeatS)
@@ -2486,7 +2515,7 @@ namespace io {
 					QDomElement coordinate = findNode(coordTag, 2, geometry);
 					result = solveDefUse(coordinate, defMap, coordinate, info);
 					if (result != E_NOERROR) return result;
-					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid") || (geometry.tagName() == "Cylinder"))
+					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid") || (geometry.tagName() == "Cylinder") || (geometry.tagName() == "Sphere"))
 					{
 						//Get coordinate 
 						QStringList coordList;
@@ -2537,8 +2566,8 @@ namespace io {
 										textureInfo[j].isValid = (mode == "COORD") || (mode == "SPHERE");
 										textureInfo[j].isCoordGenerator = true;
 									}
-									if ( i < textureTransformList.size())										
-										textureInfo[j].textureTransform = createTextureTrasformMatrix(textureTransformList.at(i).toElement());
+									if ( i < (size_t)textureTransformList.size())
+										textureInfo[j].textureTransform = createTextureTransformMatrix(textureTransformList.at(i).toElement());
 									j++;
 								}
 								i++;
@@ -2553,7 +2582,7 @@ namespace io {
 								if (textureInfo[0].textureCoordList.isEmpty())
 									textureInfo[0].isValid = false;
 								if (textureTransformList.size() > 0)
-									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
+									textureInfo[0].textureTransform = createTextureTransformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
 						else if (textureCoord.tagName() == "TextureCoordinateGenerator")
@@ -2566,7 +2595,7 @@ namespace io {
 								textureInfo[0].isValid = (mode == "COORD") || (mode == "SPHERE");
 								textureInfo[0].isCoordGenerator = true;
 								if (textureTransformList.size() > 0)
-									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
+									textureInfo[0].textureTransform = createTextureTransformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
 						else if (validTexture.size() == 1 && validTexture.at(0))
@@ -2602,6 +2631,8 @@ namespace io {
 							return LoadPointSet(geometry, m, tMatrix, coordList, colorList, colorComponent, info, cb);
 						else if (geometry.tagName() == "Cylinder")
 							return LoadCylinder(geometry, m, tMatrix, info, cb);
+						else if (geometry.tagName() == "Sphere")
+							return LoadSphere(geometry, m, tMatrix, info, cb);
 					}
 					else if (geometry.tagName() == "Polypoint2D")
 						return LoadPolypoint2D(geometry, m, tMatrix, info, cb);

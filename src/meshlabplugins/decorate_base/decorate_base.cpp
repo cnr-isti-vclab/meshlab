@@ -25,6 +25,7 @@
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/bitquad_support.h>
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
@@ -47,11 +48,16 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
     case DP_SHOW_QUALITY_CONTOUR:   return tr("Draw quality contours, e.g. the isolines of the quality field defined over the surface ");
     case DP_SHOW_CAMERA:            return tr("Draw the position of the mesh camera and raster cameras");
-    case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
+    case DP_SHOW_TEXPARAM:          return tr("Draw an overlaid flattened version of the current mesh that show the current parametrization");
     case DP_SHOW_SELECTED_MESH:     return tr("Highlight the current mesh");
     }
     assert(0);
     return QString();
+}
+
+QString DecorateBasePlugin::pluginName() const
+{
+    return "DecorateBase";
 }
 
 QString DecorateBasePlugin::decorationName(FilterIDType filter) const
@@ -73,7 +79,7 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
     return QString("error!");
 }
 
-void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
+void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const RichParameterList *rm, GLArea *gla, QPainter *painter, GLLogStream &/*_log*/)
 {
  QFont qf;
 
@@ -101,7 +107,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
 			}
 
 			if (md.meshList.size() == 0)
-				this->RealTimeLog("Show Mesh Camera", md.mm()->label(), "There are no Mesh Layers");
+				this->realTimeLog("Show Mesh Camera", md.mm()->label(), "There are no Mesh Layers");
 		}
 
 		// draw all visible raster cameras
@@ -121,7 +127,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
 			}
 
 			if (md.rasterList.size() == 0)
-				this->RealTimeLog("Show Raster Camera", md.mm()->label(), "There are no Rasters");
+				this->realTimeLog("Show Raster Camera", md.mm()->label(), "There are no Rasters");
 		}
 	} break;
 
@@ -156,7 +162,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
  } // end switch
 }
 
-void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
+void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const RichParameterList *rm, GLArea *gla, QPainter *painter, GLLogStream &_log)
 {
     this->setLog(&_log);
     QFont qf;
@@ -178,13 +184,13 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
     case DP_SHOW_NORMALS:
         {
             glPushAttrib(GL_ENABLE_BIT );
-			float NormalLen=rm->getFloat(NormalLength());
-			float NormalWid = rm->getFloat(NormalWidth());
+			Scalarm NormalLen=rm->getFloat(NormalLength());
+			Scalarm NormalWid = rm->getFloat(NormalWidth());
 			vcg::Color4b VertNormalColor = rm->getColor4b(NormalVertColor());
 			vcg::Color4b FaceNormalColor = rm->getColor4b(NormalFaceColor());
 			bool showselection = rm->getBool(NormalSelection());
 
-			float LineLen = m.cm.bbox.Diag()*NormalLen;
+			Scalarm LineLen = m.cm.bbox.Diag()*NormalLen;
 
 			//query line width range
 			GLfloat widthRange[2];
@@ -238,14 +244,14 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
 
     case DP_SHOW_BOX_CORNERS:
         {
-			bool untrasformed = rm->getBool(this->BBAbsParam());
-            DrawBBoxCorner(m, untrasformed);
+			bool untransformed = rm->getBool(this->BBAbsParam());
+            DrawBBoxCorner(m, untransformed);
 
 			Point3m bmin, bmax;
 			bmin = m.cm.bbox.min;
 			bmax = m.cm.bbox.max;
 
-            this->RealTimeLog("Bounding Box", m.label(), "<table>"
+            this->realTimeLog("Bounding Box", m.label(), "<table>"
                 "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
                 "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
 				"<tr><td>Size: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
@@ -284,7 +290,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
 
             CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
-			this->RealTimeLog("Quality Contour", m.label(),
+			this->realTimeLog("Quality Contour", m.label(),
                 "min Q %f -- max Q %f",mmqH().first,mmqH().second);
 
             float stripe_num = rm->getFloat(this->ShowContourFreq());
@@ -375,9 +381,12 @@ void DecorateBasePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float
     // fmod ( -104.5 , 10) returns -4.5
     // So it holds that
 
-    if(aVal > 0 ) firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
-    if(aVal ==0 ) firstTick = tickScalarDistance;
-    if(aVal < 0 ) firstTick = aVal + fmod(fabs(aVal),tickScalarDistance);
+    if (aVal > 0 )
+        firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
+    else if(aVal ==0 )
+        firstTick = tickScalarDistance;
+    else //aVal < 0
+        firstTick = aVal + fmod(fabs(aVal),tickScalarDistance);
 
     // now we are sure that aVal < firstTick
     // let also be sure that there is enough space
@@ -501,7 +510,7 @@ void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glPopAttrib();
 }
 
-int DecorateBasePlugin::getDecorationClass(QAction *action) const
+int DecorateBasePlugin::getDecorationClass(const QAction *action) const
 {
     switch(ID(action))
     {
@@ -520,7 +529,7 @@ int DecorateBasePlugin::getDecorationClass(QAction *action) const
     return 0;
 }
 
-bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
+bool DecorateBasePlugin::isDecorationApplicable(const QAction* action, const MeshModel& m, QString &ErrorMessage) const
 {
     if( ID(action) == DP_SHOW_LABEL )
     {
@@ -557,7 +566,7 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
     return true;
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichParameterSet *, GLArea *)
+bool DecorateBasePlugin::startDecorate(const QAction * action, MeshDocument &, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -566,7 +575,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichPar
         return true;
     case DP_SHOW_SELECTED_MESH :
         {
-            return (glewInit() == GLEW_OK);
+            return GLExtensionsManager::initializeGLextensions_notThrowing();
         }
     
     }
@@ -574,7 +583,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichPar
 }
 
 
-void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, RichParameterSet *, GLArea *)
+void DecorateBasePlugin::endDecorate(const QAction * action, MeshModel &m, const RichParameterList *, GLArea *)
 {
     switch(ID(action))
     {
@@ -589,7 +598,7 @@ void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, RichParamet
     }
 }
 
-bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
+bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, const RichParameterList *rm, GLArea *gla)
 {
     switch(ID(action))
     {
@@ -714,12 +723,14 @@ void DecorateBasePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
     glDisable(GL_LIGHTING);
     glColor3f(.4f,.4f,.4f);
     for(size_t i=0;i<m.cm.face.size();++i)
+    {
         if(!m.cm.face[i].IsD())
         {
             Point3m bar=Barycenter(m.cm.face[i]);
             glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
         }
-        glPopAttrib();
+    }
+    glPopAttrib();
 }
 
 void DecorateBasePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
@@ -729,12 +740,14 @@ void DecorateBasePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
     glDisable(GL_LIGHTING);
     glColor3f(.4f,.4f,.4f);
     for(size_t i=0;i<m.cm.edge.size();++i)
+    {
         if(!m.cm.edge[i].IsD())
         {
             Point3m bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
             glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
         }
-        glPopAttrib();
+    }
+    glPopAttrib();
 }
 
 
@@ -762,11 +775,11 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
     if(!ls.IsValid())
     {
         if(cameraSourceId == 1 )
-			this->RealTimeLog("Show Mesh Camera", who, "Current Mesh Has an invalid Camera");
+			this->realTimeLog("Show Mesh Camera", who, "Current Mesh Has an invalid Camera");
         else if(cameraSourceId == 2 )
-			this->RealTimeLog("Show Raster Camera", who, "Current Raster Has an invalid Camera");
+			this->realTimeLog("Show Raster Camera", who, "Current Raster Has an invalid Camera");
         else
-			this->RealTimeLog("Show Camera", who, "Current TrackBall Has an invalid Camera");
+			this->realTimeLog("Show Camera", who, "Current TrackBall Has an invalid Camera");
         return;
     }
 
@@ -785,10 +798,10 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 1 - %1 %2 %3").arg(ax1[0]).arg(ax1[1]).arg(ax1[2]));
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
-    //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
+    //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Length %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 
 
-	this->RealTimeLog("Camera Info", who,
+	this->realTimeLog("Camera Info", who,
         "<table>"
         "<tr><td>Viewpoint: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
         "<tr><td>axis 0:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
@@ -807,7 +820,7 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
         focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
-void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter * /*painter*/, QFont /*qf*/)
+void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, const RichParameterList *rm, QPainter * /*painter*/, QFont /*qf*/)
 {
     if(!ls.IsValid())  // no drawing if camera not valid
         return;
@@ -905,7 +918,7 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
     glPopAttrib();
 }
 
-void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
+void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, const RichParameterList *par, QFont qf)
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -975,7 +988,7 @@ void DecorateBasePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
 }
 
 
-void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterSet *rm, QFont qf)
+void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  const RichParameterList *rm, QFont qf)
 {
 	if ((gla == NULL) && (gla->getSceneGLSharedContext() == NULL))
 		return;
@@ -1024,7 +1037,7 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 	bool faceColor = rm->getBool(this->TextureFaceColorParam());
 	if (faceColor && !m.hasDataMask(MeshModel::MM_FACECOLOR))
 	{
-		this->RealTimeLog("Show UV Tex Param", "The model has no face color", "The model has no Face Color");
+		this->realTimeLog("Show UV Tex Param", "The model has no face color", "The model has no Face Color");
 		faceColor = false;
 	}
 
@@ -1063,60 +1076,60 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+void DecorateBasePlugin::initGlobalParameterList(const QAction* action, RichParameterList &parset)
 {
 
 switch(ID(action))
 {
     case DP_SHOW_BOX_CORNERS :
 	{
-		parset.addParam(new RichBool(this->BBAbsParam(), false, "Draw Untrasformed","If true the bbox is drawn in the original, untrasformed position "
+		parset.addParam(RichBool(this->BBAbsParam(), false, "Draw Untransformed","If true the bbox is drawn in the original, untransformed position "
 			"(instead of the position obtained by transforming it using the matrix associated to the current Layer)"));
 	} break;
 
     case DP_SHOW_TEXPARAM : 
 	{
         assert(!parset.hasParameter(TextureStyleParam()));
-        parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
-        parset.addParam(new RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
-		parset.addParam(new RichInt(TextureIndexParam(), 0, "Texture Index", "Which texture is shown, for models with multiple textures (index start at 0)."));
+        parset.addParam(RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
+        parset.addParam(RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
+        parset.addParam(RichInt(TextureIndexParam(), 0, "Texture Index", "Which texture is shown, for models with multiple textures (index start at 0)."));
 	} break;
 
     case DP_SHOW_LABEL :
 	{
-        parset.addParam(new RichBool(LabelVertFlag(),true,"Per Vertex",""));
-        parset.addParam(new RichBool(LabelEdgeFlag(),true,"Per Edge",""));
-        parset.addParam(new RichBool(LabelFaceFlag(),true,"Per Face",""));
+		parset.addParam(RichBool(LabelVertFlag(),true,"Per Vertex",""));
+		parset.addParam(RichBool(LabelEdgeFlag(),true,"Per Edge",""));
+		parset.addParam(RichBool(LabelFaceFlag(),true,"Per Face",""));
 	} break;
 
     case DP_SHOW_NORMALS : 
 	{
-        parset.addParam(new RichFloat(NormalLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
-		parset.addParam(new RichFloat(NormalWidth(), 1.0f,"Normal Width","The width of the normal expressed in pixels"));
-		parset.addParam(new RichColor(NormalVertColor(),QColor(102, 102, 255, 153),QString("Curr Vert Normal Color"),QString("Current Vert Normal Color")));
-		parset.addParam(new RichColor(NormalFaceColor(),QColor(102, 102, 255, 153),QString("Curr Face Normal Color"),QString("Current Face Normal Color")));
-        parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
-        parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
-		parset.addParam(new RichBool(NormalSelection(), false, "Show Selected", ""));
+		parset.addParam(RichFloat(NormalLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+		parset.addParam(RichFloat(NormalWidth(), 1.0f,"Normal Width","The width of the normal expressed in pixels"));
+		parset.addParam(RichColor(NormalVertColor(),QColor(102, 102, 255, 153),QString("Curr Vert Normal Color"),QString("Current Vert Normal Color")));
+		parset.addParam(RichColor(NormalFaceColor(),QColor(102, 102, 255, 153),QString("Curr Face Normal Color"),QString("Current Face Normal Color")));
+		parset.addParam(RichBool(NormalVertFlag(),true,"Per Vertex",""));
+		parset.addParam(RichBool(NormalFaceFlag(),true,"Per Face",""));
+		parset.addParam(RichBool(NormalSelection(), false, "Show Selected", ""));
 	} break;
 
     case DP_SHOW_CURVATURE : 
 	{
-        parset.addParam(new RichFloat(CurvatureLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
-        parset.addParam(new RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
-        parset.addParam(new RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
+		parset.addParam(RichFloat(CurvatureLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+		parset.addParam(RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
+		parset.addParam(RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
 	} break;
 
     case DP_SHOW_QUALITY_HISTOGRAM :
 	{
-		parset.addParam(new RichEnum(HistTypeParam(),0,QStringList()<<"Per Vertex"<<"Per Face","Quality Src","Set the source of the quality, it can be either per vertex or per face."));
-		parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
-		parset.addParam(new RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
+		parset.addParam(RichEnum(HistTypeParam(),0,QStringList()<<"Per Vertex"<<"Per Face","Quality Src","Set the source of the quality, it can be either per vertex or per face."));
+		parset.addParam(RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
+		parset.addParam(RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
 			"e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
-		parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Width","if true the parametrization is drawn in a textured wireframe style"));
-		parset.addParam(new RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-		parset.addParam(new RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-		parset.addParam(new RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
+		parset.addParam(RichBool(HistFixedParam(), false,"Fixed Width","if true the parametrization is drawn in a textured wireframe style"));
+		parset.addParam(RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+		parset.addParam(RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+		parset.addParam(RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
 			"Useful only if you have to compare multiple histograms.<br>"
 			"Warning, with wrong values the histogram can become excessively flat or it can overflow"));
 	} break;
@@ -1125,27 +1138,27 @@ switch(ID(action))
 	{
 		QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
 		QStringList scale; scale << "No Scale" << "Fixed Factor";
-		parset.addParam(new RichEnum(this->CameraScaleParam(), 0, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
-		parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
-		parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
-		parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
-		parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
-		parset.addParam(new RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the poistions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
+		parset.addParam(RichEnum(this->CameraScaleParam(), 0, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
+		parset.addParam(RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
+		parset.addParam(RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
+		parset.addParam(RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
+		parset.addParam(RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
+		parset.addParam(RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the positions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
 	} break;
 
     case DP_SHOW_QUALITY_CONTOUR :
 	{
 		QStringList ColorMapList; ColorMapList << "None" << "ColorJet"<<"Parula";
-		parset.addParam(new RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
-		parset.addParam(new RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
-		parset.addParam(new RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
-		parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
-		parset.addParam(new RichEnum(this->ShowContourColorMap(), 0, ColorMapList,"ColorMap","Choose a colormap for the contours"));        
+		parset.addParam(RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
+		parset.addParam(RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
+		parset.addParam(RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
+		parset.addParam(RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
+		parset.addParam(RichEnum(this->ShowContourColorMap(), 0, ColorMapList,"ColorMap","Choose a colormap for the contours"));
 	} break;
 
     case DP_SHOW_SELECTED_MESH :
 	{
-		parset.addParam(new RichColor(selectedMeshBlendingColor(),QColor(255, 178,0, 50),QString("Curr Mesh Blend Color"),QString("Current Mesh Blending Color")));
+		parset.addParam(RichColor(selectedMeshBlendingColor(),QColor(255, 178,0, 50),QString("Curr Mesh Blend Color"),QString("Current Mesh Blending Color")));
 	} break;
 }
 

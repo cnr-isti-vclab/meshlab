@@ -38,16 +38,16 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
+void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("ASC"))
 	{
-			parlst.addParam(new RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
-			parlst.addParam(new RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
+			parlst.addParam(RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
+			parlst.addParam(RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Length of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
 	}
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *)
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
 {
 	if(formatName.toUpper() == tr("TRI"))
 		{
@@ -73,7 +73,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return false;
 }
 
-bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterSet &, vcg::CallBackPos *, QWidget *)
+bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
 {
 	assert(0);
 	return false;
@@ -82,21 +82,26 @@ bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int,
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
+QString TriIOPlugin::pluginName() const
 {
-	QList<Format> formatList;
+	return "IOTRI";
+}
+
+QList<FileFormat> TriIOPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
 	formatList 
-		<< Format("TRI (photogrammetric reconstructions)", tr("TRI")) 
-	  << Format("ASC (ascii triplets of points)", tr("ASC"));
+		<< FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) 
+	  << FileFormat("ASC (ascii triplets of points)", tr("ASC"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> TriIOPlugin::exportFormats() const
+QList<FileFormat> TriIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	return formatList;
 }
 
@@ -104,7 +109,7 @@ QList<MeshIOInterface::Format> TriIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TriIOPlugin::GetExportMaskCapability(QString &, int &capability, int &defaultBits) const
+void TriIOPlugin::GetExportMaskCapability(const QString &, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;
@@ -166,17 +171,18 @@ static int readPoint(FILE* fp, bool TRIInverseBytes, float &x,float &y, float &z
   }
   return 0;
 }
-static int readTexel(FILE* fp, bool TRIInverseBytes, float &s, float &t) {
-  if (TRIInverseBytes) {
-    //printf("!!! Warning : not implemented\n");
-    readOtherE(&s,sizeof(float),1,fp);
-    readOtherE(&t,sizeof(float),1,fp);
-  } else {
-    fread(&s,sizeof(float),1,fp);
-    fread(&t,sizeof(float),1,fp);
-  }
-  return 0;
-}
+
+//static int readTexel(FILE* fp, bool TRIInverseBytes, float &s, float &t) {
+//  if (TRIInverseBytes) {
+//    //printf("!!! Warning : not implemented\n");
+//    readOtherE(&s,sizeof(float),1,fp);
+//    readOtherE(&t,sizeof(float),1,fp);
+//  } else {
+//    fread(&s,sizeof(float),1,fp);
+//    fread(&t,sizeof(float),1,fp);
+//  }
+//  return 0;
+//}
 
 static int readFace(FILE *fp, bool TRIInverseBytes, int &p1, int &p2, int &p3) {
   if (TRIInverseBytes) {

@@ -30,11 +30,10 @@ Revision 1.1  2006/09/25 09:24:39  e_cerisoli
 add sampleplugins
 
 ****************************************************************************/
+#ifndef ALIGNGLOBAL_H
+#define ALIGNGLOBAL_H
 
-
-
-#include <common/interfaces.h>
-
+#include <vector>
 
 class AlignPair
 {
@@ -53,7 +52,7 @@ public:
 
 	bool valid;
 
-	bool CreatePair(int imId, int prId, int mId, float mut, float ar, bool val) {imageId=imId; projId=prId, meshId=mId, mutual=mut; area=ar; valid=val; }
+	void CreatePair(int imId, int prId, int mId, float mut, float ar, bool val) {imageId=imId; projId=prId, meshId=mId, mutual=mut; area=ar; valid=val; }
 
 	
 
@@ -101,3 +100,5 @@ public:
 
 //std::vector<SubGraph*> graphs;
 
+
+#endif // ALIGNGLOBAL_H

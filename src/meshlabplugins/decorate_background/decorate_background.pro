@@ -1,10 +1,14 @@
 include (../../shared.pri)
 
-HEADERS       += decorate_background.h cubemap.h
+HEADERS += \
+    decorate_background.h cubemap.h
 
-SOURCES      += decorate_background.cpp\
-                cubemap.cpp
+SOURCES += \
+    decorate_background.cpp \
+    cubemap.cpp
 
-TARGET        = decorate_background
+RESOURCES += \
+    decorate_background.qrc
 
-RESOURCES +=  decorate_background.qrc
+TARGET = decorate_background
+

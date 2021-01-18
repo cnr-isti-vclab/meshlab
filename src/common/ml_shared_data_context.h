@@ -27,7 +27,7 @@
 #include <GL/glew.h>
 #include <QTimer>
 
-#include "ml_mesh_type.h"
+#include "ml_document/cmesh.h"
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
 
 
@@ -200,19 +200,19 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     _perpoint_pointattenuation_enabled = bset[31];
   }
 
-	static float minPointSize()
+	static Scalarm minPointSize()
 	{
-		return 1.0f;
+		return 1.0;
 	}
 
-	static float maxPointSize()
+	static Scalarm maxPointSize()
 	{
-		return 15.0f;
+		return 15.0;
 	}
 
-	static float maxLineWidth()
+	static Scalarm maxLineWidth()
 	{
-		return 5.0f;
+		return 5.0;
 	}
 
 private:
@@ -250,7 +250,7 @@ class MLRenderingData : public vcg::PerViewData<MLPerViewGLOptions>
 {
 public:
  	MLRenderingData();
-	MLRenderingData(const MLRenderingData& dt);
+    //MLRenderingData(const MLRenderingData& dt);
 
 	bool set(MLRenderingData::PRIMITIVE_MODALITY pm, const MLRenderingData::RendAtts& atts);
 	bool set(MLRenderingData::PRIMITIVE_MODALITY pm, MLRenderingData::ATT_NAMES att, bool onoff);

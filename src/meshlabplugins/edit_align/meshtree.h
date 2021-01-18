@@ -26,8 +26,8 @@
 
 #include <QObject>
 
-#include <common/interfaces.h>
-#include "align/AlignPair.h"
+#include <common/ml_document/mesh_model.h>
+#include <vcg/complex/algorithms/align_pair.h>
 #include "align/AlignGlobal.h"
 #include "align/OccupancyGrid.h"
 #include <wrap/gui/trackball.h>
@@ -46,7 +46,6 @@ public:
   MeshModel *m;
   Matrix44m &tr() {return m->cm.Tr;}
   const Box3m &bbox() const {return m->cm.bbox;}
-  const Box3m &trBbox() const { return m->cm.trBB(); }
   int Id() {return m->id();}
 };
 

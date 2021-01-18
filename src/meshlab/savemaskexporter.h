@@ -24,17 +24,19 @@
 #ifndef __VCGLIB_SAVEMASK_EXPORT
 #define __VCGLIB_SAVEMASK_EXPORT
 
+#include <QDialog>
+
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "stdpardialog.h"
-#include "../common/filterparameter.h"
+#include "rich_parameter_gui/richparameterlistframe.h"
+#include <common/parameters/rich_parameter_list.h>
 #include "glarea.h"
 //
 // Each file format exposes:
 //  a capability bit vector with all the things that it can save (the bits are the one indicated in the IOM_XXX bit mask) ; 
 //  a default bit vector that indicate what things are saved by defaults (eg. by default normals and flags are not saved in ply)
 //  a vector of optional parameters (like for example a bool for ascii/binary, a bool for choosing what  
-// This dialog allow to select what things actually save. 
+// This dialog allows one to select what things actually save. 
 // 
 // 
 // 
@@ -48,7 +50,7 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterSet *par,GLArea* glar = NULL);
+	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterList *par,GLArea* glar = NULL);
 	~SaveMaskExporterDialog();
 	
 	void InitDialog();
@@ -72,8 +74,8 @@ private:
 	int type;
 	int capability;
 	int defaultBits;
-    RichParameterSet *parSet;
-	StdParFrame *stdParFrame;
+    RichParameterList *parSet;
+	RichParameterListFrame *stdParFrame;
 	GLArea* glar;
 	
 	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);

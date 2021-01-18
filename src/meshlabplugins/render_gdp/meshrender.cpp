@@ -24,13 +24,21 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include <common/GLExtensionsManager.h>
 #include "meshrender.h"
 #include <QGLWidget>
 #include <QTextStream>
+#include <QDir>
+#include <QMessageBox>
 #include "../../meshlab/glarea.h"
 
 using namespace std;
 using namespace vcg;
+
+QString MeshShaderRenderPlugin::pluginName() const
+{
+	return "RenderGDP";
+}
 
 void MeshShaderRenderPlugin::initActionList() {
 
@@ -40,7 +48,16 @@ void MeshShaderRenderPlugin::initActionList() {
 
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins")
+	QString d = shadersDir.dirName();
+	QString dLower = d.toLower();
+	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
+		dLower == "minsizerel") {
+		// This is a configuration directory for MS Visual Studio.
+		shadersDir.cdUp();
+	}
+	d = shadersDir.dirName();
+	if (shadersDir.dirName() == "plugins")
+
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	//	if (shadersDir.dirName() == "MacOS") {
@@ -51,6 +68,15 @@ void MeshShaderRenderPlugin::initActionList() {
 	//	}
 #endif
 	bool ret = shadersDir.cd("shaders");
+
+#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+	if (! ret) {
+		shadersDir = QDir(qApp->applicationDirPath());
+		if (shadersDir.dirName() == "bin") {
+			ret = shadersDir.cdUp() && shadersDir.cd("share")&& shadersDir.cd("meshlab") && shadersDir.cd("shaders");
+		}
+	}
+#endif
 	if (!ret)
 	{
 		QMessageBox::information(0, "MeshLab",
@@ -230,7 +256,7 @@ void MeshShaderRenderPlugin::initActionList() {
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
+void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	if (sDialog) {
 		sDialog->close();
@@ -239,8 +265,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedD
 	}
 
 	gla->makeCurrent();
-	GLenum err = glewInit();
-	if (GLEW_OK == err) {
+	if (GLExtensionsManager::initializeGLextensions_notThrowing()) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 			supported = true;
 			if (shaders.find(a->text()) != shaders.end()) {
@@ -386,7 +411,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedD
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
+void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	//  MeshModel &mm
 	if (shaders.find(a->text()) != shaders.end()) {
@@ -465,7 +490,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLShare
 	if ((gla != NULL) && (gla->mvc() != NULL))
 	{
 		MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
-		foreach(MeshModel * mp, md.meshList)
+		for(MeshModel * mp : md.meshList)
 		{
 			if ((mp != NULL) && (gla->meshVisibilityMap[mp->id()]))
 				shared->draw(mp->id(),gla->context());

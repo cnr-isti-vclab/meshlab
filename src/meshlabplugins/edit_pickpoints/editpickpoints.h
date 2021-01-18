@@ -30,13 +30,13 @@
 #ifndef EDIT_PickPoints_PLUGIN_H
 #define EDIT_PickPoints_PLUGIN_H
 
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include "pickpointsDialog.h"
 
-class EditPickPointsPlugin : public QObject, public MeshEditInterface
+class EditPickPointsPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 	
 public:
 	//constructor
@@ -49,6 +49,7 @@ public:
 	}
 	
 	static const QString Info();
+	QString pluginName() const;
 
 	virtual bool StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
 	virtual void EndEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);

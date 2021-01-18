@@ -1,6 +1,8 @@
 #ifndef SINGLEMESHFILTERINTERFACE_H
 #define SINGLEMESHFILTERINTERFACE_H
-#include "common/interfaces.h"
+#include "common/interfaces/filter_plugin_interface.h"
+
+#include <QDebug>
 
 /**
   * @brief The interface for a filter plugin which defines a *single* action
@@ -17,7 +19,7 @@
   *
   * public:
   *     MyFilter();
-  *     bool applyFilter(MeshDocument &, RichParameterSet &, vcg::CallBackPos* cb = 0);
+  *     bool applyFilter(MeshDocument &, const RichParameterSet &, vcg::CallBackPos* cb = 0);
   * };
   * \endcode
   *
@@ -29,14 +31,14 @@
   *     //... your initialization code here
   * }
   *
-  * bool MyFilter::applyFilter(MeshDocument &, RichParameterSet&, vcg::CallBackPos*){
+  * bool MyFilter::applyFilter(MeshDocument &, const RichParameterSet&, vcg::CallBackPos*){
   *     //... your algorithm implementation here
   * }
   *
   * Q_EXPORT_PLUGIN(SdfPlugin)
   * \endcode
   */
-class SingleMeshFilterInterface : public QObject, public MeshFilterInterface{
+class SingleMeshFilterInterface : public QObject, public FilterPluginInterface{
   
 public:
   /**
@@ -45,7 +47,7 @@ public:
       * @param name the name of the plugin.
       *
       * The name of the plugin is used in the Meshlab menus as well as in the source
-      * as a key to identify the plugin uniquely. Tipically your plugin will have to
+      * as a key to identify the plugin uniquely. Typically your plugin will have to
       * implement a construction like the following:
       * \code
       * MyPlugin::MyPlugin() : SingleMeshFilterInterface( "My Mesh Filter" ){
@@ -79,8 +81,8 @@ public:
       * by meshlab to determine in which filter sub-menu-entry insert this filter. The default value adds the
       * plugin to the bottom of the list.
       */
-  virtual FilterClass getClass(){
-    return MeshFilterInterface::Generic;
+  virtual FilterClass getClass() const{
+    return FilterPluginInterface::Generic;
   }
   
   /**
@@ -91,7 +93,7 @@ public:
       * parameter set according to your mesh document (data dependent parameters). A GUI will be
       * automatically designed according to this parameters.
       */
-  virtual void initParameterSet(MeshDocument &, RichParameterSet &){ qDebug() << "HERE2!"; }
+  virtual void initParameterList(MeshDocument &, RichParameterList &){ qDebug() << "HERE2!"; }
   
   /**
       * @brief The implementation of the filter algorithm
@@ -101,7 +103,7 @@ public:
       * and is used to understand what type of plugin is being developed. This information will be used
       * by meshlab to determine in which filter sub-folder insert this filter.
       */
-  virtual bool applyFilter(MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
+  virtual bool applyFilter(MeshDocument &md, const RichParameterList & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
   
   /**
       * @brief The pre-conditions required by the filter on the input mesh
@@ -139,25 +141,25 @@ private:
   QString filterInfo(FilterIDType ) const{
     return filterInfo();
   }
-  FilterClass getClass(QAction *){
+  FilterClass getClass(const QAction *) const{
     return getClass();
   }
   // NOTE: Paolo informed that this will be killed sooner or later.
   // any behavior defined therein should be moved to getPostConditions()
-  int getRequirements(QAction* ){
+  int getRequirements(const QAction* ){
     return postConditions();
   }
-  int getPreConditions(QAction* ) const{
+  int getPreConditions(const QAction* ) const{
     return getPreConditions();
   }
-  int postCondition() const{
+  int postCondition(const QAction*) const{
     return MeshModel::MM_NONE;
   }
-  bool applyFilter(QAction *, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos * cb){
+  bool applyFilter(const QAction *, MeshDocument &md, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos * cb){
     return applyFilter(md, par, cb);
   }
-  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterSet &par){
-    initParameterSet(md,par);
+  virtual void initParameterList(const QAction *, MeshDocument &md, RichParameterList &par){
+    initParameterList(md,par);
   }
 };
 

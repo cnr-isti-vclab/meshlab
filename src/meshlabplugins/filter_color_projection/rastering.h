@@ -25,16 +25,16 @@
 #define _RASTERING_H
 
 #include <QtGui>
-#include <common/interfaces.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
+#include <common/ml_document/mesh_model.h>
 
 
 // texel descriptor---------------------------------
 
 typedef struct{
 
-  Point2i texcoord;
+  vcg::Point2i texcoord;
 
   Point3m meshpoint;
   Point3m meshnormal;

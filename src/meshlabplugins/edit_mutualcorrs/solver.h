@@ -5,7 +5,7 @@
 #include "alignset.h"
 
 #include "parameters.h"
-#include "../../external/levmar-2.3/lm.h"
+#include "lm.h"
 
 #include <iostream>
 #include <fstream>
@@ -22,7 +22,7 @@ class AlignSet;
 class MutualInfo;
 
 class Solver {
-  typedef vcg::Shot<float> Shot;
+  typedef vcg::Shot<MESHLAB_SCALAR> Shot;
   typedef vcg::Box3<float> Box;
 
  public:

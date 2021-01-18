@@ -1,7 +1,9 @@
 include (../../shared.pri)
 
-HEADERS       += filter_measure.h
-SOURCES       += filter_measure.cpp 
-TARGET         = filter_measure
+HEADERS += \
+    filter_measure.h
 
-include (../../shared_post.pri)
+SOURCES += \
+    filter_measure.cpp
+		
+TARGET = filter_measure

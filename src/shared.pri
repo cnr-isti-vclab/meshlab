@@ -1,46 +1,33 @@
 # This is the common include for all the plugins
 
 include (general.pri)
-VCGDIR = ../$$VCGDIR
-EIGENDIR = ../$$EIGENDIR
 
-TEMPLATE      = lib
-CONFIG       += plugin
+TEMPLATE = lib
+CONFIG += plugin
 QT += opengl
 QT += xml
-QT += xmlpatterns
-QT += script
 
-mac:LIBS += ../../common/libcommon.dylib
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/meshlab-common.lib -lopengl32 -lGLU32
+win32-g++:LIBS += -lmeshlab-common -lopengl32 -lGLU32
+linux:LIBS += -fopenmp -lmeshlab-common -lGL -lGLU
 
-#correct qmake syntax requires CONFIG(option, list of options)
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
+macx:QMAKE_POST_LINK = " \ #every plugin needs to point to meshlab-common placed in the appbundle
+    install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/plugins/lib$${TARGET}.dylib; \
+"
 
-win32-msvc2013:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-msvc2015:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-msvc:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
-linux-g++:LIBS += -L../../distrib -lcommon -lGL -lGLU
-linux-g++-32:LIBS += -L../../distrib -lcommon -lGL -lGLU
-linux-g++-64:LIBS += -L../../distrib -lcommon -lGL -lGLU
-
-win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
-win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
-INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR ../$$GLEWDIR/include
+INCLUDEPATH *= ../.. $$VCGDIR $$EIGENDIR
+!CONFIG(system_glew): INCLUDEPATH *=  $$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
 
-# the following line is to hide the hundred of warnings about the deprecated
-# old printf are all around the code
-win32-msvc2013:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-win32-msvc2015:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-win32-msvc:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release,debug | release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG
  }
 
-DESTDIR       = ../../distrib/plugins
+DESTDIR = $$MESHLAB_DISTRIB_PLUGINS_DIRECTORY
 # uncomment in you local copy only in emergency cases.
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive

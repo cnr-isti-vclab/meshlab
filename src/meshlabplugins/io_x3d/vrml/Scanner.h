@@ -137,7 +137,7 @@ private:
 	bool isUserStream;  // was the stream opened by the user?
 	
 	int ReadNextStreamChunk();
-	bool CanSeek();     // true if stream can be seeked otherwise false
+	bool CanSeek();     // true if stream can seek otherwise false
 	
 public:
 	static const int EoF = COCO_WCHAR_MAX + 1;
@@ -162,7 +162,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------------
-// StartStates  -- maps charactes to start states of tokens
+// StartStates  -- maps characters to start states of tokens
 //-----------------------------------------------------------------------------------
 class StartStates {
 private:

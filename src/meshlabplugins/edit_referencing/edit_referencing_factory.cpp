@@ -41,15 +41,16 @@ QList<QAction *> EditReferencingFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditReferencingFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditReferencingFactory::getMeshEditInterface(const QAction *action)
 {
     if(action == editReferencing)
 	{
         return new EditReferencingPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else assert(0); //should never be asked for an action that isn't here
+    return nullptr;
 }
 
-QString EditReferencingFactory::getEditToolDescription(QAction *)
+QString EditReferencingFactory::getEditToolDescription(const QAction *)
 {
     return EditReferencingPlugin::Info();
 }

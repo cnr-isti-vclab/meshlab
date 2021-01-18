@@ -28,7 +28,7 @@
 #include <wrap/qt/gl_label.h>
 
 #include "mainwindow.h"
-#include "ml_selection_buffers.h"
+#include <common/ml_selection_buffers.h>
 
 MLDefaultMeshDecorators::MLDefaultMeshDecorators(MainWindow* mw)
 	:_mw(mw)
@@ -104,22 +104,22 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
     if (!valid)
         return false;
 
-	//if (opts._peredge_extra_enabled)
-	//{
-	initBoundaryDecoratorData(m, opts._peredge_edgeboundary_enabled, opts._peredge_faceboundary_enabled);
+    //if (opts._peredge_extra_enabled)
+    //{
+    initBoundaryDecoratorData(m, opts._peredge_edgeboundary_enabled, opts._peredge_faceboundary_enabled);
 
-	if (opts._peredge_edgemanifold_enabled)
-		initNonManifEdgeDecoratorData(m);
+    if (opts._peredge_edgemanifold_enabled)
+        initNonManifEdgeDecoratorData(m);
 
-	if (opts._peredge_vertmanifold_enabled)
-		initNonManifVertDecoratorData(m);
+    if (opts._peredge_vertmanifold_enabled)
+        initNonManifVertDecoratorData(m);
 
-	if (opts._peredge_text_boundary_enabled)
-		initBoundaryTextDecoratorData(m);
-	//}
-	
-	initSelectionDecoratorData(m, opts._vertex_sel, opts._face_sel);
-	
+    if (opts._peredge_text_boundary_enabled)
+        initBoundaryTextDecoratorData(m);
+    //}
+
+    initSelectionDecoratorData(m, opts._vertex_sel, opts._face_sel);
+
 
     return true;
 }
@@ -316,7 +316,7 @@ void MLDefaultMeshDecorators::drawQuotedLine(const vcg::Point3d &a,const vcg::Po
     glDisable(GL_LIGHT0);
     glDisable(GL_NORMALIZE);
     float labelMargin =tickScalarDistance /4.0;
-    float firstTick;
+    float firstTick = 0.0;
     // fmod returns the floating-point remainder of numerator/denominator (with the sign of the dividend)
     // fmod ( 104.5 , 10) returns 4.5     --> aVal - fmod(aval/tick) = 100
     // fmod ( -104.5 , 10) returns -4.5
@@ -333,7 +333,7 @@ void MLDefaultMeshDecorators::drawQuotedLine(const vcg::Point3d &a,const vcg::Po
 
 
     float tickDistTen=tickScalarDistance /10.0f;
-    float firstTickTen;
+    float firstTickTen = 0.0;
     if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
     else firstTickTen = aVal - fmod(aVal,tickDistTen);
 
@@ -483,8 +483,8 @@ void MLDefaultMeshDecorators::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp
 
 bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLRenderingData& dt )
 {
-	if (_mw == NULL)
-		return false;
+    if (_mw == NULL)
+        return false;
 
     MLPerViewGLOptions opts;
     bool valid = dt.get(opts);
@@ -497,14 +497,14 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
     if (opts._peredge_edgemanifold_enabled)
         cleanNonManifEdgeDecoratorData(mesh);
 
-	if (opts._peredge_vertmanifold_enabled)
-		cleanNonManifVertDecoratorData(mesh);
+    if (opts._peredge_vertmanifold_enabled)
+        cleanNonManifVertDecoratorData(mesh);
 
     if (opts._peredge_text_boundary_enabled)
         cleanBoundaryTextDecoratorData(mesh);
 
-	if (opts._vertex_sel || opts._face_sel)
-		cleanSelectionDecoratorData(mesh, !opts._vertex_sel, !opts._face_sel);
+    if (opts._vertex_sel || opts._face_sel)
+        cleanSelectionDecoratorData(mesh, !opts._vertex_sel, !opts._face_sel);
     return true;
 }
 
@@ -859,7 +859,7 @@ void MLDefaultMeshDecorators::cleanBoundaryTextDecoratorData( MeshModel& m)
 	}
 }
 
-void MLDefaultMeshDecorators::drawLineVector(const vcg::Matrix44f& tr, std::vector<PointPC> &EV)
+void MLDefaultMeshDecorators::drawLineVector(const Matrix44m& tr, std::vector<PointPC> &EV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -887,7 +887,7 @@ void MLDefaultMeshDecorators::drawLineVector(const vcg::Matrix44f& tr, std::vect
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawTriVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV)
+void MLDefaultMeshDecorators::drawTriVector(const Matrix44m& tr,std::vector<PointPC> &TV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -914,7 +914,7 @@ void MLDefaultMeshDecorators::drawTriVector(const vcg::Matrix44f& tr,std::vector
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawDotVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV, float baseSize)
+void MLDefaultMeshDecorators::drawDotVector(const Matrix44m& tr,std::vector<PointPC> &TV, float baseSize)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);

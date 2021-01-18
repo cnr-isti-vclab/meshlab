@@ -275,7 +275,7 @@ inline void getHresVertex(std::vector<FaceType*> &domain,
 }
 
 ///copy mesh low level & high level
-///putting the link between them toghether
+///putting the link between them together
 template <class MeshType>
 void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
                                              MeshType &Domain,MeshType &hlevMesh)
@@ -713,7 +713,7 @@ inline void getAroundFaceVertices(typename MeshType::VertexType *v0,
     }
 
     ///get all vertices around the collapse
-    for (int i=0;i<in_v0.size();i++)
+    for (int i=0;i<in_v1.size();i++)
     {
         for (int j=0;j<3;j++)
             if ((in_v1[i].V(j)!=v0)&&(in_v1[i].V(j)!=v1))

@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -36,34 +36,31 @@ add sampleplugins
 
 #include <QObject>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include "alignset.h"
 
-
-
-class QScriptEngine;
-
-class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
+class FilterMutualGlobal : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum { FP_IMAGE_GLOBALIGN} ;
 
-	FilterMutualInfoPlugin();
+	FilterMutualGlobal();
 
-	virtual QString pluginName(void) const { return "FilterMutualInfoPlugin"; }
+	QString pluginName() const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
-    FilterClass getClass(QAction *a);
+	void initParameterList(const QAction*, MeshDocument & md, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
+	FilterClass getClass(const QAction* a) const;
+	bool requiresGLContext(const QAction* action) const;
 	QString filterScriptFunctionName(FilterIDType filterID);
-	bool preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+	bool preAlignment(MeshDocument &md, const RichParameterList& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
 	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);
 	std::vector<SubGraph> CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs);
@@ -72,8 +69,8 @@ public:
 	bool AlignNode(MeshDocument &md, Node node);
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
-	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
-	FILTER_ARITY filterArity(QAction *) const { return SINGLE_MESH; }
+	float calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points);
+	FILTER_ARITY filterArity(const QAction *) const { return SINGLE_MESH; }
 
 
 

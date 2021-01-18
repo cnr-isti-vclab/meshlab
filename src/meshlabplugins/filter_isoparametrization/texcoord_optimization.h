@@ -64,7 +64,7 @@ public:
   // initializes on current geometry 
   virtual void TargetCurrentGeometry()=0;
   
-  // performs an interation. Returns largest movement.
+  // performs an iteration. Returns largest movement.
   virtual ScalarType Iterate()=0;
   
   // performs an iteration (faster, but it does not tell how close it is to stopping)
@@ -629,7 +629,7 @@ public:
 };
 
 
-#if 0  // Temporarly commented out. It still have to be thoroughly tested...
+#if 0  // Temporarily commented out. It still have to be thoroughly tested...
 
 template<class MESH_TYPE> 
 class WachspressTexCoordOptimization:public TexCoordOptimization<MESH_TYPE>{
@@ -1002,7 +1002,7 @@ template<class MESH_TYPE>
 class MIPSTexCoordFoldHealer:public MIPSTexCoordOptimization<MESH_TYPE>{
 public:
   
-  int maxStarSize; // max star size that is affected around a folded face.. Defualt: 3
+  int maxStarSize; // max star size that is affected around a folded face.. Default: 3
   
   typedef MESH_TYPE MeshType;
   typedef typename MESH_TYPE::VertexIterator VertexIterator;

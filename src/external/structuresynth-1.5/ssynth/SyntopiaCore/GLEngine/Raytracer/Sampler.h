@@ -11,6 +11,7 @@ namespace SyntopiaCore {
 		class Filter {
 		public:
 			Filter() {};
+			virtual ~Filter();
 			virtual float getWeight(float xSqr, float ySqr) = 0;
 			virtual int getExtent() = 0;
 		};
@@ -24,7 +25,7 @@ namespace SyntopiaCore {
 
 		class GaussianFilter : public Filter {
 		public:
-			GaussianFilter(double ext, double alpha) : extent(extent), alpha(alpha) {
+			GaussianFilter(double ext, double alpha) : extent(ext), alpha(alpha) {
 				this->extent = int(0.5+ext);
 				s =  -exp(-alpha*(ext*ext));
 			};

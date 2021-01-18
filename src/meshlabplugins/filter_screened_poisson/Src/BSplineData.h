@@ -200,7 +200,7 @@ class BSplineEvaluationData
 {
 public:
 	static const int Pad = (BType==BOUNDARY_FREE ) ? BSplineSupportSizes< Degree >::SupportEnd : ( (Degree&1) && BType==BOUNDARY_DIRICHLET ) ? -1 : 0;
-	inline static int Begin( int depth ){ return -Pad; }
+	inline static int Begin( int ){ return -Pad; }
 	inline static int End  ( int depth ){ return (1<<depth) + (Degree&1) + Pad; }
 	inline static bool OutOfBounds( int depth , int offset ){ return offset<Begin(depth) || offset>=End(depth); }
 

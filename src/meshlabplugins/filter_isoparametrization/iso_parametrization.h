@@ -559,7 +559,7 @@ private:
                             ParamVertex * v=&diamond_meshes[index].HresDomain->vert[k];
                             CoordType bary=CoordType(v->T().U(),v->T().V(),1-v->T().U()-v->T().V());
                             AbstractMesh *paramDomain=diamond_meshes[index].domain;
-                            ///get the rigth face on the parametrized domain
+                            ///get the right face on the parametrized domain
                             int Father=v->T().N();
                             int faceNum=-1;
                             for (unsigned int i=0;i<diamond_meshes[index].local_to_global.size();i++)
@@ -1393,7 +1393,7 @@ public:
         CoordType bary=CoordType(UV.X(),UV.Y(),1-UV.X()-UV.Y());
 
         ///then transform to the half-diamond domain
-        ///get egde mesh
+        ///get edge mesh
         AbstractMesh* diam_domain=diamond_meshes[DiamIndex].domain;
         int LocalIndex=diamond_meshes[DiamIndex].Global2Local(I);
         if(LocalIndex!=-1)
@@ -1401,7 +1401,7 @@ public:
       InterpolateUV<AbstractMesh>(&diam_domain->face[LocalIndex],bary,UVDiam.X(),UVDiam.Y());
             return;
         }
-        ///if ! found seach in the star space
+        ///if ! found search in the star space
         else
         {
             AbstractFace *f_diam=&diam_domain->face[0];

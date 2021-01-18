@@ -20,9 +20,12 @@
 
 using namespace std;
 
-AlignSet::AlignSet(): mode(COMBINE),
-target(NULL), render(NULL),
-vbo(0), nbo(0), cbo(0), ibo(0), error(0){
+AlignSet::AlignSet():
+    error(0),
+    vbo(0), nbo(0), cbo(0), ibo(0),
+    mode(COMBINE),
+    target(NULL), render(NULL)
+    {
 
   box.SetNull();
   //correspList = new QList<PointCorrespondence*>();
@@ -159,18 +162,18 @@ void AlignSet::resize(int max_side) {
 #endif
 }
 
-void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
+void AlignSet::renderScene(vcg::Shot<Scalarm> &view, int component) {
   QSize fbosize(wt,ht);
   QGLFramebufferObjectFormat frmt;
   frmt.setInternalTextureFormat(GL_RGBA);
   frmt.setAttachment(QGLFramebufferObject::Depth);
   QGLFramebufferObject fbo(fbosize,frmt);
 
-  float _near, _far;
+  Scalarm _near, _far;
   _near = 0.1f;
   _far = 10000.0f;
-  vcg::Box3f bb=vcg::Box3f::Construct(mesh->bbox);
-  GlShot< vcg::Shot<float> >::GetNearFarPlanes(view, bb, _near, _far);
+  Box3m bb=Box3m::Construct(mesh->bbox);
+  GlShot< vcg::Shot<Scalarm> >::GetNearFarPlanes(view, bb, _near, _far);
   //assert(_near <= _far);
   if(_near <= 0) _near = 0.1f;
   if(_far < _near) _far = 1000.0f;
@@ -183,7 +186,7 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
 
   glViewport(0, 0, wt, ht);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  GlShot< vcg::Shot<float> >::SetView(shot, 0.5*_near, 2*_far);
+  GlShot< vcg::Shot<Scalarm> >::SetView(shot, 0.5*_near, 2*_far);
 
 //	err = glGetError();
 

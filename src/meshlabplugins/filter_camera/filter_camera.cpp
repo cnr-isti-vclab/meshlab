@@ -47,6 +47,11 @@ FilterCameraPlugin::FilterCameraPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterCameraPlugin::pluginName() const
+{
+    return "FilterCamera";
+}
+
 // ST() return the very short string describing each filtering action
 QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 {
@@ -68,8 +73,8 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
-    case FP_SET_MESH_CAMERA :     return QString("This filter allow to set a shot for the current mesh");
-    case FP_SET_RASTER_CAMERA :   return QString("This filter allow to set a shot for the current mesh");
+    case FP_SET_MESH_CAMERA :     return QString("This filter allows one to set a shot for the current mesh");
+    case FP_SET_RASTER_CAMERA :   return QString("This filter allows one to set a shot for the current mesh");
     case FP_QUALITY_FROM_CAMERA : return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
     case FP_CAMERA_ROTATE :       return QString("Rotate the camera, or all the cameras of the project. The selected raster is the reference if viewpoint rotation is selected.");
     case FP_CAMERA_SCALE :        return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
@@ -82,9 +87,9 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
+void FilterCameraPlugin::initParameterList(const QAction *action, MeshDocument &/*m*/, RichParameterList & parlst)
 {
-    Shotf defShot;
+    Shotm defShot;
     switch(ID(action))
     {
     case FP_CAMERA_ROTATE :
@@ -92,23 +97,23 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
             QStringList rotMethod;
             rotMethod.push_back("X axis");
             rotMethod.push_back("Y axis");
             rotMethod.push_back("Z axis");
             rotMethod.push_back("custom axis");
-            parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+            parlst.addParam(RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
             QStringList rotCenter;
             rotCenter.push_back("origin");
             rotCenter.push_back("camera viewpoint");
             rotCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-            parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
-            parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+            parlst.addParam(RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
+            parlst.addParam(RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+            parlst.addParam(RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_SCALE :
@@ -116,16 +121,16 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
             QStringList scaleCenter;
             scaleCenter.push_back("origin");
             scaleCenter.push_back("camera viewpoint");
             scaleCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
+            parlst.addParam(RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
+            parlst.addParam(RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_TRANSLATE :
@@ -133,13 +138,13 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             QStringList shotType;
             shotType.push_back("Raster Camera");
             shotType.push_back("Mesh Camera");
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
-            parlst.addParam(new RichDynamicFloat("axisX",0,-1000,1000,"X Axis","Absolute translation amount along the X axis"));
-            parlst.addParam(new RichDynamicFloat("axisY",0,-1000,1000,"Y Axis","Absolute translation amount along the Y axis"));
-            parlst.addParam(new RichDynamicFloat("axisZ",0,-1000,1000,"Z Axis","Absolute translation amount along the Z axis"));
-            parlst.addParam(new RichBool("centerFlag",false,"translate viewpoint position to the origin","If selected, the camera viewpoint is translated to the origin"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichDynamicFloat("axisX",0,-1000,1000,"X Axis","Absolute translation amount along the X axis"));
+            parlst.addParam(RichDynamicFloat("axisY",0,-1000,1000,"Y Axis","Absolute translation amount along the Y axis"));
+            parlst.addParam(RichDynamicFloat("axisZ",0,-1000,1000,"Z Axis","Absolute translation amount along the Z axis"));
+            parlst.addParam(RichBool("centerFlag",false,"translate viewpoint position to the origin","If selected, the camera viewpoint is translated to the origin"));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
 
@@ -153,33 +158,33 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             behaviour.push_back("The matrix represent the new extrinsics");
 
             Matrix44m mat; mat.SetIdentity();
-            parlst.addParam(new RichMatrix44f("TransformMatrix",mat,""));
-            parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
-            parlst.addParam(new RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
+            parlst.addParam(RichMatrix44f("TransformMatrix",mat,""));
+            parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+            parlst.addParam(RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
+            parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
 
         }
         break;  case FP_SET_RASTER_CAMERA :
-        parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
+        parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
         break;
 
         case FP_SET_MESH_CAMERA :
-            parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
+            parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
             break;
         case FP_QUALITY_FROM_CAMERA :
-            parlst.addParam(new RichBool ("Depth", true, "Depth", "Use depth as a factor."));
-            parlst.addParam(new RichBool ("Facing", false, "ViewAngle", "Use cosine of viewing angle as a factor."));
-            parlst.addParam(new RichBool ("Clip", false,  "Clipping", "clip values outside the viewport to zero."));
-            parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
-            parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
+            parlst.addParam(RichBool ("Depth", true, "Depth", "Use depth as a factor."));
+            parlst.addParam(RichBool ("Facing", false, "ViewAngle", "Use cosine of viewing angle as a factor."));
+            parlst.addParam(RichBool ("Clip", false,  "Clipping", "clip values outside the viewport to zero."));
+            parlst.addParam(RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
+            parlst.addParam(RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
             break;
         default: break; // do not add any parameter for the other filters
     }
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterCameraPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel* mesh = md.mm();
     CMeshO* cm = NULL;
@@ -221,7 +226,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     case 0:
                         if (rm == NULL)
                         {
-                            Log(0, "You need a Raster Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                             return false;
                         }
                         tranVec=rm->shot.Extrinsics.Tra();
@@ -229,7 +234,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     case 1: 	
                         if (cm == NULL)
                         {
-                            Log(0, "You need a Mesh Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                             return false;
                         }        
                         tranVec=cm->shot.Extrinsics.Tra();
@@ -242,7 +247,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 break;
             }
 
-            float angleDeg= par.getDynamicFloat("angle");
+            Scalarm angleDeg= par.getDynamicFloat("angle");
 
             trRot.SetRotateDeg(angleDeg,axis);
             trTran.SetTranslate(tranVec);
@@ -285,7 +290,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (rm == NULL)
                     {
-                        Log(0, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(transf);
@@ -295,7 +300,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (cm == NULL)
                     {
-                        Log(0, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(transf);
@@ -308,10 +313,10 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     case FP_CAMERA_SCALE :
         {
             Matrix44m trScale; trScale.SetIdentity();
-            Point3m tranVec;
+            Point3m tranVec(0,0,0);
             Matrix44m trTran,trTranInv;
 
-            float Scale= par.getFloat("scale");
+            Scalarm Scale= par.getFloat("scale");
             trScale.SetScale(Scale,Scale,Scale);
 
             switch(par.getEnum("scaleCenter"))
@@ -326,7 +331,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     case 0:
                         if (rm == NULL)
                         {
-                            Log(0, "You need a Raster Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                             return false;
                         }
                         tranVec=rm->shot.Extrinsics.Tra();
@@ -334,7 +339,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     case 1:
                         if (cm == NULL)
                         {
-                            Log(0, "You need a Mesh Model to apply this filter!");
+                            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                             return false;
                         }
                         tranVec=cm->shot.Extrinsics.Tra();
@@ -395,7 +400,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (rm == NULL)
                     {
-                        Log(0, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(trTran);
@@ -407,7 +412,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (cm == NULL)
                     {
-                        Log(0, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(trTran);
@@ -423,9 +428,9 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
         {
             Matrix44m trTran; trTran.SetIdentity();
 
-            float xScale= par.getDynamicFloat("axisX");
-            float yScale= par.getDynamicFloat("axisY");
-            float zScale= par.getDynamicFloat("axisZ");
+            Scalarm xScale= par.getDynamicFloat("axisX");
+            Scalarm yScale= par.getDynamicFloat("axisY");
+            Scalarm zScale= par.getDynamicFloat("axisZ");
 
             trTran.SetTranslate(xScale,yScale,zScale);
             if(par.getBool("centerFlag"))
@@ -435,7 +440,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 case 0:     
                     if (rm == NULL)
                     {
-                        Log(0, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     trTran.SetTranslate(-rm->shot.Extrinsics.Tra());
@@ -443,7 +448,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 case 1: 	
                     if (cm == NULL)
                     {
-                        Log(0, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     trTran.SetTranslate(-cm->shot.Extrinsics.Tra());
@@ -486,7 +491,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (rm == NULL)
                     {
-                        Log(0, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(trTran);
@@ -496,7 +501,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (cm == NULL)
                     {
-                        Log(0, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(trTran);
@@ -511,12 +516,12 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             Matrix44m mat,inv;
             inv.SetIdentity();
             Point3m tra;
-            mat = par.getMatrix44m("TransformMatrix");
+            mat = par.getMatrix44("TransformMatrix");
             if(par.getEnum("behaviour") == 1)
             {
                 if (rm == NULL)
                 {
-                    Log(0, "You need a Raster Model to apply this filter!");
+                    log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                     return false;
                 }
                 inv = rm->shot.Extrinsics.Rot();
@@ -563,7 +568,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (rm == NULL)
                     {
-                        Log(0, "You need a Raster Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                         return false;
                     }
                     rm->shot.ApplyRigidTransformation(mat);
@@ -573,7 +578,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (cm == NULL)
                     {
-                        Log(0, "You need a Mesh Model to apply this filter!");
+                        log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                         return false;
                     }
                     cm->shot.ApplyRigidTransformation(mat);
@@ -588,10 +593,10 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
         {
             if (rm == NULL)
             {
-                Log(0, "You need a Raster Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
                 return false;
             }
-            Shotm shotGot=par.getShotm("Shot");
+            Shotm shotGot=par.getShotf("Shot");
             rm->shot = shotGot;
             float ratio=(float)rm->currentPlane->image.height()/(float)shotGot.Intrinsics.ViewportPx[1];
             rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
@@ -605,16 +610,16 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     case FP_SET_MESH_CAMERA :
         if (cm == NULL)
         {
-            Log(0, "You need a Mesh Model to apply this filter!");
+            log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
             return false;
         }
-        cm->shot = par.getShotm("Shot");
+        cm->shot = par.getShotf("Shot");
         break;
     case FP_QUALITY_FROM_CAMERA :
         {
             if (cm == NULL)
             {
-                Log(0, "You need a Mesh Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                 return false;
             }
             if(!cm->shot.IsValid())
@@ -656,7 +661,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
         {
             if (cm == NULL)
             {
-                Log(0, "You need a Mesh Model to apply this filter!");
+                log(GLLogStream::SYSTEM, "You need a Mesh Model to apply this filter!");
                 return false;
             }
             struct Correspondence{unsigned int id_img;float padding[3];};
@@ -685,7 +690,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     return true;
 }
 
-int FilterCameraPlugin::postCondition(QAction * filter) const
+int FilterCameraPlugin::postCondition(const QAction * filter) const
 {
     switch (ID(filter))
     {
@@ -702,7 +707,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     }
 }
 
-FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
+FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(const QAction *a) const
 {
     switch(ID(a))
     {
@@ -711,19 +716,19 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
     case FP_CAMERA_TRANSLATE :
     case FP_CAMERA_TRANSFORM:
     case FP_SET_RASTER_CAMERA :
-        return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
+        return FilterClass (FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer) ;
 	case FP_QUALITY_FROM_CAMERA:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer + MeshFilterInterface::Quality);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer + FilterPluginInterface::Quality);
     case FP_ORIENT_NORMALS_WITH_CAMERAS:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Normal);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::Normal);
 	case FP_SET_MESH_CAMERA:
-		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Layer);
+		return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::Layer);
     }
     assert(0);
-	return MeshFilterInterface::Camera;
+	return FilterPluginInterface::Camera;
 }
 
-int FilterCameraPlugin::getPreConditions( QAction * a) const
+int FilterCameraPlugin::getPreConditions(const QAction * a) const
 {
 	switch (ID(a))
 	{
@@ -739,10 +744,10 @@ int FilterCameraPlugin::getPreConditions( QAction * a) const
 		return MeshModel::MM_VERTNORMAL;
 	}
 	assert(0);
-	return NULL;
+	return 0;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity( QAction* act ) const
+FilterPluginInterface::FILTER_ARITY FilterCameraPlugin::filterArity(const QAction* act ) const
 {
 	switch (ID(act))
 	{

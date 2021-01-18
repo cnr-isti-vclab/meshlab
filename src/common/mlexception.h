@@ -2,6 +2,7 @@
 #define ML_EXCEPTION_H
 
 #include <exception>
+#include <QString>
 
 class MLException : public std::exception
 {
@@ -17,16 +18,6 @@ protected:
 	QByteArray _ba;
 
 };
-
-class MeshLabXMLParsingException : public MLException
-{
-public:
-        MeshLabXMLParsingException(const QString& text)
-                :MLException(QString("Error While parsing the XML filter plugin descriptors: ") + text){}
-
-        ~MeshLabXMLParsingException() throw() {}
-};
-
 
 class ParsingException : public MLException
 {

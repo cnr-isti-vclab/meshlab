@@ -26,14 +26,26 @@ $Log: meshedit.cpp,v $
 ****************************************************************************/
 
 #include "edit_align.h"
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
-#include <meshlab/stdpardialog.h>
+#include <meshlab/rich_parameter_gui/richparameterlistframe.h>
+#include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
 #include "align/align_parameter.h"
 #include <vcg/space/point_matching.h>
+#include <vcg/complex/algorithms/point_matching_scale.h>
+
+#include <QMessageBox>
+
 using namespace vcg;
+
+//todo: remove these orrible defs from here
+//make vcg::PointMatchingScale independent
+std::vector<vcg::Point3d>* vcg::PointMatchingScale::fix;
+std::vector<vcg::Point3d>* vcg::PointMatchingScale::mov;
+vcg::Box3d vcg::PointMatchingScale::b;
 
 EditAlignPlugin::EditAlignPlugin()
 {
@@ -47,7 +59,12 @@ EditAlignPlugin::EditAlignPlugin()
 
 const QString EditAlignPlugin::Info()
 {
-    return tr("Allow to align different layers together.");
+    return tr("Allows one to align different layers together.");
+}
+
+QString EditAlignPlugin::pluginName() const
+{
+    return "EditAlign";
 }
 
 void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData& dt)
@@ -106,7 +123,6 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     _gla= gla;
 	_shared = cont;
 
-	//GLenum err = glewInit();
 	if ((_gla == NULL) || (_shared == NULL) || (md.meshList.size() < 1))
 		return false;
 
@@ -118,7 +134,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     {
 
         // assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
-        // if above 50, truly unique color would geenrate too similar colors, so total number of unique color
+        // if above 50, truly unique color would generate too similar colors, so total number of unique color
         // is capped to 50 and the color reused, id that are close will have different color anyway
 		if (mm != NULL)
 		{
@@ -138,8 +154,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     _gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
     if(alignDialog==0)
     {
-		GLenum err = glewInit();
-		if (err != GLEW_OK)
+        if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 			return false;
 
         alignDialog=new AlignDialog(_gla->window(),this);
@@ -267,15 +282,15 @@ void EditAlignPlugin::glueByPicking()
 
     // i picked points sono in due sistemi di riferimento.
 
-    std::vector<vcg::Point3f>freePnt = dd->aa->freePickedPointVec;
-    std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec;
+    std::vector<Point3m>freePnt = dd->aa->freePickedPointVec;
+    std::vector<Point3m>gluedPnt= dd->aa->gluedPickedPointVec;
 
     if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
         QMessageBox::warning(0,"Align tool", "ERROR: alignment requires the same number of chosen points");
         return;
     }
 
-    Matrix44f res;
+    Matrix44m res;
     if ((dd != NULL) && (dd->aa != NULL) && (dd->aa->allowscaling))
         ComputeSimilarityMatchMatrix(gluedPnt,freePnt,res);
     else
@@ -348,11 +363,11 @@ void EditAlignPlugin:: alignParamCurrent()
 {
     assert(currentArc());
 
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
     AlignParameter::AlignPairParamToRichParameterSet(currentArc()->ap, alignParamSet);
 
-    GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
+	RichParameterListDialog ad(alignDialog, alignParamSet, titleString);
     ad.setWindowFlags(Qt::Dialog);
     ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();
@@ -364,9 +379,9 @@ void EditAlignPlugin:: alignParamCurrent()
 
 void EditAlignPlugin:: meshTreeParam()
 {
-  RichParameterSet  meshTreeParamSet;
+  RichParameterList  meshTreeParamSet;
   AlignParameter::MeshTreeParamToRichParameterSet(defaultMTP, meshTreeParamSet);
-  GenericParamDialog ad(alignDialog,&meshTreeParamSet,"Default Alignment Parameters");
+  RichParameterListDialog ad(alignDialog, meshTreeParamSet, "Default Alignment Parameters");
   ad.setWindowFlags(Qt::Dialog);
   ad.setWindowModality(Qt::WindowModal);
   int result=ad.exec();
@@ -378,9 +393,9 @@ void EditAlignPlugin:: meshTreeParam()
 
 void EditAlignPlugin:: alignParam()
 {
-    RichParameterSet alignParamSet;
+    RichParameterList alignParamSet;
     AlignParameter::AlignPairParamToRichParameterSet(defaultAP, alignParamSet);
-    GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
+	RichParameterListDialog ad(alignDialog, alignParamSet, "Default Alignment Parameters");
     ad.setWindowFlags(Qt::Dialog);
     ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();

@@ -29,6 +29,8 @@
 
 #include<vcg/complex/append.h>
 #include <QImageReader>
+#include <QDir>
+#include <QXmlStreamWriter>
 
 
 
@@ -59,6 +61,11 @@ FilterLayerPlugin::FilterLayerPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterLayerPlugin::pluginName() const
+{
+    return "FilterLayer";
+}
+
 // ST() return the very short string describing each filtering action
 QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 {
@@ -76,8 +83,8 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
     case FP_RENAME_RASTER :  return QString("Rename Current Raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer");
     case FP_MESH_VISIBILITY :  return QString("Change Visibility of layer(s)");
-	case FP_EXPORT_CAMERAS:  return QString("Export active rasters cameras to file");
-	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
+    case FP_EXPORT_CAMERAS:  return QString("Export active rasters cameras to file");
+    case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
     default : assert(0);
     }
 	return NULL;
@@ -87,8 +94,8 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
-    case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transfered.");
-    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transfered.");
+    case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transferred.");
+    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transferred.");
     case FP_DELETE_MESH :  return QString("The current mesh layer is deleted");
     case FP_DELETE_NON_VISIBLE_MESH :  return QString("All the non visible mesh layers are deleted");
     case FP_DELETE_RASTER :  return QString("The current raster layer is deleted");
@@ -100,15 +107,15 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
     case FP_RENAME_RASTER :  return QString("Explicitly change the label shown for a given raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer to a chosen one");
     case FP_MESH_VISIBILITY :  return QString("Make layer(s) visible/invisible. Useful for scripting.");
-	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
-	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
+    case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
+    case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
     default : assert(0);
     }
 	return NULL;
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterLayerPlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
 {
     MeshModel *mm=md.mm();
     RasterModel *rm=md.rm();
@@ -117,7 +124,7 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
     case FP_SPLITSELECTEDVERTICES:
     case FP_SPLITSELECTEDFACES :
         {
-            parlst.addParam(new RichBool ("DeleteOriginal",
+            parlst.addParam(RichBool ("DeleteOriginal",
                 true,
                 "Delete original selection",
                 "Deletes the original selected faces/vertices, thus splitting the mesh among layers. \n\n"
@@ -125,55 +132,55 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         }
         break;
     case FP_FLATTEN :
-        parlst.addParam(new RichBool ("MergeVisible", true, "Merge Only Visible Layers",
-            "If true, flatten only visible layers, othwerwise, all layers are used"));
-        parlst.addParam(new RichBool ("DeleteLayer", true, "Delete Layers ",
+        parlst.addParam(RichBool ("MergeVisible", true, "Merge Only Visible Layers",
+            "If true, flatten only visible layers, otherwise, all layers are used"));
+        parlst.addParam(RichBool ("DeleteLayer", true, "Delete Layers ",
             "Delete all the layers used as source in flattening. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
-        parlst.addParam(new RichBool ("MergeVertices", true,  "Merge duplicate vertices",
+        parlst.addParam(RichBool ("MergeVertices", true,  "Merge duplicate vertices",
             "Merge the vertices that are duplicated among different layers. \n\n"
             "Very useful when the layers are spliced portions of a single big mesh."));
-        parlst.addParam(new RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
+        parlst.addParam(RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
             "Do not discard unreferenced vertices from source layers\n\n"
             "Necessary for point-cloud layers"));
         break;
     case FP_RENAME_MESH :
-        parlst.addParam(new RichString ("newName",
+        parlst.addParam(RichString ("newName",
             mm->label(),
             "New Label",
             "New Label for the mesh"));
         break;
     case FP_RENAME_RASTER :
-        parlst.addParam(new RichString ("newName",
-            rm->label(),
+        parlst.addParam(RichString ("newName",
+            rm?rm->label():"",
             "New Label",
             "New Label for the raster"));
         break;
     case FP_SELECTCURRENT :
-        parlst.addParam(new RichMesh ("layer",md.mm(),&md, "Layer Name",
+        parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name",
             "The name of the current layer"));
         break;
     case FP_MESH_VISIBILITY :
-        parlst.addParam(new RichMesh ("layer",md.mm(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
-		parlst.addParam(new RichString("lName", "", "Substring match", "Apply visibility to all layers with name substring matching the entered string. If not empty, the first parameter is ignored."));
-        parlst.addParam(new RichBool ("isMeshVisible", true,  "Visible", "It makes the selected layer(s) visible or invisible."));
+        parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
+        parlst.addParam(RichString("lName", "", "Substring match", "Apply visibility to all layers with name substring matching the entered string. If not empty, the first parameter is ignored."));
+        parlst.addParam(RichBool ("isMeshVisible", true,  "Visible", "It makes the selected layer(s) visible or invisible."));
         break;
         
 	case FP_EXPORT_CAMERAS:
-		parlst.addParam(new RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format, The filter enables to export the cameras to both Bundler and Agisoft Photoscan."));
-		parlst.addParam(new RichString("newName",
+		parlst.addParam(RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format, The filter enables to export the cameras to both Bundler and Agisoft Photoscan."));
+		parlst.addParam(RichString("newName",
 			"cameras",
 			"Export file name (the right extension will be added at the end)",
 			"Name of the output file, it will be saved in the same folder as the project file"));
 		break;
 	case FP_IMPORT_CAMERAS:
-		parlst.addParam(new RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
+		parlst.addParam(RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
 		break;
     default: break; // do not add any parameter for the other filters
     }
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterLayerPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
  CMeshO::FaceIterator fi;
  int numFacesSel,numVertSel;
@@ -182,7 +189,19 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
  {
 	case  FP_RENAME_MESH:     md.mm()->setLabel(par.getString("newName")); break;
 
-	case  FP_RENAME_RASTER:   md.rm()->setLabel(par.getString("newName")); break;
+	case  FP_RENAME_RASTER:
+	{
+    if (md.rm()) 
+    {
+      md.rm()->setLabel(par.getString("newName"));
+    }
+    else
+    {
+      this->errorMessage = "Error: Call to Rename Current Raster with no valid raster.";
+      return false;
+    }
+    
+	} break;
 
 	case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("layer")); break;
 
@@ -257,11 +276,11 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			Log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
+			log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
 		}
 		else								// keep original faces
 		{
-			Log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
+			log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 
@@ -302,11 +321,11 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			tri::UpdateSelection<CMeshO>::FaceClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 		}
 		else								// keep original faces
 		{
-			Log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 		vcg::tri::UpdateFlags<CMeshO>::FaceClear(destModel->cm, CMeshO::FaceType::SELECTED);
@@ -325,7 +344,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		destModel->updateDataMask(currentModel);
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm);
 
-		Log("Duplicated current model to layer %i", md.meshList.size());
+		log("Duplicated current model to layer %i", md.meshList.size());
 
 		// init new layer
 		destModel->UpdateBoxAndNormals();
@@ -368,7 +387,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             
 		if( deleteLayer )
 		{
-			Log( "Deleted %d merged layers", toBeDeletedList.size());
+			log( "Deleted %d merged layers", toBeDeletedList.size());
 			foreach(MeshModel *mmp,toBeDeletedList)
 				md.delMesh(mmp);
 			md.setCurrent(destModel); // setting again newly created model as current
@@ -377,11 +396,11 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		if( mergeVertices )
 		{
 			int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(destModel->cm);
-			Log( "Removed %d duplicated vertices", delvert);
+			log( "Removed %d duplicated vertices", delvert);
 		}
 
 		destModel->UpdateBoxAndNormals();
-		Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+		log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
 	} break;
 
     case FP_SPLITCONNECTED :
@@ -391,7 +410,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		std::vector< std::pair<int,CMeshO::FacePointer> > connectedCompVec;
 		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm,  connectedCompVec);
-		Log("Found %i Connected Components",numCC);
+		log("Found %i Connected Components",numCC);
 		
 		for(size_t i=0; i<connectedCompVec.size();++i)
 		{
@@ -442,9 +461,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 				{
 					fprintf(outfile, "%f %d %d\n", md.rasterList[i]->shot.Intrinsics.FocalMm / md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0], 0, 0);
 
-					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+					Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 
-					Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+					Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 				
 					Point3f pos = Rt * md.rasterList[i]->shot.Extrinsics.Tra();
 					Rt.Transpose();
@@ -555,7 +574,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 					xmlWriter.writeAttribute("label", md.rasterList[i]->currentPlane->shortName());
 					xmlWriter.writeAttribute("sensor_id", QString::number(i));
 					xmlWriter.writeAttribute("enabled", "true");
-					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+					Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 					Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
 					QString transform= QString::number(mat[0][0]);
 					transform.append(" " + QString::number(-mat[1][0]));
@@ -613,7 +632,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			sscanf(line, "%d %d", &num_cams, &num_points);
 			
 			///// Check if the number of active rasters and cameras is the same
-			int active = 0;
+			unsigned active = 0;
 			for (int i = 0; i < md.rasterList.size(); i++)
 			{
 				if (md.rasterList[i]->visible)
@@ -622,8 +641,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
 			if (active != num_cams)
 			{
-				this->errorMessage = "Error!";
-				errorMessage = "Wait! The number of active rasters and the number of cams in the Bundler file is not the same!";
+				this->errorMessage = "Wait! The number of active rasters and the number of cams in the Bundler file is not the same!";
 				return false;
 			}
 
@@ -631,7 +649,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			for (uint i = 0; i < num_cams; ++i)
 			{
 				float f, k1, k2;
-				float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+				Scalarm R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 				vcg::Point3f t;
 
 				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &f, &k1, &k2);
@@ -642,9 +660,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
 				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(t[0]), &(t[1]), &(t[2]));
 
-				Matrix44f mat = Matrix44f::Construct(Matrix44f(R));
+				Matrix44m mat(R);
 
-				Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+				Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 				Rt.Transpose();
 
 				Point3f pos = Rt * Point3f(t[0], t[1], t[2]);
@@ -731,7 +749,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 								if (k1 != 0.0f)
 								{
 									this->errorMessage = "Distortion is not supported";
-									Log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
+									log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
 
 								}
 
@@ -785,7 +803,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 						md.rasterList[rasterId]->shot.Intrinsics.PixelSizeMm[1] = shots[sensor_id].Intrinsics.PixelSizeMm[1];
 
 						QStringList values = node.toElement().text().split(" ", QString::SkipEmptyParts);
-						Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+						Matrix44m mat = md.rasterList[i]->shot.Extrinsics.Rot();
 						Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
 						
 						mat[0][0] = values[0].toFloat();
@@ -820,7 +838,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
  return true;
 }
 
-FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
+FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -833,18 +851,18 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
 		case FP_MESH_VISIBILITY :
 		case FP_SPLITCONNECTED :
 		case FP_DELETE_MESH :
-		case FP_DELETE_NON_VISIBLE_MESH :        return MeshFilterInterface::Layer;
+		case FP_DELETE_NON_VISIBLE_MESH :        return FilterPluginInterface::Layer;
 		case FP_RENAME_RASTER :
 		case FP_DELETE_RASTER :
 		case FP_DELETE_NON_SELECTED_RASTER :
-		case FP_EXPORT_CAMERAS:	                 return MeshFilterInterface::RasterLayer;
-		case FP_IMPORT_CAMERAS:                  return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer);
+		case FP_EXPORT_CAMERAS:	                 return FilterPluginInterface::RasterLayer;
+		case FP_IMPORT_CAMERAS:                  return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer);
 		default :  assert(0);
     }
-		return MeshFilterInterface::Generic;
+		return FilterPluginInterface::Generic;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filter) const
+FilterPluginInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {
@@ -856,21 +874,21 @@ MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filte
     case FP_SELECTCURRENT :
     case FP_SPLITCONNECTED :
     case FP_DELETE_MESH :
-        return MeshFilterInterface::SINGLE_MESH;
+        return FilterPluginInterface::SINGLE_MESH;
     case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
 	case FP_EXPORT_CAMERAS:
 	case FP_IMPORT_CAMERAS:
-        return MeshFilterInterface::NONE;
+        return FilterPluginInterface::NONE;
     case FP_FLATTEN :
     case FP_DELETE_NON_VISIBLE_MESH :
-        return MeshFilterInterface::VARIABLE;
+        return FilterPluginInterface::VARIABLE;
     }
-    return MeshFilterInterface::NONE;
+    return FilterPluginInterface::NONE;
 }
 
-int FilterLayerPlugin::postCondition(QAction* filter) const
+int FilterLayerPlugin::postCondition(const QAction* filter) const
 {
 	switch (ID(filter))
 	{
@@ -893,7 +911,7 @@ int FilterLayerPlugin::postCondition(QAction* filter) const
 
 		default:  assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return FilterPluginInterface::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterLayerPlugin)

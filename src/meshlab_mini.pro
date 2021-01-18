@@ -1,41 +1,55 @@
+# File for compiling just meshlab mini (without the external libraries!)
 #
-# meshlab_mini.pro
+# MeshLab qmake config uses the following variables:
 #
-# This is a minimal project file for compiling as less as possible and having a minimal meshlab setup.
-# Compiling this minimal subset does not require any additional library (except obviously qt and vcg).
+# MESHLAB_SOURCE_DIRECTORY: the directory where is placed the main meshlab.pro
+# MESHLAB_BUILD_DIRECTORY: the directory where the meshlab build files are placed
+# MESHLAB_DISTRIB_DIRECTORY: the directory that will contain all the files necessary
+#                            for a portable version (after build and deploy)
+#                            (if shadow build, will be MESHLAB_BUILD_DIRECTORY/distrib)
+# MESHLAB_EXTERNAL_DIRECTORY: the directory where external libraries are placed
 #
 
-TEMPLATE      = subdirs
-CONFIG       += ordered
+TEMPLATE = subdirs
 
+message("MeshLab Mini")
+message("DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
 
-                           # the common framework, used by all the plugins,
-SUBDIRS       = common \
-                meshlab \                         # the GUI framework
-                meshlabserver \
-                meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
-                meshlabplugins/filter_meshing \
-                meshlabplugins/decorate_base \
-                meshlabplugins/filter_measure \
-#
-# Next some other useful, but still easy to be compiled, plugins
-# Uncomment them if you succeed in compiling the above ones.
-#                sampleplugins/sample_xmlfilter \
-#                meshlabplugins/decorate_background \
-#                meshlabplugins/edit_align \
-#                meshlabplugins/edit_manipulators \
-#                meshlabplugins/edit_select \
-#                meshlabplugins/filter_clean\
-#                meshlabplugins/filter_colorproc\
-#                meshlabplugins/filter_create\
-#                meshlabplugins/filter_layer\
-#                meshlabplugins/filter_mutualinfoxml\
-#                meshlabplugins/filter_quality \
-#                meshlabplugins/filter_sampling\
-#                meshlabplugins/filter_select \
-#                meshlabplugins/filter_sketchfab \
-#                meshlabplugins/filter_texture \
-#                meshlabplugins/filter_unsharp \
-#                meshlabplugins/io_collada \
-#                meshlabplugins/io_x3d \
+#the following sub projects are compiled ALSO with MeshLab Mini
+SUBDIRS = \ #sub projects names
+    common \
+    meshlab \
+    meshlabserver \
+    io_base \        # a few basic file formats (ply, obj, off), without this you cannot open anything
+    decorate_base \
+    filter_measure \
+    filter_meshing
+    
+common.subdir = common
+meshlab.subdir = meshlab
+meshlabserver.subdir = meshlabserver
+io_base.subdir = meshlabplugins/io_base
+decorate_base.subdir = meshlabplugins/decorate_base
+filter_measure.subdir = meshlabplugins/filter_measure
+filter_meshing.subdir = meshlabplugins/filter_meshing
 
+meshlab.depends = common
+meshlabserver.depends = common
+io_base.depends = common
+decorate_base.depends = common
+filter_measure.depends = common
+filter_meshing.depends = common
+
+# if distrib folder is not in $$PWD/../distrib (shadow build case),
+# we need to copy all the files inside $$PWD/../distrib in the actual
+# distrib folder ($$OUT_PWD/distrib or $$MESHLAB_DISTRIB_DIRECTORY)
+!equals(PWD, $$OUT_PWD) : !equals(PWD, $$OUT_PWD/src) {
+    #copying the "lib" folder inside the $$OUT_PWD/distrib
+    win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD/distrib)\"
+    !win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD)\"
+    first.depends += $(first) copydir
+    export(first.depends)
+    export(copydir.commands)
+
+    QMAKE_EXTRA_TARGETS += first copydir
+}

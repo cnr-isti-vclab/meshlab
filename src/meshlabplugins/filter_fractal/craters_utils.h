@@ -169,7 +169,7 @@ public:
         }
     }
 
-    /* Detectes the faces of a crater starting from a given face, using FF adjacency. */
+    /* Detects the faces of a crater starting from a given face, using FF adjacency. */
     static void GetCraterFaces(MeshType *m,              // target mesh
                                FacePointer startingFace, // face under the crater centre
                                VertexPointer centre,     // crater centre
@@ -291,7 +291,7 @@ public:
         SampleFaceVector sfv;
         CratersUtils<MeshType>::FindSamplesFaces(args.target_mesh, args.samples_mesh, sfv);
 
-        // detectes crater faces and applies the radial perturbation
+        // detects crater faces and applies the radial perturbation
         int cratersNo = int(args.samples_mesh->vert.size()), currentCrater = 0;
         char buffer[50];
         typename SampleFaceVector::iterator sfvi;

@@ -145,9 +145,9 @@ bool Cube::IsEdgeCorner( int cIndex , int e )
 	FactorEdgeIndex( e , o , i , j );
 	switch( o )
 	{
-	case 0: return (cIndex && 2)==(i<<1) && (cIndex && 4)==(j<<2);
-	case 1: return (cIndex && 1)==(i<<0) && (cIndex && 4)==(j<<2);
-	case 2: return (cIndex && 4)==(i<<2) && (cIndex && 2)==(j<<1);
+	case 0: return (cIndex & 2)==(i<<1) && (cIndex & 4)==(j<<2);
+	case 1: return (cIndex & 1)==(i<<0) && (cIndex & 4)==(j<<2);
+	case 2: return (cIndex & 4)==(i<<2) && (cIndex & 2)==(j<<1);
 	default: return false;
 	}
 }
@@ -303,7 +303,7 @@ int	Cube::EdgeReflectEdgeIndex( int edgeIndex )
 // MarchingSquares //
 /////////////////////
 #if NEW_ORDERING
-#pragma message ( "[WARNING] Not clear if MarchingSquares::edgeMask and MarchingSquares::edges are set correctly" )
+//#pragma message ( "[WARNING] Not clear if MarchingSquares::edgeMask and MarchingSquares::edges are set correctly" )
 const int MarchingSquares::cornerMap[] = { 0 , 1 , 3 , 2 };
 bool MarchingSquares::HasEdgeRoots( unsigned char mcIndex , int edgeIndex )
 {

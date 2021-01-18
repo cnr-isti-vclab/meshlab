@@ -27,7 +27,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
 	validcache = false;
 	curAction = action;
@@ -39,12 +39,12 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 	curMeshDoc = mdp;
 	curgla = gla;
 
-	mfi->initParameterSet(action, *mdp, curParSet);
+	mfi->initParameterList(action, *mdp, curParSet);
 	curmask = mfi->postCondition(action);
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
 	createFrame();
-	loadFrameContent(mdp);
+	loadFrameContent();
 	if (isPreviewable())
 	{
 		meshState.create(curmask, curModel);
@@ -69,7 +69,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != MeshFilterInterface::SINGLE_MESH))
+	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != FilterPluginInterface::SINGLE_MESH))
 		return false;
 
 	if ((curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE))
@@ -105,15 +105,15 @@ void MeshlabStdDialog::createFrame()
 void MeshlabStdDialog::resetValues()
 {
 	curParSet.clear();
-	curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
+	curmfi->initParameterList(curAction, *curMeshDoc, curParSet);
 
 	assert(qf);
 	assert(qf->isVisible());
 	// assert(curParSet.paramList.count() == stdfieldwidgets.count());
-	stdParFrame->resetValues(curParSet);
+	stdParFrame->resetValues();
 }
 
-void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
+void MeshlabStdDialog::loadFrameContent()
 {
 	assert(qf);
 	qf->hide();
@@ -124,10 +124,10 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QLabel *ql = new QLabel("<i>" + curmfi->filterInfo(curAction) + "</i>", qf);
 	ql->setTextFormat(Qt::RichText);
 	ql->setWordWrap(true);
+	ql->setOpenExternalLinks(true);
 	gridLayout->addWidget(ql, 0, 0, 1, 2, Qt::AlignTop); // this widgets spans over two columns.
 
-	stdParFrame = new StdParFrame(this, curgla);
-	stdParFrame->loadFrameContent(curParSet, mdPt);
+	stdParFrame = new RichParameterListFrame(curParSet, this, curgla);
 	gridLayout->addWidget(stdParFrame, 1, 0, 1, 2);
 
 	int buttonRow = 2;  // the row where the line of buttons start
@@ -185,7 +185,7 @@ void MeshlabStdDialog::toggleHelp()
 void MeshlabStdDialog::applyClick()
 {
 	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
+	stdParFrame->writeValuesOnParameterList(curParSet);
 
 	// Note that curModel CAN BE NULL (for creation filters on empty docs...)
 	if (curmask && curModel)
@@ -196,6 +196,13 @@ void MeshlabStdDialog::applyClick()
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
+	if ((q != nullptr) && (curMeshDoc != nullptr))
+	{
+		FilterNameParameterValuesPair oldpair;
+		oldpair.first = q->text(); oldpair.second = curParSet;
+		curMeshDoc->filterHistory.append(oldpair);
+	}
+
 	bool isEqual = (curParSet == prevParSet);
 	if (curModel && (isEqual) && (validcache))
 	{
@@ -217,12 +224,12 @@ void MeshlabStdDialog::applyDynamic()
 	if (!previewCB->isChecked())
 		return;
 	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
+	stdParFrame->writeValuesOnParameterList(curParSet);
 	//for cache mechanism
 	//needed to allocate the required memory space in prevParSet
 	//it called the operator=(RichParameterSet) function defined in RichParameterSet
 	prevParSet = curParSet;
-	stdParFrame->readValues(prevParSet);
+	stdParFrame->writeValuesOnParameterList(prevParSet);
 	// Restore the
 	meshState.apply(curModel);
 	curmwi->executeFilter(q, curParSet, true);
@@ -243,7 +250,7 @@ void MeshlabStdDialog::togglePreview()
 
 	if (previewCB->isChecked())
 	{
-		stdParFrame->readValues(curParSet);
+		stdParFrame->writeValuesOnParameterList(curParSet);
 		if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
 		{
 			meshCacheState.apply(curModel);

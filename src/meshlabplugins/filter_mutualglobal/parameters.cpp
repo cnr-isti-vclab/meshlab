@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "../../common/meshmodel.h"
+#include <common/ml_document/mesh_model.h>
 #include "parameters.h"
 
 using namespace std;
@@ -192,11 +192,11 @@ vcg::Point2f Parameters::pixelDiff(Shot &test, vcg::Point3f p) {
   }
 }*/
 
-vcg::Shot<float> Parameters::toShot(bool scale) {
+vcg::Shot<MESHLAB_SCALAR> Parameters::toShot(bool scale) {
   double _p[7];
   scramble(_p, scale);
 
-  Similarity<float, Matrix44<float> > s;
+  Similarity<MESHLAB_SCALAR, Matrix44<MESHLAB_SCALAR> > s;
   s.SetIdentity();
   s.rot.FromEulerAngles(_p[3], _p[4], _p[5]);
   s.tra = vcg::Point3f(_p[0], _p[1], _p[2]);
@@ -216,16 +216,16 @@ vcg::Shot<float> Parameters::toShot(bool scale) {
   } else {
     shot.Intrinsics.FocalMm = reference.Intrinsics.FocalMm;
   }
-  Matrix44f rot = shot.Extrinsics.Rot();
-  Matrix44f irot = Inverse(rot);
+  Matrix44m rot = shot.Extrinsics.Rot();
+  Matrix44m irot = Inverse(rot);
 
-  Point3f tra = shot.Extrinsics.Tra();
+  Point3m tra = shot.Extrinsics.Tra();
 
 //rotation in camera space, remove it and we are in model space
   s.rot = irot*s.rot*rot;
 
-  Matrix44f isrot = Inverse(s.rot);
-  Point3f center = box.Center();
+  Matrix44m isrot = Inverse(s.rot);
+  Point3m center = box.Center();
 
   shot.Extrinsics.SetRot(rot *s.rot);
   shot.Extrinsics.SetTra(irot*s.tra + isrot*(tra - center)  + center);

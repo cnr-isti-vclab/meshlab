@@ -25,9 +25,12 @@
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include "edit_point.h"
+
+#include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
 #include <vcg/space/fitting3.h>
+#include <wrap/qt/trackball.h>
 
 #include <vcg/complex/algorithms/create/platonic.h>
 
@@ -46,9 +49,14 @@ const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
+QString EditPointPlugin::pluginName() const
 {
-  this->RealTimeLog("Point Selection",m.shortName(),
+    return "EditPoint";
+}
+
+void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
+{
+  this->realTimeLog("Point Selection",m.shortName(),
                     "<table>"
                     "<tr><td width=50> Hop Thr:</td><td width=100 align=right><b >%8.3f </b></td><td><i> (Wheel to change it)</i> </td></tr>"
                     "<tr><td>          Radius: </td><td width=70 align=right><b> %8.3f </b></td><td><i> (Drag or Alt+Wheel to change it)</i></td></tr>"
@@ -63,6 +71,23 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         glMultMatrix(m.cm.Tr);
         CMeshO::VertexPointer newStartingVertex=0;
         GLPickTri<CMeshO>::PickClosestVert(cur.x(), gla->height() - cur.y(), m.cm, newStartingVertex);
+	     Point3m pp;
+		  bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pp);
+
+        //Find closest vertex to point clicked
+        float a = Distance(m.cm.vert[0].cP(),pp);
+        int ind = 0;
+        for(int j=0; j < m.cm.vert.size(); j++){
+            float dist = Distance(m.cm.vert[j].cP(),pp);
+            if(dist < a){
+                a = dist;
+                ind = j;
+            }
+        }
+        newStartingVertex = &m.cm.vert[ind];
+        //printf("(%d,%d)\n",cur.x(), gla->height() - cur.y());
+        //printf("(%f,%f,%f)\n",pp[0],pp[1],pp[2]);
+        //newStartingVertex = &m.cm.vert[0];
         if(newStartingVertex)
         {
             startingVertex = newStartingVertex;
@@ -167,10 +192,6 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 }
 
 bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
-    // Needed by MeshLab to colorize the selected points (for istance when we exit the plugin)
-    connect(this, SIGNAL(setSelectionRendering(bool)), gla, SLOT(setSelectVertRendering(bool)));
-    setSelectionRendering(true);
-
     for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {
         if (vi->IsS()) OldComponentVector.push_back(&*vi);
     }
@@ -197,7 +218,7 @@ void EditPointPlugin::EndEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLShare
     tri::ComponentFinder<CMeshO>::DeletePerVertexAttribute(m.cm);
 }
 
-void EditPointPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)
+void EditPointPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData & dt)
 {
 	MLPerViewGLOptions opts;
 	dt.get(opts);
@@ -209,6 +230,7 @@ void EditPointPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt
 void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
 
     cur = ev->pos();
+	 currentMousePosition =  QPoint(QT2VCG_X(gla, ev), QT2VCG_Y(gla, ev));        
 
     this->isMousePressed = true;
     if(!(ev->modifiers() & Qt::AltModifier) || startingVertex == NULL)
@@ -261,7 +283,7 @@ void EditPointPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla 
     }
 }
 
-void EditPointPlugin::mouseReleaseEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
+void EditPointPlugin::mouseReleaseEvent(QMouseEvent */*ev*/, MeshModel &/*m*/, GLArea *gla) {
     this->isMousePressed = false;
 
     gla->update();
@@ -358,13 +380,13 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
 void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla)
 {
   bool hopDistModified = false;
-  bool distModified = false;
+//  bool distModified = false;
 
   int wheelDirection = ev->delta();
   if (startingVertex != NULL && (ev->modifiers() & Qt::AltModifier))
   {
     this->dist *= pow(1.1f, wheelDirection / 120.f);
-    distModified = true;
+//    distModified = true;
   }
 
   if (!(ev->modifiers() & Qt::AltModifier))

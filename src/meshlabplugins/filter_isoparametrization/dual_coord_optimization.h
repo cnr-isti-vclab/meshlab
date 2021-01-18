@@ -40,7 +40,7 @@ public:
     std::vector<MeshType*> HRES_meshes;
     std::vector<std::vector<VertexType*> > Ord_HVert;
 
-    ///hight resolution mesh and domain mesh
+    ///high resolution mesh and domain mesh
     MeshType *domain;
     MeshType *h_res_mesh;
 
@@ -266,7 +266,7 @@ public:
                     {
                         inDomain.push_back(test);
                         ///parametrize it
-            InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
+                        InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
                     }
                 }
                 ///create Hres mesh already parametrized
@@ -332,7 +332,7 @@ public:
                         {
                             inDomain.push_back(test);
                             ///parametrize it
-              InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
+                            InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
                         }
                     }
                     ///create Hres mesh already parametrized
@@ -387,7 +387,7 @@ public:
                 FaceType * father=test->father;
                 assert(father==f0);
                 CoordType bary=test->Bary;
-        InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
+                InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
             }
             ///create Hres mesh already parametrized
             std::vector<FaceType*> OrderedFaces;
@@ -468,7 +468,7 @@ public:
                     //opt.IterateUntilConvergence();
 
                     ///test for uv errors
-                    bool IsOK=true;
+                    //bool IsOK=true;
                     for (unsigned int j=0;j<currMesh->vert.size();j++)
                     {
                         VertexType *ParamVert=&currMesh->vert[j];
@@ -477,7 +477,7 @@ public:
                         if ((!((u<=1.001)&&(u>=-1.001)))||
                             (!(v<=1.001)&&(v>=-1.001)))
                         {
-                            IsOK=false;
+                            //IsOK=false;
 
                             for (unsigned int k=0;k<currMesh->vert.size();k++)
                                 currMesh->vert[k].T().P()=currMesh->vert[k].RestUV;

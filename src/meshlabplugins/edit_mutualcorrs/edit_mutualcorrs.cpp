@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
@@ -61,6 +62,11 @@ const QString EditMutualCorrsPlugin::Info()
 {
     return tr("Registration of images on 3D models using mutual correspondences");
 }
+
+QString EditMutualCorrsPlugin::pluginName() const
+{
+    return "EditMutualCorrs";
+}
  
 void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
@@ -83,7 +89,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
     else
         status_line1.sprintf("Check the Info Tab if you need more details <br> Active Point: %s",pointID[cindex].toStdString().c_str());
 
-    this->RealTimeLog("Raster Alignment", m.shortName(),
+    this->realTimeLog("Raster Alignment", m.shortName(),
                       "%s<br>"
                       "%s<br>"
                       "%s<br>"
@@ -96,7 +102,6 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
     // draw picked & reference points
     if(true)
     {
-        int pindex;
         Point3m currpoint;
 		Point2m currim;
         QString buf;
@@ -107,9 +112,9 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 
         glDisable(GL_LIGHTING);
 
-        for(pindex=0; pindex<usePoint.size(); pindex++)
+        for(size_t pindex=0; pindex<usePoint.size(); pindex++)
         {
-            if(pindex == cindex)            //if current
+            if(pindex == (size_t)cindex)            //if current
                 glColor3ub(255, 255, 0);
             else if(usePoint[pindex])       //if active
                 glColor3ub(150, 150, 0);
@@ -130,9 +135,9 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
             vcg::glLabel::render(p,currpoint,buf);       
         }
 
-		for (pindex = 0; pindex < usePoint.size(); pindex++)
+		for (size_t pindex = 0; pindex < usePoint.size(); pindex++)
 		{
-			if (pindex == cindex)            //if current
+			if (pindex == (size_t)cindex)            //if current
 				glColor3ub(255, 255, 0);
 			else if (usePoint[pindex])       //if active
 				glColor3ub(150, 150, 0);
@@ -268,7 +273,6 @@ void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneG
 void EditMutualCorrsPlugin::addNewPoint()
 {
     status_error = "";
-    int pindex;
     bool alreadyThere;
     QString newname;
 
@@ -284,7 +288,7 @@ void EditMutualCorrsPlugin::addNewPoint()
     {
         alreadyThere = false;
         newname = "PP" + QString::number(lastname++);
-        for(pindex=0; pindex<pointID.size(); pindex++)
+        for(size_t pindex=0; pindex<pointID.size(); pindex++)
         {
             if(pointID[pindex] == newname)
                alreadyThere=true;
@@ -456,7 +460,6 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
 {
     status_error = "";
     // saving
-    int pindex;
 
     QString openFileName = "";
     openFileName = QFileDialog::getSaveFileName(NULL, "Save Correspondences list", QDir::currentPath(), "Text file (*.txt)");
@@ -475,7 +478,7 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
 			openFileTS << "Raster: " << glArea->md()->rm()->currentPlane->fullPathFileName << "\n";
 
             // writing reference
-            for(pindex=0; pindex<usePoint.size(); pindex++)
+            for(size_t pindex=0; pindex<usePoint.size(); pindex++)
             {
                 if(usePoint[pindex] == true)
                 {
@@ -508,7 +511,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 	Correspondence corr;
 	
-	for (int i = 0; i < imagePoints.size(); i++)
+	for (size_t i = 0; i < imagePoints.size(); i++)
 	{
 		if (usePoint[i])
 		{
@@ -567,12 +570,12 @@ void EditMutualCorrsPlugin::applyMutual()
 
 	///// Initialize GLContext
 
-	Log("Initialize GL");
+	log("Initialize GL");
 	//glContext->makeCurrent();
 	if (this->initGL() == false)
 		return;
 
-	Log("Done");
+	log("Done");
 
 	for (int i = 0; i < align.mesh->fn; i++)
 	for (int k = 0; k < 3; k++)
@@ -610,7 +613,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 		if (solver.mIweight == 0.0)
 		{
-			for (int i = 0; i < align.correspList.size(); i++)
+			for (size_t i = 0; i < align.correspList.size(); i++)
 			{
 				pointError[align.correspList[i].index] = align.correspList[i].error;
 			}
@@ -631,7 +634,7 @@ void EditMutualCorrsPlugin::applyMutual()
 	int rounds = (int)(solver.maxiter / 30);
 	for (int i = 0; i<rounds; i++)
 	{
-		Log("Step %i of %i.", i + 1, rounds);
+		log("Step %i of %i.", i + 1, rounds);
 
 		solver.maxiter = 30;
 
@@ -652,7 +655,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 
 	}
-	for (int i = 0; i < align.correspList.size(); i++)
+	for (size_t i = 0; i < align.correspList.size(); i++)
 	{
 		pointError[align.correspList[i].index] = align.correspList[i].error;
 	}
@@ -701,15 +704,14 @@ Point2m EditMutualCorrsPlugin::fromImageToGL(Point2m picked)
 
 bool EditMutualCorrsPlugin::initGL()
 {
-	GLenum err = glewInit();
-	Log(0, "GL Initialization");
-	if (GLEW_OK != err) {
-		Log(0, "GLEW initialization error!");
+    log(GLLogStream::SYSTEM, "GL Initialization");
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
+        log(GLLogStream::SYSTEM, "GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-		Log(0, "Graphics hardware does not support FBOs");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -719,11 +721,11 @@ bool EditMutualCorrsPlugin::initGL()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-		Log(0, "Graphics hardware does not support non-power-of-two textures");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-		Log(0, "Graphics hardware does not support vertex buffer objects");
+        log(GLLogStream::SYSTEM, "Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -740,6 +742,6 @@ bool EditMutualCorrsPlugin::initGL()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-	Log(0, "GL Initialization done");
+    log(GLLogStream::SYSTEM, "GL Initialization done");
 	return true;
 }

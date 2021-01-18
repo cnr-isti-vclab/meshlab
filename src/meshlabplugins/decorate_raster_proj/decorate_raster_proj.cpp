@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "decorate_raster_proj.h"
+#include <common/GLExtensionsManager.h>
 #include <wrap/gl/shot.h>
 #include <common/pluginmanager.h>
 #include <meshlab/glarea.h>
@@ -162,6 +163,11 @@ DecorateRasterProjPlugin::~DecorateRasterProjPlugin()
 {
 }
 
+QString DecorateRasterProjPlugin::pluginName() const
+{
+    return "DecorateRasterProj";
+}
+
 
 QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
 {
@@ -183,7 +189,7 @@ QString DecorateRasterProjPlugin::decorationName( FilterIDType id ) const
 }
 
 
-int DecorateRasterProjPlugin::getDecorationClass( QAction *act ) const
+int DecorateRasterProjPlugin::getDecorationClass(const QAction *act ) const
 {
     switch( ID(act) )
     {
@@ -193,33 +199,33 @@ int DecorateRasterProjPlugin::getDecorationClass( QAction *act ) const
 }
 
 
-void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParameterSet &par )
+void DecorateRasterProjPlugin::initGlobalParameterList(const QAction* act, RichParameterList &par )
 {
     switch( ID(act) )
     {
         case DP_PROJECT_RASTER:
         {
-            par.addParam( new RichDynamicFloat( "MeshLab::Decoration::ProjRasterAlpha",
+            par.addParam( RichDynamicFloat( "MeshLab::Decoration::ProjRasterAlpha",
                                                 1.0f,
                                                 0.0f,
                                                 1.0f,
                                                 "Transparency",
                                                 "Transparency" ) );
 
-            par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterLighting",
+            par.addParam( RichBool( "MeshLab::Decoration::ProjRasterLighting",
                                         true,
                                         "Apply lighting",
                                         "Apply lighting" ) );
 
-            par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterOnAllMeshes",
+            par.addParam( RichBool( "MeshLab::Decoration::ProjRasterOnAllMeshes",
                                         false,
                                         "Project on all meshes",
                                         "Project the current raster on all meshes instead of only on the current one" ) );
-            par.addParam( new RichBool( "MeshLab::Decoration::ShowAlpha",
+            par.addParam( RichBool( "MeshLab::Decoration::ShowAlpha",
                                         false,
                                         "Show Alpha Mask",
                                         "Show in purple the alpha value" ) );
-            par.addParam( new RichBool( "MeshLab::Decoration::EnableAlpha",
+            par.addParam( RichBool( "MeshLab::Decoration::EnableAlpha",
                                         false,
                                         "Enable Alpha",
                                         "If the current raster has an alpha channel use it during the rendering. It is multiplied with the 'global' transparency set in the above parameter." ) );
@@ -230,8 +236,8 @@ void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParamet
 }
 
 
-void DecorateRasterProjPlugin::updateCurrentMesh( MeshDocument &m,
-                                                  RichParameterSet &par )
+void DecorateRasterProjPlugin::updateCurrentMesh(MeshDocument &m,
+												  const RichParameterList& par )
 {
     if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") )
     {
@@ -519,10 +525,11 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
 }
 
 
-bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
-                                              MeshDocument     & m,
-                                              RichParameterSet * /*par*/,
-                                              GLArea           * /*gla*/ )
+bool DecorateRasterProjPlugin::startDecorate(
+		const QAction* act,
+		MeshDocument     & m,
+		const RichParameterList * /*par*/,
+		GLArea           * /*gla*/ )
 {
     switch( ID(act) )
     {
@@ -535,10 +542,9 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
             }
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-            GLenum err = glewInit();
-            if( err != GLEW_OK )
+            if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
             {
-                qWarning("Impossible to load GLEW library. %s",(const char *)glewGetErrorString(err));
+                qWarning("Impossible to load GLEW library.");
                 return false;
             }
 
@@ -567,10 +573,11 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
 }
 
 
-void DecorateRasterProjPlugin::endDecorate( QAction          *act,
-                                            MeshDocument     & /*m*/,
-                                            RichParameterSet * /*par*/,
-                                            GLArea           * /*gla*/ )
+void DecorateRasterProjPlugin::endDecorate(
+		const QAction          *act,
+		MeshDocument     & /*m*/,
+		const RichParameterList * /*par*/,
+		GLArea           * /*gla*/ )
 {
     switch( ID(act) )
     {
@@ -594,7 +601,7 @@ void DecorateRasterProjPlugin::endDecorate( QAction          *act,
 
 
 void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
-                                                   RichParameterSet *par )
+												   const RichParameterList *par )
 {
     if( par->getBool("MeshLab::Appearance::pointSmooth") )
         glEnable( GL_POINT_SMOOTH );
@@ -627,12 +634,13 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
 }
 
 
-void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
-                                         MeshDocument      &m  ,
-                                         RichParameterSet  *par,
-                                         GLArea            *gla,
-                                         QPainter          *,
-                                            GLLogStream &)
+void DecorateRasterProjPlugin::decorateDoc(
+		const QAction* act,
+		MeshDocument      &m  ,
+		const RichParameterList  *par,
+		GLArea            *gla,
+		QPainter          *,
+		GLLogStream &)
 {
     switch( ID(act) )
     {
@@ -700,7 +708,7 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
             shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
             vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
             shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
-            shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
+            shader->setUniform( "u_AlphaValue", (float)par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
             shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
 			shader->setUniform("u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
             shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );

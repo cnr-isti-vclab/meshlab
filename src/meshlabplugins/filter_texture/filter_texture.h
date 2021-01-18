@@ -28,17 +28,17 @@
 #include <QObject>
 #include <QTime>
 
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 #include <vcg/complex/append.h>
 #include <vcg/complex/algorithms/attribute_seam.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 
-class FilterTexturePlugin : public QObject, public MeshFilterInterface
+class FilterTexturePlugin : public QObject, public FilterPluginInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+    Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum {
@@ -55,15 +55,16 @@ public:
 
     FilterTexturePlugin();
 
+    QString pluginName() const;
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-    virtual int getRequirements(QAction *);
-    virtual int getPreConditions(QAction *) const;
-    virtual int postCondition( QAction* ) const;
-    FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction * filter) const;
+    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+    virtual int getRequirements(const QAction*);
+    virtual int getPreConditions(const QAction*) const;
+    virtual int postCondition(const QAction* ) const;
+    FilterClass getClass(const QAction *a) const;
+    FILTER_ARITY filterArity(const QAction* filter) const;
 };
 
 #endif

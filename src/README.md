@@ -1,65 +1,48 @@
-## Compiling MeshLab
+# MeshLab Source Code structure
 
-1. install Qt5.9, be sure to select additional packages "script" and "xmlpatterns"
-2. clone meshlab repo
-3. clone vcglib repo (_devel_ branch) at the same level of meshlab 
-4. compile `src/external/external.pro`, 
-5. compile `src/meshlab_full.pro`
+In the `src` directory there are several folders containing all the source code and configuration files that allows to build MeshLab.
 
-### Dependencies
-You need Qt5.9 and we assume that we have qtcreator installed and you know how to build something from a `*.pro` qt file (either from qtcreator, or from the command line). As external dependencies MeshLab uses the _vcglib_ c++ library for most of the mesh processing tasks; so you need to clone it from github ( http://github.com/cnr-isti-vclab/vcglib/ ) in a folder named `vcglib` at the same level of the folder `meshlab`. To be clear your folder structure should be something quite similar to:
+The source code of MeshLab is structured in the following directories:
 
-    yourdevelfolder/
-     |
-     ├──meshlab
-     │   ├──docs
-     │   ├──README.md
-     │   ├──src
-     │   ├──...
-     │   └──...
-     └──vcglib
-         ├──apps
-         ├──doc
-         ├──eigenlib
-         ├──...
-         └──...
+ * cmake: it contains a series of cmake scripts used to find external libraries;
+ * [external](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/external): it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding system library is not found and then linked; other are header-only libraries that are just included;
+ * [common](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/common): a series of utility classes and functions used by MeshLab and its plugins;
+ * [meshlab](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlab): GUI and core of MeshLab;
+ * [meshlabserver](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabserver): a tool that allows to compute mesh operations through command line;
+ * [meshlabplugins](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabplugins): all the plugins that can be added to MeshLab;
+ * [use_cpu_opengl](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/use_cpu_opengl): a tool compiled only under windows that allows to use non-GPU accelerated OpenGL calls;
+ * [vcglib](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/vcglib): submodule containing the vcglib.
 
-All the include paths inside the `.pro` assume this relative positioning of the `meshlab` and `vcglib` folders. Please note that, given the fact that the developement of the vcglib and meshlab are often intermixed, if you compile the devel branch of the meshlab repo (or the current master until we reach a distributable beta), you should use the devel branch of the vcglib. 
+## Build MeshLab
 
-### Compiling
-MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Don't worry, if a plugin fails to compile just remove it and you lose just that functionality. As a first step you should try to use the `src/meshlab_mini.pro` that contains the info for building meshlab with a minimal set of plugins with no external dependencies and usually compile with no problem.
+MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.12.
 
-Some plugins of MeshLab need external libraries. All the required libraries are included in the `meshlab/src/external` folder. You have to compile these libraries before attempting to compile the whole MeshLab. Just use the `meshlab/src/external.pro` file. For OsX 10.12 we kindly provide the already compiled binaries. 
+After setting up the Qt environment:
 
-Once you have the required lib (check for lib files in the folder `meshlab/src/external/lib/<your_architecture>`) you can try to compile the whole meshlab using `src/meshlab_full.pro`. 
+	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+	mkdir meshlab/src/build
+	cd meshlab/src/build
+    cmake ..
+    make
+
+
+You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
+
+1. Install QtCreator and Qt >= 5.12;
+2. Open `CMakeLists.txt` inside `src`;
+3. Select your favourite shadow build directory;
+4. Build meshlab.
+
+MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Don't worry: if a plugin fails to compile, just remove it and you lose just that functionality.
 
 ### Platform specific notes
-On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparametrization) so you need a compiler supporting it and the clang provided by xcode does not support openmp. Install 'clang++-mp-3.9' using macport or modify the .pro accordingly.
+On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparametrization) so you need a compiler supporting it and the clang provided by xcode does not support openmp. You can install all the required libraries by running the following command in a terminal:
 
-###### Ubuntu 16 Compilation example
-* Make sure you selected the correct version of Qt: `qmake -v`. You can use `qtchooser -l` to list the versions and if in doubt use the direct path to your qmake binary.
-* Clone repositories:
-```
-git clone --depth 1 git@github.com:cnr-isti-vclab/meshlab.git
-git clone --depth 1 git@github.com:cnr-isti-vclab/vcglib.git -b devel
-cd meshlab
-```
-* Set build flags:
-```
-QMAKE_FLAGS=('-spec' 'linux-g++' 'CONFIG+=release' 'CONFIG+=qml_release' 'CONFIG+=c++11' 'QMAKE_CXXFLAGS+=-fPIC' 'QMAKE_CXXFLAGS+=-std=c++11' 'QMAKE_CXXFLAGS+=-fpermissive' 'INCLUDEPATH+=/usr/include/eigen3' "LIBS+=-L`pwd`/lib/linux-g++")
-MAKE_FLAGS=('-j11')
-```
-* Build:
-```
-cd src/external
-qmake external.pro $QMAKE_FLAGS && make $MAKE_FLAGS
-cd ../common
-qmake common.pro $QMAKE_FLAGS && make $MAKE_FLAGS
-cd ..
-qmake meshlab_mini.pro $QMAKE_FLAGS && make $MAKE_FLAGS
-qmake meshlab_full.pro $QMAKE_FLAGS && make $MAKE_FLAGS
-```
-* Run:
-```
-./distrib/meshlab
-```
+	brew install llvm libomp
+
+On __Windows__, we suggest to build meshlab using QtCreator. Before trying to build, you should:
+
+ * install VisualStudio >= 2017 with the C++ developement package;
+ * install Qt >= 5.12 and QtCreator.
+
+then, open the CMakeLists.txt file and try to build MeshLab.

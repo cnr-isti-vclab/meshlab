@@ -37,7 +37,7 @@
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
     int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
@@ -49,10 +49,10 @@ bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, Me
     return true;
 }
 
-bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
+bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
-    bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
-    float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();
+	bool lossLessFlag = par.getBool("LossLess");
+	Scalarm relativePrecisionParam = par.getFloat("relativePrecisionParam");
     int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
     if(result!=0)
     {
@@ -66,20 +66,25 @@ bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, Me
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> IOMPlugin::importFormats() const
+QString IOMPlugin::pluginName() const
 {
-	QList<Format> formatList;
-  formatList << Format("OpenCTM compressed format"	,tr("CTM"));
+	return "IOCTM";
+}
+
+QList<FileFormat> IOMPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
+  formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> IOMPlugin::exportFormats() const
+QList<FileFormat> IOMPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-    formatList << Format("OpenCTM compressed format"	,tr("CTM"));
+	QList<FileFormat> formatList;
+    formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
 	return formatList;
 }
 
@@ -87,17 +92,17 @@ QList<MeshIOInterface::Format> IOMPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void IOMPlugin::GetExportMaskCapability(QString &/*format*/, int &capability, int &defaultBits) const
+void IOMPlugin::GetExportMaskCapability(const QString &/*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
-void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & par)
+void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & par)
 {
-  par.addParam(new RichBool("LossLess",false, "LossLess compression",
+  par.addParam(RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));
-  par.addParam(new RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
+  par.addParam(RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
-                             "It is a number relative to the average edge lenght. (e.g. the default means that the error should be roughly 1/10000 of the average edge lenght)"));
+                             "It is a number relative to the average edge length. (e.g. the default means that the error should be roughly 1/10000 of the average edge length)"));
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(IOMPlugin)

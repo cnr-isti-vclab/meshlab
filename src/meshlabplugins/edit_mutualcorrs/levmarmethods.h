@@ -12,7 +12,7 @@ sufficient to get a calibrated shot.<br>
 
 #include <list>
 
-#include "../../external/levmar-2.3/lm.h"
+#include "lm.h"
 
 
 struct LevmarCorrelation {
@@ -22,7 +22,7 @@ struct LevmarCorrelation {
 
 struct LevmarData{
 	vcg::Point3f** points3d; 
-	vcg::Shot<float>* levmarCam;
+	vcg::Shot<MESHLAB_SCALAR>* levmarCam;
 };
 
 
@@ -30,18 +30,18 @@ class LevmarMethods
 {
 public:
 	//Calibration of the shot according to the 2D and 3D points
-	static bool calibrate( vcg::Shot<float>* shot,std::list<LevmarCorrelation>* corr,bool p_focal); 
+	static bool calibrate(vcg::Shot<MESHLAB_SCALAR>* shot, std::list<LevmarCorrelation>* corr, bool p_focal); 
 
 	///Transformation of the camera data between tsai structure and vcg structure
 	///True if you want calibrate the focal, false if you want calibrate the extrinsics
-	static void Shot2Levmar(vcg::Shot<float>*,double* p,bool p_foc);
+	static void Shot2Levmar(vcg::Shot<MESHLAB_SCALAR>*, double* p, bool p_foc);
 	///Transformation of the camera data between tsai structure and vcg structure
 	///True if you have calibrated the focal, false if you had calibrated the extrinsics
-	static void Levmar2Shot(vcg::Shot<float>*, double *p, bool p_foc);
+	static void Levmar2Shot(vcg::Shot<MESHLAB_SCALAR>*, double *p, bool p_foc);
 	
 private:
 	static void Cam2Levmar(vcg::Shot<float>*);
-    static bool createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<float>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double info[LM_INFO_SZ]);
+    static bool createDataSet(std::list<LevmarCorrelation>* corr, vcg::Shot<MESHLAB_SCALAR>* s, LevmarData* data, double* x, double opts[LM_OPTS_SZ], double info[LM_INFO_SZ]);
 	static void estimateExtr(double *p, double *x, int m, int n, void *data);
 	static void estimateFocal(double *p, double *x, int m, int n, void *data);
 

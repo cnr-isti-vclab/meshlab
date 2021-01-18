@@ -1,14 +1,16 @@
 #include "ml_shared_data_context.h"
+#include "GLExtensionsManager.h"
 #include "mlexception.h"
 #include <vector>
+#include <QThread>
 
-#include "meshmodel.h"
+#include "ml_document/mesh_document.h"
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
     :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)
 {
-    if (md.size() != 0)
-        throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
+    //if (md.size() != 0)
+    //    throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
     
     _timer = new QTimer(this);
     connect(_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
@@ -48,17 +50,10 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 }
 
 void MLSceneGLSharedDataContext::initializeGL()
-{   
-    glewExperimental=GL_TRUE;
-
-    QGLContext* ctx = makeCurrentGLContext();
-    GLenum err = glewInit();
+{
+    QGLContext *ctx = makeCurrentGLContext();
+    GLExtensionsManager::initializeGLextensions();
     doneCurrentGLContext(ctx);
-    
-    if (err != GLEW_OK ) {
-        throw MLException("MLSceneGLSharedDataContext: GLEW initialization failed\n");
-    }
-    
 }
 
 void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata )
@@ -106,13 +101,17 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
     if (man != NULL)
     {
         QGLContext* ctx = makeCurrentGLContext();
+        std::vector<GLuint> texids;
         for(size_t ii = 0;ii < man->textureIDContainer().size();++ii)
         {
-            GLuint textid = man->textureIDContainer().remove(man->textureIDContainer()[ii]);
-            glDeleteTextures(1,&textid);
+            texids.push_back(man->textureIDContainer()[ii]);
         }
-        doneCurrentGLContext(ctx);
 
+        for (auto tex : texids)
+            man->textureIDContainer().remove(tex);
+
+        glDeleteTextures(texids.size(), texids.data());
+        doneCurrentGLContext(ctx);
     }
 }
 
@@ -395,8 +394,8 @@ bool MLSceneGLSharedDataContext::isBORenderingAvailable( int mmid )
 
 void MLSceneGLSharedDataContext::updateGPUMemInfo()
 {   
+    initializeGL();
     QGLContext* ctx = makeCurrentGLContext();
-
 	GLint allmem = 0;
     glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
     GLint currentallocated = 0;
@@ -912,10 +911,10 @@ MLRenderingData::MLRenderingData()
     _glopts = new MLPerViewGLOptions();
 }
 
-MLRenderingData::MLRenderingData( const MLRenderingData& dt )
-    :PerViewData<MLPerViewGLOptions>(dt)
-{
-}
+//MLRenderingData::MLRenderingData( const MLRenderingData& dt )
+//    :PerViewData<MLPerViewGLOptions>(dt)
+//{
+//}
 
 bool MLRenderingData::set( MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& atts )
 {

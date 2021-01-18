@@ -45,30 +45,32 @@
 
 ****************************************************************************/
 
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <math.h>
 
 
-#if defined(__cplusplus)
 extern "C"
 {
-#endif
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../external/qhull-2003.1/src/qhull.h"
-#include "../../external/qhull-2003.1/src/mem.h"
-#include "../../external/qhull-2003.1/src/qset.h"
-#include "../../external/qhull-2003.1/src/geom.h"
-#include "../../external/qhull-2003.1/src/merge.h"
-#include "../../external/qhull-2003.1/src/poly.h"
-#include "../../external/qhull-2003.1/src/io.h"
-#include "../../external/qhull-2003.1/src/stat.h"
-#if defined(__cplusplus)
-}
+
+// qhull includes - qhull/ omitted to support both system and bundled libs.
+#ifdef SYSTEM_QHULL
+#include "libqhull.h"
+#else
+#include "qhull.h"
+#include "qset.h"
 #endif
+#include "mem.h"
+#include "geom.h"
+#include "merge.h"
+#include "poly.h"
+#include "io.h"
+#include "stat.h"
+}
 
 facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m);
 facetT *compute_delaunay(int dim, int numpoints, MeshModel &m);
-bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm,float threshold);
+bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, Scalarm threshold);
 bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm,double alpha, bool alphashape);
 int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, Point3m viewpointP,float threshold,bool convex_hullFP,bool triangVP);

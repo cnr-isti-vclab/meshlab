@@ -27,7 +27,7 @@
 #include "const_types.h"
 #include "transferfunction.h"
 #include <vcg/math/histogram.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <cassert>
 #include <utility> // for pair<T,T>
 
@@ -36,7 +36,7 @@
 using namespace std;
 using namespace vcg;
 
-// Applies colors to mesh vertexes by quality
+// Applies colors to mesh vertices by quality
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness);
 
 // Opens a CSV file and gets its equalizer parameters

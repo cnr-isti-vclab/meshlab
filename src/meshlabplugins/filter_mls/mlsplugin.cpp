@@ -26,8 +26,6 @@
 #include <time.h>
 #include <iostream>
 
-#include <common/interfaces.h>
-
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/refine.h>
 #include <vcg/complex/algorithms/refine_loop.h>
@@ -46,6 +44,8 @@
 
 using namespace GaelMls;
 using namespace vcg;
+
+typedef Histogram<Scalarm> Histogramm;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -74,6 +74,11 @@ MlsPlugin::MlsPlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
+QString MlsPlugin::pluginName() const
+{
+    return "FilterMLS";
+}
+
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
  QString MlsPlugin::filterName(FilterIDType filterId) const
@@ -94,24 +99,24 @@ MlsPlugin::MlsPlugin()
 return QString("Filter Unknown");
 }
 
- MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
+ FilterPluginInterface::FilterClass MlsPlugin::getClass(const QAction *a) const
 {
     int filterId = ID(a);
 
     switch(filterId) {
         case FP_APSS_PROJECTION         :
-        case FP_RIMLS_PROJECTION        : return FilterClass(MeshFilterInterface::PointSet + MeshFilterInterface::Smoothing);
+        case FP_RIMLS_PROJECTION        : return FilterClass(FilterPluginInterface::PointSet + FilterPluginInterface::Smoothing);
         case FP_APSS_AFRONT             :
         case FP_RIMLS_AFRONT            :
         case FP_APSS_MCUBE              :
-        case FP_RIMLS_MCUBE             : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::Remeshing);
+        case FP_RIMLS_MCUBE             : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::Remeshing);
         case FP_APSS_COLORIZE           :
-        case FP_RIMLS_COLORIZE          : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::VertexColoring);
-        case FP_RADIUS_FROM_DENSITY     : return MeshFilterInterface::PointSet;
-        case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
+        case FP_RIMLS_COLORIZE          : return FilterClass(FilterPluginInterface::PointSet | FilterPluginInterface::VertexColoring);
+        case FP_RADIUS_FROM_DENSITY     : return FilterPluginInterface::PointSet;
+        case FP_SELECT_SMALL_COMPONENTS : return FilterPluginInterface::Selection;
         }
     assert(0);
-    return MeshFilterInterface::Generic;
+    return FilterPluginInterface::Generic;
 }
 
 // Info() must return the longer string describing each filtering action
@@ -134,7 +139,7 @@ return QString("Filter Unknown");
 
     if (filterId & _COLORIZE_)
     {
-        str += "Colorize the vertices of a mesh or point set using the curfvature of the underlying surface.<br>";
+        str += "Colorize the vertices of a mesh or point set using the curvature of the underlying surface.<br>";
     }
 
     if (filterId & _APSS_)
@@ -165,24 +170,24 @@ return QString("Filter Unknown");
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterSet& parlst)
+void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichParameterList& parlst)
 {
     int id = ID(action);
     MeshModel *target = md.mm();
 
     if (id == FP_SELECT_SMALL_COMPONENTS)
     {
-        parlst.addParam(new RichFloat("NbFaceRatio",
+        parlst.addParam(RichFloat("NbFaceRatio",
                                         0.1f,
                                         "Small component ratio",
                                         "This ratio (between 0 and 1) defines the meaning of <i>small</i> as the threshold ratio between the number of faces"
                                         "of the largest component and the other ones. A larger value will select more components."));
-        parlst.addParam(new RichBool( "NonClosedOnly",
+        parlst.addParam(RichBool( "NonClosedOnly",
                                         false,
                                         "Select only non closed components",
                                         ""));
@@ -190,7 +195,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
     else if (id == FP_RADIUS_FROM_DENSITY)
     {
-        parlst.addParam(new RichInt("NbNeighbors",
+        parlst.addParam(RichInt("NbNeighbors",
                                     16,
                                     "Number of neighbors",
                                     "Number of neighbors used to estimate the local density. Larger values lead to smoother variations."));
@@ -199,14 +204,14 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if ((id & _PROJECTION_))
     {
-        parlst.addParam(new RichMesh( "ControlMesh", target,&md, "Point set",
+        parlst.addParam(RichMesh( "ControlMesh", target,&md, "Point set",
                                         "The point set (or mesh) which defines the MLS surface."));
-        parlst.addParam(new RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
+        parlst.addParam(RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
                                         "The mesh that will be projected/resampled onto the MLS surface."));
     }
     if ((id & _PROJECTION_) || (id & _COLORIZE_))
     {
-        parlst.addParam(new RichBool( "SelectionOnly",
+        parlst.addParam(RichBool( "SelectionOnly",
                                         target->cm.sfn>0,
                                         "Selection only",
                                         "If checked, only selected vertices will be projected."));
@@ -214,17 +219,17 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if ( (id & _APSS_) || (id & _RIMLS_) )
     {
-        parlst.addParam(new RichFloat("FilterScale",
+        parlst.addParam(RichFloat("FilterScale",
                                         2.0,
                                         "MLS - Filter scale",
                                         "Scale of the spatial low pass filter.\n"
                                         "It is relative to the radius (local point spacing) of the vertices."));
-        parlst.addParam(new RichFloat("ProjectionAccuracy",
+        parlst.addParam(RichFloat("ProjectionAccuracy",
                                         1e-4f,
                                         "Projection - Accuracy (adv)",
                                         "Threshold value used to stop the projections.\n"
                                         "This value is scaled by the mean point spacing to get the actual threshold."));
-        parlst.addParam(new RichInt(  "MaxProjectionIters",
+        parlst.addParam(RichInt(  "MaxProjectionIters",
                                         15,
                                         "Projection - Max iterations (adv)",
                                         "Max number of iterations for the projection."));
@@ -232,15 +237,15 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _APSS_)
     {
-        parlst.addParam(new RichFloat("SphericalParameter",
+        parlst.addParam(RichFloat("SphericalParameter",
                                         1,
                                         "MLS - Spherical parameter",
                                         "Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
                                         "1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
-                                        "while others real values might give interresting results, but take care with extreme"
+                                        "while other real values might give interesting results, but take care with extreme"
                                         "settings !"));
         if (!(id & _COLORIZE_))
-            parlst.addParam(new RichBool( "AccurateNormal",
+            parlst.addParam(RichBool( "AccurateNormal",
                                         true,
                                         "Accurate normals",
                                         "If checked, use the accurate MLS gradient instead of the local approximation"
@@ -249,13 +254,13 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _RIMLS_)
     {
-        parlst.addParam(new RichFloat("SigmaN",
+        parlst.addParam(RichFloat("SigmaN",
                                         0.75,
                                         "MLS - Sharpness",
                                         "Width of the filter used by the normal refitting weight."
                                         "This weight function is a Gaussian on the distance between two unit vectors:"
                                         "the current gradient and the input normal. Therefore, typical value range between 0.5 (sharp) to 2 (smooth)."));
-        parlst.addParam(new RichInt(  "MaxRefittingIters",
+        parlst.addParam(RichInt(  "MaxRefittingIters",
                                         3,
                                         "MLS - Max fitting iterations",
                                         "Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)"));
@@ -263,11 +268,11 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _PROJECTION_)
     {
-        parlst.addParam(new RichInt(  "MaxSubdivisions",
+        parlst.addParam(RichInt(  "MaxSubdivisions",
                                         0,
                                         "Refinement - Max subdivisions",
                                         "Max number of subdivisions."));
-        parlst.addParam(new RichFloat("ThAngleInDegree",
+        parlst.addParam(RichFloat("ThAngleInDegree",
                                         2,
                                         "Refinement - Crease angle (degree)",
                                         "Threshold angle between two faces controlling the refinement."));
@@ -284,13 +289,13 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
         if (id & _APSS_)
             lst << "ApproxMean";
 
-        parlst.addParam(new RichEnum("CurvatureType", CT_MEAN,
+        parlst.addParam(RichEnum("CurvatureType", CT_MEAN,
             lst,
             "Curvature type",
             QString("The type of the curvature to plot.")
             + ((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature." : "")));
 // 		if ((id & _APSS_))
-// 			parlst.addParam(new RichBool( "ApproxCurvature",
+// 			parlst.addParam(RichBool( "ApproxCurvature",
 // 										false,
 // 										"Approx mean curvature",
 // 										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
@@ -298,7 +303,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
 
     if (id & _MCUBE_)
     {
-        parlst.addParam(new RichInt(  "Resolution",
+        parlst.addParam(RichInt(  "Resolution",
                                         200,
                                         "Grid Resolution",
                                         "The resolution of the grid on which we run the marching cubes."
@@ -306,7 +311,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
 }
 
- int MlsPlugin::getRequirements(QAction *action)
+ int MlsPlugin::getRequirements(const QAction *)
 {
     return 0;
 }
@@ -338,7 +343,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
 {
     typedef typename MeshType::VertexType     VertexType;
     typedef typename VertexType::NormalType   NormalType;
-    typedef typename VertexType::ScalarType   ScalarType;
+    //typedef typename VertexType::ScalarType   ScalarType;
     typedef typename MeshType::FaceIterator   FaceIterator;
 
     for (FaceIterator f=m.face.begin(); f!=m.face.end(); ++f)
@@ -352,7 +357,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
     }
 }
 
-bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb)
+bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos* cb)
 {
     int id = ID(filter);
 
@@ -368,7 +373,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
         MeshModel* mesh = md.mm();
         mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
         bool nonClosedOnly = par.getBool("NonClosedOnly");
-        float ratio = par.getFloat("NbFaceRatio");
+        Scalarm ratio = par.getFloat("NbFaceRatio");
         vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
         return true;
     }
@@ -379,7 +384,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
         { // if we start from a mesh, and it has unreferenced vertices
           // normals are undefined on that vertices.
             int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-            if(delvert) Log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+            if(delvert) log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
         }
         tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 
@@ -389,7 +394,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
             md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
             APSS<CMeshO> mls(md.mm()->cm);
             mls.computeVertexRaddi();
-            Log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+            log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
         }
 
         MeshModel* pPoints = 0;
@@ -481,7 +486,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
                 }
             }
 
-            Log( "Successfully projected %i vertices", mesh->cm.vn);
+            log( "Successfully projected %i vertices", mesh->cm.vn);
         }
         else if (id & _COLORIZE_)
         {
@@ -549,9 +554,9 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
             minc += 0.05*d;
             maxc -= 0.05*d;
 
-            vcg::Histogramf H;
-      vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
-      vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
+            Histogramm H;
+            vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
+            vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
         }
     // 	else if (id & _AFRONT_)
     // 	{
@@ -595,7 +600,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
                 mesh->clearDataMask(MeshModel::MM_FACEFACETOPO);
             }
 
-            Log( "Marching cubes MLS meshing done.");
+            log( "Marching cubes MLS meshing done.");
         }
 
         delete mls;

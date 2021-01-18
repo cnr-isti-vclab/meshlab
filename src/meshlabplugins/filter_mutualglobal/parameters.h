@@ -8,7 +8,7 @@
 class CMeshO;
 
 class Parameters {
- typedef vcg::Shot<float> Shot;
+ typedef vcg::Shot<MESHLAB_SCALAR> Shot;
  typedef vcg::Box3<float> Box;
 
  public:
@@ -17,7 +17,7 @@ class Parameters {
   bool use_focal;
   bool max_norm; //use max distance as pixel diff (instead of rms)
 
-  vcg::Shot<float> reference;
+  vcg::Shot<MESHLAB_SCALAR> reference;
   vcg::Box3f box;
   //vcg::Point3d center;
   double rx, ry; //ratio between fbo width and height and reference values
@@ -41,14 +41,14 @@ class Parameters {
 
   //estimate pixeldifference 
   double pixelDiff(CMeshO &mesh, int samples = 1000);
-  double pixelDiff(vcg::Shot<float> &test, CMeshO &mesh, int samples = 1000);
+  double pixelDiff(vcg::Shot<MESHLAB_SCALAR> &test, CMeshO &mesh, int samples = 1000);
 
   double pixelDiff();
-  double pixelDiff(vcg::Shot<float> &test);
+  double pixelDiff(vcg::Shot<MESHLAB_SCALAR> &test);
 
-  vcg::Point2f pixelDiff(vcg::Shot<float> &test, vcg::Point3f p);
+  vcg::Point2f pixelDiff(vcg::Shot<MESHLAB_SCALAR> &test, vcg::Point3f p);
 
-  vcg::Shot<float> toShot(bool scale = true);
+  vcg::Shot<MESHLAB_SCALAR> toShot(bool scale = true);
   //void ShotAndSim(vcg::Shot<double> &shot, vcg::Similarity<double, vcg::Matrix44<double> > &s);
 
  private:

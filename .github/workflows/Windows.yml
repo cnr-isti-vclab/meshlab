@@ -1,0 +1,68 @@
+name: Windows
+
+on: [push, pull_request]
+
+jobs:
+  windows_build:
+    name: Build MeshLab (Windows)
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        precision: [single_precision, double_precision]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Download Jom
+      run: |
+        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
+        New-Item -Name "jom" -ItemType "directory"
+        Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
+        echo "$(Get-Location)\jom" >> GITHUB_PATH
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+    - name: Setup env variables
+      shell: bash
+      id: envs
+      run: |
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo  ::set-output name=version::"$(cat ML_VERSION)d"
+          echo  ::set-output name=artifact_suffix::"_double"
+        else
+          echo  ::set-output name=version::"$(cat ML_VERSION)"
+          echo  ::set-output name=artifact_suffix::""
+        fi
+        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+    - name: Configure and Build
+      shell: bash
+      run: |
+        sh scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
+    - name: Deploy
+      shell: bash
+      run: |
+        sh scripts/${{ runner.os }}/2_deploy.sh
+    - name: NSIS script
+      shell: bash
+      run: |
+        sh scripts/${{ runner.os }}/resources/nsis_script.sh --${{ matrix.precision }}
+    - name: Create Installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: "src/install/meshlab_final.nsi"
+    - name: Rename Installer
+      shell: bash
+      run: |
+        mv src/install/MeshLab${{steps.envs.outputs.version}}.exe  src/MeshLab${{steps.envs.outputs.version}}-windows.exe
+    - name: Uploading MeshLab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_portable${{steps.envs.outputs.artifact_suffix}}
+        path: src/install
+    - name: Upload Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
+        path: src/MeshLab${{steps.envs.outputs.version}}-windows.exe

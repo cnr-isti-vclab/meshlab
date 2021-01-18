@@ -39,7 +39,7 @@ static QTextEdit *globalLogTextEdit = 0;
 MeshNode *AlignDialog::currentNode() { return edit->currentNode(); }
 
 // Global function to write on the log in the lower part of the window.
-bool AlignCallBackPos(const int pos, const char * message)
+bool AlignCallBackPos(const int, const char * message)
 {
 	assert(globalLogTextEdit);
 
@@ -80,7 +80,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 {
 	assert(meshTree);
 
-	// First clear the backgrund of previously selected arc
+	// First clear the background of previously selected arc
 	MeshTreeWidgetItem *oldArcF = A2Tf[currentArc];
 	MeshTreeWidgetItem *oldArcB = A2Tb[currentArc];
 	if (oldArcF != NULL)
@@ -186,7 +186,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* /*meshTree*/, vcg::AlignPair::R
 		.arg((*A).area, 6, 'f', 3)
 		.arg((*A).err, 6, 'f', 3)
 		.arg((*A).ap.SampleNum, 6)
-		.arg((*A).as.LastSampleUsed());
+		.arg((*A).as.lastSampleUsed());
 	setText(3, buf);
 
 	QFont fixedFont("Courier");
@@ -197,9 +197,9 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* /*meshTree*/, vcg::AlignPair::R
 	itemArcIter = new QTreeWidgetItem(this);
 	itemArcIter->setFont(3, fixedFont);
 	itemArcIter->setText(3, buf);
-	for (int qi = 0; qi < I.size(); ++qi)
+	for (size_t qi = 0; qi < I.size(); ++qi)
 	{
-		buf.sprintf(" %02i   %6.2f  %7.4f   %05i  %05i  %5i  %5i  %5i",
+		buf.sprintf(" %02zu   %6.2f  %7.4f   %05i  %05i  %5i  %5i  %5i",
 			qi, I[qi].MinDistAbs, I[qi].pcl50,
 			I[qi].SampleTested, I[qi].SampleUsed, I[qi].DistanceDiscarded, I[qi].BorderDiscarded, I[qi].AngleDiscarded);
 		itemArcIter = new QTreeWidgetItem(this);

@@ -25,7 +25,7 @@
 #define EditMutualCorrsPlugin_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include "edit_mutualcorrsDialog.h"
 #include "alignset.h"
 
@@ -33,16 +33,17 @@
 #include <vcg/space/point_matching.h>
 
 
-class EditMutualCorrsPlugin : public QObject, public MeshEditInterface
+class EditMutualCorrsPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(EditPluginInterface)
 		
 public:
     EditMutualCorrsPlugin();
     virtual ~EditMutualCorrsPlugin() {}
 
     static const QString Info();
+    QString pluginName() const;
 
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

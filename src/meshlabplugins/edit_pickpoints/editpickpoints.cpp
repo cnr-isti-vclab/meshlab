@@ -28,9 +28,10 @@
  */
 
 #include <GL/glew.h>
+#include <qdebug.h>
 
 #include "editpickpoints.h"
-#include <meshlab/mainwindow.h>
+#include <meshlab/glarea.h>
 
 #include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
@@ -48,7 +49,7 @@ using namespace vcg;
 
 EditPickPointsPlugin::EditPickPointsPlugin()
 {
-	//initialize to false so we dont end up collection some weird point in the beginning
+	// initialize to false so we don't end up collecting some weird point in the beginning
 	registerPoint = false;
 	moveSelectPoint = false;
 
@@ -64,6 +65,11 @@ EditPickPointsPlugin::EditPickPointsPlugin()
 const QString EditPickPointsPlugin::Info()
 {
 	return tr("Pick and save 3D points on the mesh");
+}
+
+QString EditPickPointsPlugin::pluginName() const
+{
+	return "EditPickPoints";
 }
 
 //called
@@ -98,7 +104,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 				currentMousePosition.y(),
 				pickedPoint[0], pickedPoint[1], pickedPoint[2]); */
 
-				//let the dialog know that this was the pointed picked incase it wants the information
+				//let the dialog know that this was the pointed picked in case it wants the information
 		bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pickedPoint);
 		pickPointsDialog->selectOrMoveThisPoint(pickedPoint);
 
@@ -127,7 +133,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 				CFaceO::NormalType faceNormal = face[0]->N();
 				//qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
 
-				//if we didnt find a face then dont add the point because the user was probably
+				//if we didn't find a face then don't add the point because the user was probably
 				//clicking on another mesh opened inside the glarea
 				pickPointsDialog->addMoveSelectPoint(pickedPoint, faceNormal);
 			}
@@ -143,7 +149,7 @@ bool EditPickPointsPlugin::StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLShar
 {
 	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
-	//if there are no faces then we cant do anything with this plugin
+	//if there are no faces then we can't do anything with this plugin
 	if (mm.cm.fn < 1)
 	{
 		if (NULL != pickPointsDialog)
@@ -166,7 +172,7 @@ bool EditPickPointsPlugin::StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLShar
 	//set this so redraw can use it
 	glArea = gla;
 
-	//Create GUI window if we dont already have one
+	//Create GUI window if we don't already have one
 	if (pickPointsDialog == 0)
 	{
 		pickPointsDialog = new PickPointsDialog(this, gla->window());
@@ -206,7 +212,7 @@ void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GL
 {
 	//qDebug() << "mouse press Pick Points: " << mm.fileName.c_str() << " ...";
 
-	//if there are no faces then we cant do anything with this plugin
+	//if there are no faces then we can't do anything with this plugin
 	if (mm.cm.fn < 1) return;
 
 	if (Qt::RightButton == event->button() &&
@@ -225,7 +231,7 @@ void EditPickPointsPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel &mm, GLA
 {
 	//qDebug() << "mousemove pick Points: " << mm.fileName.c_str() << " ...";
 
-	//if there are no faces then we cant do anything with this plugin
+	//if there are no faces then we can't do anything with this plugin
 	if (mm.cm.fn < 1) return;
 
 	if (Qt::RightButton == event->button() &&
@@ -244,7 +250,7 @@ void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, 
 {
 	//qDebug() << "mouseRelease Pick Points: " << mm.fileName.c_str() << " ...";
 
-	//if there are no faces then we cant do anything with this plugin
+	//if there are no faces then we can't do anything with this plugin
 	if (mm.cm.fn < 1) return;
 
 	//only add points for the left button

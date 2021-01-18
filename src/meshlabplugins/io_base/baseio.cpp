@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "baseio.h"
+#include <QTextStream>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
@@ -67,24 +68,26 @@ class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>
 
 
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
-	if (formatName.toUpper() == tr("PTX"))
-	{
-		parlst.addParam(new RichInt("meshindex", 0, "Index of Range Map to be Imported",
+	if (formatName.toUpper() == tr("PTX")) {
+		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",
 			"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
-		parlst.addParam(new RichBool("pointsonly", true, "Keep only points", "Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
-		parlst.addParam(new RichBool("usecolor", true, "import color", "Read color from PTX, if color is not present, uses reflectance instead"));
-		parlst.addParam(new RichBool("flipfaces", false, "LEICA: flip normal direction", "LEICA PTX exporter goes counterclockwise, FARO PTX exporter goes clockwise"));
-		parlst.addParam(new RichBool("pointcull", true, "delete unsampled points", "Deletes unsampled points in the grid that are normally located in [0,0,0]"));
-		parlst.addParam(new RichBool("anglecull", true, "Cull faces by angle", "short"));
-		parlst.addParam(new RichFloat("angle", 85.0, "Angle limit for face culling", "short"));
+		parlst.addParam(RichBool("pointsonly", true, "Keep only points", "Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
+		parlst.addParam(RichBool("usecolor", true, "import color", "Read color from PTX, if color is not present, uses reflectance instead"));
+		parlst.addParam(RichBool("flipfaces", false, "LEICA: flip normal direction", "LEICA PTX exporter goes counterclockwise, FARO PTX exporter goes clockwise"));
+		parlst.addParam(RichBool("pointcull", true, "delete unsampled points", "Deletes unsampled points in the grid that are normally located in [0,0,0]"));
+		parlst.addParam(RichBool("anglecull", true, "Cull faces by angle", "short"));
+		parlst.addParam(RichFloat("angle", 85.0, "Angle limit for face culling", "short"));
+	}
+	if (formatName.toUpper() == tr("STL")) {
+		parlst.addParam(RichBool(stlUnifyParName(), true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
-	bool normalsUpdated = false;
+    //bool normalsUpdated = false;
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
     if(!QFile::exists(fileName))
@@ -135,8 +138,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			return false;
 		}
 
-		RichParameter* stlunif = parlst.findParameter(stlUnifyParName());
-		if ((stlunif != NULL) && (stlunif->val->getBool()))
+		bool stluinf = parlst.getBool(stlUnifyParName());
+		if (stluinf)
 		{
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
@@ -163,8 +166,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			}
 		}
 
-		if (oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
-			normalsUpdated = true;
+//		if (oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
+//			normalsUpdated = true;
 		m.Enable(oi.mask);
 		if (m.hasDataMask(MeshModel::MM_POLYGONAL)) qDebug("Mesh is Polygonal!");
 		mask = oi.mask;
@@ -287,14 +290,14 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		}
 	}
 	if (someTextureNotFound)
-		Log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
+		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget * /*parent*/)
+bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();
@@ -302,7 +305,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	string ex = formatName.toUtf8().data();
 	bool binaryFlag = false;
 	if (formatName.toUpper() == tr("STL") || formatName.toUpper() == tr("PLY"))
-		binaryFlag = par.findParameter("Binary")->val->getBool();
+		binaryFlag = par.getBool("Binary");
 
 	if (formatName.toUpper() == tr("PLY"))
 	{
@@ -310,23 +313,22 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		pi.mask = mask;
 
 		// custom attributes
-		for (int parI = 0; parI < par.paramList.size(); parI++)
-		{
-			QString pname = par.paramList[parI]->name;
+		for (const RichParameter& pr : par) {
+			QString pname = pr.name();
 			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.getBool(pname))	// if it is true, add to save list
 					pi.AddPerVertexFloatAttribute(qUtf8Printable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.getBool(pname))	// if it is true, add to save list
 					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
 			}
 			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
-				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				if (par.getBool(pname))	// if it is true, add to save list
 					pi.AddPerFaceFloatAttribute(qUtf8Printable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
-				//if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+				//if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					//pi.add(m, qUtf8Printable(pname.mid(5)));
 			}
 		}
@@ -363,7 +365,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	}
 	if (formatName.toUpper() == tr("OFF"))
 	{
-		if (mask && tri::io::Mask::IOM_BITPOLYGONAL)
+		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		int result = tri::io::ExporterOFF<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
@@ -379,7 +381,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 		int result;
 
-		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.findParameter("poligonalize")->val->getBool()))
+		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.getBool("poligonalize")))
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
@@ -422,20 +424,25 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	return false;
 }
 
+QString BaseMeshIOPlugin::pluginName() const
+{
+	return "IOBase";
+}
+
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
+QList<FileFormat> BaseMeshIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Quad Object", tr("QOBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("PTX File Format", tr("PTX"));
-	formatList << Format("VCG Dump File Format", tr("VMI"));
-    formatList << Format("FBX Autodesk Interchange Format", tr("FBX"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
+	formatList << FileFormat("STL File Format", tr("STL"));
+	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
+	formatList << FileFormat("Quad Object", tr("QOBJ"));
+	formatList << FileFormat("Object File Format", tr("OFF"));
+	formatList << FileFormat("PTX File Format", tr("PTX"));
+	formatList << FileFormat("VCG Dump File Format", tr("VMI"));
+    formatList << FileFormat("FBX Autodesk Interchange Format", tr("FBX"));
 
 	return formatList;
 }
@@ -443,15 +450,15 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> BaseMeshIOPlugin::exportFormats() const
+QList<FileFormat> BaseMeshIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("VRML File Format", tr("WRL"));
-	formatList << Format("DXF File Format", tr("DXF"));
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
+	formatList << FileFormat("STL File Format", tr("STL"));
+	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
+	formatList << FileFormat("Object File Format", tr("OFF"));
+	formatList << FileFormat("VRML File Format", tr("WRL"));
+	formatList << FileFormat("DXF File Format", tr("DXF"));
 	return formatList;
 }
 
@@ -459,7 +466,7 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if (format.toUpper() == tr("PLY")) {
 		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
@@ -478,6 +485,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 	}
 	if (format.toUpper() == tr("OFF")) { capability = defaultBits = tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability(); }
 	if (format.toUpper() == tr("WRL")) { capability = defaultBits = tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability(); }
+	if (format.toUpper() == tr("DXF")) { capability = defaultBits = tri::io::Mask::IOM_VERTCOORD | tri::io::Mask::IOM_FACEINDEX;}
 
 }
 
@@ -488,18 +496,18 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 //                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 //}
 
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterSet &par)
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterList &par)
 {
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addParam(new RichBool("Binary", true, "Binary encoding",
+		par.addParam(RichBool("Binary", true, "Binary encoding",
 		"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
 
 	if (format.toUpper() == tr("STL"))
-		par.addParam(new RichBool("ColorMode", true, "Materialise Color Encoding",
+		par.addParam(RichBool("ColorMode", true, "Materialise Color Encoding",
 		"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
 
 	if (format.toUpper() == tr("OBJ") && m.hasDataMask(MeshModel::MM_POLYGONAL)) //only shows up when the poligonalization is possible
-		par.addParam(new RichBool("poligonalize", false, "Convert triangles to polygons",
+		par.addParam(RichBool("poligonalize", false, "Convert triangles to polygons",
 		"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting. WARNING: unstable, may cause crash")); // default is false, because it is a bit buggy, and should be anable only when sure
 
 	if (format.toUpper() == tr("PLY")){
@@ -508,38 +516,33 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, Ri
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(new RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
+			par.addParam(RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
 		}
 		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(new RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
+			par.addParam(RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
 		}
 		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(new RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
+			par.addParam(RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
 		}
 		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(new RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
+			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
 		}
 	}
-}
-
-void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParameterSet & globalparam)
-{
-	globalparam.addParam(new RichBool(stlUnifyParName(), true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 }
 
 //void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
 //{
 //    if(format.toUpper() == tr("STL"))
-//		if (par.findParameter(stlUnifyParName())->val->getBool())
+//		if (par.findParameter(stlUnifyParName())->value().getBool())
 //		{
 //			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 //			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);

@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+#include <common/GLExtensionsManager.h>
 #include <QGLWidget>
 #include <QTextStream>
 #include <QResource>
@@ -53,6 +54,11 @@ RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
 
 }
 
+QString RadianceScalingRendererPlugin::pluginName() const
+{
+	return "RenderRadianceScaling";
+}
+
 void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla) {
 	if (_sDialog) {
 		_sDialog->close();
@@ -61,7 +67,7 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSha
 	}
 
 	gla->makeCurrent();
-	glewInit();
+	GLExtensionsManager::initializeGLextensions();
 
 	GL_TEST_ERR
 

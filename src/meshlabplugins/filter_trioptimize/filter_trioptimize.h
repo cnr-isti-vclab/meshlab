@@ -25,13 +25,13 @@
 #define TRIOPTIMIZEFILTERSPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces.h>
+#include <common/interfaces/filter_plugin_interface.h>
 
-class TriOptimizePlugin : public QObject, public MeshFilterInterface
+class TriOptimizePlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
 	enum { 
@@ -44,14 +44,15 @@ public:
 
 	TriOptimizePlugin();
 	
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &/*parent*/, vcg::CallBackPos * cb) ;
-	int getRequirements(QAction *);
-	FilterClass getClass(QAction *);
-	int postCondition( QAction* ) const;
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	bool applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
+	int getRequirements(const QAction*);
+	FilterClass getClass(const QAction *) const;
+	int postCondition(const QAction* ) const;
+	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 
 };
 

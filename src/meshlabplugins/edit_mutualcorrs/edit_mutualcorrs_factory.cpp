@@ -41,16 +41,16 @@ QList<QAction *> EditMutualCorrsFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditMutualCorrsFactory::getMeshEditInterface(QAction *action)
+EditPluginInterface* EditMutualCorrsFactory::getMeshEditInterface(const QAction *action)
 {
     if(action == editMutualCorrs)
 	{
         return new EditMutualCorrsPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else assert(0); //should never be asked for an action that isn't here
 	return NULL;
 }
 
-QString EditMutualCorrsFactory::getEditToolDescription(QAction *)
+QString EditMutualCorrsFactory::getEditToolDescription(const QAction *)
 {
     return EditMutualCorrsPlugin::Info();
 }

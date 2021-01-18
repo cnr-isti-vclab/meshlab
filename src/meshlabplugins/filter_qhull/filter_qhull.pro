@@ -1,33 +1,26 @@
 include (../../shared.pri)
 
-HEADERS       += filter_qhull.h \
-		qhull_tools.h 
+HEADERS += \
+    filter_qhull.h \
+    qhull_tools.h
 
-SOURCES       += filter_qhull.cpp \ 
-		qhull_tools.cpp 
+SOURCES += \
+    filter_qhull.cpp \
+    qhull_tools.cpp
 
-HEADERS += 	../../external/qhull-2003.1/src/geom.h \
-		../../external/qhull-2003.1/src/io.h \
-		../../external/qhull-2003.1/src/mem.h \
-		../../external/qhull-2003.1/src/merge.h \
-		../../external/qhull-2003.1/src/poly.h \
-		../../external/qhull-2003.1/src/qhull.h \
-		../../external/qhull-2003.1/src/qset.h \
-		../../external/qhull-2003.1/src/stat.h \
-		../../external/qhull-2003.1/src/user.h 
+system_qhull {
+    INCLUDEPATH += /usr/include/libqhull
+    DEFINES += SYSTEM_QHULL
+}
+!system_qhull {
+INCLUDEPATH += \
+    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src
+}
 
-SOURCES +=	../../external/qhull-2003.1/src/geom.c \
-		../../external/qhull-2003.1/src/geom2.c \
-		../../external/qhull-2003.1/src/global.c \
-		../../external/qhull-2003.1/src/io.c \
-		../../external/qhull-2003.1/src/mem.c \
-		../../external/qhull-2003.1/src/merge.c \
-		../../external/qhull-2003.1/src/poly.c \
-		../../external/qhull-2003.1/src/poly2.c \
-		../../external/qhull-2003.1/src/qconvex.c \
-		../../external/qhull-2003.1/src/qhull.c \
-		../../external/qhull-2003.1/src/qset.c \
-		../../external/qhull-2003.1/src/stat.c \
-		../../external/qhull-2003.1/src/user.c 
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/qhull.lib
+win32-g++:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
+macx:LIBS += $$MESHLAB_DISTRIB_EXT_DIRECTORY/libqhull.a
+!system_qhull:linux:LIBS += -L$$MESHLAB_DISTRIB_EXT_DIRECTORY
+linux:LIBS += -lqhull
 
-TARGET        = filter_qhull
+TARGET = filter_qhull

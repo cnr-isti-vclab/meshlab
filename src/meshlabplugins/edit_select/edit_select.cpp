@@ -22,10 +22,12 @@
  ****************************************************************************/
 
 #include "edit_select.h"
+#include <common/GLExtensionsManager.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/device_to_logical.h>
 #include <meshlab/glarea.h>
 #include <vcg/space/intersection2.h>
+#include <QApplication>
 
 
 using namespace std;
@@ -38,6 +40,11 @@ EditSelectPlugin::EditSelectPlugin(int ConnectedMode) :selectionMode(ConnectedMo
 QString EditSelectPlugin::Info()
 {
 	return tr("Interactive selection inside a dragged rectangle in screen space");
+}
+
+QString EditSelectPlugin::pluginName() const
+{
+	return "EditSelect";
 }
 
 void EditSelectPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData & dt)
@@ -153,7 +160,37 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		}
         gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}
-
+    else
+    {
+        gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
+        Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
+        if(selectionMode == SELECT_VERT_MODE)
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+        }
+        else
+        {
+            if (mod & Qt::AltModifier)
+            {
+                if (mod & Qt::ControlModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+                else if (mod & Qt::ShiftModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+                else
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
+            }
+            else
+            {
+                if (mod & Qt::ControlModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+                else if (mod & Qt::ShiftModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+            }
+        }
+    }
 	
 }
 
@@ -163,7 +200,7 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
   bufQImg.fill(Qt::white);
   QPainter bufQPainter(&bufQImg);
   vector<QPointF> qpoints;
-  for(int i=0;i<selPolyLine.size();++i)
+  for(size_t i=0;i<selPolyLine.size();++i)
     qpoints.push_back(QPointF(selPolyLine[i][0],selPolyLine[i][1]));    
   bufQPainter.setBrush(QBrush(Qt::black));
   bufQPainter.drawPolygon(&qpoints[0],qpoints.size(), Qt::WindingFill); 
@@ -237,25 +274,34 @@ void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, G
 	if (selectionMode == SELECT_AREA_MODE)
 		return;
 
+    gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 	Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
-	if (mod == Qt::AltModifier && selectionMode != SELECT_VERT_MODE)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
-	if (mod == (Qt::AltModifier + Qt::ControlModifier))
-	{
-		if (selectionMode != SELECT_VERT_MODE)
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
-		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
-	}
-	if (mod == (Qt::AltModifier + Qt::ShiftModifier))
-	{
-		if (selectionMode != SELECT_VERT_MODE)
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
-		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
-	}
-	if (mod == Qt::ControlModifier)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
-	if (mod == Qt::ShiftModifier)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+    if(selectionMode == SELECT_VERT_MODE)
+    {
+        if (mod & Qt::ControlModifier)
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+        else if (mod & Qt::ShiftModifier)
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+    }
+    else
+    {
+        if (mod & Qt::AltModifier)
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+            else
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
+        }
+        else
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+        }
+    }
 }
 
 void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea *gla)
@@ -284,9 +330,9 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 	}
 
 	composingSelMode = SMClear;
-	if (event->modifiers() & Qt::ControlModifier)
+    if (event->modifiers() & Qt::ControlModifier)
 		composingSelMode = SMAdd;
-	if (event->modifiers() & Qt::ShiftModifier)
+    else if (event->modifiers() & Qt::ShiftModifier)
 		composingSelMode = SMSub;
 
 	if (event->modifiers() & Qt::AltModifier)
@@ -382,7 +428,7 @@ void EditSelectPlugin::DrawXORPolyLine(GLArea * gla)
 	else
 	{
 		glBegin(GL_LINE_LOOP);
-		for (int ii = 0; ii < selPolyLine.size(); ii++)
+		for (size_t ii = 0; ii < selPolyLine.size(); ii++)
 			glVertex(selPolyLine[ii]);
 	}
 	glEnd();
@@ -474,7 +520,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 
 		line4 = "<br>A select all, D de-select all, I invert all";
 
-		this->RealTimeLog("Selection from Area", m.shortName(),
+		this->realTimeLog("Selection from Area", m.shortName(),
 			"%s<br>%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str(), line4.toStdString().c_str());
 
 		return;
@@ -490,7 +536,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 			line2 = "you may hold:<br>- CTRL to add<br>- SHIFT to subtract";
 		line3 = "<br>A select all, D de-select all, I invert all";
 
-		this->RealTimeLog("Interactive Selection", m.shortName(), "%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
+		this->realTimeLog("Interactive Selection", m.shortName(), "%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
 	}
 
 	if (isDragging)
@@ -590,9 +636,7 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 {
 	if (gla == NULL)
 		return false;
-	GLenum err = glewInit();
-
-	if (err != GLEW_OK)
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 

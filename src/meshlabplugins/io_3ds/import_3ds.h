@@ -41,12 +41,14 @@
 #ifndef __VCGLIB_IMPORT_3DS
 #define __VCGLIB_IMPORT_3DS
 
-#include <wrap/callback.h>
 #include "io_3ds.h"
+
+#include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/complex.h>
 
 // lib3ds headers
-#include <lib3ds/file.h>                        
+#include <lib3ds/file.h>
 #include <lib3ds/camera.h>
 #include <lib3ds/mesh.h>
 #include <lib3ds/node.h>
@@ -78,7 +80,7 @@ typedef typename OpenMeshType::VertexIterator VertexIterator;
 typedef typename OpenMeshType::FaceIterator FaceIterator;
 
 enum _3DSError {
-		// Successfull opening
+		// Successful opening
 	E_NOERROR,								// 0
 		// Opening Errors
 	E_CANTOPEN,								// 1
@@ -315,7 +317,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 						// ---------------------
 						// we do not have to multiply normal for current matrix (as we did for vertices)
 						// since translation operations do not affect normals
-						(*fi).N() = f->normal;
+						(*fi).N() = Point3f(f->normal);
 					}
 					
 					for (int i=0; i<3; ++i)
@@ -324,7 +326,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 						{
 							// assigning per wedge normal
 							// --------------------------
-							(*fi).WN(i) = normalL[3*p+i];
+							(*fi).WN(i) = Point3f(normalL[3*p+i]);
 						}
 
 						// assigning face vertices

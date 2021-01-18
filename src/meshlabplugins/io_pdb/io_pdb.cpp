@@ -43,31 +43,31 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PDB"))
 	{
-		parlst.addParam(new RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
-		parlst.addParam(new RichBool("justpoints",false,"SURFACE: Atoms as Points","Atoms are created as points, no surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("justspheres",true,"SURFACE: Atoms as Spheres","Atoms are created as intersecting spheres, no interpolation surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("interpspheres",false,"SURFACE: Atoms as Jointed Spheres","Atoms are created as spheres, joining surface is built. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichBool("metaballs",false,"SURFACE: Atoms as Metaballs","Atoms are created as blobby interpolation surface, refer to BLINN Metaballs article. Overrides all subsequential surface parameters"));
-		parlst.addParam(new RichFloat("voxelsize",0.25,"Surface Resolution","is used by Jointed Spheres and Metaball"));
-		parlst.addParam(new RichFloat("blobby",2.0,"Blobbyness factor","is used by Metaball"));
+		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
+		parlst.addParam(RichBool("justpoints",false,"SURFACE: Atoms as Points","Atoms are created as points, no surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("justspheres",true,"SURFACE: Atoms as Spheres","Atoms are created as intersecting spheres, no interpolation surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("interpspheres",false,"SURFACE: Atoms as Jointed Spheres","Atoms are created as spheres, joining surface is built. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichBool("metaballs",false,"SURFACE: Atoms as Metaballs","Atoms are created as blobby interpolation surface, refer to BLINN Metaballs article. Overrides all subsequential surface parameters"));
+		parlst.addParam(RichFloat("voxelsize",0.25,"Surface Resolution","is used by Jointed Spheres and Metaball"));
+		parlst.addParam(RichFloat("blobby",2.0,"Blobbyness factor","is used by Metaball"));
 		/*
-		parlst.addParam(new RichInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
-		parlst.addParam(new RichBool("anglecull",true,"Cull faces by angle","short");
-		parlst.addParam(new RichFloat("angle",85.0,"Angle limit for face culling","short");
-		parlst.addParam(new RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
-		parlst.addParam(new RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
-		parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
-		parlst.addParam(new RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");		
-		parlst.addParam(new RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
+		parlst.addParam(RichInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
+		parlst.addParam(RichBool("anglecull",true,"Cull faces by angle","short");
+		parlst.addParam(RichFloat("angle",85.0,"Angle limit for face culling","short");
+		parlst.addParam(RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
+		parlst.addParam(RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
+		parlst.addParam(RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
+		parlst.addParam(RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");
+		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	//bool normalsUpdated = false;
 
@@ -134,7 +134,7 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return true;
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
   assert(0); 
 	return false;
@@ -143,10 +143,15 @@ bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> PDBIOPlugin::importFormats() const
+QString PDBIOPlugin::pluginName() const
 {
-	QList<Format> formatList;
-	formatList << Format("Protein Data Bank"	, tr("PDB"));
+	return "IOPDB";
+}
+
+QList<FileFormat> PDBIOPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Protein Data Bank"	, tr("PDB"));
 
 	return formatList;
 }
@@ -154,9 +159,9 @@ QList<MeshIOInterface::Format> PDBIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> PDBIOPlugin::exportFormats() const
+QList<FileFormat> PDBIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 //	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
 
 	return formatList;
@@ -166,13 +171,13 @@ QList<MeshIOInterface::Format> PDBIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void PDBIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability, int &defaultBits) const
+void PDBIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;
 }
 
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL"))
@@ -180,7 +185,7 @@ void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -188,7 +193,7 @@ void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
   */
 }
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterSet & /*par*/) 
+void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
 {
   /*
 	if(format.toUpper() == tr("STL"))
@@ -201,10 +206,9 @@ MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)
 
 
 //---------- PDB READER -----------//
-bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterSet &parlst, CallBackPos *cb) 
+bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, CallBackPos *cb) 
 {
-	int atomNumber=0;
-	int atomIndex;
+	size_t atomNumber=0;
 	bool surfacecreated = false;
 
   FILE *fp = fopen(filename.c_str(), "rb");
@@ -235,11 +239,11 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 
 	// updating progress bar status
 	char msgbuf[256];
-	sprintf(msgbuf,"Read %i atoms...",atomNumber);
+	sprintf(msgbuf,"Read %zu atoms...",atomNumber);
 	if (cb != NULL)		(*cb)(10, "Loading...");
 
 	//-- atoms parsing
-	for(atomIndex=0; atomIndex<atomDetails.size(); atomIndex++)
+	for(size_t atomIndex=0; atomIndex<atomDetails.size(); atomIndex++)
 	{
 		Point3m currAtomPos;
 		Color4b currAtomCol;
@@ -266,7 +270,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 	{
 		tri::Allocator<CMeshO>::AddVertices(m,atomNumber);
 
-		for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+		for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
 		{
 			m.vert[atomIndex].P()=atomPos[atomIndex];
 			m.vert[atomIndex].C()=atomCol[atomIndex];
@@ -281,7 +285,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		tmpmesh.face.EnableFFAdjacency();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(tmpmesh);
 
-		for ( atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+		for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
 		{
 				tmpmesh.Clear();
 				vcg::tri::Sphere<CMeshO>(tmpmesh,1);
@@ -315,7 +319,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		// calculating an enlarged bbox
 		rbb.min[0]=rbb.min[1]=rbb.min[2]= 100000;
 		rbb.max[0]=rbb.max[1]=rbb.max[2]=-100000;
-		for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+		for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
 		{
 			if(atomPos[atomIndex].X() < rbb.min[0])			rbb.min[0]=atomPos[atomIndex].X();
 			if(atomPos[atomIndex].X() > rbb.max[0])			rbb.max[0]=atomPos[atomIndex].X();
@@ -336,26 +340,26 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		for(double i=0;i<siz[0];i++)
 			for(double j=0;j<siz[1];j++)
 				for(double k=0;k<siz[2];k++)
-							{
-								xpos = rbb.min[0]+step*i;
-								ypos = rbb.min[1]+step*j;
-								zpos = rbb.min[2]+step*k;
-							 
-								volume.Val(i,j,k)=10000;
-								for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+				{
+					xpos = rbb.min[0]+step*i;
+					ypos = rbb.min[1]+step*j;
+					zpos = rbb.min[2]+step*k;
+
+					volume.Val(i,j,k)=10000;
+					for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
+					{
+						if(! (fabs(xpos-atomPos[atomIndex].X())>3.0f) )
+							if(! (fabs(ypos-atomPos[atomIndex].Y())>3.0f) )
+								if(! (fabs(zpos-atomPos[atomIndex].Z())>3.0f) )
 								{
-									if(! (fabs(xpos-atomPos[atomIndex].X())>3.0f) )
-										if(! (fabs(ypos-atomPos[atomIndex].Y())>3.0f) )
-											if(! (fabs(zpos-atomPos[atomIndex].Z())>3.0f) )
-											{
-												float val = pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
-																		pow((double)(ypos-atomPos[atomIndex].Y()),2.0) + 
-													    			pow((double)(zpos-atomPos[atomIndex].Z()),2.0) - atomRad[atomIndex];
-												if(val < volume.Val(i,j,k))
-													volume.Val(i,j,k) = val;
-											}
+									float val = pow((double)(xpos-atomPos[atomIndex].X()),2.0) +
+															pow((double)(ypos-atomPos[atomIndex].Y()),2.0) +
+														pow((double)(zpos-atomPos[atomIndex].Z()),2.0) - atomRad[atomIndex];
+									if(val < volume.Val(i,j,k))
+										volume.Val(i,j,k) = val;
 								}
-							}
+					}
+				}
 		
 		// MARCHING CUBES
 		MyMarchingCubes	mc(m, walker);
@@ -384,7 +388,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		// calculating an enlarged bbox
 		rbb.min[0]=rbb.min[1]=rbb.min[2]= 100000;
 		rbb.max[0]=rbb.max[1]=rbb.max[2]=-100000;
-		for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+		for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
 		{
 			if(atomPos[atomIndex].X() < rbb.min[0])			rbb.min[0]=atomPos[atomIndex].X();
 			if(atomPos[atomIndex].X() > rbb.max[0])			rbb.max[0]=atomPos[atomIndex].X();
@@ -408,27 +412,27 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		for(double i=0;i<siz[0];i++)
 			for(double j=0;j<siz[1];j++)
 				for(double k=0;k<siz[2];k++)
-							{
-								xpos = rbb.min[0]+step*i;
-								ypos = rbb.min[1]+step*j;
-								zpos = rbb.min[2]+step*k;
-							 
-								volume.Val(i,j,k)=0.0;
-								for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
-								{
-									if(! (fabs(xpos-atomPos[atomIndex].X())>5.0f) )
-										if(! (fabs(ypos-atomPos[atomIndex].Y())>5.0f) )
-											if(! (fabs(zpos-atomPos[atomIndex].Z())>5.0f) )
-											{
-												float r2 = (pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
-																	  pow((double)(ypos-atomPos[atomIndex].Y()),2.0) + 
-													    		  pow((double)(zpos-atomPos[atomIndex].Z()),2.0));
-												float val = exp((blobby/atomRad[atomIndex])*r2 - blobby);
+				{
+					xpos = rbb.min[0]+step*i;
+					ypos = rbb.min[1]+step*j;
+					zpos = rbb.min[2]+step*k;
 
-												volume.Val(i,j,k) += val;
-											}
+					volume.Val(i,j,k)=0.0;
+					for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
+					{
+						if(! (fabs(xpos-atomPos[atomIndex].X())>5.0f) )
+							if(! (fabs(ypos-atomPos[atomIndex].Y())>5.0f) )
+								if(! (fabs(zpos-atomPos[atomIndex].Z())>5.0f) )
+								{
+									float r2 = (pow((double)(xpos-atomPos[atomIndex].X()),2.0) +
+														  pow((double)(ypos-atomPos[atomIndex].Y()),2.0) +
+													  pow((double)(zpos-atomPos[atomIndex].Z()),2.0));
+									float val = exp((blobby/atomRad[atomIndex])*r2 - blobby);
+
+									volume.Val(i,j,k) += val;
 								}
-							}
+					}
+				}
 		
 		// MARCHING CUBES
 		MyMarchingCubes	mc(m, walker);
@@ -440,7 +444,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		//tri::io::ExporterPLY<CMeshO>::Save(m,"./pippo.ply");
 
 		tri::UpdatePosition<CMeshO>::Matrix(m,tr);
-	  tri::Clean<CMeshO>::FlipMesh(m);
+		tri::Clean<CMeshO>::FlipMesh(m);
 		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 		tri::UpdateBounding<CMeshO>::Box(m);					// updates bounding box		
 
@@ -457,10 +461,12 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 			zpos = m.vert[vind].P().Z(); 				
 			ww=rr=gg=bb=0;
 			
-			for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
+			for (size_t atomIndex = 0; atomIndex < atomNumber; ++atomIndex)
 			{
 				if(! (fabs(xpos-atomPos[atomIndex].X())>5.0f) )
+				{
 					if(! (fabs(ypos-atomPos[atomIndex].Y())>5.0f) )
+					{
 						if(! (fabs(zpos-atomPos[atomIndex].Z())>5.0f) )
 						{
 							float r2 = (pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
@@ -475,10 +481,12 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 							bb += r2 * atomCol[atomIndex].Z();
 
 						}
+					}
+				}
 
-						m.vert[vind].C().X() = rr/ww;
-						m.vert[vind].C().Y() = gg/ww;
-						m.vert[vind].C().Z() = bb/ww;
+				m.vert[vind].C().X() = rr/ww;
+				m.vert[vind].C().Y() = gg/ww;
+				m.vert[vind].C().Z() = bb/ww;
 			}
 
 

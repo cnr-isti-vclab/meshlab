@@ -31,12 +31,12 @@
 #include <QSplitter>
 #include <QSplitterHandle>
 
-#include "../common/meshmodel.h"
-#include "../common/ml_shared_data_context.h"
+#include <common/ml_document/mesh_document.h>
+#include <common/ml_shared_data_context.h>
 
 // Class list
 class GLArea;
-class RichParameterSet;
+class RichParameterList;
 class MultiViewer_Container;
 class MainWindow;
 

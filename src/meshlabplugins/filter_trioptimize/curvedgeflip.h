@@ -65,7 +65,7 @@ protected:
 
     typedef typename TRIMESH_TYPE::VertContainer VertContainer;
 
-    // New curvature precomputed for the vertexes of the faces
+    // New curvature precomputed for the vertices of the faces
     // adjacent to edge to be flipped
     ScalarType _cv0, _cv1, _cv2, _cv3;
 
@@ -258,7 +258,7 @@ public:
         FacePointer f2 = this->_pos.F()->FFp(i);
         v3 = f2->V2(f1->FFi(i));
 
-        // save sum of curvatures of vertexes
+        // save sum of curvatures of vertices
         float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
 
         // saving current vertex normals
@@ -300,7 +300,7 @@ public:
         // The priority of an edge flip is **how much we lower the overall curvature**.
         // If after the flip the sum of the curvature is decreased it is a good move;
         // good flips have:    cafter < cbefore
-        // Since the local optimization is designed to make the miniumum cost move we put inside
+        // Since the local optimization is designed to make the minimum cost move we put inside
         // negative values (the more negative the better).
         this->_priority = (cafter - cbefore);
         //qDebug("computed curvature change, %f->%f (priority = %f)", cbefore,cafter,this->_priority);

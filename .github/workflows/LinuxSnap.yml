@@ -1,0 +1,35 @@
+name: LinuxSnap
+
+on:
+  workflow_dispatch
+
+jobs:
+  linux_build_snap:
+    name: Build MeshLab (Linux - Snap)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install dependencies
+      run: |
+        #needed for some reason...
+        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+        sudo apt update
+        sudo apt-get install -y snapcraft
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
+    - name: Build MeshLab Snap
+      run: |
+        snapcraft
+    - name: Rename Snap
+      run: |
+        mv ./meshlab*.snap ./MeshLab${{steps.envs.outputs.date}}-linux.snap
+    - name: Upload Meshlab Snap
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_snap
+        path: MeshLab${{steps.envs.outputs.date}}-linux.snap

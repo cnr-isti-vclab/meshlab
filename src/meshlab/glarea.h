@@ -36,12 +36,14 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/interfaces.h>
+#include <common/interfaces/render_plugin_interface.h>
+#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/interfaces/edit_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
-#include "ml_selection_buffers.h"
+#include <common/ml_selection_buffers.h>
 #include "ml_default_decorators.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
@@ -58,9 +60,9 @@ class GLArea : public QGLWidget
     //typedef vcg::Shot<double> Shot;
 
 public:
-    GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterSet *current);
+    GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterList *current);
     ~GLArea();
-    static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
+    static void initGlobalParameterList( RichParameterList * /*globalparam*/);
 
 private:
     int id;  //the very important unique id of each subwindow.
@@ -131,14 +133,29 @@ public:
 
     vcg::Trackball trackball;
     vcg::Trackball trackball_light;
-    void Logf(int Level, const char * f, ... );
+    template <typename... Ts>
+    void Logf(int Level, const char * f, Ts&&... ts)
+    {
+        makeCurrent();
+        if( this->md() != nullptr){
+            this->md()->Log.Logf(Level, f, std::forward<Ts>(ts)...);
+        }
+    }
+
+    void Log(int Level, const char * f)
+    {
+        makeCurrent();
+        if( this->md() != nullptr){
+            this->md()->Log.Log(Level, f);
+        }
+    }
 
     GLAreaSetting glas;
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    QAction *getLastAppliedFilter()							{return lastFilterRef;}
-    void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
+    const QAction *getLastAppliedFilter() {return lastFilterRef;}
+    void setLastAppliedFilter(const QAction *qa) {lastFilterRef = qa;}
 
     ////RenderMode*  getCurrentRenderMode();
     //RenderMode* getCurrentRenderMode()
@@ -177,8 +194,8 @@ public:
     QList<QAction *> iPerDocDecoratorlist;
     QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
-    void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
-    MeshRenderInterface * getRenderer() { return iRenderer; }
+    void setRenderer(RenderPluginInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
+    RenderPluginInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
     
     
@@ -208,7 +225,7 @@ public slots:
     void setColorMode(RenderMode& rm,vcg::GLW::ColorMode mode);
     void setTextureMode(vcg::GLW::TextureMode mode);
     void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
-    void updateCustomSettingValues(RichParameterSet& rps);
+	void updateCustomSettingValues(const RichParameterList& rps);
 
     void endEdit()
 	{
@@ -293,7 +310,7 @@ public slots:
 			MeshModel *m = md()->getMesh(i.key());
 			foreach(QAction *p, i.value())
 			{
-				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+				DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
 				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
 				decorInterface->setLog(&md()->Log);
 				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);
@@ -317,6 +334,12 @@ public slots:
 			defdec.initMeshDecorationData(*mm, dt);
 		}
 	}
+
+	void updatePerMeshDecorators(int)
+	{
+		update();
+	}
+
 	void updateAllDecorators();
 
 public:
@@ -329,13 +352,13 @@ public:
     QAction * getCurrentEditAction() { return currentEditor; }
 
     //get the currently active mesh editor
-    MeshEditInterface * getCurrentMeshEditor() { return iEdit; }
+    EditPluginInterface * getCurrentMeshEditor() { return iEdit; }
 
     //see if this glAarea has a MESHEditInterface for this action
     bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
 
     //add a MeshEditInterface for the given action
-    void addMeshEditor(QAction *editAction, MeshEditInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
+    void addMeshEditor(QAction *editAction, EditPluginInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
     bool readyToClose();
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
@@ -346,7 +369,7 @@ public:
 
     // the following pairs of slot/signal implements a very simple message passing mechanism.
     // a widget that has a pointer to the glarea call the sendViewDir() slot and
-    // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
+    // setup a connect to receive the transmitViewDir signal that actually contains the point3f.
     // This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
     // See the Point3fWidget code.
 signals :
@@ -402,8 +425,8 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
-	void renderingFacilityString();
-	QString renderfacility;
+    void renderingFacilityString();
+    QString renderfacility;
     void setLightingColors(const MLPerViewGLOptions& opts);
 
     QMap<QString,QCursor> curMap;
@@ -424,16 +447,16 @@ private:
     vcg::Point2i pointToPick;
 
     //shader support
-    MeshRenderInterface *iRenderer;
+    RenderPluginInterface *iRenderer;
     QAction *currentShader;
-    QAction *lastFilterRef; // reference to last filter applied
+    const QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings
 
     // Editing support
-    MeshEditInterface *iEdit;
+    EditPluginInterface *iEdit;
     QAction *currentEditor;
     QAction *suspendedEditRef; // reference to last Editing Mode Used
-    QMap<QAction*, MeshEditInterface*> actionToMeshEditMap;
+    QMap<QAction*, EditPluginInterface*> actionToMeshEditMap;
 
     //the last model that start edit was called with
     MeshModel *lastModelEdited;
@@ -510,16 +533,18 @@ private:
 public:
     QPair<Shotm, float > shotFromTrackball();
     void viewFromCurrentShot(QString kind);
-    bool viewFromFile();
+    bool saveViewToFile();
+    bool readViewFromFile();
+    bool readViewFromFile(QString const& filename);
     void createOrthoView(QString);
-	void toggleOrtho();
-	void trackballStep(QString);
+    void toggleOrtho();
+    void trackballStep(QString);
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();
     void loadShot(const QPair<Shotm, float> &) ;
-	void loadShotFromTextAlignFile(const QDomDocument &doc);
-	void loadViewFromViewStateFile(const QDomDocument &doc);
+    void loadShotFromTextAlignFile(const QDomDocument &doc);
+    void loadViewFromViewStateFile(const QDomDocument &doc);
 
 private:
 
@@ -588,9 +613,9 @@ private:
     vcg::Shot<T> track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
         vcg::Shot<T> view;
 
-        double _near, _far;
-        _near = 0.1;
-        _far = 100;
+        //double _near, _far;
+        //_near = 0.1;
+        //_far = 100;
 
         //get shot extrinsics matrix
         vcg::Matrix44<T> shotExtr;
@@ -628,8 +653,8 @@ private:
 
     /*
     Given a shot "from" and a trackball "track", updates "track" with "from" extrinsics.
-    A traslation involving cameraDistance is included. This is necessary to compensate a trasformation that OpenGL performs
-    at the end of the graphic pipeline.
+    A translation involving cameraDistance is included. This is necessary to compensate
+    a transformation that OpenGL performs at the end of the graphic pipeline.
     */
     template <class T>
     void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){

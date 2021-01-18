@@ -22,14 +22,12 @@
 ****************************************************************************/
 
 
-#include "../common/interfaces.h"
-#include "../common/xmlfilterinfo.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
+#include "../common/mlexception.h"
 
 #include <QToolBar>
 #include <QProgressBar>
-#include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFileOpenEvent>
@@ -40,25 +38,21 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QWidgetAction>
+#include <QMessageBox>
 #include "mainwindow.h"
-#include "plugindialog.h"
-#include "customDialog.h"
-#include "saveSnapshotDialog.h"
-#include "ui_congratsDialog.h"
-
+#include "dialogs/options_dialog.h"
+#include "dialogs/save_snapshot_dialog.h"
+#include "dialogs/congrats_dialog.h"
 
 
 QProgressBar *MainWindow::qb;
 
-MainWindow::MainWindow()
-	:mwsettings(), gpumeminfo(NULL), xmlfiltertimer(), wama()
+MainWindow::MainWindow(): 
+	httpReq(this), 
+	gpumeminfo(NULL),
+	_currviewcontainer(NULL)
 {
-	_currviewcontainer = NULL;
-	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
-	//Subsequently restart function will be invoked.
 	setContextMenuPolicy(Qt::NoContextMenu);
-	xmlfiltertimer.start();
-	//xmlfiltertimer.elapsed();
 
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
@@ -76,8 +70,8 @@ MainWindow::MainWindow()
 	connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(switchCurrentContainer(QMdiSubWindow *)));
-	httpReq = new QNetworkAccessManager(this);
-	connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
+	//httpReq = new QNetworkAccessManager(this);
+	connect(&httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
 
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
@@ -96,13 +90,12 @@ MainWindow::MainWindow()
 	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
-	mwsettings.updateGlobalParameterSet(currentGlobalParams);
+	mwsettings.updateGlobalParameterList(currentGlobalParams);
 	createActions();
 	createToolBars();
 	createMenus();
 	gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
 	stddialog = 0;
-	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(MeshLabApplication::shortName());
@@ -118,23 +111,9 @@ MainWindow::MainWindow()
     nvgpumeminfo->setStyleSheet(" QProgressBar { background-color: #d0d0d0; border: 2px solid grey; border-radius: 0px; text-align: center; }"
                                 " QProgressBar::chunk {background-color: #80c080; width: 1px;}");
 	statusBar()->addPermanentWidget(nvgpumeminfo, 0);
-	//updateMenus();
 	newProject();
-	//PM should be initialized before passing it to PluginGeneratorGUI
-	plugingui = new PluginGeneratorGUI(PM, this);
-	plugingui->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::LeftDockWidgetArea, plugingui);
 	updateCustomSettings();
-	connect(plugingui, SIGNAL(scriptCodeExecuted(const QScriptValue&, const int, const QString&)), this, SLOT(scriptCodeExecuted(const QScriptValue&, const int, const QString&)));
-	connect(plugingui, SIGNAL(insertXMLPluginRequested(const QString&, const QString&)), this, SLOT(loadAndInsertXMLPlugin(const QString&, const QString&)));
-	connect(plugingui, SIGNAL(historyRequest()), this, SLOT(sendHistory()));
-	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
-	//wid->showMaximized();
-	//ar->update();
 
-	//qb->setAutoClose(true);
-	//qb->setMinimumDuration(0);
-	//qb->reset();
 	connect(this, SIGNAL(updateLayerTable()), this, SLOT(updateLayerDialog()));
 	connect(layerDialog, SIGNAL(removeDecoratorRequested(QAction*)), this, SLOT(switchOffDecorator(QAction*)));
 }
@@ -392,15 +371,21 @@ connectRenderModeActionList(rendlist);*/
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
-	viewFromFileAct = new QAction(tr("View from file"), this);
-	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+	readViewFromFileAct = new QAction(tr("Read camera settings from file"), this);
+	readViewFromFileAct->setToolTip(tr("Restore camera settings from an XML description stored in a file."));
+	saveViewToFileAct = new QAction(tr("Save camera settings to file"), this);
+	saveViewToFileAct->setToolTip(tr("Save camera settings to a file as an XML description."));
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
+	connect(readViewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+	connect(saveViewToFileAct, SIGNAL(triggered()), this, SLOT(saveViewToFile()));
 
-	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
+	copyShotToClipboardAct = new QAction(tr("Copy camera settings to clipboard"), this);
+	copyShotToClipboardAct->setToolTip(tr("Save current camera settings to clipboard as a XML document that you can share or restore anytime."));
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
 
-	pasteShotFromClipboardAct = new QAction(tr("Paste shot"), this);
+	pasteShotFromClipboardAct = new QAction(tr("Paste clipboard to camera settings"), this);
+	pasteShotFromClipboardAct->setToolTip(tr("Restore camera settings from a XML description stored in the clipboard."));
 	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
@@ -457,11 +442,6 @@ connectRenderModeActionList(rendlist);*/
 
 	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
 
-	//TOOL MENU
-	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"), this);
-	showFilterEditAct->setEnabled(true);
-	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
-
 }
 
 void MainWindow::createToolBars()
@@ -492,10 +472,8 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
-	{
-		foreach(QAction *decorateAction, iDecorate->actions())
-		{
+	for(DecoratePluginInterface *iDecorate: PM.meshDecoratePlugins()) {
+		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);
 		}
@@ -503,12 +481,9 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
-	{
-		foreach(QAction* editAction, iEditFactory->actions())
-		{
-			if (!editAction->icon().isNull())
-			{
+	for(EditPluginInterfaceFactory *iEditFactory: PM.meshEditFactoryPlugins()) {
+		for(QAction* editAction: iEditFactory->actions()){
+			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
 			}
 			else qDebug() << "action was null";
@@ -519,12 +494,9 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
-	{
-		foreach(QAction* filterAction, iFilter->actions())
-		{
-			if (!filterAction->icon().isNull())
-			{
+	for(FilterPluginInterface *iFilter: PM.meshFilterPlugins()) {
+		for(QAction* filterAction: iFilter->actions()) {
+			if (!filterAction->icon().isNull()) {
 				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 				if (filterAction->priority() != QAction::LowPriority)
 					filterToolBar->addAction(filterAction);
@@ -618,6 +590,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	windowsMenu->setToolTipsVisible(true);
     updateWindowMenu();
 	menuBar()->addSeparator();
 
@@ -660,9 +633,6 @@ void MainWindow::initSearchEngine()
 {
 	for (QMap<QString, QAction*>::iterator it = PM.actionFilterMap.begin(); it != PM.actionFilterMap.end(); ++it)
 		initItemForSearching(it.value());
-
-	for (QMap<QString, MeshLabXMLFilterContainer>::iterator it = PM.stringXMLFilterMap.begin(); it != PM.stringXMLFilterMap.end(); ++it)
-		initItemForSearching(it.value().act);
 
 	initMenuForSearching(editMenu);
 	initMenuForSearching(renderMenu);
@@ -738,90 +708,90 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuCamera);
 
 
-	QMap<QString, MeshFilterInterface *>::iterator msi;
+	QMap<QString, FilterPluginInterface *>::iterator msi;
 	for (msi = PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end(); ++msi)
 	{
-		MeshFilterInterface * iFilter = msi.value();
-		QAction *filterAction = iFilter->AC((msi.key()));
+		FilterPluginInterface * iFilter = msi.value();
+		QAction *filterAction = iFilter->getFilterAction((msi.key()));
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
 		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if (filterClass & MeshFilterInterface::FaceColoring)
+		if (filterClass & FilterPluginInterface::FaceColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::VertexColoring)
+		if (filterClass & FilterPluginInterface::VertexColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshColoring)
+		if (filterClass & FilterPluginInterface::MeshColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Selection)
+		if (filterClass & FilterPluginInterface::Selection)
 		{
 			filterMenuSelect->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Cleaning)
+		if (filterClass & FilterPluginInterface::Cleaning)
 		{
 			filterMenuClean->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Remeshing)
+		if (filterClass & FilterPluginInterface::Remeshing)
 		{
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Smoothing)
+		if (filterClass & FilterPluginInterface::Smoothing)
 		{
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Normal)
+		if (filterClass & FilterPluginInterface::Normal)
 		{
 			filterMenuNormal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Quality)
+		if (filterClass & FilterPluginInterface::Quality)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Measure)
+		if (filterClass & FilterPluginInterface::Measure)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Layer)
+		if (filterClass & FilterPluginInterface::Layer)
 		{
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RasterLayer)
+		if (filterClass & FilterPluginInterface::RasterLayer)
 		{
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::MeshCreation)
+		if (filterClass & FilterPluginInterface::MeshCreation)
 		{
 			filterMenuCreate->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::RangeMap)
+		if (filterClass & FilterPluginInterface::RangeMap)
 		{
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::PointSet)
+		if (filterClass & FilterPluginInterface::PointSet)
 		{
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Sampling)
+		if (filterClass & FilterPluginInterface::Sampling)
 		{
 			filterMenuSampling->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Texture)
+		if (filterClass & FilterPluginInterface::Texture)
 		{
 			filterMenuTexture->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Polygonal)
+		if (filterClass & FilterPluginInterface::Polygonal)
 		{
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if (filterClass & MeshFilterInterface::Camera)
+		if (filterClass & FilterPluginInterface::Camera)
 		{
 			filterMenuCamera->addAction(filterAction);
 		}
@@ -835,119 +805,11 @@ void MainWindow::fillFilterMenu()
 
 
 	}
-
-	QMap<QString, MeshLabXMLFilterContainer>::iterator xmlit;
-	for (xmlit = PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end(); ++xmlit)
-	{
-		try
-		{
-			//MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
-			QAction *filterAction = xmlit.value().act;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter action value.");
-			MLXMLPluginInfo* info = xmlit.value().xmlInfo;
-			if (filterAction == NULL)
-				throw MLException("Invalid filter info value.");
-			QString filterName = xmlit.key();
-
-			QString help = info->filterHelp(filterName);
-			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
-			connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
-			QString filterClasses = info->filterAttribute(filterName, MLXMLElNames::filterClass);
-			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-			foreach(QString nameClass, filterClassesList)
-			{
-				if (nameClass == QString("FaceColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("VertexColoring"))
-				{
-					filterMenuColorize->addAction(filterAction);
-				}
-				if (nameClass == QString("Selection"))
-				{
-					filterMenuSelect->addAction(filterAction);
-				}
-				if (nameClass == QString("Cleaning"))
-				{
-					filterMenuClean->addAction(filterAction);
-				}
-				if (nameClass == QString("Remeshing"))
-				{
-					filterMenuRemeshing->addAction(filterAction);
-				}
-				if (nameClass == QString("Smoothing"))
-				{
-					filterMenuSmoothing->addAction(filterAction);
-				}
-				if (nameClass == QString("Normal"))
-				{
-					filterMenuNormal->addAction(filterAction);
-				}
-				if (nameClass == QString("Quality"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Measure"))
-				{
-					filterMenuQuality->addAction(filterAction);
-				}
-				if (nameClass == QString("Layer"))
-				{
-					filterMenuMeshLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("RasterLayer"))
-				{
-					filterMenuRasterLayer->addAction(filterAction);
-				}
-				if (nameClass == QString("MeshCreation"))
-				{
-					filterMenuCreate->addAction(filterAction);
-				}
-				if (nameClass == QString("RangeMap"))
-				{
-					filterMenuRangeMap->addAction(filterAction);
-				}
-				if (nameClass == QString("PointSet"))
-				{
-					filterMenuPointSet->addAction(filterAction);
-				}
-				if (nameClass == QString("Sampling"))
-				{
-					filterMenuSampling->addAction(filterAction);
-				}
-				if (nameClass == QString("Texture"))
-				{
-					filterMenuTexture->addAction(filterAction);
-				}
-				if (nameClass == QString("Polygonal"))
-				{
-					filterMenuPolygonal->addAction(filterAction);
-				}
-				if (nameClass == QString("Camera"))
-				{
-					filterMenuCamera->addAction(filterAction);
-				}
-				//  //  MeshFilterInterface::Generic :
-				if (nameClass == QString("Generic"))
-				{
-					filterMenu->addAction(filterAction);
-				}
-				//if(!filterAction->icon().isNull())
-				//    filterToolBar->addAction(filterAction);
-			}
-		}
-		catch (ParsingException e)
-		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what());
-		}
-	}
 }
 
 void MainWindow::fillDecorateMenu()
 {
-	foreach(MeshDecorateInterface *iDecorate, PM.meshDecoratePlugins())
+	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
@@ -965,7 +827,7 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	foreach(MeshRenderInterface *iRender, PM.meshRenderPlugins())
+	foreach(RenderPluginInterface *iRender, PM.meshRenderPlugins())
 	{
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
@@ -973,7 +835,7 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
-	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -989,8 +851,8 @@ void MainWindow::loadMeshLabSettings()
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
-	MainWindowSetting::initGlobalParameterSet(&defaultGlobalParams);
-	GLArea::initGlobalParameterSet(&defaultGlobalParams);
+	MainWindowSetting::initGlobalParameterList(&defaultGlobalParams);
+	GLArea::initGlobalParameterList(&defaultGlobalParams);
 
 	QSettings settings;
 	QStringList klist = settings.allKeys();
@@ -1004,47 +866,31 @@ void MainWindow::loadMeshLabSettings()
 		QString st = settings.value(klist.at(ii)).toString();
 		QDomElement docElem = doc.firstChild().toElement();
 
-		RichParameter* rpar = NULL;
 		if (!docElem.isNull())
 		{
-			bool ret = RichParameterAdapter::create(docElem, &rpar);
-			if (!ret)
-			{
-				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qUtf8Printable(docElem.attribute("name")), qUtf8Printable(docElem.attribute("value")));
-				continue;
-			}
-			if (!defaultGlobalParams.hasParameter(rpar->name))
-			{
-				//  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-				//         "It happens if you are running MeshLab with only a subset of the plugins. ", qUtf8Printable(rpar->name));
-			}
-			else
-				currentGlobalParams.addParam(rpar);
+			RichParameter* rp = nullptr;
+			bool b = RichParameterAdapter::create(docElem, &rp);
+			if (b && defaultGlobalParams.hasParameter(rp->name()))
+				currentGlobalParams.pushFromQDomElement(docElem);
 		}
 	}
 
 	// 2) eventually fill missing values with the hardwired defaults
-	for (int ii = 0; ii < defaultGlobalParams.paramList.size(); ++ii)
-	{
+	for (const RichParameter& p : defaultGlobalParams) {
 		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
-		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
-		{
-			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-			RichParameterCopyConstructor v;
-			defaultGlobalParams.paramList.at(ii)->accept(v);
-			currentGlobalParams.paramList.push_back(v.lastCreated);
+		if (!currentGlobalParams.hasParameter(p.name())) {
+			//qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
+			RichParameter& v = currentGlobalParams.addParam(p);
 
 			QDomDocument doc("MeshLabSettings");
-			RichParameterXMLVisitor vxml(doc);
-			v.lastCreated->accept(vxml);
-			doc.appendChild(vxml.parElem);
+			doc.appendChild(v.fillToXMLDocument(doc));
 			QString docstring = doc.toString();
 			QSettings setting;
-			setting.setValue(v.lastCreated->name, QVariant(docstring));
+			setting.setValue(v.name(), QVariant(docstring));
 		}
 	}
+	assert(currentGlobalParams.size() == defaultGlobalParams.size());
 
-	//emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
@@ -1084,22 +930,21 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 void MainWindow::sendUsAMail()
 {
 	QSettings settings;
+
+	// Check if the user specified not to be reminded to send email
+	const QString dontRemindMeToSendEmailVar("dontRemindMeToSendEmail");
+	bool dontRemindMeToSendEmailVal = false;
+	if (settings.contains(dontRemindMeToSendEmailVar))
+		dontRemindMeToSendEmailVal = settings.value(dontRemindMeToSendEmailVar).toBool();
+	if (dontRemindMeToSendEmailVal)
+		return;
+
 	int loadedMeshCounter = settings.value("loadedMeshCounter").toInt();
-	//int connectionInterval = settings.value("connectionInterval", 20).toInt();
-	//int lastComunicatedValue = settings.value("lastComunicatedValue", 0).toInt();
 
 	int congratsMeshCounter = settings.value("congratsMeshCounter", 50).toInt();
-	if (loadedMeshCounter > congratsMeshCounter)
-	{
-		QDialog *congratsDialog = new QDialog();
-		Ui::CongratsDialog temp;
-		temp.setupUi(congratsDialog);
-		temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
-		congratsDialog->exec();
-		if (congratsDialog->result() == QDialog::Accepted)
-			QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
-		// This preference values store when you did the last request for a mail
-		settings.setValue("congratsMeshCounter", congratsMeshCounter * 2);
+	if (loadedMeshCounter > congratsMeshCounter) {
+		CongratsDialog* congratsDialog = new CongratsDialog(this);
+		congratsDialog->show();
 	}
 }
 
@@ -1127,51 +972,148 @@ void MainWindow::saveRecentProjectList(const QString &projName)
 
 void MainWindow::checkForUpdates(bool verboseFlag)
 {
-	VerboseCheckingFlag = verboseFlag;
+	verboseCheckingFlag = verboseFlag;
+
+	bool checkForMonthlyAndBetasVal = false;
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
+
+	QString urlCheck = "https://www.meshlab.net/ML_VERSION";
 	QSettings settings;
+	if (settings.contains(checkForMonthlyAndBetasVar))
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();
+	if (checkForMonthlyAndBetasVal){
+		urlCheck = "https://github.com/cnr-isti-vclab/meshlab/blob/master/ML_VERSION";
+	}
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
 	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
 	QString UID = settings.value("UID", QString("")).toString();
-	if (UID.isEmpty())
-	{
+	if (UID.isEmpty()) {
 		UID = QUuid::createUuid().toString();
 		settings.setValue("UID", UID);
 	}
+	QString baseCommand("/~cignoni/meshlab_latest.php");
 
-	QString BaseCommand("/~cignoni/meshlab_latest.php");
+	#ifdef Q_OS_WIN
+		QString OS = "Win";
+	#elif defined( Q_OS_OSX)
+		QString OS = "Mac";
+	#else
+		QString OS = "Lin";
+	#endif
+	QString message = baseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
 
-#ifdef Q_OS_WIN
-	QString OS = "Win";
-#elif defined( Q_OS_OSX)
-	QString OS = "Mac";
-#else
-	QString OS = "Lin";
-#endif
-	QString message = BaseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
-	//idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
-	httpReq->get(QNetworkRequest(MeshLabApplication::organizationHost() + message));
-	//idGet=httpReq->get(message,&myLocalBuf);     // id == 2
+	QNetworkAccessManager stats;
+	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
+	stats.get(statreq);
+
+	QNetworkRequest request(urlCheck);
+	httpReq.get(request);
 }
 
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
-  QString answer = reply->readAll();
-  if (answer.left(3) == QString("NEW"))
-    QMessageBox::information(this, "MeshLab Version Checking", answer.remove(0, 3));
-  else 
-    if (VerboseCheckingFlag)
-    {
-      if (answer.left(2) == QString("ok"))
-        QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
-      else 
-        QMessageBox::warning(this, "Warning. Update Checking server did not answer correctly",answer);
-    }
-  reply->deleteLater();
-  
-  QSettings settings;
-  int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
-  settings.setValue("lastComunicatedValue", loadedMeshCounter);
+	QSettings settings;
+	QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+	bool dontRemindMeAboutUpgradeVal = false;
+	bool checkForMonthlyAndBetasVal = false;
+	const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+	const QString checkForMonthlyAndBetasVar("checkForMonthlyAndBetas");
+
+	// Check if the user specified not to be reminded to upgrade
+	if (settings.contains(dontRemindMeAboutUpgradeVar))
+		dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+	if (!verboseCheckingFlag) {
+		if (dontRemindMeAboutUpgradeVal)
+			return;
+	}
+	
+	if (settings.contains(checkForMonthlyAndBetasVar)){
+		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();;
+	}
+
+	QByteArray ddata = reply->readAll();
+	QString onlineVersion = QString::fromStdString(ddata.toStdString());
+	QStringList splitOnlineVersion = onlineVersion.split(".");
+
+
+	QString thisVersion = MeshLabApplication::appVer();
+	if (thisVersion.endsWith("d")){
+		thisVersion.chop(1);
+	}
+	QStringList splitThisVersion = thisVersion.split(".");
+
+	bool newVersionAvailable = false;
+	if (splitOnlineVersion.first().toInt() > splitThisVersion.first().toInt()){
+		newVersionAvailable = true;
+	}
+	else if (splitOnlineVersion.first().toInt() == splitThisVersion.first().toInt()){
+		if (splitOnlineVersion[1].toInt() > splitThisVersion[1].toInt()) {
+			newVersionAvailable = true;
+		}
+		else if (splitOnlineVersion[1].toInt() == splitThisVersion[1].toInt() && splitOnlineVersion.size() > 2) {
+			//case of beta version or very important fixes
+			if (splitThisVersion.size() == 2 || (splitThisVersion.size() > 2 && splitOnlineVersion[2] > splitThisVersion[2])){
+				newVersionAvailable = true;
+			}
+		}
+	}
+
+	// Set up a message box for the user
+	QMessageBox msgBox(this);
+	msgBox.setWindowTitle("MeshLab Version Checking");
+	msgBox.addButton(QMessageBox::Ok);
+	QCheckBox dontShowCheckBox("Don't show this message again.");
+	dontShowCheckBox.blockSignals(true);
+	msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+	dontShowCheckBox.setChecked(dontRemindMeAboutUpgradeVal);
+	QCheckBox checkMonthlysCheckBox("Check for Monthly and Beta versions.");
+	checkMonthlysCheckBox.blockSignals(true);
+	msgBox.addButton(&checkMonthlysCheckBox, QMessageBox::ResetRole);
+	checkMonthlysCheckBox.setChecked(checkForMonthlyAndBetasVal);
+
+	if (newVersionAvailable){
+		QString message =
+				"<center>You are using an old version of MeshLab.<br><br>"
+				"Please, upgrade to the new version!<br><br>";
+		if (checkForMonthlyAndBetasVal){
+			message +=
+					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>";
+		}
+		else {
+			message +=
+					"<big> <a href=\"https://www.meshlab.net/#download\">Download</a></big></center>";
+		}
+		
+		msgBox.setText(
+					"<center>You are using an old version of MeshLab.<br><br>"
+					"Please, upgrade to the new version!<br><br>"
+					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>");
+	}
+	else if (verboseCheckingFlag && !newVersionAvailable) {
+		msgBox.setText("<center>Your MeshLab version is the most recent one.</center>");
+	}
+	reply->deleteLater();
+
+	// Showing the dialog only if there is a new version or if we are verbose
+	if (newVersionAvailable || verboseCheckingFlag) {
+		int userReply = msgBox.exec();
+		if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
+			settings.setValue(dontRemindMeAboutUpgradeVar, true);
+		else if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(dontRemindMeAboutUpgradeVar, false);
+		if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Checked) {
+			settings.setValue(checkForMonthlyAndBetasVar, true);
+			if (!checkForMonthlyAndBetasVal) {
+				//the user changed the states: he now wants to check for betas
+				//need to check again with properly set 
+				checkForUpdates(false);
+			}
+		}
+		else if (userReply == QMessageBox::Ok && checkMonthlysCheckBox.checkState() == Qt::Unchecked)
+			settings.setValue(checkForMonthlyAndBetasVar, false);
+	}
 }
 
 
@@ -1242,29 +1184,28 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
+void MainWindowSetting::initGlobalParameterList(RichParameterList* gbllist)
 {
-	glbset->addParam(new RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
-	glbset->addParam(new RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	glbset->addParam(new RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+	gbllist->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+	gbllist->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
-//	glbset->addParam(new RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
+//	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		glbset->addParam(new RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
-	glbset->addParam(new RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+		gbllist->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
+	gbllist->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
-void MainWindowSetting::updateGlobalParameterSet(RichParameterSet& rps)
+void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 {
-	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
-	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
-	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
-//	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
+	maxgpumem = (std::ptrdiff_t)rpl.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
+	perbatchprimitives = (size_t)rpl.getInt(perBatchPrimitives());
+	minpolygonpersmoothrendering = (size_t)rpl.getInt(minPolygonNumberPerSmoothRendering());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		highprecision = rps.getBool(highPrecisionRendering());
-	maxTextureMemory = (std::ptrdiff_t) rps.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
+		highprecision = rpl.getBool(highPrecisionRendering());
+	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

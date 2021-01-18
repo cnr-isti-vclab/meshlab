@@ -11,7 +11,7 @@ LEVMAR METHODS
 /**********************************************************************
 Calibrate extrinsics (if p_foc is false) or focal (if p_foc is true)
 **********************************************************************/
-bool LevmarMethods::calibrate( vcg::Shot<float>* shot,std::list<LevmarCorrelation>* corr, bool p_foc)
+bool LevmarMethods::calibrate( vcg::Shot<MESHLAB_SCALAR>* shot,std::list<LevmarCorrelation>* corr, bool p_foc)
 {
 	bool my_ret_val=false;
 
@@ -41,7 +41,7 @@ bool LevmarMethods::calibrate( vcg::Shot<float>* shot,std::list<LevmarCorrelatio
 		}
 
 		Levmar2Shot(shot,p,p_foc);
-		vcg::Matrix44f rot = shot->Extrinsics.Rot();
+		vcg::Matrix44<MESHLAB_SCALAR> rot = shot->Extrinsics.Rot();
 	}
 
 	delete data;
@@ -56,7 +56,7 @@ CREATE DATA SET
 Modify data,x, opts and info(?)
 *********************************************/
 //TOGLIERE SHOT DAI PARAMETRI!
-bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<float>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double info[LM_INFO_SZ])
+bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<MESHLAB_SCALAR>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double /*info*/[LM_INFO_SZ])
 {	
 	bool my_ret_val=false;
 	
@@ -113,11 +113,11 @@ bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<f
 SHOT 2 TSAI
 Transformation of the camera data between levmar structure and vcg structure
 *********************************************/
-void LevmarMethods::Shot2Levmar(vcg::Shot<float>* shot, double* p, bool p_foc){
+void LevmarMethods::Shot2Levmar(vcg::Shot<MESHLAB_SCALAR>* shot, double* p, bool p_foc){
 
 	if(!p_foc){
-		float alpha, beta, gamma;
-		vcg::Matrix44f rot = shot->Extrinsics.Rot();
+		MESHLAB_SCALAR alpha, beta, gamma;
+		vcg::Matrix44<MESHLAB_SCALAR> rot = shot->Extrinsics.Rot();
 		rot.ToEulerAngles(alpha, beta, gamma);
 
 		vcg::Point3f tVect = shot->Extrinsics.Tra();
@@ -139,7 +139,7 @@ void LevmarMethods::Shot2Levmar(vcg::Shot<float>* shot, double* p, bool p_foc){
 TSAI 2 SHOT
 Transformation of the camera data between levmar structure and vcg structure
 *********************************************/
-void LevmarMethods::Levmar2Shot(vcg::Shot<float>* shot,  double *p,bool p_foc) {
+void LevmarMethods::Levmar2Shot(vcg::Shot<MESHLAB_SCALAR>* shot,  double *p,bool p_foc) {
 	
 	//if(p_foc)
 	//	shot->Intrinsics.FocalMm =	cc.f;//*cp.sx;// *SCALE_FACTOR;
@@ -157,7 +157,7 @@ void LevmarMethods::Levmar2Shot(vcg::Shot<float>* shot,  double *p,bool p_foc) {
 	if(!p_foc){
 
 		//* ROTATION */
-		vcg::Matrix44<vcg::Shot<float>::ScalarType> mat;
+		vcg::Matrix44<MESHLAB_SCALAR> mat;
 		mat.SetIdentity();
 		mat.FromEulerAngles(float(p[0]), float(p[1]), float(p[2]));
 
@@ -197,9 +197,9 @@ void LevmarMethods::Cam2Levmar(vcg::Shot<float> * /*s*/){
 void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
-	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;
+	vcg::Shot<MESHLAB_SCALAR>* levmarCam = ((LevmarData*) data)->levmarCam;
 
-	vcg::Matrix44f matrix;
+	vcg::Matrix44<MESHLAB_SCALAR> matrix;
 #ifdef USE_QUATERNION
 	vcg::Quaterniond quaternion(p[0], p[1], p[2], p[3]);
 	quaternion.ToMatrix(matrix);
@@ -221,10 +221,10 @@ void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *d
 }
 
 //Estimate only the focal.
-void LevmarMethods::estimateFocal(double *p, double *x, int m, int n, void *data)
+void LevmarMethods::estimateFocal(double *p, double *x, int /*m*/, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
-	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;
+	vcg::Shot<MESHLAB_SCALAR>* levmarCam = ((LevmarData*) data)->levmarCam;
 
 	levmarCam->Intrinsics.FocalMm = p[0];
 

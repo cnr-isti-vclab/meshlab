@@ -1,9 +1,15 @@
 include (../../shared.pri)
 
-HEADERS       += $$VCGDIR/vcg/complex/algorithms/clean.h\
-                 meshselect.h
-SOURCES       += meshselect.cpp
+HEADERS += \
+    $$VCGDIR/vcg/complex/algorithms/clean.h\
+    meshselect.h
 
-TARGET        = filter_select
+SOURCES += \
+    meshselect.cpp
 
-RESOURCES     = meshlab.qrc
+RESOURCES += \
+    meshlab.qrc
+
+TARGET = filter_select
+
+

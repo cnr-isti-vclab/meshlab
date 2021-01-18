@@ -416,7 +416,7 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
     {
         const LVector& dSumP = mCachedGradSumP[k];
         const LVector& dSumN = mCachedGradSumN[k];
-        const LScalar& dSumDotPN = mCachedGradSumDotPN[k];
+        //const LScalar& dSumDotPN = mCachedGradSumDotPN[k];
         const LScalar& dSumDotPP = mCachedGradSumDotPP[k];
         const LScalar& dSumW = mCachedGradSumW[k];
 
@@ -440,7 +440,7 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
                 int id = mNeighborhood.index(i);
                 LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
                 LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
-                LScalar dw = mCachedWeightGradients.at(i)[j];
+                //LScalar dw = mCachedWeightGradients.at(i)[j];
                 LScalar d2w = ((x[k]-p[k]))*((x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
 
                 if (j==k)

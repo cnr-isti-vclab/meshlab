@@ -24,6 +24,7 @@
 //#include <GL/glew.h>
 
 
+#include <common/GLExtensionsManager.h>
 #include "edit_align.h"
 #include <QGLWidget>
 #include "AlignPairWidget.h"
@@ -75,7 +76,7 @@ void AlignPairWidget::initializeGL()
 	if (shared == NULL)
 		return;
 
-	glewInit();  //needed to init extensions, used by the aligner GL window while rendering
+	GLExtensionsManager::initializeGLextensions();  //needed to init extensions, used by the aligner GL window while rendering
 
 	shared->addView(context());
 	glClearColor(0, 0, 0, 0);
@@ -139,7 +140,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		tt[i]->radius = 1;
 		tt[i]->GetView();
 		tt[i]->Apply();
-		vcg::Box3f bb;
+		Box3m bb;
 		if (i == 0)
 			bb.Add(freeMesh->tr(), freeMesh->bbox()); //bb.Import(freeMesh->bbox());
 		else
@@ -173,11 +174,11 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		int pickSide = (pointToPick[0] < QTLogicalToDevice(this, (width() / 2))) ? 0 : 1;
 		if (hasToPick && pickSide == i)
 		{
-			vcg::Point3f pp;
+			Point3m pp;
 			hasToPick = false;
-			if (vcg::Pick<vcg::Point3f>(pointToPick[0], pointToPick[1], pp))
+			if (vcg::Pick<Point3m>(pointToPick[0], pointToPick[1], pp))
 			{
-				std::vector<vcg::Point3f> &curVec = pickSide ? gluedPickedPointVec : freePickedPointVec;
+				std::vector<Point3m> &curVec = pickSide ? gluedPickedPointVec : freePickedPointVec;
 
 				qDebug("Picked point %i %i -> %f %f %f", pointToPick[0], pointToPick[1], pp[0], pp[1], pp[2]);
 
@@ -185,7 +186,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 				{
 					int bestInd = -1;
 					double bestDist = 10e100;
-					for (int i = 0; i < curVec.size(); ++i)
+					for (size_t i = 0; i < curVec.size(); ++i)
 						if (Distance(pp, curVec[i]) < bestDist)
 						{
 							bestDist = Distance(pp, curVec[i]);
@@ -206,7 +207,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 	painter.endNativePainting();
 }
 
-void AlignPairWidget::drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &pointVec, vcg::Color4b color)
+void AlignPairWidget::drawPickedPoints(QPainter *qp, std::vector<Point3m> &pointVec, vcg::Color4b color)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_LIGHTING);
@@ -215,7 +216,7 @@ void AlignPairWidget::drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &
 	//glDisable(GL_DEPTH_TEST);
 	for (uint i = 0; i < pointVec.size(); ++i)
 	{
-		vcg::Point3f &pt = pointVec[i];
+		Point3m &pt = pointVec[i];
 		glPointSize(5.0);
 		glColor(vcg::Color4b(vcg::Color4b::Black));
 		glBegin(GL_POINTS);
@@ -351,7 +352,7 @@ void AlignPairWidget::mouseReleaseEvent(QMouseEvent * e)
 void AlignPairWidget::wheelEvent(QWheelEvent * e)
 {
 	const int WHEEL_STEP = 120;
-	AlignPairDialog * dd = qobject_cast<AlignPairDialog *>(parent());
+	//AlignPairDialog * dd = qobject_cast<AlignPairDialog *>(parent());
 	if (allowscaling)
 	{
 		int index = e->x() < (width() / 2) ? 0 : 1;

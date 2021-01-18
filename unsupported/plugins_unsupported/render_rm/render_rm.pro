@@ -1,0 +1,27 @@
+include (../../shared.pri)
+
+QT      += opengl xml
+
+HEADERS  = rmmeshrender.h \
+           rmshaderdialog.h \
+           glstateholder.h \
+           parser/GlState.h \
+           parser/RmEffect.h \
+           parser/RmPass.h \
+           parser/RmXmlParser.h \
+           parser/UniformVar.h
+
+SOURCES  = rmmeshrender.cpp \
+           rmshaderdialog.cpp \
+           glstateholder.cpp \
+           parser/RmPass.cpp \
+           parser/RmXmlParser.cpp \
+           parser/UniformVar.cpp
+!CONFIG(system_glew): SOURCES += $$GLEWCODE
+CONFIG(system_glew) {
+    linux: LIBS += -lGLEW
+}
+
+FORMS    = rmShadowDialog.ui
+
+TARGET   = render_rm

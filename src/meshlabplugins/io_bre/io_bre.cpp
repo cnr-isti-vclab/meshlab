@@ -99,7 +99,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
     if ((result == 0) && (header.Transformed() == true))
     {
       //if transformed before, undo transformation (will be changed soon)
-      Matrix44f inverse = vcg::Inverse(header.Matrix());
+      Matrix44m inverse = vcg::Inverse(header.Matrix());
       m.Tr = inverse;
       return result;
     }
@@ -121,17 +121,17 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
+void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
 {
   
 	if (formatName.toUpper() == tr("BRE"))
 	{
-		parlst.addParam(new RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
+		parlst.addParam(RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
 	}
   
 }
 
-bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
   // initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
@@ -147,7 +147,7 @@ bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileNam
   return true;
 }
 
-bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos *, QWidget * /*parent*/)
+bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
 {
   return false;
 }
@@ -155,10 +155,15 @@ bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*file
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> BreMeshIOPlugin::importFormats() const
+QString BreMeshIOPlugin::pluginName() const
 {
-	QList<Format> formatList;
-	formatList << Format("Breuckmann File Format"	, tr("BRE"));
+	return "IOBRE";
+}
+
+QList<FileFormat> BreMeshIOPlugin::importFormats() const
+{
+	QList<FileFormat> formatList;
+	formatList << FileFormat("Breuckmann File Format"	, tr("BRE"));
 
 	return formatList;
 }
@@ -166,9 +171,9 @@ QList<MeshIOInterface::Format> BreMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> BreMeshIOPlugin::exportFormats() const
+QList<FileFormat> BreMeshIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
+	QList<FileFormat> formatList;
 	//formatList << Format("Breuckmann File Format"	, tr("BRE"));
 	return formatList;
 }
@@ -177,7 +182,7 @@ QList<MeshIOInterface::Format> BreMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
+void BreMeshIOPlugin::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
 	/*if(format.toUpper() == tr("BRE"))
   {
@@ -186,14 +191,14 @@ void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capabi
   }*/
 }
 
-void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
+void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par) 
 {
 	if(format.toUpper() == tr("BRE"))
-		par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
+		par.addParam(RichBool("Unify",true, "Unify Duplicated Vertices",
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
   
 }
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet &/*par*/)
+void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList &/*par*/)
 {
   /*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -202,11 +207,11 @@ void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*
   */
 }
 
-void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par) 
+void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par) 
 {
 	if(format.toUpper() == tr("BRE"))
   {
-		if(par.findParameter("Unify")->val->getBool())
+		if(par.getBool("Unify"))
     {
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
     }
@@ -313,9 +318,9 @@ int vcg::tri::io::BreHeader::Size() const
 }
 
 
-Matrix44f vcg::tri::io::BreHeader::Matrix() const 
+Matrix44m vcg::tri::io::BreHeader::Matrix() const 
 {
-  Matrix44f matrix;
+  Matrix44m matrix;
   float *ptr = (float*) (m_data.data() + 128);
 
   for ( int i=0; i<4; i++) 
@@ -571,7 +576,7 @@ bool vcg::tri::io::VertexGrid::IsValid( int col, int row)
 //function reads in the BreElements, writes them in a VertexGrid and creates a mesh
 int vcg::tri::io::ReadBreElementsInGrid( QFile &file, VertexGrid &grid, CMeshO &m, int dataType, int numberElements, vcg::CallBackPos *cb) 
 {
-  CMeshO::PerMeshAttributeHandle<Point3f> test_index = tri::Allocator<CMeshO>::GetPerMeshAttribute<Point3f>(m, "Camera Position");
+  /*CMeshO::PerMeshAttributeHandle<Point3f> test_index =*/ tri::Allocator<CMeshO>::GetPerMeshAttribute<Point3f>(m, "Camera Position");
   Point3f curPoint;
   QPoint curPixel;
   GLbyte curRed, curGreen, curBlue;
@@ -600,7 +605,7 @@ int vcg::tri::io::ReadBreElementsInGrid( QFile &file, VertexGrid &grid, CMeshO &
   
   //creating mesh
   //going through the whole grid, testing if Valid. 
-  //Only Points that are valid and have enough valid neigbours to form a triangle will be added.
+  //Only Points that are valid and have enough valid neighbours to form a triangle will be added.
   
   float cbstep = ((float)(80)/(float)(num));//for the progress bar
   float cbvalue = 0.f;//for the progress bar

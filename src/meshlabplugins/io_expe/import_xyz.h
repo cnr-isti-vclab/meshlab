@@ -94,7 +94,7 @@ class ImporterXYZ
 				"No errors", "Can't open file", "Invalid file", "Unsupported version"
 			};
 
-			if(message_code>4 || message_code<0)
+			if(message_code>=4 || message_code<0)
 				return "Unknown error";
 			else
 				return error_msg[message_code];
@@ -211,7 +211,7 @@ class ImporterXYZ
         }
       }
       VertexIterator v_iter = Allocator<MESH_TYPE>::AddVertices(mesh,pos.size());
-      for (int i=0; i<pos.size(); ++i)
+      for (size_t i=0; i<pos.size(); ++i)
       {
         v_iter->P() = pos[i];
         v_iter->N() = normals[i];

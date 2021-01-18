@@ -194,8 +194,8 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
         assert(Diam.face[0].FFp(edge0)==&Diam.face[1]);///test
         assert(Diam.face[1].FFp(edge1)==&Diam.face[0]);///test
 
-        ///Evaluate lenght of shared edge
-        ScalarType L0=EstimateLenghtByParam<BaseMesh>(Diam.face[0].V(edge0),Diam.face[0].V((edge0+1)%3),on_edge);
+        ///Evaluate length of shared edge
+        ScalarType L0=EstimateLengthByParam<BaseMesh>(Diam.face[0].V(edge0),Diam.face[0].V((edge0+1)%3),on_edge);
 
         ///do the flip on the copied mesh do not affect the original mesh
         ExecuteFlip(Diam.face[0],edge0);
@@ -214,7 +214,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
             NB_edge=2;
         assert(NB_edge!=-1);
 
-        ScalarType L1=EstimateLenghtByParam<BaseMesh>(Diam.face[0].V(NB_edge),Diam.face[0].V((NB_edge+1)%3),on_edge);
+        ScalarType L1=EstimateLengthByParam<BaseMesh>(Diam.face[0].V(NB_edge),Diam.face[0].V((NB_edge+1)%3),on_edge);
 
         ScalarType value=L0-L1;
         diff=value;
@@ -242,7 +242,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
         v1 = this->_pos.F()->V1(edge0);
         v2 = this->_pos.F()->V2(edge0);
         v3 = this->_pos.F()->FFp(edge0)->V2(this->_pos.F()->FFi(edge0));
-        ///assing texcoords
+        ///assign texcoords
         ScalarType h=(sqrt((ScalarType)3.0)/(ScalarType)2.0);
         v0->T().P()=vcg::Point2<ScalarType>(0,(ScalarType)-0.5);
         v1->T().P()=vcg::Point2<ScalarType>(0,(ScalarType)0.5);

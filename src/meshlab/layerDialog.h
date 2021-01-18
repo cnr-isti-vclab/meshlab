@@ -30,7 +30,7 @@
 #include <QTabWidget>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <common/filterparameter.h>
+#include <common/parameters/rich_parameter_list.h>
 #include <common/ml_shared_data_context.h>
 #include "ml_render_gui.h"
 
@@ -42,8 +42,8 @@ class GLLogStream;
 class MeshModel;
 class RasterModel;
 class MeshDocument;
-class MeshDecorateInterface;
-class StdParFrame;
+class DecoratePluginInterface;
+class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;
 
@@ -99,8 +99,8 @@ public slots:
 private:
     float osDependentButtonHeightScaleFactor();
     MainWindow* mainWin;
-    StdParFrame* frame;
-    RichParameterSet tmpSet;
+    RichParameterListFrame* frame;
+    RichParameterList tmpSet;
     QPushButton* savebut;
     QPushButton* resetbut;
     QPushButton* loadbut;
@@ -113,7 +113,7 @@ class LayerDialog : public QDockWidget
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-	void updateLog(GLLogStream &Log);
+    void updateLog(const GLLogStream& Log);
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();

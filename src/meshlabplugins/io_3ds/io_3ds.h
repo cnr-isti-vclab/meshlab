@@ -42,11 +42,11 @@ public:
     cb=0;
   }
 
-	/// It returns a bit mask describing the field preesnt in the ply file
+	/// It returns a bit mask describing the field present in the ply file
   int mask;  
 
   /// a Simple callback that can be used for long obj parsing. 
-  // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertexes, faces...)
+  // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertices, faces...)
   CallBackPos *cb;
 
   /// number of vertices

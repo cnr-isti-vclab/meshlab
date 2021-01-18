@@ -58,6 +58,11 @@ QhullPlugin::~QhullPlugin()
         delete actionList.at(i);
 }
 
+QString QhullPlugin::pluginName() const
+{
+    return "FilterQHull";
+}
+
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
  QString QhullPlugin::filterName(FilterIDType filterId) const
@@ -98,7 +103,7 @@ QhullPlugin::~QhullPlugin()
         case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
                                           "It uses the Qhull library (http://www.qhull.org/ <br><br>"
                                           "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-                                          "A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.");
+                                          "A point is considered visible if its transformed point lies on the convex hull of a transformed points cloud from the original mesh points.");
         default : assert(0);
     }
     return QString("Error: Unknown Filter");
@@ -106,8 +111,8 @@ QhullPlugin::~QhullPlugin()
 
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
-// More than a single class can be choosen.
- QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
+// More than a single class can be chosen.
+ QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
 {
   switch(ID(a))
     {
@@ -115,9 +120,9 @@ QhullPlugin::~QhullPlugin()
         case FP_QHULL_DELAUNAY_TRIANGULATION :
         case FP_QHULL_VORONOI_FILTERING :
         case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            return FilterClass (MeshFilterInterface::Remeshing) ;
+            return FilterClass (FilterPluginInterface::Remeshing) ;
         case FP_QHULL_VISIBLE_POINTS:
-            return FilterClass (MeshFilterInterface::Selection + MeshFilterInterface::PointSet);
+            return FilterClass (FilterPluginInterface::Selection + FilterPluginInterface::PointSet);
         default : assert(0);
     }
   return FilterClass(0);
@@ -125,17 +130,17 @@ QhullPlugin::~QhullPlugin()
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void QhullPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
 {
      switch(ID(action))	 {
         case FP_QHULL_CONVEX_HULL :
             {
-               //parlst.addParam(new RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
+               //parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
                 break;
             }
         case FP_QHULL_DELAUNAY_TRIANGULATION :
@@ -144,7 +149,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
             }
         case FP_QHULL_VORONOI_FILTERING :
             {
-                parlst.addParam(new RichDynamicFloat("threshold",10.0f, 0.0f, 2000.0f,"Pole Discard Thr",
+                parlst.addParam(RichDynamicFloat("threshold",10.0f, 0.0f, 2000.0f,"Pole Discard Thr",
                 "Threshold used to discard the Voronoi vertices too far from the origin."
                 "We discard vertices are further than this factor times the bbox diagonal <br>"
                 "Growing values of this value will add more Voronoi vertices for a better tightier surface reconstruction."
@@ -154,8 +159,8 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
             }
         case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
             {
-                parlst.addParam(new RichAbsPerc("alpha",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
-                parlst.addParam(new RichEnum("Filtering", 0,
+                parlst.addParam(RichAbsPerc("alpha",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
+                parlst.addParam(RichEnum("Filtering", 0,
                                     QStringList() << "Alpha Complex" << "Alpha Shape" ,
                                     tr("Get:"),
                                     tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex")));
@@ -163,7 +168,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
             }
         case FP_QHULL_VISIBLE_POINTS:
             {
-                parlst.addParam(new RichDynamicFloat("radiusThreshold",
+                parlst.addParam(RichDynamicFloat("radiusThreshold",
                                                  0.0f, 0.0f, 7.0f,
                                                  "radius threshold ","Bounds the radius of the sphere used to select visible points."
                                                  "It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) "
@@ -172,18 +177,18 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
                                                  "As the radius increases more points are marked as visible."
                                                  "Use a big threshold for dense point clouds, a small one for sparse clouds."));
 
-                parlst.addParam(new RichBool ("usecamera",
+                parlst.addParam(RichBool ("usecamera",
                                                 false,
                                                 "Use ViewPoint from Mesh Camera",
                                                 "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
-                parlst.addParam(new RichPoint3f("viewpoint",
+                parlst.addParam(RichPoint3f("viewpoint",
                                                 Point3f(0.0f, 0.0f, 0.0f),
                                                 "ViewPoint",
                                                 "if UseCamera is true, this value is ignored"));
 
-                parlst.addParam(new RichBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud"));
-                parlst.addParam(new RichBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points"));
-                //parlst.addParam(new RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
+                parlst.addParam(RichBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud"));
+                parlst.addParam(RichBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points"));
+                //parlst.addParam(RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
                 //                "If no Convex Hulls are selected , this value is ignored"));
                 break;
                 break;
@@ -193,7 +198,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */* cb*/)
+bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos */* cb*/)
 {
     switch(ID(filter))
     {
@@ -204,6 +209,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                 pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
                 bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
                 pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+                pm.UpdateBoxAndNormals();
                 return result;
             }
         case FP_QHULL_DELAUNAY_TRIANGULATION:
@@ -266,7 +272,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                     }
 
                     assert(pm.cm.fn == ridgeCount);
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
                     //m.cm.Clear();
 
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -295,7 +301,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                 int dim= 3;				/* dimension of points */
                 int numpoints= m.cm.vn;	/* number of mesh vertices */
 
-                float threshold = par.getDynamicFloat("threshold");
+                Scalarm threshold = par.getDynamicFloat("threshold");
 
                 bool result = compute_voronoi(dim,numpoints,m,pm,threshold);
 
@@ -303,7 +309,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
                     return true;
                 }
@@ -353,8 +359,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                     //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
                     //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
                     pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-                    Log("Alpha = %f ",alpha);
+                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                    log("Alpha = %f ",alpha);
                     //m.cm.Clear();
 
                     return true;
@@ -376,7 +382,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 
                 bool usecam = par.getBool("usecamera");
                 Point3m viewpoint = par.getPoint3m("viewpoint");
-                float threshold = par.getDynamicFloat("radiusThreshold");
+                Scalarm threshold = par.getDynamicFloat("radiusThreshold");
 
                 // if usecamera but mesh does not have one
                 if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
@@ -405,7 +411,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                 if(!triangVP)
                     md.delMesh(&pm2);
                 if(result>=0){
-                    Log("Selected %i visible points", result);
+                    log("Selected %i visible points", result);
                     return true;
                 }
                 else return false;

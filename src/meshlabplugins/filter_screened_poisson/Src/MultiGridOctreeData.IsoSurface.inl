@@ -26,6 +26,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#include "MultiGridOctreeData.h"
+
 #include "Octree.h"
 #include "MyTime.h"
 #include "MemoryUsage.h"
@@ -316,7 +318,7 @@ void Octree< Real >::_setSliceIsoVertices( const BSplineData< ColorDegree , BTyp
 				neighborKey.getNeighbors( leaf );
 				if( densityWeights ) weightKey.getNeighbors( leaf );
 				if( colorData ) colorKey.getNeighbors( leaf );
-				for( int e=0 ; e<Square::EDGES ; e++ )
+				for( unsigned int e=0 ; e<Square::EDGES ; e++ )
 					if( MarchingSquares::HasEdgeRoots( sValues.mcIndices[idx] , e ) )
 					{
 						int vIndex = eIndices[e];
@@ -344,7 +346,7 @@ void Octree< Real >::_setSliceIsoVertices( const BSplineData< ColorDegree , BTyp
 							if( stillOwner )
 							{
 								// We only need to pass the iso-vertex down if the edge it lies on is adjacent to a coarser leaf
-								bool isNeeded;
+								bool isNeeded = false;
 								switch( o )
 								{
 								case 0: isNeeded = ( !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][1] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][2*z] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][1][2*z] ) ) ; break;
@@ -762,11 +764,11 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 		if( inBounds && !IsActiveNode( leaf->children ) )
 		{
 			edges.clear();
-			unsigned char mcIndex = ( bValues.mcIndices[ i - bValues.sliceData.nodeOffset ] ) | ( fValues.mcIndices[ i - fValues.sliceData.nodeOffset ]<<4 );
+			//unsigned char mcIndex = ( bValues.mcIndices[ i - bValues.sliceData.nodeOffset ] ) | ( fValues.mcIndices[ i - fValues.sliceData.nodeOffset ]<<4 );
 			// [WARNING] Just because the node looks empty doesn't mean it doesn't get eges from finer neighbors
 			{
 				// Gather the edges from the faces (with the correct orientation)
-				for( int f=0 ; f<Cube::FACES ; f++ )
+				for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 				{
 					int d , o;
 					Cube::FactorFaceIndex( f , d , o );
@@ -825,8 +827,9 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 					long long start = edge[0] , current = edge[1];
 					while( current!=start )
 					{
-						int idx;
-						for( idx=0 ; idx<(int)edges.size() ; idx++ ) if( edges[idx][0]==current ) break;
+						unsigned int idx;
+						for( idx=0 ; idx<edges.size() ; idx++ )
+							if( edges[idx][0]==current ) break;
 						if( idx==edges.size() )
 						{
 							typename std::unordered_map< long long, long long >::const_iterator iter;
@@ -1050,12 +1053,14 @@ int Octree< Real >::_addIsoPolygons( CoredMeshData< Vertex >& mesh , std::vector
 		std::vector< int > triangle( 3 );
 
 		if( addBarycenter )
-			for( int i=0 ; i<(int)polygon.size() ; i++ )
-				for( int j=0 ; j<i ; j++ )
+			for( unsigned int i=0 ; i<polygon.size() ; i++ )
+				for( unsigned int j=0 ; j<i ; j++ )
 					if( (i+1)%polygon.size()!=j && (j+1)%polygon.size()!=i )
 					{
 						Vertex v1 = polygon[i].second , v2 = polygon[j].second;
-						for( int k=0 ; k<3 ; k++ ) if( v1.point[k]==v2.point[k] ) isCoplanar = true;
+						for( int k=0 ; k<3 ; k++ )
+							if( v1.point[k]==v2.point[k] )
+								isCoplanar = true;
 					}
 		if( isCoplanar )
 		{

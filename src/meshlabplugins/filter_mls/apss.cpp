@@ -24,7 +24,7 @@
 #include <qglobal.h>
 #include "apss.h"
 #include "apss.tpp"
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 namespace GaelMls {
 
 template class APSS<CMeshO>;

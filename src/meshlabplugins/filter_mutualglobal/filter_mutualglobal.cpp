@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_mutualglobal.h"
-#include <QtScript>
+#include <common/GLExtensionsManager.h>
 
 #include "alignset.h"
 
@@ -38,7 +38,9 @@
 
 #include <vcg/complex/algorithms/point_sampling.h>
 
-// Constructor usually performs only two simple tasks of filling the two lists 
+#include <QElapsedTimer>
+
+// Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
@@ -46,67 +48,83 @@ AlignSet alignset;
 
 
 
-FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
-{ 
-	typeList << FP_IMAGE_GLOBALIGN;
-  
+FilterMutualGlobal::FilterMutualGlobal()
+{
+    typeList << FP_IMAGE_GLOBALIGN;
+
   foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+      actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
+QString FilterMutualGlobal::pluginName() const
+{
+    return "FilterMutualGlobal";
+}
+
+// ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
+QString FilterMutualGlobal::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information"); 
-		default : assert(0); 
-	}
+        case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information");
+        default : assert(0);
+    }
   return QString();
 }
 
-// Info() must return the longer string describing each filtering action 
+// Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
+ QString FilterMutualGlobal::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!"); 
-		default : assert(0); 
-	}
-	return QString("Unknown Filter");
+        case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!");
+        default : assert(0);
+    }
+    return QString("Unknown Filter");
 }
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
-// More than a single class can be choosen.
-FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
+// The FilterClass describes in which generic class of filters it fits.
+// This choice affect the submenu in which each filter will be placed
+// More than a single class can be chosen.
+FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(const QAction *a) const
 {
   switch(ID(a))
-	{
-		case FP_IMAGE_GLOBALIGN :  return MeshFilterInterface::Camera; 
-		default : assert(0); 
+    {
+        case FP_IMAGE_GLOBALIGN :  return FilterPluginInterface::Camera;
+        default : assert(0);
+    }
+  return FilterPluginInterface::Generic;
+}
+
+bool FilterMutualGlobal::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)) {
+	case FP_IMAGE_GLOBALIGN:
+		return true;
+	default:
+		assert(0);
 	}
-	return MeshFilterInterface::Generic;
+	return false;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
+// For each parameter you need to define,
+// - the name of the parameter,
+// - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterSet & parlst) 
+void FilterMutualGlobal::initParameterList(const QAction *action,MeshDocument & md, RichParameterList & parlst)
 {
-	QStringList rendList; 
+	QStringList rendList;
 	switch(ID(action))	 {
-		case FP_IMAGE_GLOBALIGN :  
-			//parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+		case FP_IMAGE_GLOBALIGN :
+			//parlst.addParam(RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
 				//								"The mesh on which the image must be aligned"));
-			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
+			/*parlst.addParam(RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
 												"The mesh on which the image must be aligned"));*/
-			
-			
+
+
 			rendList.push_back("Combined");
 			rendList.push_back("Normal map");
 			rendList.push_back("Color per vertex");
@@ -115,76 +133,80 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 			rendList.push_back("Specular combined");
 
 			//rendList.push_back("ABS Curvature");
-			parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
-                                QString("Rendering modes")));
-			
-			//parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-			
-			parlst.addParam(new RichInt ("Max number of refinement steps",
+			parlst.addParam(RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
+								QString("Rendering modes")));
+
+			//parlst.addParam(RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+
+			parlst.addParam(RichInt ("Max number of refinement steps",
 				5,
 				"Maximum number of minimizations step",
 				"Maximum number of minimizations step on the global graph"));
-			parlst.addParam(new RichFloat ("Threshold for refinement convergence",
+			parlst.addParam(RichFloat ("Threshold for refinement convergence",
 				1.2,
 				"Threshold for refinement convergence (in pixels)",
 				"The threshold (average quadratic variation in the projection on image plane of some samples of the mesh before and after each step of refinement) that stops the refinement"));
 
-			parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
-			parlst.addParam(new RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
-			parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
+			parlst.addParam(RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
+			parlst.addParam(RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
+			parlst.addParam(RichBool("Fine",true,"Fine Alignment","Fine alignment"));
 
- 		  /*parlst.addParam(new RichBool ("UpdateNormals",
+		  /*parlst.addParam(RichBool ("UpdateNormals",
 											true,
 											"Recompute normals",
 											"Toggle the recomputation of the normals after the random displacement.\n\n"
 											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-			parlst.addParam(new RichAbsPerc("Displacement",
+			parlst.addParam(RichAbsPerc("Displacement",
 												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
 												"Max displacement",
 												"The vertex are displaced of a vector whose norm is bounded by this value"));*/
 											break;
 
 
-		
-											
-		default : assert(0); 
+
+
+		default : assert(0);
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
-	QTime filterTime;
+	if (glContext == nullptr){
+		errorMessage = "Fatal error: glContext not initialized";
+		return false;
+	}
+	QElapsedTimer filterTime;
 	filterTime.start();
 
-	float thresDiff=par.getFloat("Threshold for refinement convergence");
+	Scalarm thresDiff=par.getFloat("Threshold for refinement convergence");
 
 	std::vector<vcg::Point3f> myVec;
 	int leap=(int)((float)md.mm()->cm.vn/1000.0f);
-	CMeshO::VertexIterator vi;
-	for(int i=0;i<=md.mm()->cm.vn;i=i+leap) 
+	//CMeshO::VertexIterator vi;
+	for(int i=0;i<=md.mm()->cm.vn;i=i+leap)
 	{
 		myVec.push_back(md.mm()->cm.vert[i].P());
 	}
-	std::vector<vcg::Shotf> oldShots;
+	std::vector<Shotm> oldShots;
 	for (int r=0; r<md.rasterList.size();r++)
 	{
 		oldShots.push_back(md.rasterList[r]->shot);
 	}
 
-	Log(0,"Sampled has %i vertices",myVec.size());
-	
+	log(0,"Sampled has %i vertices",myVec.size());
+
 	std::vector<SubGraph> Graphs;
 	/// Preliminary singular alignment using classic MI
 	switch(ID(action))	 {
-		case FP_IMAGE_GLOBALIGN :  
+		case FP_IMAGE_GLOBALIGN :
 			/// Building of the graph of images
 			if (md.rasterList.size()==0)
 			{
-				 Log(0, "You need a Raster Model to apply this filter!");
+				 log(0, "You need a Raster Model to apply this filter!");
 				 return false;
-				 
+
 			}
 
 			this->glContext->makeCurrent();
@@ -198,14 +220,14 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 
 			if (par.getInt("Max number of refinement steps")!=0)
 			{
-				
+
 				Graphs=buildGraph(md);
-				Log(0, "BuildGraph completed");
+				log(0, "BuildGraph completed");
 				for (int i=0; i<par.getInt("Max number of refinement steps"); i++)
 				{
 					AlignGlobal(md, Graphs);
 					float diff=calcShotsDifference(md,oldShots,myVec);
-					Log(0, "AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
+					log(0, "AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
 					if (diff<thresDiff)
 						break;
 					oldShots.clear();
@@ -215,15 +237,15 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 					}
 				}
 			}
-			
+
 			this->glContext->doneCurrent();
-			Log(0, "Done!");
+			log(0, "Done!");
 			break;
-		
-		default : assert(0); 
+
+		default : assert(0);
 	}
 
-	Log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
+	log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
 
 		return true;
 
@@ -231,7 +253,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 
 }
 
-float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points)
+float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points)
 {
 	std::vector<float> distances;
 	for (int i=0; i<points.size(); i++)
@@ -257,17 +279,16 @@ float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<
 
 }
 
-void FilterMutualInfoPlugin::initGL()
+void FilterMutualGlobal::initGL()
 {
-  GLenum err = glewInit();
-  Log(0, "GL Initialization");
-  if (GLEW_OK != err) {
-    Log(0, "GLEW initialization error!");
+  log(0, "GL Initialization");
+  if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
+    log(0, "GLEW initialization error!");
     exit(-1);
   }
 
   if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-    Log(0, "Graphics hardware does not support FBOs");
+    log(0, "Graphics hardware does not support FBOs");
     exit(0);
   }
   if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -277,11 +298,11 @@ void FilterMutualInfoPlugin::initGL()
   }
 
   if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-    Log(0,"Graphics hardware does not support non-power-of-two textures");
+    log(0,"Graphics hardware does not support non-power-of-two textures");
     exit(0);
   }
   if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-    Log(0, "Graphics hardware does not support vertex buffer objects");
+    log(0, "Graphics hardware does not support vertex buffer objects");
     exit(0);
   }
 
@@ -319,54 +340,54 @@ void FilterMutualInfoPlugin::initGL()
   //alignset.resize(800);
   assert(glGetError() == 0);
 
-  Log(0, "GL Initialization done");
+  log(0, "GL Initialization done");
 
 }
 
-QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID )
+QString FilterMutualGlobal::filterScriptFunctionName( FilterIDType filterID )
 {
 	switch(filterID) {
-		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment"); 
-		default : assert(0); 
+		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment");
+		default : assert(0);
 	}
 	return QString();
 }
 
-bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList & par, vcg::CallBackPos *cb)
 {
 	Solver solver;
 	MutualInfo mutual;
 	if (md.rasterList.size()==0)
 	{
-		 Log(0, "You need a Raster Model to apply this filter!");
+		 log(0, "You need a Raster Model to apply this filter!");
 		 return false;
 	}
 	else {
 
 	alignset.mesh=&md.mm()->cm;
-	
+
 	solver.optimize_focal=par.getBool("Estimate Focal");
 	solver.fine_alignment=par.getBool("Fine");
 
 	int rendmode= par.getEnum("RenderingMode");
-			
-			switch(rendmode){ 
-				case 0: 
+
+			switch(rendmode){
+				case 0:
 					alignset.mode=AlignSet::COMBINE;
 					break;
-				case 1: 
+				case 1:
 					alignset.mode=AlignSet::NORMALMAP;
 					break;
-				case 2: 
+				case 2:
 					alignset.mode=AlignSet::COLOR;
 					break;
-				case 3: 
+				case 3:
 					alignset.mode=AlignSet::SPECULAR;
 					break;
-				case 4: 
+				case 4:
 					alignset.mode=AlignSet::SILHOUETTE;
 					break;
-				case 5: 
+				case 5:
 					alignset.mode=AlignSet::SPECAMB;
 					break;
 				default:
@@ -374,7 +395,7 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 					break;
 			}
 
-	vcg::Point3f *vertices = new vcg::Point3f[alignset.mesh->vn];
+    vcg::Point3f *vertices = new vcg::Point3f[alignset.mesh->vn];
   vcg::Point3f *normals = new vcg::Point3f[alignset.mesh->vn];
   vcg::Color4b *colors = new vcg::Color4b[alignset.mesh->vn];
   unsigned int *indices = new unsigned int[alignset.mesh->fn*3];
@@ -385,23 +406,23 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
     colors[i] = alignset.mesh->vert[i].C();
   }
 
-  for(int i = 0; i < alignset.mesh->fn; i++) 
-    for(int k = 0; k < 3; k++) 
+  for(int i = 0; i < alignset.mesh->fn; i++)
+    for(int k = 0; k < 3; k++)
       indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
                   vertices, GL_STATIC_DRAW_ARB);
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
                   normals, GL_STATIC_DRAW_ARB);
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b), 
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
                   colors, GL_STATIC_DRAW_ARB);
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
   glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
-  glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int), 
+  glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
                   indices, GL_STATIC_DRAW_ARB);
   glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
@@ -418,7 +439,7 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 		{
 				alignset.image=&md.rasterList[r]->currentPlane->image;
 				alignset.shot=md.rasterList[r]->shot;
-				
+
 				alignset.resize(800);
 
 				alignset.shot.Intrinsics.ViewportPx[0]=int((double)alignset.shot.Intrinsics.ViewportPx[1]*alignset.image->width()/alignset.image->height());
@@ -429,9 +450,9 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 				else
 				{
 				solver.iterative(&alignset, &mutual, alignset.shot);
-				Log(0, "Vado di rough",r);
+				log(0, "Vado di rough",r);
 				}
-				
+
 				md.rasterList[r]->shot=alignset.shot;
 				float ratio=(float)md.rasterList[r]->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
 				md.rasterList[r]->shot.Intrinsics.ViewportPx[0]=md.rasterList[r]->currentPlane->image.width();
@@ -441,37 +462,37 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 				md.rasterList[r]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[0]/2.0);
 				md.rasterList[r]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[1]/2.0);
 
-				Log(0, "Image %d completed",r);
-				
+				log(0, "Image %d completed",r);
+
 		}
 		else
-			Log(0, "Image %d skipped",r);
+			log(0, "Image %d skipped",r);
 		}
 	}
-	
+
 	return true;
 }
 
-std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md, bool globalign)
+std::vector<SubGraph> FilterMutualGlobal::buildGraph(MeshDocument &md, bool globalign)
 {
-		
+
 	std::vector<AlignPair> allArcs;
-		
+
 	allArcs=CalcPairs(md, globalign);
-	Log(0, "Calcpairs completed");
+	log(0, "Calcpairs completed");
 	return CreateGraphs(md, allArcs);
-		 
+
 }
 
-std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool globalign)
+std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool globalign)
 {
 	Solver solver;
 	MutualInfo mutual;
-	
+
 	std::vector<AlignPair> list;
 
 	alignset.mesh=&md.mm()->cm;
-	
+
 	/*solver.optimize_focal=true;
 	solver.fine_alignment=true;*/
 
@@ -487,23 +508,23 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 			colors[i] = alignset.mesh->vert[i].C();
 		}
 
-		for(int i = 0; i < alignset.mesh->fn; i++) 
-		for(int k = 0; k < 3; k++) 
+		for(int i = 0; i < alignset.mesh->fn; i++)
+		for(int k = 0; k < 3; k++)
 		indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 				  vertices, GL_STATIC_DRAW_ARB);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 				  normals, GL_STATIC_DRAW_ARB);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b), 
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
 				  colors, GL_STATIC_DRAW_ARB);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
-		glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int), 
+		glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
 				  indices, GL_STATIC_DRAW_ARB);
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
@@ -515,7 +536,7 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 	}
 
 	//alignset.mode=AlignSet::PROJIMG;
-		
+
 	//this->glContext->makeCurrent();
 	for (int r=0; r<md.rasterList.size(); r++)
 	{
@@ -568,7 +589,7 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 							}
 						}
 						pair.area=countCol/countTot;
-											
+
 						if (pair.area>0.2)
 						{
 							pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
@@ -581,12 +602,12 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 				}
 			}
 
-			Log(0, "Image %d completed",r);
+			log(0, "Image %d completed",r);
 			if (!globalign)
 			{
 				for (int i=0; i<weightList.size(); i++)
 				{
-					Log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
+					log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
 					list.push_back(weightList[i]);
 
 				}
@@ -638,38 +659,38 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 						/*covered.save("covered.jpg");
 						alignset.rend.save("rend.jpg");
 						alignset.comb.save("comb.jpg");*/
-						
+
 						pair.area*=countCov/countTot;
 						pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
 						pair.imageId=r;
 						pair.projId=p;
 						pair.weight=weightList[i].weight;
 						list.push_back(pair);
-						Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
+						log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
 					}
 			}
-			
+
 		}
 		}
 //////////////////////////////////////////////////////
 
-	
 
-	Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
-		
-	
+
+	log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
+
+
 		//emit md.rasterSetChanged();
 	//this->glContext->doneCurrent();
 	return list;
 
 }
 
-std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs)
+std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs)
 {
 	std::vector<SubGraph> Gr;
 	SubGraph allNodes;
 	int numNodes=md.rasterList.size();
-	Log(0, "Tuttok1");
+	log(0, "Tuttok1");
 	for (int s=0; s<numNodes; s++)
 	{
 		Node n;
@@ -712,7 +733,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 		}
 	int involvedNodes=nod.size();
 	int totNodes=0;
-	Log(0, "Tuttok2");
+	log(0, "Tuttok2");
 	while (!done)
 	{
 		for (int i=0; i<arcs.size(); i++)
@@ -741,22 +762,22 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 			done=true;
 		else totGr++;
 	}
-	Log(0, "Tuttok3");
-	
+	log(0, "Tuttok3");
+
 	for (int i=1; i<totGr+1; i++)
 	{
 		SubGraph graph;
 		graph.id=i;
 		for (int j=0; j<numNodes; j++)
 		{
-			Log(0, "Node %d of %d",j,numNodes);
+			log(0, "Node %d of %d",j,numNodes);
 			if (allNodes.nodes[j].grNum==i)
 			{
 				Node n;
 				double mut=0.0; double are=0.00001;
 				if(md.rasterList[j]->visible)
 					n.active=false;
-				else 
+				else
 					n.active=true;
 				n.id=j;
 				n.avMut=0.0;
@@ -771,7 +792,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 				}
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
 				graph.nodes.push_back(n);
-				Log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
+				log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
 			}
 			else
 				{
@@ -780,18 +801,18 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 				n.id=j;
 				n.avMut=0.0;
 				graph.nodes.push_back(n);
-				Log(0, "Node %d of %d: not used",j,numNodes);
+				log(0, "Node %d of %d: not used",j,numNodes);
 			}
 		}
 		Gr.push_back(graph);
 	}
-	Log(0, "Tuttok5");
-	Log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
-	
+	log(0, "Tuttok5");
+	log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
+
 	return Gr;
 }
 
-bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs)
+bool FilterMutualGlobal::AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs)
 {
 	for (int j=0; j<1; j++)
 	{
@@ -822,7 +843,7 @@ bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph>
 	return true;
 }
 
-int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
+int FilterMutualGlobal::getTheRightNode(SubGraph graph)
 {
 	int bestLinks=0; int bestActive=-1;
 	int cand;
@@ -838,13 +859,13 @@ int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
 			}
 			if (act>bestActive)
 			{
-				bestActive=act;			
+				bestActive=act;
 				bestLinks=graph.nodes[k].arcs.size();
 				cand=k;
 			}
 			else if (act==bestActive && graph.nodes[k].avMut>graph.nodes[cand].avMut)
 			{
-				bestActive=act;			
+				bestActive=act;
 				bestLinks=graph.nodes[k].arcs.size();
 				cand=k;
 			}
@@ -854,7 +875,7 @@ int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
 
 }
 
-bool FilterMutualInfoPlugin::allActive(SubGraph graph)
+bool FilterMutualGlobal::allActive(SubGraph graph)
 {
 	for (int k=0; k<graph.nodes.size(); k++)
 	{
@@ -866,13 +887,13 @@ bool FilterMutualInfoPlugin::allActive(SubGraph graph)
 
 }
 
-bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
+bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 {
 	Solver solver;
 	MutualInfo mutual;
 
 	alignset.mode=AlignSet::NODE;
-	alignset.node=&node;
+	//alignset.node=&node;
 
 	alignset.image=&md.rasterList[node.id]->currentPlane->image;
 	alignset.shot=md.rasterList[node.id]->shot;
@@ -906,7 +927,7 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	}
 
 	alignset.ProjectedMultiImageChanged();
-	
+
 	/*solver.optimize_focal=true;
 	solver.fine_alignment=true;*/
 
@@ -925,23 +946,23 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	colors[i] = alignset.mesh->vert[i].C();
 	}
 
-	for(int i = 0; i < alignset.mesh->fn; i++) 
-	for(int k = 0; k < 3; k++) 
+	for(int i = 0; i < alignset.mesh->fn; i++)
+	for(int k = 0; k < 3; k++)
 	indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 			  vertices, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 			  normals, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
 			  colors, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
-	glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int), 
+	glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
 			  indices, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
@@ -951,12 +972,12 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	delete []normals;
 	delete []colors;
 	delete []indices;
-	
-    //alignset.shot=par.getShotf("Shot");
-		
+
+	//alignset.shot=par.getShotf("Shot");
+
 	alignset.shot.Intrinsics.ViewportPx[0]=int((double)alignset.shot.Intrinsics.ViewportPx[1]*alignset.image->width()/alignset.image->height());
 	alignset.shot.Intrinsics.CenterPx[0]=(int)(alignset.shot.Intrinsics.ViewportPx[0]/2);
-	
+
 	int iter;
 	if (solver.fine_alignment)
 		iter=solver.optimize(&alignset, &mutual, alignset.shot);
@@ -964,8 +985,8 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 		solver.iterative(&alignset, &mutual, alignset.shot);
 	//alignset.renderScene(alignset.shot, 3);
 	//alignset.readRender(0);
-		
-	
+
+
 	//md.rasterList[node.id]->shot=alignset.shot;
 	md.rasterList[node.id]->shot=alignset.shot;
 	float ratio=(float)md.rasterList[node.id]->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
@@ -991,11 +1012,11 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	return true;
 }
 
-bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
+bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 {
 	Solver solver;
 	MutualInfo mutual;
-	
+
 	alignset.mesh=&md.mm()->cm;
 
 	vcg::Point3f *vertices = new vcg::Point3f[alignset.mesh->vn];
@@ -1009,23 +1030,23 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 	colors[i] = alignset.mesh->vert[i].C();
 	}
 
-	for(int i = 0; i < alignset.mesh->fn; i++) 
-	for(int k = 0; k < 3; k++) 
+	for(int i = 0; i < alignset.mesh->fn; i++)
+	for(int k = 0; k < 3; k++)
 	indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 	  vertices, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
 	  normals, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b), 
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
 	  colors, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
-	glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int), 
+	glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
 	  indices, GL_STATIC_DRAW_ARB);
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
@@ -1035,7 +1056,7 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 	delete []normals;
 	delete []colors;
 	delete []indices;
-	
+
 	for (int h=0; h<graph.nodes.size(); h++)
 		for (int l=0; l<graph.nodes[h].arcs.size(); l++)
 		{
@@ -1046,14 +1067,14 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 				int imageProj=graph.nodes[h].arcs[l].projId;
 
 				//this->glContext->makeCurrent();
-				
+
 				alignset.image=&md.rasterList[imageId]->currentPlane->image;
 				alignset.shot=md.rasterList[imageId]->shot;
 
 				//this->initGL();
 				alignset.resize(800);
 
-				
+
 
 				//alignset.shot=par.getShotf("Shot");
 
@@ -1087,8 +1108,8 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 					}
 				graph.nodes[h].arcs[l].area=countCol/countTot;*/
 				graph.nodes[h].arcs[l].mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
-					
-					
+
+
 				//this->glContext->doneCurrent();
 
 //////////////////////////77

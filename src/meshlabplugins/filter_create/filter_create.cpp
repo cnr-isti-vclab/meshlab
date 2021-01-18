@@ -44,6 +44,11 @@ FilterCreate::FilterCreate()
       actionList << new QAction(filterName(tt), this);
 }
 
+QString FilterCreate::pluginName() const
+{
+    return "FilterCreate";
+}
+
 QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
@@ -88,67 +93,67 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet & parlst)
+void FilterCreate::initParameterList(const QAction *action, MeshModel & /*m*/, RichParameterList & parlst)
 {
   switch(ID(action))	 {
 
   case CR_SPHERE :
-    parlst.addParam(new RichFloat("radius",1,"Radius","Radius of the sphere"));
-    parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+    parlst.addParam(RichFloat("radius",1,"Radius","Radius of the sphere"));
+    parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
     break;
 
   case CR_SPHERE_CAP :
-    parlst.addParam(new RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
-    parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+    parlst.addParam(RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
+    parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
     break;
   case CR_ANNULUS :
-    parlst.addParam(new RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
-    parlst.addParam(new RichFloat("externalRadius",1.0f,"External Radius","Externale Radius of the annulus"));
-    parlst.addParam(new RichInt("sides",32,"Sides","Number of the sides of the poligonal approximation of the annulus "));
+    parlst.addParam(RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
+    parlst.addParam(RichFloat("externalRadius",1.0f,"External Radius","Externale Radius of the annulus"));
+    parlst.addParam(RichInt("sides",32,"Sides","Number of the sides of the poligonal approximation of the annulus "));
     break;
   case CR_RANDOM_SPHERE :
-    parlst.addParam(new RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
-    parlst.addParam(new RichEnum("sphereGenTech", 3,
+    parlst.addParam(RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
+    parlst.addParam(RichEnum("sphereGenTech", 3,
                                  QStringList() << "Montecarlo" << "Poisson Sampling" << "DiscoBall" << "Octahedron" << "Fibonacci",
                                  tr("Generation Technique:"),
                                  tr("Generation Technique:"
                                         "<b>Montecarlo</b>: The points are randomly generated with an uniform distribution.<br>"
                                         "<b>Poisson Disk</b>: The points are to follow a poisson disk distribution.<br>"
                                         "<b>Disco Ball</b> Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used. <br>"
-                                        "<b>Recursive Octahedron</b> Points are genereate on the vertex of a recursively subdivided octahedron <br>"
+                                        "<b>Recursive Octahedron</b> Points are generated on the vertex of a recursively subdivided octahedron <br>"
                                         "<b>Fibonacci</b> . "
                                         )));
 
     break;
   case CR_BOX :
-    parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
+    parlst.addParam(RichFloat("size",1,"Scale factor","Scales the new mesh"));
     break;
   case CR_CONE:
-    parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
-    parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
-    parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
-    parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
+    parlst.addParam(RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
+    parlst.addParam(RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
+    parlst.addParam(RichFloat("h",3,"Height","Height of the Cone"));
+    parlst.addParam(RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
     break;
 
   case CR_TORUS:
-    parlst.addParam(new RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
-    parlst.addParam(new RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
-    parlst.addParam(new RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
-    parlst.addParam(new RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
+    parlst.addParam(RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
+    parlst.addParam(RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
+    parlst.addParam(RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
+    parlst.addParam(RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
     break;
 
   case CR_FITPLANE:
-	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "Howe large is the plane, with respect to the size of the selction: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
-	  parlst.addParam(new RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
-	  parlst.addParam(new RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
-	  parlst.addParam(new RichEnum("orientation", 0,
+      parlst.addParam(RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
+      parlst.addParam(RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
+      parlst.addParam(RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
+      parlst.addParam(RichEnum("orientation", 0,
 		  QStringList() << "quasi-Straight Fit" << "Best Fit" << "XZ Parallel" << "YZ Parallel" << "YX Parallel",
 		  tr("Plane orientation"),
 		  tr("Orientation:"
@@ -162,10 +167,10 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
+bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, CallBackPos * /*cb*/)
 {
 	MeshModel *currM = md.mm();
-	MeshModel *m;
+	MeshModel *m = nullptr;
 
 	switch(ID(filter))	 
 	{
@@ -173,7 +178,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Tetrahedron<CMeshO>(m->cm);
 		break;
-    case CR_ICOSAHEDRON:
+	case CR_ICOSAHEDRON:
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Icosahedron<CMeshO>(m->cm);
 		break;
@@ -189,17 +194,17 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 	case CR_ANNULUS:
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"), par.getFloat("externalRadius"), par.getInt("sides"));
-      break;
-
+		break;
 	case CR_TORUS:
-    {
-		m = md.addNewMesh("", this->filterName(ID(filter)));
-		float hRadius=par.getFloat("hRadius");
-		float vRadius=par.getFloat("vRadius");
-		int hSubdiv=par.getInt("hSubdiv");
-		int vSubdiv=par.getInt("vSubdiv");
-		tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
-	} break;
+		{
+			m = md.addNewMesh("", this->filterName(ID(filter)));
+			Scalarm hRadius=par.getFloat("hRadius");
+			Scalarm vRadius=par.getFloat("vRadius");
+			int hSubdiv=par.getInt("hSubdiv");
+			int vSubdiv=par.getInt("vSubdiv");
+			tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
+		}
+		break;
 
 	case CR_FITPLANE:
 	{
@@ -235,7 +240,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			selected_pts.push_back(p);
 			Naccum = Naccum + (*vi).N();
 		}
-		Log("Using %i vertexes to build a fitting  plane", int(selected_pts.size()));
+		log("Using %i vertices to build a fitting plane", int(selected_pts.size()));
 		Plane3m plane;
 		FitPlaneToPointSet(selected_pts, plane);
 		plane.Normalize();
@@ -248,9 +253,9 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		float errorSum = 0;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
-		Log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
-		Log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
-		Log("Fitting Plane offset is %f", plane.Offset());
+		log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
+		log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		log("Fitting Plane offset is %f", plane.Offset());
 
 		// find center of selection on plane
 		Point3m centerP;
@@ -259,7 +264,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			centerP += plane.Projection(selected_pts[i]);
 		}
 		centerP /= selected_pts.size();
-		Log("center [%f, %f, %f]", centerP.X(), centerP.Y(), centerP.Z());
+		log("center [%f, %f, %f]", centerP.X(), centerP.Y(), centerP.Z());
 
 		// find horizontal and vertical axis
 		Point3m dirH, dirV;
@@ -355,28 +360,28 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			}
 		}
 
-		Log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
-		Log("V [%f, %f, %f]", dirV.X(), dirV.Y(), dirV.Z());
+		log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
+		log("V [%f, %f, %f]", dirV.X(), dirV.Y(), dirV.Z());
 
 
 		// find extent
-		float dimH = -1000000;
-		float dimV = -1000000;
+		Scalarm dimH = -1000000;
+		Scalarm dimV = -1000000;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 		{
 			Point3m pp = plane.Projection(selected_pts[i]);
-			float distH = fabs(((pp - centerP) * dirH));
-			float distV = fabs(((pp - centerP) * dirV));
+			Scalarm distH = fabs(((pp - centerP) * dirH));
+			Scalarm distV = fabs(((pp - centerP) * dirV));
 
 			if (distH > dimH)
 				dimH = distH;
 			if (distV > dimV)
 				dimV = distV;
 		}
-		float exScale = par.getFloat("extent");
+		Scalarm exScale = par.getFloat("extent");
 		dimV = dimV * exScale;
 		dimH = dimH * exScale;
-		Log("extent on plane [%f, %f]", dimV, dimH);
+		log("extent on plane [%f, %f]", dimV, dimH);
 
 		int vertNum = par.getInt("subdiv") + 1;
 		if (vertNum <= 1) vertNum = 2;
@@ -477,7 +482,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 	case CR_SPHERE_CAP:
 	{
 		int rec = par.getInt("subdiv");
-		const float angleDeg = par.getFloat("angle");
+		const Scalarm angleDeg = par.getFloat("angle");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
@@ -487,7 +492,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 	case CR_SPHERE:
     {
 		int rec = par.getInt("subdiv");
-		float radius = par.getFloat("radius");
+		Scalarm radius = par.getFloat("radius");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		m->cm.face.EnableFFAdjacency();
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -498,7 +503,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
     case CR_BOX:
     {
-      float sz=par.getFloat("size");
+      Scalarm sz=par.getFloat("size");
       Box3m b(Point3m(1,1,1)*(-sz/2),Point3m(1,1,1)*(sz/2));
 	  m = md.addNewMesh("", this->filterName(ID(filter)));
       tri::Box<CMeshO>(m->cm,b);
@@ -507,9 +512,9 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
 	case CR_CONE:
 	{
-		float r0 = par.getFloat("r0");
-		float r1 = par.getFloat("r1");
-		float h = par.getFloat("h");
+		Scalarm r0 = par.getFloat("r0");
+		Scalarm r1 = par.getFloat("r1");
+		Scalarm h = par.getFloat("h");
 		int subdiv = par.getInt("subdiv");
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Cone<CMeshO>(m->cm, r0, r1, h, subdiv);
@@ -522,7 +527,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     return true;
 }
 
- MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
+ FilterPluginInterface::FilterClass FilterCreate::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -538,11 +543,11 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		case CR_CONE:
 		case CR_TORUS:
 		case CR_FITPLANE:
-			return MeshFilterInterface::MeshCreation;
+			return FilterPluginInterface::MeshCreation;
 			break;
 		default: 
 			assert(0);
-			return MeshFilterInterface::Generic;
+			return FilterPluginInterface::Generic;
   }
 }
 
@@ -564,8 +569,8 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
 		case CR_FITPLANE:  return QString("fitplane");
 		default : assert(0);
     }
-	return NULL;
- }
+    return NULL;
+}
 
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterCreate)

@@ -48,7 +48,12 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
 
 const QString EditManipulatorsPlugin::Info() 
 {
-	return tr("Provide tools for moving meshes around the space");
+    return tr("Provide tools for moving meshes around the space");
+}
+
+QString EditManipulatorsPlugin::pluginName() const
+{
+    return "EditManipulators";
 }
 
 void EditManipulatorsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * gla)
@@ -638,7 +643,7 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
   float manipsize(model.cm.bbox.Diag() / 2.0);
-  Matrix44f original_rot = original_Transform;
+  Matrix44m original_rot = original_Transform;
   original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
   gla->trackball.track.rot.ToMatrix(track_rotation);
@@ -739,7 +744,7 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
   float manipsize = model.cm.bbox.Diag() / 2.0;
-  Matrix44f original_rot = original_Transform;
+  Matrix44m original_rot = original_Transform;
   original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
   gla->trackball.track.rot.ToMatrix(track_rotation);
@@ -1069,6 +1074,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     case EditManipulatorsPlugin::ManMove   : HelpString1 = "<br> LEFT CLICK and DRAG to move"; break;
     case EditManipulatorsPlugin::ManRotate : HelpString1 = "<br> LEFT CLICK and DRAG to rotate"; break;
     case EditManipulatorsPlugin::ManScale  : HelpString1 = "<br> LEFT CLICK and DRAG to scale"; break;
+    case EditManipulatorsPlugin::ManNone   : break;
     }
 
     if((current_manip != EditManipulatorsPlugin::ManMove) || (current_manip_mode != EditManipulatorsPlugin::ModNone))
@@ -1095,7 +1101,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
   }
 
-  this->RealTimeLog("Manipulator","",qUtf8Printable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
+  this->realTimeLog("Manipulator","",qUtf8Printable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
 
   // render original mesh BBox
   DrawMeshBox(model);
