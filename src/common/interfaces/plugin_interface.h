@@ -67,6 +67,8 @@ public:
 	// NEVER EVER use a msgbox to say something to the user.
 	template <typename... Ts>
 	void log(const char* f, Ts&&... ts);
+	template <typename... Ts>
+	void log(const std::string& s, Ts&&... ts);
 
 	void log(const char* s);
 	void log(const std::string& s);
@@ -96,6 +98,14 @@ void PluginInterface::log(const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
+	}
+}
+
+template<typename... Ts>
+void PluginInterface::log(const std::string& s, Ts&&... ts)
+{
+	if(logstream != nullptr) {
+		logstream->Logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
 	}
 }
 

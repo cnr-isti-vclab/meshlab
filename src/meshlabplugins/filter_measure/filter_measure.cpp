@@ -39,6 +39,8 @@
 using namespace std;
 using namespace vcg;
 
+typedef Histogram<Scalarm> Histogramm;
+
 FilterMeasurePlugin::FilterMeasurePlugin()
 { 
 	typeList << COMPUTE_TOPOLOGICAL_MEASURES
@@ -385,6 +387,8 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 	log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
 	log("Mesh Bounding Box min %f  %f  %f", m.bbox.min[0], m.bbox.min[1], m.bbox.min[2]);
 	log("Mesh Bounding Box max %f  %f  %f", m.bbox.max[0], m.bbox.max[1], m.bbox.max[2]);
+	
+	outputValues["bbox"] = QVariant::fromValue(m.bbox);
 
 	// is pointcloud?
 	if ((m.fn == 0) && (m.vn != 0))
@@ -394,6 +398,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 		// cloud barycenter
 		Point3m bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
 		log("Pointcloud (vertex) barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["barycenter"] = QVariant::fromValue(bc);
 
 		// if there is vertex quality, also provide weighted barycenter
 		if (tri::HasPerVertexQuality(m))
@@ -401,6 +406,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 			bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, true);
 			log("Pointcloud (vertex) barycenter, weighted by verytex quality:");
 			log("  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+			outputValues["vertex_quality_weighted_barycenter"] = QVariant::fromValue(bc);
 		}
 
 		// principal axis
@@ -410,6 +416,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+		outputValues["pca"] = QVariant::fromValue(PCA);
 	}
 	else {
 		// area
@@ -431,10 +438,12 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 		// Thin shell barycenter
 		Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
 		log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["shell_barycenter"] = QVariant::fromValue(bc);
 
 		// cloud barycenter
 		bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
 		log("Vertices barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["barycenter"] = QVariant::fromValue(bc);
 
 		// is watertight?
 		int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
@@ -450,6 +459,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 
 			// center of mass
 			log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+			outputValues["center_of_mass"] = QVariant::fromValue(I.CenterOfMass());
 
 			// inertia tensor
 			Matrix33m IT;
@@ -458,6 +468,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 			log("    | %9.6f  %9.6f  %9.6f |", IT[0][0], IT[0][1], IT[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", IT[1][0], IT[1][1], IT[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", IT[2][0], IT[2][1], IT[2][2]);
+			outputValues["inertia_tensor"] = QVariant::fromValue(IT);
 
 			// principal axis
 			Matrix33m PCA;
@@ -467,9 +478,11 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+			outputValues["pca"] =  QVariant::fromValue(PCA);
 
 			log("axis momenta are :");
 			log("    | %9.6f  %9.6f  %9.6f |", pcav[0], pcav[1], pcav[2]);
+			outputValues["axis_momenta"] = QVariant::fromValue(pcav);
 
 		}
 		else {
@@ -482,6 +495,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+			outputValues["pca"] =  QVariant::fromValue(PCA);
 		}
 
 	}
@@ -581,12 +595,18 @@ bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::str
 	return true;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
+bool FilterMeasurePlugin::perVertexQualityHistogram(
+		MeshDocument& md, 
+		Scalarm RangeMin, 
+		Scalarm RangeMax, 
+		int binNum, 
+		bool areaFlag, 
+		std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
-	Histogramf H;
+	Histogramm H;
 	H.SetRange(RangeMin, RangeMax, binNum);
 	vector<Scalarm> aVec(m.vn, 1.0);
 	if (areaFlag)
@@ -595,46 +615,42 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, Scalarm Ra
 	for (int i = 0; i<m.vn; ++i)
 		H.Add(m.vert[i].Q(), aVec[i]);
 
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
+	std::string formatter = areaFlag ? "%15.7f" : "%4.0f";
+	Eigen::VectorXd rmin(binNum+2), rmax(binNum+2), count(binNum+2);
 
-	aVec = vector<Scalarm>(m.vn, 1.0);
-	if (areaFlag)
-		tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
+	log("(         -inf..%15.7f) : " + formatter, RangeMin, H.BinCountInd(0));
+	rmin(0) = std::numeric_limits<double>::min();
+	rmax(0) = RangeMin;
+	count(0) = H.BinCountInd(0);
+	for (int i = 1; i <= binNum; ++i){
+		log("[%15.7f..%15.7f) : " + formatter, H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+		rmin(i) = H.BinLowerBound(i);
+		rmax(i) = H.BinUpperBound(i);
+		count(i) = H.BinCountInd(i);
+	}
+	log("[%15.7f..             +inf) : " + formatter, RangeMax, H.BinCountInd(binNum + 1));
+	rmin(binNum+1) = RangeMax;
+	rmax(binNum+1) = std::numeric_limits<double>::max();
+	count(binNum+1) = H.BinCountInd(binNum+1);
+	outputValues["hist_bin_min"] = QVariant::fromValue(rmin);
+	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
+	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	for (int i = 0; i<m.vn; ++i)
-		H.Add(m.vert[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
 	return true;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>&)
+bool FilterMeasurePlugin::perFaceQualityHostogram(
+		MeshDocument& md, 
+		Scalarm RangeMin, 
+		Scalarm RangeMax, 
+		int binNum, 
+		bool areaFlag, 
+		std::map<std::string, QVariant>& outputValues)
 {
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
-	Histogramf H;
+	Histogramm H;
 	H.SetRange(RangeMin, RangeMax, binNum);
 
 	vector<Scalarm> aVec(m.fn, 1.0);
@@ -643,37 +659,28 @@ bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, Scalarm Rang
 
 	for (int i = 0; i<m.fn; ++i)
 		H.Add(m.face[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
+	
+	std::string formatter = areaFlag ? "%15.7f" : "%4.0f";
+	Eigen::VectorXd rmin(binNum+2), rmax(binNum+2), count(binNum+2);
 
-	aVec = vector<Scalarm>(m.fn, 1.0);
-	if (areaFlag)
-		tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
+	log("(         -inf..%15.7f) : " + formatter, RangeMin, H.BinCountInd(0));
+	rmin(0) = std::numeric_limits<double>::min();
+	rmax(0) = RangeMin;
+	count(0) = H.BinCountInd(0);
+	for (int i = 1; i <= binNum; ++i) {
+		log("[%15.7f..%15.7f) : " + formatter, H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+		rmin(i) = H.BinLowerBound(i);
+		rmax(i) = H.BinUpperBound(i);
+		count(i) = H.BinCountInd(i);
+	}
+	log("[%15.7f..             +inf) : " + formatter, RangeMax, H.BinCountInd(binNum + 1));
+	rmin(binNum+1) = RangeMax;
+	rmax(binNum+1) = std::numeric_limits<double>::max();
+	count(binNum+1) = H.BinCountInd(binNum+1);
+	outputValues["hist_bin_min"] = QVariant::fromValue(rmin);
+	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
+	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	for (int i = 0; i<m.fn; ++i)
-		H.Add(m.face[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
 	return true;
 }
 

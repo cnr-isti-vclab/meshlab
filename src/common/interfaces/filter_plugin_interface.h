@@ -27,6 +27,15 @@
 #include "plugin_interface.h"
 #include "../ml_document/mesh_document.h"
 
+//declaring types to be used as QVariants
+
+Q_DECLARE_METATYPE(Point2m)
+Q_DECLARE_METATYPE(Point3m)
+Q_DECLARE_METATYPE(Box3m)
+Q_DECLARE_METATYPE(Matrix33m)
+Q_DECLARE_METATYPE(Matrix44m)
+Q_DECLARE_METATYPE(Eigen::VectorXd)
+
 /**
  *\brief The FilterPluginInterface class provide the interface of the filter plugins.
  *
