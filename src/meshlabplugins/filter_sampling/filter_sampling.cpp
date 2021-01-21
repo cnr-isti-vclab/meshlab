@@ -1101,13 +1101,13 @@ bool FilterDocSampling::applyFilter(
 		log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
 		
 		outputValues.clear();
-		outputValues["n_samples"] = QVariant(hs.n_total_samples);
-		outputValues["min"] = QVariant(hs.getMinDist());
-		outputValues["max"] = QVariant(hs.getMaxDist());
-		outputValues["mean"] = QVariant(hs.getMeanDist());
-		outputValues["RMS"] = QVariant(hs.getRMSDist());
-		outputValues["diag_mesh_0"] = QVariant(d);
-		outputValues["diag_mesh_1"] = QVariant(mm1->cm.bbox.Diag());
+		outputValues["n_samples"] = hs.n_total_samples;
+		outputValues["min"] = hs.getMinDist();
+		outputValues["max"] = hs.getMaxDist();
+		outputValues["mean"] = hs.getMeanDist();
+		outputValues["RMS"] = hs.getRMSDist();
+		outputValues["diag_mesh_0"] = d;
+		outputValues["diag_mesh_1"] = mm1->cm.bbox.Diag();
 		
 		if(saveSampleFlag)
 		{
