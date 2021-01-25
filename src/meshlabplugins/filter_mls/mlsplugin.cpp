@@ -501,7 +501,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<st
 
             uint size = mesh->cm.vert.size();
             //std::vector<float> curvatures(size);
-            float minc=1e9, maxc=-1e9, minabsc=1e9;
+            Scalarm minc=1e9, maxc=-1e9, minabsc=1e9;
             Point3m grad;
             Matrix33m hess;
 
@@ -513,7 +513,7 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<st
                 if ( (!selectionOnly) || (pPoints->cm.vert[i].IsS()) )
                 {
                     Point3m p = mls->project(mesh->cm.vert[i].P());
-                    float c = 0;
+                    Scalarm c = 0;
 
                     if (ct==CT_APSS)
                         c = apss->approxMeanCurvature(p);
@@ -545,12 +545,12 @@ bool MlsPlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<st
                     mesh->cm.vert[i].Q() = c;
                     minc = std::min(c,minc);
                     maxc = std::max(c,maxc);
-                    minabsc = std::min(fabsf(c),minabsc);
+                    minabsc = std::min(std::abs(c),minabsc);
                 }
             }
             // pass 2: convert the curvature to color
             cb(99, "Curvature to color...");
-            float d = maxc-minc;
+            Scalarm d = maxc-minc;
             minc += 0.05*d;
             maxc -= 0.05*d;
 
