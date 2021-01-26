@@ -1310,7 +1310,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m,AllVertexAttribName);
 	for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
 	{
-		CMeshO::PerVertexAttributeHandle<Point3f> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, AllVertexAttribName[i]);
+		CMeshO::PerVertexAttributeHandle<Point3m> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m, AllVertexAttribName[i]);
 		
 		v3_handlers.push_back(hh3);
 		
