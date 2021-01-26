@@ -475,7 +475,7 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	for(DecoratePluginInterface *iDecorate: PM.meshDecoratePlugins()) {
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
 		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);
@@ -804,9 +804,9 @@ void MainWindow::fillFilterMenu()
 
 void MainWindow::fillDecorateMenu()
 {
-	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator())
 	{
-		foreach(QAction *decorateAction, iDecorate->actions())
+		for(QAction *decorateAction: iDecorate->actions())
 		{
 			connect(decorateAction, SIGNAL(triggered()), this, SLOT(applyDecorateMode()));
 			decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
@@ -822,7 +822,7 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	for(RenderPluginInterface *iRender:  PM.meshRenderPlugins()) {
+	for(RenderPluginInterface *iRender:  PM.renderPluginIterator()) {
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
 }

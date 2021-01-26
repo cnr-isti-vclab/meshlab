@@ -343,8 +343,6 @@ public:
 		return _currviewcontainer;
 	}
 
-	const PluginManager& pluginManager() const { return PM; }
-
 	static QStatusBar *&globalStatusBar()
 	{
 		static QStatusBar *_qsb=0;
