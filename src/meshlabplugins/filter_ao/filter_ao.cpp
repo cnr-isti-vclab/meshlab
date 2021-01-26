@@ -228,16 +228,16 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
-	CMeshO::PerVertexAttributeHandle<Point3f> BN;
-	CMeshO::PerFaceAttributeHandle<Point3f> FBN;
+	CMeshO::PerVertexAttributeHandle<Point3m> BN;
+	CMeshO::PerFaceAttributeHandle<Point3m> FBN;
 
 	if (perFace)
 	{
-		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m.cm, "BentNormal");
 	}
 	else
 	{
-		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "BentNormal");
 	}
 
     glEnable(GL_DEPTH_TEST);

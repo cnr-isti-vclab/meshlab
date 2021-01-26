@@ -43,14 +43,14 @@ protected:
 	double fr,fg,fb,fa,fnx,fny,fnz,fq,fsel;
 	double v,f,v0i,v1i,v2i,ti;
 	std::vector<std::string> v_attrNames;  // names of the <float> per vertex attributes
-	std::vector<double>      v_attrValue;  // values of the <float> per vertex attributes
+	std::vector<Scalarm>      v_attrValue;  // values of the <float> per vertex attributes
 	std::vector<std::string> v3_attrNames;  // names of the <Point3f> per vertex attributes There are 3x (one foreach coord _x, _y, _z)
-	std::vector<double>      v3_attrValue;  // values of the <Point3f> per vertex attributes. There are 3x (one foreach coord _x, _y, _z)
+	std::vector<Scalarm>      v3_attrValue;  // values of the <Point3f> per vertex attributes. There are 3x (one foreach coord _x, _y, _z)
 	std::vector<std::string> f_attrNames;
-	std::vector<double> f_attrValue;
-	std::vector<CMeshO::PerVertexAttributeHandle<float> > v_handlers;
+	std::vector<Scalarm> f_attrValue;
+	std::vector<CMeshO::PerVertexAttributeHandle<Scalarm> > v_handlers;
 	std::vector<CMeshO::PerVertexAttributeHandle<Point3f> > v3_handlers;
-	std::vector<CMeshO::PerFaceAttributeHandle<float> > f_handlers;
+	std::vector<CMeshO::PerFaceAttributeHandle<Scalarm> > f_handlers;
 
 public:
 	enum {

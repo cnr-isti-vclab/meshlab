@@ -103,9 +103,9 @@ const QString PerVertexAttributeString(	"It's possible to use the following per-
 
 const QString PerFaceAttributeString("It's possible to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
 									 "<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex position, <b>x2,y2,z2</b> for the third vertex position, "
-									 "<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, "
+									 "<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, <b>vi0, vi1, vi2</b> for vertex indices, "
 									 "<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> for per-wedge texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex selection (1 yes, 0 no) "
-									 "<b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
+									 "<b>fi<\b> for face index, <b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
 
 // long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
@@ -863,22 +863,22 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		std::string expr = par.getString("expr").toStdString();
 		
 		// add per-vertex attribute with type float and name specified by user
-		CMeshO::PerVertexAttributeHandle<float> h;
+		CMeshO::PerVertexAttributeHandle<Scalarm> h;
 		if(tri::HasPerVertexAttribute(m.cm,name))
 		{
-			h = tri::Allocator<CMeshO>::FindPerVertexAttribute<float>(m.cm, name);
-			if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+			h = tri::Allocator<CMeshO>::FindPerVertexAttribute<Scalarm>(m.cm, name);
+			if(!tri::Allocator<CMeshO>::IsValidHandle<Scalarm>(m.cm,h))
 			{
 				errorMessage = "attribute already exists with a different type";
 				return false;
 			}
 		}
 		else
-			h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
+			h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm> (m.cm,name);
 		
 		std::vector<std::string> AllVertexAttribName;
-		tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm,AllVertexAttribName);
-		qDebug("Now mesh has %lu vertex float attribute",AllVertexAttribName.size());
+		tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(m.cm,AllVertexAttribName);
+		qDebug("Now mesh has %lu vertex scalar attribute",AllVertexAttribName.size());
 		Parser p;
 		setPerVertexVariables(p,m.cm);
 		p.SetExpr(conversion::fromStringToWString(expr));
@@ -921,18 +921,18 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// add per-face attribute with type float and name specified by user
 		// add per-vertex attribute with type float and name specified by user
-		CMeshO::PerFaceAttributeHandle<float> h;
+		CMeshO::PerFaceAttributeHandle<Scalarm> h;
 		if(tri::HasPerFaceAttribute(m.cm,name))
 		{
-			h = tri::Allocator<CMeshO>::FindPerFaceAttribute<float>(m.cm, name);
-			if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+			h = tri::Allocator<CMeshO>::FindPerFaceAttribute<Scalarm>(m.cm, name);
+			if(!tri::Allocator<CMeshO>::IsValidHandle<Scalarm>(m.cm,h))
 			{
 				errorMessage = "attribute already exists with a different type";
 				return false;
 			}
 		}
 		else
-			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
+			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm> (m.cm,name);
 		Parser p;
 		setPerFaceVariables(p,m.cm);
 		p.SetExpr(conversion::fromStringToWString(expr));
@@ -1296,10 +1296,10 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	v3_attrNames.clear();
 	v3_attrValue.clear();
 	std::vector<std::string> AllVertexAttribName;
-	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m,AllVertexAttribName);
+	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(m,AllVertexAttribName);
 	for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
 	{
-		CMeshO::PerVertexAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m, AllVertexAttribName[i]);
+		CMeshO::PerVertexAttributeHandle<Scalarm> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(m, AllVertexAttribName[i]);
 		v_handlers.push_back(hh);
 		v_attrNames.push_back(AllVertexAttribName[i]);
 		v_attrValue.push_back(0);
@@ -1423,7 +1423,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	f_attrValue.clear();
 	for(int i = 0; i < (int) AllFaceAttribName.size(); i++)
 	{
-		CMeshO::PerFaceAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m, AllFaceAttribName[i]);
+		CMeshO::PerFaceAttributeHandle<Scalarm> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(m, AllFaceAttribName[i]);
 		f_handlers.push_back(hh);
 		f_attrNames.push_back(AllFaceAttribName[i]);
 		f_attrValue.push_back(0);
