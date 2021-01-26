@@ -146,7 +146,6 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					for(QAction *filterAction : iFilter->actions()) {
 						filterAction->setData(QVariant(fileName));
 						actionFilterMap.insert(filterAction->text(), filterAction);
-						stringFilterMap.insert(filterAction->text(), iFilter);
 					}
 					filterPlugins.push_back(iFilter);
 				}
@@ -224,6 +223,15 @@ DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 	return 0;
 }
 
+QAction* PluginManager::filterAction(const QString& name)
+{
+	auto it = actionFilterMap.find(name);
+	if (it != actionFilterMap.end())
+		return it.value();
+	else
+		return nullptr;
+}
+
 PluginManager::PluginRangeIterator PluginManager::pluginIterator()
 {
 	return PluginRangeIterator(this);
@@ -242,6 +250,11 @@ PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator()
 PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator()
 {
 	return DecoratePluginRangeIterator(this);
+}
+
+PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator()
+{
+	return EditPluginFactoryRangeIterator(this);
 }
 
 void PluginManager::fillKnownIOFormats()

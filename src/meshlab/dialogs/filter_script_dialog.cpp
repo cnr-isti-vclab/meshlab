@@ -199,7 +199,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 	
 	//get a pointer to this action and filter from the main window so we can get the
 	//description of the parameters from the filter
-	QAction *action = meshlab::MeshLabSingletons::pluginManagerInstance().actionFilterMap[actionName];
+	QAction *action = meshlab::MeshLabSingletons::pluginManagerInstance().filterAction(actionName);
 	FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
 	
 	if(NULL == iFilter){

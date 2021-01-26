@@ -781,7 +781,7 @@ void MainWindow::runFilterScript()
 		QString filtnm = pair.filterName();
 		int classes = 0;
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		QAction *action = PM.actionFilterMap[ filtnm];
+		QAction *action = PM.filterAction(filtnm);
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
 		
 		int req=iFilter->getRequirements(action);

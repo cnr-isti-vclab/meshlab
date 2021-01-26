@@ -54,6 +54,8 @@ public:
 	unsigned int size() const;
 
 	DecoratePluginInterface* getDecoratePlugin(const QString& name);
+	
+	QAction* filterAction(const QString& name);
 
 	class PluginRangeIterator 
 	{
@@ -98,20 +100,29 @@ public:
 		DecoratePluginRangeIterator(PluginManager* pm) : pm(pm) {}
 		PluginManager* pm;
 	};
+	
+	class EditPluginFactoryRangeIterator
+	{
+		friend class PluginManager;
+	public:
+		QVector<EditPluginInterfaceFactory*>::iterator begin() {return pm->editPlugins.begin();}
+		QVector<EditPluginInterfaceFactory*>::iterator end() {return pm->editPlugins.end();}
+	private:
+		EditPluginFactoryRangeIterator(PluginManager* pm) : pm(pm) {}
+		PluginManager* pm;
+	};
 
 	PluginRangeIterator pluginIterator();
 	FilterPluginRangeIterator filterPluginIterator();
 	RenderPluginRangeIterator renderPluginIterator();
 	DecoratePluginRangeIterator decoratePluginIterator();
+	EditPluginFactoryRangeIterator editPluginFactoryIterator();
 
 	static QString osIndependentPluginName(const QString& plname);
 	
 	/** Old declarations, to be deleted or moved to private */
-	
-	inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return editPlugins;}
 
 	QMap<QString, QAction*> actionFilterMap;
-	QMap<QString, FilterPluginInterface*> stringFilterMap;
 	QMap<QString,IOMeshPluginInterface*> allKnowInputMeshFormats;
 	QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
 	QMap<QString, IORasterPluginInterface*> allKnownInputRasterFormats;
