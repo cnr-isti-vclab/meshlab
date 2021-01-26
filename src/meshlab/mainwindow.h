@@ -238,6 +238,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
 
+	void updateFilterToolBar();
 	void updateGPUMemBar(int,int,int,int);
 
 	void updateLog();

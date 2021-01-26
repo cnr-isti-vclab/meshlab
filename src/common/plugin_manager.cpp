@@ -214,7 +214,7 @@ unsigned int PluginManager::size() const
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
+DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 {
 	foreach(DecoratePluginInterface *tt, this->meshDecoratePlugins())
 	{
@@ -228,6 +228,11 @@ DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QStrin
 PluginManager::PluginRangeIterator PluginManager::pluginIterator()
 {
 	return PluginRangeIterator(this);
+}
+
+PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator()
+{
+	return FilterPluginRangeIterator(this);
 }
 
 void PluginManager::fillKnownIOFormats()

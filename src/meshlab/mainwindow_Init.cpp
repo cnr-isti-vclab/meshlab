@@ -497,15 +497,7 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	for(FilterPluginInterface *iFilter: PM.meshFilterPlugins()) {
-		for(QAction* filterAction: iFilter->actions()) {
-			if (!filterAction->icon().isNull()) {
-				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
-				if (filterAction->priority() != QAction::LowPriority)
-					filterToolBar->addAction(filterAction);
-			} //else qDebug() << "action was null";
-		}
-	}
+	updateFilterToolBar();
 
 	QWidget *spacerWidget = new QWidget();
 	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -830,8 +822,7 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	foreach(RenderPluginInterface *iRender, PM.meshRenderPlugins())
-	{
+	for(RenderPluginInterface *iRender:  PM.meshRenderPlugins()) {
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
 }

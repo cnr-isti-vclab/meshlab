@@ -52,12 +52,8 @@ public:
 
 	int numberIOPlugins() const;
 	unsigned int size() const;
-	inline QVector<FilterPluginInterface*>& meshFilterPlugins()  {return filterPlugins;}
-	inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return renderPlugins;}
-	inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return decoratePlugins;}
-	inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return editPlugins;}
 
-	DecoratePluginInterface* getDecoratorInterfaceByName(const QString& name);
+	DecoratePluginInterface* getDecoratePlugin(const QString& name);
 
 	class PluginRangeIterator 
 	{
@@ -69,10 +65,28 @@ public:
 		PluginRangeIterator(PluginManager* pm) : pm(pm) {}
 		PluginManager* pm;
 	};
+	
+	class FilterPluginRangeIterator
+	{
+		friend class PluginManager;
+	public:
+		QVector<FilterPluginInterface*>::iterator begin() {return pm->filterPlugins.begin();}
+		QVector<FilterPluginInterface*>::iterator end() {return pm->filterPlugins.end();}
+	private:
+		FilterPluginRangeIterator(PluginManager* pm) : pm(pm) {}
+		PluginManager* pm;
+	};
 
 	PluginRangeIterator pluginIterator();
+	FilterPluginRangeIterator filterPluginIterator();
 
 	static QString osIndependentPluginName(const QString& plname);
+	
+	/** Old declarations, to be deleted */
+	
+	inline QVector<RenderPluginInterface*>& meshRenderPlugins()  {return renderPlugins;}
+	inline QVector<DecoratePluginInterface*>& meshDecoratePlugins()  {return decoratePlugins;}
+	inline QVector<EditPluginInterfaceFactory*>& meshEditFactoryPlugins()  {return editPlugins;}
 
 	QMap<QString, QAction*> actionFilterMap;
 	QMap<QString, FilterPluginInterface*> stringFilterMap;
@@ -83,8 +97,6 @@ public:
 	QStringList inpRasterFilters;
 	QStringList outFilters;
 
-
-	QVector<FilterPluginInterface*> filterPlugins;
 	QVector<RenderPluginInterface*> renderPlugins;
 	QVector<DecoratePluginInterface*> decoratePlugins;
 	QVector<EditPluginInterfaceFactory*> editPlugins;
@@ -98,6 +110,7 @@ private:
 	QVector<PluginInterface *> ownerPlug;
 	QVector<IOMeshPluginInterface*> ioMeshPlugins;
 	QVector<IORasterPluginInterface*> ioRasterPlugins;
+	QVector<FilterPluginInterface*> filterPlugins;
 	QDir pluginsDir;
 
 	void fillKnownIOFormats();

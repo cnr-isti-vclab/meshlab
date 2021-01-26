@@ -1926,6 +1926,21 @@ void MainWindow::documentUpdateRequested()
 	}
 }
 
+void MainWindow::updateFilterToolBar()
+{
+	filterToolBar->clear();
+	
+	for(FilterPluginInterface *iFilter: PM.filterPluginIterator()) {
+		for(QAction* filterAction: iFilter->actions()) {
+			if (!filterAction->icon().isNull()) {
+				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+				if (filterAction->priority() != QAction::LowPriority)
+					filterToolBar->addAction(filterAction);
+			} //else qDebug() << "action was null";
+		}
+	}
+}
+
 void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati_free_tex, int ati_free_vbo)
 {
 #ifdef Q_OS_WIN
