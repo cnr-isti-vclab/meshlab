@@ -74,7 +74,7 @@ QString meshlab::defaultPluginPath()
 		pluginsDir.cd("PlugIns");
 		return pluginsDir.absolutePath();
 	}
-	
+
 	if (pluginsDir.exists("plugins")) {
 		pluginsDir.cd("plugins");
 		
