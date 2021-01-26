@@ -96,7 +96,7 @@ jobs:
         submodules: true
     - name: Download Jom
       run: |
-        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
+        Invoke-WebRequest -Uri "http://mirrors.ukfast.co.uk/sites/qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         echo "$(Get-Location)\jom" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
