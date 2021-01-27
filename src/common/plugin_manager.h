@@ -49,6 +49,7 @@ public:
 	QString pluginsCode() const;
 
 	unsigned int size() const;
+	int numberIOPlugins() const;
 
 	DecoratePluginInterface* getDecoratePlugin(const QString& name);
 

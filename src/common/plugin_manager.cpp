@@ -200,6 +200,11 @@ unsigned int PluginManager::size() const
 	return allPlugins.size();
 }
 
+int PluginManager::numberIOPlugins() const	
+{	
+	return ioMeshPlugins.size();	
+}
+
 // Search among all the decorator plugins the one that contains a decoration with the given name
 DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 {
