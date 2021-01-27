@@ -61,8 +61,8 @@ public:
 	{
 		friend class PluginManager;
 	public:
-		QVector<PluginInterface*>::iterator begin() {return pm->ownerPlug.begin();}
-		QVector<PluginInterface*>::iterator end() {return pm->ownerPlug.end();}
+		std::map<QString, PluginInterface*>::iterator begin() {return pm->ownerPlug.begin();}
+		std::map<QString, PluginInterface*>::iterator end() {return pm->ownerPlug.end();}
 	private:
 		PluginRangeIterator(PluginManager* pm) : pm(pm) {}
 		PluginManager* pm;
@@ -122,7 +122,6 @@ public:
 	
 	/** Old declarations, to be deleted or moved to private */
 
-	QMap<QString, QAction*> actionFilterMap;
 	QMap<QString,IOMeshPluginInterface*> allKnowInputMeshFormats;
 	QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
 	QMap<QString, IORasterPluginInterface*> allKnownInputRasterFormats;
@@ -137,7 +136,7 @@ public:
 	QStringList pluginsLoaded;
 
 private:
-	QVector<PluginInterface *> ownerPlug;
+	std::map<QString, PluginInterface*> ownerPlug;
 	QVector<IOMeshPluginInterface*> ioMeshPlugins;
 	QVector<IORasterPluginInterface*> ioRasterPlugins;
 	QVector<FilterPluginInterface*> filterPlugins;
@@ -145,6 +144,7 @@ private:
 	QVector<DecoratePluginInterface*> decoratePlugins;
 	QVector<EditPluginInterfaceFactory*> editPlugins;
 	QDir pluginsDir;
+	QMap<QString, QAction*> actionFilterMap;
 
 	void fillKnownIOFormats();
 

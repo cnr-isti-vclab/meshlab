@@ -74,8 +74,8 @@ PluginManager::~PluginManager()
 	filterPlugins.clear();
 	renderPlugins.clear();
 	decoratePlugins.clear();
-	for (PluginInterface* plugin : ownerPlug)
-		delete plugin;
+	for (auto& plugin : ownerPlug)
+		delete plugin.second;
 	ownerPlug.clear();
 	
 	for (int ii = 0; ii < editPlugins.size(); ++ii)
@@ -96,22 +96,18 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	// ToDo: get rid of any qApp here
 	qApp->addLibraryPath(meshlab::defaultPluginPath());
-	//qApp->addLibraryPath(getBaseDirPath());
 	QStringList nameFiltersPlugins = fileNamePluginDLLs();
 	
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(nameFiltersPlugins);
 	
 	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
-	for(QString fileName : pluginsDir.entryList(QDir::Files))
-	{
-		//      qDebug() << fileName;
+	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
 		QPluginLoader loader(absfilepath);
 		QObject *plugin = loader.instance();
-		if (plugin)
-		{
+		if (plugin) {
 			pluginsLoaded.push_back(fileName);
 			PluginInterface *iCommon = nullptr;
 			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
@@ -186,12 +182,17 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iEditFactory)
 			{
 				editPlugins.push_back(iEditFactory);
-				foreach(QAction* editAction, iEditFactory->actions())
+				for(QAction* editAction: iEditFactory->actions())
 					editActionList.push_back(editAction);
 			}
 			else if (iCommon)
 			{
-				ownerPlug.push_back(iCommon);
+				if (ownerPlug.find(iCommon->pluginName()) == ownerPlug.end()) {
+					ownerPlug[iCommon->pluginName()] = iCommon;
+				}
+				else {
+					std::cerr << "Warning: " << iCommon->pluginName().toStdString() << " has been already loaded.\n";
+				}
 			} else {
 				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
 			}

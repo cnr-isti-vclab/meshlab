@@ -79,7 +79,6 @@ MainWindow::MainWindow():
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
 	setWindowIcon(icon);
-	PM.loadPlugins(defaultGlobalParams);
 	QSettings settings;
 	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
 	//should update those values only after I run MeshLab for the very first time or after I installed a new version
@@ -88,8 +87,6 @@ MainWindow::MainWindow():
 		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(), meshlab::defaultPluginPath());
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(), MeshLabApplication::appVer());
 		settings.setValue(MeshLabApplication::wordSizeKeyName(), QSysInfo::WordSize);
-		foreach(QString plfile, PM.pluginsLoaded)
-			settings.setValue(PluginManager::osIndependentPluginName(plfile), MeshLabApplication::appVer());
 	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
@@ -626,9 +623,18 @@ void MainWindow::createMenus()
 
 void MainWindow::initSearchEngine()
 {
-	for (QMap<QString, QAction*>::iterator it = PM.actionFilterMap.begin(); it != PM.actionFilterMap.end(); ++it){
-		initItemForSearching(it.value());
+	for (const auto& p : PM.filterPluginIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
 	}
+	/*for (const auto& p : PM.editPluginFactoryIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
+	}
+	for (const auto& p : PM.renderPluginIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
+	}*/
 
 	initMenuForSearching(editMenu);
 	initMenuForSearching(renderMenu);
