@@ -63,17 +63,6 @@ public:
 	const QStringList& outputMeshFormatList() const;
 	const QStringList& inputRasterFormatList() const;
 
-	class PluginRangeIterator 
-	{
-		friend class PluginManager;
-	public:
-		std::map<QString, PluginInterface*>::iterator begin() {return pm->allPlugins.begin();}
-		std::map<QString, PluginInterface*>::iterator end() {return pm->allPlugins.end();}
-	private:
-		PluginRangeIterator(PluginManager* pm) : pm(pm) {}
-		PluginManager* pm;
-	};
-
 	class FilterPluginRangeIterator
 	{
 		friend class PluginManager;
@@ -118,7 +107,6 @@ public:
 		PluginManager* pm;
 	};
 
-	PluginRangeIterator pluginIterator();
 	FilterPluginRangeIterator filterPluginIterator();
 	RenderPluginRangeIterator renderPluginIterator();
 	DecoratePluginRangeIterator decoratePluginIterator();

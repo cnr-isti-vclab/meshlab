@@ -269,11 +269,6 @@ const QStringList& PluginManager::inputRasterFormatList() const
 	return allInputRasterFormats;
 }
 
-PluginManager::PluginRangeIterator PluginManager::pluginIterator()
-{
-	return PluginRangeIterator(this);
-}
-
 PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator()
 {
 	return FilterPluginRangeIterator(this);
