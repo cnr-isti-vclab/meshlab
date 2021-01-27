@@ -1998,7 +1998,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpRasterFilters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputRasterFormatList().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 	
@@ -2017,7 +2017,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IORasterPluginInterface *pCurrentIOPlugin = PM.allKnownInputRasterFormats[extension.toLower()];
+		IORasterPluginInterface *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
 		if (pCurrentIOPlugin == NULL)
 		{
@@ -2253,7 +2253,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpMeshFilters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatList().join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
@@ -2272,9 +2272,9 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+		IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
-		if (pCurrentIOPlugin == NULL)
+		if (pCurrentIOPlugin == nullptr)
 		{
 			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
@@ -2368,7 +2368,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+	IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 	
 	if(pCurrentIOPlugin != NULL)
 	{
@@ -2441,7 +2441,7 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-	QStringList& suffixList = PM.outFilters;
+	const QStringList& suffixList = PM.outputMeshFormatList();
 	
 	//QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);
@@ -2507,7 +2507,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		QStringListIterator itFilter(suffixList);
 		
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
+		IOMeshPluginInterface *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");

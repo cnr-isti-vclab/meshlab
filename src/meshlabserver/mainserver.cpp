@@ -173,7 +173,7 @@ public:
         QString extension = fi.suffix();
         qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
-        IOMeshPluginInterface* pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+        IOMeshPluginInterface* pCurrentIOPlugin = PM.inputMeshPlugin(extension);
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -238,8 +238,8 @@ public:
         QString extension = fi.suffix();
 
         // retrieving corresponding IO plugin
-        IOMeshPluginInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
-        if (pCurrentIOPlugin == 0)
+        IOMeshPluginInterface* pCurrentIOPlugin = PM.outputMeshPlugin(extension);
+        if (pCurrentIOPlugin == nullptr)
         {
             fprintf(fp,"Error encountered while opening file: ");
             //QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
@@ -403,7 +403,7 @@ public:
             mm->Clear();
         QFileInfo fi(fullPath);
         QString extension = fi.suffix();
-        IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+        IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 
         if(pCurrentIOPlugin != NULL)
         {

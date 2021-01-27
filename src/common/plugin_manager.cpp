@@ -233,6 +233,45 @@ QAction* PluginManager::filterAction(const QString& name)
 		return nullptr;
 }
 
+IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat)
+{
+	auto it = allKnowInputMeshFormats.find(inputFormat.toLower());
+	if (it != allKnowInputMeshFormats.end())
+		return *it;
+	return nullptr;
+}
+
+IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat)
+{
+	auto it = allKnowOutputFormats.find(outputFormat.toLower());
+	if (it != allKnowOutputFormats.end())
+		return *it;
+	return nullptr;
+}
+
+IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat)
+{
+	auto it = allKnownInputRasterFormats.find(inputFormat.toLower());
+	if (it != allKnownInputRasterFormats.end())
+		return *it;
+	return nullptr;
+}
+
+const QStringList& PluginManager::inputMeshFormatList() const
+{
+	return inpMeshFilters;
+}
+
+const QStringList& PluginManager::outputMeshFormatList() const
+{
+	return outFilters;
+}
+
+const QStringList& PluginManager::inputRasterFormatList() const
+{
+	return inpRasterFilters;
+}
+
 PluginManager::PluginRangeIterator PluginManager::pluginIterator()
 {
 	return PluginRangeIterator(this);
