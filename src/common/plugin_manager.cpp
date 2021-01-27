@@ -58,16 +58,6 @@ PluginManager::PluginManager()
 {
 }
 
-PluginManager::PluginManager(RichParameterList& defaultGlobal, bool verbose)
-{
-	loadPlugins(defaultGlobal, verbose);
-}
-
-PluginManager::PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose)
-{
-	loadPlugins(defaultGlobal, pluginsDirectory, verbose);
-}
-
 PluginManager::~PluginManager()
 {
 	ioMeshPlugins.clear();
@@ -85,12 +75,12 @@ PluginManager::~PluginManager()
 
 
 
-void PluginManager::loadPlugins(RichParameterList& defaultGlobal, bool verbose)
+void PluginManager::loadPlugins(bool verbose)
 {
-	loadPlugins(defaultGlobal, QDir(meshlab::defaultPluginPath()), verbose);
+	loadPlugins(QDir(meshlab::defaultPluginPath()), verbose);
 }
 
-void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose)
+void PluginManager::loadPlugins(const QDir& pluginsDirectory, bool verbose)
 {
 	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -171,7 +161,7 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				decoratePlugins.push_back(iDecorator);
 				for(QAction *decoratorAction : iDecorator->actions())
 				{
-					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
+					iDecorator->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
 				}
 			}
 			

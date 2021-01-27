@@ -63,6 +63,7 @@ MainWindow::MainWindow():
 	layerDialog->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	layerDialog->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
+	PM.loadPlugins();
 
 
 	//setCentralWidget(workspace);

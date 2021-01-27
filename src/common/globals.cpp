@@ -109,8 +109,8 @@ RichParameterList& meshlab::defaultGlobalParameterList()
 	return globalRPS;
 }
 
-PluginManager& meshlab::pluginManagerInstance(bool verbose)
+PluginManager& meshlab::pluginManagerInstance()
 {
-	static PluginManager pm(defaultGlobalParameterList(), verbose);
+	static PluginManager pm;
 	return pm;
 }

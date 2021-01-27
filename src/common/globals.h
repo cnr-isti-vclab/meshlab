@@ -35,7 +35,7 @@ QString defaultPluginPath();
 QString defaultShadersPath();
 
 RichParameterList& defaultGlobalParameterList();
-PluginManager& pluginManagerInstance(bool verbose = true);
+PluginManager& pluginManagerInstance();
 
 }
 

@@ -42,12 +42,10 @@ class PluginManager
 {
 public:
 	PluginManager();
-	PluginManager(RichParameterList& defaultGlobal, bool verbose = false);
-	PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose = false);
-
 	~PluginManager();
-	void loadPlugins(RichParameterList& defaultGlobal, bool verbose = false);
-	void loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose = false);
+	
+	void loadPlugins(bool verbose = false);
+	void loadPlugins(const QDir& pluginsDirectory, bool verbose = false);
 	QString pluginsCode() const;
 
 	unsigned int size() const;
