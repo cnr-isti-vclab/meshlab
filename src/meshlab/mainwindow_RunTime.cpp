@@ -395,10 +395,10 @@ void MainWindow::updateMenus()
 		// you exit from editing mode by pressing again the editing button
 		// When you are in a editing mode all the other editing are disabled.
 		
-		foreach (QAction *a,PM.editActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled( GLA()->getCurrentEditAction() == NULL );
+		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator())
+			for (QAction* a : ep->actions()) {
+				a->setChecked(false);
+				a->setEnabled(GLA()->getCurrentEditAction() == nullptr);
 		}
 		
 		suspendEditModeAct->setChecked(GLA()->suspendedEditor);
@@ -415,10 +415,11 @@ void MainWindow::updateMenus()
 		
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
-		foreach (QAction *a, PM.decoratorActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled(true);
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setChecked(false);
+				a->setEnabled(true);
+			}
 		}
 		// Check the decorator per Document of the current glarea
 		foreach (QAction *a,   GLA()->iPerDocDecoratorlist)
@@ -431,13 +432,17 @@ void MainWindow::updateMenus()
 	} // if active
 	else
 	{
-		foreach (QAction *a,PM.editActionList)
-		{
-			a->setEnabled(false);
+		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator()) {
+			for (QAction* a : ep->actions()) {
+				a->setEnabled(false);
+			}
 		}
-		foreach (QAction *a,PM.decoratorActionList)
-			a->setEnabled(false);
-		
+
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setEnabled(false);
+			}
+		}
 	}
 	GLArea* tmp = GLA();
 	if(tmp != NULL)
@@ -448,12 +453,12 @@ void MainWindow::updateMenus()
 	}
 	else
 	{
-		foreach (QAction *a,PM.decoratorActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled(false);
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setChecked(false);
+				a->setEnabled(false);
+			}
 		}
-		
 		
 		layerDialog->setVisible(false);
 	}

@@ -67,8 +67,8 @@ public:
 	{
 		friend class PluginManager;
 	public:
-		std::map<QString, PluginInterface*>::iterator begin() {return pm->ownerPlug.begin();}
-		std::map<QString, PluginInterface*>::iterator end() {return pm->ownerPlug.end();}
+		std::map<QString, PluginInterface*>::iterator begin() {return pm->allPlugins.begin();}
+		std::map<QString, PluginInterface*>::iterator end() {return pm->allPlugins.end();}
 	private:
 		PluginRangeIterator(PluginManager* pm) : pm(pm) {}
 		PluginManager* pm;
@@ -125,32 +125,28 @@ public:
 	EditPluginFactoryRangeIterator editPluginFactoryIterator();
 
 	static QString osIndependentPluginName(const QString& plname);
-	
-	/** Old declarations, to be deleted or moved to private */
-
-	QVector<QAction *> editActionList;
-	QVector<QAction *> decoratorActionList;
 	// Used for unique destruction - this "owns" all IO, Filter, Render, and Decorate plugins
 
+	//Going to be removed when the PluginDialog will be well organized
 	QStringList pluginsLoaded;
 
 private:
 	QDir pluginsDir;
 
 	//all plugins
-	std::map<QString, PluginInterface*> ownerPlug;
+	std::map<QString, PluginInterface*> allPlugins;
 
 	//IOMeshPlugins
 	QVector<IOMeshPluginInterface*> ioMeshPlugins;
-	QMap<QString,IOMeshPluginInterface*> allKnowInputMeshFormats;
-	QMap<QString,IOMeshPluginInterface*> allKnowOutputFormats;
-	QStringList inpMeshFilters;
-	QStringList outFilters;
+	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
+	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
+	QStringList allInputMeshFormats;
+	QStringList allOutputMeshFormats;
 
 	//IORasterPlugins
 	QVector<IORasterPluginInterface*> ioRasterPlugins;
-	QMap<QString, IORasterPluginInterface*> allKnownInputRasterFormats;
-	QStringList inpRasterFilters;
+	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
+	QStringList allInputRasterFormats;
 
 	//Filter Plugins
 	QVector<FilterPluginInterface*> filterPlugins;

@@ -74,9 +74,9 @@ PluginManager::~PluginManager()
 	filterPlugins.clear();
 	renderPlugins.clear();
 	decoratePlugins.clear();
-	for (auto& plugin : ownerPlug)
+	for (auto& plugin : allPlugins)
 		delete plugin.second;
-	ownerPlug.clear();
+	allPlugins.clear();
 	
 	for (int ii = 0; ii < editPlugins.size(); ++ii)
 		delete editPlugins[ii];
@@ -166,7 +166,6 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				decoratePlugins.push_back(iDecorator);
 				for(QAction *decoratorAction : iDecorator->actions())
 				{
-					decoratorActionList.push_back(decoratorAction);
 					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
 				}
 			}
@@ -182,13 +181,11 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iEditFactory)
 			{
 				editPlugins.push_back(iEditFactory);
-				for(QAction* editAction: iEditFactory->actions())
-					editActionList.push_back(editAction);
 			}
 			else if (iCommon)
 			{
-				if (ownerPlug.find(iCommon->pluginName()) == ownerPlug.end()) {
-					ownerPlug[iCommon->pluginName()] = iCommon;
+				if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
+					allPlugins[iCommon->pluginName()] = iCommon;
 				}
 				else {
 					std::cerr << "Warning: " << iCommon->pluginName().toStdString() << " has been already loaded.\n";
@@ -210,7 +207,7 @@ int PluginManager::numberIOPlugins() const
 
 unsigned int PluginManager::size() const
 {
-	return ownerPlug.size();
+	return allPlugins.size();
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
@@ -235,41 +232,41 @@ QAction* PluginManager::filterAction(const QString& name)
 
 IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat)
 {
-	auto it = allKnowInputMeshFormats.find(inputFormat.toLower());
-	if (it != allKnowInputMeshFormats.end())
+	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputMeshFormatToPluginMap.end())
 		return *it;
 	return nullptr;
 }
 
 IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat)
 {
-	auto it = allKnowOutputFormats.find(outputFormat.toLower());
-	if (it != allKnowOutputFormats.end())
+	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
+	if (it != outputMeshFormatToPluginMap.end())
 		return *it;
 	return nullptr;
 }
 
 IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat)
 {
-	auto it = allKnownInputRasterFormats.find(inputFormat.toLower());
-	if (it != allKnownInputRasterFormats.end())
+	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputRasterFormatToPluginMap.end())
 		return *it;
 	return nullptr;
 }
 
 const QStringList& PluginManager::inputMeshFormatList() const
 {
-	return inpMeshFilters;
+	return allInputMeshFormats;
 }
 
 const QStringList& PluginManager::outputMeshFormatList() const
 {
-	return outFilters;
+	return allOutputMeshFormats;
 }
 
 const QStringList& PluginManager::inputRasterFormatList() const
 {
-	return inpRasterFilters;
+	return allInputRasterFormats;
 }
 
 PluginManager::PluginRangeIterator PluginManager::pluginIterator()
@@ -301,23 +298,23 @@ void PluginManager::fillKnownIOFormats()
 {
 	QString allKnownFormatsFilter = QObject::tr("All known formats (");
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		allKnownFormatsFilter += addPluginMeshFormats(allKnowInputMeshFormats, inpMeshFilters, pMeshIOPlugin, pMeshIOPlugin->importFormats());
+		allKnownFormatsFilter += addPluginMeshFormats(inputMeshFormatToPluginMap, allInputMeshFormats, pMeshIOPlugin, pMeshIOPlugin->importFormats());
 	}
 	allKnownFormatsFilter.append(')');
-	inpMeshFilters.push_front(allKnownFormatsFilter);
+	allInputMeshFormats.push_front(allKnownFormatsFilter);
 	
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		addPluginMeshFormats(allKnowOutputFormats, outFilters, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
+		addPluginMeshFormats(outputMeshFormatToPluginMap, allOutputMeshFormats, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
 	}
 	
 	allKnownFormatsFilter = QObject::tr("All known formats (");
 	
 	for (IORasterPluginInterface* pRasterIOPlugin : ioRasterPlugins){
-		allKnownFormatsFilter += addPluginRasterFormats(allKnownInputRasterFormats, inpRasterFilters, pRasterIOPlugin, pRasterIOPlugin->importFormats());
+		allKnownFormatsFilter += addPluginRasterFormats(inputRasterFormatToPluginMap, allInputRasterFormats, pRasterIOPlugin, pRasterIOPlugin->importFormats());
 	}
 	
 	allKnownFormatsFilter.append(')');
-	inpRasterFilters.push_front(allKnownFormatsFilter);
+	allInputRasterFormats.push_front(allKnownFormatsFilter);
 }
 
 QString PluginManager::addPluginRasterFormats(
