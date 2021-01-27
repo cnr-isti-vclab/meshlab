@@ -2003,7 +2003,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputRasterFormatList().join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputRasterFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 	
@@ -2258,7 +2258,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatList().join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
@@ -2446,7 +2446,7 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-	const QStringList& suffixList = PM.outputMeshFormatList();
+	const QStringList& suffixList = PM.outputMeshFormatListDialog();
 	
 	//QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);

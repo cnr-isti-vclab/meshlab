@@ -50,18 +50,24 @@ public:
 	void loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose = false);
 	QString pluginsCode() const;
 
-	int numberIOPlugins() const;
 	unsigned int size() const;
 
 	DecoratePluginInterface* getDecoratePlugin(const QString& name);
 
 	QAction* filterAction(const QString& name);
+	
 	IOMeshPluginInterface* inputMeshPlugin(const QString& inputFormat) const;
 	IOMeshPluginInterface* outputMeshPlugin(const QString& outputFormat) const;
 	IORasterPluginInterface* inputRasterPlugin(const QString inputFormat) const;
-	const QStringList& inputMeshFormatList() const;
-	const QStringList& outputMeshFormatList() const;
-	const QStringList& inputRasterFormatList() const;
+	bool isInputMeshFormatSupported(const QString inputFormat) const;
+	bool isOutputMeshFormatSupported(const QString outputFormat) const;
+	bool isInputRasterFormatSupported(const QString inputFormat) const;
+	QStringList inputMeshFormatList() const;
+	QStringList outputMeshFormatList() const;
+	QStringList inputRasterFormatList() const;
+	const QStringList& inputMeshFormatListDialog() const;
+	const QStringList& outputMeshFormatListDialog() const;
+	const QStringList& inputRasterFormatListDialog() const;
 
 	class NamePluginPairRangeIterator
 	{
@@ -164,13 +170,13 @@ private:
 	QVector<IOMeshPluginInterface*> ioMeshPlugins;
 	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
 	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
-	QStringList allInputMeshFormats;
-	QStringList allOutputMeshFormats;
+	QStringList inputMeshFormatsDialogStringList; //todo: remove this
+	QStringList outputMeshFormatsDialogStringList; //todo: remove this
 
 	//IORasterPlugins
 	QVector<IORasterPluginInterface*> ioRasterPlugins;
 	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
-	QStringList allInputRasterFormats;
+	QStringList inputRasterFormatsDialogStringList;
 
 	//Filter Plugins
 	QVector<FilterPluginInterface*> filterPlugins;
