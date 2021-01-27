@@ -32,6 +32,7 @@
 #include <common/parameters/rich_parameter_list.h>
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 #include <wrap/io_trimesh/alnParser.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 
 #include <clocale>
 
@@ -83,29 +84,50 @@ public:
     {
         PM.loadPlugins(defaultGlobal);
 
-        printf("Total %i filtering actions\n", PM.actionFilterMap.size());
+        //printf("Total %i filtering actions\n", PM.actionFilterMap.size());
         printf("Total %i io plugins\n", PM.numberIOPlugins());
     }
 
     void dumpPluginInfoWiki(FILE *fp)
     {
         if(!fp) return;
-        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
-            foreach(QAction *filterAction, iFilter->actions())
-            fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
+        for(FilterPluginInterface *iFilter: PM.filterPluginIterator())
+            for(QAction *filterAction: iFilter->actions())
+                fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
     }
+	
+	QMap<QString, RichParameterList> generateFilterParameterMap()
+	{	
+		QMap<QString, RichParameterList> FPM;
+		MeshDocument md;	
+		MeshModel* mm = md.addNewMesh("", "dummy", true);	
+		vcg::tri::Tetrahedron(mm->cm);
+		mm->updateDataMask(MeshModel::MM_ALL);
+		QMap<QString, QAction*>::iterator ai;	
+		for(FilterPluginInterface* fpi : PM.filterPluginIterator())
+		//for (ai = this->actionFilterMap.begin(); ai != this->actionFilterMap.end(); ++ai)	
+		{	
+			for (QAction* ai: fpi->actions()) {
+				QString filterName = fpi->filterName(ai);//  ->filterName();	
+				//QAction act(filterName,NULL);	
+				RichParameterList rp;	
+				FPM[filterName] = rp;
+			}
+		}	
+		return FPM;	
+	}
 
     void dumpPluginInfoDoxygen(FILE *fp)
     {
         if(!fp) return;
         int i=0;
-        QMap<QString, RichParameterList> FPM = PM.generateFilterParameterMap();
+        QMap<QString, RichParameterList> FPM = generateFilterParameterMap();
         fprintf(fp,"/*! \\mainpage MeshLab Filter Documentation\n");
         //fprintf(fp,"\\AtBeginDocument{\\setcounter{tocdepth}{1}}");
 
-        foreach(FilterPluginInterface *iFilter, PM.meshFilterPlugins())
+        for(FilterPluginInterface *iFilter: PM.filterPluginIterator())
         {
-            foreach(QAction *filterAction, iFilter->actions())
+            for(QAction *filterAction: iFilter->actions())
             {
                 fprintf(fp,
                     "\n\\section f%i %s \n\n"
@@ -579,7 +601,7 @@ public:
             //RichParameterSet &par = (*ii).second;
             QString fname = pair.filterName();
             fprintf(fp,"filter: %s\n", qUtf8Printable(fname));
-            QAction *action = PM.actionFilterMap[ fname];
+            QAction *action = PM.filterAction(fname);
             if (action == NULL)
             {
                 fprintf(fp,"filter %s not found", qUtf8Printable(fname));
