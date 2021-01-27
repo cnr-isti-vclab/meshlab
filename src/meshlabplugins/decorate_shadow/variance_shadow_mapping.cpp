@@ -23,7 +23,7 @@
 
 #include "decorate_shader.h"
 #include "variance_shadow_mapping.h"
-#include <common/pluginmanager.h>
+#include <common/globals/globals.h>
 #include <meshlab/glarea.h>
 
 
@@ -57,12 +57,12 @@ bool VarianceShadowMapping::init()
             this->_depthShaderProgram,
             this->_depthVert,
             this->_depthFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsm/depthVSM"))) ||
+            meshlab::defaultShadersPath() + "/decorate_shadow/vsm/depthVSM") ||
        !compileAndLink(
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsm/objectVSM"))))
+            meshlab::defaultShadersPath() + "/shaders/decorate_shadow/vsm/objectVSM"))
         return false;
 
     return true;

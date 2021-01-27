@@ -1,8 +1,8 @@
 /****************************************************************************
 * MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005, 2009                                          \/)\/    *
+* Copyright(C) 2005-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,45 +21,32 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef U3D_IO_H
-#define U3D_IO_H
+#ifndef MESHLAB_SINGLETONS_H
+#define MESHLAB_SINGLETONS_H
 
-#include <QObject>
-#include <QList>
-#include <QString>
+class RichParameterList;
+class PluginManager;
 
-#include <common/interfaces/iomesh_plugin_interface.h>
-#include <common/ml_document/mesh_model.h>
-#include <wrap/io_trimesh/export_u3d.h>
-#include <wrap/io_trimesh/export_idtf.h>
+namespace meshlab {
 
-class U3DIOPlugin : public QObject, public IOMeshPluginInterface
+/**
+ * @brief The MeshLabSingletons class
+ * This class contains all the singleton instances used on MeshLab.
+ * - pluginManager
+ * - defaultGlobalParameterList
+ */
+class MeshLabSingletons
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(IOMeshPluginInterface)
-
 public:
-	QString pluginName() const;
-	QList<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	/** Singleton Instances **/
+	static PluginManager& pluginManagerInstance();
 
-	U3DIOPlugin();
-
-	virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
-
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par);
-
+	MeshLabSingletons(MeshLabSingletons const&) = delete;
+	void operator=(MeshLabSingletons const&) = delete;
 private:
-	void saveParameters(const RichParameterList &par);
-
-	void saveLatex(const QString& file,const vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& mov_par);
-	void substituteChar(QString& st, const QChar& ch_remove, const QString& sub);
-
-	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
+	MeshLabSingletons();
 };
 
-#endif
+}
+
+#endif // MESHLAB_SINGLETONS_H

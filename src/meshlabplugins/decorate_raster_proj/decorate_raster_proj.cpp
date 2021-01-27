@@ -24,12 +24,8 @@
 #include "decorate_raster_proj.h"
 #include <common/GLExtensionsManager.h>
 #include <wrap/gl/shot.h>
-#include <common/pluginmanager.h>
 #include <meshlab/glarea.h>
 #include <vcg/math/matrix44.h>
-
-
-
 
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {

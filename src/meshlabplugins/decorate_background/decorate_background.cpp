@@ -29,7 +29,7 @@
 
 #include <meshlab/glarea.h>
 #include <common/GLExtensionsManager.h>
-#include <common/pluginmanager.h>
+#include <common/plugin_manager.h>
 
 
 using namespace vcg;
@@ -66,11 +66,6 @@ void DecorateBackgroundPlugin::initGlobalParameterList(const QAction* action, Ri
     switch(ID(action))
     {
     case DP_SHOW_CUBEMAPPED_ENV :
-        if(!parset.hasParameter(CubeMapPathParam()))
-        {
-            QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-            //parset.addParam(RichString(CubeMapPathParam(), cubemapDirPath,"",""));
-        }
         break;
     case DP_SHOW_GRID :
       parset.addParam(RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));

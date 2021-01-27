@@ -1403,11 +1403,11 @@ void GLArea::toggleDecorator(QString name)
 void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 {
 	makeCurrent();
-    DecoratePluginInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
+    DecoratePluginInterface *iDecorateTemp = this->mw()->PM.getDecoratePlugin(name);
     if (!iDecorateTemp) {
         this->Logf(GLLogStream::SYSTEM,"Could not get Decorate interface %s", qUtf8Printable(name));
         this->Log(GLLogStream::SYSTEM,"Known decorate interfaces:");
-        for (auto tt : this->mw()->PM.meshDecoratePlugins()) {
+        for (auto tt : this->mw()->PM.decoratePluginIterator()) {
             for (auto action : tt->actions()) {
                 this->Logf(GLLogStream::SYSTEM,"- %s", qUtf8Printable(tt->decorationName(action)));
             }

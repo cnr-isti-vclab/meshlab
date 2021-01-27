@@ -40,11 +40,12 @@
 #include <QElapsedTimer>
 #include <QMimeData>
 
-#include "../common/meshlabdocumentxml.h"
-#include "../common/meshlabdocumentbundler.h"
-#include "../common/mlapplication.h"
-#include "../common/filterscript.h"
-#include "../common/mlexception.h"
+#include <common/meshlabdocumentxml.h>
+#include <common/meshlabdocumentbundler.h>
+#include <common/mlapplication.h>
+#include <common/filterscript.h>
+#include <common/mlexception.h>
+#include <common/globals/globals.h>
 
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
@@ -394,10 +395,10 @@ void MainWindow::updateMenus()
 		// you exit from editing mode by pressing again the editing button
 		// When you are in a editing mode all the other editing are disabled.
 		
-		foreach (QAction *a,PM.editActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled( GLA()->getCurrentEditAction() == NULL );
+		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator())
+			for (QAction* a : ep->actions()) {
+				a->setChecked(false);
+				a->setEnabled(GLA()->getCurrentEditAction() == nullptr);
 		}
 		
 		suspendEditModeAct->setChecked(GLA()->suspendedEditor);
@@ -414,10 +415,11 @@ void MainWindow::updateMenus()
 		
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
-		foreach (QAction *a, PM.decoratorActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled(true);
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setChecked(false);
+				a->setEnabled(true);
+			}
 		}
 		// Check the decorator per Document of the current glarea
 		foreach (QAction *a,   GLA()->iPerDocDecoratorlist)
@@ -430,13 +432,17 @@ void MainWindow::updateMenus()
 	} // if active
 	else
 	{
-		foreach (QAction *a,PM.editActionList)
-		{
-			a->setEnabled(false);
+		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator()) {
+			for (QAction* a : ep->actions()) {
+				a->setEnabled(false);
+			}
 		}
-		foreach (QAction *a,PM.decoratorActionList)
-			a->setEnabled(false);
-		
+
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setEnabled(false);
+			}
+		}
 	}
 	GLArea* tmp = GLA();
 	if(tmp != NULL)
@@ -447,12 +453,12 @@ void MainWindow::updateMenus()
 	}
 	else
 	{
-		foreach (QAction *a,PM.decoratorActionList)
-		{
-			a->setChecked(false);
-			a->setEnabled(false);
+		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+			for (QAction* a : dp->actions()){
+				a->setChecked(false);
+				a->setEnabled(false);
+			}
 		}
-		
 		
 		layerDialog->setVisible(false);
 	}
@@ -780,7 +786,7 @@ void MainWindow::runFilterScript()
 		QString filtnm = pair.filterName();
 		int classes = 0;
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		QAction *action = PM.actionFilterMap[ filtnm];
+		QAction *action = PM.filterAction(filtnm);
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
 		
 		int req=iFilter->getRequirements(action);
@@ -1925,6 +1931,21 @@ void MainWindow::documentUpdateRequested()
 	}
 }
 
+void MainWindow::updateFilterToolBar()
+{
+	filterToolBar->clear();
+	
+	for(FilterPluginInterface *iFilter: PM.filterPluginIterator()) {
+		for(QAction* filterAction: iFilter->actions()) {
+			if (!filterAction->icon().isNull()) {
+				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+				if (filterAction->priority() != QAction::LowPriority)
+					filterToolBar->addAction(filterAction);
+			} //else qDebug() << "action was null";
+		}
+	}
+}
+
 void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati_free_tex, int ati_free_vbo)
 {
 #ifdef Q_OS_WIN
@@ -1982,7 +2003,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpRasterFilters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputRasterFormatList().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 	
@@ -2001,7 +2022,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IORasterPluginInterface *pCurrentIOPlugin = PM.allKnownInputRasterFormats[extension.toLower()];
+		IORasterPluginInterface *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
 		if (pCurrentIOPlugin == NULL)
 		{
@@ -2237,7 +2258,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpMeshFilters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatList().join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
@@ -2256,9 +2277,9 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+		IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
-		if (pCurrentIOPlugin == NULL)
+		if (pCurrentIOPlugin == nullptr)
 		{
 			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
@@ -2352,7 +2373,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowInputMeshFormats[extension.toLower()];
+	IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 	
 	if(pCurrentIOPlugin != NULL)
 	{
@@ -2425,7 +2446,7 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-	QStringList& suffixList = PM.outFilters;
+	const QStringList& suffixList = PM.outputMeshFormatList();
 	
 	//QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);
@@ -2491,7 +2512,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		QStringListIterator itFilter(suffixList);
 		
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
+		IOMeshPluginInterface *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
@@ -2611,8 +2632,8 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qUtf8Printable(pluginManager().getDefaultPluginDirPath()));
-	PluginInfoDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ", qUtf8Printable(meshlab::defaultPluginPath()));
+	PluginInfoDialog dialog(meshlab::defaultPluginPath(), PM.pluginsLoaded, this);
 	dialog.exec();
 }
 

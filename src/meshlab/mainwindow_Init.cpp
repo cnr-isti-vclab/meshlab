@@ -22,10 +22,6 @@
 ****************************************************************************/
 
 
-#include "../common/searcher.h"
-#include "../common/mlapplication.h"
-#include "../common/mlexception.h"
-
 #include <QToolBar>
 #include <QProgressBar>
 #include <QNetworkRequest>
@@ -40,6 +36,11 @@
 #include <QWidgetAction>
 #include <QMessageBox>
 #include "mainwindow.h"
+#include <common/searcher.h>
+#include <common/mlapplication.h>
+#include <common/mlexception.h>
+#include <common/globals/globals.h>
+#include <common/globals/singletons.h>
 #include "dialogs/options_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
@@ -50,6 +51,8 @@ QProgressBar *MainWindow::qb;
 MainWindow::MainWindow(): 
 	httpReq(this), 
 	gpumeminfo(NULL),
+	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
+	PM(meshlab::MeshLabSingletons::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {
 	setContextMenuPolicy(Qt::NoContextMenu);
@@ -76,17 +79,14 @@ MainWindow::MainWindow():
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
 	setWindowIcon(icon);
-	PM.loadPlugins(defaultGlobalParams);
 	QSettings settings;
 	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
 	//should update those values only after I run MeshLab for the very first time or after I installed a new version
 	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
 	{
-		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(), PluginManager::getDefaultPluginDirPath());
+		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(), meshlab::defaultPluginPath());
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(), MeshLabApplication::appVer());
 		settings.setValue(MeshLabApplication::wordSizeKeyName(), QSysInfo::WordSize);
-		foreach(QString plfile, PM.pluginsLoaded)
-			settings.setValue(PluginManager::osIndependentPluginName(plfile), MeshLabApplication::appVer());
 	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
@@ -472,7 +472,7 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	for(DecoratePluginInterface *iDecorate: PM.meshDecoratePlugins()) {
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
 		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);
@@ -481,7 +481,7 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	for(EditPluginInterfaceFactory *iEditFactory: PM.meshEditFactoryPlugins()) {
+	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
@@ -494,15 +494,7 @@ void MainWindow::createToolBars()
 	filterToolBar = addToolBar(tr("Filter"));
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	for(FilterPluginInterface *iFilter: PM.meshFilterPlugins()) {
-		for(QAction* filterAction: iFilter->actions()) {
-			if (!filterAction->icon().isNull()) {
-				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
-				if (filterAction->priority() != QAction::LowPriority)
-					filterToolBar->addAction(filterAction);
-			} //else qDebug() << "action was null";
-		}
-	}
+	updateFilterToolBar();
 
 	QWidget *spacerWidget = new QWidget();
 	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -631,8 +623,18 @@ void MainWindow::createMenus()
 
 void MainWindow::initSearchEngine()
 {
-	for (QMap<QString, QAction*>::iterator it = PM.actionFilterMap.begin(); it != PM.actionFilterMap.end(); ++it)
-		initItemForSearching(it.value());
+	for (const auto& p : PM.filterPluginIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
+	}
+	/*for (const auto& p : PM.editPluginFactoryIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
+	}
+	for (const auto& p : PM.renderPluginIterator()){
+		for (QAction* act : p->actions())
+			initItemForSearching(act);
+	}*/
 
 	initMenuForSearching(editMenu);
 	initMenuForSearching(renderMenu);
@@ -708,11 +710,19 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuCamera);
 
 
-	QMap<QString, FilterPluginInterface *>::iterator msi;
-	for (msi = PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end(); ++msi)
-	{
-		FilterPluginInterface * iFilter = msi.value();
-		QAction *filterAction = iFilter->getFilterAction((msi.key()));
+	//this is used just to fill the menus with alhabetical order
+	std::map<QString, FilterPluginInterface*> mapFilterPlugins;
+	
+	//populate the map
+	for (FilterPluginInterface* fpi : PM.filterPluginIterator()){
+		for (QAction* act : fpi->actions()){
+			mapFilterPlugins[act->text()] = fpi;
+		}
+	}
+
+	for (const auto& p : mapFilterPlugins) {
+		FilterPluginInterface * iFilter = p.second;
+		QAction *filterAction = iFilter->getFilterAction(p.first);
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
 		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
@@ -809,9 +819,9 @@ void MainWindow::fillFilterMenu()
 
 void MainWindow::fillDecorateMenu()
 {
-	foreach(DecoratePluginInterface *iDecorate, PM.meshDecoratePlugins())
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator())
 	{
-		foreach(QAction *decorateAction, iDecorate->actions())
+		for(QAction *decorateAction: iDecorate->actions())
 		{
 			connect(decorateAction, SIGNAL(triggered()), this, SLOT(applyDecorateMode()));
 			decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
@@ -827,17 +837,16 @@ void MainWindow::fillRenderMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	foreach(RenderPluginInterface *iRender, PM.meshRenderPlugins())
-	{
+	for(RenderPluginInterface *iRender:  PM.renderPluginIterator()) {
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
 }
 
 void MainWindow::fillEditMenu()
 {
-	foreach(EditPluginInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator())
 	{
-		foreach(QAction* editAction, iEditFactory->actions())
+		for(QAction* editAction: iEditFactory->actions())
 		{
 			editMenu->addAction(editAction);
 			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));

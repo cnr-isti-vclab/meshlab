@@ -1,4 +1,27 @@
-#include "pluginmanager.h"
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2020                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+#include "plugin_manager.h"
 #include <QObject>
 #include <qapplication.h>
 #include <QPluginLoader>
@@ -6,6 +29,7 @@
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
+#include "globals/globals.h"
 
 static QStringList fileNamePluginDLLs() {
 	QStringList l;
@@ -32,55 +56,58 @@ static QString fileNamePrefixPluginDLLs() {
 
 PluginManager::PluginManager()
 {
-	//pluginsDir=QDir(getPluginDirPath());
-	//without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	//qApp->addLibraryPath(getPluginDirPath());
-	//qApp->addLibraryPath(getBaseDirPath());
+}
+
+PluginManager::PluginManager(RichParameterList& defaultGlobal)
+{
+	loadPlugins(defaultGlobal);
+}
+
+PluginManager::PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
+{
+	loadPlugins(defaultGlobal, pluginsDirectory);
 }
 
 PluginManager::~PluginManager()
 {
 	ioMeshPlugins.clear();
-	meshFilterPlug.clear();
-	meshRenderPlug.clear();
-	meshDecoratePlug.clear();
-	for (PluginInterface* plugin : ownerPlug)
-		delete plugin;
-	ownerPlug.clear();
+	filterPlugins.clear();
+	renderPlugins.clear();
+	decoratePlugins.clear();
+	for (auto& plugin : allPlugins)
+		delete plugin.second;
+	allPlugins.clear();
 	
-	for (int ii = 0; ii < meshEditInterfacePlug.size(); ++ii)
-		delete meshEditInterfacePlug[ii];
-	meshEditInterfacePlug.clear();
+	for (int ii = 0; ii < editPlugins.size(); ++ii)
+		delete editPlugins[ii];
+	editPlugins.clear();
 }
 
 
 
 void PluginManager::loadPlugins(RichParameterList& defaultGlobal)
 {
-	loadPlugins(defaultGlobal, QDir(getDefaultPluginDirPath()));
+	loadPlugins(defaultGlobal, QDir(meshlab::defaultPluginPath()));
 }
 
 void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
 {
 	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	qApp->addLibraryPath(getDefaultPluginDirPath());
-	qApp->addLibraryPath(getBaseDirPath());
+	// ToDo: get rid of any qApp here
+	qApp->addLibraryPath(meshlab::defaultPluginPath());
 	QStringList nameFiltersPlugins = fileNamePluginDLLs();
 	
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(nameFiltersPlugins);
 	
 	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
-	for(QString fileName : pluginsDir.entryList(QDir::Files))
-	{
-		//      qDebug() << fileName;
+	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
 		QPluginLoader loader(absfilepath);
 		QObject *plugin = loader.instance();
-		if (plugin)
-		{
+		if (plugin) {
 			pluginsLoaded.push_back(fileName);
 			PluginInterface *iCommon = nullptr;
 			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
@@ -115,9 +142,8 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 					for(QAction *filterAction : iFilter->actions()) {
 						filterAction->setData(QVariant(fileName));
 						actionFilterMap.insert(filterAction->text(), filterAction);
-						stringFilterMap.insert(filterAction->text(), iFilter);
 					}
-					meshFilterPlug.push_back(iFilter);
+					filterPlugins.push_back(iFilter);
 				}
 			}
 			IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
@@ -137,10 +163,9 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iDecorator)
 			{
 				iCommon = iDecorator;
-				meshDecoratePlug.push_back(iDecorator);
+				decoratePlugins.push_back(iDecorator);
 				for(QAction *decoratorAction : iDecorator->actions())
 				{
-					decoratorActionList.push_back(decoratorAction);
 					iDecorator->initGlobalParameterList(decoratorAction, defaultGlobal);
 				}
 			}
@@ -149,19 +174,22 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 			if (iRender)
 			{
 				iCommon = iRender;
-				meshRenderPlug.push_back(iRender);
+				renderPlugins.push_back(iRender);
 			}
 			
 			EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
 			if (iEditFactory)
 			{
-				meshEditInterfacePlug.push_back(iEditFactory);
-				foreach(QAction* editAction, iEditFactory->actions())
-					editActionList.push_back(editAction);
+				editPlugins.push_back(iEditFactory);
 			}
 			else if (iCommon)
 			{
-				ownerPlug.push_back(iCommon);
+				if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
+					allPlugins[iCommon->pluginName()] = iCommon;
+				}
+				else {
+					std::cerr << "Warning: " << iCommon->pluginName().toStdString() << " has been already loaded.\n";
+				}
 			} else {
 				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
 			}
@@ -179,141 +207,109 @@ int PluginManager::numberIOPlugins() const
 
 unsigned int PluginManager::size() const
 {
-	return ownerPlug.size();
+	return allPlugins.size();
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-DecoratePluginInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
+DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 {
-	foreach(DecoratePluginInterface *tt, this->meshDecoratePlugins())
-	{
-		foreach( QAction *ac, tt->actions())
+	for(DecoratePluginInterface *tt : decoratePlugins) {
+		for( QAction *ac: tt->actions())
 			if( name == tt->decorationName(ac) ) return tt;
 	}
 	assert(0);
 	return 0;
 }
 
-PluginManager::PluginRangeIterator PluginManager::pluginIterator()
+QAction* PluginManager::filterAction(const QString& name)
 {
-	return PluginRangeIterator(this);
+	auto it = actionFilterMap.find(name);
+	if (it != actionFilterMap.end())
+		return it.value();
+	else
+		return nullptr;
 }
 
-/*
-This function create a map from filtername to dummy RichParameterSet.
-containing for each filtername the set of parameter that it uses.
-*/
-QMap<QString, RichParameterList> PluginManager::generateFilterParameterMap()
+IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat)
 {
-	QMap<QString, RichParameterList> FPM;
-	MeshDocument md;
-	MeshModel* mm = md.addNewMesh("", "dummy", true);
-	vcg::tri::Tetrahedron<CMeshO>(mm->cm);
-	mm->updateDataMask(MeshModel::MM_ALL);
-	QMap<QString, QAction*>::iterator ai;
-	for (ai = this->actionFilterMap.begin(); ai != this->actionFilterMap.end(); ++ai)
-	{
-		QString filterName = ai.key();//  ->filterName();
-		//QAction act(filterName,NULL);
-		RichParameterList rp;
-		stringFilterMap[filterName]->initParameterList(ai.value(), md, rp);
-		FPM[filterName] = rp;
-	}
-	return FPM;
+	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputMeshFormatToPluginMap.end())
+		return *it;
+	return nullptr;
 }
 
-QString PluginManager::getBaseDirPath()
+IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat)
 {
-	QDir baseDir(qApp->applicationDirPath());
-	
-#if defined(Q_OS_WIN)
-	// Windows:
-	// during development with visual studio binary could be in the debug/release subdir.
-	// once deployed plugins dir is in the application directory, so
-	if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp(); 
-#endif
-	
-#if defined(Q_OS_MAC)
-	// Mac: during developmentwith xcode  and well deployed the binary is well buried.
-	for(int i=0;i<6;++i){
-		if(baseDir.exists("plugins") || baseDir.exists("PlugIns")) break;
-		baseDir.cdUp();
-	}
-	qDebug("The base dir is %s", qUtf8Printable(baseDir.absolutePath()));
-#endif
-	return baseDir.absolutePath();
+	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
+	if (it != outputMeshFormatToPluginMap.end())
+		return *it;
+	return nullptr;
 }
 
-QString PluginManager::getDefaultPluginDirPath()
+IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat)
 {
-	QDir pluginsDir(getBaseDirPath());
-#if defined(Q_OS_WIN)
-	QString d = pluginsDir.dirName();
-	QString dLower = d.toLower();
-	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
-			dLower == "minsizerel") {
-		// This is a configuration directory for MS Visual Studio.
-		pluginsDir.cdUp();
-	} else {
-		d.clear();
-	}
-#endif
-	if (pluginsDir.exists("PlugIns")){
-		pluginsDir.cd("PlugIns");
-		return pluginsDir.absolutePath();
-	}
-	
-	if (pluginsDir.exists("plugins")) {
-		pluginsDir.cd("plugins");
-		
-#if defined(Q_OS_WIN)
-		// Re-apply the configuration dir, if any.
-		if (!d.isEmpty() && pluginsDir.exists(d)) {
-			pluginsDir.cd(d);
-		}
-#endif
-		
-		return pluginsDir.absolutePath();
-	}
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
-	else if (pluginsDir.dirName() == "bin") {
-		pluginsDir.cdUp();
-		pluginsDir.cd("lib");
-		pluginsDir.cd("meshlab");
-		if (pluginsDir.exists("plugins")) {
-			pluginsDir.cd("plugins");
-			return pluginsDir.absolutePath();
-		}
-	}
-#endif
-	//QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
-	qDebug("Meshlab Initialization: Serious error. Unable to find the plugins directory.");
-	return {};
+	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputRasterFormatToPluginMap.end())
+		return *it;
+	return nullptr;
 }
 
+const QStringList& PluginManager::inputMeshFormatList() const
+{
+	return allInputMeshFormats;
+}
 
+const QStringList& PluginManager::outputMeshFormatList() const
+{
+	return allOutputMeshFormats;
+}
+
+const QStringList& PluginManager::inputRasterFormatList() const
+{
+	return allInputRasterFormats;
+}
+
+PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator()
+{
+	return FilterPluginRangeIterator(this);
+}
+
+PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator()
+{
+	return RenderPluginRangeIterator(this);
+}
+
+PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator()
+{
+	return DecoratePluginRangeIterator(this);
+}
+
+PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator()
+{
+	return EditPluginFactoryRangeIterator(this);
+}
 
 void PluginManager::fillKnownIOFormats()
 {
 	QString allKnownFormatsFilter = QObject::tr("All known formats (");
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		allKnownFormatsFilter += addPluginMeshFormats(allKnowInputMeshFormats, inpMeshFilters, pMeshIOPlugin, pMeshIOPlugin->importFormats());
+		allKnownFormatsFilter += addPluginMeshFormats(inputMeshFormatToPluginMap, allInputMeshFormats, pMeshIOPlugin, pMeshIOPlugin->importFormats());
 	}
 	allKnownFormatsFilter.append(')');
-	inpMeshFilters.push_front(allKnownFormatsFilter);
+	allInputMeshFormats.push_front(allKnownFormatsFilter);
 	
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		addPluginMeshFormats(allKnowOutputFormats, outFilters, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
+		addPluginMeshFormats(outputMeshFormatToPluginMap, allOutputMeshFormats, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
 	}
 	
 	allKnownFormatsFilter = QObject::tr("All known formats (");
 	
 	for (IORasterPluginInterface* pRasterIOPlugin : ioRasterPlugins){
-		allKnownFormatsFilter += addPluginRasterFormats(allKnownInputRasterFormats, inpRasterFilters, pRasterIOPlugin, pRasterIOPlugin->importFormats());
+		allKnownFormatsFilter += addPluginRasterFormats(inputRasterFormatToPluginMap, allInputRasterFormats, pRasterIOPlugin, pRasterIOPlugin->importFormats());
 	}
 	
 	allKnownFormatsFilter.append(')');
-	inpRasterFilters.push_front(allKnownFormatsFilter);
+	allInputRasterFormats.push_front(allKnownFormatsFilter);
 }
 
 QString PluginManager::addPluginRasterFormats(

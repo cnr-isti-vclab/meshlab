@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "ssao.h"
 
-#include <common/pluginmanager.h>
+#include <common/globals/globals.h>
 
 SSAO::SSAO(float radius):DecorateShader()
 {
@@ -93,17 +93,17 @@ bool SSAO::init()
         this->_ssaoShaderProgram,
         this->_ssaoVert,
         this->_ssaoFrag,
-        PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/ssao"))) ||
+        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/ssao") ||
         !compileAndLink(
         this->_normalMapShaderProgram,
         this->_normalMapVert,
         this->_normalMapFrag,
-        PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/normalMap"))) ||
+        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/normalMap") ||
         !compileAndLink(
         this->_blurShaderProgram,
         this->_blurVert,
         this->_blurFrag,
-        PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/blur"))))
+        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/blur"))
         return false;
     return true;
 }

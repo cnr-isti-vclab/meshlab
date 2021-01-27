@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "decorate_shader.h"
 #include "variance_shadow_mapping_blur.h"
-#include <common/pluginmanager.h>
+#include <common/globals/globals.h>
 
 VarianceShadowMappingBlur::VarianceShadowMappingBlur(float intensity):VarianceShadowMapping(intensity)
 {
@@ -56,17 +56,17 @@ bool VarianceShadowMappingBlur::init()
             this->_depthShaderProgram,
             this->_depthVert,
             this->_depthFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsmb/depthVSM"))) ||
+            meshlab::defaultShadersPath() + "/decorate_shadow/vsmb/depthVSM") ||
        !compileAndLink(
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsmb/objectVSM"))) ||
+            meshlab::defaultShadersPath() + "/shaders/decorate_shadow/vsmb/objectVSM") ||
        !compileAndLink(
             this->_blurShaderProgram,
             this->_blurVert,
             this->_blurFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsmb/blurVSM"))))
+            meshlab::defaultShadersPath() + "/shaders/decorate_shadow/vsmb/blurVSM"))
         return false;
     return true;
 }

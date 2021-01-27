@@ -40,12 +40,8 @@ exists(../../ML_VERSION){
 
 # Input
 HEADERS += 	\
-	GLExtensionsManager.h \
-	parameters/rich_parameter_list.h \
-	parameters/value.h \
-	parameters/rich_parameter.h \
-	filterscript.h \
-	GLLogStream.h \
+	globals/globals.h \
+	globals/singletons.h \
 	interfaces/decorate_plugin_interface.h \
 	interfaces/edit_plugin_interface.h \
 	interfaces/filter_plugin_interface.h \
@@ -62,8 +58,14 @@ HEADERS += 	\
 	ml_document/mesh_document.h \
 	ml_document/raster_model.h \
 	ml_document/render_raster.h \
+	parameters/rich_parameter_list.h \
+	parameters/value.h \
+	parameters/rich_parameter.h \
 	utilities/file_format.h \
-	pluginmanager.h \
+	GLExtensionsManager.h \
+	filterscript.h \
+	GLLogStream.h \
+	plugin_manager.h \
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
@@ -72,12 +74,8 @@ HEADERS += 	\
 	meshlabdocumentxml.h
 
 SOURCES += \
-	GLExtensionsManager.cpp \
-	parameters/rich_parameter.cpp \
-	parameters/rich_parameter_list.cpp \
-	parameters/value.cpp \
-	filterscript.cpp \
-	GLLogStream.cpp \
+	globals/globals.cpp \
+	globals/singletons.cpp \
 	interfaces/decorate_plugin_interface.cpp \
 	interfaces/filter_plugin_interface.cpp \
 	interfaces/plugin_interface.cpp \
@@ -88,7 +86,13 @@ SOURCES += \
 	ml_document/mesh_document.cpp \
 	ml_document/raster_model.cpp \
 	ml_document/render_raster.cpp \
-	pluginmanager.cpp \
+	parameters/rich_parameter.cpp \
+	parameters/rich_parameter_list.cpp \
+	parameters/value.cpp \
+	GLExtensionsManager.cpp \
+	filterscript.cpp \
+	GLLogStream.cpp \
+	plugin_manager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \

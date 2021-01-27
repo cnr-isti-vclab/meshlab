@@ -8,9 +8,8 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 endif()
 
 set(HEADERS
-	parameters/rich_parameter.h
-	parameters/rich_parameter_list.h
-	parameters/value.h
+	globals/globals.h
+	globals/singletons.h
 	interfaces/decorate_plugin_interface.h
 	interfaces/edit_plugin_interface.h
 	interfaces/filter_plugin_interface.h
@@ -28,6 +27,9 @@ set(HEADERS
 	ml_document/mesh_model_state.h
 	ml_document/raster_model.h
 	ml_document/render_raster.h
+	parameters/rich_parameter.h
+	parameters/rich_parameter_list.h
+	parameters/value.h
 	utilities/file_format.h
 	GLExtensionsManager.h
 	GLLogStream.h
@@ -39,13 +41,12 @@ set(HEADERS
 	ml_thread_safe_memory_info.h
 	mlapplication.h
 	mlexception.h
-	pluginmanager.h
+	plugin_manager.h
 	searcher.h)
 
 set(SOURCES
-	parameters/rich_parameter.cpp
-	parameters/rich_parameter_list.cpp
-	parameters/value.cpp
+	globals/globals.cpp
+	globals/singletons.cpp
 	interfaces/decorate_plugin_interface.cpp
 	interfaces/filter_plugin_interface.cpp
 	interfaces/plugin_interface.cpp
@@ -56,6 +57,9 @@ set(SOURCES
 	ml_document/mesh_model_state.cpp
 	ml_document/raster_model.cpp
 	ml_document/render_raster.cpp
+	parameters/rich_parameter.cpp
+	parameters/rich_parameter_list.cpp
+	parameters/value.cpp
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
@@ -65,7 +69,7 @@ set(SOURCES
 	ml_shared_data_context.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
-	pluginmanager.cpp
+	plugin_manager.cpp
 	searcher.cpp
 	${EXTERNAL_DIR}/easyexif/exif.cpp)
 

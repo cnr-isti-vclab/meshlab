@@ -29,8 +29,8 @@
 
 #include <GL/glew.h>
 
-#include "../common/interfaces/mainwindow_interface.h"
-#include "../common/pluginmanager.h"
+#include "common/interfaces/mainwindow_interface.h"
+#include "common/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 
@@ -238,6 +238,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
 
+	void updateFilterToolBar();
 	void updateGPUMemBar(int,int,int,int);
 
 	void updateLog();
@@ -292,14 +293,14 @@ private:
 	*/
 
 	RichParameterList currentGlobalParams;
-	RichParameterList defaultGlobalParams;
+	RichParameterList& defaultGlobalParams;
 
 	QByteArray toolbarState; //toolbar and dockwidgets state
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 public:
-	PluginManager PM;
+	PluginManager& PM;
 
 	MeshDocument *meshDoc() {
 		if (currentViewContainer() != NULL)
@@ -341,8 +342,6 @@ public:
 
 		return _currviewcontainer;
 	}
-
-	const PluginManager& pluginManager() const { return PM; }
 
 	static QStatusBar *&globalStatusBar()
 	{
