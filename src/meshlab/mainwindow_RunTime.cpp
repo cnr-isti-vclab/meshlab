@@ -45,7 +45,7 @@
 #include <common/mlapplication.h>
 #include <common/filterscript.h>
 #include <common/mlexception.h>
-#include <common/globals/globals.h>
+#include <common/globals.h>
 
 #include "rich_parameter_gui/richparameterlistdialog.h"
 

@@ -40,8 +40,7 @@ exists(../../ML_VERSION){
 
 # Input
 HEADERS += 	\
-	globals/globals.h \
-	globals/singletons.h \
+	globals.h \
 	interfaces/decorate_plugin_interface.h \
 	interfaces/edit_plugin_interface.h \
 	interfaces/filter_plugin_interface.h \
@@ -74,8 +73,7 @@ HEADERS += 	\
 	meshlabdocumentxml.h
 
 SOURCES += \
-	globals/globals.cpp \
-	globals/singletons.cpp \
+	globals.cpp \
 	interfaces/decorate_plugin_interface.cpp \
 	interfaces/filter_plugin_interface.cpp \
 	interfaces/plugin_interface.cpp \

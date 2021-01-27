@@ -39,8 +39,7 @@
 #include <common/searcher.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
-#include <common/globals/globals.h>
-#include <common/globals/singletons.h>
+#include <common/globals.h>
 #include "dialogs/options_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 #include "dialogs/congrats_dialog.h"
@@ -52,7 +51,7 @@ MainWindow::MainWindow():
 	httpReq(this), 
 	gpumeminfo(NULL),
 	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
-	PM(meshlab::MeshLabSingletons::pluginManagerInstance()),
+	PM(meshlab::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {
 	setContextMenuPolicy(Qt::NoContextMenu);

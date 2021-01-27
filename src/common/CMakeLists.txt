@@ -8,8 +8,7 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 endif()
 
 set(HEADERS
-	globals/globals.h
-	globals/singletons.h
+	globals.h
 	interfaces/decorate_plugin_interface.h
 	interfaces/edit_plugin_interface.h
 	interfaces/filter_plugin_interface.h
@@ -45,8 +44,7 @@ set(HEADERS
 	searcher.h)
 
 set(SOURCES
-	globals/globals.cpp
-	globals/singletons.cpp
+	globals.cpp
 	interfaces/decorate_plugin_interface.cpp
 	interfaces/filter_plugin_interface.cpp
 	interfaces/plugin_interface.cpp

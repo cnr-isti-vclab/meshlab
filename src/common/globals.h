@@ -21,32 +21,22 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_SINGLETONS_H
-#define MESHLAB_SINGLETONS_H
+#ifndef MESHLAB_GLOBALS_H
+#define MESHLAB_GLOBALS_H
+
+#include <QString>
 
 class RichParameterList;
 class PluginManager;
 
 namespace meshlab {
 
-/**
- * @brief The MeshLabSingletons class
- * This class contains all the singleton instances used on MeshLab.
- * - pluginManager
- * - defaultGlobalParameterList
- */
-class MeshLabSingletons
-{
-public:
-	/** Singleton Instances **/
-	static PluginManager& pluginManagerInstance(bool verbose = true);
+QString defaultPluginPath();
+QString defaultShadersPath();
 
-	MeshLabSingletons(MeshLabSingletons const&) = delete;
-	void operator=(MeshLabSingletons const&) = delete;
-private:
-	MeshLabSingletons();
-};
+RichParameterList& defaultGlobalParameterList();
+PluginManager& pluginManagerInstance(bool verbose = true);
 
 }
 
-#endif // MESHLAB_SINGLETONS_H
+#endif // MESHLAB_GLOBALS_H

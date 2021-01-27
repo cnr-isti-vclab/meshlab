@@ -29,7 +29,7 @@
 #include <vcg/complex/algorithms/create/platonic.h>
 
 #include "mlexception.h"
-#include "globals/globals.h"
+#include "globals.h"
 
 static QStringList fileNamePluginDLLs() {
 	QStringList l;

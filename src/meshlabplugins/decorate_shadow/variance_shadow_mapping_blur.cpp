@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "decorate_shader.h"
 #include "variance_shadow_mapping_blur.h"
-#include <common/globals/globals.h>
+#include <common/globals.h>
 
 VarianceShadowMappingBlur::VarianceShadowMappingBlur(float intensity):VarianceShadowMapping(intensity)
 {

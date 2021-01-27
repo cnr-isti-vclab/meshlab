@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
-#include <common/globals/globals.h>
+#include <common/globals.h>
 
 
 ShadowMapping::ShadowMapping(float intensity):DecorateShader()

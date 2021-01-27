@@ -26,13 +26,8 @@
 #include <QDir>
 #include <qapplication.h>
 
-#include "../parameters/rich_parameter_list.h"
-
-RichParameterList& meshlab::defaultGlobalParameterList()
-{
-	static RichParameterList globalRPS;
-	return globalRPS;
-}
+#include "parameters/rich_parameter_list.h"
+#include "plugin_manager.h"
 
 QString basePath()
 {
@@ -106,4 +101,16 @@ QString meshlab::defaultPluginPath()
 QString meshlab::defaultShadersPath()
 {
 	return basePath() + "/shaders";
+}
+
+RichParameterList& meshlab::defaultGlobalParameterList()
+{
+	static RichParameterList globalRPS;
+	return globalRPS;
+}
+
+PluginManager& meshlab::pluginManagerInstance(bool verbose)
+{
+	static PluginManager pm(defaultGlobalParameterList(), verbose);
+	return pm;
 }
