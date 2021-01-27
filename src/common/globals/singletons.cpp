@@ -9,9 +9,9 @@ MeshLabSingletons::MeshLabSingletons()
 {
 }
 
-PluginManager& MeshLabSingletons::pluginManagerInstance()
+PluginManager& MeshLabSingletons::pluginManagerInstance(bool verbose)
 {
-	static PluginManager pm(defaultGlobalParameterList());
+	static PluginManager pm(defaultGlobalParameterList(), verbose);
 	return pm;
 }
 

@@ -58,14 +58,14 @@ PluginManager::PluginManager()
 {
 }
 
-PluginManager::PluginManager(RichParameterList& defaultGlobal)
+PluginManager::PluginManager(RichParameterList& defaultGlobal, bool verbose)
 {
-	loadPlugins(defaultGlobal);
+	loadPlugins(defaultGlobal, verbose);
 }
 
-PluginManager::PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
+PluginManager::PluginManager(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose)
 {
-	loadPlugins(defaultGlobal, pluginsDirectory);
+	loadPlugins(defaultGlobal, pluginsDirectory, verbose);
 }
 
 PluginManager::~PluginManager()
@@ -85,12 +85,12 @@ PluginManager::~PluginManager()
 
 
 
-void PluginManager::loadPlugins(RichParameterList& defaultGlobal)
+void PluginManager::loadPlugins(RichParameterList& defaultGlobal, bool verbose)
 {
-	loadPlugins(defaultGlobal, QDir(meshlab::defaultPluginPath()));
+	loadPlugins(defaultGlobal, QDir(meshlab::defaultPluginPath()), verbose);
 }
 
-void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory)
+void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pluginsDirectory, bool verbose)
 {
 	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -100,8 +100,8 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 	
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(nameFiltersPlugins);
-	
-	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
+	if (verbose)
+		qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
 	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
@@ -117,23 +117,28 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				bool loadFilterOK = true;
 				for(QAction *filterAction : iFilter->actions()) {
 					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
-						qDebug() << "Missing class for " +fileName + " " + filterAction->text();
+						if (verbose)
+							qDebug() << "Missing class for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
+						if (verbose)
+							qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
+						if (verbose)
+							qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
-						qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
+						if (verbose)
+							qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
-						qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
+						if (verbose)
+							qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					
@@ -187,14 +192,14 @@ void PluginManager::loadPlugins(RichParameterList& defaultGlobal, const QDir& pl
 				if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
 					allPlugins[iCommon->pluginName()] = iCommon;
 				}
-				else {
-					std::cerr << "Warning: " << iCommon->pluginName().toStdString() << " has been already loaded.\n";
+				else if (verbose){
+					qDebug() << "Warning: " << iCommon->pluginName() << " has been already loaded.\n";
 				}
 			} else {
 				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
 			}
 		}
-		else
+		else if (verbose)
 			qDebug() << loader.errorString();
 	}
 	fillKnownIOFormats();
@@ -230,7 +235,7 @@ QAction* PluginManager::filterAction(const QString& name)
 		return nullptr;
 }
 
-IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat)
+IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
 	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
 	if (it != inputMeshFormatToPluginMap.end())
@@ -238,7 +243,7 @@ IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat
 	return nullptr;
 }
 
-IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat)
+IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
 	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
 	if (it != outputMeshFormatToPluginMap.end())
@@ -246,7 +251,7 @@ IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputForm
 	return nullptr;
 }
 
-IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat)
+IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
 	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
 	if (it != inputRasterFormatToPluginMap.end())
@@ -269,22 +274,37 @@ const QStringList& PluginManager::inputRasterFormatList() const
 	return allInputRasterFormats;
 }
 
-PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator()
+PluginManager::NamePluginPairRangeIterator PluginManager::namePluginPairIterator() const
+{
+	return NamePluginPairRangeIterator(this);
+}
+
+PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator() const
 {
 	return FilterPluginRangeIterator(this);
 }
 
-PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator()
+PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator() const
+{
+	return IOMeshPluginIterator(this);
+}
+
+PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator() const
+{
+	return IORasterPluginIterator(this);
+}
+
+PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator() const
 {
 	return RenderPluginRangeIterator(this);
 }
 
-PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator()
+PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator() const
 {
 	return DecoratePluginRangeIterator(this);
 }
 
-PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator()
+PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator() const
 {
 	return EditPluginFactoryRangeIterator(this);
 }

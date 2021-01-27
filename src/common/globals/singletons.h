@@ -39,7 +39,7 @@ class MeshLabSingletons
 {
 public:
 	/** Singleton Instances **/
-	static PluginManager& pluginManagerInstance();
+	static PluginManager& pluginManagerInstance(bool verbose = true);
 
 	MeshLabSingletons(MeshLabSingletons const&) = delete;
 	void operator=(MeshLabSingletons const&) = delete;
