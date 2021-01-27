@@ -25,6 +25,7 @@
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
 #include <common/plugin_manager.h>
+#include <common/globals.h>
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
 #include <common/meshlabdocumentbundler.h>
@@ -82,7 +83,7 @@ public:
 
     void loadPlugins()
     {
-        PM.loadPlugins(defaultGlobal);
+        PM.loadPlugins();
 
         //printf("Total %i filtering actions\n", PM.actionFilterMap.size());
         printf("Total %i io plugins\n", PM.numberIOPlugins());
@@ -184,7 +185,7 @@ public:
 
         RichParameterList prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
-        prePar.join(defaultGlobal);
+        prePar.join(meshlab::defaultGlobalParameterList());
 
         if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
         {
@@ -726,7 +727,6 @@ public:
 
 private:
     PluginManager PM;
-    RichParameterList defaultGlobal;
     MLSceneGLSharedDataContext* shared;
 };
 
