@@ -73,14 +73,12 @@ PluginManager::~PluginManager()
 	editPlugins.clear();
 }
 
-
-
-void PluginManager::loadPlugins(bool verbose)
+void PluginManager::loadPlugins()
 {
-	loadPlugins(QDir(meshlab::defaultPluginPath()), verbose);
+	loadPlugins(QDir(meshlab::defaultPluginPath()));
 }
 
-void PluginManager::loadPlugins(const QDir& pluginsDirectory, bool verbose)
+void PluginManager::loadPlugins(const QDir& pluginsDirectory)
 {
 	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -90,8 +88,7 @@ void PluginManager::loadPlugins(const QDir& pluginsDirectory, bool verbose)
 	
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(nameFiltersPlugins);
-	if (verbose)
-		qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
+	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
 	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
@@ -107,28 +104,23 @@ void PluginManager::loadPlugins(const QDir& pluginsDirectory, bool verbose)
 				bool loadFilterOK = true;
 				for(QAction *filterAction : iFilter->actions()) {
 					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
-						if (verbose)
-							qDebug() << "Missing class for " +fileName + " " + filterAction->text();
+						qDebug() << "Missing class for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						if (verbose)
-							qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
+						qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						if (verbose)
-							qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
+						qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
-						if (verbose)
-							qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
+						qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
-						if (verbose)
-							qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
+						qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
 						loadFilterOK = false;
 					}
 					
@@ -182,14 +174,14 @@ void PluginManager::loadPlugins(const QDir& pluginsDirectory, bool verbose)
 				if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
 					allPlugins[iCommon->pluginName()] = iCommon;
 				}
-				else if (verbose){
+				else{
 					qDebug() << "Warning: " << iCommon->pluginName() << " has been already loaded.\n";
 				}
 			} else {
 				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
 			}
 		}
-		else if (verbose)
+		else
 			qDebug() << loader.errorString();
 	}
 	fillKnownIOFormats();

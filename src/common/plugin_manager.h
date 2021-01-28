@@ -44,8 +44,8 @@ public:
 	PluginManager();
 	~PluginManager();
 	
-	void loadPlugins(bool verbose = false);
-	void loadPlugins(const QDir& pluginsDirectory, bool verbose = false);
+	void loadPlugins();
+	void loadPlugins(const QDir& pluginsDirectory);
 	QString pluginsCode() const;
 
 	unsigned int size() const;
