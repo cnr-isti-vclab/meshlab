@@ -45,47 +45,44 @@ using namespace vcg;
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 {
 	typeList
-	    << FP_LOOP_SS
-	    << FP_BUTTERFLY_SS
-	    << FP_CLUSTERING
-	    << FP_QUADRIC_SIMPLIFICATION
-	    << FP_QUADRIC_TEXCOORD_SIMPLIFICATION
-	    << FP_EXPLICIT_ISOTROPIC_REMESHING
-	    << FP_MIDPOINT
-	    << FP_REORIENT
-	    << FP_FLIP_AND_SWAP
-	    << FP_ROTATE
-	    << FP_ROTATE_FIT
-	    << FP_PRINCIPAL_AXIS
-	    << FP_SCALE
-	    << FP_CENTER
-	    << FP_INVERT_FACES
-	    << FP_NORMAL_EXTRAPOLATION
-	    << FP_NORMAL_SMOOTH_POINTCLOUD
-	    << FP_COMPUTE_PRINC_CURV_DIR
-	    << FP_CLOSE_HOLES
-	    << FP_FREEZE_TRANSFORM
-	    << FP_RESET_TRANSFORM
-	    << FP_INVERT_TRANSFORM
-	    << FP_SET_TRANSFORM_PARAMS
-	    << FP_SET_TRANSFORM_MATRIX
-	    << FP_CYLINDER_UNWRAP
-	    << FP_REFINE_CATMULL
-	    << FP_REFINE_HALF_CATMULL
-	    << FP_QUAD_DOMINANT
-	    << FP_MAKE_PURE_TRI
-	    << FP_QUAD_PAIRING
-	    << FP_FAUX_CREASE
-	    << FP_FAUX_EXTRACT
-	    << FP_VATTR_SEAM
-	    << FP_REFINE_LS3_LOOP
-	    << FP_SLICE_WITH_A_PLANE
-	    << FP_PERIMETER_POLYLINE
-	    ;
+		<< FP_LOOP_SS
+		<< FP_BUTTERFLY_SS
+		<< FP_CLUSTERING
+		<< FP_QUADRIC_SIMPLIFICATION
+		<< FP_QUADRIC_TEXCOORD_SIMPLIFICATION
+		<< FP_EXPLICIT_ISOTROPIC_REMESHING
+		<< FP_MIDPOINT
+		<< FP_REORIENT
+		<< FP_FLIP_AND_SWAP
+		<< FP_ROTATE
+		<< FP_ROTATE_FIT
+		<< FP_PRINCIPAL_AXIS
+		<< FP_SCALE
+		<< FP_CENTER
+		<< FP_INVERT_FACES
+		<< FP_NORMAL_EXTRAPOLATION
+		<< FP_NORMAL_SMOOTH_POINTCLOUD
+		<< FP_COMPUTE_PRINC_CURV_DIR
+		<< FP_CLOSE_HOLES
+		<< FP_FREEZE_TRANSFORM
+		<< FP_RESET_TRANSFORM
+		<< FP_INVERT_TRANSFORM
+		<< FP_SET_TRANSFORM_PARAMS
+		<< FP_SET_TRANSFORM_MATRIX
+		<< FP_CYLINDER_UNWRAP
+		<< FP_REFINE_CATMULL
+		<< FP_REFINE_HALF_CATMULL
+		<< FP_QUAD_DOMINANT
+		<< FP_MAKE_PURE_TRI
+		<< FP_QUAD_PAIRING
+		<< FP_FAUX_CREASE
+		<< FP_FAUX_EXTRACT
+		<< FP_VATTR_SEAM
+		<< FP_REFINE_LS3_LOOP
+		<< FP_SLICE_WITH_A_PLANE
+		<< FP_PERIMETER_POLYLINE;
 
-	FilterIDType tt;
-
-	foreach(tt, types())
+	for(FilterIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 
 	tri::TriEdgeCollapseQuadricParameter lpp;
@@ -155,14 +152,14 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 		case FP_COMPUTE_PRINC_CURV_DIR           : return FilterClass( Normal + VertexColoring );
 
 		case FP_FREEZE_TRANSFORM                 :
-	case FP_INVERT_TRANSFORM                 :
-	case FP_SET_TRANSFORM_PARAMS             :
-	case FP_SET_TRANSFORM_MATRIX             :
+		case FP_INVERT_TRANSFORM                 :
+		case FP_SET_TRANSFORM_PARAMS             :
+		case FP_SET_TRANSFORM_MATRIX             :
 		case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
 
-	case FP_PERIMETER_POLYLINE               :
+		case FP_PERIMETER_POLYLINE               :
 		case FP_SLICE_WITH_A_PLANE               :
-	case FP_CYLINDER_UNWRAP                  : return FilterPluginInterface::Measure;
+		case FP_CYLINDER_UNWRAP                  : return FilterPluginInterface::Measure;
 
 		default                                  : assert(0); return FilterPluginInterface::Generic;
 	}
@@ -194,7 +191,7 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 		case FP_FAUX_EXTRACT                     :
 		case FP_VATTR_SEAM                       :
 		case FP_SLICE_WITH_A_PLANE               :
-	case FP_PERIMETER_POLYLINE               :
+		case FP_PERIMETER_POLYLINE               :
 		case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
 		case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
 		case FP_CLUSTERING                       :
@@ -206,9 +203,9 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 		case FP_FLIP_AND_SWAP                    :
 		case FP_FREEZE_TRANSFORM                 :
 		case FP_RESET_TRANSFORM                  :
-	case FP_INVERT_TRANSFORM                 :
-	case FP_SET_TRANSFORM_PARAMS             :
-	case FP_SET_TRANSFORM_MATRIX             :
+		case FP_INVERT_TRANSFORM                 :
+		case FP_SET_TRANSFORM_PARAMS             :
+		case FP_SET_TRANSFORM_MATRIX             :
 		case FP_NORMAL_EXTRAPOLATION             : return MeshModel::MM_NONE;
 	}
 	return MeshModel::MM_NONE;
@@ -222,7 +219,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_BUTTERFLY_SS                     : return tr("Subdivision Surfaces: Butterfly Subdivision");
 		case FP_MIDPOINT                         : return tr("Subdivision Surfaces: Midpoint");
 		case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
-	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
+		case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
 		case FP_EXPLICIT_ISOTROPIC_REMESHING     : return tr("Remeshing: Isotropic Explicit Remeshing");
 		case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
@@ -234,11 +231,11 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
 		case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
 		case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
-	case FP_FREEZE_TRANSFORM                 : return tr("Matrix: Freeze Current Matrix");
+		case FP_FREEZE_TRANSFORM                 : return tr("Matrix: Freeze Current Matrix");
 		case FP_RESET_TRANSFORM                  : return tr("Matrix: Reset Current Matrix");
-	case FP_INVERT_TRANSFORM                 : return tr("Matrix: Invert Current Matrix");
-	case FP_SET_TRANSFORM_PARAMS             : return tr("Matrix: Set from translation/rotation/scale");
-	case FP_SET_TRANSFORM_MATRIX             : return tr("Matrix: Set/Copy Transformation");
+		case FP_INVERT_TRANSFORM                 : return tr("Matrix: Invert Current Matrix");
+		case FP_SET_TRANSFORM_PARAMS             : return tr("Matrix: Set from translation/rotation/scale");
+		case FP_SET_TRANSFORM_MATRIX             : return tr("Matrix: Set/Copy Transformation");
 		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
 		case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
@@ -253,7 +250,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
 		case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
 		case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
-	case FP_PERIMETER_POLYLINE               : return tr("Create Selection Perimeter Polyline");
+		case FP_PERIMETER_POLYLINE               : return tr("Create Selection Perimeter Polyline");
 
 		default                                  : assert(0);
 	}
@@ -265,7 +262,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
 	switch (filterID)
 	{
-	case FP_REFINE_LS3_LOOP                    : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This refinement method take normals into account. "
+		case FP_REFINE_LS3_LOOP                    : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This refinement method take normals into account. "
 			                                               "<br>See:"
 			                                               "<i>Boye', S. Guennebaud, G. & Schlick, C.</i> <br>"
 			                                               "<b>Least squares subdivision surfaces</b><br>"
@@ -279,7 +276,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated refinement method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
 		case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is split on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
 		case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. "
-                                                           "If the mesh is triangle based (no <a href='https://stackoverflow.com/questions/59392193'>faux edges</a>) it generates a quad mesh, otherwise it honores it the faux-edge bits");
+			                                               "If the mesh is triangle based (no <a href='https://stackoverflow.com/questions/59392193'>faux edges</a>) it generates a quad mesh, otherwise it honores it the faux-edge bits");
 		case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
 			                                               "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
 			                                               "(it adds only a single vertex for each triangle instead of four)."
@@ -310,9 +307,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_FLIP_AND_SWAP                      : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
 		case FP_RESET_TRANSFORM                    : return tr("Set the current transformation matrix to the Identity. ");
 		case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coordinates of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coordinates.");
-	case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. The current transformation is reversed, becoming its opposite.");
-	case FP_SET_TRANSFORM_PARAMS               : return tr("Set the current transformation matrix starting from parameters: [XYZ] translation, [XYZ] Euler angles rotation and [XYZ] scaling.");
-	case FP_SET_TRANSFORM_MATRIX               : return tr("Set the current transformation matrix by filling it, or copying from another layer.");
+		case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. The current transformation is reversed, becoming its opposite.");
+		case FP_SET_TRANSFORM_PARAMS               : return tr("Set the current transformation matrix starting from parameters: [XYZ] translation, [XYZ] Euler angles rotation and [XYZ] scaling.");
+		case FP_SET_TRANSFORM_MATRIX               : return tr("Set the current transformation matrix by filling it, or copying from another layer.");
 		case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 		case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 		case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
@@ -328,7 +325,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 			                                               "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 			                                               "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
 		case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
-	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
+		case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
 		case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the selected edges of the current mesh");
 
 		default                                  : assert(0);

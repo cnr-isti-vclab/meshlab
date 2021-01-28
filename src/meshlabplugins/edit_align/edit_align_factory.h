@@ -43,7 +43,7 @@ public:
 	
 	//get the edit tool for the given action
 	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
-    
+
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction*);
 	
