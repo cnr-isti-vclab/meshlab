@@ -95,7 +95,6 @@ void PluginManager::loadPlugins(const QDir& pluginsDirectory)
 		QPluginLoader loader(absfilepath);
 		QObject *plugin = loader.instance();
 		if (plugin) {
-			pluginsLoaded.push_back(fileName);
 			PluginInterface *iCommon = nullptr;
 			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
 			if (iFilter)

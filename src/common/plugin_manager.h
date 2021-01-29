@@ -153,9 +153,6 @@ public:
 	DecoratePluginRangeIterator decoratePluginIterator() const;
 	EditPluginFactoryRangeIterator editPluginFactoryIterator() const;
 
-	//Going to be removed when the PluginDialog will be well organized
-	QStringList pluginsLoaded;
-
 private:
 	QDir pluginsDir;
 
