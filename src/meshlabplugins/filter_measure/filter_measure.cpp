@@ -684,12 +684,12 @@ bool FilterMeasurePlugin::perFaceQualityHostogram(
 	return true;
 }
 
-Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO& m)
+Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(const CMeshO& m)
 {
 	Matrix33m cov;
 	Point3m bp(0, 0, 0);
 	std::vector<Point3m> PtVec;
-	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 	if (!(*vi).IsD()) {
 		PtVec.push_back((*vi).cP());
 		bp += (*vi).cP();

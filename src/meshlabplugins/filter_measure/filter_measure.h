@@ -68,7 +68,7 @@ private:
 	bool perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
 
 
-	Matrix33m computePrincipalAxisCloud(CMeshO & m);
+	Matrix33m computePrincipalAxisCloud(const CMeshO& m);
 
 };
 
