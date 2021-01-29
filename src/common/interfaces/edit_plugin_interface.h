@@ -89,6 +89,9 @@ public:
 	virtual void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *) {}
 	virtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea *) {}
 	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *) { e->ignore(); }
+	
+private:
+	virtual QString pluginName() const {return QString();};
 };
 
 
@@ -102,6 +105,9 @@ class EditPluginInterfaceFactory
 {
 public:
 	virtual ~EditPluginInterfaceFactory() {}
+	
+	//returns the plugin name
+	virtual QString pluginName() const = 0;
 
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const = 0;

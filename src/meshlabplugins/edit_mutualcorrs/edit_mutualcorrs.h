@@ -43,7 +43,6 @@ public:
     virtual ~EditMutualCorrsPlugin() {}
 
     static const QString Info();
-    QString pluginName() const;
 
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

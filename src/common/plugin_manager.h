@@ -153,9 +153,6 @@ public:
 	DecoratePluginRangeIterator decoratePluginIterator() const;
 	EditPluginFactoryRangeIterator editPluginFactoryIterator() const;
 
-	static QString osIndependentPluginName(const QString& plname);
-	// Used for unique destruction - this "owns" all IO, Filter, Render, and Decorate plugins
-
 	//Going to be removed when the PluginDialog will be well organized
 	QStringList pluginsLoaded;
 

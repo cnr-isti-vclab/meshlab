@@ -34,6 +34,11 @@ QualityMapperFactory::QualityMapperFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString QualityMapperFactory::pluginName() const
+{
+	return "EditQuality";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> QualityMapperFactory::actions() const

@@ -39,6 +39,11 @@ EditSelectFactory::EditSelectFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString EditSelectFactory::pluginName() const
+{
+	return "EditSelect";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> EditSelectFactory::actions() const

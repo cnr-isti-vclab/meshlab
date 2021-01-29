@@ -33,6 +33,11 @@ EditMeasureFactory::EditMeasureFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString EditMeasureFactory::pluginName() const
+{
+	return "EditMeasure";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> EditMeasureFactory::actions() const

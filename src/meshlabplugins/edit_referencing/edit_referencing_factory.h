@@ -37,6 +37,8 @@ public:
     EditReferencingFactory();
     virtual ~EditReferencingFactory() { delete editReferencing; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

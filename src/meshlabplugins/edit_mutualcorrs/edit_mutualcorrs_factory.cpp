@@ -33,7 +33,12 @@ EditMutualCorrsFactory::EditMutualCorrsFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
+
+QString EditMutualCorrsFactory::pluginName() const
+{
+	return "EditMutualCorrs";
+}
+
 //gets a list of actions available from this plugin
 QList<QAction *> EditMutualCorrsFactory::actions() const
 {

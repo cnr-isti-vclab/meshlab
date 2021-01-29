@@ -33,7 +33,12 @@ EditPaintFactory::EditPaintFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
+
+QString EditPaintFactory::pluginName() const
+{
+	return "EditPaint";
+}
+
 //gets a list of actions available from this plugin
 QList<QAction *> EditPaintFactory::actions() const
 {

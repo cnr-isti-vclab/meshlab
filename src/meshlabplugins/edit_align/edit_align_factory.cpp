@@ -33,6 +33,11 @@ EditAlignFactory::EditAlignFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString EditAlignFactory::pluginName() const
+{
+	return "EditAlign";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> EditAlignFactory::actions() const

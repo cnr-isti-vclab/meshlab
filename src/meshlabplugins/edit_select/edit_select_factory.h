@@ -37,6 +37,8 @@ public:
 	EditSelectFactory();
 	virtual ~EditSelectFactory() { delete editSelect; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	
@@ -49,10 +51,10 @@ public:
 private:
 	QList <QAction *> actionList;
 	
-  QAction *editSelect;
-  QAction *editSelectVert;
-  QAction *editSelectConnected;
-  QAction *editSelectArea;
+	QAction *editSelect;
+	QAction *editSelectVert;
+	QAction *editSelectConnected;
+	QAction *editSelectArea;
 };
 
 #endif

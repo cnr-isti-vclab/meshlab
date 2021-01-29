@@ -35,23 +35,25 @@ class PointEditFactory : public QObject, public EditPluginInterfaceFactory
 	Q_INTERFACES(EditPluginInterfaceFactory)
 
 public:
-        PointEditFactory();
-        virtual ~PointEditFactory() { delete editPoint; }
+	PointEditFactory();
+	virtual ~PointEditFactory() { delete editPoint; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	
 	//get the edit tool for the given action
 	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
-    
+
 	//get the description for the given action
 		virtual QString getEditToolDescription(const QAction*);
 	
 private:
 	QList <QAction *> actionList;
-	
-        QAction *editPoint;
-        QAction *editPointFittingPlane;
+
+	QAction *editPoint;
+	QAction *editPointFittingPlane;
 };
 
 #endif

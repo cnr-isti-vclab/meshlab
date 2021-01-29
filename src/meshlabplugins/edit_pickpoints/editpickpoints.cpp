@@ -67,11 +67,6 @@ const QString EditPickPointsPlugin::Info()
 	return tr("Pick and save 3D points on the mesh");
 }
 
-QString EditPickPointsPlugin::pluginName() const
-{
-	return "EditPickPoints";
-}
-
 //called
 void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painter)
 {

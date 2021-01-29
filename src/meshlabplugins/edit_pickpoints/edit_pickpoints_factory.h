@@ -38,6 +38,8 @@ public:
 	EditPickPointsFactory();
 	virtual ~EditPickPointsFactory() { delete editPickPoints; }
 
+	virtual QString pluginName() const;
+
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

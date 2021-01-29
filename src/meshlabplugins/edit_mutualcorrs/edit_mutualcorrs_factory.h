@@ -37,6 +37,8 @@ public:
     EditMutualCorrsFactory();
 	virtual ~EditMutualCorrsFactory() { delete editMutualCorrs; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

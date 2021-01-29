@@ -38,6 +38,8 @@ public:
 	QualityMapperFactory();
 	virtual ~QualityMapperFactory() { delete editQuality; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

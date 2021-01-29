@@ -33,6 +33,11 @@ EditReferencingFactory::EditReferencingFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString EditReferencingFactory::pluginName() const
+{
+	return "EditReferencing";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> EditReferencingFactory::actions() const

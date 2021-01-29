@@ -62,11 +62,6 @@ const QString EditMutualCorrsPlugin::Info()
 {
     return tr("Registration of images on 3D models using mutual correspondences");
 }
-
-QString EditMutualCorrsPlugin::pluginName() const
-{
-    return "EditMutualCorrs";
-}
  
 void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {

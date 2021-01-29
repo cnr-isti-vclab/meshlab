@@ -33,7 +33,12 @@ EditPickPointsFactory::EditPickPointsFactory()
 	for(QAction *editAction : actionList)
 		editAction->setCheckable(true); 	
 }
-	
+
+QString EditPickPointsFactory::pluginName() const
+{
+	return "EditPickPoints";
+}
+
 //gets a list of actions available from this plugin
 QList<QAction *> EditPickPointsFactory::actions() const
 {

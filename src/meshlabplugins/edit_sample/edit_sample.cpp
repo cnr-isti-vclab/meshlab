@@ -52,11 +52,6 @@ const QString SampleEditPlugin::Info()
 {
 	return tr("Return detailed info about a picked face or vertex of the model.");
 }
-
-QString SampleEditPlugin::pluginName() const
-{
-    return "EditSample";
-}
  
 void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {

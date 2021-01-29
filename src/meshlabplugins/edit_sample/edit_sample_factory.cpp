@@ -33,6 +33,11 @@ SampleEditFactory::SampleEditFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString SampleEditFactory::pluginName() const
+{
+	return "EditSample";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> SampleEditFactory::actions() const

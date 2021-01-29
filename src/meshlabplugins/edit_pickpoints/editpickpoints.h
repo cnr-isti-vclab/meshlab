@@ -49,7 +49,6 @@ public:
 	}
 	
 	static const QString Info();
-	QString pluginName() const;
 
 	virtual bool StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
 	virtual void EndEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);

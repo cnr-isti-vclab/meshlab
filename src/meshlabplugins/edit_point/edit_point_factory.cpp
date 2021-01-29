@@ -33,9 +33,14 @@ PointEditFactory::PointEditFactory()
         actionList << editPointFittingPlane;
 	
 	foreach(QAction *editAction, actionList)
-                editAction->setCheckable(true);
+		editAction->setCheckable(true);
 }
-	
+
+QString PointEditFactory::pluginName() const
+{
+	return "EditPoint";
+}
+
 //gets a list of actions available from this plugin
 QList<QAction *> PointEditFactory::actions() const
 {

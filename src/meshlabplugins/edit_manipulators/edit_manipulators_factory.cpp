@@ -33,6 +33,11 @@ EditManipulatorsFactory::EditManipulatorsFactory()
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
+
+QString EditManipulatorsFactory::pluginName() const
+{
+	return "EditManipulators";
+}
 	
 //gets a list of actions available from this plugin
 QList<QAction *> EditManipulatorsFactory::actions() const

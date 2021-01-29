@@ -38,6 +38,8 @@ public:
 	EditMeasureFactory();
 	virtual ~EditMeasureFactory() { delete editMeasure; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

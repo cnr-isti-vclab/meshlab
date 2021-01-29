@@ -38,6 +38,8 @@ public:
 	EditPaintFactory();
 	virtual ~EditPaintFactory() { delete editPaint; }
 
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

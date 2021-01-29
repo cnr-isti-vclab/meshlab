@@ -400,11 +400,3 @@ QString PluginManager::addPluginMeshFormats(
 	return allKnownFormatsFilter;
 }
 
-QString PluginManager::osIndependentPluginName(const QString& plname)
-{
-	QFileInfo fi(plname);
-	QString res = fi.baseName();
-	QString pref = fileNamePrefixPluginDLLs();
-	return res.remove(0, pref.size());
-}
-

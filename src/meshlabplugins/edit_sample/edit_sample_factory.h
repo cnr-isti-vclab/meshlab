@@ -38,6 +38,9 @@ public:
 	SampleEditFactory();
 	virtual ~SampleEditFactory() { delete editSample; }
 
+	//returns the name of the plugin
+	virtual QString pluginName() const;
+	
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const;
 	

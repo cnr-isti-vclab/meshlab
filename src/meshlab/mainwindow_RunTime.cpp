@@ -2633,7 +2633,7 @@ void MainWindow::about()
 void MainWindow::aboutPlugins()
 {
 	qDebug( "aboutPlugins(): Current Plugins Dir: %s ", qUtf8Printable(meshlab::defaultPluginPath()));
-	PluginInfoDialog dialog(meshlab::defaultPluginPath(), PM.pluginsLoaded, this);
+	PluginInfoDialog dialog(this);
 	dialog.exec();
 }
 

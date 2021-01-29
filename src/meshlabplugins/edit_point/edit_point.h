@@ -39,7 +39,6 @@ public:
     virtual ~EditPointPlugin() {}
 
     static const QString Info();
-    QString pluginName() const;
 
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

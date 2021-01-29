@@ -52,7 +52,6 @@ public:
 
 	static const QString Info();
 
-	QString pluginName() const;
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);
 	bool StartEdit(MeshDocument &md, GLArea *parent, MLSceneGLSharedDataContext* cont);
