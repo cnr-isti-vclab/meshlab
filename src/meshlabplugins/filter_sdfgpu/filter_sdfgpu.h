@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 #include <gpuProgram.h>
 #include <framebufferObject.h>

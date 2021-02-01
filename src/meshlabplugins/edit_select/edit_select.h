@@ -23,7 +23,7 @@
 #ifndef EDITPLUGIN_H
 #define EDITPLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 
 class EditSelectPlugin : public QObject, public EditPluginInterface
 {

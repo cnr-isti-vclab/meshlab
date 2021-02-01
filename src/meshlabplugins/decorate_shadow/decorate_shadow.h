@@ -24,7 +24,7 @@
 #define SAMPLE_DECORATE_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin_interface.h>
 
 #include "decorate_shader.h"
 #include "shadow_mapping.h"

@@ -19,61 +19,6 @@ protected:
 
 };
 
-class ParsingException : public MLException
-{
-public:
-        ParsingException(const QString& text)
-                :MLException(QString("Parsing Error: ") + text){}
-
-        ~ParsingException() throw() {}
-};
-
-class ValueNotFoundException : public MLException
-{
-public:
-        ValueNotFoundException(const QString& valName)
-                :MLException(QString("Value Name: ") + valName +  QString(" has not been defined in current environment.")){}
-
-        ~ValueNotFoundException() throw() {}
-};
-
-class NotConstException : public MLException
-{
-public:
-	NotConstException(const QString& exp)
-		:MLException(QString("Expression: ") + exp +  QString(" is not a const expression. Expression contains an assignment operator \"=\".")){}
-
-	~NotConstException() throw() {}
-};
-
-
-class QueryException : public MLException
-{
-public:
-	QueryException(const QString& syntaxError)
-		:MLException(QString("Query Error: ") + syntaxError){}
-
-	~QueryException() throw() {}
-};
-
-class JavaScriptException : public MLException
-{
-public:
-	JavaScriptException(const QString& syntaxError)
-		:MLException(QString("JavaScript Error: ") + syntaxError){}
-
-	~JavaScriptException() throw() {}
-};
-
-class ExpressionHasNotThisTypeException :  public MLException
-{
-public:
-	ExpressionHasNotThisTypeException(const QString& expectedType,const QString& exp)
-		:MLException(QString("Expression: ") + exp + " cannot be evaluated to a " + expectedType + "'s value."){}
-
-	~ExpressionHasNotThisTypeException() throw() {}
-};
-
 class InvalidInvariantException : public MLException
 {
 public:
@@ -82,4 +27,14 @@ public:
 
 	~InvalidInvariantException() throw() {}
 };
+
+class InvalidPluginException: public MLException
+{
+public:
+	InvalidPluginException(const QString& error)
+		:MLException(QString("Invalid Plugin Exception: ") + error){}
+
+	~InvalidPluginException() throw() {}
+};
+
 #endif

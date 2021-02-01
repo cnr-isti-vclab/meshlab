@@ -27,7 +27,7 @@
 #include <wrap/callback.h>
 
 #include "plugin_interface.h"
-#include "../utilities/file_format.h"
+#include "../../utilities/file_format.h"
 
 /** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
 */

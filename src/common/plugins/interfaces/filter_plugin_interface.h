@@ -25,7 +25,7 @@
 #define MESHLAB_FILTER_PLUGIN_INTERFACE_H
 
 #include "plugin_interface.h"
-#include "../ml_document/mesh_document.h"
+#include "../../ml_document/mesh_document.h"
 
 //declaring types to be used as QVariants
 

@@ -33,7 +33,7 @@ Added the new sample filter plugin that removes border faces
 #define FILTERCREATEISO_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 
 class FilterCreateIso : public QObject, public FilterPluginInterface

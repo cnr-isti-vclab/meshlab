@@ -21,51 +21,22 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_RENDER_PLUGIN_INTERFACE_H
-#define MESHLAB_RENDER_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_MAINWINDOW_INTERFACE_H
+#define MESHLAB_MAINWINDOW_INTERFACE_H
 
-#include "plugin_interface.h"
-#include "../ml_shared_data_context.h"
+#include <QAction>
+#include "parameters/rich_parameter_list.h"
 
-/**
-RenderPluginInterface
-Used to customized the rendering process.
-Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel.
-
-The Render function is called in with the ModelView and Projection Matrices already set up, screen cleared and background drawn.
-After the Render call the MeshLab frawework draw on the opengl context other decorations and the trackball, so it there is the
-requirement for a rendering plugin is that it should leave the z-buffer in a coherent state.
-
-The typical rendering loop of a Render plugin is something like, :
-
-<your own opengl setup>
-
-foreach(MeshModel * mp, meshDoc.meshList)
-{
-if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-}
-
+/** The MainWindowInterface class defines just the executeFilter() callback function
+that is invoked by the standard parameter input dialog.
+It is used as base class of the MainWindow.
 */
-
-class GLArea;
-
-class RenderPluginInterface : public PluginInterface
+class MainWindowInterface
 {
 public:
-	RenderPluginInterface() :PluginInterface() {}
-	virtual ~RenderPluginInterface() {}
-
-	virtual void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *) {}
-	virtual void Render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) = 0;
-	virtual void Finalize(QAction *, MeshDocument *, GLArea *) {}
-	virtual bool isSupported() = 0;
-	virtual QList<QAction *> actions() = 0;
+	virtual void executeFilter(const QAction *, RichParameterList &, bool = false) {}
+	//parexpval is a string map containing the parameter expression values set in the filter's dialog.
+	//These parameter expression values will be evaluated when the filter will start.
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
-
-#define RENDER_PLUGIN_INTERFACE_IID  "vcg.meshlab.RenderPluginInterface/1.0"
-Q_DECLARE_INTERFACE(RenderPluginInterface, RENDER_PLUGIN_INTERFACE_IID)
-
-#endif // MESHLAB_RENDER_PLUGIN_INTERFACE_H
+#endif // MESHLAB_MAINWINDOW_INTERFACE_H

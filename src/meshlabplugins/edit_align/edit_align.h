@@ -24,7 +24,7 @@
 #ifndef EditAlignPLUGIN_H
 #define EditAlignPLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <vcg/complex/algorithms/align_pair.h>
 #include "align/OccupancyGrid.h"
 #include "meshtree.h"

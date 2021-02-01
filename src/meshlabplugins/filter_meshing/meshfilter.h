@@ -24,7 +24,7 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
 {

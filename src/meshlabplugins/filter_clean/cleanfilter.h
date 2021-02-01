@@ -25,7 +25,7 @@
 #define __CLEAN_FILTER_H__
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class CleanFilter : public QObject, public FilterPluginInterface
 {

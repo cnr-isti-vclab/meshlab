@@ -26,7 +26,7 @@
 
 #include <QObject>
 
-#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin_interface.h>
 #include <common/ml_document/mesh_model.h>
 
 class ExpeIOPlugin : public QObject, public IOMeshPluginInterface

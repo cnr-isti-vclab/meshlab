@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2020                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -28,8 +28,8 @@
 #include <QDebug>
 #include <vcg/complex/algorithms/create/platonic.h>
 
-#include "mlexception.h"
-#include "globals.h"
+#include "../mlexception.h"
+#include "../globals.h"
 
 static QStringList fileNamePluginDLLs() {
 	QStringList l;
@@ -43,14 +43,6 @@ static QStringList fileNamePluginDLLs() {
 #else //linux
 	l.push_back("*.so");
 	return l;
-#endif
-}
-
-static QString fileNamePrefixPluginDLLs() {
-#if defined(Q_OS_WIN)
-	return QString("");
-#else //macos and linux
-	return QString("lib");
 #endif
 }
 
@@ -90,98 +82,7 @@ void PluginManager::loadPlugins(const QDir& pluginsDirectory)
 	pluginsDir.setNameFilters(nameFiltersPlugins);
 	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
 	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
-		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
-		QFileInfo fin(absfilepath);
-		QPluginLoader loader(absfilepath);
-		QObject *plugin = loader.instance();
-		if (plugin) {
-			PluginInterface *iCommon = nullptr;
-			FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-			if (iFilter)
-			{
-				iCommon = iFilter;
-				bool loadFilterOK = true;
-				for(QAction *filterAction : iFilter->actions()) {
-					if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
-						qDebug() << "Missing class for " +fileName + " " + filterAction->text();
-						loadFilterOK = false;
-					}
-					if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
-						loadFilterOK = false;
-					}
-					if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
-						qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
-						loadFilterOK = false;
-					}
-					if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
-						qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
-						loadFilterOK = false;
-					}
-					if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
-						qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
-						loadFilterOK = false;
-					}
-					
-				}
-				if (loadFilterOK) {
-					for(QAction *filterAction : iFilter->actions()) {
-						filterAction->setData(QVariant(fileName));
-						actionFilterMap.insert(filterAction->text(), filterAction);
-					}
-					filterPlugins.push_back(iFilter);
-				}
-			}
-			IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
-			if (iIOMesh)
-			{
-				iCommon = iIOMesh;
-				ioMeshPlugins.push_back(iIOMesh);
-			}
-			
-			IORasterPluginInterface* iIORaster = qobject_cast<IORasterPluginInterface*>(plugin);
-			if (iIORaster){
-				iCommon = iIORaster;
-				ioRasterPlugins.push_back(iIORaster);
-			}
-			
-			DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
-			if (iDecorator)
-			{
-				iCommon = iDecorator;
-				decoratePlugins.push_back(iDecorator);
-				for(QAction *decoratorAction : iDecorator->actions())
-				{
-					iDecorator->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
-				}
-			}
-			
-			RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-			if (iRender)
-			{
-				iCommon = iRender;
-				renderPlugins.push_back(iRender);
-			}
-			
-			EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-			if (iEditFactory)
-			{
-				editPlugins.push_back(iEditFactory);
-			}
-			else if (iCommon)
-			{
-				if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
-					allPlugins[iCommon->pluginName()] = iCommon;
-				}
-				else{
-					qDebug() << "Warning: " << iCommon->pluginName() << " has been already loaded.\n";
-				}
-			} else {
-				// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
-			}
-		}
-		else
-			qDebug() << loader.errorString();
+		loadPlugin(fileName);
 	}
 	fillKnownIOFormats();
 }
@@ -318,6 +219,101 @@ PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator
 PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator() const
 {
 	return EditPluginFactoryRangeIterator(this);
+}
+
+void PluginManager::loadPlugin(QString& fileName)
+{
+	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
+	QFileInfo fin(absfilepath);
+	QPluginLoader loader(absfilepath);
+	QObject *plugin = loader.instance();
+	if (plugin) {
+		PluginInterface *iCommon = nullptr;
+		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
+		if (iFilter)
+		{
+			iCommon = iFilter;
+			bool loadFilterOK = true;
+			for(QAction *filterAction : iFilter->actions()) {
+				if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
+					qDebug() << "Missing class for " +fileName + " " + filterAction->text();
+					loadFilterOK = false;
+				}
+				if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
+					qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
+					loadFilterOK = false;
+				}
+				if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
+					qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
+					loadFilterOK = false;
+				}
+				if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
+					qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
+					loadFilterOK = false;
+				}
+				if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
+					qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
+					loadFilterOK = false;
+				}
+			}
+			if (loadFilterOK) {
+				for(QAction *filterAction : iFilter->actions()) {
+					filterAction->setData(QVariant(fileName));
+					actionFilterMap.insert(filterAction->text(), filterAction);
+				}
+				filterPlugins.push_back(iFilter);
+			}
+		}
+		IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
+		if (iIOMesh)
+		{
+			iCommon = iIOMesh;
+			ioMeshPlugins.push_back(iIOMesh);
+		}
+		
+		IORasterPluginInterface* iIORaster = qobject_cast<IORasterPluginInterface*>(plugin);
+		if (iIORaster){
+			iCommon = iIORaster;
+			ioRasterPlugins.push_back(iIORaster);
+		}
+		
+		DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
+		if (iDecorator)
+		{
+			iCommon = iDecorator;
+			decoratePlugins.push_back(iDecorator);
+			for(QAction *decoratorAction : iDecorator->actions())
+			{
+				iDecorator->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
+			}
+		}
+		
+		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
+		if (iRender)
+		{
+			iCommon = iRender;
+			renderPlugins.push_back(iRender);
+		}
+		
+		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
+		if (iEditFactory)
+		{
+			editPlugins.push_back(iEditFactory);
+		}
+		else if (iCommon)
+		{
+			if (allPlugins.find(iCommon->pluginName()) == allPlugins.end()) {
+				allPlugins[iCommon->pluginName()] = iCommon;
+			}
+			else{
+				qDebug() << "Warning: " << iCommon->pluginName() << " has been already loaded.\n";
+			}
+		} else {
+			// qDebug("Plugin %s was loaded, but could not be casted to any known type.", qUtf8Printable(fileName));
+		}
+	}
+	else
+		qDebug() << loader.errorString();
 }
 
 void PluginManager::fillKnownIOFormats()

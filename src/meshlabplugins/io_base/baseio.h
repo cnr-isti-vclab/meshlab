@@ -24,7 +24,7 @@
 #define BASEIOPLUGIN_H
 
 #include <common/ml_document/mesh_model.h>
-#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin_interface.h>
 
 class BaseMeshIOPlugin : public QObject, public IOMeshPluginInterface
 {

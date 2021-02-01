@@ -24,7 +24,7 @@
 #define MESHLAB_IORASTER_BASE_H
 
 
-#include <common/interfaces/ioraster_plugin_interface.h>
+#include <common/plugins/interfaces/ioraster_plugin_interface.h>
 
 class IORasterBasePlugin : public QObject, public IORasterPluginInterface
 {

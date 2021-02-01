@@ -36,9 +36,9 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/interfaces/render_plugin_interface.h>
-#include <common/interfaces/decorate_plugin_interface.h>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"

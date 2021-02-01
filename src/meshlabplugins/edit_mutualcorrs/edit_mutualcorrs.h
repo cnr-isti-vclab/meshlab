@@ -25,7 +25,7 @@
 #define EditMutualCorrsPlugin_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include "edit_mutualcorrsDialog.h"
 #include "alignset.h"
 

@@ -24,7 +24,7 @@
 #define FILTERGEODESIC_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <vcg/complex/algorithms/geodesic.h>
 
 

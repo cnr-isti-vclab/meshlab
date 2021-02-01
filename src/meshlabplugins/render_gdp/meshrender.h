@@ -25,7 +25,7 @@
 #define SHADERRENDERPLUGIN_H
 
 #include <GL/glew.h>
-#include <common/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin_interface.h>
 #include "textfile.h"
 #include "shaderStructs.h"
 #include "shaderDialog.h"

@@ -41,13 +41,12 @@ exists(../../ML_VERSION){
 # Input
 HEADERS += 	\
 	globals.h \
-	interfaces/decorate_plugin_interface.h \
-	interfaces/edit_plugin_interface.h \
-	interfaces/filter_plugin_interface.h \
-	interfaces/iomesh_plugin_interface.h \
-	interfaces/mainwindow_interface.h \
-	interfaces/plugin_interface.h \
-	interfaces/render_plugin_interface.h \
+	plugins/interfaces/decorate_plugin_interface.h \
+	plugins/interfaces/edit_plugin_interface.h \
+	plugins/interfaces/filter_plugin_interface.h \
+	plugins/interfaces/iomesh_plugin_interface.h \
+	plugins/interfaces/plugin_interface.h \
+	plugins/interfaces/render_plugin_interface.h \
 	ml_document/helpers/mesh_document_state_data.h \
 	ml_document/helpers/mesh_model_state_data.h \
 	ml_document/base_types.h \
@@ -64,7 +63,8 @@ HEADERS += 	\
 	GLExtensionsManager.h \
 	filterscript.h \
 	GLLogStream.h \
-	plugin_manager.h \
+	mainwindow_interface.h \
+	plugins/plugin_manager.h \
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
@@ -74,9 +74,9 @@ HEADERS += 	\
 
 SOURCES += \
 	globals.cpp \
-	interfaces/decorate_plugin_interface.cpp \
-	interfaces/filter_plugin_interface.cpp \
-	interfaces/plugin_interface.cpp \
+	plugins/interfaces/decorate_plugin_interface.cpp \
+	plugins/interfaces/filter_plugin_interface.cpp \
+	plugins/interfaces/plugin_interface.cpp \
 	ml_document/helpers/mesh_document_state_data.cpp \
 	ml_document/cmesh.cpp \
 	ml_document/mesh_model.cpp \
@@ -90,7 +90,7 @@ SOURCES += \
 	GLExtensionsManager.cpp \
 	filterscript.cpp \
 	GLLogStream.cpp \
-	plugin_manager.cpp \
+	plugins/plugin_manager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \

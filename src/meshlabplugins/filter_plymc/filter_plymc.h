@@ -24,7 +24,7 @@
 #ifndef _FILTER_PLYMC_H_
 #define _FILTER_PLYMC_H_
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class PlyMCPlugin : public QObject, public FilterPluginInterface
 {

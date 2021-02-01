@@ -25,7 +25,7 @@
 #define EDITREFERENCINGPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include "edit_referencingDialog.h"
 
 // function to calculate rototranslaton and rototranslaton+scale matrices from series of points

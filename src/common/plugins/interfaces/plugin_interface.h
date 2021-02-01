@@ -27,8 +27,8 @@
 #include <QAction>
 
 
-#include "../GLLogStream.h"
-#include "../parameters/rich_parameter_list.h"
+#include "../../GLLogStream.h"
+#include "../../parameters/rich_parameter_list.h"
 
 /**
  * \brief The PluginInterface class is the base of all the plugin interfaces.

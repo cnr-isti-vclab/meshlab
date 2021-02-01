@@ -28,7 +28,7 @@
 #include <QObject>
 #include <QTime>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <vcg/complex/append.h>
 #include <vcg/complex/algorithms/attribute_seam.h>
 #include <vcg/complex/algorithms/point_sampling.h>

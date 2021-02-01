@@ -25,8 +25,8 @@
 #define MESHLAB_IORASTER_PLUGIN_INTERFACE_H
 
 #include "plugin_interface.h"
-#include "../utilities/file_format.h"
-#include "../ml_document/raster_model.h"
+#include "../../utilities/file_format.h"
+#include "../../ml_document/raster_model.h"
 
 class IORasterPluginInterface : public PluginInterface
 {

@@ -25,7 +25,7 @@
 #define EditReferencingFactoryPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 
 class EditReferencingFactory : public QObject, public EditPluginInterfaceFactory
 {

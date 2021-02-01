@@ -25,7 +25,7 @@
 #define TRIOPTIMIZEFILTERSPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class TriOptimizePlugin : public QObject, public FilterPluginInterface
 {

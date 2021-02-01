@@ -28,7 +28,7 @@
 
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <vcg/math/similarity2.h>
 #include "Patch.h"
 #include <wrap/glw/glw.h>

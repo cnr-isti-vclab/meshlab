@@ -23,7 +23,7 @@
 
 #ifndef FILTER_CREATE_H
 #define FILTER_CREATE_H
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class FilterCreate : public QObject, public FilterPluginInterface
 {

@@ -24,7 +24,7 @@
 #ifndef FILTER_VORONOI_H
 #define FILTER_VORONOI_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class FilterVoronoiPlugin : public QObject, public FilterPluginInterface
 {

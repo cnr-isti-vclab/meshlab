@@ -27,7 +27,7 @@
 #include <qapplication.h>
 
 #include "parameters/rich_parameter_list.h"
-#include "plugin_manager.h"
+#include "plugins/plugin_manager.h"
 
 QString basePath()
 {

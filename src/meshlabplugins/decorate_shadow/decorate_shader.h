@@ -28,7 +28,7 @@
 #include <cassert>
 
 //#include <QObject>
-#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin_interface.h>
 //#include <meshlab/glarea.h>
 
 

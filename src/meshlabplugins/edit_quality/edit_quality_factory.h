@@ -26,7 +26,7 @@
 #define QualityMapperFactoryPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 
 class QualityMapperFactory : public QObject, public EditPluginInterfaceFactory
 {

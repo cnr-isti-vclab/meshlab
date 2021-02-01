@@ -26,7 +26,7 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class MlsPlugin : public QObject, public FilterPluginInterface
 {

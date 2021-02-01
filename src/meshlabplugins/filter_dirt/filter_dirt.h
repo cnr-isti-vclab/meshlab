@@ -27,7 +27,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QString>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include<vector>
 #include<vcg/complex/complex.h>
 //#include "muParser.h"

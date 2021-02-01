@@ -27,7 +27,7 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin_interface.h>
 
 class ExtraMeshIOPlugin : public QObject, public IOMeshPluginInterface
 {

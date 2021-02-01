@@ -36,7 +36,7 @@ add sampleplugins
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include "alignset.h"
 
 class FilterMutualGlobal : public QObject, public FilterPluginInterface

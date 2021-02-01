@@ -29,7 +29,7 @@
 
 #include <meshlab/glarea.h>
 #include <common/GLExtensionsManager.h>
-#include <common/plugin_manager.h>
+#include <common/plugins/plugin_manager.h>
 
 
 using namespace vcg;

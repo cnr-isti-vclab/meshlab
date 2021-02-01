@@ -29,8 +29,8 @@
 
 #include <GL/glew.h>
 
-#include "common/interfaces/mainwindow_interface.h"
-#include "common/plugin_manager.h"
+#include "common/mainwindow_interface.h"
+#include "common/plugins/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 

@@ -26,7 +26,7 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <wrap/gl/gl_surface.h>
 class AOGLWidget;
 class AmbientOcclusionPlugin : public QObject, public FilterPluginInterface

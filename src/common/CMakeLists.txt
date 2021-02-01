@@ -9,14 +9,14 @@ endif()
 
 set(HEADERS
 	globals.h
-	interfaces/decorate_plugin_interface.h
-	interfaces/edit_plugin_interface.h
-	interfaces/filter_plugin_interface.h
-	interfaces/iomesh_plugin_interface.h
-	interfaces/ioraster_plugin_interface.h
-	interfaces/mainwindow_interface.h
-	interfaces/plugin_interface.h
-	interfaces/render_plugin_interface.h
+	plugins/interfaces/decorate_plugin_interface.h
+	plugins/interfaces/edit_plugin_interface.h
+	plugins/interfaces/filter_plugin_interface.h
+	plugins/interfaces/iomesh_plugin_interface.h
+	plugins/interfaces/ioraster_plugin_interface.h
+	plugins/interfaces/plugin_interface.h
+	plugins/interfaces/render_plugin_interface.h
+	plugins/plugin_manager.h
 	ml_document/helpers/mesh_document_state_data.h
 	ml_document/helpers/mesh_model_state_data.h
 	ml_document/base_types.h
@@ -33,6 +33,7 @@ set(HEADERS
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
+	mainwindow_interface.h
 	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
 	ml_selection_buffers.h
@@ -40,14 +41,14 @@ set(HEADERS
 	ml_thread_safe_memory_info.h
 	mlapplication.h
 	mlexception.h
-	plugin_manager.h
 	searcher.h)
 
 set(SOURCES
 	globals.cpp
-	interfaces/decorate_plugin_interface.cpp
-	interfaces/filter_plugin_interface.cpp
-	interfaces/plugin_interface.cpp
+	plugins/interfaces/decorate_plugin_interface.cpp
+	plugins/interfaces/filter_plugin_interface.cpp
+	plugins/interfaces/plugin_interface.cpp
+	plugins/plugin_manager.cpp
 	ml_document/helpers/mesh_document_state_data.cpp
 	ml_document/cmesh.cpp
 	ml_document/mesh_document.cpp
@@ -67,7 +68,6 @@ set(SOURCES
 	ml_shared_data_context.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
-	plugin_manager.cpp
 	searcher.cpp
 	${EXTERNAL_DIR}/easyexif/exif.cpp)
 

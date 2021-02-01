@@ -23,7 +23,7 @@
 #ifndef JSONIOPLUGIN_H
 #define JSONIOPLUGIN_H
 
-#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin_interface.h>
 #include <common/ml_document/mesh_model.h>
 
 class JSONIOPlugin : public QObject, public IOMeshPluginInterface

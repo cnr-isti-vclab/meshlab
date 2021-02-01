@@ -1,6 +1,6 @@
 #ifndef SINGLEMESHFILTERINTERFACE_H
 #define SINGLEMESHFILTERINTERFACE_H
-#include "common/interfaces/filter_plugin_interface.h"
+#include "common/plugins/interfaces/filter_plugin_interface.h"
 
 #include <QDebug>
 

@@ -28,7 +28,7 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 #include "craters_utils.h"
 
 class FilterFractal : public QObject, public FilterPluginInterface

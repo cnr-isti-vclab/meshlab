@@ -24,7 +24,7 @@
 #ifndef EXTRADECORATEPLUGIN_H
 #define EXTRADECORATEPLUGIN_H
 
-#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin_interface.h>
 #include <common/ml_shared_data_context.h>
 
 #include <wrap/gui/coordinateframe.h>

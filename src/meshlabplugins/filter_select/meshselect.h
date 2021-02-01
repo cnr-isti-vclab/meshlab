@@ -25,7 +25,7 @@
 #define FILTER_SELECT_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 
 class SelectionFilterPlugin : public QObject, public FilterPluginInterface

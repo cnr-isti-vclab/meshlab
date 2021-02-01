@@ -27,13 +27,13 @@
 #include <QDir>
 #include <QPluginLoader>
 
-#include <common/interfaces/filter_plugin_interface.h>
-#include <common/interfaces/iomesh_plugin_interface.h>
-#include <common/interfaces/decorate_plugin_interface.h>
-#include <common/interfaces/render_plugin_interface.h>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <common/globals.h>
-#include <common/plugin_manager.h>
+#include <common/plugins/plugin_manager.h>
 
 PluginInfoDialog::PluginInfoDialog(QWidget *parent) :
 	QDialog(parent),

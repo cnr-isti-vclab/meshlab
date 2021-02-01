@@ -23,7 +23,7 @@
 #ifndef FILTERDOCSAMPLINGPLUGIN_H
 #define FILTERDOCSAMPLINGPLUGIN_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class FilterDocSampling : public QObject, public FilterPluginInterface
 {

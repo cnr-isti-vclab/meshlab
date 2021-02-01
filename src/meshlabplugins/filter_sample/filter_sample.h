@@ -39,7 +39,7 @@ add sampleplugins
 #ifndef FILTERSAMPLE_PLUGIN_H
 #define FILTERSAMPLE_PLUGIN_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 class FilterSamplePlugin : public QObject, public FilterPluginInterface
 {

@@ -30,7 +30,7 @@
 #ifndef EDIT_PickPoints_PLUGIN_H
 #define EDIT_PickPoints_PLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin_interface.h>
 #include "pickpointsDialog.h"
 
 class EditPickPointsPlugin : public QObject, public EditPluginInterface

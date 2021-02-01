@@ -32,7 +32,7 @@ FIRST RELEASE
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 #include "../edit_quality/common/transferfunction.h"
 #include <vcg/complex/algorithms/stat.h> // for ComputePerVertexQualityMinMax

@@ -23,7 +23,7 @@
 
 #include <cmath>
 #include "TexturePainter.h"
-#include <common/plugin_manager.h>
+#include <common/plugins/plugin_manager.h>
 
 
 

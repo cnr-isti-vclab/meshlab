@@ -28,7 +28,7 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin_interface.h>
 
 
 //FILE _iob[] = { *stdin, *stdout, *stderr };
