@@ -36,9 +36,9 @@
 
 class FilterTexturePlugin : public QObject, public FilterPluginInterface
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
     enum {

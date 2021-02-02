@@ -29,6 +29,7 @@
 
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
+#include "../../globals.h"
 
 /**
  * \brief The PluginInterface class is the base of all the plugin interfaces.
@@ -53,6 +54,15 @@ public:
 	PluginInterface();
 	virtual ~PluginInterface() {}
 
+	/** 
+	 * This function will be automatically defined in your plugin class
+	 * when you use the MESHLAB_PLUGIN_IID_EXPORTER macro.
+	 * The only exception is for the Edit plugins (not EditFactory!):
+	 * in this case, this function is defined by the macro
+	 * MESHLAB_EDIT_PLUGIN
+	 **/
+	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
+	
 	/**
 	 * @brief This functions returns the name of the current plugin.
 	 * Must be implemented in every plugin.

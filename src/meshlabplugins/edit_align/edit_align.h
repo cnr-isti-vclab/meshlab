@@ -34,7 +34,8 @@
 class EditAlignPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
+	MESHLAB_EDIT_PLUGIN
+	Q_INTERFACES(EditPluginInterface)
 
 		enum
 	{

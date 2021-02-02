@@ -1,6 +1,7 @@
 #include "mlapplication.h"
 #include "mlexception.h"
 #include <vcg/complex/complex.h>
+#include "globals.h"
 
 #ifndef MESHLAB_VERSION
 #define MESHLAB_VERSION 2020.09
@@ -19,9 +20,6 @@
 #define ML_COMPILER "Unknown Compiler"
 #define ML_COMPILER_VER std::string()
 #endif
-
-#define xstr(a) stringify(a)
-#define stringify(a) #a
 
 #ifdef NDEBUG
 bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
@@ -46,7 +44,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 
 const QString MeshLabApplication::appVer()
 {
-	return QString(xstr(MESHLAB_VERSION));
+	return QString::fromStdString(meshlab::meshlabVersion());
 }
 
 const QString MeshLabApplication::compilerVersion()

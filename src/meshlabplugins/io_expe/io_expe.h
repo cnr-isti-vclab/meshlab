@@ -31,9 +31,9 @@
 
 class ExpeIOPlugin : public QObject, public IOMeshPluginInterface
 {
-  Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOMeshPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(IOMeshPluginInterface)
 
 
 public:

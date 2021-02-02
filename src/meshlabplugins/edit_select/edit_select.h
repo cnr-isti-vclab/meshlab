@@ -28,7 +28,8 @@
 class EditSelectPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
+	MESHLAB_EDIT_PLUGIN
+	Q_INTERFACES(EditPluginInterface)
 
 
 public:
@@ -65,9 +66,9 @@ public:
 	GLdouble mvMatrix_f[16];
 	GLdouble prMatrix_f[16];
 	GLint viewpSize[4];
-    Eigen::Matrix<Scalarm,4,4> SelMatrix;
-    Scalarm SelViewport[4];
-    
+	Eigen::Matrix<Scalarm,4,4> SelMatrix;
+	Scalarm SelViewport[4];
+
 signals:
 	void setDecorator(QString, bool);
 

@@ -41,7 +41,8 @@ FIRST RELEASE
 class QualityMapperPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
+	MESHLAB_EDIT_PLUGIN
+	Q_INTERFACES(EditPluginInterface)
 
 private:
 	QualityMapperDialog *_qualityMapperDialog;

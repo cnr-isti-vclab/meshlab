@@ -51,7 +51,8 @@ enum PaintOptions {
  */
 class EditPaintPlugin : public QObject, public EditPluginInterface {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
+	MESHLAB_EDIT_PLUGIN
+	Q_INTERFACES(EditPluginInterface)
 
 public:
 	EditPaintPlugin();

@@ -29,8 +29,8 @@
 class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
 {
 	Q_OBJECT
-	    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 		enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 

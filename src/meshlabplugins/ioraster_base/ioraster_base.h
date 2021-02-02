@@ -29,8 +29,8 @@
 class IORasterBasePlugin : public QObject, public IORasterPluginInterface
 {
 	Q_OBJECT
-		MESHLAB_PLUGIN_IID_EXPORTER(IORASTER_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(IORasterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(IORASTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(IORasterPluginInterface)
 
 
 public:

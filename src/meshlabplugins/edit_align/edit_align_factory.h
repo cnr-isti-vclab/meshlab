@@ -31,7 +31,7 @@
 class EditAlignFactory : public QObject, public EditPluginInterfaceFactory
 {
 	Q_OBJECT
-		MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
 	Q_INTERFACES(EditPluginInterfaceFactory)
 
 public:

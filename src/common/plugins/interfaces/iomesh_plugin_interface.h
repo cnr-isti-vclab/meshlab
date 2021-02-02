@@ -31,7 +31,7 @@
 
 /** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
 */
-class IOMeshPluginInterface : public PluginInterface
+class IOMeshPluginInterface : virtual public PluginInterface
 {
 public:
 	IOMeshPluginInterface() : PluginInterface() {  }
@@ -103,7 +103,13 @@ protected:
 
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
+	Q_PLUGIN_METADATA(IID x) \
+	public: \
+		virtual std::pair<std::string, bool> getMLVersion() const { \
+			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+		} \
+	private: 
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define IOMESH_PLUGIN_INTERFACE_IID "vcg.meshlab.IOMeshPluginInterface/1.0"

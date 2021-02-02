@@ -35,6 +35,7 @@
 class EditReferencingPlugin : public QObject, public EditPluginInterface
 {
 	Q_OBJECT
+	MESHLAB_EDIT_PLUGIN
 	Q_INTERFACES(EditPluginInterface)
 		
 public:

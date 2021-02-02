@@ -38,9 +38,9 @@ using namespace vcg;
 
 class FilterDirt : public QObject, public FilterPluginInterface
 {
-    Q_OBJECT
+	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_INTERFACES(FilterPluginInterface)
 protected:
     double x,y,z,nx,ny,nz,r,g,b,q,rad;
     //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;

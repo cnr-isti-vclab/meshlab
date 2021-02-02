@@ -156,7 +156,7 @@ public:
 private:
 	QDir pluginsDir;
 
-	//all plugins
+	//all plugins (except Edit plugins)
 	std::map<QString, PluginInterface*> allPlugins;
 
 	//IOMeshPlugins
@@ -185,7 +185,14 @@ private:
 	QVector<EditPluginInterfaceFactory*> editPlugins;
 
 	//Private member functions
-	void loadPlugin(QString& filename);
+	bool loadPlugin(const QString& filename);
+	
+	bool loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName);
+	bool loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString& fileName);
+	bool loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString& fileName);
+	bool loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
+	bool loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
+	bool loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
 	
 	void fillKnownIOFormats();
 

@@ -28,7 +28,7 @@
 #include "../../utilities/file_format.h"
 #include "../../ml_document/raster_model.h"
 
-class IORasterPluginInterface : public PluginInterface
+class IORasterPluginInterface : virtual public PluginInterface
 {
 public:
 	IORasterPluginInterface() : PluginInterface() {}
@@ -59,7 +59,13 @@ protected:
 	QString errorMessage;
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
+	Q_PLUGIN_METADATA(IID x) \
+	public: \
+		virtual std::pair<std::string, bool> getMLVersion() const { \
+			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+		} \
+	private: 
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define IORASTER_PLUGIN_INTERFACE_IID "vcg.meshlab.IORasterPluginInterface/1.0"

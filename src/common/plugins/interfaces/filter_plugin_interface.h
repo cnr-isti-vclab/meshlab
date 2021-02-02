@@ -40,7 +40,7 @@ Q_DECLARE_METATYPE(Eigen::VectorXd)
  *\brief The FilterPluginInterface class provide the interface of the filter plugins.
  *
  */
-class FilterPluginInterface : public PluginInterface
+class FilterPluginInterface : virtual public PluginInterface
 {
 public:
 	/** 
@@ -233,7 +233,13 @@ protected:
 	QString errorMessage;
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
+	Q_PLUGIN_METADATA(IID x) \
+		   public: \
+			   virtual std::pair<std::string, bool> getMLVersion() const { \
+				   return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+			   } \
+		   private: 
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define FILTER_PLUGIN_INTERFACE_IID  "vcg.meshlab.FilterPluginInterface/1.0"

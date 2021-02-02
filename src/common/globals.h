@@ -24,6 +24,9 @@
 #ifndef MESHLAB_GLOBALS_H
 #define MESHLAB_GLOBALS_H
 
+#define meshlab_xstr(a) mlstringify(a)
+#define mlstringify(a) #a
+
 #include <QString>
 
 class RichParameterList;
@@ -36,6 +39,17 @@ QString defaultShadersPath();
 
 RichParameterList& defaultGlobalParameterList();
 PluginManager& pluginManagerInstance();
+
+//keep this functions inlined please
+inline std::string meshlabVersion() 
+{
+	return std::string(meshlab_xstr(MESHLAB_VERSION));
+};
+
+inline bool builtWithDoublePrecision()
+{
+	return std::string(meshlab_xstr(MESHLAB_SCALAR)) == std::string("double");
+}
 
 }
 

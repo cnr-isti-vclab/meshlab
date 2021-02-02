@@ -36,9 +36,9 @@
 #include "texture2D.h"
 
 class RadianceScalingRendererPlugin : public QObject, public RenderPluginInterface {
-    Q_OBJECT
+	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(RenderPluginInterface)
+	Q_INTERFACES(RenderPluginInterface)
 
     bool             _supported;
     QList<QAction *> _actionList;

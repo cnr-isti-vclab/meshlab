@@ -38,9 +38,9 @@ Added the new sample filter plugin that removes border faces
 
 class FilterCreateIso : public QObject, public FilterPluginInterface
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
+	Q_INTERFACES(FilterPluginInterface)
 
 public:
     /* naming convention :

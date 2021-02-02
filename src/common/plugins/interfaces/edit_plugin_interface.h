@@ -105,6 +105,8 @@ class EditPluginInterfaceFactory
 {
 public:
 	virtual ~EditPluginInterfaceFactory() {}
+
+	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
 	
 	//returns the plugin name
 	virtual QString pluginName() const = 0;
@@ -117,10 +119,22 @@ public:
 
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction *) = 0;
-
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_EDIT_PLUGIN \
+	public: \
+		virtual std::pair<std::string, bool> getMLVersion() const { \
+			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+		} \
+	private: 
+
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
+	Q_PLUGIN_METADATA(IID x) \
+	public: \
+		virtual std::pair<std::string, bool> getMLVersion() const { \
+			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+		} \
+	private:
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define EDIT_PLUGIN_INTERFACE_IID  "vcg.meshlab.EditPluginInterface/1.0"
