@@ -91,7 +91,7 @@ public:
 	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *) { e->ignore(); }
 	
 private:
-	virtual QString pluginName() const {return QString();};
+	virtual QString pluginName() const final {return QString();};
 };
 
 
@@ -101,15 +101,11 @@ private:
 This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
 This class is used by the framework to generate an independent MeshEditInterface for each document.
 */
-class EditPluginInterfaceFactory
+class EditPluginInterfaceFactory : public PluginFileInterface
 {
 public:
+	EditPluginInterfaceFactory() {}
 	virtual ~EditPluginInterfaceFactory() {}
-
-	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
-	
-	//returns the plugin name
-	virtual QString pluginName() const = 0;
 
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const = 0;

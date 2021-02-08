@@ -9,6 +9,7 @@ endif()
 
 set(HEADERS
 	globals.h
+	plugins/interfaces/plugin_file_interface.h
 	plugins/interfaces/decorate_plugin_interface.h
 	plugins/interfaces/edit_plugin_interface.h
 	plugins/interfaces/filter_plugin_interface.h

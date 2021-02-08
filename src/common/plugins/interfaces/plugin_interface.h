@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2020                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -25,8 +25,8 @@
 #define MESHLAB_PLUGIN_INTERFACE_H
 
 #include <QAction>
-#include <QFileInfo>
 
+#include "plugin_file_interface.h"
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
 #include "../../globals.h"
@@ -43,11 +43,9 @@
  *
  * \todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
  */
-class PluginInterface
+class PluginInterface : public PluginFileInterface
 {
 public:
-	friend class PluginManager;
-	
 	typedef int FilterIDType;
 
 	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
@@ -56,30 +54,8 @@ public:
 	PluginInterface();
 	virtual ~PluginInterface() {}
 
-	/** 
-	 * This function will be automatically defined in your plugin class
-	 * when you use the MESHLAB_PLUGIN_IID_EXPORTER macro.
-	 * The only exception is for the Edit plugins (not EditFactory!):
-	 * in this case, this function is defined by the macro
-	 * MESHLAB_EDIT_PLUGIN
-	 **/
-	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
-	
-	/**
-	 * @brief This functions returns the name of the current plugin.
-	 * Must be implemented in every plugin.
-	 * @return
-	 */
-	virtual QString pluginName() const = 0;
-
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);
-	
-	bool isEnabled() const;
-	void enable();
-	void disable();
-	
-	QFileInfo pluginFileInfo() const;
 
 	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
@@ -105,8 +81,6 @@ public:
 
 private:
 	GLLogStream *logstream;
-	bool enabled;
-	QFileInfo plugFileInfo;
 };
 
 /************************
