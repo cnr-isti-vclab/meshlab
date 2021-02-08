@@ -25,7 +25,7 @@
 #define MESHLAB_PLUGIN_INTERFACE_H
 
 #include <QAction>
-
+#include <QFileInfo>
 
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
@@ -46,6 +46,8 @@
 class PluginInterface
 {
 public:
+	friend class PluginManager;
+	
 	typedef int FilterIDType;
 
 	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
@@ -72,6 +74,12 @@ public:
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);
+	
+	bool isEnabled() const;
+	void enable();
+	void disable();
+	
+	QFileInfo pluginFileInfo() const;
 
 	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
@@ -97,6 +105,8 @@ public:
 
 private:
 	GLLogStream *logstream;
+	bool enabled;
+	QFileInfo plugFileInfo;
 };
 
 /************************

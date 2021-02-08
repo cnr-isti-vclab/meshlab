@@ -1,13 +1,33 @@
 #include "plugin_interface.h"
 
 PluginInterface::PluginInterface() :
-    logstream(nullptr)
+    logstream(nullptr), enabled(true)
 {
 }
 
 void PluginInterface::setLog(GLLogStream* log)
 {
 	this->logstream = log;
+}
+
+bool PluginInterface::isEnabled() const
+{
+	return enabled;
+}
+
+void PluginInterface::enable()
+{
+	enabled = true;
+}
+
+void PluginInterface::disable()
+{
+	enabled = false;
+}
+
+QFileInfo PluginInterface::pluginFileInfo() const
+{
+	return plugFileInfo;
 }
 
 void PluginInterface::log(const char* s)

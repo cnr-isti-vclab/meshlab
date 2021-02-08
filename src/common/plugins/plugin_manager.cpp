@@ -251,6 +251,7 @@ bool PluginManager::loadPlugin(const QString& fileName)
 	//TODO: check in some way also the meshlab version of the plugin
 	
 	if (ip) { //Classic MeshLab plugin (non Edit...)
+		ip->plugFileInfo = fin;
 		bool loadOk = false;
 		//FilterPlugin
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
