@@ -53,62 +53,6 @@ PluginInfoDialog::~PluginInfoDialog()
 	delete ui;
 }
 
-void PluginInfoDialog::on_treeWidget_itemClicked(QTreeWidgetItem *item, int)
-{
-	QString parent;
-	QString actionName;
-	if(item==NULL) return;
-	if (item->parent()!=NULL){
-		parent=item->parent()->text(0);
-		actionName=item->text(0);
-	}
-	else parent=item->text(0);
-	QString fileName=pathDirectory+"/"+parent;
-	QDir dir(pathDirectory);
-	QPluginLoader loader(fileName);
-	qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
-	QObject *plugin = loader.instance();
-	if (plugin) {
-		IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
-		if (iMeshIO){
-			for(const FileFormat& f: iMeshIO->importFormats()){
-				QString formats;
-				for(const QString& s: f.extensions)
-					formats+="Importer_"+s+" ";
-				if (actionName==formats) ui->labelInfo->setText(f.description);
-			}
-			for(const FileFormat& f: iMeshIO->exportFormats()){
-				QString formats;
-				for(const QString& s: f.extensions)
-					formats+="Exporter_"+s+" ";
-				if (actionName==formats) ui->labelInfo->setText(f.description);
-			}
-		}
-		DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
-		if (iDecorate) {
-			for(QAction *a: iDecorate->actions())
-				if (actionName==a->text())
-					ui->labelInfo->setText(iDecorate->decorationInfo(a));
-		}
-		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-		if (iFilter) {
-			for(QAction *a: iFilter->actions())
-				if (actionName==a->text()) 
-					ui->labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
-		}
-//		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-//		if (iRender){
-//		}
-		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (iEditFactory) {
-			for(QAction *a: iEditFactory->actions())
-				if(iEditFactory)
-					ui->labelInfo->setText(iEditFactory->getEditToolDescription(a));
-		}
-	}
-}
-
-
 void PluginInfoDialog::populateTreeWidget()
 {
 	ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);

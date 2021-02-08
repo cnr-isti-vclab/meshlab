@@ -41,13 +41,10 @@ public:
 	explicit PluginInfoDialog(QWidget *parent = nullptr);
 	~PluginInfoDialog();
 
-private slots:
-	void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
-	
 private:
 	void populateTreeWidget();
 	void addItems(const QString& pluginName, const QString& pluginType, const QStringList &features);
-	
+
 	Ui::PluginInfoDialog *ui;
 	QIcon interfaceIcon;
 	QIcon featureIcon;
