@@ -42,13 +42,28 @@ jobs:
     - name: Build MeshLab AppImage
       run : |
         sh scripts/${{ runner.os }}/3_appimage.sh --${{ matrix.precision }}
-    - name: Upload Meshlab Portable
+    - name: Build deb package
+      uses: jiro4989/build-deb-action@v2
+        with:
+          package: MeshLab
+          package_root: src/install
+          maintainer: cnr-isti-vclab
+          version: ${{steps.envs.outputs.version}} # refs/tags/v*.*.*
+          arch: 'amd64'
+          desc: 'MeshLab ${{steps.envs.outputs.version}} deb package.'
+    - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable${{steps.envs.outputs.artifact_suffix}}
         path: src/install/
-    - name: Upload Meshlab AppImage
+    - name: Upload MeshLab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
         path: src/MeshLab${{steps.envs.outputs.version}}-linux.AppImage
+    - name: Upload MeshLab deb
+      uses: actions/upload-artifact@v2
+        with:
+          name: artifact-deb
+          path: |
+            ./*.deb
