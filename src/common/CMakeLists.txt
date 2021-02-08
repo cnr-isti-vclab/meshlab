@@ -16,6 +16,7 @@ set(HEADERS
 	plugins/interfaces/ioraster_plugin_interface.h
 	plugins/interfaces/plugin_interface.h
 	plugins/interfaces/render_plugin_interface.h
+	plugins/plugin_manager_iterators.h
 	plugins/plugin_manager.h
 	ml_document/helpers/mesh_document_state_data.h
 	ml_document/helpers/mesh_model_state_data.h

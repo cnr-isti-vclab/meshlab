@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "plugin_manager.h"
+#include "plugin_manager_iterators.h" //includes plugin_manager.h
 #include <QObject>
 #include <qapplication.h>
 #include <QPluginLoader>
