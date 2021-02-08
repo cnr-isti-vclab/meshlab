@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "plugin_manager_iterators.h" //includes plugin_manager.h
+#include "meshlab_plugin_type.h"
 #include <QObject>
 #include <qapplication.h>
 #include <QPluginLoader>
@@ -241,46 +242,37 @@ bool PluginManager::loadPlugin(const QString& fileName)
 	
 	//TODO: check in some way also the meshlab version of the plugin
 	
-	if (ifp) { //Classic MeshLab plugin (non Edit...)
-		ifp->plugFileInfo = fin;
-		bool loadOk = false;
-		//FilterPlugin
-		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-		if (iFilter)
-			loadOk = loadFilterPlugin(iFilter, fileName);
-		//IOMesh
-		IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
-		if (iIOMesh)
-			loadOk = loadIOMeshPlugin(iIOMesh, fileName);
-		//IORaster
-		IORasterPluginInterface* iIORaster = qobject_cast<IORasterPluginInterface*>(plugin);
-		if (iIORaster)
-			loadOk = loadIORasterPlugin(iIORaster, fileName);
-		//Decorate
-		DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
-		if (iDecorator)
-			loadOk = loadDecoratePlugin(iDecorator, fileName);
-		//Render
-		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-		if (iRender)
-			loadOk = loadRenderPlugin(iRender, fileName);
-		
-		//EditFactory
-		EditPluginInterfaceFactory* efp = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (efp) { //EditFactory Plugin
-			loadOk = loadEditPlugin(efp, fileName);
-		}
-		
-		if (loadOk){ //If the plugin has been loaded correctly
-			if (allPlugins.find(ifp->pluginName()) != allPlugins.end()) {
-				qDebug() << "Warning: " << ifp->pluginName() << " has been already loaded.\n";
-			}
-			allPlugins[ifp->pluginName()] = ifp;
-		}
+	MeshLabPluginType type(ifp);
+	
+	bool loadOk = false;
+	if (type.isDecoratePlugin()){
+		loadOk = loadDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin), fileName);
 	}
-	
-	
-	return true;
+	if (type.isEditPlugin()){
+		loadOk = loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin), fileName);
+	}
+	if (type.isFilterPlugin()){
+		loadOk = loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin), fileName);
+	}
+	if (type.isIOMeshPlugin()){
+		loadOk = loadIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin), fileName);
+	}
+	if (type.isIORasterPlugin()){
+		loadOk = loadIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin), fileName);
+	}
+	if (type.isRenderPlugin()){
+		loadOk = loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin), fileName);
+	}
+
+	if (loadOk){ //If the plugin has been loaded correctly
+		if (allPlugins.find(ifp->pluginName()) != allPlugins.end()) {
+			qDebug() << "Warning: " << ifp->pluginName() << " has been already loaded.";
+		}
+		ifp->plugFileInfo = fin;
+		allPlugins[ifp->pluginName()] = ifp;
+	}
+
+	return loadOk;
 }
 
 bool PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName )
