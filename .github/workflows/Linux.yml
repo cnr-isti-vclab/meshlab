@@ -64,6 +64,5 @@ jobs:
     - name: Upload MeshLab deb
       uses: actions/upload-artifact@v2
       with:
-        name: artifact-deb
-        path: |
-          ./*.deb
+        name: meshlab_linux_deb${{steps.envs.outputs.artifact_suffix}}
+        path: ./*.deb
