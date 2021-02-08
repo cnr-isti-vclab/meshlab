@@ -56,13 +56,10 @@ PluginManager::~PluginManager()
 	filterPlugins.clear();
 	renderPlugins.clear();
 	decoratePlugins.clear();
+	editPlugins.clear();
 	for (auto& plugin : allPlugins)
 		delete plugin.second;
 	allPlugins.clear();
-	
-	for (int ii = 0; ii < editPlugins.size(); ++ii)
-		delete editPlugins[ii];
-	editPlugins.clear();
 }
 
 void PluginManager::loadPlugins()
@@ -232,26 +229,20 @@ bool PluginManager::loadPlugin(const QString& fileName)
 		return false;
 	}
 	
-	PluginInterface* ip = dynamic_cast<PluginInterface *>(plugin);
-	EditPluginInterfaceFactory* efp = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-	if (!ip && !efp){
+	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
+	if (!ifp){
 		qDebug() << fin.fileName() << " is not a MeshLab plugin.";
 		return false;
 	}
-	if (ip && ip->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
-		qDebug() << fin.fileName() << " has different floating point precision from the running MeshLab version.";
-		return false;
-	}
-	
-	if (efp && efp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
+	if (ifp && ifp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
 		qDebug() << fin.fileName() << " has different floating point precision from the running MeshLab version.";
 		return false;
 	}
 	
 	//TODO: check in some way also the meshlab version of the plugin
 	
-	if (ip) { //Classic MeshLab plugin (non Edit...)
-		ip->plugFileInfo = fin;
+	if (ifp) { //Classic MeshLab plugin (non Edit...)
+		ifp->plugFileInfo = fin;
 		bool loadOk = false;
 		//FilterPlugin
 		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
@@ -274,20 +265,21 @@ bool PluginManager::loadPlugin(const QString& fileName)
 		if (iRender)
 			loadOk = loadRenderPlugin(iRender, fileName);
 		
+		//EditFactory
+		EditPluginInterfaceFactory* efp = qobject_cast<EditPluginInterfaceFactory *>(plugin);
+		if (efp) { //EditFactory Plugin
+			loadOk = loadEditPlugin(efp, fileName);
+		}
+		
 		if (loadOk){ //If the plugin has been loaded correctly
-			if (allPlugins.find(ip->pluginName()) != allPlugins.end()) {
-				qDebug() << "Warning: " << ip->pluginName() << " has been already loaded.\n";
+			if (allPlugins.find(ifp->pluginName()) != allPlugins.end()) {
+				qDebug() << "Warning: " << ifp->pluginName() << " has been already loaded.\n";
 			}
-			allPlugins[ip->pluginName()] = ip;
+			allPlugins[ifp->pluginName()] = ifp;
 		}
 	}
-	if (efp) { //EditFactory Plugin
-		//EditFactory
-		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (iEditFactory)
-			loadEditPlugin(iEditFactory, fileName);
-		
-	}
+	
+	
 	return true;
 }
 

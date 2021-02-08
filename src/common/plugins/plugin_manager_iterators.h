@@ -30,8 +30,8 @@ class PluginManager::NamePluginPairRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::map<QString, PluginInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
-	std::map<QString, PluginInterface*>::const_iterator end() {return pm->allPlugins.end();}
+	std::map<QString, PluginFileInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
+	std::map<QString, PluginFileInterface*>::const_iterator end() {return pm->allPlugins.end();}
 private:
 	NamePluginPairRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;

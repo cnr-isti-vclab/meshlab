@@ -91,7 +91,7 @@ private:
 	QDir pluginsDir;
 
 	//all plugins (except Edit plugins)
-	std::map<QString, PluginInterface*> allPlugins;
+	std::map<QString, PluginFileInterface*> allPlugins;
 
 	//IOMeshPlugins
 	QVector<IOMeshPluginInterface*> ioMeshPlugins;
