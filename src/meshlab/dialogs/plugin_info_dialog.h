@@ -44,6 +44,7 @@ public:
 	
 private slots:
 	void chechBoxStateChanged(int state);
+	void uninstallPluginPushButtonClicked();
 
 	void on_loadPluginsPushButton_clicked();
 	

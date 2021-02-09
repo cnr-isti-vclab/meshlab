@@ -28,6 +28,8 @@
 #include <QPluginLoader>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
@@ -35,6 +37,7 @@
 #include <common/plugins/interfaces/render_plugin_interface.h>
 #include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <common/globals.h>
+#include <common/mlexception.h>
 #include <common/plugins/plugin_manager.h>
 #include <common/plugins/meshlab_plugin_type.h>
 
@@ -77,9 +80,39 @@ void PluginInfoDialog::chechBoxStateChanged(int state)
 	}
 }
 
+/**
+ * @brief This function will be called every time the user wants to uninstall 
+ * a plugin.
+ */
+void PluginInfoDialog::uninstallPluginPushButtonClicked()
+{
+	QPushButton* pb = (QPushButton*)QObject::sender();
+	int nPlug = pb->property("np").toInt();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	PluginFileInterface* fpi = pm[nPlug];
+	/** TODO **/
+	std::cerr << fpi->pluginName().toStdString() << " deleted!\n";
+}
+
 void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 {
-	
+#ifdef _WIN32
+	QString pluginFileFormat = "*.dll MeshLab Plugin (*.dll)";
+#else //other os
+	QString pluginFileFormat = "*.so MeshLab Plugin (*.so)";
+#endif
+	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Plugins", "", pluginFileFormat);
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	for (const QString& fileName : fileList){
+		try {
+			pm.loadPlugin(fileName);
+		}
+		catch(const MLException& e){
+			QMessageBox::warning(this, "Error while loading plugin", fileName + ":\n" + e.what());
+		}
+	}
+	ui->treeWidget->clear();
+	populateTreeWidget();
 }
 
 void PluginInfoDialog::populateTreeWidget()
@@ -146,7 +179,7 @@ void PluginInfoDialog::populateTreeWidget()
 		}
 		
 		std::string lbl = "Number of plugin loaded: " + std::to_string(pm.size());
-		ui->label->setText(tr(lbl.c_str()).arg(QDir::toNativeSeparators(meshlab::defaultPluginPath())));
+		ui->label->setText(tr(lbl.c_str()));
 	}
 }
 
@@ -170,6 +203,8 @@ void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const
 	QPushButton* pb = new QPushButton(this);
 	pb->setProperty("np", nPlug);
 	pb->setIcon(uninstallIcon);
+	connect(pb, SIGNAL(clicked()),
+			this, SLOT(uninstallPluginPushButtonClicked()));
 	if (fpi->pluginFileInfo().absolutePath() == meshlab::defaultPluginPath())
 		pb->setEnabled(false);
 	ui->treeWidget->setItemWidget(pluginItem, UNINSTALL, pb);
