@@ -184,6 +184,11 @@ const QStringList& PluginManager::inputRasterFormatListDialog() const
 	return inputRasterFormatsDialogStringList;
 }
 
+PluginFileInterface* PluginManager::operator[](unsigned int i) const
+{
+	return allPlugins[i];
+}
+
 PluginManager::PluginRangeIterator PluginManager::pluginIterator() const
 {
 	return PluginRangeIterator(this);

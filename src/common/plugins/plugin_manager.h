@@ -77,6 +77,8 @@ public:
 	const QStringList& inputMeshFormatListDialog() const;
 	const QStringList& outputMeshFormatListDialog() const;
 	const QStringList& inputRasterFormatListDialog() const;
+	
+	PluginFileInterface* operator [](unsigned int i) const;
 
 	/** Member functions for range iterators **/
 	PluginRangeIterator pluginIterator() const;

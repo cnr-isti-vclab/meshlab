@@ -26,6 +26,7 @@
 
 #include <QDir>
 #include <QPluginLoader>
+#include <QCheckBox>
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
@@ -55,6 +56,26 @@ PluginInfoDialog::~PluginInfoDialog()
 	delete ui;
 }
 
+/**
+ * @brief This function will be called every time the user sets
+ * a plugin to enabled or disabled.
+ */
+void PluginInfoDialog::chechBoxStateChanged(int state)
+{
+	QCheckBox* cb = (QCheckBox*)QObject::sender(); 
+	int nPlug = cb->property("np").toInt();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	PluginFileInterface* fpi = pm[nPlug];
+	if (state == Qt::Checked){
+		fpi->enable();
+		//std::cerr << fpi->pluginName().toStdString() << " enabled\n";
+	}
+	else {
+		fpi->disable();
+		//std::cerr << fpi->pluginName().toStdString() << " disabled\n";
+	}
+}
+
 void PluginInfoDialog::populateTreeWidget()
 {
 	ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -66,6 +87,7 @@ void PluginInfoDialog::populateTreeWidget()
 		ui->treeWidget->hide();
 	}
 	else {
+		int nPlug = 0;
 		for (PluginFileInterface* fp : pm.pluginIterator()){
 			MeshLabPluginType type(fp);
 			QString pluginType = type.pluginTypeString();
@@ -114,7 +136,7 @@ void PluginInfoDialog::populateTreeWidget()
 				for(QAction *a: rpi->actions())
 					tmplist.push_back(a->text());
 			}
-			addItems(fp->pluginName(), pluginType, tmplist);
+			addItems(fp, nPlug++, pluginType, tmplist);
 		}
 		
 		std::string lbl = "Number of plugin loaded: " + std::to_string(pm.size());
@@ -122,12 +144,22 @@ void PluginInfoDialog::populateTreeWidget()
 	}
 }
 
-void PluginInfoDialog::addItems(const QString& pluginName, const QString& pluginType, const QStringList& features)
+void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const QString& pluginType, const QStringList& features)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
-	pluginItem->setText(PLUGINS, pluginName);
+	pluginItem->setText(PLUGINS, fpi->pluginName());
 	pluginItem->setIcon(PLUGINS, interfaceIcon);
 	pluginItem->setText(TYPE, pluginType);
+	pluginItem->setText(FILE, fpi->pluginFileInfo().fileName());
+	pluginItem->setToolTip(FILE, fpi->pluginFileInfo().absoluteFilePath());
+	
+	QCheckBox* cb = new QCheckBox(this);
+	cb->setProperty("np", nPlug);
+	cb->setChecked(fpi->isEnabled());
+	connect(cb, SIGNAL(stateChanged(int)),
+			this, SLOT(chechBoxStateChanged(int)));
+	ui->treeWidget->setItemWidget(pluginItem, LOAD, cb);
+	
 	//pluginItem->setIcon(UNINSTALL, uninstallIcon);
 	ui->treeWidget->setItemExpanded(pluginItem, false);
 	QFont boldFont = pluginItem->font(PLUGINS);

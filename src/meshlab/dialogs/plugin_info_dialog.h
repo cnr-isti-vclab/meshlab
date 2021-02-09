@@ -32,6 +32,7 @@ class PluginInfoDialog;
 }
 
 class QTreeWidgetItem;
+class PluginFileInterface;
 
 class PluginInfoDialog : public QDialog
 {
@@ -40,12 +41,15 @@ class PluginInfoDialog : public QDialog
 public:
 	explicit PluginInfoDialog(QWidget *parent = nullptr);
 	~PluginInfoDialog();
+	
+private slots:
+	void chechBoxStateChanged(int state);
 
 private:
 	enum PluginDialogColumn{PLUGINS = 0, LOAD, TYPE, VENDOR, FILE, UNINSTALL};
 	
 	void populateTreeWidget();
-	void addItems(const QString& pluginName, const QString& pluginType, const QStringList &features);
+	void addItems(const PluginFileInterface* fpi, int nPlug, const QString& pluginType, const QStringList &features);
 
 	Ui::PluginInfoDialog *ui;
 	QIcon interfaceIcon;
