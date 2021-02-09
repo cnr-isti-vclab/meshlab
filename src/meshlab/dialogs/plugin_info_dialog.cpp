@@ -27,6 +27,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QCheckBox>
+#include <QPushButton>
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
@@ -74,6 +75,11 @@ void PluginInfoDialog::chechBoxStateChanged(int state)
 		fpi->disable();
 		//std::cerr << fpi->pluginName().toStdString() << " disabled\n";
 	}
+}
+
+void PluginInfoDialog::on_loadPluginsPushButton_clicked()
+{
+	
 }
 
 void PluginInfoDialog::populateTreeWidget()
@@ -158,7 +164,14 @@ void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const
 	cb->setChecked(fpi->isEnabled());
 	connect(cb, SIGNAL(stateChanged(int)),
 			this, SLOT(chechBoxStateChanged(int)));
-	ui->treeWidget->setItemWidget(pluginItem, LOAD, cb);
+	ui->treeWidget->setItemWidget(pluginItem, ENABLED, cb);
+	
+	QPushButton* pb = new QPushButton(this);
+	pb->setProperty("np", nPlug);
+	pb->setIcon(uninstallIcon);
+	if (fpi->pluginFileInfo().absolutePath() == meshlab::defaultPluginPath())
+		pb->setEnabled(false);
+	ui->treeWidget->setItemWidget(pluginItem, UNINSTALL, pb);
 	
 	//pluginItem->setIcon(UNINSTALL, uninstallIcon);
 	ui->treeWidget->setItemExpanded(pluginItem, false);
@@ -171,4 +184,3 @@ void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const
 		featureItem->setIcon(PLUGINS, featureIcon);
 	}
 }
-

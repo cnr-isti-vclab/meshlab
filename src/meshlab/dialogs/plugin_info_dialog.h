@@ -46,7 +46,7 @@ private slots:
 	void chechBoxStateChanged(int state);
 
 private:
-	enum PluginDialogColumn{PLUGINS = 0, LOAD, TYPE, VENDOR, FILE, UNINSTALL};
+	enum PluginDialogColumn{PLUGINS = 0, ENABLED, TYPE, VENDOR, FILE, UNINSTALL};
 	
 	void populateTreeWidget();
 	void addItems(const PluginFileInterface* fpi, int nPlug, const QString& pluginType, const QStringList &features);

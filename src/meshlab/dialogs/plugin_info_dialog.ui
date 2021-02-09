@@ -46,7 +46,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Load</string>
+       <string>Enabled</string>
       </property>
      </column>
      <column>
