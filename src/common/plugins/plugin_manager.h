@@ -56,6 +56,8 @@ public:
 	/** Member functions **/
 	void loadPlugins();
 	void loadPlugins(const QDir& pluginsDirectory);
+	void loadPlugin(const QString& filename);
+	
 	QString pluginsCode() const;
 
 	unsigned int size() const;
@@ -119,16 +121,13 @@ private:
 
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;
-
-	//Private member functions
-	bool loadPlugin(const QString& filename);
 	
-	bool loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName);
-	bool loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString& fileName);
-	bool loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString& fileName);
-	bool loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
-	bool loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
-	bool loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
+	void loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName);
+	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString& fileName);
+	void loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString& fileName);
+	void loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
+	void loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
+	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
 	
 	void fillKnownIOFormats();
 

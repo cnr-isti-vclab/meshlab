@@ -63,7 +63,12 @@ MainWindow::MainWindow():
 	layerDialog->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	layerDialog->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
-	PM.loadPlugins();
+	try {
+		PM.loadPlugins();
+	}
+	catch (const MLException& e) {
+		QMessageBox::warning(this, "Error while loading plugins.", e.what());
+	}
 
 
 	//setCentralWidget(workspace);
