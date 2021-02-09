@@ -32,6 +32,11 @@ bool WordActionsMap::getActionsPerWord( const QString& word,QList<QAction*>& res
 	return false;
 }
 
+void WordActionsMap::clear()
+{
+	wordacts.clear();
+}
+
 WordActionsMapAccessor::WordActionsMapAccessor()
 :map(),sepexp(),ignexp()
 {

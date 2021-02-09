@@ -258,6 +258,7 @@ private:
 	void fillDecorateMenu();
 	void fillRenderMenu();
 	void fillEditMenu();
+	void updateAllPluginsActions();
 	void createToolBars();
 	void loadMeshLabSettings();
 	void keyPressEvent(QKeyEvent *);

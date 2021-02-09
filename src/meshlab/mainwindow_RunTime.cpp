@@ -2635,6 +2635,7 @@ void MainWindow::aboutPlugins()
 	qDebug( "aboutPlugins(): Current Plugins Dir: %s ", qUtf8Printable(meshlab::defaultPluginPath()));
 	PluginInfoDialog dialog(this);
 	dialog.exec();
+	updateAllPluginsActions();
 }
 
 void MainWindow::helpOnscreen()

@@ -650,8 +650,7 @@ void MainWindow::initMenuForSearching(QMenu* menu)
 	if (menu == NULL)
 		return;
 	const QList<QAction*>& acts = menu->actions();
-	foreach(QAction* act, acts)
-	{
+	for(QAction* act: acts) {
 		QMenu* submenu = act->menu();
 		if (!act->isSeparator() && (submenu == NULL))
 			initItemForSearching(act);
@@ -857,6 +856,26 @@ void MainWindow::fillEditMenu()
 			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
 		}
 	}
+}
+
+void MainWindow::updateAllPluginsActions()
+{
+	fillFilterMenu();
+	fillDecorateMenu();
+	fillRenderMenu();
+	fillEditMenu();
+	
+	/*
+	disconnect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
+	wama.clear();
+	delete searchMenu;
+	
+	initSearchEngine();
+	int longest = longestActionWidthInAllMenus();
+	searchMenu = new SearchMenu(wama, 15, searchButton, longest);
+	searchButton->setMenu(searchMenu);
+	connect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
+	*/
 }
 
 
@@ -1193,7 +1212,7 @@ int MainWindow::longestActionWidthInAllMenus()
 {
 	int longest = 0;
 	QList<QMenu*> list = menuBar()->findChildren<QMenu*>();
-	foreach(QMenu* m, list)
+	for(QMenu* m: list)
 		longest = std::max(longest, longestActionWidthInMenu(m));
 	return longest;
 }
