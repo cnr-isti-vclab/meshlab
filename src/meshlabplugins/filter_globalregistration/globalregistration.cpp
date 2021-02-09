@@ -40,7 +40,12 @@ GlobalRegistrationPlugin::GlobalRegistrationPlugin()
 
 QString GlobalRegistrationPlugin::pluginName() const
 {
-    return "FilterGlobalRegistration";
+	return "FilterGlobalRegistration";
+}
+
+QString GlobalRegistrationPlugin::vendor() const
+{
+	return "STORM - IRIT";
 }
 
 QString GlobalRegistrationPlugin::filterName(FilterIDType filterId) const

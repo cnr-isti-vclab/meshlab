@@ -158,6 +158,7 @@ void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const
 	pluginItem->setText(TYPE, pluginType);
 	pluginItem->setText(FILE, fpi->pluginFileInfo().fileName());
 	pluginItem->setToolTip(FILE, fpi->pluginFileInfo().absoluteFilePath());
+	pluginItem->setText(VENDOR, fpi->vendor());
 	
 	QCheckBox* cb = new QCheckBox(this);
 	cb->setProperty("np", nPlug);

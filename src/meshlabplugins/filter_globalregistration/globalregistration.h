@@ -38,6 +38,7 @@ public:
     GlobalRegistrationPlugin();
 
     QString pluginName() const;
+    virtual QString vendor() const;
 
     QString filterName(FilterIDType filter) const;
     QString filterInfo(FilterIDType filter) const;

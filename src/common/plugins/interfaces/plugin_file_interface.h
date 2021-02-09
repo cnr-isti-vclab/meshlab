@@ -64,7 +64,7 @@ public:
 	 * of the plugin. 
 	 * @return 
 	 */
-	//virtual QString vendor() const = 0;
+	virtual QString vendor() const {return "CNR-ISTI VCLab";};
 	
 	bool isEnabled() const {return enabled;}
 	void enable() {enabled = true;}

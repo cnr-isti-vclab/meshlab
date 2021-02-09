@@ -45,6 +45,8 @@ public:
 private slots:
 	void chechBoxStateChanged(int state);
 
+	void on_loadPluginsPushButton_clicked();
+	
 private:
 	enum PluginDialogColumn{PLUGINS = 0, ENABLED, TYPE, VENDOR, FILE, UNINSTALL};
 	
