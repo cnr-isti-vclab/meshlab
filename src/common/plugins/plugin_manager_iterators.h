@@ -26,14 +26,14 @@
 
 #include "plugin_manager.h"
 
-class PluginManager::NamePluginPairRangeIterator
+class PluginManager::PluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::map<QString, PluginFileInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
-	std::map<QString, PluginFileInterface*>::const_iterator end() {return pm->allPlugins.end();}
+	std::vector<PluginFileInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
+	std::vector<PluginFileInterface*>::const_iterator end() {return pm->allPlugins.end();}
 private:
-	NamePluginPairRangeIterator(const PluginManager* pm) : pm(pm) {}
+	PluginRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
 };
 
@@ -41,8 +41,8 @@ class PluginManager::FilterPluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	QVector<FilterPluginInterface*>::const_iterator begin() {return pm->filterPlugins.begin();}
-	QVector<FilterPluginInterface*>::const_iterator end() {return pm->filterPlugins.end();}
+	std::vector<FilterPluginInterface*>::const_iterator begin() {return pm->filterPlugins.begin();}
+	std::vector<FilterPluginInterface*>::const_iterator end() {return pm->filterPlugins.end();}
 private:
 	FilterPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
@@ -52,8 +52,8 @@ class PluginManager::IOMeshPluginIterator
 {
 	friend class PluginManager;
 public:
-	QVector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
-	QVector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
+	std::vector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
+	std::vector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
 private:
 	IOMeshPluginIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
@@ -63,8 +63,8 @@ class PluginManager::IORasterPluginIterator
 {
 	friend class PluginManager;
 public:
-	QVector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
-	QVector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
+	std::vector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
+	std::vector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
 private:
 	IORasterPluginIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
@@ -74,8 +74,8 @@ class PluginManager::RenderPluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	QVector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
-	QVector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
+	std::vector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
+	std::vector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
 private:
 	RenderPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
@@ -85,8 +85,8 @@ class PluginManager::DecoratePluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	QVector<DecoratePluginInterface*>::const_iterator begin() {return pm->decoratePlugins.begin();}
-	QVector<DecoratePluginInterface*>::const_iterator end() {return pm->decoratePlugins.end();}
+	std::vector<DecoratePluginInterface*>::const_iterator begin() {return pm->decoratePlugins.begin();}
+	std::vector<DecoratePluginInterface*>::const_iterator end() {return pm->decoratePlugins.end();}
 private:
 	DecoratePluginRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
@@ -96,8 +96,8 @@ class PluginManager::EditPluginFactoryRangeIterator
 {
 	friend class PluginManager;
 public:
-	QVector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	QVector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
+	std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
+	std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
 private:
 	EditPluginFactoryRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;

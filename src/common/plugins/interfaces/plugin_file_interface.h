@@ -53,11 +53,18 @@ public:
 	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
 	
 	/**
-	 * @brief This functions returns the name of the current plugin.
+	 * @brief This function returns the name of the current plugin.
 	 * Must be implemented in every plugin.
 	 * @return
 	 */
 	virtual QString pluginName() const = 0;
+	
+	/**
+	 * @brief This function returns the vendor (developer or organization)
+	 * of the plugin. 
+	 * @return 
+	 */
+	//virtual QString vendor() const = 0;
 	
 	bool isEnabled() const {return enabled;}
 	void enable() {enabled = true;}
@@ -69,5 +76,14 @@ private:
 	bool enabled;
 	QFileInfo plugFileInfo;
 };
+
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
+	Q_PLUGIN_METADATA(IID x) \
+	public: \
+		virtual std::pair<std::string, bool> getMLVersion() const { \
+			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
+		} \
+	private: 
+#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #endif // MESHLAB_PLUGIN_FILE_INTERFACE_H

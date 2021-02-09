@@ -112,15 +112,6 @@ protected:
 	virtual FilterIDType ID(QString name) const;
 };
 
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
-	Q_PLUGIN_METADATA(IID x) \
-	   public: \
-		   virtual std::pair<std::string, bool> getMLVersion() const { \
-			   return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
-		   } \
-	   private: 
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
-
 #define DECORATE_PLUGIN_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
 Q_DECLARE_INTERFACE(DecoratePluginInterface, DECORATE_PLUGIN_INTERFACE_IID)
 

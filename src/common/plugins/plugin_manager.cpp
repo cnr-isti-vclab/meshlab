@@ -59,7 +59,7 @@ PluginManager::~PluginManager()
 	decoratePlugins.clear();
 	editPlugins.clear();
 	for (auto& plugin : allPlugins)
-		delete plugin.second;
+		delete plugin;
 	allPlugins.clear();
 }
 
@@ -184,9 +184,9 @@ const QStringList& PluginManager::inputRasterFormatListDialog() const
 	return inputRasterFormatsDialogStringList;
 }
 
-PluginManager::NamePluginPairRangeIterator PluginManager::namePluginPairIterator() const
+PluginManager::PluginRangeIterator PluginManager::namePluginPairIterator() const
 {
-	return NamePluginPairRangeIterator(this);
+	return PluginRangeIterator(this);
 }
 
 PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator() const
@@ -265,11 +265,8 @@ bool PluginManager::loadPlugin(const QString& fileName)
 	}
 
 	if (loadOk){ //If the plugin has been loaded correctly
-		if (allPlugins.find(ifp->pluginName()) != allPlugins.end()) {
-			qDebug() << "Warning: " << ifp->pluginName() << " has been already loaded.";
-		}
 		ifp->plugFileInfo = fin;
-		allPlugins[ifp->pluginName()] = ifp;
+		allPlugins.push_back(ifp);
 	}
 
 	return loadOk;

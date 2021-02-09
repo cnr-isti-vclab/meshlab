@@ -122,16 +122,7 @@ public:
 		virtual std::pair<std::string, bool> getMLVersion() const { \
 			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
 		} \
-	private: 
-
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
-	Q_PLUGIN_METADATA(IID x) \
-	public: \
-		virtual std::pair<std::string, bool> getMLVersion() const { \
-			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
-		} \
 	private:
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define EDIT_PLUGIN_INTERFACE_IID  "vcg.meshlab.EditPluginInterface/1.0"
 #define EDIT_PLUGIN_INTERFACE_FACTORY_IID  "vcg.meshlab.EditPluginInterfaceFactory/1.0"

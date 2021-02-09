@@ -42,12 +42,15 @@ public:
 	~PluginInfoDialog();
 
 private:
+	enum PluginDialogColumn{PLUGINS = 0, LOAD, TYPE, VENDOR, FILE, UNINSTALL};
+	
 	void populateTreeWidget();
 	void addItems(const QString& pluginName, const QString& pluginType, const QStringList &features);
 
 	Ui::PluginInfoDialog *ui;
 	QIcon interfaceIcon;
 	QIcon featureIcon;
+	QIcon uninstallIcon;
 	QString pathDirectory;
 };
 

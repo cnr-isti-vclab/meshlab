@@ -45,7 +45,7 @@ public:
 	~PluginManager();
 
 	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
-	class NamePluginPairRangeIterator;
+	class PluginRangeIterator;
 	class FilterPluginRangeIterator;
 	class IOMeshPluginIterator;
 	class IORasterPluginIterator;
@@ -79,7 +79,7 @@ public:
 	const QStringList& inputRasterFormatListDialog() const;
 
 	/** Member functions for range iterators **/
-	NamePluginPairRangeIterator namePluginPairIterator() const;
+	PluginRangeIterator namePluginPairIterator() const;
 	FilterPluginRangeIterator filterPluginIterator() const;
 	IOMeshPluginIterator ioMeshPluginIterator() const;
 	IORasterPluginIterator ioRasterPluginIterator() const;
@@ -91,32 +91,32 @@ private:
 	QDir pluginsDir;
 
 	//all plugins (except Edit plugins)
-	std::map<QString, PluginFileInterface*> allPlugins;
+	std::vector<PluginFileInterface*> allPlugins;
 
 	//IOMeshPlugins
-	QVector<IOMeshPluginInterface*> ioMeshPlugins;
+	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
 	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
 	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
 	QStringList inputMeshFormatsDialogStringList; //todo: remove this
 	QStringList outputMeshFormatsDialogStringList; //todo: remove this
 
 	//IORasterPlugins
-	QVector<IORasterPluginInterface*> ioRasterPlugins;
+	std::vector<IORasterPluginInterface*> ioRasterPlugins;
 	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
 	QStringList inputRasterFormatsDialogStringList;
 
 	//Filter Plugins
-	QVector<FilterPluginInterface*> filterPlugins;
+	std::vector<FilterPluginInterface*> filterPlugins;
 	QMap<QString, QAction*> actionFilterMap;
 
 	//Render Plugins
-	QVector<RenderPluginInterface*> renderPlugins;
+	std::vector<RenderPluginInterface*> renderPlugins;
 
 	//Decorate Plugins
-	QVector<DecoratePluginInterface*> decoratePlugins;
+	std::vector<DecoratePluginInterface*> decoratePlugins;
 
 	//Edit Plugins
-	QVector<EditPluginInterfaceFactory*> editPlugins;
+	std::vector<EditPluginInterfaceFactory*> editPlugins;
 
 	//Private member functions
 	bool loadPlugin(const QString& filename);

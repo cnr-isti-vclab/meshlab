@@ -44,6 +44,7 @@ PluginInfoDialog::PluginInfoDialog(QWidget *parent) :
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
 	featureIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
+	uninstallIcon.addPixmap(style()->standardPixmap(QStyle::SP_DialogCancelButton));
 	
 	populateTreeWidget();
 }
@@ -57,7 +58,7 @@ void PluginInfoDialog::populateTreeWidget()
 {
 	ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
 	ui->treeWidget->header()->setStretchLastSection(false);
-	ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	ui->treeWidget->header()->setSectionResizeMode(PLUGINS, QHeaderView::Stretch);
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	if (pm.size() == 0){
 		ui->label->setText(tr("No plugin has been loaded."));
@@ -136,17 +137,18 @@ void PluginInfoDialog::populateTreeWidget()
 void PluginInfoDialog::addItems(const QString& pluginName, const QString& pluginType, const QStringList& features)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
-	pluginItem->setText(0, pluginName);
-	pluginItem->setIcon(0, interfaceIcon);
-	pluginItem->setText(1, pluginType);
+	pluginItem->setText(PLUGINS, pluginName);
+	pluginItem->setIcon(PLUGINS, interfaceIcon);
+	pluginItem->setText(TYPE, pluginType);
+	//pluginItem->setIcon(UNINSTALL, uninstallIcon);
 	ui->treeWidget->setItemExpanded(pluginItem, false);
-	QFont boldFont = pluginItem->font(0);
+	QFont boldFont = pluginItem->font(PLUGINS);
 	boldFont.setBold(true);
-	pluginItem->setFont(0, boldFont);
+	pluginItem->setFont(PLUGINS, boldFont);
 	for (const QString& feature: features) {
 		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
-		featureItem->setText(0, feature);
-		featureItem->setIcon(0, featureIcon);
+		featureItem->setText(PLUGINS, feature);
+		featureItem->setIcon(PLUGINS, featureIcon);
 	}
 }
 

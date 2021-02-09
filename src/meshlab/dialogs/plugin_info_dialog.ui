@@ -46,7 +46,27 @@
      </column>
      <column>
       <property name="text">
+       <string>Load</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Vendor</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>File</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Uninstall</string>
       </property>
      </column>
     </widget>
