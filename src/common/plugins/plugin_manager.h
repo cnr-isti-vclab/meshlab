@@ -79,7 +79,7 @@ public:
 	const QStringList& inputRasterFormatListDialog() const;
 
 	/** Member functions for range iterators **/
-	PluginRangeIterator namePluginPairIterator() const;
+	PluginRangeIterator pluginIterator() const;
 	FilterPluginRangeIterator filterPluginIterator() const;
 	IOMeshPluginIterator ioMeshPluginIterator() const;
 	IORasterPluginIterator ioRasterPluginIterator() const;

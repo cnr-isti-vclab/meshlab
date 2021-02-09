@@ -34,6 +34,7 @@
 #include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <common/globals.h>
 #include <common/plugins/plugin_manager.h>
+#include <common/plugins/meshlab_plugin_type.h>
 
 PluginInfoDialog::PluginInfoDialog(QWidget *parent) :
 	QDialog(parent),
@@ -65,68 +66,55 @@ void PluginInfoDialog::populateTreeWidget()
 		ui->treeWidget->hide();
 	}
 	else {
-		QString pluginType;
-		
-		pluginType = "Decorate";
-		for (DecoratePluginInterface* dpi : pm.decoratePluginIterator()){
+		for (PluginFileInterface* fp : pm.pluginIterator()){
+			MeshLabPluginType type(fp);
+			QString pluginType = type.pluginTypeString();
 			QStringList tmplist;
-			for(QAction *a: dpi->actions())
-				tmplist.push_back(a->text());
-			addItems(dpi->pluginName(), pluginType, tmplist);
-		}
-		
-		pluginType = "Edit";
-		for (EditPluginInterfaceFactory* epi : pm.editPluginFactoryIterator()){
-			QStringList tmplist;
-			for(QAction *a: epi->actions())
-				tmplist.push_back(a->text());
-			addItems(epi->pluginName(), pluginType, tmplist);
-		}
-		
-		pluginType = "Filter";
-		for (FilterPluginInterface* fpi : pm.filterPluginIterator()){
-			QStringList tmplist;
-			for(QAction *a: fpi->actions())
-				tmplist.push_back(a->text());
-			addItems(fpi->pluginName(), pluginType, tmplist);
-		}
-		
-		pluginType = "IOMesh";
-		for (IOMeshPluginInterface* iopi : pm.ioMeshPluginIterator()){
-			QStringList tmplist;
-			for(const FileFormat& f: iopi->importFormats()){
-				QString formats;
-				for(const QString& s : f.extensions)
-					formats+="Importer_"+s+" ";
-				tmplist.push_back(formats);
+			if (type.isDecoratePlugin()){
+				DecoratePluginInterface* dpi = dynamic_cast<DecoratePluginInterface*>(fp);
+				for(QAction *a: dpi->actions())
+					tmplist.push_back(a->text());
 			}
-			for(const FileFormat& f: iopi->exportFormats()){
-				QString formats;
-				for(const QString& s: f.extensions)
-					formats+="Exporter_"+s+" ";
-				tmplist.push_back(formats);
+			if (type.isEditPlugin()){
+				EditPluginInterfaceFactory* epi = dynamic_cast<EditPluginInterfaceFactory*>(fp);
+				for(QAction *a: epi->actions())
+					tmplist.push_back(a->text());
 			}
-			addItems(iopi->pluginName(), pluginType, tmplist);
-		}
-		
-		pluginType = "IORaster";
-		for (IORasterPluginInterface* iorpi: pm.ioRasterPluginIterator()){
-			QStringList tmplist;
-			for(const FileFormat& f: iorpi->importFormats()){
-				QString formats;
-				for(const QString& s : f.extensions)
-					formats+="Importer_"+s+" ";
-				tmplist.push_back(formats);
+			if (type.isFilterPlugin()){
+				FilterPluginInterface* fpi = dynamic_cast<FilterPluginInterface*>(fp);
+				for(QAction *a: fpi->actions())
+					tmplist.push_back(a->text());
 			}
-			addItems(iorpi->pluginName(), pluginType, tmplist);
-		}
-		
-		pluginType = "Render";
-		for (RenderPluginInterface* rpi : pm.renderPluginIterator()){
-			QStringList tmplist;
-			for(QAction *a: rpi->actions())
-				tmplist.push_back(a->text());
-			addItems(rpi->pluginName(), pluginType, tmplist);
+			if (type.isIOMeshPlugin()){
+				IOMeshPluginInterface* iopi = dynamic_cast<IOMeshPluginInterface*>(fp);
+				for(const FileFormat& f: iopi->importFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="Importer_"+s+" ";
+					tmplist.push_back(formats);
+				}
+				for(const FileFormat& f: iopi->exportFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="Exporter_"+s+" ";
+					tmplist.push_back(formats);
+				}
+			}
+			if (type.isIORasterPlugin()){
+				IORasterPluginInterface* iorpi = dynamic_cast<IORasterPluginInterface*>(fp);
+				for(const FileFormat& f: iorpi->importFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="Importer_"+s+" ";
+					tmplist.push_back(formats);
+				}
+			}
+			if (type.isRenderPlugin()){
+				RenderPluginInterface* rpi = dynamic_cast<RenderPluginInterface*>(fp);
+				for(QAction *a: rpi->actions())
+					tmplist.push_back(a->text());
+			}
+			addItems(fp->pluginName(), pluginType, tmplist);
 		}
 		
 		std::string lbl = "Number of plugin loaded: " + std::to_string(pm.size());
