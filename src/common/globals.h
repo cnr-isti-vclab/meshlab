@@ -29,6 +29,13 @@
 
 #include <QString>
 
+#ifndef MESHLAB_VERSION
+#error "MESHLAB_VERSION needs to be defined!"
+#endif
+#ifndef MESHLAB_SCALAR
+#error "MESHLAB_SCALAR needs to be defined!"
+#endif
+
 class RichParameterList;
 class PluginManager;
 

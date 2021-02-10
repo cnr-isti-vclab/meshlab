@@ -130,8 +130,19 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (!ifp){
 		throw MLException(fin.fileName() + " is not a MeshLab plugin.");
 	}
-	if (ifp && ifp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
+	if (ifp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
 		throw MLException(fin.fileName() + " has different floating point precision from the running MeshLab version.");
+	}
+	std::string mlVersionPlug = ifp->getMLVersion().first;
+	std::string majorVersionPlug = mlVersionPlug.substr(0, 4); //4 is the position of '.' in meshlab version
+	std::string majorVersionML = meshlab::meshlabVersion().substr(0, 4);
+	if (majorVersionML != majorVersionPlug){
+		throw MLException(fin.fileName() + " has different major version from the running MeshLab version.");
+	}
+	std::string minorVersionPlug = mlVersionPlug.substr(5, mlVersionPlug.size());
+	std::string minorVersionML = meshlab::meshlabVersion().substr(5, meshlab::meshlabVersion().size());
+	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
+		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
 	}
 	
 	//TODO: check in some way also the meshlab version of the plugin

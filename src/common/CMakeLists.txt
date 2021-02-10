@@ -3,8 +3,18 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 	if (BUILD_WITH_DOUBLE_SCALAR)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
-	add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
+	#add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
 	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
+endif()
+
+if (BUILD_WITH_DOUBLE_SCALAR)
+	message(STATUS "Building with double precision")
+	set(MESHLAB_SCALAR "double")
+	#add_definitions(-DMESHLAB_SCALAR=double)
+else()
+	message(STATUS "Building with single precision")
+	set(MESHLAB_SCALAR "float")
+	#add_definitions(-DMESHLAB_SCALAR=float)
 endif()
 
 set(HEADERS
@@ -80,6 +90,11 @@ if(WIN32)
 	set(TARGET_TYPE STATIC)
 endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+
+target_compile_definitions(meshlab-common 
+	PUBLIC 
+		MESHLAB_VERSION=${MESHLAB_VERSION}
+		MESHLAB_SCALAR=${MESHLAB_SCALAR})
 
 target_include_directories(meshlab-common
 	PRIVATE
