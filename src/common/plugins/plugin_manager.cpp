@@ -64,62 +64,20 @@ PluginManager::~PluginManager()
 }
 
 /**
- * @brief Loads the plugins contained in the default meshlab plugin directory.
+ * @brief Checks if the given file is a valid MeshLab plugin.
+ * It does not add the plugin to the plugin manger.
  * 
- * If at least one plugin fails to be loaded, a MLException is thrown.
- * In any case, all the other valid plugins contained in the directory are loaded.
- */
-void PluginManager::loadPlugins()
-{
-	loadPlugins(QDir(meshlab::defaultPluginPath()));
-}
-
-/**
- * @brief Loads the plugins contained in the given directory.
+ * Note: this function is called automatically before loading a plugin.
  * 
- * If at least one plugin fails to be loaded, a MLException is thrown.
- * In any case, all the other valid plugins contained in the directory are loaded.
+ * Throws a MLException if the file is not a valid MeshLab plugin.
  */
-void PluginManager::loadPlugins(const QDir& pluginsDirectory)
+void PluginManager::checkPlugin(const QString& filename)
 {
-	pluginsDir = pluginsDirectory;
-	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	// ToDo: get rid of any qApp here
-	qApp->addLibraryPath(meshlab::defaultPluginPath());
-	QStringList nameFiltersPlugins = fileNamePluginDLLs();
-	
-	//only the file with extension pluginfilters will be listed by function entryList()
-	pluginsDir.setNameFilters(nameFiltersPlugins);
-	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
-	std::list<std::pair<QString, QString>> errors;
-	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
-		try {
-			loadPlugin(fileName);
-		}
-		catch(const MLException& e){
-			errors.push_back(std::make_pair(fileName, e.what()));
-		}
+	QFileInfo fin(filename);
+	if (!fin.exists()){
+		throw MLException(filename + " does not exists.");
 	}
-	if (errors.size() > 0){
-		QString singleError = "Unable to load the following plugins:\n\n";
-		for (const auto& p : errors){
-			singleError += "\t" + p.first + ": " + p.second + "\n";
-		}
-		throw MLException(singleError);
-	}
-}
-
-/**
- * @brief Loads the plugin specified in the given file and adds the plugin into the
- * PluginManager.
- * 
- * Throws a MLException if the load of the plugin fails.
- */
-void PluginManager::loadPlugin(const QString& fileName)
-{
-	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
-	QFileInfo fin(absfilepath);
-	QPluginLoader loader(absfilepath);
+	QPluginLoader loader(fin.absoluteFilePath());
 	QObject *plugin = loader.instance();
 	if (!plugin) {
 		throw MLException(loader.errorString());
@@ -153,8 +111,82 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
 		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
 	}
+	
+	MeshLabPluginType type(ifp);
+	
+	if (!type.isValid()){
+		throw MLException(fin.fileName() + " has none of the known plugin types known by this MeshLab version.");
+	}
+	
+	//ToDo: proper checks also for other plugin types...
+	if (type.isFilterPlugin()){
+		checkFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+	}
+}
+
+/**
+ * @brief Loads the plugins contained in the default meshlab plugin directory.
+ * 
+ * If at least one plugin fails to be loaded, a MLException is thrown.
+ * In any case, all the other valid plugins contained in the directory are loaded.
+ */
+void PluginManager::loadPlugins()
+{
+	loadPlugins(QDir(meshlab::defaultPluginPath()));
+}
+
+/**
+ * @brief Loads the plugins contained in the given directory.
+ * 
+ * If at least one plugin fails to be loaded, a MLException is thrown.
+ * In any case, all the other valid plugins contained in the directory are loaded.
+ */
+void PluginManager::loadPlugins(QDir pluginsDirectory)
+{
+	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
+	// ToDo: get rid of any qApp here
+	qApp->addLibraryPath(meshlab::defaultPluginPath());
+	QStringList nameFiltersPlugins = fileNamePluginDLLs();
+	
+	//only the file with extension pluginfilters will be listed by function entryList()
+	pluginsDirectory.setNameFilters(nameFiltersPlugins);
+	
+	//qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDirectory.absolutePath()));
+	std::list<std::pair<QString, QString>> errors;
+	for(QString fileName : pluginsDirectory.entryList(QDir::Files)) {
+		try {
+			loadPlugin(pluginsDirectory.absoluteFilePath(fileName));
+		}
+		catch(const MLException& e){
+			errors.push_back(std::make_pair(fileName, e.what()));
+		}
+	}
+	if (errors.size() > 0){
+		QString singleError = "Unable to load the following plugins:\n\n";
+		for (const auto& p : errors){
+			singleError += "\t" + p.first + ": " + p.second + "\n";
+		}
+		throw MLException(singleError);
+	}
+}
+
+/**
+ * @brief Loads the plugin specified in the given file and adds the plugin into the
+ * PluginManager.
+ * 
+ * Note: better to give the absolute path of the plugin file.
+ * 
+ * Throws a MLException if the load of the plugin fails.
+ */
+void PluginManager::loadPlugin(const QString& fileName)
+{
+	checkPlugin(fileName);
 
 	//load the plugin depending on the type (can be more than one type!)
+	QFileInfo fin(fileName);
+	QPluginLoader loader(fin.absoluteFilePath());
+	QObject *plugin = loader.instance();
+	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
@@ -339,7 +371,7 @@ PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIt
 	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
+void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 {
 	for(QAction *filterAction : iFilter->actions()) {
 		if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
@@ -358,7 +390,10 @@ void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
 			throw MLException("Missing Arity for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 	}
+}
 
+void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
+{
 	for(QAction *filterAction : iFilter->actions()) {
 		filterAction->setData(QVariant(iFilter->pluginName()));
 		actionFilterMap.insert(filterAction->text(), filterAction);

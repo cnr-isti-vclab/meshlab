@@ -54,8 +54,10 @@ public:
 	class EditPluginFactoryRangeIterator;
 
 	/** Member functions **/
+	static void checkPlugin(const QString& filename);
+	
 	void loadPlugins();
-	void loadPlugins(const QDir& pluginsDirectory);
+	void loadPlugins(QDir pluginsDirectory);
 	void loadPlugin(const QString& filename);
 	
 	void enablePlugin(PluginFileInterface* fpi);
@@ -95,8 +97,6 @@ public:
 	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	QDir pluginsDir;
-
 	//all plugins (except Edit plugins)
 	std::vector<PluginFileInterface*> allPlugins;
 
@@ -121,6 +121,8 @@ private:
 
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;
+	
+	static void checkFilterPlugin(FilterPluginInterface* iFilter);
 	
 	void loadFilterPlugin(FilterPluginInterface* iFilter);
 	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);

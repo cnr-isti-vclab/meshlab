@@ -30,6 +30,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QStandardPaths>
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
@@ -101,16 +102,35 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 #endif
 	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Plugins", "", pluginFileFormat);
 	PluginManager& pm = meshlab::pluginManagerInstance();
+	bool loadOk = false;
 	for (const QString& fileName : fileList){
+		QFileInfo finfo(fileName);
+		QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+		appDir.mkpath(appDir.absolutePath());
+		
+		appDir.mkdir("MeshLabExtraPlugins");
+		appDir.cd("MeshLabExtraPlugins");
+		
 		try {
-			pm.loadPlugin(fileName);
+			PluginManager::checkPlugin(fileName);
+			
+			QString newFileName = appDir.absolutePath() + "/" +finfo.fileName();
+			QFile::copy(fileName, newFileName);
+			
+			std::cerr << "PATH: " << newFileName.toStdString() << "\n";
+			
+			pm.loadPlugin(newFileName);
+			loadOk = true;
 		}
 		catch(const MLException& e){
 			QMessageBox::warning(this, "Error while loading plugin", fileName + ":\n" + e.what());
 		}
 	}
-	ui->treeWidget->clear();
-	populateTreeWidget();
+	if (loadOk){
+		ui->treeWidget->clear();
+		populateTreeWidget();
+		ui->treeWidget->update();
+	}
 }
 
 void PluginInfoDialog::populateTreeWidget()
