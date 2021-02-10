@@ -26,12 +26,37 @@
 
 #include "plugin_manager.h"
 
+class ConstPluginIterator 
+{
+public:
+	using Container         = std::vector<PluginFileInterface*>;
+	using iterator_category = std::forward_iterator_tag;
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = PluginFileInterface*;
+	using pointer           = Container::const_iterator;  
+	using reference         = PluginFileInterface*&;
+	
+	ConstPluginIterator(const Container& c, const pointer& it) : c(c), m_ptr(it){}
+	value_type operator*() const {return *m_ptr; } 
+	pointer operator->() { return m_ptr; }
+	ConstPluginIterator& operator++() { m_ptr++; return *this; } 
+	ConstPluginIterator operator++(int) { ConstPluginIterator tmp = *this; ++(*this); return tmp; }
+	friend bool operator== (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr == b.m_ptr; };
+	friend bool operator!= (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr != b.m_ptr; };
+	
+private:
+	const Container& c;
+	pointer m_ptr;
+};
+
+/** Range iterators **/
+
 class PluginManager::PluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<PluginFileInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
-	std::vector<PluginFileInterface*>::const_iterator end() {return pm->allPlugins.end();}
+	ConstPluginIterator begin() {return ConstPluginIterator(pm->allPlugins, pm->allPlugins.begin());}
+	ConstPluginIterator end()   {return ConstPluginIterator(pm->allPlugins, pm->allPlugins.end());}
 private:
 	PluginRangeIterator(const PluginManager* pm) : pm(pm) {}
 	const PluginManager* pm;
