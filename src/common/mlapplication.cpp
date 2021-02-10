@@ -1,6 +1,8 @@
 #include "mlapplication.h"
 #include "mlexception.h"
 #include <vcg/complex/complex.h>
+#include <QStandardPaths>
+#include <QDir>
 #include "globals.h"
 
 #ifndef MESHLAB_VERSION
@@ -55,6 +57,21 @@ const QString MeshLabApplication::compilerVersion()
 const QString MeshLabApplication::qtVersion()
 {
 	return QString(QT_VERSION_STR);
+}
+
+const QString MeshLabApplication::extraPluginsLocation()
+{
+	QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+	appDir.mkpath(appDir.absolutePath());
+	
+	appDir.mkdir("MeshLabExtraPlugins");
+	appDir.cd("MeshLabExtraPlugins");
+	
+	QString major = appVer().left(4);
+	appDir.mkdir(major);
+	appDir.cd(major);
+	
+	return appDir.absolutePath();
 }
 
 std::string MeshLabApplication::versionString(int a, int b, int c)

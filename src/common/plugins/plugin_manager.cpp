@@ -132,6 +132,9 @@ void PluginManager::checkPlugin(const QString& filename)
  */
 void PluginManager::loadPlugins()
 {
+	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
+	// ToDo: get rid of any qApp here
+	qApp->addLibraryPath(meshlab::defaultPluginPath());
 	loadPlugins(QDir(meshlab::defaultPluginPath()));
 }
 
@@ -143,30 +146,29 @@ void PluginManager::loadPlugins()
  */
 void PluginManager::loadPlugins(QDir pluginsDirectory)
 {
-	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	// ToDo: get rid of any qApp here
-	qApp->addLibraryPath(meshlab::defaultPluginPath());
-	QStringList nameFiltersPlugins = fileNamePluginDLLs();
-	
-	//only the file with extension pluginfilters will be listed by function entryList()
-	pluginsDirectory.setNameFilters(nameFiltersPlugins);
-	
-	//qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDirectory.absolutePath()));
-	std::list<std::pair<QString, QString>> errors;
-	for(QString fileName : pluginsDirectory.entryList(QDir::Files)) {
-		try {
-			loadPlugin(pluginsDirectory.absoluteFilePath(fileName));
+	if (pluginsDirectory.exists()){
+		QStringList nameFiltersPlugins = fileNamePluginDLLs();
+		
+		//only the file with extension pluginfilters will be listed by function entryList()
+		pluginsDirectory.setNameFilters(nameFiltersPlugins);
+		
+		//qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDirectory.absolutePath()));
+		std::list<std::pair<QString, QString>> errors;
+		for(QString fileName : pluginsDirectory.entryList(QDir::Files)) {
+			try {
+				loadPlugin(pluginsDirectory.absoluteFilePath(fileName));
+			}
+			catch(const MLException& e){
+				errors.push_back(std::make_pair(fileName, e.what()));
+			}
 		}
-		catch(const MLException& e){
-			errors.push_back(std::make_pair(fileName, e.what()));
+		if (errors.size() > 0){
+			QString singleError = "Unable to load the following plugins:\n\n";
+			for (const auto& p : errors){
+				singleError += "\t" + p.first + ": " + p.second + "\n";
+			}
+			throw MLException(singleError);
 		}
-	}
-	if (errors.size() > 0){
-		QString singleError = "Unable to load the following plugins:\n\n";
-		for (const auto& p : errors){
-			singleError += "\t" + p.first + ": " + p.second + "\n";
-		}
-		throw MLException(singleError);
 	}
 }
 

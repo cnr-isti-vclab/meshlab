@@ -24,13 +24,10 @@
 #include "plugin_info_dialog.h"
 #include "ui_plugin_info_dialog.h"
 
-#include <QDir>
-#include <QPluginLoader>
 #include <QCheckBox>
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QStandardPaths>
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
@@ -39,6 +36,7 @@
 #include <common/plugins/interfaces/edit_plugin_interface.h>
 #include <common/globals.h>
 #include <common/mlexception.h>
+#include <common/mlapplication.h>
 #include <common/plugins/plugin_manager.h>
 #include <common/plugins/meshlab_plugin_type.h>
 
@@ -109,16 +107,11 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 	bool loadOk = false;
 	for (const QString& fileName : fileList){
 		QFileInfo finfo(fileName);
-		QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
-		appDir.mkpath(appDir.absolutePath());
-		
-		appDir.mkdir("MeshLabExtraPlugins");
-		appDir.cd("MeshLabExtraPlugins");
 		
 		try {
 			PluginManager::checkPlugin(fileName);
 			
-			QString newFileName = appDir.absolutePath() + "/" +finfo.fileName();
+			QString newFileName = MeshLabApplication::extraPluginsLocation() + "/" +finfo.fileName();
 			QFile::copy(fileName, newFileName);
 			
 			pm.loadPlugin(newFileName);

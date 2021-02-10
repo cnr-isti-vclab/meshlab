@@ -65,6 +65,7 @@ MainWindow::MainWindow():
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
 	try {
 		PM.loadPlugins();
+		PM.loadPlugins(QDir(MeshLabApplication::extraPluginsLocation()));
 	}
 	catch (const MLException& e) {
 		QMessageBox::warning(this, "Error while loading plugins.", e.what());
