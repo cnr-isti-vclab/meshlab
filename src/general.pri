@@ -8,6 +8,12 @@
 # it can be double or float according to user needs.
 DEFINES += MESHLAB_SCALAR=float
 
+# defining meshlab version
+exists($$PWD/../ML_VERSION){
+	MESHLAB_VERSION = $$cat($$PWD/../ML_VERSION)
+	DEFINES += "MESHLAB_VERSION=$$MESHLAB_VERSION"
+}
+
 # VCG directory
 VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/vcglib
 

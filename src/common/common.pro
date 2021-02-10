@@ -31,12 +31,7 @@ INCLUDEPATH *= \
 	DEFINES += GLEW_STATIC
 }
 
-# defining meshlab version
-exists(../../ML_VERSION){
-	MESHLAB_VERSION = $$cat(../../ML_VERSION)
-	message(MeshLab Version: $$MESHLAB_VERSION)
-	DEFINES += "MESHLAB_VERSION=$$MESHLAB_VERSION"
-}
+message(MeshLab Version: $$MESHLAB_VERSION)
 
 # Input
 HEADERS += 	\
