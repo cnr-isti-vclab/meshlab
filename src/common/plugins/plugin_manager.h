@@ -122,12 +122,18 @@ private:
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;
 	
-	void loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName);
-	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString& fileName);
-	void loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString& fileName);
-	void loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
-	void loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
-	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
+	void loadFilterPlugin(FilterPluginInterface* iFilter);
+	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void loadIORasterPlugin(IORasterPluginInterface* iIORaster);
+	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void loadRenderPlugin(RenderPluginInterface* iRender);
+	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
+	
+	template <typename RangeIterator>
+	static QStringList inputFormatListDialog(RangeIterator iterator);
+	
+	template <typename RangeIterator>
+	static QStringList outputFormatListDialog(RangeIterator iterator);
 };
 
 #include "plugin_manager_iterators.h"
