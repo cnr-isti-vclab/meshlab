@@ -76,9 +76,9 @@ public:
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
 	QStringList inputRasterFormatList() const;
-	const QStringList& inputMeshFormatListDialog() const;
-	const QStringList& outputMeshFormatListDialog() const;
-	const QStringList& inputRasterFormatListDialog() const;
+	QStringList inputMeshFormatListDialog() const;
+	QStringList outputMeshFormatListDialog() const;
+	QStringList inputRasterFormatListDialog() const;
 	
 	PluginFileInterface* operator [](unsigned int i) const;
 
@@ -101,13 +101,10 @@ private:
 	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
 	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
 	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
-	QStringList inputMeshFormatsDialogStringList; //todo: remove this
-	QStringList outputMeshFormatsDialogStringList; //todo: remove this
 
 	//IORasterPlugins
 	std::vector<IORasterPluginInterface*> ioRasterPlugins;
 	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
-	QStringList inputRasterFormatsDialogStringList;
 
 	//Filter Plugins
 	std::vector<FilterPluginInterface*> filterPlugins;

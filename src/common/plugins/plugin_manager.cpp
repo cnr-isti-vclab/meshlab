@@ -125,14 +125,24 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (!plugin) {
 		throw MLException(loader.errorString());
 	}
-	
+
 	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
 	if (!ifp){
 		throw MLException(fin.fileName() + " is not a MeshLab plugin.");
 	}
+
+	//check floating point precision of the plugin
 	if (ifp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
 		throw MLException(fin.fileName() + " has different floating point precision from the running MeshLab version.");
 	}
+
+	//check version of the plugin
+	// - needs to be the same major version and 
+	//   <= minor version wrt MeshLab version
+
+	// example: 2021.01 plugin can run on 2021.03 MeshLab
+	//          2021.03 plugin cannot run on 2021.01 MeshLab
+	//          2021.12 plugin cannot run on 2022.01 MeshLab
 	std::string mlVersionPlug = ifp->getMLVersion().first;
 	std::string majorVersionPlug = mlVersionPlug.substr(0, 4); //4 is the position of '.' in meshlab version
 	std::string majorVersionML = meshlab::meshlabVersion().substr(0, 4);
@@ -144,9 +154,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
 		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
 	}
-	
-	//TODO: check in some way also the meshlab version of the plugin
-	
+
+	//load the plugin depending on the type (can be more than one type!)
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
@@ -168,6 +177,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 		loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin), fileName);
 	}
 
+	//set the QFileInfo to the plugin, and add it to the continer
+	//of all plugins
 	ifp->plugFileInfo = fin;
 	allPlugins.push_back(ifp);
 }
@@ -256,18 +267,75 @@ QStringList PluginManager::inputRasterFormatList() const
 	return inputRasterFormatToPluginMap.keys();
 }
 
-const QStringList& PluginManager::inputMeshFormatListDialog() const
+QStringList PluginManager::inputMeshFormatListDialog() const
 {
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputMeshFormatsDialogStringList;
+	for (IOMeshPluginInterface* ioMesh : ioMeshPluginIterator()){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : ioMesh->importFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			inputMeshFormatsDialogStringList.append(currentFilterEntry);
+		}
+		allKnownFormats += allKnownFormatsFilter;
+	}
+	allKnownFormats.append(')');
+	inputMeshFormatsDialogStringList.push_front(allKnownFormats);
 	return inputMeshFormatsDialogStringList;
+	//return inputMeshFormatsDialogStringList;
 }
 
-const QStringList& PluginManager::outputMeshFormatListDialog() const
+QStringList PluginManager::outputMeshFormatListDialog() const
 {
+	QStringList outputMeshFormatsDialogStringList;
+	for (IOMeshPluginInterface* ioMesh : ioMeshPluginIterator()){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : ioMesh->exportFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			outputMeshFormatsDialogStringList.append(currentFilterEntry);
+		}
+	}
 	return outputMeshFormatsDialogStringList;
 }
 
-const QStringList& PluginManager::inputRasterFormatListDialog() const
+QStringList PluginManager::inputRasterFormatListDialog() const
 {
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputRasterFormatsDialogStringList;
+	for (IORasterPluginInterface* ioRaster : ioRasterPluginIterator()){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : ioRaster->importFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+		}
+		allKnownFormats += allKnownFormatsFilter;
+	}
+	allKnownFormats.append(')');
+	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
 	return inputRasterFormatsDialogStringList;
 }
 
@@ -341,11 +409,38 @@ void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter, const QStri
 void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString&)
 {
 	ioMeshPlugins.push_back(iIOMesh);
+
+//	//add input formats to inputFormatMap
+//	for (const FileFormat& ff : iIOMesh->importFormats()){
+//		for (QString currentExtension : ff.extensions) {
+//			if (! inputMeshFormatToPluginMap.contains(currentExtension)) {
+//				inputMeshFormatToPluginMap.insert(currentExtension, iIOMesh);
+//			}
+//		}
+//	}
+	
+//	//add output formats to outputFormatMap
+//	for (const FileFormat& ff : iIOMesh->exportFormats()){
+//		for (QString currentExtension : ff.extensions) {
+//			if (! outputMeshFormatToPluginMap.contains(currentExtension)) {
+//				outputMeshFormatToPluginMap.insert(currentExtension, iIOMesh);
+//			}
+//		}
+//	}
 }
 
 void PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString&)
 {
 	ioRasterPlugins.push_back(iIORaster);
+	
+//	//add input formats to inputFormatMap
+//	for (const FileFormat& ff : iIORaster->importFormats()){
+//		for (QString currentExtension : ff.extensions) {
+//			if (! inputRasterFormatToPluginMap.contains(currentExtension)) {
+//				inputRasterFormatToPluginMap.insert(currentExtension, iIORaster);
+//			}
+//		}
+//	}
 }
 
 void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString&)
@@ -369,18 +464,21 @@ void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, con
 void PluginManager::fillKnownIOFormats()
 {
 	QString allKnownFormatsFilter = QObject::tr("All known formats (");
+	QStringList inputMeshFormatsDialogStringList;
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
 		allKnownFormatsFilter += addPluginMeshFormats(inputMeshFormatToPluginMap, inputMeshFormatsDialogStringList, pMeshIOPlugin, pMeshIOPlugin->importFormats());
 	}
 	allKnownFormatsFilter.append(')');
 	inputMeshFormatsDialogStringList.push_front(allKnownFormatsFilter);
 	
+	QStringList outputMeshFormatsDialogStringList;
 	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
 		addPluginMeshFormats(outputMeshFormatToPluginMap, outputMeshFormatsDialogStringList, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
 	}
 	
 	allKnownFormatsFilter = QObject::tr("All known formats (");
 	
+	QStringList inputRasterFormatsDialogStringList;
 	for (IORasterPluginInterface* pRasterIOPlugin : ioRasterPlugins){
 		allKnownFormatsFilter += addPluginRasterFormats(inputRasterFormatToPluginMap, inputRasterFormatsDialogStringList, pRasterIOPlugin, pRasterIOPlugin->importFormats());
 	}
@@ -428,7 +526,7 @@ QString PluginManager::addPluginMeshFormats(
 		QString currentFilterEntry = currentFormat.description + " (";
 		
 		//a particular file format could be associated with more than one file extension
-		QStringListIterator itExtension(currentFormat.extensions);
+		//QStringListIterator itExtension(currentFormat.extensions);
 		for (QString currentExtension : currentFormat.extensions) {
 			currentExtension = currentExtension.toLower();
 			if (!map.contains(currentExtension)) {
