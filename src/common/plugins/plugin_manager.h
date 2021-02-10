@@ -58,6 +58,9 @@ public:
 	void loadPlugins(const QDir& pluginsDirectory);
 	void loadPlugin(const QString& filename);
 	
+	void enablePlugin(PluginFileInterface* fpi);
+	void disablePlugin(PluginFileInterface* fpi);
+	
 	QString pluginsCode() const;
 
 	unsigned int size() const;
@@ -125,20 +128,6 @@ private:
 	void loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
 	void loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
-	
-	void fillKnownIOFormats();
-
-	static QString addPluginRasterFormats(
-			QMap<QString, IORasterPluginInterface*>& map, 
-			QStringList& formatFilters, 
-			IORasterPluginInterface* pRasterIOPlugin,
-			const QList<FileFormat>& format);
-
-	static QString addPluginMeshFormats(
-			QMap<QString, IOMeshPluginInterface*>& map, 
-			QStringList& formatFilters, 
-			IOMeshPluginInterface* pMeshIOPlugin,
-			const QList<FileFormat>& format);
 };
 
 #include "plugin_manager_iterators.h"

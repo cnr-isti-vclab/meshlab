@@ -71,12 +71,10 @@ void PluginInfoDialog::chechBoxStateChanged(int state)
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	PluginFileInterface* fpi = pm[nPlug];
 	if (state == Qt::Checked){
-		fpi->enable();
-		//std::cerr << fpi->pluginName().toStdString() << " enabled\n";
+		pm.enablePlugin(fpi);
 	}
 	else {
-		fpi->disable();
-		//std::cerr << fpi->pluginName().toStdString() << " disabled\n";
+		pm.disablePlugin(fpi);
 	}
 }
 

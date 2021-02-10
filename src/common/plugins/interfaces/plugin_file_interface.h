@@ -67,12 +67,12 @@ public:
 	virtual QString vendor() const {return "CNR-ISTI VCLab";};
 	
 	bool isEnabled() const {return enabled;}
-	void enable() {enabled = true;}
-	void disable() {enabled = false;}
 
 	QFileInfo pluginFileInfo() const {return plugFileInfo;}
 
 private:
+	void enable() {enabled = true;}
+	void disable() {enabled = false;}
 	bool enabled;
 	QFileInfo plugFileInfo;
 };
