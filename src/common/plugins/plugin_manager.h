@@ -83,13 +83,13 @@ public:
 	PluginFileInterface* operator [](unsigned int i) const;
 
 	/** Member functions for range iterators **/
-	PluginRangeIterator pluginIterator() const;
-	FilterPluginRangeIterator filterPluginIterator() const;
-	IOMeshPluginIterator ioMeshPluginIterator() const;
-	IORasterPluginIterator ioRasterPluginIterator() const;
-	RenderPluginRangeIterator renderPluginIterator() const;
-	DecoratePluginRangeIterator decoratePluginIterator() const;
-	EditPluginFactoryRangeIterator editPluginFactoryIterator() const;
+	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IOMeshPluginIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IORasterPluginIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
 	QDir pluginsDir;

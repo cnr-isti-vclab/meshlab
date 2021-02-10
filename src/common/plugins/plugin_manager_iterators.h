@@ -26,27 +26,43 @@
 
 #include "plugin_manager.h"
 
+template <typename PluginType>
 class ConstPluginIterator 
 {
 public:
-	using Container         = std::vector<PluginFileInterface*>;
+	using Container         = std::vector<PluginType*>;
 	using iterator_category = std::forward_iterator_tag;
 	using difference_type   = std::ptrdiff_t;
-	using value_type        = PluginFileInterface*;
-	using pointer           = Container::const_iterator;  
-	using reference         = PluginFileInterface*&;
+	using value_type        = PluginType*;
+	using pointer           = typename Container::const_iterator;  
+	using reference         = PluginType*&;
 	
-	ConstPluginIterator(const Container& c, const pointer& it) : c(c), m_ptr(it){}
+	ConstPluginIterator(
+			const Container& c, 
+			const pointer& it, 
+			bool iterateAlsoDisabledPlugins = false) 
+		: c(c), m_ptr(it), iterateAlsoDisabledPlugins(iterateAlsoDisabledPlugins)
+	{}
 	value_type operator*() const {return *m_ptr; } 
 	pointer operator->() { return m_ptr; }
-	ConstPluginIterator& operator++() { m_ptr++; return *this; } 
-	ConstPluginIterator operator++(int) { ConstPluginIterator tmp = *this; ++(*this); return tmp; }
+	ConstPluginIterator& operator++() {
+		if (iterateAlsoDisabledPlugins)
+			m_ptr++;
+		else {
+			do {
+				m_ptr++;
+			} while((m_ptr != c.end()) && !(*m_ptr)->isEnabled());
+		}
+		return *this; 
+	} 
+	ConstPluginIterator operator++(int) {ConstPluginIterator tmp = *this; ++(*this); return tmp; }
 	friend bool operator== (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr == b.m_ptr; };
 	friend bool operator!= (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr != b.m_ptr; };
 	
 private:
 	const Container& c;
 	pointer m_ptr;
+	bool iterateAlsoDisabledPlugins;
 };
 
 /** Range iterators **/
@@ -55,77 +71,94 @@ class PluginManager::PluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	ConstPluginIterator begin() {return ConstPluginIterator(pm->allPlugins, pm->allPlugins.begin());}
-	ConstPluginIterator end()   {return ConstPluginIterator(pm->allPlugins, pm->allPlugins.end());}
+	ConstPluginIterator<PluginFileInterface> begin() {return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.begin(), b);}
+	ConstPluginIterator<PluginFileInterface> end()   {return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.end(), b);}
 private:
-	PluginRangeIterator(const PluginManager* pm) : pm(pm) {}
+	PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::FilterPluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<FilterPluginInterface*>::const_iterator begin() {return pm->filterPlugins.begin();}
-	std::vector<FilterPluginInterface*>::const_iterator end() {return pm->filterPlugins.end();}
+	ConstPluginIterator<FilterPluginInterface> begin() {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);}
+	ConstPluginIterator<FilterPluginInterface> end()   {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);}
 private:
-	FilterPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
+	FilterPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::IOMeshPluginIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
-	std::vector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
+	ConstPluginIterator<IOMeshPluginInterface> begin() {return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.begin(), b);}
+	ConstPluginIterator<IOMeshPluginInterface> end()   {return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.end(), b);}
+	//std::vector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
+	//std::vector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
 private:
-	IOMeshPluginIterator(const PluginManager* pm) : pm(pm) {}
+	IOMeshPluginIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::IORasterPluginIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
-	std::vector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
+	ConstPluginIterator<IORasterPluginInterface> begin() {return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.begin(), b);}
+	ConstPluginIterator<IORasterPluginInterface> end()   {return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.end(), b);}
+	//std::vector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
+	//std::vector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
 private:
-	IORasterPluginIterator(const PluginManager* pm) : pm(pm) {}
+	IORasterPluginIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins)  {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::RenderPluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
-	std::vector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
+	ConstPluginIterator<RenderPluginInterface> begin() {return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.begin(), b);}
+	ConstPluginIterator<RenderPluginInterface> end()   {return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.end(), b);}
+	//std::vector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
+	//std::vector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
 private:
-	RenderPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
+	RenderPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::DecoratePluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<DecoratePluginInterface*>::const_iterator begin() {return pm->decoratePlugins.begin();}
-	std::vector<DecoratePluginInterface*>::const_iterator end() {return pm->decoratePlugins.end();}
+	ConstPluginIterator<DecoratePluginInterface> begin() {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.begin(), b);}
+	ConstPluginIterator<DecoratePluginInterface> end()   {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.end(), b);}
+	//std::vector<DecoratePluginInterface*>::const_iterator begin() {return pm->decoratePlugins.begin();}
+	//std::vector<DecoratePluginInterface*>::const_iterator end() {return pm->decoratePlugins.end();}
 private:
-	DecoratePluginRangeIterator(const PluginManager* pm) : pm(pm) {}
+	DecoratePluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 class PluginManager::EditPluginFactoryRangeIterator
 {
 	friend class PluginManager;
 public:
-	std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
+	ConstPluginIterator<EditPluginInterfaceFactory> begin() {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);}
+	ConstPluginIterator<EditPluginInterfaceFactory> end()   {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);}
+	//std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
+	//std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
 private:
-	EditPluginFactoryRangeIterator(const PluginManager* pm) : pm(pm) {}
+	EditPluginFactoryRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const PluginManager* pm;
+	bool b;
 };
 
 #endif // MESHLAB_PLUGIN_MANAGER_ITERATORS_H

@@ -127,7 +127,7 @@ void PluginInfoDialog::populateTreeWidget()
 	}
 	else {
 		int nPlug = 0;
-		for (PluginFileInterface* fp : pm.pluginIterator()){
+		for (PluginFileInterface* fp : pm.pluginIterator(true)){
 			MeshLabPluginType type(fp);
 			QString pluginType = type.pluginTypeString();
 			QStringList tmplist;

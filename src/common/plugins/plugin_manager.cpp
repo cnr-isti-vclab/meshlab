@@ -265,39 +265,39 @@ PluginFileInterface* PluginManager::operator[](unsigned int i) const
 	return allPlugins[i];
 }
 
-PluginManager::PluginRangeIterator PluginManager::pluginIterator() const
+PluginManager::PluginRangeIterator PluginManager::pluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return PluginRangeIterator(this);
+	return PluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator() const
+PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return FilterPluginRangeIterator(this);
+	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator() const
+PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IOMeshPluginIterator(this);
+	return IOMeshPluginIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator() const
+PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IORasterPluginIterator(this);
+	return IORasterPluginIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator() const
+PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return RenderPluginRangeIterator(this);
+	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator() const
+PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return DecoratePluginRangeIterator(this);
+	return DecoratePluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator() const
+PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return EditPluginFactoryRangeIterator(this);
+	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
 void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName)
