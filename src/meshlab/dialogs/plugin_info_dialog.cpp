@@ -89,8 +89,12 @@ void PluginInfoDialog::uninstallPluginPushButtonClicked()
 	int nPlug = pb->property("np").toInt();
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	PluginFileInterface* fpi = pm[nPlug];
-	/** TODO **/
-	std::cerr << fpi->pluginName().toStdString() << " deleted!\n";
+	QFileInfo fdel = fpi->pluginFileInfo();
+	pm.unloadPlugin(fpi);
+	QFile::remove(fdel.absoluteFilePath());
+	ui->treeWidget->clear();
+	populateTreeWidget();
+	ui->treeWidget->update();
 }
 
 void PluginInfoDialog::on_loadPluginsPushButton_clicked()
@@ -116,8 +120,6 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 			
 			QString newFileName = appDir.absolutePath() + "/" +finfo.fileName();
 			QFile::copy(fileName, newFileName);
-			
-			std::cerr << "PATH: " << newFileName.toStdString() << "\n";
 			
 			pm.loadPlugin(newFileName);
 			loadOk = true;

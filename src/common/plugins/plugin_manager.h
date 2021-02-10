@@ -59,9 +59,10 @@ public:
 	void loadPlugins();
 	void loadPlugins(QDir pluginsDirectory);
 	void loadPlugin(const QString& filename);
+	void unloadPlugin(PluginFileInterface* ifp);
 	
-	void enablePlugin(PluginFileInterface* fpi);
-	void disablePlugin(PluginFileInterface* fpi);
+	void enablePlugin(PluginFileInterface* ifp);
+	void disablePlugin(PluginFileInterface* ifp);
 	
 	QString pluginsCode() const;
 
@@ -130,6 +131,13 @@ private:
 	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void loadRenderPlugin(RenderPluginInterface* iRender);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
+	
+	void unloadFilterPlugin(FilterPluginInterface* iFilter);
+	void unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void unloadIORasterPlugin(IORasterPluginInterface* iIORaster);
+	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void unloadRenderPlugin(RenderPluginInterface* iRender);
+	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 	
 	template <typename RangeIterator>
 	static QStringList inputFormatListDialog(RangeIterator iterator);

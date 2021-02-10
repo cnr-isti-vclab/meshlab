@@ -214,20 +214,48 @@ void PluginManager::loadPlugin(const QString& fileName)
 	allPlugins.push_back(ifp);
 }
 
-void PluginManager::enablePlugin(PluginFileInterface* fpi)
+void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 {
-	auto it = std::find(allPlugins.begin(), allPlugins.end(), fpi);
-	if (it  != allPlugins.end() && !fpi->isEnabled()){
-		fpi->enable();
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it != allPlugins.end()){
+		MeshLabPluginType type(ifp);
+		if (type.isDecoratePlugin()){
+			unloadDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+		}
+		if (type.isEditPlugin()){
+			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
+		}
+		if (type.isFilterPlugin()){
+			unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+		}
+		if (type.isIOMeshPlugin()){
+			unloadIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
+		}
+		if (type.isIORasterPlugin()){
+			unloadIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
+		}
+		if (type.isRenderPlugin()){
+			unloadRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
+		}
+		allPlugins.erase(it);
+		delete ifp;
+	}
+}
+
+void PluginManager::enablePlugin(PluginFileInterface* ifp)
+{
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it  != allPlugins.end() && !ifp->isEnabled()){
+		ifp->enable();
 		//ToDo other checks...
 	}
 }
 
-void PluginManager::disablePlugin(PluginFileInterface* fpi)
+void PluginManager::disablePlugin(PluginFileInterface* ifp)
 {
-	auto it = std::find(allPlugins.begin(), allPlugins.end(), fpi);
-	if (it  != allPlugins.end() && fpi->isEnabled()){
-		fpi->disable();
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it  != allPlugins.end() && ifp->isEnabled()){
+		ifp->disable();
 		//ToDo other checks...
 	}
 }
@@ -454,6 +482,54 @@ void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
 void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
+}
+
+void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
+{
+	for(QAction *filterAction : iFilter->actions()) {
+		actionFilterMap.remove(filterAction->text());
+	}
+	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
+}
+
+void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
+{
+	ioMeshPlugins.erase(std::find(ioMeshPlugins.begin(), ioMeshPlugins.end(), iIOMesh));
+	for (const FileFormat& ff : iIOMesh->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			inputMeshFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+	for (const FileFormat& ff : iIOMesh->exportFormats()){
+		for (QString currentExtension : ff.extensions) {
+			outputMeshFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+}
+
+void PluginManager::unloadIORasterPlugin(IORasterPluginInterface* iIORaster)
+{
+	ioRasterPlugins.erase(std::find(ioRasterPlugins.begin(), ioRasterPlugins.end(), iIORaster));
+	for (const FileFormat& ff : iIORaster->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			inputRasterFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+}
+
+void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
+{
+	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
+}
+
+void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
+{
+	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
+}
+
+void PluginManager::unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
+{
+	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
 }
 
 template<typename RangeIterator>
