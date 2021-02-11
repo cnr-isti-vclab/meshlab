@@ -887,7 +887,6 @@ void MainWindow::updateAllPluginsActions()
 	editToolBar->clear();
 	editToolBar->addAction(suspendEditModeAct);
 	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
-		std::cerr << "Plugin visited: " << iEditFactory->pluginName().toStdString() << "\n";
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
