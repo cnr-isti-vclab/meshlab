@@ -98,9 +98,11 @@ void PluginInfoDialog::uninstallPluginPushButtonClicked()
 void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 {
 #ifdef _WIN32
-	QString pluginFileFormat = "*.dll MeshLab Plugin (*.dll)";
-#else //other os
-	QString pluginFileFormat = "*.so MeshLab Plugin (*.so)";
+	QString pluginFileFormat = "*MeshLab Plugin (*.dll)";
+#elif __APPLE__ //other os
+	QString pluginFileFormat = "All known formats (*.so, *.dylib);;MeshLab Plugin (*.so);;MeshLab Plugin (*.dylib)";
+#else
+	QString pluginFileFormat = "*MeshLab Plugin (*.so)";
 #endif
 	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Plugins", "", pluginFileFormat);
 	PluginManager& pm = meshlab::pluginManagerInstance();
