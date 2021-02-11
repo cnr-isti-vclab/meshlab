@@ -100,7 +100,7 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 #ifdef _WIN32
 	QString pluginFileFormat = "*MeshLab Plugin (*.dll)";
 #elif __APPLE__ //other os
-	QString pluginFileFormat = "All known formats (*.so, *.dylib);;MeshLab Plugin (*.so);;MeshLab Plugin (*.dylib)";
+	QString pluginFileFormat = "All known formats (*.so *.dylib);;MeshLab Plugin (*.so);;MeshLab Plugin (*.dylib)";
 #else
 	QString pluginFileFormat = "*MeshLab Plugin (*.so)";
 #endif
