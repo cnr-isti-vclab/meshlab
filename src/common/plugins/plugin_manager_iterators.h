@@ -42,7 +42,10 @@ public:
 			const pointer& it, 
 			bool iterateAlsoDisabledPlugins = false) 
 		: c(c), m_ptr(it), iterateAlsoDisabledPlugins(iterateAlsoDisabledPlugins)
-	{}
+	{
+		if (m_ptr != c.end() && !iterateAlsoDisabledPlugins && !(*m_ptr)->isEnabled())
+			++(*this);
+	}
 	value_type operator*() const {return *m_ptr; } 
 	pointer operator->() { return m_ptr; }
 	ConstPluginIterator& operator++() {

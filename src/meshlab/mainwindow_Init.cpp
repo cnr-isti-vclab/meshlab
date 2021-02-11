@@ -70,7 +70,15 @@ MainWindow::MainWindow():
 	catch (const MLException& e) {
 		QMessageBox::warning(this, "Error while loading plugins.", e.what());
 	}
-
+	QSettings settings;
+	
+	//disable previously disabled plugins
+	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
+	for (PluginFileInterface* fp : PM.pluginIterator(true)){
+		if (disabledPlugins.contains(fp->pluginName()))
+			PM.disablePlugin(fp);
+	}
+	
 
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
@@ -85,7 +93,7 @@ MainWindow::MainWindow():
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
 	setWindowIcon(icon);
-	QSettings settings;
+	
 	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
 	//should update those values only after I run MeshLab for the very first time or after I installed a new version
 	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
@@ -879,6 +887,7 @@ void MainWindow::updateAllPluginsActions()
 	editToolBar->clear();
 	editToolBar->addAction(suspendEditModeAct);
 	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+		std::cerr << "Plugin visited: " << iEditFactory->pluginName().toStdString() << "\n";
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
@@ -891,6 +900,8 @@ void MainWindow::updateAllPluginsActions()
 	filterToolBar->clear();
 	updateFilterToolBar();
 	
+	//TODO update the searcher: this seems to be an impossible task due to unreadable code.
+	//for now, just close and reopen meshlab....
 	/*
 	disconnect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
 	wama.clear();

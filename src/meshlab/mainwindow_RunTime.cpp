@@ -2636,6 +2636,14 @@ void MainWindow::aboutPlugins()
 	PluginInfoDialog dialog(this);
 	dialog.exec();
 	updateAllPluginsActions();
+	QSettings settings;
+	QStringList disabledPlugins;
+	for (PluginFileInterface* pf : PM.pluginIterator(true)){
+		if (!pf->isEnabled()){
+			disabledPlugins.append(pf->pluginName());
+		}
+	}
+	settings.setValue("DisabledPlugins", QVariant::fromValue(disabledPlugins));
 }
 
 void MainWindow::helpOnscreen()
