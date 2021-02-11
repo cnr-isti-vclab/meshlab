@@ -114,6 +114,11 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 			PluginManager::checkPlugin(fileName);
 			
 			QString newFileName = MeshLabApplication::extraPluginsLocation() + "/" +finfo.fileName();
+			
+			if (QFile::exists(newFileName)){
+				throw MLException("A plugin called " + finfo.fileName() + " already exists. Please uninstall it before installing a new one.");
+			}
+			
 			QFile::copy(fileName, newFileName);
 			
 			pm.loadPlugin(newFileName);
