@@ -861,10 +861,35 @@ void MainWindow::fillEditMenu()
 
 void MainWindow::updateAllPluginsActions()
 {
+	//update menus
 	fillFilterMenu();
 	fillDecorateMenu();
 	fillRenderMenu();
 	fillEditMenu();
+	
+	//update toolbars
+	decoratorToolBar->clear();
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
+		for(QAction *decorateAction: iDecorate->actions()) {
+			if (!decorateAction->icon().isNull())
+				decoratorToolBar->addAction(decorateAction);
+		}
+	}
+	
+	editToolBar->clear();
+	editToolBar->addAction(suspendEditModeAct);
+	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+		for(QAction* editAction: iEditFactory->actions()){
+			if (!editAction->icon().isNull()) {
+				editToolBar->addAction(editAction);
+			}
+			else qDebug() << "action was null";
+		}
+	}
+	editToolBar->addSeparator();
+	
+	filterToolBar->clear();
+	updateFilterToolBar();
 	
 	/*
 	disconnect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
