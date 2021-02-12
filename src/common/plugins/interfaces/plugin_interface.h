@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2020                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -26,7 +26,7 @@
 
 #include <QAction>
 
-
+#include "plugin_file_interface.h"
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
 #include "../../globals.h"
@@ -43,7 +43,7 @@
  *
  * \todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
  */
-class PluginInterface
+class PluginInterface : public PluginFileInterface
 {
 public:
 	typedef int FilterIDType;
@@ -53,22 +53,6 @@ public:
 	*/
 	PluginInterface();
 	virtual ~PluginInterface() {}
-
-	/** 
-	 * This function will be automatically defined in your plugin class
-	 * when you use the MESHLAB_PLUGIN_IID_EXPORTER macro.
-	 * The only exception is for the Edit plugins (not EditFactory!):
-	 * in this case, this function is defined by the macro
-	 * MESHLAB_EDIT_PLUGIN
-	 **/
-	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
-	
-	/**
-	 * @brief This functions returns the name of the current plugin.
-	 * Must be implemented in every plugin.
-	 * @return
-	 */
-	virtual QString pluginName() const = 0;
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);

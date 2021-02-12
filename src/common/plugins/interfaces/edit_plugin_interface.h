@@ -91,7 +91,7 @@ public:
 	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *) { e->ignore(); }
 	
 private:
-	virtual QString pluginName() const {return QString();};
+	virtual QString pluginName() const final {return QString();};
 };
 
 
@@ -101,15 +101,11 @@ private:
 This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
 This class is used by the framework to generate an independent MeshEditInterface for each document.
 */
-class EditPluginInterfaceFactory
+class EditPluginInterfaceFactory : public PluginFileInterface
 {
 public:
+	EditPluginInterfaceFactory() {}
 	virtual ~EditPluginInterfaceFactory() {}
-
-	virtual std::pair<std::string, bool> getMLVersion() const  = 0;
-	
-	//returns the plugin name
-	virtual QString pluginName() const = 0;
 
 	//gets a list of actions available from this plugin
 	virtual QList<QAction *> actions() const = 0;
@@ -126,16 +122,7 @@ public:
 		virtual std::pair<std::string, bool> getMLVersion() const { \
 			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
 		} \
-	private: 
-
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) \
-	Q_PLUGIN_METADATA(IID x) \
-	public: \
-		virtual std::pair<std::string, bool> getMLVersion() const { \
-			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
-		} \
 	private:
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
 #define EDIT_PLUGIN_INTERFACE_IID  "vcg.meshlab.EditPluginInterface/1.0"
 #define EDIT_PLUGIN_INTERFACE_FACTORY_IID  "vcg.meshlab.EditPluginInterfaceFactory/1.0"

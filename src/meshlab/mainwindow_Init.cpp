@@ -63,8 +63,22 @@ MainWindow::MainWindow():
 	layerDialog->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	layerDialog->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
-	PM.loadPlugins();
-
+	try {
+		PM.loadPlugins();
+		PM.loadPlugins(QDir(MeshLabApplication::extraPluginsLocation()));
+	}
+	catch (const MLException& e) {
+		QMessageBox::warning(this, "Error while loading plugins.", e.what());
+	}
+	QSettings settings;
+	
+	//disable previously disabled plugins
+	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
+	for (PluginFileInterface* fp : PM.pluginIterator(true)){
+		if (disabledPlugins.contains(fp->pluginName()))
+			PM.disablePlugin(fp);
+	}
+	
 
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
@@ -79,7 +93,7 @@ MainWindow::MainWindow():
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
 	setWindowIcon(icon);
-	QSettings settings;
+	
 	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
 	//should update those values only after I run MeshLab for the very first time or after I installed a new version
 	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
@@ -645,8 +659,7 @@ void MainWindow::initMenuForSearching(QMenu* menu)
 	if (menu == NULL)
 		return;
 	const QList<QAction*>& acts = menu->actions();
-	foreach(QAction* act, acts)
-	{
+	for(QAction* act: acts) {
 		QMenu* submenu = act->menu();
 		if (!act->isSeparator() && (submenu == NULL))
 			initItemForSearching(act);
@@ -852,6 +865,53 @@ void MainWindow::fillEditMenu()
 			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
 		}
 	}
+}
+
+void MainWindow::updateAllPluginsActions()
+{
+	//update menus
+	fillFilterMenu();
+	fillDecorateMenu();
+	fillRenderMenu();
+	fillEditMenu();
+	
+	//update toolbars
+	decoratorToolBar->clear();
+	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
+		for(QAction *decorateAction: iDecorate->actions()) {
+			if (!decorateAction->icon().isNull())
+				decoratorToolBar->addAction(decorateAction);
+		}
+	}
+	
+	editToolBar->clear();
+	editToolBar->addAction(suspendEditModeAct);
+	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+		for(QAction* editAction: iEditFactory->actions()){
+			if (!editAction->icon().isNull()) {
+				editToolBar->addAction(editAction);
+			}
+			else qDebug() << "action was null";
+		}
+	}
+	editToolBar->addSeparator();
+	
+	filterToolBar->clear();
+	updateFilterToolBar();
+	
+	//TODO update the searcher: this seems to be an impossible task due to unreadable code.
+	//for now, just close and reopen meshlab....
+	/*
+	disconnect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
+	wama.clear();
+	delete searchMenu;
+	
+	initSearchEngine();
+	int longest = longestActionWidthInAllMenus();
+	searchMenu = new SearchMenu(wama, 15, searchButton, longest);
+	searchButton->setMenu(searchMenu);
+	connect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
+	*/
 }
 
 
@@ -1188,7 +1248,7 @@ int MainWindow::longestActionWidthInAllMenus()
 {
 	int longest = 0;
 	QList<QMenu*> list = menuBar()->findChildren<QMenu*>();
-	foreach(QMenu* m, list)
+	for(QMenu* m: list)
 		longest = std::max(longest, longestActionWidthInMenu(m));
 	return longest;
 }

@@ -21,7 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "plugin_manager.h"
+#include "plugin_manager_iterators.h" //includes plugin_manager.h
+#include "meshlab_plugin_type.h"
 #include <QObject>
 #include <qapplication.h>
 #include <QPluginLoader>
@@ -56,35 +57,209 @@ PluginManager::~PluginManager()
 	filterPlugins.clear();
 	renderPlugins.clear();
 	decoratePlugins.clear();
-	for (auto& plugin : allPlugins)
-		delete plugin.second;
-	allPlugins.clear();
-	
-	for (int ii = 0; ii < editPlugins.size(); ++ii)
-		delete editPlugins[ii];
 	editPlugins.clear();
+	for (auto& plugin : allPlugins)
+		delete plugin;
+	allPlugins.clear();
 }
 
+/**
+ * @brief Checks if the given file is a valid MeshLab plugin.
+ * It does not add the plugin to the plugin manger.
+ * 
+ * Note: this function is called automatically before loading a plugin.
+ * 
+ * Throws a MLException if the file is not a valid MeshLab plugin.
+ */
+void PluginManager::checkPlugin(const QString& filename)
+{
+	QFileInfo fin(filename);
+	if (!fin.exists()){
+		throw MLException(filename + " does not exists.");
+	}
+	QPluginLoader loader(fin.absoluteFilePath());
+	QObject *plugin = loader.instance();
+	if (!plugin) {
+		throw MLException(loader.errorString());
+	}
+
+	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
+	if (!ifp){
+		throw MLException(fin.fileName() + " is not a MeshLab plugin.");
+	}
+
+	//check floating point precision of the plugin
+	if (ifp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
+		throw MLException(fin.fileName() + " has different floating point precision from the running MeshLab version.");
+	}
+
+	//check version of the plugin
+	// - needs to be the same major version and 
+	//   <= minor version wrt MeshLab version
+
+	// example: 2021.01 plugin can run on 2021.03 MeshLab
+	//          2021.03 plugin cannot run on 2021.01 MeshLab
+	//          2021.12 plugin cannot run on 2022.01 MeshLab
+	std::string mlVersionPlug = ifp->getMLVersion().first;
+	std::string majorVersionPlug = mlVersionPlug.substr(0, 4); //4 is the position of '.' in meshlab version
+	std::string majorVersionML = meshlab::meshlabVersion().substr(0, 4);
+	if (majorVersionML != majorVersionPlug){
+		throw MLException(fin.fileName() + " has different major version from the running MeshLab version.");
+	}
+	std::string minorVersionPlug = mlVersionPlug.substr(5, mlVersionPlug.size());
+	std::string minorVersionML = meshlab::meshlabVersion().substr(5, meshlab::meshlabVersion().size());
+	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
+		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
+	}
+	
+	MeshLabPluginType type(ifp);
+	
+	if (!type.isValid()){
+		throw MLException(fin.fileName() + " has none of the known plugin types known by this MeshLab version.");
+	}
+	
+	//ToDo: proper checks also for other plugin types...
+	if (type.isFilterPlugin()){
+		checkFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+	}
+}
+
+/**
+ * @brief Loads the plugins contained in the default meshlab plugin directory.
+ * 
+ * If at least one plugin fails to be loaded, a MLException is thrown.
+ * In any case, all the other valid plugins contained in the directory are loaded.
+ */
 void PluginManager::loadPlugins()
 {
-	loadPlugins(QDir(meshlab::defaultPluginPath()));
-}
-
-void PluginManager::loadPlugins(const QDir& pluginsDirectory)
-{
-	pluginsDir = pluginsDirectory;
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	// ToDo: get rid of any qApp here
 	qApp->addLibraryPath(meshlab::defaultPluginPath());
-	QStringList nameFiltersPlugins = fileNamePluginDLLs();
-	
-	//only the file with extension pluginfilters will be listed by function entryList()
-	pluginsDir.setNameFilters(nameFiltersPlugins);
-	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
-	for(QString fileName : pluginsDir.entryList(QDir::Files)) {
-		loadPlugin(fileName);
+	loadPlugins(QDir(meshlab::defaultPluginPath()));
+}
+
+/**
+ * @brief Loads the plugins contained in the given directory.
+ * 
+ * If at least one plugin fails to be loaded, a MLException is thrown.
+ * In any case, all the other valid plugins contained in the directory are loaded.
+ */
+void PluginManager::loadPlugins(QDir pluginsDirectory)
+{
+	if (pluginsDirectory.exists()){
+		QStringList nameFiltersPlugins = fileNamePluginDLLs();
+		
+		//only the file with extension pluginfilters will be listed by function entryList()
+		pluginsDirectory.setNameFilters(nameFiltersPlugins);
+		
+		//qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDirectory.absolutePath()));
+		std::list<std::pair<QString, QString>> errors;
+		for(QString fileName : pluginsDirectory.entryList(QDir::Files)) {
+			try {
+				loadPlugin(pluginsDirectory.absoluteFilePath(fileName));
+			}
+			catch(const MLException& e){
+				errors.push_back(std::make_pair(fileName, e.what()));
+			}
+		}
+		if (errors.size() > 0){
+			QString singleError = "Unable to load the following plugins:\n\n";
+			for (const auto& p : errors){
+				singleError += "\t" + p.first + ": " + p.second + "\n";
+			}
+			throw MLException(singleError);
+		}
 	}
-	fillKnownIOFormats();
+}
+
+/**
+ * @brief Loads the plugin specified in the given file and adds the plugin into the
+ * PluginManager.
+ * 
+ * Note: better to give the absolute path of the plugin file.
+ * 
+ * Throws a MLException if the load of the plugin fails.
+ */
+void PluginManager::loadPlugin(const QString& fileName)
+{
+	checkPlugin(fileName);
+
+	//load the plugin depending on the type (can be more than one type!)
+	QFileInfo fin(fileName);
+	QPluginLoader loader(fin.absoluteFilePath());
+	QObject *plugin = loader.instance();
+	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
+	MeshLabPluginType type(ifp);
+	
+	if (type.isDecoratePlugin()){
+		loadDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
+	}
+	if (type.isEditPlugin()){
+		loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
+	}
+	if (type.isFilterPlugin()){
+		loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+	}
+	if (type.isIOMeshPlugin()){
+		loadIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
+	}
+	if (type.isIORasterPlugin()){
+		loadIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
+	}
+	if (type.isRenderPlugin()){
+		loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
+	}
+
+	//set the QFileInfo to the plugin, and add it to the continer
+	//of all plugins
+	ifp->plugFileInfo = fin;
+	allPlugins.push_back(ifp);
+}
+
+void PluginManager::unloadPlugin(PluginFileInterface* ifp)
+{
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it != allPlugins.end()){
+		MeshLabPluginType type(ifp);
+		if (type.isDecoratePlugin()){
+			unloadDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+		}
+		if (type.isEditPlugin()){
+			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
+		}
+		if (type.isFilterPlugin()){
+			unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+		}
+		if (type.isIOMeshPlugin()){
+			unloadIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
+		}
+		if (type.isIORasterPlugin()){
+			unloadIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
+		}
+		if (type.isRenderPlugin()){
+			unloadRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
+		}
+		allPlugins.erase(it);
+		delete ifp;
+	}
+}
+
+void PluginManager::enablePlugin(PluginFileInterface* ifp)
+{
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it  != allPlugins.end() && !ifp->isEnabled()){
+		ifp->enable();
+		//ToDo other checks...
+	}
+}
+
+void PluginManager::disablePlugin(PluginFileInterface* ifp)
+{
+	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
+	if (it  != allPlugins.end() && ifp->isEnabled()){
+		ifp->disable();
+		//ToDo other checks...
+	}
 }
 
 unsigned int PluginManager::size() const
@@ -171,269 +346,235 @@ QStringList PluginManager::inputRasterFormatList() const
 	return inputRasterFormatToPluginMap.keys();
 }
 
-const QStringList& PluginManager::inputMeshFormatListDialog() const
+QStringList PluginManager::inputMeshFormatListDialog() const
 {
-	return inputMeshFormatsDialogStringList;
+	return inputFormatListDialog(ioMeshPluginIterator());
 }
 
-const QStringList& PluginManager::outputMeshFormatListDialog() const
+QStringList PluginManager::outputMeshFormatListDialog() const
 {
-	return outputMeshFormatsDialogStringList;
+	return outputFormatListDialog(ioMeshPluginIterator());
 }
 
-const QStringList& PluginManager::inputRasterFormatListDialog() const
+QStringList PluginManager::inputRasterFormatListDialog() const
 {
-	return inputRasterFormatsDialogStringList;
+	return inputFormatListDialog(ioRasterPluginIterator());
 }
 
-PluginManager::NamePluginPairRangeIterator PluginManager::namePluginPairIterator() const
+PluginFileInterface* PluginManager::operator[](unsigned int i) const
 {
-	return NamePluginPairRangeIterator(this);
+	return allPlugins[i];
 }
 
-PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator() const
+PluginManager::PluginRangeIterator PluginManager::pluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return FilterPluginRangeIterator(this);
+	return PluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator() const
+PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IOMeshPluginIterator(this);
+	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator() const
+PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IORasterPluginIterator(this);
+	return IOMeshPluginIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator() const
+PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return RenderPluginRangeIterator(this);
+	return IORasterPluginIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator() const
+PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return DecoratePluginRangeIterator(this);
+	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator() const
+PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return EditPluginFactoryRangeIterator(this);
+	return DecoratePluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-bool PluginManager::loadPlugin(const QString& fileName)
+PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
 {
-	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
-	QFileInfo fin(absfilepath);
-	QPluginLoader loader(absfilepath);
-	QObject *plugin = loader.instance();
-	if (!plugin) {
-		qDebug() << loader.errorString();
-		return false;
-	}
-	
-	PluginInterface* ip = dynamic_cast<PluginInterface *>(plugin);
-	EditPluginInterfaceFactory* efp = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-	if (!ip && !efp){
-		qDebug() << fin.fileName() << " is not a MeshLab plugin.";
-		return false;
-	}
-	if (ip && ip->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
-		qDebug() << fin.fileName() << " has different floating point precision from the running MeshLab version.";
-		return false;
-	}
-	
-	if (efp && efp->getMLVersion().second != MeshLabScalarTest<Scalarm>::doublePrecision()) {
-		qDebug() << fin.fileName() << " has different floating point precision from the running MeshLab version.";
-		return false;
-	}
-	
-	//TODO: check in some way also the meshlab version of the plugin
-	
-	if (ip) { //Classic MeshLab plugin (non Edit...)
-		bool loadOk = false;
-		//FilterPlugin
-		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-		if (iFilter)
-			loadOk = loadFilterPlugin(iFilter, fileName);
-		//IOMesh
-		IOMeshPluginInterface *iIOMesh = qobject_cast<IOMeshPluginInterface *>(plugin);
-		if (iIOMesh)
-			loadOk = loadIOMeshPlugin(iIOMesh, fileName);
-		//IORaster
-		IORasterPluginInterface* iIORaster = qobject_cast<IORasterPluginInterface*>(plugin);
-		if (iIORaster)
-			loadOk = loadIORasterPlugin(iIORaster, fileName);
-		//Decorate
-		DecoratePluginInterface *iDecorator = qobject_cast<DecoratePluginInterface *>(plugin);
-		if (iDecorator)
-			loadOk = loadDecoratePlugin(iDecorator, fileName);
-		//Render
-		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-		if (iRender)
-			loadOk = loadRenderPlugin(iRender, fileName);
-		
-		if (loadOk){ //If the plugin has been loaded correctly
-			if (allPlugins.find(ip->pluginName()) != allPlugins.end()) {
-				qDebug() << "Warning: " << ip->pluginName() << " has been already loaded.\n";
-			}
-			allPlugins[ip->pluginName()] = ip;
-		}
-	}
-	if (efp) { //EditFactory Plugin
-		//EditFactory
-		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (iEditFactory)
-			loadEditPlugin(iEditFactory, fileName);
-		
-	}
-	return true;
+	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-bool PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName )
+void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 {
-	bool loadFilterOK = true;
 	for(QAction *filterAction : iFilter->actions()) {
 		if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
-			qDebug() << "Missing class for " +fileName + " " + filterAction->text();
-			loadFilterOK = false;
+			throw MLException("Missing class for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 		if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
-			qDebug() << "Missing requirements for " +fileName + " " + filterAction->text();
-			loadFilterOK = false;
+			throw MLException("Missing requirements for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 		if(iFilter->getPreConditions(filterAction) == int(MeshModel::MM_UNKNOWN)){
-			qDebug() << "Missing preconditions for "+fileName + " " + filterAction->text();
-			loadFilterOK = false;
+			throw MLException("Missing preconditions for "+ iFilter->pluginName() + " " + filterAction->text());
 		}
-		if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN )) {
-			qDebug() << "Missing postcondition for "+fileName + " " + filterAction->text();
-			loadFilterOK = false;
+		if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN)) {
+			throw MLException("Missing postcondition for "+ iFilter->pluginName() + " " + filterAction->text());
 		}
-		if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY ) {
-			qDebug() << "Missing Arity for " +fileName + " " + filterAction->text();
-			loadFilterOK = false;
+		if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY) {
+			throw MLException("Missing Arity for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 	}
-	if (loadFilterOK) {
-		for(QAction *filterAction : iFilter->actions()) {
-			filterAction->setData(QVariant(fileName));
-			actionFilterMap.insert(filterAction->text(), filterAction);
-		}
-		filterPlugins.push_back(iFilter);
-	}
-	return loadFilterOK;
 }
 
-bool PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString&)
+void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
+{
+	for(QAction *filterAction : iFilter->actions()) {
+		filterAction->setData(QVariant(iFilter->pluginName()));
+		actionFilterMap.insert(filterAction->text(), filterAction);
+	}
+	filterPlugins.push_back(iFilter);
+}
+
+void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {
 	ioMeshPlugins.push_back(iIOMesh);
-	return true;
+
+	//add input formats to inputFormatMap
+	for (const FileFormat& ff : iIOMesh->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			if (! inputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
+				inputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
+			}
+		}
+	}
+	
+	//add output formats to outputFormatMap
+	for (const FileFormat& ff : iIOMesh->exportFormats()){
+		for (QString currentExtension : ff.extensions) {
+			if (! outputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
+				outputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
+			}
+		}
+	}
 }
 
-bool PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString&)
+void PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster)
 {
 	ioRasterPlugins.push_back(iIORaster);
-	return true;
+	
+	//add input formats to inputFormatMap
+	for (const FileFormat& ff : iIORaster->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			if (! inputRasterFormatToPluginMap.contains(currentExtension.toLower())) {
+				inputRasterFormatToPluginMap.insert(currentExtension.toLower(), iIORaster);
+			}
+		}
+	}
 }
 
-bool PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString&)
+void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
 	decoratePlugins.push_back(iDecorate);
 	for(QAction *decoratorAction : iDecorate->actions()) {
 		iDecorate->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
 	}
-	return true;
 }
 
-bool PluginManager::loadRenderPlugin(RenderPluginInterface* iRender, const QString&)
+void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
 {
 	renderPlugins.push_back(iRender);
-	return true;
 }
 
-bool PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString&)
+void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
-	return true;
 }
 
-void PluginManager::fillKnownIOFormats()
+void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
 {
-	QString allKnownFormatsFilter = QObject::tr("All known formats (");
-	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		allKnownFormatsFilter += addPluginMeshFormats(inputMeshFormatToPluginMap, inputMeshFormatsDialogStringList, pMeshIOPlugin, pMeshIOPlugin->importFormats());
+	for(QAction *filterAction : iFilter->actions()) {
+		actionFilterMap.remove(filterAction->text());
 	}
-	allKnownFormatsFilter.append(')');
-	inputMeshFormatsDialogStringList.push_front(allKnownFormatsFilter);
-	
-	for (IOMeshPluginInterface* pMeshIOPlugin:  ioMeshPlugins) {
-		addPluginMeshFormats(outputMeshFormatToPluginMap, outputMeshFormatsDialogStringList, pMeshIOPlugin, pMeshIOPlugin->exportFormats());
-	}
-	
-	allKnownFormatsFilter = QObject::tr("All known formats (");
-	
-	for (IORasterPluginInterface* pRasterIOPlugin : ioRasterPlugins){
-		allKnownFormatsFilter += addPluginRasterFormats(inputRasterFormatToPluginMap, inputRasterFormatsDialogStringList, pRasterIOPlugin, pRasterIOPlugin->importFormats());
-	}
-	
-	allKnownFormatsFilter.append(')');
-	inputRasterFormatsDialogStringList.push_front(allKnownFormatsFilter);
+	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
 }
 
-QString PluginManager::addPluginRasterFormats(
-		QMap<QString, IORasterPluginInterface*>& map, 
-		QStringList& formatFilters, 
-		IORasterPluginInterface* pRasterIOPlugin,
-		const QList<FileFormat>& format)
+void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {
-	QString allKnownFormatsFilter;
-	for (const FileFormat& currentFormat : format) {
-		QString currentFilterEntry = currentFormat.description + " (";
-		
-		//a particular file format could be associated with more than one file extension
-		QStringListIterator itExtension(currentFormat.extensions);
-		for (QString currentExtension : currentFormat.extensions) {
-			currentExtension = currentExtension.toLower();
-			if (!map.contains(currentExtension)) {
-				map.insert(currentExtension, pRasterIOPlugin);
+	ioMeshPlugins.erase(std::find(ioMeshPlugins.begin(), ioMeshPlugins.end(), iIOMesh));
+	for (const FileFormat& ff : iIOMesh->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			inputMeshFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+	for (const FileFormat& ff : iIOMesh->exportFormats()){
+		for (QString currentExtension : ff.extensions) {
+			outputMeshFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+}
+
+void PluginManager::unloadIORasterPlugin(IORasterPluginInterface* iIORaster)
+{
+	ioRasterPlugins.erase(std::find(ioRasterPlugins.begin(), ioRasterPlugins.end(), iIORaster));
+	for (const FileFormat& ff : iIORaster->importFormats()){
+		for (QString currentExtension : ff.extensions) {
+			inputRasterFormatToPluginMap.remove(currentExtension.toLower());
+		}
+	}
+}
+
+void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
+{
+	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
+}
+
+void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
+{
+	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
+}
+
+void PluginManager::unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
+{
+	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
+}
+
+template<typename RangeIterator>
+QStringList PluginManager::inputFormatListDialog(RangeIterator iterator)
+{
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputRasterFormatsDialogStringList;
+	for (auto ioRaster : iterator){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : ioRaster->importFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
 				allKnownFormatsFilter.append(QObject::tr(" *."));
 				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
 			}
-			currentFilterEntry.append(QObject::tr(" *."));
-			currentFilterEntry.append(currentExtension);
+			currentFilterEntry.append(')');
+			inputRasterFormatsDialogStringList.append(currentFilterEntry);
 		}
-		currentFilterEntry.append(')');
-		formatFilters.append(currentFilterEntry);
+		allKnownFormats += allKnownFormatsFilter;
 	}
-	return allKnownFormatsFilter;
+	allKnownFormats.append(')');
+	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
+	return inputRasterFormatsDialogStringList;
 }
 
-QString PluginManager::addPluginMeshFormats(
-		QMap<QString, IOMeshPluginInterface*>& map, 
-		QStringList& formatFilters, 
-		IOMeshPluginInterface* pMeshIOPlugin,
-		const QList<FileFormat>& format)
+template<typename RangeIterator>
+QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 {
-	QString allKnownFormatsFilter;
-	for (const FileFormat& currentFormat : format) {
-		QString currentFilterEntry = currentFormat.description + " (";
-		
-		//a particular file format could be associated with more than one file extension
-		QStringListIterator itExtension(currentFormat.extensions);
-		for (QString currentExtension : currentFormat.extensions) {
-			currentExtension = currentExtension.toLower();
-			if (!map.contains(currentExtension)) {
-				map.insert(currentExtension, pMeshIOPlugin);
-				allKnownFormatsFilter.append(QObject::tr(" *."));
-				allKnownFormatsFilter.append(currentExtension);
+	QStringList inputRasterFormatsDialogStringList;
+	for (auto ioRaster : iterator){
+		for (const FileFormat& currentFormat : ioRaster->exportFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
 			}
-			currentFilterEntry.append(QObject::tr(" *."));
-			currentFilterEntry.append(currentExtension);
+			currentFilterEntry.append(')');
+			inputRasterFormatsDialogStringList.append(currentFilterEntry);
 		}
-		currentFilterEntry.append(')');
-		formatFilters.append(currentFilterEntry);
 	}
-	return allKnownFormatsFilter;
+	return inputRasterFormatsDialogStringList;
 }
-

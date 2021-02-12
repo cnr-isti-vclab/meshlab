@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2020                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,44 +21,41 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_INFO_DIALOG_H
-#define MESHLAB_PLUGIN_INFO_DIALOG_H
+#ifndef MESHLAB_PLUGIN_TYPE_H
+#define MESHLAB_PLUGIN_TYPE_H
 
-#include <QDialog>
-#include <QIcon>
+class QString;
 
-namespace Ui {
-class PluginInfoDialog;
-}
-
-class QTreeWidgetItem;
 class PluginFileInterface;
 
-class PluginInfoDialog : public QDialog
+class MeshLabPluginType
 {
-	Q_OBJECT
-	
 public:
-	explicit PluginInfoDialog(QWidget *parent = nullptr);
-	~PluginInfoDialog();
-	
-private slots:
-	void chechBoxStateChanged(int state);
-	void uninstallPluginPushButtonClicked();
+	MeshLabPluginType(const PluginFileInterface* fpi);
 
-	void on_loadPluginsPushButton_clicked();
-	
+	bool isValid() const;
+	bool isDecoratePlugin() const;
+	bool isEditPlugin() const;
+	bool isFilterPlugin() const;
+	bool isIOMeshPlugin() const;
+	bool isIORasterPlugin() const;
+	bool isRenderPlugin() const;
+
+	bool isMultipleTypePlugin() const;
+	QString pluginTypeString() const;
+
 private:
-	enum PluginDialogColumn{PLUGINS = 0, ENABLED, TYPE, VENDOR, FILE, UNINSTALL};
-	
-	void populateTreeWidget();
-	void addItems(const PluginFileInterface* fpi, int nPlug, const QString& pluginType, const QStringList &features);
+	enum MLPType {
+		UNKNOWN   = 1<<0, //1
+		DECORATE  = 1<<1, //2
+		EDIT      = 1<<2, //4
+		FILTER    = 1<<3, //8
+		IO_MESH   = 1<<4, //16
+		IO_RASTER = 1<<5, //32
+		RENDER    = 1<<6  //64
+	};
 
-	Ui::PluginInfoDialog *ui;
-	QIcon interfaceIcon;
-	QIcon featureIcon;
-	QIcon uninstallIcon;
-	QString pathDirectory;
+	int type;
 };
 
-#endif // MESHLAB_PLUGIN_INFO_DIALOG_H
+#endif // MESHLAB_PLUGIN_TYPE_H

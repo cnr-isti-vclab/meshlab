@@ -52,14 +52,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ### Build Settings
-if (BUILD_WITH_DOUBLE_SCALAR)
-	message(STATUS "Building with double precision")
-	add_definitions(-DMESHLAB_SCALAR=double)
-else()
-	message(STATUS "Building with single precision")
-	add_definitions(-DMESHLAB_SCALAR=float)
-endif()
-
 if(WIN32)
 	add_definitions(-DNOMINMAX)
 	if(MSVC)
@@ -185,7 +177,7 @@ else()
 		meshlabplugins/filter_dirt
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
-		meshlabplugins/filter_globalregistration
+		#meshlabplugins/filter_globalregistration
 		meshlabplugins/filter_img_patch_param
 		meshlabplugins/filter_isoparametrization
 		meshlabplugins/filter_layer

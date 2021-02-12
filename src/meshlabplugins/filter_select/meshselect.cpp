@@ -120,7 +120,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 
 QString SelectionFilterPlugin::pluginName() const
 {
-    return "FlterSelect";
+    return "FilterSelect";
 }
 
  QString SelectionFilterPlugin::filterName(FilterIDType filter) const

@@ -31,22 +31,21 @@ INCLUDEPATH *= \
 	DEFINES += GLEW_STATIC
 }
 
-# defining meshlab version
-exists(../../ML_VERSION){
-	MESHLAB_VERSION = $$cat(../../ML_VERSION)
-	message(MeshLab Version: $$MESHLAB_VERSION)
-	DEFINES += "MESHLAB_VERSION=$$MESHLAB_VERSION"
-}
+message(MeshLab Version: $$MESHLAB_VERSION)
 
 # Input
 HEADERS += 	\
 	globals.h \
+	plugins/interfaces/plugin/file/interface.h \
 	plugins/interfaces/decorate_plugin_interface.h \
 	plugins/interfaces/edit_plugin_interface.h \
 	plugins/interfaces/filter_plugin_interface.h \
 	plugins/interfaces/iomesh_plugin_interface.h \
 	plugins/interfaces/plugin_interface.h \
 	plugins/interfaces/render_plugin_interface.h \
+	plugins/meshlab_plugin_type.h \
+	plugins/plugin_manager_iterators.h \
+	plugins/plugin_manager.h \
 	ml_document/helpers/mesh_document_state_data.h \
 	ml_document/helpers/mesh_model_state_data.h \
 	ml_document/base_types.h \
@@ -64,7 +63,6 @@ HEADERS += 	\
 	filterscript.h \
 	GLLogStream.h \
 	mainwindow_interface.h \
-	plugins/plugin_manager.h \
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
@@ -77,6 +75,8 @@ SOURCES += \
 	plugins/interfaces/decorate_plugin_interface.cpp \
 	plugins/interfaces/filter_plugin_interface.cpp \
 	plugins/interfaces/plugin_interface.cpp \
+	plugins/meshlab_plugin_type.cpp \
+	plugins/plugin_manager.cpp \
 	ml_document/helpers/mesh_document_state_data.cpp \
 	ml_document/cmesh.cpp \
 	ml_document/mesh_model.cpp \
@@ -90,7 +90,6 @@ SOURCES += \
 	GLExtensionsManager.cpp \
 	filterscript.cpp \
 	GLLogStream.cpp \
-	plugins/plugin_manager.cpp \
 	mlapplication.cpp \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \

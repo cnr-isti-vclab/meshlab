@@ -58,7 +58,7 @@ QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 
 QString DecorateBackgroundPlugin::pluginName() const
 {
-    return "DecorateBackGround";
+	return "DecorateBackGround";
 }
 
 void DecorateBackgroundPlugin::initGlobalParameterList(const QAction* action, RichParameterList &parset)

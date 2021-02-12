@@ -43,9 +43,27 @@ class PluginManager
 public:
 	PluginManager();
 	~PluginManager();
+
+	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
+	class PluginRangeIterator;
+	class FilterPluginRangeIterator;
+	class IOMeshPluginIterator;
+	class IORasterPluginIterator;
+	class RenderPluginRangeIterator;
+	class DecoratePluginRangeIterator;
+	class EditPluginFactoryRangeIterator;
+
+	/** Member functions **/
+	static void checkPlugin(const QString& filename);
 	
 	void loadPlugins();
-	void loadPlugins(const QDir& pluginsDirectory);
+	void loadPlugins(QDir pluginsDirectory);
+	void loadPlugin(const QString& filename);
+	void unloadPlugin(PluginFileInterface* ifp);
+	
+	void enablePlugin(PluginFileInterface* ifp);
+	void disablePlugin(PluginFileInterface* ifp);
+	
 	QString pluginsCode() const;
 
 	unsigned int size() const;
@@ -64,149 +82,70 @@ public:
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
 	QStringList inputRasterFormatList() const;
-	const QStringList& inputMeshFormatListDialog() const;
-	const QStringList& outputMeshFormatListDialog() const;
-	const QStringList& inputRasterFormatListDialog() const;
+	QStringList inputMeshFormatListDialog() const;
+	QStringList outputMeshFormatListDialog() const;
+	QStringList inputRasterFormatListDialog() const;
+	
+	PluginFileInterface* operator [](unsigned int i) const;
 
-	class NamePluginPairRangeIterator
-	{
-		friend class PluginManager;
-	public:
-		std::map<QString, PluginInterface*>::const_iterator begin() {return pm->allPlugins.begin();}
-		std::map<QString, PluginInterface*>::const_iterator end() {return pm->allPlugins.end();}
-	private:
-		NamePluginPairRangeIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class FilterPluginRangeIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<FilterPluginInterface*>::const_iterator begin() {return pm->filterPlugins.begin();}
-		QVector<FilterPluginInterface*>::const_iterator end() {return pm->filterPlugins.end();}
-	private:
-		FilterPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class IOMeshPluginIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
-		QVector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
-	private:
-		IOMeshPluginIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class IORasterPluginIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
-		QVector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
-	private:
-		IORasterPluginIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class RenderPluginRangeIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
-		QVector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
-	private:
-		RenderPluginRangeIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class DecoratePluginRangeIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<DecoratePluginInterface*>::const_iterator begin() {return pm->decoratePlugins.begin();}
-		QVector<DecoratePluginInterface*>::const_iterator end() {return pm->decoratePlugins.end();}
-	private:
-		DecoratePluginRangeIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	class EditPluginFactoryRangeIterator
-	{
-		friend class PluginManager;
-	public:
-		QVector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-		QVector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
-	private:
-		EditPluginFactoryRangeIterator(const PluginManager* pm) : pm(pm) {}
-		const PluginManager* pm;
-	};
-
-	NamePluginPairRangeIterator namePluginPairIterator() const;
-	FilterPluginRangeIterator filterPluginIterator() const;
-	IOMeshPluginIterator ioMeshPluginIterator() const;
-	IORasterPluginIterator ioRasterPluginIterator() const;
-	RenderPluginRangeIterator renderPluginIterator() const;
-	DecoratePluginRangeIterator decoratePluginIterator() const;
-	EditPluginFactoryRangeIterator editPluginFactoryIterator() const;
+	/** Member functions for range iterators **/
+	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IOMeshPluginIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IORasterPluginIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	QDir pluginsDir;
-
 	//all plugins (except Edit plugins)
-	std::map<QString, PluginInterface*> allPlugins;
+	std::vector<PluginFileInterface*> allPlugins;
 
 	//IOMeshPlugins
-	QVector<IOMeshPluginInterface*> ioMeshPlugins;
+	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
 	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
 	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
-	QStringList inputMeshFormatsDialogStringList; //todo: remove this
-	QStringList outputMeshFormatsDialogStringList; //todo: remove this
 
 	//IORasterPlugins
-	QVector<IORasterPluginInterface*> ioRasterPlugins;
+	std::vector<IORasterPluginInterface*> ioRasterPlugins;
 	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
-	QStringList inputRasterFormatsDialogStringList;
 
 	//Filter Plugins
-	QVector<FilterPluginInterface*> filterPlugins;
+	std::vector<FilterPluginInterface*> filterPlugins;
 	QMap<QString, QAction*> actionFilterMap;
 
 	//Render Plugins
-	QVector<RenderPluginInterface*> renderPlugins;
+	std::vector<RenderPluginInterface*> renderPlugins;
 
 	//Decorate Plugins
-	QVector<DecoratePluginInterface*> decoratePlugins;
+	std::vector<DecoratePluginInterface*> decoratePlugins;
 
 	//Edit Plugins
-	QVector<EditPluginInterfaceFactory*> editPlugins;
-
-	//Private member functions
-	bool loadPlugin(const QString& filename);
+	std::vector<EditPluginInterfaceFactory*> editPlugins;
 	
-	bool loadFilterPlugin(FilterPluginInterface* iFilter, const QString& fileName);
-	bool loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh, const QString& fileName);
-	bool loadIORasterPlugin(IORasterPluginInterface* iIORaster, const QString& fileName);
-	bool loadDecoratePlugin(DecoratePluginInterface* iDecorate, const QString& fileName);
-	bool loadRenderPlugin(RenderPluginInterface* iRender, const QString& fileName);
-	bool loadEditPlugin(EditPluginInterfaceFactory* iEditFactory, const QString& fileName);
+	static void checkFilterPlugin(FilterPluginInterface* iFilter);
 	
-	void fillKnownIOFormats();
-
-	static QString addPluginRasterFormats(
-			QMap<QString, IORasterPluginInterface*>& map, 
-			QStringList& formatFilters, 
-			IORasterPluginInterface* pRasterIOPlugin,
-			const QList<FileFormat>& format);
-
-	static QString addPluginMeshFormats(
-			QMap<QString, IOMeshPluginInterface*>& map, 
-			QStringList& formatFilters, 
-			IOMeshPluginInterface* pMeshIOPlugin,
-			const QList<FileFormat>& format);
+	void loadFilterPlugin(FilterPluginInterface* iFilter);
+	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void loadIORasterPlugin(IORasterPluginInterface* iIORaster);
+	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void loadRenderPlugin(RenderPluginInterface* iRender);
+	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
+	
+	void unloadFilterPlugin(FilterPluginInterface* iFilter);
+	void unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void unloadIORasterPlugin(IORasterPluginInterface* iIORaster);
+	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void unloadRenderPlugin(RenderPluginInterface* iRender);
+	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
+	
+	template <typename RangeIterator>
+	static QStringList inputFormatListDialog(RangeIterator iterator);
+	
+	template <typename RangeIterator>
+	static QStringList outputFormatListDialog(RangeIterator iterator);
 };
+
+#include "plugin_manager_iterators.h"
 
 #endif // MESHLAB_PLUGIN_MANAGER_H

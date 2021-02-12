@@ -14,3 +14,6 @@ endif()
 
 # Eigen3 - required
 include(${EXTERNAL_DIR}/eigen.cmake)
+
+# GLEW - required
+include(${EXTERNAL_DIR}/glew.cmake)

@@ -3,12 +3,23 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 	if (BUILD_WITH_DOUBLE_SCALAR)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
-	add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
+	#add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
 	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
+endif()
+
+if (BUILD_WITH_DOUBLE_SCALAR)
+	message(STATUS "Building with double precision")
+	set(MESHLAB_SCALAR "double")
+	#add_definitions(-DMESHLAB_SCALAR=double)
+else()
+	message(STATUS "Building with single precision")
+	set(MESHLAB_SCALAR "float")
+	#add_definitions(-DMESHLAB_SCALAR=float)
 endif()
 
 set(HEADERS
 	globals.h
+	plugins/interfaces/plugin_file_interface.h
 	plugins/interfaces/decorate_plugin_interface.h
 	plugins/interfaces/edit_plugin_interface.h
 	plugins/interfaces/filter_plugin_interface.h
@@ -16,6 +27,8 @@ set(HEADERS
 	plugins/interfaces/ioraster_plugin_interface.h
 	plugins/interfaces/plugin_interface.h
 	plugins/interfaces/render_plugin_interface.h
+	plugins/meshlab_plugin_type.h
+	plugins/plugin_manager_iterators.h
 	plugins/plugin_manager.h
 	ml_document/helpers/mesh_document_state_data.h
 	ml_document/helpers/mesh_model_state_data.h
@@ -48,6 +61,7 @@ set(SOURCES
 	plugins/interfaces/decorate_plugin_interface.cpp
 	plugins/interfaces/filter_plugin_interface.cpp
 	plugins/interfaces/plugin_interface.cpp
+	plugins/meshlab_plugin_type.cpp
 	plugins/plugin_manager.cpp
 	ml_document/helpers/mesh_document_state_data.cpp
 	ml_document/cmesh.cpp
@@ -76,6 +90,11 @@ if(WIN32)
 	set(TARGET_TYPE STATIC)
 endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+
+target_compile_definitions(meshlab-common 
+	PUBLIC 
+		MESHLAB_VERSION=${MESHLAB_VERSION}
+		MESHLAB_SCALAR=${MESHLAB_SCALAR})
 
 target_include_directories(meshlab-common
 	PRIVATE
