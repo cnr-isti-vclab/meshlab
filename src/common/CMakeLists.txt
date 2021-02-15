@@ -111,6 +111,7 @@ target_link_libraries(
 		Qt5::OpenGL
 		Qt5::Widgets
 		Qt5::Xml
+		Qt5::Network
 		external-glew
 )
 
