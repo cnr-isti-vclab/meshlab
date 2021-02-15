@@ -1,6 +1,6 @@
 include (../../shared.pri)
 
-Qt += network
+QT += network
 
 HEADERS += \
     filter_sketchfab.h \
