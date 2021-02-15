@@ -1,7 +1,5 @@
 include (../../shared.pri)
 
-QT += qml
-
 HEADERS += \
     filter_sketchfab.h \
     miniz.h

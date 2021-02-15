@@ -25,7 +25,7 @@
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QJSEngine>
+//#include <QJSEngine>
 #include <QSettings>
 #include <QApplication>
 #include <QDir>
@@ -111,7 +111,7 @@ void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&,
 	}
 	switch(ID(action)) {
 	case FP_SKETCHFAB :
-		parlst.addParam(RichString("sketchFabKeyCode", sketchFabAPIValue, "Sketch Fab Code", "Mandatory."));
+		parlst.addParam(RichString("sketchFabKeyCode", sketchFabAPIValue, "SketchFab Account API token", "The API token of the account on which to upload the model.<br>You can find it by going on Settings -> Password and API -> API token."));
 		parlst.addParam(RichString("title", "MeshLabModel", "Title", "Mandatory."));
 		parlst.addParam(RichString("description", "A model generated with meshlab", "Description", "Mandatory. A short description of the model that is uploaded."));
 		parlst.addParam(RichString("tags", "meshlab", "Tags", "Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry."));
@@ -255,11 +255,17 @@ bool FilterSketchFabPlugin::upload(
 
 	// get the api answer
 	QByteArray result = reply->readAll();
-	QJSValue sc;
-	QJSEngine engine;
-	qDebug() << "Result:" << result;
-	sc = engine.evaluate("(" + QString(result) + ")");
-	QString uid = sc.property("uid").toString();
+	QStringList sp = QString(result).split("\"");
+	std::cerr << "result:\n";
+	for (int i = 0; i < sp.size(); ++i)
+		std::cerr << std::to_string(i) + ": " << sp[i].toStdString() << "\n";
+	
+	
+	//QJSValue sc;
+	//QJSEngine engine;
+	//qDebug() << "Result:" << result;
+	//sc = engine.evaluate("(" + QString(result) + ")");
+	QString uid = sp[3];
 	if(uid.isEmpty())
 		return false;
 	qDebug() << "Model uploaded with id" << uid;

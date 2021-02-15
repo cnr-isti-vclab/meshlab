@@ -26,9 +26,6 @@ find_package(
 	COMPONENTS OpenGL Xml Network
 	REQUIRED)
 find_package(OpenMP)
-if (NOT BUILD_MINI)
-	find_package(Qt5Qml)
-endif()
 
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
