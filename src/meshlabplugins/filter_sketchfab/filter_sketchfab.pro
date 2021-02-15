@@ -1,5 +1,7 @@
 include (../../shared.pri)
 
+Qt += network
+
 HEADERS += \
     filter_sketchfab.h \
     miniz.h
