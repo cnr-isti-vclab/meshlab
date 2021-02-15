@@ -98,8 +98,9 @@ public:
 	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	//all plugins (except Edit plugins)
+	//all plugins
 	std::vector<PluginFileInterface*> allPlugins;
+	std::set<QString> pluginFiles; //used to check if a plugin file has been already loaded
 
 	//IOMeshPlugins
 	std::vector<IOMeshPluginInterface*> ioMeshPlugins;

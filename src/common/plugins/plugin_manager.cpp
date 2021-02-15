@@ -182,10 +182,13 @@ void PluginManager::loadPlugins(QDir pluginsDirectory)
  */
 void PluginManager::loadPlugin(const QString& fileName)
 {
+	QFileInfo fin(fileName);
+	if (pluginFiles.find(fin.absoluteFilePath()) != pluginFiles.end())
+		throw MLException(fin.fileName() + " has been already loaded.");
+
 	checkPlugin(fileName);
 
 	//load the plugin depending on the type (can be more than one type!)
-	QFileInfo fin(fileName);
 	QPluginLoader loader(fin.absoluteFilePath());
 	QObject *plugin = loader.instance();
 	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
@@ -214,6 +217,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	//of all plugins
 	ifp->plugFileInfo = fin;
 	allPlugins.push_back(ifp);
+	pluginFiles.insert(fin.absoluteFilePath());
 }
 
 void PluginManager::unloadPlugin(PluginFileInterface* ifp)
