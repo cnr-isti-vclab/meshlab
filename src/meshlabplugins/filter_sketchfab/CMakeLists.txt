@@ -11,8 +11,6 @@ target_include_directories(filter_sketchfab
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(filter_sketchfab PUBLIC meshlab-common)
 
-target_link_libraries(filter_sketchfab PUBLIC Qt5::Network)
-
 set_property(TARGET filter_sketchfab PROPERTY FOLDER Plugins)
 
 set_property(TARGET filter_sketchfab 
