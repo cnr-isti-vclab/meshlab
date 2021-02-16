@@ -187,6 +187,8 @@ private slots:
 
 	void applyRenderMode();
 	void applyDecorateMode();
+	
+	void addShaders();
 
 	void switchOffDecorator(QAction* );
 	///////////Slot Menu View ////////////////////////

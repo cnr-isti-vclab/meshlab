@@ -1467,6 +1467,22 @@ void MainWindow::applyDecorateMode()
 	GLA()->update();
 }
 
+void MainWindow::addShaders()
+{
+	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Shaders", "", "*GDP Shader File (*.gdp)");
+	for (const QString& fileName : fileList){
+		QFileInfo finfo(fileName);
+
+		/** ToDo check vert and frag files **/
+		/** ToDo check if shader already exists **/
+
+		QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" +finfo.fileName();
+
+		
+		QFile::copy(fileName, newGdpFileName);
+	}
+}
+
 
 /*
 Save project. It saves the info of all the layers and the layer themselves. So

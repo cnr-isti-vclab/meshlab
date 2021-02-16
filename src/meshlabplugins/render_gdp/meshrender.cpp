@@ -25,6 +25,8 @@
 #include <stdlib.h>
 
 #include <common/GLExtensionsManager.h>
+#include <common/globals.h>
+#include <common/mlapplication.h>
 #include "meshrender.h"
 #include <QGLWidget>
 #include <QTextStream>
@@ -40,54 +42,20 @@ QString MeshShaderRenderPlugin::pluginName() const
 	return "RenderGDP";
 }
 
-void MeshShaderRenderPlugin::initActionList() {
+void MeshShaderRenderPlugin::initActionList() 
+{
+	QDir shadersDir = QDir(meshlab::defaultShadersPath());
 
-	/*QAction * qaNone = new QAction("None", this);
-	qaNone->setCheckable(false);
-	actionList << qaNone;*/
-
-	QDir shadersDir = QDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-	QString d = shadersDir.dirName();
-	QString dLower = d.toLower();
-	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
-		dLower == "minsizerel") {
-		// This is a configuration directory for MS Visual Studio.
-		shadersDir.cdUp();
-	}
-	d = shadersDir.dirName();
-	if (shadersDir.dirName() == "plugins")
-
-		shadersDir.cdUp();
-#elif defined(Q_OS_MAC)
-	//	if (shadersDir.dirName() == "MacOS") {
-	for (int i = 0; i < 6; ++i) {
-		if (shadersDir.exists("shaders")) break;
-		shadersDir.cdUp();
-	}
-	//	}
-#endif
-	bool ret = shadersDir.cd("shaders");
-
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
-	if (! ret) {
-		shadersDir = QDir(qApp->applicationDirPath());
-		if (shadersDir.dirName() == "bin") {
-			ret = shadersDir.cdUp() && shadersDir.cd("share")&& shadersDir.cd("meshlab") && shadersDir.cd("shaders");
-		}
-	}
-#endif
-	if (!ret)
-	{
-		QMessageBox::information(0, "MeshLab",
-			"Unable to find the shaders directory.\n"
-			"No shaders will be loaded.");
-	}
 	qDebug("Shader directory found '%s', and it contains %i gdp files", qUtf8Printable(shadersDir.path()), shadersDir.entryList(QStringList("*.gdp")).size());
+	loadShaders(shadersDir);
+	
+	loadShaders(MeshLabApplication::extraShadersLocation());
+}
 
-
+void MeshShaderRenderPlugin::loadShaders(const QDir& shadersDir)
+{
 	QDomDocument doc;
-	foreach(QString fileName, shadersDir.entryList(QDir::Files)) {
+	for(const QString& fileName : shadersDir.entryList(QDir::Files)) {
 		if (fileName.endsWith(".gdp")) {
 			QFile file(shadersDir.absoluteFilePath(fileName));
 			if (file.open(QIODevice::ReadOnly)) {
@@ -95,156 +63,7 @@ void MeshShaderRenderPlugin::initActionList() {
 					file.close();
 
 					QDomElement root = doc.documentElement();
-					if (root.nodeName() == tr("GLSLang")) {
-
-						ShaderInfo si;
-
-						QDomElement elem;
-
-						//Vertex program filename
-						elem = root.firstChildElement("VPCount");
-						if (!elem.isNull()) {
-							//first child of VPCount is "Filenames"
-							QDomNode child = elem.firstChild();
-							if (!child.isNull()) {
-								//first child of "Filenames" is "Filename0"
-								child = child.firstChild();
-								si.vpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("VertexProgram", ""));
-							}
-						}
-
-						//Fragment program filename
-						elem = root.firstChildElement("FPCount");
-						if (!elem.isNull()) {
-							//first child of FPCount is "Filenames"
-							QDomNode child = elem.firstChild();
-							if (!child.isNull()) {
-								//first child of "Filenames" is "Filename0"
-								child = child.firstChild();
-								si.fpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("FragmentProgram", ""));
-							}
-						}
-
-						//Uniform Variables
-						elem = root.firstChildElement("UniformVariables");
-						if (!elem.isNull()) {
-
-							QDomNode unif = elem.firstChild();
-							while (!unif.isNull()) {
-
-								UniformVariable uv;
-
-								QDomElement unifElem = unif.toElement();
-								QString unifVarName = unifElem.attribute("Name", "");
-
-								uv.type = (unifElem.attribute("Type", "")).toInt();
-								uv.widget = (unifElem.attribute("Widget", "")).toInt();
-								uv.min = (unifElem.attribute("Min", "")).toFloat();
-								uv.max = (unifElem.attribute("Max", "")).toFloat();
-								uv.step = (unifElem.attribute("Step", "")).toFloat();
-
-								QDomNode unifElemValue = unifElem.firstChild();
-
-								if (!unifElemValue.isNull()) {
-
-									switch (uv.type)
-									{
-									case SINGLE_INT:
-									{
-										uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
-									} break;
-									case SINGLE_FLOAT:
-									{
-										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-									} break;
-									case ARRAY_2_FLOAT:
-									{
-										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
-									} break;
-									case ARRAY_3_FLOAT:
-									{
-										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
-										uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-									} break;
-									case ARRAY_4_FLOAT:
-									{
-										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
-										uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-										uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();
-									} break;
-									default:
-									{
-
-									} break;
-									}
-
-									si.uniformVars[unifVarName] = uv;
-								}
-
-								unif = unif.nextSibling();
-							}
-						}
-
-
-						//OpenGL Status
-						elem = root.firstChildElement("FragmentProcessor");
-						if (!elem.isNull()) {
-							if (elem.hasAttribute("Shade"))					si.glStatus[SHADE] = elem.attribute("Shade", "0");
-							if (elem.hasAttribute("AlphaTest"))			si.glStatus[ALPHA_TEST] = elem.attribute("AlphaTest", "False");
-							if (elem.hasAttribute("AlphaFunc"))			si.glStatus[ALPHA_FUNC] = elem.attribute("AlphaFunc", "0");
-							if (elem.hasAttribute("AlphaClamp"))		si.glStatus[ALPHA_CLAMP] = elem.attribute("AlphaClamp", "0");
-							if (elem.hasAttribute("Blending"))			si.glStatus[BLENDING] = elem.attribute("Blending", "False");
-							if (elem.hasAttribute("BlendFuncSRC"))	si.glStatus[BLEND_FUNC_SRC] = elem.attribute("BlendFuncSRC", "0");
-							if (elem.hasAttribute("BlendFuncDST"))	si.glStatus[BLEND_FUNC_DST] = elem.attribute("BlendFuncDST", "0");
-							if (elem.hasAttribute("BlendEquation")) si.glStatus[BLEND_EQUATION] = elem.attribute("BlendEquation", "0");
-							if (elem.hasAttribute("DepthTest"))			si.glStatus[DEPTH_TEST] = elem.attribute("DepthTest", "False");
-							if (elem.hasAttribute("DepthFunc"))			si.glStatus[DEPTH_FUNC] = elem.attribute("DepthFunc", "0");
-							if (elem.hasAttribute("ClampNear"))			si.glStatus[CLAMP_NEAR] = elem.attribute("ClampNear", "0");
-							if (elem.hasAttribute("ClampFar"))			si.glStatus[CLAMP_FAR] = elem.attribute("ClampFar", "0");
-							if (elem.hasAttribute("ClearColorR"))		si.glStatus[CLEAR_COLOR_R] = elem.attribute("ClearColorR", "0");
-							if (elem.hasAttribute("ClearColorG"))		si.glStatus[CLEAR_COLOR_G] = elem.attribute("ClearColorG", "0");
-							if (elem.hasAttribute("ClearColorB"))		si.glStatus[CLEAR_COLOR_B] = elem.attribute("ClearColorB", "0");
-							if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
-						}
-
-
-						//Textures
-
-						QDir textureDir(shadersDir);
-						textureDir.cdUp();
-						textureDir.cd("textures");
-						elem = root.firstChildElement("TexturedUsed");
-						if (!elem.isNull()) {
-							QDomNode unif = elem.firstChild();
-							while (!unif.isNull()) {
-								QDomElement unifElem = unif.toElement();
-								TextureInfo tInfo;
-
-								tInfo.path = shadersDir.absoluteFilePath((unifElem.attribute("Filename", "")));
-								tInfo.MinFilter = (unifElem.attribute("MinFilter", 0)).toInt();
-								tInfo.MagFilter = (unifElem.attribute("MagFilter", 0)).toInt();
-								tInfo.Target = (unifElem.attribute("Target", 0)).toInt();
-								tInfo.WrapS = (unifElem.attribute("WrapS", 0)).toInt();
-								tInfo.WrapT = (unifElem.attribute("WrapT", 0)).toInt();
-								tInfo.WrapR = (unifElem.attribute("WrapR", 0)).toInt();
-
-								si.textureInfo.push_back(tInfo);
-								unif = unif.nextSibling();
-							}
-						}
-
-						//End Textures
-
-						shaders[fileName] = si;
-
-						QAction * qa = new QAction(fileName, this);
-						qa->setCheckable(false);
-						actionList << qa;
-					}
-					else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qUtf8Printable(fileName));
+					loadGDPDoc(root, shadersDir, fileName);
 				}
 				else {
 					qDebug("Failed doc.setContent(%s)", qUtf8Printable(fileName));
@@ -254,6 +73,160 @@ void MeshShaderRenderPlugin::initActionList() {
 			else  qDebug("Failed file.open(%s)", qUtf8Printable(shadersDir.absoluteFilePath(fileName)));
 		}
 	}
+}
+
+void MeshShaderRenderPlugin::loadGDPDoc(const QDomElement& root, const QDir& shadersDir, const QString& fileName)
+{
+	if (root.nodeName() == tr("GLSLang")) {
+
+		ShaderInfo si;
+
+		QDomElement elem;
+
+		//Vertex program filename
+		elem = root.firstChildElement("VPCount");
+		if (!elem.isNull()) {
+			//first child of VPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				si.vpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("VertexProgram", ""));
+			}
+		}
+
+		//Fragment program filename
+		elem = root.firstChildElement("FPCount");
+		if (!elem.isNull()) {
+			//first child of FPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				si.fpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("FragmentProgram", ""));
+			}
+		}
+
+		//Uniform Variables
+		elem = root.firstChildElement("UniformVariables");
+		if (!elem.isNull()) {
+
+			QDomNode unif = elem.firstChild();
+			while (!unif.isNull()) {
+
+				UniformVariable uv;
+
+				QDomElement unifElem = unif.toElement();
+				QString unifVarName = unifElem.attribute("Name", "");
+
+				uv.type = (unifElem.attribute("Type", "")).toInt();
+				uv.widget = (unifElem.attribute("Widget", "")).toInt();
+				uv.min = (unifElem.attribute("Min", "")).toFloat();
+				uv.max = (unifElem.attribute("Max", "")).toFloat();
+				uv.step = (unifElem.attribute("Step", "")).toFloat();
+
+				QDomNode unifElemValue = unifElem.firstChild();
+
+				if (!unifElemValue.isNull()) {
+
+					switch (uv.type)
+					{
+					case SINGLE_INT:
+					{
+						uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
+					} break;
+					case SINGLE_FLOAT:
+					{
+						uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+					} break;
+					case ARRAY_2_FLOAT:
+					{
+						uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+						uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+					} break;
+					case ARRAY_3_FLOAT:
+					{
+						uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+						uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+						uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+					} break;
+					case ARRAY_4_FLOAT:
+					{
+						uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+						uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+						uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+						uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();
+					} break;
+					default:
+					{
+
+					} break;
+					}
+
+					si.uniformVars[unifVarName] = uv;
+				}
+
+				unif = unif.nextSibling();
+			}
+		}
+
+
+		//OpenGL Status
+		elem = root.firstChildElement("FragmentProcessor");
+		if (!elem.isNull()) {
+			if (elem.hasAttribute("Shade"))					si.glStatus[SHADE] = elem.attribute("Shade", "0");
+			if (elem.hasAttribute("AlphaTest"))			si.glStatus[ALPHA_TEST] = elem.attribute("AlphaTest", "False");
+			if (elem.hasAttribute("AlphaFunc"))			si.glStatus[ALPHA_FUNC] = elem.attribute("AlphaFunc", "0");
+			if (elem.hasAttribute("AlphaClamp"))		si.glStatus[ALPHA_CLAMP] = elem.attribute("AlphaClamp", "0");
+			if (elem.hasAttribute("Blending"))			si.glStatus[BLENDING] = elem.attribute("Blending", "False");
+			if (elem.hasAttribute("BlendFuncSRC"))	si.glStatus[BLEND_FUNC_SRC] = elem.attribute("BlendFuncSRC", "0");
+			if (elem.hasAttribute("BlendFuncDST"))	si.glStatus[BLEND_FUNC_DST] = elem.attribute("BlendFuncDST", "0");
+			if (elem.hasAttribute("BlendEquation")) si.glStatus[BLEND_EQUATION] = elem.attribute("BlendEquation", "0");
+			if (elem.hasAttribute("DepthTest"))			si.glStatus[DEPTH_TEST] = elem.attribute("DepthTest", "False");
+			if (elem.hasAttribute("DepthFunc"))			si.glStatus[DEPTH_FUNC] = elem.attribute("DepthFunc", "0");
+			if (elem.hasAttribute("ClampNear"))			si.glStatus[CLAMP_NEAR] = elem.attribute("ClampNear", "0");
+			if (elem.hasAttribute("ClampFar"))			si.glStatus[CLAMP_FAR] = elem.attribute("ClampFar", "0");
+			if (elem.hasAttribute("ClearColorR"))		si.glStatus[CLEAR_COLOR_R] = elem.attribute("ClearColorR", "0");
+			if (elem.hasAttribute("ClearColorG"))		si.glStatus[CLEAR_COLOR_G] = elem.attribute("ClearColorG", "0");
+			if (elem.hasAttribute("ClearColorB"))		si.glStatus[CLEAR_COLOR_B] = elem.attribute("ClearColorB", "0");
+			if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
+		}
+
+
+		//Textures
+
+		QDir textureDir(shadersDir);
+		textureDir.cdUp();
+		textureDir.cd("textures");
+		elem = root.firstChildElement("TexturedUsed");
+		if (!elem.isNull()) {
+			QDomNode unif = elem.firstChild();
+			while (!unif.isNull()) {
+				QDomElement unifElem = unif.toElement();
+				TextureInfo tInfo;
+
+				tInfo.path = shadersDir.absoluteFilePath((unifElem.attribute("Filename", "")));
+				tInfo.MinFilter = (unifElem.attribute("MinFilter", 0)).toInt();
+				tInfo.MagFilter = (unifElem.attribute("MagFilter", 0)).toInt();
+				tInfo.Target = (unifElem.attribute("Target", 0)).toInt();
+				tInfo.WrapS = (unifElem.attribute("WrapS", 0)).toInt();
+				tInfo.WrapT = (unifElem.attribute("WrapT", 0)).toInt();
+				tInfo.WrapR = (unifElem.attribute("WrapR", 0)).toInt();
+
+				si.textureInfo.push_back(tInfo);
+				unif = unif.nextSibling();
+			}
+		}
+
+		//End Textures
+
+		shaders[fileName] = si;
+
+		QAction * qa = new QAction(fileName, this);
+		qa->setCheckable(false);
+		actionList << qa;
+	}
+	else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qUtf8Printable(fileName));
 }
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)

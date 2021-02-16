@@ -65,6 +65,8 @@ public:
 	}
 
 	void initActionList();
+	void loadShaders(const QDir& shadersDir);
+	void loadGDPDoc(const QDomElement& root, const QDir& shadersDir, const QString& fileName);
 
 	bool isSupported() { return supported; }
 

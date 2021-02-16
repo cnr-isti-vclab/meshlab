@@ -74,6 +74,17 @@ const QString MeshLabApplication::extraPluginsLocation()
 	return appDir.absolutePath();
 }
 
+const QString MeshLabApplication::extraShadersLocation()
+{
+	QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+	appDir.mkpath(appDir.absolutePath());
+	
+	appDir.mkdir("MeshLabExtraShaders");
+	appDir.cd("MeshLabExtraShaders");
+	
+	return appDir.absolutePath();
+}
+
 std::string MeshLabApplication::versionString(int a, int b, int c)
 {
 	std::ostringstream ss;
