@@ -28,6 +28,7 @@
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/create/ball_pivoting.h>
 #include <vcg/complex/algorithms/update/texture.h>
+#include <QCoreApplication>
 
 using namespace std;
 using namespace vcg;
@@ -59,7 +60,10 @@ CleanFilter::CleanFilter()
 
 	for(FilterIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
-	getFilterAction(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
+	
+	QCoreApplication* app = QCoreApplication::instance();
+	if (app != nullptr)
+		getFilterAction(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
 }
 
 CleanFilter::~CleanFilter() {
