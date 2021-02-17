@@ -473,7 +473,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
                 shared->getRenderInfoPerMeshView(context(),dt);
 
-                iRenderer->Render(currentShader, *this->md(),dt,this);
+                iRenderer->render(currentShader, *this->md(),dt,this);
 
                 MLDefaultMeshDecorators defdec(mw());
 
@@ -1146,7 +1146,7 @@ bool GLArea::readyToClose()
 		md()->meshDocStateData().clear();
 	}
     if (iRenderer)
-        iRenderer->Finalize(currentShader, this->md(), this);
+        iRenderer->finalize(currentShader, this->md(), this);
 
     // Now manage the closing of the decorator set;
     foreach(QAction* act, iPerDocDecoratorlist)

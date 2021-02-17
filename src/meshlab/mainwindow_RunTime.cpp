@@ -1409,7 +1409,7 @@ void MainWindow::applyRenderMode()
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 	if ((GLA()!= NULL) && (GLA()->getRenderer() != NULL))
 	{
-		GLA()->getRenderer()->Finalize(GLA()->getCurrentShaderAction(),meshDoc(),GLA());
+		GLA()->getRenderer()->finalize(GLA()->getCurrentShaderAction(),meshDoc(),GLA());
 		GLA()->setRenderer(NULL,NULL);
 	}
 	// Make the call to the plugin core
@@ -1425,7 +1425,7 @@ void MainWindow::applyRenderMode()
 	{
 		MLSceneGLSharedDataContext::PerMeshRenderingDataMap rdmap;
 		shared->getRenderInfoPerMeshView(GLA()->context(), rdmap);
-		iRenderTemp->Init(action,*(meshDoc()),rdmap, GLA());
+		iRenderTemp->init(action,*(meshDoc()),rdmap, GLA());
 		initsupport = iRenderTemp->isSupported();
 		if (initsupport)
 			GLA()->setRenderer(iRenderTemp,action);
@@ -1436,7 +1436,7 @@ void MainWindow::applyRenderMode()
 				QString msg = "The selected shader is not supported by your graphic hardware!";
 				GLA()->Log(GLLogStream::SYSTEM,qUtf8Printable(msg));
 			}
-			iRenderTemp->Finalize(action,meshDoc(),GLA());
+			iRenderTemp->finalize(action,meshDoc(),GLA());
 		}
 	}
 	
@@ -1467,20 +1467,72 @@ void MainWindow::applyDecorateMode()
 	GLA()->update();
 }
 
+std::pair<QString, QString> MainWindow::extractVertFragFileNames(const QDomElement& root)
+{
+	std::pair<QString, QString> fileNames;
+	if (root.nodeName() == tr("GLSLang")) {
+		QDomElement elem;
+
+		//Vertex program filename
+		elem = root.firstChildElement("VPCount");
+		if (!elem.isNull()) {
+			//first child of VPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				fileNames.first = (child.toElement()).attribute("VertexProgram", "");
+			}
+		}
+
+		//Fragment program filename
+		elem = root.firstChildElement("FPCount");
+		if (!elem.isNull()) {
+			//first child of FPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				fileNames.second = (child.toElement()).attribute("FragmentProgram", "");
+			}
+		}
+	}
+	return fileNames;
+}
+
 void MainWindow::addShaders()
 {
 	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Shaders", "", "*GDP Shader File (*.gdp)");
 	for (const QString& fileName : fileList){
 		QFileInfo finfo(fileName);
+		QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" + finfo.fileName();
+		//check if shader already exists
+		if (!QFile::exists(newGdpFileName)){
+			//check vert and frag files
+			QFile file(fileName);
+			if (file.open(QIODevice::ReadOnly)){
+				QDomDocument doc;
+				doc.setContent(&file);
+				QDomElement root = doc.documentElement();
+				std::pair<QString, QString> shaderFiles = extractVertFragFileNames(root);
+				QString vFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.first);
+				QFileInfo vfinfo(vFilePath);
+				QString fFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.second);
+				QFileInfo ffinfo(fFilePath);
+				QString newVertFileName = MeshLabApplication::extraShadersLocation() + "/" + vfinfo.fileName();
+				QString newFragFileName = MeshLabApplication::extraShadersLocation() + "/" + ffinfo.fileName();
 
-		/** ToDo check vert and frag files **/
-		/** ToDo check if shader already exists **/
-
-		QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" +finfo.fileName();
-
-		
-		QFile::copy(fileName, newGdpFileName);
+				QFile::copy(fileName, newGdpFileName);
+				QFile::copy(vFilePath, newVertFileName);
+				QFile::copy(fFilePath, newFragFileName);
+			}
+		}
 	}
+
+	for (RenderPluginInterface* renderPlugin : PM.renderPluginIterator()){
+		 renderPlugin->refreshActions();
+	}
+	fillRenderMenu();
 }
 
 
@@ -1541,7 +1593,7 @@ void MainWindow::saveProject()
 		fi.setFile(fileName);
 	}
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
-	
+
 	/*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
 	meshDoc()->setDocLabel(fileName);
 	QMdiSubWindow* sub = mdiarea->currentSubWindow();

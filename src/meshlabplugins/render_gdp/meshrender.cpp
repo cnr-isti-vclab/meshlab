@@ -37,9 +37,30 @@
 using namespace std;
 using namespace vcg;
 
+MeshShaderRenderPlugin::MeshShaderRenderPlugin()
+{
+	supported = false;
+	sDialog = nullptr;
+	initActionList();
+}
+
 QString MeshShaderRenderPlugin::pluginName() const
 {
 	return "RenderGDP";
+}
+
+QList<QAction*> MeshShaderRenderPlugin::actions()
+{
+	return actionList;
+}
+
+void MeshShaderRenderPlugin::refreshActions()
+{
+	actionList.clear();
+	shaders.clear();
+	supported = false;
+	sDialog = nullptr;
+	initActionList();
 }
 
 void MeshShaderRenderPlugin::initActionList() 
@@ -75,8 +96,9 @@ void MeshShaderRenderPlugin::loadShaders(const QDir& shadersDir)
 	}
 }
 
-void MeshShaderRenderPlugin::loadGDPDoc(const QDomElement& root, const QDir& shadersDir, const QString& fileName)
+QAction* MeshShaderRenderPlugin::loadGDPDoc(const QDomElement& root, const QDir& shadersDir, const QString& fileName)
 {
+	QAction* qa = nullptr;
 	if (root.nodeName() == tr("GLSLang")) {
 
 		ShaderInfo si;
@@ -222,19 +244,20 @@ void MeshShaderRenderPlugin::loadGDPDoc(const QDomElement& root, const QDir& sha
 
 		shaders[fileName] = si;
 
-		QAction * qa = new QAction(fileName, this);
+		qa = new QAction(fileName, this);
 		qa->setCheckable(false);
 		actionList << qa;
 	}
 	else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qUtf8Printable(fileName));
+	return qa;
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
+void MeshShaderRenderPlugin::init(QAction *a, MeshDocument &/*md*/, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	if (sDialog) {
 		sDialog->close();
 		delete sDialog;
-		sDialog = 0;
+		sDialog = nullptr;
 	}
 
 	gla->makeCurrent();
@@ -384,7 +407,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSha
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
+void MeshShaderRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	//  MeshModel &mm
 	if (shaders.find(a->text()) != shaders.end()) {
@@ -472,10 +495,10 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLShare
 	glUseProgramObjectARB(0);
 }
 
-void MeshShaderRenderPlugin::Finalize(QAction*, MeshDocument*, GLArea*)
+void MeshShaderRenderPlugin::finalize(QAction*, MeshDocument*, GLArea*)
 {
 	delete sDialog;
-	sDialog = 0;
+	sDialog = nullptr;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(MeshShaderRenderPlugin)
