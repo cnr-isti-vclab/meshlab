@@ -1500,39 +1500,71 @@ std::pair<QString, QString> MainWindow::extractVertFragFileNames(const QDomEleme
 	return fileNames;
 }
 
+/**
+ * @brief this function opens a dialog that allows to open gdp files.
+ * All the selected files will be copied (along their vert/frag files)
+ * inside the extraShadersLocation stored in the local system default app
+ * location.
+ * This location will be automatically checked by the renderGDP plugin.
+ */
 void MainWindow::addShaders()
 {
 	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Shaders", "", "*GDP Shader File (*.gdp)");
+	QString errors;
 	for (const QString& fileName : fileList){
-		QFileInfo finfo(fileName);
-		QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" + finfo.fileName();
-		//check if shader already exists
-		if (!QFile::exists(newGdpFileName)){
+		try {
+			QFileInfo finfo(fileName);
+			QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" + finfo.fileName();
+			//check if shader already exists
+			if (QFile::exists(newGdpFileName)){
+				throw MLException(finfo.fileName() + " already exists in " + MeshLabApplication::extraShadersLocation());
+			}
+
 			//check vert and frag files
 			QFile file(fileName);
-			if (file.open(QIODevice::ReadOnly)){
-				QDomDocument doc;
-				doc.setContent(&file);
-				QDomElement root = doc.documentElement();
-				std::pair<QString, QString> shaderFiles = extractVertFragFileNames(root);
-				QString vFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.first);
-				QFileInfo vfinfo(vFilePath);
-				QString fFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.second);
-				QFileInfo ffinfo(fFilePath);
-				QString newVertFileName = MeshLabApplication::extraShadersLocation() + "/" + vfinfo.fileName();
-				QString newFragFileName = MeshLabApplication::extraShadersLocation() + "/" + ffinfo.fileName();
-
-				QFile::copy(fileName, newGdpFileName);
-				QFile::copy(vFilePath, newVertFileName);
-				QFile::copy(fFilePath, newFragFileName);
+			bool openOk = file.open(QIODevice::ReadOnly);
+			if (!openOk){
+				throw MLException(finfo.fileName() + ": impossible to open file.");
 			}
+			QDomDocument doc;
+			doc.setContent(&file);
+			file.close();
+			QDomElement root = doc.documentElement();
+			std::pair<QString, QString> shaderFiles = extractVertFragFileNames(root);
+			if (shaderFiles.first.isEmpty() || shaderFiles.second.isEmpty()){
+				throw MLException(finfo.fileName() + ": malformed file: missing VertexProgram and/or FragmentProgram.");
+			}
+			QString vFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.first);
+			QFileInfo vfinfo(vFilePath);
+			if (!vfinfo.exists()){
+				throw MLException(finfo.fileName() + ": cannot find VertexProgram " + vfinfo.fileName());
+			}
+			QString fFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.second);
+			QFileInfo ffinfo(fFilePath);
+			if (!ffinfo.exists()){
+				throw MLException(finfo.fileName() + ": cannot find FragmentProgram " + ffinfo.fileName());
+			}
+			QString newVertFileName = MeshLabApplication::extraShadersLocation() + "/" + vfinfo.fileName();
+			QString newFragFileName = MeshLabApplication::extraShadersLocation() + "/" + ffinfo.fileName();
+
+			//copy gdp, vert and frag to the extraShadersLocation
+			QFile::copy(fileName, newGdpFileName);
+			QFile::copy(vFilePath, newVertFileName);
+			QFile::copy(fFilePath, newFragFileName);
+		}
+		catch (const MLException& e){
+			errors += QString(e.what()) + "\n";
 		}
 	}
+	if (!errors.isEmpty()){
+		QMessageBox::warning(this, "Error while loading GDP", "Error while loading the following GDP files: \n" + errors);
+	}
 
+	//refresh actions of render plugins -> needed to update the shaders menu
 	for (RenderPluginInterface* renderPlugin : PM.renderPluginIterator()){
 		 renderPlugin->refreshActions();
 	}
-	fillRenderMenu();
+	fillRenderMenu(); //clean and refill menu
 }
 
 
