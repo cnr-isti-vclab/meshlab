@@ -1409,7 +1409,7 @@ void MainWindow::applyRenderMode()
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 	if ((GLA()!= NULL) && (GLA()->getRenderer() != NULL))
 	{
-		GLA()->getRenderer()->Finalize(GLA()->getCurrentShaderAction(),meshDoc(),GLA());
+		GLA()->getRenderer()->finalize(GLA()->getCurrentShaderAction(),meshDoc(),GLA());
 		GLA()->setRenderer(NULL,NULL);
 	}
 	// Make the call to the plugin core
@@ -1425,7 +1425,7 @@ void MainWindow::applyRenderMode()
 	{
 		MLSceneGLSharedDataContext::PerMeshRenderingDataMap rdmap;
 		shared->getRenderInfoPerMeshView(GLA()->context(), rdmap);
-		iRenderTemp->Init(action,*(meshDoc()),rdmap, GLA());
+		iRenderTemp->init(action,*(meshDoc()),rdmap, GLA());
 		initsupport = iRenderTemp->isSupported();
 		if (initsupport)
 			GLA()->setRenderer(iRenderTemp,action);
@@ -1436,7 +1436,7 @@ void MainWindow::applyRenderMode()
 				QString msg = "The selected shader is not supported by your graphic hardware!";
 				GLA()->Log(GLLogStream::SYSTEM,qUtf8Printable(msg));
 			}
-			iRenderTemp->Finalize(action,meshDoc(),GLA());
+			iRenderTemp->finalize(action,meshDoc(),GLA());
 		}
 	}
 	
@@ -1465,6 +1465,106 @@ void MainWindow::applyDecorateMode()
 	layerDialog->updateLog(meshDoc()->Log);
 	layerDialog->update();
 	GLA()->update();
+}
+
+std::pair<QString, QString> MainWindow::extractVertFragFileNames(const QDomElement& root)
+{
+	std::pair<QString, QString> fileNames;
+	if (root.nodeName() == tr("GLSLang")) {
+		QDomElement elem;
+
+		//Vertex program filename
+		elem = root.firstChildElement("VPCount");
+		if (!elem.isNull()) {
+			//first child of VPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				fileNames.first = (child.toElement()).attribute("VertexProgram", "");
+			}
+		}
+
+		//Fragment program filename
+		elem = root.firstChildElement("FPCount");
+		if (!elem.isNull()) {
+			//first child of FPCount is "Filenames"
+			QDomNode child = elem.firstChild();
+			if (!child.isNull()) {
+				//first child of "Filenames" is "Filename0"
+				child = child.firstChild();
+				fileNames.second = (child.toElement()).attribute("FragmentProgram", "");
+			}
+		}
+	}
+	return fileNames;
+}
+
+/**
+ * @brief this function opens a dialog that allows to open gdp files.
+ * All the selected files will be copied (along their vert/frag files)
+ * inside the extraShadersLocation stored in the local system default app
+ * location.
+ * This location will be automatically checked by the renderGDP plugin.
+ */
+void MainWindow::addShaders()
+{
+	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Shaders", "", "*GDP Shader File (*.gdp)");
+	QString errors;
+	for (const QString& fileName : fileList){
+		try {
+			QFileInfo finfo(fileName);
+			QString newGdpFileName = MeshLabApplication::extraShadersLocation() + "/" + finfo.fileName();
+			//check if shader already exists
+			if (QFile::exists(newGdpFileName)){
+				throw MLException(finfo.fileName() + " already exists in " + MeshLabApplication::extraShadersLocation());
+			}
+
+			//check vert and frag files
+			QFile file(fileName);
+			bool openOk = file.open(QIODevice::ReadOnly);
+			if (!openOk){
+				throw MLException(finfo.fileName() + ": impossible to open file.");
+			}
+			QDomDocument doc;
+			doc.setContent(&file);
+			file.close();
+			QDomElement root = doc.documentElement();
+			std::pair<QString, QString> shaderFiles = extractVertFragFileNames(root);
+			if (shaderFiles.first.isEmpty() || shaderFiles.second.isEmpty()){
+				throw MLException(finfo.fileName() + ": malformed file: missing VertexProgram and/or FragmentProgram.");
+			}
+			QString vFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.first);
+			QFileInfo vfinfo(vFilePath);
+			if (!vfinfo.exists()){
+				throw MLException(finfo.fileName() + ": cannot find VertexProgram " + vfinfo.fileName());
+			}
+			QString fFilePath = QDir(finfo.absolutePath()).filePath(shaderFiles.second);
+			QFileInfo ffinfo(fFilePath);
+			if (!ffinfo.exists()){
+				throw MLException(finfo.fileName() + ": cannot find FragmentProgram " + ffinfo.fileName());
+			}
+			QString newVertFileName = MeshLabApplication::extraShadersLocation() + "/" + vfinfo.fileName();
+			QString newFragFileName = MeshLabApplication::extraShadersLocation() + "/" + ffinfo.fileName();
+
+			//copy gdp, vert and frag to the extraShadersLocation
+			QFile::copy(fileName, newGdpFileName);
+			QFile::copy(vFilePath, newVertFileName);
+			QFile::copy(fFilePath, newFragFileName);
+		}
+		catch (const MLException& e){
+			errors += QString(e.what()) + "\n";
+		}
+	}
+	if (!errors.isEmpty()){
+		QMessageBox::warning(this, "Error while loading GDP", "Error while loading the following GDP files: \n" + errors);
+	}
+
+	//refresh actions of render plugins -> needed to update the shaders menu
+	for (RenderPluginInterface* renderPlugin : PM.renderPluginIterator()){
+		 renderPlugin->refreshActions();
+	}
+	fillRenderMenu(); //clean and refill menu
 }
 
 
@@ -1525,7 +1625,7 @@ void MainWindow::saveProject()
 		fi.setFile(fileName);
 	}
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
-	
+
 	/*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
 	meshDoc()->setDocLabel(fileName);
 	QMdiSubWindow* sub = mdiarea->currentSubWindow();

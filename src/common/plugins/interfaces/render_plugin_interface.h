@@ -55,11 +55,21 @@ public:
 	RenderPluginInterface() :PluginInterface() {}
 	virtual ~RenderPluginInterface() {}
 
-	virtual void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *) {}
-	virtual void Render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) = 0;
-	virtual void Finalize(QAction *, MeshDocument *, GLArea *) {}
 	virtual bool isSupported() = 0;
 	virtual QList<QAction *> actions() = 0;
+
+	virtual void init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *) {}
+	virtual void render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) = 0;
+	virtual void finalize(QAction *, MeshDocument *, GLArea *) {}
+
+	/** 
+	 * this function is called whenever MeshLab should update GUI's menus filled
+	 * with the actions of your plugin. 
+	 * Reimplement this if your actions depend on something that may change during
+	 * a MeshLab session (e.g. new shader files have been loaded and need to be
+	 * added to the MeshLab interface)
+	 */
+	virtual void refreshActions() {}
 };
 
 #define RENDER_PLUGIN_INTERFACE_IID  "vcg.meshlab.RenderPluginInterface/1.0"

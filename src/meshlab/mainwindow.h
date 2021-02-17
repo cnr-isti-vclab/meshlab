@@ -188,6 +188,9 @@ private slots:
 	void applyRenderMode();
 	void applyDecorateMode();
 
+	static std::pair<QString, QString> extractVertFragFileNames(const QDomElement& root);
+	void addShaders();
+
 	void switchOffDecorator(QAction* );
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();

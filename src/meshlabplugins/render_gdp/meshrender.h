@@ -36,7 +36,23 @@ class MeshShaderRenderPlugin : public QObject, public RenderPluginInterface
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_INTERFACE_IID)
 	Q_INTERFACES(RenderPluginInterface)
+public:
 
+	MeshShaderRenderPlugin();
+	virtual ~MeshShaderRenderPlugin() {}
+
+	QString pluginName() const;
+
+	QList<QAction *> actions();
+
+	bool isSupported() { return supported; }
+	void refreshActions();
+
+	void init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& , GLArea *);
+	void render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&, GLArea *);
+	void finalize(QAction*, MeshDocument*, GLArea*);
+	
+private:
 	GLhandleARB v;
 	GLhandleARB f;
 
@@ -46,32 +62,10 @@ class MeshShaderRenderPlugin : public QObject, public RenderPluginInterface
 	QList <QAction *> actionList;
 
 	ShaderDialog *sDialog;
-
-public:
-
-	MeshShaderRenderPlugin()
-	{
-
-		supported = false;
-		sDialog = 0;
-	}
-
-	QString pluginName() const;
-
-	QList<QAction *> actions() 
-	{
-		if (actionList.isEmpty()) initActionList();
-		return actionList;
-	}
-
+	
 	void initActionList();
-
-	bool isSupported() { return supported; }
-
-	void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& , GLArea *);
-	void Render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&, GLArea *);
-	void Finalize(QAction*, MeshDocument*, GLArea*);
-
+	void loadShaders(const QDir& shadersDir);
+	QAction* loadGDPDoc(const QDomElement& root, const QDir& shadersDir, const QString& fileName);
 };
 
 #endif

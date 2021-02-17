@@ -846,6 +846,7 @@ void MainWindow::fillDecorateMenu()
 
 void MainWindow::fillRenderMenu()
 {
+	shadersMenu->clear();
 	QAction * qaNone = new QAction("None", this);
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
@@ -853,6 +854,11 @@ void MainWindow::fillRenderMenu()
 	for(RenderPluginInterface *iRender:  PM.renderPluginIterator()) {
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
+	shadersMenu->addSeparator();
+	QAction * addShaderAction = new QAction("Add Shaders", this);
+	addShaderAction->setCheckable(false);
+	shadersMenu->addAction(addShaderAction);
+	connect(addShaderAction, SIGNAL(triggered()), this, SLOT(addShaders()));
 }
 
 void MainWindow::fillEditMenu()
