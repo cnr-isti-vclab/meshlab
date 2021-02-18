@@ -46,6 +46,7 @@ set(HEADERS
 	parameters/rich_parameter_list.h
 	parameters/value.h
 	utilities/file_format.h
+	utilities/python_binding_utils.h
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
@@ -78,6 +79,7 @@ set(SOURCES
 	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp
 	parameters/value.cpp
+	utilities/python_binding_utils.cpp
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp

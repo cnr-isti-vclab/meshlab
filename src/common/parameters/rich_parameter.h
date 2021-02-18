@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -62,6 +62,10 @@ public:
 	void setValue(const Value& ov);
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
+
+	//python names of paraeter
+	QString pythonName() const;
+	QString pythonType() const;
 
 	virtual RichParameter* clone() const = 0;
 	RichParameter& operator=(const RichParameter& rp);
