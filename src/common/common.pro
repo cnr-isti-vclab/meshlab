@@ -55,6 +55,9 @@ HEADERS += 	\
 	ml_document/mesh_document.h \
 	ml_document/raster_model.h \
 	ml_document/render_raster.h \
+	ml_shared_data_context/ml_plugin_gl_context.h \
+	ml_shared_data_context/ml_scene_gl_shared_data_context.h \
+	ml_shared_data_context/ml_shared_data_context.h \
 	parameters/rich_parameter_list.h \
 	parameters/value.h \
 	parameters/rich_parameter.h \
@@ -66,7 +69,6 @@ HEADERS += 	\
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
-	ml_shared_data_context.h \
 	ml_selection_buffers.h \
 	meshlabdocumentxml.h
 
@@ -84,6 +86,9 @@ SOURCES += \
 	ml_document/mesh_document.cpp \
 	ml_document/raster_model.cpp \
 	ml_document/render_raster.cpp \
+	ml_shared_data_context/ml_plugin_gl_context.cpp \
+	ml_shared_data_context/ml_scene_gl_shared_data_context.cpp \
+	ml_shared_data_context/ml_shared_data_context.cpp \
 	parameters/rich_parameter.cpp \
 	parameters/rich_parameter_list.cpp \
 	parameters/value.cpp \
@@ -94,7 +99,6 @@ SOURCES += \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \
 	meshlabdocumentbundler.cpp \
-	ml_shared_data_context.cpp \
 	ml_selection_buffers.cpp \
 	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif/exif.cpp
 
