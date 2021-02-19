@@ -32,7 +32,7 @@
 #include <QSplitterHandle>
 
 #include <common/ml_document/mesh_document.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 
 // Class list
 class GLArea;

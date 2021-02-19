@@ -28,7 +28,7 @@
 
 #include <QObject>
 #include <common/plugins/interfaces/decorate_plugin_interface.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include <common/ml_document/raster_model.h>
 #include <wrap/glw/glw.h>
 

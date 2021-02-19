@@ -1,10 +1,10 @@
 #include "ml_shared_data_context.h"
-#include "GLExtensionsManager.h"
-#include "mlexception.h"
+#include "../GLExtensionsManager.h"
+#include "../mlexception.h"
 #include <vector>
 #include <QThread>
 
-#include "ml_document/mesh_document.h"
+#include "../ml_document/mesh_document.h"
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
     :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)

@@ -39,7 +39,7 @@
 #include <common/plugins/interfaces/render_plugin_interface.h>
 #include <common/plugins/interfaces/decorate_plugin_interface.h>
 #include <common/plugins/interfaces/edit_plugin_interface.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"

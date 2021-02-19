@@ -27,11 +27,12 @@
 #include <GL/glew.h>
 #include <QTimer>
 
-#include "ml_document/cmesh.h"
+#include "../ml_document/cmesh.h"
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
 
 
 #include <QGLWidget>
+#include <QOffscreenSurface>
 #include <QMap>
 
 class MeshModel;
@@ -412,6 +413,9 @@ private:
 	PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid) const;
 	QGLContext* makeCurrentGLContext();
 	void doneCurrentGLContext(QGLContext* oldone = NULL);
+
+	QGLWidget* m_widget;
+	QOffscreenSurface* m_offScreenSurface;
 
 	MeshDocument& _md;
 	typedef QMap<int, PerMeshMultiViewManager*> MeshIDManMap;

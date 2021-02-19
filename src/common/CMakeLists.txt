@@ -39,6 +39,7 @@ set(HEADERS
 	ml_document/mesh_model_state.h
 	ml_document/raster_model.h
 	ml_document/render_raster.h
+	ml_shared_data_context/ml_shared_data_context.h
 	parameters/rich_parameter.h
 	parameters/rich_parameter_list.h
 	parameters/value.h
@@ -50,7 +51,6 @@ set(HEADERS
 	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
 	ml_selection_buffers.h
-	ml_shared_data_context.h
 	ml_thread_safe_memory_info.h
 	mlapplication.h
 	mlexception.h
@@ -70,6 +70,7 @@ set(SOURCES
 	ml_document/mesh_model_state.cpp
 	ml_document/raster_model.cpp
 	ml_document/render_raster.cpp
+	ml_shared_data_context/ml_shared_data_context.cpp
 	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp
 	parameters/value.cpp
@@ -79,7 +80,6 @@ set(SOURCES
 	meshlabdocumentbundler.cpp
 	meshlabdocumentxml.cpp
 	ml_selection_buffers.cpp
-	ml_shared_data_context.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
 	searcher.cpp

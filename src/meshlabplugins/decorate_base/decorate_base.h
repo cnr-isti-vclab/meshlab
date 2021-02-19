@@ -25,7 +25,7 @@
 #define EXTRADECORATEPLUGIN_H
 
 #include <common/plugins/interfaces/decorate_plugin_interface.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 
 #include <wrap/gui/coordinateframe.h>
 #include "colorhistogram.h"

@@ -25,7 +25,7 @@
 #define MESHLAB_RENDER_PLUGIN_INTERFACE_H
 
 #include "plugin_interface.h"
-#include "../../ml_shared_data_context.h"
+#include "../../ml_shared_data_context/ml_shared_data_context.h"
 
 /**
 RenderPluginInterface
