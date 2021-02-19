@@ -125,7 +125,7 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 			loadOk = true;
 		}
 		catch(const MLException& e){
-			QMessageBox::warning(this, "Error while loading plugin", fileName + ":\n" + e.what());
+			QMessageBox::warning(this, "Error while loading plugin", e.what());
 		}
 	}
 	if (loadOk){
@@ -218,6 +218,8 @@ void PluginInfoDialog::addItems(const PluginFileInterface* fpi, int nPlug, const
 	cb->setChecked(fpi->isEnabled());
 	connect(cb, SIGNAL(stateChanged(int)),
 			this, SLOT(chechBoxStateChanged(int)));
+	if (fpi->pluginFileInfo().absolutePath() == meshlab::defaultPluginPath())
+		cb->setEnabled(false);
 	ui->treeWidget->setItemWidget(pluginItem, ENABLED, cb);
 	
 	QPushButton* pb = new QPushButton(this);

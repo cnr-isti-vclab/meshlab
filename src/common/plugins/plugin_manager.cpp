@@ -80,7 +80,7 @@ void PluginManager::checkPlugin(const QString& filename)
 	QPluginLoader loader(fin.absoluteFilePath());
 	QObject *plugin = loader.instance();
 	if (!plugin) {
-		throw MLException(loader.errorString());
+		throw MLException(fin.fileName() + " does not seem to be a Qt Plugin.\n\n" + loader.errorString());
 	}
 
 	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
@@ -93,23 +93,28 @@ void PluginManager::checkPlugin(const QString& filename)
 		throw MLException(fin.fileName() + " has different floating point precision from the running MeshLab version.");
 	}
 
-	//check version of the plugin
-	// - needs to be the same major version and 
-	//   <= minor version wrt MeshLab version
-
-	// example: 2021.01 plugin can run on 2021.03 MeshLab
+	std::string mlVersionPlug = ifp->getMLVersion().first;
+	/** Rules for the future: **/
+	//  check version of the plugin
+	//   - needs to be the same major version and
+	//     <= minor version wrt MeshLab version
+	//   example: 2021.01 plugin can run on 2021.03 MeshLab
 	//          2021.03 plugin cannot run on 2021.01 MeshLab
 	//          2021.12 plugin cannot run on 2022.01 MeshLab
-	std::string mlVersionPlug = ifp->getMLVersion().first;
-	std::string majorVersionPlug = mlVersionPlug.substr(0, 4); //4 is the position of '.' in meshlab version
-	std::string majorVersionML = meshlab::meshlabVersion().substr(0, 4);
-	if (majorVersionML != majorVersionPlug){
-		throw MLException(fin.fileName() + " has different major version from the running MeshLab version.");
-	}
-	std::string minorVersionPlug = mlVersionPlug.substr(5, mlVersionPlug.size());
-	std::string minorVersionML = meshlab::meshlabVersion().substr(5, meshlab::meshlabVersion().size());
-	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
-		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
+//	std::string majorVersionPlug = mlVersionPlug.substr(0, 4); //4 is the position of '.' in meshlab version
+//	std::string majorVersionML = meshlab::meshlabVersion().substr(0, 4);
+//	if (majorVersionML != majorVersionPlug){
+//		throw MLException(fin.fileName() + " has different major version from the running MeshLab version.");
+//	}
+//	std::string minorVersionPlug = mlVersionPlug.substr(5, mlVersionPlug.size());
+//	std::string minorVersionML = meshlab::meshlabVersion().substr(5, meshlab::meshlabVersion().size());
+//	if (std::stoi(minorVersionPlug) > std::stoi(minorVersionML)){
+//		throw MLException(fin.fileName() + " has greater version from the running MeshLab version. Please update MeshLab to use it.");
+//	}
+
+	/** Rules for now: plugin needs to have same version of meshlab **/
+	if (mlVersionPlug != meshlab::meshlabVersion()){
+		throw MLException(fin.fileName() + " has different version from the running MeshLab version.");
 	}
 	
 	MeshLabPluginType type(ifp);

@@ -67,10 +67,14 @@ const QString MeshLabApplication::extraPluginsLocation()
 	appDir.mkdir("MeshLabExtraPlugins");
 	appDir.cd("MeshLabExtraPlugins");
 	
-	QString major = appVer().left(4);
-	appDir.mkdir(major);
-	appDir.cd(major);
-	
+	//QString major = appVer().left(4);
+	//appDir.mkdir(major);
+	//appDir.cd(major);
+
+	//just for first versions, compatibility of plugins is fixed for same version of meshlab
+	appDir.mkdir(appVer());
+	appDir.cd(appVer());
+
 	return appDir.absolutePath();
 }
 
