@@ -35,7 +35,7 @@ New small samples
 #include <QList>
 
 #include <common/plugins/interfaces/decorate_plugin_interface.h>
-#include <common/ml_shared_data_context/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 #include "cubemap.h"
 
 class DecorateBackgroundPlugin : public QObject, public DecoratePluginInterface

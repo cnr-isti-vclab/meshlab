@@ -31,7 +31,7 @@
 #include <vcg/space/point2.h>
 #include <wrap/gui/trackball.h>
 
-#include <common/ml_shared_data_context/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 
 class MeshTree;
 class MeshNode;
