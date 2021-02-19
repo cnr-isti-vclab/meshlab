@@ -58,7 +58,7 @@
 #include <QAction>
 #include "../GLLogStream.h"
 #include "../filterscript.h"
-#include "../ml_shared_data_context/ml_shared_data_context.h"
+#include "../ml_shared_data_context/ml_plugin_gl_context.h"
 
 /*
 MeshModel Class

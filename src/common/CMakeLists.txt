@@ -39,6 +39,7 @@ set(HEADERS
 	ml_document/mesh_model_state.h
 	ml_document/raster_model.h
 	ml_document/render_raster.h
+	ml_shared_data_context/ml_plugin_gl_context.h
 	ml_shared_data_context/ml_shared_data_context.h
 	parameters/rich_parameter.h
 	parameters/rich_parameter_list.h
@@ -70,6 +71,7 @@ set(SOURCES
 	ml_document/mesh_model_state.cpp
 	ml_document/raster_model.cpp
 	ml_document/render_raster.cpp
+	ml_shared_data_context/ml_plugin_gl_context.cpp
 	ml_shared_data_context/ml_shared_data_context.cpp
 	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp

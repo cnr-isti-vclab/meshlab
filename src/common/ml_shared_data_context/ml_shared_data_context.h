@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -442,24 +442,6 @@ signals:
 	void setPerMeshViewRenderingDataRequestMT(int, QGLContext*, const MLRenderingData&);
 	void meshAttributesUpdatedRequestMT(int, bool, const MLRenderingData::RendAtts&);
 	/***************************************/
-};
-
-class MLPluginGLContext : public QGLContext
-{
-public:
-	MLPluginGLContext(const QGLFormat& frmt, QPaintDevice* dvc, MLSceneGLSharedDataContext& shared);
-	~MLPluginGLContext();
-
-	void initPerViewRenderingData(int meshid, MLRenderingData& dt);
-	void removePerViewRenderindData();
-	void setRenderingData(int meshid, MLRenderingData& dt);
-	void drawMeshModel(int meshid) const;
-	void meshAttributesUpdated(int meshid, bool conntectivitychanged, const MLRenderingData::RendAtts& dt);
-
-	static void smoothModalitySuggestedRenderingData(MLRenderingData& dt);
-	static void pointModalitySuggestedRenderingData(MLRenderingData& dt);
-private:
-	MLSceneGLSharedDataContext& _shared;
 };
 
 #endif
