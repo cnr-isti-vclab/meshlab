@@ -331,7 +331,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
             else 
 				generateOcclusionSW(m);
         }
-        checkGLError::debugInfo("Debug");
+        checkGLError::debugInfo("Debug AO: ");
     }
 
     if (useGPU)

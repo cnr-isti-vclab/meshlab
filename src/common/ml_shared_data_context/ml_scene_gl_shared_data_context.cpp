@@ -50,6 +50,14 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 
 	_timer->start(1000);
 	updateGPUMemInfo();
+	
+	//if in the document there are already some meshes, we insert them here....
+	MeshModel* mm = md.nextMesh();
+	do {
+		if (mm != nullptr)
+			meshInserted(mm->id());
+		mm = md.nextMesh(mm);
+	} while (mm != nullptr);
 }
 
 MLSceneGLSharedDataContext::~MLSceneGLSharedDataContext()
