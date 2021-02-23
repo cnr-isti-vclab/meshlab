@@ -111,17 +111,14 @@ private:
 	QGLContext* makeCurrentGLContext();
 	void doneCurrentGLContext(QGLContext* oldone = NULL);
 
-	QGLWidget* m_widget;
-	QOffscreenSurface* m_offScreenSurface;
-
 	MeshDocument& _md;
-	typedef QMap<int, PerMeshMultiViewManager*> MeshIDManMap;
+	typedef std::map<int, PerMeshMultiViewManager*> MeshIDManMap;
 	MeshIDManMap _meshboman;
 	vcg::QtThreadSafeMemoryInfo& _gpumeminfo;
 	size_t _perbatchtriangles;
 	size_t _minfacessmoothrendering;
 	bool _highprecision;
-	QTimer* _timer;
+	QTimer _timer;
 
 signals:
 

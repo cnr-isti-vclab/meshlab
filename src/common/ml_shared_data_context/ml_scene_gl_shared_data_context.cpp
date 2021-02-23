@@ -27,13 +27,12 @@
 
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
-	:QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)
+	:QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision),_timer(this)
 {
 	//if (md.size() != 0)
 	//    throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
 
-	_timer = new QTimer(this);
-	connect(_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
+	connect(&_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
 
 	/*connection intended for the plugins living in another thread*/
 	connect(this,SIGNAL(initPerMeshViewRequestMT(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
@@ -48,20 +47,26 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 	//connect(this,SIGNAL(setPerMeshViewRenderingDataRequestST(int,QGLContext*,const MLRenderingData&)),this,SLOT(setPerMeshViewRenderingDataRequested(int,QGLContext*,const MLRenderingData&)),Qt::DirectConnection);
 	///****************************************************************/
 
-	_timer->start(1000);
+	_timer.start(1000);
 	updateGPUMemInfo();
 	
 	//if in the document there are already some meshes, we insert them here....
-	MeshModel* mm = md.nextMesh();
+	MeshModel* mm = _md.nextMesh();
 	do {
 		if (mm != nullptr)
 			meshInserted(mm->id());
-		mm = md.nextMesh(mm);
+		mm = _md.nextMesh(mm);
 	} while (mm != nullptr);
 }
 
 MLSceneGLSharedDataContext::~MLSceneGLSharedDataContext()
 {
+	MeshModel* mm = _md.nextMesh();
+	do {
+		if (mm != nullptr)
+			meshRemoved(mm->id());
+		mm = _md.nextMesh(mm);
+	} while (mm != nullptr);
 }
 
 void MLSceneGLSharedDataContext::setMinFacesForSmoothRendering(size_t fcnum)
@@ -74,7 +79,7 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 	MeshIDManMap::const_iterator it = _meshboman.find(mmid);
 	if (it == _meshboman.end())
 		return NULL;
-	return it.value();
+	return it->second;
 }
 
 void MLSceneGLSharedDataContext::initializeGL()
@@ -225,7 +230,7 @@ void MLSceneGLSharedDataContext::meshRemoved(int mmid)
 	if (it == _meshboman.end())
 		return;
 
-	PerMeshMultiViewManager* man = it.value();
+	PerMeshMultiViewManager* man = it->second;
 	if (man != NULL)
 	{
 		QGLContext* ctx = makeCurrentGLContext();
@@ -274,7 +279,7 @@ void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 	QGLContext* ctx = makeCurrentGLContext();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
-		PerMeshMultiViewManager* man = it.value();
+		PerMeshMultiViewManager* man = it->second;
 		if (man != NULL)
 		{
 			man->removeView(viewerid);
@@ -288,12 +293,12 @@ void MLSceneGLSharedDataContext::addView( QGLContext* viewerid,MLRenderingData& 
 {
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
-		MeshModel* mesh = _md.getMesh(it.key());
+		MeshModel* mesh = _md.getMesh(it->first);
 		if (mesh != NULL)
 		{
 			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mesh,dt, _minfacessmoothrendering);
-			setRenderingDataPerMeshView(it.key(),viewerid,dt);
-			manageBuffers(it.key());
+			setRenderingDataPerMeshView(it->first,viewerid,dt);
+			manageBuffers(it->first);
 		}
 	}
 }
@@ -302,11 +307,11 @@ void MLSceneGLSharedDataContext::addView(QGLContext* viewerid)
 {
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
-		MeshModel* mesh = _md.getMesh(it.key());
+		MeshModel* mesh = _md.getMesh(it->first);
 		if (mesh != NULL)
 		{
 			MLRenderingData dt;
-			setRenderingDataPerMeshView(it.key(),viewerid,dt);
+			setRenderingDataPerMeshView(it->first,viewerid,dt);
 			//manageBuffers(it.key());
 		}
 	}
@@ -317,8 +322,8 @@ void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
 	QGLContext* ctx = makeCurrentGLContext();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
-		PerMeshMultiViewManager* man = it.value();
-		deAllocateTexturesPerMesh(it.key());
+		PerMeshMultiViewManager* man = it->second;
+		deAllocateTexturesPerMesh(it->first);
 		man->removeAllViewsAndDeallocateBO();
 	}
 	doneCurrentGLContext(ctx);
@@ -352,7 +357,7 @@ void MLSceneGLSharedDataContext::getRenderInfoPerMeshView( QGLContext* ctx,PerMe
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		MLRenderingData dt;
-		int meshid = it.key();
+		int meshid = it->first;
 		PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(meshid);
 		if (man != NULL)
 			man->getPerViewInfo(ctx,dt);
