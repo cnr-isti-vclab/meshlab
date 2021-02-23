@@ -61,12 +61,8 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 
 MLSceneGLSharedDataContext::~MLSceneGLSharedDataContext()
 {
-	MeshModel* mm = _md.nextMesh();
-	do {
-		if (mm != nullptr)
-			meshRemoved(mm->id());
-		mm = _md.nextMesh(mm);
-	} while (mm != nullptr);
+	for (auto& p : _meshboman)
+		delete p.second;
 }
 
 void MLSceneGLSharedDataContext::setMinFacesForSmoothRendering(size_t fcnum)
