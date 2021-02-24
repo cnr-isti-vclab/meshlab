@@ -24,7 +24,7 @@
 #include "python_binding_utils.h"
 
 #include <QRegularExpression>
-#include <common/parameters/rich_parameter.h>
+#include "../parameters/rich_parameter.h"
 
 QString ml_python::computePythonTypeString(const RichParameter& par)
 {
