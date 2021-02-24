@@ -58,7 +58,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dumm
 		f.addParameter(par);
 
 		for (const RichParameter& rp : rps){
-			QString pythonParameterName = toPythonName(rp.name());
+			QString pythonParameterName = computePythonName(rp.name());
 			FunctionParameter par(pythonParameterName, rp);
 			f.addParameter(par);
 		}
@@ -81,7 +81,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dumm
 		f.addParameter(par);
 
 		for (const RichParameter& rp : rps){
-			QString pythonParameterName = toPythonName(rp.name());
+			QString pythonParameterName = computePythonName(rp.name());
 			FunctionParameter par(pythonParameterName, rp);
 			f.addParameter(par);
 		}
@@ -113,14 +113,14 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dumm
 		for (QAction* act : acts) {
 			QString originalFilterName = fp->filterName(act);
 			QString description = fp->filterInfo(act);
-			QString pythonFilterName = toPythonName(originalFilterName);
+			QString pythonFilterName = computePythonName(originalFilterName);
 			Function f(pythonFilterName, originalFilterName, description);
 
 			RichParameterList rps;
 			fp->initParameterList(act, dummyMeshDocument, rps);
 
 			for (const RichParameter& rp : rps){
-				QString pythonParameterName = toPythonName(rp.name());
+				QString pythonParameterName = computePythonName(rp.name());
 				FunctionParameter par(pythonParameterName, rp);
 				f.addParameter(par);
 			}
@@ -210,19 +210,6 @@ pymeshlab::FunctionSet::FunctionRangeIterator pymeshlab::FunctionSet::loadRaster
 	return FunctionRangeIterator(loadRasterSet);
 }
 
-QString pymeshlab::FunctionSet::toPythonName(const QString& name)
-{
-	QString pythonName = name.toLower();
-	pythonName.replace(' ', '_');
-	pythonName.replace('/', '_');
-	pythonName.replace('-', '_');
-	pythonName.remove(QRegularExpression("[().,'\":+]+"));
-	
-	if (pythonKeywords.contains(pythonName))
-		pythonName += "_";
-	return pythonName;
-}
-
 void pymeshlab::FunctionSet::updateSaveParameters(IOMeshPluginInterface* plugin,
 		const QString& outputFormat,
 		pymeshlab::Function& f)
@@ -236,7 +223,7 @@ void pymeshlab::FunctionSet::updateSaveParameters(IOMeshPluginInterface* plugin,
 			RichBool rb(
 						saveCapabilitiesStrings[i], def,
 						saveCapabilitiesStrings[i], saveCapabilitiesStrings[i]);
-			FunctionParameter par(toPythonName(saveCapabilitiesStrings[i]), rb);
+			FunctionParameter par(computePythonName(saveCapabilitiesStrings[i]), rb);
 			f.addParameter(par);
 
 		}

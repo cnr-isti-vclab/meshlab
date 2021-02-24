@@ -28,6 +28,22 @@
 
 namespace pymeshlab {
 
+/**
+ * @brief The FunctionSet class represents a container of "python function names".
+ * Each one of these function is binded with a particular action of a plugin,
+ * which can be a filter action, an input/output mesh format or an input raster
+ * format. Therefore, given a PluginManager, a FunctionSet will be constructed
+ * from it considering only Filter, IOMesh and IORaster type of plugins.
+ *
+ * Note: there is not the actual link between the function and the action here.
+ * This container is meant just as a container of *names*, therefore from here
+ * you can check if a particular function exists, if it has some parameters and
+ * the parameter types, and get the *name* of the binded action in meshlab.
+ *
+ * This cointainer just allows to access and iterate through all the contained
+ * Functions. Please refer to the pymeshlab::Function class to see how to manage
+ * a Function.
+ */
 class FunctionSet
 {
 public:
@@ -64,8 +80,6 @@ public:
 	FunctionRangeIterator loadMeshFunctionIterator() const;
 	FunctionRangeIterator saveMeshFunctionIterator() const;
 	FunctionRangeIterator loadRasterFunctionIterator() const;
-
-	static QString toPythonName(const QString& name);
 
 private:
 	void updateSaveParameters(

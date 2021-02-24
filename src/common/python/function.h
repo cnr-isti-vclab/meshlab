@@ -31,6 +31,11 @@
 
 namespace pymeshlab {
 
+/**
+ * @brief The Function class represents a python function that can be binded with
+ * a plugin action. A function has its python name, its meshlab name, its description
+ * and a list of parameters.
+ */
 class Function
 {
 public:
