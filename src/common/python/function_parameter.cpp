@@ -23,7 +23,7 @@
 #include "function_parameter.h"
 
 #include "python_utils.h"
-#include <common/parameters/rich_parameter_list.h>
+#include "../parameters/rich_parameter_list.h"
 
 pymeshlab::FunctionParameter::FunctionParameter(const QString& pName,
 		const RichParameter& parameter) :
