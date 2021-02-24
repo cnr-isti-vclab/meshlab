@@ -45,8 +45,8 @@ set(HEADERS
 	parameters/rich_parameter.h
 	parameters/rich_parameter_list.h
 	parameters/value.h
+	python/python_binding_utils.h
 	utilities/file_format.h
-	utilities/python_binding_utils.h
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
@@ -79,7 +79,7 @@ set(SOURCES
 	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp
 	parameters/value.cpp
-	utilities/python_binding_utils.cpp
+	python/python_binding_utils.cpp
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
@@ -97,8 +97,8 @@ if(WIN32)
 endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_compile_definitions(meshlab-common 
-	PUBLIC 
+target_compile_definitions(meshlab-common
+	PUBLIC
 		MESHLAB_VERSION=${MESHLAB_VERSION}
 		MESHLAB_SCALAR=${MESHLAB_SCALAR})
 
@@ -112,7 +112,7 @@ target_include_directories(meshlab-common
 
 target_link_libraries(
 	meshlab-common
-	PUBLIC 
+	PUBLIC
 		Qt5::Core
 		Qt5::OpenGL
 		Qt5::Widgets
@@ -135,4 +135,3 @@ if (WIN32)
 endif()
 
 install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
-

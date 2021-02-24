@@ -23,7 +23,7 @@
 
 #include "rich_parameter.h"
 #include "../ml_document/mesh_document.h"
-#include "../utilities/python_binding_utils.h"
+#include "../python/python_binding_utils.h"
 
 /**** RichParameter Class ****/
 
