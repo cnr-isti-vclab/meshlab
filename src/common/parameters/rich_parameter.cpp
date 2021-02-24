@@ -23,7 +23,7 @@
 
 #include "rich_parameter.h"
 #include "../ml_document/mesh_document.h"
-#include "../python/python_binding_utils.h"
+#include "../python/python_utils.h"
 
 /**** RichParameter Class ****/
 
@@ -98,7 +98,7 @@ QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc, bool saveDescrip
  */
 QString RichParameter::pythonName() const
 {
-	return ml_python::computePythonName(pName);
+	return pymeshlab::computePythonName(pName);
 }
 
 /**
@@ -107,7 +107,7 @@ QString RichParameter::pythonName() const
  */
 QString RichParameter::pythonType() const
 {
-	return ml_python::computePythonTypeString(*this);
+	return pymeshlab::computePythonTypeString(*this);
 }
 
 RichParameter& RichParameter::operator=(const RichParameter& rp)

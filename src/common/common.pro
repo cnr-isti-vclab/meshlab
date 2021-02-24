@@ -61,7 +61,10 @@ HEADERS += 	\
 	parameters/rich_parameter_list.h \
 	parameters/value.h \
 	parameters/rich_parameter.h \
-	python/python_binding_utils.h \
+	python/function.h \
+	python/function_parameter.h \
+	python/function_set.h \
+	python/python_utils.h \
 	utilities/file_format.h \
 	GLExtensionsManager.h \
 	filterscript.h \
@@ -93,7 +96,10 @@ SOURCES += \
 	parameters/rich_parameter.cpp \
 	parameters/rich_parameter_list.cpp \
 	parameters/value.cpp \
-	python/python_binding_utils.cpp \
+	python/function.cpp \
+	python/function_parameter.cpp \
+	python/function_set.cpp \
+	python/python_utils.cpp \
 	GLExtensionsManager.cpp \
 	filterscript.cpp \
 	GLLogStream.cpp \

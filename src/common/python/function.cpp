@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2021                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,53 +20,71 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#include "function.h"
 
-#include "python_binding_utils.h"
-
-#include <QRegularExpression>
+#include <QStringList>
 #include "../parameters/rich_parameter.h"
 
-QString ml_python::computePythonTypeString(const RichParameter& par)
+pymeshlab::Function::Function()
 {
-	const Value& v = par.value();
-	if (v.isEnum())
-		return PYTHON_TYPE_ENUM;
-	if (v.isAbsPerc())
-		return PYTHON_TYPE_ABSPERC;
-	if (v.isDynamicFloat())
-		return PYTHON_TYPE_DYNAMIC_FLOAT;
-	if (v.isBool())
-		return PYTHON_TYPE_BOOL;
-	if (v.isInt())
-		return PYTHON_TYPE_INT;
-	if (v.isFloat())
-		return PYTHON_TYPE_FLOAT;
-	if (v.isString())
-		return PYTHON_TYPE_STRING;
-	if (v.isMatrix44f())
-		return PYTHON_TYPE_MATRIX44F;
-	if (v.isPoint3f())
-		return PYTHON_TYPE_POINT3F;
-	if (v.isShotf())
-		return PYTHON_TYPE_SHOTF;
-	if (v.isColor())
-		return PYTHON_TYPE_COLOR;
-	if (v.isMesh())
-		return PYTHON_TYPE_MESH;
-	if (v.isFileName())
-		return PYTHON_TYPE_FILENAME;
-	return "still_unsupported";
 }
 
-QString ml_python::computePythonName(const QString& name)
+pymeshlab::Function::Function(
+		const QString pythonFunctionName,
+		const QString meshlabFilterName,
+		const QString description) :
+	pythonFunName(pythonFunctionName), meshlabFunName(meshlabFilterName), funDescription(description)
 {
-	QString pythonName = name.toLower();
-	pythonName.replace(' ', '_');
-	pythonName.replace('/', '_');
-	pythonName.replace('-', '_');
-	pythonName.remove(QRegularExpression("[().,'\":+]+"));
+}
 
-	if (pythonKeywords.contains(pythonName))
-		pythonName += "_";
-	return pythonName;
+void pymeshlab::Function::addParameter(const pymeshlab::FunctionParameter& p)
+{
+	parameters.push_back(p);
+}
+
+QString pymeshlab::Function::pythonFunctionName() const
+{
+	return pythonFunName;
+}
+
+QString pymeshlab::Function::meshlabFunctionName() const
+{
+	return meshlabFunName;
+}
+
+QString pymeshlab::Function::description() const
+{
+	return funDescription;
+}
+
+unsigned int pymeshlab::Function::parametersNumber() const
+{
+	return parameters.size();
+}
+
+QStringList pymeshlab::Function::pythonFunctionParameters() const
+{
+	QStringList list;
+	for (const FunctionParameter& p : parameters)
+		list.push_back(p.pythonName());
+	return list;
+}
+
+bool pymeshlab::Function::contains(const QString& pythonParameter) const
+{
+	RichInt tmp("", 0);
+	iterator it = std::find(parameters.begin(), parameters.end(), FunctionParameter(pythonParameter, tmp));
+	return it != parameters.end();
+}
+
+const pymeshlab::FunctionParameter& pymeshlab::Function::getFilterFunctionParameter(const QString& pythonParameter) const
+{
+	RichInt tmp("", 0);
+	iterator it = std::find(parameters.begin(), parameters.end(), FunctionParameter(pythonParameter, tmp));
+	return *it;
+}
+
+bool pymeshlab::Function::operator<(const pymeshlab::Function& oth) const
+{
+	return pythonFunName < oth.pythonFunName;
 }

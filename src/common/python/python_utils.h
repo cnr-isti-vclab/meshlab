@@ -21,14 +21,50 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PYTHON_BINDING_UTILS_H
-#define MESHLAB_PYTHON_BINDING_UTILS_H
+#ifndef PYMESHLAB_PYTHON_UTILS_H
+#define PYMESHLAB_PYTHON_UTILS_H
 
 #include <QStringList>
+#include <array>
+#include <vcg/../wrap/io_trimesh/io_mask.h>
 
 class RichParameter;
 
-namespace ml_python {
+namespace pymeshlab {
+
+const static std::array<int, 14> capabilitiesBits= {
+	vcg::tri::io::Mask::IOM_VERTQUALITY,
+	vcg::tri::io::Mask::IOM_VERTFLAGS,
+	vcg::tri::io::Mask::IOM_VERTCOLOR,
+	vcg::tri::io::Mask::IOM_VERTTEXCOORD,
+	vcg::tri::io::Mask::IOM_VERTNORMAL,
+	vcg::tri::io::Mask::IOM_VERTRADIUS,
+	vcg::tri::io::Mask::IOM_FACEQUALITY,
+	vcg::tri::io::Mask::IOM_FACEFLAGS,
+	vcg::tri::io::Mask::IOM_FACECOLOR,
+	vcg::tri::io::Mask::IOM_FACENORMAL,
+	vcg::tri::io::Mask::IOM_WEDGCOLOR,
+	vcg::tri::io::Mask::IOM_WEDGTEXCOORD,
+	vcg::tri::io::Mask::IOM_WEDGNORMAL,
+	vcg::tri::io::Mask::IOM_BITPOLYGONAL
+};
+
+const static std::array<QString, 14> saveCapabilitiesStrings = {
+	"Save Vertex Quality",
+	"Save Vertex Flag",
+	"Save Vertex Color",
+	"Save Vertex Coord",
+	"Save Vertex Normal",
+	"Save Vertex Radius",
+	"Save Face Quality",
+	"Save Face Flag",
+	"Save Face Color",
+	"Save Face Normal",
+	"Save Wedge Color",
+	"Save Wedge TexCoord",
+	"Save Wedge Normal",
+	"Save Polygonal"
+};
 
 const char PYTHON_TYPE_ENUM[] = "str";
 const char PYTHON_TYPE_ABSPERC[] = "Percentage";
@@ -54,9 +90,11 @@ const static QStringList pythonKeywords = {
 	"async", "elif", "if", "or", "yield"
 };
 
+/** Utilities **/
 QString computePythonTypeString(const RichParameter& par);
 QString computePythonName(const QString& name);
+void printSaveMask(int mask);
 
 }
 
-#endif // MESHLAB_PYTHON_BINDING_UTILS_H
+#endif // PYMESHLAB_PYTHON_UTILS_H
