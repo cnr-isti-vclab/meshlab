@@ -57,7 +57,6 @@ public:
 private:
 	QString computePythonTypeString(const RichParameter& par);
 	QString pName;
-	QString pType;
 	RichParameter* parameter;
 };
 

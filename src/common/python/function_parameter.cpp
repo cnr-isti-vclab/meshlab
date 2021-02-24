@@ -28,7 +28,6 @@
 pymeshlab::FunctionParameter::FunctionParameter(const QString& pName,
 		const RichParameter& parameter) :
 	pName(pName),
-	pType(computePythonTypeString(parameter)),
 	parameter(parameter.clone())
 {
 }
@@ -36,14 +35,12 @@ pymeshlab::FunctionParameter::FunctionParameter(const QString& pName,
 pymeshlab::FunctionParameter::FunctionParameter(
 		const pymeshlab::FunctionParameter& oth):
 	pName(oth.pName),
-	pType(oth.pType),
 	parameter(oth.parameter->clone())
 {
 }
 
 pymeshlab::FunctionParameter::FunctionParameter(pymeshlab::FunctionParameter&& oth):
-	pName(oth.pName),
-	pType(oth.pType)
+	pName(oth.pName)
 {
 	parameter = oth.parameter;
 	oth.parameter = nullptr;
@@ -206,7 +203,6 @@ bool pymeshlab::FunctionParameter::operator==(const pymeshlab::FunctionParameter
 void pymeshlab::FunctionParameter::swap(pymeshlab::FunctionParameter& oth)
 {
 	std::swap(pName, oth.pName);
-	std::swap(pType, oth.pType);
 	std::swap(parameter, oth.parameter);
 }
 

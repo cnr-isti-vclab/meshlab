@@ -23,7 +23,7 @@
 #ifndef PYMESHLAB_FUNCTION_SET_H
 #define PYMESHLAB_FUNCTION_SET_H
 
-#include <common/plugins/plugin_manager.h>
+#include "../plugins/plugin_manager.h"
 #include "function.h"
 
 namespace pymeshlab {

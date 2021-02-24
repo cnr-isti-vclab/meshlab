@@ -23,7 +23,7 @@
 #include "function_set.h"
 
 #include <QRegularExpression>
-#include <common/mlexception.h>
+#include "../mlexception.h"
 #include <algorithm>
 #include "python_utils.h"
 
