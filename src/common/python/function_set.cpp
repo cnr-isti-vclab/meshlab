@@ -31,7 +31,7 @@ pymeshlab::FunctionSet::FunctionSet()
 {
 }
 
-void pymeshlab::FunctionSet::populate(const PluginManager& pm, const QString& dummyMeshFile)
+pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dummyMeshFile)
 {
 	MeshDocument dummyMeshDocument;
 	dummyMeshDocument.addNewMesh(dummyMeshFile, "");
@@ -91,7 +91,7 @@ void pymeshlab::FunctionSet::populate(const PluginManager& pm, const QString& du
 
 		saveMeshSet.insert(f);
 	}
-	
+
 	for (auto inputRasterFormat : pm.inputRasterFormatList()){
 		QString originalFilterName = inputRasterFormat;
 		QString pythonFilterName = inputRasterFormat.toLower();
