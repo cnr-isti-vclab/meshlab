@@ -156,14 +156,18 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 	QElapsedTimer t;
 	t.start();
 	
+	if (filename.isEmpty()){
+		return;
+	}
+
 	QDomDocument* doc = new QDomDocument(filename);
 	QFile file(filename);
-	if (!file.open(QIODevice::ReadOnly))
-				return;
-	if (!doc->setContent(&file)) 
-	{
-				file.close();
-				return;
+	if (!file.open(QIODevice::ReadOnly)){
+		return;
+	}
+	if (!doc->setContent(&file)) {
+		file.close();
+		return;
 	}
 	file.close();
 	
