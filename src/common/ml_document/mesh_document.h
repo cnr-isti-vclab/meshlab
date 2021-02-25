@@ -87,6 +87,7 @@ public:
 	void setBusy(bool _busy);
 
 	///add a new mesh with the given name
+	MeshModel* addNewMesh(const CMeshO& mesh, QString Label, bool setAsCurrent=true);
 	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
 	MeshModel *addOrGetMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
 	

@@ -28,6 +28,7 @@
 
 #include "parameters/rich_parameter_list.h"
 #include "plugins/plugin_manager.h"
+#include "python/function_set.h"
 
 QString basePath()
 {
@@ -113,4 +114,10 @@ PluginManager& meshlab::pluginManagerInstance()
 {
 	static PluginManager pm;
 	return pm;
+}
+
+pymeshlab::FunctionSet& pymeshlab::functionSetInstance()
+{
+	static FunctionSet fs(meshlab::pluginManagerInstance());
+	return fs;
 }

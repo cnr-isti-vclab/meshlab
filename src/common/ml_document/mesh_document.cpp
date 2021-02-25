@@ -291,6 +291,17 @@ void MeshDocument::setBusy(bool _busy)
 	busy=_busy;
 }
 
+/**
+ * @brief Adds a new mesh to the MeshDocument. The added mesh is a COPY of the mesh
+ * passed as parameter.
+ */
+MeshModel* MeshDocument::addNewMesh(const CMeshO& mesh, QString label, bool setAsCurrent)
+{
+	MeshModel* m = addNewMesh("", label, setAsCurrent);
+	m->cm = mesh;
+	return m;
+}
+
 MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
 {
 	QString newlabel = NameDisambiguator(this->meshList,std::move(label));

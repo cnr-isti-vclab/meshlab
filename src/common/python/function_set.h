@@ -48,7 +48,7 @@ class FunctionSet
 {
 public:
 	FunctionSet();
-	FunctionSet(const PluginManager& pm, const QString& dummyMeshFile);
+	FunctionSet(const PluginManager& pm);
 
 	QStringList pythonFilterFunctionNames() const;
 

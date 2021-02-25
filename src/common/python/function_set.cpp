@@ -26,15 +26,21 @@
 #include "../mlexception.h"
 #include <algorithm>
 #include "python_utils.h"
+#include <vcg/complex/algorithms/create/platonic.h>
 
 pymeshlab::FunctionSet::FunctionSet()
 {
 }
 
-pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dummyMeshFile)
+pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 {
+	//dummy MeshDocument use to compute default value parameters
+	//the mesh used is a 1x1x1 cube (with extremes [-0.5; 0.5])
 	MeshDocument dummyMeshDocument;
-	dummyMeshDocument.addNewMesh(dummyMeshFile, "");
+	Box3m b(Point3m(-0.5,-0.5,-0.5),Point3m(0.5,0.5,0.5));
+	CMeshO dummyMesh;
+	vcg::tri::Box<CMeshO>(dummyMesh,b);
+	dummyMeshDocument.addNewMesh(dummyMesh, "");
 	int mask = 0;
 	mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
@@ -46,7 +52,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm, const QString& dumm
 		Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
 		IOMeshPluginInterface* plugin = pm.inputMeshPlugin(inputFormat);
 		RichParameterList rps;
-		plugin->initPreOpenParameter(inputFormat, dummyMeshFile, rps);
+		//plugin->initPreOpenParameter(inputFormat, dummyMeshFile, rps);
 		plugin->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
 
 		//filename parameter

@@ -60,4 +60,10 @@ inline bool builtWithDoublePrecision()
 
 }
 
+namespace pymeshlab {
+class FunctionSet;
+
+FunctionSet& functionSetInstance();
+}
+
 #endif // MESHLAB_GLOBALS_H
