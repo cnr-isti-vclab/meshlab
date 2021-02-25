@@ -299,6 +299,7 @@ MeshModel* MeshDocument::addNewMesh(const CMeshO& mesh, QString label, bool setA
 {
 	MeshModel* m = addNewMesh("", label, setAsCurrent);
 	m->cm = mesh;
+	m->UpdateBoxAndNormals();
 	return m;
 }
 

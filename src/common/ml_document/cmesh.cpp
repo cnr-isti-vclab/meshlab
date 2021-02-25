@@ -25,7 +25,7 @@
 
 CMeshO::CMeshO() :
 	vcgTriMesh(),
-	sfn(0), svn(0), pvn(0), pfn(0)
+	sfn(0), svn(0), pvn(0), pfn(0), Tr(Matrix44m::Identity())
 {
 }
 

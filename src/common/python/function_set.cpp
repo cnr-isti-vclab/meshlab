@@ -40,7 +40,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 	Box3m b(Point3m(-0.5,-0.5,-0.5),Point3m(0.5,0.5,0.5));
 	CMeshO dummyMesh;
 	vcg::tri::Box<CMeshO>(dummyMesh,b);
-	dummyMeshDocument.addNewMesh(dummyMesh, "");
+	dummyMeshDocument.addNewMesh(dummyMesh, "cube");
 	int mask = 0;
 	mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
@@ -52,14 +52,14 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
 		IOMeshPluginInterface* plugin = pm.inputMeshPlugin(inputFormat);
 		RichParameterList rps;
-		//plugin->initPreOpenParameter(inputFormat, dummyMeshFile, rps);
+		plugin->initPreOpenParameter(inputFormat, "", rps);
 		plugin->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
 
 		//filename parameter
 		QString pythonParameterName = "file_name";
 		QString sv = "file_name." + inputFormat;
 		QStringList sl(inputFormat);
-		RichOpenFile of("fileName", sv, sl, "File Name", "The name of the file to load");
+		RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
 		FunctionParameter par(pythonParameterName, of);
 		f.addParameter(par);
 
@@ -82,7 +82,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		//filename parameter
 		QString pythonParameterName = "file_name";
 		QString sv = "file_name." + outputFormat;
-		RichSaveFile of("fileName", sv, outputFormat, "File Name", "The name of the file to save");
+		RichSaveFile of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
 		FunctionParameter par(pythonParameterName, of);
 		f.addParameter(par);
 
@@ -107,7 +107,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		QString pythonParameterName = "file_name";
 		QString sv = "file_name." + inputRasterFormat;
 		QStringList sl(inputRasterFormat);
-		RichOpenFile of("fileName", sv, sl, "File Name", "The name of the file to load");
+		RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
 		FunctionParameter par(pythonParameterName, of);
 		f.addParameter(par);
 
