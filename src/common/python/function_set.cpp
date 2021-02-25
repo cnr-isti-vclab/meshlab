@@ -135,11 +135,11 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 	}
 }
 
-QStringList pymeshlab::FunctionSet::pythonFilterFunctionNames() const
+std::list<std::string> pymeshlab::FunctionSet::pythonFilterFunctionNames() const
 {
-	QStringList fnames;
+	std::list<std::string> fnames;
 	for (const Function& f: filterSet){
-		fnames.push_back(f.pythonFunctionName());
+		fnames.push_back(f.pythonFunctionName().toStdString());
 	}
 	return fnames;
 }

@@ -50,7 +50,7 @@ public:
 	FunctionSet();
 	FunctionSet(const PluginManager& pm);
 
-	QStringList pythonFilterFunctionNames() const;
+	std::list<std::string> pythonFilterFunctionNames() const;
 
 	const Function& filterFunction(const QString& pythonFunctionName) const;
 	bool containsFilterFunction(const QString& pythonFunctionName) const;
