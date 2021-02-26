@@ -119,7 +119,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		for (QAction* act : acts) {
 			QString originalFilterName = fp->filterName(act);
 			QString description = fp->filterInfo(act);
-			QString pythonFilterName = computePythonName(originalFilterName);
+			QString pythonFilterName = fp->pythonFilterName(act);
 			Function f(pythonFilterName, originalFilterName, description);
 
 			RichParameterList rps;

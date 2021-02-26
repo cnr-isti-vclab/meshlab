@@ -1,4 +1,10 @@
 #include "filter_plugin_interface.h"
+#include "../../python/python_utils.h"
+
+QString FilterPluginInterface::pythonFilterName(PluginInterface::FilterIDType f) const
+{
+	return pymeshlab::computePythonName(filterName(f));
+}
 
 bool FilterPluginInterface::isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const
 {

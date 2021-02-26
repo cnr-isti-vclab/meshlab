@@ -85,6 +85,14 @@ public:
 	 */
 	virtual QString filterName(FilterIDType) const = 0;
 
+	/**
+	 * @brief This function returns the name of each filter in python (pymeshlab).
+	 * If not reimplemented, computes the name starting from the filterName output
+	 * and making it compliant to python style name convention:
+	 * python.org/dev/peps/pep-0008/
+	 */
+	virtual QString pythonFilterName(FilterIDType f) const;
+
 	/** 
 	 * @brief The long, formatted string describing each filtering action.
 	 * This string is printed in the top of the parameter window
@@ -201,6 +209,7 @@ public:
 	const QString& errorMsg() const { return this->errorMessage; }
 	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }
+	virtual QString pythonFilterName(const QAction* a) const {return this->pythonFilterName(ID(a)); }
 	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
 
 	virtual FilterIDType ID(const QAction *a) const;
