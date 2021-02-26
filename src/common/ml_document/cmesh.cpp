@@ -33,6 +33,7 @@ CMeshO::CMeshO(const CMeshO& oth) :
 	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
 	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
 {
+	enableOCFComponentsFromOtherMesh(oth);
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
 }
 
@@ -42,6 +43,7 @@ CMeshO::CMeshO(CMeshO&& oth):
 	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
 	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
 {
+	enableOCFComponentsFromOtherMesh(oth);
 	//I could take everything from oth and place it in
 	//this mesh
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
@@ -51,6 +53,7 @@ CMeshO::CMeshO(CMeshO&& oth):
 CMeshO& CMeshO::operator=(const CMeshO& oth)
 {
 	Clear();
+	enableOCFComponentsFromOtherMesh(oth);
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshCopyConst(*this, oth);
 	sfn = oth.sfn;
 	svn = oth.svn;
@@ -65,6 +68,44 @@ Box3m CMeshO::trBB() const
 	Box3m bb;
 	bb.Add(Tr,bbox);
 	return bb;
+}
+
+/**
+ * @brief When copying a vcg mesh, it is first necessary to enable
+ * all the optional fields that are enabled on the other mesh, otherwise
+ * they won't be copied on this mesh...........
+ */
+void CMeshO::enableOCFComponentsFromOtherMesh(const CMeshO& oth)
+{
+	//vertex
+	if (oth.vert.IsVFAdjacencyEnabled())
+		this->vert.EnableVFAdjacency();
+	if (oth.vert.IsMarkEnabled())
+		this->vert.EnableMark();
+	if (oth.vert.IsTexCoordEnabled())
+		this->vert.EnableTexCoord();
+	if (oth.vert.IsCurvatureEnabled())
+		this->vert.EnableCurvature();
+	if (oth.vert.IsCurvatureDirEnabled())
+		this->vert.EnableCurvatureDir();
+	if (oth.vert.IsRadiusEnabled())
+		this->vert.EnableRadius();
+
+	//face
+	if (oth.face.IsQualityEnabled())
+		this->face.EnableQuality();
+	if (oth.face.IsMarkEnabled())
+		this->face.EnableMark();
+	if (oth.face.IsColorEnabled())
+		this->face.EnableColor();
+	if (oth.face.IsFFAdjacencyEnabled())
+		this->face.EnableFFAdjacency();
+	if (oth.face.IsVFAdjacencyEnabled())
+		this->face.EnableVFAdjacency();
+	if (oth.face.IsCurvatureDirEnabled())
+		this->face.EnableCurvatureDir();
+	if (oth.face.IsWedgeTexCoordEnabled())
+		this->face.EnableWedgeTexCoord();
 }
 
 
