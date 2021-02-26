@@ -33,9 +33,7 @@ namespace pymeshlab {
 class FunctionParameter
 {
 public:
-	FunctionParameter(
-			const QString& pName,
-			const RichParameter& parameter);
+	FunctionParameter(const RichParameter& parameter);
 	FunctionParameter(const FunctionParameter& oth);
 	FunctionParameter(FunctionParameter&& oth);
 	virtual ~FunctionParameter();
@@ -56,7 +54,6 @@ public:
 	void swap(FunctionParameter& oth);
 private:
 	QString computePythonTypeString(const RichParameter& par);
-	QString pName;
 	RichParameter* parameter;
 };
 

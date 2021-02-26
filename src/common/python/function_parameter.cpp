@@ -25,22 +25,18 @@
 #include "python_utils.h"
 #include "../parameters/rich_parameter_list.h"
 
-pymeshlab::FunctionParameter::FunctionParameter(const QString& pName,
-		const RichParameter& parameter) :
-	pName(pName),
+pymeshlab::FunctionParameter::FunctionParameter(const RichParameter& parameter) :
 	parameter(parameter.clone())
 {
 }
 
 pymeshlab::FunctionParameter::FunctionParameter(
 		const pymeshlab::FunctionParameter& oth):
-	pName(oth.pName),
 	parameter(oth.parameter->clone())
 {
 }
 
-pymeshlab::FunctionParameter::FunctionParameter(pymeshlab::FunctionParameter&& oth):
-	pName(oth.pName)
+pymeshlab::FunctionParameter::FunctionParameter(pymeshlab::FunctionParameter&& oth)
 {
 	parameter = oth.parameter;
 	oth.parameter = nullptr;
@@ -53,7 +49,6 @@ pymeshlab::FunctionParameter::~FunctionParameter()
 
 QString pymeshlab::FunctionParameter::pythonName() const
 {
-	//return pName;
 	return parameter->pythonName();
 }
 
@@ -64,7 +59,6 @@ QString pymeshlab::FunctionParameter::meshlabName() const
 
 QString pymeshlab::FunctionParameter::pythonTypeString() const
 {
-	//return pType;
 	return parameter->pythonType();
 }
 
@@ -173,8 +167,6 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << "'" << parameter->value().getFileName().toStdString() << "'";
 		return;
 	}
-
-	//to support: dynamicfloat, filename, mesh
 }
 
 QString pymeshlab::FunctionParameter::defaultValueString() const
@@ -192,17 +184,16 @@ pymeshlab::FunctionParameter& pymeshlab::FunctionParameter::operator=(pymeshlab:
 
 bool pymeshlab::FunctionParameter::operator<(const pymeshlab::FunctionParameter& oth) const
 {
-	return pName < oth.pName;
+	return parameter->pythonName() < oth.parameter->pythonName();
 }
 
 bool pymeshlab::FunctionParameter::operator==(const pymeshlab::FunctionParameter& oth) const
 {
-	return pName == oth.pName;
+	return parameter->pythonName() == oth.parameter->pythonName();
 }
 
 void pymeshlab::FunctionParameter::swap(pymeshlab::FunctionParameter& oth)
 {
-	std::swap(pName, oth.pName);
 	std::swap(parameter, oth.parameter);
 }
 
