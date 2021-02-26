@@ -21,50 +21,58 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_FILTER_PLUGIN_CONTAINER_H
-#define MESHLAB_FILTER_PLUGIN_CONTAINER_H
+#ifndef MESHLAB_IOMESH_PLUGIN_CONTAINER_H
+#define MESHLAB_IOMESH_PLUGIN_CONTAINER_H
 
-#include "../interfaces/filter_plugin_interface.h"
+#include "../interfaces/iomesh_plugin_interface.h"
 #include "generic_container_iterator.h"
 
 /**
- * @brief The FilterPluginContainer class allows to organize
- * all the filter plugins contained in the PluginManager.
+ * @brief The IOMeshPluginContainer class allows to organize
+ * all the IOMesh plugins contained in the PluginManager.
  *
  * Note: plugins are not owned by this container, but by the PluginManager,
  * since each plugin can inherit from more than one PluginInterface.
  */
-class FilterPluginContainer
+class IOMeshPluginContainer
 {
 public:
-	class FilterPluginRangeIterator;
-	FilterPluginContainer();
+	class IOMeshPluginRangeIterator;
+	IOMeshPluginContainer();
 
+	size_t size() const;
 	void clear();
-	void pushFilterPlugin(FilterPluginInterface* iFilter);
-	void eraseFilterPlugin(FilterPluginInterface* iFilter);
+	void pushIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void eraseIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
 
-	QAction* filterAction(const QString& name);
+	bool isInputMeshFormatSupported(const QString& inputFormat) const;
+	bool isOutputMeshFormatSupported(const QString& outputFormat) const;
+	IOMeshPluginInterface* inputMeshPlugin(const QString& inputFormat) const;
+	IOMeshPluginInterface* outputMeshPlugin(const QString& outputFormat) const;
 
-	FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	QStringList inputMeshFormatList() const;
+	QStringList outputMeshFormatList() const;
+
+	IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	std::vector<FilterPluginInterface*> filterPlugins;
-	QMap<QString, QAction*> actionFilterMap;
+	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
+	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
+	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
 };
 
-class FilterPluginContainer::FilterPluginRangeIterator
+class IOMeshPluginContainer::IOMeshPluginRangeIterator
 {
-	friend class FilterPluginContainer;
+	friend class IOMeshPluginContainer;
 public:
-	ConstPluginIterator<FilterPluginInterface> begin();
-	ConstPluginIterator<FilterPluginInterface> end();
+	ConstPluginIterator<IOMeshPluginInterface> begin();
+	ConstPluginIterator<IOMeshPluginInterface> end();
 private:
-	FilterPluginRangeIterator(
-			const FilterPluginContainer* pm,
+	IOMeshPluginRangeIterator(
+			const IOMeshPluginContainer* pm,
 			bool iterateAlsoDisabledPlugins = false);
-	const FilterPluginContainer* pm;
+	const IOMeshPluginContainer* pm;
 	bool b;
 };
 
-#endif // MESHLAB_FILTER_PLUGIN_CONTAINER_H
+#endif // MESHLAB_IOMESH_PLUGIN_CONTAINER_H

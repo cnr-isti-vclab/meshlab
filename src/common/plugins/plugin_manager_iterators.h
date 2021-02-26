@@ -29,44 +29,6 @@
 
 /** Range iterators **/
 
-class PluginManager::PluginRangeIterator
-{
-	friend class PluginManager;
-public:
-	ConstPluginIterator<PluginFileInterface> begin() {return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.begin(), b);}
-	ConstPluginIterator<PluginFileInterface> end()   {return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.end(), b);}
-private:
-	PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
-
-//class PluginManager::FilterPluginRangeIterator
-//{
-//	friend class PluginManager;
-//public:
-//	ConstPluginIterator<FilterPluginInterface> begin() {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);}
-//	ConstPluginIterator<FilterPluginInterface> end()   {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);}
-//private:
-//	FilterPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-//	const PluginManager* pm;
-//	bool b;
-//};
-
-class PluginManager::IOMeshPluginIterator
-{
-	friend class PluginManager;
-public:
-	ConstPluginIterator<IOMeshPluginInterface> begin() {return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.begin(), b);}
-	ConstPluginIterator<IOMeshPluginInterface> end()   {return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.end(), b);}
-	//std::vector<IOMeshPluginInterface*>::const_iterator begin() {return pm->ioMeshPlugins.begin();}
-	//std::vector<IOMeshPluginInterface*>::const_iterator end() {return pm->ioMeshPlugins.end();}
-private:
-	IOMeshPluginIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
-
 class PluginManager::IORasterPluginIterator
 {
 	friend class PluginManager;

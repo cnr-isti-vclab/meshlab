@@ -201,10 +201,9 @@ void PluginManager::loadPlugin(const QString& fileName)
 	}
 	if (type.isFilterPlugin()){
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
-		//loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
 	}
 	if (type.isIOMeshPlugin()){
-		loadIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
+		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
 	}
 	if (type.isIORasterPlugin()){
 		loadIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
@@ -233,10 +232,9 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 		}
 		if (type.isFilterPlugin()){
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
-			//unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
 		}
 		if (type.isIOMeshPlugin()){
-			unloadIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
+			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
 		}
 		if (type.isIORasterPlugin()){
 			unloadIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
@@ -295,18 +293,12 @@ QAction* PluginManager::filterAction(const QString& name)
 
 IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
-	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
-	if (it != inputMeshFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioMeshPlugins.inputMeshPlugin(inputFormat);
 }
 
 IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
-	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
-	if (it != outputMeshFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioMeshPlugins.outputMeshPlugin(outputFormat);
 }
 
 IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat) const
@@ -319,12 +311,12 @@ IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFor
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
 {
-	return inputMeshFormatToPluginMap.find(inputFormat.toLower()) != inputMeshFormatToPluginMap.end();
+	return ioMeshPlugins.isInputMeshFormatSupported(inputFormat);
 }
 
 bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) const
 {
-	return outputMeshFormatToPluginMap.find(outputFormat.toLower()) != outputMeshFormatToPluginMap.end();
+	return ioMeshPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
@@ -334,12 +326,12 @@ bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) cons
 
 QStringList PluginManager::inputMeshFormatList() const
 {
-	return inputMeshFormatToPluginMap.keys();
+	return ioMeshPlugins.inputMeshFormatList();
 }
 
 QStringList PluginManager::outputMeshFormatList() const
 {
-	return outputMeshFormatToPluginMap.keys();
+	return ioMeshPlugins.outputMeshFormatList();
 }
 
 QStringList PluginManager::inputRasterFormatList() const
@@ -377,9 +369,9 @@ FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIter
 	return filterPlugins.filterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
+IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IOMeshPluginIterator(this, iterateAlsoDisabledPlugins);
+	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -423,29 +415,6 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 	}
 }
 
-void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
-{
-	ioMeshPlugins.push_back(iIOMesh);
-
-	//add input formats to inputFormatMap
-	for (const FileFormat& ff : iIOMesh->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! inputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
-				inputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
-			}
-		}
-	}
-	
-	//add output formats to outputFormatMap
-	for (const FileFormat& ff : iIOMesh->exportFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! outputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
-				outputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
-			}
-		}
-	}
-}
-
 void PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster)
 {
 	ioRasterPlugins.push_back(iIORaster);
@@ -476,21 +445,6 @@ void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
 void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
-}
-
-void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
-{
-	ioMeshPlugins.erase(std::find(ioMeshPlugins.begin(), ioMeshPlugins.end(), iIOMesh));
-	for (const FileFormat& ff : iIOMesh->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			inputMeshFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
-	for (const FileFormat& ff : iIOMesh->exportFormats()){
-		for (QString currentExtension : ff.extensions) {
-			outputMeshFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
 }
 
 void PluginManager::unloadIORasterPlugin(IORasterPluginInterface* iIORaster)
@@ -561,4 +515,19 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 		}
 	}
 	return inputRasterFormatsDialogStringList;
+}
+
+ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::begin()
+{
+	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.begin(), b);
+}
+
+ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::end()
+{
+	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.end(), b);
+}
+
+PluginManager::PluginRangeIterator::PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins) :
+	pm(pm), b(iterateAlsoDisabledPlugins)
+{
 }

@@ -32,6 +32,7 @@
 #include "interfaces/edit_plugin_interface.h"
 
 #include "containers/filter_plugin_container.h"
+#include "containers/iomesh_plugin_container.h"
 
 #include<QMap>
 #include<QObject>
@@ -48,7 +49,6 @@ public:
 
 	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
 	class PluginRangeIterator;
-	class IOMeshPluginIterator;
 	class IORasterPluginIterator;
 	class RenderPluginRangeIterator;
 	class DecoratePluginRangeIterator;
@@ -92,7 +92,7 @@ public:
 	/** Member functions for range iterators **/
 	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	FilterPluginContainer::FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	IOMeshPluginIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IORasterPluginIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
@@ -104,9 +104,7 @@ private:
 	std::set<QString> pluginFiles; //used to check if a plugin file has been already loaded
 
 	//IOMeshPlugins
-	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
-	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
-	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
+	IOMeshPluginContainer ioMeshPlugins;
 
 	//IORasterPlugins
 	std::vector<IORasterPluginInterface*> ioRasterPlugins;
@@ -126,13 +124,11 @@ private:
 
 	static void checkFilterPlugin(FilterPluginInterface* iFilter);
 
-	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
 	void loadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void loadRenderPlugin(RenderPluginInterface* iRender);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 
-	void unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
 	void unloadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void unloadRenderPlugin(RenderPluginInterface* iRender);
@@ -143,6 +139,18 @@ private:
 
 	template <typename RangeIterator>
 	static QStringList outputFormatListDialog(RangeIterator iterator);
+};
+
+class PluginManager::PluginRangeIterator
+{
+	friend class PluginManager;
+public:
+	ConstPluginIterator<PluginFileInterface> begin();
+	ConstPluginIterator<PluginFileInterface> end();
+private:
+	PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false);
+	const PluginManager* pm;
+	bool b;
 };
 
 #include "plugin_manager_iterators.h"
