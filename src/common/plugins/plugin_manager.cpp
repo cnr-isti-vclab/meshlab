@@ -53,14 +53,8 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-	ioMeshPlugins.clear();
-	filterPlugins.clear();
-	renderPlugins.clear();
-	decoratePlugins.clear();
-	editPlugins.clear();
 	for (auto& plugin : allPlugins)
 		delete plugin;
-	allPlugins.clear();
 }
 
 /**
@@ -206,7 +200,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 		loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
 	}
 	if (type.isFilterPlugin()){
-		loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+		//loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
 	}
 	if (type.isIOMeshPlugin()){
 		loadIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
@@ -237,7 +232,8 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
 		}
 		if (type.isFilterPlugin()){
-			unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+			//unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
 		}
 		if (type.isIOMeshPlugin()){
 			unloadIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
@@ -294,11 +290,7 @@ DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 
 QAction* PluginManager::filterAction(const QString& name)
 {
-	auto it = actionFilterMap.find(name);
-	if (it != actionFilterMap.end())
-		return it.value();
-	else
-		return nullptr;
+	return filterPlugins.filterAction(name);
 }
 
 IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat) const
@@ -380,9 +372,9 @@ PluginManager::PluginRangeIterator PluginManager::pluginIterator(bool iterateAls
 	return PluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
+FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return filterPlugins.filterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -431,14 +423,14 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 	}
 }
 
-void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
-{
-	for(QAction *filterAction : iFilter->actions()) {
-		filterAction->setData(QVariant(iFilter->pluginName()));
-		actionFilterMap.insert(filterAction->text(), filterAction);
-	}
-	filterPlugins.push_back(iFilter);
-}
+//void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
+//{
+//	for(QAction *filterAction : iFilter->actions()) {
+//		filterAction->setData(QVariant(iFilter->pluginName()));
+//		actionFilterMap.insert(filterAction->text(), filterAction);
+//	}
+//	filterPlugins.push_back(iFilter);
+//}
 
 void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {
@@ -495,13 +487,13 @@ void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 	editPlugins.push_back(iEditFactory);
 }
 
-void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
-{
-	for(QAction *filterAction : iFilter->actions()) {
-		actionFilterMap.remove(filterAction->text());
-	}
-	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
-}
+//void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
+//{
+//	for(QAction *filterAction : iFilter->actions()) {
+//		actionFilterMap.remove(filterAction->text());
+//	}
+//	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
+//}
 
 void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {

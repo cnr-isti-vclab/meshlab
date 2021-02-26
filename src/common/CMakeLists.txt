@@ -19,6 +19,8 @@ endif()
 
 set(HEADERS
 	globals.h
+	plugins/containers/generic_container_iterator.h
+	plugins/containers/filter_plugin_container.h
 	plugins/interfaces/plugin_file_interface.h
 	plugins/interfaces/decorate_plugin_interface.h
 	plugins/interfaces/edit_plugin_interface.h
@@ -64,6 +66,7 @@ set(HEADERS
 
 set(SOURCES
 	globals.cpp
+	plugins/containers/filter_plugin_container.cpp
 	plugins/interfaces/decorate_plugin_interface.cpp
 	plugins/interfaces/filter_plugin_interface.cpp
 	plugins/interfaces/plugin_interface.cpp

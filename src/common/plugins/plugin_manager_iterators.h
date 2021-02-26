@@ -25,48 +25,7 @@
 #define MESHLAB_PLUGIN_MANAGER_ITERATORS_H
 
 #include "plugin_manager.h"
-
-template <typename PluginType>
-class ConstPluginIterator 
-{
-public:
-	using Container         = std::vector<PluginType*>;
-	using iterator_category = std::forward_iterator_tag;
-	using difference_type   = std::ptrdiff_t;
-	using value_type        = PluginType*;
-	using pointer           = typename Container::const_iterator;  
-	using reference         = PluginType*&;
-	
-	ConstPluginIterator(
-			const Container& c, 
-			const pointer& it, 
-			bool iterateAlsoDisabledPlugins = false) 
-		: c(c), m_ptr(it), iterateAlsoDisabledPlugins(iterateAlsoDisabledPlugins)
-	{
-		if (m_ptr != c.end() && !iterateAlsoDisabledPlugins && !(*m_ptr)->isEnabled())
-			++(*this);
-	}
-	value_type operator*() const {return *m_ptr; } 
-	pointer operator->() { return m_ptr; }
-	ConstPluginIterator& operator++() {
-		if (iterateAlsoDisabledPlugins)
-			m_ptr++;
-		else {
-			do {
-				m_ptr++;
-			} while((m_ptr != c.end()) && !(*m_ptr)->isEnabled());
-		}
-		return *this; 
-	} 
-	ConstPluginIterator operator++(int) {ConstPluginIterator tmp = *this; ++(*this); return tmp; }
-	friend bool operator== (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr == b.m_ptr; };
-	friend bool operator!= (const ConstPluginIterator& a, const ConstPluginIterator& b) { return a.m_ptr != b.m_ptr; };
-	
-private:
-	const Container& c;
-	pointer m_ptr;
-	bool iterateAlsoDisabledPlugins;
-};
+#include "containers/generic_container_iterator.h"
 
 /** Range iterators **/
 
@@ -82,17 +41,17 @@ private:
 	bool b;
 };
 
-class PluginManager::FilterPluginRangeIterator
-{
-	friend class PluginManager;
-public:
-	ConstPluginIterator<FilterPluginInterface> begin() {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);}
-	ConstPluginIterator<FilterPluginInterface> end()   {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);}
-private:
-	FilterPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
+//class PluginManager::FilterPluginRangeIterator
+//{
+//	friend class PluginManager;
+//public:
+//	ConstPluginIterator<FilterPluginInterface> begin() {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);}
+//	ConstPluginIterator<FilterPluginInterface> end()   {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);}
+//private:
+//	FilterPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
+//	const PluginManager* pm;
+//	bool b;
+//};
 
 class PluginManager::IOMeshPluginIterator
 {
