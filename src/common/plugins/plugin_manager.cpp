@@ -423,15 +423,6 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 	}
 }
 
-//void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
-//{
-//	for(QAction *filterAction : iFilter->actions()) {
-//		filterAction->setData(QVariant(iFilter->pluginName()));
-//		actionFilterMap.insert(filterAction->text(), filterAction);
-//	}
-//	filterPlugins.push_back(iFilter);
-//}
-
 void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {
 	ioMeshPlugins.push_back(iIOMesh);
@@ -486,14 +477,6 @@ void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
 }
-
-//void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
-//{
-//	for(QAction *filterAction : iFilter->actions()) {
-//		actionFilterMap.remove(filterAction->text());
-//	}
-//	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
-//}
 
 void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 {

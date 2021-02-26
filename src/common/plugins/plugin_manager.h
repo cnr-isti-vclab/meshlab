@@ -48,7 +48,6 @@ public:
 
 	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
 	class PluginRangeIterator;
-	//class FilterPluginRangeIterator;
 	class IOMeshPluginIterator;
 	class IORasterPluginIterator;
 	class RenderPluginRangeIterator;
@@ -57,15 +56,15 @@ public:
 
 	/** Member functions **/
 	static void checkPlugin(const QString& filename);
-	
+
 	void loadPlugins();
 	void loadPlugins(QDir pluginsDirectory);
 	void loadPlugin(const QString& filename);
 	void unloadPlugin(PluginFileInterface* ifp);
-	
+
 	void enablePlugin(PluginFileInterface* ifp);
 	void disablePlugin(PluginFileInterface* ifp);
-	
+
 	QString pluginsCode() const;
 
 	unsigned int size() const;
@@ -74,7 +73,7 @@ public:
 	DecoratePluginInterface* getDecoratePlugin(const QString& name);
 
 	QAction* filterAction(const QString& name);
-	
+
 	IOMeshPluginInterface* inputMeshPlugin(const QString& inputFormat) const;
 	IOMeshPluginInterface* outputMeshPlugin(const QString& outputFormat) const;
 	IORasterPluginInterface* inputRasterPlugin(const QString inputFormat) const;
@@ -115,8 +114,6 @@ private:
 
 	//Filter Plugins
 	FilterPluginContainer filterPlugins;
-	//std::vector<FilterPluginInterface*> filterPlugins;
-	//QMap<QString, QAction*> actionFilterMap;
 
 	//Render Plugins
 	std::vector<RenderPluginInterface*> renderPlugins;
@@ -126,26 +123,24 @@ private:
 
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;
-	
+
 	static void checkFilterPlugin(FilterPluginInterface* iFilter);
-	
-	//void loadFilterPlugin(FilterPluginInterface* iFilter);
+
 	void loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
 	void loadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void loadRenderPlugin(RenderPluginInterface* iRender);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
-	
-	//void unloadFilterPlugin(FilterPluginInterface* iFilter);
+
 	void unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
 	void unloadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void unloadRenderPlugin(RenderPluginInterface* iRender);
 	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
-	
+
 	template <typename RangeIterator>
 	static QStringList inputFormatListDialog(RangeIterator iterator);
-	
+
 	template <typename RangeIterator>
 	static QStringList outputFormatListDialog(RangeIterator iterator);
 };

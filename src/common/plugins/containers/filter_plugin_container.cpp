@@ -25,7 +25,6 @@
 
 FilterPluginContainer::FilterPluginContainer()
 {
-
 }
 
 void FilterPluginContainer::clear()
@@ -65,4 +64,21 @@ QAction* FilterPluginContainer::filterAction(const QString& name)
 FilterPluginContainer::FilterPluginRangeIterator FilterPluginContainer::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
 	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+}
+
+ConstPluginIterator<FilterPluginInterface> FilterPluginContainer::FilterPluginRangeIterator::begin()
+{
+	return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);
+}
+
+ConstPluginIterator<FilterPluginInterface> FilterPluginContainer::FilterPluginRangeIterator::end()
+{
+	return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);
+}
+
+FilterPluginContainer::FilterPluginRangeIterator::FilterPluginRangeIterator(
+		const FilterPluginContainer* pm,
+		bool iterateAlsoDisabledPlugins) :
+	pm(pm), b(iterateAlsoDisabledPlugins)
+{
 }

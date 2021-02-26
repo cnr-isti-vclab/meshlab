@@ -57,10 +57,12 @@ class FilterPluginContainer::FilterPluginRangeIterator
 {
 	friend class FilterPluginContainer;
 public:
-	ConstPluginIterator<FilterPluginInterface> begin() {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);}
-	ConstPluginIterator<FilterPluginInterface> end()   {return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);}
+	ConstPluginIterator<FilterPluginInterface> begin();
+	ConstPluginIterator<FilterPluginInterface> end();
 private:
-	FilterPluginRangeIterator(const FilterPluginContainer* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
+	FilterPluginRangeIterator(
+			const FilterPluginContainer* pm,
+			bool iterateAlsoDisabledPlugins = false);
 	const FilterPluginContainer* pm;
 	bool b;
 };
