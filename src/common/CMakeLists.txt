@@ -10,11 +10,9 @@ endif()
 if (BUILD_WITH_DOUBLE_SCALAR)
 	message(STATUS "Building with double precision")
 	set(MESHLAB_SCALAR "double")
-	#add_definitions(-DMESHLAB_SCALAR=double)
 else()
 	message(STATUS "Building with single precision")
 	set(MESHLAB_SCALAR "float")
-	#add_definitions(-DMESHLAB_SCALAR=float)
 endif()
 
 set(HEADERS
@@ -22,6 +20,7 @@ set(HEADERS
 	plugins/containers/generic_container_iterator.h
 	plugins/containers/filter_plugin_container.h
 	plugins/containers/iomesh_plugin_container.h
+	plugins/containers/ioraster_plugin_container.h
 	plugins/interfaces/plugin_file_interface.h
 	plugins/interfaces/decorate_plugin_interface.h
 	plugins/interfaces/edit_plugin_interface.h
@@ -69,6 +68,7 @@ set(SOURCES
 	globals.cpp
 	plugins/containers/filter_plugin_container.cpp
 	plugins/containers/iomesh_plugin_container.cpp
+	plugins/containers/ioraster_plugin_container.cpp
 	plugins/interfaces/decorate_plugin_interface.cpp
 	plugins/interfaces/filter_plugin_interface.cpp
 	plugins/interfaces/plugin_interface.cpp

@@ -29,20 +29,6 @@
 
 /** Range iterators **/
 
-class PluginManager::IORasterPluginIterator
-{
-	friend class PluginManager;
-public:
-	ConstPluginIterator<IORasterPluginInterface> begin() {return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.begin(), b);}
-	ConstPluginIterator<IORasterPluginInterface> end()   {return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.end(), b);}
-	//std::vector<IORasterPluginInterface*>::const_iterator begin() {return pm->ioRasterPlugins.begin();}
-	//std::vector<IORasterPluginInterface*>::const_iterator end() {return pm->ioRasterPlugins.end();}
-private:
-	IORasterPluginIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins)  {}
-	const PluginManager* pm;
-	bool b;
-};
-
 class PluginManager::RenderPluginRangeIterator
 {
 	friend class PluginManager;

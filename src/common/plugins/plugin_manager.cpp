@@ -206,7 +206,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
 	}
 	if (type.isIORasterPlugin()){
-		loadIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
+		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
 	}
 	if (type.isRenderPlugin()){
 		loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
@@ -237,7 +237,7 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
 		}
 		if (type.isIORasterPlugin()){
-			unloadIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
+			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
 		}
 		if (type.isRenderPlugin()){
 			unloadRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
@@ -303,10 +303,7 @@ IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputForm
 
 IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
-	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
-	if (it != inputRasterFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioRasterPlugins.inputRasterPlugin(inputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
@@ -321,7 +318,7 @@ bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) cons
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
 {
-	return inputRasterFormatToPluginMap.find(inputFormat.toLower()) != inputRasterFormatToPluginMap.end();
+	return ioRasterPlugins.isInputRasterFormatSupported(inputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
@@ -336,7 +333,7 @@ QStringList PluginManager::outputMeshFormatList() const
 
 QStringList PluginManager::inputRasterFormatList() const
 {
-	return inputRasterFormatToPluginMap.keys();
+	return ioRasterPlugins.inputRasterFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
@@ -374,9 +371,9 @@ IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIter
 	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
+IORasterPluginContainer::IORasterPluginRangeIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IORasterPluginIterator(this, iterateAlsoDisabledPlugins);
+	return ioRasterPlugins.ioRasterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -415,20 +412,6 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 	}
 }
 
-void PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster)
-{
-	ioRasterPlugins.push_back(iIORaster);
-	
-	//add input formats to inputFormatMap
-	for (const FileFormat& ff : iIORaster->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! inputRasterFormatToPluginMap.contains(currentExtension.toLower())) {
-				inputRasterFormatToPluginMap.insert(currentExtension.toLower(), iIORaster);
-			}
-		}
-	}
-}
-
 void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
 	decoratePlugins.push_back(iDecorate);
@@ -445,16 +428,6 @@ void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
 void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
-}
-
-void PluginManager::unloadIORasterPlugin(IORasterPluginInterface* iIORaster)
-{
-	ioRasterPlugins.erase(std::find(ioRasterPlugins.begin(), ioRasterPlugins.end(), iIORaster));
-	for (const FileFormat& ff : iIORaster->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			inputRasterFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
 }
 
 void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)

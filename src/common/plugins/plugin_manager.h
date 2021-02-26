@@ -33,6 +33,7 @@
 
 #include "containers/filter_plugin_container.h"
 #include "containers/iomesh_plugin_container.h"
+#include "containers/ioraster_plugin_container.h"
 
 #include<QMap>
 #include<QObject>
@@ -49,7 +50,6 @@ public:
 
 	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
 	class PluginRangeIterator;
-	class IORasterPluginIterator;
 	class RenderPluginRangeIterator;
 	class DecoratePluginRangeIterator;
 	class EditPluginFactoryRangeIterator;
@@ -93,7 +93,7 @@ public:
 	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	FilterPluginContainer::FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	IORasterPluginIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IORasterPluginContainer::IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
@@ -107,8 +107,7 @@ private:
 	IOMeshPluginContainer ioMeshPlugins;
 
 	//IORasterPlugins
-	std::vector<IORasterPluginInterface*> ioRasterPlugins;
-	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
+	IORasterPluginContainer ioRasterPlugins;
 
 	//Filter Plugins
 	FilterPluginContainer filterPlugins;
@@ -124,12 +123,10 @@ private:
 
 	static void checkFilterPlugin(FilterPluginInterface* iFilter);
 
-	void loadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void loadRenderPlugin(RenderPluginInterface* iRender);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 
-	void unloadIORasterPlugin(IORasterPluginInterface* iIORaster);
 	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
 	void unloadRenderPlugin(RenderPluginInterface* iRender);
 	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);

@@ -39,6 +39,7 @@ HEADERS += 	\
 	plugins/containers/generic_container_iterator.h \
 	plugins/containers/filter_plugin_container.h \
 	plugins/containers/iomesh_plugin_container.h \
+	plugins/containers/ioraster_plugin_container.h \
 	plugins/interfaces/plugin/file/interface.h \
 	plugins/interfaces/decorate_plugin_interface.h \
 	plugins/interfaces/edit_plugin_interface.h \
@@ -83,6 +84,7 @@ SOURCES += \
 	globals.cpp \
 	plugins/containers/filter_plugin_container.cpp \
 	plugins/containers/iomesh_plugin_container.cpp \
+	plugins/containers/ioraster_plugin_container.cpp \
 	plugins/interfaces/decorate_plugin_interface.cpp \
 	plugins/interfaces/filter_plugin_interface.cpp \
 	plugins/interfaces/plugin_interface.cpp \
