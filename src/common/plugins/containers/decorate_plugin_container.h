@@ -41,8 +41,8 @@ public:
 	DecoratePluginContainer();
 
 	void clear();
-	void pushFilterPlugin(DecoratePluginInterface* iDecorate);
-	void eraseFilterPlugin(DecoratePluginInterface* iDecorate);
+	void pushDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void eraseDecoratePlugin(DecoratePluginInterface* iDecorate);
 
 	DecoratePluginInterface* decoratePlugin(const QString& name);
 

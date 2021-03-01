@@ -25,7 +25,6 @@
 
 DecoratePluginContainer::DecoratePluginContainer()
 {
-
 }
 
 void DecoratePluginContainer::clear()
@@ -33,7 +32,7 @@ void DecoratePluginContainer::clear()
 	decoratePlugins.clear();
 }
 
-void DecoratePluginContainer::pushFilterPlugin(DecoratePluginInterface* iDecorate)
+void DecoratePluginContainer::pushDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
 	decoratePlugins.push_back(iDecorate);
 	for(QAction *decoratorAction : iDecorate->actions()) {
@@ -41,7 +40,7 @@ void DecoratePluginContainer::pushFilterPlugin(DecoratePluginInterface* iDecorat
 	}
 }
 
-void DecoratePluginContainer::eraseFilterPlugin(DecoratePluginInterface* iDecorate)
+void DecoratePluginContainer::eraseDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
 	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
 }

@@ -119,12 +119,8 @@ private:
 
 	static void checkFilterPlugin(FilterPluginInterface* iFilter);
 
-	void loadDecoratePlugin(DecoratePluginInterface* iDecorate);
-	void loadRenderPlugin(RenderPluginInterface* iRender);
 	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 
-	void unloadDecoratePlugin(DecoratePluginInterface* iDecorate);
-	void unloadRenderPlugin(RenderPluginInterface* iRender);
 	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 
 	template <typename RangeIterator>

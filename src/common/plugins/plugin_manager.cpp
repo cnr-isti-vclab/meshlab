@@ -194,7 +194,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
-		loadDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
+		decoratePlugins.pushFilterPlugin(qobject_cast<DecoratePluginInterface *>(plugin));
 	}
 	if (type.isEditPlugin()){
 		loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
@@ -209,7 +209,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
 	}
 	if (type.isRenderPlugin()){
-		loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
+		renderPlugins.pushRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
 	}
 
 	//set the QFileInfo to the plugin, and add it to the continer
@@ -225,7 +225,7 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 	if (it != allPlugins.end()){
 		MeshLabPluginType type(ifp);
 		if (type.isDecoratePlugin()){
-			unloadDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+			decoratePlugins.eraseFilterPlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
 		}
 		if (type.isEditPlugin()){
 			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
@@ -240,7 +240,7 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
 		}
 		if (type.isRenderPlugin()){
-			unloadRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
+			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
 		}
 		allPlugins.erase(it);
 		delete ifp;
@@ -407,24 +407,9 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 	}
 }
 
-void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
-{
-	decoratePlugins.pushFilterPlugin(iDecorate);
-}
-
-void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
-{
-	renderPlugins.pushRenderPlugin(iRender);
-}
-
 void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
-}
-
-void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
-{
-	decoratePlugins.eraseFilterPlugin(iDecorate);
 }
 
 void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
