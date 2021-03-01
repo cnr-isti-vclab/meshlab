@@ -43,28 +43,12 @@ if(TARGET external-newuoa)
 
 	set(UI alignDialog.ui)
 
-	add_library(edit_align MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
-
-	target_include_directories(edit_align PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(edit_align PUBLIC meshlab-common)
+	add_meshlab_plugin(edit_align ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 	target_link_libraries(edit_align PRIVATE external-newuoa OpenGL::GLU)
 	if(OpenMP_CXX_FOUND)
 		target_link_libraries(edit_align PRIVATE OpenMP::OpenMP_CXX)
 	endif()
-
-	set_property(TARGET edit_align PROPERTY FOLDER Plugins)
-
-	set_property(TARGET edit_align PROPERTY RUNTIME_OUTPUT_DIRECTORY
-		${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	set_property(TARGET edit_align PROPERTY LIBRARY_OUTPUT_DIRECTORY
-		${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	install(
-		TARGETS edit_align
-		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-		COMPONENT Plugins)
 
 else()
 	message(
