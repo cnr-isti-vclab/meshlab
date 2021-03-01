@@ -21,26 +21,45 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_MANAGER_ITERATORS_H
-#define MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#include "edit_plugin_container.h"
 
-#include "plugin_manager.h"
-#include "containers/generic_container_iterator.h"
-
-/** Range iterators **/
-
-class PluginManager::EditPluginFactoryRangeIterator
+EditPluginContainer::EditPluginContainer()
 {
-	friend class PluginManager;
-public:
-	ConstPluginIterator<EditPluginInterfaceFactory> begin() {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);}
-	ConstPluginIterator<EditPluginInterfaceFactory> end()   {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
-private:
-	EditPluginFactoryRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
+}
 
-#endif // MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+void EditPluginContainer::clear()
+{
+	editPlugins.clear();
+}
+
+void EditPluginContainer::pushEditPlugin(EditPluginInterfaceFactory* iEditFactory)
+{
+	editPlugins.push_back(iEditFactory);
+}
+
+void EditPluginContainer::eraseEditPlugin(EditPluginInterfaceFactory* iEditFactory)
+{
+	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
+}
+
+EditPluginContainer::EditPluginFactoryRangeIterator EditPluginContainer::editPluginIterator(bool iterateAlsoDisabledPlugins) const
+{
+	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
+}
+
+ConstPluginIterator<EditPluginInterfaceFactory> EditPluginContainer::EditPluginFactoryRangeIterator::begin()
+{
+	return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);
+}
+
+ConstPluginIterator<EditPluginInterfaceFactory> EditPluginContainer::EditPluginFactoryRangeIterator::end()
+{
+	return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);
+}
+
+EditPluginContainer::EditPluginFactoryRangeIterator::EditPluginFactoryRangeIterator(
+		const EditPluginContainer* pm,
+		bool iterateAlsoDisabledPlugins) :
+	pm(pm), b(iterateAlsoDisabledPlugins)
+{
+}

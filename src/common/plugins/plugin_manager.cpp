@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "plugin_manager_iterators.h" //includes plugin_manager.h
+#include "plugin_manager.h"
 #include "meshlab_plugin_type.h"
 #include <QObject>
 #include <qapplication.h>
@@ -194,10 +194,10 @@ void PluginManager::loadPlugin(const QString& fileName)
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
-		decoratePlugins.pushFilterPlugin(qobject_cast<DecoratePluginInterface *>(plugin));
+		decoratePlugins.pushDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
 	}
 	if (type.isEditPlugin()){
-		loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
+		editPlugins.pushEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
 	}
 	if (type.isFilterPlugin()){
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
@@ -225,10 +225,10 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 	if (it != allPlugins.end()){
 		MeshLabPluginType type(ifp);
 		if (type.isDecoratePlugin()){
-			decoratePlugins.eraseFilterPlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
 		}
 		if (type.isEditPlugin()){
-			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
+			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
 		}
 		if (type.isFilterPlugin()){
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
@@ -381,9 +381,9 @@ DecoratePluginContainer::DecoratePluginRangeIterator PluginManager::decoratePlug
 	return decoratePlugins.decoratePluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
+EditPluginContainer::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
+	return editPlugins.editPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
@@ -405,21 +405,6 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 			throw MLException("Missing Arity for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 	}
-}
-
-void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
-{
-	editPlugins.push_back(iEditFactory);
-}
-
-void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
-{
-	renderPlugins.eraseRenderPlugin(iRender);
-}
-
-void PluginManager::unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
-{
-	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
 }
 
 template<typename RangeIterator>

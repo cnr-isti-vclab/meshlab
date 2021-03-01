@@ -24,9 +24,8 @@
 #ifndef MESHLAB_PLUGIN_MANAGER_H
 #define MESHLAB_PLUGIN_MANAGER_H
 
-#include "interfaces/edit_plugin_interface.h"
-
 #include "containers/decorate_plugin_container.h"
+#include "containers/edit_plugin_container.h"
 #include "containers/filter_plugin_container.h"
 #include "containers/iomesh_plugin_container.h"
 #include "containers/ioraster_plugin_container.h"
@@ -45,10 +44,7 @@ public:
 	PluginManager();
 	~PluginManager();
 
-	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
 	class PluginRangeIterator;
-	class RenderPluginRangeIterator;
-	class EditPluginFactoryRangeIterator;
 
 	/** Member functions **/
 	static void checkPlugin(const QString& filename);
@@ -60,8 +56,6 @@ public:
 
 	void enablePlugin(PluginFileInterface* ifp);
 	void disablePlugin(PluginFileInterface* ifp);
-
-	QString pluginsCode() const;
 
 	unsigned int size() const;
 	int numberIOPlugins() const;
@@ -92,36 +86,23 @@ public:
 	IORasterPluginContainer::IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginContainer::RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginContainer::DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
+	EditPluginContainer::EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
 	//all plugins
 	std::vector<PluginFileInterface*> allPlugins;
 	std::set<QString> pluginFiles; //used to check if a plugin file has been already loaded
 
-	//IOMeshPlugins
+	//Plugin containers: used for better organization of each type of plugin
+	// note: these containers do not own any plugin. Plugins are owned by the PluginManager
 	IOMeshPluginContainer ioMeshPlugins;
-
-	//IORasterPlugins
 	IORasterPluginContainer ioRasterPlugins;
-
-	//Filter Plugins
 	FilterPluginContainer filterPlugins;
-
-	//Render Plugins
 	RenderPluginContainer renderPlugins;
-
-	//Decorate Plugins
 	DecoratePluginContainer decoratePlugins;
-
-	//Edit Plugins
-	std::vector<EditPluginInterfaceFactory*> editPlugins;
+	EditPluginContainer editPlugins;
 
 	static void checkFilterPlugin(FilterPluginInterface* iFilter);
-
-	void loadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
-
-	void unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory);
 
 	template <typename RangeIterator>
 	static QStringList inputFormatListDialog(RangeIterator iterator);
@@ -141,7 +122,5 @@ private:
 	const PluginManager* pm;
 	bool b;
 };
-
-#include "plugin_manager_iterators.h"
 
 #endif // MESHLAB_PLUGIN_MANAGER_H
