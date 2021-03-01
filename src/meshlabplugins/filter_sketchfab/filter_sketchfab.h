@@ -25,7 +25,8 @@
 #define FILTERSKETCHFAB_H
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
-#include <QHttpPart>
+
+class QHttpPart;
 
 class FilterSketchFabPlugin : public QObject, public FilterPluginInterface
 {

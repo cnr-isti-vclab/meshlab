@@ -22,10 +22,10 @@
 ****************************************************************************/
 
 #include "filter_sketchfab.h"
+#include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-//#include <QJSEngine>
 #include <QSettings>
 #include <QApplication>
 #include <QDir>
