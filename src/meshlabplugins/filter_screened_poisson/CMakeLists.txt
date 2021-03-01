@@ -53,7 +53,7 @@ set(INL_HEADERS
 	Src/SparseMatrix.inl
 	Src/Vector.inl)
 
-add_library(filter_screened_poisson MODULE ${SOURCES} ${HEADERS} ${INL_HEADERS})
+add_meshlab_plugin(filter_screened_poisson ${SOURCES} ${HEADERS} ${INL_HEADERS})
 
 target_compile_definitions(filter_screened_poisson PRIVATE BRUNO_LEVY_FIX
 														   FOR_RELEASE)
@@ -61,20 +61,3 @@ target_compile_definitions(filter_screened_poisson PRIVATE BRUNO_LEVY_FIX
 if(OpenMP_CXX_FOUND)
 	target_link_libraries(filter_screened_poisson PRIVATE OpenMP::OpenMP_CXX)
 endif()
-
-target_include_directories(filter_screened_poisson
-						   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_screened_poisson PUBLIC meshlab-common)
-
-set_property(TARGET filter_screened_poisson PROPERTY FOLDER Plugins)
-
-set_property(TARGET filter_screened_poisson
-			 PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET filter_screened_poisson
-			 PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-	TARGETS filter_screened_poisson
-	DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-	COMPONENT Plugins)
