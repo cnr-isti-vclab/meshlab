@@ -947,7 +947,7 @@ void GLArea::displayHelp()
         tableText.replace("Ctrl","Command");
 #endif
     }
-    md()->Log.RealTimeLog("Quick Help","",tableText);
+    md()->Log.realTimeLog("Quick Help","",tableText);
 }
 
 

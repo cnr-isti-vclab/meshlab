@@ -36,8 +36,8 @@
 #include <QDir>
 
 /**
-\brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
-*/
+ * @brief The PluginManager class provides the basic tools for managing all the plugins.
+ */
 class PluginManager
 {
 public:

@@ -138,7 +138,7 @@ public:
     {
         makeCurrent();
         if( this->md() != nullptr){
-            this->md()->Log.Logf(Level, f, std::forward<Ts>(ts)...);
+            this->md()->Log.logf(Level, f, std::forward<Ts>(ts)...);
         }
     }
 
@@ -146,7 +146,7 @@ public:
     {
         makeCurrent();
         if( this->md() != nullptr){
-            this->md()->Log.Log(Level, f);
+            this->md()->Log.log(Level, f);
         }
     }
 

@@ -961,7 +961,7 @@ void MainWindow::startFilter()
 		if(currentViewContainer())
 		{
 			iFilter->setLog(currentViewContainer()->LogPtr());
-			currentViewContainer()->LogPtr()->SetBookmark();
+			currentViewContainer()->LogPtr()->setBookmark();
 		}
 		// just to be sure...
 		createStdPluginWnd();
@@ -1159,9 +1159,9 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	
 	// (3) save the current filter and its parameters in the history
 	if(!isPreview)
-		meshDoc()->Log.ClearBookmark();
+		meshDoc()->Log.clearBookmark();
 	else
-		meshDoc()->Log.BackToBookmark();
+		meshDoc()->Log.backToBookmark();
 	// (4) Apply the Filter
 	bool ret;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1236,7 +1236,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		
 		if(ret)
 		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
+			meshDoc()->Log.logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
 			if (meshDoc()->mm() != NULL)
 				meshDoc()->mm()->setMeshModified();
 			MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
@@ -1250,7 +1250,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		else // filter has failed. show the message error.
 		{
 			QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qUtf8Printable(iFilter->errorMsg()));
+			meshDoc()->Log.logf(GLLogStream::SYSTEM,"Filter failed: %s",qUtf8Printable(iFilter->errorMsg()));
 			MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 		}
 		
@@ -2886,7 +2886,7 @@ void MainWindow::updateTexture(int meshid)
 			if(!res)
 			{
 				QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
-				meshDoc()->Log.Log(GLLogStream::WARNING,qUtf8Printable(errmsg));
+				meshDoc()->Log.log(GLLogStream::WARNING,qUtf8Printable(errmsg));
 				unexistingtext += "<font color=red>" + filename + "</font><br>";
 			}
 		}
@@ -3149,7 +3149,7 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
 				QString data = QString(deb._currentlyallocated.c_str()) + "\n" + QString(deb._tobedeallocated.c_str()) + "\n" + QString(deb._tobeallocated.c_str()) + "\n" + QString(deb._tobeupdated.c_str()) + "\n";
 				for(std::vector<std::string>::iterator it = deb._perviewdata.begin();it != deb._perviewdata.end();++it)
 					data += QString((*it).c_str()) + "<br>";
-				meshDoc()->Log.Log(GLLogStream::SYSTEM, data);
+				meshDoc()->Log.log(GLLogStream::SYSTEM, data);
 			}
 		}
 	}

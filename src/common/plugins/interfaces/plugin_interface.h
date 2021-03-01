@@ -91,7 +91,7 @@ template<typename... Ts>
 void PluginInterface::log(const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
+		logstream->logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
 	}
 }
 
@@ -99,7 +99,7 @@ template<typename... Ts>
 void PluginInterface::log(const std::string& s, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->Logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
+		logstream->logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
 	}
 }
 
@@ -107,7 +107,7 @@ template <typename... Ts>
 void PluginInterface::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->Logf(Level, f, std::forward<Ts>(ts)...);
+		logstream->logf(Level, f, std::forward<Ts>(ts)...);
 	}
 }
 
@@ -115,7 +115,7 @@ template <typename... Ts>
 void PluginInterface::realTimeLog(QString Id, const QString& meshName, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->RealTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
+		logstream->realTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
 	}
 }
 

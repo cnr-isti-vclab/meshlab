@@ -13,34 +13,34 @@ void PluginInterface::setLog(GLLogStream* log)
 void PluginInterface::log(const char* s)
 {
 	if(logstream != nullptr) {
-		logstream->Log(GLLogStream::FILTER, s);
+		logstream->log(GLLogStream::FILTER, s);
 	}
 }
 
 void PluginInterface::log(const std::string& s)
 {
 	if(logstream != nullptr) {
-		logstream->Log(GLLogStream::FILTER, s);
+		logstream->log(GLLogStream::FILTER, s);
 	}
 }
 
 void PluginInterface::log(GLLogStream::Levels level, const char* s)
 {
 	if(logstream != nullptr) {
-		logstream->Log(level, s);
+		logstream->log(level, s);
 	}
 }
 
 void PluginInterface::log(GLLogStream::Levels level, const std::string& s)
 {
 	if(logstream != nullptr) {
-		logstream->Log(level, s);
+		logstream->log(level, s);
 	}
 }
 
 void PluginInterface::realTimeLog(QString Id, const QString& meshName, const char* f)
 {
 	if(logstream != nullptr) {
-		logstream->RealTimeLog(Id, meshName, f);
+		logstream->realTimeLog(Id, meshName, f);
 	}
 }
