@@ -371,9 +371,9 @@ IORasterPluginContainer::IORasterPluginRangeIterator PluginManager::ioRasterPlug
 	return ioRasterPlugins.ioRasterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
+RenderPluginContainer::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return renderPlugins.renderPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 DecoratePluginContainer::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -414,7 +414,7 @@ void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
 
 void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
 {
-	renderPlugins.push_back(iRender);
+	renderPlugins.pushRenderPlugin(iRender);
 }
 
 void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
@@ -429,7 +429,7 @@ void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
 
 void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
 {
-	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
+	renderPlugins.eraseRenderPlugin(iRender);
 }
 
 void PluginManager::unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory)

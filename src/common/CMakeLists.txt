@@ -22,6 +22,7 @@ set(HEADERS
 	plugins/containers/filter_plugin_container.h
 	plugins/containers/iomesh_plugin_container.h
 	plugins/containers/ioraster_plugin_container.h
+	plugins/containers/render_plugin_container.h
 	plugins/interfaces/plugin_file_interface.h
 	plugins/interfaces/decorate_plugin_interface.h
 	plugins/interfaces/edit_plugin_interface.h
@@ -71,6 +72,7 @@ set(SOURCES
 	plugins/containers/filter_plugin_container.cpp
 	plugins/containers/iomesh_plugin_container.cpp
 	plugins/containers/ioraster_plugin_container.cpp
+	plugins/containers/render_plugin_container.cpp
 	plugins/interfaces/decorate_plugin_interface.cpp
 	plugins/interfaces/filter_plugin_interface.cpp
 	plugins/interfaces/plugin_interface.cpp

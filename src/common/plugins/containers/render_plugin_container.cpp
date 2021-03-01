@@ -21,26 +21,45 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_MANAGER_ITERATORS_H
-#define MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#include "render_plugin_container.h"
 
-#include "plugin_manager.h"
-#include "containers/generic_container_iterator.h"
-
-/** Range iterators **/
-
-class PluginManager::EditPluginFactoryRangeIterator
+RenderPluginContainer::RenderPluginContainer()
 {
-	friend class PluginManager;
-public:
-	ConstPluginIterator<EditPluginInterfaceFactory> begin() {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);}
-	ConstPluginIterator<EditPluginInterfaceFactory> end()   {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
-private:
-	EditPluginFactoryRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
+}
 
-#endif // MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+void RenderPluginContainer::clear()
+{
+	renderPlugins.clear();
+}
+
+void RenderPluginContainer::pushRenderPlugin(RenderPluginInterface* iRender)
+{
+	renderPlugins.push_back(iRender);
+}
+
+void RenderPluginContainer::eraseRenderPlugin(RenderPluginInterface* iRender)
+{
+	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
+}
+
+RenderPluginContainer::RenderPluginRangeIterator RenderPluginContainer::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
+{
+	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+}
+
+ConstPluginIterator<RenderPluginInterface> RenderPluginContainer::RenderPluginRangeIterator::begin()
+{
+	return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.begin(), b);
+}
+
+ConstPluginIterator<RenderPluginInterface> RenderPluginContainer::RenderPluginRangeIterator::end()
+{
+	return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.end(), b);
+}
+
+RenderPluginContainer::RenderPluginRangeIterator::RenderPluginRangeIterator(
+		const RenderPluginContainer* pm,
+		bool iterateAlsoDisabledPlugins) :
+	pm(pm), b(iterateAlsoDisabledPlugins)
+{
+}

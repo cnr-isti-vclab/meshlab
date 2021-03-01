@@ -24,13 +24,13 @@
 #ifndef MESHLAB_PLUGIN_MANAGER_H
 #define MESHLAB_PLUGIN_MANAGER_H
 
-#include "interfaces/render_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
 
 #include "containers/decorate_plugin_container.h"
 #include "containers/filter_plugin_container.h"
 #include "containers/iomesh_plugin_container.h"
 #include "containers/ioraster_plugin_container.h"
+#include "containers/render_plugin_container.h"
 
 #include<QMap>
 #include<QObject>
@@ -90,7 +90,7 @@ public:
 	FilterPluginContainer::FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IORasterPluginContainer::IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	RenderPluginContainer::RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginContainer::DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
@@ -109,11 +109,10 @@ private:
 	FilterPluginContainer filterPlugins;
 
 	//Render Plugins
-	std::vector<RenderPluginInterface*> renderPlugins;
+	RenderPluginContainer renderPlugins;
 
 	//Decorate Plugins
 	DecoratePluginContainer decoratePlugins;
-	//std::vector<DecoratePluginInterface*> decoratePlugins;
 
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;

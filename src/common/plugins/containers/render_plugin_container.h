@@ -21,26 +21,46 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_MANAGER_ITERATORS_H
-#define MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#ifndef MESHLAB_RENDER_PLUGIN_CONTAINER_H
+#define MESHLAB_RENDER_PLUGIN_CONTAINER_H
 
-#include "plugin_manager.h"
-#include "containers/generic_container_iterator.h"
+#include "../interfaces/render_plugin_interface.h"
+#include "generic_container_iterator.h"
 
-/** Range iterators **/
-
-class PluginManager::EditPluginFactoryRangeIterator
+/**
+ * @brief The RenderPluginContainer class allows to organize
+ * all the render plugins contained in the PluginManager.
+ *
+ * Note: plugins are not owned by this container, but by the PluginManager,
+ * since each plugin can inherit from more than one PluginInterface.
+ */
+class RenderPluginContainer
 {
-	friend class PluginManager;
 public:
-	ConstPluginIterator<EditPluginInterfaceFactory> begin() {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);}
-	ConstPluginIterator<EditPluginInterfaceFactory> end()   {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
+	class RenderPluginRangeIterator;
+	RenderPluginContainer();
+
+	void clear();
+	void pushRenderPlugin(RenderPluginInterface* iRender);
+	void eraseRenderPlugin(RenderPluginInterface* iRender);
+
+	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 private:
-	EditPluginFactoryRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
+	std::vector<RenderPluginInterface*> renderPlugins;
+};
+
+class RenderPluginContainer::RenderPluginRangeIterator
+{
+	friend class RenderPluginContainer;
+public:
+	ConstPluginIterator<RenderPluginInterface> begin();
+	ConstPluginIterator<RenderPluginInterface> end();
+private:
+	RenderPluginRangeIterator(
+			const RenderPluginContainer* pm,
+			bool iterateAlsoDisabledPlugins = false);
+	const RenderPluginContainer* pm;
 	bool b;
 };
 
-#endif // MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#endif // MESHLAB_RENDER_PLUGIN_CONTAINER_H
