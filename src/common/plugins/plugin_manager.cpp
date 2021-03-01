@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "plugin_manager_iterators.h" //includes plugin_manager.h
+#include "plugin_manager.h"
 #include "meshlab_plugin_type.h"
 #include <QObject>
 #include <qapplication.h>
@@ -53,14 +53,8 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-	ioMeshPlugins.clear();
-	filterPlugins.clear();
-	renderPlugins.clear();
-	decoratePlugins.clear();
-	editPlugins.clear();
 	for (auto& plugin : allPlugins)
 		delete plugin;
-	allPlugins.clear();
 }
 
 /**
@@ -200,22 +194,22 @@ void PluginManager::loadPlugin(const QString& fileName)
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
-		loadDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
+		decoratePlugins.pushDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
 	}
 	if (type.isEditPlugin()){
-		loadEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
+		editPlugins.pushEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
 	}
 	if (type.isFilterPlugin()){
-		loadFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
 	}
 	if (type.isIOMeshPlugin()){
-		loadIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
+		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
 	}
 	if (type.isIORasterPlugin()){
-		loadIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
+		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
 	}
 	if (type.isRenderPlugin()){
-		loadRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
+		renderPlugins.pushRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
 	}
 
 	//set the QFileInfo to the plugin, and add it to the continer
@@ -231,22 +225,22 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 	if (it != allPlugins.end()){
 		MeshLabPluginType type(ifp);
 		if (type.isDecoratePlugin()){
-			unloadDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
 		}
 		if (type.isEditPlugin()){
-			unloadEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
+			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
 		}
 		if (type.isFilterPlugin()){
-			unloadFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
 		}
 		if (type.isIOMeshPlugin()){
-			unloadIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
+			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
 		}
 		if (type.isIORasterPlugin()){
-			unloadIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
+			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
 		}
 		if (type.isRenderPlugin()){
-			unloadRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
+			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
 		}
 		allPlugins.erase(it);
 		delete ifp;
@@ -284,75 +278,57 @@ int PluginManager::numberIOPlugins() const
 // Search among all the decorator plugins the one that contains a decoration with the given name
 DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 {
-	for(DecoratePluginInterface *tt : decoratePlugins) {
-		for( QAction *ac: tt->actions())
-			if( name == tt->decorationName(ac) ) return tt;
-	}
-	assert(0);
-	return 0;
+	return decoratePlugins.decoratePlugin(name);
 }
 
 QAction* PluginManager::filterAction(const QString& name)
 {
-	auto it = actionFilterMap.find(name);
-	if (it != actionFilterMap.end())
-		return it.value();
-	else
-		return nullptr;
+	return filterPlugins.filterAction(name);
 }
 
 IOMeshPluginInterface* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
-	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
-	if (it != inputMeshFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioMeshPlugins.inputMeshPlugin(inputFormat);
 }
 
 IOMeshPluginInterface* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
-	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
-	if (it != outputMeshFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioMeshPlugins.outputMeshPlugin(outputFormat);
 }
 
 IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
-	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
-	if (it != inputRasterFormatToPluginMap.end())
-		return *it;
-	return nullptr;
+	return ioRasterPlugins.inputRasterPlugin(inputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
 {
-	return inputMeshFormatToPluginMap.find(inputFormat.toLower()) != inputMeshFormatToPluginMap.end();
+	return ioMeshPlugins.isInputMeshFormatSupported(inputFormat);
 }
 
 bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) const
 {
-	return outputMeshFormatToPluginMap.find(outputFormat.toLower()) != outputMeshFormatToPluginMap.end();
+	return ioMeshPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
 {
-	return inputRasterFormatToPluginMap.find(inputFormat.toLower()) != inputRasterFormatToPluginMap.end();
+	return ioRasterPlugins.isInputRasterFormatSupported(inputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
 {
-	return inputMeshFormatToPluginMap.keys();
+	return ioMeshPlugins.inputMeshFormatList();
 }
 
 QStringList PluginManager::outputMeshFormatList() const
 {
-	return outputMeshFormatToPluginMap.keys();
+	return ioMeshPlugins.outputMeshFormatList();
 }
 
 QStringList PluginManager::inputRasterFormatList() const
 {
-	return inputRasterFormatToPluginMap.keys();
+	return ioRasterPlugins.inputRasterFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
@@ -380,34 +356,34 @@ PluginManager::PluginRangeIterator PluginManager::pluginIterator(bool iterateAls
 	return PluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
+FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return filterPlugins.filterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IOMeshPluginIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
+IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IOMeshPluginIterator(this, iterateAlsoDisabledPlugins);
+	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::IORasterPluginIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
+IORasterPluginContainer::IORasterPluginRangeIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return IORasterPluginIterator(this, iterateAlsoDisabledPlugins);
+	return ioRasterPlugins.ioRasterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
+RenderPluginContainer::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return renderPlugins.renderPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
+DecoratePluginContainer::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return DecoratePluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return decoratePlugins.decoratePluginIterator(iterateAlsoDisabledPlugins);
 }
 
-PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
+EditPluginContainer::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
+	return editPlugins.editPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
@@ -429,118 +405,6 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 			throw MLException("Missing Arity for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 	}
-}
-
-void PluginManager::loadFilterPlugin(FilterPluginInterface* iFilter)
-{
-	for(QAction *filterAction : iFilter->actions()) {
-		filterAction->setData(QVariant(iFilter->pluginName()));
-		actionFilterMap.insert(filterAction->text(), filterAction);
-	}
-	filterPlugins.push_back(iFilter);
-}
-
-void PluginManager::loadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
-{
-	ioMeshPlugins.push_back(iIOMesh);
-
-	//add input formats to inputFormatMap
-	for (const FileFormat& ff : iIOMesh->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! inputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
-				inputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
-			}
-		}
-	}
-	
-	//add output formats to outputFormatMap
-	for (const FileFormat& ff : iIOMesh->exportFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! outputMeshFormatToPluginMap.contains(currentExtension.toLower())) {
-				outputMeshFormatToPluginMap.insert(currentExtension.toLower(), iIOMesh);
-			}
-		}
-	}
-}
-
-void PluginManager::loadIORasterPlugin(IORasterPluginInterface* iIORaster)
-{
-	ioRasterPlugins.push_back(iIORaster);
-	
-	//add input formats to inputFormatMap
-	for (const FileFormat& ff : iIORaster->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			if (! inputRasterFormatToPluginMap.contains(currentExtension.toLower())) {
-				inputRasterFormatToPluginMap.insert(currentExtension.toLower(), iIORaster);
-			}
-		}
-	}
-}
-
-void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
-{
-	decoratePlugins.push_back(iDecorate);
-	for(QAction *decoratorAction : iDecorate->actions()) {
-		iDecorate->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
-	}
-}
-
-void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
-{
-	renderPlugins.push_back(iRender);
-}
-
-void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
-{
-	editPlugins.push_back(iEditFactory);
-}
-
-void PluginManager::unloadFilterPlugin(FilterPluginInterface* iFilter)
-{
-	for(QAction *filterAction : iFilter->actions()) {
-		actionFilterMap.remove(filterAction->text());
-	}
-	filterPlugins.erase(std::find(filterPlugins.begin(), filterPlugins.end(), iFilter));
-}
-
-void PluginManager::unloadIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
-{
-	ioMeshPlugins.erase(std::find(ioMeshPlugins.begin(), ioMeshPlugins.end(), iIOMesh));
-	for (const FileFormat& ff : iIOMesh->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			inputMeshFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
-	for (const FileFormat& ff : iIOMesh->exportFormats()){
-		for (QString currentExtension : ff.extensions) {
-			outputMeshFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
-}
-
-void PluginManager::unloadIORasterPlugin(IORasterPluginInterface* iIORaster)
-{
-	ioRasterPlugins.erase(std::find(ioRasterPlugins.begin(), ioRasterPlugins.end(), iIORaster));
-	for (const FileFormat& ff : iIORaster->importFormats()){
-		for (QString currentExtension : ff.extensions) {
-			inputRasterFormatToPluginMap.remove(currentExtension.toLower());
-		}
-	}
-}
-
-void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
-{
-	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
-}
-
-void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
-{
-	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
-}
-
-void PluginManager::unloadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
-{
-	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
 }
 
 template<typename RangeIterator>
@@ -586,4 +450,19 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 		}
 	}
 	return inputRasterFormatsDialogStringList;
+}
+
+ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::begin()
+{
+	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.begin(), b);
+}
+
+ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::end()
+{
+	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.end(), b);
+}
+
+PluginManager::PluginRangeIterator::PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins) :
+	pm(pm), b(iterateAlsoDisabledPlugins)
+{
 }

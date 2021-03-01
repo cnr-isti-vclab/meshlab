@@ -36,6 +36,13 @@ message(MeshLab Version: $$MESHLAB_VERSION)
 # Input
 HEADERS += 	\
 	globals.h \
+	plugins/containers/generic_container_iterator.h \
+	plugins/containers/decorate_plugin_container.h \
+	plugins/containers/edit_plugin_container.h \
+	plugins/containers/filter_plugin_container.h \
+	plugins/containers/iomesh_plugin_container.h \
+	plugins/containers/ioraster_plugin_container.h \
+	plugins/containers/render_plugin_container.h \
 	plugins/interfaces/plugin/file/interface.h \
 	plugins/interfaces/decorate_plugin_interface.h \
 	plugins/interfaces/edit_plugin_interface.h \
@@ -44,7 +51,6 @@ HEADERS += 	\
 	plugins/interfaces/plugin_interface.h \
 	plugins/interfaces/render_plugin_interface.h \
 	plugins/meshlab_plugin_type.h \
-	plugins/plugin_manager_iterators.h \
 	plugins/plugin_manager.h \
 	ml_document/helpers/mesh_document_state_data.h \
 	ml_document/helpers/mesh_model_state_data.h \
@@ -78,6 +84,12 @@ HEADERS += 	\
 
 SOURCES += \
 	globals.cpp \
+	plugins/containers/decorate_plugin_container.cpp \
+	plugins/containers/edit_plugin_container.cpp \
+	plugins/containers/filter_plugin_container.cpp \
+	plugins/containers/iomesh_plugin_container.cpp \
+	plugins/containers/ioraster_plugin_container.cpp \
+	plugins/containers/render_plugin_container.cpp \
 	plugins/interfaces/decorate_plugin_interface.cpp \
 	plugins/interfaces/filter_plugin_interface.cpp \
 	plugins/interfaces/plugin_interface.cpp \
