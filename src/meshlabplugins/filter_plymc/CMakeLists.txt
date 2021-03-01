@@ -6,6 +6,6 @@ set(SOURCES filter_plymc.cpp ${VCGDIR}/wrap/ply/plylib.cpp)
 
 set(HEADERS filter_plymc.h)
 
-add_meshlab_plugin(filter_plymc MODULE ${SOURCES} ${HEADERS})
+add_meshlab_plugin(filter_plymc ${SOURCES} ${HEADERS})
 
 target_link_libraries(filter_plymc PRIVATE OpenGL::GLU)
