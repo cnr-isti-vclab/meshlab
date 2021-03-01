@@ -2,6 +2,7 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
+#function used to add plugins
 function(add_meshlab_plugin target_name)
 	cmake_parse_arguments(ARG "" "" "" ${ARGN})
 
