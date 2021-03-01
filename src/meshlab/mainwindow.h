@@ -258,9 +258,10 @@ private:
 	void initItemForSearching(QAction* act);
 	void initMenuForSearching(QMenu* menu);
 	void fillFilterMenu();
-	void fillDecorateMenu();
 	void fillRenderMenu();
+	void fillShadersMenu();
 	void fillEditMenu();
+	void clearMenu(QMenu* menu);
 	void updateAllPluginsActions();
 	void createToolBars();
 	void loadMeshLabSettings();

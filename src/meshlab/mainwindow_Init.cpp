@@ -573,8 +573,8 @@ void MainWindow::createMenus()
 	renderMenu = menuBar()->addMenu(tr("&Render"));
 
 	// Shaders SUBmenu
-	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
-	renderMenu->addSeparator();
+	//shadersMenu = renderMenu->addMenu(tr("&Shaders"));
+	//renderMenu->addSeparator();
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu = menuBar()->addMenu(tr("&View"));
@@ -617,7 +617,6 @@ void MainWindow::createMenus()
 
 	fillEditMenu();
 	fillRenderMenu();
-	fillDecorateMenu();
 
 	//////////////////// Menu Split/Unsplit from handle
 	handleMenu = new QMenu(this);
@@ -681,7 +680,8 @@ QString MainWindow::getDecoratedFileName(const QString& name)
 
 void MainWindow::fillFilterMenu()
 {
-	filterMenu->clear();
+	clearMenu(filterMenu);
+	//filterMenu->clear();
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addSeparator();
@@ -830,8 +830,14 @@ void MainWindow::fillFilterMenu()
 	}
 }
 
-void MainWindow::fillDecorateMenu()
+void MainWindow::fillRenderMenu()
 {
+	clearMenu(renderMenu);
+
+	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
+	renderMenu->addSeparator();
+	fillShadersMenu();
+
 	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator())
 	{
 		for(QAction *decorateAction: iDecorate->actions())
@@ -844,9 +850,8 @@ void MainWindow::fillDecorateMenu()
 	connect(renderMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)));
 }
 
-void MainWindow::fillRenderMenu()
+void MainWindow::fillShadersMenu()
 {
-	shadersMenu->clear();
 	QAction * qaNone = new QAction("None", this);
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
@@ -863,6 +868,7 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
+	clearMenu(editMenu);
 	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator())
 	{
 		for(QAction* editAction: iEditFactory->actions())
@@ -873,11 +879,22 @@ void MainWindow::fillEditMenu()
 	}
 }
 
+void MainWindow::clearMenu(QMenu* menu)
+{
+	for (QAction *action : menu->actions()) {
+		if (action->menu()) {
+			clearMenu(action->menu());
+		} else if (!action->isSeparator()){
+			disconnect(action, SIGNAL(triggered()), 0, 0);
+		}
+	}
+	menu->clear();
+}
+
 void MainWindow::updateAllPluginsActions()
 {
 	//update menus
 	fillFilterMenu();
-	fillDecorateMenu();
 	fillRenderMenu();
 	fillEditMenu();
 	
