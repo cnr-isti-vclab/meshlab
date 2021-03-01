@@ -17,6 +17,7 @@ option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
 ### Dependencies
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_tools.cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
