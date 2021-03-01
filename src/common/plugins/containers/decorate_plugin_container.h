@@ -21,40 +21,47 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_MANAGER_ITERATORS_H
-#define MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#ifndef MESHLAB_DECORATE_PLUGIN_CONTAINER_H
+#define MESHLAB_DECORATE_PLUGIN_CONTAINER_H
 
-#include "plugin_manager.h"
-#include "containers/generic_container_iterator.h"
+#include "../interfaces/decorate_plugin_interface.h"
+#include "generic_container_iterator.h"
 
-/** Range iterators **/
-
-class PluginManager::RenderPluginRangeIterator
+/**
+ * @brief The DecoratePluginContainer class allows to organize
+ * all the decorate plugins contained in the PluginManager.
+ *
+ * Note: plugins are not owned by this container, but by the PluginManager,
+ * since each plugin can inherit from more than one PluginInterface.
+ */
+class DecoratePluginContainer
 {
-	friend class PluginManager;
 public:
-	ConstPluginIterator<RenderPluginInterface> begin() {return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.begin(), b);}
-	ConstPluginIterator<RenderPluginInterface> end()   {return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.end(), b);}
-	//std::vector<RenderPluginInterface*>::const_iterator begin() {return pm->renderPlugins.begin();}
-	//std::vector<RenderPluginInterface*>::const_iterator end() {return pm->renderPlugins.end();}
+	class DecoratePluginRangeIterator;
+	DecoratePluginContainer();
+
+	void clear();
+	void pushFilterPlugin(DecoratePluginInterface* iDecorate);
+	void eraseFilterPlugin(DecoratePluginInterface* iDecorate);
+
+	DecoratePluginInterface* decoratePlugin(const QString& name);
+
+	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+
 private:
-	RenderPluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
+	std::vector<DecoratePluginInterface*> decoratePlugins;
+};
+
+class DecoratePluginContainer::DecoratePluginRangeIterator
+{
+	friend class DecoratePluginContainer;
+public:
+	ConstPluginIterator<DecoratePluginInterface> begin() {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.begin(), b);}
+	ConstPluginIterator<DecoratePluginInterface> end()   {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.end(), b);}
+private:
+	DecoratePluginRangeIterator(const DecoratePluginContainer* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
+	const DecoratePluginContainer* pm;
 	bool b;
 };
 
-class PluginManager::EditPluginFactoryRangeIterator
-{
-	friend class PluginManager;
-public:
-	ConstPluginIterator<EditPluginInterfaceFactory> begin() {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.begin(), b);}
-	ConstPluginIterator<EditPluginInterfaceFactory> end()   {return ConstPluginIterator<EditPluginInterfaceFactory>(pm->editPlugins, pm->editPlugins.end(), b);}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator begin() {return pm->editPlugins.begin();}
-	//std::vector<EditPluginInterfaceFactory*>::const_iterator end() {return pm->editPlugins.end();}
-private:
-	EditPluginFactoryRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
-	const PluginManager* pm;
-	bool b;
-};
-
-#endif // MESHLAB_PLUGIN_MANAGER_ITERATORS_H
+#endif // MESHLAB_DECORATE_PLUGIN_CONTAINER_H

@@ -37,6 +37,7 @@ message(MeshLab Version: $$MESHLAB_VERSION)
 HEADERS += 	\
 	globals.h \
 	plugins/containers/generic_container_iterator.h \
+	plugins/containers/decorate_plugin_container.h \
 	plugins/containers/filter_plugin_container.h \
 	plugins/containers/iomesh_plugin_container.h \
 	plugins/containers/ioraster_plugin_container.h \
@@ -82,6 +83,7 @@ HEADERS += 	\
 
 SOURCES += \
 	globals.cpp \
+	plugins/containers/decorate_plugin_container.cpp \
 	plugins/containers/filter_plugin_container.cpp \
 	plugins/containers/iomesh_plugin_container.cpp \
 	plugins/containers/ioraster_plugin_container.cpp \

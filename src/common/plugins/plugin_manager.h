@@ -24,13 +24,10 @@
 #ifndef MESHLAB_PLUGIN_MANAGER_H
 #define MESHLAB_PLUGIN_MANAGER_H
 
-#include "interfaces/filter_plugin_interface.h"
-#include "interfaces/iomesh_plugin_interface.h"
-#include "interfaces/ioraster_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
-#include "interfaces/decorate_plugin_interface.h"
 #include "interfaces/edit_plugin_interface.h"
 
+#include "containers/decorate_plugin_container.h"
 #include "containers/filter_plugin_container.h"
 #include "containers/iomesh_plugin_container.h"
 #include "containers/ioraster_plugin_container.h"
@@ -51,7 +48,6 @@ public:
 	/** Iterators (definitions can be found in plugin_manager_iterators.h) **/ 
 	class PluginRangeIterator;
 	class RenderPluginRangeIterator;
-	class DecoratePluginRangeIterator;
 	class EditPluginFactoryRangeIterator;
 
 	/** Member functions **/
@@ -95,7 +91,7 @@ public:
 	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IORasterPluginContainer::IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	DecoratePluginContainer::DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
@@ -116,7 +112,8 @@ private:
 	std::vector<RenderPluginInterface*> renderPlugins;
 
 	//Decorate Plugins
-	std::vector<DecoratePluginInterface*> decoratePlugins;
+	DecoratePluginContainer decoratePlugins;
+	//std::vector<DecoratePluginInterface*> decoratePlugins;
 
 	//Edit Plugins
 	std::vector<EditPluginInterfaceFactory*> editPlugins;

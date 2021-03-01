@@ -278,12 +278,7 @@ int PluginManager::numberIOPlugins() const
 // Search among all the decorator plugins the one that contains a decoration with the given name
 DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
 {
-	for(DecoratePluginInterface *tt : decoratePlugins) {
-		for( QAction *ac: tt->actions())
-			if( name == tt->decorationName(ac) ) return tt;
-	}
-	assert(0);
-	return 0;
+	return decoratePlugins.decoratePlugin(name);
 }
 
 QAction* PluginManager::filterAction(const QString& name)
@@ -381,9 +376,9 @@ PluginManager::RenderPluginRangeIterator PluginManager::renderPluginIterator(boo
 	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-PluginManager::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
+DecoratePluginContainer::DecoratePluginRangeIterator PluginManager::decoratePluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return DecoratePluginRangeIterator(this, iterateAlsoDisabledPlugins);
+	return decoratePlugins.decoratePluginIterator(iterateAlsoDisabledPlugins);
 }
 
 PluginManager::EditPluginFactoryRangeIterator PluginManager::editPluginFactoryIterator(bool iterateAlsoDisabledPlugins) const
@@ -414,10 +409,7 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 
 void PluginManager::loadDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
-	decoratePlugins.push_back(iDecorate);
-	for(QAction *decoratorAction : iDecorate->actions()) {
-		iDecorate->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
-	}
+	decoratePlugins.pushFilterPlugin(iDecorate);
 }
 
 void PluginManager::loadRenderPlugin(RenderPluginInterface* iRender)
@@ -432,7 +424,7 @@ void PluginManager::loadEditPlugin(EditPluginInterfaceFactory* iEditFactory)
 
 void PluginManager::unloadDecoratePlugin(DecoratePluginInterface* iDecorate)
 {
-	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
+	decoratePlugins.eraseFilterPlugin(iDecorate);
 }
 
 void PluginManager::unloadRenderPlugin(RenderPluginInterface* iRender)
