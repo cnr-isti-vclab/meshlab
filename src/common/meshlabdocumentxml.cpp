@@ -89,10 +89,21 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					{
 						if (!binary)
 						{
-							QStringList values = tr.firstChild().nodeValue().split(" ", QString::SkipEmptyParts);
-							for (int y = 0; y < 4; y++)
-								for (int x = 0; x < 4; x++)
-									md.mm()->cm.Tr[y][x] = values[x + 4 * y].toFloat();
+							QStringList rows = tr.firstChild().nodeValue().split("\n", QString::SkipEmptyParts);
+							int i = 0;
+							for (const QString& row : qAsConst(rows)){
+								if (rows.size() > 0) {
+									QStringList values = row.split(" ", QString::SkipEmptyParts);
+									int j = 0;
+									for (const QString& value : qAsConst(values)) {
+										if (i < 4 && j < 4) {
+											md.mm()->cm.Tr[i][j] = value.toFloat();
+											j++;
+										}
+									}
+									i++;
+								}
+							}
 						}
 						else
 						{
