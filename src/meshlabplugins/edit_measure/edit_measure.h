@@ -47,11 +47,11 @@ public:
 //--------------------------------------
 
 
-class EditMeasurePlugin : public QObject, public EditPluginInterface
+class EditMeasurePlugin : public QObject, public EditPlugin
 {
 	Q_OBJECT
 	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPluginInterface)
+	Q_INTERFACES(EditPlugin)
 
 public:
   EditMeasurePlugin();

@@ -28,11 +28,11 @@
 #include <QObject>
 #include <common/plugins/interfaces/edit_plugin.h>
 
-class EditPickPointsFactory : public QObject, public EditPluginInterfaceFactory
+class EditPickPointsFactory : public QObject, public EditPluginFactory
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
-	Q_INTERFACES(EditPluginInterfaceFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_FACTORY_IID)
+	Q_INTERFACES(EditPluginFactory)
 
 public:
 	EditPickPointsFactory();
@@ -44,7 +44,7 @@ public:
 	virtual QList<QAction *> actions() const;
 	
 	//get the edit tool for the given action
-	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
+	virtual EditPlugin* getMeshEditInterface(const QAction*);
     
 	//get the description for the given action
 	QString getEditToolDescription(const QAction*);

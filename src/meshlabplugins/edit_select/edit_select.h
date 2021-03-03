@@ -25,11 +25,11 @@
 
 #include <common/plugins/interfaces/edit_plugin.h>
 
-class EditSelectPlugin : public QObject, public EditPluginInterface
+class EditSelectPlugin : public QObject, public EditPlugin
 {
 	Q_OBJECT
 	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPluginInterface)
+	Q_INTERFACES(EditPlugin)
 
 
 public:

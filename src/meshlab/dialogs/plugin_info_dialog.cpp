@@ -157,7 +157,7 @@ void PluginInfoDialog::populateTreeWidget()
 					tmplist.push_back(a->text());
 			}
 			if (type.isEditPlugin()){
-				EditPluginInterfaceFactory* epi = dynamic_cast<EditPluginInterfaceFactory*>(fp);
+				EditPluginFactory* epi = dynamic_cast<EditPluginFactory*>(fp);
 				for(QAction *a: epi->actions())
 					tmplist.push_back(a->text());
 			}

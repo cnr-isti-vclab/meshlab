@@ -32,7 +32,7 @@
  * @brief The MeshLabPluginFile class is the base of all MeshLab plugin classes,
  * and represents the library file of the plugin.
  * Each MeshLab plugin can then be a classic plugin (and inherit from the MeshLabPlugin class)
- * or a collection of Edit plugins (and inherit from the EditPluginInterfaceFactory class).
+ * or a collection of Edit plugins (and inherit from the EditPluginFactory class).
  * Each Plugin (classic or edit) inherits from this class. 
  */
 class MeshLabPluginFile

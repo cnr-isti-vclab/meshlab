@@ -197,7 +197,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		decoratePlugins.pushDecoratePlugin(qobject_cast<DecoratePlugin *>(plugin));
 	}
 	if (type.isEditPlugin()){
-		editPlugins.pushEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
+		editPlugins.pushEditPlugin(qobject_cast<EditPluginFactory *>(plugin));
 	}
 	if (type.isFilterPlugin()){
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
@@ -228,7 +228,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePlugin *>(ifp));
 		}
 		if (type.isEditPlugin()){
-			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
+			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginFactory *>(ifp));
 		}
 		if (type.isFilterPlugin()){
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));

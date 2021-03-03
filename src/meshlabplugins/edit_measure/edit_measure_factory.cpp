@@ -46,7 +46,7 @@ QList<QAction *> EditMeasureFactory::actions() const
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditMeasureFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditMeasureFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editMeasure)
 	{

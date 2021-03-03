@@ -33,11 +33,11 @@
 #include <common/plugins/interfaces/edit_plugin.h>
 #include "pickpointsDialog.h"
 
-class EditPickPointsPlugin : public QObject, public EditPluginInterface
+class EditPickPointsPlugin : public QObject, public EditPlugin
 {
 	Q_OBJECT
 	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPluginInterface)
+	Q_INTERFACES(EditPlugin)
 	
 public:
 	//constructor

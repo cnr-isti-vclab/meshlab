@@ -48,7 +48,7 @@ QList<QAction *> PointEditFactory::actions() const
 }
 
 //get the edit tool for the given action
-EditPluginInterface* PointEditFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* PointEditFactory::getMeshEditInterface(const QAction *action)
 {
         if(action == editPoint)
             return new EditPointPlugin(EditPointPlugin::SELECT_DEFAULT_MODE);

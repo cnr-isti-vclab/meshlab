@@ -46,7 +46,7 @@ QList<QAction *> EditMutualCorrsFactory::actions() const
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditMutualCorrsFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditMutualCorrsFactory::getMeshEditInterface(const QAction *action)
 {
     if(action == editMutualCorrs)
 	{

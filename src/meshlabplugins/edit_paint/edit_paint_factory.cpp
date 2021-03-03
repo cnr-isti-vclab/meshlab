@@ -46,7 +46,7 @@ QList<QAction *> EditPaintFactory::actions() const
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditPaintFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditPaintFactory::getMeshEditInterface(const QAction *action)
 {
 	if(action == editPaint)
 	{

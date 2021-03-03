@@ -395,7 +395,7 @@ void MainWindow::updateMenus()
 		// you exit from editing mode by pressing again the editing button
 		// When you are in a editing mode all the other editing are disabled.
 		
-		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator())
+		for (EditPluginFactory* ep : PM.editPluginFactoryIterator())
 			for (QAction* a : ep->actions()) {
 				a->setChecked(false);
 				a->setEnabled(GLA()->getCurrentEditAction() == nullptr);
@@ -432,7 +432,7 @@ void MainWindow::updateMenus()
 	} // if active
 	else
 	{
-		for (EditPluginInterfaceFactory* ep : PM.editPluginFactoryIterator()) {
+		for (EditPluginFactory* ep : PM.editPluginFactoryIterator()) {
 			for (QAction* a : ep->actions()) {
 				a->setEnabled(false);
 			}
@@ -1394,8 +1394,8 @@ void MainWindow::applyEditMode()
 	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
 	if(!GLA()->editorExistsForAction(action))
 	{
-		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(action->parent());
-		EditPluginInterface *iEdit = iEditFactory->getMeshEditInterface(action);
+		EditPluginFactory *iEditFactory = qobject_cast<EditPluginFactory *>(action->parent());
+		EditPlugin *iEdit = iEditFactory->getMeshEditInterface(action);
 		GLA()->addMeshEditor(action, iEdit);
 	}
 	meshDoc()->meshDocStateData().create(*meshDoc());

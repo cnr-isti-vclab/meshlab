@@ -495,7 +495,7 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator()) {
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
@@ -869,7 +869,7 @@ void MainWindow::fillShadersMenu()
 void MainWindow::fillEditMenu()
 {
 	clearMenu(editMenu);
-	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator())
+	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator())
 	{
 		for(QAction* editAction: iEditFactory->actions())
 		{
@@ -909,7 +909,7 @@ void MainWindow::updateAllPluginsActions()
 	
 	editToolBar->clear();
 	editToolBar->addAction(suspendEditModeAct);
-	for(EditPluginInterfaceFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator()) {
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);

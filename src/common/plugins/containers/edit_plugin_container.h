@@ -41,20 +41,20 @@ public:
 	EditPluginContainer();
 
 	void clear();
-	void pushEditPlugin(EditPluginInterfaceFactory* iEditFactory);
-	void eraseEditPlugin(EditPluginInterfaceFactory* iEditFactory);
+	void pushEditPlugin(EditPluginFactory* iEditFactory);
+	void eraseEditPlugin(EditPluginFactory* iEditFactory);
 
 	EditPluginFactoryRangeIterator editPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 private:
-	std::vector<EditPluginInterfaceFactory*> editPlugins;
+	std::vector<EditPluginFactory*> editPlugins;
 };
 
 class EditPluginContainer::EditPluginFactoryRangeIterator
 {
 	friend class EditPluginContainer;
 public:
-	ConstPluginIterator<EditPluginInterfaceFactory> begin();
-	ConstPluginIterator<EditPluginInterfaceFactory> end();
+	ConstPluginIterator<EditPluginFactory> begin();
+	ConstPluginIterator<EditPluginFactory> end();
 private:
 	EditPluginFactoryRangeIterator(const EditPluginContainer* pm, bool iterateAlsoDisabledPlugins = false);
 	const EditPluginContainer* pm;

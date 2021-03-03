@@ -38,7 +38,7 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 		type |= DECORATE;
 	}
 	//EditFactory
-	const EditPluginInterfaceFactory* efp = dynamic_cast<const EditPluginInterfaceFactory *>(fpi);
+	const EditPluginFactory* efp = dynamic_cast<const EditPluginFactory *>(fpi);
 	if (efp) { //EditFactory Plugin
 		type |= EDIT;
 	}
