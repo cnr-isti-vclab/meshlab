@@ -27,12 +27,13 @@
 #include <wrap/callback.h>
 
 #include "meshlab_plugin.h"
+#include "meshlab_plugin_file.h"
 #include "../../utilities/file_format.h"
 
 /** 
  * @brief The IOMeshPlugin is the base class for all the single mesh loading plugins.
  */
-class IOMeshPlugin : virtual public MeshLabPlugin
+class IOMeshPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPlugin
 {
 public:
 	IOMeshPlugin() : MeshLabPlugin() {  }

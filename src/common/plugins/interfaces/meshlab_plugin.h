@@ -48,7 +48,7 @@
  * Note: this class does NOT contain member functions that need to be 
  * implemented in base classes.
  */
-class MeshLabPlugin : public MeshLabPluginFile
+class MeshLabPlugin
 {
 public:
 	/** 

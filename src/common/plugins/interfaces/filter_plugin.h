@@ -25,6 +25,7 @@
 #define MESHLAB_FILTER_PLUGIN_H
 
 #include "meshlab_plugin.h"
+#include "meshlab_plugin_file.h"
 #include "../../ml_document/mesh_document.h"
 
 //declaring types to be used as QVariants
@@ -39,7 +40,7 @@ Q_DECLARE_METATYPE(Eigen::VectorXd)
 /**
  * @brief The FilterPlugin class provide the interface of the filter plugins.
  */
-class FilterPlugin : virtual public MeshLabPlugin
+class FilterPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPlugin
 {
 public:
 	/** 

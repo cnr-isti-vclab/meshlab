@@ -25,6 +25,7 @@
 #define MESHLAB_DECORATE_PLUGIN_H
 
 #include "meshlab_plugin.h"
+#include "meshlab_plugin_file.h"
 
 class GLArea;
 
@@ -52,7 +53,7 @@ class GLArea;
  * - display of specific tagging
  **/
 
-class DecoratePlugin : public MeshLabPlugin
+class DecoratePlugin : virtual public MeshLabPluginFile, public MeshLabPlugin
 {
 public:
 

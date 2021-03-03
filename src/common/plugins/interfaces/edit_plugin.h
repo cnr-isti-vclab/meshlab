@@ -27,6 +27,7 @@
 #include <QTabletEvent>
 
 #include "meshlab_plugin.h"
+#include "meshlab_plugin_file.h"
 #include "../../ml_document/mesh_document.h"
 
 
@@ -89,9 +90,6 @@ public:
 	virtual void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *) {}
 	virtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea *) {}
 	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *) { e->ignore(); }
-	
-private:
-	virtual QString pluginName() const final {return QString();};
 };
 
 
