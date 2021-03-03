@@ -57,7 +57,7 @@ EditPlugin* SampleEditFactory::getMeshEditInterface(const QAction *action)
 
 QString SampleEditFactory::getEditToolDescription(const QAction *)
 {
-	return SampleEditPlugin::Info();
+	return SampleEditPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(SampleEditFactory)

@@ -73,7 +73,7 @@ EditReferencingPlugin::EditReferencingPlugin() {
     referencingResults.reserve(4096);
 }
 
-const QString EditReferencingPlugin::Info()
+const QString EditReferencingPlugin::info()
 {
     return tr("Reference layer(s) using fiducial points or scale layer(s) using reference distances.");
 }

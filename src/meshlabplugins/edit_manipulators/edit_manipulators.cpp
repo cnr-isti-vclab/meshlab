@@ -46,7 +46,7 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
   delta_Transform = Matrix44m::Identity();
 }
 
-const QString EditManipulatorsPlugin::Info() 
+const QString EditManipulatorsPlugin::info() 
 {
     return tr("Provide tools for moving meshes around the space");
 }

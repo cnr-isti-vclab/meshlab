@@ -45,7 +45,7 @@ using namespace vcg;
 
 EditPointPlugin::EditPointPlugin(int _editType) : editType(_editType) {}
 
-const QString EditPointPlugin::Info() {
+const QString EditPointPlugin::info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 

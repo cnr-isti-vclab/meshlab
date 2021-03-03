@@ -49,7 +49,7 @@ public:
 		delete pickPointsDialog;
 	}
 	
-	static const QString Info();
+	static const QString info();
 
 	virtual bool startEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
 	virtual void endEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);

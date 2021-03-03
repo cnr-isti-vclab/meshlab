@@ -58,7 +58,7 @@ public:
 	EditPaintPlugin();
 	virtual ~EditPaintPlugin();
 
-	static const QString Info();
+	static const QString info();
 
 	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
 	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

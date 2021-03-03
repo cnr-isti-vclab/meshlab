@@ -57,7 +57,7 @@ EditPlugin* EditPaintFactory::getMeshEditInterface(const QAction *action)
 
 QString EditPaintFactory::getEditToolDescription(const QAction *)
 {
-	return EditPaintPlugin::Info();
+	return EditPaintPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditPaintFactory)

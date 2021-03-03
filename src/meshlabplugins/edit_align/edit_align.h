@@ -51,7 +51,7 @@ public:
 	virtual ~EditAlignPlugin() {
 	}
 
-	static const QString Info();
+	static const QString info();
 
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);

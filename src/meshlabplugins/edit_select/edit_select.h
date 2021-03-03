@@ -39,7 +39,7 @@ public:
 
 	virtual ~EditSelectPlugin() {}
 
-	static QString Info();
+	static QString info();
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
 	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}

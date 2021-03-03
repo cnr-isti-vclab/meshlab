@@ -46,7 +46,7 @@ public:
 	virtual ~EditPlugin() {}
 
 	//should return a sentence describing what the editing tool does
-	static const QString Info();
+	static const QString info();
 
 	virtual void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/) {}
 

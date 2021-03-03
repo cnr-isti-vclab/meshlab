@@ -37,7 +37,7 @@ EditSelectPlugin::EditSelectPlugin(int ConnectedMode) :selectionMode(ConnectedMo
 	isDragging = false;
 }
 
-QString EditSelectPlugin::Info()
+QString EditSelectPlugin::info()
 {
 	return tr("Interactive selection inside a dragged rectangle in screen space");
 }

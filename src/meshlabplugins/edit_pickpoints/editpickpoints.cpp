@@ -62,7 +62,7 @@ EditPickPointsPlugin::EditPickPointsPlugin()
 //Constants
 
 
-const QString EditPickPointsPlugin::Info()
+const QString EditPickPointsPlugin::info()
 {
 	return tr("Pick and save 3D points on the mesh");
 }

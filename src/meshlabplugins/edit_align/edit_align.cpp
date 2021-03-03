@@ -57,7 +57,7 @@ EditAlignPlugin::EditAlignPlugin()
     trackball.radius= 1;
 }
 
-const QString EditAlignPlugin::Info()
+const QString EditAlignPlugin::info()
 {
     return tr("Allows one to align different layers together.");
 }

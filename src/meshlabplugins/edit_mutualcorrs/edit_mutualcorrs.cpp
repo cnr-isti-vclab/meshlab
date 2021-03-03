@@ -58,7 +58,7 @@ EditMutualCorrsPlugin::EditMutualCorrsPlugin() {
 
     }
 
-const QString EditMutualCorrsPlugin::Info()
+const QString EditMutualCorrsPlugin::info()
 {
     return tr("Registration of images on 3D models using mutual correspondences");
 }

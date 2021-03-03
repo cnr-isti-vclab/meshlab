@@ -41,7 +41,7 @@ EditPaintPlugin::EditPaintPlugin()
 
 EditPaintPlugin::~EditPaintPlugin() {}
 
-const QString EditPaintPlugin::Info() {
+const QString EditPaintPlugin::info() {
 	return tr("Improved Painting");
 }
 

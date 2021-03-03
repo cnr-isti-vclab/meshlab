@@ -40,7 +40,7 @@ EditMeasurePlugin::EditMeasurePlugin()
 	mName = 0;
 }
 
-const QString EditMeasurePlugin::Info()
+const QString EditMeasurePlugin::info()
 {
 	return tr("Allows one to measure distances between points of a model");
 }

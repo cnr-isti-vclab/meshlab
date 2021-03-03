@@ -57,7 +57,7 @@ EditPlugin* EditReferencingFactory::getMeshEditInterface(const QAction *action)
 
 QString EditReferencingFactory::getEditToolDescription(const QAction *)
 {
-    return EditReferencingPlugin::Info();
+    return EditReferencingPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditReferencingFactory)

@@ -42,7 +42,7 @@ public:
 
   EditManipulatorsPlugin();
   virtual ~EditManipulatorsPlugin() {}
-  static const QString Info();
+  static const QString info();
   virtual bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
   virtual void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
   virtual void decorate(MeshModel &, GLArea *,QPainter*);

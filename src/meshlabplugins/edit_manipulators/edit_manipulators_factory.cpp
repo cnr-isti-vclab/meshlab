@@ -57,7 +57,7 @@ EditPlugin* EditManipulatorsFactory::getMeshEditInterface(const QAction *action)
 
 QString EditManipulatorsFactory::getEditToolDescription(const QAction *)
 {
-	return EditManipulatorsPlugin::Info();
+	return EditManipulatorsPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditManipulatorsFactory)

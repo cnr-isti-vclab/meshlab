@@ -48,7 +48,7 @@ SampleEditPlugin::SampleEditPlugin()
 	pIndex = 0;
 }
 
-const QString SampleEditPlugin::Info() 
+const QString SampleEditPlugin::info() 
 {
 	return tr("Return detailed info about a picked face or vertex of the model.");
 }

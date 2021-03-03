@@ -1,6 +1,8 @@
 #include "filter_plugin.h"
 #include "../../python/python_utils.h"
 
+#include <QtGlobal>
+
 QString FilterPlugin::pythonFilterName(MeshLabPlugin::ActionIDType f) const
 {
 	return pymeshlab::computePythonName(filterName(f));
@@ -48,10 +50,10 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
-	for(ActionIDType tt : types())
+	for(ActionIDType tt : qAsConst(typeList))
 		if (a->text() == this->filterName(tt)) return tt;
 	aa.replace("&","");
-	for(ActionIDType tt : types())
+	for(ActionIDType tt : qAsConst(typeList))
 		if (aa == this->filterName(tt)) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
@@ -68,10 +70,10 @@ QAction* FilterPlugin::getFilterAction(MeshLabPlugin::ActionIDType filterID)
 QAction* FilterPlugin::getFilterAction(const QString& idName)
 {
 	QString i=idName;
-	for(QAction *tt : actionList)
+	for(QAction *tt : qAsConst(actionList))
 		if (idName == tt->text()) return tt;
 	i.replace("&","");
-	for(QAction *tt : actionList)
+	for(QAction *tt : qAsConst(actionList))
 		if (i == tt->text()) return tt;
 
 	qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));

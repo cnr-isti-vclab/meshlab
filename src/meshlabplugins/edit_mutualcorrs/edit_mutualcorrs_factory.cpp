@@ -57,7 +57,7 @@ EditPlugin* EditMutualCorrsFactory::getMeshEditInterface(const QAction *action)
 
 QString EditMutualCorrsFactory::getEditToolDescription(const QAction *)
 {
-    return EditMutualCorrsPlugin::Info();
+    return EditMutualCorrsPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditMutualCorrsFactory)

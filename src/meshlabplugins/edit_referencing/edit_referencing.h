@@ -45,7 +45,7 @@ public:
     EditReferencingPlugin();
     virtual ~EditReferencingPlugin() {}
 
-    static const QString Info();
+    static const QString info();
 
 	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
     void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);

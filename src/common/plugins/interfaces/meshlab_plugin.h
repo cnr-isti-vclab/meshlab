@@ -35,7 +35,7 @@
  * @brief The MeshLabPlugin class is the base of all the plugin classes.
  *
  * The main idea common to all the framework is that each plugin export a set 
- * of actions, internally each action is associated to a FilterIDType, and for 
+ * of actions, internally each action is associated to an ActionIDType, and for 
  * each action a name and a formatted INFO is defined.
  *
  * For coding easyness ID are more practical (you can use them in switches).
@@ -46,7 +46,8 @@
  * used only INTERNALLY
  *
  * Note: this class does NOT contain member functions that need to be 
- * implemented in base classes.
+ * implemented in base classes. It just provides some common functionalities
+ * like logs.
  */
 class MeshLabPlugin
 {

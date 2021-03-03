@@ -54,7 +54,7 @@ EditPlugin* EditAlignFactory::getMeshEditInterface(const QAction *action)
 
 QString EditAlignFactory::getEditToolDescription(const QAction *)
 {
-	return EditAlignPlugin::Info();
+	return EditAlignPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditAlignFactory)

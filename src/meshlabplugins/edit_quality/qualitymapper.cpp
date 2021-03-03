@@ -42,7 +42,7 @@ QualityMapperPlugin::QualityMapperPlugin()
 	_qualityMapperDialog = 0;
 }
 
-const QString QualityMapperPlugin::Info() 
+const QString QualityMapperPlugin::info() 
 {
 	return tr("Colorize mesh vertices by Quality");
 }

@@ -58,7 +58,7 @@ EditPlugin* EditPickPointsFactory::getMeshEditInterface(const QAction *action)
 
 QString EditPickPointsFactory::getEditToolDescription(const QAction *)
 {
-	return EditPickPointsPlugin::Info();
+	return EditPickPointsPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditPickPointsFactory)

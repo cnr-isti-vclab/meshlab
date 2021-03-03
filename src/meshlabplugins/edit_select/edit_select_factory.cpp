@@ -69,7 +69,7 @@ EditPlugin* EditSelectFactory::getMeshEditInterface(const QAction *action)
 
 QString EditSelectFactory::getEditToolDescription(const QAction * /*a*/)
 {
-  return EditSelectPlugin::Info();
+  return EditSelectPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditSelectFactory)

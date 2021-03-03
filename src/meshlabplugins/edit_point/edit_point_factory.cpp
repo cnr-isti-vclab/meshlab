@@ -61,7 +61,7 @@ EditPlugin* PointEditFactory::getMeshEditInterface(const QAction *action)
 
 QString PointEditFactory::getEditToolDescription(const QAction *)
 {
-        return EditPointPlugin::Info();
+        return EditPointPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PointEditFactory)

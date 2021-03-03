@@ -58,7 +58,7 @@ EditPlugin* QualityMapperFactory::getMeshEditInterface(const QAction *action)
 
 QString QualityMapperFactory::getEditToolDescription(const QAction *)
 {
-	return QualityMapperPlugin::Info();
+	return QualityMapperPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(QualityMapperFactory)
