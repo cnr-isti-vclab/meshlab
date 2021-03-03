@@ -63,8 +63,8 @@ public:
 	MlsPlugin();
 
 	QString pluginName() const;
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction *a) const;
 	virtual void initParameterList(const QAction*, MeshDocument &md, RichParameterList &parent);
     virtual int getRequirements(const QAction* action);

@@ -45,7 +45,7 @@ FilterGeodesic::FilterGeodesic()
 	         << FP_QUALITY_POINT_GEODESIC
 	         << FP_QUALITY_SELECTED_GEODESIC;
 
-	FilterIDType tt;
+	ActionIDType tt;
 	foreach(tt , types())
 		actionList << new QAction(filterName(tt), this);
 }
@@ -60,7 +60,7 @@ QString FilterGeodesic::pluginName() const
 	return "FilterGeodesic";
 }
 
-QString FilterGeodesic::filterName(FilterIDType filter) const
+QString FilterGeodesic::filterName(ActionIDType filter) const
 {
 	switch(filter)
 	{
@@ -72,7 +72,7 @@ QString FilterGeodesic::filterName(FilterIDType filter) const
 	return QString("error!");
 }
 
-QString FilterGeodesic::filterInfo(FilterIDType filterId) const
+QString FilterGeodesic::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{

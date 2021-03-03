@@ -43,8 +43,8 @@ class DecorateBackgroundPlugin : public QObject, public DecoratePlugin
   Q_OBJECT
   MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
   Q_INTERFACES(DecoratePlugin)
-  QString decorationName(FilterIDType id) const;
-  QString decorationInfo(FilterIDType id) const;
+  QString decorationName(ActionIDType id) const;
+  QString decorationInfo(ActionIDType id) const;
   QString pluginName() const;
 
   enum {
@@ -73,7 +73,7 @@ DecorateBackgroundPlugin()
       /*<< DP_SHOW_CUBEMAPPED_ENV*/
       << DP_SHOW_GRID;
 
-  for(FilterIDType tt : types()){
+  for(ActionIDType tt : types()){
     actionList << new QAction(decorationName(tt), this);
     if(tt==DP_SHOW_GRID)
       actionList.last()->setIcon(QIcon(":/images/show_background_grid.png"));

@@ -51,11 +51,12 @@
 class MeshLabPlugin : public MeshLabPluginFile
 {
 public:
-	typedef int FilterIDType;
+	/** 
+	 * @brief the type used to identify plugin actions; 
+	 * there is a one-to-one relation between an ID and an Action.
+	 */
+	typedef int ActionIDType;
 
-	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
-	\todo To be renamed as ActionIDType
-	*/
 	MeshLabPlugin();
 	virtual ~MeshLabPlugin() {}
 
@@ -73,7 +74,7 @@ public:
 	void log(const std::string& s);
 
 	template <typename... Ts>
-	void log(GLLogStream::Levels Level, const char* f, Ts&&... ts);
+	void log(GLLogStream::Levels level, const char* f, Ts&&... ts);
 
 	void log(GLLogStream::Levels level, const char* s);
 
@@ -109,18 +110,18 @@ void MeshLabPlugin::log(const std::string& s, Ts&&... ts)
 }
 
 template <typename... Ts>
-void MeshLabPlugin::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
+void MeshLabPlugin::log(GLLogStream::Levels level, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->logf(Level, f, std::forward<Ts>(ts)...);
+		logstream->logf(level, f, std::forward<Ts>(ts)...);
 	}
 }
 
 template <typename... Ts>
-void MeshLabPlugin::realTimeLog(QString Id, const QString& meshName, const char* f, Ts&&... ts)
+void MeshLabPlugin::realTimeLog(QString id, const QString& meshName, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
-		logstream->realTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
+		logstream->realTimeLogf(id, meshName, f, std::forward<Ts>(ts)...);
 	}
 }
 

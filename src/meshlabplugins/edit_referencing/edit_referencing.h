@@ -47,13 +47,13 @@ public:
 
     static const QString Info();
 
-	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 
-    void Decorate(MeshModel &/*m*/, GLArea *parent, QPainter *p);
+    void decorate(MeshModel &/*m*/, GLArea *parent, QPainter *p);
 	void DecorateAbsolute(MeshModel &/*m*/, GLArea *parent, QPainter *p);
 	void DecorateScale(MeshModel &/*m*/, GLArea *parent, QPainter *p);
-    void Decorate (MeshModel &/*m*/, GLArea * ){};
+    void decorate (MeshModel &/*m*/, GLArea * ){};
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );

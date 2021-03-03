@@ -53,7 +53,7 @@ FilterFunctionPlugin::FilterFunctionPlugin()
 			<< FF_ISOSURFACE
 			<< FF_REFINE;
 	
-	foreach(FilterIDType tt , types())
+	foreach(ActionIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -69,7 +69,7 @@ QString FilterFunctionPlugin::pluginName() const
 }
 
 // short string describing each filtering action
-QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
+QString FilterFunctionPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FF_VERT_SELECTION:     return QString("Conditional Vertex Selection");
@@ -108,7 +108,7 @@ const QString PerFaceAttributeString("It's possible to use the following per-fac
 									 "<b>fi</b> for face index, <b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
 
 // long string describing each filtering action
-QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
+QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FF_VERT_SELECTION : return tr(	"Boolean function using muparser lib to perform vertex selection over current mesh.<br>")

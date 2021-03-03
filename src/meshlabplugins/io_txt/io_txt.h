@@ -39,7 +39,7 @@ public:
 	QString pluginName() const;
 	QList<FileFormat> importFormats() const;
 	QList<FileFormat> exportFormats() const;
-	virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/);
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);

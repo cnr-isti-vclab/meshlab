@@ -38,7 +38,7 @@ QualityMapperFilter::QualityMapperFilter()
 { 
 	typeList << FP_QUALITY_MAPPER;
   
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -49,7 +49,7 @@ QString QualityMapperFilter::pluginName() const
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
- QString QualityMapperFilter::filterName(FilterIDType filterId) const
+ QString QualityMapperFilter::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
 		case FP_QUALITY_MAPPER :  return QString("Quality Mapper applier"); 
@@ -60,7 +60,7 @@ QString QualityMapperFilter::pluginName() const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
- QString QualityMapperFilter::filterInfo(FilterIDType filterId) const
+ QString QualityMapperFilter::filterInfo(ActionIDType filterId) const
 {
   switch(filterId) {
 		case FP_QUALITY_MAPPER :  return QString("The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertices. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping");

@@ -52,7 +52,7 @@ FilterMutualGlobal::FilterMutualGlobal()
 {
     typeList << FP_IMAGE_GLOBALIGN;
 
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -63,7 +63,7 @@ QString FilterMutualGlobal::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString FilterMutualGlobal::filterName(FilterIDType filterId) const
+QString FilterMutualGlobal::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
         case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information");
@@ -74,7 +74,7 @@ QString FilterMutualGlobal::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString FilterMutualGlobal::filterInfo(FilterIDType filterId) const
+ QString FilterMutualGlobal::filterInfo(ActionIDType filterId) const
 {
   switch(filterId) {
         case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!");
@@ -344,7 +344,7 @@ void FilterMutualGlobal::initGL()
 
 }
 
-QString FilterMutualGlobal::filterScriptFunctionName( FilterIDType filterID )
+QString FilterMutualGlobal::filterScriptFunctionName( ActionIDType filterID )
 {
 	switch(filterID) {
 		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment");

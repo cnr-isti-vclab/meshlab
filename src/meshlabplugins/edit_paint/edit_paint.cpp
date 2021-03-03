@@ -68,7 +68,7 @@ void EditPaintPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
 	dt.set(pr, atts);
 }
 
-bool EditPaintPlugin::StartEdit(MeshModel & m, GLArea * parent, MLSceneGLSharedDataContext* /*cont*/)
+bool EditPaintPlugin::startEdit(MeshModel & m, GLArea * parent, MLSceneGLSharedDataContext* /*cont*/)
 {
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
@@ -126,7 +126,7 @@ bool EditPaintPlugin::StartEdit(MeshModel & m, GLArea * parent, MLSceneGLSharedD
 	return true;
 }
 
-void EditPaintPlugin::EndEdit(MeshModel &/* m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditPaintPlugin::endEdit(MeshModel &/* m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
 	QObject::disconnect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::disconnect(paintbox, SIGNAL(redo()), this, SLOT(update()));
@@ -239,7 +239,7 @@ void EditPaintPlugin::setBrushSettings(int size, int opacity, int hardness)
  * method and not where mouse events are processed.
  *
  */
-void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
+void EditPaintPlugin::decorate(MeshModel &m, GLArea * gla)
 {
 	glarea = gla;
 	if (gla->mvc() == NULL)

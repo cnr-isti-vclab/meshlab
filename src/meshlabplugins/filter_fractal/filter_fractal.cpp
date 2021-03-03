@@ -30,7 +30,7 @@ using namespace vcg;
 FilterFractal::FilterFractal()
 {
     typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH << FP_CRATERS;
-    FilterIDType tt;
+    ActionIDType tt;
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 }
@@ -40,7 +40,7 @@ QString FilterFractal::pluginName() const
     return "FilterFractal";
 }
 
-QString FilterFractal::filterName(FilterIDType filterId) const
+QString FilterFractal::filterName(ActionIDType filterId) const
 {
     switch (filterId) 
 	{
@@ -59,7 +59,7 @@ QString FilterFractal::filterName(FilterIDType filterId) const
     }
 }
 
-QString FilterFractal::filterInfo(FilterIDType filterId) const
+QString FilterFractal::filterInfo(ActionIDType filterId) const
 {
     QString filename, description;
     switch (filterId) {

@@ -52,14 +52,14 @@ public:
 
 	QString pluginName() const;
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	void initParameterList(const QAction*, MeshDocument & md, RichParameterList & /*parent*/);
 	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
 	FilterClass getClass(const QAction* a) const;
 	bool requiresGLContext(const QAction* action) const;
-	QString filterScriptFunctionName(FilterIDType filterID);
+	QString filterScriptFunctionName(ActionIDType filterID);
 	bool preAlignment(MeshDocument &md, const RichParameterList& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
 	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);

@@ -45,8 +45,8 @@ public:
 	FilterVoronoiPlugin();
 
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FILTER_ARITY filterArity(const QAction* a) const;
 	void initParameterList(const QAction* action, MeshModel& m, RichParameterList& par);

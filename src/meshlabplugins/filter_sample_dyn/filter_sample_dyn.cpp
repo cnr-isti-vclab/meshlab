@@ -37,7 +37,7 @@ ExtraSampleDynPlugin::ExtraSampleDynPlugin()
 { 
 	typeList << FP_VERTEX_COLOR_NOISE;
   
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -48,7 +48,7 @@ QString ExtraSampleDynPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
+QString ExtraSampleDynPlugin::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
 		case FP_VERTEX_COLOR_NOISE :  return QString("Vertex Color Noise"); 
@@ -59,7 +59,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
- QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId) const
+ QString ExtraSampleDynPlugin::filterInfo(ActionIDType filterId) const
 {
   switch(filterId) {
 		case FP_VERTEX_COLOR_NOISE :  return QString("Randomly add a small amount of a random base color to the mesh"); 

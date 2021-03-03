@@ -59,8 +59,8 @@ public:
     ~FilterDirt(){};
 
     QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(ActionIDType filter) const;
+    virtual QString filterInfo(ActionIDType filter) const;
     virtual int getRequirements(const QAction*);
     virtual bool autoDialog(QAction *) {return true;}
     //      virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};

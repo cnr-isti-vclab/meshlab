@@ -57,7 +57,7 @@ FilterLayerPlugin::FilterLayerPlugin()
 		FP_EXPORT_CAMERAS <<
 		FP_IMPORT_CAMERAS;
 
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -67,7 +67,7 @@ QString FilterLayerPlugin::pluginName() const
 }
 
 // ST() return the very short string describing each filtering action
-QString FilterLayerPlugin::filterName(FilterIDType filterId) const
+QString FilterLayerPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SPLITSELECTEDFACES :  return QString("Move selected faces to another layer");
@@ -91,7 +91,7 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 }
 
 // Info() return the longer string describing each filtering action
-QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
+QString FilterLayerPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transferred.");

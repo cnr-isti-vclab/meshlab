@@ -38,9 +38,9 @@ void MeshLabPlugin::log(GLLogStream::Levels level, const std::string& s)
 	}
 }
 
-void MeshLabPlugin::realTimeLog(QString Id, const QString& meshName, const char* f)
+void MeshLabPlugin::realTimeLog(QString id, const QString& meshName, const char* f)
 {
 	if(logstream != nullptr) {
-		logstream->realTimeLog(Id, meshName, f);
+		logstream->realTimeLog(id, meshName, f);
 	}
 }

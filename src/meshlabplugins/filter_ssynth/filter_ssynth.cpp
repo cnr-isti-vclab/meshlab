@@ -21,7 +21,7 @@ using namespace SyntopiaCore::Exceptions;
 FilterSSynth::FilterSSynth(){
     typeList<< CR_SSYNTH;
     this->renderTemplate= "";
-    for(FilterIDType tt : types())
+    for(ActionIDType tt : types())
         actionList << new QAction(filterName(tt), this);
     //num=0;
 }
@@ -31,7 +31,7 @@ QString FilterSSynth::pluginName() const
     return "FilterSSynth";
 }
 //FilterSSynth::~FilterSSynth(){}
-QString FilterSSynth::filterName(FilterIDType filter) const
+QString FilterSSynth::filterName(ActionIDType filter) const
 {
     switch(filter)
     {
@@ -44,7 +44,7 @@ QString FilterSSynth::filterName(FilterIDType filter) const
     }
 }
 
-QString FilterSSynth::filterInfo(FilterIDType filterId) const
+QString FilterSSynth::filterInfo(ActionIDType filterId) const
 {
     switch(filterId)
     {
@@ -204,7 +204,7 @@ bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName
     return true;
 }
 
-void FilterSSynth::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
+void FilterSSynth::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
 void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, const QString &/*filename*/, RichParameterList &parlst){
     parlst.addParam(RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));

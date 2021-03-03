@@ -479,7 +479,7 @@ void EditSelectPlugin::DrawXORRect(GLArea * gla, bool doubleDraw)
 
 }
 
-void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
+void EditSelectPlugin::decorate(MeshModel &m, GLArea * gla)
 {
 	if (selectionMode == SELECT_AREA_MODE)
 	{
@@ -627,7 +627,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 	}
 }
 
-bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditSelectPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
 	if (gla == NULL)
 		return false;

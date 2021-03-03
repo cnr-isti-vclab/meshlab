@@ -36,7 +36,7 @@ ExtraSampleGPUPlugin::ExtraSampleGPUPlugin()
 {
 	typeList << FP_GPU_EXAMPLE;
 
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -47,7 +47,7 @@ QString ExtraSampleGPUPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
+QString ExtraSampleGPUPlugin::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
 		case FP_GPU_EXAMPLE :  return QString("GPU Filter Example ");
@@ -58,7 +58,7 @@ QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString ExtraSampleGPUPlugin::filterInfo(FilterIDType filterId) const
+QString ExtraSampleGPUPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_GPU_EXAMPLE : 

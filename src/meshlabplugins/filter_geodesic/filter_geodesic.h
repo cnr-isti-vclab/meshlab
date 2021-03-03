@@ -51,8 +51,8 @@ class FilterGeodesic : public QObject, public FilterPlugin
 	~FilterGeodesic();
 
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction*) const;
 	int getRequirements(const QAction*);

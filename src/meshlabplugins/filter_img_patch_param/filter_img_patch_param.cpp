@@ -41,7 +41,7 @@ FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
 			 << FP_RASTER_VERT_COVERAGE
 			 << FP_RASTER_FACE_COVERAGE;
 	
-	foreach( FilterIDType tt , types() )
+	foreach( ActionIDType tt , types() )
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -58,7 +58,7 @@ QString FilterImgPatchParamPlugin::pluginName() const
 }
 
 
-QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
+QString FilterImgPatchParamPlugin::filterName( ActionIDType id ) const
 {
 	switch( id )
 	{
@@ -71,7 +71,7 @@ QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
 }
 
 
-QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
+QString FilterImgPatchParamPlugin::filterInfo( ActionIDType id ) const
 {
 	switch( id )
 	{

@@ -29,7 +29,7 @@ SdfGpuPlugin::SdfGpuPlugin()
         << SDF_DEPTH_COMPLEXITY
         << SDF_OBSCURANCE;
 
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 
 }
@@ -94,7 +94,7 @@ void SdfGpuPlugin::initParameterList(const QAction *action, MeshModel &/*m*/, Ri
     }
 }
 
-QString SdfGpuPlugin::filterName(FilterIDType filterId) const
+QString SdfGpuPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId)
     {
@@ -108,7 +108,7 @@ QString SdfGpuPlugin::filterName(FilterIDType filterId) const
     return QString("");
 }
 
-QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
+QString SdfGpuPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId)
     {

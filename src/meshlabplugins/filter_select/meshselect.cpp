@@ -69,7 +69,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 
     QCoreApplication* app = QCoreApplication::instance();
 
-    for(FilterIDType tt : types())
+    for(ActionIDType tt : types())
     {
         actionList << new QAction(filterName(tt), this);
 
@@ -123,7 +123,7 @@ QString SelectionFilterPlugin::pluginName() const
     return "FilterSelect";
 }
 
- QString SelectionFilterPlugin::filterName(FilterIDType filter) const
+ QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 {
  switch(filter)
  {
@@ -157,7 +157,7 @@ QString SelectionFilterPlugin::pluginName() const
  return QString("Unknown filter");
 }
 
-QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
+QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
 {
  switch(filterId)
  {

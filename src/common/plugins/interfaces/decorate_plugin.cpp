@@ -43,13 +43,13 @@ QAction* DecoratePlugin::action(QString name) const
 	return 0;
 }
 
-MeshLabPlugin::FilterIDType DecoratePlugin::ID(const QAction* a) const
+MeshLabPlugin::ActionIDType DecoratePlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
-	foreach(FilterIDType tt, types())
+	foreach(ActionIDType tt, types())
 		if (a->text() == this->decorationName(tt)) return tt;
 	aa.replace("&","");
-	foreach(FilterIDType tt, types())
+	foreach(ActionIDType tt, types())
 		if (aa == this->decorationName(tt)) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
@@ -57,13 +57,13 @@ MeshLabPlugin::FilterIDType DecoratePlugin::ID(const QAction* a) const
 	return -1;
 }
 
-MeshLabPlugin::FilterIDType DecoratePlugin::ID(QString name) const
+MeshLabPlugin::ActionIDType DecoratePlugin::ID(QString name) const
 {
 	QString n = name;
-	foreach(FilterIDType tt, types())
+	foreach(ActionIDType tt, types())
 		if (name == this->decorationName(tt)) return tt;
 	n.replace("&","");
-	foreach(FilterIDType tt, types())
+	foreach(ActionIDType tt, types())
 		if (n == this->decorationName(tt)) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));

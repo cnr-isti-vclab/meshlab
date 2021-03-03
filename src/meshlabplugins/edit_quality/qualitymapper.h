@@ -52,8 +52,8 @@ public:
 	~QualityMapperPlugin(void) {};
 
 	static const QString Info();
-	bool StartEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
-	void EndEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	bool startEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	void endEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
 	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
     //virtual void Decorate(MeshModel&, GLArea*);
     void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};

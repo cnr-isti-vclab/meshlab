@@ -49,8 +49,8 @@ class FilterIsoParametrization : public QObject, public FilterPlugin
   
   QString pluginName() const;
   virtual FilterClass getClass(const QAction*) const;
-  virtual QString filterName(FilterIDType filter) const;
-  virtual QString filterInfo(FilterIDType filter) const;
+  virtual QString filterName(ActionIDType filter) const;
+  virtual QString filterInfo(ActionIDType filter) const;
   
   virtual int getRequirements(const QAction*);
   

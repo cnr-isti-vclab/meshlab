@@ -41,8 +41,8 @@ public:
     PlyMCPlugin();
 
     QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(ActionIDType filter) const;
+    virtual QString filterInfo(ActionIDType filter) const;
     virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(const QAction* a) const;

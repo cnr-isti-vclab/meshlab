@@ -75,8 +75,8 @@ public:
 	~FilterFunctionPlugin();
 	
 	QString pluginName() const;
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 	virtual FilterClass getClass(const QAction*) const;
 	virtual int postCondition(const QAction *action) const;
 	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);

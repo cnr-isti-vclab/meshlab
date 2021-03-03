@@ -84,8 +84,8 @@ public:
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin(){}
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction*) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);

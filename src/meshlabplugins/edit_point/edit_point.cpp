@@ -49,7 +49,7 @@ const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
+void EditPointPlugin::decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
 {
   this->realTimeLog("Point Selection",m.shortName(),
                     "<table>"
@@ -186,7 +186,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
     }
 }
 
-bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
+bool EditPointPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
     for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {
         if (vi->IsS()) OldComponentVector.push_back(&*vi);
     }
@@ -207,7 +207,7 @@ bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedData
     return true;
 }
 
-void EditPointPlugin::EndEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {
+void EditPointPlugin::endEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {
     //delete the circle if present.
     fittingCircle.Clear();
     tri::ComponentFinder<CMeshO>::DeletePerVertexAttribute(m.cm);

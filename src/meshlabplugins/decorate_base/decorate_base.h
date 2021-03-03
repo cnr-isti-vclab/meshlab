@@ -40,8 +40,8 @@ class DecorateBasePlugin : public QObject, public DecoratePlugin
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
 	Q_INTERFACES(DecoratePlugin)
-	QString decorationName(FilterIDType filter) const;
-	QString decorationInfo(FilterIDType filter) const;
+	QString decorationName(ActionIDType filter) const;
+	QString decorationInfo(ActionIDType filter) const;
 	QString pluginName() const;
 	
 	enum {
@@ -82,7 +82,7 @@ public:
 					DP_SHOW_CURVATURE <<
 					DP_SHOW_LABEL;
 		
-		FilterIDType tt;
+		ActionIDType tt;
 		foreach(tt , types())
 		{
 			actionList << new QAction(decorationName(tt), this);

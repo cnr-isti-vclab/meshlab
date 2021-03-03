@@ -48,7 +48,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 			 << FP_TRANSFER_TO_TEXTURE
 			 << FP_TEX_TO_VCOLOR_TRANSFER;
 	
-	foreach(FilterIDType tt , types())
+	foreach(ActionIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -57,7 +57,7 @@ QString FilterTexturePlugin::pluginName() const
 	return "FilterTexture";
 }
 
-QString FilterTexturePlugin::filterName(FilterIDType filterId) const
+QString FilterTexturePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -77,7 +77,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
+QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{

@@ -40,8 +40,8 @@ public:
     FilterSSynth();
     ~FilterSSynth(){}
     QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(ActionIDType filter) const;
+    virtual QString filterInfo(ActionIDType filter) const;
     virtual int getRequirements(const QAction*);
     virtual void initParameterList(const QAction* /*filter*/,MeshModel &,RichParameterList &){};
     virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
@@ -53,7 +53,7 @@ public:
     QList<FileFormat> importFormats() const;
     QList<FileFormat> exportFormats() const;
 
-    virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+    virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
     bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
     bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);

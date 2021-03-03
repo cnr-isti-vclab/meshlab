@@ -55,9 +55,9 @@ public:
 
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);
-	bool StartEdit(MeshDocument &md, GLArea *parent, MLSceneGLSharedDataContext* cont);
-	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	bool startEdit(MeshDocument &md, GLArea *parent, MLSceneGLSharedDataContext* cont);
+	void decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 	void mousePressEvent(QMouseEvent *, MeshModel &, GLArea *);
 	void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea *);
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
@@ -80,7 +80,7 @@ public:
 	MeshTree::Param defaultMTP;  // default MeshTree parameters
 
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-	void LayerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* )
+	void layerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* )
 	{
 		// add code here to manage the external layer switching
 	}

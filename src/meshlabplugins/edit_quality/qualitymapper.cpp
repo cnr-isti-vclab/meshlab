@@ -47,7 +47,7 @@ const QString QualityMapperPlugin::Info()
 	return tr("Colorize mesh vertices by Quality");
 }
 
-bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
+bool QualityMapperPlugin::startEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
 { 
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
@@ -88,7 +88,7 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDat
 	return true;
 }
 
-void QualityMapperPlugin::EndEdit(MeshModel & /*m*/, GLArea *,MLSceneGLSharedDataContext* /*cont*/)
+void QualityMapperPlugin::endEdit(MeshModel & /*m*/, GLArea *,MLSceneGLSharedDataContext* /*cont*/)
 {
 	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )

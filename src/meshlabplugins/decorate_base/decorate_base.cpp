@@ -36,7 +36,7 @@ using namespace vcg;
 using namespace std;
 
 
-QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
+QString DecorateBasePlugin::decorationInfo(ActionIDType filter) const
 {
 	switch(filter)
 	{
@@ -61,7 +61,7 @@ QString DecorateBasePlugin::pluginName() const
 	return "DecorateBase";
 }
 
-QString DecorateBasePlugin::decorationName(FilterIDType filter) const
+QString DecorateBasePlugin::decorationName(ActionIDType filter) const
 {
 	switch(filter)
 	{

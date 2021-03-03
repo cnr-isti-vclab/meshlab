@@ -57,8 +57,8 @@ class DecorateShadowPlugin : public QObject, public DecoratePlugin
                 <<"Variance shadow mapping with blur";
     }
 
-    virtual QString decorationInfo(FilterIDType filter) const;
-    virtual QString decorationName(FilterIDType filter) const;
+    virtual QString decorationInfo(ActionIDType filter) const;
+    virtual QString decorationName(ActionIDType filter) const;
 
 public:
      
@@ -67,7 +67,7 @@ public:
         DP_SHOW_SHADOW <<
         DP_SHOW_SSAO;
 
-        FilterIDType tt;
+        ActionIDType tt;
         foreach(tt , types()){
           actionList << new QAction(decorationName(tt), this);
         }

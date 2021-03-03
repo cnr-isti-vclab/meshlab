@@ -43,7 +43,7 @@ FilterVoronoiPlugin::FilterVoronoiPlugin()
 		<< CROSS_FIELD_CREATION;
 //		<< CROSS_FIELD_SMOOTHING;
 
-	for (FilterIDType tt : types())
+	for (ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -52,7 +52,7 @@ QString FilterVoronoiPlugin::pluginName() const
 	return "FilterVoronoi";
 }
 
-QString FilterVoronoiPlugin::filterName(FilterIDType filterId) const
+QString FilterVoronoiPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case VORONOI_SAMPLING :
@@ -74,7 +74,7 @@ QString FilterVoronoiPlugin::filterName(FilterIDType filterId) const
 }
 
 
-QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
+QString FilterVoronoiPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case VORONOI_SAMPLING :

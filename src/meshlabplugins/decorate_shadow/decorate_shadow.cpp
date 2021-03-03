@@ -25,7 +25,7 @@
 
 using namespace vcg;
 
-QString DecorateShadowPlugin::decorationInfo(FilterIDType id) const
+QString DecorateShadowPlugin::decorationInfo(ActionIDType id) const
 {
 	switch (id) {
 	case DP_SHOW_SHADOW:           return tr("Enable shadow mapping");
@@ -34,7 +34,7 @@ QString DecorateShadowPlugin::decorationInfo(FilterIDType id) const
 	}
 }
 
-QString DecorateShadowPlugin::decorationName(FilterIDType id) const
+QString DecorateShadowPlugin::decorationName(ActionIDType id) const
 {
 	switch (id) {
 	case DP_SHOW_SHADOW:           return tr("Enable shadow mapping");

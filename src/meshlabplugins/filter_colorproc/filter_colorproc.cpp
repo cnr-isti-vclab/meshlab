@@ -72,7 +72,7 @@ FilterColorProc::FilterColorProc()
 		   << CP_RANDOM_FACE
 		   << CP_RANDOM_CONNECTED_COMPONENT ;
 
-  FilterIDType tt;
+  ActionIDType tt;
   foreach(tt , types())
     actionList << new QAction(filterName(tt), this);
 
@@ -89,7 +89,7 @@ QString FilterColorProc::pluginName() const
     return "FilterColorProc";
 }
 
- QString FilterColorProc::filterName(FilterIDType filter) const
+ QString FilterColorProc::filterName(ActionIDType filter) const
 {
   switch(filter)
   {
@@ -125,7 +125,7 @@ QString FilterColorProc::pluginName() const
   return QString("error!");
 }
 
- QString FilterColorProc::filterInfo(FilterIDType filterId) const
+ QString FilterColorProc::filterInfo(ActionIDType filterId) const
 {
   switch(filterId)
   {

@@ -68,8 +68,8 @@ class FilterUnsharp : public QObject, public FilterPlugin
 	~FilterUnsharp();
 
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction*) const;
 	int getRequirements(const QAction*);
 	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;

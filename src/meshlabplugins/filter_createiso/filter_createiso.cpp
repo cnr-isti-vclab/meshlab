@@ -43,7 +43,7 @@ FilterCreateIso::FilterCreateIso()
 {
   typeList << FP_CREATEISO;
 
-  FilterIDType tt;
+  ActionIDType tt;
   foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 
@@ -59,7 +59,7 @@ QString FilterCreateIso::pluginName() const
     return "FilterCreateIso";
 }
 
- QString FilterCreateIso::filterName(FilterIDType filter) const
+ QString FilterCreateIso::filterName(ActionIDType filter) const
 {
     switch(filter)
   {
@@ -69,7 +69,7 @@ QString FilterCreateIso::pluginName() const
   return QString("error!");
 }
 
- QString FilterCreateIso::filterInfo(FilterIDType filterId) const
+ QString FilterCreateIso::filterInfo(ActionIDType filterId) const
 {
   switch(filterId)
   {

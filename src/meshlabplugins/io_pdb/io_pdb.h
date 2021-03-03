@@ -40,7 +40,7 @@ public:
 	QList<FileFormat> importFormats() const;
 	QList<FileFormat> exportFormats() const;
 
-	void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent= 0);

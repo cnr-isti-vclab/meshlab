@@ -112,7 +112,7 @@ void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData&
 	}*/
 }
 
-bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedDataContext* cont)
+bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedDataContext* cont)
 {
     _md=&md;
     _gla= gla;
@@ -182,7 +182,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     return true;
 }
 
-void EditAlignPlugin::Decorate(MeshModel & mm, GLArea * gla)
+void EditAlignPlugin::decorate(MeshModel & mm, GLArea * gla)
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -217,7 +217,7 @@ void EditAlignPlugin::Decorate(MeshModel & mm, GLArea * gla)
 	glPopAttrib();
 }
 
-void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditAlignPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
 
     // some cleaning at the end.

@@ -52,7 +52,7 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 			 << PER_VERTEX_QUALITY_HISTOGRAM
 			 << PER_FACE_QUALITY_HISTOGRAM;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -61,7 +61,7 @@ QString FilterMeasurePlugin::pluginName() const
 	return "FilterMeasure";
 }
 
-QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
@@ -94,7 +94,7 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 	}
 }
 
-QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch (filterId) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:

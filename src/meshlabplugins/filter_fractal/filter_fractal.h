@@ -42,8 +42,8 @@ public:
     ~FilterFractal(){}
 
     QString pluginName() const;
-    QString filterName(FilterIDType filter) const;
-    QString filterInfo(FilterIDType filter) const;
+    QString filterName(ActionIDType filter) const;
+    QString filterInfo(ActionIDType filter) const;
 
     int getRequirements(const QAction*);
     void initParameterList(const QAction*, MeshDocument &, RichParameterList &);

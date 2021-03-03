@@ -232,10 +232,10 @@ public slots:
         if(iEdit && currentEditor)
         {
 			if (md() != NULL)
-				iEdit->EndEdit(*md(), this, parentmultiview->sharedDataContext());
+				iEdit->endEdit(*md(), this, parentmultiview->sharedDataContext());
 
 			if (mm() != NULL)
-				iEdit->EndEdit(*mm(), this, parentmultiview->sharedDataContext());
+				iEdit->endEdit(*mm(), this, parentmultiview->sharedDataContext());
         }
 		
 		//MLSceneGLSharedDataContext* shared;

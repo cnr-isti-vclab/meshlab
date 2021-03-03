@@ -55,7 +55,7 @@ FilterUnsharp::FilterUnsharp()
               FP_LINEAR_MORPH <<
               FP_SCALAR_HARMONIC_FIELD;
 
-  FilterIDType tt;
+  ActionIDType tt;
   foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 
@@ -71,7 +71,7 @@ QString FilterUnsharp::pluginName() const
     return "FilterUnsharp";
 }
 
-QString FilterUnsharp::filterName(FilterIDType filter) const
+QString FilterUnsharp::filterName(ActionIDType filter) const
 {
   switch(filter)
   {
@@ -102,7 +102,7 @@ QString FilterUnsharp::filterName(FilterIDType filter) const
   return QString("Error on FilterUnsharp::filterName()");
 }
 
-QString FilterUnsharp::filterInfo(FilterIDType filterId) const
+QString FilterUnsharp::filterInfo(ActionIDType filterId) const
 {
   switch(filterId)
   {

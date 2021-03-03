@@ -2622,7 +2622,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		
 		int capability=0,defaultBits=0;
-		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
+		pCurrentIOPlugin->exportMaskCapability(extension,capability,defaultBits);
 		
 		// optional saving parameters (like ascii/binary encoding)
 		RichParameterList savePar;

@@ -261,7 +261,7 @@ QString ExtraMeshIOPlugin::pluginName() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void ExtraMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("3DS")){capability=defaultBits= vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 	return;

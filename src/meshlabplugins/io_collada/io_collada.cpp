@@ -244,7 +244,7 @@ QList<FileFormat> ColladaIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void ColladaIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits)  const
+void ColladaIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits)  const
 {
 	if(format.toUpper() == tr("DAE")){
 		capability = defaultBits = vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();

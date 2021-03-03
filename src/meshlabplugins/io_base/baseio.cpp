@@ -466,7 +466,7 @@ QList<FileFormat> BaseMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if (format.toUpper() == tr("PLY")) {
 		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();

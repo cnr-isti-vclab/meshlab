@@ -64,7 +64,7 @@ public:
 	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
 
 
-	virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const = 0;
+	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const = 0;
 
 	/// callback used to actually load a mesh from a file
 	virtual bool open(

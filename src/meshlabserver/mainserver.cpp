@@ -258,7 +258,7 @@ public:
 
         int formatmask = 0;
         int defbits = 0;
-        pCurrentIOPlugin->GetExportMaskCapability(extension,formatmask,defbits);
+        pCurrentIOPlugin->exportMaskCapability(extension,formatmask,defbits);
         if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar))
         {
             fprintf(fp,"Failed saving\n");

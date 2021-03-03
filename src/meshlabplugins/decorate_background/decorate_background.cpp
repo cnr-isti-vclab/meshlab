@@ -34,7 +34,7 @@
 
 using namespace vcg;
 
-QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationName(ActionIDType id) const
 {
     switch (id)
     {
@@ -45,7 +45,7 @@ QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
     return QString();
 }
 
-QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationInfo(ActionIDType id) const
 {
     switch(id)
     {

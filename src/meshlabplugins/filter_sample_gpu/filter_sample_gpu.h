@@ -53,8 +53,8 @@ public:
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
     void initParameterList(const QAction* action, MeshModel &m, RichParameterList & parlst);
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	bool requiresGLContext(const QAction* action) const;
 	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
 	FilterClass getClass(const QAction* a) const;

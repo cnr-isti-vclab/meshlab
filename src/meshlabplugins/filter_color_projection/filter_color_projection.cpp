@@ -62,7 +62,7 @@ FilterColorProjectionPlugin::FilterColorProjectionPlugin()
         <<  FP_MULTIIMAGETRIVIALPROJ
         <<  FP_MULTIIMAGETRIVIALPROJTEXTURE;
 
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -72,7 +72,7 @@ QString FilterColorProjectionPlugin::pluginName() const
 }
 
 // ST() return the very short string describing each filtering action
-QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
+QString FilterColorProjectionPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SINGLEIMAGEPROJ	:	return QString("Project current raster color to current mesh");
@@ -84,7 +84,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 }
 
 // Info() return the longer string describing each filtering action
-QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
+QString FilterColorProjectionPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SINGLEIMAGEPROJ	:	return QString("Color information from the current raster is perspective-projected on the current mesh");

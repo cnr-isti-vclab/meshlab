@@ -48,8 +48,8 @@ public:
 	QString pluginName() const;
 	int getPreConditions(const QAction*) const;
 	int postCondition(const QAction* filter) const;
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 	virtual FilterClass getClass(const QAction*) const;
 	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;

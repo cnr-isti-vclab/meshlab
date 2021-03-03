@@ -554,7 +554,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         }
         if (iEdit) {
             iEdit->setLog(&md()->Log);
-            iEdit->Decorate(*mm(), this, &painter);
+            iEdit->decorate(*mm(), this, &painter);
         }
 
         glPopAttrib();
@@ -1005,7 +1005,7 @@ void GLArea::manageCurrentMeshChange()
             assert(lastModelEdited);  // if there is an editor that works on a single mesh
         // last model edited should always be set when start edit is called
 
-        iEdit->LayerChanged(*this->md(), *lastModelEdited, this,parentmultiview->sharedDataContext());
+        iEdit->layerChanged(*this->md(), *lastModelEdited, this,parentmultiview->sharedDataContext());
 
         //now update the last model edited
         //TODO this is not the best design....   iEdit should maybe keep track of the model on its own
@@ -1120,7 +1120,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	}
 	if (mw() != NULL)
 		mw()->updateLayerDialog();
-    if (!iEdit->StartEdit(*this->md(), this,parentmultiview->sharedDataContext()))
+    if (!iEdit->startEdit(*this->md(), this,parentmultiview->sharedDataContext()))
     {
         //iEdit->EndEdit(*(this->md()->mm()), this);
         endEdit();

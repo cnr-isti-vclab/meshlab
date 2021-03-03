@@ -48,7 +48,7 @@ QhullPlugin::QhullPlugin()
              << FP_QHULL_ALPHA_COMPLEX_AND_SHAPE
              << FP_QHULL_VISIBLE_POINTS;
 
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -65,7 +65,7 @@ QString QhullPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
- QString QhullPlugin::filterName(FilterIDType filterId) const
+ QString QhullPlugin::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
         case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull");
@@ -80,7 +80,7 @@ QString QhullPlugin::pluginName() const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString QhullPlugin::filterInfo(FilterIDType filterId) const
+ QString QhullPlugin::filterInfo(ActionIDType filterId) const
 {
   switch(filterId) {
         case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "

@@ -37,7 +37,7 @@ FilterCSG::FilterCSG()
 {
     typeList << FP_CSG;
 
-    foreach(FilterIDType tt, types())
+    foreach(ActionIDType tt, types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -46,7 +46,7 @@ QString FilterCSG::pluginName() const
     return "FilterCSG";
 }
 
-QString FilterCSG::filterName(FilterIDType filterId) const
+QString FilterCSG::filterName(ActionIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:
@@ -58,7 +58,7 @@ QString FilterCSG::filterName(FilterIDType filterId) const
     }
 }
 
-QString FilterCSG::filterInfo(FilterIDType filterId) const
+QString FilterCSG::filterInfo(ActionIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:

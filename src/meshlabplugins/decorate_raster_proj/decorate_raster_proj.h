@@ -108,8 +108,8 @@ private:
     bool                    initShaders(std::string &logs);
 
 
-    virtual QString         decorationInfo( FilterIDType filter ) const;
-    virtual QString         decorationName( FilterIDType filter ) const;
+    virtual QString         decorationInfo( ActionIDType filter ) const;
+    virtual QString         decorationName( ActionIDType filter ) const;
 
 public:
     inline QList<QAction*>  actions() const                             { return actionList; }

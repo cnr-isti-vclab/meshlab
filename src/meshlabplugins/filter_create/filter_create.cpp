@@ -40,7 +40,7 @@ FilterCreate::FilterCreate()
              << CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS
 			 << CR_FITPLANE;
 
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -49,7 +49,7 @@ QString FilterCreate::pluginName() const
     return "FilterCreate";
 }
 
-QString FilterCreate::filterName(FilterIDType filterId) const
+QString FilterCreate::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
   case CR_BOX : return QString("Box/Cube");
@@ -71,7 +71,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString FilterCreate::filterInfo(FilterIDType filterId) const
+QString FilterCreate::filterInfo(ActionIDType filterId) const
 {
   switch(filterId) {
   case CR_BOX : return QString("Create a Box, Cube, Hexahedron. You can specify the side length.");
@@ -551,7 +551,7 @@ bool FilterCreate::applyFilter(const QAction *filter, MeshDocument &md, std::map
   }
 }
 
-QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
+QString FilterCreate::filterScriptFunctionName( ActionIDType filterID )
  {
 	switch(filterID)
 	{

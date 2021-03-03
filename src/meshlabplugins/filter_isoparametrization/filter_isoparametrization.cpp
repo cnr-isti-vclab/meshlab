@@ -43,7 +43,7 @@ FilterIsoParametrization::FilterIsoParametrization()
 			 << ISOP_DIAMPARAM
 			 << ISOP_TRANSFER;
 	
-	FilterIDType tt;
+	ActionIDType tt;
 	foreach(tt , types())
 		actionList << new QAction(filterName(tt), this);
 	
@@ -60,7 +60,7 @@ QString FilterIsoParametrization::pluginName() const
 	return "FilterIsoParametrization";
 }
 
-QString FilterIsoParametrization::filterName(FilterIDType filter) const
+QString FilterIsoParametrization::filterName(ActionIDType filter) const
 {
 	switch(filter)
 	{
@@ -76,7 +76,7 @@ static const QString bibRef("For more details see: <br>"
 							"<b>N. Pietroni, M. Tarini and P. Cignoni</b>, <br><a href=\"http://vcg.isti.cnr.it/Publications/2010/PTC10/\">'Almost isometric mesh parameterization through abstract domains'</a> <br>"
 							"IEEE Transaction of Visualization and Computer Graphics, 2010");
 
-QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
+QString FilterIsoParametrization::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{

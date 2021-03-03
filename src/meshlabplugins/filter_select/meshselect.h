@@ -70,8 +70,8 @@ class SelectionFilterPlugin : public QObject, public FilterPlugin
 	SelectionFilterPlugin();
   //~SelectionFilterPlugin();
     QString pluginName() const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+  virtual QString filterName(ActionIDType filter) const;
   
   virtual FilterClass getClass(const QAction*) const;
   void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);

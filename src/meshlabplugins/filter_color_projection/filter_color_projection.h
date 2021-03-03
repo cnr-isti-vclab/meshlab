@@ -39,8 +39,8 @@ class FilterColorProjectionPlugin : public QObject, public FilterPlugin
 	FilterColorProjectionPlugin();
 	
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	int postCondition( const QAction* ) const;
 	
 	FilterClass getClass(const QAction*) const;

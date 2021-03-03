@@ -70,8 +70,8 @@ public:
     QualityMapperFilter();
 
     QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(ActionIDType filter) const;
+    virtual QString filterInfo(ActionIDType filter) const;
     int getPreConditions(const QAction *) const;
     int postCondition(const QAction* ) const;
     virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);

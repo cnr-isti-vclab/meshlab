@@ -43,7 +43,7 @@ FilterCameraPlugin::FilterCameraPlugin()
         FP_CAMERA_TRANSFORM <<
         FP_ORIENT_NORMALS_WITH_CAMERAS;
 
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -53,7 +53,7 @@ QString FilterCameraPlugin::pluginName() const
 }
 
 // ST() return the very short string describing each filtering action
-QString FilterCameraPlugin::filterName(FilterIDType filterId) const
+QString FilterCameraPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SET_MESH_CAMERA :           return QString("Set Mesh Camera");
@@ -70,7 +70,7 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 }
 
 // Info() return the longer string describing each filtering action
-QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
+QString FilterCameraPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SET_MESH_CAMERA :     return QString("This filter allows one to set a shot for the current mesh");

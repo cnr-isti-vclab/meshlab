@@ -100,8 +100,8 @@ public:
     ~FilterImgPatchParamPlugin();
 
     QString pluginName() const;
-    virtual QString     filterName( FilterIDType id ) const;
-    virtual QString     filterInfo( FilterIDType id ) const;
+    virtual QString     filterName( ActionIDType id ) const;
+    virtual QString     filterInfo( ActionIDType id ) const;
 
     virtual FilterClass getClass(const QAction* act ) const;
 

@@ -70,7 +70,7 @@ MlsPlugin::MlsPlugin()
         << FP_SELECT_SMALL_COMPONENTS;
 
 // 	initFilterList(this);
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -81,7 +81,7 @@ QString MlsPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
- QString MlsPlugin::filterName(FilterIDType filterId) const
+ QString MlsPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
         case FP_APSS_PROJECTION         : return QString("MLS projection (APSS)");
@@ -121,7 +121,7 @@ return QString("Filter Unknown");
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString MlsPlugin::filterInfo(FilterIDType filterId) const
+ QString MlsPlugin::filterInfo(ActionIDType filterId) const
 {
     QString str = "";
     if (filterId & _PROJECTION_)

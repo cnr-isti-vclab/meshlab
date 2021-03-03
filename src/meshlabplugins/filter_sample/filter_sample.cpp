@@ -32,7 +32,7 @@ FilterSamplePlugin::FilterSamplePlugin()
 { 
 	typeList << FP_MOVE_VERTEX;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -47,7 +47,7 @@ QString FilterSamplePlugin::pluginName() const
  * @param filterId: the id of the filter
  * @return the name of the filter
  */
-QString FilterSamplePlugin::filterName(FilterIDType filterId) const
+QString FilterSamplePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_MOVE_VERTEX :
@@ -65,7 +65,7 @@ QString FilterSamplePlugin::filterName(FilterIDType filterId) const
  * @param filterId: the id of the filter
  * @return an info string of the filter
  */
- QString FilterSamplePlugin::filterInfo(FilterIDType filterId) const
+ QString FilterSamplePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_MOVE_VERTEX :

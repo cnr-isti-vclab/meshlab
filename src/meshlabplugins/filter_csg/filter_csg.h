@@ -53,8 +53,8 @@ public:
     ~FilterCSG() {};
 
     QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(ActionIDType filter) const;
+    virtual QString filterInfo(ActionIDType filter) const;
 
     virtual bool autoDialog(QAction *) { return true; }
 

@@ -53,7 +53,7 @@ FilterDirt::FilterDirt()
     typeList << FP_DIRT
              <<FP_CLOUD_MOVEMENT;
 
-    FilterIDType tt;
+    ActionIDType tt;
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 }
@@ -63,7 +63,7 @@ QString FilterDirt::pluginName() const
     return "FilterDirt";
 }
 
-QString FilterDirt::filterName(FilterIDType filterId) const
+QString FilterDirt::filterName(ActionIDType filterId) const
 {
     switch (filterId) {
     case FP_DIRT:{
@@ -82,7 +82,7 @@ QString FilterDirt::filterName(FilterIDType filterId) const
     }
 }
 
-QString FilterDirt::filterInfo(FilterIDType filterId) const
+QString FilterDirt::filterInfo(ActionIDType filterId) const
 {
     switch (filterId) {
     case FP_DIRT:{

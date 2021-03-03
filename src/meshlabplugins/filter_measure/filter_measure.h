@@ -48,8 +48,8 @@ public:
 
 	QString pluginName() const;
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction*) const;
 	FILTER_ARITY filterArity(const QAction*) const;
 	int getPreConditions(const QAction *action) const;

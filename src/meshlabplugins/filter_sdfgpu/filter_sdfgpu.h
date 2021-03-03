@@ -25,9 +25,9 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 	
 	QString pluginName() const;
 	
-	QString filterName(FilterIDType filterId) const;
+	QString filterName(ActionIDType filterId) const;
 	
-	QString filterInfo(FilterIDType filterId) const;
+	QString filterInfo(ActionIDType filterId) const;
 	
 	FilterClass getClass(const QAction *) const
 	{

@@ -150,7 +150,7 @@ QList<FileFormat> U3DIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void U3DIOPlugin::GetExportMaskCapability(
+void U3DIOPlugin::exportMaskCapability(
 		const QString &format, 
 		int &capability, 
 		int &defaultBits) const

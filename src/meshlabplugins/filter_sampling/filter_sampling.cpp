@@ -367,7 +367,7 @@ FilterDocSampling::FilterDocSampling()
       << FP_POINTCLOUD_SIMPLIFICATION
          ;
 
-  foreach(FilterIDType tt , types())
+  foreach(ActionIDType tt , types())
       actionList << new QAction(filterName(tt), this);
 }
 
@@ -378,7 +378,7 @@ QString FilterDocSampling::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString FilterDocSampling::filterName(FilterIDType filterId) const
+QString FilterDocSampling::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
   case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Sampling");
@@ -402,7 +402,7 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString FilterDocSampling::filterInfo(FilterIDType filterId) const
+QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.");

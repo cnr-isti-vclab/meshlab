@@ -36,7 +36,7 @@ FilterSketchFabPlugin::FilterSketchFabPlugin()
 { 
 	typeList << FP_SKETCHFAB;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -45,7 +45,7 @@ QString FilterSketchFabPlugin::pluginName() const
 	return "FilterSketchFab";
 }
 
-QString FilterSketchFabPlugin::filterName(FilterIDType filterId) const
+QString FilterSketchFabPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_SKETCHFAB :
@@ -56,7 +56,7 @@ QString FilterSketchFabPlugin::filterName(FilterIDType filterId) const
 	}
 }
 
-QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
+QString FilterSketchFabPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_SKETCHFAB :

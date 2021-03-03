@@ -41,7 +41,7 @@ PlyMCPlugin::PlyMCPlugin()
 			<< FP_MC_SIMPLIFY
 			   ;
 	
-	foreach(FilterIDType tt , types())
+	foreach(ActionIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -52,7 +52,7 @@ QString PlyMCPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString PlyMCPlugin::filterName(FilterIDType filterId) const
+QString PlyMCPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -65,7 +65,7 @@ QString PlyMCPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
+QString PlyMCPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{

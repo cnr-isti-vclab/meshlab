@@ -51,9 +51,9 @@ public:
 	
 	static const QString Info();
 
-	virtual bool StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
-	virtual void EndEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
-  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *);
+	virtual bool startEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
+	virtual void endEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
+  virtual void decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *);
 	virtual void mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );

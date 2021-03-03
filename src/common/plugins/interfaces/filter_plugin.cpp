@@ -1,7 +1,7 @@
 #include "filter_plugin.h"
 #include "../../python/python_utils.h"
 
-QString FilterPlugin::pythonFilterName(MeshLabPlugin::FilterIDType f) const
+QString FilterPlugin::pythonFilterName(MeshLabPlugin::ActionIDType f) const
 {
 	return pymeshlab::computePythonName(filterName(f));
 }
@@ -45,13 +45,13 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 	return MissingItems.isEmpty();
 }
 
-MeshLabPlugin::FilterIDType FilterPlugin::ID(const QAction* a) const
+MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		if (a->text() == this->filterName(tt)) return tt;
 	aa.replace("&","");
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		if (aa == this->filterName(tt)) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
@@ -59,7 +59,7 @@ MeshLabPlugin::FilterIDType FilterPlugin::ID(const QAction* a) const
 	return -1;
 }
 
-QAction* FilterPlugin::getFilterAction(MeshLabPlugin::FilterIDType filterID)
+QAction* FilterPlugin::getFilterAction(MeshLabPlugin::ActionIDType filterID)
 {
 	QString idName = this->filterName(filterID);
 	return getFilterAction(idName);

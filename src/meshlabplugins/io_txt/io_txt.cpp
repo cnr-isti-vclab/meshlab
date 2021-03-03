@@ -124,7 +124,7 @@ QList<FileFormat> TxtIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TxtIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
+void TxtIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
 	capability=defaultBits=0;
 	return;

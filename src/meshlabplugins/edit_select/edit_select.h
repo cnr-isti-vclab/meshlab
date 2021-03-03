@@ -41,9 +41,9 @@ public:
 
 	static QString Info();
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
-	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
-	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
+	void decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);

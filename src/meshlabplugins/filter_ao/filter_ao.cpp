@@ -48,7 +48,7 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
     typeList
 		<< FP_AMBIENT_OCCLUSION;
 
-    foreach(FilterIDType tt , types())
+    foreach(ActionIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 
     init = false;
@@ -71,7 +71,7 @@ QString AmbientOcclusionPlugin::pluginName() const
     return "FilterAmbientOcclusion";
 }
 
-QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId)
     {
@@ -82,7 +82,7 @@ QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
     return QString("");
 }
 
-QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_AMBIENT_OCCLUSION: 

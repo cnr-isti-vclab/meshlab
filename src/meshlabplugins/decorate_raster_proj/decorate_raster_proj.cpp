@@ -147,7 +147,7 @@ DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
 {
     typeList << DP_PROJECT_RASTER;
 
-    foreach( FilterIDType tt, types() )
+    foreach( ActionIDType tt, types() )
         actionList << new QAction(decorationName(tt), this);
 
     foreach( QAction *ap, actionList )
@@ -165,7 +165,7 @@ QString DecorateRasterProjPlugin::pluginName() const
 }
 
 
-QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationInfo( ActionIDType id ) const
 {
     switch( id )
     {
@@ -175,7 +175,7 @@ QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
 }
 
 
-QString DecorateRasterProjPlugin::decorationName( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationName( ActionIDType id ) const
 {
     switch( id )
     {

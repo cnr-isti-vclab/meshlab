@@ -84,7 +84,7 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
 
-void EditReferencingPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
+void EditReferencingPlugin::decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
 	if (referencingMode == EditReferencingPlugin::REF_ABSOLUTE)
 		DecorateAbsolute(m, gla, p);
@@ -301,7 +301,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	}
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditReferencingPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -357,7 +357,7 @@ bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
     return true;
 }
 
-void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditReferencingPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     delete(referencingDialog);

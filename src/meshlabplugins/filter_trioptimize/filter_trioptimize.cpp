@@ -115,7 +115,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 	<< FP_CURVATURE_EDGE_FLIP
 	<< FP_NEAR_LAPLACIAN_SMOOTH;
 
-	foreach(FilterIDType tt , types())
+	foreach(ActionIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -127,7 +127,7 @@ QString TriOptimizePlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
- QString TriOptimizePlugin::filterName(FilterIDType filterId) const
+ QString TriOptimizePlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
 		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
@@ -153,7 +153,7 @@ QString TriOptimizePlugin::pluginName() const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString TriOptimizePlugin::filterInfo(FilterIDType filterId) const
+ QString TriOptimizePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_PLANAR_EDGE_FLIP:

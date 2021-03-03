@@ -58,7 +58,7 @@ CleanFilter::CleanFilter()
 	<< FP_COMPACT_FACE
 	<< FP_COMPACT_VERT;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 	
 	QCoreApplication* app = QCoreApplication::instance();
@@ -76,7 +76,7 @@ QString CleanFilter::pluginName() const
     return "FilterClean";
 }
 
-QString CleanFilter::filterName(FilterIDType filter) const
+QString CleanFilter::filterName(ActionIDType filter) const
 {
   switch(filter)
   {
@@ -104,7 +104,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
- QString CleanFilter::filterInfo(FilterIDType filterId) const
+ QString CleanFilter::filterInfo(ActionIDType filterId) const
 {
   switch(filterId)
   {

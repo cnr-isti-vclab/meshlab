@@ -82,7 +82,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_SLICE_WITH_A_PLANE
 		<< FP_PERIMETER_POLYLINE;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 
 	tri::TriEdgeCollapseQuadricParameter lpp;
@@ -211,7 +211,7 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 	return MeshModel::MM_NONE;
 }
 
-QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
+QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 {
 	switch (filter)
 	{
@@ -258,7 +258,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 	return tr("error!");
 }
 
-QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
+QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 {
 	switch (filterID)
 	{

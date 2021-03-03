@@ -215,7 +215,7 @@ void pymeshlab::FunctionSet::updateSaveParameters(IOMeshPlugin* plugin,
 		pymeshlab::Function& f)
 {
 	int capabilityBits, defaultBits;
-	plugin->GetExportMaskCapability(outputFormat, capabilityBits, defaultBits);
+	plugin->exportMaskCapability(outputFormat, capabilityBits, defaultBits);
 
 	for (unsigned int i = 0; i < capabilitiesBits.size(); ++i){
 		if (capabilityBits & capabilitiesBits[i]){
