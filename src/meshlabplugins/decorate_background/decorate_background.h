@@ -38,11 +38,11 @@ New small samples
 #include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 #include "cubemap.h"
 
-class DecorateBackgroundPlugin : public QObject, public DecoratePluginInterface
+class DecorateBackgroundPlugin : public QObject, public DecoratePlugin
 {
   Q_OBJECT
   MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(DecoratePluginInterface)
+  Q_INTERFACES(DecoratePlugin)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;
   QString pluginName() const;
@@ -89,7 +89,7 @@ DecorateBackgroundPlugin()
   void decorateDoc(const QAction *a, MeshDocument &md, const RichParameterList *, GLArea *gla, QPainter *, GLLogStream &_log);
   void decorateMesh(const QAction *, MeshModel &, const RichParameterList *, GLArea *, QPainter *, GLLogStream &){}
   void initGlobalParameterList(const QAction *, RichParameterList &/*globalparam*/);
-  int getDecorationClass(const QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
+  int getDecorationClass(const QAction * /*action*/) const { return DecoratePlugin::PerDocument; }
 
 
 private:

@@ -35,11 +35,11 @@ typedef vcg::ColorHistogram<float>  CHist;
 
 typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
-class DecorateBasePlugin : public QObject, public DecoratePluginInterface
+class DecorateBasePlugin : public QObject, public DecoratePlugin
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(DecoratePluginInterface)
+	Q_INTERFACES(DecoratePlugin)
 	QString decorationName(FilterIDType filter) const;
 	QString decorationInfo(FilterIDType filter) const;
 	QString pluginName() const;

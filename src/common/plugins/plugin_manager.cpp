@@ -194,7 +194,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
-		decoratePlugins.pushDecoratePlugin(qobject_cast<DecoratePluginInterface *>(plugin));
+		decoratePlugins.pushDecoratePlugin(qobject_cast<DecoratePlugin *>(plugin));
 	}
 	if (type.isEditPlugin()){
 		editPlugins.pushEditPlugin(qobject_cast<EditPluginInterfaceFactory *>(plugin));
@@ -225,7 +225,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 	if (it != allPlugins.end()){
 		MeshLabPluginType type(ifp);
 		if (type.isDecoratePlugin()){
-			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePluginInterface *>(ifp));
+			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePlugin *>(ifp));
 		}
 		if (type.isEditPlugin()){
 			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginInterfaceFactory *>(ifp));
@@ -276,7 +276,7 @@ int PluginManager::numberIOPlugins() const
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-DecoratePluginInterface *PluginManager::getDecoratePlugin(const QString& name)
+DecoratePlugin *PluginManager::getDecoratePlugin(const QString& name)
 {
 	return decoratePlugins.decoratePlugin(name);
 }

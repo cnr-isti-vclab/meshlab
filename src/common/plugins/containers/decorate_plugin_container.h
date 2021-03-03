@@ -41,23 +41,23 @@ public:
 	DecoratePluginContainer();
 
 	void clear();
-	void pushDecoratePlugin(DecoratePluginInterface* iDecorate);
-	void eraseDecoratePlugin(DecoratePluginInterface* iDecorate);
+	void pushDecoratePlugin(DecoratePlugin* iDecorate);
+	void eraseDecoratePlugin(DecoratePlugin* iDecorate);
 
-	DecoratePluginInterface* decoratePlugin(const QString& name);
+	DecoratePlugin* decoratePlugin(const QString& name);
 
 	DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	std::vector<DecoratePluginInterface*> decoratePlugins;
+	std::vector<DecoratePlugin*> decoratePlugins;
 };
 
 class DecoratePluginContainer::DecoratePluginRangeIterator
 {
 	friend class DecoratePluginContainer;
 public:
-	ConstPluginIterator<DecoratePluginInterface> begin() {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.begin(), b);}
-	ConstPluginIterator<DecoratePluginInterface> end()   {return ConstPluginIterator<DecoratePluginInterface>(pm->decoratePlugins, pm->decoratePlugins.end(), b);}
+	ConstPluginIterator<DecoratePlugin> begin() {return ConstPluginIterator<DecoratePlugin>(pm->decoratePlugins, pm->decoratePlugins.begin(), b);}
+	ConstPluginIterator<DecoratePlugin> end()   {return ConstPluginIterator<DecoratePlugin>(pm->decoratePlugins, pm->decoratePlugins.end(), b);}
 private:
 	DecoratePluginRangeIterator(const DecoratePluginContainer* pm, bool iterateAlsoDisabledPlugins = false) : pm(pm), b(iterateAlsoDisabledPlugins) {}
 	const DecoratePluginContainer* pm;

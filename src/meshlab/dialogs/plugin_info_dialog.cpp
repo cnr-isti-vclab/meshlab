@@ -152,7 +152,7 @@ void PluginInfoDialog::populateTreeWidget()
 			QString pluginType = type.pluginTypeString();
 			QStringList tmplist;
 			if (type.isDecoratePlugin()){
-				DecoratePluginInterface* dpi = dynamic_cast<DecoratePluginInterface*>(fp);
+				DecoratePlugin* dpi = dynamic_cast<DecoratePlugin*>(fp);
 				for(QAction *a: dpi->actions())
 					tmplist.push_back(a->text());
 			}

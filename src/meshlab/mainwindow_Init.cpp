@@ -486,7 +486,7 @@ void MainWindow::createToolBars()
 
 
 	decoratorToolBar = addToolBar("Decorator");
-	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
+	for(DecoratePlugin *iDecorate: PM.decoratePluginIterator()) {
 		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);
@@ -838,7 +838,7 @@ void MainWindow::fillRenderMenu()
 	renderMenu->addSeparator();
 	fillShadersMenu();
 
-	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator())
+	for(DecoratePlugin *iDecorate: PM.decoratePluginIterator())
 	{
 		for(QAction *decorateAction: iDecorate->actions())
 		{
@@ -900,7 +900,7 @@ void MainWindow::updateAllPluginsActions()
 	
 	//update toolbars
 	decoratorToolBar->clear();
-	for(DecoratePluginInterface *iDecorate: PM.decoratePluginIterator()) {
+	for(DecoratePlugin *iDecorate: PM.decoratePluginIterator()) {
 		for(QAction *decorateAction: iDecorate->actions()) {
 			if (!decorateAction->icon().isNull())
 				decoratorToolBar->addAction(decorateAction);

@@ -415,7 +415,7 @@ void MainWindow::updateMenus()
 		
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
-		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+		for (DecoratePlugin* dp : PM.decoratePluginIterator()){
 			for (QAction* a : dp->actions()){
 				a->setChecked(false);
 				a->setEnabled(true);
@@ -438,7 +438,7 @@ void MainWindow::updateMenus()
 			}
 		}
 
-		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+		for (DecoratePlugin* dp : PM.decoratePluginIterator()){
 			for (QAction* a : dp->actions()){
 				a->setEnabled(false);
 			}
@@ -453,7 +453,7 @@ void MainWindow::updateMenus()
 	}
 	else
 	{
-		for (DecoratePluginInterface* dp : PM.decoratePluginIterator()){
+		for (DecoratePlugin* dp : PM.decoratePluginIterator()){
 			for (QAction* a : dp->actions()){
 				a->setChecked(false);
 				a->setEnabled(false);
@@ -1456,7 +1456,7 @@ void MainWindow::applyDecorateMode()
 	if(GLA()->mm() == 0) return;
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 	
-	DecoratePluginInterface *iDecorateTemp = qobject_cast<DecoratePluginInterface *>(action->parent());
+	DecoratePlugin *iDecorateTemp = qobject_cast<DecoratePlugin *>(action->parent());
 	
 	GLA()->toggleDecorator(iDecorateTemp->decorationName(action));
 	

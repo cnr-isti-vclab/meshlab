@@ -60,7 +60,7 @@ public:
 	unsigned int size() const;
 	int numberIOPlugins() const;
 
-	DecoratePluginInterface* getDecoratePlugin(const QString& name);
+	DecoratePlugin* getDecoratePlugin(const QString& name);
 
 	QAction* filterAction(const QString& name);
 

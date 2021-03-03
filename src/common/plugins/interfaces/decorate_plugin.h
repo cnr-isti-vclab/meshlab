@@ -21,39 +21,38 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_DECORATE_PLUGIN_INTERFACE_H
-#define MESHLAB_DECORATE_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_DECORATE_PLUGIN_H
+#define MESHLAB_DECORATE_PLUGIN_H
 
 #include "meshlab_plugin.h"
 
 class GLArea;
 
 /**
-MeshDecorateInterface is the base class of all <b> decorators </b>
-Decorators are 'read-only' visualization aids that helps to show some data about a document.
-Decorators can make some permesh precomputation but the rendering has to be efficient.
-Decorators should save the additional data into per-mesh attribute.
+ * @class The DecoratePlugin is the base class of all <b> decorators </b>
+ * Decorators are 'read-only' visualization aids that helps to show some data about a document.
+ * Decorators can make some permesh precomputation but the rendering has to be efficient.
+ * Decorators should save the additional data into per-mesh attribute.
 
+ * There are two classes of Decorations
+ * - PerMesh
+ * - PerDocument
 
-There are two classes of Decorations
-- PerMesh
-- PerDocument
+ * PerMesh Decorators are associated to each mesh/view
+ * Some example of PerDocument Decorations
+ * - backgrounds
+ * - trackball icon
+ * - axis
+ * - shadows
+ * - screen space Ambient occlusion (think it as a generic 'darkner')
 
-PerMesh Decorators are associated to each mesh/view
-Some example of PerDocument Decorations
-- backgrounds
-- trackball icon
-- axis
-- shadows
-- screen space Ambient occlusion (think it as a generic 'darkner')
+ * Some example of PerMesh Decorations
+ * - coloring of selected vertex/face
+ * - displaying of normals/curvature directions
+ * - display of specific tagging
+ **/
 
-Some example of PerMesh Decorations
-- coloring of selected vertex/face
-- displaying of normals/curvature directions
-- display of specific tagging
-*/
-
-class DecoratePluginInterface : public MeshLabPlugin
+class DecoratePlugin : public MeshLabPlugin
 {
 public:
 
@@ -69,8 +68,8 @@ public:
 		PostRendering = 0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
 	};
 
-	DecoratePluginInterface() : MeshLabPlugin() {}
-	virtual ~DecoratePluginInterface() {}
+	DecoratePlugin() : MeshLabPlugin() {}
+	virtual ~DecoratePlugin() {}
 	/** The very short string (a few words) describing each filtering action
 	// This string is used also to define the menu entry
 	*/
@@ -112,7 +111,7 @@ protected:
 	virtual FilterIDType ID(QString name) const;
 };
 
-#define DECORATE_PLUGIN_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
-Q_DECLARE_INTERFACE(DecoratePluginInterface, DECORATE_PLUGIN_INTERFACE_IID)
+#define DECORATE_PLUGIN_IID  "vcg.meshlab.DecoratePlugin/1.0"
+Q_DECLARE_INTERFACE(DecoratePlugin, DECORATE_PLUGIN_IID)
 
-#endif // MESHLAB_DECORATE_PLUGIN_INTERFACE_H
+#endif // MESHLAB_DECORATE_PLUGIN_H

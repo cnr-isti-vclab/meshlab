@@ -42,7 +42,7 @@ class GLLogStream;
 class MeshModel;
 class RasterModel;
 class MeshDocument;
-class DecoratePluginInterface;
+class DecoratePlugin;
 class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;

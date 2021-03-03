@@ -1,4 +1,4 @@
-#include "decorate_plugin_interface.h"
+#include "decorate_plugin.h"
 
 /** \brief
  * This function is called by the framework, for each plugin that has global parameters (e.g. \ref MeshDecorateInterface) at the start of the application.

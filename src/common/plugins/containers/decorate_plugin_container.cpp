@@ -32,7 +32,7 @@ void DecoratePluginContainer::clear()
 	decoratePlugins.clear();
 }
 
-void DecoratePluginContainer::pushDecoratePlugin(DecoratePluginInterface* iDecorate)
+void DecoratePluginContainer::pushDecoratePlugin(DecoratePlugin* iDecorate)
 {
 	decoratePlugins.push_back(iDecorate);
 	for(QAction *decoratorAction : iDecorate->actions()) {
@@ -40,14 +40,14 @@ void DecoratePluginContainer::pushDecoratePlugin(DecoratePluginInterface* iDecor
 	}
 }
 
-void DecoratePluginContainer::eraseDecoratePlugin(DecoratePluginInterface* iDecorate)
+void DecoratePluginContainer::eraseDecoratePlugin(DecoratePlugin* iDecorate)
 {
 	decoratePlugins.erase(std::find(decoratePlugins.begin(), decoratePlugins.end(), iDecorate));
 }
 
-DecoratePluginInterface* DecoratePluginContainer::decoratePlugin(const QString& name)
+DecoratePlugin* DecoratePluginContainer::decoratePlugin(const QString& name)
 {
-	for(DecoratePluginInterface *tt : decoratePlugins) {
+	for(DecoratePlugin *tt : decoratePlugins) {
 		for( QAction *ac: tt->actions())
 			if( name == tt->decorationName(ac) ) return tt;
 	}

@@ -33,7 +33,7 @@
 MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 {
 	//Decorate
-	const DecoratePluginInterface *iDecorator = dynamic_cast<const DecoratePluginInterface *>(fpi);
+	const DecoratePlugin *iDecorator = dynamic_cast<const DecoratePlugin *>(fpi);
 	if (iDecorator) {
 		type |= DECORATE;
 	}

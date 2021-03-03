@@ -310,7 +310,7 @@ public slots:
 			MeshModel *m = md()->getMesh(i.key());
 			foreach(QAction *p, i.value())
 			{
-				DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
+				DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>(p->parent());
 				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
 				decorInterface->setLog(&md()->Log);
 				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);

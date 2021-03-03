@@ -903,7 +903,7 @@ void LayerDialog::updateDecoratorParsView()
 	ui->decParsTree->clear();
 	for(int ii = 0; ii < decList.size();++ii)
 	{
-		DecoratePluginInterface* decPlug =  qobject_cast<DecoratePluginInterface *>(decList[ii]->parent());
+		DecoratePlugin* decPlug =  qobject_cast<DecoratePlugin *>(decList[ii]->parent());
 		if (!decPlug)
 		{
 			mw->GLA()->Log(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
@@ -1213,7 +1213,7 @@ void RasterTreeWidgetItem::updateVisibilityIcon( bool isvisible )
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent) :
 	QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),loadbut(NULL),dialoglayout(NULL)
 {
-	DecoratePluginInterface* decPlug =  qobject_cast<DecoratePluginInterface *>(act->parent());
+	DecoratePlugin* decPlug =  qobject_cast<DecoratePlugin *>(act->parent());
 	if (!decPlug) {
 		mw->GLA()->Log(GLLogStream::SYSTEM, "MeshLab System Error: A Decorator Plugin has been expected.");
 	}
