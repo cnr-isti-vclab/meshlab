@@ -34,7 +34,7 @@ void FilterPluginContainer::clear()
 }
 
 void FilterPluginContainer::pushFilterPlugin(
-		FilterPluginInterface* iFilter)
+		FilterPlugin* iFilter)
 {
 	for(QAction *filterAction : iFilter->actions()) {
 		filterAction->setData(QVariant(iFilter->pluginName()));
@@ -44,7 +44,7 @@ void FilterPluginContainer::pushFilterPlugin(
 }
 
 void FilterPluginContainer::eraseFilterPlugin(
-		FilterPluginInterface* iFilter)
+		FilterPlugin* iFilter)
 {
 	for(QAction *filterAction : iFilter->actions()) {
 		actionFilterMap.remove(filterAction->text());
@@ -66,14 +66,14 @@ FilterPluginContainer::FilterPluginRangeIterator FilterPluginContainer::filterPl
 	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-ConstPluginIterator<FilterPluginInterface> FilterPluginContainer::FilterPluginRangeIterator::begin()
+ConstPluginIterator<FilterPlugin> FilterPluginContainer::FilterPluginRangeIterator::begin()
 {
-	return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.begin(), b);
+	return ConstPluginIterator<FilterPlugin>(pm->filterPlugins, pm->filterPlugins.begin(), b);
 }
 
-ConstPluginIterator<FilterPluginInterface> FilterPluginContainer::FilterPluginRangeIterator::end()
+ConstPluginIterator<FilterPlugin> FilterPluginContainer::FilterPluginRangeIterator::end()
 {
-	return ConstPluginIterator<FilterPluginInterface>(pm->filterPlugins, pm->filterPlugins.end(), b);
+	return ConstPluginIterator<FilterPlugin>(pm->filterPlugins, pm->filterPlugins.end(), b);
 }
 
 FilterPluginContainer::FilterPluginRangeIterator::FilterPluginRangeIterator(

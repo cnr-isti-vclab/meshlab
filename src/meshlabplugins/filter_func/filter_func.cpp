@@ -166,22 +166,22 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(const QAction *
 	switch(ID(a))
 	{
 	case FF_FACE_SELECTION:
-	case FF_VERT_SELECTION: return FilterPluginInterface::Selection;
+	case FF_VERT_SELECTION: return FilterPlugin::Selection;
 	case FF_FACE_QUALITY: return FilterClass(Quality + FaceColoring);
 	case FF_VERT_QUALITY: return FilterClass(Quality + VertexColoring);
-	case FF_VERT_TEXTURE_FUNC: return FilterPluginInterface::Texture;
-	case FF_VERT_COLOR:	return FilterPluginInterface::VertexColoring;
-	case FF_VERT_NORMAL:	return FilterPluginInterface::Normal;
-	case FF_FACE_COLOR: return FilterPluginInterface::FaceColoring;
-	case FF_WEDGE_TEXTURE_FUNC: return FilterPluginInterface::Texture;
-	case FF_ISOSURFACE: return FilterPluginInterface::MeshCreation;
-	case FF_GRID: return FilterPluginInterface::MeshCreation;
-	case FF_REFINE: return FilterPluginInterface::Remeshing;
-	case FF_GEOM_FUNC: return FilterPluginInterface::Smoothing;
-	case FF_DEF_VERT_ATTRIB: return FilterPluginInterface::Layer;
-	case FF_DEF_FACE_ATTRIB: return FilterPluginInterface::Layer;
+	case FF_VERT_TEXTURE_FUNC: return FilterPlugin::Texture;
+	case FF_VERT_COLOR:	return FilterPlugin::VertexColoring;
+	case FF_VERT_NORMAL:	return FilterPlugin::Normal;
+	case FF_FACE_COLOR: return FilterPlugin::FaceColoring;
+	case FF_WEDGE_TEXTURE_FUNC: return FilterPlugin::Texture;
+	case FF_ISOSURFACE: return FilterPlugin::MeshCreation;
+	case FF_GRID: return FilterPlugin::MeshCreation;
+	case FF_REFINE: return FilterPlugin::Remeshing;
+	case FF_GEOM_FUNC: return FilterPlugin::Smoothing;
+	case FF_DEF_VERT_ATTRIB: return FilterPlugin::Layer;
+	case FF_DEF_FACE_ATTRIB: return FilterPlugin::Layer;
 		
-	default: return FilterPluginInterface::Generic;
+	default: return FilterPlugin::Generic;
 	}
 }
 
@@ -375,7 +375,7 @@ void FilterFunctionPlugin::initParameterList(const QAction *action,MeshModel &m,
 // The Real Core Function doing the actual mesh processing.
 bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
 {
-	if(this->getClass(filter) == FilterPluginInterface::MeshCreation)
+	if(this->getClass(filter) == FilterPlugin::MeshCreation)
 		md.addNewMesh("",this->filterName(ID(filter)));
 	MeshModel &m=*(md.mm());
 	Q_UNUSED(cb);
@@ -1432,7 +1432,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	
 }
 
-FilterPluginInterface::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAction* filter ) const
+FilterPlugin::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAction* filter ) const
 {
 	switch(ID(filter)) 
 	{
@@ -1449,12 +1449,12 @@ FilterPluginInterface::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAct
 	case FF_DEF_VERT_ATTRIB:    
 	case FF_DEF_FACE_ATTRIB:    
 	case FF_REFINE:
-		return FilterPluginInterface::SINGLE_MESH;
+		return FilterPlugin::SINGLE_MESH;
 	case FF_GRID:                            
 	case FF_ISOSURFACE:         
-		return FilterPluginInterface::NONE;
+		return FilterPlugin::NONE;
 	}
-	return FilterPluginInterface::NONE;
+	return FilterPlugin::NONE;
 }
 
 

@@ -92,7 +92,7 @@ public:
     void dumpPluginInfoWiki(FILE *fp)
     {
         if(!fp) return;
-        for(FilterPluginInterface *iFilter: PM.filterPluginIterator())
+        for(FilterPlugin *iFilter: PM.filterPluginIterator())
             for(QAction *filterAction: iFilter->actions())
                 fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
     }
@@ -105,7 +105,7 @@ public:
 		vcg::tri::Tetrahedron(mm->cm);
 		mm->updateDataMask(MeshModel::MM_ALL);
 		QMap<QString, QAction*>::iterator ai;	
-		for(FilterPluginInterface* fpi : PM.filterPluginIterator())
+		for(FilterPlugin* fpi : PM.filterPluginIterator())
 		//for (ai = this->actionFilterMap.begin(); ai != this->actionFilterMap.end(); ++ai)	
 		{	
 			for (QAction* ai: fpi->actions()) {
@@ -126,7 +126,7 @@ public:
         fprintf(fp,"/*! \\mainpage MeshLab Filter Documentation\n");
         //fprintf(fp,"\\AtBeginDocument{\\setcounter{tocdepth}{1}}");
 
-        for(FilterPluginInterface *iFilter: PM.filterPluginIterator())
+        for(FilterPlugin *iFilter: PM.filterPluginIterator())
         {
             for(QAction *filterAction: iFilter->actions())
             {
@@ -609,7 +609,7 @@ public:
                 return false;
             }
 
-            FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
+            FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
             iFilter->setLog(&log);
             int req = iFilter->getRequirements(action);
             if (mm != NULL)
@@ -668,7 +668,7 @@ public:
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
                 atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-                if (iFilter->filterArity(action) == FilterPluginInterface::SINGLE_MESH)
+                if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
                 {
                     MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDocument.mm());
                     if ((pm != MLRenderingData::PR_ARITY) && (meshDocument.mm() != NULL))

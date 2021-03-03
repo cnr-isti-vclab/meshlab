@@ -24,7 +24,7 @@
 #ifndef MESHLAB_FILTER_PLUGIN_CONTAINER_H
 #define MESHLAB_FILTER_PLUGIN_CONTAINER_H
 
-#include "../interfaces/filter_plugin_interface.h"
+#include "../interfaces/filter_plugin.h"
 #include "generic_container_iterator.h"
 
 /**
@@ -41,15 +41,15 @@ public:
 	FilterPluginContainer();
 
 	void clear();
-	void pushFilterPlugin(FilterPluginInterface* iFilter);
-	void eraseFilterPlugin(FilterPluginInterface* iFilter);
+	void pushFilterPlugin(FilterPlugin* iFilter);
+	void eraseFilterPlugin(FilterPlugin* iFilter);
 
 	QAction* filterAction(const QString& name);
 
 	FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	std::vector<FilterPluginInterface*> filterPlugins;
+	std::vector<FilterPlugin*> filterPlugins;
 	QMap<QString, QAction*> actionFilterMap;
 };
 
@@ -57,8 +57,8 @@ class FilterPluginContainer::FilterPluginRangeIterator
 {
 	friend class FilterPluginContainer;
 public:
-	ConstPluginIterator<FilterPluginInterface> begin();
-	ConstPluginIterator<FilterPluginInterface> end();
+	ConstPluginIterator<FilterPlugin> begin();
+	ConstPluginIterator<FilterPlugin> end();
 private:
 	FilterPluginRangeIterator(
 			const FilterPluginContainer* pm,

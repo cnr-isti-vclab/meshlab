@@ -257,7 +257,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 
 bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos* cb)
 {
-  if(this->getClass(filter) == FilterPluginInterface::MeshCreation)
+  if(this->getClass(filter) == FilterPlugin::MeshCreation)
        md.addNewMesh("",this->filterName(ID(filter)));
   switch(ID(filter))
     {
@@ -338,18 +338,18 @@ bool FilterFractal::applyFilter(const QAction* filter, MeshDocument &md, std::ma
     return false;
 }
 
-FilterPluginInterface::FilterClass FilterFractal::getClass(const QAction* filter) const
+FilterPlugin::FilterClass FilterFractal::getClass(const QAction* filter) const
 {
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
-        return FilterPluginInterface::MeshCreation;
+        return FilterPlugin::MeshCreation;
         break;
     case FP_FRACTAL_MESH:
     case FP_CRATERS:
-        return FilterPluginInterface::Smoothing;
+        return FilterPlugin::Smoothing;
         break;
     default: assert(0);
-        return FilterPluginInterface::Generic;
+        return FilterPlugin::Generic;
     }
 }
 
@@ -382,18 +382,18 @@ int FilterFractal::postCondition(const QAction *filter) const
 	return MeshModel::MM_ALL;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterFractal::filterArity(const QAction* act ) const
+FilterPlugin::FILTER_ARITY FilterFractal::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {
     case FP_FRACTAL_MESH:
-        return FilterPluginInterface::SINGLE_MESH;
+        return FilterPlugin::SINGLE_MESH;
     case CR_FRACTAL_TERRAIN:
-        return FilterPluginInterface::NONE;
+        return FilterPlugin::NONE;
     case FP_CRATERS:
-        return FilterPluginInterface::VARIABLE;
+        return FilterPlugin::VARIABLE;
     }
-    return FilterPluginInterface::NONE;
+    return FilterPlugin::NONE;
 }
 
 // ----------------------------------------------------------------------

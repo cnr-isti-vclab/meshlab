@@ -651,18 +651,18 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 	return true;
 }
 
-FilterPluginInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
+FilterPlugin::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
-	case CP_SELFINTERSECT_SELECT:	return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Cleaning);
+	case CP_SELFINTERSECT_SELECT:	return FilterClass(FilterPlugin::Selection + FilterPlugin::Cleaning);
 
-	case CP_SELECT_TEXBORDER : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Texture);
+	case CP_SELECT_TEXBORDER : return FilterClass(FilterPlugin::Selection + FilterPlugin::Texture);
 
 	case FP_SELECT_BY_FACE_QUALITY :
-	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Quality);
+	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(FilterPlugin::Selection + FilterPlugin::Quality);
 
-	case FP_SELECTBYANGLE : return FilterPluginInterface::FilterClass(FilterPluginInterface::RangeMap + FilterPluginInterface::Selection);
+	case FP_SELECTBYANGLE : return FilterPlugin::FilterClass(FilterPlugin::RangeMap + FilterPlugin::Selection);
 
 	case FP_SELECT_ALL :
 	case FP_SELECT_NONE :
@@ -683,9 +683,9 @@ FilterPluginInterface::FilterClass SelectionFilterPlugin::getClass(const QAction
 	case FP_SELECT_OUTLIER:
 	case FP_SELECT_BY_COLOR: 
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
-	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(FilterPluginInterface::Selection);
+	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(FilterPlugin::Selection);
   }
-  return FilterPluginInterface::Selection;
+  return FilterPlugin::Selection;
 }
 
  int SelectionFilterPlugin::getRequirements(const QAction *action)

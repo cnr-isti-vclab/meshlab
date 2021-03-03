@@ -24,13 +24,13 @@
 #ifndef FILTER_VORONOI_H
 #define FILTER_VORONOI_H
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterVoronoiPlugin : public QObject, public FilterPluginInterface
+class FilterVoronoiPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
 	enum {

@@ -102,7 +102,7 @@ private:
 	DecoratePluginContainer decoratePlugins;
 	EditPluginContainer editPlugins;
 
-	static void checkFilterPlugin(FilterPluginInterface* iFilter);
+	static void checkFilterPlugin(FilterPlugin* iFilter);
 
 	template <typename RangeIterator>
 	static QStringList inputFormatListDialog(RangeIterator iterator);

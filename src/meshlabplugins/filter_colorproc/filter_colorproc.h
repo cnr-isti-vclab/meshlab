@@ -25,14 +25,14 @@
 #define FILTERCOLORPROCPLUGIN_H
 
 #include <QObject>
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 
-class FilterColorProc : public QObject, public FilterPluginInterface
+class FilterColorProc : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
     enum { CP_FILLING,

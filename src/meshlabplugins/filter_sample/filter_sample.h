@@ -39,13 +39,13 @@ add sampleplugins
 #ifndef FILTERSAMPLE_PLUGIN_H
 #define FILTERSAMPLE_PLUGIN_H
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterSamplePlugin : public QObject, public FilterPluginInterface
+class FilterSamplePlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
 	enum { FP_MOVE_VERTEX  } ;

@@ -1,12 +1,12 @@
-#include "filter_plugin_interface.h"
+#include "filter_plugin.h"
 #include "../../python/python_utils.h"
 
-QString FilterPluginInterface::pythonFilterName(MeshLabPlugin::FilterIDType f) const
+QString FilterPlugin::pythonFilterName(MeshLabPlugin::FilterIDType f) const
 {
 	return pymeshlab::computePythonName(filterName(f));
 }
 
-bool FilterPluginInterface::isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const
+bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const
 {
 	int preMask = getPreConditions(act);
 	MissingItems.clear();
@@ -45,7 +45,7 @@ bool FilterPluginInterface::isFilterApplicable(const QAction* act, const MeshMod
 	return MissingItems.isEmpty();
 }
 
-MeshLabPlugin::FilterIDType FilterPluginInterface::ID(const QAction* a) const
+MeshLabPlugin::FilterIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	for(FilterIDType tt : types())
@@ -59,13 +59,13 @@ MeshLabPlugin::FilterIDType FilterPluginInterface::ID(const QAction* a) const
 	return -1;
 }
 
-QAction* FilterPluginInterface::getFilterAction(MeshLabPlugin::FilterIDType filterID)
+QAction* FilterPlugin::getFilterAction(MeshLabPlugin::FilterIDType filterID)
 {
 	QString idName = this->filterName(filterID);
 	return getFilterAction(idName);
 }
 
-QAction* FilterPluginInterface::getFilterAction(const QString& idName)
+QAction* FilterPlugin::getFilterAction(const QString& idName)
 {
 	QString i=idName;
 	for(QAction *tt : actionList)
@@ -79,7 +79,7 @@ QAction* FilterPluginInterface::getFilterAction(const QString& idName)
 	return 0;
 }
 
-int FilterPluginInterface::previewOnCreatedAttributes(const QAction* act, const MeshModel& mm ) const
+int FilterPlugin::previewOnCreatedAttributes(const QAction* act, const MeshModel& mm ) const
 {
 	int changedIfCalled = postCondition(act);
 	int createdIfCalled = MeshModel::MM_NONE;
@@ -104,7 +104,7 @@ int FilterPluginInterface::previewOnCreatedAttributes(const QAction* act, const 
 	if ((changedIfCalled & MeshModel::MM_VERTRADIUS) && !mm.hasDataMask(MeshModel::MM_VERTRADIUS))
 		createdIfCalled = createdIfCalled | MeshModel::MM_VERTRADIUS;
 
-	if ((getClass(act) == FilterPluginInterface::MeshCreation) && (mm.cm.vn == 0))
+	if ((getClass(act) == FilterPlugin::MeshCreation) && (mm.cm.vn == 0))
 		createdIfCalled = createdIfCalled | MeshModel::MM_VERTCOORD;
 
 	return createdIfCalled;

@@ -1098,9 +1098,9 @@ void SdfGpuPlugin::TraceRay(const QAction* action, int peelingIteration,const Po
     checkGLError::debugInfo("Error during depth peeling");
 }
 
-FilterPluginInterface::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
+FilterPlugin::FILTER_ARITY SdfGpuPlugin::filterArity(const QAction *) const
 {
-	return FilterPluginInterface::SINGLE_MESH;
+	return FilterPlugin::SINGLE_MESH;
 }
 
 bool SdfGpuPlugin::requiresGLContext(const QAction* action) const

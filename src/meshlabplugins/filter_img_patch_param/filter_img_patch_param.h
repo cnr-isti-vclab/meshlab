@@ -28,18 +28,18 @@
 
 
 #include <QObject>
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <vcg/math/similarity2.h>
 #include "Patch.h"
 #include <wrap/glw/glw.h>
 class VisibleSet;
 
 
-class FilterImgPatchParamPlugin : public QObject, public FilterPluginInterface
+class FilterImgPatchParamPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES( FilterPluginInterface )
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES( FilterPlugin )
 
     enum
     {

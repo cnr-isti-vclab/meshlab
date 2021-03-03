@@ -87,10 +87,10 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
 {
 	switch(ID(a)) {
 	case FP_MOVE_VERTEX :
-		return FilterPluginInterface::Smoothing;
+		return FilterPlugin::Smoothing;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -98,7 +98,7 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
  * @brief FilterSamplePlugin::filterArity
  * @return
  */
-FilterPluginInterface::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
+FilterPlugin::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

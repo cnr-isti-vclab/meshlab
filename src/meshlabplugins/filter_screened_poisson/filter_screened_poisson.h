@@ -24,13 +24,13 @@
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterScreenedPoissonPlugin : public QObject, public FilterPluginInterface
+class FilterScreenedPoissonPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 public:
 
 	enum {

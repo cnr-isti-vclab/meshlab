@@ -90,10 +90,10 @@ FilterMutualGlobal::FilterClass FilterMutualGlobal::getClass(const QAction *a) c
 {
   switch(ID(a))
     {
-        case FP_IMAGE_GLOBALIGN :  return FilterPluginInterface::Camera;
+        case FP_IMAGE_GLOBALIGN :  return FilterPlugin::Camera;
         default : assert(0);
     }
-  return FilterPluginInterface::Generic;
+  return FilterPlugin::Generic;
 }
 
 bool FilterMutualGlobal::requiresGLContext(const QAction* action) const

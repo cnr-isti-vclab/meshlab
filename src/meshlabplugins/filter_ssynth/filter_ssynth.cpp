@@ -152,9 +152,9 @@ int FilterSSynth::postCondition(const QAction* /*filter*/) const
     return MeshModel::MM_NONE;
 }
 
-FilterPluginInterface::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
+FilterPlugin::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
 {
-    return FilterPluginInterface::MeshCreation;
+    return FilterPlugin::MeshCreation;
 }
 
 QList<FileFormat> FilterSSynth::importFormats() const

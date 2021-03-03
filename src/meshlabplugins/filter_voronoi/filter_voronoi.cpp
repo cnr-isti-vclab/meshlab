@@ -101,20 +101,20 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a)
 	case VORONOI_SAMPLING :
 	case VOLUME_SAMPLING:
 	case VORONOI_SCAFFOLDING:
-		return FilterPluginInterface::Sampling;
+		return FilterPlugin::Sampling;
 	case BUILD_SHELL:
-		return FilterPluginInterface::Remeshing;
+		return FilterPlugin::Remeshing;
 	case CROSS_FIELD_CREATION:
-		return FilterPluginInterface::Normal;
+		return FilterPlugin::Normal;
 //	case CROSS_FIELD_SMOOTHING:
 //		return MeshFilterInterface::Smoothing;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
-FilterPluginInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
+FilterPlugin::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :

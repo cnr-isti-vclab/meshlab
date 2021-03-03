@@ -71,7 +71,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // In this case this sample belong to the class of filters that change the vertex colors
- FilterPluginInterface::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const { return FilterPluginInterface::VertexColoring; }
+ FilterPlugin::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const { return FilterPlugin::VertexColoring; }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh

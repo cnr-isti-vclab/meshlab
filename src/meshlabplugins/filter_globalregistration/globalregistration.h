@@ -24,7 +24,7 @@
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 class GlobalRegistrationPlugin : public QObject, public FilterPluginInterface
 {

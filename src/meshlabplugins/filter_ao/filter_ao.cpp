@@ -109,16 +109,16 @@ bool AmbientOcclusionPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPluginInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
+FilterPlugin::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
 
 int getRequirements(QAction *action);
 
-FilterPluginInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
+FilterPlugin::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
 {
-	return FilterPluginInterface::VertexColoring;
+	return FilterPlugin::VertexColoring;
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 

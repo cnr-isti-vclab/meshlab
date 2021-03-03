@@ -951,7 +951,7 @@ FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(c
         return FilterClass(Camera + Texture);
         break;
     default :  assert(0);
-        return FilterPluginInterface::Generic;
+        return FilterPlugin::Generic;
     }
 }
 

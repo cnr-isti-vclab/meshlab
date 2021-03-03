@@ -73,10 +73,10 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QActi
 {
 	switch(ID(a)) {
 	case FP_IMAGE_MUTUALINFO:
-		return FilterPluginInterface::Camera;
+		return FilterPlugin::Camera;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -91,7 +91,7 @@ bool FilterMutualInfoPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
+FilterPlugin::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

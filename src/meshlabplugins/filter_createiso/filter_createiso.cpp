@@ -83,8 +83,8 @@ QString FilterCreateIso::pluginName() const
 {
   switch(ID(a))
   {
-    case FP_CREATEISO : return FilterPluginInterface::MeshCreation;
-    default					  : return FilterPluginInterface::Generic;
+    case FP_CREATEISO : return FilterPlugin::MeshCreation;
+    default					  : return FilterPlugin::Generic;
   }
 }
 

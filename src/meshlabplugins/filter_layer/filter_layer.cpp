@@ -851,18 +851,18 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) con
 		case FP_MESH_VISIBILITY :
 		case FP_SPLITCONNECTED :
 		case FP_DELETE_MESH :
-		case FP_DELETE_NON_VISIBLE_MESH :        return FilterPluginInterface::Layer;
+		case FP_DELETE_NON_VISIBLE_MESH :        return FilterPlugin::Layer;
 		case FP_RENAME_RASTER :
 		case FP_DELETE_RASTER :
 		case FP_DELETE_NON_SELECTED_RASTER :
-		case FP_EXPORT_CAMERAS:	                 return FilterPluginInterface::RasterLayer;
-		case FP_IMPORT_CAMERAS:                  return FilterClass(FilterPluginInterface::Camera + FilterPluginInterface::RasterLayer);
+		case FP_EXPORT_CAMERAS:	                 return FilterPlugin::RasterLayer;
+		case FP_IMPORT_CAMERAS:                  return FilterClass(FilterPlugin::Camera + FilterPlugin::RasterLayer);
 		default :  assert(0);
     }
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
+FilterPlugin::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
 {
     switch(ID(filter))
     {
@@ -874,18 +874,18 @@ FilterPluginInterface::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction
     case FP_SELECTCURRENT :
     case FP_SPLITCONNECTED :
     case FP_DELETE_MESH :
-        return FilterPluginInterface::SINGLE_MESH;
+        return FilterPlugin::SINGLE_MESH;
     case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
 	case FP_EXPORT_CAMERAS:
 	case FP_IMPORT_CAMERAS:
-        return FilterPluginInterface::NONE;
+        return FilterPlugin::NONE;
     case FP_FLATTEN :
     case FP_DELETE_NON_VISIBLE_MESH :
-        return FilterPluginInterface::VARIABLE;
+        return FilterPlugin::VARIABLE;
     }
-    return FilterPluginInterface::NONE;
+    return FilterPlugin::NONE;
 }
 
 int FilterLayerPlugin::postCondition(const QAction* filter) const
@@ -911,7 +911,7 @@ int FilterLayerPlugin::postCondition(const QAction* filter) const
 
 		default:  assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterLayerPlugin)

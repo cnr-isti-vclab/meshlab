@@ -71,14 +71,14 @@ FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
-		return FilterPluginInterface::Smoothing;
+		return FilterPlugin::Smoothing;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
-FilterPluginInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
+FilterPlugin::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :

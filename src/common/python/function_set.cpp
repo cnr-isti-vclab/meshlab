@@ -109,7 +109,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		loadRasterSet.insert(f);
 	}
 
-	for (FilterPluginInterface* fp : pm.filterPluginIterator()){
+	for (FilterPlugin* fp : pm.filterPluginIterator()){
 		QList<QAction*> acts = fp->actions();
 		for (QAction* act : acts) {
 			QString originalFilterName = fp->filterName(act);

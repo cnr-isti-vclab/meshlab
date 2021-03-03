@@ -87,11 +87,11 @@ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
-	case FP_PLYMC :  return FilterPluginInterface::Remeshing;
-	case FP_MC_SIMPLIFY :  return FilterPluginInterface::Remeshing;
+	case FP_PLYMC :  return FilterPlugin::Remeshing;
+	case FP_MC_SIMPLIFY :  return FilterPlugin::Remeshing;
 	default : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -247,13 +247,13 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 	return true;
 }
 
-FilterPluginInterface::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter)) 
 	{
-	case FP_PLYMC :       return FilterPluginInterface::VARIABLE;
-	case FP_MC_SIMPLIFY : return FilterPluginInterface::SINGLE_MESH;
-	default:              return FilterPluginInterface::NONE;
+	case FP_PLYMC :       return FilterPlugin::VARIABLE;
+	case FP_MC_SIMPLIFY : return FilterPlugin::SINGLE_MESH;
+	default:              return FilterPlugin::NONE;
 	}
 }
 

@@ -32,7 +32,7 @@ FIRST RELEASE
 
 #include <QObject>
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 #include "../edit_quality/common/transferfunction.h"
 #include <vcg/complex/algorithms/stat.h> // for ComputePerVertexQualityMinMax
@@ -55,11 +55,11 @@ public:
 };
 
 
-class QualityMapperFilter : public QObject, public FilterPluginInterface
+class QualityMapperFilter : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 private:
     Frange _meshMinMaxQuality;

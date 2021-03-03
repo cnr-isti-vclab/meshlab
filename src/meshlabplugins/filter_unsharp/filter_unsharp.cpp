@@ -186,7 +186,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   switch(ID(a))
   {
             case FP_CREASE_CUT :
-            return FilterPluginInterface::FilterClass( 	FilterPluginInterface::Normal | FilterPluginInterface::Remeshing);
+            return FilterPlugin::FilterClass( 	FilterPlugin::Normal | FilterPlugin::Remeshing);
             case FP_SD_LAPLACIAN_SMOOTH:
             case FP_HC_LAPLACIAN_SMOOTH:
             case FP_LAPLACIAN_SMOOTH:
@@ -200,20 +200,20 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
             case FP_UNSHARP_GEOMETRY:
             case FP_UNSHARP_QUALITY:
             case FP_LINEAR_MORPH :
-                    return 	FilterPluginInterface::Smoothing;
+                    return 	FilterPlugin::Smoothing;
 
             case FP_UNSHARP_VERTEX_COLOR:
-                    return FilterPluginInterface::FilterClass( 	FilterPluginInterface::Smoothing | FilterPluginInterface::VertexColoring);
+                    return FilterPlugin::FilterClass( 	FilterPlugin::Smoothing | FilterPlugin::VertexColoring);
 
             case FP_RECOMPUTE_FACE_NORMAL :
             case FP_RECOMPUTE_QUADFACE_NORMAL :
             case FP_RECOMPUTE_VERTEX_NORMAL :
             case FP_FACE_NORMAL_NORMALIZE:
             case FP_VERTEX_NORMAL_NORMALIZE:
-                    return FilterPluginInterface::Normal;
-  case FP_SCALAR_HARMONIC_FIELD: return FilterPluginInterface::Remeshing;
+                    return FilterPlugin::Normal;
+  case FP_SCALAR_HARMONIC_FIELD: return FilterPlugin::Remeshing;
 
-    default : return FilterPluginInterface::Generic;
+    default : return FilterPlugin::Generic;
   }
 }
 int FilterUnsharp::getPreConditions(const QAction *a) const
@@ -785,7 +785,7 @@ bool FilterUnsharp::applyFilter(const QAction *filter, MeshDocument &md, std::ma
     return true;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterUnsharp::filterArity(const QAction * filter ) const
+FilterPlugin::FILTER_ARITY FilterUnsharp::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -809,11 +809,11 @@ FilterPluginInterface::FILTER_ARITY FilterUnsharp::filterArity(const QAction * f
     case FP_RECOMPUTE_FACE_NORMAL:      
     case FP_RECOMPUTE_QUADFACE_NORMAL:
     case FP_SCALAR_HARMONIC_FIELD:
-        return FilterPluginInterface::SINGLE_MESH;
+        return FilterPlugin::SINGLE_MESH;
     case FP_LINEAR_MORPH :	
-        return FilterPluginInterface::FIXED;
+        return FilterPlugin::FIXED;
     }
-    return FilterPluginInterface::NONE;
+    return FilterPlugin::NONE;
 }
 
 

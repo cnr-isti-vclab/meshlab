@@ -87,10 +87,10 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *
 {
 	switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE:  return FilterPluginInterface::RasterLayer;  //should be generic, but better avoid it
+		case FP_GPU_EXAMPLE:  return FilterPlugin::RasterLayer;  //should be generic, but better avoid it
 		default : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters

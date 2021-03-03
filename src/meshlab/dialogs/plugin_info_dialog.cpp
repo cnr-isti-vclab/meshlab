@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/plugins/interfaces/render_plugin_interface.h>
@@ -162,7 +162,7 @@ void PluginInfoDialog::populateTreeWidget()
 					tmplist.push_back(a->text());
 			}
 			if (type.isFilterPlugin()){
-				FilterPluginInterface* fpi = dynamic_cast<FilterPluginInterface*>(fp);
+				FilterPlugin* fpi = dynamic_cast<FilterPlugin*>(fp);
 				for(QAction *a: fpi->actions())
 					tmplist.push_back(a->text());
 			}

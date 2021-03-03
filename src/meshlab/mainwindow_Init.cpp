@@ -724,17 +724,17 @@ void MainWindow::fillFilterMenu()
 
 
 	//this is used just to fill the menus with alhabetical order
-	std::map<QString, FilterPluginInterface*> mapFilterPlugins;
+	std::map<QString, FilterPlugin*> mapFilterPlugins;
 	
 	//populate the map
-	for (FilterPluginInterface* fpi : PM.filterPluginIterator()){
+	for (FilterPlugin* fpi : PM.filterPluginIterator()){
 		for (QAction* act : fpi->actions()){
 			mapFilterPlugins[act->text()] = fpi;
 		}
 	}
 
 	for (const auto& p : mapFilterPlugins) {
-		FilterPluginInterface * iFilter = p.second;
+		FilterPlugin * iFilter = p.second;
 		QAction *filterAction = iFilter->getFilterAction(p.first);
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
@@ -742,79 +742,79 @@ void MainWindow::fillFilterMenu()
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if (filterClass & FilterPluginInterface::FaceColoring)
+		if (filterClass & FilterPlugin::FaceColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::VertexColoring)
+		if (filterClass & FilterPlugin::VertexColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::MeshColoring)
+		if (filterClass & FilterPlugin::MeshColoring)
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Selection)
+		if (filterClass & FilterPlugin::Selection)
 		{
 			filterMenuSelect->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Cleaning)
+		if (filterClass & FilterPlugin::Cleaning)
 		{
 			filterMenuClean->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Remeshing)
+		if (filterClass & FilterPlugin::Remeshing)
 		{
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Smoothing)
+		if (filterClass & FilterPlugin::Smoothing)
 		{
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Normal)
+		if (filterClass & FilterPlugin::Normal)
 		{
 			filterMenuNormal->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Quality)
+		if (filterClass & FilterPlugin::Quality)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Measure)
+		if (filterClass & FilterPlugin::Measure)
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Layer)
+		if (filterClass & FilterPlugin::Layer)
 		{
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::RasterLayer)
+		if (filterClass & FilterPlugin::RasterLayer)
 		{
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::MeshCreation)
+		if (filterClass & FilterPlugin::MeshCreation)
 		{
 			filterMenuCreate->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::RangeMap)
+		if (filterClass & FilterPlugin::RangeMap)
 		{
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::PointSet)
+		if (filterClass & FilterPlugin::PointSet)
 		{
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Sampling)
+		if (filterClass & FilterPlugin::Sampling)
 		{
 			filterMenuSampling->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Texture)
+		if (filterClass & FilterPlugin::Texture)
 		{
 			filterMenuTexture->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Polygonal)
+		if (filterClass & FilterPlugin::Polygonal)
 		{
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if (filterClass & FilterPluginInterface::Camera)
+		if (filterClass & FilterPlugin::Camera)
 		{
 			filterMenuCamera->addAction(filterAction);
 		}

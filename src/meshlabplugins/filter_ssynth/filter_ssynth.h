@@ -27,13 +27,13 @@
 
 
 #include <QObject>
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <meshlabplugins/io_x3d/io_x3d.h>
 
-class FilterSSynth : public QObject, public IOMeshPluginInterface, public FilterPluginInterface{
+class FilterSSynth : public QObject, public IOMeshPluginInterface, public FilterPlugin{
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface IOMeshPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin IOMeshPluginInterface)
 public:
     enum {CR_SSYNTH} ;
 
@@ -57,7 +57,7 @@ public:
     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
     bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
     bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
-    FilterPluginInterface::FILTER_ARITY filterArity(const QAction *) const {return NONE;}
+    FilterPlugin::FILTER_ARITY filterArity(const QAction *) const {return NONE;}
 private:
     QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
     QString GetTemplate(int sphereres);

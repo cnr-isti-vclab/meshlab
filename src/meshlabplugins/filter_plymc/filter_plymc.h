@@ -24,13 +24,13 @@
 #ifndef _FILTER_PLYMC_H_
 #define _FILTER_PLYMC_H_
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class PlyMCPlugin : public QObject, public FilterPluginInterface
+class PlyMCPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
     enum { 
@@ -46,7 +46,7 @@ public:
     virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
     virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(const QAction* a) const;
-    FilterPluginInterface::FILTER_ARITY filterArity(const QAction* filter) const;
+    FilterPlugin::FILTER_ARITY filterArity(const QAction* filter) const;
     int postCondition(const QAction *filter) const;
 };
 

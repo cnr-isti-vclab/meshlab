@@ -90,10 +90,10 @@ FilterGeodesic::FilterClass FilterGeodesic::getClass(const QAction *a) const
 	{
 	case FP_QUALITY_BORDER_GEODESIC    :
 	case FP_QUALITY_SELECTED_GEODESIC  :
-	case FP_QUALITY_POINT_GEODESIC     : return FilterGeodesic::FilterClass(FilterPluginInterface::VertexColoring + FilterPluginInterface::Quality);
+	case FP_QUALITY_POINT_GEODESIC     : return FilterGeodesic::FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Quality);
 	default                          : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 int FilterGeodesic::getRequirements(const QAction *action)

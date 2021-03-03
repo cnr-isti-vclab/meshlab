@@ -174,11 +174,11 @@ QString TriOptimizePlugin::pluginName() const
  TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action) const
 {
 	switch(ID(action)) {
-		case FP_PLANAR_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
-		case FP_CURVATURE_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
-		case FP_NEAR_LAPLACIAN_SMOOTH: return FilterPluginInterface::Smoothing;
+		case FP_PLANAR_EDGE_FLIP:             return FilterPlugin::Remeshing;
+		case FP_CURVATURE_EDGE_FLIP:             return FilterPlugin::Remeshing;
+		case FP_NEAR_LAPLACIAN_SMOOTH: return FilterPlugin::Smoothing;
 	}
- return FilterPluginInterface::Generic;
+ return FilterPlugin::Generic;
 }
 
 int TriOptimizePlugin::postCondition(const QAction *a) const

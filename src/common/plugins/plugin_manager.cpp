@@ -119,7 +119,7 @@ void PluginManager::checkPlugin(const QString& filename)
 	
 	//ToDo: proper checks also for other plugin types...
 	if (type.isFilterPlugin()){
-		checkFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+		checkFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
 }
 
@@ -200,7 +200,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		editPlugins.pushEditPlugin(qobject_cast<EditPluginFactory *>(plugin));
 	}
 	if (type.isFilterPlugin()){
-		filterPlugins.pushFilterPlugin(qobject_cast<FilterPluginInterface *>(plugin));
+		filterPlugins.pushFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
 	if (type.isIOMeshPlugin()){
 		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPluginInterface *>(plugin));
@@ -231,7 +231,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 			editPlugins.eraseEditPlugin(dynamic_cast<EditPluginFactory *>(ifp));
 		}
 		if (type.isFilterPlugin()){
-			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPluginInterface *>(ifp));
+			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPlugin *>(ifp));
 		}
 		if (type.isIOMeshPlugin()){
 			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPluginInterface *>(ifp));
@@ -386,10 +386,10 @@ EditPluginContainer::EditPluginFactoryRangeIterator PluginManager::editPluginFac
 	return editPlugins.editPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
+void PluginManager::checkFilterPlugin(FilterPlugin* iFilter)
 {
 	for(QAction *filterAction : iFilter->actions()) {
-		if(iFilter->getClass(filterAction)==FilterPluginInterface::Generic){
+		if(iFilter->getClass(filterAction)==FilterPlugin::Generic){
 			throw MLException("Missing class for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 		if(iFilter->getRequirements(filterAction) == int(MeshModel::MM_UNKNOWN)){
@@ -401,7 +401,7 @@ void PluginManager::checkFilterPlugin(FilterPluginInterface* iFilter)
 		if(iFilter->postCondition(filterAction) == int(MeshModel::MM_UNKNOWN)) {
 			throw MLException("Missing postcondition for "+ iFilter->pluginName() + " " + filterAction->text());
 		}
-		if(iFilter->filterArity(filterAction) == FilterPluginInterface::UNKNOWN_ARITY) {
+		if(iFilter->filterArity(filterAction) == FilterPlugin::UNKNOWN_ARITY) {
 			throw MLException("Missing Arity for " + iFilter->pluginName() + " " + filterAction->text());
 		}
 	}

@@ -28,17 +28,17 @@
 #include <QObject>
 #include <QTime>
 
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <vcg/complex/append.h>
 #include <vcg/complex/algorithms/attribute_seam.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 
-class FilterTexturePlugin : public QObject, public FilterPluginInterface
+class FilterTexturePlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
     enum {

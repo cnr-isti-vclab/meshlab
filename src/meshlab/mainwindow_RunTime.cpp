@@ -787,7 +787,7 @@ void MainWindow::runFilterScript()
 		int classes = 0;
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
 		QAction *action = PM.filterAction(filtnm);
-		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
+		FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 		
 		int req=iFilter->getRequirements(action);
 		if (meshDoc()->mm() != NULL)
@@ -828,7 +828,7 @@ void MainWindow::runFilterScript()
 			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 			
 			
-			if (iFilter->filterArity(action) == FilterPluginInterface::SINGLE_MESH)
+			if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
 			{
 				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
 				if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
@@ -871,11 +871,11 @@ void MainWindow::runFilterScript()
 		
 		if (meshDoc()->mm() != NULL)
 		{
-			if(classes & FilterPluginInterface::FaceColoring )
+			if(classes & FilterPlugin::FaceColoring )
 			{
 				meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
 			}
-			if(classes & FilterPluginInterface::VertexColoring )
+			if(classes & FilterPlugin::VertexColoring )
 			{
 				meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 			}
@@ -888,12 +888,12 @@ void MainWindow::runFilterScript()
 		}
 		
 		bool newmeshcreated = false;
-		if (classes & FilterPluginInterface::MeshCreation)
+		if (classes & FilterPlugin::MeshCreation)
 			newmeshcreated = true;
 		updateSharedContextDataAfterFilterExecution(postCondMask, classes, newmeshcreated);
 		meshDoc()->meshDocStateData().clear();
 		
-		if(classes & FilterPluginInterface::MeshCreation)
+		if(classes & FilterPlugin::MeshCreation)
 			GLA()->resetTrackBall();
 		/* to be changed */
 		
@@ -938,7 +938,7 @@ void MainWindow::startFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	if (action == NULL)
 		throw MLException("Invalid filter action value.");
-	FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
+	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	if (meshDoc() == NULL)
 		return;
 	//OLD FILTER PHILOSOPHY
@@ -999,19 +999,19 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 				if (mm == NULL)
 					continue;
 				//Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
-				if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & FilterPluginInterface::FaceColoring ))
+				if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & FilterPlugin::FaceColoring ))
 					postcondmask = postcondmask | MeshModel::MM_FACECOLOR;
 				
-				if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & FilterPluginInterface::VertexColoring ))
+				if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & FilterPlugin::VertexColoring ))
 					postcondmask = postcondmask | MeshModel::MM_VERTCOLOR;
 				
-				if ((mm->hasDataMask(MeshModel::MM_COLOR)) && (fclasses & FilterPluginInterface::MeshColoring ))
+				if ((mm->hasDataMask(MeshModel::MM_COLOR)) && (fclasses & FilterPlugin::MeshColoring ))
 					postcondmask = postcondmask | MeshModel::MM_COLOR;
 				
-				if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & FilterPluginInterface::Quality ))
+				if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & FilterPlugin::Quality ))
 					postcondmask = postcondmask | MeshModel::MM_FACEQUALITY;
 				
-				if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & FilterPluginInterface::Quality ))
+				if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & FilterPlugin::Quality ))
 					postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
 				
 				MLRenderingData dttoberendered;
@@ -1073,7 +1073,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 					}
 					MLPerViewGLOptions opts;
 					curr.get(opts);
-					if (fclasses & FilterPluginInterface::MeshColoring)
+					if (fclasses & FilterPlugin::MeshColoring)
 					{
 						bool hasmeshcolor = mm->hasDataMask(MeshModel::MM_COLOR);
 						opts._perpoint_mesh_color_enabled = hasmeshcolor;
@@ -1144,7 +1144,7 @@ from the user defined dialog
 
 void MainWindow::executeFilter(const QAction* action, RichParameterList &params, bool isPreview)
 {
-	FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
+	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	qb->show();
 	iFilter->setLog(&meshDoc()->Log);
 	
@@ -1186,7 +1186,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 		
-		if (iFilter->filterArity(action) == FilterPluginInterface::SINGLE_MESH)
+		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
 		{
 			MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
 			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
@@ -1255,16 +1255,16 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		}
 		
 		
-		FilterPluginInterface::FILTER_ARITY arity = iFilter->filterArity(action);
+		FilterPlugin::FILTER_ARITY arity = iFilter->filterArity(action);
 		QList<MeshModel*> tmp;
 		switch(arity)
 		{
-		case (FilterPluginInterface::SINGLE_MESH):
+		case (FilterPlugin::SINGLE_MESH):
 		{
 			tmp.push_back(meshDoc()->mm());
 			break;
 		}
-		case (FilterPluginInterface::FIXED):
+		case (FilterPlugin::FIXED):
 		{
 			for(const RichParameter& p : mergedenvironment)
 			{
@@ -1277,7 +1277,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			}
 			break;
 		}
-		case (FilterPluginInterface::VARIABLE):
+		case (FilterPlugin::VARIABLE):
 		{
 			for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
 			{
@@ -1290,7 +1290,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			break;
 		}
 		
-		if(iFilter->getClass(action) & FilterPluginInterface::MeshCreation )
+		if(iFilter->getClass(action) & FilterPlugin::MeshCreation )
 			GLA()->resetTrackBall();
 		
 		for(int jj = 0;jj < tmp.size();++jj)
@@ -1299,19 +1299,19 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			if (mm != NULL)
 			{
 				// at the end for filters that change the color, or selection set the appropriate rendering mode
-				if(iFilter->getClass(action) & FilterPluginInterface::FaceColoring )
+				if(iFilter->getClass(action) & FilterPlugin::FaceColoring )
 					mm->updateDataMask(MeshModel::MM_FACECOLOR);
 				
-				if(iFilter->getClass(action) & FilterPluginInterface::VertexColoring )
+				if(iFilter->getClass(action) & FilterPlugin::VertexColoring )
 					mm->updateDataMask(MeshModel::MM_VERTCOLOR);
 				
-				if(iFilter->getClass(action) & FilterPluginInterface::MeshColoring )
+				if(iFilter->getClass(action) & FilterPlugin::MeshColoring )
 					mm->updateDataMask(MeshModel::MM_COLOR);
 				
 				if(postCondMask & MeshModel::MM_CAMERA)
 					mm->updateDataMask(MeshModel::MM_CAMERA);
 				
-				if(iFilter->getClass(action) & FilterPluginInterface::Texture )
+				if(iFilter->getClass(action) & FilterPlugin::Texture )
 					updateTexture(mm->id());
 			}
 		}
@@ -2035,7 +2035,7 @@ void MainWindow::updateFilterToolBar()
 {
 	filterToolBar->clear();
 	
-	for(FilterPluginInterface *iFilter: PM.filterPluginIterator()) {
+	for(FilterPlugin *iFilter: PM.filterPluginIterator()) {
 		for(QAction* filterAction: iFilter->actions()) {
 			if (!filterAction->icon().isNull()) {
 				// tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());

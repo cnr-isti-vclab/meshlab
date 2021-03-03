@@ -454,9 +454,9 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 	return false;
 }
 
-FilterPluginInterface::FilterClass FilterIsoParametrization::getClass(const QAction *) const
+FilterPlugin::FilterClass FilterIsoParametrization::getClass(const QAction *) const
 {
-	return FilterPluginInterface::Remeshing;
+	return FilterPlugin::Remeshing;
 }
 
 int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
@@ -464,18 +464,18 @@ int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
+FilterPlugin::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
 {
 	switch(ID(filter))
 	{
 	case ISOP_PARAM :	
 	case ISOP_REMESHING :
 	case ISOP_DIAMPARAM :
-		return FilterPluginInterface::SINGLE_MESH;
+		return FilterPlugin::SINGLE_MESH;
 	case ISOP_TRANSFER:	
-		return FilterPluginInterface::FIXED;
+		return FilterPlugin::FIXED;
 	}
-	return FilterPluginInterface::NONE;
+	return FilterPlugin::NONE;
 }
 
 

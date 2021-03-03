@@ -917,7 +917,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 	return false;
 }
 
- FilterPluginInterface::FilterClass FilterColorProc::getClass(const QAction *a) const
+ FilterPlugin::FilterClass FilterColorProc::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
@@ -935,10 +935,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_MAP_VQUALITY_INTO_COLOR:
 		case CP_VERTEX_SMOOTH:
 		case CP_FACE_TO_VERTEX:
-		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::VertexColoring;
-		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::MeshColoring;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPlugin::VertexColoring;
+		case CP_SCATTER_PER_MESH:           return FilterPlugin::MeshColoring;
 		case CP_SATURATE_QUALITY:
-		case CP_CLAMP_QUALITY:              return FilterPluginInterface::Quality;
+		case CP_CLAMP_QUALITY:              return FilterPlugin::Quality;
 		case CP_DISCRETE_CURVATURE:         return FilterClass(Normal + VertexColoring);
 		case CP_TRIANGLE_QUALITY:           return FilterClass(Quality + FaceColoring);
 		case CP_RANDOM_FACE:
@@ -946,10 +946,10 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 		case CP_FACE_SMOOTH:
 		case CP_VERTEX_TO_FACE:
 		case CP_MESH_TO_FACE:
-		case CP_MAP_FQUALITY_INTO_COLOR:    return FilterPluginInterface::FaceColoring;
+		case CP_MAP_FQUALITY_INTO_COLOR:    return FilterPlugin::FaceColoring;
 		default: assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 int FilterColorProc::postCondition( const QAction* filter ) const
@@ -1024,7 +1024,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
+FilterPlugin::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {
@@ -1052,12 +1052,12 @@ FilterPluginInterface::FILTER_ARITY FilterColorProc::filterArity(const QAction* 
 		case CP_MAP_FQUALITY_INTO_COLOR:
 		case CP_FACE_TO_VERTEX:
 		case CP_FACE_SMOOTH:
-		case CP_TEXTURE_TO_VERTEX:          return FilterPluginInterface::SINGLE_MESH;
-		case CP_SCATTER_PER_MESH:           return FilterPluginInterface::VARIABLE;
+		case CP_TEXTURE_TO_VERTEX:          return FilterPlugin::SINGLE_MESH;
+		case CP_SCATTER_PER_MESH:           return FilterPlugin::VARIABLE;
 
 		default: assert(0);
     }
-	return FilterPluginInterface::SINGLE_MESH;
+	return FilterPlugin::SINGLE_MESH;
 }
 
 

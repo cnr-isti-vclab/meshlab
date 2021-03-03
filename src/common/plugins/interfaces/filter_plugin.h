@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_FILTER_PLUGIN_INTERFACE_H
-#define MESHLAB_FILTER_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_FILTER_PLUGIN_H
+#define MESHLAB_FILTER_PLUGIN_H
 
 #include "meshlab_plugin.h"
 #include "../../ml_document/mesh_document.h"
@@ -37,10 +37,9 @@ Q_DECLARE_METATYPE(Matrix44m)
 Q_DECLARE_METATYPE(Eigen::VectorXd)
 
 /**
- *\brief The FilterPluginInterface class provide the interface of the filter plugins.
- *
+ * @brief The FilterPlugin class provide the interface of the filter plugins.
  */
-class FilterPluginInterface : virtual public MeshLabPlugin
+class FilterPlugin : virtual public MeshLabPlugin
 {
 public:
 	/** 
@@ -73,10 +72,10 @@ public:
 
 
 
-	FilterPluginInterface() : MeshLabPlugin(), glContext(nullptr)
+	FilterPlugin() : MeshLabPlugin(), glContext(nullptr)
 	{
 	}
-	virtual ~FilterPluginInterface() {}
+	virtual ~FilterPlugin() {}
 
 
 	/** 
@@ -115,7 +114,7 @@ public:
 	 * This choice affect the submenu in which each filter will be placed
 	 * For example filters that perform an action only on the selection will be placed in the Selection Class
 	 */
-	virtual FilterClass getClass(const QAction*) const { return FilterPluginInterface::Generic; }
+	virtual FilterClass getClass(const QAction*) const { return FilterPlugin::Generic; }
 
 	/**
 	 * @brief The filters can have some additional requirements on the mesh capabiliteis.
@@ -242,7 +241,7 @@ protected:
 	QString errorMessage;
 };
 
-#define FILTER_PLUGIN_INTERFACE_IID  "vcg.meshlab.FilterPluginInterface/1.0"
-Q_DECLARE_INTERFACE(FilterPluginInterface, FILTER_PLUGIN_INTERFACE_IID)
+#define FILTER_PLUGIN_IID  "vcg.meshlab.FilterPlugin/1.0"
+Q_DECLARE_INTERFACE(FilterPlugin, FILTER_PLUGIN_IID)
 
-#endif // MESHLAB_FILTER_PLUGIN_INTERFACE_H
+#endif // MESHLAB_FILTER_PLUGIN_H

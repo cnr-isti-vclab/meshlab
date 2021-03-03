@@ -111,7 +111,7 @@ bool FilterImgPatchParamPlugin::requiresGLContext(const QAction* action) const
 }
 
 
-FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
+FilterPlugin::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
 {
 	switch( ID(act) )
 	{
@@ -119,7 +119,7 @@ FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAc
 	case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
 	case FP_RASTER_VERT_COVERAGE:
 	case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
-	default:  assert(0); return FilterPluginInterface::Generic;
+	default:  assert(0); return FilterPlugin::Generic;
 	}
 }
 

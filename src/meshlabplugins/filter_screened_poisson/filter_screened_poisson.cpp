@@ -77,14 +77,14 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 	}
 }
 
-FilterPluginInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
+FilterPlugin::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
 {
 	if (ID(a) == FP_SCREENED_POISSON){
-		return FilterScreenedPoissonPlugin::FilterClass(FilterPluginInterface::Remeshing);
+		return FilterPlugin::Remeshing;
 	}
 	else {
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -229,7 +229,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-FilterPluginInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
+FilterPlugin::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

@@ -27,7 +27,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QString>
-#include <common/plugins/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include<vector>
 #include<vcg/complex/complex.h>
 //#include "muParser.h"
@@ -36,11 +36,11 @@ using namespace vcg;
 //using namespace mu;
 
 
-class FilterDirt : public QObject, public FilterPluginInterface
+class FilterDirt : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 protected:
     double x,y,z,nx,ny,nz,r,g,b,q,rad;
     //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
