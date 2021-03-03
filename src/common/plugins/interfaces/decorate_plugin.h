@@ -73,8 +73,8 @@ public:
 	/** The very short string (a few words) describing each filtering action
 	// This string is used also to define the menu entry
 	*/
-	virtual QString decorationName(FilterIDType) const = 0;
-	virtual QString decorationInfo(FilterIDType) const = 0;
+	virtual QString decorationName(ActionIDType) const = 0;
+	virtual QString decorationInfo(ActionIDType) const = 0;
 
 	virtual QString decorationName(const QAction *a) const { return decorationName(ID(a)); }
 	virtual QString decorationInfo(const QAction *a) const { return decorationInfo(ID(a)); }
@@ -100,15 +100,15 @@ public:
 	virtual int getDecorationClass(const QAction *) const = 0;
 
 	virtual QList<QAction *> actions() const { return actionList; }
-	virtual QList<FilterIDType> types() const { return typeList; }
+	virtual QList<ActionIDType> types() const { return typeList; }
 
 	virtual QAction *action(QString name) const;
 
 protected:
 	QList <QAction *> actionList;
-	QList <FilterIDType> typeList;
-	virtual FilterIDType ID(const QAction *a) const;
-	virtual FilterIDType ID(QString name) const;
+	QList <ActionIDType> typeList;
+	virtual ActionIDType ID(const QAction *a) const;
+	virtual ActionIDType ID(QString name) const;
 };
 
 #define DECORATE_PLUGIN_IID  "vcg.meshlab.DecoratePlugin/1.0"

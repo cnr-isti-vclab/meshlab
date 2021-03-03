@@ -37,7 +37,7 @@ FilterScreenedPoissonPlugin::FilterScreenedPoissonPlugin()
 {
 	typeList << FP_SCREENED_POISSON;
 
-	for (FilterIDType tt : types()){
+	for (ActionIDType tt : types()){
 		actionList << new QAction(filterName(tt), this);
 	}
 }
@@ -54,7 +54,7 @@ QString FilterScreenedPoissonPlugin::pluginName() const
 	return "FilterScreenedPoisson";
 }
 
-QString FilterScreenedPoissonPlugin::filterName(FilterIDType filter) const
+QString FilterScreenedPoissonPlugin::filterName(ActionIDType filter) const
 {
 	if (filter == FP_SCREENED_POISSON)
 		return "Surface Reconstruction: Screened Poisson";
@@ -63,7 +63,7 @@ QString FilterScreenedPoissonPlugin::filterName(FilterIDType filter) const
 	}
 }
 
-QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
+QString FilterScreenedPoissonPlugin::filterInfo(ActionIDType filter) const
 {
 	if (filter == FP_SCREENED_POISSON)
 		return	"This surface reconstruction algorithm creates watertight surfaces "

@@ -82,7 +82,7 @@ public:
 	 * @brief The very short string (a few words) describing each filtering action
 	 * This string is used also to define the menu entry
 	 */
-	virtual QString filterName(FilterIDType) const = 0;
+	virtual QString filterName(ActionIDType) const = 0;
 
 	/**
 	 * @brief This function returns the name of each filter in python (pymeshlab).
@@ -90,7 +90,7 @@ public:
 	 * and making it compliant to python style name convention:
 	 * python.org/dev/peps/pep-0008/
 	 */
-	virtual QString pythonFilterName(FilterIDType f) const;
+	virtual QString pythonFilterName(ActionIDType f) const;
 
 	/** 
 	 * @brief The long, formatted string describing each filtering action.
@@ -107,7 +107,7 @@ public:
 	 * <br>
 	 * e.g. italic for authors, bold for title (quoted) and plain for bib ref.
 	 */
-	virtual QString filterInfo(FilterIDType filter) const = 0;
+	virtual QString filterInfo(ActionIDType filter) const = 0;
 
 	/** 
 	 * @brief The FilterClass describes in which generic class of filters it fits.
@@ -209,15 +209,15 @@ public:
 	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }
 	virtual QString pythonFilterName(const QAction* a) const {return this->pythonFilterName(ID(a)); }
-	virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) { return ""; }
+	virtual QString filterScriptFunctionName(ActionIDType /*filterID*/) { return ""; }
 
-	virtual FilterIDType ID(const QAction *a) const;
+	virtual ActionIDType ID(const QAction *a) const;
 
-	virtual QAction* getFilterAction(FilterIDType filterID);
+	virtual QAction* getFilterAction(ActionIDType filterID);
 	virtual QAction* getFilterAction(const QString& idName);
 
 	virtual QList<QAction*> actions() const { return actionList; }
-	virtual QList<FilterIDType> types() const { return typeList; }
+	virtual QList<ActionIDType> types() const { return typeList; }
 
 	/** 
 	 * Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
@@ -235,7 +235,7 @@ protected:
 	// The list of actions exported by the plugin. Each actions strictly corresponds to
 	QList <QAction*> actionList;
 
-	QList <FilterIDType> typeList;
+	QList <ActionIDType> typeList;
 
 	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
 	QString errorMessage;

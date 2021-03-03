@@ -41,8 +41,8 @@ public:
 	~FilterScreenedPoissonPlugin();
 
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction* a) const;
 	int getRequirements(const QAction* a);

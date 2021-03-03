@@ -38,7 +38,7 @@ FilterMutualInfoPlugin::FilterMutualInfoPlugin()
 {
 	typeList << FP_IMAGE_MUTUALINFO;
 
-	for(FilterIDType tt : types())
+	for(ActionIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -47,7 +47,7 @@ QString FilterMutualInfoPlugin::pluginName() const
 	return "FilterMutualInfo";
 }
 
-QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
+QString FilterMutualInfoPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_IMAGE_MUTUALINFO:
@@ -58,7 +58,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 	}
 }
 
-QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
+QString FilterMutualInfoPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_IMAGE_MUTUALINFO:
