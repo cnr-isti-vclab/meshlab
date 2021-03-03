@@ -32,7 +32,7 @@ class PluginInfoDialog;
 }
 
 class QTreeWidgetItem;
-class PluginFileInterface;
+class MeshLabPluginFile;
 
 class PluginInfoDialog : public QDialog
 {
@@ -52,7 +52,7 @@ private:
 	enum PluginDialogColumn{PLUGINS = 0, ENABLED, TYPE, VENDOR, FILE, UNINSTALL};
 	
 	void populateTreeWidget();
-	void addItems(const PluginFileInterface* fpi, int nPlug, const QString& pluginType, const QStringList &features);
+	void addItems(const MeshLabPluginFile* fpi, int nPlug, const QString& pluginType, const QStringList &features);
 
 	Ui::PluginInfoDialog *ui;
 	QIcon interfaceIcon;

@@ -21,27 +21,27 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_FILE_INTERFACE_H
-#define MESHLAB_PLUGIN_FILE_INTERFACE_H
+#ifndef MESHLAB_PLUGIN_FILE_H
+#define MESHLAB_PLUGIN_FILE_H
 
 #include <string>
 #include <QFileInfo>
 #include <QString>
 
 /**
- * @brief The PluginFileInterface class is the base of all MeshLab plugin classes,
+ * @brief The MeshLabPluginFile class is the base of all MeshLab plugin classes,
  * and represents the library file of the plugin.
- * Each MeshLab plugin can then be a classic plugin (and inherit from the PluginInterface class)
+ * Each MeshLab plugin can then be a classic plugin (and inherit from the MeshLabPlugin class)
  * or a collection of Edit plugins (and inherit from the EditPluginInterfaceFactory class).
  * Each Plugin (classic or edit) inherits from this class. 
  */
-class PluginFileInterface
+class MeshLabPluginFile
 {
 public:
 	friend class PluginManager;
 	
-	PluginFileInterface() : enabled(true) {};
-	virtual ~PluginFileInterface() {}
+	MeshLabPluginFile() : enabled(true) {};
+	virtual ~MeshLabPluginFile() {}
 	
 	/** 
 	 * This function will be automatically defined in your plugin class
@@ -86,4 +86,4 @@ private:
 	private: 
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
-#endif // MESHLAB_PLUGIN_FILE_INTERFACE_H
+#endif // MESHLAB_PLUGIN_FILE_H

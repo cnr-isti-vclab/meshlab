@@ -1,7 +1,7 @@
 #include "filter_plugin_interface.h"
 #include "../../python/python_utils.h"
 
-QString FilterPluginInterface::pythonFilterName(PluginInterface::FilterIDType f) const
+QString FilterPluginInterface::pythonFilterName(MeshLabPlugin::FilterIDType f) const
 {
 	return pymeshlab::computePythonName(filterName(f));
 }
@@ -45,7 +45,7 @@ bool FilterPluginInterface::isFilterApplicable(const QAction* act, const MeshMod
 	return MissingItems.isEmpty();
 }
 
-PluginInterface::FilterIDType FilterPluginInterface::ID(const QAction* a) const
+MeshLabPlugin::FilterIDType FilterPluginInterface::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	for(FilterIDType tt : types())
@@ -59,7 +59,7 @@ PluginInterface::FilterIDType FilterPluginInterface::ID(const QAction* a) const
 	return -1;
 }
 
-QAction* FilterPluginInterface::getFilterAction(PluginInterface::FilterIDType filterID)
+QAction* FilterPluginInterface::getFilterAction(MeshLabPlugin::FilterIDType filterID)
 {
 	QString idName = this->filterName(filterID);
 	return getFilterAction(idName);

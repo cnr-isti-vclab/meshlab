@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RENDER_PLUGIN_INTERFACE_H
 #define MESHLAB_RENDER_PLUGIN_INTERFACE_H
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 #include "../../ml_shared_data_context/ml_scene_gl_shared_data_context.h"
 
 /**
@@ -49,10 +49,10 @@ if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
 class GLArea;
 
-class RenderPluginInterface : virtual public PluginInterface
+class RenderPluginInterface : virtual public MeshLabPlugin
 {
 public:
-	RenderPluginInterface() :PluginInterface() {}
+	RenderPluginInterface() :MeshLabPlugin() {}
 	virtual ~RenderPluginInterface() {}
 
 	virtual bool isSupported() = 0;

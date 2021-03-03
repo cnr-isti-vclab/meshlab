@@ -21,29 +21,34 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_INTERFACE_H
-#define MESHLAB_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_PLUGIN_H
+#define MESHLAB_PLUGIN_H
 
 #include <QAction>
 
-#include "plugin_file_interface.h"
+#include "meshlab_plugin_file.h"
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
 #include "../../globals.h"
 
 /**
- * \brief The PluginInterface class is the base of all the plugin interfaces.
+ * @brief The MeshLabPlugin class is the base of all the plugin classes.
  *
- * The main idea common to all the framework is that each plugin export a set of actions,
- * internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
+ * The main idea common to all the framework is that each plugin export a set 
+ * of actions, internally each action is associated to a FilterIDType, and for 
+ * each action a name and a formatted INFO is defined.
  *
  * For coding easyness ID are more practical (you can use them in switches).
- * Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
- * Moreover ID are UNSAFE (different plugin can have same id) so they should be used only INTERNALLY
+ * Using action on the other hand is practical because it simplify their 
+ * management in menus/toolbars and it allows to define icons and other things 
+ * in a automatic way.
+ * Moreover ID are UNSAFE (different plugin can have same id) so they should be 
+ * used only INTERNALLY
  *
- * \todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
+ * Note: this class does NOT contain member functions that need to be 
+ * implemented in base classes.
  */
-class PluginInterface : public PluginFileInterface
+class MeshLabPlugin : public MeshLabPluginFile
 {
 public:
 	typedef int FilterIDType;
@@ -51,8 +56,8 @@ public:
 	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
 	\todo To be renamed as ActionIDType
 	*/
-	PluginInterface();
-	virtual ~PluginInterface() {}
+	MeshLabPlugin();
+	virtual ~MeshLabPlugin() {}
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);
@@ -88,7 +93,7 @@ private:
  ************************/
 
 template<typename... Ts>
-void PluginInterface::log(const char* f, Ts&&... ts)
+void MeshLabPlugin::log(const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
@@ -96,7 +101,7 @@ void PluginInterface::log(const char* f, Ts&&... ts)
 }
 
 template<typename... Ts>
-void PluginInterface::log(const std::string& s, Ts&&... ts)
+void MeshLabPlugin::log(const std::string& s, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
@@ -104,7 +109,7 @@ void PluginInterface::log(const std::string& s, Ts&&... ts)
 }
 
 template <typename... Ts>
-void PluginInterface::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
+void MeshLabPlugin::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(Level, f, std::forward<Ts>(ts)...);
@@ -112,11 +117,11 @@ void PluginInterface::log(GLLogStream::Levels Level, const char* f, Ts&&... ts)
 }
 
 template <typename... Ts>
-void PluginInterface::realTimeLog(QString Id, const QString& meshName, const char* f, Ts&&... ts)
+void MeshLabPlugin::realTimeLog(QString Id, const QString& meshName, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->realTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
 	}
 }
 
-#endif // MESHLAB_PLUGIN_INTERFACE_H
+#endif // MESHLAB_PLUGIN_H

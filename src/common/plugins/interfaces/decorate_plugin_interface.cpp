@@ -43,7 +43,7 @@ QAction* DecoratePluginInterface::action(QString name) const
 	return 0;
 }
 
-PluginInterface::FilterIDType DecoratePluginInterface::ID(const QAction* a) const
+MeshLabPlugin::FilterIDType DecoratePluginInterface::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	foreach(FilterIDType tt, types())
@@ -57,7 +57,7 @@ PluginInterface::FilterIDType DecoratePluginInterface::ID(const QAction* a) cons
 	return -1;
 }
 
-PluginInterface::FilterIDType DecoratePluginInterface::ID(QString name) const
+MeshLabPlugin::FilterIDType DecoratePluginInterface::ID(QString name) const
 {
 	QString n = name;
 	foreach(FilterIDType tt, types())

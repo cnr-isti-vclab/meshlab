@@ -24,14 +24,14 @@
 #ifndef MESHLAB_IORASTER_PLUGIN_INTERFACE_H
 #define MESHLAB_IORASTER_PLUGIN_INTERFACE_H
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
 #include "../../ml_document/raster_model.h"
 
-class IORasterPluginInterface : virtual public PluginInterface
+class IORasterPluginInterface : virtual public MeshLabPlugin
 {
 public:
-	IORasterPluginInterface() : PluginInterface() {}
+	IORasterPluginInterface() : MeshLabPlugin() {}
 	virtual ~IORasterPluginInterface() {}
 	
 	virtual QList<FileFormat> importFormats() const = 0;

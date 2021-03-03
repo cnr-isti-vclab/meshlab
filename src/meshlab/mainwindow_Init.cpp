@@ -74,7 +74,7 @@ MainWindow::MainWindow():
 	
 	//disable previously disabled plugins
 	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
-	for (PluginFileInterface* fp : PM.pluginIterator(true)){
+	for (MeshLabPluginFile* fp : PM.pluginIterator(true)){
 		if (disabledPlugins.contains(fp->pluginName()))
 			PM.disablePlugin(fp);
 	}

@@ -26,15 +26,15 @@
 
 #include <wrap/callback.h>
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
 
 /** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
 */
-class IOMeshPluginInterface : virtual public PluginInterface
+class IOMeshPluginInterface : virtual public MeshLabPlugin
 {
 public:
-	IOMeshPluginInterface() : PluginInterface() {  }
+	IOMeshPluginInterface() : MeshLabPlugin() {  }
 	virtual ~IOMeshPluginInterface() {}
 
 	virtual QList<FileFormat> importFormats() const = 0;

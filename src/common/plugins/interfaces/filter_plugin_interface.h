@@ -24,7 +24,7 @@
 #ifndef MESHLAB_FILTER_PLUGIN_INTERFACE_H
 #define MESHLAB_FILTER_PLUGIN_INTERFACE_H
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 #include "../../ml_document/mesh_document.h"
 
 //declaring types to be used as QVariants
@@ -40,7 +40,7 @@ Q_DECLARE_METATYPE(Eigen::VectorXd)
  *\brief The FilterPluginInterface class provide the interface of the filter plugins.
  *
  */
-class FilterPluginInterface : virtual public PluginInterface
+class FilterPluginInterface : virtual public MeshLabPlugin
 {
 public:
 	/** 
@@ -73,7 +73,7 @@ public:
 
 
 
-	FilterPluginInterface() : PluginInterface(), glContext(nullptr)
+	FilterPluginInterface() : MeshLabPlugin(), glContext(nullptr)
 	{
 	}
 	virtual ~FilterPluginInterface() {}

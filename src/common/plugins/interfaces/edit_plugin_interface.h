@@ -26,7 +26,7 @@
 
 #include <QTabletEvent>
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 #include "../../ml_document/mesh_document.h"
 
 
@@ -38,10 +38,10 @@ Used to provide tools that needs some kind of interaction with the mesh.
 Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
 */
 
-class EditPluginInterface : public PluginInterface
+class EditPluginInterface : public MeshLabPlugin
 {
 public:
-	EditPluginInterface() : PluginInterface() {}
+	EditPluginInterface() : MeshLabPlugin() {}
 	virtual ~EditPluginInterface() {}
 
 	//should return a sentence describing what the editing tool does
@@ -101,7 +101,7 @@ private:
 This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
 This class is used by the framework to generate an independent MeshEditInterface for each document.
 */
-class EditPluginInterfaceFactory : public PluginFileInterface
+class EditPluginInterfaceFactory : public MeshLabPluginFile
 {
 public:
 	EditPluginInterfaceFactory() {}

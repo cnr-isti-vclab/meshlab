@@ -30,7 +30,7 @@
 #include "interfaces/ioraster_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
 
-MeshLabPluginType::MeshLabPluginType(const PluginFileInterface* fpi) : type(0)
+MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 {
 	//Decorate
 	const DecoratePluginInterface *iDecorator = dynamic_cast<const DecoratePluginInterface *>(fpi);

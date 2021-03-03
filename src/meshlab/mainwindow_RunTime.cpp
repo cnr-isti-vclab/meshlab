@@ -2738,7 +2738,7 @@ void MainWindow::aboutPlugins()
 	updateAllPluginsActions();
 	QSettings settings;
 	QStringList disabledPlugins;
-	for (PluginFileInterface* pf : PM.pluginIterator(true)){
+	for (MeshLabPluginFile* pf : PM.pluginIterator(true)){
 		if (!pf->isEnabled()){
 			disabledPlugins.append(pf->pluginName());
 		}

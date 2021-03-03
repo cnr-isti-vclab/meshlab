@@ -77,7 +77,7 @@ void PluginManager::checkPlugin(const QString& filename)
 		throw MLException(fin.fileName() + " does not seem to be a Qt Plugin.\n\n" + loader.errorString());
 	}
 
-	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
+	MeshLabPluginFile* ifp = dynamic_cast<MeshLabPluginFile *>(plugin);
 	if (!ifp){
 		throw MLException(fin.fileName() + " is not a MeshLab plugin.");
 	}
@@ -190,7 +190,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	//load the plugin depending on the type (can be more than one type!)
 	QPluginLoader loader(fin.absoluteFilePath());
 	QObject *plugin = loader.instance();
-	PluginFileInterface* ifp = dynamic_cast<PluginFileInterface *>(plugin);
+	MeshLabPluginFile* ifp = dynamic_cast<MeshLabPluginFile *>(plugin);
 	MeshLabPluginType type(ifp);
 	
 	if (type.isDecoratePlugin()){
@@ -219,7 +219,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	pluginFiles.insert(fin.absoluteFilePath());
 }
 
-void PluginManager::unloadPlugin(PluginFileInterface* ifp)
+void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 {
 	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
 	if (it != allPlugins.end()){
@@ -247,7 +247,7 @@ void PluginManager::unloadPlugin(PluginFileInterface* ifp)
 	}
 }
 
-void PluginManager::enablePlugin(PluginFileInterface* ifp)
+void PluginManager::enablePlugin(MeshLabPluginFile* ifp)
 {
 	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
 	if (it  != allPlugins.end() && !ifp->isEnabled()){
@@ -256,7 +256,7 @@ void PluginManager::enablePlugin(PluginFileInterface* ifp)
 	}
 }
 
-void PluginManager::disablePlugin(PluginFileInterface* ifp)
+void PluginManager::disablePlugin(MeshLabPluginFile* ifp)
 {
 	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
 	if (it  != allPlugins.end() && ifp->isEnabled()){
@@ -346,7 +346,7 @@ QStringList PluginManager::inputRasterFormatListDialog() const
 	return inputFormatListDialog(ioRasterPluginIterator());
 }
 
-PluginFileInterface* PluginManager::operator[](unsigned int i) const
+MeshLabPluginFile* PluginManager::operator[](unsigned int i) const
 {
 	return allPlugins[i];
 }
@@ -452,14 +452,14 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 	return inputRasterFormatsDialogStringList;
 }
 
-ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::begin()
+ConstPluginIterator<MeshLabPluginFile> PluginManager::PluginRangeIterator::begin()
 {
-	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.begin(), b);
+	return ConstPluginIterator<MeshLabPluginFile>(pm->allPlugins, pm->allPlugins.begin(), b);
 }
 
-ConstPluginIterator<PluginFileInterface> PluginManager::PluginRangeIterator::end()
+ConstPluginIterator<MeshLabPluginFile> PluginManager::PluginRangeIterator::end()
 {
-	return ConstPluginIterator<PluginFileInterface>(pm->allPlugins, pm->allPlugins.end(), b);
+	return ConstPluginIterator<MeshLabPluginFile>(pm->allPlugins, pm->allPlugins.end(), b);
 }
 
 PluginManager::PluginRangeIterator::PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins) :

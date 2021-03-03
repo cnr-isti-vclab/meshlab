@@ -24,7 +24,7 @@
 #ifndef MESHLAB_DECORATE_PLUGIN_INTERFACE_H
 #define MESHLAB_DECORATE_PLUGIN_INTERFACE_H
 
-#include "plugin_interface.h"
+#include "meshlab_plugin.h"
 
 class GLArea;
 
@@ -53,7 +53,7 @@ Some example of PerMesh Decorations
 - display of specific tagging
 */
 
-class DecoratePluginInterface : public PluginInterface
+class DecoratePluginInterface : public MeshLabPlugin
 {
 public:
 
@@ -69,7 +69,7 @@ public:
 		PostRendering = 0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
 	};
 
-	DecoratePluginInterface() : PluginInterface() {}
+	DecoratePluginInterface() : MeshLabPlugin() {}
 	virtual ~DecoratePluginInterface() {}
 	/** The very short string (a few words) describing each filtering action
 	// This string is used also to define the menu entry
