@@ -30,7 +30,7 @@
 #include <QString>
 #include <QFile>
 
-JSONIOPlugin::JSONIOPlugin(void) : IOMeshPluginInterface()
+JSONIOPlugin::JSONIOPlugin(void) : IOMeshPlugin()
 {
 	;
 }

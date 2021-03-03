@@ -30,7 +30,7 @@
 #include <QMessageBox>
 
 #include <common/plugins/interfaces/filter_plugin.h>
-#include <common/plugins/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/plugins/interfaces/render_plugin_interface.h>
 #include <common/plugins/interfaces/edit_plugin.h>
@@ -167,7 +167,7 @@ void PluginInfoDialog::populateTreeWidget()
 					tmplist.push_back(a->text());
 			}
 			if (type.isIOMeshPlugin()){
-				IOMeshPluginInterface* iopi = dynamic_cast<IOMeshPluginInterface*>(fp);
+				IOMeshPlugin* iopi = dynamic_cast<IOMeshPlugin*>(fp);
 				for(const FileFormat& f: iopi->importFormats()){
 					QString formats;
 					for(const QString& s : f.extensions)

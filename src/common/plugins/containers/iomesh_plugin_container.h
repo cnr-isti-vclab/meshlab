@@ -24,7 +24,7 @@
 #ifndef MESHLAB_IOMESH_PLUGIN_CONTAINER_H
 #define MESHLAB_IOMESH_PLUGIN_CONTAINER_H
 
-#include "../interfaces/iomesh_plugin_interface.h"
+#include "../interfaces/iomesh_plugin.h"
 #include "generic_container_iterator.h"
 
 /**
@@ -42,13 +42,13 @@ public:
 
 	size_t size() const;
 	void clear();
-	void pushIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
-	void eraseIOMeshPlugin(IOMeshPluginInterface* iIOMesh);
+	void pushIOMeshPlugin(IOMeshPlugin* iIOMesh);
+	void eraseIOMeshPlugin(IOMeshPlugin* iIOMesh);
 
 	bool isInputMeshFormatSupported(const QString& inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString& outputFormat) const;
-	IOMeshPluginInterface* inputMeshPlugin(const QString& inputFormat) const;
-	IOMeshPluginInterface* outputMeshPlugin(const QString& outputFormat) const;
+	IOMeshPlugin* inputMeshPlugin(const QString& inputFormat) const;
+	IOMeshPlugin* outputMeshPlugin(const QString& outputFormat) const;
 
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
@@ -56,17 +56,17 @@ public:
 	IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	std::vector<IOMeshPluginInterface*> ioMeshPlugins;
-	QMap<QString,IOMeshPluginInterface*> inputMeshFormatToPluginMap;
-	QMap<QString,IOMeshPluginInterface*> outputMeshFormatToPluginMap;
+	std::vector<IOMeshPlugin*> ioMeshPlugins;
+	QMap<QString,IOMeshPlugin*> inputMeshFormatToPluginMap;
+	QMap<QString,IOMeshPlugin*> outputMeshFormatToPluginMap;
 };
 
 class IOMeshPluginContainer::IOMeshPluginRangeIterator
 {
 	friend class IOMeshPluginContainer;
 public:
-	ConstPluginIterator<IOMeshPluginInterface> begin();
-	ConstPluginIterator<IOMeshPluginInterface> end();
+	ConstPluginIterator<IOMeshPlugin> begin();
+	ConstPluginIterator<IOMeshPlugin> end();
 private:
 	IOMeshPluginRangeIterator(
 			const IOMeshPluginContainer* pm,

@@ -17,7 +17,7 @@ void IOMeshPluginContainer::clear()
 	outputMeshFormatToPluginMap.clear();
 }
 
-void IOMeshPluginContainer::pushIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
+void IOMeshPluginContainer::pushIOMeshPlugin(IOMeshPlugin* iIOMesh)
 {
 	ioMeshPlugins.push_back(iIOMesh);
 
@@ -40,7 +40,7 @@ void IOMeshPluginContainer::pushIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
 	}
 }
 
-void IOMeshPluginContainer::eraseIOMeshPlugin(IOMeshPluginInterface* iIOMesh)
+void IOMeshPluginContainer::eraseIOMeshPlugin(IOMeshPlugin* iIOMesh)
 {
 	ioMeshPlugins.erase(std::find(ioMeshPlugins.begin(), ioMeshPlugins.end(), iIOMesh));
 	for (const FileFormat& ff : iIOMesh->importFormats()){
@@ -65,7 +65,7 @@ bool IOMeshPluginContainer::isOutputMeshFormatSupported(const QString& outputFor
 	return outputMeshFormatToPluginMap.find(outputFormat.toLower()) != outputMeshFormatToPluginMap.end();
 }
 
-IOMeshPluginInterface* IOMeshPluginContainer::inputMeshPlugin(const QString& inputFormat) const
+IOMeshPlugin* IOMeshPluginContainer::inputMeshPlugin(const QString& inputFormat) const
 {
 	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
 	if (it != inputMeshFormatToPluginMap.end())
@@ -73,7 +73,7 @@ IOMeshPluginInterface* IOMeshPluginContainer::inputMeshPlugin(const QString& inp
 	return nullptr;
 }
 
-IOMeshPluginInterface* IOMeshPluginContainer::outputMeshPlugin(const QString& outputFormat) const
+IOMeshPlugin* IOMeshPluginContainer::outputMeshPlugin(const QString& outputFormat) const
 {
 	auto it = outputMeshFormatToPluginMap.find(outputFormat.toLower());
 	if (it != outputMeshFormatToPluginMap.end())
@@ -96,14 +96,14 @@ IOMeshPluginContainer::IOMeshPluginRangeIterator IOMeshPluginContainer::ioMeshPl
 	return IOMeshPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-ConstPluginIterator<IOMeshPluginInterface> IOMeshPluginContainer::IOMeshPluginRangeIterator::begin()
+ConstPluginIterator<IOMeshPlugin> IOMeshPluginContainer::IOMeshPluginRangeIterator::begin()
 {
-	return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.begin(), b);
+	return ConstPluginIterator<IOMeshPlugin>(pm->ioMeshPlugins, pm->ioMeshPlugins.begin(), b);
 }
 
-ConstPluginIterator<IOMeshPluginInterface> IOMeshPluginContainer::IOMeshPluginRangeIterator::end()
+ConstPluginIterator<IOMeshPlugin> IOMeshPluginContainer::IOMeshPluginRangeIterator::end()
 {
-	return ConstPluginIterator<IOMeshPluginInterface>(pm->ioMeshPlugins, pm->ioMeshPlugins.end(), b);
+	return ConstPluginIterator<IOMeshPlugin>(pm->ioMeshPlugins, pm->ioMeshPlugins.end(), b);
 }
 
 IOMeshPluginContainer::IOMeshPluginRangeIterator::IOMeshPluginRangeIterator(

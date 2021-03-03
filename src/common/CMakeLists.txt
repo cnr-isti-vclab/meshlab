@@ -29,7 +29,7 @@ set(HEADERS
 	plugins/interfaces/decorate_plugin.h
 	plugins/interfaces/edit_plugin.h
 	plugins/interfaces/filter_plugin.h
-	plugins/interfaces/iomesh_plugin_interface.h
+	plugins/interfaces/iomesh_plugin.h
 	plugins/interfaces/ioraster_plugin_interface.h
 	plugins/interfaces/render_plugin_interface.h
 	plugins/meshlab_plugin_type.h

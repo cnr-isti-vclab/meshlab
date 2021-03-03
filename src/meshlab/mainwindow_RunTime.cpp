@@ -2164,7 +2164,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, IOMeshPluginInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
+bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
 {
 	if ((GLA() == NULL) || (mm == NULL))
 		return false;
@@ -2377,7 +2377,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+		IOMeshPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
 		if (pCurrentIOPlugin == nullptr)
 		{
@@ -2473,7 +2473,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+	IOMeshPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 	
 	if(pCurrentIOPlugin != NULL)
 	{
@@ -2612,7 +2612,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		QStringListIterator itFilter(suffixList);
 		
-		IOMeshPluginInterface *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
+		IOMeshPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");

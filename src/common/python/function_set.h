@@ -83,7 +83,7 @@ public:
 
 private:
 	void updateSaveParameters(
-			IOMeshPluginInterface* plugin,
+			IOMeshPlugin* plugin,
 			const QString& outputFormat,
 			Function& f);
 

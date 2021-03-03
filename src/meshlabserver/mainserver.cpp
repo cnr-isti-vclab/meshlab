@@ -162,7 +162,7 @@ public:
 
         // HashTable storing all supported formats together with
         // the (1-based) index  of first plugin which is able to open it
-        QHash<QString, IOMeshPluginInterface*> allKnownFormats;
+        QHash<QString, IOMeshPlugin*> allKnownFormats;
 
         //PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 
@@ -174,7 +174,7 @@ public:
         QString extension = fi.suffix();
         qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
-        IOMeshPluginInterface* pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+        IOMeshPlugin* pCurrentIOPlugin = PM.inputMeshPlugin(extension);
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -239,7 +239,7 @@ public:
         QString extension = fi.suffix();
 
         // retrieving corresponding IO plugin
-        IOMeshPluginInterface* pCurrentIOPlugin = PM.outputMeshPlugin(extension);
+        IOMeshPlugin* pCurrentIOPlugin = PM.outputMeshPlugin(extension);
         if (pCurrentIOPlugin == nullptr)
         {
             fprintf(fp,"Error encountered while opening file: ");
@@ -269,7 +269,7 @@ public:
         return true;
     }
 
-    bool loadMesh(const QString& fileName, IOMeshPluginInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
+    bool loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)
     {
         if (mm == NULL)
             return false;
@@ -404,7 +404,7 @@ public:
             mm->Clear();
         QFileInfo fi(fullPath);
         QString extension = fi.suffix();
-        IOMeshPluginInterface *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+        IOMeshPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 
         if(pCurrentIOPlugin != NULL)
         {

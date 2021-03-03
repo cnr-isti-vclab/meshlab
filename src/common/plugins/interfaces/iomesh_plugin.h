@@ -21,21 +21,22 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IOMESH_PLUGIN_INTERFACE_H
-#define MESHLAB_IOMESH_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_IOMESH_PLUGIN_H
+#define MESHLAB_IOMESH_PLUGIN_H
 
 #include <wrap/callback.h>
 
 #include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
 
-/** \brief The IOPluginInterface is the base class for all the single mesh loading plugins.
-*/
-class IOMeshPluginInterface : virtual public MeshLabPlugin
+/** 
+ * @brief The IOMeshPlugin is the base class for all the single mesh loading plugins.
+ */
+class IOMeshPlugin : virtual public MeshLabPlugin
 {
 public:
-	IOMeshPluginInterface() : MeshLabPlugin() {  }
-	virtual ~IOMeshPluginInterface() {}
+	IOMeshPlugin() : MeshLabPlugin() {  }
+	virtual ~IOMeshPlugin() {}
 
 	virtual QList<FileFormat> importFormats() const = 0;
 	virtual QList<FileFormat> exportFormats() const = 0;
@@ -103,7 +104,7 @@ protected:
 
 };
 
-#define IOMESH_PLUGIN_INTERFACE_IID "vcg.meshlab.IOMeshPluginInterface/1.0"
-Q_DECLARE_INTERFACE(IOMeshPluginInterface, IOMESH_PLUGIN_INTERFACE_IID)
+#define IOMESH_PLUGIN_IID "vcg.meshlab.IOMeshPlugin/1.0"
+Q_DECLARE_INTERFACE(IOMeshPlugin, IOMESH_PLUGIN_IID)
 
-#endif // MESHLAB_IOMESH_PLUGIN_INTERFACE_H
+#endif // MESHLAB_IOMESH_PLUGIN_H

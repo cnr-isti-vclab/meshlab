@@ -26,7 +26,7 @@
 #include "interfaces/decorate_plugin.h"
 #include "interfaces/edit_plugin.h"
 #include "interfaces/filter_plugin.h"
-#include "interfaces/iomesh_plugin_interface.h"
+#include "interfaces/iomesh_plugin.h"
 #include "interfaces/ioraster_plugin_interface.h"
 #include "interfaces/render_plugin_interface.h"
 
@@ -48,7 +48,7 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 		type |= FILTER;
 	}
 	//IOMesh
-	const IOMeshPluginInterface *iIOMesh = dynamic_cast<const IOMeshPluginInterface *>(fpi);
+	const IOMeshPlugin *iIOMesh = dynamic_cast<const IOMeshPlugin *>(fpi);
 	if (iIOMesh) {
 		type |= IO_MESH;
 	}

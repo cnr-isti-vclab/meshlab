@@ -64,8 +64,8 @@ public:
 
 	QAction* filterAction(const QString& name);
 
-	IOMeshPluginInterface* inputMeshPlugin(const QString& inputFormat) const;
-	IOMeshPluginInterface* outputMeshPlugin(const QString& outputFormat) const;
+	IOMeshPlugin* inputMeshPlugin(const QString& inputFormat) const;
+	IOMeshPlugin* outputMeshPlugin(const QString& outputFormat) const;
 	IORasterPluginInterface* inputRasterPlugin(const QString inputFormat) const;
 	bool isInputMeshFormatSupported(const QString inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString outputFormat) const;

@@ -23,14 +23,14 @@
 #ifndef JSONIOPLUGIN_H
 #define JSONIOPLUGIN_H
 
-#include <common/plugins/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/iomesh_plugin.h>
 #include <common/ml_document/mesh_model.h>
 
-class JSONIOPlugin : public QObject, public IOMeshPluginInterface
+class JSONIOPlugin : public QObject, public IOMeshPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(IOMeshPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
+	Q_INTERFACES(IOMeshPlugin)
 
 public:
 
