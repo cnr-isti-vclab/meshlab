@@ -28,7 +28,7 @@
 #include "interfaces/filter_plugin.h"
 #include "interfaces/iomesh_plugin.h"
 #include "interfaces/ioraster_plugin.h"
-#include "interfaces/render_plugin_interface.h"
+#include "interfaces/render_plugin.h"
 
 MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 {
@@ -59,7 +59,7 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 	}
 	
 	//Render
-	const RenderPluginInterface *iRender = dynamic_cast<const RenderPluginInterface *>(fpi);
+	const RenderPlugin *iRender = dynamic_cast<const RenderPlugin *>(fpi);
 	if (iRender) {
 		type |= RENDER;
 	}

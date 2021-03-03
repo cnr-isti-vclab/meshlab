@@ -209,7 +209,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPlugin*>(plugin));
 	}
 	if (type.isRenderPlugin()){
-		renderPlugins.pushRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
+		renderPlugins.pushRenderPlugin(qobject_cast<RenderPlugin *>(plugin));
 	}
 
 	//set the QFileInfo to the plugin, and add it to the continer
@@ -240,7 +240,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPlugin*>(ifp));
 		}
 		if (type.isRenderPlugin()){
-			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
+			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPlugin *>(ifp));
 		}
 		allPlugins.erase(it);
 		delete ifp;

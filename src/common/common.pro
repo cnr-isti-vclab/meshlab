@@ -50,7 +50,7 @@ HEADERS += 	\
 	plugins/interfaces/filter_plugin.h \
 	plugins/interfaces/iomesh_plugin.h \
 	plugins/interfaces/ioraster_plugin.h \
-	plugins/interfaces/render_plugin_interface.h \
+	plugins/interfaces/render_plugin.h \
 	plugins/meshlab_plugin_type.h \
 	plugins/plugin_manager.h \
 	ml_document/helpers/mesh_document_state_data.h \

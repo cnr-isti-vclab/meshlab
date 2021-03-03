@@ -36,7 +36,7 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/plugins/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/plugins/interfaces/edit_plugin.h>
 #include <common/ml_shared_data_context/ml_shared_data_context.h>
@@ -194,8 +194,8 @@ public:
     QList<QAction *> iPerDocDecoratorlist;
     QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
-    void setRenderer(RenderPluginInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
-    RenderPluginInterface * getRenderer() { return iRenderer; }
+    void setRenderer(RenderPlugin *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
+    RenderPlugin * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
     
     
@@ -447,7 +447,7 @@ private:
     vcg::Point2i pointToPick;
 
     //shader support
-    RenderPluginInterface *iRenderer;
+    RenderPlugin *iRenderer;
     QAction *currentShader;
     const QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings

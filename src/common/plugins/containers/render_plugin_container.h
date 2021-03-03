@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RENDER_PLUGIN_CONTAINER_H
 #define MESHLAB_RENDER_PLUGIN_CONTAINER_H
 
-#include "../interfaces/render_plugin_interface.h"
+#include "../interfaces/render_plugin.h"
 #include "generic_container_iterator.h"
 
 /**
@@ -41,20 +41,20 @@ public:
 	RenderPluginContainer();
 
 	void clear();
-	void pushRenderPlugin(RenderPluginInterface* iRender);
-	void eraseRenderPlugin(RenderPluginInterface* iRender);
+	void pushRenderPlugin(RenderPlugin* iRender);
+	void eraseRenderPlugin(RenderPlugin* iRender);
 
 	RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 private:
-	std::vector<RenderPluginInterface*> renderPlugins;
+	std::vector<RenderPlugin*> renderPlugins;
 };
 
 class RenderPluginContainer::RenderPluginRangeIterator
 {
 	friend class RenderPluginContainer;
 public:
-	ConstPluginIterator<RenderPluginInterface> begin();
-	ConstPluginIterator<RenderPluginInterface> end();
+	ConstPluginIterator<RenderPlugin> begin();
+	ConstPluginIterator<RenderPlugin> end();
 private:
 	RenderPluginRangeIterator(
 			const RenderPluginContainer* pm,

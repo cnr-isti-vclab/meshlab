@@ -1413,7 +1413,7 @@ void MainWindow::applyRenderMode()
 		GLA()->setRenderer(NULL,NULL);
 	}
 	// Make the call to the plugin core
-	RenderPluginInterface *iRenderTemp = qobject_cast<RenderPluginInterface *>(action->parent());
+	RenderPlugin *iRenderTemp = qobject_cast<RenderPlugin *>(action->parent());
 	bool initsupport = false;
 	
 	if (currentViewContainer() == NULL)
@@ -1561,7 +1561,7 @@ void MainWindow::addShaders()
 	}
 
 	//refresh actions of render plugins -> needed to update the shaders menu
-	for (RenderPluginInterface* renderPlugin : PM.renderPluginIterator()){
+	for (RenderPlugin* renderPlugin : PM.renderPluginIterator()){
 		 renderPlugin->refreshActions();
 	}
 	fillRenderMenu(); //clean and refill menu

@@ -856,7 +856,7 @@ void MainWindow::fillShadersMenu()
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone, SIGNAL(triggered()), this, SLOT(applyRenderMode()));
-	for(RenderPluginInterface *iRender:  PM.renderPluginIterator()) {
+	for(RenderPlugin *iRender:  PM.renderPluginIterator()) {
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 	}
 	shadersMenu->addSeparator();

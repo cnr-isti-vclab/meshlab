@@ -32,7 +32,7 @@
 #include <common/plugins/interfaces/filter_plugin.h>
 #include <common/plugins/interfaces/iomesh_plugin.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
-#include <common/plugins/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin.h>
 #include <common/plugins/interfaces/edit_plugin.h>
 #include <common/globals.h>
 #include <common/mlexception.h>
@@ -191,7 +191,7 @@ void PluginInfoDialog::populateTreeWidget()
 				}
 			}
 			if (type.isRenderPlugin()){
-				RenderPluginInterface* rpi = dynamic_cast<RenderPluginInterface*>(fp);
+				RenderPlugin* rpi = dynamic_cast<RenderPlugin*>(fp);
 				for(QAction *a: rpi->actions())
 					tmplist.push_back(a->text());
 			}

@@ -32,12 +32,12 @@ void RenderPluginContainer::clear()
 	renderPlugins.clear();
 }
 
-void RenderPluginContainer::pushRenderPlugin(RenderPluginInterface* iRender)
+void RenderPluginContainer::pushRenderPlugin(RenderPlugin* iRender)
 {
 	renderPlugins.push_back(iRender);
 }
 
-void RenderPluginContainer::eraseRenderPlugin(RenderPluginInterface* iRender)
+void RenderPluginContainer::eraseRenderPlugin(RenderPlugin* iRender)
 {
 	renderPlugins.erase(std::find(renderPlugins.begin(), renderPlugins.end(), iRender));
 }
@@ -47,14 +47,14 @@ RenderPluginContainer::RenderPluginRangeIterator RenderPluginContainer::renderPl
 	return RenderPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-ConstPluginIterator<RenderPluginInterface> RenderPluginContainer::RenderPluginRangeIterator::begin()
+ConstPluginIterator<RenderPlugin> RenderPluginContainer::RenderPluginRangeIterator::begin()
 {
-	return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.begin(), b);
+	return ConstPluginIterator<RenderPlugin>(pm->renderPlugins, pm->renderPlugins.begin(), b);
 }
 
-ConstPluginIterator<RenderPluginInterface> RenderPluginContainer::RenderPluginRangeIterator::end()
+ConstPluginIterator<RenderPlugin> RenderPluginContainer::RenderPluginRangeIterator::end()
 {
-	return ConstPluginIterator<RenderPluginInterface>(pm->renderPlugins, pm->renderPlugins.end(), b);
+	return ConstPluginIterator<RenderPlugin>(pm->renderPlugins, pm->renderPlugins.end(), b);
 }
 
 RenderPluginContainer::RenderPluginRangeIterator::RenderPluginRangeIterator(

@@ -24,7 +24,7 @@
 #define RADIANCESCALINGRENDERER_H
 
 #include <GL/glew.h>
-#include <common/plugins/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin.h>
 
 #include <QAction>
 #include <QString>
@@ -35,10 +35,10 @@
 #include "framebufferObject.h"
 #include "texture2D.h"
 
-class RadianceScalingRendererPlugin : public QObject, public RenderPluginInterface {
+class RadianceScalingRendererPlugin : public QObject, public RenderPlugin {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(RenderPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_IID)
+	Q_INTERFACES(RenderPlugin)
 
     bool             _supported;
     QList<QAction *> _actionList;
