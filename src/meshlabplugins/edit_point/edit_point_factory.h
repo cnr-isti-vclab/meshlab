@@ -26,7 +26,7 @@
 #define EditPointFactoryPLUGIN_H
 
 #include <QObject>
-#include <common/plugins/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
 class PointEditFactory : public QObject, public EditPluginInterfaceFactory
 {

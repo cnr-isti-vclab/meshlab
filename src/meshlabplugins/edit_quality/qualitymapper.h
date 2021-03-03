@@ -34,7 +34,7 @@ FIRST RELEASE
 #include <QAction>
 #include <QList>
 
-#include <common/plugins/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include "qualitymapperdialog.h"
 
 //This class defines the plugin interface

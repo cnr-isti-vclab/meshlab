@@ -31,9 +31,9 @@
 
 #include <common/plugins/interfaces/filter_plugin_interface.h>
 #include <common/plugins/interfaces/iomesh_plugin_interface.h>
-#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/plugins/interfaces/render_plugin_interface.h>
-#include <common/plugins/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include <common/globals.h>
 #include <common/mlexception.h>
 #include <common/mlapplication.h>

@@ -24,7 +24,7 @@
 #ifndef MESHLAB_DECORATE_PLUGIN_CONTAINER_H
 #define MESHLAB_DECORATE_PLUGIN_CONTAINER_H
 
-#include "../interfaces/decorate_plugin_interface.h"
+#include "../interfaces/decorate_plugin.h"
 #include "generic_container_iterator.h"
 
 /**

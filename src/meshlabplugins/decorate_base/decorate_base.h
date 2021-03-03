@@ -24,7 +24,7 @@
 #ifndef EXTRADECORATEPLUGIN_H
 #define EXTRADECORATEPLUGIN_H
 
-#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/ml_shared_data_context/ml_shared_data_context.h>
 
 #include <wrap/gui/coordinateframe.h>
@@ -38,7 +38,7 @@ typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a 
 class DecorateBasePlugin : public QObject, public DecoratePlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+	MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
 	Q_INTERFACES(DecoratePlugin)
 	QString decorationName(FilterIDType filter) const;
 	QString decorationInfo(FilterIDType filter) const;

@@ -24,7 +24,7 @@
 #define SAMPLE_DECORATE_PLUGIN_H
 
 #include <QObject>
-#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
@@ -35,7 +35,7 @@
 class DecorateShadowPlugin : public QObject, public DecoratePlugin
 {
   Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+  MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
   Q_INTERFACES(DecoratePlugin)
 
     enum {

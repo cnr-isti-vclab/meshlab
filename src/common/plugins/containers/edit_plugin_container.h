@@ -24,7 +24,7 @@
 #ifndef MESHLAB_EDIT_PLUGIN_CONTAINER_H
 #define MESHLAB_EDIT_PLUGIN_CONTAINER_H
 
-#include "../interfaces/edit_plugin_interface.h"
+#include "../interfaces/edit_plugin.h"
 #include "generic_container_iterator.h"
 
 /**

@@ -23,8 +23,8 @@
 
 #include "meshlab_plugin_type.h"
 
-#include "interfaces/decorate_plugin_interface.h"
-#include "interfaces/edit_plugin_interface.h"
+#include "interfaces/decorate_plugin.h"
+#include "interfaces/edit_plugin.h"
 #include "interfaces/filter_plugin_interface.h"
 #include "interfaces/iomesh_plugin_interface.h"
 #include "interfaces/ioraster_plugin_interface.h"

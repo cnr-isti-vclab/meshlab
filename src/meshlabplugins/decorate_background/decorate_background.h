@@ -34,14 +34,14 @@ New small samples
 #include <QAction>
 #include <QList>
 
-#include <common/plugins/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 #include "cubemap.h"
 
 class DecorateBackgroundPlugin : public QObject, public DecoratePlugin
 {
   Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
+  MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
   Q_INTERFACES(DecoratePlugin)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;

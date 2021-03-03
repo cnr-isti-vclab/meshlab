@@ -27,7 +27,7 @@ set(HEADERS
 	plugins/interfaces/meshlab_plugin_file.h
 	plugins/interfaces/meshlab_plugin.h
 	plugins/interfaces/decorate_plugin.h
-	plugins/interfaces/edit_plugin_interface.h
+	plugins/interfaces/edit_plugin.h
 	plugins/interfaces/filter_plugin_interface.h
 	plugins/interfaces/iomesh_plugin_interface.h
 	plugins/interfaces/ioraster_plugin_interface.h

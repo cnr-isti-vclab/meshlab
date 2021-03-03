@@ -26,11 +26,11 @@
  * At the start up the initGlobalParameterList function is called with an empty RichParameterList (to collect the default values)
  * If a filter wants to save some permanent stuff should set the permanent default values.
  */
-void DecoratePluginInterface::initGlobalParameterList(const QAction* /*format*/, RichParameterList& /*globalparam*/)
+void DecoratePlugin::initGlobalParameterList(const QAction* /*format*/, RichParameterList& /*globalparam*/)
 {
 }
 
-QAction* DecoratePluginInterface::action(QString name) const
+QAction* DecoratePlugin::action(QString name) const
 {
 	QString n = name;
 	foreach(QAction *tt, actions())
@@ -43,7 +43,7 @@ QAction* DecoratePluginInterface::action(QString name) const
 	return 0;
 }
 
-MeshLabPlugin::FilterIDType DecoratePluginInterface::ID(const QAction* a) const
+MeshLabPlugin::FilterIDType DecoratePlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	foreach(FilterIDType tt, types())
@@ -57,7 +57,7 @@ MeshLabPlugin::FilterIDType DecoratePluginInterface::ID(const QAction* a) const
 	return -1;
 }
 
-MeshLabPlugin::FilterIDType DecoratePluginInterface::ID(QString name) const
+MeshLabPlugin::FilterIDType DecoratePlugin::ID(QString name) const
 {
 	QString n = name;
 	foreach(FilterIDType tt, types())

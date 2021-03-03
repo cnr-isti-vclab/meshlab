@@ -27,7 +27,7 @@
 #include <QStringList>
 #include <QList>
 
-#include <common/plugins/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
 class EditManipulatorsPlugin : public QObject, public EditPluginInterface
 {

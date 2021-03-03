@@ -25,7 +25,7 @@
 #define SAMPLEEDITPLUGIN_H
 
 #include <QObject>
-#include <common/plugins/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
 class SampleEditPlugin : public QObject, public EditPluginInterface
 {
