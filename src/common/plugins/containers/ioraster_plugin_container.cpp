@@ -15,7 +15,7 @@ void IORasterPluginContainer::clear()
 	inputRasterFormatToPluginMap.clear();
 }
 
-void IORasterPluginContainer::pushIORasterPlugin(IORasterPluginInterface* iIORaster)
+void IORasterPluginContainer::pushIORasterPlugin(IORasterPlugin* iIORaster)
 {
 	ioRasterPlugins.push_back(iIORaster);
 
@@ -29,7 +29,7 @@ void IORasterPluginContainer::pushIORasterPlugin(IORasterPluginInterface* iIORas
 	}
 }
 
-void IORasterPluginContainer::eraseIORasterPlugin(IORasterPluginInterface* iIORaster)
+void IORasterPluginContainer::eraseIORasterPlugin(IORasterPlugin* iIORaster)
 {
 	ioRasterPlugins.erase(std::find(ioRasterPlugins.begin(), ioRasterPlugins.end(), iIORaster));
 	for (const FileFormat& ff : iIORaster->importFormats()){
@@ -39,7 +39,7 @@ void IORasterPluginContainer::eraseIORasterPlugin(IORasterPluginInterface* iIORa
 	}
 }
 
-IORasterPluginInterface* IORasterPluginContainer::inputRasterPlugin(const QString inputFormat) const
+IORasterPlugin* IORasterPluginContainer::inputRasterPlugin(const QString inputFormat) const
 {
 	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
 	if (it != inputRasterFormatToPluginMap.end())
@@ -62,14 +62,14 @@ IORasterPluginContainer::IORasterPluginRangeIterator IORasterPluginContainer::io
 	return IORasterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-ConstPluginIterator<IORasterPluginInterface> IORasterPluginContainer::IORasterPluginRangeIterator::begin()
+ConstPluginIterator<IORasterPlugin> IORasterPluginContainer::IORasterPluginRangeIterator::begin()
 {
-	return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.begin(), b);
+	return ConstPluginIterator<IORasterPlugin>(pm->ioRasterPlugins, pm->ioRasterPlugins.begin(), b);
 }
 
-ConstPluginIterator<IORasterPluginInterface> IORasterPluginContainer::IORasterPluginRangeIterator::end()
+ConstPluginIterator<IORasterPlugin> IORasterPluginContainer::IORasterPluginRangeIterator::end()
 {
-	return ConstPluginIterator<IORasterPluginInterface>(pm->ioRasterPlugins, pm->ioRasterPlugins.end(), b);
+	return ConstPluginIterator<IORasterPlugin>(pm->ioRasterPlugins, pm->ioRasterPlugins.end(), b);
 }
 
 IORasterPluginContainer::IORasterPluginRangeIterator::IORasterPluginRangeIterator(

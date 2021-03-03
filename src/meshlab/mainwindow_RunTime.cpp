@@ -2122,7 +2122,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		IORasterPluginInterface *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
+		IORasterPlugin *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
 		//pCurrentIOPlugin->setLog(gla->log);
 		if (pCurrentIOPlugin == NULL)
 		{

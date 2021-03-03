@@ -182,7 +182,7 @@ void PluginInfoDialog::populateTreeWidget()
 				}
 			}
 			if (type.isIORasterPlugin()){
-				IORasterPluginInterface* iorpi = dynamic_cast<IORasterPluginInterface*>(fp);
+				IORasterPlugin* iorpi = dynamic_cast<IORasterPlugin*>(fp);
 				for(const FileFormat& f: iorpi->importFormats()){
 					QString formats;
 					for(const QString& s : f.extensions)

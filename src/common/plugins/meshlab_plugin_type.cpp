@@ -27,7 +27,7 @@
 #include "interfaces/edit_plugin.h"
 #include "interfaces/filter_plugin.h"
 #include "interfaces/iomesh_plugin.h"
-#include "interfaces/ioraster_plugin_interface.h"
+#include "interfaces/ioraster_plugin.h"
 #include "interfaces/render_plugin_interface.h"
 
 MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
@@ -53,7 +53,7 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPluginFile* fpi) : type(0)
 		type |= IO_MESH;
 	}
 	//IORaster
-	const IORasterPluginInterface* iIORaster = dynamic_cast<const IORasterPluginInterface*>(fpi);
+	const IORasterPlugin* iIORaster = dynamic_cast<const IORasterPlugin*>(fpi);
 	if (iIORaster) {
 		type |= IO_RASTER;
 	}

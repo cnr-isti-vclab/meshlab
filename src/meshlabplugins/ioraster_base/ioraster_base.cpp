@@ -29,7 +29,7 @@
 
 
 IORasterBasePlugin::IORasterBasePlugin() :
-	IORasterPluginInterface(),
+	IORasterPlugin(),
 	formatList({FileFormat("JPEG", tr("JPEG")),
 				FileFormat("JPG", tr("JPG")),
 				FileFormat("PNG", tr("PNG")),

@@ -206,7 +206,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPlugin *>(plugin));
 	}
 	if (type.isIORasterPlugin()){
-		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPluginInterface*>(plugin));
+		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPlugin*>(plugin));
 	}
 	if (type.isRenderPlugin()){
 		renderPlugins.pushRenderPlugin(qobject_cast<RenderPluginInterface *>(plugin));
@@ -237,7 +237,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPlugin *>(ifp));
 		}
 		if (type.isIORasterPlugin()){
-			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPluginInterface*>(ifp));
+			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPlugin*>(ifp));
 		}
 		if (type.isRenderPlugin()){
 			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPluginInterface *>(ifp));
@@ -296,7 +296,7 @@ IOMeshPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 	return ioMeshPlugins.outputMeshPlugin(outputFormat);
 }
 
-IORasterPluginInterface* PluginManager::inputRasterPlugin(const QString inputFormat) const
+IORasterPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
 	return ioRasterPlugins.inputRasterPlugin(inputFormat);
 }

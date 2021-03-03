@@ -21,18 +21,18 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IORASTER_PLUGIN_INTERFACE_H
-#define MESHLAB_IORASTER_PLUGIN_INTERFACE_H
+#ifndef MESHLAB_IORASTER_PLUGIN_H
+#define MESHLAB_IORASTER_PLUGIN_H
 
 #include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
 #include "../../ml_document/raster_model.h"
 
-class IORasterPluginInterface : virtual public MeshLabPlugin
+class IORasterPlugin : virtual public MeshLabPlugin
 {
 public:
-	IORasterPluginInterface() : MeshLabPlugin() {}
-	virtual ~IORasterPluginInterface() {}
+	IORasterPlugin() : MeshLabPlugin() {}
+	virtual ~IORasterPlugin() {}
 	
 	virtual QList<FileFormat> importFormats() const = 0;
 	
@@ -59,7 +59,7 @@ protected:
 	QString errorMessage;
 };
 
-#define IORASTER_PLUGIN_INTERFACE_IID "vcg.meshlab.IORasterPluginInterface/1.0"
-Q_DECLARE_INTERFACE(IORasterPluginInterface, IORASTER_PLUGIN_INTERFACE_IID)
+#define IORASTER_PLUGIN_IID "vcg.meshlab.IORasterPlugin/1.0"
+Q_DECLARE_INTERFACE(IORasterPlugin, IORASTER_PLUGIN_IID)
 
-#endif // MESHLAB_IORASTER_PLUGIN_INTERFACE_H
+#endif // MESHLAB_IORASTER_PLUGIN_H

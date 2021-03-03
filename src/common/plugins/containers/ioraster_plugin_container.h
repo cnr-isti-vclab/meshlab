@@ -24,7 +24,7 @@
 #ifndef MESHLAB_IORASTER_PLUGIN_CONTAINER_H
 #define MESHLAB_IORASTER_PLUGIN_CONTAINER_H
 
-#include "../interfaces/ioraster_plugin_interface.h"
+#include "../interfaces/ioraster_plugin.h"
 #include "generic_container_iterator.h"
 
 /**
@@ -42,10 +42,10 @@ public:
 
 	size_t size() const;
 	void clear();
-	void pushIORasterPlugin(IORasterPluginInterface* iIORaster);
-	void eraseIORasterPlugin(IORasterPluginInterface* iIORaster);
+	void pushIORasterPlugin(IORasterPlugin* iIORaster);
+	void eraseIORasterPlugin(IORasterPlugin* iIORaster);
 
-	IORasterPluginInterface* inputRasterPlugin(const QString inputFormat) const;
+	IORasterPlugin* inputRasterPlugin(const QString inputFormat) const;
 	bool isInputRasterFormatSupported(const QString inputFormat) const;
 
 	QStringList inputRasterFormatList() const;
@@ -53,16 +53,16 @@ public:
 	IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
 private:
-	std::vector<IORasterPluginInterface*> ioRasterPlugins;
-	QMap<QString, IORasterPluginInterface*> inputRasterFormatToPluginMap;
+	std::vector<IORasterPlugin*> ioRasterPlugins;
+	QMap<QString, IORasterPlugin*> inputRasterFormatToPluginMap;
 };
 
 class IORasterPluginContainer::IORasterPluginRangeIterator
 {
 	friend class IORasterPluginContainer;
 public:
-	ConstPluginIterator<IORasterPluginInterface> begin();
-	ConstPluginIterator<IORasterPluginInterface> end();
+	ConstPluginIterator<IORasterPlugin> begin();
+	ConstPluginIterator<IORasterPlugin> end();
 private:
 	IORasterPluginRangeIterator(
 			const IORasterPluginContainer* pm,

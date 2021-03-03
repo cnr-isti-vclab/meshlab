@@ -66,7 +66,7 @@ public:
 
 	IOMeshPlugin* inputMeshPlugin(const QString& inputFormat) const;
 	IOMeshPlugin* outputMeshPlugin(const QString& outputFormat) const;
-	IORasterPluginInterface* inputRasterPlugin(const QString inputFormat) const;
+	IORasterPlugin* inputRasterPlugin(const QString inputFormat) const;
 	bool isInputMeshFormatSupported(const QString inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString outputFormat) const;
 	bool isInputRasterFormatSupported(const QString inputFormat) const;
