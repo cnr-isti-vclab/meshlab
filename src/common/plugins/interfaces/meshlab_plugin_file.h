@@ -27,6 +27,7 @@
 #include <string>
 #include <QFileInfo>
 #include <QString>
+#include "../../mlexception.h"
 
 /**
  * @brief The MeshLabPluginFile class is the base of all MeshLab plugin classes,

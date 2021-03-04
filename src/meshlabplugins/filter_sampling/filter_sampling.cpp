@@ -713,7 +713,7 @@ bool FilterDocSampling::applyFilter(
 		MeshModel *curMM = md.mm();
 		if (par.getInt("SampleNum") == 0) {
 			log("Mesh Element Sampling: Number of Samples is  0, cannot do anything");
-			errorMessage = "Number of Samples is  0, cannot do anything";
+			throw MLException("Number of Samples is  0, cannot do anything");
 			return false; // can't continue, mesh can't be processed
 		}
 		if ((par.getEnum("Sampling")>0) && (curMM->cm.fn == 0)) {

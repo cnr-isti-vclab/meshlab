@@ -781,127 +781,139 @@ void MainWindow::runFilterScript()
 {
 	if (meshDoc() == nullptr)
 		return;
-	for (FilterNameParameterValuesPair& pair : meshDoc()->filterHistory)
-	{
-		QString filtnm = pair.filterName();
-		int classes = 0;
-		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		QAction *action = PM.filterAction(filtnm);
-		FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
-		
-		int req=iFilter->getRequirements(action);
-		if (meshDoc()->mm() != NULL)
-			meshDoc()->mm()->updateDataMask(req);
-		iFilter->setLog(&meshDoc()->Log);
-		RichParameterList &parameterSet = pair.second;
-		
-		for(RichParameter& parameter : parameterSet) {
-			//if this is a mesh parameter and the index is valid
-			if(parameter.value().isMesh()) {
-				RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
-				if( md.meshindex < meshDoc()->size() && md.meshindex >= 0  ) {
-					parameterSet.setValue(md.name(), MeshValue(meshDoc(), md.meshindex));
-				}
-				else {
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.meshindex );
-					printf("One of the filters in the script needs more meshes than you have loaded.\n");
-					return;
-				}
-			}
-		}
-		//iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
-		
-		bool created = false;
-		MLSceneGLSharedDataContext* shar = NULL;
-		if (currentViewContainer() != NULL)
+	QString filterName;
+	try {
+		for (FilterNameParameterValuesPair& pair : meshDoc()->filterHistory)
 		{
-			shar = currentViewContainer()->sharedDataContext();
-			//GLA() is only the parent
-			QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
-			QGLFormat defForm = QGLFormat::defaultFormat();
-			iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-			created = iFilter->glContext->create(filterWidget->context());
-			shar->addView(iFilter->glContext);
-			MLRenderingData dt;
-			MLRenderingData::RendAtts atts;
-			atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-			
-			
-			if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
-			{
-				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-				if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-				{
-					dt.set(pm,atts);
-					shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
-				}
-			}
-			else
-			{
-				for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
-				{
-					MeshModel* mm = meshDoc()->meshList[ii];
-					MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-					if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-					{
-						dt.set(pm,atts);
-						shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
+			filterName = pair.filterName();
+			int classes = 0;
+			unsigned int postCondMask = MeshModel::MM_UNKNOWN;
+			QAction *action = PM.filterAction(filterName);
+			FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
+
+			int req=iFilter->getRequirements(action);
+			if (meshDoc()->mm() != NULL)
+				meshDoc()->mm()->updateDataMask(req);
+			iFilter->setLog(&meshDoc()->Log);
+			RichParameterList &parameterSet = pair.second;
+
+			for(RichParameter& parameter : parameterSet) {
+				//if this is a mesh parameter and the index is valid
+				if(parameter.value().isMesh()) {
+					RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
+					if( md.meshindex < meshDoc()->size() && md.meshindex >= 0  ) {
+						parameterSet.setValue(md.name(), MeshValue(meshDoc(), md.meshindex));
+					}
+					else {
+						printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.meshindex );
+						printf("One of the filters in the script needs more meshes than you have loaded.\n");
+						return;
 					}
 				}
 			}
-			
+			//iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
+
+			bool created = false;
+			MLSceneGLSharedDataContext* shar = NULL;
+			if (currentViewContainer() != NULL)
+			{
+				shar = currentViewContainer()->sharedDataContext();
+				//GLA() is only the parent
+				QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+				QGLFormat defForm = QGLFormat::defaultFormat();
+				iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+				created = iFilter->glContext->create(filterWidget->context());
+				shar->addView(iFilter->glContext);
+				MLRenderingData dt;
+				MLRenderingData::RendAtts atts;
+				atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+				atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+
+				if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
+				{
+					MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+					if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+					{
+						dt.set(pm,atts);
+						shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
+					}
+				}
+				else
+				{
+					for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+					{
+						MeshModel* mm = meshDoc()->meshList[ii];
+						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+						if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+						{
+							dt.set(pm,atts);
+							shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
+						}
+					}
+				}
+
+			}
+			if ((!created) || (!iFilter->glContext->isValid()))
+				throw MLException("A valid GLContext is required by the filter to work.\n");
+			meshDoc()->setBusy(true);
+			iFilter->applyFilter( action, *meshDoc(), postCondMask, pair.second, QCallBack);
+			if (postCondMask == MeshModel::MM_UNKNOWN)
+				postCondMask = iFilter->postCondition(action);
+			for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
+				vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+			meshDoc()->setBusy(false);
+			if (shar != NULL)
+				shar->removeView(iFilter->glContext);
+			delete iFilter->glContext;
+			classes = int(iFilter->getClass(action));
+
+			if (meshDoc()->mm() != NULL)
+			{
+				if(classes & FilterPlugin::FaceColoring )
+				{
+					meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+				}
+				if(classes & FilterPlugin::VertexColoring )
+				{
+
+
+
+
+
+					meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+				}
+				if(classes & MeshModel::MM_COLOR)
+				{
+					meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+				}
+				if(classes & MeshModel::MM_CAMERA)
+					meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
+			}
+
+			bool newmeshcreated = false;
+			if (classes & FilterPlugin::MeshCreation)
+				newmeshcreated = true;
+			updateSharedContextDataAfterFilterExecution(postCondMask, classes, newmeshcreated);
+			meshDoc()->meshDocStateData().clear();
+
+			if(classes & FilterPlugin::MeshCreation)
+				GLA()->resetTrackBall();
+			/* to be changed */
+
+			qb->reset();
+			GLA()->update();
+			GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable(pair.filterName()));
+			if (_currviewcontainer != NULL)
+				_currviewcontainer->updateAllDecoratorsForAllViewers();
 		}
-		if ((!created) || (!iFilter->glContext->isValid()))
-			throw MLException("A valid GLContext is required by the filter to work.\n");
-		meshDoc()->setBusy(true);
-		//WARNING!!!!!!!!!!!!
-		/* to be changed */
-		std::map<std::string, QVariant> outputValues;
-		iFilter->applyFilter( action, *meshDoc(), outputValues, postCondMask, pair.second, QCallBack);
-		if (postCondMask == MeshModel::MM_UNKNOWN)
-			postCondMask = iFilter->postCondition(action);
-		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
-			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-		meshDoc()->setBusy(false);
-		if (shar != NULL)
-			shar->removeView(iFilter->glContext);
-		delete iFilter->glContext;
-		classes = int(iFilter->getClass(action));
-		
-		if (meshDoc()->mm() != NULL)
-		{
-			if(classes & FilterPlugin::FaceColoring )
-			{
-				meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-			}
-			if(classes & FilterPlugin::VertexColoring )
-			{
-				meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-			}
-			if(classes & MeshModel::MM_COLOR)
-			{
-				meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
-			}
-			if(classes & MeshModel::MM_CAMERA)
-				meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
-		}
-		
-		bool newmeshcreated = false;
-		if (classes & FilterPlugin::MeshCreation)
-			newmeshcreated = true;
-		updateSharedContextDataAfterFilterExecution(postCondMask, classes, newmeshcreated);
-		meshDoc()->meshDocStateData().clear();
-		
-		if(classes & FilterPlugin::MeshCreation)
-			GLA()->resetTrackBall();
-		/* to be changed */
-		
-		qb->reset();
-		GLA()->update();
-		GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable(pair.filterName()));
-		if (_currviewcontainer != NULL)
-			_currviewcontainer->updateAllDecoratorsForAllViewers();
+	}
+	catch(const MLException& exc){
+		QMessageBox::warning(
+				this,
+				tr("Filter Failure"),
+				"Failure of filter <font color=red>: '" + filterName + "'</font><br><br>" + exc.what());
+		meshDoc()->Log.log(GLLogStream::SYSTEM, filterName + " failed: " + exc.what());
 	}
 }
 
@@ -1163,7 +1175,6 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	else
 		meshDoc()->Log.backToBookmark();
 	// (4) Apply the Filter
-	bool ret;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QElapsedTimer tt; tt.start();
 	meshDoc()->setBusy(true);
@@ -1215,8 +1226,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		std::map<std::string, QVariant> outputValues;
-		ret=iFilter->applyFilter(action, *(meshDoc()), outputValues, postCondMask,  mergedenvironment, QCallBack);
+		iFilter->applyFilter(action, *(meshDoc()), postCondMask,  mergedenvironment, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)
 			postCondMask = iFilter->postCondition(action);
 		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
@@ -1234,25 +1244,17 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		
 		// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 		
-		if(ret)
+		meshDoc()->Log.logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
+		if (meshDoc()->mm() != NULL)
+			meshDoc()->mm()->setMeshModified();
+		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+		if(GLA())
 		{
-			meshDoc()->Log.logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
-			if (meshDoc()->mm() != NULL)
-				meshDoc()->mm()->setMeshModified();
-			MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-			if(GLA())
-			{
-				GLA()->setLastAppliedFilter(action);
-			}
-			lastFilterAct->setText(QString("Apply filter ") + action->text());
-			lastFilterAct->setEnabled(true);
+			GLA()->setLastAppliedFilter(action);
 		}
-		else // filter has failed. show the message error.
-		{
-			QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
-			meshDoc()->Log.logf(GLLogStream::SYSTEM,"Filter failed: %s",qUtf8Printable(iFilter->errorMsg()));
-			MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
-		}
+		lastFilterAct->setText(QString("Apply filter ") + action->text());
+		lastFilterAct->setEnabled(true);
+
 		
 		
 		FilterPlugin::FILTER_ARITY arity = iFilter->filterArity(action);
@@ -1322,8 +1324,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
 		meshDoc()->meshDocStateData().clear();
 	}
-	catch (const std::bad_alloc& bdall)
-	{
+	catch (const std::bad_alloc& bdall) {
 		meshDoc()->setBusy(false);
 		qApp->restoreOverrideCursor();
 		QMessageBox::warning(
@@ -1332,6 +1333,17 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 					"Failure of filter <font color=red>: '%1'</font><br>").arg(action->text())+bdall.what()); // text
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 	}
+	catch(const MLException& exc){
+		meshDoc()->setBusy(false);
+		qApp->restoreOverrideCursor();
+		QMessageBox::warning(
+				this,
+				tr("Filter Failure"),
+				"Failure of filter <font color=red>: '" + iFilter->filterName(action) + "'</font><br><br>" + exc.what());
+		meshDoc()->Log.log(GLLogStream::SYSTEM, iFilter->filterName(action) + " failed: " + exc.what());
+		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+	}
+
 	qb->reset();
 	layerDialog->setVisible(layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->size() > 0)));
 	updateLayerDialog();
