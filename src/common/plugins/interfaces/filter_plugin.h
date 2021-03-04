@@ -176,12 +176,12 @@ public:
 			const RichParameterList& par,
 			MeshDocument& md,
 			unsigned int& postConditionMask,
-			vcg::CallBackPos* cb);
+			vcg::CallBackPos* cb) = 0;
 
 	/**
 	 * THIS FUNCTION IS GOING TO BE REMOVED. Please use the apply filter declared above.
 	 */
-	virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
+	//virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
 
 	/** 
 	 * \brief tests if a filter is applicable to a mesh.
@@ -232,6 +232,12 @@ public:
 
 	virtual QList<QAction*> actions() const { return actionList; }
 	virtual QList<ActionIDType> types() const { return typeList; }
+
+	/**
+	 * @brief wrongActionCalled throws a MLException. Call this function whenever
+	 * you receive an unknown action as parameter.
+	 */
+	static void wrongActionCalled(const QAction*);
 
 	/** 
 	 * Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
