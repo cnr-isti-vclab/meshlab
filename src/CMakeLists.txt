@@ -133,7 +133,7 @@ else()
 		meshlabplugins/filter_createiso
 		meshlabplugins/filter_geodesic
 		meshlabplugins/filter_sample_gpu
-#		meshlabplugins/filter_ao
+		meshlabplugins/filter_ao
 #		meshlabplugins/filter_camera
 #		meshlabplugins/filter_clean
 #		meshlabplugins/filter_color_projection
