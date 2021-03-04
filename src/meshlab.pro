@@ -25,7 +25,7 @@ SUBDIRS = \ #sub projects names
 	external \
 	common \
 	meshlab \
-	meshlabserver \
+	#meshlabserver \
 	io_base \ # a few basic file formats (ply, obj, off), without this you cannot open anything
 	decorate_base \
 	filter_measure \
