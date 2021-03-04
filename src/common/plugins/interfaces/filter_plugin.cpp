@@ -8,7 +8,11 @@ QString FilterPlugin::pythonFilterName(MeshLabPlugin::ActionIDType f) const
 	return pymeshlab::computePythonName(filterName(f));
 }
 
-std::map<std::string, QVariant> FilterPlugin::applyFilter(const QAction* filter, MeshDocument& md, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb)
+std::map<std::string, QVariant> FilterPlugin::applyFilter(
+		const QAction* filter,
+		const RichParameterList& par,
+		MeshDocument& md, unsigned int& postConditionMask,
+		vcg::CallBackPos* cb)
 {
 	std::map<std::string, QVariant> output;
 	bool result = applyFilter(filter, md, output, postConditionMask, par, cb);
