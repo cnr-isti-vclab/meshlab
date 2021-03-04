@@ -27,9 +27,9 @@ SUBDIRS = \ #sub projects names
 	meshlab \
 	#meshlabserver \
 	io_base \ # a few basic file formats (ply, obj, off), without this you cannot open anything
-	decorate_base \
-	filter_measure \
-	filter_meshing
+	decorate_base# \
+	#filter_measure \
+	#filter_meshing
 
 !meshlab_mini {
 # Other sub project, compiled only when config is not MeshLab Mini
