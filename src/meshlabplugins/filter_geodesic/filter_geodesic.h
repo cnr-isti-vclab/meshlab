@@ -56,7 +56,7 @@ class FilterGeodesic : public QObject, public FilterPlugin
 
 	FilterClass getClass(const QAction*) const;
 	int getRequirements(const QAction*);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 	int postCondition(const QAction * filter) const;
 	FILTER_ARITY filterArity(const QAction*) const {return SINGLE_MESH;}
