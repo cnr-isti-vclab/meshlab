@@ -156,17 +156,30 @@ public:
 	 */
 	virtual int postCondition(const QAction*) const { return MeshModel::MM_ALL; }
 
-	/** 
+	/**
 	 * @brief applies the selected filter with the already stabilished parameters
-	 * This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet
+	 * This function is called by the framework after getting values for the parameters specified in the \ref initParameterList
 	 * NO GUI interaction should be done here. No dialog asking, no messagebox errors.
 	 * Think that his function will also be called by the commandline framework.
-	 * If you want report errors, use the \ref errorMsg() string. It will displayed in case of filters returning false.
+	 * If you want to report warnings **TODO - still not possible but could be useful**
+	 * If you want report errors, throw a MLException with the message of the error.
 	 * When implementing your applyFilter, you should use the cb function to report to the framework the current state of the processing.
 	 * During your (long) processing you should call from time to time cb(perc,descriptiveString), where perc is an int (0..100)
 	 * saying what you are doing and at what point of the computation you currently are.
+	 * The function returns a map of [string-value] pairs, that will be output of command-line calls of the filter.
+	 * If your filter does not return nothing, just return an empty map.
 	 * @sa errorMsg
 	 * @sa initParameterSet
+	 */
+	virtual std::map<std::string, QVariant> applyFilter(
+			const QAction* filter,
+			const RichParameterList& par,
+			MeshDocument& md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos* cb);
+
+	/**
+	 * THIS FUNCTION IS GOING TO BE REMOVED. Please use the apply filter declared above.
 	 */
 	virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
 

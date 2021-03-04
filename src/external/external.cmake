@@ -28,6 +28,3 @@ include(${EXTERNAL_DIR}/qhull.cmake)
 
 # u3d - optional, for io_u3d
 include(${EXTERNAL_DIR}/u3d.cmake)
-
-# opengr - optional and header-only, for filter_globalregistration
-include(${EXTERNAL_DIR}/opengr.cmake)
