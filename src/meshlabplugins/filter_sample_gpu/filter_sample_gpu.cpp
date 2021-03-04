@@ -121,18 +121,20 @@ void ExtraSampleGPUPlugin::initParameterList(const QAction * action, MeshModel &
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> ExtraSampleGPUPlugin::applyFilter(const QAction * a, const RichParameterList & par, MeshDocument & md , unsigned int& /*postConditionMask*/, vcg::CallBackPos * /*cb*/)
 {
 	if (glContext == nullptr){
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
+		//errorMessage = "Fatal error: glContext not initialized";
+		//return false;
 	}
 	switch(ID(a))
 	{
 		case FP_GPU_EXAMPLE:
 		{
 			CMeshO & mesh = md.mm()->cm;
-			if ((mesh.vn < 3) || (mesh.fn < 1)) return false;
+			if ((mesh.vn < 3) || (mesh.fn < 1))
+				throw MLException("Error: number of vertices less than three or zero number of faces on selected mesh.");
 
 //			const unsigned char * p0      = (const unsigned char *)(&(mesh.vert[0].P()));
 //			const unsigned char * p1      = (const unsigned char *)(&(mesh.vert[1].P()));
@@ -270,14 +272,14 @@ bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , st
 			glPopAttrib();
 			glContext->doneCurrent();
 
-			QString st = par.getSaveFileName("ImageFileName");
-
 			image.rgbSwapped().mirrored().save(par.getSaveFileName("ImageFileName"));
 
 			break;
 		}
+	default:
+		wrongActionCalled(a);
 	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSampleGPUPlugin)
