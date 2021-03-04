@@ -50,42 +50,41 @@ SUBDIRS += \ #sub projects names
 	io_txt \
 	io_u3d \
 	ioraster_base \
-# Filter samples
 	edit_sample \
+# Filter plugins
 	filter_sample \
 	filter_sample_dyn \
 	filter_createiso \
-	filter_geodesic \
-	filter_sample_gpu \
-# Filter plugins
-	filter_ao \
-	filter_camera \
-	filter_clean \
-	filter_color_projection \
-	filter_colorproc \
-	filter_create \
-	filter_dirt \
-	filter_fractal \
-	filter_func \
-	filter_img_patch_param \
-	filter_isoparametrization \
-	filter_layer \
-	filter_mls \
-	filter_mutualglobal \
-	filter_mutualinfo \
-	filter_plymc \
-	filter_qhull \
-	filter_quality \
-	filter_sampling \
-	filter_screened_poisson \
-	filter_sdfgpu \
-	filter_select \
-	filter_sketchfab \
-	filter_ssynth \
-	filter_texture \
-	filter_trioptimize \
-	filter_unsharp \
-	filter_voronoi \
+	#filter_geodesic \
+	#filter_sample_gpu \
+	#filter_ao \
+	#filter_camera \
+	#filter_clean \
+	#filter_color_projection \
+	#filter_colorproc \
+	#filter_create \
+	#filter_dirt \
+	#filter_fractal \
+	#filter_func \
+	#filter_img_patch_param \
+	#filter_isoparametrization \
+	#filter_layer \
+	#filter_mls \
+	#filter_mutualglobal \
+	#filter_mutualinfo \
+	#filter_plymc \
+	#filter_qhull \
+	#filter_quality \
+	#filter_sampling \
+	#filter_screened_poisson \
+	#filter_sdfgpu \
+	#filter_select \
+	#filter_sketchfab \
+	#filter_ssynth \
+	#filter_texture \
+	#filter_trioptimize \
+	#filter_unsharp \
+	#filter_voronoi \
 # Rendering and Decoration Plugins
 	decorate_background \
 	decorate_raster_proj \
