@@ -58,7 +58,7 @@ SUBDIRS += \ #sub projects names
 	filter_geodesic \
 	filter_sample_gpu \
 	filter_ao \
-	#filter_camera \
+	filter_camera \
 	#filter_clean \
 	#filter_color_projection \
 	#filter_colorproc \

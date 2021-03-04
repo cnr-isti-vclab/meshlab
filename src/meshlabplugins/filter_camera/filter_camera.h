@@ -52,7 +52,7 @@ public:
 	virtual QString filterInfo(ActionIDType filter) const;
 	virtual FilterClass getClass(const QAction*) const;
 	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-	virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	FILTER_ARITY filterArity(const QAction* act) const;
 };
 
