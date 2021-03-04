@@ -130,7 +130,7 @@ else()
 		# Filter plugins
 		meshlabplugins/filter_sample
 		meshlabplugins/filter_sample_dyn
-#		meshlabplugins/filter_createiso
+		meshlabplugins/filter_createiso
 #		meshlabplugins/filter_geodesic
 #		meshlabplugins/filter_sample_gpu
 #		meshlabplugins/filter_ao
