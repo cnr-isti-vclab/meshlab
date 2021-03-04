@@ -5,10 +5,8 @@
 cmake_minimum_required(VERSION 3.9)
 project(MeshLab)
 
-# Prefer GLVND
-if(POLICY CMP0072)
-	cmake_policy(SET CMP0072 NEW)
-endif()
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_global_settings.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_tools.cmake")
 
 ### Build options
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
@@ -37,30 +35,6 @@ set(MESHLAB_LIB_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR})
 set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
 set(MESHLAB_SHADER_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/shaders)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR})
-
-### Build settings
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum OS X deployment version" FORCE)
-
-### Settings needed for both "external" and internal code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-### Build Settings
-if(WIN32)
-	add_definitions(-DNOMINMAX)
-	if(MSVC)
-		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-	endif()
-endif()
-
-if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
-	# Make sure that our shared libraries were appropriately linked
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
-endif()
 
 ### Install directories
 if(WIN32 OR APPLE)
@@ -113,11 +87,6 @@ endif()
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(${EXTERNAL_DIR}/external_common.cmake)
 add_subdirectory(${EXTERNAL_DIR})
-
-# Start automoc/autouic/autorcc
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 
 add_subdirectory(common)
 add_subdirectory(meshlab)

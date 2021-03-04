@@ -9,10 +9,7 @@ if(TARGET external-gmp OR TARGET external-mpir)
 
 	set(HEADERS filter_csg.h gmpfrac.h intercept.h)
 
-	add_library(filter_csg MODULE ${SOURCES} ${HEADERS})
-
-	target_include_directories(filter_csg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(filter_csg PUBLIC meshlab-common)
+	add_meshlab_plugin(filter_csg ${SOURCES} ${HEADERS})
 
 	if(TARGET external-gmp)
 		target_compile_definitions(filter_csg PRIVATE BUILD_WITH_GMP)
@@ -20,21 +17,6 @@ if(TARGET external-gmp OR TARGET external-mpir)
 	else()
 		target_link_libraries(filter_csg PRIVATE external-mpir)
 	endif()
-
-	set_property(TARGET filter_csg PROPERTY FOLDER Plugins)
-
-	set_property(
-		TARGET filter_csg
-		PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	set_property(
-		TARGET filter_csg
-		PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	install(
-		TARGETS filter_csg
-		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-		COMPONENT Plugins)
 
 else()
 	message(

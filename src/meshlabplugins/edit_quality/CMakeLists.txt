@@ -36,20 +36,4 @@ set(RESOURCES qualitymapper.qrc)
 
 set(UI qualitymapperdialog.ui)
 
-add_library(edit_quality MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
-
-target_include_directories(edit_quality PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_quality PUBLIC meshlab-common)
-
-set_property(TARGET edit_quality PROPERTY FOLDER Plugins)
-
-set_property(TARGET edit_quality PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET edit_quality PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS edit_quality
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)
+add_meshlab_plugin(edit_quality ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
