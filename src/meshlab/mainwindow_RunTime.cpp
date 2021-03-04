@@ -857,7 +857,7 @@ void MainWindow::runFilterScript()
 			if ((!created) || (!iFilter->glContext->isValid()))
 				throw MLException("A valid GLContext is required by the filter to work.\n");
 			meshDoc()->setBusy(true);
-			iFilter->applyFilter( action, *meshDoc(), postCondMask, pair.second, QCallBack);
+			iFilter->applyFilter(action, pair.second, *meshDoc(), postCondMask, QCallBack);
 			if (postCondMask == MeshModel::MM_UNKNOWN)
 				postCondMask = iFilter->postCondition(action);
 			for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
@@ -1226,7 +1226,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
-		iFilter->applyFilter(action, *(meshDoc()), postCondMask,  mergedenvironment, QCallBack);
+		iFilter->applyFilter(action, mergedenvironment, *(meshDoc()), postCondMask, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)
 			postCondMask = iFilter->postCondition(action);
 		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
