@@ -74,7 +74,7 @@ SUBDIRS += \ #sub projects names
 	filter_mutualinfo \
 	filter_plymc \
 	filter_qhull \
-	#filter_quality \
+	filter_quality \
 	#filter_sampling \
 	#filter_screened_poisson \
 	#filter_sdfgpu \
