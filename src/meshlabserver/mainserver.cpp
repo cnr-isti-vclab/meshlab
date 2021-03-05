@@ -706,8 +706,12 @@ public:
             }
             meshDocument.setBusy(true);
             unsigned int postConditionMask = MeshModel::MM_UNKNOWN;
-			std::map<std::string, QVariant> outputValues;
-            ret = iFilter->applyFilter( action, meshDocument, outputValues, postConditionMask, pair.second, filterCallBack);
+			try {
+				iFilter->applyFilter( action, pair.second, meshDocument, postConditionMask, filterCallBack);
+			}
+			catch (MLException& exc) {
+				ret = false;
+			}
             meshDocument.setBusy(false);
             if (shared != NULL)
                 delete iFilter->glContext;
