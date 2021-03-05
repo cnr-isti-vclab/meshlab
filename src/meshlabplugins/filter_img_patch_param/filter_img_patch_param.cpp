@@ -205,20 +205,18 @@ void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
 }
 
 
-bool FilterImgPatchParamPlugin::applyFilter(
+std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 		const QAction *act,
-		MeshDocument &md, 
-		std::map<std::string, QVariant>&,
-		unsigned int& /*postConditionMask*/,
 		const RichParameterList &par,
+		MeshDocument &md, 
+		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos * /*cb*/ )
 {
 	if (glContext != nullptr){
 		glContext->makeCurrent();
 		if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
 		{
-			this->errorMessage="Failed GLEW initialization";
-			return false;
+			throw MLException("Failed GLEW initialization");
 		}
 		
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -229,8 +227,7 @@ bool FilterImgPatchParamPlugin::applyFilter(
 		
 		if( !VisibilityCheck::GetInstance(*m_Context) )
 		{
-			this->errorMessage="VisibilityCheck failed";
-			return false;
+			throw MLException("VisibilityCheck failed");
 		}
 		VisibilityCheck::ReleaseInstance();
 		
@@ -253,8 +250,7 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			this->errorMessage="No active Raster";
 			{
 				glContext->doneCurrent();
-				errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
-				return false;
+				throw MLException("You need to have at least one valid raster layer in your project, to apply this filter"); // text
 			}
 		}
 		
@@ -265,8 +261,7 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
 			{
 				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
+				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
 			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
@@ -289,8 +284,7 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
 			{
 				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
+				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
 			vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
@@ -329,6 +323,8 @@ bool FilterImgPatchParamPlugin::applyFilter(
 					}
 				}
 			}
+			if (!retValue)
+				throw MLException(act->text() + " filter failed.");
 			
 			break;
 		}
@@ -385,6 +381,8 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			
 			break;
 		}
+		default:
+			wrongActionCalled(act);
 		}
 		
 		
@@ -404,11 +402,10 @@ bool FilterImgPatchParamPlugin::applyFilter(
 		glContext->doneCurrent();
 		
 		
-		return retValue;
+		return std::map<std::string, QVariant>();
 	}
 	else {
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 }
 

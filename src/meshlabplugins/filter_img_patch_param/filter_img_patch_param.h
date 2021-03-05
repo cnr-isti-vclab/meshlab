@@ -113,13 +113,12 @@ public:
 	bool requiresGLContext(const QAction* action) const;
     //virtual int         postCondition( QAction *act ) const;
 
-	virtual bool applyFilter(
-			const QAction* act,
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
 			MeshDocument &md,
-			std::map<std::string, QVariant>& outputValues,
 			unsigned int& postConditionMask,
-			const RichParameterList &par,
-			vcg::CallBackPos *cb );
+			vcg::CallBackPos * cb);
 
     FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
 };
