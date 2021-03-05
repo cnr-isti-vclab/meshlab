@@ -68,7 +68,7 @@ SUBDIRS += \ #sub projects names
 	filter_func \
 	filter_img_patch_param \
 	filter_isoparametrization \
-	#filter_layer \
+	filter_layer \
 	#filter_mls \
 	#filter_mutualglobal \
 	#filter_mutualinfo \
