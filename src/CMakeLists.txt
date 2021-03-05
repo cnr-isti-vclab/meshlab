@@ -159,7 +159,7 @@ else()
 		meshlabplugins/filter_sdfgpu
 		meshlabplugins/filter_select
 		meshlabplugins/filter_sketchfab
-#		meshlabplugins/filter_ssynth
+		meshlabplugins/filter_ssynth
 #		meshlabplugins/filter_texture
 #		meshlabplugins/filter_trioptimize
 #		meshlabplugins/filter_unsharp

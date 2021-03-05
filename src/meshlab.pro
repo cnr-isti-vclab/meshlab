@@ -80,7 +80,7 @@ SUBDIRS += \ #sub projects names
 	filter_sdfgpu \
 	filter_select \
 	filter_sketchfab \
-	#filter_ssynth \
+	filter_ssynth \
 	#filter_texture \
 	#filter_trioptimize \
 	#filter_unsharp \
