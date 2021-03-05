@@ -78,7 +78,7 @@ FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction
 	}
 }
 
-FilterPlugin::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
+FilterPlugin::FilterArity FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :

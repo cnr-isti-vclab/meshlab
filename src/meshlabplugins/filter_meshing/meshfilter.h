@@ -97,7 +97,7 @@ public:
 			vcg::CallBackPos * cb);
 	int postCondition(const QAction *filter) const;
 	int getPreConditions(const QAction *filter) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 
 protected:
 

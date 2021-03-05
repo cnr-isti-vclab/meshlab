@@ -46,7 +46,7 @@ class ExtraSampleDynPlugin : public QObject, public FilterPlugin
 	virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	virtual FilterClass getClass(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

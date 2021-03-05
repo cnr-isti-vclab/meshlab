@@ -114,7 +114,7 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a)
 	}
 }
 
-FilterPlugin::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
+FilterPlugin::FilterArity FilterVoronoiPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :

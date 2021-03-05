@@ -120,7 +120,7 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+    FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 

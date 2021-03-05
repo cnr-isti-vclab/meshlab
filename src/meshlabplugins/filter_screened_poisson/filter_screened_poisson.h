@@ -56,7 +56,7 @@ public:
 
 	void initParameterList(const QAction* a, MeshModel&, RichParameterList& parlist);
 	int postCondition(const QAction* filter) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 };
 
 

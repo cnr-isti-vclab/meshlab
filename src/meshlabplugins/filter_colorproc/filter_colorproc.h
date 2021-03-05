@@ -79,6 +79,6 @@ public:
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	int postCondition(const QAction* filter) const;
 	int getPreConditions(const QAction *) const;
-	FILTER_ARITY filterArity(const QAction *act) const;
+	FilterArity filterArity(const QAction *act) const;
 };
 #endif

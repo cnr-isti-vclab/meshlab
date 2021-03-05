@@ -71,7 +71,7 @@ public:
     QString pluginName() const;
     QString filterName(ActionIDType filter) const;
     QString	filterInfo(ActionIDType filterId) const;
-    FILTER_ARITY filterArity(const QAction*) const;
+    FilterArity filterArity(const QAction*) const;
 	int getRequirements (const QAction* action);
 	bool requiresGLContext(const QAction* action) const;
     FilterClass getClass(const QAction* filter) const;

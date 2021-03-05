@@ -187,7 +187,7 @@ public:
 	bool isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const;
 
 
-	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
+	enum FilterArity { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
 
 	/** 
 	 * @brief this function informs the MeshLab core on how many meshes the filter will work on.
@@ -196,7 +196,7 @@ public:
 	 * - FIXED: the number (and the names) of the meshes involved in the filter computation is determined by the parameters selected in the filter's parameters form
 	 * - VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
 	 */
-	virtual FILTER_ARITY filterArity(const QAction *act) const = 0;
+	virtual FilterArity filterArity(const QAction *act) const = 0;
 
 	/**
 	 * @brief This function is called to initialized the list of parameters.

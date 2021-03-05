@@ -1113,7 +1113,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 	
-FilterPlugin::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter))
 	{

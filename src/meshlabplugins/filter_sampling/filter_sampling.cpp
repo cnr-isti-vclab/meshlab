@@ -1393,7 +1393,7 @@ int FilterDocSampling::postCondition(const QAction* a ) const
   return MeshModel::MM_ALL;
 }
 
-FilterPlugin::FILTER_ARITY FilterDocSampling::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterDocSampling::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {

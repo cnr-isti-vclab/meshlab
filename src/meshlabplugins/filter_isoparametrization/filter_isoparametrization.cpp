@@ -464,7 +464,7 @@ int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
-FilterPlugin::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
+FilterPlugin::FilterArity FilterIsoParametrization::filterArity(const QAction* filter) const
 {
 	switch(ID(filter))
 	{

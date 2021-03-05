@@ -62,7 +62,7 @@ class FilterSSynth : public QObject, public IOMeshPlugin, public FilterPlugin{
 	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
-	FilterPlugin::FILTER_ARITY filterArity(const QAction *) const {return NONE;}
+	FilterPlugin::FilterArity filterArity(const QAction *) const {return NONE;}
 private:
 	QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
 	QString GetTemplate(int sphereres);

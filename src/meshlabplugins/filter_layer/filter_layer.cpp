@@ -868,7 +868,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction *a) con
 	return FilterPlugin::Generic;
 }
 
-FilterPlugin::FILTER_ARITY FilterLayerPlugin::filterArity(const QAction* filter) const
+FilterPlugin::FilterArity FilterLayerPlugin::filterArity(const QAction* filter) const
 {
 	switch(ID(filter))
 	{

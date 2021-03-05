@@ -53,7 +53,7 @@ public:
 	virtual FilterClass getClass(const QAction*) const;
 	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
-	FILTER_ARITY filterArity(const QAction* act) const;
+	FilterArity filterArity(const QAction* act) const;
 };
 
 #endif

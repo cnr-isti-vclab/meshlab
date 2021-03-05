@@ -228,7 +228,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-FilterPlugin::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

@@ -34,7 +34,7 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 		return FilterPlugin::VertexColoring;
 	}
 	
-	FILTER_ARITY filterArity(const QAction* act) const;
+	FilterArity filterArity(const QAction* act) const;
 	
 	bool requiresGLContext(const QAction* action) const;
 	

@@ -109,7 +109,7 @@ bool AmbientOcclusionPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPlugin::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

@@ -75,7 +75,7 @@ public:
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points);
-	FILTER_ARITY filterArity(const QAction *) const { return SINGLE_MESH; }
+	FilterArity filterArity(const QAction *) const { return SINGLE_MESH; }
 
 
 

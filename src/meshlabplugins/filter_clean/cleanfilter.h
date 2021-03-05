@@ -73,7 +73,7 @@ class CleanFilter : public QObject, public FilterPlugin
 	int getPreConditions(const QAction *) const {    return MeshModel::MM_NONE; }
 	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 

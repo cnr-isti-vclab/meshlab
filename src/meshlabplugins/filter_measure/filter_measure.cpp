@@ -132,7 +132,7 @@ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) 
 	return FilterPlugin::Measure;
 }
 
-FilterPlugin::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterMeasurePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

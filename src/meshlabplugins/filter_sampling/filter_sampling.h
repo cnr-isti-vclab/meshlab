@@ -64,7 +64,7 @@ public:
 	int getRequirements(const QAction* action);
 	int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction* filter) const;
+	FilterArity filterArity(const QAction* filter) const;
 };
 
 #endif

@@ -81,7 +81,7 @@ public:
 	void initParameterList(const QAction* action, MeshDocument &/*m*/, RichParameterList & parlst);
 	int postCondition(const QAction* ) const;
 	int getPreConditions(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction* filter) const;
+	FilterArity filterArity(const QAction* filter) const;
 
 };
 

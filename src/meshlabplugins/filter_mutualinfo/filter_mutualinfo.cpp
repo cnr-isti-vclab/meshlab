@@ -91,7 +91,7 @@ bool FilterMutualInfoPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPlugin::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

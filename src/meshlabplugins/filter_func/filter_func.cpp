@@ -1406,7 +1406,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	
 }
 
-FilterPlugin::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAction* filter ) const
+FilterPlugin::FilterArity FilterFunctionPlugin::filterArity(const QAction* filter ) const
 {
 	switch(ID(filter)) 
 	{

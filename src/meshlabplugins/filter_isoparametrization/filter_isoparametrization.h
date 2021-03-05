@@ -63,7 +63,7 @@ public:
 			vcg::CallBackPos * cb);
 	int postCondition(const QAction* filter) const;
 	void PrintStats(CMeshO *mesh);
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 
 };
 #endif

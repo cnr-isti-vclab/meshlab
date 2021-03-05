@@ -388,7 +388,7 @@ int FilterFractal::postCondition(const QAction *filter) const
 	return MeshModel::MM_ALL;
 }
 
-FilterPlugin::FILTER_ARITY FilterFractal::filterArity(const QAction* act ) const
+FilterPlugin::FilterArity FilterFractal::filterArity(const QAction* act ) const
 {
 	switch(ID(act))
 	{

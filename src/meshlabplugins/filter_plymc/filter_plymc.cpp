@@ -249,7 +249,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 
-FilterPlugin::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity PlyMCPlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter)) 
 	{

@@ -82,7 +82,7 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	virtual FilterClass getClass(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

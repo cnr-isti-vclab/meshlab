@@ -69,7 +69,7 @@ public:
 	virtual int getPreConditions(const QAction*) const;
 	virtual int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction *a) const;
-	FILTER_ARITY filterArity(const QAction* filter) const;
+	FilterArity filterArity(const QAction* filter) const;
 };
 
 #endif

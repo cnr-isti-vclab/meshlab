@@ -51,7 +51,7 @@ class FilterFractal : public QObject, public FilterPlugin
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	int postCondition(const QAction *action) const;
 	FilterClass getClass(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction* act) const;
+	FilterArity filterArity(const QAction* act) const;
 private:
 	void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
 	void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);

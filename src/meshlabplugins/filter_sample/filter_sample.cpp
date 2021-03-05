@@ -98,7 +98,7 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
  * @brief FilterSamplePlugin::filterArity
  * @return
  */
-FilterPlugin::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterSamplePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }

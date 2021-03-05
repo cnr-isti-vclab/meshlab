@@ -56,7 +56,7 @@ public:
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	QString filterScriptFunctionName(ActionIDType filterID);
-	FILTER_ARITY filterArity(const QAction *) const {return NONE;}
+	FilterArity filterArity(const QAction *) const {return NONE;}
 };
 
 #endif

@@ -1022,7 +1022,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-FilterPlugin::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
+FilterPlugin::FilterArity FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {

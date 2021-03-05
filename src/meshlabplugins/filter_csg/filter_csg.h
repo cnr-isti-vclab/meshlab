@@ -63,7 +63,7 @@ public:
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 
 	virtual FilterClass getClass(const QAction *) const { return FilterPlugin::FilterClass( FilterPlugin::Layer + FilterPlugin::Remeshing ); }
-	FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
+	FilterArity filterArity(const QAction*) const {return FIXED;}
 };
 
 

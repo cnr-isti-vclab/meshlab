@@ -728,7 +728,7 @@ int FilterCameraPlugin::getPreConditions(const QAction * a) const
 	return 0;
 }
 
-FilterPlugin::FILTER_ARITY FilterCameraPlugin::filterArity(const QAction* act ) const
+FilterPlugin::FilterArity FilterCameraPlugin::filterArity(const QAction* act ) const
 {
 	switch (ID(act))
 	{

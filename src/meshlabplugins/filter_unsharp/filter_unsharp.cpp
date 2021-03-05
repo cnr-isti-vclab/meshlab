@@ -779,7 +779,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 
-FilterPlugin::FILTER_ARITY FilterUnsharp::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterUnsharp::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {

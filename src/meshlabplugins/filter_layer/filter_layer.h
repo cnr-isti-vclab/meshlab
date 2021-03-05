@@ -66,7 +66,7 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);    int postCondition(const QAction *filter) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 };
 
 #endif

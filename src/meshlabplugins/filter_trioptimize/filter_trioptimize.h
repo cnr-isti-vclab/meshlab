@@ -57,7 +57,7 @@ public:
 	int getRequirements(const QAction*);
 	FilterClass getClass(const QAction *) const;
 	int postCondition(const QAction* ) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 
 };
 

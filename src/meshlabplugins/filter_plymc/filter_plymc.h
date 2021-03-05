@@ -51,7 +51,7 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	FilterClass getClass(const QAction* a) const;
-	FilterPlugin::FILTER_ARITY filterArity(const QAction* filter) const;
+	FilterPlugin::FilterArity filterArity(const QAction* filter) const;
 	int postCondition(const QAction *filter) const;
 };
 

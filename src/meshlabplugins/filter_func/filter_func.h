@@ -88,7 +88,7 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	FILTER_ARITY filterArity(const QAction* filter) const;
+	FilterArity filterArity(const QAction* filter) const;
 
 
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
