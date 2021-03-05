@@ -140,7 +140,7 @@ else()
 		meshlabplugins/filter_colorproc
 		meshlabplugins/filter_create
 		meshlabplugins/filter_csg
-#		meshlabplugins/filter_dirt
+		meshlabplugins/filter_dirt
 #		meshlabplugins/filter_fractal
 #		meshlabplugins/filter_func
 #		meshlabplugins/filter_img_patch_param
