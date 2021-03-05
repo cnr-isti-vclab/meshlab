@@ -109,7 +109,7 @@ bool AmbientOcclusionPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPlugin::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -142,73 +142,82 @@ void AmbientOcclusionPlugin::initParameterList(const QAction *action, MeshModel 
 		default: break; // do not add any parameter for the other filters
     }
 }
-bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> AmbientOcclusionPlugin::applyFilter(const QAction * filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
-	if (glContext != nullptr) {
-		MeshModel &m=*(md.mm());
+	if (ID(filter) == FP_AMBIENT_OCCLUSION) {
+		if (glContext != nullptr) {
+			MeshModel &m=*(md.mm());
 
-		int occlusionMode = par.getEnum("occMode");
-		if (occlusionMode == 1)
-			perFace = true;
-		else 
-			perFace = false;
-	
-		useGPU = par.getBool("useGPU");
-		if (perFace) //GPU only works per-vertex
-			useGPU = false;
-		depthTexSize = par.getInt("depthTexSize");
-		depthTexArea = depthTexSize*depthTexSize;
-		numViews = par.getInt("reqViews");
-		errInit = false;
-		Scalarm dirBias = par.getFloat("dirBias");
-		Point3m coneDir = par.getPoint3m("coneDir");
-		Scalarm coneAngle = par.getFloat("coneAngle");
-	
-		if(perFace)
-			m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-		else
-			m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
-	
-		std::vector<Point3m> unifDirVec;
-		GenNormal<Scalarm>::Fibonacci(numViews,unifDirVec);
-	
-		std::vector<Point3m> coneDirVec;
-		GenNormal<Scalarm>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
-	
-		std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
-		std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
-	
-		int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
-		int coneNum = floor(coneDirVec.size() * (dirBias ));
-	
-		viewDirVec.clear();
-		viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
-		viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
-		numViews = viewDirVec.size();
-	
-		this->glContext->makeCurrent();
-		this->initGL(cb,m.cm.vn);
-		unsigned int widgetSize = std::min(maxTexSize, depthTexSize);
-		QSize fbosize(widgetSize,widgetSize);
-		QGLFramebufferObjectFormat frmt;
-		frmt.setInternalTextureFormat(GL_RGBA);
-		frmt.setAttachment(QGLFramebufferObject::Depth);
-		QGLFramebufferObject fbo(fbosize,frmt);
-		qDebug("Start Painting window size %i %i", fbo.width(), fbo.height());
-		GLenum err = glGetError();
-		fbo.bind();
-		processGL(m,viewDirVec);
-		fbo.release();
-		err = glGetError();
-		const GLubyte* errname = gluErrorString(err); (void)errname;
-		qDebug("End Painting");
-		this->glContext->doneCurrent();
-		return !errInit;
+			int occlusionMode = par.getEnum("occMode");
+			if (occlusionMode == 1)
+				perFace = true;
+			else
+				perFace = false;
+
+			useGPU = par.getBool("useGPU");
+			if (perFace) //GPU only works per-vertex
+				useGPU = false;
+			depthTexSize = par.getInt("depthTexSize");
+			depthTexArea = depthTexSize*depthTexSize;
+			numViews = par.getInt("reqViews");
+			errInit = false;
+			Scalarm dirBias = par.getFloat("dirBias");
+			Point3m coneDir = par.getPoint3m("coneDir");
+			Scalarm coneAngle = par.getFloat("coneAngle");
+
+			if(perFace)
+				m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+			else
+				m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
+
+			std::vector<Point3m> unifDirVec;
+			GenNormal<Scalarm>::Fibonacci(numViews,unifDirVec);
+
+			std::vector<Point3m> coneDirVec;
+			GenNormal<Scalarm>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
+
+			std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
+			std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
+
+			int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
+			int coneNum = floor(coneDirVec.size() * (dirBias ));
+
+			viewDirVec.clear();
+			viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
+			viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
+			numViews = viewDirVec.size();
+
+			this->glContext->makeCurrent();
+			this->initGL(cb,m.cm.vn);
+			unsigned int widgetSize = std::min(maxTexSize, depthTexSize);
+			QSize fbosize(widgetSize,widgetSize);
+			QGLFramebufferObjectFormat frmt;
+			frmt.setInternalTextureFormat(GL_RGBA);
+			frmt.setAttachment(QGLFramebufferObject::Depth);
+			QGLFramebufferObject fbo(fbosize,frmt);
+			qDebug("Start Painting window size %i %i", fbo.width(), fbo.height());
+			GLenum err;
+			fbo.bind();
+			processGL(m,viewDirVec);
+			fbo.release();
+			err = glGetError();
+			const GLubyte* errname = gluErrorString(err); (void)errname;
+			qDebug("End Painting");
+			this->glContext->doneCurrent();
+			if (errInit) {
+				throw MLException("OpenGL error: " + QString::fromUtf8((char*)errname));
+			}
+		}
+		else {
+			throw MLException("Fatal error: glContext not initialized");
+			//errorMessage = "Fatal error: glContext not initialized";
+			//return false;
+		}
 	}
 	else {
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		wrongActionCalled(filter);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)

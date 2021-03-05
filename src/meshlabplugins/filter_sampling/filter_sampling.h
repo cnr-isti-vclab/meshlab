@@ -31,35 +31,40 @@ class FilterDocSampling : public QObject, public FilterPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
-  public:
-    enum {
-    FP_ELEMENT_SUBSAMPLING,
-        FP_MONTECARLO_SAMPLING,
-        FP_REGULAR_RECURSIVE_SAMPLING,
-        FP_CLUSTERED_SAMPLING,
-        FP_STRATIFIED_SAMPLING,
-        FP_HAUSDORFF_DISTANCE,
+public:
+	enum {
+		FP_ELEMENT_SUBSAMPLING,
+		FP_MONTECARLO_SAMPLING,
+		FP_REGULAR_RECURSIVE_SAMPLING,
+		FP_CLUSTERED_SAMPLING,
+		FP_STRATIFIED_SAMPLING,
+		FP_HAUSDORFF_DISTANCE,
 		FP_DISTANCE_REFERENCE,
-        FP_TEXEL_SAMPLING,
-        FP_VERTEX_RESAMPLING,
-        FP_UNIFORM_MESH_RESAMPLING,
-        FP_VORONOI_COLORING,
-        FP_DISK_COLORING,
-        FP_POISSONDISK_SAMPLING,
-        FP_POINTCLOUD_SIMPLIFICATION
-  } ;
+		FP_TEXEL_SAMPLING,
+		FP_VERTEX_RESAMPLING,
+		FP_UNIFORM_MESH_RESAMPLING,
+		FP_VORONOI_COLORING,
+		FP_DISK_COLORING,
+		FP_POISSONDISK_SAMPLING,
+		FP_POINTCLOUD_SIMPLIFICATION
+	} ;
 
-  FilterDocSampling();
+	FilterDocSampling();
 
-  QString pluginName() const;
-  QString filterName(ActionIDType filter) const;
-  QString filterInfo(ActionIDType filter) const;
-  void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-  bool applyFilter(const QAction* filter, MeshDocument &m, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-  int getRequirements(const QAction* action);
-  int postCondition(const QAction* ) const;
-  FilterClass getClass(const QAction*) const;
-  FILTER_ARITY filterArity(const QAction* filter) const;
+	QString pluginName() const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	int getRequirements(const QAction* action);
+	int postCondition(const QAction* ) const;
+	FilterClass getClass(const QAction*) const;
+	FilterArity filterArity(const QAction* filter) const;
 };
 
 #endif

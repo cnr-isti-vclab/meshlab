@@ -132,7 +132,7 @@ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) 
 	return FilterPlugin::Measure;
 }
 
-FilterPlugin::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterMeasurePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -173,37 +173,34 @@ void FilterMeasurePlugin::initParameterList(const QAction *action, MeshModel &m,
 	}
 }
 
-bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& /*postConditionMask*/, const RichParameterList& parlst, vcg::CallBackPos*)
+std::map<std::string, QVariant> FilterMeasurePlugin::applyFilter(
+		const QAction* filter,
+		const RichParameterList& parlst,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos*)
 {
 	switch (ID(filter)) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
-		return computeTopologicalMeasures(md, outputValues);
-		break;
+		return computeTopologicalMeasures(md);
 	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
-		return computeTopologicalMeasuresForQuadMeshes(md, outputValues);
-		break;
+		return computeTopologicalMeasuresForQuadMeshes(md);
 	case COMPUTE_GEOMETRIC_MEASURES:
-		return computeGeometricMeasures(md, outputValues);
-		break;
+		return computeGeometricMeasures(md);
 	case COMPUTE_AREA_PERIMETER_SELECTION:
-		return computeAreaPerimeterOfSelection(md, outputValues);
-		break;
+		return computeAreaPerimeterOfSelection(md);
 	case PER_VERTEX_QUALITY_STAT:
-		return perVertexQualityStat(md, outputValues);
-		break;
+		return perVertexQualityStat(md);
 	case PER_FACE_QUALITY_STAT:
-		return perFaceQualityStat(md, outputValues);
-		break;
+		return perFaceQualityStat(md);
 	case PER_VERTEX_QUALITY_HISTOGRAM:
-		return perVertexQualityHistogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"), outputValues);
-		break;
+		return perVertexQualityHistogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
 	case PER_FACE_QUALITY_HISTOGRAM:
-		return perFaceQualityHostogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"), outputValues);
-		break;
+		return perFaceQualityHostogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
 	default:
-		assert(0);
-		return false;
+		wrongActionCalled(filter);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterMeasurePlugin::postCondition(const QAction*) const
@@ -211,8 +208,9 @@ int FilterMeasurePlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactFaceVector(m);
 	tri::Allocator<CMeshO>::CompactVertexVector(m);
@@ -276,22 +274,21 @@ bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md, std::map<
 		outputValues["genus"] = -1;
 	}
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 	md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
 
 	if (!tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)) {
-		this->errorMessage = "Error: mesh has a not consistent FF adjacency";
-		return false;
+		throw MLException("Error: mesh has a not consistent FF adjacency");
 	}
 	if (!tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
-		this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
-		return false;
+		throw MLException("QuadMesh problem: mesh has a not consistent FauxEdge tagging");
 	}
 
 	int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
@@ -310,8 +307,7 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	outputValues["large_polys_number"]=nLargePolys;
 
 	if (!tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-		this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
-		return false;
+		throw MLException("QuadMesh problem: the mesh is not TriQuadOnly");
 	}
 
 	//
@@ -340,8 +336,7 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 		}
 
 		if (!quadFound) {
-			errorMessage = "QuadMesh problem: current mesh doesn't contain quads.";
-			return false;
+			throw MLException("QuadMesh problem: current mesh doesn't contain quads.");
 		}
 
 		for (int i = 0; i<4; ++i)
@@ -367,11 +362,12 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	outputValues["quad_ratio_avg"] = RatioD.Avg();
 	outputValues["quad_ratio_min"] = RatioD.Min();
 	outputValues["quad_ratio_max"] = RatioD.Max();
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	bool watertight = false;
 	bool pointcloud = false;
@@ -504,16 +500,16 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md, std::map<st
 	if (m.Tr != Matrix44m::Identity())
 		tri::UpdatePosition<CMeshO>::Matrix(m, Inverse(m.Tr), true);
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	if (m.sfn == 0) {// no face selected, fail
-		errorMessage = "Cannot apply: there is no face selection";
 		log("Cannot apply: there is no face selection");
-		return false;
+		throw MLException("Cannot apply: there is no face selection");
 	}
 
 	log("Selection is %i triangles", m.sfn);
@@ -554,11 +550,12 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md, std:
 	outputValues["border_edge_number"] = ePerimeter;
 	outputValues["perimeter"] = sPerimeter;
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	Distribution<Scalarm> DD;
 	tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
@@ -573,11 +570,12 @@ bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md, std::map<std::s
 	outputValues["med"] = DD.Percentile(0.5);
 	outputValues["stddev"] = DD.StandardDeviation();
 	outputValues["variance"] = DD.Variance();
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues)
+std::map<std::string, QVariant> FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	Distribution<Scalarm> DD;
 	tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
@@ -592,17 +590,17 @@ bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md, std::map<std::str
 	outputValues["med"] = DD.Percentile(0.5);
 	outputValues["stddev"] = DD.StandardDeviation();
 	outputValues["variance"] = DD.Variance();
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(
+std::map<std::string, QVariant> FilterMeasurePlugin::perVertexQualityHistogram(
 		MeshDocument& md, 
 		Scalarm RangeMin, 
 		Scalarm RangeMax, 
 		int binNum, 
-		bool areaFlag, 
-		std::map<std::string, QVariant>& outputValues)
+		bool areaFlag)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
@@ -636,17 +634,17 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(
 	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
 	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(
+std::map<std::string, QVariant> FilterMeasurePlugin::perFaceQualityHostogram(
 		MeshDocument& md, 
 		Scalarm RangeMin, 
 		Scalarm RangeMax, 
 		int binNum, 
-		bool areaFlag, 
-		std::map<std::string, QVariant>& outputValues)
+		bool areaFlag)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
@@ -681,7 +679,7 @@ bool FilterMeasurePlugin::perFaceQualityHostogram(
 	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
 	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	return true;
+	return outputValues;
 }
 
 Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(const CMeshO& m)

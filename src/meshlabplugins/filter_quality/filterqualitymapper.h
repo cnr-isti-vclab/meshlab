@@ -46,12 +46,12 @@ using namespace std;
 class Frange
 {
 public:
-    Frange(){}
-    Frange(std::pair<MESHLAB_SCALAR,MESHLAB_SCALAR> minmax):minV(minmax.first),maxV(minmax.second){}
-    Frange(MESHLAB_SCALAR _min,MESHLAB_SCALAR _max):minV(_min),maxV(_max){}
+	Frange(){}
+	Frange(std::pair<MESHLAB_SCALAR,MESHLAB_SCALAR> minmax):minV(minmax.first),maxV(minmax.second){}
+	Frange(MESHLAB_SCALAR _min,MESHLAB_SCALAR _max):minV(_min),maxV(_max){}
 
-    MESHLAB_SCALAR minV;
-    MESHLAB_SCALAR maxV;
+	MESHLAB_SCALAR minV;
+	MESHLAB_SCALAR maxV;
 };
 
 
@@ -61,23 +61,28 @@ class QualityMapperFilter : public QObject, public FilterPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
-private:
-    Frange _meshMinMaxQuality;
+	private:
+		Frange _meshMinMaxQuality;
 
 public:
-    enum { FP_QUALITY_MAPPER  } ;
+	enum { FP_QUALITY_MAPPER  } ;
 
-    QualityMapperFilter();
+	QualityMapperFilter();
 
-    QString pluginName() const;
-    virtual QString filterName(ActionIDType filter) const;
-    virtual QString filterInfo(ActionIDType filter) const;
-    int getPreConditions(const QAction *) const;
-    int postCondition(const QAction* ) const;
-    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+	int getPreConditions(const QAction *) const;
+	int postCondition(const QAction* ) const;
+	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	virtual FilterClass getClass(const QAction*) const;
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

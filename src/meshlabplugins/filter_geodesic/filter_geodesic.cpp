@@ -108,7 +108,7 @@ int FilterGeodesic::getRequirements(const QAction *action)
 	return 0;
 }
 
-bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos * /*cb*/)
 {
 	MeshModel &m=*(md.mm());
 	CMeshO::VertexIterator vi;
@@ -226,10 +226,11 @@ bool FilterGeodesic::applyFilter(const QAction *filter, MeshDocument &md, std::m
 			log("Warning: no vertices are selected! aborting geodesic computation.");
 	}
 		break;
-	default: assert(0);
+	default:
+		wrongActionCalled(filter);
 		break;
 	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
 void FilterGeodesic::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)

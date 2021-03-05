@@ -31,32 +31,32 @@ class FilterCreate : public QObject, public FilterPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
-  public:
-    enum {
-    CR_BOX,
-        CR_ANNULUS,
-        CR_SPHERE,
-        CR_SPHERE_CAP,
-        CR_RANDOM_SPHERE,
-        CR_ICOSAHEDRON,
-        CR_DODECAHEDRON,
-        CR_TETRAHEDRON,
-        CR_OCTAHEDRON,
-        CR_CONE,
-        CR_TORUS,
+public:
+	enum {
+		CR_BOX,
+		CR_ANNULUS,
+		CR_SPHERE,
+		CR_SPHERE_CAP,
+		CR_RANDOM_SPHERE,
+		CR_ICOSAHEDRON,
+		CR_DODECAHEDRON,
+		CR_TETRAHEDRON,
+		CR_OCTAHEDRON,
+		CR_CONE,
+		CR_TORUS,
 		CR_FITPLANE,
-  } ;
+	};
 
-  FilterCreate();
-  QString pluginName() const;
+	FilterCreate();
+	QString pluginName() const;
 
-  QString filterName(ActionIDType filter) const;
-  QString filterInfo(ActionIDType filter) const;
-  FilterClass getClass(const QAction*) const;
-  void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-  bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-  QString filterScriptFunctionName(ActionIDType filterID);
-  FILTER_ARITY filterArity(const QAction *) const {return NONE;}
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction*) const;
+	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+	QString filterScriptFunctionName(ActionIDType filterID);
+	FilterArity filterArity(const QAction *) const {return NONE;}
 };
 
 #endif

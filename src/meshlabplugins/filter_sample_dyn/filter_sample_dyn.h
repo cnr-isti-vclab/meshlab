@@ -34,19 +34,19 @@ class ExtraSampleDynPlugin : public QObject, public FilterPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
-public:
-    enum { FP_VERTEX_COLOR_NOISE  } ;
+	public:
+		enum { FP_VERTEX_COLOR_NOISE  } ;
 
-    ExtraSampleDynPlugin();
+	ExtraSampleDynPlugin();
 
-    QString pluginName() const;
-    virtual QString filterName(ActionIDType filter) const;
-    virtual QString filterInfo(ActionIDType filter) const;
-    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
-    virtual bool applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+	virtual FilterClass getClass(const QAction*) const;
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

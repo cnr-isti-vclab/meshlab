@@ -32,25 +32,25 @@ class FilterColorProjectionPlugin : public QObject, public FilterPlugin
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
-	
+
 	public:
 		enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
-	
+
 	FilterColorProjectionPlugin();
-	
+
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	int postCondition( const QAction* ) const;
-	
+
 	FilterClass getClass(const QAction*) const;
 	void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	int getRequirements(const QAction*);
 	bool requiresGLContext(const QAction* action) const;
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-	
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
-	
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
+
 private:
 	int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
 };

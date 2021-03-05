@@ -48,11 +48,16 @@ public:
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &/*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int getRequirements(const QAction*);
 	FilterClass getClass(const QAction *) const;
 	int postCondition(const QAction* ) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 
 };
 

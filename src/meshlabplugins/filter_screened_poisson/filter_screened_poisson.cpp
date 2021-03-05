@@ -99,12 +99,11 @@ int FilterScreenedPoissonPlugin::getRequirements(const QAction* a)
 	}
 }
 
-bool FilterScreenedPoissonPlugin::applyFilter(
+std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 		const QAction* filter,
-		MeshDocument& md,
-		std::map<std::string, QVariant>&,
-		unsigned int& /*postConditionMask*/,
 		const RichParameterList& params,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos* cb)
 {
 	bool currDirChanged=false;
@@ -120,8 +119,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 			QTemporaryFile file2("./_tmp_XXXXXX.tmp"); //try to create a file in the meshlab folder
 			if (!file2.open()){ //if a file cannot be created in the tmp and in the meshlab folder, we cannot run the filter
 				log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
-				errorMessage = "current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
-				return false;
+				throw MLException("current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.");
 			}
 		}
 		else { //if the tmp folder is writable, we will use it
@@ -158,14 +156,13 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 		}
 
 		if(!goodNormal) {
-			this->errorMessage = "Filter requires correct per vertex normals.<br>"
+			throw MLException("Filter requires correct per vertex normals.<br>"
 								 "E.g. it is necessary that your <b>ALL</b> the input vertices have a proper, not-null normal.<br> "
 								 "Try enabling the <i>pre-clean<i> option and retry.<br><br>"
 								 "To permanently remove this problem:<br>"
 								 "If you encounter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> filter"
 								 "If you encounter this error on a pointcloud try to use the <i>Conditional Vertex Selection</i> filter"
-								 "with function '(nx==0.0) && (ny==0.0) && (nz==0.0)', and then <i>delete selected vertices</i>.<br>";
-			return false;
+								 "with function '(nx==0.0) && (ny==0.0) && (nz==0.0)', and then <i>delete selected vertices</i>.<br>");
 		}
 
 		MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
@@ -194,9 +191,11 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 		md.setCurrentMesh(pm->id());
 		if(currDirChanged)
 			QDir::setCurrent(currDir.path());
-		return true;
 	}
-	return false;
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 void FilterScreenedPoissonPlugin::initParameterList(
@@ -229,7 +228,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-FilterPlugin::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

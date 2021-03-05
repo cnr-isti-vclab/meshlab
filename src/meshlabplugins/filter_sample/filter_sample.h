@@ -57,11 +57,16 @@ public:
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* action, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 
 private:
 	bool vertexDisplacement(

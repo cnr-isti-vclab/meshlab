@@ -114,7 +114,7 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a)
 	}
 }
 
-FilterPlugin::FILTER_ARITY FilterVoronoiPlugin::filterArity(const QAction* a) const
+FilterPlugin::FilterArity FilterVoronoiPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
@@ -211,31 +211,39 @@ int FilterVoronoiPlugin::getPreConditions(const QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterVoronoiPlugin::applyFilter(
+		const QAction * action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
-		return voronoiSampling(
+		voronoiSampling(
 					md, cb,
 					par.getInt("iterNum"), par.getInt("sampleNum"), par.getFloat("radiusVariance"),
 					par.getEnum("distanceType"), par.getInt("randomSeed"), par.getEnum("relaxType"),
 					par.getEnum("colorStrategy"), par.getInt("refineFactor"), par.getFloat("perturbProbability"),
 					par.getFloat("perturbAmount"), par.getBool("preprocessFlag"));
+		break;
 	case VOLUME_SAMPLING:
-		return volumeSampling(
+		volumeSampling(
 					md, cb,
 					par.getFloat("sampleSurfRadius"),
 					par.getInt("sampleVolNum"),
 					par.getBool("poissonFiltering"),
 					par.getFloat("poissonRadius"));
+		break;
 	case VORONOI_SCAFFOLDING:
-		return voronoiScaffolding(
+		voronoiScaffolding(
 					md, cb,
 					par.getFloat("sampleSurfRadius"), par.getInt("sampleVolNum"),
 					par.getInt("voxelRes"), par.getFloat("isoThr"), par.getInt("smoothStep"),
 					par.getInt("relaxStep"), par.getBool("surfFlag"), par.getInt("elemType"));
+		break;
 	case BUILD_SHELL:
-		return createSolidWireframe(
+		createSolidWireframe(
 					md,
 					par.getBool("edgeCylFlag"), par.getFloat("edgeCylRadius"),
 					par.getBool("vertCylFlag"), par.getFloat("vertCylRadius"),
@@ -243,14 +251,17 @@ bool FilterVoronoiPlugin::applyFilter(const QAction * action, MeshDocument &md, 
 					par.getBool("faceExtFlag"), par.getFloat("faceExtHeight"),
 					par.getFloat("faceExtInset"), par.getBool("edgeFauxFlag"),
 					par.getInt("cylinderSideNum"));
+		break;
 	case CROSS_FIELD_CREATION:
-		return crossFieldCreation(md, par.getEnum("crossType"));
+		crossFieldCreation(md, par.getEnum("crossType"));
+		break;
 //	case CROSS_FIELD_SMOOTHING:
 //		return crossFieldSmoothing(md, par.getBool("preprocessFlag"));
 	default :
-		assert(0);
-		return false;
+		wrongActionCalled(action);
+		break;
 	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterVoronoiPlugin::postCondition(const QAction* action) const
@@ -272,7 +283,7 @@ int FilterVoronoiPlugin::postCondition(const QAction* action) const
 	}
 }
 
-bool FilterVoronoiPlugin::voronoiSampling(
+void FilterVoronoiPlugin::voronoiSampling(
 		MeshDocument &md,
 		vcg::CallBackPos* cb,
 		int iterNum,
@@ -380,10 +391,9 @@ bool FilterVoronoiPlugin::voronoiSampling(
 		(*vi)->SetS();
 
 	om->UpdateBoxAndNormals();
-	return true;
 }
 
-bool FilterVoronoiPlugin::volumeSampling(
+void FilterVoronoiPlugin::volumeSampling(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
 		Scalarm sampleSurfRadius,
@@ -414,10 +424,9 @@ bool FilterVoronoiPlugin::volumeSampling(
 	tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.psd.poissonSurfaceMesh);
 
 	//TODO: compute poisson filtered volume mesh
-	return true;
 }
 
-bool FilterVoronoiPlugin::voronoiScaffolding(
+void FilterVoronoiPlugin::voronoiScaffolding(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
 		Scalarm sampleSurfRadius,
@@ -463,10 +472,9 @@ bool FilterVoronoiPlugin::voronoiScaffolding(
 	sm->UpdateBoxAndNormals();
 	tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
 	tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
-	return true;
 }
 
-bool FilterVoronoiPlugin::createSolidWireframe(
+void FilterVoronoiPlugin::createSolidWireframe(
 		MeshDocument& md,
 		bool edgeCylFlag,
 		Scalarm edgeCylRadius,
@@ -498,10 +506,9 @@ bool FilterVoronoiPlugin::createSolidWireframe(
 	if(faceExtFlag) tri::BuildPrismFaceShell(m->cm,sm->cm,faceExtHeight,faceExtInset);
 
 	sm->UpdateBoxAndNormals();
-	return true;
 }
 
-bool FilterVoronoiPlugin::crossFieldCreation(
+void FilterVoronoiPlugin::crossFieldCreation(
 		MeshDocument& md,
 		int crossType)
 {
@@ -528,11 +535,9 @@ bool FilterVoronoiPlugin::crossFieldCreation(
 		//      tri::FieldSmoother<CMeshO>::SmoothParam par;
 		//      tri::FieldSmoother<CMeshO>::SmoothDirections(m.cm,par);
 	}
-
-	return true;
 }
 
-bool FilterVoronoiPlugin::crossFieldColoring(MeshDocument& md)
+void FilterVoronoiPlugin::crossFieldColoring(MeshDocument& md)
 {
 	//ToDo: Filter not used
 	MeshModel &m=*md.mm();
@@ -543,7 +548,6 @@ bool FilterVoronoiPlugin::crossFieldColoring(MeshDocument& md)
 	}
 
 	tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
-	return true;
 }
 
 //bool FilterVoronoiPlugin::crossFieldSmoothing(

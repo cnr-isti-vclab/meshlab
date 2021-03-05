@@ -39,29 +39,34 @@ class QhullPlugin : public QObject, public FilterPlugin
 
 public:
 
-    /* naming convention :
-    - FP -> Filter Plugin
-    - name of the plugin separated by _
-    */
+	/* naming convention :
+	- FP -> Filter Plugin
+	- name of the plugin separated by _
+	*/
 
-    enum { 
-        FP_QHULL_CONVEX_HULL,  
-        FP_QHULL_DELAUNAY_TRIANGULATION,
-        FP_QHULL_VORONOI_FILTERING,
-        FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
-        FP_QHULL_VISIBLE_POINTS
-    } ;
+	enum {
+		FP_QHULL_CONVEX_HULL,
+		FP_QHULL_DELAUNAY_TRIANGULATION,
+		FP_QHULL_VORONOI_FILTERING,
+		FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
+		FP_QHULL_VISIBLE_POINTS
+	};
 
-    QhullPlugin();
-    ~QhullPlugin();
+	QhullPlugin();
+	~QhullPlugin();
 
-    QString pluginName() const;
-    virtual QString filterName(ActionIDType filter) const;
-    virtual QString filterInfo(ActionIDType filter) const;
-    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &m, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    virtual FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	virtual FilterClass getClass(const QAction*) const;
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

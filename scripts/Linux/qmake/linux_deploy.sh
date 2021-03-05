@@ -6,7 +6,7 @@
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
 #
 # Without given arguments, the folder that will be deployed is meshlab/distrib.
-# 
+#
 # You can give as argument the DISTRIB_PATH.
 
 #checking for parameters
@@ -22,17 +22,17 @@ INSTALL_PATH=$(pwd)/../
 
 cd $DISTRIB_PATH
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs #-executable=usr/bin/meshlabserver
 
 chmod +x usr/bin/meshlab
-chmod +x usr/bin/meshlabserver
+#chmod +x usr/bin/meshlabserver
 rm AppRun
 
 cp $INSTALL_PATH/resources/AppRunMeshLab .
 mv AppRunMeshLab AppRun
-cp $INSTALL_PATH/resources/AppRunMeshLabServer .
+#cp $INSTALL_PATH/resources/AppRunMeshLabServer .
 chmod +x AppRun
-chmod +x AppRunMeshLabServer
+#chmod +x AppRunMeshLabServer
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"

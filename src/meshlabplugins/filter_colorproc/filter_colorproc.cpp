@@ -36,7 +36,7 @@
 #include <time.h>
 
 // ERROR CHECKING UTILITY
-#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
 
 using namespace std;
 using namespace vcg;
@@ -370,7 +370,7 @@ void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, Rich
 	}
 }
 
-bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filter, const RichParameterList &par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	MeshModel *m = md.mm();  //get current mesh from document
 
@@ -384,8 +384,8 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexConstant(m->cm, new_col, selected);
-			return true;
 		}
+		break;
 
 		case CP_THRESHOLDING:
 		{
@@ -397,7 +397,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexThresholding(m->cm, threshold, c1, c2, selected);
-			return true;
+			break;
 		}
 
 		case CP_CONTR_BRIGHT:
@@ -409,7 +409,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
 			vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0,contrast/256.0 , selected);
-			return true;
+			break;
 		}
 
 		case CP_INVERT :
@@ -417,7 +417,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexInvert(m->cm, selected);
-			return true;
+			break;
 		}
 
 		case CP_LEVELS:
@@ -448,7 +448,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			{
 			vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
 			}
-			return true;
+			break;
 		}
 
 		case CP_COLOURISATION:
@@ -465,7 +465,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 255);
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexColourisation(m->cm, color, intensity, selected);
-			return true;
+			break;
 		}
 
 		case CP_DESATURATION:
@@ -474,7 +474,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexDesaturation(m->cm, method, selected);
-			return true;
+			break;
 		}
 
 		case CP_EQUALIZE:
@@ -487,7 +487,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexEqualize(m->cm, rgbMask, selected);
-			return true;
+			break;
 		}
 
 		case CP_WHITE_BAL:
@@ -497,7 +497,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			vcg::tri::UpdateColor<CMeshO>::PerVertexWhiteBalance(m->cm, color, selected);
-			return true;
+			break;
 		}
 
 		case CP_SCATTER_PER_MESH:
@@ -514,7 +514,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 					mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
 				id=(id+1)%numOfMeshes;
 			}
-			return true;
+			break;
 		}
 
 		case CP_PERLIN_COLOR:
@@ -529,7 +529,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			tri::UpdateColor<CMeshO>::PerVertexPerlinColoring(m->cm, period, offset, c1, c2, selected);
-			return true;
+			break;
 		}
 
 		case CP_COLOR_NOISE:
@@ -538,7 +538,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			bool selected = par.getBool("onSelected");
 
 			tri::UpdateColor<CMeshO>::PerVertexAddNoise(m->cm, noiseBits, selected);
-			return true;
+			break;
 		}
 
 		case CP_SATURATE_QUALITY:
@@ -553,7 +553,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			}
 			log("Saturated Vertex Quality");
-			return true;
+			break;
 		}
 
 		case CP_MAP_VQUALITY_INTO_COLOR:
@@ -587,7 +587,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
 				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
-			return true;
+			break;
 		}
 
 		case CP_CLAMP_QUALITY:
@@ -619,7 +619,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, RangeMin, RangeMax);
 				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
-			return true;
+			break;
 		}
 
 		case CP_MAP_FQUALITY_INTO_COLOR:
@@ -653,7 +653,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
 				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
-			return true;
+			break;
 		}
 
 		case CP_DISCRETE_CURVATURE:
@@ -663,8 +663,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m->cm);
 
 			if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m->cm) > 0) {
-				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
+				throw MLException("Mesh has some not 2-manifold faces, Curvature computation requires manifoldness");
 			}
 
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
@@ -686,7 +685,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
-			return true;
+			break;
 		}
 
 		case CP_TRIANGLE_QUALITY:
@@ -701,14 +700,12 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			{
 				if (!m->hasDataMask(MeshModel::MM_VERTTEXCOORD) && !m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 				{
-					this->errorMessage = "This metric need Texture Coordinate";
-					return false;
+					throw MLException("This metric need Texture Coordinate");
 				}
 			}
 			if ((metric == 6 || metric == 7) && !m->hasDataMask(MeshModel::MM_POLYGONAL))
 			{
-				this->errorMessage = "This metric is meaningless for triangle only meshes (all faces are planar by definition)";
-				return false;
+				throw MLException("This metric is meaningless for triangle only meshes (all faces are planar by definition)");
 			}
 			switch (metric){
 
@@ -807,11 +804,12 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 						maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
 			} break;
 
-			default: assert(0);
+			default:
+				throw MLException("Wrong metric selected.");
 			}
 			tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, minV, maxV, false);
-			return true;
 		}
+		break;
 
 
 		case CP_RANDOM_CONNECTED_COMPONENT:
@@ -819,7 +817,7 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
 			vcg::tri::UpdateColor<CMeshO>::PerFaceRandomConnectedComponent(m->cm);
-			return true;
+			break;
 		}
 
 		case CP_RANDOM_FACE:
@@ -827,14 +825,14 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
 			vcg::tri::UpdateColor<CMeshO>::PerFaceRandom(m->cm);
-			return true;
+			break;
 		}
 
 		case CP_VERTEX_SMOOTH:
 		{
 			int iteration = par.getInt("iteration");
 			tri::Smooth<CMeshO>::VertexColorLaplacian(m->cm, iteration, false, cb);
-			return true;
+			break;
 		}
 
 		case CP_FACE_SMOOTH:
@@ -842,19 +840,18 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			int iteration = par.getInt("iteration");
 			tri::Smooth<CMeshO>::FaceColorLaplacian(m->cm, iteration, false, cb);
-			return true;
+			break;
 		}
 
 		case CP_FACE_TO_VERTEX:
 		{
 			m->updateDataMask(MeshModel::MM_VERTCOLOR);
 			tri::UpdateColor<CMeshO>::PerVertexFromFace(m->cm);
-			return true;
+			break;
 		}
 
 		case CP_MESH_TO_FACE:
 		{
-			QList<MeshModel *> meshList;
 			foreach(MeshModel *mmi, md.meshList)
 			{
 				if (mmi->visible)
@@ -863,15 +860,16 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 					tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm, mmi->cm.C());
 				}
 			}
-			return true;
+			break;
 		}
 
 		case CP_VERTEX_TO_FACE:
 		{
 			m->updateDataMask(MeshModel::MM_FACECOLOR);
 			tri::UpdateColor<CMeshO>::PerFaceFromVertex(m->cm);
-			return true;
+			break;
 		}
+
 
 		case CP_TEXTURE_TO_VERTEX:
 		{
@@ -909,12 +907,12 @@ bool FilterColorProc::applyFilter(const QAction *filter, MeshDocument &md, std::
 					}
 				}
 			}
-			return true;
+			break;
 		}
-
-		default: assert(0);
+		default:
+			wrongActionCalled(filter);
 	}
-	return false;
+	return std::map<std::string, QVariant>();
 }
 
  FilterPlugin::FilterClass FilterColorProc::getClass(const QAction *a) const
@@ -1024,7 +1022,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 	return MeshModel::MM_NONE;
 }
 
-FilterPlugin::FILTER_ARITY FilterColorProc::filterArity(const QAction* act ) const
+FilterPlugin::FilterArity FilterColorProc::filterArity(const QAction* act ) const
 {
     switch(ID(act))
     {

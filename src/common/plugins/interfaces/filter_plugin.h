@@ -176,12 +176,7 @@ public:
 			const RichParameterList& par,
 			MeshDocument& md,
 			unsigned int& postConditionMask,
-			vcg::CallBackPos* cb);
-
-	/**
-	 * THIS FUNCTION IS GOING TO BE REMOVED. Please use the apply filter declared above.
-	 */
-	virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
+			vcg::CallBackPos* cb) = 0;
 
 	/** 
 	 * \brief tests if a filter is applicable to a mesh.
@@ -192,7 +187,7 @@ public:
 	bool isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const;
 
 
-	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
+	enum FilterArity { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
 
 	/** 
 	 * @brief this function informs the MeshLab core on how many meshes the filter will work on.
@@ -201,7 +196,7 @@ public:
 	 * - FIXED: the number (and the names) of the meshes involved in the filter computation is determined by the parameters selected in the filter's parameters form
 	 * - VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
 	 */
-	virtual FILTER_ARITY filterArity(const QAction *act) const = 0;
+	virtual FilterArity filterArity(const QAction *act) const = 0;
 
 	/**
 	 * @brief This function is called to initialized the list of parameters.
@@ -214,12 +209,6 @@ public:
 		initParameterList(filter, *(md.mm()), par);
 	}
 
-	/** 
-	 * @brief is invoked by the framework when the applyFilter fails to give some info to the user about the filter failure
-	 * Filters \b must never use QMessageBox for reporting errors.
-	 * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
-	 */
-	const QString& errorMsg() const { return this->errorMessage; }
 	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }
 	virtual QString pythonFilterName(const QAction* a) const {return this->pythonFilterName(ID(a)); }
@@ -233,12 +222,17 @@ public:
 	virtual QList<QAction*> actions() const { return actionList; }
 	virtual QList<ActionIDType> types() const { return typeList; }
 
+	/**
+	 * @brief wrongActionCalled throws a MLException. Call this function whenever
+	 * you receive an unknown action as parameter.
+	 */
+	static void wrongActionCalled(const QAction*);
+
 	/** 
 	 * Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
 	 * BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! 
 	 */
 	int previewOnCreatedAttributes(const QAction* act, const MeshModel& mm) const;
-	QString generatedScriptCode;
 
 	MLPluginGLContext* glContext;
 protected:
@@ -250,9 +244,6 @@ protected:
 	QList <QAction*> actionList;
 
 	QList <ActionIDType> typeList;
-
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	QString errorMessage;
 };
 
 #define FILTER_PLUGIN_IID  "vcg.meshlab.FilterPlugin/1.0"

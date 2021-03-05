@@ -47,17 +47,16 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	int getRequirements(const QAction* a);
 
-	bool applyFilter(
-			const QAction* filter,
-			MeshDocument& md,
-			std::map<std::string, QVariant>& outputValues,
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
 			unsigned int& postConditionMask,
-			const RichParameterList& params,
-			vcg::CallBackPos* cb) ;
+			vcg::CallBackPos * cb);
 
 	void initParameterList(const QAction* a, MeshModel&, RichParameterList& parlist);
 	int postCondition(const QAction* filter) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 };
 
 

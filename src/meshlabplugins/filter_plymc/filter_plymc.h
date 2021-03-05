@@ -33,21 +33,26 @@ class PlyMCPlugin : public QObject, public FilterPlugin
 	Q_INTERFACES(FilterPlugin)
 
 public:
-    enum { 
-		FP_PLYMC, 
-		FP_MC_SIMPLIFY 
+	enum {
+		FP_PLYMC,
+		FP_MC_SIMPLIFY
 	} ;
 
-    PlyMCPlugin();
+	PlyMCPlugin();
 
-    QString pluginName() const;
-    virtual QString filterName(ActionIDType filter) const;
-    virtual QString filterInfo(ActionIDType filter) const;
-    virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(const QAction* a) const;
-    FilterPlugin::FILTER_ARITY filterArity(const QAction* filter) const;
-    int postCondition(const QAction *filter) const;
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	FilterClass getClass(const QAction* a) const;
+	FilterPlugin::FilterArity filterArity(const QAction* filter) const;
+	int postCondition(const QAction *filter) const;
 };
 
 #endif

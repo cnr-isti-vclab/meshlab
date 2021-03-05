@@ -51,21 +51,26 @@ public:
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction*) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	FilterArity filterArity(const QAction*) const;
 	int getPreConditions(const QAction *action) const;
 	void initParameterList(const QAction* , MeshModel& m, RichParameterList& parlst);
-	bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& parlst, vcg::CallBackPos*) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction* ) const;
 
 private:
-	bool computeTopologicalMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool computeTopologicalMeasuresForQuadMeshes(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool computeGeometricMeasures(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool computeAreaPerimeterOfSelection(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool perVertexQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool perFaceQualityStat(MeshDocument& md, std::map<std::string, QVariant>& outputValues);
-	bool perVertexQualityHistogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
-	bool perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag, std::map<std::string, QVariant>& outputValues);
+	std::map<std::string, QVariant> computeTopologicalMeasures(MeshDocument& md);
+	std::map<std::string, QVariant> computeTopologicalMeasuresForQuadMeshes(MeshDocument& md);
+	std::map<std::string, QVariant> computeGeometricMeasures(MeshDocument& md);
+	std::map<std::string, QVariant> computeAreaPerimeterOfSelection(MeshDocument& md);
+	std::map<std::string, QVariant> perVertexQualityStat(MeshDocument& md);
+	std::map<std::string, QVariant> perFaceQualityStat(MeshDocument& md);
+	std::map<std::string, QVariant> perVertexQualityHistogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag);
+	std::map<std::string, QVariant> perFaceQualityHostogram(MeshDocument& md, Scalarm RangeMin, Scalarm RangeMax, int binNum, bool areaFlag);
 
 
 	Matrix33m computePrincipalAxisCloud(const CMeshO& m);

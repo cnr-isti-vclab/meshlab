@@ -330,7 +330,7 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 }
 	
 // ERROR CHECKING UTILITY
-#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
 ///////////////////////////////////////////////////////
 
 template<typename T>
@@ -340,7 +340,12 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, CallBackPos *cb)
+std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
+			const QAction *filter,
+			const RichParameterList &par,
+			MeshDocument &md,
+			unsigned int& /*postConditionMask*/,
+			CallBackPos *cb)
 {
 	MeshModel &m=*(md.mm());
 	switch(ID(filter))     {
@@ -354,8 +359,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		if(nonManifVertNum>0 || nonManifEdgeNum>0)
 		{
 			log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
-			this->errorMessage = "Mesh is not manifold. See Log for details";
-			return false;
+			throw MLException("Mesh is not manifold. See Log for details");
 		}
 		
 		MeshModel *paraModel=md.addNewMesh("","VoroAtlas",false);
@@ -1102,13 +1106,14 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 	}
 		break;
 		
-	default: assert(0);
+	default:
+		wrongActionCalled(filter);
 	}
 	
-	return true;
+	return std::map<std::string, QVariant>();
 }
 	
-FilterPlugin::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter))
 	{

@@ -8,20 +8,6 @@ QString FilterPlugin::pythonFilterName(MeshLabPlugin::ActionIDType f) const
 	return pymeshlab::computePythonName(filterName(f));
 }
 
-std::map<std::string, QVariant> FilterPlugin::applyFilter(
-		const QAction* filter,
-		const RichParameterList& par,
-		MeshDocument& md, unsigned int& postConditionMask,
-		vcg::CallBackPos* cb)
-{
-	std::map<std::string, QVariant> output;
-	bool result = applyFilter(filter, md, output, postConditionMask, par, cb);
-	if (!result) {
-		throw MLException(errorMessage);
-	}
-	return output;
-}
-
 bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QStringList &MissingItems) const
 {
 	int preMask = getPreConditions(act);
@@ -93,6 +79,11 @@ QAction* FilterPlugin::getFilterAction(const QString& idName)
 	qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
 	assert(0);
 	return 0;
+}
+
+void FilterPlugin::wrongActionCalled(const QAction* action)
+{
+	throw MLException("Internal error: unknown action filter " + action->text() + " to this plugin.");
 }
 
 int FilterPlugin::previewOnCreatedAttributes(const QAction* act, const MeshModel& mm ) const

@@ -43,18 +43,22 @@ public:
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
-	FILTER_ARITY filterArity(const QAction* a) const;
+	FilterArity filterArity(const QAction* a) const;
 	int getPreConditions(const QAction*) const;
 	int postCondition(const QAction* ) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 public slots:
 	void finished();
 	void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 private:
-	bool sketchfab(MeshDocument &md,
+	std::string sketchfab(MeshDocument &md,
 			vcg::CallBackPos* cb,
 			const QString& apiToken,
 			const QString&,

@@ -1257,7 +1257,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 
 		
 		
-		FilterPlugin::FILTER_ARITY arity = iFilter->filterArity(action);
+		FilterPlugin::FilterArity arity = iFilter->filterArity(action);
 		QList<MeshModel*> tmp;
 		switch(arity)
 		{

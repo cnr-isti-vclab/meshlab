@@ -41,30 +41,35 @@ class FilterTexturePlugin : public QObject, public FilterPlugin
 	Q_INTERFACES(FilterPlugin)
 
 public:
-    enum {
-        FP_VORONOI_ATLAS,
-        FP_UV_WEDGE_TO_VERTEX,
-        FP_UV_VERTEX_TO_WEDGE,
-        FP_BASIC_TRIANGLE_MAPPING,
-        FP_PLANAR_MAPPING,
-        FP_SET_TEXTURE,
-        FP_COLOR_TO_TEXTURE,
-        FP_TRANSFER_TO_TEXTURE,
-        FP_TEX_TO_VCOLOR_TRANSFER
-    };
+	enum {
+		FP_VORONOI_ATLAS,
+		FP_UV_WEDGE_TO_VERTEX,
+		FP_UV_VERTEX_TO_WEDGE,
+		FP_BASIC_TRIANGLE_MAPPING,
+		FP_PLANAR_MAPPING,
+		FP_SET_TEXTURE,
+		FP_COLOR_TO_TEXTURE,
+		FP_TRANSFER_TO_TEXTURE,
+		FP_TEX_TO_VCOLOR_TRANSFER
+	};
 
-    FilterTexturePlugin();
+	FilterTexturePlugin();
 
-    QString pluginName() const;
-    virtual QString filterName(ActionIDType filter) const;
-    virtual QString filterInfo(ActionIDType filter) const;
-    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-    virtual int getRequirements(const QAction*);
-    virtual int getPreConditions(const QAction*) const;
-    virtual int postCondition(const QAction* ) const;
-    FilterClass getClass(const QAction *a) const;
-    FILTER_ARITY filterArity(const QAction* filter) const;
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
+	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	virtual int getRequirements(const QAction*);
+	virtual int getPreConditions(const QAction*) const;
+	virtual int postCondition(const QAction* ) const;
+	FilterClass getClass(const QAction *a) const;
+	FilterArity filterArity(const QAction* filter) const;
 };
 
 #endif

@@ -77,33 +77,41 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
     delete(info);
 }
 
-bool FilterSSynth::applyFilter(const QAction*  filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterSSynth::applyFilter(
+		const QAction* filter,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
-    md.addNewMesh("",this->filterName(ID(filter)));
-    QWidget *  parent=(QWidget*)this->parent();
-    QString grammar = par.getString("grammar");
-    int seed = par.getInt("seed");
-	int sphereres=par.getInt("sphereres");
-    this->renderTemplate=GetTemplate(sphereres);
-    if(this->renderTemplate!=QString::Null()){
-        QString path=ssynth(grammar,-50,seed,cb);
-        if(QFile::exists(path)){
-            QFile file(path);
-            int mask;
-            QString name(file.fileName());
-            openX3D(name,*(md.mm()),mask,cb);
-            file.remove();
-            return true;
-        }
-        else{
-            QString message=QString("An error occurred during the mesh generation:" ).append(path);
-            QMessageBox::critical(parent,"Error",message);
-            return false;
-        }
-    }
-    else{
-        QMessageBox::critical(parent,"Error","Sphere resolution must be between 1 and 4"); return false;
-    }
+	if (ID(filter) == CR_SSYNTH) {
+		md.addNewMesh("",this->filterName(ID(filter)));
+		QString grammar = par.getString("grammar");
+		int seed = par.getInt("seed");
+		int sphereres=par.getInt("sphereres");
+		this->renderTemplate = GetTemplate(sphereres);
+		if(this->renderTemplate != ""){
+			QString path=ssynth(grammar,-50,seed,cb);
+			if (! QFile::exists(path)){
+				QString message=QString("An error occurred during the mesh generation: " ).append(path);
+				throw MLException(message);
+			}
+			else {
+				QFile file(path);
+				int mask;
+				QString name(file.fileName());
+				openX3D(name,*(md.mm()),mask,cb);
+				file.remove();
+			}
+		}
+		else{
+			throw MLException("Error: Sphere resolution must be between 1 and 4");
+		}
+	}
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterSSynth::getRequirements(const QAction *)
@@ -177,7 +185,7 @@ bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, 
 	int sphereres=par.getInt("sphereres");
 	int maxobj=par.getInt("maxobj");
     this->renderTemplate=GetTemplate(sphereres);
-    if(this->renderTemplate!=QString::Null()){
+	if(this->renderTemplate!= ""){
         QFile grammar(fileName);
         grammar.open(QFile::ReadOnly|QFile::Text);
         QString gcontent(grammar.readAll());
