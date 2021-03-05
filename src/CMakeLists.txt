@@ -138,7 +138,7 @@ else()
 		meshlabplugins/filter_clean
 		meshlabplugins/filter_color_projection
 		meshlabplugins/filter_colorproc
-#		meshlabplugins/filter_create
+		meshlabplugins/filter_create
 #		meshlabplugins/filter_csg
 #		meshlabplugins/filter_dirt
 #		meshlabplugins/filter_fractal
