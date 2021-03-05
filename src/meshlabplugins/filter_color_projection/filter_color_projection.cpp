@@ -928,6 +928,8 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
 				tri::UpdateBounding<CMeshO>::Box(model->cm);
 			} break;
+		default:
+			wrongActionCalled(filter);
 		}
 		return std::map<std::string, QVariant>();
 	}

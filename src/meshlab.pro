@@ -61,7 +61,7 @@ SUBDIRS += \ #sub projects names
 	filter_camera \
 	filter_clean \
 	filter_color_projection \
-	#filter_colorproc \
+	filter_colorproc \
 	#filter_create \
 	#filter_dirt \
 	#filter_fractal \

@@ -460,7 +460,8 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 		vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	} break;
 
-	default : assert(0); // unknown filter;
+	default :
+		wrongActionCalled(filter); // unknown filter;
 	}
 	return std::map<std::string, QVariant>();
 }

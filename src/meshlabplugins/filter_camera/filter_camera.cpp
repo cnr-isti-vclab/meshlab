@@ -665,6 +665,8 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 	}
 		md.documentUpdated();
 		break;
+	default:
+		wrongActionCalled(filter);
 	}
 	return std::map<std::string, QVariant>();
 }
