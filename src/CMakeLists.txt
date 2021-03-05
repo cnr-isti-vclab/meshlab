@@ -136,7 +136,7 @@ else()
 		meshlabplugins/filter_ao
 		meshlabplugins/filter_camera
 		meshlabplugins/filter_clean
-#		meshlabplugins/filter_color_projection
+		meshlabplugins/filter_color_projection
 #		meshlabplugins/filter_colorproc
 #		meshlabplugins/filter_create
 #		meshlabplugins/filter_csg

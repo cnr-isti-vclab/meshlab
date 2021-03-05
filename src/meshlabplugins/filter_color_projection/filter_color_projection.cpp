@@ -45,7 +45,7 @@ using namespace vcg;
 
 // utility---------------------------------
 
-#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
 
 static QString extractFilenameWOExt(MeshModel* mm)
 {
@@ -231,7 +231,7 @@ void FilterColorProjectionPlugin::initParameterList(const QAction *action, MeshD
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	if (glContext != nullptr){
 		//CMeshO::FaceIterator fi;
@@ -260,8 +260,9 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 				MeshModel   *model    = md.mm();
 	
 				// no projection if camera not valid
-				if(!raster->shot.IsValid())
-					return false;
+				if(!raster || !raster->shot.IsValid()) {
+					throw MLException("Raster or camera not valid.");
+				}
 	
 				// the mesh has to be correctly transformed before mapping
 				tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
@@ -277,7 +278,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 					if( rendermanager->initializeGL(cb) != 0 )
 					{
 						delete rendermanager;
-						return false;
+						throw MLException("Failed on initializing GL rendermanager.");
 					}
 					log("init GL");
 					//if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
@@ -435,8 +436,10 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 							if(rendermanager != NULL)
 								delete rendermanager;
 							rendermanager = new RenderHelper();
-							if( rendermanager->initializeGL(cb) != 0 )
-								return false;
+							if( rendermanager->initializeGL(cb) != 0 ){
+								delete rendermanager;
+								throw MLException("Failed on initializing GL rendermanager.");
+							}
 							log("init GL");
 							/*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
 								return false;
@@ -612,8 +615,7 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 	
 				if(!tri::HasPerWedgeTexCoord(md.mm()->cm))
 				{
-					errorMessage="Warning: nothing have been done. Mesh has no Texture Coordinates.";
-					return false;
+					throw MLException("Error: nothing have been done. Mesh has no Texture Coordinates.");
 				}
 	
 				//bool onselection = par.getBool("onselection");
@@ -750,8 +752,10 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 							if(rendermanager != NULL)
 								delete rendermanager;
 							rendermanager = new RenderHelper();
-							if( rendermanager->initializeGL(cb) != 0 )
-								return false;
+							if( rendermanager->initializeGL(cb) != 0 ) {
+								delete rendermanager;
+								throw MLException("Failed on initializing GL rendermanager.");
+							}
 							log("init GL");
 							/*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
 								return false;
@@ -923,18 +927,12 @@ bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocumen
 				// the mesh has to return to its original position
 				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
 				tri::UpdateBounding<CMeshO>::Box(model->cm);
-	
-	
 			} break;
-	
-	
 		}
-	
-		return true;
+		return std::map<std::string, QVariant>();
 	}
 	else {
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 }
 
