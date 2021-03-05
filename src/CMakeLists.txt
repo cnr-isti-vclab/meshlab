@@ -157,7 +157,7 @@ else()
 		meshlabplugins/filter_sampling
 		meshlabplugins/filter_screened_poisson
 		meshlabplugins/filter_sdfgpu
-#		meshlabplugins/filter_select
+		meshlabplugins/filter_select
 #		meshlabplugins/filter_sketchfab
 #		meshlabplugins/filter_ssynth
 #		meshlabplugins/filter_texture

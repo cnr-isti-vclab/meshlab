@@ -303,11 +303,13 @@ void SelectionFilterPlugin::initParameterList(const QAction *action, MeshModel &
  }
 }
 
-bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
+		const QAction *action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos * /*cb*/)
 {
-	if (md.mm() == NULL)
-		return false;
-
 	MeshModel &m=*(md.mm());
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
@@ -408,8 +410,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		// if usecamera but mesh does not have one
 		if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
 		{
-			errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
-			return false;
+			throw MLException("Mesh has not a camera that can be used to compute view direction. Please set a view direction.");
 		}
 		if(usecam)
 		{
@@ -646,9 +647,10 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		log("Selected %d outlier vertices", selVertexNum);
 	} break;
 
-	default: assert(0);
+	default:
+		wrongActionCalled(action);
 	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
 FilterPlugin::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const

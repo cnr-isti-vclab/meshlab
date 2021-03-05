@@ -78,7 +78,7 @@ SUBDIRS += \ #sub projects names
 	filter_sampling \
 	filter_screened_poisson \
 	filter_sdfgpu \
-	#filter_select \
+	filter_select \
 	#filter_sketchfab \
 	#filter_ssynth \
 	#filter_texture \
