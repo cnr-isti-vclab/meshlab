@@ -51,6 +51,7 @@ protected:
 	std::vector<CMeshO::PerVertexAttributeHandle<Scalarm> > v_handlers;
 	std::vector<CMeshO::PerVertexAttributeHandle<Point3m> > v3_handlers;
 	std::vector<CMeshO::PerFaceAttributeHandle<Scalarm> > f_handlers;
+	QString errorMsg;
 
 public:
 	enum {
@@ -81,7 +82,12 @@ public:
 	virtual int postCondition(const QAction *action) const;
 	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 	virtual int getRequirements(const QAction*);
-	virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	FILTER_ARITY filterArity(const QAction* filter) const;
 
 
