@@ -757,9 +757,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 								float k1 = node1.toElement().text().toFloat();
 								if (k1 != 0.0f)
 								{
-									this->errorMessage = "Distortion is not supported";
 									log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
-
 								}
 
 							}
@@ -836,7 +834,6 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 		else
 		{
-			this->errorMessage = "No file to open";
 			throw MLException("Unknown file type");
 		}
 	} break;

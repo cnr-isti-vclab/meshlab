@@ -247,7 +247,6 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 		}
 		
 		if( activeRasters.empty() )    {
-			this->errorMessage="No active Raster";
 			{
 				glContext->doneCurrent();
 				throw MLException("You need to have at least one valid raster layer in your project, to apply this filter"); // text

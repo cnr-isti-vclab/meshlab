@@ -178,11 +178,6 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos* cb) = 0;
 
-	/**
-	 * THIS FUNCTION IS GOING TO BE REMOVED. Please use the apply filter declared above.
-	 */
-	//virtual bool applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) = 0;
-
 	/** 
 	 * \brief tests if a filter is applicable to a mesh.
 	 * This function is a handy wrapper used by the framework for the \a getPreConditions callback;
@@ -214,12 +209,6 @@ public:
 		initParameterList(filter, *(md.mm()), par);
 	}
 
-	/** 
-	 * @brief is invoked by the framework when the applyFilter fails to give some info to the user about the filter failure
-	 * Filters \b must never use QMessageBox for reporting errors.
-	 * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
-	 */
-	const QString& errorMsg() const { return this->errorMessage; }
 	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }
 	virtual QString pythonFilterName(const QAction* a) const {return this->pythonFilterName(ID(a)); }
@@ -244,7 +233,6 @@ public:
 	 * BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! 
 	 */
 	int previewOnCreatedAttributes(const QAction* act, const MeshModel& mm) const;
-	QString generatedScriptCode;
 
 	MLPluginGLContext* glContext;
 protected:
@@ -256,9 +244,6 @@ protected:
 	QList <QAction*> actionList;
 
 	QList <ActionIDType> typeList;
-
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	QString errorMessage;
 };
 
 #define FILTER_PLUGIN_IID  "vcg.meshlab.FilterPlugin/1.0"
