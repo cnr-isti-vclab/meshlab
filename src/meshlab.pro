@@ -73,7 +73,7 @@ SUBDIRS += \ #sub projects names
 	filter_mutualglobal \
 	filter_mutualinfo \
 	filter_plymc \
-	#filter_qhull \
+	filter_qhull \
 	#filter_quality \
 	#filter_sampling \
 	#filter_screened_poisson \
