@@ -81,7 +81,7 @@ SUBDIRS += \ #sub projects names
 	filter_select \
 	filter_sketchfab \
 	filter_ssynth \
-	#filter_texture \
+	filter_texture \
 	#filter_trioptimize \
 	#filter_unsharp \
 	#filter_voronoi \
