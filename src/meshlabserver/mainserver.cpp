@@ -709,7 +709,7 @@ public:
 			try {
 				iFilter->applyFilter( action, pair.second, meshDocument, postConditionMask, filterCallBack);
 			}
-			catch (MLException& exc) {
+			catch (MLException&) {
 				ret = false;
 			}
             meshDocument.setBusy(false);
