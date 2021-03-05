@@ -51,11 +51,16 @@ public:
 	FILTER_ARITY filterArity(const QAction* a) const;
 	void initParameterList(const QAction* action, MeshModel& m, RichParameterList& par);
 	int getPreConditions(const QAction* action) const;
-	bool applyFilter(const QAction* action, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction* ) const;
 
 private:
-	bool voronoiSampling(
+	void voronoiSampling(
 			MeshDocument &md,
 			vcg::CallBackPos* cb,
 			int iterNum,
@@ -70,7 +75,7 @@ private:
 			Scalarm perturbAmount,
 			bool preprocessingFlag);
 
-	bool volumeSampling(
+	void volumeSampling(
 			MeshDocument& md,
 			vcg::CallBackPos* cb,
 			Scalarm sampleSurfRadius,
@@ -78,7 +83,7 @@ private:
 			bool poissonFiltering,
 			Scalarm poissonRadius);
 
-	bool voronoiScaffolding(
+	void voronoiScaffolding(
 			MeshDocument& md,
 			vcg::CallBackPos* cb,
 			Scalarm sampleSurfRadius,
@@ -90,7 +95,7 @@ private:
 			bool surfFlag,
 			int elemType);
 
-	bool createSolidWireframe(
+	void createSolidWireframe(
 			MeshDocument& md,
 			bool edgeCylFlag,
 			Scalarm edgeCylRadius,
@@ -104,11 +109,11 @@ private:
 			bool /*edgeFauxFlag*/,
 			int cylinderSideNum);
 
-	bool crossFieldCreation(
+	void crossFieldCreation(
 			MeshDocument& md,
 			int crossType);
 
-	bool crossFieldColoring(MeshDocument& md);
+	void crossFieldColoring(MeshDocument& md);
 
 //	bool crossFieldSmoothing(
 //			MeshDocument& md,

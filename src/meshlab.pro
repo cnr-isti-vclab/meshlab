@@ -84,7 +84,7 @@ SUBDIRS += \ #sub projects names
 	filter_texture \
 	filter_trioptimize \
 	filter_unsharp \
-	#filter_voronoi \
+	filter_voronoi \
 # Rendering and Decoration Plugins
 	decorate_background \
 	decorate_raster_proj \

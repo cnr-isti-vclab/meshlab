@@ -163,7 +163,7 @@ else()
 		meshlabplugins/filter_texture
 		meshlabplugins/filter_trioptimize
 		meshlabplugins/filter_unsharp
-#		meshlabplugins/filter_voronoi
+		meshlabplugins/filter_voronoi
 
 		# Rendering and Decoration Plugins
 		meshlabplugins/render_gdp
