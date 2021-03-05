@@ -33,18 +33,18 @@ class FilterUnsharp : public QObject, public FilterPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
-		public:
+public:
 	/* naming convention :
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum { 
-      FP_CREASE_CUT, 
-		FP_LAPLACIAN_SMOOTH, 
-		FP_DIRECTIONAL_PRESERVATION, 
-		FP_DEPTH_SMOOTH, 
+	enum {
+		FP_CREASE_CUT,
+		FP_LAPLACIAN_SMOOTH,
+		FP_DIRECTIONAL_PRESERVATION,
+		FP_DEPTH_SMOOTH,
 		FP_HC_LAPLACIAN_SMOOTH,
-		FP_SD_LAPLACIAN_SMOOTH, 
+		FP_SD_LAPLACIAN_SMOOTH,
 		FP_TWO_STEP_SMOOTH,
 		FP_TAUBIN_SMOOTH,
 		FP_FACE_NORMAL_SMOOTHING,
@@ -60,8 +60,8 @@ class FilterUnsharp : public QObject, public FilterPlugin
 		FP_RECOMPUTE_FACE_NORMAL,
 		FP_RECOMPUTE_QUADFACE_NORMAL,
 		FP_LINEAR_MORPH,
-        FP_SCALAR_HARMONIC_FIELD
-  } ;
+		FP_SCALAR_HARMONIC_FIELD
+	} ;
 	
 	/* default values for standard parameters' values of the plugin actions */
 	FilterUnsharp();
@@ -72,7 +72,12 @@ class FilterUnsharp : public QObject, public FilterPlugin
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction*) const;
 	int getRequirements(const QAction*);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	void initParameterList(const QAction* action, MeshDocument &/*m*/, RichParameterList & parlst);
 	int postCondition(const QAction* ) const;
 	int getPreConditions(const QAction*) const;
