@@ -82,7 +82,7 @@ SUBDIRS += \ #sub projects names
 	filter_sketchfab \
 	filter_ssynth \
 	filter_texture \
-	#filter_trioptimize \
+	filter_trioptimize \
 	#filter_unsharp \
 	#filter_voronoi \
 # Rendering and Decoration Plugins

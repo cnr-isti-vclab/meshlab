@@ -161,7 +161,7 @@ else()
 		meshlabplugins/filter_sketchfab
 		meshlabplugins/filter_ssynth
 		meshlabplugins/filter_texture
-#		meshlabplugins/filter_trioptimize
+		meshlabplugins/filter_trioptimize
 #		meshlabplugins/filter_unsharp
 #		meshlabplugins/filter_voronoi
 
