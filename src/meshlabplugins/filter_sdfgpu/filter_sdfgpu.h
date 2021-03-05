@@ -39,7 +39,12 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 	bool requiresGLContext(const QAction* action) const;
 	
 	//Main plugin function
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	
 	//Parameters init for user interface
 	virtual void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
