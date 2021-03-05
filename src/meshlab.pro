@@ -70,7 +70,7 @@ SUBDIRS += \ #sub projects names
 	filter_isoparametrization \
 	filter_layer \
 	filter_mls \
-	#filter_mutualglobal \
+	filter_mutualglobal \
 	#filter_mutualinfo \
 	#filter_plymc \
 	#filter_qhull \

@@ -171,11 +171,15 @@ void FilterMutualGlobal::initParameterList(const QAction *action,MeshDocument & 
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
+		const QAction *action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
 	if (glContext == nullptr){
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 	QElapsedTimer filterTime;
 	filterTime.start();
@@ -205,7 +209,7 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, st
 			if (md.rasterList.size()==0)
 			{
 				 log(0, "You need a Raster Model to apply this filter!");
-				 return false;
+				 throw MLException("You need a Raster Model to apply this filter!");
 
 			}
 
@@ -242,12 +246,13 @@ bool FilterMutualGlobal::applyFilter(const QAction *action, MeshDocument &md, st
 			log(0, "Done!");
 			break;
 
-		default : assert(0);
+		default :
+			wrongActionCalled(action);
 	}
 
 	log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
 
-		return true;
+	return std::map<std::string, QVariant>();
 
 
 
