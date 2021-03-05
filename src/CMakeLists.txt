@@ -154,7 +154,7 @@ else()
 		meshlabplugins/filter_plymc
 		meshlabplugins/filter_qhull
 		meshlabplugins/filter_quality
-#		meshlabplugins/filter_sampling
+		meshlabplugins/filter_sampling
 #		meshlabplugins/filter_screened_poisson
 #		meshlabplugins/filter_sdfgpu
 #		meshlabplugins/filter_select
