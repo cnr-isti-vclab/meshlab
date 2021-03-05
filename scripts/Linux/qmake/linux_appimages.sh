@@ -28,25 +28,25 @@ cd ..
 
 #mv $PARENT_NAME/usr/share/applications/meshlab.desktop .
 
-mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLab
-mv $PARENT_NAME/AppRunMeshLabServer $PARENT_NAME/AppRun
-rm $PARENT_NAME/*.desktop
-cp $PARENT_NAME/usr/share/applications/meshlab_server.desktop $PARENT_NAME/
+#mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLab
+#mv $PARENT_NAME/AppRunMeshLabServer $PARENT_NAME/AppRun
+#rm $PARENT_NAME/*.desktop
+#cp $PARENT_NAME/usr/share/applications/meshlab_server.desktop $PARENT_NAME/
 
-$INSTALL_PATH/resources/appimagetool $PARENT_NAME
-mv MeshLabServer-$VERSION*.AppImage MeshLabServer$VERSION-linux.AppImage
+#$INSTALL_PATH/resources/appimagetool $PARENT_NAME
+#mv MeshLabServer-$VERSION*.AppImage MeshLabServer$VERSION-linux.AppImage
 #chmod +x MeshLabServer$VERSION-linux.AppImage
 
 #mv $PARENT_NAME/usr/share/applications/meshlab_server.desktop .
 #mv meshlab.desktop $PARENT_NAME/usr/share/applications/
-mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLabServer
-mv $PARENT_NAME/AppRunMeshLab $PARENT_NAME/AppRun
-rm $PARENT_NAME/*.desktop
-cp $PARENT_NAME/usr/share/applications/meshlab.desktop $PARENT_NAME/
+#mv $PARENT_NAME/AppRun $PARENT_NAME/AppRunMeshLabServer
+#mv $PARENT_NAME/AppRunMeshLab $PARENT_NAME/AppRun
+#rm $PARENT_NAME/*.desktop
+#cp $PARENT_NAME/usr/share/applications/meshlab.desktop $PARENT_NAME/
 
 $INSTALL_PATH/resources/appimagetool $PARENT_NAME
 mv MeshLab-$VERSION*.AppImage MeshLab$VERSION-linux.AppImage
 #chmod +x MeshLab$VERSION-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo MeshLab$VERSION-linux.AppImage and MeshLabServer$VERSION-linux.AppImage generated
+echo MeshLab$VERSION-linux.AppImage generated
