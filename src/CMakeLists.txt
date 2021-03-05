@@ -147,7 +147,7 @@ else()
 		meshlabplugins/filter_isoparametrization
 		meshlabplugins/filter_layer
 		meshlabplugins/filter_measure
-#		meshlabplugins/filter_meshing
+		meshlabplugins/filter_meshing
 #		meshlabplugins/filter_mls
 #		meshlabplugins/filter_mutualglobal
 #		meshlabplugins/filter_mutualinfo
