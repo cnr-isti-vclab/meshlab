@@ -125,22 +125,31 @@ void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&,
 	}
 }
 
-bool FilterSketchFabPlugin::applyFilter(const QAction * action, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos* cb)
+std::map<std::string, QVariant> FilterSketchFabPlugin::applyFilter(
+		const QAction * action,
+		const RichParameterList& par,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos* cb)
 {
+	std::map<std::string, QVariant> outValues;
+	std::string url;
 	switch (ID(action)) {
 	case FP_SKETCHFAB:
-		return sketchfab(md, cb,
+		url = sketchfab(md, cb,
 						 par.getString("sketchFabKeyCode"), par.getString("title"),
 						 par.getString("description"), par.getString("tags"),
 						 par.getBool("isPrivate"), par.getBool("isPublished"),
 						 par.getBool("autoRotate"), par.getBool("saveApiSetting"));
+		outValues["url_model"] = QVariant::fromValue(QString::fromStdString(url));
+		break;
 	default:
-		assert(0);
-		return false;
+		wrongActionCalled(action);
 	}
+	return outValues;
 }
 
-bool FilterSketchFabPlugin::sketchfab(
+std::string FilterSketchFabPlugin::sketchfab(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
 		const QString& apiToken,
@@ -160,8 +169,7 @@ bool FilterSketchFabPlugin::sketchfab(
 	Matrix44m rotI; rot.SetRotateDeg(90,Point3m(1,0,0));
 
 	if(apiToken.isEmpty() || apiToken == DEFAULT_API) {
-		this->errorMessage = QString("Please set in the MeshLab preferences your private API Token string that you can find on the<a href=\"https://sketchfab.com/settings/password\">Sketchfab Password Settings.");
-		return false;
+		throw MLException("Please set in the MeshLab preferences your private API Token string that you can find on the<a href=\"https://sketchfab.com/settings/password\">Sketchfab Password Settings.");
 	}
 
 	QSettings settings;
@@ -190,13 +198,12 @@ bool FilterSketchFabPlugin::sketchfab(
 	std::string urlModel;
 	bool ret = upload(tmpZipFileName, apiToken, name, description, tags, QString::number(isPrivate), QString::number(isPublished), urlModel);
 	if(!ret){
-		qDebug("Upload FAILED");
-		return false;
+		throw MLException("Upload FAILED");
 	}
 
 	this->log("Upload Completed; you can access the uploaded model at the following URL:\n");
 	this->log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
-	return true;
+	return urlModel;
 }
 
 bool FilterSketchFabPlugin::upload(
