@@ -153,11 +153,11 @@ void FilterSamplePlugin::initParameterList(const QAction *action,MeshModel &m, R
  * @param cb: callback object to tell MeshLab the percentage of execution of the filter
  * @return true if the filter has been applied correctly, false otherwise
  */
-std::map<std::string, QVariant> FilterSamplePlugin::applyFilter(const QAction * action, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterSamplePlugin::applyFilter(const QAction * action, const RichParameterList & parameters, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
-		vertexDisplacement(md, cb, par.getBool("UpdateNormals"), par.getAbsPerc("Displacement"));
+		vertexDisplacement(md, cb, parameters.getBool("UpdateNormals"), parameters.getAbsPerc("Displacement"));
 		break;
 	default :
 		wrongActionCalled(action);

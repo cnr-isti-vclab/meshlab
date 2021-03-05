@@ -64,7 +64,7 @@ SUBDIRS += \ #sub projects names
 	filter_colorproc \
 	filter_create \
 	filter_dirt \
-	#filter_fractal \
+	filter_fractal \
 	#filter_func \
 	#filter_img_patch_param \
 	#filter_isoparametrization \
