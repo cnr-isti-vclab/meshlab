@@ -76,7 +76,7 @@ SUBDIRS += \ #sub projects names
 	filter_qhull \
 	filter_quality \
 	filter_sampling \
-	#filter_screened_poisson \
+	filter_screened_poisson \
 	#filter_sdfgpu \
 	#filter_select \
 	#filter_sketchfab \
