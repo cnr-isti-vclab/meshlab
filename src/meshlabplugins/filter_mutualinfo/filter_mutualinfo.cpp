@@ -121,15 +121,19 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	}
 }
 
-bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
+std::map<std::string, QVariant> FilterMutualInfoPlugin::applyFilter(
+		const QAction *action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos* )
 {
 	if (glContext == nullptr){
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :
-		return imageMutualInfoAlign(
+		imageMutualInfoAlign(
 					md,
 					par.getEnum("Rendering Mode"), par.getBool("Estimate Focal"),
 					par.getBool("Fine"), par.getFloat("ExpectedVariance"),
@@ -137,9 +141,9 @@ bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md
 					par.getInt("BackgroundWeight"), par.getShotf("Shot"));
 		break;
 	default :
-		assert(0);
-		return false;
+		wrongActionCalled(action);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterMutualInfoPlugin::postCondition(const QAction*) const
@@ -147,7 +151,7 @@ int FilterMutualInfoPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-bool FilterMutualInfoPlugin::imageMutualInfoAlign(
+void FilterMutualInfoPlugin::imageMutualInfoAlign(
 		MeshDocument& md,
 		int rendmode,
 		bool estimateFocal,
@@ -162,12 +166,12 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 	MutualInfo mutual;
 	if (!shot.IsValid()){
 		log(GLLogStream::FILTER, "Error: shot not valid. Press 'Get Shot' button before applying!");
-		return false;
+		throw MLException("Error: shot not valid. Press 'Get Shot' button before applying!");
 	}
 
 	if (md.rasterList.size()==0) {
 		log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
-		return false;
+		throw MLException("You need a Raster Model to apply this filter!");
 	}
 	else {
 		align.image=&md.rm()->currentPlane->image;
@@ -219,7 +223,7 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 	align.setGLContext(glContext);
 	glContext->makeCurrent();
 	if (initGLMutualInfo() == false)
-		return false;
+		throw MLException("Error while initializing GL.");
 
 	log( "Done");
 
@@ -253,8 +257,6 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		md.documentUpdated();
 	}
 	this->glContext->doneCurrent();
-
-	return true;
 }
 
 bool FilterMutualInfoPlugin::initGLMutualInfo()

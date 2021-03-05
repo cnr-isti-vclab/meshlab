@@ -49,14 +49,19 @@ public:
 	bool requiresGLContext(const QAction* action) const;
 	FILTER_ARITY filterArity(const QAction*) const;
 	void initParameterList(const QAction*, MeshDocument &, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction*) const;
 
 private:
 	AlignSet align;
 
 	//mutualInfo
-	bool imageMutualInfoAlign(
+	void imageMutualInfoAlign(
 			MeshDocument &md,
 			int rendmode,
 			bool estimateFocal,

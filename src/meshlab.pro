@@ -71,7 +71,7 @@ SUBDIRS += \ #sub projects names
 	filter_layer \
 	filter_mls \
 	filter_mutualglobal \
-	#filter_mutualinfo \
+	filter_mutualinfo \
 	#filter_plymc \
 	#filter_qhull \
 	#filter_quality \
