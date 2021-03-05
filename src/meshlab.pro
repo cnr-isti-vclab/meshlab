@@ -72,7 +72,7 @@ SUBDIRS += \ #sub projects names
 	filter_mls \
 	filter_mutualglobal \
 	filter_mutualinfo \
-	#filter_plymc \
+	filter_plymc \
 	#filter_qhull \
 	#filter_quality \
 	#filter_sampling \
