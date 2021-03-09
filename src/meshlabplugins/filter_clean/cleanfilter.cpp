@@ -37,29 +37,30 @@ int SnapVertexBorder(CMeshO &m, Scalarm threshold,vcg::CallBackPos * cb);
 
 CleanFilter::CleanFilter()
 {
-	typeList
-			<< FP_BALL_PIVOTING
-			<< FP_REMOVE_WRT_Q
-			<< FP_REMOVE_ISOLATED_COMPLEXITY
-			<< FP_REMOVE_ISOLATED_DIAMETER
-			<< FP_REMOVE_TVERTEX_FLIP
-			<< FP_REMOVE_TVERTEX_COLLAPSE
-			<< FP_SNAP_MISMATCHED_BORDER
-			<< FP_REMOVE_DUPLICATE_FACE
-			<< FP_REMOVE_FOLD_FACE
-			<< FP_REMOVE_NON_MANIF_EDGE
-			<< FP_REMOVE_NON_MANIF_EDGE_SPLIT
-			<< FP_REMOVE_NON_MANIF_VERT
-			<< FP_REMOVE_UNREFERENCED_VERTEX
-			<< FP_REMOVE_DUPLICATED_VERTEX
-			<< FP_REMOVE_FACE_ZERO_AREA
-			<< FP_MERGE_CLOSE_VERTEX
-			<< FP_MERGE_WEDGE_TEX
-			<< FP_COMPACT_FACE
-			<< FP_COMPACT_VERT;
+	typeList = {
+		FP_BALL_PIVOTING,
+		FP_REMOVE_WRT_Q,
+		FP_REMOVE_ISOLATED_COMPLEXITY,
+		FP_REMOVE_ISOLATED_DIAMETER,
+		FP_REMOVE_TVERTEX_FLIP,
+		FP_REMOVE_TVERTEX_COLLAPSE,
+		FP_SNAP_MISMATCHED_BORDER,
+		FP_REMOVE_DUPLICATE_FACE,
+		FP_REMOVE_FOLD_FACE,
+		FP_REMOVE_NON_MANIF_EDGE,
+		FP_REMOVE_NON_MANIF_EDGE_SPLIT,
+		FP_REMOVE_NON_MANIF_VERT,
+		FP_REMOVE_UNREFERENCED_VERTEX,
+		FP_REMOVE_DUPLICATED_VERTEX,
+		FP_REMOVE_FACE_ZERO_AREA,
+		FP_MERGE_CLOSE_VERTEX,
+		FP_MERGE_WEDGE_TEX,
+		FP_COMPACT_FACE,
+		FP_COMPACT_VERT
+	};
 
 	for(ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 	
 	QCoreApplication* app = QCoreApplication::instance();
 	if (app != nullptr)
@@ -67,8 +68,6 @@ CleanFilter::CleanFilter()
 }
 
 CleanFilter::~CleanFilter() {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString CleanFilter::pluginName() const

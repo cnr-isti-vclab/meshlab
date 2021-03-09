@@ -38,6 +38,7 @@ class ExtraSampleDynPlugin : public QObject, public FilterPlugin
 		enum { FP_VERTEX_COLOR_NOISE  } ;
 
 	ExtraSampleDynPlugin();
+	virtual ~ExtraSampleDynPlugin();
 
 	QString pluginName() const;
 	virtual QString filterName(ActionIDType filter) const;

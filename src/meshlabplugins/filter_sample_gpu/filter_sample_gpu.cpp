@@ -34,10 +34,10 @@ using namespace glw;
 
 ExtraSampleGPUPlugin::ExtraSampleGPUPlugin()
 {
-	typeList << FP_GPU_EXAMPLE;
+	typeList = {FP_GPU_EXAMPLE};
 
-  foreach(ActionIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString ExtraSampleGPUPlugin::pluginName() const

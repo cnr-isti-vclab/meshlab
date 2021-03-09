@@ -35,13 +35,23 @@ using namespace tri;
 
 FilterCreate::FilterCreate()
 {
-	typeList << CR_BOX<< CR_ANNULUS << CR_SPHERE<< CR_SPHERE_CAP
-			 << CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON
-			 << CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS
-			 << CR_FITPLANE;
+	typeList = {
+		CR_BOX,
+		CR_ANNULUS,
+		CR_SPHERE,
+		CR_SPHERE_CAP,
+		CR_RANDOM_SPHERE,
+		CR_ICOSAHEDRON,
+		CR_DODECAHEDRON,
+		CR_TETRAHEDRON,
+		CR_OCTAHEDRON,
+		CR_CONE,
+		CR_TORUS,
+		CR_FITPLANE
+	};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterCreate::pluginName() const

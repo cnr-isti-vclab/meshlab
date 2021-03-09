@@ -110,8 +110,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 	}
 
 	for (FilterPlugin* fp : pm.filterPluginIterator()){
-		QList<QAction*> acts = fp->actions();
-		for (QAction* act : acts) {
+		for (QAction* act : fp->actions()) {
 			QString originalFilterName = fp->filterName(act);
 			QString description = fp->filterInfo(act);
 			QString pythonFilterName = fp->pythonFilterName(act);

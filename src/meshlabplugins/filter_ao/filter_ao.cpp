@@ -45,11 +45,12 @@ static GLuint vs, fs, shdrID;
 
 AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 {
-    typeList
-		<< FP_AMBIENT_OCCLUSION;
+	typeList = {
+		FP_AMBIENT_OCCLUSION
+	};
 
-    foreach(ActionIDType tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 
     init = false;
     useGPU = AMBOCC_USEGPU_BY_DEFAULT;

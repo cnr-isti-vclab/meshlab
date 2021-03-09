@@ -33,10 +33,10 @@ void DecoratePlugin::initGlobalParameterList(const QAction* /*format*/, RichPara
 QAction* DecoratePlugin::action(QString name) const
 {
 	QString n = name;
-	foreach(QAction *tt, actions())
+	for(QAction *tt : actions())
 		if (name == this->decorationName(ID(tt))) return tt;
 	n.replace("&","");
-	foreach(QAction *tt, actions())
+	for(QAction *tt : actions())
 		if (n == this->decorationName(ID(tt))) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));

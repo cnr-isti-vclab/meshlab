@@ -26,14 +26,19 @@
 /**
  * @brief Constructor usually performs only two simple tasks of filling the two lists
  *  - typeList: with all the possible id of the filtering actions
- *  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+ *  - actionList with the corresponding actions. If you want to add icons to
+ *  your filtering actions you can do here by construction the QActions accordingly
  */
 FilterSamplePlugin::FilterSamplePlugin() 
 { 
-	typeList << FP_MOVE_VERTEX;
+	typeList = {FP_MOVE_VERTEX};
 
 	for(ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
+}
+
+FilterSamplePlugin::~FilterSamplePlugin()
+{
 }
 
 QString FilterSamplePlugin::pluginName() const

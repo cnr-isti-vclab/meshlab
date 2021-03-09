@@ -51,6 +51,7 @@ public:
 	enum { FP_MOVE_VERTEX  } ;
 
 	FilterSamplePlugin();
+	virtual ~FilterSamplePlugin();
 
 	QString pluginName() const;
 
