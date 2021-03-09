@@ -144,19 +144,19 @@ else()
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
 		meshlabplugins/filter_img_patch_param
-		#meshlabplugins/filter_isoparametrization
-		#meshlabplugins/filter_layer
-		#meshlabplugins/filter_measure
-		#meshlabplugins/filter_meshing
-		#meshlabplugins/filter_mls
-		#meshlabplugins/filter_mutualglobal
-		#meshlabplugins/filter_mutualinfo
-		#meshlabplugins/filter_plymc
-		#meshlabplugins/filter_qhull
-		#meshlabplugins/filter_quality
-		#meshlabplugins/filter_sampling
-		#meshlabplugins/filter_screened_poisson
-		#meshlabplugins/filter_sdfgpu
+		meshlabplugins/filter_isoparametrization
+		meshlabplugins/filter_layer
+		meshlabplugins/filter_measure
+		meshlabplugins/filter_meshing
+		meshlabplugins/filter_mls
+		meshlabplugins/filter_mutualglobal
+		meshlabplugins/filter_mutualinfo
+		meshlabplugins/filter_plymc
+		meshlabplugins/filter_qhull
+		meshlabplugins/filter_quality
+		meshlabplugins/filter_sampling
+		meshlabplugins/filter_screened_poisson
+		meshlabplugins/filter_sdfgpu
 		#meshlabplugins/filter_select
 		#meshlabplugins/filter_sketchfab
 		#meshlabplugins/filter_ssynth

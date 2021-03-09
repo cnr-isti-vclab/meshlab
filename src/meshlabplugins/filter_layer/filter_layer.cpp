@@ -40,25 +40,26 @@ using namespace vcg;
 // Constructor
 FilterLayerPlugin::FilterLayerPlugin()
 {
-	typeList <<
-				FP_FLATTEN <<
-				FP_MESH_VISIBILITY <<
-				FP_DELETE_MESH <<
-				FP_DELETE_NON_VISIBLE_MESH <<
-				FP_DELETE_RASTER <<
-				FP_DELETE_NON_SELECTED_RASTER <<
-				FP_SPLITSELECTEDFACES <<
-				FP_SPLITSELECTEDVERTICES <<
-				FP_SPLITCONNECTED <<
-				FP_RENAME_MESH <<
-				FP_RENAME_RASTER <<
-				FP_DUPLICATE <<
-				FP_SELECTCURRENT <<
-				FP_EXPORT_CAMERAS <<
-				FP_IMPORT_CAMERAS;
+	typeList = {
+		FP_FLATTEN,
+		FP_MESH_VISIBILITY,
+		FP_DELETE_MESH,
+		FP_DELETE_NON_VISIBLE_MESH,
+		FP_DELETE_RASTER,
+		FP_DELETE_NON_SELECTED_RASTER,
+		FP_SPLITSELECTEDFACES,
+		FP_SPLITSELECTEDVERTICES,
+		FP_SPLITCONNECTED,
+		FP_RENAME_MESH,
+		FP_RENAME_RASTER,
+		FP_DUPLICATE,
+		FP_SELECTCURRENT,
+		FP_EXPORT_CAMERAS,
+		FP_IMPORT_CAMERAS
+	};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterLayerPlugin::pluginName() const

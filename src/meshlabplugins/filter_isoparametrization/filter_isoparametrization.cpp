@@ -38,21 +38,20 @@ using namespace vcg;
 
 FilterIsoParametrization::FilterIsoParametrization()
 {
-	typeList << ISOP_PARAM
-			 << ISOP_REMESHING
-			 << ISOP_DIAMPARAM
-			 << ISOP_TRANSFER;
+	typeList = {
+		ISOP_PARAM,
+		ISOP_REMESHING,
+		ISOP_DIAMPARAM,
+		ISOP_TRANSFER
+	};
 	
-	ActionIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 	
 }
 
 FilterIsoParametrization::~FilterIsoParametrization()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterIsoParametrization::pluginName() const

@@ -43,17 +43,19 @@ typedef Histogram<Scalarm> Histogramm;
 
 FilterMeasurePlugin::FilterMeasurePlugin()
 { 
-	typeList << COMPUTE_TOPOLOGICAL_MEASURES
-			 << COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES
-			 << COMPUTE_GEOMETRIC_MEASURES
-			 << COMPUTE_AREA_PERIMETER_SELECTION
-			 << PER_VERTEX_QUALITY_STAT
-			 << PER_FACE_QUALITY_STAT
-			 << PER_VERTEX_QUALITY_HISTOGRAM
-			 << PER_FACE_QUALITY_HISTOGRAM;
+	typeList = {
+		COMPUTE_TOPOLOGICAL_MEASURES,
+		COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES,
+		COMPUTE_GEOMETRIC_MEASURES,
+		COMPUTE_AREA_PERIMETER_SELECTION,
+		PER_VERTEX_QUALITY_STAT,
+		PER_FACE_QUALITY_STAT,
+		PER_VERTEX_QUALITY_HISTOGRAM,
+		PER_FACE_QUALITY_HISTOGRAM
+	};
 
 	for(ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterMeasurePlugin::pluginName() const

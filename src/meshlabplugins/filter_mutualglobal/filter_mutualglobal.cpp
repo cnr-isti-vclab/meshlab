@@ -50,15 +50,15 @@ AlignSet alignset;
 
 FilterMutualGlobal::FilterMutualGlobal()
 {
-    typeList << FP_IMAGE_GLOBALIGN;
+	typeList = {FP_IMAGE_GLOBALIGN};
 
-  foreach(ActionIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterMutualGlobal::pluginName() const
 {
-    return "FilterMutualGlobal";
+	return "FilterMutualGlobal";
 }
 
 // ST() must return the very short string describing each filtering action

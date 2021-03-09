@@ -61,17 +61,21 @@ enum {
 
 MlsPlugin::MlsPlugin()
 {
-	typeList
-			<< FP_RIMLS_PROJECTION << FP_APSS_PROJECTION
-			   // 		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
-			<< FP_RIMLS_MCUBE << FP_APSS_MCUBE
-			<< FP_RIMLS_COLORIZE << FP_APSS_COLORIZE
-			<< FP_RADIUS_FROM_DENSITY
-			<< FP_SELECT_SMALL_COMPONENTS;
+	typeList= {
+		FP_RIMLS_PROJECTION,
+		FP_APSS_PROJECTION,
+		//FP_RIMLS_AFRONT, FP_APSS_AFRONT,
+		FP_RIMLS_MCUBE,
+		FP_APSS_MCUBE,
+		FP_RIMLS_COLORIZE,
+		FP_APSS_COLORIZE,
+		FP_RADIUS_FROM_DENSITY,
+		FP_SELECT_SMALL_COMPONENTS
+	};
 
 	// 	initFilterList(this);
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString MlsPlugin::pluginName() const

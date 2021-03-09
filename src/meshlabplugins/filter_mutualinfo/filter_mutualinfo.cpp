@@ -36,10 +36,10 @@
 
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
 {
-	typeList << FP_IMAGE_MUTUALINFO;
+	typeList= {FP_IMAGE_MUTUALINFO};
 
 	for(ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterMutualInfoPlugin::pluginName() const
