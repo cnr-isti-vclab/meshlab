@@ -34,10 +34,10 @@
 
 FilterSketchFabPlugin::FilterSketchFabPlugin()
 { 
-	typeList << FP_SKETCHFAB;
+	typeList = {FP_SKETCHFAB};
 
 	for(ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterSketchFabPlugin::pluginName() const

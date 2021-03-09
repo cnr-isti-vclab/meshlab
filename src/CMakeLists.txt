@@ -157,13 +157,13 @@ else()
 		meshlabplugins/filter_sampling
 		meshlabplugins/filter_screened_poisson
 		meshlabplugins/filter_sdfgpu
-		#meshlabplugins/filter_select
-		#meshlabplugins/filter_sketchfab
-		#meshlabplugins/filter_ssynth
-		#meshlabplugins/filter_texture
-		#meshlabplugins/filter_trioptimize
-		#meshlabplugins/filter_unsharp
-		#meshlabplugins/filter_voronoi
+		meshlabplugins/filter_select
+		meshlabplugins/filter_sketchfab
+		meshlabplugins/filter_ssynth
+		meshlabplugins/filter_texture
+		meshlabplugins/filter_trioptimize
+		meshlabplugins/filter_unsharp
+		meshlabplugins/filter_voronoi
 
 		# Rendering and Decoration Plugins
 		meshlabplugins/render_gdp

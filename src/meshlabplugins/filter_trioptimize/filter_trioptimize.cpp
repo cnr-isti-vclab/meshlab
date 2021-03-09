@@ -110,13 +110,14 @@ public:
 //    your filtering actions you can do here by construction the QActions accordingly
 TriOptimizePlugin::TriOptimizePlugin()
 {
-	typeList
-	<< FP_PLANAR_EDGE_FLIP
-	<< FP_CURVATURE_EDGE_FLIP
-	<< FP_NEAR_LAPLACIAN_SMOOTH;
+	typeList = {
+		FP_PLANAR_EDGE_FLIP,
+		FP_CURVATURE_EDGE_FLIP,
+		FP_NEAR_LAPLACIAN_SMOOTH
+	};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString TriOptimizePlugin::pluginName() const

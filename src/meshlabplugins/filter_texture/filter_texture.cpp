@@ -38,18 +38,20 @@ using namespace vcg;
 
 FilterTexturePlugin::FilterTexturePlugin()
 {
-	typeList << FP_VORONOI_ATLAS
-			 << FP_UV_WEDGE_TO_VERTEX
-			 << FP_UV_VERTEX_TO_WEDGE
-			 << FP_BASIC_TRIANGLE_MAPPING
-			 << FP_SET_TEXTURE
-			 << FP_PLANAR_MAPPING
-			 << FP_COLOR_TO_TEXTURE
-			 << FP_TRANSFER_TO_TEXTURE
-			 << FP_TEX_TO_VCOLOR_TRANSFER;
+	typeList = {
+		FP_VORONOI_ATLAS,
+		FP_UV_WEDGE_TO_VERTEX,
+		FP_UV_VERTEX_TO_WEDGE,
+		FP_BASIC_TRIANGLE_MAPPING,
+		FP_SET_TEXTURE,
+		FP_PLANAR_MAPPING,
+		FP_COLOR_TO_TEXTURE,
+		FP_TRANSFER_TO_TEXTURE,
+		FP_TEX_TO_VCOLOR_TRANSFER
+	};
 	
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterTexturePlugin::pluginName() const

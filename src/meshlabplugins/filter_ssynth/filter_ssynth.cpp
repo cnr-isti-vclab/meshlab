@@ -18,19 +18,21 @@ using namespace StructureSynth::Parser;
 using namespace StructureSynth::Model;
 using namespace StructureSynth::Model::Rendering;
 using namespace SyntopiaCore::Exceptions;
-FilterSSynth::FilterSSynth(){
-    typeList<< CR_SSYNTH;
-    this->renderTemplate= "";
-    for(ActionIDType tt : types())
-        actionList << new QAction(filterName(tt), this);
-    //num=0;
+
+
+FilterSSynth::FilterSSynth()
+{
+	typeList = {CR_SSYNTH};
+	this->renderTemplate= "";
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterSSynth::pluginName() const
 {
     return "FilterSSynth";
 }
-//FilterSSynth::~FilterSSynth(){}
+
 QString FilterSSynth::filterName(ActionIDType filter) const
 {
     switch(filter)

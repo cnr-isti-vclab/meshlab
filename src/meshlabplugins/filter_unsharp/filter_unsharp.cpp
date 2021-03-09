@@ -32,38 +32,36 @@ using namespace std;
 
 FilterUnsharp::FilterUnsharp()
 {
-  typeList <<
-              FP_CREASE_CUT <<
-              FP_LAPLACIAN_SMOOTH<<
-              FP_HC_LAPLACIAN_SMOOTH<<
-              FP_SD_LAPLACIAN_SMOOTH<<
-              FP_TWO_STEP_SMOOTH<<
-              FP_TAUBIN_SMOOTH<<
-              FP_DEPTH_SMOOTH<<
-              FP_DIRECTIONAL_PRESERVATION<<
-              FP_VERTEX_QUALITY_SMOOTHING<<
-              FP_FACE_NORMAL_SMOOTHING<<
-              FP_UNSHARP_NORMAL<<
-              FP_UNSHARP_GEOMETRY<<
-              FP_UNSHARP_QUALITY <<
-              FP_UNSHARP_VERTEX_COLOR <<
-              FP_RECOMPUTE_VERTEX_NORMAL <<
-              FP_RECOMPUTE_FACE_NORMAL <<
-              FP_RECOMPUTE_QUADFACE_NORMAL <<
-              FP_FACE_NORMAL_NORMALIZE <<
-              FP_VERTEX_NORMAL_NORMALIZE <<
-              FP_LINEAR_MORPH <<
-              FP_SCALAR_HARMONIC_FIELD;
+	typeList = {
+		FP_CREASE_CUT,
+		FP_LAPLACIAN_SMOOTH,
+		FP_HC_LAPLACIAN_SMOOTH,
+		FP_SD_LAPLACIAN_SMOOTH,
+		FP_TWO_STEP_SMOOTH,
+		FP_TAUBIN_SMOOTH,
+		FP_DEPTH_SMOOTH,
+		FP_DIRECTIONAL_PRESERVATION,
+		FP_VERTEX_QUALITY_SMOOTHING,
+		FP_FACE_NORMAL_SMOOTHING,
+		FP_UNSHARP_NORMAL,
+		FP_UNSHARP_GEOMETRY,
+		FP_UNSHARP_QUALITY,
+		FP_UNSHARP_VERTEX_COLOR,
+		FP_RECOMPUTE_VERTEX_NORMAL,
+		FP_RECOMPUTE_FACE_NORMAL,
+		FP_RECOMPUTE_QUADFACE_NORMAL,
+		FP_FACE_NORMAL_NORMALIZE,
+		FP_VERTEX_NORMAL_NORMALIZE,
+		FP_LINEAR_MORPH,
+		FP_SCALAR_HARMONIC_FIELD
+	};
 
-  ActionIDType tt;
-  foreach(tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 
 }
 
 FilterUnsharp::~FilterUnsharp() {
-    for (int i = 0; i < actionList.count() ; i++ )
-        delete actionList.at(i);
 }
 
 QString FilterUnsharp::pluginName() const
