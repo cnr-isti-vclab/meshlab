@@ -36,31 +36,30 @@ using namespace vcg;
 // Constructor
 FilterFunctionPlugin::FilterFunctionPlugin()
 {
-	typeList
-			<< FF_VERT_SELECTION
-			<< FF_FACE_SELECTION
-			<< FF_GEOM_FUNC
-			<< FF_WEDGE_TEXTURE_FUNC
-			<< FF_VERT_TEXTURE_FUNC
-			<< FF_FACE_COLOR
-			<< FF_VERT_COLOR
-			<< FF_VERT_QUALITY
-			<< FF_VERT_NORMAL
-			<< FF_FACE_QUALITY
-			<< FF_DEF_VERT_ATTRIB
-			<< FF_DEF_FACE_ATTRIB
-			<< FF_GRID
-			<< FF_ISOSURFACE
-			<< FF_REFINE;
+	typeList = {
+		FF_VERT_SELECTION,
+		FF_FACE_SELECTION,
+		FF_GEOM_FUNC,
+		FF_WEDGE_TEXTURE_FUNC,
+		FF_VERT_TEXTURE_FUNC,
+		FF_FACE_COLOR,
+		FF_VERT_COLOR,
+		FF_VERT_QUALITY,
+		FF_VERT_NORMAL,
+		FF_FACE_QUALITY,
+		FF_DEF_VERT_ATTRIB,
+		FF_DEF_FACE_ATTRIB,
+		FF_GRID,
+		FF_ISOSURFACE,
+		FF_REFINE
+	};
 	
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 FilterFunctionPlugin::~FilterFunctionPlugin()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterFunctionPlugin::pluginName() const

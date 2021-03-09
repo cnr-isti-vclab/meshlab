@@ -49,13 +49,13 @@ using namespace tri;
 
 FilterDirt::FilterDirt()
 {
+	typeList = {
+		FP_DIRT,
+		FP_CLOUD_MOVEMENT
+	};
 
-	typeList << FP_DIRT
-			 <<FP_CLOUD_MOVEMENT;
-
-	ActionIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterDirt::pluginName() const

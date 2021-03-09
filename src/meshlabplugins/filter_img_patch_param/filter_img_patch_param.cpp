@@ -36,13 +36,15 @@
 
 FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
 {
-	typeList << FP_PATCH_PARAM_ONLY
-			 << FP_PATCH_PARAM_AND_TEXTURING
-			 << FP_RASTER_VERT_COVERAGE
-			 << FP_RASTER_FACE_COVERAGE;
+	typeList = {
+		FP_PATCH_PARAM_ONLY,
+		FP_PATCH_PARAM_AND_TEXTURING,
+		FP_RASTER_VERT_COVERAGE,
+		FP_RASTER_FACE_COVERAGE
+	};
 	
-	foreach( ActionIDType tt , types() )
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 

@@ -57,13 +57,14 @@ static QString extractFilenameWOExt(MeshModel* mm)
 // Constructor
 FilterColorProjectionPlugin::FilterColorProjectionPlugin()
 {
-    typeList
-        <<  FP_SINGLEIMAGEPROJ
-        <<  FP_MULTIIMAGETRIVIALPROJ
-        <<  FP_MULTIIMAGETRIVIALPROJTEXTURE;
+	typeList = {
+		FP_SINGLEIMAGEPROJ,
+		FP_MULTIIMAGETRIVIALPROJ,
+		FP_MULTIIMAGETRIVIALPROJTEXTURE
+	};
 
-    foreach(ActionIDType tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterColorProjectionPlugin::pluginName() const
