@@ -28,6 +28,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <common/plugins/interfaces/filter_plugin.h>
 #include <common/plugins/interfaces/iomesh_plugin.h>
@@ -91,11 +92,15 @@ void PluginInfoDialog::uninstallPluginPushButtonClicked()
 	pm.unloadPlugin(fpi);
 	bool res = QFile::remove(fdel.absoluteFilePath());
 	if (!res){
+		QSettings settings;
+		QStringList toDeletePlugins = settings.value("ToDeletePlugins").value<QStringList>();
+		toDeletePlugins.append(fdel.absoluteFilePath());
+		settings.setValue("ToDeletePlugins", toDeletePlugins);
 		//pm.loadPlugin(fdel.absoluteFilePath());
-		QMessageBox::warning(
-					this, "Error while deleting plugin.", 
-					"Impossible to delete the plugin. Please delete manually the following file (or disable the plugin):\n"
-					+ fdel.absoluteFilePath());
+		//QMessageBox::warning(
+		//			this, "Error while deleting plugin.",
+		//			"Impossible to delete the plugin. Please delete manually the following file (or disable the plugin):\n"
+		//			+ fdel.absoluteFilePath());
 	}
 	ui->treeWidget->clear();
 	populateTreeWidget();
