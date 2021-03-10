@@ -54,6 +54,21 @@ MainWindow::MainWindow():
 	PM(meshlab::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {
+	QSettings settings;
+	//toDelete plugins, flagged in the last session
+	//this is needed on windows, since it refuses to delete dll plugins while meshlab is
+	//running. Therefore, in these cases plugins that are going to be deleted are
+	//saved in this list, and the files are removed in the next meshlab session,
+	//BEFORE they will be loaded. Therefore, these lines need to be executed
+	//before the PM.loadPlugins call.
+	QStringList toDeletePlugins = settings.value("ToDeletePlugins").value<QStringList>();
+	if (!toDeletePlugins.isEmpty()){
+		for (const QString& file : toDeletePlugins){
+			QFile::remove(file);
+		}
+	}
+	settings.remove("ToDeletePlugins");
+
 	setContextMenuPolicy(Qt::NoContextMenu);
 
 	//workspace = new QWorkspace(this);
@@ -70,7 +85,6 @@ MainWindow::MainWindow():
 	catch (const MLException& e) {
 		QMessageBox::warning(this, "Error while loading plugins.", e.what());
 	}
-	QSettings settings;
 	
 	//disable previously disabled plugins
 	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
@@ -78,7 +92,6 @@ MainWindow::MainWindow():
 		if (disabledPlugins.contains(fp->pluginName()))
 			PM.disablePlugin(fp);
 	}
-	
 
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
