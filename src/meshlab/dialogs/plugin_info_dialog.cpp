@@ -89,7 +89,14 @@ void PluginInfoDialog::uninstallPluginPushButtonClicked()
 	MeshLabPluginFile* fpi = pm[nPlug];
 	QFileInfo fdel = fpi->pluginFileInfo();
 	pm.unloadPlugin(fpi);
-	QFile::remove(fdel.absoluteFilePath());
+	bool res = QFile::remove(fdel.absoluteFilePath());
+	if (!res){
+		//pm.loadPlugin(fdel.absoluteFilePath());
+		QMessageBox::warning(
+					this, "Error while deleting plugin.", 
+					"Impossible to delete the plugin. Please delete manually the following file (or disable the plugin):\n"
+					+ fdel.absoluteFilePath());
+	}
 	ui->treeWidget->clear();
 	populateTreeWidget();
 	ui->treeWidget->update();
