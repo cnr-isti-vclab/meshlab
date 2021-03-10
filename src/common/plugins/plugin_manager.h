@@ -31,9 +31,8 @@
 #include "containers/ioraster_plugin_container.h"
 #include "containers/render_plugin_container.h"
 
-#include<QMap>
-#include<QObject>
-#include <QDir>
+#include <QPluginLoader>
+#include <QObject>
 
 /**
  * @brief The PluginManager class provides the basic tools for managing all the plugins.
@@ -91,6 +90,7 @@ public:
 private:
 	//all plugins
 	std::vector<MeshLabPluginFile*> allPlugins;
+	std::vector<QPluginLoader*> allPluginLoaders;
 	std::set<QString> pluginFiles; //used to check if a plugin file has been already loaded
 
 	//Plugin containers: used for better organization of each type of plugin

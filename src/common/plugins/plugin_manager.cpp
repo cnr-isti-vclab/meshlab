@@ -22,13 +22,14 @@
 ****************************************************************************/
 
 #include "plugin_manager.h"
-#include "meshlab_plugin_type.h"
+
 #include <QObject>
-#include <qapplication.h>
-#include <QPluginLoader>
-#include <QDebug>
+#include <QDir>
+#include <QApplication>
+
 #include <vcg/complex/algorithms/create/platonic.h>
 
+#include "meshlab_plugin_type.h"
 #include "../mlexception.h"
 #include "../globals.h"
 
@@ -53,8 +54,10 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-	for (auto& plugin : allPlugins)
+	for (auto& plugin : allPluginLoaders){
+		plugin->unload();
 		delete plugin;
+	}
 }
 
 /**
@@ -121,6 +124,8 @@ void PluginManager::checkPlugin(const QString& filename)
 	if (type.isFilterPlugin()){
 		checkFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
+
+	loader.unload();
 }
 
 /**
@@ -188,8 +193,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 	checkPlugin(fileName);
 
 	//load the plugin depending on the type (can be more than one type!)
-	QPluginLoader loader(fin.absoluteFilePath());
-	QObject *plugin = loader.instance();
+	QPluginLoader* loader = new QPluginLoader(fin.absoluteFilePath());
+	QObject *plugin = loader->instance();
 	MeshLabPluginFile* ifp = dynamic_cast<MeshLabPluginFile *>(plugin);
 	MeshLabPluginType type(ifp);
 	
@@ -216,6 +221,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	//of all plugins
 	ifp->plugFileInfo = fin;
 	allPlugins.push_back(ifp);
+	allPluginLoaders.push_back(loader);
 	pluginFiles.insert(fin.absoluteFilePath());
 }
 
@@ -223,6 +229,7 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 {
 	auto it = std::find(allPlugins.begin(), allPlugins.end(), ifp);
 	if (it != allPlugins.end()){
+		unsigned int index = it - allPlugins.begin();
 		MeshLabPluginType type(ifp);
 		if (type.isDecoratePlugin()){
 			decoratePlugins.eraseDecoratePlugin(dynamic_cast<DecoratePlugin *>(ifp));
@@ -242,8 +249,11 @@ void PluginManager::unloadPlugin(MeshLabPluginFile* ifp)
 		if (type.isRenderPlugin()){
 			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPlugin *>(ifp));
 		}
+		QPluginLoader* l = allPluginLoaders[index];
+		allPluginLoaders.erase(allPluginLoaders.begin() + index);
 		allPlugins.erase(it);
-		delete ifp;
+		l->unload();
+		delete l;
 	}
 }
 
