@@ -40,7 +40,7 @@ QString EditMutualCorrsFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditMutualCorrsFactory::getEditTool(const QAction *action)
+EditTool* EditMutualCorrsFactory::getEditTool(const QAction *action)
 {
 	if(action == editMutualCorrs) {
 		return new EditMutualCorrsPlugin();

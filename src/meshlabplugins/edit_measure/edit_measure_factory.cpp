@@ -40,7 +40,7 @@ QString EditMeasureFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditMeasureFactory::getEditTool(const QAction *action)
+EditTool* EditMeasureFactory::getEditTool(const QAction *action)
 {
 	if(action == editMeasure){
 		return new EditMeasurePlugin();

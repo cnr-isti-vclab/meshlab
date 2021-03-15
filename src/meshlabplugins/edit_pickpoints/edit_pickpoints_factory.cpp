@@ -40,7 +40,7 @@ QString EditPickPointsFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditPickPointsFactory::getEditTool(const QAction *action)
+EditTool* EditPickPointsFactory::getEditTool(const QAction *action)
 {
 	if(action == editPickPoints) {
 		return new EditPickPointsPlugin();

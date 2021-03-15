@@ -40,7 +40,7 @@ QString EditAlignFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditAlignFactory::getEditTool(const QAction *action)
+EditTool* EditAlignFactory::getEditTool(const QAction *action)
 {
 	assert(action == editAlign); (void) action;
 	return new EditAlignPlugin();

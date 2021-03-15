@@ -40,7 +40,7 @@ QString EditReferencingFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditReferencingFactory::getEditTool(const QAction *action)
+EditTool* EditReferencingFactory::getEditTool(const QAction *action)
 {
 	if(action == editReferencing) {
 		return new EditReferencingPlugin();

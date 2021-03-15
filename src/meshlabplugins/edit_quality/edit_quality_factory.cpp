@@ -41,7 +41,7 @@ QString QualityMapperFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* QualityMapperFactory::getEditTool(const QAction *action)
+EditTool* QualityMapperFactory::getEditTool(const QAction *action)
 {
 	if(action == editQuality)
 	{

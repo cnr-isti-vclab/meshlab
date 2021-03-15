@@ -352,13 +352,13 @@ public:
     QAction * getCurrentEditAction() { return currentEditor; }
 
     //get the currently active mesh editor
-    EditPlugin * getCurrentMeshEditor() { return iEdit; }
+    EditTool * getCurrentMeshEditor() { return iEdit; }
 
     //see if this glAarea has a MESHEditInterface for this action
     bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
 
     //add a MeshEditInterface for the given action
-    void addMeshEditor(QAction *editAction, EditPlugin *editor){ actionToMeshEditMap.insert(editAction, editor); }
+    void addMeshEditor(QAction *editAction, EditTool *editor){ actionToMeshEditMap.insert(editAction, editor); }
     bool readyToClose();
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
@@ -453,10 +453,10 @@ private:
     QFont	qFont;			//font settings
 
     // Editing support
-    EditPlugin *iEdit;
+    EditTool *iEdit;
     QAction *currentEditor;
     QAction *suspendedEditRef; // reference to last Editing Mode Used
-    QMap<QAction*, EditPlugin*> actionToMeshEditMap;
+    QMap<QAction*, EditTool*> actionToMeshEditMap;
 
     //the last model that start edit was called with
     MeshModel *lastModelEdited;

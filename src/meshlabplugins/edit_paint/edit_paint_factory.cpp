@@ -40,7 +40,7 @@ QString EditPaintFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditPaintFactory::getEditTool(const QAction *action)
+EditTool* EditPaintFactory::getEditTool(const QAction *action)
 {
 	if(action == editPaint) {
 		return new EditPaintPlugin();

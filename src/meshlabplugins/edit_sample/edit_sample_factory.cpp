@@ -40,7 +40,7 @@ QString SampleEditFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* SampleEditFactory::getEditTool(const QAction *action)
+EditTool* SampleEditFactory::getEditTool(const QAction *action)
 {
 	if(action == editSample)
 	{

@@ -46,7 +46,7 @@ QString EditSelectFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditSelectFactory::getEditTool(const QAction *action)
+EditTool* EditSelectFactory::getEditTool(const QAction *action)
 {
 	if(action == editSelect)
 		return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);

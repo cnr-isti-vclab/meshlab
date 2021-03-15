@@ -42,7 +42,7 @@ QString PointEditFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* PointEditFactory::getEditTool(const QAction *action)
+EditTool* PointEditFactory::getEditTool(const QAction *action)
 {
 	if(action == editPoint)
 		return new EditPointPlugin(EditPointPlugin::SELECT_DEFAULT_MODE);

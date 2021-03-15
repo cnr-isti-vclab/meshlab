@@ -42,7 +42,7 @@ public:
 	virtual QString pluginName() const;
 
 	//get the edit tool for the given action
-	virtual EditPlugin* getEditTool(const QAction*);
+	virtual EditTool* getEditTool(const QAction*);
 
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction*);

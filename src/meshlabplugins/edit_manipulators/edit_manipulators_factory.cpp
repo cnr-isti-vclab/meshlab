@@ -40,7 +40,7 @@ QString EditManipulatorsFactory::pluginName() const
 }
 
 //get the edit tool for the given action
-EditPlugin* EditManipulatorsFactory::getEditTool(const QAction *action)
+EditTool* EditManipulatorsFactory::getEditTool(const QAction *action)
 {
 	if(action == editManipulators) {
 		return new EditManipulatorsPlugin();

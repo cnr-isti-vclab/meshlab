@@ -34,16 +34,16 @@
 class GLArea;
 
 /**
- * @brief The EditPlugin class is used to provide tools that needs some kind of 
+ * @brief The EditTool class is used to provide tools that needs some kind of
  * interaction with the mesh. Editing tools are exclusive (only one at a time) 
  * and can grab the mouse events and customize the rendering process.
  **/
 
-class EditPlugin : public MeshLabPlugin
+class EditTool : public MeshLabPlugin
 {
 public:
-	EditPlugin() : MeshLabPlugin() {}
-	virtual ~EditPlugin() {}
+	EditTool() : MeshLabPlugin() {}
+	virtual ~EditTool() {}
 
 	//should return a sentence describing what the editing tool does
 	static const QString info();
@@ -112,7 +112,7 @@ public:
 	virtual std::list<QAction *> actions() const {return actionList;};
 
 	//get the edit tool for the given action
-	virtual EditPlugin* getEditTool(const QAction *) = 0;
+	virtual EditTool* getEditTool(const QAction *) = 0;
 
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction *) = 0;
@@ -128,10 +128,10 @@ protected:
 		} \
 	private:
 
-#define EDIT_PLUGIN_IID  "vcg.meshlab.EditPlugin/1.0"
+#define EDIT_TOOL_IID  "vcg.meshlab.EditTool/1.0"
 #define EDIT_PLUGIN_FACTORY_IID  "vcg.meshlab.EditPluginFactory/1.0"
 
-Q_DECLARE_INTERFACE(EditPlugin, EDIT_PLUGIN_IID)
+Q_DECLARE_INTERFACE(EditTool, EDIT_TOOL_IID)
 Q_DECLARE_INTERFACE(EditPluginFactory, EDIT_PLUGIN_FACTORY_IID)
 
 
