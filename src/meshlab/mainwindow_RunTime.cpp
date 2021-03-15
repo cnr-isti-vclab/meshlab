@@ -395,7 +395,7 @@ void MainWindow::updateMenus()
 		// you exit from editing mode by pressing again the editing button
 		// When you are in a editing mode all the other editing are disabled.
 		
-		for (EditPluginFactory* ep : PM.editPluginFactoryIterator())
+		for (EditPlugin* ep : PM.editPluginFactoryIterator())
 			for (QAction* a : ep->actions()) {
 				a->setChecked(false);
 				a->setEnabled(GLA()->getCurrentEditAction() == nullptr);
@@ -432,7 +432,7 @@ void MainWindow::updateMenus()
 	} // if active
 	else
 	{
-		for (EditPluginFactory* ep : PM.editPluginFactoryIterator()) {
+		for (EditPlugin* ep : PM.editPluginFactoryIterator()) {
 			for (QAction* a : ep->actions()) {
 				a->setEnabled(false);
 			}
@@ -1406,7 +1406,7 @@ void MainWindow::applyEditMode()
 	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
 	if(!GLA()->editorExistsForAction(action))
 	{
-		EditPluginFactory *iEditFactory = qobject_cast<EditPluginFactory *>(action->parent());
+		EditPlugin *iEditFactory = qobject_cast<EditPlugin *>(action->parent());
 		EditTool *iEdit = iEditFactory->getEditTool(action);
 		GLA()->addMeshEditor(action, iEdit);
 	}
@@ -2750,7 +2750,7 @@ void MainWindow::aboutPlugins()
 	updateAllPluginsActions();
 	QSettings settings;
 	QStringList disabledPlugins;
-	for (MeshLabPluginFile* pf : PM.pluginIterator(true)){
+	for (MeshLabPlugin* pf : PM.pluginIterator(true)){
 		if (!pf->isEnabled()){
 			disabledPlugins.append(pf->pluginName());
 		}

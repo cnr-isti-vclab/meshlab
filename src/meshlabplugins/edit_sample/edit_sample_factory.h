@@ -28,11 +28,11 @@
 #include <QObject>
 #include <common/plugins/interfaces/edit_plugin.h>
 
-class SampleEditFactory : public QObject, public EditPluginFactory
+class SampleEditFactory : public QObject, public EditPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_FACTORY_IID)
-	Q_INTERFACES(EditPluginFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_IID)
+	Q_INTERFACES(EditPlugin)
 
 public:
 	SampleEditFactory();

@@ -43,7 +43,7 @@ QAction* DecoratePlugin::action(QString name) const
 	return 0;
 }
 
-MeshLabPluginFile::ActionIDType DecoratePlugin::ID(const QAction* a) const
+MeshLabPlugin::ActionIDType DecoratePlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	foreach(ActionIDType tt, types())
@@ -57,7 +57,7 @@ MeshLabPluginFile::ActionIDType DecoratePlugin::ID(const QAction* a) const
 	return -1;
 }
 
-MeshLabPluginFile::ActionIDType DecoratePlugin::ID(QString name) const
+MeshLabPlugin::ActionIDType DecoratePlugin::ID(QString name) const
 {
 	QString n = name;
 	foreach(ActionIDType tt, types())

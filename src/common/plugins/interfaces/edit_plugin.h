@@ -27,7 +27,7 @@
 #include <QTabletEvent>
 
 #include "meshlab_plugin_logger.h"
-#include "meshlab_plugin_file.h"
+#include "meshlab_plugin.h"
 #include "../../ml_document/mesh_document.h"
 
 
@@ -94,19 +94,19 @@ public:
 
 
 /** 
- * @brief The EditPluginFactory class  is used to generate an action for each 
- * starting of an editing filter.
+ * @brief The EditPlugin class  is used to generate an action for each
+ * starting of an editing tool.
  *
- * This is needed because editing filters have a internal state, so if you want 
+ * This is needed because editing tools have a internal state, so if you want
  * to have an editing tool for two different documents you have to instance 
  * two objects. This class is used by the framework to generate an independent 
- * EditPlugin for each document.
+ * EditTool for each document.
  */
-class EditPluginFactory : public MeshLabPluginFile
+class EditPlugin : public MeshLabPlugin
 {
 public:
-	EditPluginFactory() {}
-	virtual ~EditPluginFactory() {}
+	EditPlugin() {}
+	virtual ~EditPlugin() {}
 
 	//gets a list of actions available from this plugin
 	virtual std::list<QAction *> actions() const {return actionList;};
@@ -121,8 +121,8 @@ protected:
 	std::list<QAction*> actionList;
 };
 
-#define EDIT_PLUGIN_FACTORY_IID  "vcg.meshlab.EditPluginFactory/1.0"
-Q_DECLARE_INTERFACE(EditPluginFactory, EDIT_PLUGIN_FACTORY_IID)
+#define EDIT_PLUGIN_IID  "vcg.meshlab.EditPlugin/1.0"
+Q_DECLARE_INTERFACE(EditPlugin, EDIT_PLUGIN_IID)
 
 
 #endif // MESHLAB_EDIT_PLUGIN_H

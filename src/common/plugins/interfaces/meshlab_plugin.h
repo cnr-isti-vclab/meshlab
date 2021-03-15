@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_FILE_H
-#define MESHLAB_PLUGIN_FILE_H
+#ifndef MESHLAB_PLUGIN_H
+#define MESHLAB_PLUGIN_H
 
 #include <string>
 #include <QFileInfo>
@@ -44,13 +44,13 @@
  * Moreover ID are UNSAFE (different plugin can have same id) so they should be
  * used only INTERNALLY.
  */
-class MeshLabPluginFile
+class MeshLabPlugin
 {
 public:
 	friend class PluginManager;
 	
-	MeshLabPluginFile() : enabled(true) {};
-	virtual ~MeshLabPluginFile() {}
+	MeshLabPlugin() : enabled(true) {};
+	virtual ~MeshLabPlugin() {}
 	
 	/**
 	 * @brief the type used to identify plugin actions;
@@ -101,4 +101,4 @@ private:
 	private: 
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 
-#endif // MESHLAB_PLUGIN_FILE_H
+#endif // MESHLAB_PLUGIN_H

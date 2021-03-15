@@ -26,12 +26,12 @@
 
 class QString;
 
-class MeshLabPluginFile;
+class MeshLabPlugin;
 
 class MeshLabPluginType
 {
 public:
-	MeshLabPluginType(const MeshLabPluginFile* fpi);
+	MeshLabPluginType(const MeshLabPlugin* fpi);
 
 	bool isValid() const;
 	bool isDecoratePlugin() const;

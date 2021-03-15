@@ -27,11 +27,11 @@
 #include <QObject>
 #include <common/plugins/interfaces/edit_plugin.h>
 
-class EditMutualCorrsFactory : public QObject, public EditPluginFactory
+class EditMutualCorrsFactory : public QObject, public EditPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_FACTORY_IID)
-	Q_INTERFACES(EditPluginFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_IID)
+	Q_INTERFACES(EditPlugin)
 
 public:
 	EditMutualCorrsFactory();

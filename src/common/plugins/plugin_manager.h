@@ -51,10 +51,10 @@ public:
 	void loadPlugins();
 	void loadPlugins(QDir pluginsDirectory);
 	void loadPlugin(const QString& filename);
-	void unloadPlugin(MeshLabPluginFile* ifp);
+	void unloadPlugin(MeshLabPlugin* ifp);
 
-	void enablePlugin(MeshLabPluginFile* ifp);
-	void disablePlugin(MeshLabPluginFile* ifp);
+	void enablePlugin(MeshLabPlugin* ifp);
+	void disablePlugin(MeshLabPlugin* ifp);
 
 	unsigned int size() const;
 	int numberIOPlugins() const;
@@ -76,7 +76,7 @@ public:
 	QStringList outputMeshFormatListDialog() const;
 	QStringList inputRasterFormatListDialog() const;
 	
-	MeshLabPluginFile* operator [](unsigned int i) const;
+	MeshLabPlugin* operator [](unsigned int i) const;
 
 	/** Member functions for range iterators **/
 	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
@@ -89,7 +89,7 @@ public:
 
 private:
 	//all plugins
-	std::vector<MeshLabPluginFile*> allPlugins;
+	std::vector<MeshLabPlugin*> allPlugins;
 	std::vector<QPluginLoader*> allPluginLoaders;
 	std::set<QString> pluginFiles; //used to check if a plugin file has been already loaded
 
@@ -115,8 +115,8 @@ class PluginManager::PluginRangeIterator
 {
 	friend class PluginManager;
 public:
-	ConstPluginIterator<MeshLabPluginFile> begin();
-	ConstPluginIterator<MeshLabPluginFile> end();
+	ConstPluginIterator<MeshLabPlugin> begin();
+	ConstPluginIterator<MeshLabPlugin> end();
 private:
 	PluginRangeIterator(const PluginManager* pm, bool iterateAlsoDisabledPlugins = false);
 	const PluginManager* pm;

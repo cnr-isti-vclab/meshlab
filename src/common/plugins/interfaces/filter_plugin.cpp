@@ -47,7 +47,7 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 	return MissingItems.isEmpty();
 }
 
-MeshLabPluginFile::ActionIDType FilterPlugin::ID(const QAction* a) const
+MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	for(ActionIDType tt : qAsConst(typeList))

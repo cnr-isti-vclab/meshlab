@@ -25,7 +25,7 @@
 #define MESHLAB_RENDER_PLUGIN_H
 
 #include "meshlab_plugin_logger.h"
-#include "meshlab_plugin_file.h"
+#include "meshlab_plugin.h"
 #include "../../ml_shared_data_context/ml_scene_gl_shared_data_context.h"
 
 /**
@@ -50,7 +50,7 @@
 
 class GLArea;
 
-class RenderPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPluginLogger
+class RenderPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
 public:
 	RenderPlugin() :MeshLabPluginLogger() {}

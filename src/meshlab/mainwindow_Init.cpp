@@ -88,7 +88,7 @@ MainWindow::MainWindow():
 	
 	//disable previously disabled plugins
 	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
-	for (MeshLabPluginFile* fp : PM.pluginIterator(true)){
+	for (MeshLabPlugin* fp : PM.pluginIterator(true)){
 		if (disabledPlugins.contains(fp->pluginName()))
 			PM.disablePlugin(fp);
 	}
@@ -508,7 +508,7 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator()) {
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
@@ -881,7 +881,7 @@ void MainWindow::fillEditMenu()
 {
 	clearMenu(editMenu);
 	editMenu->addAction(suspendEditModeAct);
-	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator())
+	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator())
 	{
 		for(QAction* editAction: iEditFactory->actions())
 		{
@@ -921,7 +921,7 @@ void MainWindow::updateAllPluginsActions()
 	
 	editToolBar->clear();
 	editToolBar->addAction(suspendEditModeAct);
-	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator()) {
+	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator()) {
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);

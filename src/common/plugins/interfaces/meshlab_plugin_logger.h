@@ -26,19 +26,19 @@
 
 #include <QAction>
 
-#include "meshlab_plugin_file.h"
+#include "meshlab_plugin.h"
 #include "../../GLLogStream.h"
 #include "../../parameters/rich_parameter_list.h"
 #include "../../globals.h"
 
 /**
- * @brief The PluginLogger provides some common log functionalities that are
- * used by meshlab.
+ * @brief The MeshLabPluginLogger provides some common log functionalities that are
+ * used by MeshLab.
  *
- * Each MeshLab abstract plugin class inherit from this class in order to make
+ * Each MeshLab abstract plugin class inherits from this class in order to make
  * available log member functions to plugins.
  * The only exception is the EditPlugin class, since it is not the Edit plugin
- * that should be able to log, but the EditTool class (The EditPlugin class is a
+ * that should be able to log, but the EditTool class (the EditPlugin class is a
  * "container" of EditTools).
  */
 class MeshLabPluginLogger

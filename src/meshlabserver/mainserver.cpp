@@ -37,6 +37,7 @@
 
 #include <clocale>
 
+#include <QDir>
 #include <QGLFormat>
 #include <QFileInfo>
 #include <QElapsedTimer>

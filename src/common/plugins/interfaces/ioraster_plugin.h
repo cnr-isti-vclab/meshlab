@@ -25,11 +25,11 @@
 #define MESHLAB_IORASTER_PLUGIN_H
 
 #include "meshlab_plugin_logger.h"
-#include "meshlab_plugin_file.h"
+#include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
 #include "../../ml_document/raster_model.h"
 
-class IORasterPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPluginLogger
+class IORasterPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
 public:
 	IORasterPlugin() : MeshLabPluginLogger() {}

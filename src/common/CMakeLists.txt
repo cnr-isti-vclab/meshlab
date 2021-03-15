@@ -24,7 +24,7 @@ set(HEADERS
 	plugins/containers/iomesh_plugin_container.h
 	plugins/containers/ioraster_plugin_container.h
 	plugins/containers/render_plugin_container.h
-	plugins/interfaces/meshlab_plugin_file.h
+	plugins/interfaces/meshlab_plugin.h
 	plugins/interfaces/meshlab_plugin_logger.h
 	plugins/interfaces/decorate_plugin.h
 	plugins/interfaces/edit_plugin.h
