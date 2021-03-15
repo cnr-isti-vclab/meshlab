@@ -34,10 +34,8 @@
 class EditAlignPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditTool)
 
-		enum
+	enum
 	{
 		ALIGN_IDLE = 0x01,
 		ALIGN_INSPECT_ARC = 0x02,

@@ -30,9 +30,7 @@
 class EditPointPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditTool)
-		
+
 public:
     enum {SELECT_DEFAULT_MODE, SELECT_FITTING_PLANE_MODE};
 

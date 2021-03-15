@@ -121,17 +121,7 @@ protected:
 	std::list<QAction*> actionList;
 };
 
-#define MESHLAB_EDIT_PLUGIN \
-	public: \
-		virtual std::pair<std::string, bool> getMLVersion() const { \
-			return std::make_pair(meshlab::meshlabVersion(), meshlab::builtWithDoublePrecision()); \
-		} \
-	private:
-
-#define EDIT_TOOL_IID  "vcg.meshlab.EditTool/1.0"
 #define EDIT_PLUGIN_FACTORY_IID  "vcg.meshlab.EditPluginFactory/1.0"
-
-Q_DECLARE_INTERFACE(EditTool, EDIT_TOOL_IID)
 Q_DECLARE_INTERFACE(EditPluginFactory, EDIT_PLUGIN_FACTORY_IID)
 
 

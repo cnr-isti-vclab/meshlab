@@ -52,12 +52,6 @@
 class MeshLabPlugin
 {
 public:
-	/** 
-	 * @brief the type used to identify plugin actions; 
-	 * there is a one-to-one relation between an ID and an Action.
-	 */
-	typedef int ActionIDType;
-
 	MeshLabPlugin();
 	virtual ~MeshLabPlugin() {}
 

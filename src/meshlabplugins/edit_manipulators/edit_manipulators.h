@@ -32,8 +32,6 @@
 class EditManipulatorsPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditTool)
 
 public:
 

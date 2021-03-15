@@ -36,9 +36,7 @@
 class EditMutualCorrsPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditTool)
-		
+
 public:
     EditMutualCorrsPlugin();
     virtual ~EditMutualCorrsPlugin() {}

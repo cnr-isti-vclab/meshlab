@@ -44,6 +44,12 @@ public:
 	MeshLabPluginFile() : enabled(true) {};
 	virtual ~MeshLabPluginFile() {}
 	
+	/**
+	 * @brief the type used to identify plugin actions;
+	 * there is a one-to-one relation between an ID and an Action.
+	 */
+	typedef int ActionIDType;
+
 	/** 
 	 * This function will be automatically defined in your plugin class
 	 * when you use the MESHLAB_PLUGIN_IID_EXPORTER macro.
