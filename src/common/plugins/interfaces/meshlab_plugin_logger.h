@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_PLUGIN_H
-#define MESHLAB_PLUGIN_H
+#ifndef MESHLAB_PLUGIN_LOGGER_H
+#define MESHLAB_PLUGIN_LOGGER_H
 
 #include <QAction>
 
@@ -32,28 +32,20 @@
 #include "../../globals.h"
 
 /**
- * @brief The MeshLabPlugin class is the base of all the plugin classes.
+ * @brief The PluginLogger provides some common log functionalities that are
+ * used by meshlab.
  *
- * The main idea common to all the framework is that each plugin export a set 
- * of actions, internally each action is associated to an ActionIDType, and for 
- * each action a name and a formatted INFO is defined.
- *
- * For coding easyness ID are more practical (you can use them in switches).
- * Using action on the other hand is practical because it simplify their 
- * management in menus/toolbars and it allows to define icons and other things 
- * in a automatic way.
- * Moreover ID are UNSAFE (different plugin can have same id) so they should be 
- * used only INTERNALLY
- *
- * Note: this class does NOT contain member functions that need to be 
- * implemented in base classes. It just provides some common functionalities
- * like logs.
+ * Each MeshLab abstract plugin class inherit from this class in order to make
+ * available log member functions to plugins.
+ * The only exception is the EditPlugin class, since it is not the Edit plugin
+ * that should be able to log, but the EditTool class (The EditPlugin class is a
+ * "container" of EditTools).
  */
-class MeshLabPlugin
+class MeshLabPluginLogger
 {
 public:
-	MeshLabPlugin();
-	virtual ~MeshLabPlugin() {}
+	MeshLabPluginLogger();
+	virtual ~MeshLabPluginLogger() {}
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream* log);
@@ -89,7 +81,7 @@ private:
  ************************/
 
 template<typename... Ts>
-void MeshLabPlugin::log(const char* f, Ts&&... ts)
+void MeshLabPluginLogger::log(const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
@@ -97,7 +89,7 @@ void MeshLabPlugin::log(const char* f, Ts&&... ts)
 }
 
 template<typename... Ts>
-void MeshLabPlugin::log(const std::string& s, Ts&&... ts)
+void MeshLabPluginLogger::log(const std::string& s, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
@@ -105,7 +97,7 @@ void MeshLabPlugin::log(const std::string& s, Ts&&... ts)
 }
 
 template <typename... Ts>
-void MeshLabPlugin::log(GLLogStream::Levels level, const char* f, Ts&&... ts)
+void MeshLabPluginLogger::log(GLLogStream::Levels level, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->logf(level, f, std::forward<Ts>(ts)...);
@@ -113,11 +105,11 @@ void MeshLabPlugin::log(GLLogStream::Levels level, const char* f, Ts&&... ts)
 }
 
 template <typename... Ts>
-void MeshLabPlugin::realTimeLog(QString id, const QString& meshName, const char* f, Ts&&... ts)
+void MeshLabPluginLogger::realTimeLog(QString id, const QString& meshName, const char* f, Ts&&... ts)
 {
 	if(logstream != nullptr) {
 		logstream->realTimeLogf(id, meshName, f, std::forward<Ts>(ts)...);
 	}
 }
 
-#endif // MESHLAB_PLUGIN_H
+#endif // MESHLAB_PLUGIN_LOGGER_H

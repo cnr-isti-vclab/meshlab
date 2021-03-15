@@ -30,11 +30,19 @@
 #include "../../mlexception.h"
 
 /**
- * @brief The MeshLabPluginFile class is the base of all MeshLab plugin classes,
+ * @brief The MeshLabPlugin class is the base of all MeshLab plugin classes,
  * and represents the library file of the plugin.
- * Each MeshLab plugin can then be a classic plugin (and inherit from the MeshLabPlugin class)
- * or a collection of Edit plugins (and inherit from the EditPluginFactory class).
- * Each Plugin (classic or edit) inherits from this class. 
+ *
+ * The main idea common to all the framework is that each plugin export a set
+ * of actions, internally each action is associated to an ActionIDType, and for
+ * each action a name and a formatted INFO is defined.
+ *
+ * For coding easyness ID are more practical (you can use them in switches).
+ * Using action on the other hand is practical because it simplify their
+ * management in menus/toolbars and it allows to define icons and other things
+ * in a automatic way.
+ * Moreover ID are UNSAFE (different plugin can have same id) so they should be
+ * used only INTERNALLY.
  */
 class MeshLabPluginFile
 {

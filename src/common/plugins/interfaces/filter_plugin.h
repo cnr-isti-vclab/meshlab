@@ -24,7 +24,7 @@
 #ifndef MESHLAB_FILTER_PLUGIN_H
 #define MESHLAB_FILTER_PLUGIN_H
 
-#include "meshlab_plugin.h"
+#include "meshlab_plugin_logger.h"
 #include "meshlab_plugin_file.h"
 #include "../../ml_document/mesh_document.h"
 
@@ -40,7 +40,7 @@ Q_DECLARE_METATYPE(Eigen::VectorXd)
 /**
  * @brief The FilterPlugin class provide the interface of the filter plugins.
  */
-class FilterPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPlugin
+class FilterPlugin : virtual public MeshLabPluginFile, virtual public MeshLabPluginLogger
 {
 public:
 	/** 
@@ -73,7 +73,7 @@ public:
 
 
 
-	FilterPlugin() : MeshLabPlugin(), glContext(nullptr)
+	FilterPlugin() : MeshLabPluginLogger(), glContext(nullptr)
 	{
 	}
 	virtual ~FilterPlugin() {}

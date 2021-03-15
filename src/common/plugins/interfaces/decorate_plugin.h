@@ -24,7 +24,7 @@
 #ifndef MESHLAB_DECORATE_PLUGIN_H
 #define MESHLAB_DECORATE_PLUGIN_H
 
-#include "meshlab_plugin.h"
+#include "meshlab_plugin_logger.h"
 #include "meshlab_plugin_file.h"
 
 class GLArea;
@@ -53,7 +53,7 @@ class GLArea;
  * - display of specific tagging
  **/
 
-class DecoratePlugin : virtual public MeshLabPluginFile, public MeshLabPlugin
+class DecoratePlugin : virtual public MeshLabPluginFile, public MeshLabPluginLogger
 {
 public:
 
@@ -69,7 +69,7 @@ public:
 		PostRendering = 0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
 	};
 
-	DecoratePlugin() : MeshLabPlugin() {}
+	DecoratePlugin() : MeshLabPluginLogger() {}
 	virtual ~DecoratePlugin() {}
 	/** The very short string (a few words) describing each filtering action
 	// This string is used also to define the menu entry

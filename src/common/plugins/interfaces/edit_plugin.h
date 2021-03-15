@@ -26,7 +26,7 @@
 
 #include <QTabletEvent>
 
-#include "meshlab_plugin.h"
+#include "meshlab_plugin_logger.h"
 #include "meshlab_plugin_file.h"
 #include "../../ml_document/mesh_document.h"
 
@@ -39,10 +39,10 @@ class GLArea;
  * and can grab the mouse events and customize the rendering process.
  **/
 
-class EditTool : public MeshLabPlugin
+class EditTool : public MeshLabPluginLogger
 {
 public:
-	EditTool() : MeshLabPlugin() {}
+	EditTool() : MeshLabPluginLogger() {}
 	virtual ~EditTool() {}
 
 	//should return a sentence describing what the editing tool does
