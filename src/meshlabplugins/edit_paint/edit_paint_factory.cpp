@@ -28,7 +28,7 @@ EditPaintFactory::EditPaintFactory()
 {
 	editPaint = new QAction(QIcon(":/images/paintbrush-22.png"), "Z-painting", this);
 
-	actionList << editPaint;
+	actionList.push_back(editPaint);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -39,20 +39,15 @@ QString EditPaintFactory::pluginName() const
 	return "EditPaint";
 }
 
-//gets a list of actions available from this plugin
-QList<QAction *> EditPaintFactory::actions() const
-{
-	return actionList;
-}
-
 //get the edit tool for the given action
-EditPlugin* EditPaintFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditPaintFactory::getEditTool(const QAction *action)
 {
-	if(action == editPaint)
-	{
+	if(action == editPaint) {
 		return new EditPaintPlugin();
-	} else assert(0); //should never be asked for an action that isn't here
-    return NULL;
+	}
+	else
+		assert(0); //should never be asked for an action that isn't here
+	return NULL;
 }
 
 QString EditPaintFactory::getEditToolDescription(const QAction *)

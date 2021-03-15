@@ -28,7 +28,7 @@ EditManipulatorsFactory::EditManipulatorsFactory()
 {
 	editManipulators = new QAction(QIcon(":/images/icon_manipulators.png"),"Manipulators Tool", this);
 
-	actionList << editManipulators;
+	actionList.push_back(editManipulators);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -38,21 +38,16 @@ QString EditManipulatorsFactory::pluginName() const
 {
 	return "EditManipulators";
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditManipulatorsFactory::actions() const
-{
-	return actionList;
-}
 
 //get the edit tool for the given action
-EditPlugin* EditManipulatorsFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditManipulatorsFactory::getEditTool(const QAction *action)
 {
-	if(action == editManipulators)
-	{
+	if(action == editManipulators) {
 		return new EditManipulatorsPlugin();
-	} else assert(0); //should never be asked for an action that isn't here
-    return NULL;
+	}
+	else
+		assert(0); //should never be asked for an action that isn't here
+	return NULL;
 }
 
 QString EditManipulatorsFactory::getEditToolDescription(const QAction *)

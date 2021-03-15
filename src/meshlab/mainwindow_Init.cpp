@@ -576,7 +576,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
 	editMenu = menuBar()->addMenu(tr("&Edit"));
-	editMenu->addAction(suspendEditModeAct);
+	fillEditMenu();
 
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
@@ -584,6 +584,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu = menuBar()->addMenu(tr("&Render"));
+	fillRenderMenu();
 
 	// Shaders SUBmenu
 	//shadersMenu = renderMenu->addMenu(tr("&Shaders"));
@@ -610,7 +611,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	windowsMenu->setToolTipsVisible(true);
-    updateWindowMenu();
+	updateWindowMenu();
 	menuBar()->addSeparator();
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
@@ -627,9 +628,6 @@ void MainWindow::createMenus()
 	helpMenu->addAction(onscreenHelpAct);
 	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
-
-	fillEditMenu();
-	fillRenderMenu();
 
 	//////////////////// Menu Split/Unsplit from handle
 	handleMenu = new QMenu(this);
@@ -882,6 +880,7 @@ void MainWindow::fillShadersMenu()
 void MainWindow::fillEditMenu()
 {
 	clearMenu(editMenu);
+	editMenu->addAction(suspendEditModeAct);
 	for(EditPluginFactory *iEditFactory: PM.editPluginFactoryIterator())
 	{
 		for(QAction* editAction: iEditFactory->actions())
@@ -897,7 +896,7 @@ void MainWindow::clearMenu(QMenu* menu)
 	for (QAction *action : menu->actions()) {
 		if (action->menu()) {
 			clearMenu(action->menu());
-		} else if (!action->isSeparator()){
+		} else if (!action->isSeparator() && !(action==suspendEditModeAct)){
 			disconnect(action, SIGNAL(triggered()), 0, 0);
 		}
 	}

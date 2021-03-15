@@ -38,11 +38,9 @@ FIRST RELEASE
 #include "qualitymapperdialog.h"
 
 //This class defines the plugin interface
-class QualityMapperPlugin : public QObject, public EditPlugin
+class QualityMapperPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPlugin)
 
 private:
 	QualityMapperDialog *_qualityMapperDialog;

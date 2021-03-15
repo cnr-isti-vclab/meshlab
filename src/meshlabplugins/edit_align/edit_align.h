@@ -31,13 +31,11 @@
 #include <wrap/gui/trackball.h>
 #include "alignDialog.h"
 
-class EditAlignPlugin : public QObject, public EditPlugin
+class EditAlignPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPlugin)
 
-		enum
+	enum
 	{
 		ALIGN_IDLE = 0x01,
 		ALIGN_INSPECT_ARC = 0x02,

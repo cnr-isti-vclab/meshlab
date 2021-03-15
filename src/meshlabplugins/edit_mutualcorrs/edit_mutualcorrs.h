@@ -33,12 +33,10 @@
 #include <vcg/space/point_matching.h>
 
 
-class EditMutualCorrsPlugin : public QObject, public EditPlugin
+class EditMutualCorrsPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPlugin)
-		
+
 public:
     EditMutualCorrsPlugin();
     virtual ~EditMutualCorrsPlugin() {}

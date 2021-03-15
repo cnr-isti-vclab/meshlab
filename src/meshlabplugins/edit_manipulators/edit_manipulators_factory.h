@@ -39,19 +39,14 @@ public:
 	virtual ~EditManipulatorsFactory() { delete editManipulators; }
 
 	virtual QString pluginName() const;
-	
-	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const;
-	
+
 	//get the edit tool for the given action
-	virtual EditPlugin* getMeshEditInterface(const QAction*);
-    
+	virtual EditTool* getEditTool(const QAction*);
+
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction*);
 	
 private:
-	QList <QAction *> actionList;
-	
 	QAction *editManipulators;
 };
 

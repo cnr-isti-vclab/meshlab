@@ -27,8 +27,8 @@
 EditPickPointsFactory::EditPickPointsFactory()
 {
 	editPickPoints = new QAction(QIcon(":/images/pickpoints.png"), "PickPoints", this);
-		
-	actionList << editPickPoints;
+
+	actionList.push_back(editPickPoints);
 	
 	for(QAction *editAction : actionList)
 		editAction->setCheckable(true); 	
@@ -39,14 +39,8 @@ QString EditPickPointsFactory::pluginName() const
 	return "EditPickPoints";
 }
 
-//gets a list of actions available from this plugin
-QList<QAction *> EditPickPointsFactory::actions() const
-{
-	return actionList;
-}
-
 //get the edit tool for the given action
-EditPlugin* EditPickPointsFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditPickPointsFactory::getEditTool(const QAction *action)
 {
 	if(action == editPickPoints) {
 		return new EditPickPointsPlugin();

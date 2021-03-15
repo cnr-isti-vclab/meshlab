@@ -29,11 +29,9 @@
 
 #include <common/plugins/interfaces/edit_plugin.h>
 
-class EditManipulatorsPlugin : public QObject, public EditPlugin
+class EditManipulatorsPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	MESHLAB_EDIT_PLUGIN
-	Q_INTERFACES(EditPlugin)
 
 public:
 

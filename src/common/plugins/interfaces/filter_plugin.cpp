@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-QString FilterPlugin::pythonFilterName(MeshLabPlugin::ActionIDType f) const
+QString FilterPlugin::pythonFilterName(ActionIDType f) const
 {
 	return pymeshlab::computePythonName(filterName(f));
 }
@@ -47,7 +47,7 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 	return MissingItems.isEmpty();
 }
 
-MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
+MeshLabPluginFile::ActionIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
 	for(ActionIDType tt : qAsConst(typeList))
@@ -61,7 +61,7 @@ MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
 	return -1;
 }
 
-QAction* FilterPlugin::getFilterAction(MeshLabPlugin::ActionIDType filterID)
+QAction* FilterPlugin::getFilterAction(ActionIDType filterID)
 {
 	QString idName = this->filterName(filterID);
 	return getFilterAction(idName);
