@@ -34,24 +34,19 @@ class EditMutualCorrsFactory : public QObject, public EditPluginFactory
 	Q_INTERFACES(EditPluginFactory)
 
 public:
-    EditMutualCorrsFactory();
+	EditMutualCorrsFactory();
 	virtual ~EditMutualCorrsFactory() { delete editMutualCorrs; }
 
 	virtual QString pluginName() const;
-	
-	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const;
-	
+
 	//get the edit tool for the given action
-	virtual EditPlugin* getMeshEditInterface(const QAction*);
-    
+	virtual EditPlugin* getEditTool(const QAction*);
+
 	//get the description for the given action
-   virtual QString getEditToolDescription(const QAction*);
-	
+	virtual QString getEditToolDescription(const QAction*);
+
 private:
-	QList <QAction *> actionList;
-	
-    QAction *editMutualCorrs;
+	QAction *editMutualCorrs;
 };
 
 #endif

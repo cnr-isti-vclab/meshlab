@@ -109,13 +109,16 @@ public:
 	virtual ~EditPluginFactory() {}
 
 	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const = 0;
+	virtual std::list<QAction *> actions() const {return actionList;};
 
 	//get the edit tool for the given action
-	virtual EditPlugin* getMeshEditInterface(const QAction *) = 0;
+	virtual EditPlugin* getEditTool(const QAction *) = 0;
 
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction *) = 0;
+
+protected:
+	std::list<QAction*> actionList;
 };
 
 #define MESHLAB_EDIT_PLUGIN \

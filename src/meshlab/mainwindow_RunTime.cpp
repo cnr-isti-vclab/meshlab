@@ -1407,7 +1407,7 @@ void MainWindow::applyEditMode()
 	if(!GLA()->editorExistsForAction(action))
 	{
 		EditPluginFactory *iEditFactory = qobject_cast<EditPluginFactory *>(action->parent());
-		EditPlugin *iEdit = iEditFactory->getMeshEditInterface(action);
+		EditPlugin *iEdit = iEditFactory->getEditTool(action);
 		GLA()->addMeshEditor(action, iEdit);
 	}
 	meshDoc()->meshDocStateData().create(*meshDoc());

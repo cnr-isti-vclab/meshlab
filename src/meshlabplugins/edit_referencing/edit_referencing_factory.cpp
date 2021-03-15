@@ -26,9 +26,9 @@
 
 EditReferencingFactory::EditReferencingFactory()
 {
-    editReferencing = new QAction(QIcon(":/images/icon_referencing.png"),"Reference scene", this);
+	editReferencing = new QAction(QIcon(":/images/icon_referencing.png"),"Reference scene", this);
 	
-    actionList << editReferencing;
+	actionList.push_back(editReferencing);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -38,26 +38,21 @@ QString EditReferencingFactory::pluginName() const
 {
 	return "EditReferencing";
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditReferencingFactory::actions() const
-{
-	return actionList;
-}
 
 //get the edit tool for the given action
-EditPlugin* EditReferencingFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditReferencingFactory::getEditTool(const QAction *action)
 {
-    if(action == editReferencing)
-	{
-        return new EditReferencingPlugin();
-	} else assert(0); //should never be asked for an action that isn't here
-    return nullptr;
+	if(action == editReferencing) {
+		return new EditReferencingPlugin();
+	}
+	else
+		assert(0); //should never be asked for an action that isn't here
+	return nullptr;
 }
 
 QString EditReferencingFactory::getEditToolDescription(const QAction *)
 {
-    return EditReferencingPlugin::info();
+	return EditReferencingPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditReferencingFactory)

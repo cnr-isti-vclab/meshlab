@@ -26,9 +26,9 @@
 
 EditMutualCorrsFactory::EditMutualCorrsFactory()
 {
-    editMutualCorrs = new QAction(QIcon(":/images/icon_mutualcorrs.png"),"Raster alignment", this);
+	editMutualCorrs = new QAction(QIcon(":/images/icon_mutualcorrs.png"),"Raster alignment", this);
 	
-	actionList << editMutualCorrs;
+	actionList.push_back(editMutualCorrs);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -39,25 +39,20 @@ QString EditMutualCorrsFactory::pluginName() const
 	return "EditMutualCorrs";
 }
 
-//gets a list of actions available from this plugin
-QList<QAction *> EditMutualCorrsFactory::actions() const
-{
-	return actionList;
-}
-
 //get the edit tool for the given action
-EditPlugin* EditMutualCorrsFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditMutualCorrsFactory::getEditTool(const QAction *action)
 {
-    if(action == editMutualCorrs)
-	{
-        return new EditMutualCorrsPlugin();
-	} else assert(0); //should never be asked for an action that isn't here
+	if(action == editMutualCorrs) {
+		return new EditMutualCorrsPlugin();
+	}
+	else
+		assert(0); //should never be asked for an action that isn't here
 	return NULL;
 }
 
 QString EditMutualCorrsFactory::getEditToolDescription(const QAction *)
 {
-    return EditMutualCorrsPlugin::info();
+	return EditMutualCorrsPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditMutualCorrsFactory)

@@ -28,7 +28,7 @@ EditAlignFactory::EditAlignFactory()
 {
 	editAlign = new QAction(QIcon(":/images/icon_align.png"), "Align", this);
 
-	actionList << editAlign;
+	actionList.push_back(editAlign);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -38,18 +38,12 @@ QString EditAlignFactory::pluginName() const
 {
 	return "EditAlign";
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditAlignFactory::actions() const
-{
-	return actionList;
-}
 
 //get the edit tool for the given action
-EditPlugin* EditAlignFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditAlignFactory::getEditTool(const QAction *action)
 {
-  assert(action == editAlign); (void) action;
-  return new EditAlignPlugin();
+	assert(action == editAlign); (void) action;
+	return new EditAlignPlugin();
 }
 
 QString EditAlignFactory::getEditToolDescription(const QAction *)

@@ -28,30 +28,24 @@ EditMeasureFactory::EditMeasureFactory()
 {
 	editMeasure = new QAction(QIcon(":/images/icon_measure.png"),"Measuring Tool", this);
 
-	actionList << editMeasure;
+	actionList.push_back(editMeasure);
 	
 	foreach(QAction *editAction, actionList)
-		editAction->setCheckable(true); 	
+		editAction->setCheckable(true);
 }
 
 QString EditMeasureFactory::pluginName() const
 {
 	return "EditMeasure";
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditMeasureFactory::actions() const
-{
-	return actionList;
-}
 
 //get the edit tool for the given action
-EditPlugin* EditMeasureFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* EditMeasureFactory::getEditTool(const QAction *action)
 {
-	if(action == editMeasure)
-	{
+	if(action == editMeasure){
 		return new EditMeasurePlugin();
-	} else assert(0); //should never be asked for an action that isn't here
+	} else
+		assert(0); //should never be asked for an action that isn't here
 	return NULL;
 }
 

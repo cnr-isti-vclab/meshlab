@@ -28,7 +28,7 @@ SampleEditFactory::SampleEditFactory()
 {
 	editSample = new QAction(QIcon(":/images/icon_info.png"),"Get Info", this);
 	
-	actionList << editSample;
+	actionList.push_back(editSample);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -38,15 +38,9 @@ QString SampleEditFactory::pluginName() const
 {
 	return "EditSample";
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> SampleEditFactory::actions() const
-{
-	return actionList;
-}
 
 //get the edit tool for the given action
-EditPlugin* SampleEditFactory::getMeshEditInterface(const QAction *action)
+EditPlugin* SampleEditFactory::getEditTool(const QAction *action)
 {
 	if(action == editSample)
 	{
