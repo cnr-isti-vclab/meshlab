@@ -35,10 +35,14 @@ using namespace vcg;
 
 ExtraSampleDynPlugin::ExtraSampleDynPlugin() 
 { 
-	typeList << FP_VERTEX_COLOR_NOISE;
+	typeList = {FP_VERTEX_COLOR_NOISE};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
+}
+
+ExtraSampleDynPlugin::~ExtraSampleDynPlugin()
+{
 }
 
 QString ExtraSampleDynPlugin::pluginName() const

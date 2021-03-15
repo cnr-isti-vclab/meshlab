@@ -219,8 +219,8 @@ public:
 	virtual QAction* getFilterAction(ActionIDType filterID);
 	virtual QAction* getFilterAction(const QString& idName);
 
-	virtual QList<QAction*> actions() const { return actionList; }
-	virtual QList<ActionIDType> types() const { return typeList; }
+	virtual std::list<QAction*> actions() const { return actionList; }
+	virtual std::list<ActionIDType> types() const { return typeList; }
 
 	/**
 	 * @brief wrongActionCalled throws a MLException. Call this function whenever
@@ -241,9 +241,9 @@ protected:
 	//
 
 	// The list of actions exported by the plugin. Each actions strictly corresponds to
-	QList <QAction*> actionList;
+	std::list <QAction*> actionList;
 
-	QList <ActionIDType> typeList;
+	std::list <ActionIDType> typeList;
 };
 
 #define FILTER_PLUGIN_IID  "vcg.meshlab.FilterPlugin/1.0"

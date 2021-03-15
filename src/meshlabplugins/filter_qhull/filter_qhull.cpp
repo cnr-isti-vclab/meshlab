@@ -42,20 +42,20 @@ using namespace vcg;
 
 QhullPlugin::QhullPlugin()
 {
-	typeList << FP_QHULL_CONVEX_HULL
-			 <<	FP_QHULL_DELAUNAY_TRIANGULATION
-			 <<	FP_QHULL_VORONOI_FILTERING
-			 << FP_QHULL_ALPHA_COMPLEX_AND_SHAPE
-			 << FP_QHULL_VISIBLE_POINTS;
+	typeList = {
+		FP_QHULL_CONVEX_HULL,
+		FP_QHULL_DELAUNAY_TRIANGULATION,
+		FP_QHULL_VORONOI_FILTERING,
+		FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
+		FP_QHULL_VISIBLE_POINTS
+	};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QhullPlugin::~QhullPlugin()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString QhullPlugin::pluginName() const

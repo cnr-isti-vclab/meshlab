@@ -35,16 +35,17 @@ using namespace vcg;
 
 FilterVoronoiPlugin::FilterVoronoiPlugin()
 { 
-	typeList
-		<< VORONOI_SAMPLING
-		<< VOLUME_SAMPLING
-		<< VORONOI_SCAFFOLDING
-		<< BUILD_SHELL
-		<< CROSS_FIELD_CREATION;
-//		<< CROSS_FIELD_SMOOTHING;
+	typeList = {
+		VORONOI_SAMPLING,
+		VOLUME_SAMPLING,
+		VORONOI_SCAFFOLDING,
+		BUILD_SHELL,
+		CROSS_FIELD_CREATION,
+//		CROSS_FIELD_SMOOTHING,
+	};
 
 	for (ActionIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterVoronoiPlugin::pluginName() const

@@ -33,18 +33,19 @@ using namespace vcg;
 // Constructor
 FilterCameraPlugin::FilterCameraPlugin()
 {
-	typeList <<
-				FP_SET_MESH_CAMERA <<
-				FP_SET_RASTER_CAMERA <<
-				FP_QUALITY_FROM_CAMERA <<
-				FP_CAMERA_ROTATE<<
-				FP_CAMERA_SCALE<<
-				FP_CAMERA_TRANSLATE<<
-				FP_CAMERA_TRANSFORM <<
-				FP_ORIENT_NORMALS_WITH_CAMERAS;
+	typeList  = {
+		FP_SET_MESH_CAMERA,
+		FP_SET_RASTER_CAMERA,
+		FP_QUALITY_FROM_CAMERA,
+		FP_CAMERA_ROTATE,
+		FP_CAMERA_SCALE,
+		FP_CAMERA_TRANSLATE,
+		FP_CAMERA_TRANSFORM,
+		FP_ORIENT_NORMALS_WITH_CAMERAS
+	};
 	
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterCameraPlugin::pluginName() const

@@ -36,10 +36,10 @@ FIRST RELEASE
 
 QualityMapperFilter::QualityMapperFilter() 
 { 
-	typeList << FP_QUALITY_MAPPER;
+	typeList = {FP_QUALITY_MAPPER};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString QualityMapperFilter::pluginName() const

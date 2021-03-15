@@ -41,18 +41,17 @@ using namespace vcg;
 
 FilterGeodesic::FilterGeodesic()
 {
-	typeList << FP_QUALITY_BORDER_GEODESIC
-	         << FP_QUALITY_POINT_GEODESIC
-	         << FP_QUALITY_SELECTED_GEODESIC;
+	typeList = {
+		FP_QUALITY_BORDER_GEODESIC,
+		FP_QUALITY_POINT_GEODESIC,
+		FP_QUALITY_SELECTED_GEODESIC
+	};
 
-	ActionIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 FilterGeodesic::~FilterGeodesic() {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterGeodesic::pluginName() const

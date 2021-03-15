@@ -35,10 +35,10 @@ using namespace vcg::intercept;
 
 FilterCSG::FilterCSG()
 {
-	typeList << FP_CSG;
+	typeList = {FP_CSG};
 
-	foreach(ActionIDType tt, types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterCSG::pluginName() const

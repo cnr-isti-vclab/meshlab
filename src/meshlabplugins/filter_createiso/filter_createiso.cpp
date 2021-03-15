@@ -41,17 +41,14 @@ using namespace vcg;
 
 FilterCreateIso::FilterCreateIso()
 {
-	typeList << FP_CREATEISO;
+	typeList = {FP_CREATEISO};
 
-	ActionIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 
 }
 
 FilterCreateIso::~FilterCreateIso() {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterCreateIso::pluginName() const

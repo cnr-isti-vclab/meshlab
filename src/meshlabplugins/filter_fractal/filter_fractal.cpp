@@ -29,10 +29,14 @@ using namespace vcg;
 // ------- MeshFilterInterface implementation ------------------------
 FilterFractal::FilterFractal()
 {
-	typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH << FP_CRATERS;
-	ActionIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	typeList = {
+		CR_FRACTAL_TERRAIN,
+		FP_FRACTAL_MESH,
+		FP_CRATERS
+	};
+
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterFractal::pluginName() const

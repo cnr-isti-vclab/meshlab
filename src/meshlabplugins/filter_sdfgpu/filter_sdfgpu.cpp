@@ -24,14 +24,14 @@ SdfGpuPlugin::SdfGpuPlugin()
 	  mDepthComplexity(0),
 	  mDepthComplexityWarning(false)
 {
-	typeList
-			<< SDF_SDF
-			<< SDF_DEPTH_COMPLEXITY
-			<< SDF_OBSCURANCE;
+	typeList = {
+		SDF_SDF,
+		SDF_DEPTH_COMPLEXITY,
+		SDF_OBSCURANCE
+	};
 
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
-
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString SdfGpuPlugin::pluginName() const

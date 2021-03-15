@@ -350,25 +350,25 @@ public:
 
 FilterDocSampling::FilterDocSampling()
 {
-  typeList
-      << FP_ELEMENT_SUBSAMPLING
-      << FP_MONTECARLO_SAMPLING
-      << FP_STRATIFIED_SAMPLING
-      << FP_CLUSTERED_SAMPLING
-      << FP_POISSONDISK_SAMPLING
-      << FP_HAUSDORFF_DISTANCE
-	  << FP_DISTANCE_REFERENCE
-      << FP_TEXEL_SAMPLING
-      << FP_VERTEX_RESAMPLING
-      << FP_UNIFORM_MESH_RESAMPLING
-      << FP_VORONOI_COLORING
-      << FP_DISK_COLORING
-      << FP_REGULAR_RECURSIVE_SAMPLING
-      << FP_POINTCLOUD_SIMPLIFICATION
-         ;
+	typeList = {
+		FP_ELEMENT_SUBSAMPLING,
+		FP_MONTECARLO_SAMPLING,
+		FP_STRATIFIED_SAMPLING,
+		FP_CLUSTERED_SAMPLING,
+		FP_POISSONDISK_SAMPLING,
+		FP_HAUSDORFF_DISTANCE,
+		FP_DISTANCE_REFERENCE,
+		FP_TEXEL_SAMPLING,
+		FP_VERTEX_RESAMPLING,
+		FP_UNIFORM_MESH_RESAMPLING,
+		FP_VORONOI_COLORING,
+		FP_DISK_COLORING,
+		FP_REGULAR_RECURSIVE_SAMPLING,
+		FP_POINTCLOUD_SIMPLIFICATION
+	};
 
-  foreach(ActionIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterDocSampling::pluginName() const

@@ -36,13 +36,13 @@ using namespace vcg;
 
 PlyMCPlugin::PlyMCPlugin()
 {
-	typeList 
-			<< FP_PLYMC
-			<< FP_MC_SIMPLIFY
-			   ;
+	typeList = {
+		FP_PLYMC,
+		FP_MC_SIMPLIFY
+	};
 	
-	foreach(ActionIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString PlyMCPlugin::pluginName() const

@@ -45,43 +45,41 @@ typedef Histogram<Scalarm> Histogramm;
 
 FilterColorProc::FilterColorProc()
 {
-  typeList << CP_FILLING
-           << CP_INVERT
-           << CP_THRESHOLDING
-           << CP_CONTR_BRIGHT
-           << CP_LEVELS
-           << CP_COLOURISATION
-           << CP_DESATURATION
-           << CP_EQUALIZE
-           << CP_WHITE_BAL
-           << CP_PERLIN_COLOR
-           << CP_COLOR_NOISE
-           << CP_SCATTER_PER_MESH
-		   << CP_CLAMP_QUALITY
-		   << CP_SATURATE_QUALITY
-		   << CP_MAP_VQUALITY_INTO_COLOR
-		   << CP_MAP_FQUALITY_INTO_COLOR
-		   << CP_DISCRETE_CURVATURE
-		   << CP_TRIANGLE_QUALITY
-		   << CP_VERTEX_SMOOTH
-		   << CP_FACE_SMOOTH
-		   << CP_FACE_TO_VERTEX
-		   << CP_TEXTURE_TO_VERTEX
-		   << CP_VERTEX_TO_FACE
-		   << CP_MESH_TO_FACE
-		   << CP_RANDOM_FACE
-		   << CP_RANDOM_CONNECTED_COMPONENT ;
+	typeList = {
+		CP_FILLING,
+		CP_INVERT,
+		CP_THRESHOLDING,
+		CP_CONTR_BRIGHT,
+		CP_LEVELS,
+		CP_COLOURISATION,
+		CP_DESATURATION,
+		CP_EQUALIZE,
+		CP_WHITE_BAL,
+		CP_PERLIN_COLOR,
+		CP_COLOR_NOISE,
+		CP_SCATTER_PER_MESH,
+		CP_CLAMP_QUALITY,
+		CP_SATURATE_QUALITY,
+		CP_MAP_VQUALITY_INTO_COLOR,
+		CP_MAP_FQUALITY_INTO_COLOR,
+		CP_DISCRETE_CURVATURE,
+		CP_TRIANGLE_QUALITY,
+		CP_VERTEX_SMOOTH,
+		CP_FACE_SMOOTH,
+		CP_FACE_TO_VERTEX,
+		CP_TEXTURE_TO_VERTEX,
+		CP_VERTEX_TO_FACE,
+		CP_MESH_TO_FACE,
+		CP_RANDOM_FACE,
+		CP_RANDOM_CONNECTED_COMPONENT
+	} ;
 
-  ActionIDType tt;
-  foreach(tt , types())
-    actionList << new QAction(filterName(tt), this);
-
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 FilterColorProc::~FilterColorProc()
 {
-    for (int i = 0; i < actionList.count() ; i++ )
-        delete actionList.at(i);
 }
 
 QString FilterColorProc::pluginName() const

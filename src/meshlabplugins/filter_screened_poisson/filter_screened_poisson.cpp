@@ -35,18 +35,15 @@
 
 FilterScreenedPoissonPlugin::FilterScreenedPoissonPlugin()
 {
-	typeList << FP_SCREENED_POISSON;
+	typeList = {FP_SCREENED_POISSON};
 
 	for (ActionIDType tt : types()){
-		actionList << new QAction(filterName(tt), this);
+		actionList.push_back(new QAction(filterName(tt), this));
 	}
 }
 
 FilterScreenedPoissonPlugin::~FilterScreenedPoissonPlugin()
 {
-	for (QAction* a : actionList){
-		delete a;
-	}
 }
 
 QString FilterScreenedPoissonPlugin::pluginName() const
