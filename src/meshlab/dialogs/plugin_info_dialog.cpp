@@ -69,7 +69,7 @@ void PluginInfoDialog::chechBoxStateChanged(int state)
 	QCheckBox* cb = (QCheckBox*)QObject::sender(); 
 	int nPlug = cb->property("np").toInt();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	MeshLabPluginFile* fpi = pm[nPlug];
+	MeshLabPlugin* fpi = pm[nPlug];
 	if (state == Qt::Checked){
 		pm.enablePlugin(fpi);
 	}
@@ -87,7 +87,7 @@ void PluginInfoDialog::uninstallPluginPushButtonClicked()
 	QPushButton* pb = (QPushButton*)QObject::sender();
 	int nPlug = pb->property("np").toInt();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	MeshLabPluginFile* fpi = pm[nPlug];
+	MeshLabPlugin* fpi = pm[nPlug];
 	QFileInfo fdel = fpi->pluginFileInfo();
 	pm.unloadPlugin(fpi);
 	bool res = QFile::remove(fdel.absoluteFilePath());
@@ -159,7 +159,7 @@ void PluginInfoDialog::populateTreeWidget()
 	}
 	else {
 		int nPlug = 0;
-		for (MeshLabPluginFile* fp : pm.pluginIterator(true)){
+		for (MeshLabPlugin* fp : pm.pluginIterator(true)){
 			MeshLabPluginType type(fp);
 			QString pluginType = type.pluginTypeString();
 			QStringList tmplist;
@@ -169,7 +169,7 @@ void PluginInfoDialog::populateTreeWidget()
 					tmplist.push_back(a->text());
 			}
 			if (type.isEditPlugin()){
-				EditPluginFactory* epi = dynamic_cast<EditPluginFactory*>(fp);
+				EditPlugin* epi = dynamic_cast<EditPlugin*>(fp);
 				for(QAction *a: epi->actions())
 					tmplist.push_back(a->text());
 			}
@@ -215,7 +215,7 @@ void PluginInfoDialog::populateTreeWidget()
 	}
 }
 
-void PluginInfoDialog::addItems(const MeshLabPluginFile* fpi, int nPlug, const QString& pluginType, const QStringList& features)
+void PluginInfoDialog::addItems(const MeshLabPlugin* fpi, int nPlug, const QString& pluginType, const QStringList& features)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
 	pluginItem->setText(PLUGINS, fpi->pluginName());

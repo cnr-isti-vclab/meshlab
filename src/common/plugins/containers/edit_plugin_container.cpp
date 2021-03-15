@@ -32,12 +32,12 @@ void EditPluginContainer::clear()
 	editPlugins.clear();
 }
 
-void EditPluginContainer::pushEditPlugin(EditPluginFactory* iEditFactory)
+void EditPluginContainer::pushEditPlugin(EditPlugin* iEditFactory)
 {
 	editPlugins.push_back(iEditFactory);
 }
 
-void EditPluginContainer::eraseEditPlugin(EditPluginFactory* iEditFactory)
+void EditPluginContainer::eraseEditPlugin(EditPlugin* iEditFactory)
 {
 	editPlugins.erase(std::find(editPlugins.begin(), editPlugins.end(), iEditFactory));
 }
@@ -47,14 +47,14 @@ EditPluginContainer::EditPluginFactoryRangeIterator EditPluginContainer::editPlu
 	return EditPluginFactoryRangeIterator(this, iterateAlsoDisabledPlugins);
 }
 
-ConstPluginIterator<EditPluginFactory> EditPluginContainer::EditPluginFactoryRangeIterator::begin()
+ConstPluginIterator<EditPlugin> EditPluginContainer::EditPluginFactoryRangeIterator::begin()
 {
-	return ConstPluginIterator<EditPluginFactory>(pm->editPlugins, pm->editPlugins.begin(), b);
+	return ConstPluginIterator<EditPlugin>(pm->editPlugins, pm->editPlugins.begin(), b);
 }
 
-ConstPluginIterator<EditPluginFactory> EditPluginContainer::EditPluginFactoryRangeIterator::end()
+ConstPluginIterator<EditPlugin> EditPluginContainer::EditPluginFactoryRangeIterator::end()
 {
-	return ConstPluginIterator<EditPluginFactory>(pm->editPlugins, pm->editPlugins.end(), b);
+	return ConstPluginIterator<EditPlugin>(pm->editPlugins, pm->editPlugins.end(), b);
 }
 
 EditPluginContainer::EditPluginFactoryRangeIterator::EditPluginFactoryRangeIterator(
