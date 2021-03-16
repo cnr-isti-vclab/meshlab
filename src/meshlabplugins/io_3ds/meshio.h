@@ -35,11 +35,8 @@ class ExtraMeshIOPlugin : public QObject, public IOMeshPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
 	Q_INTERFACES(IOMeshPlugin)
 
-  
 public:
-
-
-	QList<FileFormat> importFormats() const;
+	std::list<FileFormat> importFormats() const;
 	QList<FileFormat> exportFormats() const;
 
 	QString pluginName() const;

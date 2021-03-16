@@ -129,9 +129,9 @@ QString U3DIOPlugin::pluginName() const
 	return "IOU3D";
 }
 
-QList<FileFormat> U3DIOPlugin::importFormats() const
+std::list<FileFormat> U3DIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
+	std::list<FileFormat> formatList;
 	return formatList;
 }
 

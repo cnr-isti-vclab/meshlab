@@ -160,12 +160,9 @@ QString BreMeshIOPlugin::pluginName() const
 	return "IOBRE";
 }
 
-QList<FileFormat> BreMeshIOPlugin::importFormats() const
+std::list<FileFormat> BreMeshIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Breuckmann File Format"	, tr("BRE"));
-
-	return formatList;
+	return {FileFormat("Breuckmann File Format"	, tr("BRE"))};
 }
 
 /*

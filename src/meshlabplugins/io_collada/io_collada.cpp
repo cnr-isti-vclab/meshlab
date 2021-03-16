@@ -223,11 +223,9 @@ QString ColladaIOPlugin::pluginName() const
 	return "IOCollada";
 }
 
-QList<FileFormat> ColladaIOPlugin::importFormats() const
+std::list<FileFormat> ColladaIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Collada File Format"	,tr("DAE"));
-	return formatList;
+	return {FileFormat("Collada File Format"	,tr("DAE")) };
 }
 
 /*

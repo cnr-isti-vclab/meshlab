@@ -425,9 +425,9 @@ bool JSONIOPlugin::save(const QString & formatName,const QString & fileName, Mes
 /*
 	returns the list of the file's type which can be imported
 */
-QList<FileFormat> JSONIOPlugin::importFormats(void) const
+std::list<FileFormat> JSONIOPlugin::importFormats(void) const
 {
-	QList<FileFormat> formatList;
+	std::list<FileFormat> formatList;
 	//formatList << Format("JavaScript JSON", tr("JSON"));
 	return formatList;
 }

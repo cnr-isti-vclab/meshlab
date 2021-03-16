@@ -167,11 +167,9 @@ FilterPlugin::FilterClass FilterSSynth::getClass(const QAction */*filter*/) cons
     return FilterPlugin::MeshCreation;
 }
 
-QList<FileFormat> FilterSSynth::importFormats() const
+std::list<FileFormat> FilterSSynth::importFormats() const
 {
-    QList<FileFormat> formats;
-    formats<< FileFormat("Eisen Script File", tr("ES"));
-    return formats;
+	return {FileFormat("Eisen Script File", tr("ES"))};
 }
 
 QList<FileFormat> FilterSSynth::exportFormats() const

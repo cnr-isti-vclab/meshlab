@@ -148,12 +148,9 @@ QString PDBIOPlugin::pluginName() const
 	return "IOPDB";
 }
 
-QList<FileFormat> PDBIOPlugin::importFormats() const
+std::list<FileFormat> PDBIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Protein Data Bank"	, tr("PDB"));
-
-	return formatList;
+	return {FileFormat("Protein Data Bank" , tr("PDB"))};
 }
 
 /*

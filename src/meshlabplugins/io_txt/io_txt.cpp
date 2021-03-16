@@ -103,12 +103,9 @@ QString TxtIOPlugin::pluginName() const
 	return "IOTXT";
 }
 
-QList<FileFormat> TxtIOPlugin::importFormats() const
+std::list<FileFormat> TxtIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-    formatList << FileFormat("TXT (Generic ASCII point list)", tr("TXT"));
-
-	return formatList;
+	return {FileFormat("TXT (Generic ASCII point list)", tr("TXT"))};
 }
 
 /*

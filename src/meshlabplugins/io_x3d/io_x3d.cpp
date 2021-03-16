@@ -151,12 +151,13 @@ QString IoX3DPlugin::pluginName() const
 	return "IOX3D";
 }
 
-QList<FileFormat> IoX3DPlugin::importFormats() const
+std::list<FileFormat> IoX3DPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("X3D File Format - XML encoding", tr("X3D"));
-	formatList << FileFormat("X3D File Format - VRML encoding", tr("X3DV"));
-	formatList << FileFormat("VRML 2.0 File Format", tr("WRL"));
+	std::list<FileFormat> formatList = {
+		FileFormat("X3D File Format - XML encoding", tr("X3D")),
+		FileFormat("X3D File Format - VRML encoding", tr("X3DV")),
+		FileFormat("VRML 2.0 File Format", tr("WRL"))
+	};
 	return formatList;
 }
 

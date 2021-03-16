@@ -432,18 +432,18 @@ QString BaseMeshIOPlugin::pluginName() const
 /*
 	returns the list of the file's type which can be imported
 */
-QList<FileFormat> BaseMeshIOPlugin::importFormats() const
+std::list<FileFormat> BaseMeshIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
-	formatList << FileFormat("STL File Format", tr("STL"));
-	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
-	formatList << FileFormat("Quad Object", tr("QOBJ"));
-	formatList << FileFormat("Object File Format", tr("OFF"));
-	formatList << FileFormat("PTX File Format", tr("PTX"));
-	formatList << FileFormat("VCG Dump File Format", tr("VMI"));
-    formatList << FileFormat("FBX Autodesk Interchange Format", tr("FBX"));
-
+	std::list<FileFormat> formatList = {
+		FileFormat("Stanford Polygon File Format", tr("PLY")),
+		FileFormat("STL File Format", tr("STL")),
+		FileFormat("Alias Wavefront Object", tr("OBJ")),
+		FileFormat("Quad Object", tr("QOBJ")),
+		FileFormat("Object File Format", tr("OFF")),
+		FileFormat("PTX File Format", tr("PTX")),
+		FileFormat("VCG Dump File Format", tr("VMI")),
+		FileFormat("FBX Autodesk Interchange Format", tr("FBX"))
+	};
 	return formatList;
 }
 

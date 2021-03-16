@@ -58,7 +58,7 @@ class ColladaIOPlugin : public QObject, public IOMeshPlugin
 	 std::vector<MeshModel*> _mp;
 
 	QString pluginName() const;
-	QList<FileFormat> importFormats() const;
+	std::list<FileFormat> importFormats() const;
 	QList<FileFormat> exportFormats() const;
 
 	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;

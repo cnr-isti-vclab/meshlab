@@ -147,12 +147,13 @@ QString ExpeIOPlugin::pluginName() const
 	return "IOExpe";
 }
 
-QList<FileFormat> ExpeIOPlugin::importFormats() const
+std::list<FileFormat> ExpeIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Expe's point set (binary)"		,tr("pts"));
-	formatList << FileFormat("Expe's point set (ascii)"			,tr("apts"));
-	formatList << FileFormat("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
+	std::list<FileFormat> formatList = {
+		FileFormat("Expe's point set (binary)" ,tr("pts")),
+		FileFormat("Expe's point set (ascii)" ,tr("apts")),
+		FileFormat("XYZ Point Cloud (with or without normal)",tr("xyz"))
+	};
 	return formatList;
 }
 

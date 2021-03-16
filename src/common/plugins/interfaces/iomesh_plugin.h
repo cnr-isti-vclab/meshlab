@@ -39,7 +39,7 @@ public:
 	IOMeshPlugin() : MeshLabPluginLogger() {  }
 	virtual ~IOMeshPlugin() {}
 
-	virtual QList<FileFormat> importFormats() const = 0;
+	virtual std::list<FileFormat> importFormats() const = 0;
 	virtual QList<FileFormat> exportFormats() const = 0;
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require

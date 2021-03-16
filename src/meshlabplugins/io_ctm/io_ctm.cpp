@@ -71,11 +71,9 @@ QString IOMPlugin::pluginName() const
 	return "IOCTM";
 }
 
-QList<FileFormat> IOMPlugin::importFormats() const
+std::list<FileFormat> IOMPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-  formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
-	return formatList;
+	return { FileFormat("OpenCTM compressed format"	,tr("CTM"))};
 }
 
 /*

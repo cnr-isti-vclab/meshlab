@@ -87,12 +87,12 @@ QString TriIOPlugin::pluginName() const
 	return "IOTRI";
 }
 
-QList<FileFormat> TriIOPlugin::importFormats() const
+std::list<FileFormat> TriIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList 
-		<< FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) 
-	  << FileFormat("ASC (ascii triplets of points)", tr("ASC"));
+	std::list<FileFormat> formatList = {
+		FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) ,
+		FileFormat("ASC (ascii triplets of points)", tr("ASC"))
+	};
 	return formatList;
 }
 
