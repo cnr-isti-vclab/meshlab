@@ -38,7 +38,7 @@ class TxtIOPlugin : public QObject, public IOMeshPlugin
 public:
 	QString pluginName() const;
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/);
 

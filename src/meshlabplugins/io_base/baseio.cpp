@@ -450,15 +450,16 @@ std::list<FileFormat> BaseMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> BaseMeshIOPlugin::exportFormats() const
+std::list<FileFormat> BaseMeshIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Stanford Polygon File Format", tr("PLY"));
-	formatList << FileFormat("STL File Format", tr("STL"));
-	formatList << FileFormat("Alias Wavefront Object", tr("OBJ"));
-	formatList << FileFormat("Object File Format", tr("OFF"));
-	formatList << FileFormat("VRML File Format", tr("WRL"));
-	formatList << FileFormat("DXF File Format", tr("DXF"));
+	std::list<FileFormat> formatList = {
+		FileFormat("Stanford Polygon File Format", tr("PLY")),
+		FileFormat("STL File Format", tr("STL")),
+		FileFormat("Alias Wavefront Object", tr("OBJ")),
+		FileFormat("Object File Format", tr("OFF")),
+		FileFormat("VRML File Format", tr("WRL")),
+		FileFormat("DXF File Format", tr("DXF"))
+	};
 	return formatList;
 }
 

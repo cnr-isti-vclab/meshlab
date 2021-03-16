@@ -138,11 +138,12 @@ std::list<FileFormat> U3DIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> U3DIOPlugin::exportFormats() const
+std::list<FileFormat> U3DIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("U3D File Format"	,tr("U3D"));
-	formatList << FileFormat("IDTF File Format"	,tr("IDTF"));
+	std::list<FileFormat> formatList = {
+		FileFormat("U3D File Format" ,tr("U3D")),
+		FileFormat("IDTF File Format" ,tr("IDTF"))
+	};
 	return formatList;
 }
 

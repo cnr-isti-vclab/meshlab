@@ -164,11 +164,9 @@ std::list<FileFormat> IoX3DPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> IoX3DPlugin::exportFormats() const
+std::list<FileFormat> IoX3DPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("X3D File Format", tr("X3D"));
-	return formatList;
+	return {FileFormat("X3D File Format", tr("X3D"))};
 }
 
 /*

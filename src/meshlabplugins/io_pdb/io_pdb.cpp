@@ -156,12 +156,10 @@ std::list<FileFormat> PDBIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> PDBIOPlugin::exportFormats() const
+std::list<FileFormat> PDBIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
 //	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
-
-	return formatList;
+	return {};
 }
 
 /*

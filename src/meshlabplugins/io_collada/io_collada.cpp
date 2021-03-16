@@ -231,11 +231,9 @@ std::list<FileFormat> ColladaIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> ColladaIOPlugin::exportFormats() const
+std::list<FileFormat> ColladaIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Collada File Format"	,tr("DAE"));
-	return formatList;
+	return {FileFormat("Collada File Format" ,tr("DAE"))};
 }
 
 /*

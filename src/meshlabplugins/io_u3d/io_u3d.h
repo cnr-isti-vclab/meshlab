@@ -42,7 +42,7 @@ class U3DIOPlugin : public QObject, public IOMeshPlugin
 public:
 	QString pluginName() const;
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
 	U3DIOPlugin();
 

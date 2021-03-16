@@ -79,11 +79,9 @@ std::list<FileFormat> IOMPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> IOMPlugin::exportFormats() const
+std::list<FileFormat> IOMPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-    formatList << FileFormat("OpenCTM compressed format"	,tr("CTM"));
-	return formatList;
+	return {FileFormat("OpenCTM compressed format" ,tr("CTM"))};
 }
 
 /*

@@ -37,7 +37,7 @@ class ExtraMeshIOPlugin : public QObject, public IOMeshPlugin
 
 public:
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
 	QString pluginName() const;
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;

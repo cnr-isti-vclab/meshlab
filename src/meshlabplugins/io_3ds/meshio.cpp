@@ -243,11 +243,9 @@ std::list<FileFormat> ExtraMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> ExtraMeshIOPlugin::exportFormats() const
+std::list<FileFormat> ExtraMeshIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("3D-Studio File Format"		,tr("3DS"));
-	return formatList;
+	return {FileFormat("3D-Studio File Format" ,tr("3DS"))};
 }
 
 QString ExtraMeshIOPlugin::pluginName() const

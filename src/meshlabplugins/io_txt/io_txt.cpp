@@ -111,10 +111,9 @@ std::list<FileFormat> TxtIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> TxtIOPlugin::exportFormats() const
+std::list<FileFormat> TxtIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	return formatList;
+	return {};
 }
 
 /*

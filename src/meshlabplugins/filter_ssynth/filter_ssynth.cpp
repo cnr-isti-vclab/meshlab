@@ -172,10 +172,10 @@ std::list<FileFormat> FilterSSynth::importFormats() const
 	return {FileFormat("Eisen Script File", tr("ES"))};
 }
 
-QList<FileFormat> FilterSSynth::exportFormats() const
+std::list<FileFormat> FilterSSynth::exportFormats() const
 {
-    QList<FileFormat> formats;
-    return formats ;
+	std::list<FileFormat> formats;
+	return formats ;
 }
 
 bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, CallBackPos *cb, QWidget *parent)

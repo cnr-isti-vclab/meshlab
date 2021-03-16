@@ -56,7 +56,7 @@ class FilterSSynth : public QObject, public IOMeshPlugin, public FilterPlugin{
 	static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
 	virtual int postCondition(const QAction* filter) const;
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
 	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);

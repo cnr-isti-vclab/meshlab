@@ -435,11 +435,9 @@ std::list<FileFormat> JSONIOPlugin::importFormats(void) const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> JSONIOPlugin::exportFormats(void) const
+std::list<FileFormat> JSONIOPlugin::exportFormats(void) const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("JavaScript JSON", tr("JSON"));
-	return formatList;
+	return {FileFormat("JavaScript JSON", tr("JSON"))};
 }
 
 /*

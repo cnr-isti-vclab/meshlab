@@ -59,7 +59,7 @@ class ColladaIOPlugin : public QObject, public IOMeshPlugin
 
 	QString pluginName() const;
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
 	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/);

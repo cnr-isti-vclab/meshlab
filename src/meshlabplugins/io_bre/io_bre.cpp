@@ -168,11 +168,10 @@ std::list<FileFormat> BreMeshIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> BreMeshIOPlugin::exportFormats() const
+std::list<FileFormat> BreMeshIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
 	//formatList << Format("Breuckmann File Format"	, tr("BRE"));
-	return formatList;
+	return {};
 }
 
 /*

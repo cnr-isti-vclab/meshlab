@@ -40,7 +40,7 @@ public:
 	virtual ~IOMeshPlugin() {}
 
 	virtual std::list<FileFormat> importFormats() const = 0;
-	virtual QList<FileFormat> exportFormats() const = 0;
+	virtual std::list<FileFormat> exportFormats() const = 0;
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require
 	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file

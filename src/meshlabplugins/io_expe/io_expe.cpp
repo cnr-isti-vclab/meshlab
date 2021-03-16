@@ -160,12 +160,13 @@ std::list<FileFormat> ExpeIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> ExpeIOPlugin::exportFormats() const
+std::list<FileFormat> ExpeIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	// 	formatList << Format("Expe's point set (binary)"		,tr("pts"));
-	// 	formatList << Format("Expe's point set (ascii)"			,tr("apts"));
-	formatList << FileFormat("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
+	std::list<FileFormat> formatList = {
+		// FileFormat("Expe's point set (binary)" ,tr("pts")),
+		// FileFormat("Expe's point set (ascii)" ,tr("apts")),
+		FileFormat("XYZ Point Cloud (with or without normal)" ,tr("xyz"))
+	};
 	return formatList;
 }
 

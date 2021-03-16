@@ -45,7 +45,7 @@ public:
 	QString pluginName() const;
 
 	std::list<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
     virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
     void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/);

@@ -99,10 +99,9 @@ std::list<FileFormat> TriIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> TriIOPlugin::exportFormats() const
+std::list<FileFormat> TriIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	return formatList;
+	return {};
 }
 
 /*
