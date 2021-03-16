@@ -39,33 +39,92 @@ public:
 	IOMeshPlugin() : MeshLabPluginLogger() {  }
 	virtual ~IOMeshPlugin() {}
 
+	/**
+	 * @brief The importFormats functions return a list of all the supported
+	 * input file formats supported by the plugin.
+	 * This function must be implemented on any IOMesh plugin.
+	 */
 	virtual std::list<FileFormat> importFormats() const = 0;
+
+	/**
+	 * @brief The exportFormats functions return a list of all the supported
+	 * output file formats supported by the plugin.
+	 * This function must be implemented on any IOMesh plugin.
+	 */
 	virtual std::list<FileFormat> exportFormats() const = 0;
 
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require
-	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
-	// The instanced parameters are then passed to the open at the loading time.
-	// Typical example of use to decide what subportion of a mesh you have to load.
-	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
-	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterList & /*par*/) {}
+	/**
+	 * @brief The initPreOpenParameter function is called to initialize the list
+	 * of additional parameters that a OPENING filter could require. It is
+	 * called by the framework BEFORE the actual mesh loading to determine how
+	 * to parse the input file. The instanced parameters are then passed to the
+	 * open at the loading time.
+	 * Typical example of use to decide what subportion of a mesh you have to load.
+	 * If you do not need any additional processing simply do not override this
+	 * and ignore the parameterList in the open member function
+	 */
+	virtual void initPreOpenParameter(
+			const QString& /*format*/,
+			const QString& /*fileName*/,
+			RichParameterList& /*parameters*/)
+	{
+	}
 
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require
-	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
-	// typical example: unifying vertices in stl models.
-	// If you do not need any additional processing do nothing.
-	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
+	/**
+	 * @brief The initOpenParameter function is called to initialize the list
+	 * of additional parameters that a OPENING filter could require.
+	 * It is called by the framework AFTER the mesh is already loaded to
+	 * perform more or less standard processing on the mesh.
+	 * typical example: unifying vertices in stl models.
+	 * If you do not need any additional processing do nothing.
+	 */
+	virtual void initOpenParameter(
+			const QString& /*format*/,
+			MeshModel& /*m*/,
+			RichParameterList& /*parameters*/)
+	{
+	}
 
-	// This is the corresponding function that is called after the mesh is loaded with the initialized parameters
-	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterList &/*par*/) {}
+	/**
+	 * @brief The applyOpenParameter function is the corrispondent function to
+	 * the initOpenParameter. It is called after the mesh is loaded,
+	 * and it should apply the given parameters to the loaded mesh.
+	 * If you haven't implemented the initOpenParameter member function,
+	 * you do not need to implement this.
+	 */
+	virtual void applyOpenParameter(
+			const QString& /*format*/,
+			MeshModel& /*m*/,
+			const RichParameterList& /*parameters*/)
+	{
+	}
 
-	// This function is called to initialize the list of additional parameters that a SAVING filter could require
-	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
-	// typical example: ascii or binary format for ply or stl
-	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) {}
+	/**
+	 * @brief The initSaveParameter function is called to initialize the list
+	 * of additional parameters that a SAVING filter could require. It is called
+	 * by the framework after the output format is selected by the user.
+	 * typical example: ascii or binary format for ply or stl
+	 * If you do not need any additional parameters, simply do not implement
+	 * this function.
+	 */
+	virtual void initSaveParameter(
+			const QString& /*format*/,
+			MeshModel& /*m*/,
+			RichParameterList& /*par*/)
+	{
+	}
 
-
-	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const = 0;
+	/**
+	 * @brief The exportMaskCapability function tells to the framework which
+	 * export capabilities are supported by the given format (e.g. if the format
+	 * supports saving face colors, vertex quality...).
+	 * It also tells to the framework which of these export capabilities are
+	 * set by default.
+	 */
+	virtual void exportMaskCapability(
+			const QString &format,
+			int& capability,
+			int& defaultBits) const = 0;
 
 	/// callback used to actually load a mesh from a file
 	virtual bool open(
