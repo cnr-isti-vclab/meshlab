@@ -49,11 +49,18 @@ QString ExtraSampleGPUPlugin::pluginName() const
 // (this string is used also to define the menu entry)
 QString ExtraSampleGPUPlugin::filterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-		case FP_GPU_EXAMPLE :  return QString("GPU Filter Example ");
-		default : assert(0);
-	}
-  return QString();
+	if (filterId == FP_GPU_EXAMPLE)
+		return "GPU Filter Example";
+	else
+		return "";
+}
+
+QString ExtraSampleGPUPlugin::pythonFilterName(ActionIDType filterId) const
+{
+	if (filterId == FP_GPU_EXAMPLE)
+		return "snapshot";
+	else
+		return "";
 }
 
 // Info() must return the longer string describing each filtering action

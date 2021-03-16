@@ -54,6 +54,7 @@ public:
     void initParameterList(const QAction* action, MeshModel &m, RichParameterList & parlst);
 
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType filterId) const;
 	QString filterInfo(ActionIDType filter) const;
 	bool requiresGLContext(const QAction* action) const;
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
