@@ -448,41 +448,43 @@ bool VisibilityCheck_ShadowMap::isSupported()
 
 void VisibilityCheck_ShadowMap::initMeshTextures()
 {
-    // Creates a first OpenGL texture into which normal vectors at each mesh vertex are stored.
-    int mapH = (int) std::ceil( m_Mesh->vn / 2048.0f );
-    Point3m *mapData = new Point3m [ 2048*mapH ];
+	// Creates a first OpenGL texture into which normal vectors at each mesh vertex are stored.
+	int mapH = (int) std::ceil( m_Mesh->vn / 2048.0f );
+	Point3m *mapData = new Point3m [ 2048*mapH ];
 
-    for( int i=0; i<m_Mesh->vn; ++i )
-        mapData[i] = m_Mesh->vert[i].N();
+	for( int i=0; i<m_Mesh->vn; ++i )
+		mapData[i] = m_Mesh->vert[i].N();
 
-    m_NormalMap = glw::createTexture2D( m_Context,
-                                        GL_RGB32F,
-                                        2048,
-                                        mapH,
-                                        GL_RGB,
-                                        GL_FLOAT,
-                                        mapData );
+	m_NormalMap = glw::createTexture2D(
+				m_Context,
+				GL_RGB32F,
+				2048,
+				mapH,
+				GL_RGB,
+				GL_FLOAT,
+				mapData );
 
-    glw::BoundTexture2DHandle boundTex = m_Context.bindTexture2D( m_NormalMap, 0 );
-        boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
-    m_Context.unbindTexture2D( 0 );
+	glw::BoundTexture2DHandle boundTex = m_Context.bindTexture2D( m_NormalMap, 0 );
+	boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+	m_Context.unbindTexture2D( 0 );
 
 
-    // Does the same with a second texture to store the mesh vertices.
-    for( int i=0; i<m_Mesh->vn; ++i )
-        mapData[i] = m_Mesh->vert[i].P();
+	// Does the same with a second texture to store the mesh vertices.
+	for( int i=0; i<m_Mesh->vn; ++i )
+		mapData[i] = m_Mesh->vert[i].P();
 
-    m_VertexMap = glw::createTexture2D( m_Context,
-                                        GL_RGB32F,
-                                        2048,
-                                        mapH,
-                                        GL_RGB,
-                                        GL_FLOAT,
-                                        mapData );
+	m_VertexMap = glw::createTexture2D(
+				m_Context,
+				GL_RGB32F,
+				2048,
+				mapH,
+				GL_RGB,
+				GL_FLOAT,
+				mapData );
 
-    boundTex = m_Context.bindTexture2D( m_VertexMap, 0 );
-        boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
-    m_Context.unbindTexture2D( 0 );
+	boundTex = m_Context.bindTexture2D( m_VertexMap, 0 );
+	boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+	m_Context.unbindTexture2D( 0 );
 
 
     // Creates the VBO that will be used for the generation of the shadow map.
