@@ -65,7 +65,6 @@ public:
 	 */
 	virtual void initPreOpenParameter(
 			const QString& /*format*/,
-			const QString& /*fileName*/,
 			RichParameterList& /*parameters*/)
 	{
 	}

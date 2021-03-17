@@ -149,41 +149,6 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 	return true;
 }
 
-void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, RichParameterList & parlst)
-{
-	QElapsedTimer t;
-	t.start();
-	
-	if (filename.isEmpty()){
-		return;
-	}
-
-	QDomDocument* doc = new QDomDocument(filename);
-	QFile file(filename);
-	if (!file.open(QIODevice::ReadOnly)){
-		return;
-	}
-	if (!doc->setContent(&file)) {
-		file.close();
-		return;
-	}
-	file.close();
-	
-	QDomNodeList geomList = doc->elementsByTagName("geometry");
-	QStringList idList;
-	idList.push_back("Full Scene");
-	for(int i=0;i<geomList.size();++i)
-	{
-		QString idVal = geomList.at(i).toElement().attribute("id");
-		idList.push_back(idVal);
-		qDebug("Node %i geom id = '%s'",i,qUtf8Printable(idVal));
-	}
-	parlst.addParam(RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
-	qDebug("Time elapsed: %llu ms", t.elapsed());
-}
-
-
-
 bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";

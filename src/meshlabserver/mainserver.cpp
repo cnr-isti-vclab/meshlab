@@ -185,7 +185,7 @@ public:
         int mask = 0;
 
         RichParameterList prePar;
-        pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
+		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
         prePar.join(meshlab::defaultGlobalParameterList());
 
         if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
@@ -410,7 +410,7 @@ public:
         if(pCurrentIOPlugin != NULL)
         {
             RichParameterList prePar;
-            pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
+			pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
             //prePar = prePar.join(currentGlobalParams);
             int mask = 0;
             QElapsedTimer t;t.start();

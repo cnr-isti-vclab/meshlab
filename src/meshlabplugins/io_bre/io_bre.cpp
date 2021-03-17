@@ -121,7 +121,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
   
 	if (formatName.toUpper() == tr("BRE"))

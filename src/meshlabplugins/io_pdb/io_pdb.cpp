@@ -40,7 +40,7 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PDB"))
 	{

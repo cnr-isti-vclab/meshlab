@@ -35,7 +35,7 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
+void TriIOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("ASC"))
 	{

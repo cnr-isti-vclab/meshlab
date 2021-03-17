@@ -46,7 +46,6 @@ public:
 
 	void initPreOpenParameter(
 				const QString& format,
-				const QString& fileName,
 				RichParameterList& parameters);
 
 	bool open(const QString &formatName,

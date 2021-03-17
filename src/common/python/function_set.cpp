@@ -52,7 +52,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
 		IOMeshPlugin* plugin = pm.inputMeshPlugin(inputFormat);
 		RichParameterList rps;
-		plugin->initPreOpenParameter(inputFormat, "", rps);
+		plugin->initPreOpenParameter(inputFormat, rps);
 		plugin->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
 
 		//filename parameter

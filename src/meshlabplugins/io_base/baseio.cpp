@@ -68,7 +68,7 @@ class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>
 
 
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PTX")) {
 		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",

@@ -30,7 +30,7 @@ using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
-void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
+void TxtIOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
 {
 	if(format.toUpper() == tr("TXT"))
 	{

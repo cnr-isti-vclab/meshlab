@@ -69,7 +69,6 @@ void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capabil
 
 void ExtraMeshIOPlugin::initPreOpenParameter(
 		const QString& format,
-		const QString&,
 		RichParameterList& parameters)
 {
 	if (format.toUpper() == tr("3DS")){
