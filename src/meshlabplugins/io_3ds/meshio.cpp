@@ -40,7 +40,6 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 
-#include <QMessageBox>
 #include <QFile>
 #include <common/ml_document/mesh_document.h>
 
@@ -74,7 +73,7 @@ void ExtraMeshIOPlugin::initPreOpenParameter(
 		RichParameterList& parameters)
 {
 	if (format.toUpper() == tr("3DS")){
-		//parameters.addParam(RichBool(paramNames[SEPARATE_LAYERS], false, "Separate layers", "Import each mesh contained in the file as a separate layer"));
+		parameters.addParam(RichBool(paramNames[SEPARATE_LAYERS], true, "Separate layers", "Import each mesh contained in the file as a separate layer"));
 	}
 }
 
@@ -84,7 +83,7 @@ bool ExtraMeshIOPlugin::open(
 		MeshModel &m, int& mask,
 		const RichParameterList& params,
 		CallBackPos *cb,
-		QWidget *parent)
+		QWidget*)
 {
 	// initializing mask
 	mask = 0;
@@ -134,12 +133,8 @@ bool ExtraMeshIOPlugin::open(
 		lib3ds_file_eval(file, 0);
 		
 		bool singleLayer = true;
-		if ( file->nodes->next)
-		{
-			if ( QMessageBox::question(parent, tr("3DS Import Option"),
-									   tr("File with more than a mesh.\n\nDo you want to import each mesh as a separate layer?"),
-									   QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes )
-				singleLayer = false;
+		if ( file->nodes->next) {
+			singleLayer = params.getBool(paramNames[SEPARATE_LAYERS]);
 		}
 		
 		if (!singleLayer)
@@ -158,9 +153,8 @@ bool ExtraMeshIOPlugin::open(
 				mm.Enable(info.mask);
 				
 				int result = vcg::tri::io::Importer3DS<CMeshO>::Load(mm.cm, file, p, info);
-				if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
-				{
-					QMessageBox::warning(parent, tr("3DS Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
+				if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR) {
+					errorMessage = "3DS Opening Error" + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result));
 					continue;
 				}
 				
@@ -175,16 +169,16 @@ bool ExtraMeshIOPlugin::open(
 				for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
 				{
 					FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
-					if (pFile == NULL)
-					{
+					if (pFile == NULL) {
 						missingTextureFilesMsg.append("\n");
 						missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
 						someTextureNotFound = true;
 					}
 					fclose (pFile);
 				}
-				if (someTextureNotFound)
-					QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+				if (someTextureNotFound){
+					errorMessage = "Missing texture files: " + missingTextureFilesMsg;
+				}
 				
 				vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
 				if (!normalsUpdated)
@@ -201,7 +195,7 @@ bool ExtraMeshIOPlugin::open(
 			int result = vcg::tri::io::Importer3DS<CMeshO>::Load(m.cm, file, 0, info);
 			if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
 			{
-				QMessageBox::warning(parent, tr("3DS Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
+				errorMessage = "3DS Opening Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result));
 				lib3ds_file_free(file);
 				return false;
 			}
@@ -226,8 +220,9 @@ bool ExtraMeshIOPlugin::open(
 				}
 				fclose (pFile);
 			}
-			if (someTextureNotFound)
-				QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+			if (someTextureNotFound){
+				errorMessage = "Missing texture files: " + missingTextureFilesMsg;
+			}
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 			if (!normalsUpdated) 

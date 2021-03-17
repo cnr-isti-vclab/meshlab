@@ -55,7 +55,7 @@ public:
 			int& mask,
 			const RichParameterList &params,
 			vcg::CallBackPos *cb=0,
-			QWidget *parent=0);
+			QWidget* parent=0);
 
 	bool save(
 			const QString &formatName,
