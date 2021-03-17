@@ -655,7 +655,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			for (uint i = 0; i < num_cams; ++i)
 			{
 				float f, k1, k2;
-				Scalarm R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+				float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 				vcg::Point3f t;
 
 				fgets(line, 100, fp);; if (line[0] == '\0') throw MLException("Error while parsing " + fileName);;
@@ -671,7 +671,9 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 				fgets(line, 100, fp);; if (line[0] == '\0') throw MLException("Error while parsing " + fileName);;
 				sscanf(line, "%f %f %f", &(t[0]), &(t[1]), &(t[2]));
 
-				Matrix44m mat(R);
+				Matrix44f matF(R);
+				Matrix44m mat;
+				mat.Import(matF);
 
 				Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 				Rt.Transpose();
