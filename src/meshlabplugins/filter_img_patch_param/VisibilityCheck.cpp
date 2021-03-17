@@ -29,15 +29,17 @@ VisibilityCheck* VisibilityCheck::s_Instance = NULL;
 
 VisibilityCheck* VisibilityCheck::GetInstance( glw::Context &ctx )
 {
-    if( !s_Instance )
-    {
-        if( VisibilityCheck_ShadowMap::isSupported() )
-            s_Instance = new VisibilityCheck_ShadowMap( ctx );
-        else if( VisibilityCheck_VMV2002::isSupported() )
-            s_Instance = new VisibilityCheck_VMV2002( ctx );
-    }
+	if( !s_Instance )
+	{
+		if( VisibilityCheck_ShadowMap::isSupported() ){
+			s_Instance = new VisibilityCheck_ShadowMap( ctx );
+		}
+		else if( VisibilityCheck_VMV2002::isSupported() ){
+			s_Instance = new VisibilityCheck_VMV2002( ctx );
+		}
+	}
 
-    return s_Instance;
+	return s_Instance;
 }
 
 
@@ -450,7 +452,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
 {
 	// Creates a first OpenGL texture into which normal vectors at each mesh vertex are stored.
 	int mapH = (int) std::ceil( m_Mesh->vn / 2048.0f );
-	Point3m *mapData = new Point3m [ 2048*mapH ];
+	vcg::Point3f *mapData = new vcg::Point3f [ 2048*mapH ];
 
 	for( int i=0; i<m_Mesh->vn; ++i )
 		mapData[i] = m_Mesh->vert[i].N();

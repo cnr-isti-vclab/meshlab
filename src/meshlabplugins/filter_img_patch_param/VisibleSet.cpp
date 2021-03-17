@@ -66,18 +66,18 @@ VisibleSet::VisibleSet(
 	m_DepthRangeInv = 1.0f / (m_DepthMax-depthMin);
 
 
-	foreach( RasterModel *rm, rasterList )
+	for( RasterModel *rm : qAsConst(rasterList))
 	{
 		visibility.setRaster( rm );
 		visibility.checkVisibility();
 
-		for( int f=0; f<mesh.fn; ++f )
-			if( visibility.isFaceVisible(f) )
-			{
+		for( int f=0; f<mesh.fn; ++f ){
+			if( visibility.isFaceVisible(f) ) {
 				float w = getWeight( rm, mesh.face[f] );
 				if( w >= 0.0f )
 					m_FaceVis[f].add( w, rm );
 			}
+		}
 	}
 
 	VisibilityCheck::ReleaseInstance();
