@@ -41,6 +41,7 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QFile>
+#include <array>
 #include <common/ml_document/mesh_document.h>
 
 using namespace std;
