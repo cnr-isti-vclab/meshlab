@@ -46,6 +46,13 @@
 using namespace std;
 using namespace vcg;
 
+static const std::array<QString, 1> paramNames{
+	"separate_layers"
+};
+enum paramEnum {
+	SEPARATE_LAYERS = 0
+};
+
 QString ExtraMeshIOPlugin::pluginName() const
 {
 	return "IO3DS";

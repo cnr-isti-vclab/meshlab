@@ -64,14 +64,6 @@ public:
 			const RichParameterList &,
 			vcg::CallBackPos *cb=0,
 			QWidget *parent= 0);
-
-private:
-	const std::array<QString, 1> paramNames = {
-		"separate_layers"
-	};
-	enum paramEnum {
-		SEPARATE_LAYERS = 0
-	};
 };
 
 #endif
