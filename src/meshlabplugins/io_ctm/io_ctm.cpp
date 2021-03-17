@@ -32,7 +32,6 @@
 #include <wrap/io_trimesh/import_ctm.h>
 #include <wrap/io_trimesh/export_ctm.h>
 
-#include <QMessageBox>
 #include <QFileDialog>
 
 using namespace vcg;
@@ -53,14 +52,14 @@ bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, Me
 {
 	bool lossLessFlag = par.getBool("LossLess");
 	Scalarm relativePrecisionParam = par.getFloat("relativePrecisionParam");
-    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
-    if(result!=0)
-    {
-        QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
-        return false;
-    }
-    return true;
+	int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
+	if(result!=0)
+	{
+		QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+		errorMessage = "Saving Error: " + errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result));
+		return false;
+	}
+	return true;
 }
 
 /*

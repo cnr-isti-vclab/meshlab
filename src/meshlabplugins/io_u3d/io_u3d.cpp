@@ -32,8 +32,6 @@
 #include <wrap/io_trimesh/export_idtf.h>
 #include <wrap/io_trimesh/io_mask.h>
 
-#include <QMessageBox>
-#include <qapplication.h>
 #include <QSettings>
 #include "Converter.h"
 
@@ -79,7 +77,6 @@ bool U3DIOPlugin::save(
 			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
 				m.cm, QDir::tempPath(), textures_to_be_restored);
 	if(formatName.toUpper() == tr("U3D")) {
-		qApp->restoreOverrideCursor();
 		saveParameters(par);
 		QSettings settings;
 		

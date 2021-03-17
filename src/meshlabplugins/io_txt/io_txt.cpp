@@ -26,9 +26,6 @@
 
 //#include <wrap/io_trimesh/export.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);

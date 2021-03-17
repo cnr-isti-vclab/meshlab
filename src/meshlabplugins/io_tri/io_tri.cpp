@@ -31,9 +31,6 @@
 #include <wrap/io_trimesh/import_asc.h>
 #include <wrap/io_trimesh/export.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);

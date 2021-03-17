@@ -98,7 +98,6 @@
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
 
-#include <QMessageBox>
 using namespace std;
 using namespace vcg;
 
@@ -131,8 +130,7 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
-			//QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
-			qDebug() << "DAE Opening Error" << vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result) << endl;
+			errorMessage = "DAE Opening Error" + QString(vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		else _mp.push_back(&m);
@@ -208,8 +206,7 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 
 	if(result!=0)
 	{
-		//QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-		qDebug() << "Saving Error" << vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result) << endl;
+		errorMessage = "Saving Error" + QString(vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result));
 		return false;
 	}
 	return true;

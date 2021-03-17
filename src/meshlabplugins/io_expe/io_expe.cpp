@@ -33,8 +33,6 @@
 #include "export_xyz.h"
 // #include "export_expe.h"
 
-#include <QMessageBox>
-
 using namespace std;
 using namespace vcg;
 
@@ -129,7 +127,7 @@ bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, Mesh
 		int result = vcg::tri::io::ExporterXYZ<CMeshO>::Save(m.cm,filename.c_str(),mask);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result)));
+			errorMessage = "Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;

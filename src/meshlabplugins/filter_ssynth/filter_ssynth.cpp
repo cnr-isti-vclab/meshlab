@@ -9,7 +9,6 @@
 #include <StructureSynth/Parser/Tokenizer.h>
 #include <StructureSynth/Parser/EisenParser.h>
 #include <StructureSynth/Model/Builder.h>
-#include <QMessageBox>
 
 using namespace std;
 using namespace vcg;
@@ -200,11 +199,14 @@ bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, 
             return true;
         }
         else{
-            QMessageBox::critical(parent,tr("Error"),tr("An error occurred during the mesh generation: ").append(x3dfile));
+			errorMessage = "Error: " + QString("An error occurred during the mesh generation: ").append(x3dfile);
             return false;
         }
     }
-    else{ QMessageBox::critical(parent,"Error","Sphere resolution must be between 1 and 4"); return false;}
+	else{
+		errorMessage = "Error: Sphere resolution must be between 1 and 4";
+		return false;
+	}
 }
 
 bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)

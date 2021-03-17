@@ -36,9 +36,6 @@
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
