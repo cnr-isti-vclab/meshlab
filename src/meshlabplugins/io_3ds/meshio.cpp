@@ -47,10 +47,44 @@
 using namespace std;
 using namespace vcg;
 
+QString ExtraMeshIOPlugin::pluginName() const
+{
+	return "IO3DS";
+}
 
+std::list<FileFormat> ExtraMeshIOPlugin::importFormats() const
+{
+	return {FileFormat("3D-Studio File Format" ,tr("3DS"))};
+}
 
+std::list<FileFormat> ExtraMeshIOPlugin::exportFormats() const
+{
+	return {FileFormat("3D-Studio File Format" ,tr("3DS"))};
+}
 
-bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget *parent)
+void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+{
+	if(format.toUpper() == tr("3DS")){capability=defaultBits= vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
+	return;
+}
+
+void ExtraMeshIOPlugin::initPreOpenParameter(
+		const QString& format,
+		const QString&,
+		RichParameterList& parameters)
+{
+	if (format.toUpper() == tr("3DS")){
+		//parameters.addParam(RichBool(paramNames[SEPARATE_LAYERS], false, "Separate layers", "Import each mesh contained in the file as a separate layer"));
+	}
+}
+
+bool ExtraMeshIOPlugin::open(
+		const QString &formatName,
+		const QString &fileName,
+		MeshModel &m, int& mask,
+		const RichParameterList& params,
+		CallBackPos *cb,
+		QWidget *parent)
 {
 	// initializing mask
 	mask = 0;
@@ -210,19 +244,24 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(
+		const QString &formatName,
+		const QString &fileName,
+		MeshModel &m,
+		const int mask,
+		const RichParameterList &,
+		vcg::CallBackPos *cb,
+		QWidget *)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
 	//string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
 	
-	if(formatName.toUpper() == tr("3DS"))
-	{
+	if(formatName.toUpper() == tr("3DS")) {
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-		if(result!=0)
-		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
+		if(result!=0) {
+			errorMessage = "Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
@@ -230,37 +269,6 @@ bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName,
 	else 
 		assert(0); // unknown format
 	return false;
-}
-
-/*
-	returns the list of the file's type which can be imported
-*/
-std::list<FileFormat> ExtraMeshIOPlugin::importFormats() const
-{
-	return {FileFormat("3D-Studio File Format" ,tr("3DS"))};
-}
-
-/*
-	returns the list of the file's type which can be exported
-*/
-std::list<FileFormat> ExtraMeshIOPlugin::exportFormats() const
-{
-	return {FileFormat("3D-Studio File Format" ,tr("3DS"))};
-}
-
-QString ExtraMeshIOPlugin::pluginName() const
-{
-	return "IO3DS";
-}
-
-/*
-	returns the mask on the basis of the file's type. 
-	otherwise it returns 0 if the file format is unknown
-*/
-void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
-{
-	if(format.toUpper() == tr("3DS")){capability=defaultBits= vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
-	return;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshIOPlugin)

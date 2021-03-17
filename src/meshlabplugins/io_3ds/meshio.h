@@ -36,13 +36,43 @@ class ExtraMeshIOPlugin : public QObject, public IOMeshPlugin
 	Q_INTERFACES(IOMeshPlugin)
 
 public:
+	QString pluginName() const;
+
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
 
-	QString pluginName() const;
+
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+
+	void initPreOpenParameter(
+				const QString& format,
+				const QString& fileName,
+				RichParameterList& parameters);
+
+	bool open(const QString &formatName,
+			const QString &fileName,
+			MeshModel &m,
+			int& mask,
+			const RichParameterList &params,
+			vcg::CallBackPos *cb=0,
+			QWidget *parent=0);
+
+	bool save(
+			const QString &formatName,
+			const QString &fileName,
+			MeshModel &m,
+			const int mask,
+			const RichParameterList &,
+			vcg::CallBackPos *cb=0,
+			QWidget *parent= 0);
+
+private:
+	const std::array<QString, 1> paramNames = {
+		"separate_layers"
+	};
+	enum paramEnum {
+		SEPARATE_LAYERS = 0
+	};
 };
 
 #endif
