@@ -40,14 +40,14 @@ public:
 	virtual ~IOMeshPlugin() {}
 
 	/**
-	 * @brief The importFormats functions return a list of all the supported
+	 * @brief The importFormats function returns a list of all the
 	 * input file formats supported by the plugin.
 	 * This function must be implemented on any IOMesh plugin.
 	 */
 	virtual std::list<FileFormat> importFormats() const = 0;
 
 	/**
-	 * @brief The exportFormats functions return a list of all the supported
+	 * @brief The exportFormats function returns a list of all the
 	 * output file formats supported by the plugin.
 	 * This function must be implemented on any IOMesh plugin.
 	 */
@@ -125,49 +125,87 @@ public:
 			int& capability,
 			int& defaultBits) const = 0;
 
-	/// callback used to actually load a mesh from a file
+	/**
+	 * @brief The open function is called by the framework everytime a mesh is loaded.
+	 * @param format: the extension of the format e.g. "PLY"
+	 * @param fileName: the name of the file to be opened (including its path)
+	 * @param m: the mesh that is filled with the file content
+	 * @param mask: a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
+	 * @param par: the parameters that have been set up in the initPreOpenParameter()
+	 * @param cb: standard callback for reporting progress in the loading
+	 */
 	virtual void open(
-		const QString &format, /// the extension of the format e.g. "PLY"
-		const QString &fileName, /// The name of the file to be opened
-		MeshModel &m, /// The mesh that is filled with the file content
-		int &mask, /// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-		const RichParameterList & par, /// The parameters that have been set up in the initPreOpenParameter()
-		vcg::CallBackPos *cb = nullptr) = 0; /// standard callback for reporting progress in the loading
-
-	virtual void save(
-		const QString &format, // the extension of the format e.g. "PLY"
+		const QString &format,
 		const QString &fileName,
 		MeshModel &m,
-		const int mask,// a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
+		int &mask,
+		const RichParameterList & par,
+		vcg::CallBackPos *cb = nullptr) = 0;
+
+	/**
+	 * @brief The save function is called by the framework everytime a mesh is saved.
+	 * @param format: the extension of the format e.g. "PLY"
+	 * @param fileName: the name of the file on which save the mesh m (including its path)
+	 * @param m: the mesh to be saved in the file
+	 * @param mask: a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
+	 * @param par: the parameters that have been set up in the initSaveParameter()
+	 * @param cb: standard callback for reporting progress in the saving
+	 */
+	virtual void save(
+		const QString &format,
+		const QString &fileName,
+		MeshModel &m,
+		const int mask,
 		const RichParameterList & par,
 		vcg::CallBackPos *cb) = 0;
 
+	/**
+	 * @brief The reportWarning function should be used everytime that a non-critical
+	 * error while loading or saving a file happens. This function appends the
+	 * warning message passed as parameter to a string that will be shown
+	 * by the framework at the end of the execution of the load/save function
+	 * @param warningMessage
+	 */
+	void reportWarning(const QString& warningMessage) const
+	{
+		MeshLabPluginLogger::log(GLLogStream::WARNING, warningMessage.toStdString());
+		warnString += "\n" + warningMessage;
+	}
+
+	/**
+	 * @brief call this function in any of the import functions
+	 * (initPreOpenParameters, load...) whenever you receive as parameter a
+	 * format that is not supported by your plugin
+	 */
 	void wrongOpenFormat(const QString& format)
 	{
 		throw MLException("Internal error: unknown open format " + format + " to " + pluginName() + " plugin.");
 	};
 
+	/**
+	 * @brief call this function in any of the export functions
+	 * (exportMaskCapability, save...) whenever you receive as parameter a
+	 * format that is not supported by your plugin
+	 */
 	void wrongSaveFormat(const QString& format)
 	{
 		throw MLException("Internal error: unknown save format " + format + " to " + pluginName() + " plugin.");
 	};
 
-	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
-	/// io plugins should avoid using QMessageBox for reporting errors.
-	/// Failure should put some meaningful information inside the errorMessage string.
-	const QString& errorMsg() const 
+	/**
+	 * @brief The warningMessageString is invoked by the framework after the execution
+	 * of load/save function. It returns the warning string containing all the
+	 * warinings produced by the function, and it clears the string.
+	 */
+	QString warningMessageString() const
 	{
-		return this->errorMessage;
-	}
-	void clearErrorString() 
-	{
-		errorMessage.clear();
-	}
+		QString tmp = warnString;
+		warnString.clear();
+		return tmp;
+	};
 
-protected:
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	// NEVER EVER use a msgbox to say something to the user.
-	QString errorMessage;
+private:
+	mutable QString warnString;
 
 };
 

@@ -319,7 +319,6 @@ public:
         }
         catch (const MLException& e) {
             fprintf(fp, "Opening Failure: %s", (QString("While opening: '%1'\n\n").arg(fileName)+e.what()).toStdString().c_str()); // text+
-            pCurrentIOPlugin->clearErrorString();
             md->setBusy(false);
             QDir::setCurrent(origDir); // undo the change of directory before leaving
             return false;
@@ -335,11 +334,10 @@ public:
         //pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
         //pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 
-        QString err = pCurrentIOPlugin->errorMsg();
+        QString err = pCurrentIOPlugin->warningMessageString();
         if (!err.isEmpty())
         {
-            fprintf(fp, "Opening Problems: %s", (QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()).toStdString().c_str());
-            pCurrentIOPlugin->clearErrorString();
+            fprintf(fp, "Opening Problems: %s", (QString("While opening: '%1'\n\n").arg(fileName)+err).toStdString().c_str());
         }
 
         //saveRecentFileList(fileName);

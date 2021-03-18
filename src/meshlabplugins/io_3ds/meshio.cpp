@@ -159,7 +159,7 @@ void ExtraMeshIOPlugin::open(
 				
 				int result = vcg::tri::io::Importer3DS<CMeshO>::Load(mm.cm, file, p, info);
 				if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR) {
-					errorMessage = "3DS Opening Error" + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result));
+					reportWarning("3DS Opening Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
 					continue;
 				}
 				
@@ -182,7 +182,7 @@ void ExtraMeshIOPlugin::open(
 					fclose (pFile);
 				}
 				if (someTextureNotFound){
-					errorMessage = "Missing texture files: " + missingTextureFilesMsg;
+					reportWarning("Missing texture files: " + missingTextureFilesMsg);
 				}
 				
 				vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
@@ -225,7 +225,7 @@ void ExtraMeshIOPlugin::open(
 				fclose (pFile);
 			}
 			if (someTextureNotFound){
-				errorMessage = "Missing texture files: " + missingTextureFilesMsg;
+				reportWarning("Missing texture files: " + missingTextureFilesMsg);
 			}
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box

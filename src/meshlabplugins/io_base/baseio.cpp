@@ -155,7 +155,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		if (result != tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
 			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR) {
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
+				reportWarning(errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 			}
 			else {
 				throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));

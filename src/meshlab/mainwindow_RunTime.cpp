@@ -2224,7 +2224,6 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 					this,
 					tr("Opening Failure"),
 					"While opening: " + fileName + "\n\n" + e.what());
-		pCurrentIOPlugin->clearErrorString();
 		meshDoc()->setBusy(false);
 		QDir::setCurrent(origDir); // undo the change of directory before leaving
 		return false;
@@ -2240,11 +2239,10 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 	//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 	//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 	
-	QString err = pCurrentIOPlugin->errorMsg();
+	QString err = pCurrentIOPlugin->warningMessageString();
 	if (!err.isEmpty())
 	{
-		QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
-		pCurrentIOPlugin->clearErrorString();
+		QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+ err);
 	}
 	
 	saveRecentFileList(fileName);
