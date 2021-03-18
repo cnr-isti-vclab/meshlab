@@ -85,10 +85,9 @@ void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
-	assert(0);
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*

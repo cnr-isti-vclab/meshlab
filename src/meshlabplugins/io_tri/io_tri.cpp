@@ -70,10 +70,9 @@ void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
+void TriIOPlugin::save(const QString& formatName, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
 {
-	assert(0);
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*

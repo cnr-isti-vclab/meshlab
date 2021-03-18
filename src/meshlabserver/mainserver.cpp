@@ -261,14 +261,17 @@ public:
         int formatmask = 0;
         int defbits = 0;
         pCurrentIOPlugin->exportMaskCapability(extension,formatmask,defbits);
-        if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar))
+        try {
+            pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar);
+            QDir::setCurrent(curDir.absolutePath());
+            return true;
+        }
+        catch(const MLException& e)
         {
             fprintf(fp,"Failed saving\n");
             QDir::setCurrent(curDir.absolutePath());
             return false;
         }
-        QDir::setCurrent(curDir.absolutePath());
-        return true;
     }
 
     bool loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, MeshDocument* md, FILE* fp = stdout)

@@ -120,7 +120,7 @@ void IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 }
 
 
-bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *)
+void IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *)
 {
 	QString errorMsgFormat = "Error encountered while exportering file:\n%1\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -129,14 +129,13 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		int result = vcg::tri::io::ExporterX3D<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
 		if(result!=0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (cb !=NULL) (*cb)(99, "Saving X3D File...");
-		return true;
 	}
-	assert(0);
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*

@@ -56,7 +56,7 @@ public:
 			vcg::CallBackPos *cb=0,
 			QWidget* parent=0);
 
-	bool save(
+	void save(
 			const QString &formatName,
 			const QString &fileName,
 			MeshModel &m,

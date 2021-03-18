@@ -150,32 +150,32 @@ void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 	}
 }
 
-bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+void ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	string filename = QFile::encodeName(fileName).constData ();
-  //std::string filename = fileName.toUtf8().data();
-	std::string ex = formatName.toUtf8().data();
-	int result;
-  tri::Allocator<CMeshO>::CompactVertexVector(m.cm);  
-  tri::Allocator<CMeshO>::CompactFaceVector(m.cm);  
-	// Collada exporting function do not manage very correctly the case
-    // of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
-    // so we convert it to a more standard mesh adding a fake notexture.png texture.
-	if(tri::HasPerWedgeTexCoord(m.cm))
+	if (formatName.toUpper() == tr("DAE")){
+		QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+		string filename = QFile::encodeName(fileName).constData ();
+		//std::string filename = fileName.toUtf8().data();
+		std::string ex = formatName.toUtf8().data();
+		int result;
+		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+		// Collada exporting function do not manage very correctly the case
+		// of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
+		// so we convert it to a more standard mesh adding a fake notexture.png texture.
+		if(tri::HasPerWedgeTexCoord(m.cm))
 			tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
-	
-	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
-	//else 
-		//result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 
-	if(result!=0)
-	{
-		errorMessage = "Saving Error" + QString(vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result));
-		return false;
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
+
+		if(result!=0)
+		{
+			throw MLException("Saving Error" + QString(vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		}
 	}
-	return true;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*

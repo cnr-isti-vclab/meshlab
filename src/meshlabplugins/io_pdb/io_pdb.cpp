@@ -93,10 +93,9 @@ void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void PDBIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
-  assert(0); 
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*

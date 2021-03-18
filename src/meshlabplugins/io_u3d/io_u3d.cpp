@@ -55,7 +55,8 @@ void U3DIOPlugin::open(
 {
 	wrongOpenFormat(format);
 }
-bool U3DIOPlugin::save(
+
+void U3DIOPlugin::save(
 		const QString &formatName, 
 		const QString &fileName, 
 		MeshModel &m, 
@@ -95,8 +96,7 @@ bool U3DIOPlugin::save(
 		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, resCode, _param.positionQuality);
 
 		if(result==false) {
-			errorMessage = "Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")";
-			return false;
+			throw MLException("Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")");
 		}
 		
 		//saving latex:
@@ -108,14 +108,19 @@ bool U3DIOPlugin::save(
 		dir.remove(tmp);
 
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
+		vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
+					m.cm,
+					textures_to_be_restored);
 	}
-	
-	if(formatName.toUpper() == tr("IDTF")) 
+	else if(formatName.toUpper() == tr("IDTF")) {
 		tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);
-	vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
-				m.cm,
-				textures_to_be_restored);
-	return true;
+		vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
+					m.cm,
+					textures_to_be_restored);
+	}
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*

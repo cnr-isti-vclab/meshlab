@@ -102,7 +102,7 @@ void ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 		(*cb)(99, "Done");
 }
 
-bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget *parent)
+void ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -124,14 +124,12 @@ bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, Mesh
 		int result = vcg::tri::io::ExporterXYZ<CMeshO>::Save(m.cm,filename.c_str(),mask);
 		if(result!=0)
 		{
-			errorMessage = "Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException("Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	
-	assert(0); // unknown format
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*

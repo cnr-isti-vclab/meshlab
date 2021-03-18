@@ -135,7 +135,7 @@ public:
 		vcg::CallBackPos *cb = nullptr, /// standard callback for reporting progress in the loading
 		QWidget *parent = nullptr) = 0; /// you should not use this...
 
-	virtual bool save(
+	virtual void save(
 		const QString &format, // the extension of the format e.g. "PLY"
 		const QString &fileName,
 		MeshModel &m,

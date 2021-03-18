@@ -40,17 +40,16 @@ class IOMPlugin : public QObject, public IOMeshPlugin
 	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
 	Q_INTERFACES(IOMeshPlugin)
 
-  
 public:
 	QString pluginName() const;
 
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
 
-    virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-    void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/);
-    void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-    bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos *cb, QWidget *parent);
+	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/);
+	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos *cb, QWidget *parent);
 
 };
 

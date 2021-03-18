@@ -218,9 +218,9 @@ void FilterSSynth::open(
 	}
 }
 
-bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
+void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
 {
-    return true;
+	wrongSaveFormat(formatName);
 }
 
 void FilterSSynth::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}

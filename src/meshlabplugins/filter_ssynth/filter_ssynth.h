@@ -61,7 +61,7 @@ class FilterSSynth : public QObject, public IOMeshPlugin, public FilterPlugin{
 	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
+	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *parent);
 	FilterPlugin::FilterArity filterArity(const QAction *) const {return NONE;}
 private:
 	QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);

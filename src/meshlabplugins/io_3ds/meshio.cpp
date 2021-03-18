@@ -244,7 +244,7 @@ void ExtraMeshIOPlugin::open(
 	}
 }
 
-bool ExtraMeshIOPlugin::save(
+void ExtraMeshIOPlugin::save(
 		const QString &formatName,
 		const QString &fileName,
 		MeshModel &m,
@@ -261,14 +261,12 @@ bool ExtraMeshIOPlugin::save(
 	if(formatName.toUpper() == tr("3DS")) {
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0) {
-			errorMessage = "Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException("Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	else 
-		assert(0); // unknown format
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshIOPlugin)

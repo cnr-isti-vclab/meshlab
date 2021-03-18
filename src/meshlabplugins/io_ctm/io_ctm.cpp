@@ -36,28 +36,36 @@
 
 using namespace vcg;
 
-void IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+void IOMPlugin::open(const QString & formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-	int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
-	if (result != 0) // all the importers return 0 on success
-	{
-		throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result)));
+	if (formatName.toUpper() == tr("CTM")){
+		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+		int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
+		if (result != 0) // all the importers return 0 on success
+		{
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result)));
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
 	}
 }
 
-bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
+void IOMPlugin::save(const QString & formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
-	bool lossLessFlag = par.getBool("LossLess");
-	Scalarm relativePrecisionParam = par.getFloat("relativePrecisionParam");
-	int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
-	if(result!=0)
-	{
-		QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-		errorMessage = "Saving Error: " + errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result));
-		return false;
+	if (formatName.toUpper() == tr("CTM")){
+		bool lossLessFlag = par.getBool("LossLess");
+		Scalarm relativePrecisionParam = par.getFloat("relativePrecisionParam");
+		int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
+		if(result!=0)
+		{
+			QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+			throw MLException("Saving Error: " + errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
+		}
 	}
-	return true;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*

@@ -146,9 +146,9 @@ void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileNam
 	}
 }
 
-bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
+void BreMeshIOPlugin::save(const QString & formatName,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
 {
-  return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
