@@ -45,17 +45,14 @@ QString JSONIOPlugin::pluginName() const
 	return "IOJson";
 }
 
-void JSONIOPlugin::open(const QString & formatName, const QString &, MeshModel &, int &, const RichParameterList &, vcg::CallBackPos *, QWidget * /*parent*/)
+void JSONIOPlugin::open(const QString & formatName, const QString &, MeshModel &, int &, const RichParameterList &, vcg::CallBackPos *)
 {
 	wrongOpenFormat(formatName);
 }
 
-void JSONIOPlugin::save(const QString & formatName,const QString & fileName, MeshModel & m, const int mask, const RichParameterList & par, vcg::CallBackPos * cb, QWidget * parent)
+void JSONIOPlugin::save(const QString & formatName,const QString & fileName, MeshModel & m, const int mask, const RichParameterList &, vcg::CallBackPos *)
 {
 	if (formatName.toUpper() == tr("JSON")){
-		(void)par;
-		(void)cb;
-		(void)parent;
 		vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 		vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 

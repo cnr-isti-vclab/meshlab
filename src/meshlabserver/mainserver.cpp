@@ -262,7 +262,7 @@ public:
         int defbits = 0;
         pCurrentIOPlugin->exportMaskCapability(extension,formatmask,defbits);
         try {
-            pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar);
+            pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar, nullptr);
             QDir::setCurrent(curDir.absolutePath());
             return true;
         }

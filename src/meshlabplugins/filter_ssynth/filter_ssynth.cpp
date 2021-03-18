@@ -183,8 +183,7 @@ void FilterSSynth::open(
 		MeshModel &m,
 		int& mask,
 		const RichParameterList & par,
-		CallBackPos *cb,
-		QWidget *parent)
+		CallBackPos *cb)
 {
 	if (formatName.toUpper() == tr("ES")){
 		this->seed=par.getInt("seed");
@@ -218,7 +217,7 @@ void FilterSSynth::open(
 	}
 }
 
-void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
+void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/)
 {
 	wrongSaveFormat(formatName);
 }

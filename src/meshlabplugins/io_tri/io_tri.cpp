@@ -44,7 +44,7 @@ void TriIOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
 	}
 }
 
-void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
+void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	if(formatName.toUpper() == tr("TRI"))
 	{
@@ -70,7 +70,7 @@ void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-void TriIOPlugin::save(const QString& formatName, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
+void TriIOPlugin::save(const QString& formatName, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *)
 {
 	wrongSaveFormat(formatName);
 }

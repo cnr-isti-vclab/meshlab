@@ -101,7 +101,7 @@
 using namespace std;
 using namespace vcg;
 
-void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget * /*parent*/)
+void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb)
 {
 	// initializing mask
 	mask = 0;
@@ -150,7 +150,7 @@ void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 	}
 }
 
-void ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+void ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
 	if (formatName.toUpper() == tr("DAE")){
 		QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";

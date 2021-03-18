@@ -36,7 +36,7 @@
 
 using namespace vcg;
 
-void IOMPlugin::open(const QString & formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+void IOMPlugin::open(const QString & formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb)
 {
 	if (formatName.toUpper() == tr("CTM")){
 		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
@@ -51,7 +51,7 @@ void IOMPlugin::open(const QString & formatName, const QString &fileName, MeshMo
 	}
 }
 
-void IOMPlugin::save(const QString & formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
+void IOMPlugin::save(const QString & formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/)
 {
 	if (formatName.toUpper() == tr("CTM")){
 		bool lossLessFlag = par.getBool("LossLess");

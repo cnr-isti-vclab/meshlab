@@ -131,7 +131,7 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParame
   
 }
 
-void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	// initializing progress bar status
 	if (cb != NULL)
@@ -146,7 +146,7 @@ void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileNam
 	}
 }
 
-void BreMeshIOPlugin::save(const QString & formatName,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
+void BreMeshIOPlugin::save(const QString & formatName,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *)
 {
 	wrongSaveFormat(formatName);
 }

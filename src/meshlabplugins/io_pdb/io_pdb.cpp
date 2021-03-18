@@ -64,7 +64,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterL
 	}
 }
 
-void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	//bool normalsUpdated = false;
 
@@ -93,7 +93,7 @@ void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-void PDBIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void PDBIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/)
 {
 	wrongSaveFormat(formatName);
 }

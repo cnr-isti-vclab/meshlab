@@ -85,7 +85,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParam
 	}
 }
 
-void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	//bool normalsUpdated = false;
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
@@ -286,7 +286,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	if (cb != NULL)	(*cb)(99, "Done");
 }
 
-void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb, QWidget * /*parent*/)
+void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();

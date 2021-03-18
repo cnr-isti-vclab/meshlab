@@ -2217,7 +2217,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 	pCurrentIOPlugin->setLog(&meshDoc()->Log);
 	
 	try {
-		pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack,this /*gla*/);
+		pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack);
 	}
 	catch(const MLException& e) {
 		QMessageBox::warning(
@@ -2669,7 +2669,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QElapsedTimer tt; tt.start();
 		qb->reset();
 		try {
-			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack,this);
+			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 			mod->setFileName(fileName);
 			QSettings settings;

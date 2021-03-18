@@ -59,7 +59,7 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
     }
 }
 
-void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/)
 {
 	if(formatName.toUpper() == tr("TXT")) {
 		int rowToSkip = parlst.getInt("rowToSkip");
@@ -85,7 +85,7 @@ void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 }
 
-void TxtIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
 	wrongSaveFormat(formatName);
 }

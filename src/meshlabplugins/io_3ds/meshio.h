@@ -53,8 +53,7 @@ public:
 			MeshModel &m,
 			int& mask,
 			const RichParameterList &params,
-			vcg::CallBackPos *cb=0,
-			QWidget* parent=0);
+			vcg::CallBackPos *cb=0);
 
 	void save(
 			const QString &formatName,
@@ -62,8 +61,7 @@ public:
 			MeshModel &m,
 			const int mask,
 			const RichParameterList &,
-			vcg::CallBackPos *cb=0,
-			QWidget *parent= 0);
+			vcg::CallBackPos *cb=0);
 };
 
 #endif

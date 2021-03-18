@@ -50,8 +50,7 @@ void U3DIOPlugin::open(
 		MeshModel &, 
 		int&, 
 		const RichParameterList &, 
-		CallBackPos *, 
-		QWidget *)
+		CallBackPos *)
 {
 	wrongOpenFormat(format);
 }
@@ -62,8 +61,7 @@ void U3DIOPlugin::save(
 		MeshModel &m, 
 		const int mask, 
 		const RichParameterList & par, 
-		vcg::CallBackPos *, 
-		QWidget *)
+		vcg::CallBackPos *)
 {
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);

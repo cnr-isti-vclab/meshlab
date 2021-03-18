@@ -90,8 +90,7 @@ void ExtraMeshIOPlugin::open(
 		MeshModel &m,
 		int& mask,
 		const RichParameterList& params,
-		CallBackPos *cb,
-		QWidget*)
+		CallBackPos *cb)
 {
 	// initializing mask
 	mask = 0;
@@ -250,8 +249,7 @@ void ExtraMeshIOPlugin::save(
 		MeshModel &m,
 		const int mask,
 		const RichParameterList &,
-		vcg::CallBackPos *cb,
-		QWidget *)
+		vcg::CallBackPos *cb)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
