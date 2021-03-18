@@ -59,31 +59,30 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
     }
 }
 
-bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
-    bool result=false;
+	if(formatName.toUpper() == tr("TXT")) {
+		int rowToSkip = parlst.getInt("rowToSkip");
+		int dataSeparator = parlst.getEnum("separator");
+		int dataFormat = parlst.getEnum("strformat");
+		int rgbMode = parlst.getEnum("rgbmode");
+		int onError = parlst.getEnum("onerror");
 
-    if(formatName.toUpper() == tr("TXT"))
-		{
-            int rowToSkip = parlst.getInt("rowToSkip");
-            int dataSeparator = parlst.getEnum("separator");
-            int dataFormat = parlst.getEnum("strformat");
-            int rgbMode = parlst.getEnum("rgbmode");
-			int onError = parlst.getEnum("onerror");
+		if(!(dataFormat==0) && !(dataFormat==6) && !(dataFormat==10))
+			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		if(!(dataFormat==0) && !(dataFormat==10))
+			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+		if((dataFormat==3) || (dataFormat==4) || (dataFormat==5) || (dataFormat>=8))
+			mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 
-            if(!(dataFormat==0) && !(dataFormat==6) && !(dataFormat==10))
-                mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-            if(!(dataFormat==0) && !(dataFormat==10))
-                mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-            if((dataFormat==3) || (dataFormat==4) || (dataFormat==5) || (dataFormat>=8))
-                mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+		m.Enable(mask);
 
-            m.Enable(mask);
-
-            return parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError);
-		}
-
-	return result;
+		if (!parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError))
+			throw MLException("Error while opening TXT file.");
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)

@@ -126,7 +126,7 @@ public:
 			int& defaultBits) const = 0;
 
 	/// callback used to actually load a mesh from a file
-	virtual bool open(
+	virtual void open(
 		const QString &format, /// the extension of the format e.g. "PLY"
 		const QString &fileName, /// The name of the file to be opened
 		MeshModel &m, /// The mesh that is filled with the file content
@@ -143,6 +143,16 @@ public:
 		const RichParameterList & par,
 		vcg::CallBackPos *cb = 0,
 		QWidget *parent = 0) = 0;
+
+	void wrongOpenFormat(const QString& format)
+	{
+		throw MLException("Internal error: unknown open format " + format + " to " + pluginName() + " plugin.");
+	};
+
+	void wrongSaveFormat(const QString& format)
+	{
+		throw MLException("Internal error: unknown save format " + format + " to " + pluginName() + " plugin.");
+	};
 
 	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
 	/// io plugins should avoid using QMessageBox for reporting errors.

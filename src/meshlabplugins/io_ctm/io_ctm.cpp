@@ -36,16 +36,14 @@
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+void IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
-    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
-    if (result != 0) // all the importers return 0 on success
-    {
-      errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result));
-      return false;
-    }
-    return true;
+	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
+	if (result != 0) // all the importers return 0 on success
+	{
+		throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result)));
+	}
 }
 
 bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)

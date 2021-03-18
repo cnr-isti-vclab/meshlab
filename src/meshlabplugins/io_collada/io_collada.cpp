@@ -101,52 +101,53 @@
 using namespace std;
 using namespace vcg;
 
-bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget * /*parent*/)
+void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget * /*parent*/)
 {
 	// initializing mask
-  mask = 0;
+	mask = 0;
 	
 	// initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();
-  //std::string filename = fileName.toUtf8().data();
+	//std::string filename = fileName.toUtf8().data();
 
 	bool normalsUpdated = false;
 
 	if(formatName.toUpper() == tr("DAE"))
 	{
 		//m.addinfo = NULL;
-        tri::io::InfoDAE  info;
-		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
-			return false;
+		tri::io::InfoDAE  info;
+		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info)){
+			throw MLException("Error while loading DAE mask.");
+		}
 
-        m.Enable(info.mask);
-	//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
-	//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
+		m.Enable(info.mask);
+		//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
+		//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
 		
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),info);
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
-			errorMessage = "DAE Opening Error" + QString(vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException("DAE Opening Error" + QString(vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
 		}
 		else _mp.push_back(&m);
 
-        if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+		if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
-        mask = info.mask;
+		mask = info.mask;
+
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+		if (!normalsUpdated)
+			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
+
+		if (cb != NULL)	(*cb)(99, "Done");
 	}
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-	if (!normalsUpdated) 
-		vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
-
-	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)

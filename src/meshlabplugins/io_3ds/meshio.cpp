@@ -84,10 +84,11 @@ void ExtraMeshIOPlugin::initPreOpenParameter(
 	}
 }
 
-bool ExtraMeshIOPlugin::open(
+void ExtraMeshIOPlugin::open(
 		const QString &formatName,
 		const QString &fileName,
-		MeshModel &m, int& mask,
+		MeshModel &m,
+		int& mask,
 		const RichParameterList& params,
 		CallBackPos *cb,
 		QWidget*)
@@ -104,19 +105,16 @@ bool ExtraMeshIOPlugin::open(
 	string filename = QFile::encodeName(fileName).constData ();
 	//string filename = fileName.toUtf8().data();
 	
-	if (formatName.toUpper() == tr("3DS"))
-	{
+	if (formatName.toUpper() == tr("3DS")) {
 		vcg::tri::io::_3dsInfo info;	
 		info.cb = cb;
 		Lib3dsFile *file = NULL;
 		
 		
 		file = lib3ds_file_load(filename.c_str());
-		if (!file)
-		{
+		if (!file) {
 			int result = vcg::tri::io::Importer3DS<CMeshO>::E_CANTOPEN;
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
 		}
 		
 		// No nodes?  Fabricate nodes to display all the meshes.
@@ -134,8 +132,9 @@ bool ExtraMeshIOPlugin::open(
 			}
 		}
 		
-		if( !file->nodes)
-			return false;
+		if( !file->nodes) {
+			throw MLException("Malformed file.");
+		}
 		
 		lib3ds_file_eval(file, 0);
 		
@@ -202,9 +201,8 @@ bool ExtraMeshIOPlugin::open(
 			int result = vcg::tri::io::Importer3DS<CMeshO>::Load(m.cm, file, 0, info);
 			if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
 			{
-				errorMessage = "3DS Opening Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result));
 				lib3ds_file_free(file);
-				return false;
+				throw MLException("3DS Opening Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
 			}
 			
 			if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
@@ -240,10 +238,10 @@ bool ExtraMeshIOPlugin::open(
 		
 		// freeing memory
 		lib3ds_file_free(file);
-		
-		return true;
 	}
-	return false;
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 bool ExtraMeshIOPlugin::save(

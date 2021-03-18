@@ -45,16 +45,9 @@ QString JSONIOPlugin::pluginName() const
 	return "IOJson";
 }
 
-bool JSONIOPlugin::open(const QString & formatName, const QString & fileName, MeshModel & m, int & mask, const RichParameterList & parlst, vcg::CallBackPos * cb, QWidget * /*parent*/)
+void JSONIOPlugin::open(const QString & formatName, const QString &, MeshModel &, int &, const RichParameterList &, vcg::CallBackPos *, QWidget * /*parent*/)
 {
-	(void)formatName;
-	(void)fileName;
-	(void)m;
-	(void)mask;
-	(void)parlst;
-	(void)cb;
-
-	return false;
+	wrongOpenFormat(formatName);
 }
 
 bool JSONIOPlugin::save(const QString & formatName,const QString & fileName, MeshModel & m, const int mask, const RichParameterList & par, vcg::CallBackPos * cb, QWidget * parent)

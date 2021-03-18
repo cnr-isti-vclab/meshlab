@@ -177,35 +177,44 @@ std::list<FileFormat> FilterSSynth::exportFormats() const
 	return formats ;
 }
 
-bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, CallBackPos *cb, QWidget *parent)
+void FilterSSynth::open(
+		const QString& formatName,
+		const QString& fileName,
+		MeshModel &m,
+		int& mask,
+		const RichParameterList & par,
+		CallBackPos *cb,
+		QWidget *parent)
 {
-	this->seed=par.getInt("seed");
-	int maxrec=par.getInt("maxrec");
-	int sphereres=par.getInt("sphereres");
-	int maxobj=par.getInt("maxobj");
-    this->renderTemplate=GetTemplate(sphereres);
-	if(this->renderTemplate!= ""){
-        QFile grammar(fileName);
-        grammar.open(QFile::ReadOnly|QFile::Text);
-        QString gcontent(grammar.readAll());
-        grammar.close();
-        if(maxrec>0)ParseGram(&gcontent,maxrec,tr("set maxdepth"));
-        if(maxobj>0)ParseGram(&gcontent,maxobj,tr("set maxobjects"));
-        QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
-        if(QFile::exists(x3dfile)){
-            openX3D(x3dfile,m,mask,cb);
-            QFile x3df(x3dfile);
-            x3df.remove();
-            return true;
-        }
-        else{
-			errorMessage = "Error: " + QString("An error occurred during the mesh generation: ").append(x3dfile);
-            return false;
-        }
-    }
-	else{
-		errorMessage = "Error: Sphere resolution must be between 1 and 4";
-		return false;
+	if (formatName.toUpper() == tr("ES")){
+		this->seed=par.getInt("seed");
+		int maxrec=par.getInt("maxrec");
+		int sphereres=par.getInt("sphereres");
+		int maxobj=par.getInt("maxobj");
+		this->renderTemplate=GetTemplate(sphereres);
+		if(this->renderTemplate!= ""){
+			QFile grammar(fileName);
+			grammar.open(QFile::ReadOnly|QFile::Text);
+			QString gcontent(grammar.readAll());
+			grammar.close();
+			if(maxrec>0)ParseGram(&gcontent,maxrec,tr("set maxdepth"));
+			if(maxobj>0)ParseGram(&gcontent,maxobj,tr("set maxobjects"));
+			QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
+			if(!QFile::exists(x3dfile)){
+				throw MLException("An error occurred during the mesh generation: " + x3dfile);
+			}
+			else{
+				openX3D(x3dfile,m,mask,cb);
+				QFile x3df(x3dfile);
+				x3df.remove();
+			}
+		}
+		else{
+			throw MLException("Error: Sphere resolution must be between 1 and 4");
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
 	}
 }
 

@@ -64,7 +64,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterL
 	}
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	//bool normalsUpdated = false;
 
@@ -72,63 +72,25 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	mask = 0;
 	
 	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
 
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-
-	//string filename = fileName.toUtf8().data();
 	string filename = QFile::encodeName(fileName).constData ();
-  
-  if (formatName.toUpper() == tr("PDB"))
+
+	if (formatName.toUpper() == tr("PDB"))
 	{
 		
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		m.Enable(mask);
 
-		return parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb);
- 
-
-		/*
-		tri::io::ImporterPTX<CMeshO>::Info importparams;
-
-		importparams.meshnum = parlst.getInt("meshindex");
-		importparams.anglecull =parlst.getBool("anglecull");
-		importparams.angle = parlst.getFloat("angle");
-		importparams.savecolor = parlst.getBool("usecolor");
-		importparams.pointcull = parlst.getBool("pointcull");
-		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
-		importparams.flipfaces = parlst.getBool("flipfaces");
-
-		// if color, add to mesh
-		if(importparams.savecolor)
-			importparams.mask |= tri::io::Mask::IOM_VERTCOLOR;
-
-		// reflectance is stored in quality
-		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
-
-		m.Enable(importparams.mask);
-
-		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
-		if (result == 1)
-		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
-			return false;
-		}
-
-		// update mask
-		mask = importparams.mask;
-		*/
+		if (!parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb))
+			throw MLException("Error while opening PDB file");
+		if (cb != NULL)
+			(*cb)(99, "Done");
 	}
-	else 
-	{
-		assert(0); // Unknown File type
-		return false;
+	else {
+		wrongOpenFormat(formatName);
 	}
-
-	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
 }
 
 bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)

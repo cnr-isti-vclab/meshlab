@@ -48,7 +48,7 @@ public:
 
 	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 
 	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par);

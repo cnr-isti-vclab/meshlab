@@ -131,20 +131,19 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParame
   
 }
 
-bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
-  // initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
-  mask = 0;
-  QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-  bool points = parlst.getBool("pointsonly");
-  int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
-  if (result != 0) // all the importers return 0 on success
+	// initializing progress bar status
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
+	mask = 0;
+	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	bool points = parlst.getBool("pointsonly");
+	int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
+	if (result != 0) // all the importers return 0 on success
 	{
-	  errorMessage = errorMsgFormat.arg(fileName, ErrorMsg(result));
-	  return false;
+		throw MLException(errorMsgFormat.arg(fileName, ErrorMsg(result)));
 	}
-  return true;
 }
 
 bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)

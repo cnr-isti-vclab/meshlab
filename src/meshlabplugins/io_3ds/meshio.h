@@ -48,7 +48,7 @@ public:
 				const QString& format,
 				RichParameterList& parameters);
 
-	bool open(const QString &formatName,
+	void open(const QString &formatName,
 			const QString &fileName,
 			MeshModel &m,
 			int& mask,

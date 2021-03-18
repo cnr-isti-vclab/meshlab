@@ -38,7 +38,7 @@ using namespace vcg;
 
 
 
-bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & /*parlst*/, CallBackPos *cb, QWidget*/*parent*/)
+void ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & /*parlst*/, CallBackPos *cb, QWidget*/*parent*/)
 {
 	// initializing mask
 	mask = 0;
@@ -57,26 +57,25 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 		if (!vcg::tri::io::ImporterExpePTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
 		{
 			useXYZ=true;
-			if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)) 
-				return false;
-		}        
+			if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)){
+				throw MLException("Error while loading [A]PTS mask.");
+			}
+		}
 		m.Enable(loadMask);
 		int result;
 		if(useXYZ) {
-			result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);     
+			result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 			if (result != 0)
 			{
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result)));
 			}
 		}
 		else 
 		{
-			result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);     
+			result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 			if (result != 0)
 			{
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterExpePTS<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterExpePTS<CMeshO>::ErrorMsg(result)));
 			}
 		}
 		
@@ -84,16 +83,16 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	else if (formatName.toLower() == tr("xyz"))
 	{
 		int loadMask;
-		if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask))
-			return false;
+		if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)) {
+			throw MLException("Error while loading XYZ mask.");
+		}
 		m.Enable(loadMask);
 		
 		
 		int result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	
@@ -101,8 +100,6 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	
 	if (cb != NULL)
 		(*cb)(99, "Done");
-	
-	return true;
 }
 
 bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget *parent)

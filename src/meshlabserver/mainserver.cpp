@@ -188,13 +188,14 @@ public:
 		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
         prePar.join(meshlab::defaultGlobalParameterList());
 
-        if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
-        {
+        try {
+            pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar);
+        }
+        catch(const MLException& e){
             fprintf(fp,"MeshLabServer: Failed loading of %s from dir %s\n", qUtf8Printable(fileName), qUtf8Printable(QDir::currentPath()));
             QDir::setCurrent(curDir.absolutePath());
             return false;
         }
-
         // In case of polygonal meshes the normal should be updated accordingly
         if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
         {
@@ -310,9 +311,11 @@ public:
         md->setBusy(true);
         pCurrentIOPlugin->setLog(&md->Log);
 
-        if (!pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar))
-        {
-            fprintf(fp, "Opening Failure: %s", (QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()).toStdString().c_str()); // text+
+        try {
+            pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar);
+        }
+        catch (const MLException& e) {
+            fprintf(fp, "Opening Failure: %s", (QString("While opening: '%1'\n\n").arg(fileName)+e.what()).toStdString().c_str()); // text+
             pCurrentIOPlugin->clearErrorString();
             md->setBusy(false);
             QDir::setCurrent(origDir); // undo the change of directory before leaving

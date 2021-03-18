@@ -44,8 +44,8 @@ U3DIOPlugin::U3DIOPlugin() :
 {
 }
 
-bool U3DIOPlugin::open(
-		const QString &, 
+void U3DIOPlugin::open(
+		const QString& format,
 		const QString &, 
 		MeshModel &, 
 		int&, 
@@ -53,7 +53,7 @@ bool U3DIOPlugin::open(
 		CallBackPos *, 
 		QWidget *)
 {
-	return false;
+	wrongOpenFormat(format);
 }
 bool U3DIOPlugin::save(
 		const QString &formatName, 

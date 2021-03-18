@@ -44,30 +44,30 @@ void TriIOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
 	}
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
+void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
 {
 	if(formatName.toUpper() == tr("TRI"))
+	{
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		m.Enable(mask);
+		if (!parseTRI(qUtf8Printable(fileName), m.cm))
+			throw MLException("Error while opening TRI file");
+	}
+	else if(formatName.toUpper() == tr("ASC"))
+	{
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		m.Enable(mask);
+		bool triangulate = parlst.getBool("triangulate");
+		int rowToSkip = parlst.getInt("rowToSkip");
+		int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);
+		if (result != 0) // all the importers return 0 on success
 		{
-			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
-			m.Enable(mask);			
-			return parseTRI(qUtf8Printable(fileName), m.cm);
+			throw MLException("Error while opening ASC file");
 		}
-	if(formatName.toUpper() == tr("ASC"))
-		{
-			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-			m.Enable(mask);			
-			bool triangulate = parlst.getBool("triangulate");
-			int rowToSkip = parlst.getInt("rowToSkip");
-			int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);
-			if (result != 0) // all the importers return 0 on success
-			{
-				errorMessage = QString("Failed to open:")+fileName;
-				return false;
-			}
-			
-		return true;
-		}
-	return false;
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)

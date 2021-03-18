@@ -31,7 +31,7 @@
 using namespace std;
 using namespace vcg;
 
-bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget */*parent*/)
+void IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget */*parent*/)
 {
 	// initializing mask
 	mask = 0;
@@ -52,9 +52,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMaskVrml(filename.c_str(), info);
 		if ( result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
-			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD)
 		{
@@ -74,16 +72,14 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QString fileError = info->filenameStack[info->filenameStack.size()-1];
 			QString lineError;
 			lineError.setNum(info->lineNumberError);
-			errorMessage = errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
 			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (m.cm.vert.size() == 0)
 		{
 			errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: File without a geometry";
-			errorMessage = errorMsgFormat.arg(fileName);
 			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName));
 		}
 		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
@@ -116,11 +112,11 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
 		
 		delete info;
+		if (cb != NULL)	(*cb)(99, "Done");
 	}
-	// verify if texture files are present
-	
-	if (cb != NULL)	(*cb)(99, "Done");
-	return true;
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 

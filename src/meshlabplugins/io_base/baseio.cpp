@@ -85,21 +85,20 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParam
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
-    //bool normalsUpdated = false;
-    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	//bool normalsUpdated = false;
+	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-    if(!QFile::exists(fileName))
-    {
-        errorMessage = errorMsgFormat.arg(fileName, "File does not exist");
-        return false;
-    } 
+	if(!QFile::exists(fileName)) {
+		throw MLException(errorMsgFormat.arg(fileName, "File does not exist"));
+	}
 	// initializing mask
 	mask = 0;
 
 	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
 
 	
 	//string filename = fileName.toUtf8().data();
@@ -118,8 +117,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		{
 			if (tri::io::ImporterPLY<CMeshO>::ErrorCritical(result))
 			{
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
 			}
 		}
 	}
@@ -127,15 +125,13 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		if (!tri::io::ImporterSTL<CMeshO>::LoadMask(filename.c_str(), mask))
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED)));
 		}
 		m.Enable(mask);
 		int result = tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 		}
 
 		bool stluinf = parlst.getBool(stlUnifyParName());
@@ -150,19 +146,19 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		tri::io::ImporterOBJ<CMeshO>::Info oi;
 		oi.cb = cb;
-		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
-			return false;
+		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi)){
+			throw MLException("Error while loading OBJ mask.");
+		}
 		m.Enable(oi.mask);
 
 		int result = tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 		if (result != tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
-			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
+			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR) {
 				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
-			else
-			{
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
-				return false;
+			}
+			else {
+				throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 			}
 		}
 
@@ -198,8 +194,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
 		if (result == 1)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
 		}
 
 		// update mask
@@ -210,37 +205,36 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int loadMask;
 		if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(), loadMask))
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile)));
 		}
 		m.Enable(loadMask);
 
 		int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	else if (formatName.toUpper() == tr("VMI"))
 	{
 		int loadMask;
-		if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(), loadMask))
-			return false;
+		if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(), loadMask)) {
+			throw MLException("Error while loading VMI mask.");
+		}
 		m.Enable(loadMask);
 
 		int result = tri::io::ImporterVMI<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	else if (formatName.toUpper() == tr("GTS"))
 	{
 		int loadMask;
-		if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(), loadMask))
-			return false;
+		if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(), loadMask)){
+			throw MLException("Error while loading GTS mask.");
+		}
 		m.Enable(loadMask);
 
 		tri::io::ImporterGTS<CMeshO>::Options opt;
@@ -249,34 +243,31 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = tri::io::ImporterGTS<CMeshO>::Open(m.cm, filename.c_str(), mask, opt, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result)));
 		}
 	}
-    else if (formatName.toUpper() == tr("FBX"))
-    {      
-      m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
-      
-      int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
-      if(m.cm.textures.empty()) 
-        m.clearDataMask(tri::io::Mask::IOM_WEDGTEXCOORD);
-      
-      if (result != 0)
-      {
-        errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterFBX<CMeshO>::ErrorMsg(result));
-        return false;
-      }
-    }else
-    {
-		assert(0); // Unknown File type
-		return false;
+	else if (formatName.toUpper() == tr("FBX"))
+	{
+		m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
+
+		int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
+		if(m.cm.textures.empty())
+			m.clearDataMask(tri::io::Mask::IOM_WEDGTEXCOORD);
+
+		if (result != 0)
+		{
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterFBX<CMeshO>::ErrorMsg(result)));
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
 	}
 
-    // Add a small pass to convert backslash into forward slash
-    for(auto i = m.cm.textures.begin();i!=m.cm.textures.end();++i)
-    {
-      std::replace(i->begin(), i->end(), '\\', '/');
-    }
+	// Add a small pass to convert backslash into forward slash
+	for(auto i = m.cm.textures.begin();i!=m.cm.textures.end();++i)
+	{
+		std::replace(i->begin(), i->end(), '\\', '/');
+	}
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
@@ -293,8 +284,6 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
 }
 
 bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb, QWidget * /*parent*/)

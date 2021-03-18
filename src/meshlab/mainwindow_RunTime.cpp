@@ -2216,9 +2216,14 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 	meshDoc()->setBusy(true);
 	pCurrentIOPlugin->setLog(&meshDoc()->Log);
 	
-	if (!pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack,this /*gla*/))
-	{
-		QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text+
+	try {
+		pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack,this /*gla*/);
+	}
+	catch(const MLException& e) {
+		QMessageBox::warning(
+					this,
+					tr("Opening Failure"),
+					"While opening: " + fileName + "\n\n" + e.what());
 		pCurrentIOPlugin->clearErrorString();
 		meshDoc()->setBusy(false);
 		QDir::setCurrent(origDir); // undo the change of directory before leaving
