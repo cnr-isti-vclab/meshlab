@@ -599,7 +599,7 @@ public:
         GLLogStream log;
         for (FilterNameParameterValuesPair& pair : scriptPtr)
         {
-            bool ret = false;
+            bool ret = true;
             //RichParameterSet &par = (*ii).second;
             QString fname = pair.filterName();
             fprintf(fp,"filter: %s\n", qUtf8Printable(fname));
