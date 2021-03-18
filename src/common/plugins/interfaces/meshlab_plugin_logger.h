@@ -53,27 +53,27 @@ public:
 	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
 	template <typename... Ts>
-	void log(const char* f, Ts&&... ts);
+	void log(const char* f, Ts&&... ts) const;
 	template <typename... Ts>
-	void log(const std::string& s, Ts&&... ts);
+	void log(const std::string& s, Ts&&... ts) const;
 
-	void log(const char* s);
-	void log(const std::string& s);
-
-	template <typename... Ts>
-	void log(GLLogStream::Levels level, const char* f, Ts&&... ts);
-
-	void log(GLLogStream::Levels level, const char* s);
-
-	void log(GLLogStream::Levels  level, const std::string& s);
-
-	void realTimeLog(QString Id, const QString& meshName, const char* f);
+	void log(const char* s) const;
+	void log(const std::string& s) const;
 
 	template <typename... Ts>
-	void realTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts );
+	void log(GLLogStream::Levels level, const char* f, Ts&&... ts) const;
+
+	void log(GLLogStream::Levels level, const char* s) const;
+
+	void log(GLLogStream::Levels  level, const std::string& s) const;
+
+	void realTimeLog(QString Id, const QString& meshName, const char* f) const;
+
+	template <typename... Ts>
+	void realTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts ) const;
 
 private:
-	GLLogStream *logstream;
+	mutable GLLogStream *logstream;
 };
 
 /************************
@@ -81,7 +81,7 @@ private:
  ************************/
 
 template<typename... Ts>
-void MeshLabPluginLogger::log(const char* f, Ts&&... ts)
+void MeshLabPluginLogger::log(const char* f, Ts&&... ts) const
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
@@ -89,7 +89,7 @@ void MeshLabPluginLogger::log(const char* f, Ts&&... ts)
 }
 
 template<typename... Ts>
-void MeshLabPluginLogger::log(const std::string& s, Ts&&... ts)
+void MeshLabPluginLogger::log(const std::string& s, Ts&&... ts) const
 {
 	if(logstream != nullptr) {
 		logstream->logf(GLLogStream::FILTER, s.c_str(), std::forward<Ts>(ts)...);
@@ -97,7 +97,7 @@ void MeshLabPluginLogger::log(const std::string& s, Ts&&... ts)
 }
 
 template <typename... Ts>
-void MeshLabPluginLogger::log(GLLogStream::Levels level, const char* f, Ts&&... ts)
+void MeshLabPluginLogger::log(GLLogStream::Levels level, const char* f, Ts&&... ts) const
 {
 	if(logstream != nullptr) {
 		logstream->logf(level, f, std::forward<Ts>(ts)...);
@@ -105,7 +105,7 @@ void MeshLabPluginLogger::log(GLLogStream::Levels level, const char* f, Ts&&... 
 }
 
 template <typename... Ts>
-void MeshLabPluginLogger::realTimeLog(QString id, const QString& meshName, const char* f, Ts&&... ts)
+void MeshLabPluginLogger::realTimeLog(QString id, const QString& meshName, const char* f, Ts&&... ts) const
 {
 	if(logstream != nullptr) {
 		logstream->realTimeLogf(id, meshName, f, std::forward<Ts>(ts)...);
