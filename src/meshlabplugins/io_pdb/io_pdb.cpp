@@ -138,7 +138,7 @@ void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))

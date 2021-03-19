@@ -176,7 +176,7 @@ void U3DIOPlugin::exportMaskCapability(
 	assert(0);
 }
 
-void U3DIOPlugin::initSaveParameter(const QString &, MeshModel &m, RichParameterList &par) 
+void U3DIOPlugin::initSaveParameter(const QString &, const MeshModel &m, RichParameterList &par)
 {
 	_param._campar = 
 			new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(

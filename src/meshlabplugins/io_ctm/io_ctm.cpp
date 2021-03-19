@@ -98,7 +98,7 @@ void IOMPlugin::exportMaskCapability(const QString &/*format*/, int &capability,
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
-void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & par)
+void IOMPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList & par)
 {
   par.addParam(RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));

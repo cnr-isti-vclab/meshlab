@@ -48,12 +48,12 @@ public:
 	virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par);
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 
-  virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+	virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 	//---------- PDB READER -----------//
 	bool parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, vcg::CallBackPos *cb=0); 
 	void mysscanf(const char* st, float *f);
-    void mysscanf(const char* st, double *f);
+	void mysscanf(const char* st, double *f);
 	float getAtomRadius(const char* atomicElementCharP);
 	vcg::Color4b getAtomColor(const char* atomicElementCharP);
 

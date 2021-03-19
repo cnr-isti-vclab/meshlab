@@ -171,7 +171,7 @@ public:
   virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
   virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par);
   void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
-  virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+  virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 };
 

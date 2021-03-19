@@ -108,7 +108,7 @@ public:
 	 */
 	virtual void initSaveParameter(
 			const QString& /*format*/,
-			MeshModel& /*m*/,
+			const MeshModel& /*m*/,
 			RichParameterList& /*par*/)
 	{
 	}
@@ -154,7 +154,7 @@ public:
 	virtual void save(
 		const QString &format,
 		const QString &fileName,
-		MeshModel &m,
+		MeshModel &m, /** NOTE: this is going to be const MeshModel&: try to use only const functions!! **/
 		const int mask,
 		const RichParameterList & par,
 		vcg::CallBackPos *cb) = 0;

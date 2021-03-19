@@ -471,7 +471,7 @@ void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capabili
 //                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 //}
 
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterList &par)
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m, RichParameterList &par)
 {
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(RichBool("Binary", true, "Binary encoding",

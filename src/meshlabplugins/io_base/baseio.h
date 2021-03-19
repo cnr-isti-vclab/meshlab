@@ -48,7 +48,7 @@ public:
 	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
 	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 private:
 	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
