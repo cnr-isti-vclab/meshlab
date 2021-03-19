@@ -164,7 +164,7 @@ namespace io {
 	public:
 
 
-		static int Save(SaveMeshType& m, const char * filename, const int mask, CallBackPos *cb=0)
+		static int Save(const SaveMeshType& m, const char * filename, const int mask, CallBackPos *cb=0)
 		{
 			int nFace = 0;
 			bool bHasPerWedgeTexCoord = (mask & Mask::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
@@ -189,8 +189,8 @@ namespace io {
 			QDomDocument doc("X3D PUBLIC \"ISO//Web3D//DTD X3D 3.1//EN\" \"http://www.web3d.org/specifications/x3d-3.1.dtd\"");
 			QDomElement scene = createHeader(doc, filename);
 			int indexTexture = -2;
-			std::vector<typename SaveMeshType::FaceIterator> object;
-			typename SaveMeshType::FaceIterator fi;
+			std::vector<typename SaveMeshType::ConstFaceIterator> object;
+			typename SaveMeshType::ConstFaceIterator fi;
 			if (bHasPerWedgeTexCoord || bHasPerVertexTexCoord)
 			{
 				//Search objects in the mesh(an object is a portion of mesh with the same texture index) 
@@ -372,7 +372,7 @@ namespace io {
 				shape.appendChild(geometry);
 				scene.appendChild(shape);
 			}
-			typename SaveMeshType::VertexIterator vi;
+			typename SaveMeshType::ConstVertexIterator vi;
 			std::vector<QString> pointVect;
 			std::vector<QString> colorVect;
 			//Create a PoinrSet element for all isolated vertex
