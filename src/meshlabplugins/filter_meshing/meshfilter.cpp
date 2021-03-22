@@ -212,6 +212,16 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 	return MeshModel::MM_NONE;
 }
 
+int ExtraMeshFilterPlugin::getRequirements(const QAction* filter)
+{
+	switch (ID(filter)){
+		case FP_EXPLICIT_ISOTROPIC_REMESHING :
+			return MeshModel::MM_FACEQUALITY | MeshModel::MM_VERTQUALITY;
+		default:
+			return MeshModel::MM_NONE;
+	}
+}
+
 QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 {
 	switch (filter)
