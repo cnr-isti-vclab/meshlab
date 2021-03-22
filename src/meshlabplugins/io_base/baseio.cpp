@@ -361,7 +361,7 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 		int result;
 
-		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.getBool("poligonalize")))
+		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
@@ -480,10 +480,6 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 	if (format.toUpper() == tr("STL"))
 		par.addParam(RichBool("ColorMode", true, "Materialise Color Encoding",
 		"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
-
-	if (format.toUpper() == tr("OBJ") && m.hasDataMask(MeshModel::MM_POLYGONAL)) //only shows up when the poligonalization is possible
-		par.addParam(RichBool("poligonalize", false, "Convert triangles to polygons",
-		"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting. WARNING: unstable, may cause crash")); // default is false, because it is a bit buggy, and should be anable only when sure
 
 	if (format.toUpper() == tr("PLY")){
 		std::vector<std::string> AttribNameVector;
