@@ -1,9 +1,12 @@
 # Copyright 2019, 2020, Collabora, Ltd.
-# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
 cmake_minimum_required(VERSION 3.9)
 project(MeshLab)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_global_settings.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_tools.cmake")
