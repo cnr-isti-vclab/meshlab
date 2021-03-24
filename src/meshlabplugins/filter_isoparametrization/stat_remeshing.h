@@ -155,8 +155,8 @@ void MaxMinEdge(const MeshType &mesh,typename MeshType::ScalarType &min,
 
 			for (int i=0;i<3;i++)
 			{
-			  typename MeshType::VertexType* v0=(*Fi).cV0(i);
-			  typename MeshType::VertexType* v1=(*Fi).cV1(i);
+			  const typename MeshType::VertexType* v0=(*Fi).V0(i);
+			  const typename MeshType::VertexType* v1=(*Fi).V1(i);
 				if (v0>v1)
 				{
 					ScalarType dist=(v0->P()-v1->P()).Norm();
