@@ -122,8 +122,6 @@ target_include_directories(meshlab-common
 	PRIVATE
 		${EXTERNAL_DIR}/easyexif/
 	PUBLIC
-		${VCGDIR}
-		${EIGEN_INCLUDE_DIRS}
 		${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_link_libraries(
@@ -134,6 +132,7 @@ target_link_libraries(
 		Qt5::Widgets
 		Qt5::Xml
 		Qt5::Network
+		vcglib
 		external-glew
 )
 

@@ -73,9 +73,19 @@ endif()
 ### Enter subdirectories
 
 # VCGLib -- required
-if(NOT VCGDIR)
+if (VCGDIR) # VCGDIR exists - using custom user vcglib path
+	if(EXISTS ${VCGDIR})
+		add_subdirectory(${VCGDIR} {CMAKE_CURRENT_BINARY_DIR}/vcglib)
+		message(STATUS "- VCGLib - using custom VCGDIR path library")
+	else()
+		set(VCGDIR NOTFOUND)
+	endif()
+else()
 	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
-	if(NOT EXISTS ${VCGDIR})
+	if(EXISTS ${VCGDIR})
+		add_subdirectory(${VCGDIR})
+		message(STATUS "- VCGLib - using using bundled source")
+	else()
 		set(VCGDIR NOTFOUND)
 	endif()
 endif()
