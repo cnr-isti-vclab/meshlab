@@ -12,8 +12,5 @@ if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
 	endif()
 endif()
 
-# Eigen3 - required
-include(${EXTERNAL_DIR}/eigen.cmake)
-
 # GLEW - required
 include(${EXTERNAL_DIR}/glew.cmake)
