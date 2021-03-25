@@ -140,6 +140,7 @@ else()
 		meshlabplugins/io_txt
 		meshlabplugins/io_u3d
 		meshlabplugins/io_x3d
+		meshlabplugins/io_e57
 
 		# IORaster plugins
 		meshlabplugins/ioraster_base
