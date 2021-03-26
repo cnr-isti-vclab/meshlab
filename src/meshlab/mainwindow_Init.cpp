@@ -1143,6 +1143,10 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 
 
 	QString thisVersion = MeshLabApplication::appVer();
+	if (thisVersion.contains("_")){ //remove nightly or rc
+		int pos = thisVersion.indexOf("_");
+		thisVersion = thisVersion.left(pos);
+	}
 	if (thisVersion.endsWith("d")){
 		thisVersion.chop(1);
 	}
@@ -1179,7 +1183,8 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 
 	if (newVersionAvailable){
 		QString message =
-				"<center>You are using an old version of MeshLab.<br><br>"
+				"<center>You are using an old version of MeshLab.<br>"
+				"A new MeshLab version is available: " + onlineVersion + "<br><br>"
 				"Please, upgrade to the new version!<br><br>";
 		if (checkForMonthlyAndBetasVal){
 			message +=
@@ -1190,13 +1195,10 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 					"<big> <a href=\"https://www.meshlab.net/#download\">Download</a></big></center>";
 		}
 		
-		msgBox.setText(
-					"<center>You are using an old version of MeshLab.<br><br>"
-					"Please, upgrade to the new version!<br><br>"
-					"<big> <a href=\"https://github.com/cnr-isti-vclab/meshlab/releases\">Download</a></big></center>");
+		msgBox.setText(message);
 	}
 	else if (verboseCheckingFlag && !newVersionAvailable) {
-		msgBox.setText("<center>Your MeshLab version is the most recent one.</center>");
+		msgBox.setText("<center>Your MeshLab version is the most recent one: " + onlineVersion + ".</center>");
 	}
 	reply->deleteLater();
 

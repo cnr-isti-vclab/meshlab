@@ -5,10 +5,6 @@
 #include <QDir>
 #include "globals.h"
 
-#ifndef MESHLAB_VERSION
-#define MESHLAB_VERSION 2020.09
-#endif
-
 #if defined(__clang__)
 #define ML_COMPILER "Clang"
 #define ML_COMPILER_VER MeshLabApplication::versionString(__clang_major__, __clang_minor__, __clang_patchlevel__)
