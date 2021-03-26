@@ -110,7 +110,7 @@ void PluginManager::checkPlugin(const QString& filename)
 //	}
 
 	/** Rules for now: plugin needs to have same version of meshlab **/
-	if (mlVersionPlug != meshlab::meshlabVersion()){
+	if (mlVersionPlug.substr(0, 6) != meshlab::meshlabVersion().substr(0, 6)){
 		throw MLException(fin.fileName() + " has different version from the running MeshLab version.");
 	}
 	

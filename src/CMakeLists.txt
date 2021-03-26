@@ -17,8 +17,12 @@ option(BUILD_SERVER "Build a command-line server application" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
+option(MESHLAB_IS_RELEASE_CANDIDATE_VERSION "" OFF)
+option(MESHLAB_IS_NIGHTLY_VERSION "" ON)
+
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
 
