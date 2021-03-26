@@ -689,6 +689,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos * cb)
 {
+	std::map<std::string, QVariant> outputValues;
 	MeshModel & m = *md.mm();
 
 	switch(ID(filter))
@@ -1368,6 +1369,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		else
 			holeCnt = tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
 		log("Closed %i holes and added %i new faces",holeCnt,m.cm.fn-OriginalSize);
+		outputValues["closed_holes"] = holeCnt;
+		outputValues["new_faces"] = (int)(m.cm.fn-OriginalSize);
 		assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
 		m.UpdateBoxAndNormals();
 
@@ -1764,7 +1767,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 	default:
 		wrongActionCalled(filter);
 	}
-	return std::map<std::string, QVariant>();
+	return outputValues;
 }
 
 int ExtraMeshFilterPlugin::postCondition(const QAction * filter) const
