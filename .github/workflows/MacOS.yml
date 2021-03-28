@@ -33,7 +33,7 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
     - name: Deploy
       shell: bash
       run: |
@@ -41,7 +41,7 @@ jobs:
     - name: Create DMG
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/3_dmg.sh --${{ matrix.precision }}
+        bash scripts/${{ runner.os }}/3_dmg.sh
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
