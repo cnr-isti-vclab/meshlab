@@ -25,10 +25,6 @@ case $i in
     INSTALL_PATH="${i#*=}"
     shift # past argument=value
     ;;
-    --double_precision)
-    ML_VERSION=${ML_VERSION}d
-    shift # past argument=value
-    ;;
     *)
           # unknown option
     ;;
@@ -41,6 +37,12 @@ then
     exit -1
 fi
 
+#get version
+IFS=' ' #space delimiter
+STR_VERSION=$($INSTALL_PATH/meshlab.app/Contents/MacOS/meshlab --version)
+read -a strarr <<< "$STR_VERSION"
+ML_VERSION=${strarr[1]} #get the meshlab version from the string
+
 SOURCE_PATH=$SCRIPTS_PATH/../../src
 
 # final step create the dmg using appdmg
@@ -51,7 +53,7 @@ sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" $SCRIPTS_PATH/resources/meshlab_dmg_fin
 rm -f $INSTALL_PATH/*.dmg
 
 echo "Running appdmg"
-appdmg $SCRIPTS_PATH/resources/meshlab_dmg_final.json $INSTALL_PATH/MeshLab$ML_VERSION.dmg
+appdmg $SCRIPTS_PATH/resources/meshlab_dmg_final.json $INSTALL_PATH/MeshLab$ML_VERSION-macos.dmg
 
 rm $SCRIPTS_PATH/resources/meshlab_dmg_final.json
 
