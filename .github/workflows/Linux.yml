@@ -32,14 +32,17 @@ jobs:
           echo  ::set-output name=artifact_suffix::""
         fi
     - name: Configure and Build
+      shell: bash
       run: |
-        sh scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
     - name: Deploy
+      shell: bash
       run: |
-        sh scripts/${{ runner.os }}/2_deploy.sh
+        bash scripts/${{ runner.os }}/2_deploy.sh
     - name: Build MeshLab AppImage
+      shell: bash
       run : |
-        sh scripts/${{ runner.os }}/3_appimage.sh --${{ matrix.precision }}
+        bash scripts/${{ runner.os }}/3_appimage.sh --${{ matrix.precision }}
     #todo: try deb when ubuntu16.04 won't be required anymore by linuxdeployqt...
     #- name: Build deb package
     #  uses: jiro4989/build-deb-action@v2
