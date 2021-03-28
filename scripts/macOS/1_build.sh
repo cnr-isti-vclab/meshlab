@@ -23,6 +23,8 @@ BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
+NIGHTLY_OPTION=""
+
 
 #check parameters
 for i in "$@"
@@ -44,6 +46,10 @@ case $i in
     DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
     shift # past argument=value
     ;;
+    --nightly)
+    NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
+    shift # past argument=value
+    ;;
     *)
           # unknown option
     ;;
@@ -63,6 +69,6 @@ then
 fi
 
 cd $BUILD_PATH
-cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $SOURCE_PATH
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 make $CORES
 make install
