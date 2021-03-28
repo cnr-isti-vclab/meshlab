@@ -119,9 +119,6 @@ jobs:
       uses: joncloud/makensis-action@v1
       with:
         script-file: "scripts/windows/resources/meshlab_final.nsi"
-    - name: Rename Installer
-      run: |
-        Rename-Item -Path scripts\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
