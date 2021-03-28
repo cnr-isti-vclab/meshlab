@@ -22,15 +22,17 @@ case $i in
     INSTALL_PATH="${i#*=}"
     shift # past argument=value
     ;;
-    --double_precision)
-    ML_VERSION=${ML_VERSION}d
-    shift # past argument=value
-    ;;
     *)
           # unknown option
     ;;
 esac
 done
+
+#get version
+IFS=' ' #space delimiter
+STR_VERSION=$($INSTALL_PATH/meshlab.exe --version)
+read -a strarr <<< "$STR_VERSION"
+ML_VERSION=${strarr[1]} #get the meshlab version from the string
 
 sed "s%MESHLAB_VERSION%$ML_VERSION%g" $SCRIPTS_PATH/resources/meshlab.nsi > $SCRIPTS_PATH/resources/meshlab_final.nsi
 sed -i "s%DISTRIB_PATH%.%g" $SCRIPTS_PATH/resources/meshlab_final.nsi

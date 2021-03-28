@@ -11,7 +11,6 @@
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-DOUBLE_PRECISION_OPTION=""
 
 
 #checking for parameters
@@ -22,17 +21,13 @@ case $i in
     INSTALL_PATH="${i#*=}"
     shift # past argument=value
     ;;
-    --double_precision)
-    DOUBLE_PRECISION_OPTION="--double_precision"
-    shift # past argument=value
-    ;;
     *)
           # unknown option
     ;;
 esac
 done
 
-sh $SCRIPTS_PATH/resources/nsis_script.sh -i=$INSTALL_PATH $DOUBLE_PRECISION_OPTION 
+sh $SCRIPTS_PATH/resources/nsis_script.sh -i=$INSTALL_PATH
 
 makensis.exe $SCRIPTS_PATH/resources/meshlab_final.nsi
 
