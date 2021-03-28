@@ -11,7 +11,6 @@
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-ML_VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
 
 
 #checking for parameters
@@ -33,6 +32,13 @@ esac
 done
 
 PARENT_NAME="$(dirname $INSTALL_PATH)"
+
+#get version
+IFS=' ' #space delimiter
+STR_VERSION=$($INSTALL_PATH/usr/bin/meshlab --version)
+read -a strarr <<< "$STR_VERSION"
+ML_VERSION=${strarr[1]} #get the meshlab version from the string
+
 
 export VERSION=$ML_VERSION
 
