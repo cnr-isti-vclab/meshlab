@@ -1,21 +1,31 @@
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
-	file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
+#version management
+string(TIMESTAMP MESHLAB_VERSION "%Y.%m")
+if (MESHLAB_IS_NIGHTLY_VERSION)
+	# nightly version is in the form:
+	# YYYY.mm[d]_nightly_GIT_SHA1
+	# YYYY and mm are computed by cmake and not read from file
+	include(GetGitRevisionDescription)
+	get_git_head_revision(GIT_REFSPEC GIT_SHA1 ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
+	string(SUBSTRING ${GIT_SHA1} 0 6 GIT_SHA1)
 	if (BUILD_WITH_DOUBLE_SCALAR)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
-
+	set(MESHLAB_VERSION "${MESHLAB_VERSION}_nightly_${GIT_SHA1}")
+else()
+	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
+		# YYYY and mm are read from file
+		file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
+	endif()
+	# if double precision version, "d" is appended
+	# if release candidate, "_rc" is appended
+	if (BUILD_WITH_DOUBLE_SCALAR)
+		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
+	endif()
 	if (MESHLAB_IS_RELEASE_CANDIDATE_VERSION)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}_rc")
 	endif()
-	if (MESHLAB_IS_NIGHTLY_VERSION)
-		include(GetGitRevisionDescription)
-		get_git_head_revision(GIT_REFSPEC GIT_SHA1 ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
-		string(SUBSTRING ${GIT_SHA1} 0 6 GIT_SHA1)
-		string(TIMESTAMP MESHLAB_VERSION "%Y.%m")
-		set(MESHLAB_VERSION "${MESHLAB_VERSION}_nightly_${GIT_SHA1}")
-	endif()
-	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 endif()
+message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 
 if (BUILD_WITH_DOUBLE_SCALAR)
 	message(STATUS "Building with double precision")
