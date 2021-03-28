@@ -12,17 +12,12 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 
-
 #checking for parameters
 for i in "$@"
 do
 case $i in
     -i=*|--install_path=*)
     INSTALL_PATH="${i#*=}"
-    shift # past argument=value
-    ;;
-    --double_precision)
-    ML_VERSION=${ML_VERSION}d
     shift # past argument=value
     ;;
     *)
