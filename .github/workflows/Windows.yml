@@ -50,6 +50,10 @@ jobs:
       uses: joncloud/makensis-action@v1
       with:
         script-file: "src/install/meshlab_final.nsi"
+    - name: Move Installer
+      shell: bash
+      run: |
+        mv src/install/MeshLab*.exe  src/
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
