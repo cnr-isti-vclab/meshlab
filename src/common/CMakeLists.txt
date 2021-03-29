@@ -1,5 +1,8 @@
 #version management
 string(TIMESTAMP MESHLAB_VERSION "%Y.%m")
+if (MESHLAB_IS_RELEASE_CANDIDATE_VERSION AND MESHLAB_IS_NIGHTLY_VERSION)
+	message(FATAL_ERROR "Both nightly and release candidate options are set to ON. Choose one.")
+endif()
 if (MESHLAB_IS_NIGHTLY_VERSION)
 	# nightly version is in the form:
 	# YYYY.mm[d]_nightly_GIT_SHA1
