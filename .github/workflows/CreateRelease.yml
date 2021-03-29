@@ -11,7 +11,7 @@ on:
       release_candidate:
         description: 'Is release candidate'
         required: true
-        default: false
+        default: 'false'
 
 
 jobs:
