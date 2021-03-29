@@ -72,7 +72,7 @@ elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
             ${E57Format_DIR}/src/E57XmlParser.cpp
             ${E57Format_DIR}/src/E57XmlParser.h
     )
-    target_include_directories(external-libE57Format SYSTEM PUBLIC "${E57Format_DIR}")
+    target_include_directories(external-libE57Format SYSTEM PUBLIC "${E57Format_DIR}/include")
     target_compile_definitions(external-libE57Format PUBLIC LIBE57_FORMAT_STATIC)
     set_property(TARGET external-libE57Format PROPERTY FOLDER External)
     target_link_libraries(external-libE57Format PRIVATE external-disable-warnings)
