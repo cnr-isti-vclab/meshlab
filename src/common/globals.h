@@ -47,7 +47,9 @@ QString defaultShadersPath();
 RichParameterList& defaultGlobalParameterList();
 PluginManager& pluginManagerInstance();
 
-//keep this functions inlined please
+// keep these functions inlined please
+// each plugin that uses them need to have their own definition
+// plugins cannot link them!!
 inline std::string meshlabVersion() 
 {
 	return std::string(meshlab_xstr(MESHLAB_VERSION));
