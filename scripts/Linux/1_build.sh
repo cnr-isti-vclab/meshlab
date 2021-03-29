@@ -19,34 +19,39 @@ INSTALL_PATH=$SOURCE_PATH/install/usr/
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
+RC_OPTION=""
 
 #check parameters
 for i in "$@"
 do
 case $i in
     -b=*|--build_path=*)
-    BUILD_PATH="${i#*=}"
-    shift # past argument=value
-    ;;
+        BUILD_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"/usr/
-    shift # past argument=value
-    ;;
+        INSTALL_PATH="${i#*=}"/usr/
+        shift # past argument=value
+        ;;
     -j*)
-    CORES=$i
-    shift # past argument=value
-    ;;
-    --double_precision)
-    DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
-    shift # past argument=value
-    ;;
-    --nightly)
-    NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
-    shift # past argument=value
-    ;;
+        CORES=$i
+        shift # past argument=value
+        ;;
+    -d|--double_precision)
+        DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
+        shift # past argument=value
+        ;;
+    -n|--nightly)
+        NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
+        shift # past argument=value
+        ;;
+    -rc|--release_candidate)
+        RC_OPTION="-DMESHLAB_IS_RELEASE_CANDIDATE_VERSION=ON"
+        shift # past argument=value
+        ;;
     *)
-          # unknown option
-    ;;
+        # unknown option
+        ;;
 esac
 done
 
@@ -66,6 +71,6 @@ BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 cd $BUILD_PATH
-cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $RC_OPTION $SOURCE_PATH
 make $CORES
 make install

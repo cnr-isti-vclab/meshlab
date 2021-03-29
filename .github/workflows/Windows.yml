@@ -53,7 +53,7 @@ jobs:
     - name: Move Installer
       shell: bash
       run: |
-        mv src/install/MeshLab*.exe  src/
+        mv src/install/MeshLab*-windows.exe  src/
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
