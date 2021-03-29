@@ -335,7 +335,7 @@ jobs:
         tag_name: Meshlab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
         release_name: MeshLab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
         draft: false
-        prerelease: false
+        prerelease: ${{ github.event.inputs.release_candidate }}
     #Linux
     - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
