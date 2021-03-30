@@ -7,9 +7,12 @@ if (MESHLAB_IS_NIGHTLY_VERSION)
 	# nightly version is in the form:
 	# YYYY.mm[d]_nightly_GIT_SHA1
 	# YYYY and mm are computed by cmake and not read from file
-	include(GetGitRevisionDescription)
-	get_git_head_revision(GIT_REFSPEC GIT_SHA1 ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
-	string(SUBSTRING ${GIT_SHA1} 0 6 GIT_SHA1)
+	find_package(Git)
+	execute_process(COMMAND
+		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=6
+		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+		OUTPUT_VARIABLE GIT_SHA1
+		ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 	if (BUILD_WITH_DOUBLE_SCALAR)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
