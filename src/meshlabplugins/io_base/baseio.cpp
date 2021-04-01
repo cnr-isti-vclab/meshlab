@@ -483,25 +483,25 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 
 	if (format.toUpper() == tr("PLY")){
 		std::vector<std::string> AttribNameVector;
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
