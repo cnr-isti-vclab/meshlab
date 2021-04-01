@@ -28,6 +28,7 @@
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/update/curvature.h>
+#include <vcg/complex/algorithms/update/quality.h>
 #include <vcg/complex/algorithms/parametrization/distortion.h>
 #include <vcg/space/fitting3.h>
 #include <vcg/math/random_generator.h>
@@ -71,8 +72,10 @@ FilterColorProc::FilterColorProc()
 		CP_VERTEX_TO_FACE,
 		CP_MESH_TO_FACE,
 		CP_RANDOM_FACE,
-		CP_RANDOM_CONNECTED_COMPONENT
-	} ;
+		CP_RANDOM_CONNECTED_COMPONENT,
+		CP_VERTEX_TO_FACE_QUALITY,
+		CP_FACE_TO_VERTEX_QUALITY
+	};
 
 	for(ActionIDType tt: types())
 		actionList.push_back(new QAction(filterName(tt), this));
@@ -87,10 +90,10 @@ QString FilterColorProc::pluginName() const
     return "FilterColorProc";
 }
 
- QString FilterColorProc::filterName(ActionIDType filter) const
+QString FilterColorProc::filterName(ActionIDType filter) const
 {
-  switch(filter)
-  {
+	switch(filter)
+	{
 	case CP_FILLING:                   return QString("Vertex Color Filling");
 	case CP_THRESHOLDING:              return QString("Vertex Color Thresholding");
 	case CP_CONTR_BRIGHT:              return QString("Vertex Color Brightness Contrast Gamma");
@@ -117,16 +120,18 @@ QString FilterColorProc::pluginName() const
 	case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
 	case CP_RANDOM_FACE:               return QString("Random Face Color");
 	case CP_RANDOM_CONNECTED_COMPONENT:return QString("Random Component Color");
+	case CP_VERTEX_TO_FACE_QUALITY:    return QString("Transfer Quality: Vertex to Face");
+	case CP_FACE_TO_VERTEX_QUALITY:    return QString("Transfer Quality: Face to Vertex");
 
-    default: assert(0);
-  }
-  return QString("error!");
+	default: assert(0);
+	}
+	return QString("error!");
 }
 
- QString FilterColorProc::filterInfo(ActionIDType filterId) const
+QString FilterColorProc::filterInfo(ActionIDType filterId) const
 {
-  switch(filterId)
-  {
+	switch(filterId)
+	{
 	case CP_FILLING: return QString("Fills the color of the vertices of the mesh with a color chosen by the user.");
 	case CP_THRESHOLDING: return QString("Colors the vertices of the mesh using two colors according to a lightness threshold (on the original color).");
 	case CP_CONTR_BRIGHT: return QString("Change the color the vertices of the mesh adjusting brightness, contrast and gamma.");
@@ -163,208 +168,217 @@ QString FilterColorProc::pluginName() const
 	case CP_FACE_TO_VERTEX: return QString("Face to Vertex color transfer");
 	case CP_TEXTURE_TO_VERTEX: return QString("Texture to Vertex color transfer");
 	case CP_RANDOM_FACE: return QString("Colorize Faces randomly. If internal edges are present they are used. Useful for quads.");
-	case CP_RANDOM_CONNECTED_COMPONENT:  return QString("Colorize each connected component randomly.");
+	case CP_RANDOM_CONNECTED_COMPONENT: return QString("Colorize each connected component randomly.");
+	case CP_VERTEX_TO_FACE_QUALITY: return QString("Vertex to Face quality transfer");
+	case CP_FACE_TO_VERTEX_QUALITY: return QString("Face to Vertex quality transfer");
 
-    default: assert(0);
-  }
-  return QString("error!");
+	default: assert(0);
+	}
+	return QString("error!");
 }
 
- int FilterColorProc::getRequirements(const QAction *action)
+int FilterColorProc::getRequirements(const QAction *action)
 {
-    switch(ID(action))
-    {
-        case CP_SCATTER_PER_MESH : return MeshModel::MM_COLOR;
-        default : return MeshModel::MM_VERTCOLOR;
-    }
-    assert(0);
+	switch(ID(action))
+	{
+	case CP_SCATTER_PER_MESH : return MeshModel::MM_COLOR;
+	case CP_VERTEX_TO_FACE_QUALITY: return MeshModel::MM_VERTQUALITY;
+	case CP_FACE_TO_VERTEX_QUALITY: return MeshModel::MM_FACEQUALITY;;
+	default : return MeshModel::MM_VERTCOLOR;
+	}
+	assert(0);
 }
 
 void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
 {
 	switch(ID(a))
 	{
-		case CP_FILLING:
-		{
-			QColor color1 = QColor(0, 0, 0, 255);
-			par.addParam(RichColor("color1", color1, "Color:", "Sets the color to apply to vertices."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_THRESHOLDING:
-		{
-			float threshold = 128.0f;
-			QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);;
-			par.addParam(RichColor("color1", color1, "Color 1:", "Sets the color to apply below the threshold."));
-			par.addParam(RichColor("color2", color2, "Color 2:", "Sets the color to apply above the threshold."));
-			par.addParam(RichDynamicFloat("threshold", threshold, 0.0f, 255.0f,"Threshold:", "Vertices with color above the lightness threshold becomes Color 2, the others Color 1."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_CONTR_BRIGHT:
-		{
-			float brightness = 0.0f;
-			float contrast = 0.0f;
-			float gamma = 1.0f;
-			par.addParam(RichDynamicFloat("brightness", brightness, -255.0f, 255.0f, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
-			par.addParam(RichDynamicFloat("contrast", contrast, -255.0f, 255.0f, "Contrast factor:", "Sets the amount of contrast of the mesh."));
-			par.addParam(RichDynamicFloat("gamma", gamma, 0.1f, 5.0f, "Gamma:", "Sets the values of the exponent gamma."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_INVERT:
-		{
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}			
-		case CP_LEVELS:
-		{
-			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-			par.addParam(RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,       "Gamma:", ""));
-			par.addParam(RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,   "Min input level:", ""));
-			par.addParam(RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,   "Max input level:", ""));
-			par.addParam(RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
-			par.addParam(RichDynamicFloat("out_max", out_max, 0.0f, 255.0f, "Max output level:", ""));
-			par.addParam(RichBool("rCh", true, "Red Channel:",   ""));
-			par.addParam(RichBool("gCh", true, "Green Channel:", ""));
-			par.addParam(RichBool("bCh", true, "Blue Channel:",  ""));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			par.addParam(RichBool("apply_to_all", false, "All visible layers", "if true, apply to all visible layers"));
-			break;
-		}
-		case CP_COLOURISATION:
-		{
-			float intensity = 0.5f;
-			double hue, luminance, saturation;
-			ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
-			par.addParam(RichDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh."));
-			par.addParam(RichDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh."));
-			par.addParam(RichDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh."));
-			par.addParam(RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Blending:", "Sets the blending factor used in adding the new color to the existing one."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_DESATURATION:
-		{
-			QStringList l; l << "Lightness" << "Luminosity" << "Average";
-			par.addParam(RichEnum("method", 0, l,"Desaturation method:", "Lightness is computed as (Max(r,g,b)+Min(r,g,b))/2<br>Luminosity is computed as 0.212*r + 0.715*g + 0.072*b<br>Average is computed as (r+g+b)/3"));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_EQUALIZE:
-		{
-			par.addParam(RichBool("rCh", true, "Red Channel:",   "Select the red channel."));
-			par.addParam(RichBool("gCh", true, "Green Channel:", "Select the green channel."));
-			par.addParam(RichBool("bCh", true, "Blue Channel:",  "Select the blue channel.<br><br>If no channel is selected<br>filter works on Lightness."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_WHITE_BAL:
-		{
-			par.addParam(RichColor("color", QColor(255,255,255),"Unbalanced white: ","The color that is supposed to be white."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_PERLIN_COLOR:
-		{
-			QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);
-			par.addParam(RichColor("color1", color1, "Color 1:", "Sets the first color to mix with Perlin Noise function."));
-			par.addParam(RichColor("color2", color2, "Color 2:", "Sets the second color to mix with Perlin Noise function."));
-			par.addParam(RichDynamicFloat("freq", 10.0f, 0.1f, 100.0f,"Frequency:","Frequency of the Perlin Noise function, expressed as multiples of mesh bbox (frequency 10 means a noise period of bbox diagonal / 10). High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
-			par.addParam(RichPoint3f("offset", Point3f(0.0f, 0.0f, 0.0f), "Offset",	"This values is the XYZ frequency offset of the Noise function (offset 1 means 1 period shift)."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_COLOR_NOISE:
-		{
-			par.addParam(RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
-			par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
-			break;
-		}
-		case CP_SCATTER_PER_MESH:
-		{
-			par.addParam(RichInt("seed", 0, "Seed","Random seed used to generate scattered colors. Zero means totally random (each time the filter is started it generates a different result)"));
-			break;
-		}
-		case CP_FACE_SMOOTH:
-		case CP_VERTEX_SMOOTH:
-		{
-			par.addParam(RichInt("iteration", 1, QString("Iteration"), QString("the number of iteration of the smoothing algorithm")));
-			break;
-		}
-		case CP_TRIANGLE_QUALITY:
-		{
-			QStringList metrics;
-			metrics.push_back("area/max side");
-			metrics.push_back("inradius/circumradius");
-			metrics.push_back("Mean ratio");
-			metrics.push_back("Area");
-			metrics.push_back("Texture Angle Distortion");
-			metrics.push_back("Texture Area Distortion");
-			metrics.push_back("Polygonal planarity (max)");
-			metrics.push_back("Polygonal planarity (relative)");
+	case CP_FILLING:
+	{
+		QColor color1 = QColor(0, 0, 0, 255);
+		par.addParam(RichColor("color1", color1, "Color:", "Sets the color to apply to vertices."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_THRESHOLDING:
+	{
+		float threshold = 128.0f;
+		QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);;
+		par.addParam(RichColor("color1", color1, "Color 1:", "Sets the color to apply below the threshold."));
+		par.addParam(RichColor("color2", color2, "Color 2:", "Sets the color to apply above the threshold."));
+		par.addParam(RichDynamicFloat("threshold", threshold, 0.0f, 255.0f,"Threshold:", "Vertices with color above the lightness threshold becomes Color 2, the others Color 1."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_CONTR_BRIGHT:
+	{
+		float brightness = 0.0f;
+		float contrast = 0.0f;
+		float gamma = 1.0f;
+		par.addParam(RichDynamicFloat("brightness", brightness, -255.0f, 255.0f, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
+		par.addParam(RichDynamicFloat("contrast", contrast, -255.0f, 255.0f, "Contrast factor:", "Sets the amount of contrast of the mesh."));
+		par.addParam(RichDynamicFloat("gamma", gamma, 0.1f, 5.0f, "Gamma:", "Sets the values of the exponent gamma."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_INVERT:
+	{
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_LEVELS:
+	{
+		float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
+		par.addParam(RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,       "Gamma:", ""));
+		par.addParam(RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,   "Min input level:", ""));
+		par.addParam(RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,   "Max input level:", ""));
+		par.addParam(RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
+		par.addParam(RichDynamicFloat("out_max", out_max, 0.0f, 255.0f, "Max output level:", ""));
+		par.addParam(RichBool("rCh", true, "Red Channel:",   ""));
+		par.addParam(RichBool("gCh", true, "Green Channel:", ""));
+		par.addParam(RichBool("bCh", true, "Blue Channel:",  ""));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		par.addParam(RichBool("apply_to_all", false, "All visible layers", "if true, apply to all visible layers"));
+		break;
+	}
+	case CP_COLOURISATION:
+	{
+		float intensity = 0.5f;
+		double hue, luminance, saturation;
+		ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
+		par.addParam(RichDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh."));
+		par.addParam(RichDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh."));
+		par.addParam(RichDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh."));
+		par.addParam(RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Blending:", "Sets the blending factor used in adding the new color to the existing one."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_DESATURATION:
+	{
+		QStringList l; l << "Lightness" << "Luminosity" << "Average";
+		par.addParam(RichEnum("method", 0, l,"Desaturation method:", "Lightness is computed as (Max(r,g,b)+Min(r,g,b))/2<br>Luminosity is computed as 0.212*r + 0.715*g + 0.072*b<br>Average is computed as (r+g+b)/3"));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_EQUALIZE:
+	{
+		par.addParam(RichBool("rCh", true, "Red Channel:",   "Select the red channel."));
+		par.addParam(RichBool("gCh", true, "Green Channel:", "Select the green channel."));
+		par.addParam(RichBool("bCh", true, "Blue Channel:",  "Select the blue channel.<br><br>If no channel is selected<br>filter works on Lightness."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_WHITE_BAL:
+	{
+		par.addParam(RichColor("color", QColor(255,255,255),"Unbalanced white: ","The color that is supposed to be white."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_PERLIN_COLOR:
+	{
+		QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);
+		par.addParam(RichColor("color1", color1, "Color 1:", "Sets the first color to mix with Perlin Noise function."));
+		par.addParam(RichColor("color2", color2, "Color 2:", "Sets the second color to mix with Perlin Noise function."));
+		par.addParam(RichDynamicFloat("freq", 10.0f, 0.1f, 100.0f,"Frequency:","Frequency of the Perlin Noise function, expressed as multiples of mesh bbox (frequency 10 means a noise period of bbox diagonal / 10). High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
+		par.addParam(RichPoint3f("offset", Point3f(0.0f, 0.0f, 0.0f), "Offset",	"This values is the XYZ frequency offset of the Noise function (offset 1 means 1 period shift)."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_COLOR_NOISE:
+	{
+		par.addParam(RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
+		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
+		break;
+	}
+	case CP_SCATTER_PER_MESH:
+	{
+		par.addParam(RichInt("seed", 0, "Seed","Random seed used to generate scattered colors. Zero means totally random (each time the filter is started it generates a different result)"));
+		break;
+	}
+	case CP_FACE_SMOOTH:
+	case CP_VERTEX_SMOOTH:
+	{
+		par.addParam(RichInt("iteration", 1, QString("Iteration"), QString("the number of iteration of the smoothing algorithm")));
+		break;
+	}
+	case CP_TRIANGLE_QUALITY:
+	{
+		QStringList metrics;
+		metrics.push_back("area/max side");
+		metrics.push_back("inradius/circumradius");
+		metrics.push_back("Mean ratio");
+		metrics.push_back("Area");
+		metrics.push_back("Texture Angle Distortion");
+		metrics.push_back("Texture Area Distortion");
+		metrics.push_back("Polygonal planarity (max)");
+		metrics.push_back("Polygonal planarity (relative)");
 
-			par.addParam(RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
-			break;
-		}
-		case CP_DISCRETE_CURVATURE:
-		{
-			QStringList curvNameList;
-			curvNameList.push_back("Mean Curvature");
-			curvNameList.push_back("Gaussian Curvature");
-			curvNameList.push_back("RMS Curvature");
-			curvNameList.push_back("ABS Curvature");
-			par.addParam(RichEnum("CurvatureType", 0, curvNameList, tr("Type:"),
-				QString("Choose the curvature value that you want transferred onto the scalar Quality."
+		par.addParam(RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
+		break;
+	}
+	case CP_DISCRETE_CURVATURE:
+	{
+		QStringList curvNameList;
+		curvNameList.push_back("Mean Curvature");
+		curvNameList.push_back("Gaussian Curvature");
+		curvNameList.push_back("RMS Curvature");
+		curvNameList.push_back("ABS Curvature");
+		par.addParam(RichEnum("CurvatureType", 0, curvNameList, tr("Type:"),
+		                      QString("Choose the curvature value that you want transferred onto the scalar Quality."
 				"Mean (H) and Gaussian (K) curvature are computed according the technique described in the Desbrun et al. paper.<br>"
 				"Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation"
 				"for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. ")));
-			break;
-		}
-		case CP_SATURATE_QUALITY:
-		{
-			par.addParam(RichFloat("gradientThr", 1, "Gradient Threshold", "The maximum value admitted for the quality gradient (in absolute value)"));
-			par.addParam(RichBool("updateColor", false, "Update ColorMap", "if true the color ramp is computed again"));
+		break;
+	}
+	case CP_SATURATE_QUALITY:
+	{
+		par.addParam(RichFloat("gradientThr", 1, "Gradient Threshold", "The maximum value admitted for the quality gradient (in absolute value)"));
+		par.addParam(RichBool("updateColor", false, "Update ColorMap", "if true the color ramp is computed again"));
 
-			break;
-		}
-		case CP_MESH_TO_FACE:
-		{
-			par.addParam(RichBool("allVisibleMesh", false, "Apply to all Meshes", "If true the color mapping is applied to all the meshes."));
-			break;
-		}
-		case CP_CLAMP_QUALITY:
-		{
-			pair<float, float> minmax;
-			minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-			par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
-			par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
-			par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
-			par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
-			break;
-		}
-		case CP_MAP_VQUALITY_INTO_COLOR:
-		{
-			pair<float, float> minmax;
-			minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-			par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
-			par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
-			par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
-			par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
-			break;
-		}
-		case CP_MAP_FQUALITY_INTO_COLOR:
-		{
-			pair<float, float> minmax;
-			minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(md.mm()->cm);
-			par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
-			par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
-			par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the faces have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
-			par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
-			break;
-		}
+		break;
+	}
+	case CP_MESH_TO_FACE:
+	{
+		par.addParam(RichBool("allVisibleMesh", false, "Apply to all Meshes", "If true the color mapping is applied to all the meshes."));
+		break;
+	}
+	case CP_CLAMP_QUALITY:
+	{
+		pair<float, float> minmax;
+		minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
+		par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
+		par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
+		par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+		par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
+		break;
+	}
+	case CP_MAP_VQUALITY_INTO_COLOR:
+	{
+		pair<float, float> minmax;
+		minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
+		par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
+		par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
+		par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+		par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
+		break;
+	}
+	case CP_MAP_FQUALITY_INTO_COLOR:
+	{
+		pair<float, float> minmax;
+		minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(md.mm()->cm);
+		par.addParam(RichFloat("minVal", minmax.first, "Min", "The value that will be mapped with the lower end of the scale (red)"));
+		par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
+		par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the faces have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+		par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
+		break;
+	}
+	case CP_FACE_TO_VERTEX_QUALITY:
+	{
+		par.addParam(RichBool("areaWeight", true, "Area Weighted", "If true the vertex quality is computed according to the surface of the involved faces."));
+		break;
+	}
 
-		default: break; // do not add any parameter for the other filters
+	default: break; // do not add any parameter for the other filters
 	}
 }
 
@@ -907,6 +921,25 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 			}
 			break;
 		}
+
+
+		case CP_VERTEX_TO_FACE_QUALITY:
+		{
+			m->updateDataMask(MeshModel::MM_FACEQUALITY);
+			vcg::tri::UpdateQuality<CMeshO>::FaceFromVertex(m->cm);
+			break;
+		}
+
+
+		case CP_FACE_TO_VERTEX_QUALITY:
+		{
+			m->updateDataMask(MeshModel::MM_VERTQUALITY);
+			const bool aw = par.getBool("areaWeight");
+			vcg::tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm, aw);
+			break;
+		}
+
+
 		default:
 			wrongActionCalled(filter);
 	}
@@ -943,6 +976,8 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 		case CP_VERTEX_TO_FACE:
 		case CP_MESH_TO_FACE:
 		case CP_MAP_FQUALITY_INTO_COLOR:    return FilterPlugin::FaceColoring;
+		case CP_VERTEX_TO_FACE_QUALITY:
+		case CP_FACE_TO_VERTEX_QUALITY: return FilterPlugin::Quality;
 		default: assert(0);
 	}
 	return FilterPlugin::Generic;
@@ -978,9 +1013,10 @@ int FilterColorProc::postCondition( const QAction* filter ) const
 		case CP_MAP_FQUALITY_INTO_COLOR:    return MeshModel::MM_FACECOLOR;
 		case CP_TRIANGLE_QUALITY:           return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
 		case CP_SCATTER_PER_MESH:           return MeshModel::MM_COLOR;
-
+		case CP_VERTEX_TO_FACE_QUALITY:     return MeshModel::MM_FACEQUALITY;
+		case CP_FACE_TO_VERTEX_QUALITY:     return MeshModel::MM_VERTQUALITY;
 		default: assert(0);
-    }
+	}
 	return MeshModel::MM_NONE;
 }
 
@@ -1014,6 +1050,8 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 		case CP_FACE_TO_VERTEX:
 		case CP_FACE_SMOOTH:                return MeshModel::MM_FACECOLOR;
 		case CP_TEXTURE_TO_VERTEX:          return MeshModel::MM_NONE;
+		case CP_VERTEX_TO_FACE_QUALITY:     return MeshModel::MM_VERTQUALITY;
+		case CP_FACE_TO_VERTEX_QUALITY:     return MeshModel::MM_FACEQUALITY;
 
 		default: assert(0);
 	}
@@ -1048,7 +1086,9 @@ FilterPlugin::FilterArity FilterColorProc::filterArity(const QAction* act ) cons
 		case CP_MAP_FQUALITY_INTO_COLOR:
 		case CP_FACE_TO_VERTEX:
 		case CP_FACE_SMOOTH:
-		case CP_TEXTURE_TO_VERTEX:          return FilterPlugin::SINGLE_MESH;
+		case CP_TEXTURE_TO_VERTEX:
+		case CP_VERTEX_TO_FACE_QUALITY:
+		case CP_FACE_TO_VERTEX_QUALITY:     return FilterPlugin::SINGLE_MESH;
 		case CP_SCATTER_PER_MESH:           return FilterPlugin::VARIABLE;
 
 		default: assert(0);
