@@ -238,16 +238,16 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
-	CMeshO::PerVertexAttributeHandle<Point3f> BN;
-	CMeshO::PerFaceAttributeHandle<Point3f> FBN;
+	CMeshO::PerVertexAttributeHandle<Point3m> BN;
+	CMeshO::PerFaceAttributeHandle<Point3m> FBN;
 
 	if (perFace)
 	{
-		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m.cm, "BentNormal");
 	}
 	else
 	{
-		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "BentNormal");
 	}
 
     glEnable(GL_DEPTH_TEST);
@@ -816,7 +816,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
-    CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+    CMeshO::PerVertexAttributeHandle<Point3m> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "BentNormal");
 
     for (int i=0; i<m.cm.vn; ++i)
     {
@@ -852,7 +852,7 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
-	CMeshO::PerFaceAttributeHandle<Point3f> FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+    CMeshO::PerFaceAttributeHandle<Point3m> FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m.cm, "BentNormal");
 
     for (uint i=0; i<faceCenterVec.size(); ++i)
     {
