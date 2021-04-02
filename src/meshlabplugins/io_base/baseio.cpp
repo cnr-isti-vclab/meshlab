@@ -309,20 +309,23 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		// custom attributes
 		for (const RichParameter& pr : par) {
 			QString pname = pr.name();
-			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
-				if (par.getBool(pname)){	// if it is true, add to save list
+			if (pname.startsWith("PVAF")) { // if pname starts with PVAF, it is a PLY per-vertex float custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
 					pi.addPerVertexScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
 				}
 			}
-			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
-				if (par.getBool(pname))	// if it is true, add to save list
-					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
+			else if (pname.startsWith("PVA3F")) { // if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
+					pi.addPerVertexPoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+				}
 			}
-			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
-				if (par.getBool(pname))	// if it is true, add to save list
+			else if (pname.startsWith("PFAF")) { // if pname starts with PFAF, it is a PLY per-face float custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
 					pi.addPerFaceScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
+				}
 			}
-			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
+			else if (pname.startsWith("PFA3F")){ // if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
+				//TODO
 				//if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
 					//pi.add(m, qUtf8Printable(pname.mid(5)));
 			}
