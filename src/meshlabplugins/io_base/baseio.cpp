@@ -325,9 +325,9 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 				}
 			}
 			else if (pname.startsWith("PFA3F")){ // if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
-				//TODO
-				//if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
-					//pi.add(m, qUtf8Printable(pname.mid(5)));
+				if (par.getBool(pname)) {
+					pi.addPerFacePoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+				}
 			}
 		}
 
