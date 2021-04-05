@@ -26,8 +26,9 @@
 #include <external/e57/include/E57SimpleReader.h>
 
 #define START_LOADING "Loading E57 File..."
-#define DONE_LOADING "Done!"
+#define DONE_LOADING  "Done!"
 
+#define E57_DEBUG 1
 #define E57_WRAPPER(e57f, exceptionMessage) if (!e57f) throw MLException(QString{exceptionMessage})
 
 void debug(const char* message) noexcept;
@@ -42,6 +43,8 @@ void E57IOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
 
 void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, vcg::CallBackPos* cb)
 {
+
+    // TODO: format exception messages
 
     mask = 0;
 
@@ -93,32 +96,45 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshM
     try {
 
         unsigned long size;
+        auto vertexIterator = vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, static_cast<size_t>(numberPointSize));
         e57::CompressedVectorReader dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPointsData);
 
+        m.Enable(mask);
+
         while ((size = dataReader.read()) > 0) {
-            for (unsigned long i = 0; i < size; i++) {
+            for (unsigned long i = 0; i < size; i++, vertexIterator++) {
+
+                auto vertex = (*vertexIterator).P();
                 auto x = data3DPointsData.cartesianX[i];
                 auto y = data3DPointsData.cartesianY[i];
                 auto z = data3DPointsData.cartesianZ[i];
-                std::fprintf(stderr, "Debug::E57(%s) :: {x=%f,y=%f,z=%f}\n", stdFilename.c_str(), x, y, z);
+
+                vertex[0] = x; vertex[1] = y; vertex[2] = z;
+
+                std::fprintf(stderr, "Debug::E57(%s) :: {x=%.3ff,y=%.3ff,z=%.3f}\n", stdFilename.c_str(), x, y, z);
             }
         }
 
     }
     catch (const e57::E57Exception& exception) {
 
-        std::fprintf(stderr, "Debug::E57(%s) Exception(%s::%s)\n", stdFilename.c_str(), exception.what(), exception.context().c_str());
+        if (E57_DEBUG)
+            std::fprintf(stderr, "Debug::E57(%s) Exception(%s::%s)\n", stdFilename.c_str(), exception.what(), exception.context().c_str());
 
         delete[] data3DPointsData.cartesianX;
         delete[] data3DPointsData.cartesianY;
         delete[] data3DPointsData.cartesianZ;
 
+        fileReader.Close();
+
         throw MLException(QString{exception.what()});
     }
 
 
-    std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(guid): %s\n", stdFilename.c_str(), e57FileInfo.guid.c_str());
-    std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(2D Count): %lld\n", stdFilename.c_str(), fileReader.GetImage2DCount());
+    if (E57_DEBUG) {
+        std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(guid): %s\n", stdFilename.c_str(), e57FileInfo.guid.c_str());
+        std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(2D Count): %lld\n", stdFilename.c_str(), fileReader.GetImage2DCount());
+    }
 
     updateProgress(*cb, 99, DONE_LOADING);
 
