@@ -23,24 +23,111 @@
 #include <Qt>
 
 #include "io_e57.h"
+#include <external/e57/include/E57SimpleReader.h>
 
-//#include <wrap/io_trimesh/export.h>
+#define START_LOADING "Loading E57 File..."
+#define DONE_LOADING "Done!"
 
-using namespace vcg;
+#define E57_WRAPPER(e57f, exceptionMessage) if (!e57f) throw MLException(QString{exceptionMessage})
+
+void debug(const char* message) noexcept;
+void debug(std::string& message) noexcept;
+
+void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
 
 void E57IOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
 {
 	return;
 }
 
-void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/)
+void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, vcg::CallBackPos* cb)
 {
-	if (formatName.toUpper() == tr("E57")) {
-	    throw MLException("Error while opening E57 file.");
+
+    mask = 0;
+
+    if (formatName.toUpper() != tr("E57")) {
+        wrongOpenFormat(formatName);
+        return;
 	}
-	else {
-		wrongOpenFormat(formatName);
-	}
+
+    int scanIndex = 0;
+    bool columnIndex = false;
+
+    std::size_t buffSize;
+
+    std::int64_t cols = 0;
+    std::int64_t rows = 0;
+    std::int64_t numberPointSize = 0;
+    std::int64_t numberGroupSize = 0;
+    std::int64_t numberCountSize = 0;
+
+    std::string stdFilename = std::string{QFile::encodeName(fileName).constData()};
+
+    e57::Reader fileReader{stdFilename};
+    e57::E57Root e57FileInfo{};
+    e57::Data3D scanHeader{};
+    e57::Data3DPointsData data3DPointsData{};
+
+    // check if the file is opened
+    E57_WRAPPER(fileReader.IsOpen(), "Error while opening E57 file!");
+
+    updateProgress(*cb, 0, START_LOADING);
+
+    // read E57 root to explore the tree
+    E57_WRAPPER(fileReader.GetE57Root(e57FileInfo), "Error while reading E57 root info!");
+    // read 3D data
+    E57_WRAPPER(fileReader.ReadData3D(scanIndex, scanHeader), "Error while reading 3D from file!");
+    // read scan's size information
+    E57_WRAPPER(fileReader.GetData3DSizes(scanIndex, rows, cols, numberPointSize, numberGroupSize, numberCountSize, columnIndex),
+                "Error while reading scan information!");
+
+    buffSize = (rows > 0) ? rows : 1024;
+
+    // TODO: colors?
+
+    // allocate the buffers to store points position
+    data3DPointsData.cartesianX = new float[buffSize];
+    data3DPointsData.cartesianY = new float[buffSize];
+    data3DPointsData.cartesianZ = new float[buffSize];
+
+    try {
+
+        unsigned long size;
+        e57::CompressedVectorReader dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPointsData);
+
+        while ((size = dataReader.read()) > 0) {
+            for (unsigned long i = 0; i < size; i++) {
+                auto x = data3DPointsData.cartesianX[i];
+                auto y = data3DPointsData.cartesianY[i];
+                auto z = data3DPointsData.cartesianZ[i];
+                std::fprintf(stderr, "Debug::E57(%s) :: {x=%f,y=%f,z=%f}\n", stdFilename.c_str(), x, y, z);
+            }
+        }
+
+    }
+    catch (const e57::E57Exception& exception) {
+
+        std::fprintf(stderr, "Debug::E57(%s) Exception(%s::%s)\n", stdFilename.c_str(), exception.what(), exception.context().c_str());
+
+        delete[] data3DPointsData.cartesianX;
+        delete[] data3DPointsData.cartesianY;
+        delete[] data3DPointsData.cartesianZ;
+
+        throw MLException(QString{exception.what()});
+    }
+
+
+    std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(guid): %s\n", stdFilename.c_str(), e57FileInfo.guid.c_str());
+    std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(2D Count): %lld\n", stdFilename.c_str(), fileReader.GetImage2DCount());
+
+    updateProgress(*cb, 99, DONE_LOADING);
+
+    delete[] data3DPointsData.cartesianX;
+    delete[] data3DPointsData.cartesianY;
+    delete[] data3DPointsData.cartesianZ;
+
+    // close the file to free the memory
+    fileReader.Close();
 }
 
 void E57IOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/)
@@ -79,6 +166,13 @@ void E57IOPlugin::exportMaskCapability(const QString & /*format*/, int &capabili
 {
 	capability = defaultBits=0;
 	return;
+}
+
+void updateProgress(vcg::CallBackPos& positionCallback, int percentage, const char* description) noexcept {
+
+    if (positionCallback != nullptr) {
+        positionCallback(percentage, description);
+    }
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(E57IOPlugin)

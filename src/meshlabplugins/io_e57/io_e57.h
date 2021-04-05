@@ -27,6 +27,7 @@
 
 #include <common/plugins/interfaces/iomesh_plugin.h>
 #include <common/ml_document/mesh_model.h>
+#include <external/e57/include/E57Format.h>
 
 class E57IOPlugin : public QObject, public IOMeshPlugin
 {
