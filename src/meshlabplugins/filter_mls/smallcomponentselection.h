@@ -54,7 +54,7 @@ public:
 			while (faceSeed<m.face.size())
 			{
 				CFaceO& f = m.face[faceSeed];
-				if (!f.IsS())
+				if (!f.IsD() && !f.IsS())
 				{
 					if (nonClosedOnly)
 					{
