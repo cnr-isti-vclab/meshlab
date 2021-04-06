@@ -143,7 +143,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/meshlab.app
+        path: src/install/MeshLab*.app
     - name: Upload DMG
       uses: actions/upload-artifact@v2
       with:
@@ -265,8 +265,10 @@ jobs:
         chmod +x meshlab_linux_portable_double/AppRun
     - name: Create MeshLab Portable Linux Archive
       run: |
-        tar -cvzf MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz meshlab_linux_portable/
-        tar -cvzf MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz meshlab_linux_portable_double/
+        mv meshlab_linux_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
+        tar -cvzf MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}/
+        mv meshlab_linux_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}
+        tar -cvzf MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}/
 
 
     #Download MacOS Package
@@ -292,11 +294,11 @@ jobs:
         path: meshlab_macos_portable_double
     - name: Create MeshLab Portable MacOS
       run: |
-        mv meshlab_macos_portable meshlab.app
-        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip meshlab.app/
-        rm -r meshlab.app
-        mv meshlab_macos_portable_double meshlab.app
-        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip meshlab.app/
+        mv meshlab_macos_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app
+        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app/
+        rm -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app
+        mv meshlab_macos_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}.app
+        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}.app/
 
     #Download Windows Packages
     - name: Download Windows ZIP
@@ -321,8 +323,10 @@ jobs:
         path: meshlab_windows_installer_double
     - name: Create MeshLab Portable Windows Archive
       run: |
-        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip meshlab_windows_portable/
-        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip meshlab_windows_portable_double/
+        mv meshlab_windows_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
+        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}/
+        mv meshlab_windows_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}
+        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}/
 
 
     #Create release and upload
