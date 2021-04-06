@@ -52,5 +52,6 @@
         <file>images/meshlabLogo_256x256.png</file>
         <file>images/email-icon.png</file>
         <file>images/github-icon.png</file>
+        <file>images/reload_all.png</file>
     </qresource>
 </RCC>

@@ -198,7 +198,7 @@ void MainWindow::createActions()
 	reloadMeshAct->setShortcut(Qt::ALT + Qt::Key_R);
 	connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
 
-	reloadAllMeshAct = new QAction(tr("&Reload All"), this);
+	reloadAllMeshAct = new QAction(QIcon(":/images/reload_all.png"), tr("&Reload All"), this);
 	reloadAllMeshAct->setShortcutContext(Qt::ApplicationShortcut);
 	reloadAllMeshAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_R);
 	connect(reloadAllMeshAct, SIGNAL(triggered()), this, SLOT(reloadAllMesh()));
@@ -483,7 +483,7 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(this->openProjectAct);
 	mainToolBar->addAction(importMeshAct);
 	mainToolBar->addAction(reloadMeshAct);
-	//  mainToolBar->addAction(reloadAllMeshAct);
+	mainToolBar->addAction(reloadAllMeshAct);
 	mainToolBar->addAction(exportMeshAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
