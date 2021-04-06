@@ -26,37 +26,38 @@
 #include <external/e57/include/E57SimpleReader.h>
 
 #define START_LOADING "Loading E57 File..."
+#define LOADING_POINTS "Loading points..."
 #define DONE_LOADING  "Done!"
 
 #define E57_DEBUG 1
 #define E57_WRAPPER(e57f, exceptionMessage) if (!e57f) throw MLException(QString{exceptionMessage})
 
-void debug(const char* message) noexcept;
-void debug(std::string& message) noexcept;
+/***
+ * Load the cloud points read from the E57 file, inside the mesh to display.
+ * @param m The mesh to display
+ * @param mask
+ * @param scanIndex Data block index given by the NewData3D
+ * @param buffSize Dimension for buffer size
+ * @param numberPointSize How many points are contained inside the cloud
+ * @param fileReader The file reader object used to scan the file
+ */
+static void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
+                     const e57::Reader &fileReader, vcg::CallBackPos& positionCallback);
 
-void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
+static void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
 
 void E57IOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
 {
-	return;
 }
 
-void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, vcg::CallBackPos* cb)
+void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,
+                       const RichParameterList &parlst, vcg::CallBackPos* cb)
 {
 
     // TODO: format exception messages
 
-    mask = 0;
-
-    if (formatName.toUpper() != tr("E57")) {
-        wrongOpenFormat(formatName);
-        return;
-	}
-
     int scanIndex = 0;
     bool columnIndex = false;
-
-    std::size_t buffSize;
 
     std::int64_t cols = 0;
     std::int64_t rows = 0;
@@ -64,12 +65,18 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshM
     std::int64_t numberGroupSize = 0;
     std::int64_t numberCountSize = 0;
 
-    std::string stdFilename = std::string{QFile::encodeName(fileName).constData()};
+    auto stdFilename = std::string{QFile::encodeName(fileName).constData()};
+
+    mask = 0;
+
+    if (formatName.toUpper() != tr("E57")) {
+        wrongOpenFormat(formatName);
+        return;
+    }
 
     e57::Reader fileReader{stdFilename};
     e57::E57Root e57FileInfo{};
     e57::Data3D scanHeader{};
-    e57::Data3DPointsData data3DPointsData{};
 
     // check if the file is opened
     E57_WRAPPER(fileReader.IsOpen(), "Error while opening E57 file!");
@@ -84,71 +91,17 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshM
     E57_WRAPPER(fileReader.GetData3DSizes(scanIndex, rows, cols, numberPointSize, numberGroupSize, numberCountSize, columnIndex),
                 "Error while reading scan information!");
 
-    buffSize = (rows > 0) ? rows : 1024;
+    loadMesh(m, mask, scanIndex, ((rows > 0) ? rows : 1024), numberPointSize, fileReader, *cb);
 
-    // TODO: colors?
+    updateProgress(*cb, 100, DONE_LOADING);
 
-    // allocate the buffers to store points position
-    data3DPointsData.cartesianX = new float[buffSize];
-    data3DPointsData.cartesianY = new float[buffSize];
-    data3DPointsData.cartesianZ = new float[buffSize];
-
-    try {
-
-        unsigned long size;
-        auto vertexIterator = vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, static_cast<size_t>(numberPointSize));
-        e57::CompressedVectorReader dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPointsData);
-
-        m.Enable(mask);
-
-        while ((size = dataReader.read()) > 0) {
-            for (unsigned long i = 0; i < size; i++, vertexIterator++) {
-
-                auto vertex = (*vertexIterator).P();
-                auto x = data3DPointsData.cartesianX[i];
-                auto y = data3DPointsData.cartesianY[i];
-                auto z = data3DPointsData.cartesianZ[i];
-
-                vertex[0] = x; vertex[1] = y; vertex[2] = z;
-
-                std::fprintf(stderr, "Debug::E57(%s) :: {x=%.3ff,y=%.3ff,z=%.3f}\n", stdFilename.c_str(), x, y, z);
-            }
-        }
-
-    }
-    catch (const e57::E57Exception& exception) {
-
-        if (E57_DEBUG)
-            std::fprintf(stderr, "Debug::E57(%s) Exception(%s::%s)\n", stdFilename.c_str(), exception.what(), exception.context().c_str());
-
-        delete[] data3DPointsData.cartesianX;
-        delete[] data3DPointsData.cartesianY;
-        delete[] data3DPointsData.cartesianZ;
-
-        fileReader.Close();
-
-        throw MLException(QString{exception.what()});
-    }
-
-
-    if (E57_DEBUG) {
-        std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(guid): %s\n", stdFilename.c_str(), e57FileInfo.guid.c_str());
-        std::fprintf(stderr, "Debug::E57(%s) :: E57 Root(2D Count): %lld\n", stdFilename.c_str(), fileReader.GetImage2DCount());
-    }
-
-    updateProgress(*cb, 99, DONE_LOADING);
-
-    delete[] data3DPointsData.cartesianX;
-    delete[] data3DPointsData.cartesianY;
-    delete[] data3DPointsData.cartesianZ;
-
-    // close the file to free the memory
     fileReader.Close();
 }
 
-void E57IOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/)
+void E57IOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/,
+                       const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
-	wrongSaveFormat(formatName);
+    wrongSaveFormat(formatName);
 }
 
 /*
@@ -156,14 +109,14 @@ void E57IOPlugin::save(const QString & formatName, const QString & /*fileName*/,
 */
 QString E57IOPlugin::pluginName() const
 {
-	return QString{"IOE57"};
+    return QString{"IOE57"};
 }
 
 std::list<FileFormat> E57IOPlugin::importFormats() const
 {
-	return {
-	    FileFormat("E57 (E57 point cloud)", tr("E57"))
-	};
+    return {
+            FileFormat("E57 (E57 point cloud)", tr("E57"))
+    };
 }
 
 /*
@@ -171,7 +124,7 @@ std::list<FileFormat> E57IOPlugin::importFormats() const
 */
 std::list<FileFormat> E57IOPlugin::exportFormats() const
 {
-	return {};
+    return {};
 }
 
 /*
@@ -180,8 +133,64 @@ std::list<FileFormat> E57IOPlugin::exportFormats() const
 */
 void E57IOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-	capability = defaultBits=0;
-	return;
+    capability = defaultBits=0;
+    return;
+}
+
+void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
+              const e57::Reader &fileReader, vcg::CallBackPos& positionCallback) {
+
+    e57::Data3DPointsData data3DPointsData{};
+    // allocate the buffers to store points position
+    data3DPointsData.cartesianX = new float[buffSize];
+    data3DPointsData.cartesianY = new float[buffSize];
+    data3DPointsData.cartesianZ = new float[buffSize];
+
+    auto currentLoadingPercentage = 0;
+    auto loadingScale = (100 / numberPointSize);
+
+    auto size = 0UL;
+    auto vertexIterator = vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, static_cast<size_t>(numberPointSize));
+    auto dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPointsData);
+
+    m.Enable(mask);
+
+    // read the data from the E57 file
+    try {
+
+        while ((size = dataReader.read()) > 0) {
+
+            for (auto i = 0UL; i < size; i++, vertexIterator++) {
+
+                // read the x, y, z coordinates from the Data3DPoints
+                auto& currentPoint = (*vertexIterator).P();
+                auto x = data3DPointsData.cartesianX[i], y = data3DPointsData.cartesianY[i],
+                        z = data3DPointsData.cartesianZ[i];
+
+                currentPoint[0] = x;
+                currentPoint[1] = y;
+                currentPoint[2] = z;
+
+                currentLoadingPercentage += loadingScale;
+
+                updateProgress(positionCallback, currentLoadingPercentage, LOADING_POINTS);
+            }
+        }
+    }
+    catch (const e57::E57Exception& e) {
+
+        // free the used memory
+        delete[] data3DPointsData.cartesianX;
+        delete[] data3DPointsData.cartesianY;
+        delete[] data3DPointsData.cartesianZ;
+
+        throw e;
+    }
+
+    // free the used memory
+    delete[] data3DPointsData.cartesianX;
+    delete[] data3DPointsData.cartesianY;
+    delete[] data3DPointsData.cartesianZ;
 }
 
 void updateProgress(vcg::CallBackPos& positionCallback, int percentage, const char* description) noexcept {

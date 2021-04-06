@@ -28,6 +28,7 @@
 #include <common/plugins/interfaces/iomesh_plugin.h>
 #include <common/ml_document/mesh_model.h>
 #include <external/e57/include/E57Format.h>
+#include <E57SimpleReader.h>
 
 typedef typename CMeshO::VertexIterator VertexIterator;
 
@@ -46,6 +47,7 @@ public:
 
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb);
+
 };
 
 #endif
