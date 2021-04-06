@@ -196,11 +196,13 @@ void MainWindow::createActions()
 	reloadMeshAct = new QAction(QIcon(":/images/reload.png"), tr("&Reload"), this);
 	reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
 	reloadMeshAct->setShortcut(Qt::ALT + Qt::Key_R);
+	reloadMeshAct->setToolTip("Reload Current Layer");
 	connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
 
 	reloadAllMeshAct = new QAction(QIcon(":/images/reload_all.png"), tr("&Reload All"), this);
 	reloadAllMeshAct->setShortcutContext(Qt::ApplicationShortcut);
 	reloadAllMeshAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_R);
+	reloadAllMeshAct->setToolTip("Reload All Layers");
 	connect(reloadAllMeshAct, SIGNAL(triggered()), this, SLOT(reloadAllMesh()));
 
 	importRasterAct = new QAction(QIcon(":/images/open.png"), tr("Import Raster..."), this);
