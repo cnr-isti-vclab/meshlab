@@ -46,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/meshlab.app
+        path: src/install/MeshLab*.app
     - name: Upload DMG
       uses: actions/upload-artifact@v2
       with:
