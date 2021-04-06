@@ -5,7 +5,7 @@
 #
 # Without given arguments, meshlab.app will be looked for in meshlab/distrib
 # folder. MeshLab DMG will be placed in the same directory of meshlab.app.
-# 
+#
 # You can give as argument the DISTRIB_PATH containing meshlab.app.
 
 #realpath function
@@ -34,15 +34,24 @@ fi
 
 SOURCE_PATH=$DIR/../../../src
 
+#get version
+IFS=' ' #space delimiter
+STR_VERSION=$($DISTRIB_PATH/meshlab.app/Contents/MacOS/meshlab --version)
+read -a strarr <<< "$STR_VERSION"
+ML_VERSION=${strarr[1]} #get the meshlab version from the string
+
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
 sed "s%DISTRIB_PATH%$DISTRIB_PATH%g" ../resources/meshlab_dmg_latest.json > ../resources/meshlab_dmg_final.json
+sed -i '' "s%ML_VERSION%$ML_VERSION%g" $SCRIPTS_PATH/resources/meshlab_dmg_final.json
 sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" ../resources/meshlab_dmg_final.json
 
 rm -f $DISTRIB_PATH/*.dmg
 
+mv $DISTRIB_PATH/meshlab.app $DISTRIB_PATH/MeshLab$ML_VERSION.app
+
 echo "Running appdmg"
-appdmg ../resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$(cat ../../../ML_VERSION).dmg
+appdmg ../resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$ML_VERSION.dmg
 
 #at this point, distrib folder contains a DMG MeshLab file
 echo "distrib folder now contains a DMG file"
