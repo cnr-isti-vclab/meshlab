@@ -43,7 +43,7 @@ ML_VERSION=${strarr[1]} #get the meshlab version from the string
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
 sed "s%DISTRIB_PATH%$DISTRIB_PATH%g" ../resources/meshlab_dmg_latest.json > ../resources/meshlab_dmg_final.json
-sed -i '' "s%ML_VERSION%$ML_VERSION%g" $SCRIPTS_PATH/resources/meshlab_dmg_final.json
+sed -i '' "s%ML_VERSION%$ML_VERSION%g" ../resources/meshlab_dmg_final.json
 sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" ../resources/meshlab_dmg_final.json
 
 rm -f $DISTRIB_PATH/*.dmg
