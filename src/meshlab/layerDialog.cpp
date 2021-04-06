@@ -945,7 +945,14 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 				if(item->_meshid == mm->id()) {
 					ui->meshTreeWidget->setCurrentItem(item);
 					_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
-					_renderingtabcontainer->setTitle(mm->label());
+					QString meshLabel = mm->label();
+					if (meshLabel.size() > 30){
+						QString fin = meshLabel.right(6);
+						meshLabel.truncate(20);
+						meshLabel += "...";
+						meshLabel += fin;
+					}
+					_renderingtabcontainer->setTitle(meshLabel);
 					updateDecoratorParsView();
 				}
 			}
@@ -1164,6 +1171,12 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
 
 		QFileInfo inf = meshmodel->label();
 		QString meshName = inf.completeBaseName();
+		if (meshName.size() > 30){
+			QString fin = meshName.right(6);
+			meshName.truncate(20);
+			meshName += "...";
+			meshName += fin;
+		}
 		if (meshmodel->meshModified())
 			meshName += " *";
 		if (_rendertoolbar != NULL)
