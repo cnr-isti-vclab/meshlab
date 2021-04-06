@@ -721,15 +721,18 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		else
 		{
 			CheckError(textName.length() == 0, "Texture file not specified");
-			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+			//CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 		}
 		
 		if (m.cm.textures.empty())
 		{
 			// Creates path to texture file
-			QString fileName(m.fullName());
-			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
-			
+			QString fileName = textName;
+			if (std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) == -1){
+				fileName = m.fullName();
+				fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
+			}
+
 			QFile textFile(fileName);
 			if (!textFile.exists())
 			{
@@ -745,7 +748,14 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			
 			//Assign texture
 			m.cm.textures.clear();
-			m.cm.textures.push_back(textName.toStdString());
+			m.cm.textures.push_back(fileName.toStdString());
+			for(auto fi=m.cm.face.begin();fi!=m.cm.face.end();++fi){
+				if(!(*fi).IsD()) if((*fi).WT(0).N()==-1) {
+					(*fi).WT(0).N() = 0;
+					(*fi).WT(1).N() = 0;
+					(*fi).WT(2).N() = 0;
+				}
+			}
 		}
 		
 		QString filePath(m.fullName());

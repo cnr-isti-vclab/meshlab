@@ -139,7 +139,7 @@ public:
         if (edgeDist != 0.0)
             alpha=254-edgeDist*128;
 
-		if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
+        if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
         {
             c.lerp(f.cV(0)->cC(), f.cV(1)->cC(), f.cV(2)->cC(), p);
 			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
