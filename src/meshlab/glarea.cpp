@@ -1310,7 +1310,14 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		switch(e->modifiers())
 		{
 		case Qt::ControlModifier:
-			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f,500.0f);
+			if (isRaster()){
+				trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				trackball.MouseWheel(notchY);
+				trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+			}
+			else {
+				clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f,500.0f);
+			}
 			break;
 		case Qt::ShiftModifier:
 			fov = math::Clamp(fov+1.2f*notchY,5.0f,90.0f);
