@@ -261,14 +261,14 @@ void FilterMutualInfoPlugin::imageMutualInfoAlign(
 
 bool FilterMutualInfoPlugin::initGLMutualInfo()
 {
-	log(0, "GL Initialization");
+	log("GL Initialization");
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-		log(0, "GLEW initialization error!");
+		log("GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-		log(0, "Graphics hardware does not support FBOs");
+		log("Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -278,11 +278,11 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-		log(0,"Graphics hardware does not support non-power-of-two textures");
+		log("Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-		log(0, "Graphics hardware does not support vertex buffer objects");
+		log("Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -299,7 +299,7 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-	log(0, "GL Initialization done");
+	log("GL Initialization done");
 	return true;
 }
 
