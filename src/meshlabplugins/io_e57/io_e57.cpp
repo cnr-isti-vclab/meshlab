@@ -198,9 +198,7 @@ void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int
 
 void updateProgress(vcg::CallBackPos& positionCallback, int percentage, const char* description) noexcept {
 
-    if (positionCallback != nullptr) {
-        positionCallback(percentage, description);
-    }
+    positionCallback(percentage, description);
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(E57IOPlugin)
