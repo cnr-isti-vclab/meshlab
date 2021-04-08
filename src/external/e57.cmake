@@ -7,18 +7,19 @@ option(ALLOW_SYSTEM_LIBE57_FORMAT "Allow use of system-provided libE57Format" ON
 
 set(E57Format_DIR ${EXTERNAL_DIR}/e57)
 
-if(ALLOW_SYSTEM_LIBE57_FORMAT AND TARGET E57Format::E57Format)
+if (TARGET external-xerces)
+	if(ALLOW_SYSTEM_LIBE57_FORMAT AND TARGET E57Format::E57Format)
 
-    message(STATUS "- libE57Format - using system-provided library")
-    add_library(external-libE57Format INTERFACE)
-    target_link_libraries(external-libE57Format INTERFACE E57Format::E57Format)
+		message(STATUS "- libE57Format - using system-provided library")
+		add_library(external-libE57Format INTERFACE)
+		target_link_libraries(external-libE57Format INTERFACE E57Format::E57Format)
 
-elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
+	elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
 
-    message(STATUS "- libE57Format - using bundled source")
+		message(STATUS "- libE57Format - using bundled source")
+		add_subdirectory(e57)
+		add_library(external-libE57Format INTERFACE)
+		target_link_libraries(external-libE57Format INTERFACE E57Format)
 
-    add_subdirectory(e57)
-    add_library(external-libE57Format INTERFACE)
-    target_link_libraries(external-libE57Format INTERFACE E57Format)
-
+	endif()
 endif()

@@ -65,7 +65,7 @@ if ( E57_BUILDING_SELF )
 endif()
 
 find_package( Threads REQUIRED )
-find_package( XercesC REQUIRED )
+#find_package( XercesC REQUIRED )
 
 option( E57_BUILD_SHARED
 	"Compile E57Format as a shared library"
@@ -126,7 +126,7 @@ if ( WIN32 )
 endif()
 
 # Target Libraries
-target_link_libraries( E57Format PRIVATE XercesC::XercesC )
+target_link_libraries( E57Format PRIVATE external-xerces )
 
 # Install
 install(
