@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+
+<xsd:schema xmlns:xsd=        "http://www.w3.org/2001/XMLSchema"
+            targetNamespace=  "http://www.dave.com/Base"
+            xmlns:b=          "http://www.dave.com/Base"
+            xml:lang=         "en">
+
+<xsd:include schemaLocation="test-user-config.xsd"/>
+
+<xsd:element name="UserDatabase" type="b:UserDatabase_t">
+
+<!-- A users dialled number must be unique in the xml instance file. -->
+   <xsd:unique name="UniqueNumber">
+      <xsd:selector xpath="TestUserConfig"/>
+      <xsd:field xpath="@Number"/>
+   </xsd:unique>
+
+</xsd:element>
+
+
+<xsd:complexType name="UserDatabase_t">
+   <xsd:sequence>
+
+      <xsd:element ref="b:TestUserConfig" minOccurs="0" maxOccurs="unbounded"/> 
+      
+   </xsd:sequence>
+</xsd:complexType>
+
+
+</xsd:schema>

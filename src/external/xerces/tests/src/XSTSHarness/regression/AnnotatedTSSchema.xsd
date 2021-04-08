@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+NOTE (JT): This schema differs from the official version adopted by the WG in that
+1) these attribute declarations in the xs:schema element:
+  xmlns:ts="http://www.w3.org/2003/XMLSchema/TestSuite/PLACEHOLDER"
+  targetNamespace="http://www.w3.org/2003/XMLSchema/TestSuite/PLACEHOLDER"
+are replaced by lines to enable the use of a local copy of this schema.
+2) The import declarations for XLink and XML namespace are given schemaLocation attributes.
+-->
+<xs:schema  
+  xmlns:ts="TestSuite"
+  targetNamespace="TestSuite"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  >
+<!--
+  <xs:import namespace="http://www.w3.org/1999/xlink"/>
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
+-->
+
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="file:///C:/3rd-party/XlnGui/Catalogs/Large/www.xbrl.org/2003/xlink-2003-12-31.xsd"/>
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="file:///C:/3rd-party/XlnGui/Catalogs/Small/www.w3.org/2001/03/xml.xsd"/>
+
+
+  <xs:annotation>
+    <xs:documentation>
+      This is the schema for the W3C XML Schema Test Suite collection
+      (TS), as approved by the W3C XML Schema Working Group on May 12,
+      2003. It defines the namespace:
+
+        http://www.w3.org/2003/XMLSchema/TestSuite/PLACEHOLDER
+
+      The TS consists of a set of test suites, each of which is identified
+      according to the version of W3C XML Schema it is designed to
+      test. Previous versions of test suites are archived and are also
+      available, identifiable by the version of the test suite itself.
+
+      This schema defines three separate but related document types for
+      the TS:
+
+        1) The testSuite element is the root element of a document
+           which defines a test suite as described above (e.g. the
+           2003-10-25 version of the test suite for version 1 of the
+           Recommendation).
+
+           The principal purpose of a testSuite document is the provision
+           of a set of links to documents defining the tests which
+           constitute the test suite.
+
+           Files containing testSuite documents have the filename suffix
+           ".suite".
+
+        2) The testSet element is the root element of a document which
+           describes a set of tests. Each testSuite consists primarily
+           of a set of links to testSet documents.  The scope of the
+           testSet is typically determined by the contributor of the
+           tests which make up the testSet: it is the unit in which
+           tests are contributed to the collection.
+
+           Files containing testSet documents have the filename suffix
+           ".testSet".
+
+        3) The testSuiteResults element is the root element of a
+           document describing the results of testing a processor
+           against a testSuite.
+
+           Files containing testSuiteResults documents have the filename
+           suffix ".results".
+    </xs:documentation>
+  </xs:annotation>
+
+
+  <xs:element name="testSuite">
+    <xs:annotation>
+      <xs:documentation>
+        The root element of a document describing all tests for a
+        particular version of W3C XML Schema, for the version of the TS
+        defined by the document.
+
+        The element has three attributes, each of which is required:
+
+          name - the name of this test suite.
+
+          releaseDate - the date on which this test suite was
+                        released. This value serves to identify the
+                        version of the test suite.
+
+          schemaVersion - the version of W3C XML Schema for which the 
+                          tests are designed.
+
+        Two elements may optionally be present:
+
+          annotation - at most one instance of general documentation.
+
+          testSetRef - a set of references to the sets of tests which 
+                       make up this test suite.
+
+                       The test sets referenced are uniquely named.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:annotation" minOccurs="0"/>
+        <xs:element ref="ts:testSetRef" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:Name"/>
+      <xs:attribute name="releaseDate" use="required" type="xs:date"/>
+      <xs:attribute name="schemaVersion" use="required" type="xs:string"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="testSetRef" type="ts:ref"/>
+
+
+  <xs:element name="testSet">
+    <xs:annotation>
+      <xs:documentation>
+        The root element of a document describing a set of tests,
+        normally from a single contributor.  A contributor may supply
+        any number of testSet files.
+
+        The element has two attributes, each of which is required:
+
+          contributor - the name of the contributor of this testSet.
+
+          name - the name of this testSet, which must be unique within
+                 the enclosing testSuite.
+
+        Two elements may optionally be present:
+
+          annotation - at most one instance of general documentation.
+
+          testGroup - a set of testGroup elements, each of which defines a
+                      group of closely related tests.
+
+                      The testGroup elements must be uniquely named.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:annotation" minOccurs="0"/>
+        <xs:element ref="ts:testGroup" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="contributor" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="xs:Name"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+    <xs:unique name="uniqueGroupName">
+      <xs:annotation>
+        <xs:documentation>
+          Each test group within a test set must have a unique name.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="ts:testGroup"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+  </xs:element>
+
+
+  <xs:element name="testGroup">
+    <xs:annotation>
+      <xs:documentation>
+        This element groups a collection of closely related tests. In the 
+        case where a schema is present, this element groups the schema with a
+        set of instance documents which should be validated against the
+        schema.
+
+        It has one attribute, which is required:
+
+          name - an identifier for the testGroup which is unique within
+                 the enclosing testSet.
+
+        Four elements may optionally be present:
+
+          annotation - at most one instance of general documentation.
+
+          documentationReference - any number of references to external
+                                   documentation upon which the test
+                                   is based, e.g. links to relevant
+                                   sections of the Recommendation,
+                                   to the Errata, etc.
+
+          schemaTest - any number of elements, each of which holds
+                       information on a single schema document.
+
+                       When more than one schema document is present,
+                       a single schema is constructed from the set
+                       (or from other schemas via import).
+
+                       Schema documents may be omitted, for the purpose
+                       of testing a processor's validation of an instance
+                       containing only the built-in datatypes defined in
+                       the Recommendation.
+
+          instanceTest - any number of elements, each of which holds
+                         information on a single instance document to
+                         be validated against the included schema.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:annotation" minOccurs="0"/>
+        <xs:element ref="ts:documentationReference" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="ts:schemaTest" minOccurs="0"/>
+        <xs:element ref="ts:instanceTest" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:Name"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+    <xs:unique name="uniqueTestName">
+      <xs:annotation>
+        <xs:documentation>
+          Each test within a test group must have a unique name.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="ts:schemaTest|ts:instanceTest"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+  </xs:element>
+
+
+  <xs:element name="schemaTest">
+    <xs:annotation>
+      <xs:documentation>
+        This element groups together information about the schema for
+        a particular test condition.
+
+        It has one attribute, which is required:
+
+          name - the name of the schema, which must be unique within
+                 the enclosing testGroup (i.e. it must differ from the
+                 name(s) of any associated instanceTest elements).
+
+        One element is required:
+
+          schemaDocument - at least one link to a file containing a
+                           schema document. The schema for the test is 
+                           constructed from the set (or from other 
+                           schemas via import).
+
+        Three elements may optionally be present:
+
+          expected - the expected validation outcome for the schema
+                     contained in the schema document(s).
+
+          current - the current status of this test in the TS (an
+                    indication of the test's accuracy in testing the
+                    feature it is intended to test).
+
+          prior - the history of any changes in the status of this test.
+
+        The elements "expected" and "current" may be absent when tests
+        are contributed, but will always be present for tests included in 
+        the TS.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:schemaDocument" maxOccurs="unbounded"/>
+        <xs:element ref="ts:expected" minOccurs="0"/>
+        <xs:element ref="ts:current" minOccurs="0"/>
+        <xs:element ref="ts:prior" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:Name"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="instanceTest">
+    <xs:annotation>
+      <xs:documentation>
+        This element groups together information about an instance
+        document which should be validated against the schema referenced
+        in the enclosing testGroup.
+
+        It has one attribute, which is required:
+
+          name - the name of the instance document, which must be unique
+                 within the enclosing testGroup (i.e. it must differ
+                 from the name of any associated schemaTest elements).
+
+        One element is required:
+
+          instanceDocument - a link to a file containing the instance
+                             document.
+
+        Three elements may optionally be present:
+
+          expected - the expected validation outcome for the instance
+                     document.
+
+          current - the current status of this test in the TS (an
+                    indication of the test's accuracy in testing the
+                    feature it is intended to test).
+
+          prior - the history of any changes in the status of this test.
+
+        The elements "expected" and "current" may be absent when tests
+        are contributed, but will always be present for tests included in 
+        the TS.
+
+        Note: per section 5.2 "Assessing Schema-Validity" of the
+        Recommendation "XML Schema Part 1: Structures", validation may
+        be started in a variety of ways.  For the purposes of the TS,
+        only the third method shall be used:
+
+          "The processor starts from Schema-Validity Assessment (Element)
+          (3.3.4) with no stipulated declaration or definition".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:instanceDocument"/>
+        <xs:element ref="ts:expected" minOccurs="0"/>
+        <xs:element ref="ts:current" minOccurs="0"/>
+        <xs:element ref="ts:prior" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:Name"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="schemaDocument" type="ts:ref"/>
+  <xs:element name="instanceDocument" type="ts:ref"/>
+
+
+  <xs:element name="current" type="ts:statusEntry">
+    <xs:annotation>
+      <xs:documentation>
+        The current status of a test in the TS.
+        
+        This element has two attributes, both of which are required:
+
+          status - the status of the test. One of "accepted", "stable",
+                   "disputed-test" or "disputed-spec" (see the TS website
+                   for an explanation of these values).
+
+          date - the date on which the value in the status attribute
+                 was attained.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+
+  <xs:element name="prior" type="ts:statusEntry">
+    <xs:annotation>
+      <xs:documentation>
+        A former status of a test in the TS.
+
+        This element has two attributes, both of which are required:
+
+          status - the former status of the test. One of "accepted",
+                   "stable", "disputed-test" or "disputed-spec" (see
+                   the TS website for an explanation of these values).
+
+          date - the date on which the value in the status attribute
+                 was attained.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+
+  <xs:complexType name="statusEntry">
+    <xs:attribute name="status" use="required" type="ts:status"/>
+    <xs:attribute name="date" use="required" type="xs:date"/>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:complexType>
+
+
+  <xs:simpleType name="status">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="accepted"/>
+      <xs:enumeration value="stable"/>
+      <xs:enumeration value="disputed-test"/>
+      <xs:enumeration value="disputed-spec"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:element name="expected">
+    <xs:annotation>
+      <xs:documentation>
+        The expected validation outcome of a test in the TS.
+        
+        This element has one attribute, which is required:
+        
+          validity - the expected validity of the test. One of "valid",
+                     "invalid" or "notKnown".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="validity" use="required" type="ts:validityOutcome"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:simpleType name="validityOutcome">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="valid"/>
+      <xs:enumeration value="invalid"/>
+      <xs:enumeration value="notKnown"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:element name="testSuiteResults">
+    <xs:annotation>
+      <xs:documentation>
+        This is the root element of a document containing a test result
+        report. The report takes the form of a set of test results 
+        returned by a processor/validator when run against the TS.
+
+        It has three required attributes:
+
+          suite - the name of the test suite to which these results
+                  correspond.  This should be the value of the name
+                  attribute of the testSuite element at the root of
+                  the test suite document describing the tests to which
+                  these results correspond.
+
+          processor - some identifying information for the processor/
+                      validator which produced the reported results. The
+                      value of this attribute is left to the discretion
+                      of the reporter.
+
+          submitDate - the date on which these results were submitted
+                       to the TS Task Force.
+
+        The element also has one optional attribute:
+
+          publicationPermission - the degree to which the result reporter
+                                  authorizes the W3C to disseminate the
+                                  reported results. One of "W3C members"
+                                  or "public" (see the TS website for an
+                                  explanation of these values). If this
+                                  attribute is absent, no permission to
+                                  publish is granted.
+
+        This element has two optional elements:
+
+          annotation - at most one instance of more detailed
+                       (ts:documentation) or structured (ts:appinfo)
+                       information or commentary regarding the enclosed
+                       test results.
+
+          testResult - any number of reports of the results of individual
+                       tests. Any results may be omitted, particularly
+                       those for tests of features for which the processor
+                       claims no support.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:annotation" minOccurs="0"/>
+        <xs:element ref="ts:testResult" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="suite" use="required" type="xs:Name"/>
+      <xs:attribute name="processor" use="required" type="xs:string"/>
+      <xs:attribute name="submitDate" use="required" type="xs:date"/>
+      <xs:attribute name="publicationPermission">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="W3C members"/>
+            <xs:enumeration value="public"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="testResult">
+    <xs:annotation>
+      <xs:documentation>
+        The result of an individual instance test or a schema test.
+        
+        This element has four required attributes:
+        
+          validity - the validition outcome of the test. One of "valid",
+                     "invalid" or "notKnown".
+
+          set - the value of the "name" attribute of the test set to
+                which the test belongs.
+
+          group - the value of the "name" attribute of the test group
+                  to which the test belongs.
+
+          test - the value of the "name" attribute of the schema test
+                 or instance test, the validation outcome of which this
+                 result reports.
+
+            NOTE: The "set", "group" and "test" attributes are used to
+            uniquely identify the test within the TS for which this
+            result reports the validation outcome.  Each matches the
+            "name" attribute of the respective element in the test suite.
+
+        This element has one optional attribute:
+        
+          normalizedLoad - a relative load value, intended as an indicator
+                           of the resource requirements of an individual
+                           test. Values may be based on processing time,
+                           memory usage or a combination of the two.
+                           Values should be in the vicinity of 1.0.
+
+        The element has one optional element:
+        
+          annotation - at most one instance of more detailed
+                       (ts:documentation) or structured (ts:appinfo)
+                       information or commentary regarding the individual
+                       test result. Reporters are encouraged to use
+                       annotation/appinfo to report more detailed outcome
+                       information, such as error and warning messages.
+     </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ts:annotation" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="validity" use="required" type="ts:validityOutcome"/>
+      <xs:attribute name="set" use="required" type="xs:Name"/>
+      <xs:attribute name="group" use="required" type="xs:Name"/>
+      <xs:attribute name="test" use="required" type="xs:Name"/>
+      <xs:attribute name="normalizedLoad" type="xs:decimal"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:complexType name="ref">
+    <xs:attribute ref="xlink:type" default="locator"/>
+    <xs:attribute ref="xlink:href"/>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:complexType>
+
+
+  <xs:element name="documentationReference" type="ts:ref">
+    <xs:annotation>
+      <xs:documentation>
+        A link to documentation relevant to a test, such as a link to the
+        Recommendation, an erratum, an archived email discussion, etc.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+
+  <xs:element name="annotation">
+    <xs:annotation>
+      <xs:documentation>
+        This is an exact copy of the annotation element defined in the Schema
+        Recommendation. It is duplicated here in order to replicate the 
+        functionality of the xs:annotation element and because the Schema for
+        Schemas cannot be imported. 
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="ts:appinfo"/>
+        <xs:element ref="ts:documentation"/>
+      </xs:choice>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="appinfo">
+    <xs:complexType mixed="true">
+      <xs:sequence maxOccurs="unbounded" minOccurs="0">
+        <xs:any processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="source" type="xs:anyURI"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="documentation">
+    <xs:complexType mixed="true">
+      <xs:sequence maxOccurs="unbounded" minOccurs="0">
+        <xs:any processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="source" type="xs:anyURI"/>
+      <xs:attribute ref="xml:lang"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

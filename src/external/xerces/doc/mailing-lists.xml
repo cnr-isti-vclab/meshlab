@@ -1,0 +1,59 @@
+<?xml version="1.0"  encoding="iso-8859-1" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Mailing Lists">
+
+  <s2 title="Overview">
+    <p>The &XercesCName; project hosts two mailing lists:
+       <jump href="mailto&colon;&XercesCUserEmailAddress;">&XercesCUserEmailAddress;</jump>
+       for general usage questions and
+       <jump href="mailto&colon;&XercesCDevelEmailAddress;">&XercesCDevelEmailAddress;</jump>
+       for the development-related discussions. Note that both lists accept
+       posts from subscribers only so you need to subscribe before sending
+       your questions (see below). Previous message archives and NNTP news
+       gateways are available for both mailing lists. For more information
+       on Apache-hosted mailing lists see <jump href="http://xml.apache.org/mail.html">
+       Mailing Lists and Usage Notes</jump>.</p>
+
+    <s3 title="User mailing list">
+      <p>To subscribe send an email to <jump href="mailto&colon;&XercesCUserSAddress;">&XercesCUserSAddress;</jump></p>
+      <p>To unsubscribe send an email to <jump href="mailto&colon;&XercesCUserUAddress;">&XercesCUserUAddress;</jump></p>
+      <p>For help send an email to <jump href="mailto&colon;&XercesCUserHAddress;">&XercesCUserHAddress;</jump></p>
+      <p>To post to the mailing list send an email to <jump href="mailto&colon;&XercesCUserEmailAddress;">&XercesCUserEmailAddress;</jump></p>
+      <p>NNTP news gateway: <jump href="nntp://news.gmane.org/gmane.text.xml.xerces-c.user">gmane.text.xml.xerces-c.user</jump></p>
+      <p>Mailing list archives:
+         <jump href="http://marc.info/?l=xerces-c-users">MARC</jump>,
+         <jump href="http://news.gmane.org/gmane.text.xml.xerces-c.user">Gmane</jump>,
+         <jump href="http://mail-archives.apache.org/mod_mbox/xerces-c-users/">Apache</jump></p>
+    </s3>
+
+    <s3 title="Developer mailing list">
+      <p>To subscribe send an email to <jump href="mailto&colon;&XercesCDevelSAddress;">&XercesCDevelSAddress;</jump></p>
+      <p>To unsubscribe send an email to <jump href="mailto&colon;&XercesCDevelUAddress;">&XercesCDevelUAddress;</jump></p>
+      <p>For help send an email to <jump href="mailto&colon;&XercesCDevelHAddress;">&XercesCDevelHAddress;</jump></p>
+      <p>To post to the mailing list send an email to <jump href="mailto&colon;&XercesCDevelEmailAddress;">&XercesCDevelEmailAddress;</jump></p>
+      <p>NNTP news gateway: <jump href="nntp://news.gmane.org/gmane.text.xml.xerces-c.devel">gmane.text.xml.xerces-c.devel</jump></p>
+      <p>Mailing list archives:
+         <jump href="http://marc.info/?l=xerces-c-dev">MARC</jump>,
+         <jump href="http://news.gmane.org/gmane.text.xml.xerces-c.devel">Gmane</jump>,
+         <jump href="http://mail-archives.apache.org/mod_mbox/xerces-c-dev/">Apache</jump></p>
+    </s3>
+  </s2>
+</s1>

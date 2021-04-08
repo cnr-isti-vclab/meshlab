@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<b:UserDatabase xmlns:d="http://www.dave.com/Derived"
+              xmlns:b="base"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="base test-users.xsd http://www.dave.com/Derived derived-user-config.xsd">
+
+<d:DerivedUserConfig Number="1234567">
+   <Name>bob</Name>
+   <Age>50</Age>
+</d:DerivedUserConfig>
+
+<d:DerivedUserConfig Number="1234567">
+   <Name>bob</Name>
+   <Age>50</Age>
+</d:DerivedUserConfig>
+
+</b:UserDatabase>
+

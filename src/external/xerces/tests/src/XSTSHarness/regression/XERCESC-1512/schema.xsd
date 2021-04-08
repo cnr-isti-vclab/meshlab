@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="multipleChoice">
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:float">
+				<xsd:minInclusive value="0.0"/>
+				<xsd:maxInclusive value="1.0"/>
+				<xsd:pattern value="[0-9]"/>
+				<xsd:pattern value="[0-9][.]([0-9]+)?"/>
+				<xsd:pattern value="([0-9])?[.][0-9]+"/>
+			</xsd:restriction>
+		</xsd:simpleType>
+	</xsd:element>
+
+	<xsd:element name="root">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="multipleChoice" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

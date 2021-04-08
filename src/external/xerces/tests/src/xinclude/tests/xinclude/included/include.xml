@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<include xml:base="../included/" xmlns="http://www.w3.org/2001/XInclude"
+         href="elem.xml"/>

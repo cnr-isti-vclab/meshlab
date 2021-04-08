@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+. ../scripts/run-test
+
+wd="${top_srcdir}/tests/src/DOM/TypeInfo"
+run_test DOMTypeInfoTest pass "" tests/DOMTypeInfoTest

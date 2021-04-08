@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:complexType name="AddressType" abstract="true">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="MyAddressType">
+		<xsd:simpleContent>
+			<xsd:restriction base="AddressType">
+				<xsd:enumeration value="BillingAddress"/>
+				<xsd:enumeration value="DataBackupStorageAddress"/>
+				<xsd:enumeration value="DuplicateRecordsAddress"/>
+				<xsd:enumeration value="FurthestTerminalAddress"/>
+				<xsd:enumeration value="GaragingAddress"/>
+				<xsd:enumeration value="MailingAddress"/>
+				<xsd:enumeration value="PointOfDepartureAddress"/>
+				<xsd:enumeration value="PointOfDestinationAddress"/>
+				<xsd:enumeration value="PreviousAddress"/>
+				<xsd:enumeration value="ShippingAddress"/>
+				<xsd:enumeration value="SoftwareBackupStorageAddress"/>
+				<xsd:enumeration value="StreetAddress"/>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>

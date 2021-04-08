@@ -1,0 +1,24 @@
+<?xml encoding='ISO-8859-1'?>
+
+<!-- STYLEBOOK CHANGES DTD -->
+
+<!-- import the external markup.ent dtd -->
+<!ENTITY % markupEntity SYSTEM "markup.ent">
+%markupEntity;
+
+<!ENTITY % content "(#PCDATA|%markup;|%links;)*">
+
+<!ELEMENT changes (release)+>
+<!ATTLIST changes title CDATA #REQUIRED>
+
+<!ELEMENT release ((features,fixes)|(features)|(fixes))>
+<!ATTLIST release version CDATA #REQUIRED
+                  date    CDATA #IMPLIED>
+
+<!ELEMENT features (feat)+>
+<!ELEMENT fixes (fix)+>
+
+<!ELEMENT feat %content;>
+<!ELEMENT fix %content;>
+
+<!-- CVS $Revision$ $Date$ -->

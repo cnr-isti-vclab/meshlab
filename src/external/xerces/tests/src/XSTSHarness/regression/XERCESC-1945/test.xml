@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<p xsi:type="&#10;&#9;Person&#13;" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+   xsi:noNamespaceSchemaLocation="test.xsd">
+   <name>John Doe</name>
+</p>
+

@@ -1,0 +1,75 @@
+<?xml version="1.0"  encoding="iso-8859-1" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Applications">
+
+  <s2 title="Overview">
+    <p>This page lists popular application and libraries that
+       are based on or provide an additional functionality on
+       top of &XercesCName;. If you know of an application that
+       you feel should be listed here, send an email with all the
+       relevant information to one of the <jump href="mailing-lists.html">
+       &XercesCName; mailing lists</jump>.</p>
+
+    <s3 title="CodeSynthesis XSD">
+      <p><jump href="http://www.codesynthesis.com/products/xsd/">CodeSynthesis
+         XSD</jump> is an open-source XML Schema to C++ data
+         binding compiler that uses &XercesCName; as the underlying XML
+         parser. Provided with an XML instance specification (XML Schema), XSD
+         generates C++ classes that represent the given vocabulary as well
+         as parsing and serialization code. You can then access the data
+         stored in XML using types and functions that semantically
+         correspond to your application domain rather than dealing with
+         direct representations of XML such as DOM and SAX.</p>
+    </s3>
+
+    <s3 title="Xalan-C++">
+      <p><jump href="http://xml.apache.org/xalan-c/">Xalan-C++</jump>
+         is an open-source XSLT processor for transforming XML documents
+         into HTML, text, or other XML document types. It implementes the W3C
+         recommendations for XSL Transformations (XSLT) and the XML Path
+         Language (XPath) and is based on &XercesCName;.</p>
+    </s3>
+
+    <s3 title="XQilla">
+      <p><jump href="http://xqilla.sourceforge.net">XQilla</jump>
+         is an open-source XQuery and XPath 2.0 implementation based
+         on &XercesCName;. It implements the DOM 3 XPath API and conforms
+         to the W3C proposed recommendation of XQuery and XPath 2.0.</p>
+    </s3>
+
+    <s3 title="XML Security for C++">
+      <p><jump href="http://santuario.apache.org/">XML Security
+         for C++</jump> is an open-source implementation of the XML
+         Digital Signature and Encryption specifications and is based
+         on &XercesCName;. The library also provides support for
+         serializing XML in the canonical form.</p>
+    </s3>
+
+    <s3 title="Shibboleth and OpenSAML">
+      <p><jump href="http://www.shibboleth.net/">Shibboleth</jump> is
+         an open source Web Single Sign-On and Federation implementation
+         that supports the SAML 2.0 and SAML 1.1 standards, among other
+         capabilities. The Service Provider and underlying OpenSAML
+         library use &XercesCName;.</p>
+    </s3>
+
+  </s2>
+</s1>

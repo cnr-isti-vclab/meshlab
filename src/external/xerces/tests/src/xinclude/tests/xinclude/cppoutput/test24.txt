@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- test that including the same document fails -->
+   <!-- EXPECT FAILURE -->
+   [Fatal Error] test24.xml:1:1
+[Fatal Error] test24.xml:9:35

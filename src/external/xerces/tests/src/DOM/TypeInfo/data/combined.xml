@@ -1,0 +1,7 @@
+<!DOCTYPE root SYSTEM "combined.dtd" >
+<root xsi:noNamespaceSchemaLocation="combined.xsd"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  attBoth="lala" 
+attSchema="lala" attDTD="lala"
+>
+<level1 >content</level1>
+<level1a >content</level1a>
+</root>

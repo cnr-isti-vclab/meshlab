@@ -1,0 +1,532 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define to specify no threading is used */
+#undef APP_NO_THREADS
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
+/* Define to 1 if you have the <arpa/nameser_compat.h> header file. */
+#undef HAVE_ARPA_NAMESER_COMPAT_H
+
+/* define if bool is a built-in type */
+#undef HAVE_BOOL
+
+/* Define to 1 if you have the `catclose' function. */
+#undef HAVE_CATCLOSE
+
+/* Define to 1 if you have the `catgets' function. */
+#undef HAVE_CATGETS
+
+/* Define to 1 if you have the `catopen' function. */
+#undef HAVE_CATOPEN
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define to 1 if you have the <CoreServices/CoreServices.h> header file. */
+#undef HAVE_CORESERVICES_CORESERVICES_H
+
+/* Define to 1 if you have cpuid.h */
+#undef HAVE_CPUID_H
+
+/* Define to 1 if you have the <ctype.h> header file. */
+#undef HAVE_CTYPE_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <endian.h> header file. */
+#undef HAVE_ENDIAN_H
+
+/* Define to 1 if you have the <errno.h> header file. */
+#undef HAVE_ERRNO_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the <float.h> header file. */
+#undef HAVE_FLOAT_H
+
+/* Define to 1 if you have the `ftime' function. */
+#undef HAVE_FTIME
+
+/* Define to 1 if you have the `getaddrinfo' function. */
+#undef HAVE_GETADDRINFO
+
+/* Define to 1 if you have the `getcwd' function. */
+#undef HAVE_GETCWD
+
+/* Define to 1 if you have the `gethostbyaddr' function. */
+#undef HAVE_GETHOSTBYADDR
+
+/* Define to 1 if you have the `gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the `gmtime_r' function. */
+#undef HAVE_GMTIME_R
+
+/* Define to 1 if you have the `iconv' function. */
+#undef HAVE_ICONV
+
+/* Define to 1 if you have the `iconv_close' function. */
+#undef HAVE_ICONV_CLOSE
+
+/* Define to 1 if you have the <iconv.h> header file. */
+#undef HAVE_ICONV_H
+
+/* Define to 1 if you have the `iconv_open' function. */
+#undef HAVE_ICONV_OPEN
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <langinfo.h> header file. */
+#undef HAVE_LANGINFO_H
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the `localeconv' function. */
+#undef HAVE_LOCALECONV
+
+/* Define to 1 if you have the <locale.h> header file. */
+#undef HAVE_LOCALE_H
+
+/* define if the compiler implements L"widestring" */
+#undef HAVE_LSTRING
+
+/* Define to 1 if you have the <machine/endian.h> header file. */
+#undef HAVE_MACHINE_ENDIAN_H
+
+/* Define to 1 if you have the `mblen' function. */
+#undef HAVE_MBLEN
+
+/* Define to 1 if you have the `mbrlen' function. */
+#undef HAVE_MBRLEN
+
+/* Define to 1 if you have the `mbsrtowcs' function. */
+#undef HAVE_MBSRTOWCS
+
+/* Define to 1 if you have the `mbstowcs' function. */
+#undef HAVE_MBSTOWCS
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
+/* define if the compiler implements namespaces */
+#undef HAVE_NAMESPACES
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the `nl_langinfo' function. */
+#undef HAVE_NL_LANGINFO
+
+/* Define to 1 if you have the <nl_types.h> header file. */
+#undef HAVE_NL_TYPES_H
+
+/* Define to 1 if you have the `pathconf' function. */
+#undef HAVE_PATHCONF
+
+/* Define to 1 if you have the PATH_MAX macro. */
+#undef HAVE_PATH_MAX
+
+/* Define if you have POSIX threads libraries and header files. */
+#undef HAVE_PTHREAD
+
+/* Define to 1 if you have the `realpath' function. */
+#undef HAVE_REALPATH
+
+/* Define to 1 if you have the `setlocale' function. */
+#undef HAVE_SETLOCALE
+
+/* Define to 1 if you have the `snprintf' function. */
+#undef HAVE_SNPRINTF
+
+/* Define to 1 if you have the `socket' function. */
+#undef HAVE_SOCKET
+
+/* Define to 1 if stdbool.h conforms to C99. */
+#undef HAVE_STDBOOL_H
+
+/* Define to 1 if you have the <stddef.h> header file. */
+#undef HAVE_STDDEF_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* define if the compiler supports ISO C++ standard library */
+#undef HAVE_STD_LIBS
+
+/* define if the compiler supports the std namespace */
+#undef HAVE_STD_NAMESPACE
+
+/* define if the compiler supports ISO C++11 <thread> and <mutex> */
+#undef HAVE_STD_THREAD
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the `strchr' function. */
+#undef HAVE_STRCHR
+
+/* Define to 1 if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define to 1 if you have the `stricmp' function. */
+#undef HAVE_STRICMP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strncasecmp' function. */
+#undef HAVE_STRNCASECMP
+
+/* Define to 1 if you have the `strnicmp' function. */
+#undef HAVE_STRNICMP
+
+/* Define to 1 if you have the `strrchr' function. */
+#undef HAVE_STRRCHR
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the `strtoul' function. */
+#undef HAVE_STRTOUL
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#undef HAVE_SYS_TIMEB_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the `timegm' function. */
+#undef HAVE_TIMEGM
+
+/* Define to 1 if you have the `towlower' function. */
+#undef HAVE_TOWLOWER
+
+/* Define to 1 if you have the `towupper' function. */
+#undef HAVE_TOWUPPER
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <wchar.h> header file. */
+#undef HAVE_WCHAR_H
+
+/* Define to 1 if you have the `wcsicmp' function. */
+#undef HAVE_WCSICMP
+
+/* Define to 1 if you have the `wcslwr' function. */
+#undef HAVE_WCSLWR
+
+/* Define to 1 if you have the `wcsnicmp' function. */
+#undef HAVE_WCSNICMP
+
+/* Define to 1 if you have the `wcsrtombs' function. */
+#undef HAVE_WCSRTOMBS
+
+/* Define to 1 if you have the `wcstombs' function. */
+#undef HAVE_WCSTOMBS
+
+/* Define to 1 if you have the `wcsupr' function. */
+#undef HAVE_WCSUPR
+
+/* Define to 1 if you have the <wctype.h> header file. */
+#undef HAVE_WCTYPE_H
+
+/* Define to 1 if you have the <winsock2.h> header file. */
+#undef HAVE_WINSOCK2_H
+
+/* Define to 1 if the system has the type `_Bool'. */
+#undef HAVE__BOOL
+
+/* Define to 1 if you have to use const char* with iconv, to 0 if you must use
+   char*. */
+#undef ICONV_USES_CONST_POINTER
+
+/* Definition of Xerces interface major version */
+#undef INTERFACE_VERSION_MAJOR
+
+/* Definition of Xerces interface minor version */
+#undef INTERFACE_VERSION_MINOR
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#undef LT_OBJDIR
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#undef PTHREAD_CREATE_JOINABLE
+
+/* The size of `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of `wchar_t', as computed by sizeof. */
+#undef SIZEOF_WCHAR_T
+
+/* The size of `__int64', as computed by sizeof. */
+#undef SIZEOF___INT64
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Version number of package */
+#undef VERSION
+
+/* Define to true if autoconf is used in this configuration */
+#undef XERCES_AUTOCONF
+
+/* Definition of Xerces grammar serialization level */
+#undef XERCES_GRAMMAR_SERIALIZATION_LEVEL
+
+/* Define if namespaces is supported by the compiler */
+#undef XERCES_HAS_CPP_NAMESPACE
+
+/* Define to have SSE2 instruction support detected at runtime using __cpuid
+   */
+#undef XERCES_HAVE_CPUID_INTRINSIC
+
+/* Define to 1 if cstdint is functional. */
+#undef XERCES_HAVE_CSTDINT
+
+/* Define to 1 if you have emmintrin.h */
+#undef XERCES_HAVE_EMMINTRIN_H
+
+/* Define to have SSE2 instruction support detected at runtime using
+   __get_cpuid */
+#undef XERCES_HAVE_GETCPUID
+
+/* Define to 1 if you have intrin.h */
+#undef XERCES_HAVE_INTRIN_H
+
+/* Define to 1 if we have inttypes.h */
+#undef XERCES_HAVE_INTTYPES_H
+
+/* Define to have SSE2 instruction used at runtime */
+#undef XERCES_HAVE_SSE2_INTRINSIC
+
+/* Define to 1 if we have stdint.h */
+#undef XERCES_HAVE_STDINT_H
+
+/* Define to 1 if we have sys/types.h */
+#undef XERCES_HAVE_SYS_TYPES_H
+
+/* Define if there is support for L"widestring" */
+#undef XERCES_LSTRSUPPORT
+
+/* Define if the isstream library can be included as <iostream> */
+#undef XERCES_NEW_IOSTREAMS
+
+/* Define to have XMemory.hpp avoid declaring a matching operator delete for
+   the placement operator new */
+#undef XERCES_NO_MATCHING_DELETE_OPERATOR
+
+/* Define if there is no native bool support in this environment */
+#undef XERCES_NO_NATIVE_BOOL
+
+/* Define to use backslash as an extra path delimiter character */
+#undef XERCES_PATH_DELIMITER_BACKSLASH
+
+/* Define as the platform's export attribute */
+#undef XERCES_PLATFORM_EXPORT
+
+/* Define as the platform's import attribute */
+#undef XERCES_PLATFORM_IMPORT
+
+/* An appropriate signed 16 bit integer type */
+#undef XERCES_S16BIT_INT
+
+/* An appropriate signed 32 bit integer type */
+#undef XERCES_S32BIT_INT
+
+/* An appropriate signed 64 bit integer type */
+#undef XERCES_S64BIT_INT
+
+/* Define as the appropriate SIZE_MAX macro */
+#undef XERCES_SIZE_MAX
+
+/* Define as the appropriate size_t type */
+#undef XERCES_SIZE_T
+
+/* Define as the appropriate SSIZE_MAX macro */
+#undef XERCES_SSIZE_MAX
+
+/* Define as the appropriate ssize_t type */
+#undef XERCES_SSIZE_T
+
+/* Define if the std namespace is supported */
+#undef XERCES_STD_NAMESPACE
+
+/* Define as the platform's template extern attribute */
+#undef XERCES_TEMPLATE_EXTERN
+
+/* An appropriate unsigned 16 bit integer type */
+#undef XERCES_U16BIT_INT
+
+/* An appropriate unsigned 32 bit integer type */
+#undef XERCES_U32BIT_INT
+
+/* An appropriate unsigned 64 bit integer type */
+#undef XERCES_U64BIT_INT
+
+/* Define to use the POSIX file mgr */
+#undef XERCES_USE_FILEMGR_POSIX
+
+/* Define to use the Windows file mgr */
+#undef XERCES_USE_FILEMGR_WINDOWS
+
+/* Define to use the iconv-based MsgLoader */
+#undef XERCES_USE_MSGLOADER_ICONV
+
+/* Define to use the ICU-based MsgLoader */
+#undef XERCES_USE_MSGLOADER_ICU
+
+/* Define to use the InMemory MsgLoader */
+#undef XERCES_USE_MSGLOADER_INMEMORY
+
+/* Define to use the NoThread mutex mgr */
+#undef XERCES_USE_MUTEXMGR_NOTHREAD
+
+/* Define to use the POSIX mutex mgr */
+#undef XERCES_USE_MUTEXMGR_POSIX
+
+/* Define to use the C++ standard mutex mgr (requires C++11) */
+#undef XERCES_USE_MUTEXMGR_STD
+
+/* Define to use the Windows mutex mgr */
+#undef XERCES_USE_MUTEXMGR_WINDOWS
+
+/* Define to use the Mac OS X CFURL NetAccessor */
+#undef XERCES_USE_NETACCESSOR_CFURL
+
+/* Define to use the CURL NetAccessor */
+#undef XERCES_USE_NETACCESSOR_CURL
+
+/* Define to use the Sockets-based NetAccessor */
+#undef XERCES_USE_NETACCESSOR_SOCKET
+
+/* Define to use the WinSock NetAccessor */
+#undef XERCES_USE_NETACCESSOR_WINSOCK
+
+/* Define to use the GNU iconv transcoder */
+#undef XERCES_USE_TRANSCODER_GNUICONV
+
+/* Define to use the iconv transcoder */
+#undef XERCES_USE_TRANSCODER_ICONV
+
+/* Define to use the ICU-based transcoder */
+#undef XERCES_USE_TRANSCODER_ICU
+
+/* Define to use the Mac OS UnicodeConverter-based transcoder */
+#undef XERCES_USE_TRANSCODER_MACOSUNICODECONVERTER
+
+/* Define to use the Windows transcoder */
+#undef XERCES_USE_TRANSCODER_WINDOWS
+
+/* Definition of Xerces major version */
+#undef XERCES_VERSION_MAJOR
+
+/* Definition of Xerces minor version */
+#undef XERCES_VERSION_MINOR
+
+/* Definition of Xerces patch version */
+#undef XERCES_VERSION_REVISION
+
+/* Define to the 16 bit type used to represent Xerces UTF-16 characters */
+#undef XERCES_XMLCH_T
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+
+/* Define to `long int' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to empty if the keyword `volatile' does not work. Warning: valid
+   code using `volatile' can become incorrect without. Disable with care. */
+#undef volatile
