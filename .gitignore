@@ -18,6 +18,7 @@
 *.AppImage
 .DS_Store
 distrib*
+src/build/*
 src/install/*
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
@@ -95,7 +96,7 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# QtCreator 4.8< compilation database 
+# QtCreator 4.8< compilation database
 compile_commands.json
 
 # QtCreator local machine specific files for imported projects
