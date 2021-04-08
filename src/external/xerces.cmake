@@ -21,6 +21,9 @@ elseif(ALLOW_BUNDLED_XERCES AND EXISTS "${XERCES_DIR}/CMakeLists.txt")
 	add_subdirectory(${XERCES_DIR})
 	add_library(external-xerces INTERFACE)
 	target_link_libraries(external-xerces INTERFACE xerces-c)
-	target_include_directories(external-xerces INTERFACE ${XERCES_DIR}/src)
+	target_include_directories(
+		external-xerces INTERFACE
+		${XERCES_DIR}/src
+		${CMAKE_CURRENT_BINARY_DIR}/xerces/src)
 
 endif()
