@@ -270,7 +270,6 @@ jobs:
         mv meshlab_linux_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}
         tar -cvzf MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}/
 
-
     #Download MacOS Package
     - name: Download MacOS DMG
       uses: actions/download-artifact@v2
