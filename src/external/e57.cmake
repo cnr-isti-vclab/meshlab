@@ -17,7 +17,11 @@ if (TARGET external-xerces)
 	elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
 
 		message(STATUS "- libE57Format - using bundled source")
+
+		set(MESSAGE_QUIET ON)
 		add_subdirectory(e57)
+		unset(MESSAGE_QUIET)
+
 		add_library(external-libE57Format INTERFACE)
 		target_link_libraries(external-libE57Format INTERFACE E57Format)
 

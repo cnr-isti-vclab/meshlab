@@ -18,7 +18,11 @@ if(ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
 elseif(ALLOW_BUNDLED_XERCES AND EXISTS "${XERCES_DIR}/CMakeLists.txt")
 
 	message(STATUS "- XercesC - using bundled source")
+
+	set(MESSAGE_QUIET ON)
 	add_subdirectory(${XERCES_DIR})
+	unset(MESSAGE_QUIET)
+
 	add_library(external-xerces INTERFACE)
 	target_link_libraries(external-xerces INTERFACE xerces-c)
 	target_include_directories(
