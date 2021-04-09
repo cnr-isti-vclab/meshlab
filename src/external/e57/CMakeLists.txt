@@ -129,26 +129,37 @@ endif()
 target_link_libraries( E57Format PRIVATE external-xerces )
 
 # Install
-install(
-    TARGETS
-        E57Format
-    EXPORT
-        E57Format-export
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
+if (WIN32)
+    install(
+        TARGETS
+            E57Format
+        EXPORT
+            E57Format-export
+#        ARCHIVE DESTINATION lib
+#        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
+else()
+    install(
+        TARGETS
+            E57Format
+        EXPORT
+            E57Format-export
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+    )
+endif()
 
 # CMake package files
-install(
-    EXPORT
-        E57Format-export
-    DESTINATION lib/cmake/E57Format
-)
+#install(
+#    EXPORT
+#        E57Format-export
+#    DESTINATION lib/cmake/E57Format
+#)
 
-install(
-    FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/e57format-config.cmake
-    DESTINATION
-        lib/cmake/E57Format
-)
+#install(
+#    FILES
+#        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/e57format-config.cmake
+#    DESTINATION
+#        lib/cmake/E57Format
+#)

@@ -1310,71 +1310,83 @@ else()
 endif()
 set_target_properties(xerces-c PROPERTIES FOLDER "Library")
 
-if(WIN32)
-  set(xerces_config_dir "cmake")
+#if(WIN32)
+#  set(xerces_config_dir "cmake")
+#else()
+#  set(xerces_config_dir "${CMAKE_INSTALL_LIBDIR}/cmake/XercesC")
+#endif()
+
+if (WIN32)
+    install(TARGETS xerces-c
+#      EXPORT XercesCConfigInternal
+      RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
+#      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      COMPONENT "runtime"
+#      INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    )
 else()
-  set(xerces_config_dir "${CMAKE_INSTALL_LIBDIR}/cmake/XercesC")
+    install(TARGETS xerces-c
+#      EXPORT XercesCConfigInternal
+#      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#      COMPONENT "runtime"
+#      INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    )
 endif()
+#install(EXPORT XercesCConfigInternal
+#        DESTINATION "${xerces_config_dir}"
+#        NAMESPACE "xerces_"
+#        COMPONENT "development")
 
-install(TARGETS xerces-c
-  EXPORT XercesCConfigInternal
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  COMPONENT "runtime"
-  INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(EXPORT XercesCConfigInternal
-        DESTINATION "${xerces_config_dir}"
-        NAMESPACE "xerces_"
-        COMPONENT "development")
+#include(CMakePackageConfigHelpers)
+#configure_package_config_file(
+#  "${CMAKE_CURRENT_SOURCE_DIR}/XercesCConfig.cmake.in"
+#  "${CMAKE_CURRENT_BINARY_DIR}/XercesCConfig.cmake"
+#  INSTALL_DESTINATION "${xerces_config_dir}")
+#write_basic_package_version_file(
+#  ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfigVersion.cmake
+#  VERSION "${PROJECT_VERSION}"
+#  COMPATIBILITY SameMajorVersion)
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfig.cmake
+#              ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfigVersion.cmake
+#              DESTINATION "${xerces_config_dir}")
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/XercesCConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/XercesCConfig.cmake"
-  INSTALL_DESTINATION "${xerces_config_dir}")
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfigVersion.cmake
-  VERSION "${PROJECT_VERSION}"
-  COMPATIBILITY SameMajorVersion)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/XercesCConfigVersion.cmake
-              DESTINATION "${xerces_config_dir}")
-
-foreach(hdr IN LISTS libxerces_c_HEADERS)
-  get_filename_component(hdrdir "${hdr}" DIRECTORY)
-  install(
-    FILES "${hdr}"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${hdrdir}"
-    COMPONENT "development")
-endforeach()
+#foreach(hdr IN LISTS libxerces_c_HEADERS)
+#  get_filename_component(hdrdir "${hdr}" DIRECTORY)
+#  install(
+#    FILES "${hdr}"
+#    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${hdrdir}"
+#    COMPONENT "development")
+#endforeach()
 
 # Source file grouping (for IDE project layout)
-set(source_files ${libxerces_c_SOURCES} ${libxerces_c_HEADERS})
-list(SORT source_files)
-unset(group_dir)
-unset(group_files)
-foreach(file IN LISTS source_files)
-  get_filename_component(dir "${file}" PATH)
-  if(group_dir AND NOT dir STREQUAL group_dir)
-    if(group_files)
-      source_group("${group_dir}" FILES ${group_files})
-    endif()
-    unset(group_files)
-  endif()
-  list(APPEND group_files "${file}")
-  set(group_dir "${dir}")
-endforeach()
-if(group_files)
-  source_group("${group_dir}" FILES ${group_files})
-endif()
-unset(group_dir)
-unset(group_files)
+#set(source_files ${libxerces_c_SOURCES} ${libxerces_c_HEADERS})
+#list(SORT source_files)
+#unset(group_dir)
+#unset(group_files)
+#foreach(file IN LISTS source_files)
+#  get_filename_component(dir "${file}" PATH)
+#  if(group_dir AND NOT dir STREQUAL group_dir)
+#    if(group_files)
+#      source_group("${group_dir}" FILES ${group_files})
+#    endif()
+#    unset(group_files)
+#  endif()
+#  list(APPEND group_files "${file}")
+#  set(group_dir "${dir}")
+#endforeach()
+#if(group_files)
+#  source_group("${group_dir}" FILES ${group_files})
+#endif()
+#unset(group_dir)
+#unset(group_files)
 
 # Make sure cmake-generated Xerces_autoconf_config.hpp and
 # XercesVersion.hpp end up in a proper place when installed.
-install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/Xerces_autoconf_config.hpp"
-        "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/XercesVersion.hpp"
-  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/xercesc/util"
-  COMPONENT "development")
+#install(
+#  FILES "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/Xerces_autoconf_config.hpp"
+#        "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/XercesVersion.hpp"
+#  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/xercesc/util"
+#  COMPONENT "development")
