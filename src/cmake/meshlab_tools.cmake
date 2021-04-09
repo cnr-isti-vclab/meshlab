@@ -24,3 +24,15 @@ function(add_meshlab_plugin target_name)
 		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
 		COMPONENT Plugins)
 endfunction()
+
+# make quiet some portions of cmake
+# usage
+#
+# set(MESSAGE_QUIET ON)
+# #everything here will be quiet
+# unset(MESSAGE_QUIET)
+function(message)
+	if (NOT MESSAGE_QUIET)
+		_message(${ARGN})
+	endif()
+endfunction()

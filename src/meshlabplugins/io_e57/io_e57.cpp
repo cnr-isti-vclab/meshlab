@@ -42,7 +42,7 @@
  * @param fileReader The file reader object used to scan the file
  */
 static void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
-                     const e57::Reader &fileReader, vcg::CallBackPos& positionCallback);
+                     const e57::Reader &fileReader, vcg::CallBackPos* positionCallback);
 
 static void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
 
@@ -81,7 +81,8 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshM
     // check if the file is opened
     E57_WRAPPER(fileReader.IsOpen(), "Error while opening E57 file!");
 
-    updateProgress(*cb, 0, START_LOADING);
+    if (cb)
+        updateProgress(*cb, 0, START_LOADING);
 
     // read E57 root to explore the tree
     E57_WRAPPER(fileReader.GetE57Root(e57FileInfo), "Error while reading E57 root info!");
@@ -91,9 +92,10 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, MeshM
     E57_WRAPPER(fileReader.GetData3DSizes(scanIndex, rows, cols, numberPointSize, numberGroupSize, numberCountSize, columnIndex),
                 "Error while reading scan information!");
 
-    loadMesh(m, mask, scanIndex, ((rows > 0) ? rows : 1024), numberPointSize, fileReader, *cb);
+    loadMesh(m, mask, scanIndex, ((rows > 0) ? rows : 1024), numberPointSize, fileReader, cb);
 
-    updateProgress(*cb, 100, DONE_LOADING);
+    if (cb)
+        updateProgress(*cb, 100, DONE_LOADING);
 
     fileReader.Close();
 }
@@ -138,7 +140,7 @@ void E57IOPlugin::exportMaskCapability(const QString & /*format*/, int &capabili
 }
 
 void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
-              const e57::Reader &fileReader, vcg::CallBackPos& positionCallback) {
+              const e57::Reader &fileReader, vcg::CallBackPos* positionCallback) {
 
     e57::Data3DPointsData data3DPointsData{};
     // allocate the buffers to store points position
@@ -173,7 +175,8 @@ void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int
 
                 currentLoadingPercentage += loadingScale;
 
-                updateProgress(positionCallback, currentLoadingPercentage, LOADING_POINTS);
+                if (positionCallback)
+                    updateProgress(*positionCallback, currentLoadingPercentage, LOADING_POINTS);
             }
         }
     }
@@ -195,9 +198,7 @@ void loadMesh(MeshModel &m, const int &mask, int scanIndex, size_t buffSize, int
 
 void updateProgress(vcg::CallBackPos& positionCallback, int percentage, const char* description) noexcept {
 
-    if (positionCallback != nullptr) {
-        positionCallback(percentage, description);
-    }
+    positionCallback(percentage, description);
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(E57IOPlugin)

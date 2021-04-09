@@ -1,0 +1,721 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Programming Guide">
+    <anchor name="Macro"/>
+    <s2 title="Version Macro">
+        <p>&XercesCName; defines a numeric preprocessor macro, _XERCES_VERSION, for users to
+           introduce into their code to perform conditional compilation where the
+           version of &XercesCName; is detected in order to enable or disable version
+          specific capabilities. For example,
+         </p>
+<source>
+#if _XERCES_VERSION >= 30102
+  // Code specific to Xerces-C++ version 3.1.2 and later.
+#else
+  // Old code.
+#endif
+</source>
+        <p>The minor and revision (patch level) numbers have two digits of resolution
+           which means that '1' becomes '01' and '2' becomes '02' in this example.
+        </p>
+        <p>There are also other string macros or constants to represent the Xerces-C++ version.
+           Please refer to the <code>xercesc/util/XercesVersion.hpp</code> header for details.
+        </p>
+    </s2>
+
+
+    <anchor name="Schema"/>
+    <s2 title="Schema Support">
+        <p>&XercesCName; contains an implementation of the W3C XML Schema
+           Language.  See the <jump href="schema-&XercesC3Series;.html">XML Schema Support</jump> page for details.
+         </p>
+    </s2>
+
+    <anchor name="Progressive"/>
+    <s2 title="Progressive Parsing">
+
+        <p>In addition to using the <code>parse()</code> method to parse an XML File.
+        You can use the other two parsing methods, <code>parseFirst()</code> and <code>parseNext()</code>
+        to do the so called progressive parsing. This way you don't
+        have to depend on throwing an exception to terminate the
+        parsing operation.
+         </p>
+         <p>
+        Calling <code>parseFirst()</code> will cause the DTD (both internal and
+        external subsets), and any pre-content, i.e. everything up to
+        but not including the root element, to be parsed. Subsequent calls to
+        <code>parseNext()</code> will cause one more pieces of markup to be parsed,
+        and propagated from the core scanning code to the parser (and
+        hence either on to you if using SAX/SAX2 or into the DOM tree if
+        using DOM).
+         </p>
+         <p>
+        You can quit the parse any time by just not
+        calling <code>parseNext()</code> anymore and breaking out of the loop. When
+        you call <code>parseNext()</code> and the end of the root element is the
+        next piece of markup, the parser will continue on to the end
+        of the file and return false, to let you know that the parse
+        is done. So a typical progressive parse loop will look like
+        this:</p>
+
+<source>// Create a progressive scan token
+XMLPScanToken token;
+
+if (!parser.parseFirst(xmlFile, token))
+{
+  cerr &lt;&lt; "scanFirst() failed\n" &lt;&lt; endl;
+  return 1;
+}
+
+//
+// We started ok, so lets call scanNext()
+// until we find what we want or hit the end.
+//
+bool gotMore = true;
+while (gotMore &amp;&amp; !handler.getDone())
+  gotMore = parser.parseNext(token);</source>
+
+        <p>In this case, our event handler object (named 'handler')
+        is watching for some criteria and will
+        return a status from its <code>getDone()</code> method. Since
+        the handler
+        sees the SAX events coming out of the SAXParser, it can tell
+        when it finds what it wants. So we loop until we get no more
+        data or our handler indicates that it saw what it wanted to
+        see.</p>
+
+        <p>When doing non-progressive parses, the parser can easily
+        know when the parse is complete and insure that any used
+        resources are cleaned up. Even in the case of a fatal parsing
+        error, it can clean up all per-parse resources. However, when
+        progressive parsing is done, the client code doing the parse
+        loop might choose to stop the parse before the end of the
+        primary file is reached. In such cases, the parser will not
+        know that the parse has ended, so any resources will not be
+        reclaimed until the parser is destroyed or another parse is started.</p>
+
+        <p>This might not seem like such a bad thing; however, in this case,
+        the files and sockets which were opened in order to parse the
+        referenced XML entities will remain open. This could cause
+        serious problems. Therefore, you should destroy the parser instance
+        in such cases, or restart another parse immediately. In a future
+        release, a reset method will be provided to do this more cleanly.</p>
+
+        <p>Also note that you must create a scan token and pass it
+        back in on each call. This insures that things don't get done
+        out of sequence. When you call <code>parseFirst()</code> or
+        <code>parse()</code>, any
+        previous scan tokens are invalidated and will cause an error
+        if used again. This prevents incorrect mixed use of the two
+        different parsing schemes or incorrect calls to
+        <code>parseNext()</code>.</p>
+
+    </s2>
+
+    <anchor name="GrammarCache"/>
+    <s2 title="Pre-parsing Grammar and Grammar Caching">
+        <p>&XercesCName; provides a function to pre-parse the grammar so that users
+           can check for any syntax error before using the grammar.  Users can also optionally
+           cache these pre-parsed grammars for later use during actual parsing.
+        </p>
+        <p>Here is an example:</p>
+<source>
+XercesDOMParser parser;
+
+// Enable schema processing.
+parser.setDoSchema(true);
+parser.setDONamespaces(true);
+
+// Let's preparse the schema grammar (.xsd) and cache it.
+Grammar* grammar = parser.loadGrammar(xmlFile, Grammar::SchemaGrammarType, true);
+</source>
+        <p>Besides caching pre-parsed schema grammars, users can also cache any
+           grammars encountered during an xml document parse.
+        </p>
+        <p>Here is an example:</p>
+<source>
+SAXParser parser;
+
+// Enable grammar caching by setting cacheGrammarFromParse to true.
+// The parser will cache any encountered grammars if it does not
+// exist in the pool.
+// If the grammar is DTD, no internal subset is allowed.
+parser.cacheGrammarFromParse(true);
+
+// Let's parse our xml file (DTD grammar)
+parser.parse(xmlFile);
+
+// We can get the grammar where the root element was declared
+// by calling the parser's method getRootGrammar;
+// Note: The parser owns the grammar, and the user should not delete it.
+Grammar* grammar = parser.getRootGrammar();
+</source>
+        <p>We can use any previously cached grammars when parsing new xml
+        documents. Here are some examples on how to use those cached grammars:
+        </p>
+<source>
+/**
+  * Caching and reusing XML Schema (.xsd) grammar
+  * Parse an XML document and cache its grammar set. Then,  use the cached
+  * grammar set in subsequent parses.
+  */
+
+XercesDOMParser parser;
+
+// Enable schema processing
+parser.setDoSchema(true);
+parser.setDoNamespaces(true);
+
+// Enable grammar caching
+parser.cacheGrammarFromParse(true);
+
+// Let's parse the XML document. The parser will cache any grammars encountered.
+parser.parse(xmlFile);
+
+// No need to enable re-use by setting useCachedGrammarInParse to true. It is
+// automatically enabled with grammar caching.
+for (int i=0; i&lt; 3; i++)
+    parser.parse(xmlFile);
+
+// This will flush the grammar pool
+parser.resetCachedGrammarPool();
+</source>
+
+<source>
+/**
+  * Caching and reusing DTD grammar
+  * Preparse a grammar and cache it in the pool. Then, we use the cached grammar
+  * when parsing XML documents.
+  */
+
+SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+
+// Load grammar and cache it
+parser->loadGrammar(dtdFile, Grammar::DTDGrammarType, true);
+
+// enable grammar reuse
+parser->setFeature(XMLUni::fgXercesUseCachedGrammarInParse, true);
+
+// Parse xml files
+parser->parse(xmlFile1);
+parser->parse(xmlFile2);
+</source>
+        <p>There are some limitations about caching and using cached grammars:</p>
+           <ul>
+              <li>When caching/reusing DTD grammars, no internal subset is allowed.</li>
+              <li>When preparsing grammars with caching option enabled, if a grammar, in the
+              result set, already exists in the pool (same namespace for schema or same system
+              id for DTD), the entire set will not be cached. This behavior is the default but can
+              be overridden for XML Schema caching. See the SAX/SAX2/DOM parser features for details.</li>
+              <li>When parsing an XML document with the grammar caching option enabled, the
+              reuse option is also automatically enabled. We will only parse a grammar if it
+              does not exist in the pool.</li>
+           </ul>
+    </s2>
+
+    <anchor name="LoadableMessageText"/>
+    <s2 title="Loadable Message Text">
+
+        <p>The &XercesCName; supports loadable message text.   Although
+        the current distribution only supports English, it is capable of
+        supporting other
+        languages. Anyone interested in contributing any translations
+        should contact us. This would be an extremely useful
+        service.</p>
+
+        <p>In order to support the local message loading services, all the error messages
+        are captured in an XML file in the src/xercesc/NLS/ directory.
+        There is a simple program, in the tools/NLS/Xlat/ directory,
+        which can translate that text in various formats. It currently
+        supports a simple 'in memory' format (i.e. an array of
+        strings), the Win32 resource format, and the message catalog
+        format.  The 'in memory' format is intended for very simple
+        installations or for use when porting to a new platform (since
+        you can use it until you can get your own local message
+        loading support done.)</p>
+
+        <p>In the src/xercesc/util/ directory, there is an XMLMsgLoader
+        class.  This is an abstraction from which any number of
+        message loading services can be derived. Your platform driver
+        file can create whichever type of message loader it wants to
+        use on that platform.  &XercesCName; currently has versions for the in
+        memory format, the Win32 resource format, the message
+        catalog format, and ICU message loader.
+        Some of the platforms can support multiple message
+        loaders, in which case a #define token is used to control
+        which one is used. You can set this in your build projects to
+        control the message loader type used.</p>
+
+    </s2>
+
+    <anchor name="PluggableTranscoders"/>
+    <s2 title="Pluggable Transcoders">
+
+        <p>&XercesCName; also supports pluggable transcoding services. The
+        XMLTransService class is an abstract API that can be derived
+        from, to support any desired transcoding
+        service. XMLTranscoder is the abstract API for a particular
+        instance of a transcoder for a particular encoding. The
+        platform driver file decides what specific type of transcoder
+        to use, which allows each platform to use its native
+        transcoding services, or the ICU service if desired.</p>
+
+        <p>Implementations are provided for Win32 native services, ICU
+        services, and the <ref>iconv</ref> services available on many
+        Unix platforms. The Win32 version only provides native code
+        page services, so it can only handle XML code in the intrinsic
+        encodings ASCII, UTF-8, UTF-16 (Big/Small Endian), UCS4
+        (Big/Small Endian), EBCDIC code pages IBM037, IBM1047 and
+        IBM1140 encodings, ISO-8859-1 (aka Latin1) and Windows-1252. The ICU version
+        provides all of the encodings that ICU supports. The
+        <ref>iconv</ref> version will support the encodings supported
+        by the local system. You can use transcoders we provide or
+        create your own if you feel ours are insufficient in some way,
+        or if your platform requires an implementation that &XercesCName; does not
+        provide.</p>
+
+    </s2>
+
+    <anchor name="PortingGuidelines"/>
+    <s2 title="Porting Guidelines">
+
+      <p>All platform dependent code in &XercesCName; has been
+      isolated to a couple of files, which should ease the porting
+      effort. The <code>src/xercesc/util</code> directory
+      contains all such files. In particular:</p>
+
+      <ul>
+        <li>The <code>src/xercesc/util/FileManagers</code> directory
+            contains implementations of file managers for various
+            platforms.</li>
+
+        <li>The <code>src/xercesc/util/MutexManagers</code> directory
+            contains implementations of mutex managers for various
+            platforms.</li>
+
+        <li>The <code>src/xercesc/util/Xerces_autoconf_const*</code> files
+            provide base definitions for various platforms.</li>
+      </ul>
+
+      <p>Other concerns are:</p>
+
+      <ul>
+        <li>Does ICU compile on your platform? If not, then you'll need to
+            create a transcoder implementation that uses your local transcoding
+            services. The iconv transcoder should work for you, though perhaps
+            with some modifications.</li>
+        <li>What message loader will you use? To get started, you can use the
+            "in memory" one, which is very simple and easy. Then, once you get
+            going, you may want to adapt the message catalog message loader, or
+            write one of your own that uses local services.</li>
+        <li>What should I define XMLCh to be? Please refer to <jump
+            href="build-misc-&XercesC3Series;.html#XMLChInfo">What should I define XMLCh to be?</jump> for
+            further details.</li>
+      </ul>
+
+       <p>Finally, you need to decide about how to define XMLCh. Generally,
+          XMLCh should be defined to be a type suitable for holding a
+          utf-16 encoded (16 bit) value, usually an <code>unsigned short</code>. </p>
+
+        <p>All XML data is handled within &XercesCName; as strings of
+           XMLCh characters.  Regardless of the size of the
+           type chosen, the data stored in variables of type XMLCh
+           will always be utf-16 encoded values. </p>
+
+
+
+        <p>Unlike XMLCh, the  encoding
+               of wchar_t is platform dependent.  Sometimes it is utf-16
+               (AIX, Windows), sometimes ucs-4 (Solaris,
+               Linux), sometimes it is not based on Unicode at all
+               (HP/UX, AS/400, system 390).  </p>
+
+        <p>Some earlier releases of &XercesCName; defined XMLCh to be the
+           same type as wchar_t on most platforms, with the goal of making
+           it possible to pass XMLCh strings to library or system functions
+           that were expecting wchar_t parameters.  This approach has
+           been abandoned because of</p>
+
+           <ul>
+              <li>
+                 Portability problems with any code that assumes that
+                 the types of XMLCh and wchar_t are compatible
+              </li>
+
+              <li>Excessive memory usage, especially in the DOM, on
+                  platforms with 32 bit wchar_t.
+              </li>
+
+              <li>utf-16 encoded XMLCh is not always compatible with
+                  ucs-4 encoded wchar_t on Solaris and Linux.  The
+                  problem occurs with Unicode characters with values
+                  greater than 64k; in ucs-4 the value is stored as
+                  a single 32 bit quantity.  With utf-16, the value
+                  will be stored as a "surrogate pair" of two 16 bit
+                  values.  Even with XMLCh equated to wchar_t, xerces will
+                  still create the utf-16 encoded surrogate pairs, which
+                  are illegal in ucs-4 encoded wchar_t strings.
+               </li>
+           </ul>
+
+
+
+    </s2>
+
+    <anchor name="CPPNamespace"/>
+    <s2 title="Using C++ Namespace">
+
+    <p>&XercesCName; makes use of C++ namespace to make sure its
+       definitions do not conflict with other libraries and
+       applications. As a result applications must
+       namespace-qualify all &XercesCName; classes, data and
+       variables using the <code>xercesc</code> name. Alternatively,
+       applications can use <code>using xercesc::&lt;Name>;</code>
+       declarations
+       to make individual &XercesCName; names visible in the
+       current scope
+       or <code>using namespace xercesc;</code>
+       definition to make all &XercesCName; names visible in the
+       current scope.</p>
+
+    <p>While the above information should be sufficient for the majority
+       of applications, for cases where several versions of the &XercesCName;
+       library must be used in the same application, namespace versioning is
+       provided. The following convenience macros can be used to access the
+       &XercesCName; namespace names with versions embedded
+       (see <code>src/xercesc/util/XercesDefs.hpp</code>):</p>
+
+<source>
+    #define XERCES_CPP_NAMESPACE_BEGIN    namespace &XercesC3NSVersion; {
+    #define XERCES_CPP_NAMESPACE_END    }
+    #define XERCES_CPP_NAMESPACE_USE    using namespace &XercesC3NSVersion;;
+    #define XERCES_CPP_NAMESPACE_QUALIFIER    &XercesC3NSVersion;::
+
+    namespace &XercesC3NSVersion; { }
+    namespace &XercesC3Namespace; = &XercesC3NSVersion;;
+</source>
+    </s2>
+
+
+    <anchor name="SpecifyLocaleForMessageLoader"/>
+    <s2 title="Specify Locale for Message Loader">
+
+        <p>&XercesCName; provides mechanisms for Native Language Support (NLS).
+        Even though
+        the current distribution has only English message file, it is capable
+        of supporting other languages once the translated version of the
+        target language is available.</p>
+
+        <p>An application can specify the locale for the message loader in their
+        very first invocation to XMLPlatformUtils::Initialize() by supplying
+        a parameter for the target locale intended. The default locale is "en_US".
+        </p>
+<source>
+    // Initialize the parser system
+    try
+    {
+         XMLPlatformUtils::Initialize("fr_FR");
+    }
+    catch ()
+    {
+    }
+</source>
+    </s2>
+
+
+    <anchor name="SpecifyLocationForMessageLoader"/>
+    <s2 title="Specify Location for Message Loader">
+
+        <p>&XercesCName; searches for message files at the location
+           specified in the <code>XERCESC_NLS_HOME</code> environment
+           variable and, if that is not set, at the default
+           message directory, <code>$XERCESCROOT/msg</code>.
+        </p>
+
+        <p>Application can specify an alternative location for the message files in their
+        very first invocation to XMLPlatformUtils::Initialize() by supplying
+        a parameter for the alternative location.
+        </p>
+
+<source>
+    // Initialize the parser system
+    try
+    {
+         XMLPlatformUtils::Initialize("en_US", "/usr/nls");
+    }
+    catch ()
+    {
+    }
+</source>
+    </s2>
+
+    <anchor name="PluggablePanicHandler"/>
+    <s2 title="Pluggable Panic Handler">
+
+        <p>&XercesCName; reports panic conditions encountered to the panic
+           handler installed. The panic handler can take whatever action
+           appropriate to handle the panic condition.
+        </p>
+        <p>&XercesCName; allows application to provide a customized panic handler
+           (class implementing the interface PanicHandler), in its very first invocation of
+           XMLPlatformUtils::Initialize().
+        </p>
+        <p>In the absence of an application-specific panic handler, &XercesCName; default
+           panic handler is installed and used, which aborts program whenever a panic
+           condition is encountered.
+        </p>
+
+<source>
+    // Initialize the parser system
+    try
+    {
+         PanicHandler* ph = new MyPanicHandler();
+
+         XMLPlatformUtils::Initialize("en_US",
+                                      "/usr/nls",
+                                      ph);
+    }
+    catch ()
+    {
+    }
+</source>
+    </s2>
+
+    <anchor name="PluggableMemoryManager"/>
+    <s2 title="Pluggable Memory Manager">
+        <p>Certain applications wish to maintain precise control over
+        memory allocation.  This enables them to recover more easily
+        from crashes of individual components, as well as to allocate
+        memory more efficiently than a general-purpose OS-level
+        procedure with no knowledge of the characteristics of the
+        program making the requests for memory.  In &XercesCName; this
+        is supported via the Pluggable Memory Handler.
+        </p>
+
+        <p>Users who wish to implement their own MemoryManager,
+        an interface found in <code>xercesc/framework/MemoryManager.hpp</code>,
+        need to implement only two methods:</p>
+<source>
+// This method allocates requested memory.
+// the parameter is the requested memory size
+// A pointer to the allocated memory is returned.
+virtual void* allocate(XMLSize_t size) = 0;
+
+// This method deallocates memory
+// The parameter is a pointer to the allocated memory to be deleted
+virtual void deallocate(void* p) = 0;
+</source>
+        <p>To maximize the amount of flexibility that applications
+        have in terms of controlling memory allocation, a
+        MemoryManager instance may be set as part of the call to
+        XMLPlatformUtils::Initialize() to allow for static
+        initialization to be done with the given MemoryHandler; a
+        (possibly different) MemoryManager may be passed in to the
+        constructors of all Xerces parser objects as well, and all
+        dynamic allocations within the parsers will make use of this
+        object.  Assuming that MyMemoryHandler is a class that
+        implements the MemoryManager interface, here is a bit of
+        pseudocode which illustrates these ideas:
+        </p>
+<source>
+MyMemoryHandler *mm_for_statics = new MyMemoryHandler();
+MyMemoryHandler *mm_for_particular_parser = new MyMemoryManager();
+
+// initialize the parser information; try/catch
+// removed for brevity
+XMLPlatformUtils::Initialize(XMLUni::fgXercescDefaultLocale, 0,0,
+        mm_for_statics);
+
+// create a parser object
+XercesDOMParser *parser = new
+        XercesDomParser(mm_for_particular_parser);
+
+// ...
+delete parser;
+XMLPlatformUtils::Terminate();
+</source>
+      <p>
+        If a user provides a MemoryManager object to the parser, then
+        the user owns that object.  It is also important to note that
+        &XercesCName; default implementation simply uses the global
+        new and delete operators.
+      </p>
+    </s2>
+
+    <anchor name="SecurityManager"/>
+    <s2 title="Managing Security Vulnerabilities">
+      <p>
+        The purpose of the SecurityManager class is to permit applications a
+        means to have the parser reject documents whose processing would
+        otherwise consume large amounts of system resources.  Malicious
+        use of such documents could be used to launch a denial-of-service
+        attack against a system running the parser.  Initially, the
+        SecurityManager only knows about attacks that can result from
+        exponential entity expansion; this is the only known attack that
+        involves processing a single XML document.  Other, similar attacks
+        can be launched if arbitrary schemas may be parsed; there already
+        exist means (via use of the EntityResolver interface) by which
+        applications can deny processing of untrusted schemas.  In future,
+        the SecurityManager will be expanded to take these other exploits
+        into account.
+      </p>
+      <p>
+        The SecurityManager class is very simple:  It will contain
+        getters and setters corresponding to each known variety of
+        exploit.  These will reflect limits that the application may
+        impose on the parser with respect to the processing of various
+        XML constructs.  When an instance of SecurityManager is
+        instantiated, default values for these limits will be provided
+        that should suit most applications.
+      </p>
+      <p>
+        By default, &XercesCName; is a wholly conformant XML parser; that
+        is, no security-related considerations will be observed by
+        default. An application must provide an instance of the
+        SecurityManager class to a parser in order to make that
+        parser behave in a security-conscious manner.  For example:
+      </p>
+<source>
+SAXParser *myParser = new SAXParser();
+SecurityManager *myManager = new SecurityManager();
+myManager->setEntityExpansionLimit(100000); // larger than default
+myParser->setSecurityManager(myManager);
+// ... use the parser
+</source>
+      <p>
+        Note that SecurityManager instances may be set on all kinds of
+        &XercesCName; parsers; please see the documentation for the
+        individual parsers for details.
+      </p>
+      <p>
+        Note also that the application always owns the SecurityManager
+        instance.  The default SecurityManager that &XercesCName; provides
+        is not thread-safe; although it only uses primitive operations at
+        the moment, users may need to extend the class with a
+        thread-safe implementation on some platforms.
+      </p>
+    </s2>
+<anchor name="UseSpecificScanner"/>
+    <s2 title="Use Specific Scanner">
+
+        <p>For performance and modularity &XercesCName; provides a mechanism
+        for specifying the scanner to be used when scanning an XML document.
+        Such mechanism will enable the creation of special purpose scanners
+        that can be easily plugged in.</p>
+
+        <p>&XercesCName; supports the following scanners:</p>
+
+        <s3 title="WFXMLScanner">
+
+            <p>
+            The WFXMLScanner is a non-validating scanner which performs well-formedness check only.
+            It does not do any DTD/XMLSchema processing. If the XML document contains a DOCTYPE, it
+            will be silently ignored (i.e. no warning message is issued). Similarly, any schema
+            specific attributes (e.g. schemaLocation), will be treated as normal element attributes.
+            Setting grammar specific features/properties will have no effect on its behavior
+            (e.g. setLoadExternalDTD(true) is ignored).
+            </p>
+
+<source>
+// Create a DOM parser
+XercesDOMParser parser;
+
+// Specify scanner name
+parser.useScanner(XMLUni::fgWFXMLScanner);
+
+// Specify other parser features, e.g.
+parser.setDoNamespaces(true);
+</source>
+
+
+        </s3>
+
+        <s3 title="DGXMLScanner">
+
+            <p>
+            The DGXMLScanner handles XML documents with DOCTYPE information. It does not do any
+            XMLSchema processing, which means that any schema specific attributes (e.g. schemaLocation),
+            will be treated as normal element attributes. Setting schema grammar specific features/properties
+            will have no effect on its behavior (e.g. setDoSchema(true) and setLoadSchema(true) are ignored).
+            </p>
+
+<source>
+// Create a SAX parser
+SAXParser parser;
+
+// Specify scanner name
+parser.useScanner(XMLUni::fgDGXMLScanner);
+
+// Specify other parser features, e.g.
+parser.setLoadExternalDTD(true);
+</source>
+
+        </s3>
+
+        <s3 title="SGXMLScanner">
+
+            <p>
+            The SGXMLScanner handles XML documents with XML schema grammar information.
+            If the XML document contains a DOCTYPE, it will be ignored. Namespace and
+            schema processing features are on by default, and setting them to off has
+            not effect.
+            </p>
+
+<source>
+// Create a SAX2 parser
+SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+
+// Specify scanner name
+parser->setProperty(XMLUni::fgXercesScannerName, (void *)XMLUni::fgSGXMLScanner);
+
+// Specify other parser features, e.g.
+parser->setFeature(XMLUni::fgXercesSchemaFullChecking, false);
+</source>
+
+        </s3>
+
+        <s3 title="IGXMLScanner">
+
+            <p>
+            The IGXMLScanner is an integrated scanner and handles XML documents with DTD and/or
+            XML schema grammar. This is the default scanner used by the various parsers if no
+            scanner is specified.
+            </p>
+
+<source>
+// Create a DOMLSParser parser
+DOMLSParser *parser = ((DOMImplementationLS*)impl)->createLSParser(
+  DOMImplementationLS::MODE_SYNCHRONOUS, 0);
+
+// Specify scanner name - This is optional as IGXMLScanner is the default
+parser->getDomConfig()->setParameter(
+  XMLUni::fgXercesScannerName, (void *)XMLUni::fgIGXMLScanner);
+
+// Specify other parser features, e.g.
+parser->getDomConfig()->setParameter(XMLUni::fgDOMNamespaces, doNamespaces);
+parser->getDomConfig()->setParameter(XMLUni::fgXercesSchema, doSchema);
+</source>
+
+        </s3>
+
+    </s2>
+
+</s1>

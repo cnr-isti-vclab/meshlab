@@ -1,0 +1,22 @@
+<!NOTATION png SYSTEM 'http://xml.apache.org' >
+<!ENTITY APACHE SYSTEM 'xml.apache.org' NDATA png>
+
+<!ELEMENT attributeTest EMPTY >
+
+<!ATTLIST attributeTest
+   xmlns:foo CDATA      #REQUIRED
+   cdata     CDATA      #REQUIRED
+   enum      (a | b)    #REQUIRED
+   id        ID         #REQUIRED 
+   idRef     IDREF      #REQUIRED
+   idRefs    IDREFS     #REQUIRED
+   nmToken   NMTOKEN    #REQUIRED
+   nmTokenDefault   NMTOKEN    "lala"
+   nmTokenDefault2   NMTOKEN    "lala2"
+   nmTokens  NMTOKENS   #REQUIRED
+   entity    ENTITY     #REQUIRED
+   entities  ENTITIES   #REQUIRED
+   notation  NOTATION   (png) #REQUIRED
+>
+
+

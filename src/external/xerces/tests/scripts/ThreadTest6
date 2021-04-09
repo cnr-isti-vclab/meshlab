@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+. ../scripts/run-test
+
+run_test ThreadTest6 pass "" tests/ThreadTest -parser=sax2 -v=always -quiet -threads 10 -time 20 personal.xml

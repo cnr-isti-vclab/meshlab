@@ -23,10 +23,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>&lt;p&gt;Copyright(C) 2005-2020&lt;/p&gt;
-&lt;p&gt;Paolo Cignoni&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Visual Computing Lab&lt;br /&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;http://vcg.isti.cnr.it&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;ISTI - CNR&lt;br /&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;http://www.isti.cnr.it&lt;/a&gt;&lt;/p&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright(C) 2005-2021&lt;/p&gt;&lt;p&gt;Paolo Cignoni&lt;br/&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Visual Computing Lab&lt;br/&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;http://vcg.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;ISTI - CNR&lt;br/&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;http://www.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>

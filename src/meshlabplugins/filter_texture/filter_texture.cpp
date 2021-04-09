@@ -88,7 +88,7 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 											Experimental Mathematics, Vol 2 (1), 1993<br> .");
 	case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 	case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
-	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
+	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
 	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else a dummy texture will be created and saved in the same directory of the mesh if exists, or in the default system picture directory.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
@@ -721,15 +721,18 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		else
 		{
 			CheckError(textName.length() == 0, "Texture file not specified");
-			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+			//CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 		}
 		
 		if (m.cm.textures.empty())
 		{
 			// Creates path to texture file
-			QString fileName(m.fullName());
-			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
-			
+			QString fileName = textName;
+			if (std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) == -1){
+				fileName = m.fullName();
+				fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
+			}
+
 			QFile textFile(fileName);
 			if (!textFile.exists())
 			{
@@ -745,7 +748,14 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			
 			//Assign texture
 			m.cm.textures.clear();
-			m.cm.textures.push_back(textName.toStdString());
+			m.cm.textures.push_back(fileName.toStdString());
+			for(auto fi=m.cm.face.begin();fi!=m.cm.face.end();++fi){
+				if(!(*fi).IsD()) if((*fi).WT(0).N()==-1) {
+					(*fi).WT(0).N() = 0;
+					(*fi).WT(1).N() = 0;
+					(*fi).WT(2).N() = 0;
+				}
+			}
 		}
 		
 		QString filePath(m.fullName());

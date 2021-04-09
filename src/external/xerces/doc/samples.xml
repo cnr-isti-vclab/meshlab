@@ -1,0 +1,96 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="&XercesCName; Samples">
+
+    <s2 title="Introduction">
+    <p>&XercesCName; comes with sample applications that
+    demonstrate salient features of the parser. They are simple
+    applications written on top of the SAX and DOM APIs provided by
+    the parser. Sample XML data files are provided in the
+    <code>samples/data</code> directory.</p>
+    </s2>
+
+    <s2 title="Running the Samples">
+
+    <p>The sample applications are dependent on the &XercesCName; shared library
+       (and could also depend on the ICU library if you built &XercesCName; with ICU).
+       Therefore, on Windows platforms you must make sure that your <code>PATH</code>
+       environment variable is set properly to pick up these shared libraries at
+       runtime.</p>
+
+    <p>On UNIX platforms you must ensure that <code>LD_LIBRARY_PATH</code>
+       environment variable is set properly to pick up the shared libraries at
+       runtime. (UNIX gurus will understand here that <code>LD_LIBRARY_PATH</code>
+       actually translates to <code>LD_LIBRARY_PATH</code> on Solaris and Linux,
+       <code>SHLIB_PATH</code> on HP-UX, <code>DYLD_LIBRARY_PATH</code> on Mac OS X,
+       and <code>LIBPATH</code> on AIX).</p>
+
+    <p>On both Windows and UNIX platforms, if the parser is built with the ICU
+       message loader or message catalog loader, then you may need to set another
+       environment variable, <code>XERCESC_NLS_HOME</code>, to point to the
+       &XercesC3SrcInstallDir;/msg directory, which is where the message
+       files reside.
+    </p>
+
+   <p>Once you have set up the environment variables, you can run the
+      samples by opening a command window (or your shell prompt for
+      UNIX environments).</p>
+
+   <s3 title="&XercesCName; Samples">
+			<ul>
+				<li><link idref="saxcount-&XercesC3Series;">SAXCount</link>
+					<br/>SAXCount counts the elements, attributes, spaces and
+					characters in an XML file.</li>
+				<li><link idref="saxprint-&XercesC3Series;">SAXPrint</link>
+					<br/>SAXPrint parses an XML file and prints it out.</li>
+				<li><link idref="sax2count-&XercesC3Series;">SAX2Count</link>
+					<br/>SAX2Count counts the elements, attributes, spaces and
+					characters in an XML file.</li>
+				<li><link idref="sax2print-&XercesC3Series;">SAX2Print</link>
+					<br/>SAX2Print parses an XML file and prints it out.</li>
+				<li><link idref="domcount-&XercesC3Series;">DOMCount</link>
+					<br/>DOMCount counts the elements in a XML file.</li>
+				<li><link idref="domprint-&XercesC3Series;">DOMPrint</link>
+					<br/>DOMPrint parses an XML file and prints it out.</li>
+				<li><link idref="createdoc-&XercesC3Series;">CreateDOMDocument</link>
+					<br/>CreateDOMDocument creates a DOM tree in memory from scratch.</li>
+				<li><link idref="memparse-&XercesC3Series;">MemParse</link>
+					<br/>MemParse parses XML in a memory buffer, printing the number of elements and attributes.</li>
+				<li><link idref="redirect-&XercesC3Series;">Redirect</link>
+					<br/>Redirect redirects the input stream for external entities.</li>
+				<li><link idref="pparse-&XercesC3Series;">PParse</link>
+					<br/>PParse demonstrates progressive parsing.</li>
+				<li><link idref="stdinparse-&XercesC3Series;">StdInParse</link>
+					<br/>StdInParse demonstrates streaming XML data from standard input.</li>
+				<li><link idref="enumval-&XercesC3Series;">EnumVal</link>
+					<br/>EnumVal shows how to enumerate the markup declarations in a DTD Grammar.</li>
+				<li><link idref="senumval-&XercesC3Series;">SEnumVal</link>
+					<br/>SEnumVal shows how to enumerate the markup declarations in a Schema Grammar.</li>
+				<li><link idref="psviwriter-&XercesC3Series;">PSVIWriter</link>
+					<br/>PSVIWriter exposes the underlying PSVI of the parsed XML file.</li>
+				<li><link idref="scmprint-&XercesC3Series;">SCMPrint</link>
+					<br/>SCMPrint parses an XSD file and prints information about the Schema Component Model.</li>
+				<li><link idref="xinclude-&XercesC3Series;">XInclude</link>
+					<br/>XInclude parses an XML file and writes a new XML file with the xi:include elements expanded.</li>
+			</ul>
+		</s3>
+    </s2>
+</s1>

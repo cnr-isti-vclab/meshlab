@@ -29,5 +29,8 @@ include(${EXTERNAL_DIR}/qhull.cmake)
 # u3d - optional, for io_u3d
 include(${EXTERNAL_DIR}/u3d.cmake)
 
+# xerces library - optional, needed by libe57
+include(${EXTERNAL_DIR}/xerces.cmake)
+
 # libe57Format - optional, for io_e57
 include(${EXTERNAL_DIR}/e57.cmake)

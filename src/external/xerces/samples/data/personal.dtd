@@ -1,0 +1,17 @@
+<?xml encoding="ISO-8859-1"?>
+
+<!-- @version:  -->
+
+<!ELEMENT personnel (person)+>
+<!ELEMENT person (name,email*,url*,link?)>
+<!ATTLIST person id ID #REQUIRED>
+<!ELEMENT family (#PCDATA)>
+<!ELEMENT given (#PCDATA)>
+<!ELEMENT name (#PCDATA|family|given)*>
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT url EMPTY>
+<!ATTLIST url href CDATA #REQUIRED>
+<!ELEMENT link EMPTY>
+<!ATTLIST link
+  manager IDREF #IMPLIED
+  subordinates IDREFS #IMPLIED>

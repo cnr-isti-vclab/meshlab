@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="gml" xmlns:gml="gml">
+	<xsd:simpleType name="AbstractFeatureType">
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="AbstractFeatureCollectionType">
+		<xsd:restriction base="gml:AbstractFeatureType"/>
+	</xsd:simpleType>
+	<xsd:element name="_Feature" type="gml:AbstractFeatureType" abstract="true"/>
+	<xsd:element name="_FeatureCollection" type="gml:AbstractFeatureCollectionType" abstract="true" substitutionGroup="gml:_Feature"/>
+</xsd:schema>

@@ -48,9 +48,12 @@ SOURCE_PATH=$SCRIPTS_PATH/../../src
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
 sed "s%DISTRIB_PATH%$INSTALL_PATH%g" $SCRIPTS_PATH/resources/meshlab_dmg_latest.json > $SCRIPTS_PATH/resources/meshlab_dmg_final.json
+sed -i '' "s%ML_VERSION%$ML_VERSION%g" $SCRIPTS_PATH/resources/meshlab_dmg_final.json
 sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" $SCRIPTS_PATH/resources/meshlab_dmg_final.json
 
 rm -f $INSTALL_PATH/*.dmg
+
+mv $INSTALL_PATH/meshlab.app $INSTALL_PATH/MeshLab$ML_VERSION.app
 
 echo "Running appdmg"
 appdmg $SCRIPTS_PATH/resources/meshlab_dmg_final.json $INSTALL_PATH/MeshLab$ML_VERSION-macos.dmg

@@ -65,7 +65,7 @@ if ( E57_BUILDING_SELF )
 endif()
 
 find_package( Threads REQUIRED )
-find_package( XercesC REQUIRED )
+#find_package( XercesC REQUIRED )
 
 option( E57_BUILD_SHARED
 	"Compile E57Format as a shared library"
@@ -126,29 +126,24 @@ if ( WIN32 )
 endif()
 
 # Target Libraries
-target_link_libraries( E57Format PRIVATE XercesC::XercesC )
+target_link_libraries( E57Format PRIVATE external-xerces )
 
 # Install
-install(
-    TARGETS
-        E57Format
-    EXPORT
-        E57Format-export
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-
-# CMake package files
-install(
-    EXPORT
-        E57Format-export
-    DESTINATION lib/cmake/E57Format
-)
-
-install(
-    FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/e57format-config.cmake
-    DESTINATION
-        lib/cmake/E57Format
-)
+if (WIN32)
+    install(
+        TARGETS
+            E57Format
+        EXPORT
+            E57Format-export
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
+else()
+    install(
+        TARGETS
+            E57Format
+        EXPORT
+            E57Format-export
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+    )
+endif()

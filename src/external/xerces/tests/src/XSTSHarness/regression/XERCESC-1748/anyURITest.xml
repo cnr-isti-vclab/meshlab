@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anyURITest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:noNamespaceSchemaLocation='anyURITest.xsd'>
+  <uri href="http://xerces.apache.org/xerces-c/#Features" />
+  <uri href="dvb://233a.4000.4740;b697@2007-09-03T21:00:00Z/PT03H00M" />
+  <uri href="cpe://microsoft.windows:vista" />
+  <uri href="file:///root/filename"/>
+  <uri href="/root/filename" />
+  <uri href="http://localhost:9090/test.cgi?enc=utf8&amp;target=latin-1" />
+</anyURITest>

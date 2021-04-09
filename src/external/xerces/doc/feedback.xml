@@ -1,0 +1,193 @@
+<?xml version="1.0"  encoding="iso-8859-1" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Feedback Procedures">
+    <s2 title="Questions or Comments">
+
+    <p>Please browse through this bundled documentation completely.  Most of
+       the common questions have been answered in the FAQs. Browsing this
+       documentation may be the quickest way to get an answer. Of course, if
+       all else fails, as mentioned in the link above, you can post a question
+       to one of the <jump href="mailing-lists.html">&XercesCName; mailing
+       lists</jump>.</p> <p>See <jump href="bug-report.html">Bug Reporting</jump>
+       if you would like to report a defect (which is greatly appreciated).</p>
+
+    </s2>
+
+    <s2 title="Acknowledgements">
+
+        <p>Ever since this source code base was initially created, many people
+           have helped to port the code to different platforms, and provided
+           patches for both new features and bug fixes.
+        </p>
+
+        <p>Listed below are some names (in alphabetical order) of people to whom
+        we would like to give special thanks. </p>
+
+        <ul>
+            <li>Nadav Aharoni</li>
+            <li>Curt Arnold</li>
+            <li>Edward Avis</li>
+            <li>Anupam Bagchi</li>
+            <li>Torbjörn Bäckström</li>
+            <li>Abe Backus</li>
+            <li>Frank Balluffi</li>
+            <li>Matthew Baker</li>
+            <li>Devin Barnhart</li>
+            <li>James Berry</li>
+            <li>David Bertoni</li>
+            <li>John Bellardo</li>
+            <li>Arundhati Bhowmick</li>
+            <li>Joanne Bogart</li>
+            <li>Michael Boos</li>
+            <li>Edward Bortner</li>
+            <li>Sean Bright</li>
+            <li>Phil Brown</li>
+            <li>Robert Buck</li>
+            <li>Scott Cantor</li>
+            <li>David Cargill</li>
+            <li>Chris Cates</li>
+            <li>Gilbert Chan</li>
+            <li>Sumit Chawla</li>
+            <li>Nick Chiang</li>
+            <li>Chih Hsiang Chou</li>
+            <li>Radovan Chytracek</li>
+            <li>Hiram Clawson</li>
+            <li>John Clayton</li>
+            <li>Todd Collins</li>
+            <li>Nathan Codding</li>
+            <li>Michael Crawford</li>
+            <li>Murray Cumming</li>
+            <li>Zeid Derhally</li>
+            <li>James Devries</li>
+            <li>Ailian Ding</li>
+            <li>Steve Dulin</li>
+            <li>David Earlam</li>
+            <li>Helmut Eiken</li>
+            <li>Mark Everline</li>
+            <li>Andrew Fang</li>
+            <li>Simon Fell</li>
+            <li>Paul Ferguson</li>
+            <li>Greg Franks</li>
+            <li>Pierpaolo Fumagalli</li>
+            <li>Syam Gadde</li>
+            <li>Guido Gagliardi</li>
+            <li>Gary Gale</li>
+            <li>Michael Glavassevich</li>
+	    <li>Natalie Gorden</li>
+            <li>Max Gotlib</li>
+            <li>Petr Gotthard</li>
+            <li>Neil Graham</li>
+            <li>Matthew Hall</li>
+            <li>Jay Hansen</li>
+            <li>Susan Hardenbrook</li>
+            <li>Jeff Harrell</li>
+            <li>Andrew Hefford</li>
+            <li>Adam Heinz</li>
+            <li>Andy Heninger</li>
+            <li>John Hibbert</li>
+            <li>William L. Hopper</li>
+            <li>Michael Huedepohl</li>
+            <li>Anders Hybertz</li>
+            <li>Rahul Jain</li>
+            <li>Tom Jordahl</li>
+            <li>Christopher Just</li>
+            <li>Martin Kalen</li>
+            <li>Joe Kesselman</li>
+            <li>John Kim</li>
+            <li>Artur Klauser</li>
+            <li>Bob Kline</li>
+            <li>Richard Ko</li>
+            <li>Boris Kolpackov</li>
+            <li>Paul Kramer</li>
+            <li>Volker Krause</li>
+            <li>Berin Lautenbach</li>
+            <li>Arnaud LeHors</li>
+            <li>Roger Leigh</li>
+            <li>Andy Levine</li>
+            <li>Jeff Lewis</li>
+            <li>James Littlejohn</li>
+            <li>Ray Logel</li>
+            <li>Pedro Lopes</li>
+            <li>Matt Lovett</li>
+            <li>Sean MacRoibeaird</li>
+            <li>Alberto Massari</li>
+            <li>Don Mastrovito</li>
+            <li>David McCreedy</li>
+            <li>Charles McLouth</li>
+            <li>Shin'ya Morino</li>
+            <li>Urs Muff</li>
+            <li>Jordan Naftolin</li>
+            <li>Tinny Ng</li>
+            <li>David Nickerson</li>
+            <li>Anton Nikolaevsky</li>
+            <li>Khaled Noaman</li>
+            <li>Michael Ottati</li>
+            <li>Anthony O'Dowd</li>
+            <li>Mike Pawlowski</li>
+            <li>Kevin Philips</li>
+            <li>Mike Pogue</li>
+            <li>Joe Polastre</li>
+            <li>John Ponzo</li>
+            <li>Vitaly Prapirny</li>
+            <li>Shengkai Qu</li>
+            <li>Gareth Reakes</li>
+            <li>Jim Reitz</li>
+            <li>Caroline Rioux</li>
+            <li>Dean Roddey</li>
+            <li>John Roper</li>
+            <li>Dan Rosen</li>
+            <li>Steven Rosenthal</li>
+            <li>Erik Rydgren</li>
+            <li>Markus Scherer</li>
+            <li>Bill Schindler</li>
+            <li>Erik Schroeder</li>
+            <li>Christian Schuhegger</li>
+            <li>Tobias Schuette</li>
+            <li>John Smirl</li>
+            <li>Andrei Smirnov</li>
+            <li>John Snelson</li>
+            <li>Gereon Steffens</li>
+            <li>Jason Stewart</li>
+            <li>Rick J. Stevens</li>
+            <li>Roman Sulzhyk</li>
+            <li>Linda M. Swan</li>
+            <li>Vasily Tchekalkin</li>
+            <li>Pieter Van-Dyck</li>
+            <li>Curtis Walker</li>
+            <li>John Warrier</li>
+            <li>Tom Watson</li>
+            <li>Mark Weaver</li>
+            <li>Roger Webster</li>
+            <li>Robert Weir</li>
+            <li>Axel Weiss</li>
+            <li>Carolyn Weiss</li>
+            <li>Christian Will</li>
+            <li>Kari Whitcomb</li>
+            <li>Dietrich Wolf</li>
+            <li>Kirk Wylie</li>
+            <li>Peter A. Volchek</li>
+            <li>Grace Yan</li>
+            <li>Hiramatsu Yoshifumi</li>
+            <li>PeiYong Zhang</li>
+            <li>Henry Zongaro</li>
+        </ul>
+    </s2>
+</s1>

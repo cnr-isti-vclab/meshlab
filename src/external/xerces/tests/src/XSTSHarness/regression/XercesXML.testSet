@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TESTSUITE>
+  <TESTCASES xml:base="XERCESC-2180">
+    <!-- https://issues.apache.org/jira/browse/XERCESC-2180: Assertion when scanner splits a surrogate pair across two separate buffers -->
+    <TEST ID="XERCESC-2180" TYPE="invalid" URI="crash.xml"/>
+    <TEST ID="XERCESC-2180" TYPE="invalid" URI="crash2.xml"/>
+  </TESTCASES>
+</TESTSUITE>
