@@ -315,7 +315,7 @@ void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, R
     switch(ID(action))
     {
         case FP_RECOMPUTE_VERTEX_NORMAL :
-            parlst.addParam(RichEnum("weightMode", 0, QStringList() << "Simple Average" <<  "By Angle" << "By Area" << "As defined by N. Max",  tr("Weighting Mode:"), ""));
+            parlst.addParam(RichEnum("weightMode", 0, QStringList() << "Simple Average" <<  "By Area" << "By Angle" << "As defined by N. Max",  tr("Weighting Mode:"), ""));
           break;
         case FP_CREASE_CUT :
             parlst.addParam(RichFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it.")));
