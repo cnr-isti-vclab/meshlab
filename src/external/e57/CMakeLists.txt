@@ -135,8 +135,6 @@ if (WIN32)
             E57Format
         EXPORT
             E57Format-export
-#        ARCHIVE DESTINATION lib
-#        LIBRARY DESTINATION lib
         RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
     )
 else()
@@ -149,17 +147,3 @@ else()
         LIBRARY DESTINATION lib
     )
 endif()
-
-# CMake package files
-#install(
-#    EXPORT
-#        E57Format-export
-#    DESTINATION lib/cmake/E57Format
-#)
-
-#install(
-#    FILES
-#        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/e57format-config.cmake
-#    DESTINATION
-#        lib/cmake/E57Format
-#)
