@@ -30,6 +30,8 @@
 using namespace vcg;
 using namespace std;
 
+enum WeightModeParam {WMP_AVG = 0, WMP_AREA, WMP_ANGLE, WMP_AS_DEF};
+
 FilterUnsharp::FilterUnsharp()
 {
 	typeList = {
@@ -571,20 +573,26 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		break;
 	case FP_RECOMPUTE_VERTEX_NORMAL :
 	{
+		/** ToDo: This filter should NEVER modify per face normals... **/
 		int weightMode = par.getEnum("weightMode");
 		switch(weightMode)
 		{
-		case 0: tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
+		case WMP_AVG:
+			tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 			tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 			break;
-		case 1: tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+		case WMP_AREA:
+			tri::UpdateNormal<CMeshO>::NormalizePerFaceByArea(m.cm);
+			tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 			break;
-		case 2: tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m.cm);
+		case WMP_ANGLE:
+			tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m.cm);
 			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 			break;
-		case 3: tri::UpdateNormal<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
+		case WMP_AS_DEF:
+			tri::UpdateNormal<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
 			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 			break;
 		default :
