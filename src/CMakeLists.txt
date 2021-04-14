@@ -76,6 +76,12 @@ if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these di
 	else()
 		SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
 	endif()
+
+	get_directory_property(hasParent PARENT_DIRECTORY)
+	if(hasParent)
+		set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_PLUGIN_OUTPUT_DIR} PARENT_SCOPE)
+		set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_PLUGIN_INSTALL_DIR} PARENT_SCOPE)
+	endif()
 endif()
 
 ### Enter subdirectories
