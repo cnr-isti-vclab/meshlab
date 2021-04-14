@@ -47,7 +47,93 @@ public:
 
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb);
+};
 
+class E57Data3DPoints {
+
+private:
+    e57::Data3DPointsData data3DPointsData{};
+
+public:
+
+    E57Data3DPoints(const E57Data3DPoints&) = delete;
+
+    explicit E57Data3DPoints(size_t buffSize, e57::Data3D& scanHeader) {
+
+        if (scanHeader.pointFields.cartesianXField && scanHeader.pointFields.cartesianYField &&
+                scanHeader.pointFields.cartesianZField) {
+            data3DPointsData.cartesianX = new float[buffSize];
+            data3DPointsData.cartesianY = new float[buffSize];
+            data3DPointsData.cartesianZ = new float[buffSize];
+        }
+        else {
+            // TODO: throws an exception?
+        }
+
+        if (scanHeader.pointFields.intensityField) {
+            data3DPointsData.intensity = new float[buffSize];
+        }
+
+        if (scanHeader.pointFields.colorRedField &&
+            scanHeader.pointFields.colorGreenField &&
+                scanHeader.pointFields.colorBlueField) {
+
+            data3DPointsData.colorRed = new uint8_t[buffSize];
+            data3DPointsData.colorGreen = new uint8_t[buffSize];
+            data3DPointsData.colorBlue = new uint8_t[buffSize];
+        }
+
+        if (scanHeader.pointFields.normalX && scanHeader.pointFields.normalY && scanHeader.pointFields.normalZ) {
+            data3DPointsData.normalX = new float[buffSize];
+            data3DPointsData.normalY = new float[buffSize];
+            data3DPointsData.normalZ = new float[buffSize];
+        }
+    }
+
+    ~E57Data3DPoints() {
+
+        if (areCoordinatesAvailable()) {
+            delete[] this->data3DPointsData.cartesianX;
+            delete[] this->data3DPointsData.cartesianY;
+            delete[] this->data3DPointsData.cartesianZ;
+        }
+
+        if (isQualityAvailable()) {
+            delete[] this->data3DPointsData.intensity;
+        }
+
+        if (areNormalsAvailable()) {
+            delete[] this->data3DPointsData.normalX;
+            delete[] this->data3DPointsData.normalY;
+            delete[] this->data3DPointsData.normalZ;
+        }
+
+        if (areColorsAvailable()) {
+            delete[] this->data3DPointsData.colorRed;
+            delete[] this->data3DPointsData.colorGreen;
+            delete[] this->data3DPointsData.colorBlue;
+        }
+    }
+
+    inline bool areCoordinatesAvailable() const {
+        return this->data3DPointsData.cartesianX && this->data3DPointsData.cartesianY && this->data3DPointsData.cartesianZ;
+    }
+
+    inline bool areColorsAvailable() const {
+        return this->data3DPointsData.colorRed && this->data3DPointsData.colorGreen && this->data3DPointsData.colorBlue;
+    }
+
+    inline bool areNormalsAvailable() const {
+        return this->data3DPointsData.normalX && this->data3DPointsData.normalY && this->data3DPointsData.normalZ;
+    }
+
+    inline bool isQualityAvailable() const {
+        return this->data3DPointsData.intensity;
+    }
+
+    inline e57::Data3DPointsData& points() noexcept {
+        return data3DPointsData;
+    }
 };
 
 #endif
