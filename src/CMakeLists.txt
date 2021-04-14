@@ -14,7 +14,7 @@ option(BUILD_SERVER "Build a command-line server application" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
-option(BUILD_JUST_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
+option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
 option(USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)
 
 option(MESHLAB_IS_RELEASE_CANDIDATE_VERSION "" OFF)
@@ -112,7 +112,7 @@ endif()
 
 add_subdirectory(common)
 
-if (NOT BUILD_JUST_MESHLAB_LIBRARIES)
+if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	add_subdirectory(meshlab)
 	if(BUILD_SERVER)
 		add_subdirectory(meshlabserver)
@@ -234,7 +234,7 @@ endforeach()
 # This variable keeps track of the output filenames that need to be copied at build time
 set(COPIED_FILES)
 
-if (NOT BUILD_JUST_MESHLAB_LIBRARIES)
+if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	# shaders
 	set(SHADER_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders")
 	file(
