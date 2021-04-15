@@ -156,17 +156,17 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     scanHeader.pointFields.cartesianYField = true;
     scanHeader.pointFields.cartesianZField = true;
 
-    if ((mask & Mask::IOM_VERTNORMAL)) {
+    if ((mask & Mask::IOM_VERTNORMAL) != 0) {
         scanHeader.pointFields.normalX = true;
         scanHeader.pointFields.normalY = true;
         scanHeader.pointFields.normalZ = true;
     }
-    if ((mask & Mask::IOM_VERTCOLOR)) {
+    if ((mask & Mask::IOM_VERTCOLOR) != 0) {
         scanHeader.pointFields.colorRedField = true;
         scanHeader.pointFields.colorGreenField = true;
         scanHeader.pointFields.colorBlueField = true;
     }
-    if ((mask & Mask::IOM_VERTQUALITY)) {
+    if ((mask & Mask::IOM_VERTQUALITY) != 0) {
         scanHeader.pointFields.intensityField = true;
     }
 
