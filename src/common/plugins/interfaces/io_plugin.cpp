@@ -1,6 +1,13 @@
 #include "io_plugin.h"
 #include "../../ml_document/mesh_document.h"
 
+unsigned int IOPlugin::numberMeshesContainedInFile(
+		const QString&,
+		const QString&) const
+{
+	return 1;
+}
+
 void IOPlugin::open(
 		const QString& format,
 		const QString& fileName,

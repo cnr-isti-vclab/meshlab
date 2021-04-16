@@ -160,11 +160,8 @@ public:
 	 * @return
 	 */
 	virtual unsigned int numberMeshesContainedInFile(
-			const QString& /*format*/,
-			const QString& /*fileName*/)
-	{
-		return 1;
-	}
+			const QString& format,
+			const QString& fileName) const;
 
 	/**
 	 * @brief The open function is called by the framework everytime a mesh is
