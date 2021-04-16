@@ -143,7 +143,7 @@ private:
 
 private slots:
 	void documentUpdateRequested();
-	bool importMesh(QString fileName=QString(), bool isareload = false);
+	bool importMesh(QString fileName=QString());
 	void endEdit();
 	void updateProgressBar(const int pos,const QString& text);
 	void updateTexture(int meshid);

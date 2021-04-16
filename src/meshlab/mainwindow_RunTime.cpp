@@ -2350,7 +2350,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 		//showLayerDlg(false);
 	}
 	globrendtoolbar->setEnabled(false);
-	bool res = importMesh(fileName,false);
+	bool res = importMesh(fileName);
 	globrendtoolbar->setEnabled(true);
 	if (layerDialog != NULL)
 		showLayerDlg(layervisible || meshDoc()->meshList.size());
@@ -2359,7 +2359,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 }
 
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
-bool MainWindow::importMesh(QString fileName,bool isareload)
+bool MainWindow::importMesh(QString fileName)
 {
 	if (!GLA())
 	{
@@ -2422,7 +2422,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 		t.start();
 		Matrix44m mtr;
 		mtr.SetIdentity();
-		bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,isareload);
+		bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,false);
 		if(open)
 		{
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
