@@ -50,7 +50,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		QString originalFilterName = inputFormat;
 		QString pythonFilterName = inputFormat.toLower();
 		Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
-		IOMeshPlugin* plugin = pm.inputMeshPlugin(inputFormat);
+		IOPlugin* plugin = pm.inputMeshPlugin(inputFormat);
 		RichParameterList rps;
 		plugin->initPreOpenParameter(inputFormat, rps);
 		plugin->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
@@ -73,7 +73,7 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 		QString originalFilterName = outputFormat;
 		QString pythonFilterName = outputFormat.toLower();
 		Function f(pythonFilterName, originalFilterName, "Save " + outputFormat + " format.");
-		IOMeshPlugin* plugin = pm.outputMeshPlugin(outputFormat);
+		IOPlugin* plugin = pm.outputMeshPlugin(outputFormat);
 		RichParameterList rps;
 		plugin->initSaveParameter(outputFormat, *dummyMeshDocument.mm(), rps);
 
@@ -209,7 +209,7 @@ pymeshlab::FunctionSet::FunctionRangeIterator pymeshlab::FunctionSet::loadRaster
 	return FunctionRangeIterator(loadRasterSet);
 }
 
-void pymeshlab::FunctionSet::updateSaveParameters(IOMeshPlugin* plugin,
+void pymeshlab::FunctionSet::updateSaveParameters(IOPlugin* plugin,
 		const QString& outputFormat,
 		pymeshlab::Function& f)
 {

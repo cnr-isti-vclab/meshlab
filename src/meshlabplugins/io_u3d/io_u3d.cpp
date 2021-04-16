@@ -40,7 +40,7 @@ using namespace vcg;
 
 
 U3DIOPlugin::U3DIOPlugin() :
-	QObject(), IOMeshPlugin(), _param()
+	QObject(), IOPlugin(), _param()
 {
 }
 

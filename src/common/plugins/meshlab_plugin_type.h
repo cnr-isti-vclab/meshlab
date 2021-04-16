@@ -38,7 +38,6 @@ public:
 	bool isEditPlugin() const;
 	bool isFilterPlugin() const;
 	bool isIOMeshPlugin() const;
-	bool isIORasterPlugin() const;
 	bool isRenderPlugin() const;
 
 	bool isMultipleTypePlugin() const;
@@ -50,9 +49,8 @@ private:
 		DECORATE  = 1<<1, //2
 		EDIT      = 1<<2, //4
 		FILTER    = 1<<3, //8
-		IO_MESH   = 1<<4, //16
-		IO_RASTER = 1<<5, //32
-		RENDER    = 1<<6  //64
+		IO        = 1<<4, //16
+		RENDER    = 1<<5  //32
 	};
 
 	int type;

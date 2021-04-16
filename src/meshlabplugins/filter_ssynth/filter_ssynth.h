@@ -30,10 +30,10 @@
 #include <common/plugins/interfaces/filter_plugin.h>
 #include <meshlabplugins/io_x3d/io_x3d.h>
 
-class FilterSSynth : public QObject, public IOMeshPlugin, public FilterPlugin{
+class FilterSSynth : public QObject, public IOPlugin, public FilterPlugin{
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
-	Q_INTERFACES(FilterPlugin IOMeshPlugin)
+	Q_INTERFACES(FilterPlugin IOPlugin)
 	public:
 		enum {CR_SSYNTH} ;
 

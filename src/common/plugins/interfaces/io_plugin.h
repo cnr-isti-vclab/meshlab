@@ -21,23 +21,24 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IOMESH_PLUGIN_H
-#define MESHLAB_IOMESH_PLUGIN_H
+#ifndef MESHLAB_IO_PLUGIN_H
+#define MESHLAB_IO_PLUGIN_H
 
 #include <wrap/callback.h>
 
 #include "meshlab_plugin_logger.h"
 #include "meshlab_plugin.h"
 #include "../../utilities/file_format.h"
+#include "../../ml_document/raster_model.h"
 
 /** 
  * @brief The IOMeshPlugin is the base class for all the single mesh loading plugins.
  */
-class IOMeshPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
+class IOPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
 public:
-	IOMeshPlugin() : MeshLabPluginLogger() {  }
-	virtual ~IOMeshPlugin() {}
+	IOPlugin() : MeshLabPluginLogger() {  }
+	virtual ~IOPlugin() {}
 
 	/**
 	 * @brief The importFormats function returns a list of all the
@@ -52,6 +53,8 @@ public:
 	 * This function must be implemented on any IOMesh plugin.
 	 */
 	virtual std::list<FileFormat> exportFormats() const = 0;
+
+	virtual std::list<FileFormat> importRasterFormats() const {return std::list<FileFormat>();}
 
 	/**
 	 * @brief The initPreOpenParameter function is called to initialize the list
@@ -159,6 +162,13 @@ public:
 		const RichParameterList & par,
 		vcg::CallBackPos *cb) = 0;
 
+	virtual void openRaster(
+			const QString& /*format*/,
+			const QString& /*fileName*/,
+			RasterModel& /*rm*/,
+			vcg::CallBackPos* /*cb*/ = nullptr)
+	{};
+
 	/**
 	 * @brief The reportWarning function should be used everytime that a non-critical
 	 * error while loading or saving a file happens. This function appends the
@@ -209,7 +219,7 @@ private:
 
 };
 
-#define IOMESH_PLUGIN_IID "vcg.meshlab.IOMeshPlugin/1.0"
-Q_DECLARE_INTERFACE(IOMeshPlugin, IOMESH_PLUGIN_IID)
+#define IO_PLUGIN_IID "vcg.meshlab.IOPlugin/1.0"
+Q_DECLARE_INTERFACE(IOPlugin, IO_PLUGIN_IID)
 
-#endif // MESHLAB_IOMESH_PLUGIN_H
+#endif // MESHLAB_IO_PLUGIN_H

@@ -28,7 +28,6 @@
 #include "containers/edit_plugin_container.h"
 #include "containers/filter_plugin_container.h"
 #include "containers/iomesh_plugin_container.h"
-#include "containers/ioraster_plugin_container.h"
 #include "containers/render_plugin_container.h"
 
 #include <QPluginLoader>
@@ -63,9 +62,9 @@ public:
 
 	QAction* filterAction(const QString& name);
 
-	IOMeshPlugin* inputMeshPlugin(const QString& inputFormat) const;
-	IOMeshPlugin* outputMeshPlugin(const QString& outputFormat) const;
-	IORasterPlugin* inputRasterPlugin(const QString inputFormat) const;
+	IOPlugin* inputMeshPlugin(const QString& inputFormat) const;
+	IOPlugin* outputMeshPlugin(const QString& outputFormat) const;
+	IOPlugin* inputRasterPlugin(const QString inputFormat) const;
 	bool isInputMeshFormatSupported(const QString inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString outputFormat) const;
 	bool isInputRasterFormatSupported(const QString inputFormat) const;
@@ -82,7 +81,6 @@ public:
 	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	FilterPluginContainer::FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	IORasterPluginContainer::IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginContainer::RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginContainer::DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	EditPluginContainer::EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
@@ -96,7 +94,6 @@ private:
 	//Plugin containers: used for better organization of each type of plugin
 	// note: these containers do not own any plugin. Plugins are owned by the PluginManager
 	IOMeshPluginContainer ioMeshPlugins;
-	IORasterPluginContainer ioRasterPlugins;
 	FilterPluginContainer filterPlugins;
 	RenderPluginContainer renderPlugins;
 	DecoratePluginContainer decoratePlugins;
@@ -109,6 +106,9 @@ private:
 
 	template <typename RangeIterator>
 	static QStringList outputFormatListDialog(RangeIterator iterator);
+
+	template <typename RangeIterator>
+	static QStringList inputRasterFormatListDialog(RangeIterator iterator);
 };
 
 class PluginManager::PluginRangeIterator

@@ -48,15 +48,13 @@ set(HEADERS
 	plugins/containers/edit_plugin_container.h
 	plugins/containers/filter_plugin_container.h
 	plugins/containers/iomesh_plugin_container.h
-	plugins/containers/ioraster_plugin_container.h
 	plugins/containers/render_plugin_container.h
 	plugins/interfaces/meshlab_plugin.h
 	plugins/interfaces/meshlab_plugin_logger.h
 	plugins/interfaces/decorate_plugin.h
 	plugins/interfaces/edit_plugin.h
 	plugins/interfaces/filter_plugin.h
-	plugins/interfaces/iomesh_plugin.h
-	plugins/interfaces/ioraster_plugin.h
+	plugins/interfaces/io_plugin.h
 	plugins/interfaces/render_plugin.h
 	plugins/meshlab_plugin_type.h
 	plugins/plugin_manager.h
@@ -98,7 +96,6 @@ set(SOURCES
 	plugins/containers/edit_plugin_container.cpp
 	plugins/containers/filter_plugin_container.cpp
 	plugins/containers/iomesh_plugin_container.cpp
-	plugins/containers/ioraster_plugin_container.cpp
 	plugins/containers/render_plugin_container.cpp
 	plugins/interfaces/meshlab_plugin_logger.cpp
 	plugins/interfaces/decorate_plugin.cpp

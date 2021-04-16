@@ -145,7 +145,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		)
 	else()
 		set(MESHLAB_PLUGINS
-			# IOMesh plugins
+			# IO plugins
 			meshlabplugins/io_3ds
 			meshlabplugins/io_base
 			meshlabplugins/io_bre
@@ -158,9 +158,6 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/io_txt
 			meshlabplugins/io_u3d
 			meshlabplugins/io_x3d
-
-			# IORaster plugins
-			meshlabplugins/ioraster_base
 
 			# Filter plugins
 			meshlabplugins/filter_sample

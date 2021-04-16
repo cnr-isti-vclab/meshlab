@@ -208,10 +208,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
 	if (type.isIOMeshPlugin()){
-		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPlugin *>(plugin));
-	}
-	if (type.isIORasterPlugin()){
-		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPlugin*>(plugin));
+		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOPlugin *>(plugin));
 	}
 	if (type.isRenderPlugin()){
 		renderPlugins.pushRenderPlugin(qobject_cast<RenderPlugin *>(plugin));
@@ -241,10 +238,7 @@ void PluginManager::unloadPlugin(MeshLabPlugin* ifp)
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPlugin *>(ifp));
 		}
 		if (type.isIOMeshPlugin()){
-			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPlugin *>(ifp));
-		}
-		if (type.isIORasterPlugin()){
-			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPlugin*>(ifp));
+			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOPlugin *>(ifp));
 		}
 		if (type.isRenderPlugin()){
 			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPlugin *>(ifp));
@@ -296,19 +290,19 @@ QAction* PluginManager::filterAction(const QString& name)
 	return filterPlugins.filterAction(name);
 }
 
-IOMeshPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
+IOPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
 	return ioMeshPlugins.inputMeshPlugin(inputFormat);
 }
 
-IOMeshPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
+IOPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
 	return ioMeshPlugins.outputMeshPlugin(outputFormat);
 }
 
-IORasterPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
+IOPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
-	return ioRasterPlugins.inputRasterPlugin(inputFormat);
+	return ioMeshPlugins.inputRasterPlugin(inputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
@@ -323,7 +317,7 @@ bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) cons
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
 {
-	return ioRasterPlugins.isInputRasterFormatSupported(inputFormat);
+	return ioMeshPlugins.isInputRasterFormatSupported(inputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
@@ -338,7 +332,7 @@ QStringList PluginManager::outputMeshFormatList() const
 
 QStringList PluginManager::inputRasterFormatList() const
 {
-	return ioRasterPlugins.inputRasterFormatList();
+	return ioMeshPlugins.inputRasterFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
@@ -353,7 +347,7 @@ QStringList PluginManager::outputMeshFormatListDialog() const
 
 QStringList PluginManager::inputRasterFormatListDialog() const
 {
-	return inputFormatListDialog(ioRasterPluginIterator());
+	return inputRasterFormatListDialog(ioMeshPluginIterator());
 }
 
 MeshLabPlugin* PluginManager::operator[](unsigned int i) const
@@ -374,11 +368,6 @@ FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIter
 IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
 	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
-}
-
-IORasterPluginContainer::IORasterPluginRangeIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
-{
-	return ioRasterPlugins.ioRasterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 RenderPluginContainer::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -422,9 +411,9 @@ QStringList PluginManager::inputFormatListDialog(RangeIterator iterator)
 {
 	QString allKnownFormats = QObject::tr("All known formats (");
 	QStringList inputRasterFormatsDialogStringList;
-	for (auto ioRaster : iterator){
+	for (auto io : iterator){
 		QString allKnownFormatsFilter;
-		for (const FileFormat& currentFormat : ioRaster->importFormats()){
+		for (const FileFormat& currentFormat : io->importFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();
@@ -447,8 +436,8 @@ template<typename RangeIterator>
 QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 {
 	QStringList inputRasterFormatsDialogStringList;
-	for (auto ioRaster : iterator){
-		for (const FileFormat& currentFormat : ioRaster->exportFormats()){
+	for (auto io : iterator){
+		for (const FileFormat& currentFormat : io->exportFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();
@@ -459,6 +448,32 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 			inputRasterFormatsDialogStringList.append(currentFilterEntry);
 		}
 	}
+	return inputRasterFormatsDialogStringList;
+}
+
+template<typename RangeIterator>
+QStringList PluginManager::inputRasterFormatListDialog(RangeIterator iterator)
+{
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputRasterFormatsDialogStringList;
+	for (auto io : iterator){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : io->importRasterFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+		}
+		allKnownFormats += allKnownFormatsFilter;
+	}
+	allKnownFormats.append(')');
+	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
 	return inputRasterFormatsDialogStringList;
 }
 
