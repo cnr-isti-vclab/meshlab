@@ -100,6 +100,7 @@ set(SOURCES
 	plugins/interfaces/meshlab_plugin_logger.cpp
 	plugins/interfaces/decorate_plugin.cpp
 	plugins/interfaces/filter_plugin.cpp
+	plugins/interfaces/io_plugin.cpp
 	plugins/meshlab_plugin_type.cpp
 	plugins/plugin_manager.cpp
 	ml_document/helpers/mesh_document_state_data.cpp
