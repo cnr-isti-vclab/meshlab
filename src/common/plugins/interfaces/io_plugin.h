@@ -141,11 +141,66 @@ public:
 			int& defaultBits) const = 0;
 
 	/**
+	 * @brief this function returns the number of meshes that the open function
+	 * is going to load from the file given as parameter. Default value is 1.
+	 * If the file format can contain just one mesh per file, you don't need to
+	 * re-implement this function.
+	 * If your plugin could load more than one mesh from a single file, you
+	 * should re-implement this function and return the actual number of meshes
+	 * that are present in the file.
+	 * The number returned by this function will be the number of MeshModel*
+	 * contained in the meshModelList parameter passed to the open function
+	 * that allows to open multiple meshes.
+	 *
+	 * Note: you MUST reimplement the open function that takes a list of
+	 * MeshModel* as parameter ONLY if this function may return a value != 1.
+	 *
+	 * @param format
+	 * @param fileName
+	 * @return
+	 */
+	virtual unsigned int numberMeshesContainedInFile(
+			const QString& /*format*/,
+			const QString& /*fileName*/)
+	{
+		return 1;
+	}
+
+	/**
+	 * @brief The open function is called by the framework everytime a mesh is
+	 * loaded.
+	 * If the file format can contain just one mesh per file, you don't need to
+	 * re-implement this function, but you can implement just the next "open"
+	 * function.
+	 * Re-implement this function if your plugin supports loading format
+	 * file that could load more than one mesh layer.
+	 * @param format: the extension of the format e.g. "PLY"
+	 * @param fileName: the name of the file to be opened (including its path)
+	 * @param meshModelList: the list of meshes that is filled with the file content
+	 *        the number of meshes in the list is given by the
+	 *        numberMeshesContainedInFile() function.
+	 * @param maskList: a list of bit masks that will be filled reporting what kind of data
+	 *        we have found in each mesh present in the file (per vertex color,
+	 *        texture coords etc). the number of meshes in the list is given by
+	 *        the numberMeshesContainedInFile() function.
+	 * @param par: the parameters that have been set up in the
+	 *        initPreOpenParameter()
+	 * @param cb: standard callback for reporting progress in the loading
+	 */
+	virtual void open(
+		const QString &format,
+		const QString &fileName,
+		const std::list<MeshModel*>& meshModelList,
+		std::list<int>& maskList,
+		const RichParameterList & par,
+		vcg::CallBackPos *cb = nullptr);
+
+	/**
 	 * @brief The open function is called by the framework everytime a mesh is
 	 * loaded. Re-implement this function if the format file you want to open
 	 * can contain just one mesh. If your file can contain more than one mesh,
 	 * re-implement the "open" function that takes as input the MeshDocument
-	 * instead of the MeshModel (see below).
+	 * instead of the MeshModel (see the function above).
 	 * @param format: the extension of the format e.g. "PLY"
 	 * @param fileName: the name of the file to be opened (including its path)
 	 * @param m: the mesh that is filled with the file content
@@ -162,30 +217,6 @@ public:
 		int &mask,
 		const RichParameterList & par,
 		vcg::CallBackPos *cb = nullptr) = 0;
-
-	/**
-	 * @brief The open function is called by the framework everytime a mesh is
-	 * loaded. Re-implement this function if your plugin supports loading format
-	 * file that could load more than one mesh layer. For other formats, call
-	 * the implementation of this interface class, that will take care of
-	 * calling the open function for a single layer.
-	 * @param format: the extension of the format e.g. "PLY"
-	 * @param fileName: the name of the file to be opened (including its path)
-	 * @param m: the mesh that is filled with the file content
-	 * @param mask: a bit mask that will be filled reporting what kind of data
-	 *        we have found in the file (per vertex color, texture coords etc)
-	 * @param par: the parameters that have been set up in the
-	 *        initPreOpenParameter()
-	 * @param cb: standard callback for reporting progress in the loading
-	 */
-	virtual void open(
-		const QString &format,
-		const QString &fileName,
-		MeshDocument &md,
-		std::list<MeshModel*>& meshModelList,
-		std::list<int>& maskList,
-		const RichParameterList & par,
-		vcg::CallBackPos *cb = nullptr);
 
 	/**
 	 * @brief The save function is called by the framework everytime a mesh is

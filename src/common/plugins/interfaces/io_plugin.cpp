@@ -4,24 +4,20 @@
 void IOPlugin::open(
 		const QString& format,
 		const QString& fileName,
-		MeshDocument& md,
-		std::list<MeshModel*>& meshModelList,
+		const std::list<MeshModel*>& meshModelList,
 		std::list<int>& maskList,
 		const RichParameterList& par,
 		vcg::CallBackPos* cb)
 {
-	QFileInfo info(fileName);
-	MeshModel *mm = md.addNewMesh(fileName, info.fileName());
-	meshModelList.push_back(mm);
-	int mask;
-	try {
-		open(format, fileName, *mm, mask, par, cb);
-		maskList.push_back(mask);
-	}
-	catch(const MLException& exc){
-		md.delMesh(mm);
-		throw exc;
-	}
+	// This implementation assumes that the number of meshes contained in
+	// the file is 1, and will call the open function that takes a single
+	// MeshModel* as parameter.
+	assert(meshModelList.size() == 1);
+	maskList.clear();
+	MeshModel *mm = meshModelList.front();
+	int mask = 0;
+	open(format, fileName, *mm, mask, par, cb);
+	maskList.push_back(mask);
 }
 
 void IOPlugin::reportWarning(const QString& warningMessage) const
