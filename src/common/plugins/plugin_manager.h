@@ -27,7 +27,7 @@
 #include "containers/decorate_plugin_container.h"
 #include "containers/edit_plugin_container.h"
 #include "containers/filter_plugin_container.h"
-#include "containers/iomesh_plugin_container.h"
+#include "containers/io_plugin_container.h"
 #include "containers/render_plugin_container.h"
 
 #include <QPluginLoader>
@@ -80,7 +80,7 @@ public:
 	/** Member functions for range iterators **/
 	PluginRangeIterator pluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	FilterPluginContainer::FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
-	IOMeshPluginContainer::IOMeshPluginRangeIterator ioMeshPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+	IOPluginContainer::IOPluginRangeIterator ioPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	RenderPluginContainer::RenderPluginRangeIterator renderPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	DecoratePluginContainer::DecoratePluginRangeIterator decoratePluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 	EditPluginContainer::EditPluginFactoryRangeIterator editPluginFactoryIterator(bool iterateAlsoDisabledPlugins = false) const;
@@ -93,7 +93,7 @@ private:
 
 	//Plugin containers: used for better organization of each type of plugin
 	// note: these containers do not own any plugin. Plugins are owned by the PluginManager
-	IOMeshPluginContainer ioMeshPlugins;
+	IOPluginContainer ioPlugins;
 	FilterPluginContainer filterPlugins;
 	RenderPluginContainer renderPlugins;
 	DecoratePluginContainer decoratePlugins;

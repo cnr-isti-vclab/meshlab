@@ -207,8 +207,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (type.isFilterPlugin()){
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
-	if (type.isIOMeshPlugin()){
-		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOPlugin *>(plugin));
+	if (type.isIOPlugin()){
+		ioPlugins.pushIOPlugin(qobject_cast<IOPlugin *>(plugin));
 	}
 	if (type.isRenderPlugin()){
 		renderPlugins.pushRenderPlugin(qobject_cast<RenderPlugin *>(plugin));
@@ -237,8 +237,8 @@ void PluginManager::unloadPlugin(MeshLabPlugin* ifp)
 		if (type.isFilterPlugin()){
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPlugin *>(ifp));
 		}
-		if (type.isIOMeshPlugin()){
-			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOPlugin *>(ifp));
+		if (type.isIOPlugin()){
+			ioPlugins.eraseIOPlugin(dynamic_cast<IOPlugin *>(ifp));
 		}
 		if (type.isRenderPlugin()){
 			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPlugin *>(ifp));
@@ -276,7 +276,7 @@ unsigned int PluginManager::size() const
 
 int PluginManager::numberIOPlugins() const
 {
-	return ioMeshPlugins.size();
+	return ioPlugins.size();
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
@@ -292,62 +292,62 @@ QAction* PluginManager::filterAction(const QString& name)
 
 IOPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
-	return ioMeshPlugins.inputMeshPlugin(inputFormat);
+	return ioPlugins.inputMeshPlugin(inputFormat);
 }
 
 IOPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
-	return ioMeshPlugins.outputMeshPlugin(outputFormat);
+	return ioPlugins.outputMeshPlugin(outputFormat);
 }
 
 IOPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
-	return ioMeshPlugins.inputRasterPlugin(inputFormat);
+	return ioPlugins.inputRasterPlugin(inputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
 {
-	return ioMeshPlugins.isInputMeshFormatSupported(inputFormat);
+	return ioPlugins.isInputMeshFormatSupported(inputFormat);
 }
 
 bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) const
 {
-	return ioMeshPlugins.isOutputMeshFormatSupported(outputFormat);
+	return ioPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
 {
-	return ioMeshPlugins.isInputRasterFormatSupported(inputFormat);
+	return ioPlugins.isInputRasterFormatSupported(inputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
 {
-	return ioMeshPlugins.inputMeshFormatList();
+	return ioPlugins.inputMeshFormatList();
 }
 
 QStringList PluginManager::outputMeshFormatList() const
 {
-	return ioMeshPlugins.outputMeshFormatList();
+	return ioPlugins.outputMeshFormatList();
 }
 
 QStringList PluginManager::inputRasterFormatList() const
 {
-	return ioMeshPlugins.inputRasterFormatList();
+	return ioPlugins.inputRasterFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
 {
-	return inputFormatListDialog(ioMeshPluginIterator());
+	return inputFormatListDialog(ioPluginIterator());
 }
 
 QStringList PluginManager::outputMeshFormatListDialog() const
 {
-	return outputFormatListDialog(ioMeshPluginIterator());
+	return outputFormatListDialog(ioPluginIterator());
 }
 
 QStringList PluginManager::inputRasterFormatListDialog() const
 {
-	return inputRasterFormatListDialog(ioMeshPluginIterator());
+	return inputRasterFormatListDialog(ioPluginIterator());
 }
 
 MeshLabPlugin* PluginManager::operator[](unsigned int i) const
@@ -365,9 +365,9 @@ FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIter
 	return filterPlugins.filterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
+IOPluginContainer::IOPluginRangeIterator PluginManager::ioPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
+	return ioPlugins.ioPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 RenderPluginContainer::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const

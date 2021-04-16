@@ -46,9 +46,9 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPlugin* fpi) : type(0)
 	if (iFilter){
 		type |= FILTER;
 	}
-	//IOMesh
-	const IOPlugin *iIOMesh = dynamic_cast<const IOPlugin *>(fpi);
-	if (iIOMesh) {
+	//IO
+	const IOPlugin *iIO = dynamic_cast<const IOPlugin *>(fpi);
+	if (iIO) {
 		type |= IO;
 	}
 	
@@ -82,7 +82,7 @@ bool MeshLabPluginType::isFilterPlugin() const
 	return type & FILTER;
 }
 
-bool MeshLabPluginType::isIOMeshPlugin() const
+bool MeshLabPluginType::isIOPlugin() const
 {
 	return type & IO;
 }
@@ -123,7 +123,7 @@ QString MeshLabPluginType::pluginTypeString() const
 		if (!type.isEmpty()) type += "|";
 		type += "Filter";
 	}
-	if (isIOMeshPlugin()){
+	if (isIOPlugin()){
 		if (!type.isEmpty()) type += "|";
 		type += "IO";
 	}

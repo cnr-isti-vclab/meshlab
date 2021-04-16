@@ -37,7 +37,7 @@ public:
 	bool isDecoratePlugin() const;
 	bool isEditPlugin() const;
 	bool isFilterPlugin() const;
-	bool isIOMeshPlugin() const;
+	bool isIOPlugin() const;
 	bool isRenderPlugin() const;
 
 	bool isMultipleTypePlugin() const;

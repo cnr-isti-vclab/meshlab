@@ -32,7 +32,7 @@
 #include "../../ml_document/raster_model.h"
 
 /** 
- * @brief The IOMeshPlugin is the base class for all the single mesh loading plugins.
+ * @brief The IOPlugin is the base class for all the single mesh loading plugins.
  */
 class IOPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
@@ -43,14 +43,18 @@ public:
 	/**
 	 * @brief The importFormats function returns a list of all the
 	 * input file formats supported by the plugin.
-	 * This function must be implemented on any IOMesh plugin.
+	 * This function must be implemented on any IO plugin.
+	 * If yout plugin does not import any mesh format, just return an
+	 * empty list.
 	 */
 	virtual std::list<FileFormat> importFormats() const = 0;
 
 	/**
 	 * @brief The exportFormats function returns a list of all the
 	 * output file formats supported by the plugin.
-	 * This function must be implemented on any IOMesh plugin.
+	 * This function must be implemented on any IO plugin.
+	 * If yout plugin does not export any mesh format, just return an
+	 * empty list.
 	 */
 	virtual std::list<FileFormat> exportFormats() const = 0;
 

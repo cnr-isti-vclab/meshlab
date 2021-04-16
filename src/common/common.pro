@@ -40,7 +40,7 @@ HEADERS += 	\
 	plugins/containers/decorate_plugin_container.h \
 	plugins/containers/edit_plugin_container.h \
 	plugins/containers/filter_plugin_container.h \
-	plugins/containers/iomesh_plugin_container.h \
+	plugins/containers/io_plugin_container.h \
 	plugins/containers/render_plugin_container.h \
 	plugins/interfaces/meshlab_plugin.h \
 	plugins/interfaces/meshlab_plugin_logger.h \
@@ -86,7 +86,7 @@ SOURCES += \
 	plugins/containers/decorate_plugin_container.cpp \
 	plugins/containers/edit_plugin_container.cpp \
 	plugins/containers/filter_plugin_container.cpp \
-	plugins/containers/iomesh_plugin_container.cpp \
+	plugins/containers/io_plugin_container.cpp \
 	plugins/containers/render_plugin_container.cpp \
 	plugins/interfaces/meshlab_plugin_logger.cpp \
 	plugins/interfaces/decorate_plugin.cpp \

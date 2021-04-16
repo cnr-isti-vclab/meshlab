@@ -178,7 +178,7 @@ void PluginInfoDialog::populateTreeWidget()
 				for(QAction *a: fpi->actions())
 					tmplist.push_back(a->text());
 			}
-			if (type.isIOMeshPlugin()){
+			if (type.isIOPlugin()){
 				IOPlugin* iopi = dynamic_cast<IOPlugin*>(fp);
 				for(const FileFormat& f: iopi->importFormats()){
 					QString formats;
