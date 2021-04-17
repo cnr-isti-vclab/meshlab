@@ -1,0 +1,2 @@
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\distrib\lib\meshlab\qhull.pdb
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\src\external\qhull-2003.1\debug\qhull.pdb

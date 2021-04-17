@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/TestBezier.png</file>
+    </qresource>
+</RCC>

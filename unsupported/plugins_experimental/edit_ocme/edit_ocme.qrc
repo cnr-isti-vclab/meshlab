@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>icons/icon_ocme.png</file>
-        <file>icons/cur_ocme.png</file>
-    </qresource>
-</RCC>

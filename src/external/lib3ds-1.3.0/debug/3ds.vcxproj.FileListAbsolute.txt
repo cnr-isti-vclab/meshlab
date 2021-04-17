@@ -1,0 +1,2 @@
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\distrib\lib\meshlab\3ds.pdb
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\src\external\lib3ds-1.3.0\debug\3ds.pdb

@@ -1,0 +1,2 @@
+^D:\NGHIEN_CUU_KHOA_HOC\VISUAL_STUDIO_CODES\SOURCE\REPOS\MESHLAB\SRC\MESHLABPLUGINS\FILTER_UNSHARP\DEBUG\MOC_PREDEFS.H.CBT
+cl -Bx"C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\bin\qmake.exe" -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -O0 -g /openmp -Zi -MDd -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -E C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\mkspecs\features\data\dummy.cpp 2>NUL >debug\moc_predefs.h

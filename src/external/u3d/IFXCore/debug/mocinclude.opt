@@ -1,0 +1,43 @@
+-IC:/QT/QT5.12.10/5.12.10/MSVC2017_64/mkspecs/win32-msvc
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/IFXCore
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/zlib
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/png
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/jpeg
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Include
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Kernel/Include
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Platform/Include
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Base
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/BitStream
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Bones
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/BoundHierarchy
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/CLODAuthor
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Common
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Generators/CLOD
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Generators/Glyph2D
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Generators/LineSet
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Generators/PointSet
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Mesh
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/ModifierChain
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Palette
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Rendering
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/SceneGraph
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Shaders
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Subdiv
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/Texture
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Component/UVGenerator
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Kernel/IFXCom
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Kernel/Common
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/FNVHash
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/Predicates
+-ID:/Nghien_cuu_khoa_hoc/Visual_Studio_Codes/Source/Repos/meshlab/src/external/u3d/src/RTL/Dependencies/WildCards
+-IC:/QT/QT5.12.10/5.12.10/MSVC2017_64/include
+-IC:/QT/QT5.12.10/5.12.10/MSVC2017_64/include/QtGui
+-IC:/QT/QT5.12.10/5.12.10/MSVC2017_64/include/QtANGLE
+-IC:/QT/QT5.12.10/5.12.10/MSVC2017_64/include/QtCore
+-IC:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\ATLMFC\include
+-IC:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include
+-IC:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\ucrt
+-IC:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\shared
+-IC:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\um
+-IC:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\winrt
+-IC:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\cppwinrt

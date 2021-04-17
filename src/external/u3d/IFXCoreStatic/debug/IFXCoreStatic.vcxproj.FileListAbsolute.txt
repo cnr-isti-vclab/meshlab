@@ -1,0 +1,2 @@
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\distrib\lib\meshlab\IFXCoreStatic.pdb
+D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\src\external\u3d\IFXCoreStatic\debug\IFXCoreStatic.pdb

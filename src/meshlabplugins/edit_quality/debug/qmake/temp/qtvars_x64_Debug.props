@@ -1,0 +1,57 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+<Qt_DEFINES_>UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_CORE_LIB</Qt_DEFINES_>
+<Qt_INCLUDEPATH_>C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtOpenGL;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtWidgets;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtGui;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtANGLE;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtXml;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\include\QtCore;/include;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\mkspecs\win32-msvc</Qt_INCLUDEPATH_>
+<Qt_LIBS_>C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\Qt5OpenGLd.lib;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\Qt5Widgetsd.lib;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\Qt5Guid.lib;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\Qt5Xmld.lib;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\Qt5Cored.lib;C:\Qt\Qt5.12.10\5.12.10\msvc2017_64\lib\qtmaind.lib;shell32.lib</Qt_LIBS_>
+<Qt_LIBPATH_>C:\openssl\lib;C:\Utils\my_sql\mysql-5.6.11-winx64\lib;C:\Utils\postgresql\pgsql\lib</Qt_LIBPATH_>
+<QMake_QT_SYSROOT_></QMake_QT_SYSROOT_>
+<QMake_QT_INSTALL_PREFIX_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64</QMake_QT_INSTALL_PREFIX_>
+<QMake_QT_INSTALL_ARCHDATA_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64</QMake_QT_INSTALL_ARCHDATA_>
+<QMake_QT_INSTALL_DATA_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64</QMake_QT_INSTALL_DATA_>
+<QMake_QT_INSTALL_DOCS_>C:/Qt/Qt5.12.10/Docs/Qt-5.12.10</QMake_QT_INSTALL_DOCS_>
+<QMake_QT_INSTALL_HEADERS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/include</QMake_QT_INSTALL_HEADERS_>
+<QMake_QT_INSTALL_LIBS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/lib</QMake_QT_INSTALL_LIBS_>
+<QMake_QT_INSTALL_LIBEXECS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/bin</QMake_QT_INSTALL_LIBEXECS_>
+<QMake_QT_INSTALL_BINS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/bin</QMake_QT_INSTALL_BINS_>
+<QMake_QT_INSTALL_TESTS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/tests</QMake_QT_INSTALL_TESTS_>
+<QMake_QT_INSTALL_PLUGINS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/plugins</QMake_QT_INSTALL_PLUGINS_>
+<QMake_QT_INSTALL_IMPORTS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/imports</QMake_QT_INSTALL_IMPORTS_>
+<QMake_QT_INSTALL_QML_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/qml</QMake_QT_INSTALL_QML_>
+<QMake_QT_INSTALL_TRANSLATIONS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/translations</QMake_QT_INSTALL_TRANSLATIONS_>
+<QMake_QT_INSTALL_CONFIGURATION_></QMake_QT_INSTALL_CONFIGURATION_>
+<QMake_QT_INSTALL_EXAMPLES_>C:/Qt/Qt5.12.10/Examples/Qt-5.12.10</QMake_QT_INSTALL_EXAMPLES_>
+<QMake_QT_INSTALL_DEMOS_>C:/Qt/Qt5.12.10/Examples/Qt-5.12.10</QMake_QT_INSTALL_DEMOS_>
+<QMake_QT_HOST_PREFIX_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64</QMake_QT_HOST_PREFIX_>
+<QMake_QT_HOST_DATA_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64</QMake_QT_HOST_DATA_>
+<QMake_QT_HOST_BINS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/bin</QMake_QT_HOST_BINS_>
+<QMake_QT_HOST_LIBS_>C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/lib</QMake_QT_HOST_LIBS_>
+<QMake_QMAKE_SPEC_>win32-msvc</QMake_QMAKE_SPEC_>
+<QMake_QMAKE_XSPEC_>win32-msvc</QMake_QMAKE_XSPEC_>
+<QMake_QMAKE_VERSION_>3.1</QMake_QMAKE_VERSION_>
+<QMake_QT_VERSION_>5.12.10</QMake_QT_VERSION_>
+<Qt_INCLUDEPATH_
+      >$(Qt_INCLUDEPATH_);Debug;D:\Nghien_cuu_khoa_hoc\Visual_Studio_Codes\Source\Repos\meshlab\src\meshlabplugins\edit_quality</Qt_INCLUDEPATH_>
+    <QtBkup_QtInstall
+      >msvc2017_64</QtBkup_QtInstall>
+    <QtBkup_QtModules
+      >core;xml;opengl;gui;widgets</QtBkup_QtModules>
+    <QtBkup_QtPathBinaries
+      >bin</QtBkup_QtPathBinaries>
+    <QtBkup_QtPathLibraryExecutables
+      >bin</QtBkup_QtPathLibraryExecutables>
+    <QtBkup_QtHeaderSearchPath
+      ></QtBkup_QtHeaderSearchPath>
+    <QtBkup_QtLibrarySearchPath
+      ></QtBkup_QtLibrarySearchPath>
+    <QtBkup_QtVars
+      >DEFINES=/-D([^\s=]+(=(\x22(\\\\|\\\x22|[^\x22])*\x22|\S+))?)/$1/;INCLUDEPATH=INCPATH/-(?:iquote|isystem|idirafter|I)\s*(\x22[^\x22]+\x22|[^\s]+)/$1/;LIBS=/(?:(?:\/LIBPATH:|-L)(?:\x22[^\x22]+\x22|[^\s]+))|(\x22[^\x22]+\x22|[^\s]+)/$1/;LIBPATH=LIBS/(?:\/LIBPATH:|-L)(\x22[^\x22]+\x22|[^\s]+)/$1/</QtBkup_QtVars>
+    <QtBkup_QMakeCodeLines
+      ></QtBkup_QMakeCodeLines>
+    <QtBkup_QtBuildConfig
+      >debug</QtBkup_QtBuildConfig>
+    <QtVersion>5.12.10</QtVersion>
+    <QtVersionMajor>5</QtVersionMajor>
+    <QtVersionMinor>12</QtVersionMinor>
+    <QtVersionPatch>10</QtVersionPatch>
+  </PropertyGroup>
+</Project>
