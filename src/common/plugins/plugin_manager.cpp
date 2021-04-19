@@ -207,11 +207,8 @@ void PluginManager::loadPlugin(const QString& fileName)
 	if (type.isFilterPlugin()){
 		filterPlugins.pushFilterPlugin(qobject_cast<FilterPlugin *>(plugin));
 	}
-	if (type.isIOMeshPlugin()){
-		ioMeshPlugins.pushIOMeshPlugin(qobject_cast<IOMeshPlugin *>(plugin));
-	}
-	if (type.isIORasterPlugin()){
-		ioRasterPlugins.pushIORasterPlugin(qobject_cast<IORasterPlugin*>(plugin));
+	if (type.isIOPlugin()){
+		ioPlugins.pushIOPlugin(qobject_cast<IOPlugin *>(plugin));
 	}
 	if (type.isRenderPlugin()){
 		renderPlugins.pushRenderPlugin(qobject_cast<RenderPlugin *>(plugin));
@@ -240,11 +237,8 @@ void PluginManager::unloadPlugin(MeshLabPlugin* ifp)
 		if (type.isFilterPlugin()){
 			filterPlugins.eraseFilterPlugin(dynamic_cast<FilterPlugin *>(ifp));
 		}
-		if (type.isIOMeshPlugin()){
-			ioMeshPlugins.eraseIOMeshPlugin(dynamic_cast<IOMeshPlugin *>(ifp));
-		}
-		if (type.isIORasterPlugin()){
-			ioRasterPlugins.eraseIORasterPlugin(dynamic_cast<IORasterPlugin*>(ifp));
+		if (type.isIOPlugin()){
+			ioPlugins.eraseIOPlugin(dynamic_cast<IOPlugin *>(ifp));
 		}
 		if (type.isRenderPlugin()){
 			renderPlugins.eraseRenderPlugin(dynamic_cast<RenderPlugin *>(ifp));
@@ -282,7 +276,7 @@ unsigned int PluginManager::size() const
 
 int PluginManager::numberIOPlugins() const
 {
-	return ioMeshPlugins.size();
+	return ioPlugins.size();
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
@@ -296,64 +290,64 @@ QAction* PluginManager::filterAction(const QString& name)
 	return filterPlugins.filterAction(name);
 }
 
-IOMeshPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
+IOPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
-	return ioMeshPlugins.inputMeshPlugin(inputFormat);
+	return ioPlugins.inputMeshPlugin(inputFormat);
 }
 
-IOMeshPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
+IOPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 {
-	return ioMeshPlugins.outputMeshPlugin(outputFormat);
+	return ioPlugins.outputMeshPlugin(outputFormat);
 }
 
-IORasterPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
+IOPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
 {
-	return ioRasterPlugins.inputRasterPlugin(inputFormat);
+	return ioPlugins.inputRasterPlugin(inputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
 {
-	return ioMeshPlugins.isInputMeshFormatSupported(inputFormat);
+	return ioPlugins.isInputMeshFormatSupported(inputFormat);
 }
 
 bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) const
 {
-	return ioMeshPlugins.isOutputMeshFormatSupported(outputFormat);
+	return ioPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
 bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
 {
-	return ioRasterPlugins.isInputRasterFormatSupported(inputFormat);
+	return ioPlugins.isInputRasterFormatSupported(inputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
 {
-	return ioMeshPlugins.inputMeshFormatList();
+	return ioPlugins.inputMeshFormatList();
 }
 
 QStringList PluginManager::outputMeshFormatList() const
 {
-	return ioMeshPlugins.outputMeshFormatList();
+	return ioPlugins.outputMeshFormatList();
 }
 
 QStringList PluginManager::inputRasterFormatList() const
 {
-	return ioRasterPlugins.inputRasterFormatList();
+	return ioPlugins.inputRasterFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
 {
-	return inputFormatListDialog(ioMeshPluginIterator());
+	return inputFormatListDialog(ioPluginIterator());
 }
 
 QStringList PluginManager::outputMeshFormatListDialog() const
 {
-	return outputFormatListDialog(ioMeshPluginIterator());
+	return outputFormatListDialog(ioPluginIterator());
 }
 
 QStringList PluginManager::inputRasterFormatListDialog() const
 {
-	return inputFormatListDialog(ioRasterPluginIterator());
+	return inputRasterFormatListDialog(ioPluginIterator());
 }
 
 MeshLabPlugin* PluginManager::operator[](unsigned int i) const
@@ -371,14 +365,9 @@ FilterPluginContainer::FilterPluginRangeIterator PluginManager::filterPluginIter
 	return filterPlugins.filterPluginIterator(iterateAlsoDisabledPlugins);
 }
 
-IOMeshPluginContainer::IOMeshPluginRangeIterator PluginManager::ioMeshPluginIterator(bool iterateAlsoDisabledPlugins) const
+IOPluginContainer::IOPluginRangeIterator PluginManager::ioPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
-	return ioMeshPlugins.ioMeshPluginIterator(iterateAlsoDisabledPlugins);
-}
-
-IORasterPluginContainer::IORasterPluginRangeIterator PluginManager::ioRasterPluginIterator(bool iterateAlsoDisabledPlugins) const
-{
-	return ioRasterPlugins.ioRasterPluginIterator(iterateAlsoDisabledPlugins);
+	return ioPlugins.ioPluginIterator(iterateAlsoDisabledPlugins);
 }
 
 RenderPluginContainer::RenderPluginRangeIterator PluginManager::renderPluginIterator(bool iterateAlsoDisabledPlugins) const
@@ -422,9 +411,9 @@ QStringList PluginManager::inputFormatListDialog(RangeIterator iterator)
 {
 	QString allKnownFormats = QObject::tr("All known formats (");
 	QStringList inputRasterFormatsDialogStringList;
-	for (auto ioRaster : iterator){
+	for (auto io : iterator){
 		QString allKnownFormatsFilter;
-		for (const FileFormat& currentFormat : ioRaster->importFormats()){
+		for (const FileFormat& currentFormat : io->importFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();
@@ -447,8 +436,8 @@ template<typename RangeIterator>
 QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 {
 	QStringList inputRasterFormatsDialogStringList;
-	for (auto ioRaster : iterator){
-		for (const FileFormat& currentFormat : ioRaster->exportFormats()){
+	for (auto io : iterator){
+		for (const FileFormat& currentFormat : io->exportFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();
@@ -459,6 +448,32 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 			inputRasterFormatsDialogStringList.append(currentFilterEntry);
 		}
 	}
+	return inputRasterFormatsDialogStringList;
+}
+
+template<typename RangeIterator>
+QStringList PluginManager::inputRasterFormatListDialog(RangeIterator iterator)
+{
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputRasterFormatsDialogStringList;
+	for (auto io : iterator){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : io->importRasterFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+		}
+		allKnownFormats += allKnownFormatsFilter;
+	}
+	allKnownFormats.append(')');
+	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
 	return inputRasterFormatsDialogStringList;
 }
 

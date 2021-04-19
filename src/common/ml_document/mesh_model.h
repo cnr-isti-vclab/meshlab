@@ -165,10 +165,18 @@ private:
     unsigned int _id;
     bool modified;
 
+	//this is an id used for meshes that are loaded from files
+	//that can store more than one mesh. For meshes loaded from
+	//files containing just this mesh, this id will be -1.
+	int idInsideFile;
+
 public:
     void Clear();
     void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
     inline int id() const {return _id;}
+
+	int idInFile() const {return idInsideFile;}
+	void setIdInFile(int id) {idInsideFile = id;}
     
     
     // Some notes about the files and naming.

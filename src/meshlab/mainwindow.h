@@ -143,18 +143,18 @@ private:
 
 private slots:
 	void documentUpdateRequested();
-	bool importMesh(QString fileName=QString(), bool isareload = false);
+	bool importMesh(QString fileName=QString());
 	void endEdit();
 	void updateProgressBar(const int pos,const QString& text);
 	void updateTexture(int meshid);
 public:
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool loadMesh(const QString& fileName,IOMeshPlugin *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMesh(const QString& fileName,IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
-	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(),bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void defaultPerViewRenderingData(MLRenderingData& dt) const;
 	void getRenderingData(int mid,MLRenderingData& dt) const;

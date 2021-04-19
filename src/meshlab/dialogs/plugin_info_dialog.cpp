@@ -31,7 +31,7 @@
 #include <QSettings>
 
 #include <common/plugins/interfaces/filter_plugin.h>
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
 #include <common/plugins/interfaces/render_plugin.h>
 #include <common/plugins/interfaces/edit_plugin.h>
@@ -178,8 +178,8 @@ void PluginInfoDialog::populateTreeWidget()
 				for(QAction *a: fpi->actions())
 					tmplist.push_back(a->text());
 			}
-			if (type.isIOMeshPlugin()){
-				IOMeshPlugin* iopi = dynamic_cast<IOMeshPlugin*>(fp);
+			if (type.isIOPlugin()){
+				IOPlugin* iopi = dynamic_cast<IOPlugin*>(fp);
 				for(const FileFormat& f: iopi->importFormats()){
 					QString formats;
 					for(const QString& s : f.extensions)
@@ -190,15 +190,6 @@ void PluginInfoDialog::populateTreeWidget()
 					QString formats;
 					for(const QString& s: f.extensions)
 						formats+="Exporter_"+s+" ";
-					tmplist.push_back(formats);
-				}
-			}
-			if (type.isIORasterPlugin()){
-				IORasterPlugin* iorpi = dynamic_cast<IORasterPlugin*>(fp);
-				for(const FileFormat& f: iorpi->importFormats()){
-					QString formats;
-					for(const QString& s : f.extensions)
-						formats+="Importer_"+s+" ";
 					tmplist.push_back(formats);
 				}
 			}

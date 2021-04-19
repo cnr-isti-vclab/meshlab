@@ -1014,7 +1014,11 @@ void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *pa
 	
 	glColor(textColor);
 	drawQuotedLine(Point3d(border*4/5.0,border,0),Point3d(border*4/5.0,1.0-border,0),ch.MinV(),ch.MaxV(),len/20.0,painter,qf,0,true);
-	glLabel::render(painter,Point3f(border,1-border*0.5,0),QString("MinV %1 MaxV %2 MaxC %3").arg(ch.MinElem()).arg(ch.MaxElem()).arg(maxWide),glLabel::Mode(textColor));
+	glLabel::Mode mode(textColor);
+	QString parName = perVertex ? perVertexHistFontSize() : perFaceHistFontSize();
+	int fSize = par->getInt(parName);
+	mode.qFont.setPixelSize(fSize);
+	glLabel::render(painter,Point3f(border,1-border*0.5,0),QString("MinV %1 MaxV %2 MaxC %3").arg(ch.MinElem()).arg(ch.MaxElem()).arg(maxWide), mode);
 	// Closing 2D
 	glPopAttrib();
 	glPopMatrix(); // restore modelview
@@ -1175,6 +1179,7 @@ void DecorateBasePlugin::initGlobalParameterList(const QAction* action, RichPara
 		parset.addParam(RichFloat(perVertexHistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
 			"Useful only if you have to compare multiple histograms.<br>"
 			"Warning, with wrong values the histogram can become excessively flat or it can overflow"));
+		parset.addParam(RichInt(perVertexHistFontSize(), 12, "Text Font Size", "Text Font size rendered"));
 	} break;
 		
 	case DP_SHOW_FACE_QUALITY_HISTOGRAM :
@@ -1188,6 +1193,7 @@ void DecorateBasePlugin::initGlobalParameterList(const QAction* action, RichPara
 		parset.addParam(RichFloat(perFaceHistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
 			"Useful only if you have to compare multiple histograms.<br>"
 			"Warning, with wrong values the histogram can become excessively flat or it can overflow"));
+		parset.addParam(RichInt(perFaceHistFontSize(), 12, "Text Font Size", "Text Font size rendered"));
 	} break;
 		
 	case DP_SHOW_CAMERA :

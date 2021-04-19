@@ -33,7 +33,7 @@ namespace pymeshlab {
  * Each one of these function is binded with a particular action of a plugin,
  * which can be a filter action, an input/output mesh format or an input raster
  * format. Therefore, given a PluginManager, a FunctionSet will be constructed
- * from it considering only Filter, IOMesh and IORaster type of plugins.
+ * from it considering only Filter and IO type of plugins.
  *
  * Note: there is not the actual link between the function and the action here.
  * This container is meant just as a container of *names*, therefore from here
@@ -83,7 +83,7 @@ public:
 
 private:
 	void updateSaveParameters(
-			IOMeshPlugin* plugin,
+			IOPlugin* plugin,
 			const QString& outputFormat,
 			Function& f);
 

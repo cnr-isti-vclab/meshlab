@@ -27,13 +27,13 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 
-class ExtraMeshIOPlugin : public QObject, public IOMeshPlugin
+class ExtraMeshIOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
-	Q_INTERFACES(IOMeshPlugin)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
 public:
 	QString pluginName() const;

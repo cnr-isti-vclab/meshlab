@@ -154,7 +154,9 @@ public:
 	inline QString perFaceHistFixedWidthParam() const { return  "MeshLab::Decoration::PerFaceFixedHistWidthParam" ; }
 	inline QString perVertexHistAreaParam() const { return  "MeshLab::Decoration::PerVertexAreaHistParam" ; }
 	inline QString perFaceHistAreaParam() const { return  "MeshLab::Decoration::PerFaceAreaHistParam" ; }
-	
+	inline QString perVertexHistFontSize() const { return "MeshLab::Decoration::PerVertexHistFontSize" ; }
+	inline QString perFaceHistFontSize() const { return "MeshLab::Decoration::PerFaceHistFontSize" ; }
+
 	inline QString TextColorParam() const { return  "MeshLab::Decoration::TextColor" ; }
 	
 	inline QString ShowFauxEdgeWidth() const { return  "MeshLab::Decoration::FauxEdgeWidth" ; }

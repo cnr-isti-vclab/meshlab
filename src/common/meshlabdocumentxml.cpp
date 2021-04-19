@@ -80,6 +80,10 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					visible = (mesh.attributes().namedItem("visible").nodeValue().toInt() == 1);
 				MeshModel* mm = md.addNewMesh(filen, label);
 				mm->visible = visible;
+
+				if (mesh.attributes().contains("idInFile"))
+					mm->setIdInFile(mesh.attributes().namedItem("idInFile").nodeValue().toInt());
+
 				QDomNode tr = mesh.firstChildElement("MLMatrix44");
 
 				if (!tr.isNull())
@@ -193,6 +197,7 @@ QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, bool binary, bool s
 	meshElem.setAttribute("label", mp->label());
 	meshElem.setAttribute("filename", mp->relativePathName());
 	meshElem.setAttribute("visible", saveViewState?mp->isVisible():true);
+	meshElem.setAttribute("idInFile", mp->idInFile());
 	if (binary)
 		meshElem.appendChild(Matrix44mToBinaryXML(mp->cm.Tr, doc));
 	else
@@ -251,7 +256,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 	ddoc.appendChild(root);
 	QDomElement mgroot = ddoc.createElement("MeshGroup");
 
-	foreach(MeshModel *mmp, md.meshList)
+	for(MeshModel *mmp : md.meshList)
 	{
 		if ((!onlyVisibleLayers) || (mmp->visible))
 		{

@@ -36,6 +36,17 @@
 
 using namespace vcg;
 
+MeshModel::MeshModel(MeshDocument *_parent, unsigned int id, const QString& fullFileName, const QString& labelName) :
+	idInsideFile(-1)
+{
+	/*glw.m = &(cm);*/
+	Clear();
+	parent=_parent;
+	_id=id;
+	if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
+	if(!labelName.isEmpty())     this->_label=labelName;
+}
+
 void MeshModel::Clear()
 {
 	setMeshModified(false);
@@ -57,16 +68,6 @@ void MeshModel::UpdateBoxAndNormals()
         tri::UpdateNormal<CMeshO>::PerFaceNormalized(cm);
         tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(cm);
     }
-}
-
-MeshModel::MeshModel(MeshDocument *_parent, unsigned int id, const QString& fullFileName, const QString& labelName)
-{
-    /*glw.m = &(cm);*/
-    Clear();
-    parent=_parent;
-    _id=id;
-    if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
-    if(!labelName.isEmpty())     this->_label=labelName;
 }
 
 QString MeshModel::relativePathName() const
