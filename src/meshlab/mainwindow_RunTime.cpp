@@ -46,6 +46,7 @@
 #include <common/filterscript.h>
 #include <common/mlexception.h>
 #include <common/globals.h>
+#include <common/utilities/load_save.h>
 
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
@@ -2370,28 +2371,22 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
 bool MainWindow::importMesh(QString fileName)
 {
-	if (!GLA())
-	{
+	if (!GLA()) {
 		this->newProject();
 		if(!GLA())
 			return false;
 	}
 	
-	
-	//QStringList suffixList;
-	// HashTable storing all supported formats together with
-	// the (1-based) index  of first plugin which is able to open it
-	//QHash<QString, MeshIOInterface*> allKnownFormats;
-	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
-	if (fileNameList.isEmpty())	return false;
-	else
-	{
+	if (fileNameList.isEmpty()) {
+		return false;
+	}
+	else {
 		//save path away so we can use it again
 		QString path = fileNameList.first();
 		path.truncate(path.lastIndexOf("/"));
@@ -2400,8 +2395,7 @@ bool MainWindow::importMesh(QString fileName)
 	
 	QElapsedTimer allFileTime;
 	allFileTime.start();
-	for(const QString& fileName : fileNameList)
-	{
+	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
 		if(!fi.exists()) {
 			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
@@ -2417,8 +2411,7 @@ bool MainWindow::importMesh(QString fileName)
 		QString extension = fi.suffix();
 		IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 
-		if (pCurrentIOPlugin == nullptr)
-		{
+		if (pCurrentIOPlugin == nullptr) {
 			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
 			return false;
@@ -2449,14 +2442,19 @@ bool MainWindow::importMesh(QString fileName)
 			meshList.push_back(mm);
 		}
 		qb->show();
-		QElapsedTimer t;
-		t.start();
-		Matrix44m mtr;
-		mtr.SetIdentity();
 		std::list<int> masks;
-		bool open = loadMesh(fileName,pCurrentIOPlugin, meshList, masks,&prePar,mtr,false);
-		if(open)
-		{
+		try {
+			QElapsedTimer t;
+			t.start();
+			meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, masks, QCallBack);
+			saveRecentFileList(fileName);
+			updateLayerDialog();
+			for (MeshModel* mm : meshList)
+				computeRenderingDataOnLoading(mm, false, nullptr);
+			QString warningString = pCurrentIOPlugin->warningMessageString();
+			if (!warningString.isEmpty()){
+				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
+			}
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			RichParameterList par;
 
@@ -2470,22 +2468,12 @@ bool MainWindow::importMesh(QString fileName)
 				for (MeshModel* mm : meshList)
 					pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 			}
-			/*MultiViewer_Container* mv = GLA()->mvc();
-			if (mv != NULL)
-			{
-			for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
-			{
-			GLArea* ar = mv->getViewer(glarid);
-			if (ar != NULL)
-			MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode(mm->id(),*ar);
-			}
-			}*/
 		}
-		else
-		{
+		catch (const MLException& e){
 			for (MeshModel* mm : meshList)
 				meshDoc()->delMesh(mm);
-			GLA()->Logf(0, "Warning: Mesh %s has not been opened", qUtf8Printable(fileName));
+			GLA()->Logf(0, "Error: File %s has not been loaded", qUtf8Printable(fileName));
+			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
 	}// end foreach file of the input list
 	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
