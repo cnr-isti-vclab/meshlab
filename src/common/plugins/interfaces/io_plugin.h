@@ -84,6 +84,11 @@ public:
 	{
 	}
 
+	virtual void initOpenParameter(
+			const QString& /*format*/,
+			const std::list<MeshModel*>& /*m*/,
+			RichParameterList& /*parameters*/);
+
 	/**
 	 * @brief The initOpenParameter function is called to initialize the list
 	 * of additional parameters that a OPENING filter could require.
@@ -98,6 +103,11 @@ public:
 			RichParameterList& /*parameters*/)
 	{
 	}
+
+	virtual void applyOpenParameter(
+			const QString& /*format*/,
+			const std::list<MeshModel*>& /*m*/,
+			const RichParameterList& /*parameters*/);
 
 	/**
 	 * @brief The applyOpenParameter function is the corrispondent function to
