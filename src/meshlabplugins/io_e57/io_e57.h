@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -25,18 +25,18 @@
 
 #include <QObject>
 
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 #include <common/ml_document/mesh_model.h>
 #include <external/e57/include/E57Format.h>
 #include <E57SimpleReader.h>
 
 typedef typename CMeshO::VertexIterator VertexIterator;
 
-class E57IOPlugin : public QObject, public IOMeshPlugin
+class E57IOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
-	Q_INTERFACES(IOMeshPlugin)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
   
 public:
 	QString pluginName() const;
