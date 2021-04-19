@@ -8,6 +8,16 @@ unsigned int IOPlugin::numberMeshesContainedInFile(
 	return 1;
 }
 
+void IOPlugin::initOpenParameter(const QString& format, const std::list<MeshModel*>& ml, RichParameterList& params)
+{
+	initOpenParameter(format, *ml.front(), params);
+}
+
+void IOPlugin::applyOpenParameter(const QString& format, const std::list<MeshModel*>& ml, const RichParameterList& params)
+{
+	applyOpenParameter(format, *ml.front(), params);
+}
+
 void IOPlugin::open(
 		const QString& format,
 		const QString& fileName,
