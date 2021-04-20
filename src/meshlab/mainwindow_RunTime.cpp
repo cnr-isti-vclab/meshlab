@@ -2586,7 +2586,7 @@ void MainWindow::reload()
 	MeshModel* mm = meshDoc()->mm();
 	if (meshDoc()->mm()->idInFile() > 0){
 		for (MeshModel *mmm : meshDoc()->meshList){
-			if (mmm->label() == mm->label() &&  mmm->idInFile() == 0)
+			if (mmm->shortName() == mm->shortName() && mmm->idInFile() == 0)
 				mm = mmm; // root mesh layer of the file
 		}
 		if (mm == meshDoc()->mm()){
