@@ -2557,13 +2557,22 @@ void MainWindow::reloadAllMesh()
 	// Discards changes and reloads current file
 	// save current file name
 	qb->show();
-	foreach(MeshModel *mmm,meshDoc()->meshList)
+	QElapsedTimer t;
+	t.start();
+	for(MeshModel *mmm : meshDoc()->meshList)
 	{
 		QString fileName = mmm->fullName();
-		Matrix44m mat;
-		mat.SetIdentity();
-		loadMeshWithStandardParams(fileName,mmm,mat,true);
+		if (!fileName.isEmpty()){
+			try {
+				meshlab::reloadMesh(fileName, *meshDoc(), *mmm, QCallBack);
+				computeRenderingDataOnLoading(mmm,true, nullptr);
+			}
+			catch (const MLException& e) {
+				QMessageBox::critical(this, "Reload Error", e.what());
+			}
+		}
 	}
+	GLA()->Log(0, ("All meshes reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	qb->reset();
 	
 	if (_currviewcontainer != NULL)
@@ -2580,15 +2589,33 @@ void MainWindow::reload()
 	// Discards changes and reloads current file
 	// save current file name
 	qb->show();
-	QString fileName = meshDoc()->mm()->fullName();
-	if (fileName.isEmpty())
-	{
+	MeshModel* mm = meshDoc()->mm();
+	if (meshDoc()->mm()->idInFile() > 0){
+		for (MeshModel *mmm : meshDoc()->meshList){
+			if (mmm->label() == mm->label() &&  mmm->idInFile() == 0)
+				mm = mmm; // root mesh layer of the file
+		}
+		if (mm == meshDoc()->mm()){
+			QMessageBox::critical(this, "Reload Error", "Impossible the file: cannot find the root mesh layer of the file.");
+			return;
+		}
+	}
+
+	QString fileName = mm->fullName();
+	if (fileName.isEmpty()) {
 		QMessageBox::critical(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
 		return;
 	}
-	Matrix44m mat;
-	mat.SetIdentity();
-	loadMeshWithStandardParams(fileName,meshDoc()->mm(),mat,true);
+	try {
+		QElapsedTimer t;
+		t.start();
+		meshlab::reloadMesh(fileName, *meshDoc(), *mm, QCallBack);
+		computeRenderingDataOnLoading(mm, true, nullptr);
+		GLA()->Log(0, ("Mesh reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
+	}
+	catch (const MLException& e) {
+		QMessageBox::critical(this, "Reload Error", e.what());
+	}
 	qb->reset();
 	if (_currviewcontainer != NULL)
 	{

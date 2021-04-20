@@ -213,13 +213,16 @@ void reloadMesh(
 			}
 		}
 		else {
-			throw MLException(
+			//ignore this case: this mesh will be reloaded by the mesh with id = 0
+			if (! (mm.idInFile() > 0 && nMeshes > 1)) {
+				throw MLException(
 					"Cannot reload " + filename + ": expected number layers is "
 					"different from the number of meshes contained in th file.");
+			}
 		}
 
 		std::list<int> masks;
-		loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
+		loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 		RichParameterList par;
 		ioPlugin->initOpenParameter(extension, meshList, par);
 		ioPlugin->applyOpenParameter(extension, meshList, par);
