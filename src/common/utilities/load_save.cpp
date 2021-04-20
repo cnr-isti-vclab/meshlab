@@ -53,18 +53,11 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 		throw e;
 	}
 
-	QString warningError = ioPlugin->warningMessageString();
-
-	//saveRecentFileList(fileName);
-
 	auto itmesh = meshList.begin();
 	auto itmask = maskList.begin();
 	for (unsigned int i = 0; i < meshList.size(); ++i){
 		MeshModel* mm = *itmesh;
 		int mask = *itmask;
-
-		//if (!(mm->cm.textures.empty()))
-		//	updateTexture(mm->id());
 
 		// In case of polygonal meshes the normal should be updated accordingly
 		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) {
@@ -98,21 +91,12 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
 		vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
 		if(delVertNum>0 || delFaceNum>0 )
-			ioPlugin->reportWarning(warningError + "\n" + QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum));
-			//QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-
-		//mm->cm.Tr = mtr;
+			ioPlugin->reportWarning(QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum));
 
 		//computeRenderingDataOnLoading(mm,isareload, rendOpt);
 		++itmesh;
 		++itmask;
 	}
-
-	//updateLayerDialog();
-
-
-	//meshDoc()->setBusy(false);
-
 	QDir::setCurrent(origDir); // undo the change of directory before leaving
 }
 

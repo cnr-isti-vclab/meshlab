@@ -1751,6 +1751,8 @@ bool MainWindow::openProject(QString fileName)
 				meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
 				meshDoc()->mm()->cm.Tr.Import(rm.transformation);
 				computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+				if (!(meshDoc()->mm()->cm.textures.empty()))
+					updateTexture(meshDoc()->mm()->id());
 			}
 			catch (const MLException& e){
 				QMessageBox::critical(this, "Meshlab Opening Error", e.what());
@@ -1894,6 +1896,8 @@ bool MainWindow::appendProject(QString fileName)
 					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
 					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
 					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+					if (!(meshDoc()->mm()->cm.textures.empty()))
+						updateTexture(meshDoc()->mm()->id());
 				}
 				catch (const MLException& e){
 					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
@@ -2438,8 +2442,11 @@ bool MainWindow::importMesh(QString fileName)
 			meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, masks, QCallBack);
 			saveRecentFileList(fileName);
 			updateLayerDialog();
-			for (MeshModel* mm : meshList)
+			for (MeshModel* mm : meshList) {
 				computeRenderingDataOnLoading(mm, false, nullptr);
+				if (! (mm->cm.textures.empty()))
+					updateTexture(mm->id());
+			}
 			QString warningString = pCurrentIOPlugin->warningMessageString();
 			if (!warningString.isEmpty()){
 				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
@@ -2942,17 +2949,19 @@ void MainWindow::updateTexture(int meshid)
 	{
 		QImage img;
 		QFileInfo fi(mymesh->cm.textures[i].c_str());
+		QFileInfo mfi(mymesh->fullName());
 		QString filename = fi.absoluteFilePath();
 		bool res = img.load(filename);
-		sometextfailed = sometextfailed || !res;
 		if(!res)
 		{
-			res = img.load(filename);
+			QString fn2 = mfi.absolutePath() + "/" + fi.fileName();
+			res = img.load(fn2);
 			if(!res)
 			{
 				QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
 				meshDoc()->Log.log(GLLogStream::WARNING,qUtf8Printable(errmsg));
-				unexistingtext += "<font color=red>" + filename + "</font><br>";
+				unexistingtext += "<font color=red>" + fi.fileName() + "</font><br>";
+				sometextfailed = sometextfailed || !res;
 			}
 		}
 		
@@ -2966,11 +2975,8 @@ void MainWindow::updateTexture(int meshid)
 		/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
 		
 		if (!res)
-			res = img.load(":/images/dummy.png");
+			img.load(":/images/dummy.png");
 		GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
-		
-		if (sometextfailed)
-			QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 		
 		for(int tt = 0;tt < mvc->viewerCounter();++tt)
 		{

@@ -39,8 +39,10 @@ void IOPlugin::open(
 
 void IOPlugin::reportWarning(const QString& warningMessage) const
 {
-	MeshLabPluginLogger::log(GLLogStream::WARNING, warningMessage.toStdString());
-	warnString += "\n" + warningMessage;
+	if (!warningMessage.isEmpty()){
+		MeshLabPluginLogger::log(GLLogStream::WARNING, warningMessage.toStdString());
+		warnString += "\n" + warningMessage;
+	}
 }
 
 void IOPlugin::wrongOpenFormat(const QString& format)

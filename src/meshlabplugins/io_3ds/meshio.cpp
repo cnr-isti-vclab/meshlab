@@ -174,12 +174,14 @@ void ExtraMeshIOPlugin::open(
 				for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
 				{
 					FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
-					if (pFile == NULL) {
+					if (pFile == nullptr) {
 						missingTextureFilesMsg.append("\n");
 						missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
 						someTextureNotFound = true;
 					}
-					fclose (pFile);
+					else {
+						fclose (pFile);
+					}
 				}
 				if (someTextureNotFound){
 					reportWarning("Missing texture files: " + missingTextureFilesMsg);
@@ -216,13 +218,15 @@ void ExtraMeshIOPlugin::open(
 			for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
 			{
 				FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
-				if (pFile == NULL)
+				if (pFile == nullptr)
 				{
 					missingTextureFilesMsg.append("\n");
 					missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
 					someTextureNotFound = true;
 				}
-				fclose (pFile);
+				else {
+					fclose (pFile);
+				}
 			}
 			if (someTextureNotFound){
 				reportWarning("Missing texture files: " + missingTextureFilesMsg);
