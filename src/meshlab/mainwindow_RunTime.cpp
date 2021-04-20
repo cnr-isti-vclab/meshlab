@@ -1748,7 +1748,7 @@ bool MainWindow::openProject(QString fileName)
 		for(const RangeMap& rm : rmv) {
 			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
 			try {
-				meshlab::loadWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+				meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
 				meshDoc()->mm()->cm.Tr.Import(rm.transformation);
 				computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
 			}
@@ -1891,7 +1891,7 @@ bool MainWindow::appendProject(QString fileName)
 			for(const RangeMap& rm : rmv) {
 				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
 				try {
-					meshlab::loadWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
 					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
 					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
 				}
@@ -2136,43 +2136,29 @@ bool MainWindow::importRaster(const QString& fileImg)
 	allFileTime.start();
 	
 	for(const QString& fileName : fileNameList) {
-		QFileInfo fi(fileName);
-		QString extension = fi.suffix();
-		IOPlugin *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
-		//pCurrentIOPlugin->setLog(gla->log);
-		if (pCurrentIOPlugin == NULL)
-		{
-			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
-			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-			return false;
-		}
 
-		QFileInfo info(fileName);
-		RasterModel *rm = meshDoc()->addNewRaster();
-		qb->show();
-		QElapsedTimer t;
-		t.start();
 		try {
-			pCurrentIOPlugin->openRaster(extension, fileName, *rm, QCallBack);
+			QElapsedTimer t;
+			t.start();
+			meshlab::loadRaster(fileName, *meshDoc(), QCallBack);
 			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
-			GLA()->fov = rm->shot.GetFovFromFocal();
-			rm->shot = GLA()->shotFromTrackball().first;
+			GLA()->fov = meshDoc()->rm()->shot.GetFovFromFocal();
+			meshDoc()->rm()->shot = GLA()->shotFromTrackball().first;
 			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 			if (!layerDialog->isVisible())
 				layerDialog->setVisible(true);
+			GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 		}
 		catch(const MLException& e){
 			QMessageBox::warning(
 						this,
 						tr("Opening Failure"),
 						"While opening: " + fileName + "\n\n" + e.what());
-			meshDoc()->delRaster(rm);
 			GLA()->Logf(0, "Warning: Raster %s has not been opened", qUtf8Printable(fileName));
 		}
 	}// end foreach file of the input list
-	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
-	
+
 	if (_currviewcontainer != NULL)
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 	
