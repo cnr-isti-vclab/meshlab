@@ -149,10 +149,17 @@ void loadWithStandardParameters(const QString& filename, MeshDocument& md, vcg::
 
 	std::list<int> masks;
 
-	loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
-	RichParameterList par;
-	ioPlugin->initOpenParameter(extension, meshList, par);
-	ioPlugin->applyOpenParameter(extension, meshList, par);
+	try{
+		loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
+		RichParameterList par;
+		ioPlugin->initOpenParameter(extension, meshList, par);
+		ioPlugin->applyOpenParameter(extension, meshList, par);
+	}
+	catch(const MLException& e){
+		for (MeshModel* mm : meshList)
+			md.delMesh(mm);
+		throw e;
+	}
 }
 
 

@@ -1740,21 +1740,21 @@ bool MainWindow::openProject(QString fileName)
 	{
 		vector<RangeMap> rmv;
 		int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-		if(retVal != ALNParser::NoError)
-		{
+		if(retVal != ALNParser::NoError) {
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
 			return false;
 		}
 		
-		bool openRes=true;
-		vector<RangeMap>::iterator ir;
-		for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
-		{
-			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
-			meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-			openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),ir->transformation);
-			if(!openRes)
-				meshDoc()->delMesh(meshDoc()->mm());
+		for(const RangeMap& rm : rmv) {
+			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+			try {
+				meshlab::loadWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+				meshDoc()->mm()->cm.Tr.Import(rm.transformation);
+				computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+			}
+			catch (const MLException& e){
+				QMessageBox::critical(this, "Meshlab Opening Error", e.what());
+			}
 		}
 	}
 	
@@ -1883,18 +1883,21 @@ bool MainWindow::appendProject(QString fileName)
 		{
 			vector<RangeMap> rmv;
 			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-			if(retVal != ALNParser::NoError)
-			{
+			if(retVal != ALNParser::NoError) {
 				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
 				return false;
 			}
 			
-			for(vector<RangeMap>::iterator ir=rmv.begin();ir!=rmv.end();++ir)
-			{
-				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
-				meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-				if(!loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),(*ir).transformation))
-					meshDoc()->delMesh(meshDoc()->mm());
+			for(const RangeMap& rm : rmv) {
+				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+				try {
+					meshlab::loadWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
+					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+				}
+				catch (const MLException& e){
+					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
+				}
 			}
 		}
 		
