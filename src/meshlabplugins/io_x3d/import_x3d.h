@@ -2003,19 +2003,25 @@ namespace io {
 				}
 				textTransfList = appearance.elementsByTagName("TextureTransform");
 				QDomElement materialNode = appearance.firstChildElement("Material");
-				QStringList list;
-				findAndParseAttribute(list, materialNode, "diffuseColor", "");
-				if (list.size() >= 3)
+				if (!materialNode.isNull())
 				{
-					float transparency = 1.0 - materialNode.attribute("transparency", "0.0").toFloat();
-					vcg::Color4f color(list.at(0).toFloat(), list.at( 1).toFloat(), list.at(2).toFloat(), transparency); 
-					vcg::Color4b colorB;
-					colorB.Import(color);
-					info->color = colorB;
-					info->meshColor = true;
+					result = solveDefUse(materialNode, defMap, materialNode, info);
+					if (result != E_NOERROR) return result;
+
+					QStringList list;
+					findAndParseAttribute(list, materialNode, "diffuseColor", "");
+					if (list.size() >= 3)
+					{
+						float transparency = 1.0 - materialNode.attribute("transparency", "0.0").toFloat();
+						vcg::Color4f color(list.at(0).toFloat(), list.at( 1).toFloat(), list.at(2).toFloat(), transparency); 
+						vcg::Color4b colorB;
+						colorB.Import(color);
+						info->color = colorB;
+						info->meshColor = true;
+					}
+					else
+						info->meshColor = false;
 				}
-				else
-					info->meshColor = false;
 
 			}
 			return E_NOERROR;
