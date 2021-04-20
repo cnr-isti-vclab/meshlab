@@ -2410,6 +2410,7 @@ bool MainWindow::importMesh(QString fileName)
 			return false;
 		}
 		
+		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		RichParameterList prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
 		if(!prePar.isEmpty())

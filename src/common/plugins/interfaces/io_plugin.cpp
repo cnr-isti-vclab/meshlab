@@ -45,12 +45,12 @@ void IOPlugin::reportWarning(const QString& warningMessage) const
 	}
 }
 
-void IOPlugin::wrongOpenFormat(const QString& format)
+void IOPlugin::wrongOpenFormat(const QString& format) const
 {
 	throw MLException("Internal error: unknown open format " + format + " to " + pluginName() + " plugin.");
 }
 
-void IOPlugin::wrongSaveFormat(const QString& format)
+void IOPlugin::wrongSaveFormat(const QString& format) const
 {
 	throw MLException("Internal error: unknown save format " + format + " to " + pluginName() + " plugin.");
 }

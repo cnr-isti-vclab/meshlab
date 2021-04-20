@@ -44,15 +44,24 @@ public:
 
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
 
-	void initPreOpenParameter(
-				const QString& format,
-				RichParameterList& parameters);
+	unsigned int numberMeshesContainedInFile(
+			const QString& format,
+			const QString& fileName) const;
 
-	void open(const QString &formatName,
+	void open(
+			const QString &formatName,
 			const QString &fileName,
-			MeshModel &m,
+			MeshModel& m,
 			int& mask,
-			const RichParameterList &params,
+			const RichParameterList& params,
+			vcg::CallBackPos *cb=0);
+
+	void open(
+			const QString &formatName,
+			const QString &fileName,
+			const std::list<MeshModel *>& meshList,
+			std::list<int>& maskList,
+			const RichParameterList& params,
 			vcg::CallBackPos *cb=0);
 
 	void save(
