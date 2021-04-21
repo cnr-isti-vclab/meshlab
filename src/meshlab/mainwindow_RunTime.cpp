@@ -2553,16 +2553,29 @@ void MainWindow::reloadAllMesh()
 	qb->show();
 	QElapsedTimer t;
 	t.start();
-	for(MeshModel *mmm : meshDoc()->meshList)
-	{
-		QString fileName = mmm->fullName();
-		if (!fileName.isEmpty()){
-			try {
-				meshlab::reloadMesh(fileName, *meshDoc(), *mmm, QCallBack);
-				computeRenderingDataOnLoading(mmm,true, nullptr);
-			}
-			catch (const MLException& e) {
-				QMessageBox::critical(this, "Reload Error", e.what());
+	MeshDocument* md = meshDoc();
+	for(MeshModel *mmm : md->meshIterator()) {
+		if (mmm->idInFile() <= 0){
+			QString fileName = mmm->fullName();
+			if (!fileName.isEmpty()){
+				std::list<MeshModel* > meshList = meshDoc()->getMeshesLoadedFromSameFile(mmm);
+				std::vector<bool> isReload(meshList.size(), true);
+				unsigned int i = 0;
+				for (MeshModel* m : meshList) {
+					if (m->cm.VN() == 0)
+						isReload[i] = false;
+					i++;
+				}
+				try {
+					meshlab::reloadMesh(fileName, meshList, QCallBack);
+					i = 0;
+					for (MeshModel* m : meshList){
+						computeRenderingDataOnLoading(m, i++, nullptr);
+					}
+				}
+				catch (const MLException& e) {
+					QMessageBox::critical(this, "Reload Error", e.what());
+				}
 			}
 		}
 	}
@@ -2583,29 +2596,31 @@ void MainWindow::reload()
 	// Discards changes and reloads current file
 	// save current file name
 	qb->show();
-	MeshModel* mm = meshDoc()->mm();
-	if (meshDoc()->mm()->idInFile() > 0){
-		for (MeshModel *mmm : meshDoc()->meshList){
-			if (mmm->shortName() == mm->shortName() && mmm->idInFile() == 0)
-				mm = mmm; // root mesh layer of the file
-		}
-		if (mm == meshDoc()->mm()){
-			QMessageBox::critical(this, "Reload Error", "Impossible the file: cannot find the root mesh layer of the file.");
-			return;
-		}
-	}
 
-	QString fileName = mm->fullName();
+	QString fileName = meshDoc()->mm()->fullName();
 	if (fileName.isEmpty()) {
 		QMessageBox::critical(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
 		return;
 	}
+
+	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(meshDoc()->mm());
+	std::vector<bool> isReload(meshList.size(), true);
+	unsigned int i = 0;
+	for (MeshModel* m : meshList){
+		if (m->cm.VN() == 0)
+			isReload[i] = false;
+		i++;
+	}
+
 	try {
 		QElapsedTimer t;
 		t.start();
-		meshlab::reloadMesh(fileName, *meshDoc(), *mm, QCallBack);
-		computeRenderingDataOnLoading(mm, true, nullptr);
-		GLA()->Log(0, ("Mesh reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
+		meshlab::reloadMesh(fileName, meshList, QCallBack);
+		i = 0;
+		for (MeshModel* m : meshList){
+			computeRenderingDataOnLoading(m, i++, nullptr);
+		}
+		GLA()->Log(0, ("File reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	}
 	catch (const MLException& e) {
 		QMessageBox::critical(this, "Reload Error", e.what());

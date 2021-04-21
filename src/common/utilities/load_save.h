@@ -34,13 +34,28 @@
 
 namespace meshlab {
 
-void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterList& prePar, const std::list<MeshModel*>& meshList, std::list<int>& maskList, vcg::CallBackPos *cb);
+void loadMesh(
+		const QString& fileName,
+		IOPlugin* ioPlugin,
+		const RichParameterList& prePar,
+		const std::list<MeshModel*>& meshList,
+		std::list<int>& maskList,
+		vcg::CallBackPos *cb);
 
-void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, vcg::CallBackPos *cb);
+void loadMeshWithStandardParameters(
+		const QString& filename,
+		MeshDocument& md,
+		vcg::CallBackPos *cb);
 
-void reloadMesh(const QString& filename, MeshDocument& md, MeshModel& m, vcg::CallBackPos *cb);
+void reloadMesh(
+		const QString& filename,
+		const std::list<MeshModel*>& meshList,
+		vcg::CallBackPos* cb);
 
-void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos *cb);
+void loadRaster(
+		const QString& filename,
+		MeshDocument& md,
+		vcg::CallBackPos *cb);
 }
 
 #endif // MESHLAB_LOAD_SAVE_H

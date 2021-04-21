@@ -338,6 +338,27 @@ MeshModel * MeshDocument::addOrGetMesh(QString fullPath, const QString& label, b
 	return addNewMesh(std::move(fullPath),label,setAsCurrent);
 }
 
+/**
+ * Returns the ordered list of the meshes loaded from the same
+ * file in which has been loaded the model mm.
+ */
+std::list<MeshModel*> MeshDocument::getMeshesLoadedFromSameFile(MeshModel* mm)
+{
+	std::list<MeshModel*> ml;
+	if (mm->idInFile() == -1){
+		ml.push_back(mm);
+	}
+	else {
+		if (!mm->fullName().isEmpty()){
+			for (MeshModel* m : meshList){
+				if (m->fullName() == mm->fullName())
+					ml.push_back(m);
+			}
+		}
+	}
+	return ml;
+}
+
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
 	if(!meshList.removeOne(mmToDel))

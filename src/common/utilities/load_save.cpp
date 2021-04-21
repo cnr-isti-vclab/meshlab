@@ -149,68 +149,42 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 
 void reloadMesh(
 		const QString& filename,
-		MeshDocument& md,
-		MeshModel& mm,
+		const std::list<MeshModel*>& meshList,
 		vcg::CallBackPos* cb)
 {
-	// reload can affect only meshes loaded from files containing a single mesh,
-	// or if the mesh is the first one loaded from that file.
-	// if a file contains more than one meshes (idInFile != -1), the reload of
-	// all the contained meshes will be performed by the mesh with idInFile == 0
-	if (mm.idInFile() < 1) {
-		QFileInfo fi(filename);
-		QString extension = fi.suffix();
-		PluginManager& pm = meshlab::pluginManagerInstance();
-		IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
 
-		if (ioPlugin == nullptr) {
-			throw MLException(
-					"Mesh " + filename + " cannot be opened. Your MeshLab "
-					"version has not plugin to read " + extension +
-					" file format");
-		}
+	QFileInfo fi(filename);
+	QString extension = fi.suffix();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
 
-		RichParameterList prePar;
-		ioPlugin->initPreOpenParameter(extension, prePar);
-		prePar.join(meshlab::defaultGlobalParameterList());
-
-		unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename);
-		std::list<MeshModel*> meshList;
-
-		//simple case: just one meshe expected in the file
-		if (mm.idInFile() == -1 && nMeshes == 1) {
-			meshList.push_back(&mm);
-		}
-		else if (mm.idInFile() == 0 && nMeshes > 1) {
-			//looking for all the other meshes that should be reloaded from the file
-			for (MeshModel* m : md.meshIterator()) {
-				if (m->fullName() == mm.fullName() && m->idInFile() >= 0) {
-					meshList.push_back(m);
-				}
-			}
-			if (meshList.size() != nMeshes){
-				throw MLException(
-						"Cannot reload " + filename + ": the number of layers "
-						"in this meshlab project associated to this file is "
-						"different from the number of meshes contained in the "
-						"file.");
-			}
-		}
-		else {
-			//ignore this case: this mesh will be reloaded by the mesh with id = 0
-			if (! (mm.idInFile() > 0 && nMeshes > 1)) {
-				throw MLException(
-					"Cannot reload " + filename + ": expected number layers is "
-					"different from the number of meshes contained in th file.");
-			}
-		}
-
-		std::list<int> masks;
-		loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
-		RichParameterList par;
-		ioPlugin->initOpenParameter(extension, meshList, par);
-		ioPlugin->applyOpenParameter(extension, meshList, par);
+	if (ioPlugin == nullptr) {
+		throw MLException(
+				"Mesh " + filename + " cannot be opened. Your MeshLab "
+				"version has not plugin to read " + extension +
+				" file format");
 	}
+
+	RichParameterList prePar;
+	ioPlugin->initPreOpenParameter(extension, prePar);
+	prePar.join(meshlab::defaultGlobalParameterList());
+
+	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename);
+
+	if (meshList.size() != nMeshes){
+		throw MLException(
+			"Cannot reload " + filename + ": expected number layers is "
+			"different from the number of meshes contained in th file.");
+	}
+
+	std::list<int> masks;
+	for (MeshModel* mm : meshList){
+		mm->Clear();
+	}
+	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
+	RichParameterList par;
+	ioPlugin->initOpenParameter(extension, meshList, par);
+	ioPlugin->applyOpenParameter(extension, meshList, par);
 }
 
 void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
