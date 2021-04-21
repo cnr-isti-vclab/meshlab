@@ -61,7 +61,7 @@ static void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, in
  * @param percentage The completion percentage to set
  * @param description The description to show near the progress bar
  */
-static void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
+static inline void updateProgress(vcg::CallBackPos &positionCallback, int percentage, const char* description) noexcept;
 
 /**
  * Convert a QT string filename to a std::string
@@ -223,9 +223,19 @@ std::list<FileFormat> E57IOPlugin::exportFormats() const
 	Returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void E57IOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
+void E57IOPlugin::exportMaskCapability(const QString& format, int &capability, int &defaultBits) const
 {
-    capability = defaultBits = 0;
+
+    using Mask = vcg::tri::io::Mask;
+    int mask = 0;
+
+    if (format.toUpper() != tr(E57_FILE_EXTENSION)) return;
+
+    mask |= Mask::IOM_VERTNORMAL;
+    mask |= Mask::IOM_VERTCOLOR;
+    mask |= Mask::IOM_VERTQUALITY;
+
+    capability = defaultBits = mask;
 }
 
 static void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
@@ -293,17 +303,14 @@ static void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, in
     }
     catch (const e57::E57Exception& e) {
         dataReader.close();
-        throw e;
+        throw;
     }
 
     dataReader.close();
 }
 
 static void updateProgress(vcg::CallBackPos& positionCallback, int percentage, const char* description) noexcept {
-
-    if (positionCallback != nullptr) {
-        positionCallback(percentage, description);
-    }
+    positionCallback(percentage, description);
 }
 
 static inline std::string filenameToString(const QString& fileName) noexcept {
@@ -325,7 +332,7 @@ static void writeVerticies(e57::CompressedVectorWriter &dataWriter, E57Data3DPoi
             pointsData.cartesianZ[buffIndex] = cartesianPoints[2];
         }
 
-        auto& colors = verticies[i].C();
+        vcg::Color4b& colors = verticies[i].C();
         if (data3DPoints.areColorsAvailable()) {
             pointsData.colorRed[buffIndex] = colors[0];
             pointsData.colorGreen[buffIndex] = colors[1];
