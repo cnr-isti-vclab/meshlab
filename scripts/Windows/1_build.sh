@@ -16,7 +16,6 @@ SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 SOURCE_PATH=$SCRIPTS_PATH/../../src
 BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
-CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 RC_OPTION=""
@@ -31,10 +30,6 @@ case $i in
         ;;
     -i=*|--install_path=*)
         INSTALL_PATH="${i#*=}"
-        shift # past argument=value
-        ;;
-    -j*)
-        CORES=$i
         shift # past argument=value
         ;;
     -d|--double_precision)
@@ -75,6 +70,6 @@ echo "INSTALL PATH: "$INSTALL_PATH
 echo "SCRIPTS PATH: "$SCRIPTS_PATH
 
 cd $BUILD_PATH
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $RC_OPTION $SOURCE_PATH
-jom $CORES #Qt nmake for parallel build
-nmake install
+cmake -GNinja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $RC_OPTION $SOURCE_PATH
+ninja
+ninja install

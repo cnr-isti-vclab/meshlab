@@ -90,7 +90,7 @@ public:
 	MeshModel* addNewMesh(const CMeshO& mesh, QString Label, bool setAsCurrent=true);
 	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
 	MeshModel *addOrGetMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
-	
+	std::list<MeshModel*> getMeshesLoadedFromSameFile(MeshModel* mm);
 	
 	///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);

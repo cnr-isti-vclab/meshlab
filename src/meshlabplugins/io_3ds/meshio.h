@@ -27,13 +27,13 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 
-class ExtraMeshIOPlugin : public QObject, public IOMeshPlugin
+class ExtraMeshIOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
-	Q_INTERFACES(IOMeshPlugin)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
 public:
 	QString pluginName() const;
@@ -44,15 +44,24 @@ public:
 
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
 
-	void initPreOpenParameter(
-				const QString& format,
-				RichParameterList& parameters);
+	unsigned int numberMeshesContainedInFile(
+			const QString& format,
+			const QString& fileName) const;
 
-	void open(const QString &formatName,
+	void open(
+			const QString &formatName,
 			const QString &fileName,
-			MeshModel &m,
+			MeshModel& m,
 			int& mask,
-			const RichParameterList &params,
+			const RichParameterList& params,
+			vcg::CallBackPos *cb=0);
+
+	void open(
+			const QString &formatName,
+			const QString &fileName,
+			const std::list<MeshModel *>& meshList,
+			std::list<int>& maskList,
+			const RichParameterList& params,
 			vcg::CallBackPos *cb=0);
 
 	void save(

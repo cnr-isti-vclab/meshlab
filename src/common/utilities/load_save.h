@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2021                                           \/)\/    *
+* Copyright(C) 2005-2020                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,54 +21,41 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHLAB_IORASTER_PLUGIN_CONTAINER_H
-#define MESHLAB_IORASTER_PLUGIN_CONTAINER_H
+#ifndef MESHLAB_LOAD_SAVE_H
+#define MESHLAB_LOAD_SAVE_H
 
-#include "../interfaces/ioraster_plugin.h"
-#include "generic_container_iterator.h"
+#include "../ml_shared_data_context/ml_shared_data_context.h"
+#include "../plugins/interfaces/io_plugin.h"
 
 /**
- * @brief The IORasterPluginContainer class allows to organize
- * all the IORaster plugins contained in the PluginManager.
- *
- * Note: plugins are not owned by this container, but by the PluginManager,
- * since each plugin can inherit from more than one PluginInterface.
+ * Utility functions to load/save meshes using plugins loaded in the plugin
+ * manager.
  */
-class IORasterPluginContainer
-{
-public:
-	class IORasterPluginRangeIterator;
-	IORasterPluginContainer();
 
-	size_t size() const;
-	void clear();
-	void pushIORasterPlugin(IORasterPlugin* iIORaster);
-	void eraseIORasterPlugin(IORasterPlugin* iIORaster);
+namespace meshlab {
 
-	IORasterPlugin* inputRasterPlugin(const QString inputFormat) const;
-	bool isInputRasterFormatSupported(const QString inputFormat) const;
+void loadMesh(
+		const QString& fileName,
+		IOPlugin* ioPlugin,
+		const RichParameterList& prePar,
+		const std::list<MeshModel*>& meshList,
+		std::list<int>& maskList,
+		vcg::CallBackPos *cb);
 
-	QStringList inputRasterFormatList() const;
+void loadMeshWithStandardParameters(
+		const QString& filename,
+		MeshDocument& md,
+		vcg::CallBackPos *cb);
 
-	IORasterPluginRangeIterator ioRasterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
+void reloadMesh(
+		const QString& filename,
+		const std::list<MeshModel*>& meshList,
+		vcg::CallBackPos* cb);
 
-private:
-	std::vector<IORasterPlugin*> ioRasterPlugins;
-	QMap<QString, IORasterPlugin*> inputRasterFormatToPluginMap;
-};
+void loadRaster(
+		const QString& filename,
+		MeshDocument& md,
+		vcg::CallBackPos *cb);
+}
 
-class IORasterPluginContainer::IORasterPluginRangeIterator
-{
-	friend class IORasterPluginContainer;
-public:
-	ConstPluginIterator<IORasterPlugin> begin();
-	ConstPluginIterator<IORasterPlugin> end();
-private:
-	IORasterPluginRangeIterator(
-			const IORasterPluginContainer* pm,
-			bool iterateAlsoDisabledPlugins = false);
-	const IORasterPluginContainer* pm;
-	bool b;
-};
-
-#endif // MESHLAB_IORASTER_PLUGIN_CONTAINER_H
+#endif // MESHLAB_LOAD_SAVE_H

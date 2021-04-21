@@ -26,8 +26,7 @@
 #include "interfaces/decorate_plugin.h"
 #include "interfaces/edit_plugin.h"
 #include "interfaces/filter_plugin.h"
-#include "interfaces/iomesh_plugin.h"
-#include "interfaces/ioraster_plugin.h"
+#include "interfaces/io_plugin.h"
 #include "interfaces/render_plugin.h"
 
 MeshLabPluginType::MeshLabPluginType(const MeshLabPlugin* fpi) : type(0)
@@ -47,15 +46,10 @@ MeshLabPluginType::MeshLabPluginType(const MeshLabPlugin* fpi) : type(0)
 	if (iFilter){
 		type |= FILTER;
 	}
-	//IOMesh
-	const IOMeshPlugin *iIOMesh = dynamic_cast<const IOMeshPlugin *>(fpi);
-	if (iIOMesh) {
-		type |= IO_MESH;
-	}
-	//IORaster
-	const IORasterPlugin* iIORaster = dynamic_cast<const IORasterPlugin*>(fpi);
-	if (iIORaster) {
-		type |= IO_RASTER;
+	//IO
+	const IOPlugin *iIO = dynamic_cast<const IOPlugin *>(fpi);
+	if (iIO) {
+		type |= IO;
 	}
 	
 	//Render
@@ -88,14 +82,9 @@ bool MeshLabPluginType::isFilterPlugin() const
 	return type & FILTER;
 }
 
-bool MeshLabPluginType::isIOMeshPlugin() const
+bool MeshLabPluginType::isIOPlugin() const
 {
-	return type & IO_MESH;
-}
-
-bool MeshLabPluginType::isIORasterPlugin() const
-{
-	return type & IO_RASTER;
+	return type & IO;
 }
 
 bool MeshLabPluginType::isRenderPlugin() const
@@ -134,13 +123,9 @@ QString MeshLabPluginType::pluginTypeString() const
 		if (!type.isEmpty()) type += "|";
 		type += "Filter";
 	}
-	if (isIOMeshPlugin()){
+	if (isIOPlugin()){
 		if (!type.isEmpty()) type += "|";
-		type += "IOMesh";
-	}
-	if (isIORasterPlugin()){
-		if (!type.isEmpty()) type += "|";
-		type += "IORaster";
+		type += "IO";
 	}
 	if (isRenderPlugin()){
 		if (!type.isEmpty()) type += "|";

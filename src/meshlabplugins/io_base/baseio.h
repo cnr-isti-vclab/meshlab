@@ -24,33 +24,59 @@
 #define BASEIOPLUGIN_H
 
 #include <common/ml_document/mesh_model.h>
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 
-class BaseMeshIOPlugin : public QObject, public IOMeshPlugin
+class BaseMeshIOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
-	Q_INTERFACES(IOMeshPlugin)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
 
 public:
 
-	BaseMeshIOPlugin() : IOMeshPlugin() {}
+	BaseMeshIOPlugin();
 	QString pluginName() const;
 
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
+	std::list<FileFormat> importRasterFormats() const;
 
-	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
+	void exportMaskCapability(
+			const QString& format,
+			int& capability,
+			int& defaultBits) const;
 
-	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb);
-	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb);
+	void open(
+			const QString& formatName,
+			const QString& fileName,
+			MeshModel& m,
+			int& mask,
+			const RichParameterList& par,
+			vcg::CallBackPos* cb);
+
+	void save(
+			const QString &formatName,
+			const QString &fileName,
+			MeshModel &m,
+			const int mask,
+			const RichParameterList& par,
+			vcg::CallBackPos* cb);
+
+	void openRaster(
+			const QString& format,
+			const QString& filename,
+			RasterModel& rm,
+			vcg::CallBackPos*);
+
 	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
 	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 private:
+	std::list<FileFormat> rasterFormatList;
+
 	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
 };
 

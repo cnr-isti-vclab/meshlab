@@ -34,14 +34,14 @@
 
 #include <QObject>
 
-#include <common/plugins/interfaces/iomesh_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
 #include <common/ml_document/mesh_model.h>
 
-class IoX3DPlugin : public QObject, public IOMeshPlugin
+class IoX3DPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_IID)
-	Q_INTERFACES(IOMeshPlugin)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
 
 public:

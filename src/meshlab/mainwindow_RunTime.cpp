@@ -46,6 +46,7 @@
 #include <common/filterscript.h>
 #include <common/mlexception.h>
 #include <common/globals.h>
+#include <common/utilities/load_save.h>
 
 #include "rich_parameter_gui/richparameterlistdialog.h"
 
@@ -1739,21 +1740,23 @@ bool MainWindow::openProject(QString fileName)
 	{
 		vector<RangeMap> rmv;
 		int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-		if(retVal != ALNParser::NoError)
-		{
+		if(retVal != ALNParser::NoError) {
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
 			return false;
 		}
 		
-		bool openRes=true;
-		vector<RangeMap>::iterator ir;
-		for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
-		{
-			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
-			meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-			openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),ir->transformation);
-			if(!openRes)
-				meshDoc()->delMesh(meshDoc()->mm());
+		for(const RangeMap& rm : rmv) {
+			QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+			try {
+				meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+				meshDoc()->mm()->cm.Tr.Import(rm.transformation);
+				computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+				if (!(meshDoc()->mm()->cm.textures.empty()))
+					updateTexture(meshDoc()->mm()->id());
+			}
+			catch (const MLException& e){
+				QMessageBox::critical(this, "Meshlab Opening Error", e.what());
+			}
 		}
 	}
 	
@@ -1882,18 +1885,23 @@ bool MainWindow::appendProject(QString fileName)
 		{
 			vector<RangeMap> rmv;
 			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-			if(retVal != ALNParser::NoError)
-			{
+			if(retVal != ALNParser::NoError) {
 				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
 				return false;
 			}
 			
-			for(vector<RangeMap>::iterator ir=rmv.begin();ir!=rmv.end();++ir)
-			{
-				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
-				meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-				if(!loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),(*ir).transformation))
-					meshDoc()->delMesh(meshDoc()->mm());
+			for(const RangeMap& rm : rmv) {
+				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+				try {
+					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
+					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+					if (!(meshDoc()->mm()->cm.textures.empty()))
+						updateTexture(meshDoc()->mm()->id());
+				}
+				catch (const MLException& e){
+					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
+				}
 			}
 		}
 		
@@ -2132,40 +2140,29 @@ bool MainWindow::importRaster(const QString& fileImg)
 	allFileTime.start();
 	
 	for(const QString& fileName : fileNameList) {
-		QFileInfo fi(fileName);
-		QString extension = fi.suffix();
-		IORasterPlugin *pCurrentIOPlugin = PM.inputRasterPlugin(extension);
-		//pCurrentIOPlugin->setLog(gla->log);
-		if (pCurrentIOPlugin == NULL)
-		{
-			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
-			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-			return false;
-		}
-		
-		
-		QFileInfo info(fileName);
-		RasterModel *rm = meshDoc()->addNewRaster();
-		qb->show();
-		QElapsedTimer t;
-		t.start();
-		bool open = pCurrentIOPlugin->open(extension, fileName, *rm, QCallBack);
-		if(open) {
+
+		try {
+			QElapsedTimer t;
+			t.start();
+			meshlab::loadRaster(fileName, *meshDoc(), QCallBack);
 			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
-			GLA()->fov = rm->shot.GetFovFromFocal();
-			rm->shot = GLA()->shotFromTrackball().first;
+			GLA()->fov = meshDoc()->rm()->shot.GetFovFromFocal();
+			meshDoc()->rm()->shot = GLA()->shotFromTrackball().first;
 			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 			if (!layerDialog->isVisible())
 				layerDialog->setVisible(true);
+			GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 		}
-		else {
-			meshDoc()->delRaster(rm);
+		catch(const MLException& e){
+			QMessageBox::warning(
+						this,
+						tr("Opening Failure"),
+						"While opening: " + fileName + "\n\n" + e.what());
 			GLA()->Logf(0, "Warning: Raster %s has not been opened", qUtf8Printable(fileName));
 		}
 	}// end foreach file of the input list
-	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
-	
+
 	if (_currviewcontainer != NULL)
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 	
@@ -2176,25 +2173,13 @@ bool MainWindow::importRaster(const QString& fileImg)
 	return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
+bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
 {
-	if ((GLA() == NULL) || (mm == NULL))
+	if ((GLA() == NULL))
 		return false;
 	
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
-	if(!fi.exists())
-	{
-		QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
-		QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-		return false;
-	}
-	if(!fi.isReadable())
-	{
-		QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-		QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-		return false;
-	}
 	
 	// the original directory path before we switch it
 	QString origDir = QDir::current().path();
@@ -2216,8 +2201,19 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 	meshDoc()->setBusy(true);
 	pCurrentIOPlugin->setLog(&meshDoc()->Log);
 	
+	unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileNameSansDir);
+	if (nMeshes != meshList.size()) {
+		QMessageBox::warning(
+					this,
+					tr("Opening Failure"),
+					"Expected one mesh but " + fileName + " contains " + nMeshes + " meshes.");
+		meshDoc()->setBusy(false);
+		QDir::setCurrent(origDir); // undo the change of directory before leaving
+		return false;
+	}
+
 	try {
-		pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack);
+		pCurrentIOPlugin->open(extension, fileNameSansDir, meshList ,maskList,*prePar,QCallBack);
 	}
 	catch(const MLException& e) {
 		QMessageBox::warning(
@@ -2247,49 +2243,59 @@ bool MainWindow::loadMesh(const QString& fileName, IOMeshPlugin *pCurrentIOPlugi
 	
 	saveRecentFileList(fileName);
 	
-	if (!(mm->cm.textures.empty()))
-		updateTexture(mm->id());
-	
-	// In case of polygonal meshes the normal should be updated accordingly
-	if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
-	{
-		mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
-		int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-		if(degNum)
-			GLA()->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
-		mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
-		vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
-	} // standard case
-	else
-	{
-		vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm->cm);
-		if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
-			vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
+	auto itmesh = meshList.begin();
+	auto itmask = maskList.begin();
+	for (unsigned int i = 0; i < meshList.size(); ++i){
+		MeshModel* mm = *itmesh;
+		int mask = *itmask;
+
+		if (!(mm->cm.textures.empty()))
+			updateTexture(mm->id());
+
+		// In case of polygonal meshes the normal should be updated accordingly
+		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+		{
+			mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+			int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+			if(degNum)
+				GLA()->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
+			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
+		} // standard case
+		else
+		{
+			vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm->cm);
+			if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
+				vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
+		}
+
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+		if(mm->cm.fn==0 && mm->cm.en==0)
+		{
+			if(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+		}
+
+		if(mm->cm.fn==0 && mm->cm.en>0)
+		{
+			if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+		}
+
+		updateMenus();
+		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
+		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+		tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+		if(delVertNum>0 || delFaceNum>0 )
+			QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
+		mm->cm.Tr = mtr;
+
+		computeRenderingDataOnLoading(mm,isareload, rendOpt);
+		++itmesh;
+		++itmask;
 	}
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-	if(mm->cm.fn==0 && mm->cm.en==0)
-	{
-		if(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-			mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-	}
-	
-	if(mm->cm.fn==0 && mm->cm.en>0)
-	{
-		if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-			mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-	}
-	
-	updateMenus();
-	int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
-	int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-	tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-	if(delVertNum>0 || delFaceNum>0 )
-		QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-	mm->cm.Tr = mtr;
-	
-	computeRenderingDataOnLoading(mm,isareload, rendOpt);
+
 	updateLayerDialog();
 	
 	
@@ -2347,7 +2353,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 		//showLayerDlg(false);
 	}
 	globrendtoolbar->setEnabled(false);
-	bool res = importMesh(fileName,false);
+	bool res = importMesh(fileName);
 	globrendtoolbar->setEnabled(true);
 	if (layerDialog != NULL)
 		showLayerDlg(layervisible || meshDoc()->meshList.size());
@@ -2356,30 +2362,24 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 }
 
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
-bool MainWindow::importMesh(QString fileName,bool isareload)
+bool MainWindow::importMesh(QString fileName)
 {
-	if (!GLA())
-	{
+	if (!GLA()) {
 		this->newProject();
 		if(!GLA())
 			return false;
 	}
 	
-	
-	//QStringList suffixList;
-	// HashTable storing all supported formats together with
-	// the (1-based) index  of first plugin which is able to open it
-	//QHash<QString, MeshIOInterface*> allKnownFormats;
-	//PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
 	QStringList fileNameList;
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileName);
 	
-	if (fileNameList.isEmpty())	return false;
-	else
-	{
+	if (fileNameList.isEmpty()) {
+		return false;
+	}
+	else {
 		//save path away so we can use it again
 		QString path = fileNameList.first();
 		path.truncate(path.lastIndexOf("/"));
@@ -2388,19 +2388,29 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 	
 	QElapsedTimer allFileTime;
 	allFileTime.start();
-	for(const QString& fileName : fileNameList)
-	{
+	for(const QString& fileName : fileNameList) {
 		QFileInfo fi(fileName);
+		if(!fi.exists()) {
+			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+			return false;
+		}
+		if(!fi.isReadable()) {
+			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+			return false;
+		}
+
 		QString extension = fi.suffix();
-		IOMeshPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
-		//pCurrentIOPlugin->setLog(gla->log);
-		if (pCurrentIOPlugin == nullptr)
-		{
+		IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+
+		if (pCurrentIOPlugin == nullptr) {
 			QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
 			QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
 			return false;
 		}
 		
+		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		RichParameterList prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
 		if(!prePar.isEmpty())
@@ -2410,43 +2420,57 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 			preOpenDialog.exec();
 		}
 		prePar.join(currentGlobalParams);
-		int mask = 0;
-		//MeshModel *mm= new MeshModel(gla->meshDoc);
+
+		//check how many meshes are going to be loaded from the file
+		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName);
+
 		QFileInfo info(fileName);
-		MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
+		std::list<MeshModel*> meshList;
+		for (unsigned int i = 0; i < nMeshes; i++) {
+			MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
+			if (nMeshes != 1) {
+				// if the file contains more than one mesh, this id will be
+				// != -1
+				mm->setIdInFile(i);
+			}
+			meshList.push_back(mm);
+		}
 		qb->show();
-		QElapsedTimer t;
-		t.start();
-		Matrix44m mtr;
-		mtr.SetIdentity();
-		bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,isareload);
-		if(open)
-		{
+		std::list<int> masks;
+		try {
+			QElapsedTimer t;
+			t.start();
+			meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, masks, QCallBack);
+			saveRecentFileList(fileName);
+			updateLayerDialog();
+			for (MeshModel* mm : meshList) {
+				computeRenderingDataOnLoading(mm, false, nullptr);
+				if (! (mm->cm.textures.empty()))
+					updateTexture(mm->id());
+			}
+			QString warningString = pCurrentIOPlugin->warningMessageString();
+			if (!warningString.isEmpty()){
+				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
+			}
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			RichParameterList par;
-			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
+
+			pCurrentIOPlugin->initOpenParameter(extension, *meshList.front(), par);
+
 			if(!par.isEmpty())
 			{
 				RichParameterListDialog postOpenDialog(this, par, tr("Post-Open Processing"));
 				postOpenDialog.setFocus();
 				postOpenDialog.exec();
-				pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
+				for (MeshModel* mm : meshList)
+					pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 			}
-			/*MultiViewer_Container* mv = GLA()->mvc();
-			if (mv != NULL)
-			{
-			for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
-			{
-			GLArea* ar = mv->getViewer(glarid);
-			if (ar != NULL)
-			MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode(mm->id(),*ar);
-			}
-			}*/
 		}
-		else
-		{
-			meshDoc()->delMesh(mm);
-			GLA()->Logf(0, "Warning: Mesh %s has not been opened", qUtf8Printable(fileName));
+		catch (const MLException& e){
+			for (MeshModel* mm : meshList)
+				meshDoc()->delMesh(mm);
+			GLA()->Logf(0, "Error: File %s has not been loaded", qUtf8Printable(fileName));
+			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
 	}// end foreach file of the input list
 	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
@@ -2474,6 +2498,10 @@ void MainWindow::openRecentProj()
 	if (action)	openProject(action->data().toString());
 }
 
+/**
+ * **TODO**: this function assumes that the loaded file will contain just one
+ * mesh.......
+ */
 bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr, bool isreload, MLRenderingData* rendOpt)
 {
 	if ((meshDoc() == NULL) || (mm == NULL))
@@ -2488,16 +2516,20 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	IOMeshPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
+	IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
 	
 	if(pCurrentIOPlugin != NULL)
 	{
 		RichParameterList prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension, prePar);
 		prePar.join(currentGlobalParams);
-		int mask = 0;
+
 		QElapsedTimer t;t.start();
-		bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);
+
+		std::list<MeshModel*> ml;
+		std::list<int> masks;
+		ml.push_back(mm);
+		bool open = loadMesh(fullPath,pCurrentIOPlugin,ml,masks,&prePar,mtr,isreload, rendOpt);
 		if(open)
 		{
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());
@@ -2519,13 +2551,35 @@ void MainWindow::reloadAllMesh()
 	// Discards changes and reloads current file
 	// save current file name
 	qb->show();
-	foreach(MeshModel *mmm,meshDoc()->meshList)
-	{
-		QString fileName = mmm->fullName();
-		Matrix44m mat;
-		mat.SetIdentity();
-		loadMeshWithStandardParams(fileName,mmm,mat,true);
+	QElapsedTimer t;
+	t.start();
+	MeshDocument* md = meshDoc();
+	for(MeshModel *mmm : md->meshIterator()) {
+		if (mmm->idInFile() <= 0){
+			QString fileName = mmm->fullName();
+			if (!fileName.isEmpty()){
+				std::list<MeshModel* > meshList = meshDoc()->getMeshesLoadedFromSameFile(mmm);
+				std::vector<bool> isReload(meshList.size(), true);
+				unsigned int i = 0;
+				for (MeshModel* m : meshList) {
+					if (m->cm.VN() == 0)
+						isReload[i] = false;
+					i++;
+				}
+				try {
+					meshlab::reloadMesh(fileName, meshList, QCallBack);
+					i = 0;
+					for (MeshModel* m : meshList){
+						computeRenderingDataOnLoading(m, i++, nullptr);
+					}
+				}
+				catch (const MLException& e) {
+					QMessageBox::critical(this, "Reload Error", e.what());
+				}
+			}
+		}
 	}
+	GLA()->Log(0, ("All meshes reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	qb->reset();
 	
 	if (_currviewcontainer != NULL)
@@ -2542,15 +2596,35 @@ void MainWindow::reload()
 	// Discards changes and reloads current file
 	// save current file name
 	qb->show();
+
 	QString fileName = meshDoc()->mm()->fullName();
-	if (fileName.isEmpty())
-	{
+	if (fileName.isEmpty()) {
 		QMessageBox::critical(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
 		return;
 	}
-	Matrix44m mat;
-	mat.SetIdentity();
-	loadMeshWithStandardParams(fileName,meshDoc()->mm(),mat,true);
+
+	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(meshDoc()->mm());
+	std::vector<bool> isReload(meshList.size(), true);
+	unsigned int i = 0;
+	for (MeshModel* m : meshList){
+		if (m->cm.VN() == 0)
+			isReload[i] = false;
+		i++;
+	}
+
+	try {
+		QElapsedTimer t;
+		t.start();
+		meshlab::reloadMesh(fileName, meshList, QCallBack);
+		i = 0;
+		for (MeshModel* m : meshList){
+			computeRenderingDataOnLoading(m, i++, nullptr);
+		}
+		GLA()->Log(0, ("File reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
+	}
+	catch (const MLException& e) {
+		QMessageBox::critical(this, "Reload Error", e.what());
+	}
 	qb->reset();
 	if (_currviewcontainer != NULL)
 	{
@@ -2627,7 +2701,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		QStringListIterator itFilter(suffixList);
 		
-		IOMeshPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
+		IOPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
@@ -2891,17 +2965,19 @@ void MainWindow::updateTexture(int meshid)
 	{
 		QImage img;
 		QFileInfo fi(mymesh->cm.textures[i].c_str());
+		QFileInfo mfi(mymesh->fullName());
 		QString filename = fi.absoluteFilePath();
 		bool res = img.load(filename);
-		sometextfailed = sometextfailed || !res;
 		if(!res)
 		{
-			res = img.load(filename);
+			QString fn2 = mfi.absolutePath() + "/" + fi.fileName();
+			res = img.load(fn2);
 			if(!res)
 			{
 				QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
 				meshDoc()->Log.log(GLLogStream::WARNING,qUtf8Printable(errmsg));
-				unexistingtext += "<font color=red>" + filename + "</font><br>";
+				unexistingtext += "<font color=red>" + fi.fileName() + "</font><br>";
+				sometextfailed = sometextfailed || !res;
 			}
 		}
 		
@@ -2915,11 +2991,8 @@ void MainWindow::updateTexture(int meshid)
 		/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
 		
 		if (!res)
-			res = img.load(":/images/dummy.png");
+			img.load(":/images/dummy.png");
 		GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
-		
-		if (sometextfailed)
-			QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 		
 		for(int tt = 0;tt < mvc->viewerCounter();++tt)
 		{
