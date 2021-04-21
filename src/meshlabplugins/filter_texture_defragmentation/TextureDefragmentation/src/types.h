@@ -59,6 +59,6 @@ typedef std::vector<vcg::Point2d> Outline2d;
 
 typedef std::pair<ClusteredSeamHandle, double> WeightedSeam;
 
-class TextureSize;
+struct TextureSize;
 
 #endif // TYPES_H
