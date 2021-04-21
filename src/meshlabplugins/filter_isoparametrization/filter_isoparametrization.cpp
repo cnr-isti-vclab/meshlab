@@ -26,7 +26,7 @@
 #include <QFileInfo>
 #include "defines.h"
 
-#include "../../common/meshmodel.h"
+#include <common/ml_document/mesh_model.h>
 #include <iso_transfer.h>
 
 
@@ -38,21 +38,20 @@ using namespace vcg;
 
 FilterIsoParametrization::FilterIsoParametrization()
 {
-	typeList << ISOP_PARAM
-			 << ISOP_REMESHING
-			 << ISOP_DIAMPARAM
-			 << ISOP_TRANSFER;
+	typeList = {
+		ISOP_PARAM,
+		ISOP_REMESHING,
+		ISOP_DIAMPARAM,
+		ISOP_TRANSFER
+	};
 	
-	FilterIDType tt;
-	foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 	
 }
 
 FilterIsoParametrization::~FilterIsoParametrization()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterIsoParametrization::pluginName() const
@@ -60,7 +59,7 @@ QString FilterIsoParametrization::pluginName() const
 	return "FilterIsoParametrization";
 }
 
-QString FilterIsoParametrization::filterName(FilterIDType filter) const
+QString FilterIsoParametrization::filterName(ActionIDType filter) const
 {
 	switch(filter)
 	{
@@ -76,7 +75,7 @@ static const QString bibRef("For more details see: <br>"
 							"<b>N. Pietroni, M. Tarini and P. Cignoni</b>, <br><a href=\"http://vcg.isti.cnr.it/Publications/2010/PTC10/\">'Almost isometric mesh parameterization through abstract domains'</a> <br>"
 							"IEEE Transaction of Visualization and Computer Graphics, 2010");
 
-QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
+QString FilterIsoParametrization::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -179,7 +178,12 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
 	log("stdDev Edge:  %5.2f",stdE/avE);
 }
 
-bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos  *cb)
+std::map<std::string, QVariant> FilterIsoParametrization::applyFilter(
+		const QAction *filter,
+		const RichParameterList & par,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos  *cb)
 {
 	MeshModel* m = md.mm();  //get current mesh from document
 	CMeshO *mesh=&m->cm;
@@ -244,19 +248,19 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 				switch(ret)
 				{
 				case IsoParametrizator::MultiComponent:
-					this->errorMessage="non possible parameterization because of multi component mesh"; return false;
+					throw MLException("non possible parameterization because of multi component mesh");
 				case IsoParametrizator::NonSizeCons:
-					this->errorMessage="non possible parameterization because of non size consistent mesh"; return false;
+					throw MLException("non possible parameterization because of non size consistent mesh");
 				case IsoParametrizator::NonManifoldE:
-					this->errorMessage="non possible parameterization because of non manifold edges"; return false;
+					throw MLException("non possible parameterization because of non manifold edges");
 				case IsoParametrizator::NonManifoldV:
-					this->errorMessage="non possible parameterization because of non manifold vertices";return false;
+					throw MLException("non possible parameterization because of non manifold vertices");
 				case IsoParametrizator::NonWatertigh:
-					this->errorMessage="non possible parameterization because of non watertight mesh"; return false;
+					throw MLException("non possible parameterization because of non watertight mesh");
 				case IsoParametrizator::FailParam:
-					this->errorMessage="non possible parameterization cause one of the following reasons:\n Topologycal noise \n Too Low resolution mesh \n Too Bad triangulation \n"; return false;
+					throw MLException("non possible parameterization cause one of the following reasons:\n Topologycal noise \n Too Low resolution mesh \n Too Bad triangulation \n");
 				default:
-					this->errorMessage="unknown error"; return false;
+					throw MLException("unknown error");
 				}
 			}
 			
@@ -267,8 +271,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 			
 			bool isOK=isoPHandle().Init(abs_mesh,para_mesh);
 			if (!isOK) {
-				this->errorMessage="Problems gathering parameterization \n";
-				return false;
+				throw MLException("Problems gathering parameterization \n");
 			}
 			
 			isoPHandle().CopyParametrization<CMeshO>(mesh); ///copy back to original mesh
@@ -280,19 +283,17 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 			bool Done=isoPHandle().LoadBaseDomain<CMeshO>(qUtf8Printable(AbsLoadName),mesh,para_mesh,abs_mesh,true);
 			if (!Done)
 			{
-				this->errorMessage="Abstract domain doesn't fit well with the parametrized mesh";
 				delete para_mesh;
 				delete abs_mesh;
-				return false;
+				throw MLException("Abstract domain doesn't fit well with the parametrized mesh");
 			}
 		}
 		
 		QString AbsSaveName = par.getString("AbsSaveName");
-		if(!AbsSaveName.isEmpty())
-		{
+		if(!AbsSaveName.isEmpty()) {
 			isoPHandle().SaveBaseDomain(qUtf8Printable(AbsSaveName));
 		}
-		return true;
+		break;
 	}
 	case ISOP_REMESHING :
 	{
@@ -302,16 +303,14 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 		if (!b)
 		{
-			this->errorMessage="You must compute the abstract mesh before remeshing. Use the Isoparametrization main filter.";
-			return false;
+			throw MLException("You must compute the abstract mesh before remeshing. Use the Isoparametrization main filter.");
 		}
 		
 		
 		int SamplingRate=par.getInt("SamplingRate");
 		if (SamplingRate<2)
 		{
-			this->errorMessage="Sampling rate must be >1";
-			return false;
+			throw MLException("Sampling rate must be >1");
 		}
 		MeshModel* mm=md.addNewMesh("","Re-meshed");
 		
@@ -320,7 +319,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		DiamSampl.Init(&isoPHandle());
 		bool done = DiamSampl.SamplePos(SamplingRate);
 		if (!done) 
-			return false;
+			throw MLException(filter->text() + " filter failed.");
 		DiamSampl.GetMesh<CMeshO>(*rem);
 		
 		int n_diamonds,inFace,inEdge,inStar,n_merged;
@@ -335,7 +334,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 		PrintStats(rem);
 		mm->UpdateBoxAndNormals();
-		return true;
+		break;
 	}
 	case ISOP_DIAMPARAM :
 	{
@@ -344,11 +343,10 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 		if (!b)
 		{
-			this->errorMessage="You must compute the abstract mesh before remeshing. Use the Isoparametrization main filter.";
-			return false;
+			throw MLException("You must compute the abstract mesh before remeshing. Use the Isoparametrization main filter.");
 		}
 		
-		float border_size=par.getDynamicFloat("BorderSize");
+		Scalarm border_size=par.getDynamicFloat("BorderSize");
 		MeshModel* mm=md.addNewMesh("","Diam-Parameterized");
 		mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 		mm->updateDataMask(MeshModel::MM_VERTCOLOR);
@@ -357,7 +355,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		DiaPara.Init(&isoPHandle());
 		DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
 		tri::UpdateNormal<CMeshO>::PerFace(*rem);
-		return true;
+		break;
 	}
 		//  case ISOP_LOAD :
 		//  {
@@ -427,8 +425,7 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*srcMesh,isoPHandle);
 		if (!b)
 		{
-			this->errorMessage="Your source mesh must have the abstract isoparametrization. Use the Isoparametrization command.";
-			return false;
+			throw MLException("Your source mesh must have the abstract isoparametrization. Use the Isoparametrization command.");
 		}
 		IsoTransfer IsoTr;
 		AbstractMesh *abs_mesh = isoPHandle().AbsMesh();
@@ -448,15 +445,17 @@ bool FilterIsoParametrization::applyFilter(const QAction *filter, MeshDocument& 
 		isoPHandle().AbsMesh()=abs_mesh;
 		isoPHandle().SetParamMesh<CMeshO>(trgMesh,para_mesh);
 		
-		return true;
+		break;
 	}
+	default:
+		wrongActionCalled(filter);
 	}
-	return false;
+	return std::map<std::string, QVariant>();
 }
 
-FilterPluginInterface::FilterClass FilterIsoParametrization::getClass(const QAction *) const
+FilterPlugin::FilterClass FilterIsoParametrization::getClass(const QAction *) const
 {
-	return FilterPluginInterface::Remeshing;
+	return FilterPlugin::Remeshing;
 }
 
 int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
@@ -464,18 +463,18 @@ int FilterIsoParametrization::postCondition(const QAction* /*filter*/ ) const
 	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterIsoParametrization::filterArity(const QAction* filter) const
+FilterPlugin::FilterArity FilterIsoParametrization::filterArity(const QAction* filter) const
 {
 	switch(ID(filter))
 	{
 	case ISOP_PARAM :	
 	case ISOP_REMESHING :
 	case ISOP_DIAMPARAM :
-		return FilterPluginInterface::SINGLE_MESH;
+		return FilterPlugin::SINGLE_MESH;
 	case ISOP_TRANSFER:	
-		return FilterPluginInterface::FIXED;
+		return FilterPlugin::FIXED;
 	}
-	return FilterPluginInterface::NONE;
+	return FilterPlugin::NONE;
 }
 
 

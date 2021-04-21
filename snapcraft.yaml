@@ -1,7 +1,7 @@
-# Known to build in Ubuntu 18.04
+# Known to build in Ubuntu 18.04, 20.04
 name: meshlab
 base: core18
-version: '2020.09'
+version: '2020.12'
 summary: MeshLab
 description: |
   The open source system for processing and editing 3D triangular meshes.
@@ -16,41 +16,14 @@ confinement: strict
 
 apps:
   meshlab:
-    command: desktop-launch $SNAP/AppRun
-    plugs: [home, x11, mir, opengl, removable-media]
+    command: AppRun
+    extensions: [kde-neon]
+    plugs: [home, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
 
 
 parts:
-  desktop-qt5:
-    build-packages:
-      - build-essential
-      - qtbase5-dev
-      - dpkg-dev
-    make-parameters:
-      - FLAVOR=qt5
-    plugin: make
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: qt
-    stage-packages:
-      - libxkbcommon0
-      - ttf-ubuntu-font-family
-      - dmz-cursor-theme
-      - light-themes
-      - adwaita-icon-theme
-      - gnome-themes-standard
-      - shared-mime-info
-      - libqt5gui5
-      - libqt5qml5
-      - libgdk-pixbuf2.0-0
-      - libqt5svg5
-      - try:
-        - appmenu-qt5
-      - locales-all
-      - xdg-user-dirs
-      - fcitx-frontend-qt5
   meshlab:
-    after: [desktop-qt5]
     plugin: qmake
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
@@ -69,15 +42,18 @@ parts:
       - libqhull-dev
       - patchelf
       - rsync
+      - libqt5opengl5-dev
     stage-packages:
       - lib3ds-1-3
       - libgomp1
       - libopenctm1
       - libqhull7
-      - libglew-dev
-      - libqt5opengl5-dev
-      - qtdeclarative5-dev
       - libqt5gui5
+      - qtwayland5
+      - libglu1-mesa
+      - libopengl0
+      - libqt5opengl5
+      - libqt5xml5
     override-build: |
       sh scripts/Linux/1_build.sh
       sh scripts/Linux/resources/make_bundle.sh

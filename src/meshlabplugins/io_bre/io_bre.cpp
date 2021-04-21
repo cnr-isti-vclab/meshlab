@@ -121,7 +121,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
   
 	if (formatName.toUpper() == tr("BRE"))
@@ -131,25 +131,24 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QStr
   
 }
 
-bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
-  // initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
-  mask = 0;
-  QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-  bool points = parlst.getBool("pointsonly");
-  int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
-  if (result != 0) // all the importers return 0 on success
+	// initializing progress bar status
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
+	mask = 0;
+	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	bool points = parlst.getBool("pointsonly");
+	int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
+	if (result != 0) // all the importers return 0 on success
 	{
-	  errorMessage = errorMsgFormat.arg(fileName, ErrorMsg(result));
-	  return false;
+		throw MLException(errorMsgFormat.arg(fileName, ErrorMsg(result)));
 	}
-  return true;
 }
 
-bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *, QWidget * /*parent*/)
+void BreMeshIOPlugin::save(const QString & formatName,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos *)
 {
-  return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
@@ -160,29 +159,25 @@ QString BreMeshIOPlugin::pluginName() const
 	return "IOBRE";
 }
 
-QList<IOPluginInterface::Format> BreMeshIOPlugin::importFormats() const
+std::list<FileFormat> BreMeshIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Breuckmann File Format"	, tr("BRE"));
-
-	return formatList;
+	return {FileFormat("Breuckmann File Format"	, tr("BRE"))};
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> BreMeshIOPlugin::exportFormats() const
+std::list<FileFormat> BreMeshIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
 	//formatList << Format("Breuckmann File Format"	, tr("BRE"));
-	return formatList;
+	return {};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void BreMeshIOPlugin::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
+void BreMeshIOPlugin::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
 	/*if(format.toUpper() == tr("BRE"))
   {
@@ -198,7 +193,7 @@ void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/,
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
   
 }
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList &/*par*/)
+void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList &/*par*/)
 {
   /*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))

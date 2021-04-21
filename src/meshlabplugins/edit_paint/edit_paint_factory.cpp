@@ -28,31 +28,31 @@ EditPaintFactory::EditPaintFactory()
 {
 	editPaint = new QAction(QIcon(":/images/paintbrush-22.png"), "Z-painting", this);
 
-	actionList << editPaint;
+	actionList.push_back(editPaint);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditPaintFactory::actions() const
+
+QString EditPaintFactory::pluginName() const
 {
-	return actionList;
+	return "EditPaint";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditPaintFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditPaintFactory::getEditTool(const QAction *action)
 {
-	if(action == editPaint)
-	{
+	if(action == editPaint) {
 		return new EditPaintPlugin();
-	} else assert(0); //should never be asked for an action that isn't here
-    return NULL;
+	}
+	else
+		assert(0); //should never be asked for an action that isn't here
+	return NULL;
 }
 
 QString EditPaintFactory::getEditToolDescription(const QAction *)
 {
-	return EditPaintPlugin::Info();
+	return EditPaintPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditPaintFactory)

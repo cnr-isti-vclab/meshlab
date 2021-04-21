@@ -28,28 +28,27 @@ EditAlignFactory::EditAlignFactory()
 {
 	editAlign = new QAction(QIcon(":/images/icon_align.png"), "Align", this);
 
-	actionList << editAlign;
+	actionList.push_back(editAlign);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditAlignFactory::actions() const
+
+QString EditAlignFactory::pluginName() const
 {
-	return actionList;
+	return "EditAlign";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditAlignFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditAlignFactory::getEditTool(const QAction *action)
 {
-  assert(action == editAlign); (void) action;
-  return new EditAlignPlugin();
+	assert(action == editAlign); (void) action;
+	return new EditAlignPlugin();
 }
 
 QString EditAlignFactory::getEditToolDescription(const QAction *)
 {
-	return EditAlignPlugin::Info();
+	return EditAlignPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditAlignFactory)

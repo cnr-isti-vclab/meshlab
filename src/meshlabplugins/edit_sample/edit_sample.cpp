@@ -48,14 +48,9 @@ SampleEditPlugin::SampleEditPlugin()
 	pIndex = 0;
 }
 
-const QString SampleEditPlugin::Info() 
+const QString SampleEditPlugin::info() 
 {
 	return tr("Return detailed info about a picked face or vertex of the model.");
-}
-
-QString SampleEditPlugin::pluginName() const
-{
-    return "EditSample";
 }
  
 void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -69,7 +64,7 @@ void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, 
 	pIndex = 0;
 }
   
-void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
+void SampleEditPlugin::decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
 	// first of all, the picking
 	if (haveToPick)
@@ -305,14 +300,14 @@ void SampleEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 	}
 }
 
-bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool SampleEditPlugin::startEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 	connect(this, SIGNAL(suspendEditToggle()), gla, SLOT(suspendEditToggle()));
 	return true;
 }
 
-void SampleEditPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void SampleEditPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
 	haveToPick = false;
 	pickmode = 0; // 0 face 1 vertex

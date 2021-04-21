@@ -24,12 +24,8 @@
 #include "decorate_raster_proj.h"
 #include <common/GLExtensionsManager.h>
 #include <wrap/gl/shot.h>
-#include <common/pluginmanager.h>
 #include <meshlab/glarea.h>
 #include <vcg/math/matrix44.h>
-
-
-
 
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
@@ -151,7 +147,7 @@ DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
 {
     typeList << DP_PROJECT_RASTER;
 
-    foreach( FilterIDType tt, types() )
+    foreach( ActionIDType tt, types() )
         actionList << new QAction(decorationName(tt), this);
 
     foreach( QAction *ap, actionList )
@@ -169,7 +165,7 @@ QString DecorateRasterProjPlugin::pluginName() const
 }
 
 
-QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationInfo( ActionIDType id ) const
 {
     switch( id )
     {
@@ -179,7 +175,7 @@ QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
 }
 
 
-QString DecorateRasterProjPlugin::decorationName( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationName( ActionIDType id ) const
 {
     switch( id )
     {
@@ -708,7 +704,7 @@ void DecorateRasterProjPlugin::decorateDoc(
             shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
             vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
             shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
-            shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
+            shader->setUniform( "u_AlphaValue", (float)par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
             shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
 			shader->setUniform("u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
             shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );

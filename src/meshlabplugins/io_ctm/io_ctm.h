@@ -31,26 +31,25 @@
 
 #include <QObject>
 
-#include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/plugins/interfaces/io_plugin.h>
+#include <common/ml_document/mesh_model.h>
 
-class IOMPlugin : public QObject, public IOPluginInterface
+class IOMPlugin : public QObject, public IOPlugin
 {
-  Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
-  
 public:
 	QString pluginName() const;
 
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
+	std::list<FileFormat> importFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
-    virtual void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-    void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & /*par*/);
-    bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-    bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos *cb, QWidget *parent);
+	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	void initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/);
+	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0);
+	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos *cb);
 
 };
 

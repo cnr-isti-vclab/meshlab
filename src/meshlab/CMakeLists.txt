@@ -1,14 +1,10 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/meshlab.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 set(SOURCES
 	additionalgui.cpp
 	changetexturename.cpp
-	filterScriptDialog.cpp
 	glarea.cpp
 	glarea_setting.cpp
 	layerDialog.cpp
@@ -20,14 +16,17 @@ set(SOURCES
 	ml_rendering_actions.cpp
 	ml_std_par_dialog.cpp
 	multiViewer_Container.cpp
-	plugindialog.cpp
-	saveSnapshotDialog.cpp
 	savemaskexporter.cpp
+	dialogs/about_dialog.cpp
+	dialogs/congrats_dialog.cpp
+	dialogs/filter_script_dialog.cpp
+	dialogs/options_dialog.cpp
+	dialogs/plugin_info_dialog.cpp
+	dialogs/save_snapshot_dialog.cpp
+	dialogs/setting_dialog.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
 	rich_parameter_gui/richparameterlistframe.cpp
 	rich_parameter_gui/richparameterwidgets.cpp
-	meshlab_settings/settingdialog.cpp
-	meshlab_settings/meshlabsettingsdialog.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
 	${VCGDIR}/wrap/gui/coordinateframe.cpp
@@ -36,7 +35,6 @@ set(SOURCES
 set(HEADERS
 	additionalgui.h
 	changetexturename.h
-	filterScriptDialog.h
 	glarea.h
 	glarea_setting.h
 	layerDialog.h
@@ -46,15 +44,18 @@ set(HEADERS
 	ml_rendering_actions.h
 	ml_std_par_dialog.h
 	multiViewer_Container.h
-	plugindialog.h
-	saveSnapshotDialog.h
 	savemaskexporter.h
 	snapshotsetting.h
+	dialogs/about_dialog.h
+	dialogs/congrats_dialog.h
+	dialogs/filter_script_dialog.h
+	dialogs/options_dialog.h
+	dialogs/plugin_info_dialog.h
+	dialogs/save_snapshot_dialog.h
+	dialogs/setting_dialog.h
 	rich_parameter_gui/richparameterlistdialog.h
 	rich_parameter_gui/richparameterlistframe.h
 	rich_parameter_gui/richparameterwidgets.h
-	meshlab_settings/settingdialog.h
-	meshlab_settings/meshlabsettingsdialog.h
 	${VCGDIR}/wrap/gui/trackball.h
 	${VCGDIR}/wrap/gui/trackmode.h
 	${VCGDIR}/wrap/gl/trimesh.h)
@@ -62,15 +63,14 @@ set(HEADERS
 set(RESOURCES meshlab.qrc)
 
 set(UI
-	ui/aboutDialog.ui
-	ui/congratsDialog.ui
-	ui/filterScriptDialog.ui
-	ui/filtercreatortab.ui
-	ui/filtergui.ui
+	dialogs/about_dialog.ui
+	dialogs/congrats_dialog.ui
+	dialogs/filter_script_dialog.ui
+	dialogs/plugin_info_dialog.ui
+	dialogs/save_snapshot_dialog.ui
 	ui/layerDialog.ui
 	ui/renametexture.ui
-	ui/savemaskexporter.ui
-	ui/savesnapshotDialog.ui)
+	ui/savemaskexporter.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
@@ -83,7 +83,7 @@ add_executable(meshlab WIN32 MACOSX_BUNDLE
 	${UI})
 
 target_compile_definitions(meshlab PUBLIC QT_DISABLE_DEPRECATED_BEFORE=0x000000)
-target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${EXTERNAL_DIR}/easyexif/)
+target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
 	meshlab
 	PUBLIC meshlab-common OpenGL::GLU Qt5::Network

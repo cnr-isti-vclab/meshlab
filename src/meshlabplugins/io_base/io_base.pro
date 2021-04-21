@@ -18,6 +18,9 @@ SOURCES += \
     baseio.cpp \
     $$VCGDIR/wrap/ply/plylib.cpp \
     $$VCGDIR/wrap/openfbx/src/ofbx.cpp \
-    $$VCGDIR/wrap/openfbx/src/miniz.c
+    $$VCGDIR/wrap/openfbx/src/miniz.c \
+    $$MESHLAB_EXTERNAL_DIRECTORY/easyexif/exif.cpp
+
+INCLUDEPATH += $$MESHLAB_EXTERNAL_DIRECTORY/easyexif
 
 TARGET = io_base

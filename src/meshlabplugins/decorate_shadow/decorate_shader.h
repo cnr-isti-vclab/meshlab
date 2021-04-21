@@ -28,7 +28,7 @@
 #include <cassert>
 
 //#include <QObject>
-#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 //#include <meshlab/glarea.h>
 
 
@@ -238,7 +238,7 @@ protected:
      * @param path The path to the files.
      * @return true if no errors during compilation and linking occurs
     */
-    bool compileAndLink(GLuint& program, GLuint& vertex, GLuint& fragment, QString& path){
+    bool compileAndLink(GLuint& program, GLuint& vertex, GLuint& fragment, QString path){
         //load the file containing the vertex shader
         QFile vertexShaderFile(path + QString(".vert"));
         bool ret=vertexShaderFile.open(QIODevice::ReadOnly | QIODevice::Text);

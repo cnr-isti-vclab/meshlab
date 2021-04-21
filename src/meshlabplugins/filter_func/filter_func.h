@@ -26,16 +26,16 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 #include "muParser.h"
 #include "filter_refine.h"
 
-class FilterFunctionPlugin : public QObject, public FilterPluginInterface
+class FilterFunctionPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 protected:
 	double x,y,z,nx,ny,nz,r,g,b,a,q,rad,vtu,vtv,vsel;
@@ -43,14 +43,15 @@ protected:
 	double fr,fg,fb,fa,fnx,fny,fnz,fq,fsel;
 	double v,f,v0i,v1i,v2i,ti;
 	std::vector<std::string> v_attrNames;  // names of the <float> per vertex attributes
-	std::vector<double>      v_attrValue;  // values of the <float> per vertex attributes
+	std::vector<double>      v_attrValue;  // values of the <Scalarm> per vertex attributes
 	std::vector<std::string> v3_attrNames;  // names of the <Point3f> per vertex attributes There are 3x (one foreach coord _x, _y, _z)
-	std::vector<double>      v3_attrValue;  // values of the <Point3f> per vertex attributes. There are 3x (one foreach coord _x, _y, _z)
+	std::vector<double>      v3_attrValue;  // values of the <Point3m> per vertex attributes. There are 3x (one foreach coord _x, _y, _z)
 	std::vector<std::string> f_attrNames;
 	std::vector<double> f_attrValue;
-	std::vector<CMeshO::PerVertexAttributeHandle<float> > v_handlers;
-	std::vector<CMeshO::PerVertexAttributeHandle<Point3f> > v3_handlers;
-	std::vector<CMeshO::PerFaceAttributeHandle<float> > f_handlers;
+	std::vector<CMeshO::PerVertexAttributeHandle<Scalarm> > v_handlers;
+	std::vector<CMeshO::PerVertexAttributeHandle<Point3m> > v3_handlers;
+	std::vector<CMeshO::PerFaceAttributeHandle<Scalarm> > f_handlers;
+	QString errorMsg;
 
 public:
 	enum {
@@ -75,14 +76,19 @@ public:
 	~FilterFunctionPlugin();
 	
 	QString pluginName() const;
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 	virtual FilterClass getClass(const QAction*) const;
 	virtual int postCondition(const QAction *action) const;
 	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
 	virtual int getRequirements(const QAction*);
-	virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-	FILTER_ARITY filterArity(const QAction* filter) const;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+	FilterArity filterArity(const QAction* filter) const;
 
 
 	void showParserError(const QString &s, mu::Parser::exception_type &e);

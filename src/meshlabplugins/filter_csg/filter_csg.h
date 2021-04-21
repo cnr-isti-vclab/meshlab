@@ -28,42 +28,42 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 
 //FILE _iob[] = { *stdin, *stdout, *stderr };
 //extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
 
-class FilterCSG : public QObject, public FilterPluginInterface
+class FilterCSG : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
-    enum {
-        CSG_OPERATION_INTERSECTION  = 0,
-        CSG_OPERATION_UNION         = 1,
-        CSG_OPERATION_DIFFERENCE    = 2
-    };
+	enum {
+		CSG_OPERATION_INTERSECTION  = 0,
+				CSG_OPERATION_UNION         = 1,
+				CSG_OPERATION_DIFFERENCE    = 2
+	};
 
 public:
-    enum {FP_CSG};
+	enum {FP_CSG};
 
-    FilterCSG();
-    ~FilterCSG() {};
+	FilterCSG();
+	~FilterCSG() {};
 
-    QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+	QString pluginName() const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 
-    virtual bool autoDialog(QAction *) { return true; }
+	virtual bool autoDialog(QAction *) { return true; }
 
-    virtual void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
+	virtual void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    virtual bool applyFilter(const QAction*, MeshDocument &, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &, vcg::CallBackPos *);
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 
-    virtual FilterClass getClass(const QAction *) const { return FilterPluginInterface::FilterClass( FilterPluginInterface::Layer + FilterPluginInterface::Remeshing ); }
-    FILTER_ARITY filterArity(const QAction*) const {return FIXED;}
+	virtual FilterClass getClass(const QAction *) const { return FilterPlugin::FilterClass( FilterPlugin::Layer + FilterPlugin::Remeshing ); }
+	FilterArity filterArity(const QAction*) const {return FIXED;}
 };
 
 

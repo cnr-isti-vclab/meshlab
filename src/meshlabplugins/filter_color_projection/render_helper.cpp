@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include <common/GLExtensionsManager.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 
 #include <QObject>
 #include <QGLContext>

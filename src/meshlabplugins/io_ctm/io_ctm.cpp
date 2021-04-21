@@ -32,35 +32,40 @@
 #include <wrap/io_trimesh/import_ctm.h>
 #include <wrap/io_trimesh/export_ctm.h>
 
-#include <QMessageBox>
 #include <QFileDialog>
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
+void IOMPlugin::open(const QString & formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & /*par*/,  CallBackPos *cb)
 {
-    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
-    if (result != 0) // all the importers return 0 on success
-    {
-      errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result));
-      return false;
-    }
-    return true;
+	if (formatName.toUpper() == tr("CTM")){
+		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+		int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
+		if (result != 0) // all the importers return 0 on success
+		{
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result)));
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
-bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
+void IOMPlugin::save(const QString & formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos * /*cb*/)
 {
-	bool lossLessFlag = par.getBool("LossLess");
-	float relativePrecisionParam = par.getFloat("relativePrecisionParam");
-    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
-    if(result!=0)
-    {
-        QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
-        return false;
-    }
-    return true;
+	if (formatName.toUpper() == tr("CTM")){
+		bool lossLessFlag = par.getBool("LossLess");
+		Scalarm relativePrecisionParam = par.getFloat("relativePrecisionParam");
+		int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
+		if(result!=0)
+		{
+			QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+			throw MLException("Saving Error: " + errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
+		}
+	}
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*
@@ -71,33 +76,29 @@ QString IOMPlugin::pluginName() const
 	return "IOCTM";
 }
 
-QList<IOPluginInterface::Format> IOMPlugin::importFormats() const
+std::list<FileFormat> IOMPlugin::importFormats() const
 {
-	QList<Format> formatList;
-  formatList << Format("OpenCTM compressed format"	,tr("CTM"));
-	return formatList;
+	return { FileFormat("OpenCTM compressed format"	,tr("CTM"))};
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> IOMPlugin::exportFormats() const
+std::list<FileFormat> IOMPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-    formatList << Format("OpenCTM compressed format"	,tr("CTM"));
-	return formatList;
+	return {FileFormat("OpenCTM compressed format" ,tr("CTM"))};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void IOMPlugin::GetExportMaskCapability(const QString &/*format*/, int &capability, int &defaultBits) const
+void IOMPlugin::exportMaskCapability(const QString &/*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
-void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterList & par)
+void IOMPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList & par)
 {
   par.addParam(RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));

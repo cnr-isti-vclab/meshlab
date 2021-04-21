@@ -29,56 +29,58 @@
 
 
 
-VisibleSet::VisibleSet( glw::Context &ctx,MLPluginGLContext* plugctx,int meshid,
-                        CMeshO &mesh,
-                        QList<RasterModel*> &rasterList,
-                        int weightMask ) :
-    m_Mesh(mesh),
-    m_FaceVis(mesh.fn),
-    m_WeightMask(weightMask)
+VisibleSet::VisibleSet(
+		glw::Context &ctx,
+		MLPluginGLContext* plugctx,
+		int meshid,
+		CMeshO &mesh,
+		QList<RasterModel*> &rasterList,
+		int weightMask) :
+	m_Mesh(mesh),
+	m_FaceVis(mesh.fn),
+	m_WeightMask(weightMask)
 {
-    VisibilityCheck &visibility = *VisibilityCheck::GetInstance( ctx );
-    visibility.setMesh(meshid,&mesh );
-    visibility.m_plugcontext = plugctx;
+	VisibilityCheck &visibility = *VisibilityCheck::GetInstance( ctx );
+	visibility.setMesh(meshid,&mesh );
+	visibility.m_plugcontext = plugctx;
 
 
-    float depthMin =  std::numeric_limits<float>::max();
-    m_DepthMax = -std::numeric_limits<float>::max();
+	float depthMin =  std::numeric_limits<float>::max();
+	m_DepthMax = -std::numeric_limits<float>::max();
 
-    foreach( RasterModel *rm, rasterList )
-    {
-        CMeshO::ScalarType zNear, zFar;
-        GlShot< Shotm >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
+	for(RasterModel *rm: qAsConst(rasterList)) {
+		CMeshO::ScalarType zNear, zFar;
+		GlShot< Shotm >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
 
-        if( zNear < depthMin )
-            depthMin = zNear;
-        if( zFar > m_DepthMax )
-            m_DepthMax = zFar;
-    }
+		if( zNear < depthMin )
+			depthMin = zNear;
+		if( zFar > m_DepthMax )
+			m_DepthMax = zFar;
+	}
 
-    if( depthMin < 0.0001f )
-        depthMin = 0.1f;
-    if( m_DepthMax < depthMin )
-        m_DepthMax = depthMin + 1000.0f;
+	if( depthMin < 0.0001f )
+		depthMin = 0.1f;
+	if( m_DepthMax < depthMin )
+		m_DepthMax = depthMin + 1000.0f;
 
-    m_DepthRangeInv = 1.0f / (m_DepthMax-depthMin);
+	m_DepthRangeInv = 1.0f / (m_DepthMax-depthMin);
 
 
-    foreach( RasterModel *rm, rasterList )
-    {
-        visibility.setRaster( rm );
-        visibility.checkVisibility();
+	for( RasterModel *rm : qAsConst(rasterList))
+	{
+		visibility.setRaster( rm );
+		visibility.checkVisibility();
 
-        for( int f=0; f<mesh.fn; ++f )
-            if( visibility.isFaceVisible(f) )
-            {
-                float w = getWeight( rm, mesh.face[f] );
-                if( w >= 0.0f )
-                    m_FaceVis[f].add( w, rm );
-            }
-    }
+		for( int f=0; f<mesh.fn; ++f ){
+			if( visibility.isFaceVisible(f) ) {
+				float w = getWeight( rm, mesh.face[f] );
+				if( w >= 0.0f )
+					m_FaceVis[f].add( w, rm );
+			}
+		}
+	}
 
-    VisibilityCheck::ReleaseInstance();
+	VisibilityCheck::ReleaseInstance();
 }
 
 

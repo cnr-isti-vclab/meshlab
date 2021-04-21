@@ -150,7 +150,7 @@ protected:
             Scalar delta = sqrt(MeanCurvature()*m_km - 4.0*GaussCurvature());
             m_k1 = 0.5*(m_km + delta);
             m_k2 = 0.5*(m_km - delta);
-            if (fabs(m_k1)<fabs(m_k2))
+            if (std::abs(m_k1)<std::abs(m_k2))
                 std::swap(m_k1,m_k2);
             m_kpAreDirty = false;
         }

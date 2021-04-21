@@ -29,8 +29,8 @@
 
 #include <GL/glew.h>
 
-#include "../common/interfaces/mainwindow_interface.h"
-#include "../common/pluginmanager.h"
+#include "common/mainwindow_interface.h"
+#include "common/plugins/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
 
@@ -143,18 +143,18 @@ private:
 
 private slots:
 	void documentUpdateRequested();
-	bool importMesh(QString fileName=QString(), bool isareload = false);
+	bool importMesh(QString fileName=QString());
 	void endEdit();
 	void updateProgressBar(const int pos,const QString& text);
 	void updateTexture(int meshid);
 public:
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool loadMesh(const QString& fileName,IOPluginInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMesh(const QString& fileName,IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
-	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(),bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void defaultPerViewRenderingData(MLRenderingData& dt) const;
 	void getRenderingData(int mid,MLRenderingData& dt) const;
@@ -187,6 +187,9 @@ private slots:
 
 	void applyRenderMode();
 	void applyDecorateMode();
+
+	static std::pair<QString, QString> extractVertFragFileNames(const QDomElement& root);
+	void addShaders();
 
 	void switchOffDecorator(QAction* );
 	///////////Slot Menu View ////////////////////////
@@ -238,6 +241,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
 
+	void updateFilterToolBar();
 	void updateGPUMemBar(int,int,int,int);
 
 	void updateLog();
@@ -254,9 +258,11 @@ private:
 	void initItemForSearching(QAction* act);
 	void initMenuForSearching(QMenu* menu);
 	void fillFilterMenu();
-	void fillDecorateMenu();
 	void fillRenderMenu();
+	void fillShadersMenu();
 	void fillEditMenu();
+	void clearMenu(QMenu* menu);
+	void updateAllPluginsActions();
 	void createToolBars();
 	void loadMeshLabSettings();
 	void keyPressEvent(QKeyEvent *);
@@ -292,14 +298,14 @@ private:
 	*/
 
 	RichParameterList currentGlobalParams;
-	RichParameterList defaultGlobalParams;
+	RichParameterList& defaultGlobalParams;
 
 	QByteArray toolbarState; //toolbar and dockwidgets state
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 public:
-	PluginManager PM;
+	PluginManager& PM;
 
 	MeshDocument *meshDoc() {
 		if (currentViewContainer() != NULL)
@@ -341,8 +347,6 @@ public:
 
 		return _currviewcontainer;
 	}
-
-	const PluginManager& pluginManager() const { return PM; }
 
 	static QStatusBar *&globalStatusBar()
 	{

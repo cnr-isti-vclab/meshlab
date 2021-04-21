@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/filter_quality.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 set(SOURCES
     filterqualitymapper.cpp ../edit_quality/common/meshmethods.cpp
@@ -14,20 +11,4 @@ set(HEADERS
     ../edit_quality/common/meshmethods.h
     ../edit_quality/common/transferfunction.h ../edit_quality/common/util.h)
 
-add_library(filter_quality MODULE ${SOURCES} ${HEADERS})
-
-target_include_directories(filter_quality PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_quality PUBLIC meshlab-common)
-
-set_property(TARGET filter_quality PROPERTY FOLDER Plugins)
-
-set_property(TARGET filter_quality PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                            ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET filter_quality PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                            ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS filter_quality
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)
+add_meshlab_plugin(filter_quality ${SOURCES} ${HEADERS})

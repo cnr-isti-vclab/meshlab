@@ -30,8 +30,8 @@
 #include <QTabWidget>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <common/filter_parameter/rich_parameter_list.h>
-#include <common/ml_shared_data_context.h>
+#include <common/parameters/rich_parameter_list.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include "ml_render_gui.h"
 
 
@@ -42,7 +42,7 @@ class GLLogStream;
 class MeshModel;
 class RasterModel;
 class MeshDocument;
-class DecoratePluginInterface;
+class DecoratePlugin;
 class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;

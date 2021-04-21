@@ -7,7 +7,7 @@
 # Original Author:
 # 2019 Ryan Pavlik <ryan.pavlik@collabora.com> <ryan.pavlik@gmail.com>
 #
-# Copyright Collabora, Ltd. 2019
+# Copyright 2019, Collabora, Ltd.
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)

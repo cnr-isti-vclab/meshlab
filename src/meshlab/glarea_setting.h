@@ -26,7 +26,7 @@
 
 #include<QString>
 #include <vcg/space/color4.h>
-#include <common/filter_parameter/rich_parameter_list.h>
+#include <common/parameters/rich_parameter_list.h>
 
 class GLAreaSetting
 {
@@ -64,7 +64,7 @@ public:
 	inline static QString pointDistanceAttenuationParam() {return "MeshLab::Appearance::pointDistanceAttenuation";}
 	bool pointSmooth;
 	inline static QString pointSmoothParam() {return "MeshLab::Appearance::pointSmooth";}
-	float pointSize;
+	Scalarm pointSize;
 	inline static QString pointSizeParam() {return "MeshLab::Appearance::pointSize";}
 	bool wheelDirection;
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}

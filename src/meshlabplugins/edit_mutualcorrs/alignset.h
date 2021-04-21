@@ -7,7 +7,7 @@
 #include <QGLFramebufferObject>
 
 // local headers
-#include "common/meshmodel.h"
+#include <common/ml_document/mesh_model.h>
 
 // VCG headers
 #include <vcg/math/shot.h>
@@ -36,7 +36,7 @@ class AlignSet {
   CMeshO* mesh;
   QImage* image;
   double imageRatio;
-  vcg::Shot<MESHLAB_SCALAR> shot;
+  vcg::Shot<Scalarm> shot;
   vcg::Box3<float> box;
   std::vector<Correspondence> correspList; //List that includes corresponces involving the model
   double error; //alignment error in px
@@ -62,7 +62,7 @@ class AlignSet {
   bool setFocal(double f); //return false if unchanged
   void setPixelSizeMm(double ccdWidth);
 
-  void renderScene(vcg::Shot<MESHLAB_SCALAR>& shot, int component);
+  void renderScene(vcg::Shot<Scalarm>& shot, int component);
   void readRender(int component);
 
   void drawMeshPoints();

@@ -110,13 +110,14 @@ public:
 //    your filtering actions you can do here by construction the QActions accordingly
 TriOptimizePlugin::TriOptimizePlugin()
 {
-	typeList
-	<< FP_PLANAR_EDGE_FLIP
-	<< FP_CURVATURE_EDGE_FLIP
-	<< FP_NEAR_LAPLACIAN_SMOOTH;
+	typeList = {
+		FP_PLANAR_EDGE_FLIP,
+		FP_CURVATURE_EDGE_FLIP,
+		FP_NEAR_LAPLACIAN_SMOOTH
+	};
 
-	foreach(FilterIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString TriOptimizePlugin::pluginName() const
@@ -127,7 +128,7 @@ QString TriOptimizePlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
- QString TriOptimizePlugin::filterName(FilterIDType filterId) const
+ QString TriOptimizePlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
 		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
@@ -153,7 +154,7 @@ QString TriOptimizePlugin::pluginName() const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString TriOptimizePlugin::filterInfo(FilterIDType filterId) const
+ QString TriOptimizePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_PLANAR_EDGE_FLIP:
@@ -174,11 +175,11 @@ QString TriOptimizePlugin::pluginName() const
  TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(const QAction *action) const
 {
 	switch(ID(action)) {
-		case FP_PLANAR_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
-		case FP_CURVATURE_EDGE_FLIP:             return FilterPluginInterface::Remeshing;
-		case FP_NEAR_LAPLACIAN_SMOOTH: return FilterPluginInterface::Smoothing;
+		case FP_PLANAR_EDGE_FLIP:             return FilterPlugin::Remeshing;
+		case FP_CURVATURE_EDGE_FLIP:             return FilterPlugin::Remeshing;
+		case FP_NEAR_LAPLACIAN_SMOOTH: return FilterPlugin::Smoothing;
 	}
- return FilterPluginInterface::Generic;
+ return FilterPlugin::Generic;
 }
 
 int TriOptimizePlugin::postCondition(const QAction *a) const
@@ -262,141 +263,147 @@ void TriOptimizePlugin::initParameterList(const QAction *action, MeshModel &m, R
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> TriOptimizePlugin::applyFilter(
+		const QAction *filter,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
-    MeshModel &m=*(md.mm());
-    float limit = -std::numeric_limits<float>::epsilon();
+	MeshModel &m=*(md.mm());
+	float limit = -std::numeric_limits<float>::epsilon();
 
 	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
 			log(
-				"Pre-Curvature Cleaning: Removed %d unreferenced vertices",
-				delvert);
+						"Pre-Curvature Cleaning: Removed %d unreferenced vertices",
+						delvert);
 
 		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
-	if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
-			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
-			return false; // can't continue, mesh can't be processed
+		if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
+			throw MLException("Mesh has some not 2-manifold faces, edge flips requires manifoldness");
 		}
-	vcg::tri::PlanarEdgeFlipParameter pp;
+		vcg::tri::PlanarEdgeFlipParameter pp;
 
-	vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
+		vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
 		float pthr = par.getFloat("pthreshold");
 		time_t start = clock();
 
 		if (par.getBool("selection")) {
 			// Mark not writable un-selected faces
 			for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) {
-					if (!(*fi).IsS()) (*fi).ClearW();
-					else (*fi).SetW();
-				}
+				if (!(*fi).IsS()) (*fi).ClearW();
+				else (*fi).SetW();
+			}
 
 			// select vertices with at least one incident face selected
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 
 			// Mark not writable un-selected vertices
 			for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi){
-					if (!(*vi).IsS()) (*vi).ClearW();
-					else (*vi).SetW();
-				}
+				if (!(*vi).IsS()) (*vi).ClearW();
+				else (*vi).SetW();
+			}
 		}
 
-			// VF adjacency needed for edge flips based on vertex curvature
-			vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-			vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
+		// VF adjacency needed for edge flips based on vertex curvature
+		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+		vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 
-            int metric = par.getEnum("curvtype");
-      pp.CoplanarAngleThresholdDeg = pthr;
-            switch (metric) {
-        case 0: optimiz.Init<MeanCEFlip>(); break;
-        case 1: optimiz.Init<NSMCEFlip>();  break;
-        case 2: optimiz.Init<AbsCEFlip>();  break;
-            }
-
-			// stop when flips become harmful
-			optimiz.SetTargetMetric(limit);
-			//optimiz.SetTargetOperations(10);
-			optimiz.DoOptimization();
-			optimiz.h.clear();
-
-			log( "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+		int metric = par.getEnum("curvtype");
+		pp.CoplanarAngleThresholdDeg = pthr;
+		switch (metric) {
+		case 0: optimiz.Init<MeanCEFlip>(); break;
+		case 1: optimiz.Init<NSMCEFlip>();  break;
+		case 2: optimiz.Init<AbsCEFlip>();  break;
 		}
-	if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
-	  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
-		errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
-		return false; // can't continue, mesh can't be processed
-	  }
 
-	  bool selection = par.getBool("selection");
+		// stop when flips become harmful
+		optimiz.SetTargetMetric(limit);
+		//optimiz.SetTargetOperations(10);
+		optimiz.DoOptimization();
+		optimiz.h.clear();
 
-	  tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-	  tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-	  vcg::tri::PlanarEdgeFlipParameter pp;
-	  vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
+		log( "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+	}
+	else if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
+		if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
+			throw MLException("Mesh has some not 2-manifold faces, edge flips requires manifoldness");
+		}
 
-	  float planarThrDeg = par.getFloat("pthreshold");
-	  pp.CoplanarAngleThresholdDeg=planarThrDeg;
-	  time_t	start = clock();
+		bool selection = par.getBool("selection");
+
+		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		vcg::tri::PlanarEdgeFlipParameter pp;
+		vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
+
+		float planarThrDeg = par.getFloat("pthreshold");
+		pp.CoplanarAngleThresholdDeg=planarThrDeg;
+		time_t	start = clock();
 
 
-	  int metric = par.getEnum("planartype");
-	  switch (metric) {
+		int metric = par.getEnum("planartype");
+		switch (metric) {
 		case 0: optimiz.Init<QEFlip>(); break;
 		case 1: optimiz.Init<QRadiiEFlip>(); break;
 		case 2: optimiz.Init<QMeanRatioEFlip>(); break;
 		case 3: optimiz.Init<MyTriEFlip>(); break;
 		case 4: optimiz.Init<MyTopoEFlip>(); 	break;
-	  }
-	  // stop when flips become harmful
-	  optimiz.SetTargetMetric(limit);
-	  optimiz.DoOptimization();
-	  optimiz.h.clear();
+		}
+		// stop when flips become harmful
+		optimiz.SetTargetMetric(limit);
+		optimiz.DoOptimization();
+		optimiz.h.clear();
 
-	  log( "%d planar edge flips performed in %.2f sec.", optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
-	  int iternum = par.getInt("iterations");
+		log( "%d planar edge flips performed in %.2f sec.", optimiz.nPerformedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+		int iternum = par.getInt("iterations");
 
-	  tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(planarThrDeg), selection,cb);
+		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(planarThrDeg), selection,cb);
 
 
-	  vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
-	  if (par.getBool("selection")) {
-		// Clear Writable flags (faces)
-		CMeshO::FaceIterator fi;
-		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-		  if (!(*fi).IsD())
-			(*fi).SetW();
+		if (par.getBool("selection")) {
+			// Clear Writable flags (faces)
+			CMeshO::FaceIterator fi;
+			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				if (!(*fi).IsD())
+					(*fi).SetW();
 
-		// Clear Writable flags (vertices)
-		CMeshO::VertexIterator vi;
-		for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-		  if (!(*vi).IsD())
-			(*vi).SetW();
+			// Clear Writable flags (vertices)
+			CMeshO::VertexIterator vi;
+			for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+				if (!(*vi).IsD())
+					(*vi).SetW();
 
-		// restore "default" selection  for vertices
-		vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-	  }
+			// restore "default" selection  for vertices
+			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+		}
 	}
 
-	if (ID(filter) == FP_NEAR_LAPLACIAN_SMOOTH) {
+	else if (ID(filter) == FP_NEAR_LAPLACIAN_SMOOTH) {
 		bool selection = par.getBool("selection");
 		if (selection)
 			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 
 		int iternum = par.getInt("iterations");
-		float dthreshold = par.getFloat("AngleDeg");
+		Scalarm dthreshold = par.getFloat("AngleDeg");
 		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(dthreshold), selection,cb);
 		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
+	else {
+		wrongActionCalled(filter);
+	}
 
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
 

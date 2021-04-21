@@ -1,9 +1,6 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates,
-### specifically src/templates/edit_align.cmake (custom for this directory),
-### then re-run ./make-cmake.py
 
 # Only build if we have newuoa
 if(TARGET external-newuoa)
@@ -46,28 +43,12 @@ if(TARGET external-newuoa)
 
 	set(UI alignDialog.ui)
 
-	add_library(edit_align MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
-
-	target_include_directories(edit_align PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(edit_align PUBLIC meshlab-common)
+	add_meshlab_plugin(edit_align ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 	target_link_libraries(edit_align PRIVATE external-newuoa OpenGL::GLU)
 	if(OpenMP_CXX_FOUND)
 		target_link_libraries(edit_align PRIVATE OpenMP::OpenMP_CXX)
 	endif()
-
-	set_property(TARGET edit_align PROPERTY FOLDER Plugins)
-
-	set_property(TARGET edit_align PROPERTY RUNTIME_OUTPUT_DIRECTORY
-		${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	set_property(TARGET edit_align PROPERTY LIBRARY_OUTPUT_DIRECTORY
-		${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	install(
-		TARGETS edit_align
-		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-		COMPONENT Plugins)
 
 else()
 	message(

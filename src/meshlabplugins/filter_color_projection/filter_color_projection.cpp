@@ -45,7 +45,7 @@ using namespace vcg;
 
 // utility---------------------------------
 
-#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
 
 static QString extractFilenameWOExt(MeshModel* mm)
 {
@@ -57,13 +57,14 @@ static QString extractFilenameWOExt(MeshModel* mm)
 // Constructor
 FilterColorProjectionPlugin::FilterColorProjectionPlugin()
 {
-    typeList
-        <<  FP_SINGLEIMAGEPROJ
-        <<  FP_MULTIIMAGETRIVIALPROJ
-        <<  FP_MULTIIMAGETRIVIALPROJTEXTURE;
+	typeList = {
+		FP_SINGLEIMAGEPROJ,
+		FP_MULTIIMAGETRIVIALPROJ,
+		FP_MULTIIMAGETRIVIALPROJTEXTURE
+	};
 
-    foreach(FilterIDType tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterColorProjectionPlugin::pluginName() const
@@ -72,7 +73,7 @@ QString FilterColorProjectionPlugin::pluginName() const
 }
 
 // ST() return the very short string describing each filtering action
-QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
+QString FilterColorProjectionPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SINGLEIMAGEPROJ	:	return QString("Project current raster color to current mesh");
@@ -84,7 +85,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 }
 
 // Info() return the longer string describing each filtering action
-QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
+QString FilterColorProjectionPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_SINGLEIMAGEPROJ	:	return QString("Color information from the current raster is perspective-projected on the current mesh");
@@ -103,7 +104,20 @@ int FilterColorProjectionPlugin::getRequirements(const QAction *action){
     case FP_MULTIIMAGETRIVIALPROJTEXTURE : return 0;
     default: assert(0); return 0;
     }
-    return 0;
+	return 0;
+}
+
+bool FilterColorProjectionPlugin::requiresGLContext(const QAction* action) const
+{
+	switch(ID(action)){
+	case FP_SINGLEIMAGEPROJ:
+	case FP_MULTIIMAGETRIVIALPROJ:
+	case FP_MULTIIMAGETRIVIALPROJTEXTURE :
+		return true;
+	default: 
+		assert(0);
+	}
+	return false;
 }
 
 
@@ -218,705 +232,711 @@ void FilterColorProjectionPlugin::initParameterList(const QAction *action, MeshD
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterColorProjectionPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
-    //CMeshO::FaceIterator fi;
-    CMeshO::VertexIterator vi;
-
-    RenderHelper *rendermanager=NULL;
-
-    switch(ID(filter))
-    {
-
-        ////--------------------------- project single trivial ----------------------------------
-
-    case FP_SINGLEIMAGEPROJ :
-        {
-            bool use_depth = par.getBool("usedepth");
-            bool onselection = par.getBool("onselection");
-            float eta = par.getFloat("deptheta");
-            QColor blank = par.getColor("blankColor");
-
-
-            float depth=0;     // depth of point (distance from camera)
-            float pdepth=0;    // depth value of projected point (from depth map)
-
-            // get current raster and model
-            RasterModel *raster   = md.rm();
-            MeshModel   *model    = md.mm();
-
-            // no projection if camera not valid
-            if(!raster->shot.IsValid())
-                return false;
-
-            // the mesh has to be correctly transformed before mapping
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-            // making context current
-            glContext->makeCurrent();
-
-            if(use_depth)
-            {
-                // init rendermanager
-                rendermanager = new RenderHelper();
-                if( rendermanager->initializeGL(cb) != 0 )
-                {
-                    delete rendermanager;
-                    return false;
-                }
-                log("init GL");
-                //if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
-                //    return false;
-                //Log("init Buffers");
-
-                // render depth
-                rendermanager->renderScene(raster->shot, model, RenderHelper::FLAT, glContext);
-            }
-
-            // unmaking context current
-            glContext->doneCurrent();
-
-            qDebug("Viewport %i %i",raster->shot.Intrinsics.ViewportPx[0],raster->shot.Intrinsics.ViewportPx[1]);
-            for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
-            {
-                if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
-                {
-                    Point2m pp = raster->shot.Project((*vi).P());
-                    // pray is the vector from the point-to-be-colored to the camera center
-                    Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
-
-                    if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
-                        (*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
-
-                    //if inside image
-                    if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
-                    {
-                        if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
-                        {
-                            if(use_depth)
-                            {
-                                depth  = raster->shot.Depth((*vi).P());
-                                pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1]));//rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
-                            }
-
-                            if(!use_depth || (depth <= (pdepth + eta)))
-                            {
-                                QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-                                (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // the mesh has to return to its original position
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-            // delete rendermanager
-            if(rendermanager != NULL)
-                delete rendermanager;
-        }
-
-        break;
-
-
-        ////--------------------------- project multi trivial ----------------------------------
-
-    case FP_MULTIIMAGETRIVIALPROJ :
-        {
-            bool onselection = par.getBool("onselection");
-            float eta = par.getFloat("deptheta");
-            bool  useangle = par.getBool("useangle");
-            bool  usedistance = par.getBool("usedistance");
-            bool  useborders = par.getBool("useborders");
-            bool  usesilhouettes = par.getBool("usesilhouettes");
-            bool  usealphamask =  par.getBool("usealpha");
-            QColor blank = par.getColor("blankColor");
-
-            float  depth=0;     // depth of point (distance from camera)
-            float  pdepth=0;    // depth value of projected point (from depth map)
-            double pweight;     // pixel weight
-            MeshModel *model;
-            bool do_project;
-            int cam_ind;
-
-            // min max depth for depth weight normalization
-            float allcammaxdepth;
-            float allcammindepth;
-
-            // max image size for border weight normalization
-            float allcammaximagesize;
-
-            // accumulation buffers for colors and weights
-            int buff_ind;
-            double *weights;
-            double *acc_red;
-            double *acc_grn;
-            double *acc_blu;
-
-            // get current model
-            model = md.mm();
-
-            // the mesh has to be correctly transformed before mapping
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-            // init accumulation buffers for colors and weights
-            log("init color accumulation buffers");
-            weights = new double[model->cm.vn];
-            acc_red = new double[model->cm.vn];
-            acc_grn = new double[model->cm.vn];
-            acc_blu = new double[model->cm.vn];
-            for(int buff_ind=0; buff_ind<model->cm.vn; buff_ind++)
-            {
-                weights[buff_ind] = 0.0;
-                acc_red[buff_ind] = 0.0;
-                acc_grn[buff_ind] = 0.0;
-                acc_blu[buff_ind] = 0.0;
-            }
-
-            // calculate accuratenear/far for all cameras
-            std::vector<float> my_near;
-            std::vector<float> my_far;
-            calculateNearFarAccurate(md, &my_near, &my_far);
-
-            allcammaxdepth =  -1000000;
-            allcammindepth =   1000000;
-            allcammaximagesize = -1000000;
-            for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
-            {
-                if(my_far[cam_ind] > allcammaxdepth)
-                    allcammaxdepth = my_far[cam_ind];
-                if(my_near[cam_ind] < allcammindepth)
-                    allcammindepth = my_near[cam_ind];
-
-                float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
-                if (imgdiag > allcammaximagesize)
-                    allcammaximagesize = imgdiag;
-            }
-
-            //-- cycle all cameras
-            cam_ind = 0;
-            for(RasterModel *raster : md.rasterList){
-                if(raster->visible)
-                {
-                    do_project = true;
-
-                    // no drawing if camera not valid
-                    if(!raster->shot.IsValid())
-                        do_project = false;
-
-                    // no drawing if raster is not active
-                    //if(!raster->shot.IsValid())
-                    //  do_project = false;
-
-                    if(do_project)
-                    {
-                        // making context current
-                        glContext->makeCurrent();
-
-                        // delete & reinit rendermanager
-                        if(rendermanager != NULL)
-                            delete rendermanager;
-                        rendermanager = new RenderHelper();
-                        if( rendermanager->initializeGL(cb) != 0 )
-                            return false;
-                        log("init GL");
-                        /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
-                            return false;
-                        Log("init Buffers");*/
-
-                        // render normal & depth
-                        rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
-
-                        // unmaking context current
-                        glContext->doneCurrent();
-
-                        buff_ind=0;
-
-                        // If should be used silhouette weighting, it is needed to compute depth discontinuities
-                        // and per-pixel distance from detected borders on the entire image here
-                        // the weight is then applied later, per-vertex, when needed
-                        floatbuffer *silhouette_buff=NULL;
-                        float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
-                        if(usesilhouettes)
-                        {
-                            silhouette_buff = new floatbuffer();
-                            silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
-
-                            silhouette_buff->applysobel(rendermanager->depth);
-                            //sprintf(dumpFileName,"Abord%i.pfm",cam_ind);
-                            //silhouette_buff->dumppfm(dumpFileName);
-
-                            silhouette_buff->initborder(rendermanager->depth);
-                            //sprintf(dumpFileName,"Bbord%i.pfm",cam_ind);
-                            //silhouette_buff->dumppfm(dumpFileName);
-
-                            maxsildist = silhouette_buff->distancefield();
-                            //sprintf(dumpFileName,"Cbord%i.pfm",cam_ind);
-                            //silhouette_buff->dumppfm(dumpFileName);
-                        }
-
-                        for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
-                        {
-                            if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
-                            {
-                                // pp is the projected point in image space
-                                Point2m pp = raster->shot.Project((*vi).P());
-                                // pray is the vector from the point-to-be-colored to the camera center
-                                Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
-
-                                //if inside image
-                                if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
-                                {
-                                    if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
-                                    {
-
-                                        depth  = raster->shot.Depth((*vi).P());
-                                        pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
-
-                                        if(depth <= (pdepth + eta))
-                                        {
-                                            // determine color
-                                            QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-                                            // determine weight
-                                            pweight = 1.0;
-
-                                            if(useangle)
-                                            {
-                                                Point3m pixnorm = (*vi).N();
-                                                Point3m viewaxis  = raster->shot.GetViewPoint() - (*vi).P();
-                                                pixnorm.Normalize();
-                                                viewaxis.Normalize();
-
-                                                float ang = abs(pixnorm * viewaxis);
-                                                ang = min(1.0f, ang);
-
-                                                pweight *= ang;
-                                            }
-
-                                            if(usedistance)
-                                            {
-                                                float distw = depth;
-                                                distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
-
-                                                pweight *= distw;
-                                                pweight *= distw;
-                                            }
-
-                                            if(useborders)
-                                            {
-                                                double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-                                                double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
-                                                double borderw = min (xdist , ydist);
-                                                //borderw = min(1.0,borderw); //debug debug
-                                                //borderw = max(0.0,borderw); //debug debug
-
-                                                pweight *= borderw;
-                                            }
-
-                                            if(usesilhouettes)
-                                            {
-                                                // here the silhouette weight is applied, but it is calculated before, on a per-image basis
-                                                float silw = 1.0;
-                                                silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
-                                                //silw = min(1.0f,silw); //debug debug
-                                                //silw = max(0.0f,silw); //debug debug
-
-                                                pweight *= silw;
-                                            }
-
-                                            if(usealphamask) //alpha channel of image is an additional mask
-                                            {
-                                                pweight *= (qAlpha(pcolor) / 255.0);
-                                            }
-
-                                            weights[buff_ind] += pweight;
-                                            acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
-                                            acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
-                                            acc_blu[buff_ind] += (qBlue(pcolor) * pweight / 255.0);
-                                        }
-                                    }
-                                }
-                            }
-                            buff_ind++;
-                        }
-                        cam_ind ++;
-
-                        if(usesilhouettes)
-                        {
-                            delete silhouette_buff;
-                        }
-
-                    } // end foreach camera
-                } // end foreach camera
-            }
-
-            buff_ind = 0;
-            for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
-            {
-                if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
-                {
-                    if (weights[buff_ind] != 0) // if 0, it has not found any valid projection on any camera
-                    {
-                        (*vi).C() = vcg::Color4b( (acc_red[buff_ind] / weights[buff_ind]) *255.0,
-                            (acc_grn[buff_ind] / weights[buff_ind]) *255.0,
-                            (acc_blu[buff_ind] / weights[buff_ind]) *255.0,
-                            255);
-                    }
-                    else
-                    {
-                        if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
-                            (*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
-                    }
-                }
-                buff_ind++;
-            }
-
-            // the mesh has to return to its original position
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-            // delete rendermanager
-            if(rendermanager != NULL)
-                delete rendermanager;
-
-            // delete accumulation buffers
-            delete[]  weights;
-            delete[]  acc_red;
-            delete[]  acc_grn;
-            delete[]  acc_blu;
-
-        }
-        break;
-
-
-    case FP_MULTIIMAGETRIVIALPROJTEXTURE :
-        {
-
-            if(!tri::HasPerWedgeTexCoord(md.mm()->cm))
-            {
-                errorMessage="Warning: nothing have been done. Mesh has no Texture Coordinates.";
-                return false;
-            }
-
-            //bool onselection = par.getBool("onselection");
-            int texsize = par.getInt("texsize");
-            bool  dorefill = par.getBool("dorefill");
-            float eta = par.getFloat("deptheta");
-            bool  useangle = par.getBool("useangle");
-            bool  usedistance = par.getBool("usedistance");
-            bool  useborders = par.getBool("useborders");
-            bool  usesilhouettes = par.getBool("usesilhouettes");
-            bool  usealphamask =  par.getBool("usealpha");
-            QString textName = par.getString("textName");
-
-            int textW = texsize;
-            int textH = texsize;
-
-            float  depth=0;     // depth of point (distance from camera)
-            float  pdepth=0;    // depth value of projected point (from depth map)
-            double pweight;     // pixel weight
-            MeshModel *model;
-            bool do_project;
-            int cam_ind;
-
-            // min max depth for depth weight normalization
-            float allcammaxdepth;
-            float allcammindepth;
-
-            // max image size for border weight normalization
-            float allcammaximagesize;
-
-            // get the working model
-            model = md.mm();
-
-            // the mesh has to be correctly transformed before mapping
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-            // texture file name
-            QString filePath(model->fullName());
-            filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
-            // Check textName and eventually add .png ext
-            CheckError(textName.length() == 0, "Texture file not specified");
-            CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-            if (!textName.endsWith(".png", Qt::CaseInsensitive))
-                textName.append(".png");
-            filePath.append(textName);
-
-            // Image creation
-            CheckError(textW <= 0, "Texture Width has an incorrect value");
-            CheckError(textH <= 0, "Texture Height has an incorrect value");
-            QImage img(QSize(textW,textH), QImage::Format_ARGB32);
-            img.fill(qRgba(0,0,0,0)); // transparent black
-
-            // Compute (texture-space) border edges
-            if(dorefill)
-            {
-                model->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
-                tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
-            }
-
-            // create a list of to-be-filled texels and accumulators
-            // storing texel 2d coords, texel mesh-space point, texel mesh normal
-
-            vector<TexelDesc> texels;
-            texels.clear();
-            texels.reserve(textW*textH);  // just to avoid the 2x reallocate rule...
-
-            vector<TexelAccum> accums;
-            accums.clear();
-            accums.reserve(textW*textH);  // just to avoid the 2x reallocate rule...
-
-            // Rasterizing triangles in the list of voxels
-            TexFillerSampler tfs(img);
-            tfs.texelspointer = &texels;
-            tfs.accumpointer  = &accums;
-            tfs.InitCallback(cb, model->cm.fn, 0, 80);
-            tri::SurfaceSampling<CMeshO,TexFillerSampler>::Texture(model->cm,tfs,textW,textH,true);
-
-            // Revert alpha values for border edge pixels to 255
-            cb(81, "Cleaning up texture ...");
-            for (int y=0; y<textH; ++y)
-            {
-                for (int x=0; x<textW; ++x)
-                {
-                    QRgb px = img.pixel(x,y);
-                    if (qAlpha(px) < 255 && qAlpha(px) > 0)
-                        img.setPixel(x,y, px | 0xff000000);
-                }
-            }
-
-            // calculate accuratenear/far for all cameras
-            std::vector<float> my_near;
-            std::vector<float> my_far;
-            calculateNearFarAccurate(md, &my_near, &my_far);
-
-            allcammaxdepth =  -1000000;
-            allcammindepth =   1000000;
-            allcammaximagesize = -1000000;
-            for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
-            {
-                if(my_far[cam_ind] > allcammaxdepth)
-                    allcammaxdepth = my_far[cam_ind];
-                if(my_near[cam_ind] < allcammindepth)
-                    allcammindepth = my_near[cam_ind];
-
-                float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
-                if (imgdiag > allcammaximagesize)
-                    allcammaximagesize = imgdiag;
-            }
-
-            //-- cycle all cameras
-            cam_ind = 0;
-            for(RasterModel *raster : md.rasterList)
-            {
-                if(raster->visible)
-                {
-                    do_project = true;
-
-                    // no drawing if camera not valid
-                    if(!raster->shot.IsValid())
-                        do_project = false;
-
-                    // no drawing if raster is not active
-                    //if(!raster->shot.IsValid())
-                    //  do_project = false;
-
-                    if(do_project)
-                    {
-                        // making context current
-                        glContext->makeCurrent();
-
-                        // delete & reinit rendermanager
-                        if(rendermanager != NULL)
-                            delete rendermanager;
-                        rendermanager = new RenderHelper();
-                        if( rendermanager->initializeGL(cb) != 0 )
-                            return false;
-                        log("init GL");
-                        /*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
-                            return false;
-                        Log("init Buffers");*/
-
-                        // render normal & depth
-                        rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
-
-                        // unmaking context current
-                        glContext->doneCurrent();
-
-                        // If should be used silhouette weighting, it is needed to compute depth discontinuities
-                        // and per-pixel distance from detected borders on the entire image here
-                        // the weight is then applied later, per-vertex, when needed
-                        floatbuffer *silhouette_buff=NULL;
-                        float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
-                        if(usesilhouettes)
-                        {
-                            silhouette_buff = new floatbuffer();
-                            silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
-
-                            silhouette_buff->applysobel(rendermanager->depth);
-                            //sprintf(dumpFileName,"Abord%i.bmp",cam_ind);
-                            //silhouette_buff->dumpbmp(dumpFileName);
-
-                            silhouette_buff->initborder(rendermanager->depth);
-                            //sprintf(dumpFileName,"Bbord%i.bmp",cam_ind);
-                            //silhouette_buff->dumpbmp(dumpFileName);
-
-                            maxsildist = silhouette_buff->distancefield();
-                            //sprintf(dumpFileName,"Cbord%i.bmp",cam_ind);
-                            //silhouette_buff->dumpbmp(dumpFileName);
-                        }
-
-                        for(size_t texcount=0; texcount < texels.size(); texcount++)
-                        {
-                            Point2m pp = raster->shot.Project(texels[texcount].meshpoint);
-                            // pray is the vector from the point-to-be-colored to the camera center
-                            Point3m pray = (raster->shot.GetViewPoint() - texels[texcount].meshpoint).Normalize();
-
-                            //if inside image
-                            if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
-                            {
-                                if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
-                                {
-
-                                    depth  = raster->shot.Depth(texels[texcount].meshpoint);
-                                    pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
-
-                                    if(depth <= (pdepth + eta))
-                                    {
-                                        // determine color
-                                        QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-                                        // determine weight
-                                        pweight = 1.0;
-
-                                        if(useangle)
-                                        {
-                                            Point3m pixnorm = texels[texcount].meshnormal;
-                                            pixnorm.Normalize();
-
-                                            Point3m viewaxis = raster->shot.GetViewPoint() - texels[texcount].meshpoint;
-                                            viewaxis.Normalize();
-
-                                            float ang = abs(pixnorm * viewaxis);
-                                            ang = min(1.0f, ang);
-
-                                            pweight *= ang;
-                                        }
-
-                                        if(usedistance)
-                                        {
-                                            float distw = depth;
-                                            distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
-
-                                            pweight *= distw;
-                                            pweight *= distw;
-                                        }
-
-                                        if(useborders)
-                                        {
-                                            double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-                                            double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
-                                            double borderw = min (xdist , ydist);
-
-                                            pweight *= borderw;
-                                        }
-
-                                        if(usesilhouettes)
-                                        {
-                                            // here the silhouette weight is applied, but it is calculated before, on a per-image basis
-                                            float silw = 1.0;
-                                            silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
-                                            pweight *= silw;
-                                        }
-
-                                        if(usealphamask) //alpha channel of image is an additional mask
-                                        {
-                                            pweight *= (qAlpha(pcolor) / 255.0);
-                                        }
-
-                                        accums[texcount].weights += pweight;
-                                        accums[texcount].acc_red += (qRed(pcolor) * pweight / 255.0);
-                                        accums[texcount].acc_grn += (qGreen(pcolor) * pweight / 255.0);
-                                        accums[texcount].acc_blu += (qBlue(pcolor) * pweight / 255.0);
-                                    }
-                                }
-                            }
-
-                        } // end foreach texel
-                        cam_ind ++;
-
-                        if(usesilhouettes)
-                        {
-                            delete silhouette_buff;
-                        }
-
-                    } // end if(do_project)
-
-                }
-            } // end foreach camera
-
-            // for each texel.... divide accumulated values by weight and write to texture
-            for(size_t texcount=0; texcount < texels.size(); texcount++)
-            {
-                if(accums[texcount].weights > 0.0)
-                {
-                    float texel_red   =  accums[texcount].acc_red / accums[texcount].weights;
-                    float texel_green =  accums[texcount].acc_grn / accums[texcount].weights;
-                    float texel_blue  =  accums[texcount].acc_blu / accums[texcount].weights;
-
-                    img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(texel_red*255.0, texel_green*255.0, texel_blue*255.0, 255));
-                }
-                else         // if no projected data available, black (to be refilled later on
-                {
-                    img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(0, 0, 0, 0));
-                }
-            }
-
-            // cleaning
-            texels.clear();
-            accums.clear();
-
-            // PullPush
-            if(dorefill)
-            {
-                cb(85, "Filling texture holes...");
-
-                PullPush(img, qRgba(0,0,0,0));      // atlas gaps
-            }
-
-            // Undo topology changes
-            if(dorefill)
-            {
-                tri::UpdateTopology<CMeshO>::FaceFace(model->cm);
-                tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
-            }
-
-            // Save texture
-            cb(90, "Saving texture ...");
-            CheckError(!img.save(filePath), "Texture file cannot be saved");
-            log( "Texture \"%s\" Created", filePath.toStdString().c_str());
-            assert(QFile(filePath).exists());
-
-            // Assign texture
-            model->cm.textures.clear();
-            model->cm.textures.push_back(textName.toStdString());
-
-            // the mesh has to return to its original position
-            tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
-            tri::UpdateBounding<CMeshO>::Box(model->cm);
-
-
-        } break;
-
-
-    }
-
-    return true;
+	if (glContext != nullptr){
+		//CMeshO::FaceIterator fi;
+		CMeshO::VertexIterator vi;
+	
+		RenderHelper *rendermanager=NULL;
+	
+		switch(ID(filter))
+		{
+	
+			////--------------------------- project single trivial ----------------------------------
+	
+		case FP_SINGLEIMAGEPROJ :
+			{
+				bool use_depth = par.getBool("usedepth");
+				bool onselection = par.getBool("onselection");
+				Scalarm eta = par.getFloat("deptheta");
+				QColor blank = par.getColor("blankColor");
+	
+	
+				Scalarm depth=0;     // depth of point (distance from camera)
+				Scalarm pdepth=0;    // depth value of projected point (from depth map)
+	
+				// get current raster and model
+				RasterModel *raster   = md.rm();
+				MeshModel   *model    = md.mm();
+	
+				// no projection if camera not valid
+				if(!raster || !raster->shot.IsValid()) {
+					throw MLException("Raster or camera not valid.");
+				}
+	
+				// the mesh has to be correctly transformed before mapping
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+	
+				// making context current
+				glContext->makeCurrent();
+	
+				if(use_depth)
+				{
+					// init rendermanager
+					rendermanager = new RenderHelper();
+					if( rendermanager->initializeGL(cb) != 0 )
+					{
+						delete rendermanager;
+						throw MLException("Failed on initializing GL rendermanager.");
+					}
+					log("init GL");
+					//if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
+					//    return false;
+					//Log("init Buffers");
+	
+					// render depth
+					rendermanager->renderScene(raster->shot, model, RenderHelper::FLAT, glContext);
+				}
+	
+				// unmaking context current
+				glContext->doneCurrent();
+	
+				qDebug("Viewport %i %i",raster->shot.Intrinsics.ViewportPx[0],raster->shot.Intrinsics.ViewportPx[1]);
+				for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+				{
+					if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
+					{
+						Point2m pp = raster->shot.Project((*vi).P());
+						// pray is the vector from the point-to-be-colored to the camera center
+						Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
+	
+						if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
+							(*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
+	
+						//if inside image
+						if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
+						{
+							if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
+							{
+								if(use_depth)
+								{
+									depth  = raster->shot.Depth((*vi).P());
+									pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1]));//rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
+								}
+	
+								if(!use_depth || (depth <= (pdepth + eta)))
+								{
+									QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+									(*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);
+								}
+							}
+						}
+					}
+				}
+	
+				// the mesh has to return to its original position
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+	
+				// delete rendermanager
+				if(rendermanager != NULL)
+					delete rendermanager;
+			}
+	
+			break;
+	
+	
+			////--------------------------- project multi trivial ----------------------------------
+	
+		case FP_MULTIIMAGETRIVIALPROJ :
+			{
+				bool onselection = par.getBool("onselection");
+				Scalarm eta = par.getFloat("deptheta");
+				bool  useangle = par.getBool("useangle");
+				bool  usedistance = par.getBool("usedistance");
+				bool  useborders = par.getBool("useborders");
+				bool  usesilhouettes = par.getBool("usesilhouettes");
+				bool  usealphamask =  par.getBool("usealpha");
+				QColor blank = par.getColor("blankColor");
+	
+				Scalarm  depth=0;     // depth of point (distance from camera)
+				Scalarm  pdepth=0;    // depth value of projected point (from depth map)
+				double pweight;     // pixel weight
+				MeshModel *model;
+				bool do_project;
+				int cam_ind;
+	
+				// min max depth for depth weight normalization
+				float allcammaxdepth;
+				float allcammindepth;
+	
+				// max image size for border weight normalization
+				float allcammaximagesize;
+	
+				// accumulation buffers for colors and weights
+				int buff_ind;
+				double *weights;
+				double *acc_red;
+				double *acc_grn;
+				double *acc_blu;
+	
+				// get current model
+				model = md.mm();
+	
+				// the mesh has to be correctly transformed before mapping
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+	
+				// init accumulation buffers for colors and weights
+				log("init color accumulation buffers");
+				weights = new double[model->cm.vn];
+				acc_red = new double[model->cm.vn];
+				acc_grn = new double[model->cm.vn];
+				acc_blu = new double[model->cm.vn];
+				for(int buff_ind=0; buff_ind<model->cm.vn; buff_ind++)
+				{
+					weights[buff_ind] = 0.0;
+					acc_red[buff_ind] = 0.0;
+					acc_grn[buff_ind] = 0.0;
+					acc_blu[buff_ind] = 0.0;
+				}
+	
+				// calculate accuratenear/far for all cameras
+				std::vector<float> my_near;
+				std::vector<float> my_far;
+				calculateNearFarAccurate(md, &my_near, &my_far);
+	
+				allcammaxdepth =  -1000000;
+				allcammindepth =   1000000;
+				allcammaximagesize = -1000000;
+				for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
+				{
+					if(my_far[cam_ind] > allcammaxdepth)
+						allcammaxdepth = my_far[cam_ind];
+					if(my_near[cam_ind] < allcammindepth)
+						allcammindepth = my_near[cam_ind];
+	
+					float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
+					if (imgdiag > allcammaximagesize)
+						allcammaximagesize = imgdiag;
+				}
+	
+				//-- cycle all cameras
+				cam_ind = 0;
+				for(RasterModel *raster : md.rasterList){
+					if(raster->visible)
+					{
+						do_project = true;
+	
+						// no drawing if camera not valid
+						if(!raster->shot.IsValid())
+							do_project = false;
+	
+						// no drawing if raster is not active
+						//if(!raster->shot.IsValid())
+						//  do_project = false;
+	
+						if(do_project)
+						{
+							// making context current
+							glContext->makeCurrent();
+	
+							// delete & reinit rendermanager
+							if(rendermanager != NULL)
+								delete rendermanager;
+							rendermanager = new RenderHelper();
+							if( rendermanager->initializeGL(cb) != 0 ){
+								delete rendermanager;
+								throw MLException("Failed on initializing GL rendermanager.");
+							}
+							log("init GL");
+							/*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
+								return false;
+							Log("init Buffers");*/
+	
+							// render normal & depth
+							rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
+	
+							// unmaking context current
+							glContext->doneCurrent();
+	
+							buff_ind=0;
+	
+							// If should be used silhouette weighting, it is needed to compute depth discontinuities
+							// and per-pixel distance from detected borders on the entire image here
+							// the weight is then applied later, per-vertex, when needed
+							floatbuffer *silhouette_buff=NULL;
+							float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
+							if(usesilhouettes)
+							{
+								silhouette_buff = new floatbuffer();
+								silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
+	
+								silhouette_buff->applysobel(rendermanager->depth);
+								//sprintf(dumpFileName,"Abord%i.pfm",cam_ind);
+								//silhouette_buff->dumppfm(dumpFileName);
+	
+								silhouette_buff->initborder(rendermanager->depth);
+								//sprintf(dumpFileName,"Bbord%i.pfm",cam_ind);
+								//silhouette_buff->dumppfm(dumpFileName);
+	
+								maxsildist = silhouette_buff->distancefield();
+								//sprintf(dumpFileName,"Cbord%i.pfm",cam_ind);
+								//silhouette_buff->dumppfm(dumpFileName);
+							}
+	
+							for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+							{
+								if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
+								{
+									// pp is the projected point in image space
+									Point2m pp = raster->shot.Project((*vi).P());
+									// pray is the vector from the point-to-be-colored to the camera center
+									Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
+	
+									//if inside image
+									if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
+									{
+										if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
+										{
+	
+											depth  = raster->shot.Depth((*vi).P());
+											pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
+	
+											if(depth <= (pdepth + eta))
+											{
+												// determine color
+												QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+												// determine weight
+												pweight = 1.0;
+	
+												if(useangle)
+												{
+													Point3m pixnorm = (*vi).N();
+													Point3m viewaxis  = raster->shot.GetViewPoint() - (*vi).P();
+													pixnorm.Normalize();
+													viewaxis.Normalize();
+	
+													float ang = abs(pixnorm * viewaxis);
+													ang = min(1.0f, ang);
+	
+													pweight *= ang;
+												}
+	
+												if(usedistance)
+												{
+													float distw = depth;
+													distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
+	
+													pweight *= distw;
+													pweight *= distw;
+												}
+	
+												if(useborders)
+												{
+													double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
+													double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+													double borderw = min (xdist , ydist);
+													//borderw = min(1.0,borderw); //debug debug
+													//borderw = max(0.0,borderw); //debug debug
+	
+													pweight *= borderw;
+												}
+	
+												if(usesilhouettes)
+												{
+													// here the silhouette weight is applied, but it is calculated before, on a per-image basis
+													float silw = 1.0;
+													silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
+													//silw = min(1.0f,silw); //debug debug
+													//silw = max(0.0f,silw); //debug debug
+	
+													pweight *= silw;
+												}
+	
+												if(usealphamask) //alpha channel of image is an additional mask
+												{
+													pweight *= (qAlpha(pcolor) / 255.0);
+												}
+	
+												weights[buff_ind] += pweight;
+												acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
+												acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
+												acc_blu[buff_ind] += (qBlue(pcolor) * pweight / 255.0);
+											}
+										}
+									}
+								}
+								buff_ind++;
+							}
+							cam_ind ++;
+	
+							if(usesilhouettes)
+							{
+								delete silhouette_buff;
+							}
+	
+						} // end foreach camera
+					} // end foreach camera
+				}
+	
+				buff_ind = 0;
+				for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+				{
+					if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
+					{
+						if (weights[buff_ind] != 0) // if 0, it has not found any valid projection on any camera
+						{
+							(*vi).C() = vcg::Color4b( (acc_red[buff_ind] / weights[buff_ind]) *255.0,
+								(acc_grn[buff_ind] / weights[buff_ind]) *255.0,
+								(acc_blu[buff_ind] / weights[buff_ind]) *255.0,
+								255);
+						}
+						else
+						{
+							if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
+								(*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
+						}
+					}
+					buff_ind++;
+				}
+	
+				// the mesh has to return to its original position
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+	
+				// delete rendermanager
+				if(rendermanager != NULL)
+					delete rendermanager;
+	
+				// delete accumulation buffers
+				delete[]  weights;
+				delete[]  acc_red;
+				delete[]  acc_grn;
+				delete[]  acc_blu;
+	
+			}
+			break;
+	
+	
+		case FP_MULTIIMAGETRIVIALPROJTEXTURE :
+			{
+	
+				if(!tri::HasPerWedgeTexCoord(md.mm()->cm))
+				{
+					throw MLException("Error: nothing have been done. Mesh has no Texture Coordinates.");
+				}
+	
+				//bool onselection = par.getBool("onselection");
+				int texsize = par.getInt("texsize");
+				bool  dorefill = par.getBool("dorefill");
+				Scalarm eta = par.getFloat("deptheta");
+				bool  useangle = par.getBool("useangle");
+				bool  usedistance = par.getBool("usedistance");
+				bool  useborders = par.getBool("useborders");
+				bool  usesilhouettes = par.getBool("usesilhouettes");
+				bool  usealphamask =  par.getBool("usealpha");
+				QString textName = par.getString("textName");
+	
+				int textW = texsize;
+				int textH = texsize;
+	
+				Scalarm  depth=0;     // depth of point (distance from camera)
+				Scalarm  pdepth=0;    // depth value of projected point (from depth map)
+				double pweight;     // pixel weight
+				MeshModel *model;
+				bool do_project;
+				int cam_ind;
+	
+				// min max depth for depth weight normalization
+				float allcammaxdepth;
+				float allcammindepth;
+	
+				// max image size for border weight normalization
+				float allcammaximagesize;
+	
+				// get the working model
+				model = md.mm();
+	
+				// the mesh has to be correctly transformed before mapping
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+	
+				// texture file name
+				QString filePath(model->fullName());
+				filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
+				// Check textName and eventually add .png ext
+				CheckError(textName.length() == 0, "Texture file not specified");
+				CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+				if (!textName.endsWith(".png", Qt::CaseInsensitive))
+					textName.append(".png");
+				filePath.append(textName);
+	
+				// Image creation
+				CheckError(textW <= 0, "Texture Width has an incorrect value");
+				CheckError(textH <= 0, "Texture Height has an incorrect value");
+				QImage img(QSize(textW,textH), QImage::Format_ARGB32);
+				img.fill(qRgba(0,0,0,0)); // transparent black
+	
+				// Compute (texture-space) border edges
+				if(dorefill)
+				{
+					model->updateDataMask(MeshModel::MM_FACEFACETOPO);
+					tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+					tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+				}
+	
+				// create a list of to-be-filled texels and accumulators
+				// storing texel 2d coords, texel mesh-space point, texel mesh normal
+	
+				vector<TexelDesc> texels;
+				texels.clear();
+				texels.reserve(textW*textH);  // just to avoid the 2x reallocate rule...
+	
+				vector<TexelAccum> accums;
+				accums.clear();
+				accums.reserve(textW*textH);  // just to avoid the 2x reallocate rule...
+	
+				// Rasterizing triangles in the list of voxels
+				TexFillerSampler tfs(img);
+				tfs.texelspointer = &texels;
+				tfs.accumpointer  = &accums;
+				tfs.InitCallback(cb, model->cm.fn, 0, 80);
+				tri::SurfaceSampling<CMeshO,TexFillerSampler>::Texture(model->cm,tfs,textW,textH,true);
+	
+				// Revert alpha values for border edge pixels to 255
+				cb(81, "Cleaning up texture ...");
+				for (int y=0; y<textH; ++y)
+				{
+					for (int x=0; x<textW; ++x)
+					{
+						QRgb px = img.pixel(x,y);
+						if (qAlpha(px) < 255 && qAlpha(px) > 0)
+							img.setPixel(x,y, px | 0xff000000);
+					}
+				}
+	
+				// calculate accuratenear/far for all cameras
+				std::vector<float> my_near;
+				std::vector<float> my_far;
+				calculateNearFarAccurate(md, &my_near, &my_far);
+	
+				allcammaxdepth =  -1000000;
+				allcammindepth =   1000000;
+				allcammaximagesize = -1000000;
+				for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
+				{
+					if(my_far[cam_ind] > allcammaxdepth)
+						allcammaxdepth = my_far[cam_ind];
+					if(my_near[cam_ind] < allcammindepth)
+						allcammindepth = my_near[cam_ind];
+	
+					float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
+					if (imgdiag > allcammaximagesize)
+						allcammaximagesize = imgdiag;
+				}
+	
+				//-- cycle all cameras
+				cam_ind = 0;
+				for(RasterModel *raster : md.rasterList)
+				{
+					if(raster->visible)
+					{
+						do_project = true;
+	
+						// no drawing if camera not valid
+						if(!raster->shot.IsValid())
+							do_project = false;
+	
+						// no drawing if raster is not active
+						//if(!raster->shot.IsValid())
+						//  do_project = false;
+	
+						if(do_project)
+						{
+							// making context current
+							glContext->makeCurrent();
+	
+							// delete & reinit rendermanager
+							if(rendermanager != NULL)
+								delete rendermanager;
+							rendermanager = new RenderHelper();
+							if( rendermanager->initializeGL(cb) != 0 ) {
+								delete rendermanager;
+								throw MLException("Failed on initializing GL rendermanager.");
+							}
+							log("init GL");
+							/*if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
+								return false;
+							Log("init Buffers");*/
+	
+							// render normal & depth
+							rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
+	
+							// unmaking context current
+							glContext->doneCurrent();
+	
+							// If should be used silhouette weighting, it is needed to compute depth discontinuities
+							// and per-pixel distance from detected borders on the entire image here
+							// the weight is then applied later, per-vertex, when needed
+							floatbuffer *silhouette_buff=NULL;
+							float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
+							if(usesilhouettes)
+							{
+								silhouette_buff = new floatbuffer();
+								silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
+	
+								silhouette_buff->applysobel(rendermanager->depth);
+								//sprintf(dumpFileName,"Abord%i.bmp",cam_ind);
+								//silhouette_buff->dumpbmp(dumpFileName);
+	
+								silhouette_buff->initborder(rendermanager->depth);
+								//sprintf(dumpFileName,"Bbord%i.bmp",cam_ind);
+								//silhouette_buff->dumpbmp(dumpFileName);
+	
+								maxsildist = silhouette_buff->distancefield();
+								//sprintf(dumpFileName,"Cbord%i.bmp",cam_ind);
+								//silhouette_buff->dumpbmp(dumpFileName);
+							}
+	
+							for(size_t texcount=0; texcount < texels.size(); texcount++)
+							{
+								Point2m pp = raster->shot.Project(texels[texcount].meshpoint);
+								// pray is the vector from the point-to-be-colored to the camera center
+								Point3m pray = (raster->shot.GetViewPoint() - texels[texcount].meshpoint).Normalize();
+	
+								//if inside image
+								if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
+								{
+									if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
+									{
+	
+										depth  = raster->shot.Depth(texels[texcount].meshpoint);
+										pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
+	
+										if(depth <= (pdepth + eta))
+										{
+											// determine color
+											QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+											// determine weight
+											pweight = 1.0;
+	
+											if(useangle)
+											{
+												Point3m pixnorm = texels[texcount].meshnormal;
+												pixnorm.Normalize();
+	
+												Point3m viewaxis = raster->shot.GetViewPoint() - texels[texcount].meshpoint;
+												viewaxis.Normalize();
+	
+												float ang = abs(pixnorm * viewaxis);
+												ang = min(1.0f, ang);
+	
+												pweight *= ang;
+											}
+	
+											if(usedistance)
+											{
+												float distw = depth;
+												distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
+	
+												pweight *= distw;
+												pweight *= distw;
+											}
+	
+											if(useborders)
+											{
+												double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
+												double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+												double borderw = min (xdist , ydist);
+	
+												pweight *= borderw;
+											}
+	
+											if(usesilhouettes)
+											{
+												// here the silhouette weight is applied, but it is calculated before, on a per-image basis
+												float silw = 1.0;
+												silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
+												pweight *= silw;
+											}
+	
+											if(usealphamask) //alpha channel of image is an additional mask
+											{
+												pweight *= (qAlpha(pcolor) / 255.0);
+											}
+	
+											accums[texcount].weights += pweight;
+											accums[texcount].acc_red += (qRed(pcolor) * pweight / 255.0);
+											accums[texcount].acc_grn += (qGreen(pcolor) * pweight / 255.0);
+											accums[texcount].acc_blu += (qBlue(pcolor) * pweight / 255.0);
+										}
+									}
+								}
+	
+							} // end foreach texel
+							cam_ind ++;
+	
+							if(usesilhouettes)
+							{
+								delete silhouette_buff;
+							}
+	
+						} // end if(do_project)
+	
+					}
+				} // end foreach camera
+	
+				// for each texel.... divide accumulated values by weight and write to texture
+				for(size_t texcount=0; texcount < texels.size(); texcount++)
+				{
+					if(accums[texcount].weights > 0.0)
+					{
+						float texel_red   =  accums[texcount].acc_red / accums[texcount].weights;
+						float texel_green =  accums[texcount].acc_grn / accums[texcount].weights;
+						float texel_blue  =  accums[texcount].acc_blu / accums[texcount].weights;
+	
+						img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(texel_red*255.0, texel_green*255.0, texel_blue*255.0, 255));
+					}
+					else         // if no projected data available, black (to be refilled later on
+					{
+						img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(0, 0, 0, 0));
+					}
+				}
+	
+				// cleaning
+				texels.clear();
+				accums.clear();
+	
+				// PullPush
+				if(dorefill)
+				{
+					cb(85, "Filling texture holes...");
+	
+					PullPush(img, qRgba(0,0,0,0));      // atlas gaps
+				}
+	
+				// Undo topology changes
+				if(dorefill)
+				{
+					tri::UpdateTopology<CMeshO>::FaceFace(model->cm);
+					tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+				}
+	
+				// Save texture
+				cb(90, "Saving texture ...");
+				CheckError(!img.save(filePath), "Texture file cannot be saved");
+				log( "Texture \"%s\" Created", filePath.toStdString().c_str());
+				assert(QFile(filePath).exists());
+	
+				// Assign texture
+				model->cm.textures.clear();
+				model->cm.textures.push_back(textName.toStdString());
+	
+				// the mesh has to return to its original position
+				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
+				tri::UpdateBounding<CMeshO>::Box(model->cm);
+			} break;
+		default:
+			wrongActionCalled(filter);
+		}
+		return std::map<std::string, QVariant>();
+	}
+	else {
+		throw MLException("Fatal error: glContext not initialized");
+	}
 }
 
 FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(const QAction *a) const
@@ -932,7 +952,7 @@ FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(c
         return FilterClass(Camera + Texture);
         break;
     default :  assert(0);
-        return FilterPluginInterface::Generic;
+        return FilterPlugin::Generic;
     }
 }
 

@@ -24,36 +24,36 @@
 #ifndef PDBIOPLUGIN_H
 #define PDBIOPLUGIN_H
 
-#include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/plugins/interfaces/io_plugin.h>
+#include <common/ml_document/mesh_model.h>
 
-class PDBIOPlugin : public QObject, public IOPluginInterface
+class PDBIOPlugin : public QObject, public IOPlugin
 {
-  Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
   
 public:
 	QString pluginName() const;
 
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
+	std::list<FileFormat> importFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
-	void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent= 0);
-  virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0);
+	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0);
+	virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
 	virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par);
-	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
+	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 
-  virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+	virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 	//---------- PDB READER -----------//
 	bool parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, vcg::CallBackPos *cb=0); 
 	void mysscanf(const char* st, float *f);
-    void mysscanf(const char* st, double *f);
+	void mysscanf(const char* st, double *f);
 	float getAtomRadius(const char* atomicElementCharP);
 	vcg::Color4b getAtomColor(const char* atomicElementCharP);
 

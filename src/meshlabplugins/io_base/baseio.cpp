@@ -42,6 +42,8 @@
 #include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
 
+#include "exif.h"
+
 using namespace std;
 using namespace vcg;
 
@@ -66,9 +68,62 @@ class PFace :public vcg::Face<
 
 class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
+BaseMeshIOPlugin::BaseMeshIOPlugin() : IOPlugin()
+{
+	rasterFormatList = {
+		FileFormat("JPEG", tr("JPEG")),
+		FileFormat("JPG", tr("JPG")),
+		FileFormat("PNG", tr("PNG")),
+		FileFormat("XPM", tr("XPM"))
+	};
+}
+
+QString BaseMeshIOPlugin::pluginName() const
+{
+	return "IOBase";
+}
+
+/*
+	returns the list of the file's type which can be imported
+*/
+std::list<FileFormat> BaseMeshIOPlugin::importFormats() const
+{
+	std::list<FileFormat> formatList = {
+		FileFormat("Stanford Polygon File Format", tr("PLY")),
+		FileFormat("STL File Format", tr("STL")),
+		FileFormat("Alias Wavefront Object", tr("OBJ")),
+		FileFormat("Quad Object", tr("QOBJ")),
+		FileFormat("Object File Format", tr("OFF")),
+		FileFormat("PTX File Format", tr("PTX")),
+		FileFormat("VCG Dump File Format", tr("VMI")),
+		FileFormat("FBX Autodesk Interchange Format", tr("FBX"))
+	};
+	return formatList;
+}
+
+/*
+	returns the list of the file's type which can be exported
+*/
+std::list<FileFormat> BaseMeshIOPlugin::exportFormats() const
+{
+	std::list<FileFormat> formatList = {
+		FileFormat("Stanford Polygon File Format", tr("PLY")),
+		FileFormat("STL File Format", tr("STL")),
+		FileFormat("Alias Wavefront Object", tr("OBJ")),
+		FileFormat("Object File Format", tr("OFF")),
+		FileFormat("VRML File Format", tr("WRL")),
+		FileFormat("DXF File Format", tr("DXF"))
+	};
+	return formatList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::importRasterFormats() const
+{
+	return rasterFormatList;
+}
 
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PTX")) {
 		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",
@@ -85,21 +140,20 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
-    //bool normalsUpdated = false;
-    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	//bool normalsUpdated = false;
+	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-    if(!QFile::exists(fileName))
-    {
-        errorMessage = errorMsgFormat.arg(fileName, "File does not exist");
-        return false;
-    } 
+	if(!QFile::exists(fileName)) {
+		throw MLException(errorMsgFormat.arg(fileName, "File does not exist"));
+	}
 	// initializing mask
 	mask = 0;
 
 	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
 
 	
 	//string filename = fileName.toUtf8().data();
@@ -118,8 +172,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		{
 			if (tri::io::ImporterPLY<CMeshO>::ErrorCritical(result))
 			{
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
 			}
 		}
 	}
@@ -127,15 +180,13 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		if (!tri::io::ImporterSTL<CMeshO>::LoadMask(filename.c_str(), mask))
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED)));
 		}
 		m.Enable(mask);
 		int result = tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 		}
 
 		bool stluinf = parlst.getBool(stlUnifyParName());
@@ -150,19 +201,19 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		tri::io::ImporterOBJ<CMeshO>::Info oi;
 		oi.cb = cb;
-		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
-			return false;
+		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi)){
+			throw MLException("Error while loading OBJ mask.");
+		}
 		m.Enable(oi.mask);
 
 		int result = tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 		if (result != tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
-			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
-			else
-			{
-				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
-				return false;
+			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR) {
+				reportWarning(errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+			}
+			else {
+				throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 			}
 		}
 
@@ -198,8 +249,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
 		if (result == 1)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
 		}
 
 		// update mask
@@ -210,37 +260,36 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int loadMask;
 		if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(), loadMask))
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile)));
 		}
 		m.Enable(loadMask);
 
 		int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	else if (formatName.toUpper() == tr("VMI"))
 	{
 		int loadMask;
-		if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(), loadMask))
-			return false;
+		if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(), loadMask)) {
+			throw MLException("Error while loading VMI mask.");
+		}
 		m.Enable(loadMask);
 
 		int result = tri::io::ImporterVMI<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	else if (formatName.toUpper() == tr("GTS"))
 	{
 		int loadMask;
-		if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(), loadMask))
-			return false;
+		if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(), loadMask)){
+			throw MLException("Error while loading GTS mask.");
+		}
 		m.Enable(loadMask);
 
 		tri::io::ImporterGTS<CMeshO>::Options opt;
@@ -249,34 +298,31 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = tri::io::ImporterGTS<CMeshO>::Open(m.cm, filename.c_str(), mask, opt, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result)));
 		}
 	}
-    else if (formatName.toUpper() == tr("FBX"))
-    {      
-      m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
-      
-      int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
-      if(m.cm.textures.empty()) 
-        m.clearDataMask(tri::io::Mask::IOM_WEDGTEXCOORD);
-      
-      if (result != 0)
-      {
-        errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterFBX<CMeshO>::ErrorMsg(result));
-        return false;
-      }
-    }else
-    {
-		assert(0); // Unknown File type
-		return false;
+	else if (formatName.toUpper() == tr("FBX"))
+	{
+		m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
+
+		int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
+		if(m.cm.textures.empty())
+			m.clearDataMask(tri::io::Mask::IOM_WEDGTEXCOORD);
+
+		if (result != 0)
+		{
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterFBX<CMeshO>::ErrorMsg(result)));
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
 	}
 
-    // Add a small pass to convert backslash into forward slash
-    for(auto i = m.cm.textures.begin();i!=m.cm.textures.end();++i)
-    {
-      std::replace(i->begin(), i->end(), '\\', '/');
-    }
+	// Add a small pass to convert backslash into forward slash
+	for(auto i = m.cm.textures.begin();i!=m.cm.textures.end();++i)
+	{
+		std::replace(i->begin(), i->end(), '\\', '/');
+	}
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
@@ -293,11 +339,9 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb, QWidget * /*parent*/)
+void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, CallBackPos *cb)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();
@@ -312,76 +356,76 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		tri::io::PlyInfo pi;
 		pi.mask = mask;
 
+		vcg::ply::PlyTypes scalarPlyType =
+				sizeof(Scalarm) == sizeof(float) ?
+					vcg::ply::T_FLOAT :
+					vcg::ply::T_DOUBLE;
+
 		// custom attributes
 		for (const RichParameter& pr : par) {
 			QString pname = pr.name();
-			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
-				if (par.getBool(pname))	// if it is true, add to save list
-					pi.AddPerVertexFloatAttribute(qUtf8Printable(pname.mid(4)));
+			if (pname.startsWith("PVAF")) { // if pname starts with PVAF, it is a PLY per-vertex float custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
+					pi.addPerVertexScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
+				}
 			}
-			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
-				if (par.getBool(pname))	// if it is true, add to save list
-					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
+			else if (pname.startsWith("PVA3F")) { // if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
+					pi.addPerVertexPoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+				}
 			}
-			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
-				if (par.getBool(pname))	// if it is true, add to save list
-					pi.AddPerFaceFloatAttribute(qUtf8Printable(pname.mid(4)));
+			else if (pname.startsWith("PFAF")) { // if pname starts with PFAF, it is a PLY per-face float custom attribute
+				if (par.getBool(pname)) { // if it is true, add to save list
+					pi.addPerFaceScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
+				}
 			}
-			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
-				//if (par.findParameter(pname)->value().getBool())	// if it is true, add to save list
-					//pi.add(m, qUtf8Printable(pname.mid(5)));
+			else if (pname.startsWith("PFA3F")){ // if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
+				if (par.getBool(pname)) {
+					pi.addPerFacePoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+				}
 			}
 		}
 
 		int result = tri::io::ExporterPLY<CMeshO>::Save(m.cm, filename.c_str(), binaryFlag, pi, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterPLY<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	if (formatName.toUpper() == tr("STL"))
+	else if (formatName.toUpper() == tr("STL"))
 	{
 		bool magicsFlag = par.getBool("ColorMode");
 
 		int result = tri::io::ExporterSTL<CMeshO>::Save(m.cm, filename.c_str(), binaryFlag, mask, "STL generated by MeshLab", magicsFlag);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterSTL<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	if (formatName.toUpper() == tr("WRL"))
+	else if (formatName.toUpper() == tr("WRL"))
 	{
 		int result = tri::io::ExporterWRL<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterWRL<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterWRL<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	if (formatName.toUpper() == tr("OFF"))
+	else if (formatName.toUpper() == tr("OFF"))
 	{
 		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		int result = tri::io::ExporterOFF<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterOFF<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-
-	if (formatName.toUpper() == tr("OBJ"))
+	else if (formatName.toUpper() == tr("OBJ"))
 	{
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 		int result;
 
-		if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.getBool("poligonalize")))
+		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
@@ -394,79 +438,108 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		}
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-
-	if (formatName.toUpper() == tr("DXF"))
+	else if (formatName.toUpper() == tr("DXF"))
 	{
 		int result = tri::io::ExporterDXF<CMeshO>::Save(m.cm, filename.c_str());
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterDXF<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ExporterDXF<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	if (formatName.toUpper() == tr("GTS"))
+	else if (formatName.toUpper() == tr("GTS"))
 	{
 		int result = vcg::tri::io::ExporterGTS<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ExporterGTS<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ExporterGTS<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	assert(0); // unknown format
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
-QString BaseMeshIOPlugin::pluginName() const
+void BaseMeshIOPlugin::openRaster(const QString& format, const QString& filename, RasterModel& rm, CallBackPos*)
 {
-	return "IOBase";
-}
+	bool supportedFormat = false;
+	for (const FileFormat& f : rasterFormatList){
+		if (f.extensions.first().toUpper() == format.toUpper())
+			supportedFormat = true;
+	}
 
-/*
-	returns the list of the file's type which can be imported
-*/
-QList<IOPluginInterface::Format> BaseMeshIOPlugin::importFormats() const
-{
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Quad Object", tr("QOBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("PTX File Format", tr("PTX"));
-	formatList << Format("VCG Dump File Format", tr("VMI"));
-    formatList << Format("FBX Autodesk Interchange Format", tr("FBX"));
+	if (supportedFormat) {
+		QFileInfo fi(filename);
 
-	return formatList;
-}
+		if(!fi.exists()) 	{
+			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+			throw MLException(errorMsgFormat.arg(filename));
+		}
+		if(!fi.isReadable()) 	{
+			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+			throw MLException(errorMsgFormat.arg(filename));
+		}
 
-/*
-	returns the list of the file's type which can be exported
-*/
-QList<IOPluginInterface::Format> BaseMeshIOPlugin::exportFormats() const
-{
-	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format", tr("PLY"));
-	formatList << Format("STL File Format", tr("STL"));
-	formatList << Format("Alias Wavefront Object", tr("OBJ"));
-	formatList << Format("Object File Format", tr("OFF"));
-	formatList << Format("VRML File Format", tr("WRL"));
-	formatList << Format("DXF File Format", tr("DXF"));
-	return formatList;
+		rm.setLabel(filename);
+		rm.addPlane(new RasterPlane(filename,RasterPlane::RGBA));
+
+		// Read the JPEG file into a buffer
+		FILE *fp = fopen(qUtf8Printable(filename), "rb");
+		if (!fp) {
+			QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+			throw MLException(errorMsgFormat.arg(filename));
+		}
+		fseek(fp, 0, SEEK_END);
+		unsigned long fsize = ftell(fp);
+		rewind(fp);
+		unsigned char *buf = new unsigned char[fsize];
+		if (fread(buf, 1, fsize, fp) != fsize) {
+			QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
+			delete[] buf;
+			fclose(fp);
+			throw MLException(errorMsgFormat.arg(filename));
+		}
+		fclose(fp);
+
+		// Parse EXIF
+		easyexif::EXIFInfo ImageInfo;
+		int code = ImageInfo.parseFrom(buf, fsize);
+		delete[] buf;
+		if (!code) {
+			log(GLLogStream::FILTER, "Warning unable to parse exif for file  %s", qPrintable(filename));
+		}
+
+		if (code && ImageInfo.FocalLengthIn35mm==0.0f)
+		{
+			rm.shot.Intrinsics.ViewportPx = vcg::Point2i(rm.currentPlane->image.width(), rm.currentPlane->image.height());
+			rm.shot.Intrinsics.CenterPx   = Point2m(float(rm.currentPlane->image.width()/2.0), float(rm.currentPlane->image.width()/2.0));
+			rm.shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm.currentPlane->image.width();
+			rm.shot.Intrinsics.PixelSizeMm[1]=rm.shot.Intrinsics.PixelSizeMm[0];
+			rm.shot.Intrinsics.FocalMm = 50.0f;
+		}
+		else
+		{
+			rm.shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
+			rm.shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
+			float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
+			rm.shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
+			rm.shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
+			rm.shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
+		}
+		// End of EXIF reading
+	}
+	else {
+		wrongOpenFormat(format);
+	}
 }
 
 /*
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if (format.toUpper() == tr("PLY")) {
 		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
@@ -485,6 +558,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capab
 	}
 	if (format.toUpper() == tr("OFF")) { capability = defaultBits = tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability(); }
 	if (format.toUpper() == tr("WRL")) { capability = defaultBits = tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability(); }
+	if (format.toUpper() == tr("DXF")) { capability = defaultBits = tri::io::Mask::IOM_VERTCOORD | tri::io::Mask::IOM_FACEINDEX;}
 
 }
 
@@ -495,7 +569,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(const QString &format, int &capab
 //                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 //}
 
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterList &par)
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m, RichParameterList &par)
 {
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(RichBool("Binary", true, "Binary encoding",
@@ -505,31 +579,27 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, Ri
 		par.addParam(RichBool("ColorMode", true, "Materialise Color Encoding",
 		"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
 
-	if (format.toUpper() == tr("OBJ") && m.hasDataMask(MeshModel::MM_POLYGONAL)) //only shows up when the poligonalization is possible
-		par.addParam(RichBool("poligonalize", false, "Convert triangles to polygons",
-		"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting. WARNING: unstable, may cause crash")); // default is false, because it is a bit buggy, and should be anable only when sure
-
 	if (format.toUpper() == tr("PLY")){
 		std::vector<std::string> AttribNameVector;
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();
 			par.addParam(RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(m.cm, AttribNameVector);
 		for (int i = 0; i < (int)AttribNameVector.size(); i++)
 		{
 			QString va_name = AttribNameVector[i].c_str();

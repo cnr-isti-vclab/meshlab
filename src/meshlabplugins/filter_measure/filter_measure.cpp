@@ -39,19 +39,23 @@
 using namespace std;
 using namespace vcg;
 
+typedef Histogram<Scalarm> Histogramm;
+
 FilterMeasurePlugin::FilterMeasurePlugin()
 { 
-	typeList << COMPUTE_TOPOLOGICAL_MEASURES
-			 << COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES
-			 << COMPUTE_GEOMETRIC_MEASURES
-			 << COMPUTE_AREA_PERIMETER_SELECTION
-			 << PER_VERTEX_QUALITY_STAT
-			 << PER_FACE_QUALITY_STAT
-			 << PER_VERTEX_QUALITY_HISTOGRAM
-			 << PER_FACE_QUALITY_HISTOGRAM;
+	typeList = {
+		COMPUTE_TOPOLOGICAL_MEASURES,
+		COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES,
+		COMPUTE_GEOMETRIC_MEASURES,
+		COMPUTE_AREA_PERIMETER_SELECTION,
+		PER_VERTEX_QUALITY_STAT,
+		PER_FACE_QUALITY_STAT,
+		PER_VERTEX_QUALITY_HISTOGRAM,
+		PER_FACE_QUALITY_HISTOGRAM
+	};
 
-	for(FilterIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterMeasurePlugin::pluginName() const
@@ -59,7 +63,7 @@ QString FilterMeasurePlugin::pluginName() const
 	return "FilterMeasure";
 }
 
-QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
@@ -92,7 +96,7 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 	}
 }
 
- QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch (filterId) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
@@ -127,10 +131,10 @@ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 
 FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(const QAction *) const
 {
-	return FilterPluginInterface::Measure;
+	return FilterPlugin::Measure;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterMeasurePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -171,37 +175,34 @@ void FilterMeasurePlugin::initParameterList(const QAction *action, MeshModel &m,
 	}
 }
 
-bool FilterMeasurePlugin::applyFilter(const QAction* filter, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList& parlst, vcg::CallBackPos*)
+std::map<std::string, QVariant> FilterMeasurePlugin::applyFilter(
+		const QAction* filter,
+		const RichParameterList& parlst,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos*)
 {
 	switch (ID(filter)) {
 	case COMPUTE_TOPOLOGICAL_MEASURES:
 		return computeTopologicalMeasures(md);
-		break;
 	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
 		return computeTopologicalMeasuresForQuadMeshes(md);
-		break;
 	case COMPUTE_GEOMETRIC_MEASURES:
 		return computeGeometricMeasures(md);
-		break;
 	case COMPUTE_AREA_PERIMETER_SELECTION:
 		return computeAreaPerimeterOfSelection(md);
-		break;
 	case PER_VERTEX_QUALITY_STAT:
 		return perVertexQualityStat(md);
-		break;
 	case PER_FACE_QUALITY_STAT:
 		return perFaceQualityStat(md);
-		break;
 	case PER_VERTEX_QUALITY_HISTOGRAM:
 		return perVertexQualityHistogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
-		break;
 	case PER_FACE_QUALITY_HISTOGRAM:
 		return perFaceQualityHostogram(md, parlst.getFloat("HistMin"), parlst.getFloat("HistMax"), parlst.getInt("binNum"), parlst.getBool("areaWeighted"));
-		break;
 	default:
-		assert(0);
-		return false;
+		wrongActionCalled(filter);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterMeasurePlugin::postCondition(const QAction*) const
@@ -209,8 +210,9 @@ int FilterMeasurePlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactFaceVector(m);
 	tri::Allocator<CMeshO>::CompactVertexVector(m);
@@ -230,49 +232,65 @@ bool FilterMeasurePlugin::computeTopologicalMeasures(MeshDocument& md)
 	assert(edgeNonManifFFNum == edgeNonManifNum);
 	int holeNum;
 	log("V: %6i E: %6i F:%6i", m.vn, edgeNum, m.fn);
+	outputValues["vertices_number"] = m.vn;
+	outputValues["edges_number"] = edgeNum;
+	outputValues["faces_number"] = m.fn;
 	int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
 	log("Unreferenced Vertices %i", unrefVertNum);
 	log("Boundary Edges %i", edgeBorderNum);
+	outputValues["unreferenced_vertices"] = unrefVertNum;
+	outputValues["boundary_edges"] = edgeBorderNum;
 
 	int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
 	log("Mesh is composed by %i connected component(s)\n", connectedComponentsNum);
+	outputValues["connected_components_number"] = connectedComponentsNum;
 
-	if (edgeNonManifFFNum == 0 && vertManifNum == 0){
+	bool isTwoManifold = edgeNonManifFFNum == 0 && vertManifNum == 0;
+	if (isTwoManifold){
 		log("Mesh is two-manifold ");
 	}
+	outputValues["is_mesh_two_manifold"] = isTwoManifold;
 
 	if (edgeNonManifFFNum != 0) log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n", edgeNonManifFFNum, faceEdgeManif);
 	if (vertManifNum != 0) log("Mesh has %i non two manifold vertices and %i faces are incident on these vertices\n", vertManifNum, faceVertManif);
+	
+	outputValues["non_two_manifold_edges"] = edgeNonManifFFNum;
+	outputValues["incident_faces_on_non_two_manifold_edges"] = faceEdgeManif;
+	outputValues["non_two_manifold_vertices"] = vertManifNum;
+	outputValues["incident_faces_on_non_two_manifold_vertices"] = faceVertManif;
 
 	// For Manifold meshes compute some other stuff
 	if (vertManifNum == 0 && edgeNonManifFFNum == 0) {
 		holeNum = tri::Clean<CMeshO>::CountHoles(m);
 		log("Mesh has %i holes", holeNum);
+		outputValues["number_holes"] = holeNum;
 
 		int genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
 		log("Genus is %i", genus);
+		outputValues["genus"] = genus;
 	}
 	else {
 		log("Mesh has a undefined number of holes (non 2-manifold mesh)");
 		log("Genus is undefined (non 2-manifold mesh)");
+		outputValues["number_holes"] = -1;
+		outputValues["genus"] = -1;
 	}
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 	md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
 
 	if (!tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)) {
-		this->errorMessage = "Error: mesh has a not consistent FF adjacency";
-		return false;
+		throw MLException("Error: mesh has a not consistent FF adjacency");
 	}
 	if (!tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
-		this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
-		return false;
+		throw MLException("QuadMesh problem: mesh has a not consistent FauxEdge tagging");
 	}
 
 	int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
@@ -282,13 +300,16 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	if (nLargePolys>0) nQuads = 0;
 
 	log("Mesh has %8i triangles \n", nTris);
+	outputValues["triangles_number"]=nTris;
 	log("         %8i quads \n", nQuads);
+	outputValues["quads_number"]=nQuads;
 	log("         %8i polygons \n", nPolys);
+	outputValues["polys_number"]=nPolys;
 	log("         %8i large polygons (with internal faux vertices)", nLargePolys);
+	outputValues["large_polys_number"]=nLargePolys;
 
 	if (!tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-		this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
-		return false;
+		throw MLException("QuadMesh problem: the mesh is not TriQuadOnly");
 	}
 
 	//
@@ -317,8 +338,7 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 		}
 
 		if (!quadFound) {
-			errorMessage = "QuadMesh problem: current mesh doesn't contain quads.";
-			return false;
+			throw MLException("QuadMesh problem: current mesh doesn't contain quads.");
 		}
 
 		for (int i = 0; i<4; ++i)
@@ -332,14 +352,24 @@ bool FilterMeasurePlugin::computeTopologicalMeasuresForQuadMeshes(MeshDocument& 
 	}
 
 	log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-		AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05f), AngleD.Percentile(0.95f));
+		AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05), AngleD.Percentile(0.95));
+	outputValues["right_angle_discrepancy_avg"] = AngleD.Avg();
+	outputValues["right_angle_discrepancy_min"] = AngleD.Min();
+	outputValues["right_angle_discrepancy_max"] = AngleD.Max();
+	outputValues["right_angle_discrepancy_stddev"] = AngleD.StandardDeviation();
+	outputValues["right_angle_discrepancy_perc0.05"] = AngleD.Percentile(0.05);
+	outputValues["right_angle_discrepancy_perc95"] = AngleD.Percentile(0.95);
 
 	log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
-	return true;
+	outputValues["quad_ratio_avg"] = RatioD.Avg();
+	outputValues["quad_ratio_min"] = RatioD.Min();
+	outputValues["quad_ratio_max"] = RatioD.Max();
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	bool watertight = false;
 	bool pointcloud = false;
@@ -355,6 +385,8 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 	log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
 	log("Mesh Bounding Box min %f  %f  %f", m.bbox.min[0], m.bbox.min[1], m.bbox.min[2]);
 	log("Mesh Bounding Box max %f  %f  %f", m.bbox.max[0], m.bbox.max[1], m.bbox.max[2]);
+	
+	outputValues["bbox"] = QVariant::fromValue(m.bbox);
 
 	// is pointcloud?
 	if ((m.fn == 0) && (m.vn != 0))
@@ -364,6 +396,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 		// cloud barycenter
 		Point3m bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
 		log("Pointcloud (vertex) barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["barycenter"] = QVariant::fromValue(bc);
 
 		// if there is vertex quality, also provide weighted barycenter
 		if (tri::HasPerVertexQuality(m))
@@ -371,6 +404,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 			bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, true);
 			log("Pointcloud (vertex) barycenter, weighted by verytex quality:");
 			log("  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+			outputValues["vertex_quality_weighted_barycenter"] = QVariant::fromValue(bc);
 		}
 
 		// principal axis
@@ -380,26 +414,34 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 		log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+		outputValues["pca"] = QVariant::fromValue(PCA);
 	}
 	else {
 		// area
 		float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 		log("Mesh Surface Area is %f", Area);
+		outputValues["surface_area"] = Area;
 
 		// edges
-		Distribution<MESHLAB_SCALAR> eDist;
+		Distribution<Scalarm> eDist;
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
 		log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
+		outputValues["total_edge_length"] = eDist.Sum();
+		outputValues["avg_edge_length"] = eDist.Avg();
 		tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
 		log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
-
+		outputValues["total_edge_inc_faux_length"] = eDist.Sum();
+		outputValues["avg_edge_inc_faux_length"] = eDist.Avg();
+		
 		// Thin shell barycenter
 		Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
 		log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["shell_barycenter"] = QVariant::fromValue(bc);
 
 		// cloud barycenter
 		bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
 		log("Vertices barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		outputValues["barycenter"] = QVariant::fromValue(bc);
 
 		// is watertight?
 		int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
@@ -409,11 +451,13 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 			tri::Inertia<CMeshO> I(m);
 
 			// volume
-			float Volume = I.Mass();
+			Scalarm Volume = I.Mass();
 			log("Mesh Volume  is %f", Volume);
+			outputValues["mesh_volume"] = Volume;
 
 			// center of mass
 			log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+			outputValues["center_of_mass"] = QVariant::fromValue(I.CenterOfMass());
 
 			// inertia tensor
 			Matrix33m IT;
@@ -422,6 +466,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 			log("    | %9.6f  %9.6f  %9.6f |", IT[0][0], IT[0][1], IT[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", IT[1][0], IT[1][1], IT[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", IT[2][0], IT[2][1], IT[2][2]);
+			outputValues["inertia_tensor"] = QVariant::fromValue(IT);
 
 			// principal axis
 			Matrix33m PCA;
@@ -431,9 +476,11 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+			outputValues["pca"] =  QVariant::fromValue(PCA);
 
 			log("axis momenta are :");
 			log("    | %9.6f  %9.6f  %9.6f |", pcav[0], pcav[1], pcav[2]);
+			outputValues["axis_momenta"] = QVariant::fromValue(pcav);
 
 		}
 		else {
@@ -446,6 +493,7 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
 			log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+			outputValues["pca"] =  QVariant::fromValue(PCA);
 		}
 
 	}
@@ -454,19 +502,20 @@ bool FilterMeasurePlugin::computeGeometricMeasures(MeshDocument& md)
 	if (m.Tr != Matrix44m::Identity())
 		tri::UpdatePosition<CMeshO>::Matrix(m, Inverse(m.Tr), true);
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	if (m.sfn == 0) {// no face selected, fail
-		errorMessage = "Cannot apply: there is no face selection";
 		log("Cannot apply: there is no face selection");
-		return false;
+		throw MLException("Cannot apply: there is no face selection");
 	}
 
 	log("Selection is %i triangles", m.sfn);
+	outputValues["seleced_triangles_number"] = m.sfn;
 	if (m.Tr != Matrix44m::Identity())
 		log("BEWARE: Area and Perimeter are calculated considering the current transformation matrix");
 
@@ -480,6 +529,7 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 		sArea += fArea / 2.0;
 	}
 	log("Selection Surface Area is %f", sArea);
+	outputValues["selected_surface_area"] = sArea;
 
 	int ePerimeter = 0;
 	double sPerimeter = 0.0;
@@ -499,42 +549,64 @@ bool FilterMeasurePlugin::computeAreaPerimeterOfSelection(MeshDocument& md)
 
 	log("Selection border is %i edges", ePerimeter);
 	log("Perimeter is %f", sPerimeter);
+	outputValues["border_edge_number"] = ePerimeter;
+	outputValues["perimeter"] = sPerimeter;
 
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::perVertexQualityStat(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
-	Distribution<MESHLAB_SCALAR> DD;
+	Distribution<Scalarm> DD;
 	tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
 
 	log("   Min %f Max %f", DD.Min(), DD.Max());
 	log("   Avg %f Med %f", DD.Avg(), DD.Percentile(0.5f));
 	log("   StdDev     %f", DD.StandardDeviation());
 	log("   Variance   %f", DD.Variance());
-	return true;
+	outputValues["min"] = DD.Min();
+	outputValues["max"] = DD.Max();
+	outputValues["avg"] = DD.Avg();
+	outputValues["med"] = DD.Percentile(0.5);
+	outputValues["stddev"] = DD.StandardDeviation();
+	outputValues["variance"] = DD.Variance();
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
+std::map<std::string, QVariant> FilterMeasurePlugin::perFaceQualityStat(MeshDocument& md)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
-	Distribution<MESHLAB_SCALAR> DD;
+	Distribution<Scalarm> DD;
 	tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
 
 	log("   Min %f Max %f", DD.Min(), DD.Max());
 	log("   Avg %f Med %f", DD.Avg(), DD.Percentile(0.5f));
 	log("   StdDev     %f", DD.StandardDeviation());
 	log("   Variance   %f", DD.Variance());
-	return true;
+	outputValues["min"] = DD.Min();
+	outputValues["max"] = DD.Max();
+	outputValues["avg"] = DD.Avg();
+	outputValues["med"] = DD.Percentile(0.5);
+	outputValues["stddev"] = DD.StandardDeviation();
+	outputValues["variance"] = DD.Variance();
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag)
+std::map<std::string, QVariant> FilterMeasurePlugin::perVertexQualityHistogram(
+		MeshDocument& md, 
+		Scalarm RangeMin, 
+		Scalarm RangeMax, 
+		int binNum, 
+		bool areaFlag)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
-	Histogramf H;
+	Histogramm H;
 	H.SetRange(RangeMin, RangeMax, binNum);
 	vector<Scalarm> aVec(m.vn, 1.0);
 	if (areaFlag)
@@ -543,46 +615,42 @@ bool FilterMeasurePlugin::perVertexQualityHistogram(MeshDocument& md, float Rang
 	for (int i = 0; i<m.vn; ++i)
 		H.Add(m.vert[i].Q(), aVec[i]);
 
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
+	std::string formatter = areaFlag ? "%15.7f" : "%4.0f";
+	Eigen::VectorXd rmin(binNum+2), rmax(binNum+2), count(binNum+2);
 
-	aVec = vector<Scalarm>(m.vn, 1.0);
-	if (areaFlag)
-		tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
+	log("(         -inf..%15.7f) : " + formatter, RangeMin, H.BinCountInd(0));
+	rmin(0) = std::numeric_limits<double>::min();
+	rmax(0) = RangeMin;
+	count(0) = H.BinCountInd(0);
+	for (int i = 1; i <= binNum; ++i){
+		log("[%15.7f..%15.7f) : " + formatter, H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+		rmin(i) = H.BinLowerBound(i);
+		rmax(i) = H.BinUpperBound(i);
+		count(i) = H.BinCountInd(i);
+	}
+	log("[%15.7f..             +inf) : " + formatter, RangeMax, H.BinCountInd(binNum + 1));
+	rmin(binNum+1) = RangeMax;
+	rmax(binNum+1) = std::numeric_limits<double>::max();
+	count(binNum+1) = H.BinCountInd(binNum+1);
+	outputValues["hist_bin_min"] = QVariant::fromValue(rmin);
+	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
+	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	for (int i = 0; i<m.vn; ++i)
-		H.Add(m.vert[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	return true;
+	return outputValues;
 }
 
-bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag)
+std::map<std::string, QVariant> FilterMeasurePlugin::perFaceQualityHostogram(
+		MeshDocument& md, 
+		Scalarm RangeMin, 
+		Scalarm RangeMax, 
+		int binNum, 
+		bool areaFlag)
 {
+	std::map<std::string, QVariant> outputValues;
 	CMeshO &m = md.mm()->cm;
 	tri::Allocator<CMeshO>::CompactEveryVector(m);
 
-	Histogramf H;
+	Histogramm H;
 	H.SetRange(RangeMin, RangeMax, binNum);
 
 	vector<Scalarm> aVec(m.fn, 1.0);
@@ -591,46 +659,37 @@ bool FilterMeasurePlugin::perFaceQualityHostogram(MeshDocument& md, float RangeM
 
 	for (int i = 0; i<m.fn; ++i)
 		H.Add(m.face[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
+	
+	std::string formatter = areaFlag ? "%15.7f" : "%4.0f";
+	Eigen::VectorXd rmin(binNum+2), rmax(binNum+2), count(binNum+2);
 
-	aVec = vector<Scalarm>(m.fn, 1.0);
-	if (areaFlag)
-		tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
+	log("(         -inf..%15.7f) : " + formatter, RangeMin, H.BinCountInd(0));
+	rmin(0) = std::numeric_limits<double>::min();
+	rmax(0) = RangeMin;
+	count(0) = H.BinCountInd(0);
+	for (int i = 1; i <= binNum; ++i) {
+		log("[%15.7f..%15.7f) : " + formatter, H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+		rmin(i) = H.BinLowerBound(i);
+		rmax(i) = H.BinUpperBound(i);
+		count(i) = H.BinCountInd(i);
+	}
+	log("[%15.7f..             +inf) : " + formatter, RangeMax, H.BinCountInd(binNum + 1));
+	rmin(binNum+1) = RangeMax;
+	rmax(binNum+1) = std::numeric_limits<double>::max();
+	count(binNum+1) = H.BinCountInd(binNum+1);
+	outputValues["hist_bin_min"] = QVariant::fromValue(rmin);
+	outputValues["hist_bin_max"] = QVariant::fromValue(rmax);
+	outputValues["hist_count"] = QVariant::fromValue(count);
 
-	for (int i = 0; i<m.fn; ++i)
-		H.Add(m.face[i].Q(), aVec[i]);
-	if (areaFlag) {
-		log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	else {
-		log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
-		for (int i = 1; i <= binNum; ++i)
-			log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
-		log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
-	}
-	return true;
+	return outputValues;
 }
 
-Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO& m)
+Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(const CMeshO& m)
 {
 	Matrix33m cov;
 	Point3m bp(0, 0, 0);
 	std::vector<Point3m> PtVec;
-	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 	if (!(*vi).IsD()) {
 		PtVec.push_back((*vi).cP());
 		bp += (*vi).cP();

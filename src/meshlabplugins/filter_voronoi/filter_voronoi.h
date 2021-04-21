@@ -24,13 +24,13 @@
 #ifndef FILTER_VORONOI_H
 #define FILTER_VORONOI_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterVoronoiPlugin : public QObject, public FilterPluginInterface
+class FilterVoronoiPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
 	enum {
@@ -45,69 +45,75 @@ public:
 	FilterVoronoiPlugin();
 
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
-	FILTER_ARITY filterArity(const QAction* a) const;
+	FilterArity filterArity(const QAction* a) const;
 	void initParameterList(const QAction* action, MeshModel& m, RichParameterList& par);
 	int getPreConditions(const QAction* action) const;
-	bool applyFilter(const QAction* action, MeshDocument& md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList& par, vcg::CallBackPos* cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction* ) const;
 
 private:
-	bool voronoiSampling(
+	void voronoiSampling(
 			MeshDocument &md,
 			vcg::CallBackPos* cb,
 			int iterNum,
 			int sampleNum,
-			float radiusVariance,
+			Scalarm radiusVariance,
 			int distanceType,
 			int randomSeed,
 			int relaxType,
 			int colorStrategy,
 			int refineFactor,
-			float perturbProbability,
-			float perturbAmount,
+			Scalarm perturbProbability,
+			Scalarm perturbAmount,
 			bool preprocessingFlag);
 
-	bool volumeSampling(
+	void volumeSampling(
 			MeshDocument& md,
 			vcg::CallBackPos* cb,
-			float sampleSurfRadius,
-			int sampleVolNum, bool poissonFiltering,
-			float poissonRadius);
+			Scalarm sampleSurfRadius,
+			int sampleVolNum, 
+			bool poissonFiltering,
+			Scalarm poissonRadius);
 
-	bool voronoiScaffolding(
+	void voronoiScaffolding(
 			MeshDocument& md,
 			vcg::CallBackPos* cb,
-			float sampleSurfRadius,
+			Scalarm sampleSurfRadius,
 			int sampleVolNum,
 			int voxelRes,
-			float isoThr,
+			Scalarm isoThr,
 			int smoothStep,
 			int relaxStep,
 			bool surfFlag,
 			int elemType);
 
-	bool createSolidWireframe(
+	void createSolidWireframe(
 			MeshDocument& md,
 			bool edgeCylFlag,
-			float edgeCylRadius,
+			Scalarm edgeCylRadius,
 			bool vertCylFlag,
-			float vertCylRadius,
+			Scalarm vertCylRadius,
 			bool vertSphFlag,
-			float vertSphRadius,
+			Scalarm vertSphRadius,
 			bool faceExtFlag,
-			float faceExtHeight,
-			float faceExtInset,
+			Scalarm faceExtHeight,
+			Scalarm faceExtInset,
 			bool /*edgeFauxFlag*/,
 			int cylinderSideNum);
 
-	bool crossFieldCreation(
+	void crossFieldCreation(
 			MeshDocument& md,
 			int crossType);
 
-	bool crossFieldColoring(MeshDocument& md);
+	void crossFieldColoring(MeshDocument& md);
 
 //	bool crossFieldSmoothing(
 //			MeshDocument& md,

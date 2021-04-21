@@ -36,10 +36,10 @@
 #include <QTimer>
 #include <QTime>
 
-#include <common/interfaces/render_plugin_interface.h>
-#include <common/interfaces/decorate_plugin_interface.h>
-#include <common/interfaces/edit_plugin_interface.h>
-#include <common/ml_shared_data_context.h>
+#include <common/plugins/interfaces/render_plugin.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
+#include <common/plugins/interfaces/edit_plugin.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
@@ -138,7 +138,7 @@ public:
     {
         makeCurrent();
         if( this->md() != nullptr){
-            this->md()->Log.Logf(Level, f, std::forward<Ts>(ts)...);
+            this->md()->Log.logf(Level, f, std::forward<Ts>(ts)...);
         }
     }
 
@@ -146,7 +146,7 @@ public:
     {
         makeCurrent();
         if( this->md() != nullptr){
-            this->md()->Log.Log(Level, f);
+            this->md()->Log.log(Level, f);
         }
     }
 
@@ -194,8 +194,8 @@ public:
     QList<QAction *> iPerDocDecoratorlist;
     QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
-    void setRenderer(RenderPluginInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
-    RenderPluginInterface * getRenderer() { return iRenderer; }
+    void setRenderer(RenderPlugin *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
+    RenderPlugin * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
     
     
@@ -232,10 +232,10 @@ public slots:
         if(iEdit && currentEditor)
         {
 			if (md() != NULL)
-				iEdit->EndEdit(*md(), this, parentmultiview->sharedDataContext());
+				iEdit->endEdit(*md(), this, parentmultiview->sharedDataContext());
 
 			if (mm() != NULL)
-				iEdit->EndEdit(*mm(), this, parentmultiview->sharedDataContext());
+				iEdit->endEdit(*mm(), this, parentmultiview->sharedDataContext());
         }
 		
 		//MLSceneGLSharedDataContext* shared;
@@ -310,7 +310,7 @@ public slots:
 			MeshModel *m = md()->getMesh(i.key());
 			foreach(QAction *p, i.value())
 			{
-				DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
+				DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>(p->parent());
 				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
 				decorInterface->setLog(&md()->Log);
 				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);
@@ -352,13 +352,13 @@ public:
     QAction * getCurrentEditAction() { return currentEditor; }
 
     //get the currently active mesh editor
-    EditPluginInterface * getCurrentMeshEditor() { return iEdit; }
+    EditTool * getCurrentMeshEditor() { return iEdit; }
 
     //see if this glAarea has a MESHEditInterface for this action
     bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
 
     //add a MeshEditInterface for the given action
-    void addMeshEditor(QAction *editAction, EditPluginInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
+    void addMeshEditor(QAction *editAction, EditTool *editor){ actionToMeshEditMap.insert(editAction, editor); }
     bool readyToClose();
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
@@ -447,16 +447,16 @@ private:
     vcg::Point2i pointToPick;
 
     //shader support
-    RenderPluginInterface *iRenderer;
+    RenderPlugin *iRenderer;
     QAction *currentShader;
     const QAction *lastFilterRef; // reference to last filter applied
     QFont	qFont;			//font settings
 
     // Editing support
-    EditPluginInterface *iEdit;
+    EditTool *iEdit;
     QAction *currentEditor;
     QAction *suspendedEditRef; // reference to last Editing Mode Used
-    QMap<QAction*, EditPluginInterface*> actionToMeshEditMap;
+    QMap<QAction*, EditTool*> actionToMeshEditMap;
 
     //the last model that start edit was called with
     MeshModel *lastModelEdited;

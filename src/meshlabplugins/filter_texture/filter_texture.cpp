@@ -38,18 +38,20 @@ using namespace vcg;
 
 FilterTexturePlugin::FilterTexturePlugin()
 {
-	typeList << FP_VORONOI_ATLAS
-			 << FP_UV_WEDGE_TO_VERTEX
-			 << FP_UV_VERTEX_TO_WEDGE
-			 << FP_BASIC_TRIANGLE_MAPPING
-			 << FP_SET_TEXTURE
-			 << FP_PLANAR_MAPPING
-			 << FP_COLOR_TO_TEXTURE
-			 << FP_TRANSFER_TO_TEXTURE
-			 << FP_TEX_TO_VCOLOR_TRANSFER;
+	typeList = {
+		FP_VORONOI_ATLAS,
+		FP_UV_WEDGE_TO_VERTEX,
+		FP_UV_VERTEX_TO_WEDGE,
+		FP_BASIC_TRIANGLE_MAPPING,
+		FP_SET_TEXTURE,
+		FP_PLANAR_MAPPING,
+		FP_COLOR_TO_TEXTURE,
+		FP_TRANSFER_TO_TEXTURE,
+		FP_TEX_TO_VCOLOR_TRANSFER
+	};
 	
-	foreach(FilterIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterTexturePlugin::pluginName() const
@@ -57,7 +59,7 @@ QString FilterTexturePlugin::pluginName() const
 	return "FilterTexture";
 }
 
-QString FilterTexturePlugin::filterName(FilterIDType filterId) const
+QString FilterTexturePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -77,7 +79,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
+QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -86,7 +88,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 											Experimental Mathematics, Vol 2 (1), 1993<br> .");
 	case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 	case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
-	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
+	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
 	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else a dummy texture will be created and saved in the same directory of the mesh if exists, or in the default system picture directory.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
@@ -165,11 +167,11 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a)
 	case FP_PLANAR_MAPPING :
 	case FP_SET_TEXTURE :
 	case FP_COLOR_TO_TEXTURE :
-	case FP_TRANSFER_TO_TEXTURE : return FilterPluginInterface::Texture;
-	case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(FilterPluginInterface::VertexColoring + FilterPluginInterface::Texture);
+	case FP_TRANSFER_TO_TEXTURE : return FilterPlugin::Texture;
+	case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Texture);
 	default : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 	
 static QString extractFilenameTexture(MeshModel* mm)
@@ -330,7 +332,7 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 }
 	
 // ERROR CHECKING UTILITY
-#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
 ///////////////////////////////////////////////////////
 
 template<typename T>
@@ -340,7 +342,12 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList &par, CallBackPos *cb)
+std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
+			const QAction *filter,
+			const RichParameterList &par,
+			MeshDocument &md,
+			unsigned int& /*postConditionMask*/,
+			CallBackPos *cb)
 {
 	MeshModel &m=*(md.mm());
 	switch(ID(filter))     {
@@ -354,8 +361,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		if(nonManifVertNum>0 || nonManifEdgeNum>0)
 		{
 			log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
-			this->errorMessage = "Mesh is not manifold. See Log for details";
-			return false;
+			throw MLException("Mesh is not manifold. See Log for details");
 		}
 		
 		MeshModel *paraModel=md.addNewMesh("","VoroAtlas",false);
@@ -415,7 +421,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		
 		int sideDim = par.getEnum("projectionPlane");
 		bool aspectRatio = par.getBool("aspectRatio");
-		float sideGutter = par.getFloat("sideGutter");
+		Scalarm sideGutter = par.getFloat("sideGutter");
 		
 		// the mesh has to be correctly transformed
 		if (m.cm.Tr != Matrix44m::Identity())
@@ -715,15 +721,18 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		else
 		{
 			CheckError(textName.length() == 0, "Texture file not specified");
-			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+			//CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 		}
 		
 		if (m.cm.textures.empty())
 		{
 			// Creates path to texture file
-			QString fileName(m.fullName());
-			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
-			
+			QString fileName = textName;
+			if (std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) == -1){
+				fileName = m.fullName();
+				fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
+			}
+
 			QFile textFile(fileName);
 			if (!textFile.exists())
 			{
@@ -739,7 +748,14 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 			
 			//Assign texture
 			m.cm.textures.clear();
-			m.cm.textures.push_back(textName.toStdString());
+			m.cm.textures.push_back(fileName.toStdString());
+			for(auto fi=m.cm.face.begin();fi!=m.cm.face.end();++fi){
+				if(!(*fi).IsD()) if((*fi).WT(0).N()==-1) {
+					(*fi).WT(0).N() = 0;
+					(*fi).WT(1).N() = 0;
+					(*fi).WT(2).N() = 0;
+				}
+			}
 		}
 		
 		QString filePath(m.fullName());
@@ -842,7 +858,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 		case 3: textureSampling = true; break;
 		default: assert(0);
 		}
-		float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		QString textName = par.getString("textName");
 		int textW = par.getInt("textW");
 		int textH = par.getInt("textH");
@@ -1046,7 +1062,7 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 	{
 		MeshModel *srcMesh = par.getMesh("sourceMesh");
 		MeshModel *trgMesh = par.getMesh("targetMesh");
-		float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		
 		assert(srcMesh!=NULL);
 		assert(trgMesh!=NULL);
@@ -1102,13 +1118,14 @@ bool FilterTexturePlugin::applyFilter(const QAction *filter, MeshDocument &md, s
 	}
 		break;
 		
-	default: assert(0);
+	default:
+		wrongActionCalled(filter);
 	}
 	
-	return true;
+	return std::map<std::string, QVariant>();
 }
 	
-FilterPluginInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterTexturePlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter))
 	{
@@ -1119,12 +1136,12 @@ FilterPluginInterface::FILTER_ARITY FilterTexturePlugin::filterArity(const QActi
 	case FP_PLANAR_MAPPING : 
 	case FP_SET_TEXTURE : 
 	case FP_COLOR_TO_TEXTURE : 
-		return FilterPluginInterface::SINGLE_MESH;
+		return FilterPlugin::SINGLE_MESH;
 	case FP_TRANSFER_TO_TEXTURE : 
 	case FP_TEX_TO_VCOLOR_TRANSFER : 
-		return FilterPluginInterface::FIXED;
+		return FilterPlugin::FIXED;
 	}
-	return FilterPluginInterface::NONE;
+	return FilterPlugin::NONE;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterTexturePlugin)

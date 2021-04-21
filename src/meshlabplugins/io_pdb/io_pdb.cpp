@@ -36,14 +36,11 @@
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
 {
 	if (formatName.toUpper() == tr("PDB"))
 	{
@@ -67,7 +64,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString 
 	}
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	//bool normalsUpdated = false;
 
@@ -75,69 +72,30 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	mask = 0;
 	
 	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
 
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-
-	//string filename = fileName.toUtf8().data();
 	string filename = QFile::encodeName(fileName).constData ();
-  
-  if (formatName.toUpper() == tr("PDB"))
+
+	if (formatName.toUpper() == tr("PDB"))
 	{
 		
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		m.Enable(mask);
 
-		return parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb);
- 
-
-		/*
-		tri::io::ImporterPTX<CMeshO>::Info importparams;
-
-		importparams.meshnum = parlst.getInt("meshindex");
-		importparams.anglecull =parlst.getBool("anglecull");
-		importparams.angle = parlst.getFloat("angle");
-		importparams.savecolor = parlst.getBool("usecolor");
-		importparams.pointcull = parlst.getBool("pointcull");
-		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
-		importparams.flipfaces = parlst.getBool("flipfaces");
-
-		// if color, add to mesh
-		if(importparams.savecolor)
-			importparams.mask |= tri::io::Mask::IOM_VERTCOLOR;
-
-		// reflectance is stored in quality
-		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
-
-		m.Enable(importparams.mask);
-
-		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
-		if (result == 1)
-		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
-			return false;
-		}
-
-		// update mask
-		mask = importparams.mask;
-		*/
+		if (!parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb))
+			throw MLException("Error while opening PDB file");
+		if (cb != NULL)
+			(*cb)(99, "Done");
 	}
-	else 
-	{
-		assert(0); // Unknown File type
-		return false;
+	else {
+		wrongOpenFormat(formatName);
 	}
-
-	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void PDBIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/)
 {
-  assert(0); 
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
@@ -148,30 +106,25 @@ QString PDBIOPlugin::pluginName() const
 	return "IOPDB";
 }
 
-QList<IOPluginInterface::Format> PDBIOPlugin::importFormats() const
+std::list<FileFormat> PDBIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Protein Data Bank"	, tr("PDB"));
-
-	return formatList;
+	return {FileFormat("Protein Data Bank" , tr("PDB"))};
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> PDBIOPlugin::exportFormats() const
+std::list<FileFormat> PDBIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
 //	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
-
-	return formatList;
+	return {};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void PDBIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
+void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;
@@ -185,7 +138,7 @@ void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))

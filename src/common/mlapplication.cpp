@@ -1,10 +1,9 @@
 #include "mlapplication.h"
 #include "mlexception.h"
 #include <vcg/complex/complex.h>
-
-#ifndef MESHLAB_VERSION
-#define MESHLAB_VERSION 2020.09
-#endif
+#include <QStandardPaths>
+#include <QDir>
+#include "globals.h"
 
 #if defined(__clang__)
 #define ML_COMPILER "Clang"
@@ -19,9 +18,6 @@
 #define ML_COMPILER "Unknown Compiler"
 #define ML_COMPILER_VER std::string()
 #endif
-
-#define xstr(a) stringify(a)
-#define stringify(a) #a
 
 #ifdef NDEBUG
 bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
@@ -46,7 +42,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 
 const QString MeshLabApplication::appVer()
 {
-	return QString(xstr(MESHLAB_VERSION));
+	return QString::fromStdString(meshlab::meshlabVersion());
 }
 
 const QString MeshLabApplication::compilerVersion()
@@ -57,6 +53,36 @@ const QString MeshLabApplication::compilerVersion()
 const QString MeshLabApplication::qtVersion()
 {
 	return QString(QT_VERSION_STR);
+}
+
+const QString MeshLabApplication::extraPluginsLocation()
+{
+	QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+	appDir.mkpath(appDir.absolutePath());
+	
+	appDir.mkdir("MeshLabExtraPlugins");
+	appDir.cd("MeshLabExtraPlugins");
+	
+	//QString major = appVer().left(4);
+	//appDir.mkdir(major);
+	//appDir.cd(major);
+
+	//just for first versions, compatibility of plugins is fixed for same version of meshlab
+	appDir.mkdir(appVer());
+	appDir.cd(appVer());
+
+	return appDir.absolutePath();
+}
+
+const QString MeshLabApplication::extraShadersLocation()
+{
+	QDir appDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+	appDir.mkpath(appDir.absolutePath());
+	
+	appDir.mkdir("MeshLabExtraShaders");
+	appDir.cd("MeshLabExtraShaders");
+	
+	return appDir.absolutePath();
 }
 
 std::string MeshLabApplication::versionString(int a, int b, int c)

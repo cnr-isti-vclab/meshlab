@@ -27,7 +27,7 @@
 
 
 
-#include <common/meshmodel.h>
+#include <common/ml_document/raster_model.h>
 
 
 struct TriangleUV
@@ -47,7 +47,7 @@ struct Patch
 };
 
 typedef QVector<Patch>              PatchVec;
-typedef QMap<RasterModel*,PatchVec> RasterPatchMap;
+typedef QHash<RasterModel*,PatchVec> RasterPatchMap;
 
 
 

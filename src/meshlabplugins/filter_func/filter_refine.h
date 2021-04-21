@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include "string_conversion.h"
 
 using namespace vcg;

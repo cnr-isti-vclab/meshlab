@@ -40,90 +40,91 @@ using namespace vcg;
 SelectionFilterPlugin::SelectionFilterPlugin()
 {
 
-    typeList <<
-                FP_SELECT_ALL <<
-                FP_SELECT_NONE <<
-                FP_SELECTBYANGLE <<
-                FP_SELECT_UGLY <<
-                FP_SELECT_DELETE_VERT <<
-                FP_SELECT_DELETE_ALL_FACE <<
-                FP_SELECT_DELETE_FACE <<
-                FP_SELECT_DELETE_FACEVERT <<
-                FP_SELECT_FACE_FROM_VERT <<
-                FP_SELECT_VERT_FROM_FACE <<
-                FP_SELECT_ERODE <<
-                FP_SELECT_DILATE <<
-                FP_SELECT_BORDER <<
-                FP_SELECT_INVERT <<
-                FP_SELECT_CONNECTED <<
-                FP_SELECT_BY_VERT_QUALITY <<
-                FP_SELECT_BY_FACE_QUALITY <<
-                CP_SELFINTERSECT_SELECT <<
-                CP_SELECT_TEXBORDER <<
-                CP_SELECT_NON_MANIFOLD_FACE <<
-                CP_SELECT_NON_MANIFOLD_VERTEX <<
-                FP_SELECT_FACES_BY_EDGE <<
-                FP_SELECT_BY_COLOR <<
-                FP_SELECT_FOLD_FACE <<
-                FP_SELECT_OUTLIER;
+	typeList = {
+		FP_SELECT_ALL,
+		FP_SELECT_NONE,
+		FP_SELECTBYANGLE,
+		FP_SELECT_UGLY,
+		FP_SELECT_DELETE_VERT,
+		FP_SELECT_DELETE_ALL_FACE,
+		FP_SELECT_DELETE_FACE,
+		FP_SELECT_DELETE_FACEVERT,
+		FP_SELECT_FACE_FROM_VERT,
+		FP_SELECT_VERT_FROM_FACE,
+		FP_SELECT_ERODE,
+		FP_SELECT_DILATE,
+		FP_SELECT_BORDER,
+		FP_SELECT_INVERT,
+		FP_SELECT_CONNECTED,
+		FP_SELECT_BY_VERT_QUALITY,
+		FP_SELECT_BY_FACE_QUALITY,
+		CP_SELFINTERSECT_SELECT,
+		CP_SELECT_TEXBORDER,
+		CP_SELECT_NON_MANIFOLD_FACE,
+		CP_SELECT_NON_MANIFOLD_VERTEX,
+		FP_SELECT_FACES_BY_EDGE,
+		FP_SELECT_BY_COLOR,
+		FP_SELECT_FOLD_FACE,
+		FP_SELECT_OUTLIER
+	};
 
-    QCoreApplication* app = QCoreApplication::instance();
+	QCoreApplication* app = QCoreApplication::instance();
 
-    for(FilterIDType tt : types())
-    {
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types()) {
+		QAction* act = new QAction(filterName(tt), this);
+		actionList.push_back(act);
 
-        if (app != nullptr) {
-            if(tt==FP_SELECT_DELETE_VERT){
-                actionList.last()->setShortcut(QKeySequence ("Ctrl+Del"));
-                actionList.last()->setIcon(QIcon(":/images/delete_vert.png"));
-                actionList.last()->setPriority(QAction::HighPriority);
-            }
-            if(tt==FP_SELECT_DELETE_FACE){
-                actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
-                actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
-                actionList.last()->setPriority(QAction::HighPriority);
-            }
-            if(tt==FP_SELECT_DELETE_FACEVERT){
-                actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
-                actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
-                actionList.last()->setPriority(QAction::HighPriority);
-            }
-            if (tt == FP_SELECT_ALL){
-                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
-                actionList.last()->setIcon(QIcon(":/images/sel_all.png"));
-                actionList.last()->setPriority(QAction::LowPriority);
-            }
-            if (tt == FP_SELECT_NONE){
-                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
-                actionList.last()->setIcon(QIcon(":/images/sel_none.png"));
-                actionList.last()->setPriority(QAction::LowPriority);
-            }
-            if (tt == FP_SELECT_INVERT){
-                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
-                actionList.last()->setIcon(QIcon(":/images/sel_inv.png"));
-                actionList.last()->setPriority(QAction::LowPriority);
-            }
-            if (tt == FP_SELECT_DILATE){
-                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
-                actionList.last()->setIcon(QIcon(":/images/sel_plus.png"));
-                actionList.last()->setPriority(QAction::LowPriority);
-            }
-            if (tt == FP_SELECT_ERODE){
-                actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
-                actionList.last()->setIcon(QIcon(":/images/sel_minus.png"));
-                actionList.last()->setPriority(QAction::LowPriority);
-            }
-        }
-    }
+		if (app != nullptr) {
+			if(tt==FP_SELECT_DELETE_VERT){
+				act->setShortcut(QKeySequence ("Ctrl+Del"));
+				act->setIcon(QIcon(":/images/delete_vert.png"));
+				act->setPriority(QAction::HighPriority);
+			}
+			if(tt==FP_SELECT_DELETE_FACE){
+				act->setShortcut(QKeySequence (Qt::Key_Delete));
+				act->setIcon(QIcon(":/images/delete_face.png"));
+				act->setPriority(QAction::HighPriority);
+			}
+			if(tt==FP_SELECT_DELETE_FACEVERT){
+				act->setShortcut(QKeySequence ("Shift+Del"));
+				act->setIcon(QIcon(":/images/delete_facevert.png"));
+				act->setPriority(QAction::HighPriority);
+			}
+			if (tt == FP_SELECT_ALL){
+				act->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
+				act->setIcon(QIcon(":/images/sel_all.png"));
+				act->setPriority(QAction::LowPriority);
+			}
+			if (tt == FP_SELECT_NONE){
+				act->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
+				act->setIcon(QIcon(":/images/sel_none.png"));
+				act->setPriority(QAction::LowPriority);
+			}
+			if (tt == FP_SELECT_INVERT){
+				act->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
+				act->setIcon(QIcon(":/images/sel_inv.png"));
+				act->setPriority(QAction::LowPriority);
+			}
+			if (tt == FP_SELECT_DILATE){
+				act->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
+				act->setIcon(QIcon(":/images/sel_plus.png"));
+				act->setPriority(QAction::LowPriority);
+			}
+			if (tt == FP_SELECT_ERODE){
+				act->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
+				act->setIcon(QIcon(":/images/sel_minus.png"));
+				act->setPriority(QAction::LowPriority);
+			}
+		}
+	}
 }
 
 QString SelectionFilterPlugin::pluginName() const
 {
-    return "FlterSelect";
+    return "FilterSelect";
 }
 
- QString SelectionFilterPlugin::filterName(FilterIDType filter) const
+ QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 {
  switch(filter)
  {
@@ -157,7 +158,7 @@ QString SelectionFilterPlugin::pluginName() const
  return QString("Unknown filter");
 }
 
-QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
+QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
 {
  switch(filterId)
  {
@@ -303,11 +304,13 @@ void SelectionFilterPlugin::initParameterList(const QAction *action, MeshModel &
  }
 }
 
-bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
+		const QAction *action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos * /*cb*/)
 {
-	if (md.mm() == NULL)
-		return false;
-
 	MeshModel &m=*(md.mm());
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
@@ -408,8 +411,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		// if usecamera but mesh does not have one
 		if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
 		{
-			errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
-			return false;
+			throw MLException("Mesh has not a camera that can be used to compute view direction. Please set a view direction.");
 		}
 		if(usecam)
 		{
@@ -417,7 +419,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		}
 
 		// angle threshold in radians
-		float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
+		Scalarm limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
 		Point3m viewray;
 
 		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
@@ -522,8 +524,8 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_BY_VERT_QUALITY:
 	{
-		float minQ = par.getDynamicFloat("minQ");
-		float maxQ = par.getDynamicFloat("maxQ");
+		Scalarm minQ = par.getDynamicFloat("minQ");
+		Scalarm maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);
 		if (inclusiveFlag)
@@ -534,8 +536,8 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_BY_FACE_QUALITY:
 	{
-		float minQ = par.getDynamicFloat("minQ");
-		float maxQ = par.getDynamicFloat("maxQ");
+		Scalarm minQ = par.getDynamicFloat("minQ");
+		Scalarm maxQ = par.getDynamicFloat("maxQ");
 		bool inclusiveFlag = par.getBool("Inclusive");
 		tri::UpdateSelection<CMeshO>::FaceFromQualityRange(m.cm, minQ, maxQ);
 		if (inclusiveFlag)
@@ -623,14 +625,14 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_FACES_BY_EDGE:
 	{
-		float threshold = par.getDynamicFloat("Threshold");
+		Scalarm threshold = par.getDynamicFloat("Threshold");
 		int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
 		log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
 	} break;
 
 	case FP_SELECT_FOLD_FACE:
 	{
-		float angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
+		Scalarm angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
 		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 		tri::Clean<CMeshO>::SelectFoldedFaceFromOneRingFaces(m.cm, cos(angle));
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
@@ -638,7 +640,7 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 
 	case FP_SELECT_OUTLIER:
 	{
-		float threshold = par.getDynamicFloat("PropThreshold");
+		Scalarm threshold = par.getDynamicFloat("PropThreshold");
 		int kNearest = par.getInt("KNearest");
 		VertexConstDataWrapper<CMeshO> wrapper(m.cm);
 		KdTree<typename CMeshO::ScalarType> kdTree(wrapper);
@@ -646,23 +648,24 @@ bool SelectionFilterPlugin::applyFilter(const QAction *action, MeshDocument &md,
 		log("Selected %d outlier vertices", selVertexNum);
 	} break;
 
-	default: assert(0);
+	default:
+		wrongActionCalled(action);
 	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
-FilterPluginInterface::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
+FilterPlugin::FilterClass SelectionFilterPlugin::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
-	case CP_SELFINTERSECT_SELECT:	return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Cleaning);
+	case CP_SELFINTERSECT_SELECT:	return FilterClass(FilterPlugin::Selection + FilterPlugin::Cleaning);
 
-	case CP_SELECT_TEXBORDER : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Texture);
+	case CP_SELECT_TEXBORDER : return FilterClass(FilterPlugin::Selection + FilterPlugin::Texture);
 
 	case FP_SELECT_BY_FACE_QUALITY :
-	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(FilterPluginInterface::Selection + FilterPluginInterface::Quality);
+	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(FilterPlugin::Selection + FilterPlugin::Quality);
 
-	case FP_SELECTBYANGLE : return FilterPluginInterface::FilterClass(FilterPluginInterface::RangeMap + FilterPluginInterface::Selection);
+	case FP_SELECTBYANGLE : return FilterPlugin::FilterClass(FilterPlugin::RangeMap + FilterPlugin::Selection);
 
 	case FP_SELECT_ALL :
 	case FP_SELECT_NONE :
@@ -683,9 +686,9 @@ FilterPluginInterface::FilterClass SelectionFilterPlugin::getClass(const QAction
 	case FP_SELECT_OUTLIER:
 	case FP_SELECT_BY_COLOR: 
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
-	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(FilterPluginInterface::Selection);
+	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(FilterPlugin::Selection);
   }
-  return FilterPluginInterface::Selection;
+  return FilterPlugin::Selection;
 }
 
  int SelectionFilterPlugin::getRequirements(const QAction *action)

@@ -25,29 +25,30 @@
 #define FILTERCOLORPROCPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 
-class FilterColorProc : public QObject, public FilterPluginInterface
+class FilterColorProc : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
-    enum { CP_FILLING,
-        CP_THRESHOLDING,
-        CP_CONTR_BRIGHT,
-        CP_GAMMA,
-        CP_LEVELS,
-        CP_INVERT,
-        CP_COLOURISATION,
-        CP_DESATURATION,
-        CP_WHITE_BAL,
-        CP_EQUALIZE,
-        CP_PERLIN_COLOR,
-        CP_COLOR_NOISE,
-        CP_SCATTER_PER_MESH,
+	enum {
+		CP_FILLING,
+		CP_THRESHOLDING,
+		CP_CONTR_BRIGHT,
+		CP_GAMMA,
+		CP_LEVELS,
+		CP_INVERT,
+		CP_COLOURISATION,
+		CP_DESATURATION,
+		CP_WHITE_BAL,
+		CP_EQUALIZE,
+		CP_PERLIN_COLOR,
+		CP_COLOR_NOISE,
+		CP_SCATTER_PER_MESH,
 		CP_CLAMP_QUALITY,
 		CP_SATURATE_QUALITY,
 		CP_MAP_VQUALITY_INTO_COLOR,
@@ -61,23 +62,25 @@ public:
 		CP_VERTEX_TO_FACE,
 		CP_MESH_TO_FACE,
 		CP_RANDOM_FACE,
-		CP_RANDOM_CONNECTED_COMPONENT
-    };
+		CP_RANDOM_CONNECTED_COMPONENT,
+		CP_VERTEX_TO_FACE_QUALITY,
+		CP_FACE_TO_VERTEX_QUALITY,
+	};
 
-    FilterColorProc();
-    ~FilterColorProc();
+	FilterColorProc();
+	~FilterColorProc();
 
-    QString pluginName() const;
-    virtual FilterClass getClass(const QAction*) const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+	QString pluginName() const;
+	virtual FilterClass getClass(const QAction*) const;
+	virtual QString filterName(ActionIDType filter) const;
+	virtual QString filterInfo(ActionIDType filter) const;
 
-    virtual int getRequirements(const QAction*);
+	virtual int getRequirements(const QAction*);
 
-    virtual void initParameterList(const QAction*, MeshDocument&, RichParameterList & /*parent*/);
-    virtual bool applyFilter(const QAction* filter, MeshDocument&, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
-    int postCondition(const QAction* filter) const;
-    int getPreConditions(const QAction *) const;
-    FILTER_ARITY filterArity(const QAction *act) const;
+	virtual void initParameterList(const QAction*, MeshDocument&, RichParameterList & /*parent*/);
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+	int postCondition(const QAction* filter) const;
+	int getPreConditions(const QAction *) const;
+	FilterArity filterArity(const QAction *act) const;
 };
 #endif

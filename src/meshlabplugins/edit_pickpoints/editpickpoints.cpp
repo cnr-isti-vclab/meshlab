@@ -62,18 +62,13 @@ EditPickPointsPlugin::EditPickPointsPlugin()
 //Constants
 
 
-const QString EditPickPointsPlugin::Info()
+const QString EditPickPointsPlugin::info()
 {
 	return tr("Pick and save 3D points on the mesh");
 }
 
-QString EditPickPointsPlugin::pluginName() const
-{
-	return "EditPickPoints";
-}
-
 //called
-void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painter)
+void EditPickPointsPlugin::decorate(MeshModel &mm, GLArea *gla, QPainter *painter)
 {
 	//qDebug() << "Decorate " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
@@ -145,7 +140,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox, painter);
 }
 
-bool EditPickPointsPlugin::StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditPickPointsPlugin::startEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
 	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
@@ -188,7 +183,7 @@ bool EditPickPointsPlugin::StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLShar
 	return true;
 }
 
-void EditPickPointsPlugin::EndEdit(MeshModel & mm, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditPickPointsPlugin::endEdit(MeshModel & mm, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
 {
 	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 

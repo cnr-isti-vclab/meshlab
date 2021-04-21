@@ -28,88 +28,87 @@
 #include "GLLogStream.h"
 
 using namespace std;
-GLLogStream::GLLogStream()
-	:QObject()
+GLLogStream::GLLogStream() :
+	QObject(), bookmark(-1)
 {
-	ClearBookmark();
 }
 
-void GLLogStream::RealTimeLog(const QString& Id, const QString &meshName, const QString& text)
+void GLLogStream::realTimeLog(const QString& Id, const QString &meshName, const QString& text)
 {
-	this->RealTimeLogText.insert(Id,qMakePair(meshName,text) );
+	this->realTimeLogText.insert(Id,qMakePair(meshName,text) );
 }
 
 
-void GLLogStream::Save(int /*Level*/, const char * filename )
+void GLLogStream::save(int /*Level*/, const char * filename )
 {
 	FILE *fp=fopen(filename,"wb");
 	QList<pair <int,QString> > ::iterator li;
-	for(li=S.begin();li!=S.end();++li)
+	for(li=logTextList.begin();li!=logTextList.end();++li)
 		fprintf(fp,"%s", qUtf8Printable((*li).second));
 }
 
-void GLLogStream::ClearBookmark()
+void GLLogStream::clearBookmark()
 {
 	bookmark = -1;
 }
 
-void GLLogStream::SetBookmark()
+void GLLogStream::setBookmark()
 {
-	bookmark=S.size();
+	bookmark=logTextList.size();
 }
 
-void GLLogStream::BackToBookmark()
+void GLLogStream::backToBookmark()
 {
 	if(bookmark<0) return;
-	while(S.size() > bookmark )
-		S.removeLast();
+	while(logTextList.size() > bookmark )
+		logTextList.removeLast();
 }
 
 const QList<std::pair<int, QString> >& GLLogStream::logStringList() const
 {
-	return S;
+	return logTextList;
 }
 
 const QMultiMap<QString, QPair<QString, QString> >& GLLogStream::realTimeLogMultiMap() const
 {
-	return RealTimeLogText;
+	return realTimeLogText;
 }
 
 void GLLogStream::clearRealTimeLog()
 {
-	RealTimeLogText.clear();
+	realTimeLogText.clear();
 }
 
 void GLLogStream::print(QStringList &out) const
 {
 	out.clear();
-	for (const pair <int,QString>& p : S)
+	for (const pair <int,QString>& p : logTextList)
 		out.push_back(p.second);
 }
 
-void GLLogStream::Clear()
+void GLLogStream::clear()
 {
-	S.clear();
+	logTextList.clear();
 }
 
-void GLLogStream::Log(int Level, const char * buf )
+void GLLogStream::log(int Level, const char * buf )
 {
 	QString tmp(buf);
-	S.push_back(std::make_pair(Level,tmp));
+	logTextList.push_back(std::make_pair(Level,tmp));
 	qDebug("LOG: %i %s",Level,buf);
 	emit logUpdated();
 }
 
-void GLLogStream::Log(int Level, const string& logMessage)
+void GLLogStream::log(int Level, const string& logMessage)
 {
-	S.push_back(std::make_pair(Level, QString::fromStdString(logMessage)));
+	logTextList.push_back(std::make_pair(Level, QString::fromStdString(logMessage)));
 	qDebug("LOG: %i %s",Level, logMessage.c_str());
 	emit logUpdated();
 }
 
-void GLLogStream::Log(int Level, const QString& logMessage)
+void GLLogStream::log(int Level, const QString& logMessage)
 {
-	S.push_back(std::make_pair(Level, logMessage));
+	logTextList.push_back(std::make_pair(Level, logMessage));
 	qDebug("LOG: %i %s",Level, logMessage.toStdString().c_str());
 	emit logUpdated();
 }

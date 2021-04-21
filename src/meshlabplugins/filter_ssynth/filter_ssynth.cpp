@@ -1,7 +1,7 @@
 #include <Qt>
 #include "filter_ssynth.h"
 #include <meshlabplugins/io_x3d/import_x3d.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <StructureSynth/Model/RandomStreams.h>
 #include <StructureSynth/Parser/Preprocessor.h>
 #undef __GLEW_H__ //terrible workaround to avoid problem with #warning in visual studio
@@ -9,7 +9,6 @@
 #include <StructureSynth/Parser/Tokenizer.h>
 #include <StructureSynth/Parser/EisenParser.h>
 #include <StructureSynth/Model/Builder.h>
-#include <QMessageBox>
 
 using namespace std;
 using namespace vcg;
@@ -18,20 +17,22 @@ using namespace StructureSynth::Parser;
 using namespace StructureSynth::Model;
 using namespace StructureSynth::Model::Rendering;
 using namespace SyntopiaCore::Exceptions;
-FilterSSynth::FilterSSynth(){
-    typeList<< CR_SSYNTH;
-    this->renderTemplate= "";
-    for(FilterIDType tt : types())
-        actionList << new QAction(filterName(tt), this);
-    //num=0;
+
+
+FilterSSynth::FilterSSynth()
+{
+	typeList = {CR_SSYNTH};
+	this->renderTemplate= "";
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterSSynth::pluginName() const
 {
     return "FilterSSynth";
 }
-//FilterSSynth::~FilterSSynth(){}
-QString FilterSSynth::filterName(FilterIDType filter) const
+
+QString FilterSSynth::filterName(ActionIDType filter) const
 {
     switch(filter)
     {
@@ -44,7 +45,7 @@ QString FilterSSynth::filterName(FilterIDType filter) const
     }
 }
 
-QString FilterSSynth::filterInfo(FilterIDType filterId) const
+QString FilterSSynth::filterInfo(ActionIDType filterId) const
 {
     switch(filterId)
     {
@@ -77,33 +78,41 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
     delete(info);
 }
 
-bool FilterSSynth::applyFilter(const QAction*  filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterSSynth::applyFilter(
+		const QAction* filter,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
-    md.addNewMesh("",this->filterName(ID(filter)));
-    QWidget *  parent=(QWidget*)this->parent();
-    QString grammar = par.getString("grammar");
-    int seed = par.getInt("seed");
-	int sphereres=par.getInt("sphereres");
-    this->renderTemplate=GetTemplate(sphereres);
-    if(this->renderTemplate!=QString::Null()){
-        QString path=ssynth(grammar,-50,seed,cb);
-        if(QFile::exists(path)){
-            QFile file(path);
-            int mask;
-            QString name(file.fileName());
-            openX3D(name,*(md.mm()),mask,cb);
-            file.remove();
-            return true;
-        }
-        else{
-            QString message=QString("An error occurred during the mesh generation:" ).append(path);
-            QMessageBox::critical(parent,"Error",message);
-            return false;
-        }
-    }
-    else{
-        QMessageBox::critical(parent,"Error","Sphere resolution must be between 1 and 4"); return false;
-    }
+	if (ID(filter) == CR_SSYNTH) {
+		md.addNewMesh("",this->filterName(ID(filter)));
+		QString grammar = par.getString("grammar");
+		int seed = par.getInt("seed");
+		int sphereres=par.getInt("sphereres");
+		this->renderTemplate = GetTemplate(sphereres);
+		if(this->renderTemplate != ""){
+			QString path=ssynth(grammar,-50,seed,cb);
+			if (! QFile::exists(path)){
+				QString message=QString("An error occurred during the mesh generation: " ).append(path);
+				throw MLException(message);
+			}
+			else {
+				QFile file(path);
+				int mask;
+				QString name(file.fileName());
+				openX3D(name,*(md.mm()),mask,cb);
+				file.remove();
+			}
+		}
+		else{
+			throw MLException("Error: Sphere resolution must be between 1 and 4");
+		}
+	}
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterSSynth::getRequirements(const QAction *)
@@ -152,61 +161,70 @@ int FilterSSynth::postCondition(const QAction* /*filter*/) const
     return MeshModel::MM_NONE;
 }
 
-FilterPluginInterface::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
+FilterPlugin::FilterClass FilterSSynth::getClass(const QAction */*filter*/) const
 {
-    return FilterPluginInterface::MeshCreation;
+    return FilterPlugin::MeshCreation;
 }
 
-QList<IOPluginInterface::Format> FilterSSynth::importFormats() const
+std::list<FileFormat> FilterSSynth::importFormats() const
 {
-    QList<IOPluginInterface::Format> formats;
-    formats<< IOPluginInterface::Format("Eisen Script File", tr("ES"));
-    return formats;
+	return {FileFormat("Eisen Script File", tr("ES"))};
 }
 
-QList<IOPluginInterface::Format> FilterSSynth::exportFormats() const
+std::list<FileFormat> FilterSSynth::exportFormats() const
 {
-    QList<IOPluginInterface::Format> formats;
-    return formats ;
+	std::list<FileFormat> formats;
+	return formats ;
 }
 
-bool FilterSSynth::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, CallBackPos *cb, QWidget *parent)
+void FilterSSynth::open(
+		const QString& formatName,
+		const QString& fileName,
+		MeshModel &m,
+		int& mask,
+		const RichParameterList & par,
+		CallBackPos *cb)
 {
-	this->seed=par.getInt("seed");
-	int maxrec=par.getInt("maxrec");
-	int sphereres=par.getInt("sphereres");
-	int maxobj=par.getInt("maxobj");
-    this->renderTemplate=GetTemplate(sphereres);
-    if(this->renderTemplate!=QString::Null()){
-        QFile grammar(fileName);
-        grammar.open(QFile::ReadOnly|QFile::Text);
-        QString gcontent(grammar.readAll());
-        grammar.close();
-        if(maxrec>0)ParseGram(&gcontent,maxrec,tr("set maxdepth"));
-        if(maxobj>0)ParseGram(&gcontent,maxobj,tr("set maxobjects"));
-        QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
-        if(QFile::exists(x3dfile)){
-            openX3D(x3dfile,m,mask,cb);
-            QFile x3df(x3dfile);
-            x3df.remove();
-            return true;
-        }
-        else{
-            QMessageBox::critical(parent,tr("Error"),tr("An error occurred during the mesh generation: ").append(x3dfile));
-            return false;
-        }
-    }
-    else{ QMessageBox::critical(parent,"Error","Sphere resolution must be between 1 and 4"); return false;}
+	if (formatName.toUpper() == tr("ES")){
+		this->seed=par.getInt("seed");
+		int maxrec=par.getInt("maxrec");
+		int sphereres=par.getInt("sphereres");
+		int maxobj=par.getInt("maxobj");
+		this->renderTemplate=GetTemplate(sphereres);
+		if(this->renderTemplate!= ""){
+			QFile grammar(fileName);
+			grammar.open(QFile::ReadOnly|QFile::Text);
+			QString gcontent(grammar.readAll());
+			grammar.close();
+			if(maxrec>0)ParseGram(&gcontent,maxrec,tr("set maxdepth"));
+			if(maxobj>0)ParseGram(&gcontent,maxobj,tr("set maxobjects"));
+			QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
+			if(!QFile::exists(x3dfile)){
+				throw MLException("An error occurred during the mesh generation: " + x3dfile);
+			}
+			else{
+				openX3D(x3dfile,m,mask,cb);
+				QFile x3df(x3dfile);
+				x3df.remove();
+			}
+		}
+		else{
+			throw MLException("Error: Sphere resolution must be between 1 and 4");
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
-bool FilterSSynth::save(const QString &/*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/, QWidget */*parent*/)
+void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos */*cb*/)
 {
-    return true;
+	wrongSaveFormat(formatName);
 }
 
-void FilterSSynth::GetExportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
+void FilterSSynth::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
-void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, const QString &/*filename*/, RichParameterList &parlst){
+void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, RichParameterList &parlst){
     parlst.addParam(RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
     parlst.addParam(RichInt("maxrec",0,"set the maximum recursion","the mesh is built recursively according to the productions of the grammar, so a limit is needed. If set to 0 meshlab will generate the mesh according to the maximum recursion set in the file"));
     parlst.addParam(RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));

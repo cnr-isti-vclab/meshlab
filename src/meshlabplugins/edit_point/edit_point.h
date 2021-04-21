@@ -25,26 +25,24 @@
 #define EDITPOINTPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
-class EditPointPlugin : public QObject, public EditPluginInterface
+class EditPointPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	Q_INTERFACES(EditPluginInterface)
-		
+
 public:
     enum {SELECT_DEFAULT_MODE, SELECT_FITTING_PLANE_MODE};
 
     EditPointPlugin(int _editType);
     virtual ~EditPointPlugin() {}
 
-    static const QString Info();
-    QString pluginName() const;
+    static const QString info();
 
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
-    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
+    bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
     void mouseReleaseEvent(QMouseEvent *, MeshModel &/*m*/, GLArea * );
@@ -86,6 +84,7 @@ private:
         std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
+        QPoint currentMousePosition; 
 };
 
 #endif

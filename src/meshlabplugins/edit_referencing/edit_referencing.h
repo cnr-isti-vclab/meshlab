@@ -25,18 +25,17 @@
 #define EDITREFERENCINGPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include "edit_referencingDialog.h"
 
 // function to calculate rototranslaton and rototranslaton+scale matrices from series of points
 #include <vcg/space/point_matching.h>
 
 
-class EditReferencingPlugin : public QObject, public EditPluginInterface
+class EditReferencingPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	Q_INTERFACES(EditPluginInterface)
-		
+
 public:
 
     enum refModeType {REF_ABSOLUTE, REF_SCALE};
@@ -44,16 +43,15 @@ public:
     EditReferencingPlugin();
     virtual ~EditReferencingPlugin() {}
 
-    static const QString Info();
-    QString pluginName() const;
+    static const QString info();
 
-	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 
-    void Decorate(MeshModel &/*m*/, GLArea *parent, QPainter *p);
+    void decorate(MeshModel &/*m*/, GLArea *parent, QPainter *p);
 	void DecorateAbsolute(MeshModel &/*m*/, GLArea *parent, QPainter *p);
 	void DecorateScale(MeshModel &/*m*/, GLArea *parent, QPainter *p);
-    void Decorate (MeshModel &/*m*/, GLArea * ){};
+    void decorate (MeshModel &/*m*/, GLArea * ){};
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );

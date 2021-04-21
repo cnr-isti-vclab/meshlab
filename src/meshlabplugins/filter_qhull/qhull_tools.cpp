@@ -181,7 +181,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
         false otherwise.
 
 */
-bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float threshold)
+bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, Scalarm threshold)
 {
     coordT *points;						/* array of coordinates for each point*/
     boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */

@@ -24,13 +24,13 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
+class ExtraMeshFilterPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 		enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 
@@ -84,15 +84,21 @@ public:
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin(){}
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction*) const;
 	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction *filter) const;
 	int getPreConditions(const QAction *filter) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	int getRequirements(const QAction* filter);
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 
 protected:
 
@@ -111,8 +117,8 @@ protected:
 	float lastqtex_extratw;
 
 	int lastisor_Iterations;
-	float lastisor_MaxSurfDist;
-	float lastisor_FeatureDeg;
+	Scalarm lastisor_MaxSurfDist;
+	Scalarm lastisor_FeatureDeg;
 	bool lastisor_CheckSurfDist;
 	bool lastisor_RemeshingAdaptivity;
 	bool lastisor_SelectedOnly;

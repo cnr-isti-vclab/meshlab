@@ -45,11 +45,12 @@ static GLuint vs, fs, shdrID;
 
 AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 {
-    typeList
-		<< FP_AMBIENT_OCCLUSION;
+	typeList = {
+		FP_AMBIENT_OCCLUSION
+	};
 
-    foreach(FilterIDType tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 
     init = false;
     useGPU = AMBOCC_USEGPU_BY_DEFAULT;
@@ -71,7 +72,7 @@ QString AmbientOcclusionPlugin::pluginName() const
     return "FilterAmbientOcclusion";
 }
 
-QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId)
     {
@@ -82,33 +83,43 @@ QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
     return QString("");
 }
 
-QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterInfo(ActionIDType filterId) const
 {
-    switch(filterId)
-    {
-	case FP_AMBIENT_OCCLUSION:  return QString("Compute ambient occlusions values; it takes a number of well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This value is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
-    default : assert(0);
-    }
-
-    return QString("");
+	switch(filterId) {
+	case FP_AMBIENT_OCCLUSION: 
+		return QString("Compute ambient occlusions values; it takes a number of well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This value is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
+	default : assert(0);
+	}
+	return QString("");
 }
 
 int AmbientOcclusionPlugin::getRequirements(const QAction * /*action*/)
 {
-    //no requirements needed
-    return 0;
+	//no requirements needed
+	return 0;
 }
 
-FilterPluginInterface::FILTER_ARITY AmbientOcclusionPlugin::filterArity(const QAction*) const
+bool AmbientOcclusionPlugin::requiresGLContext(const QAction* action) const
+{
+	switch (ID(action)) {
+	case FP_AMBIENT_OCCLUSION:
+		return true;
+	default:
+		assert(0);
+	}
+	return false;
+}
+
+FilterPlugin::FilterArity AmbientOcclusionPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
 
 int getRequirements(QAction *action);
 
-FilterPluginInterface::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
+FilterPlugin::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*filter*/) const
 {
-	return FilterPluginInterface::VertexColoring;
+	return FilterPlugin::VertexColoring;
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 
@@ -132,67 +143,82 @@ void AmbientOcclusionPlugin::initParameterList(const QAction *action, MeshModel 
 		default: break; // do not add any parameter for the other filters
     }
 }
-bool AmbientOcclusionPlugin::applyFilter(const QAction * /*filter*/, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> AmbientOcclusionPlugin::applyFilter(const QAction * filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
-    MeshModel &m=*(md.mm());
+	if (ID(filter) == FP_AMBIENT_OCCLUSION) {
+		if (glContext != nullptr) {
+			MeshModel &m=*(md.mm());
 
-	int occlusionMode = par.getEnum("occMode");
-	if (occlusionMode == 1)
-		perFace = true;
-    else 
-		perFace = false;
+			int occlusionMode = par.getEnum("occMode");
+			if (occlusionMode == 1)
+				perFace = true;
+			else
+				perFace = false;
 
-    useGPU = par.getBool("useGPU");
-	if (perFace) //GPU only works per-vertex
-		useGPU = false;
-    depthTexSize = par.getInt("depthTexSize");
-    depthTexArea = depthTexSize*depthTexSize;
-    numViews = par.getInt("reqViews");
-    errInit = false;
-    float dirBias = par.getFloat("dirBias");
-    Point3f coneDir = par.getPoint3f("coneDir");
-    float coneAngle = par.getFloat("coneAngle");
+			useGPU = par.getBool("useGPU");
+			if (perFace) //GPU only works per-vertex
+				useGPU = false;
+			depthTexSize = par.getInt("depthTexSize");
+			depthTexArea = depthTexSize*depthTexSize;
+			numViews = par.getInt("reqViews");
+			errInit = false;
+			Scalarm dirBias = par.getFloat("dirBias");
+			Point3m coneDir = par.getPoint3m("coneDir");
+			Scalarm coneAngle = par.getFloat("coneAngle");
 
-    if(perFace)
-        m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-    else
-        m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
+			if(perFace)
+				m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+			else
+				m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
 
-    std::vector<Point3f> unifDirVec;
-    GenNormal<float>::Fibonacci(numViews,unifDirVec);
+			std::vector<Point3m> unifDirVec;
+			GenNormal<Scalarm>::Fibonacci(numViews,unifDirVec);
 
-    std::vector<Point3f> coneDirVec;
-    GenNormal<float>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
+			std::vector<Point3m> coneDirVec;
+			GenNormal<Scalarm>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
 
-    std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
-    std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
+			std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
+			std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
 
-    int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
-    int coneNum = floor(coneDirVec.size() * (dirBias ));
+			int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
+			int coneNum = floor(coneDirVec.size() * (dirBias ));
 
-    viewDirVec.clear();
-    viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
-    viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
-    numViews = viewDirVec.size();
+			viewDirVec.clear();
+			viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
+			viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
+			numViews = viewDirVec.size();
 
-    this->glContext->makeCurrent();
-    this->initGL(cb,m.cm.vn);
-    unsigned int widgetSize = std::min(maxTexSize, depthTexSize);
-    QSize fbosize(widgetSize,widgetSize);
-    QGLFramebufferObjectFormat frmt;
-    frmt.setInternalTextureFormat(GL_RGBA);
-    frmt.setAttachment(QGLFramebufferObject::Depth);
-    QGLFramebufferObject fbo(fbosize,frmt);
-    qDebug("Start Painting window size %i %i", fbo.width(), fbo.height());
-    GLenum err = glGetError();
-    fbo.bind();
-    processGL(m,viewDirVec);
-    fbo.release();
-    err = glGetError();
-    const GLubyte* errname = gluErrorString(err); (void)errname;
-    qDebug("End Painting");
-    this->glContext->doneCurrent();
-    return !errInit;
+			this->glContext->makeCurrent();
+			this->initGL(cb,m.cm.vn);
+			unsigned int widgetSize = std::min(maxTexSize, depthTexSize);
+			QSize fbosize(widgetSize,widgetSize);
+			QGLFramebufferObjectFormat frmt;
+			frmt.setInternalTextureFormat(GL_RGBA);
+			frmt.setAttachment(QGLFramebufferObject::Depth);
+			QGLFramebufferObject fbo(fbosize,frmt);
+			qDebug("Start Painting window size %i %i", fbo.width(), fbo.height());
+			GLenum err;
+			fbo.bind();
+			processGL(m,viewDirVec);
+			fbo.release();
+			err = glGetError();
+			const GLubyte* errname = gluErrorString(err); (void)errname;
+			qDebug("End Painting");
+			this->glContext->doneCurrent();
+			if (errInit) {
+				throw MLException("OpenGL error: " + QString::fromUtf8((char*)errname));
+			}
+		}
+		else {
+			throw MLException("Fatal error: glContext not initialized");
+			//errorMessage = "Fatal error: glContext not initialized";
+			//return false;
+		}
+	}
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
@@ -212,16 +238,16 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
-	CMeshO::PerVertexAttributeHandle<Point3f> BN;
-	CMeshO::PerFaceAttributeHandle<Point3f> FBN;
+	CMeshO::PerVertexAttributeHandle<Point3m> BN;
+	CMeshO::PerFaceAttributeHandle<Point3m> FBN;
 
 	if (perFace)
 	{
-		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m.cm, "BentNormal");
 	}
 	else
 	{
-		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "BentNormal");
 	}
 
     glEnable(GL_DEPTH_TEST);
@@ -315,7 +341,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
             else 
 				generateOcclusionSW(m);
         }
-        checkGLError::debugInfo("Debug");
+        checkGLError::debugInfo("Debug AO: ");
     }
 
     if (useGPU)
@@ -790,7 +816,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
-    CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+    CMeshO::PerVertexAttributeHandle<Point3m> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "BentNormal");
 
     for (int i=0; i<m.cm.vn; ++i)
     {
@@ -826,7 +852,7 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
-	CMeshO::PerFaceAttributeHandle<Point3f> FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+    CMeshO::PerFaceAttributeHandle<Point3m> FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m.cm, "BentNormal");
 
     for (uint i=0; i<faceCenterVec.size(); ++i)
     {

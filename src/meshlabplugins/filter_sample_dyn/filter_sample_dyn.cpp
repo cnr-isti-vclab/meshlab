@@ -35,35 +35,39 @@ using namespace vcg;
 
 ExtraSampleDynPlugin::ExtraSampleDynPlugin() 
 { 
-	typeList << FP_VERTEX_COLOR_NOISE;
-  
-  foreach(FilterIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	typeList = {FP_VERTEX_COLOR_NOISE};
+
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
+}
+
+ExtraSampleDynPlugin::~ExtraSampleDynPlugin()
+{
 }
 
 QString ExtraSampleDynPlugin::pluginName() const
 {
-    return "FilterSampleDyn";
+	return "FilterSampleDyn";
 }
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
+QString ExtraSampleDynPlugin::filterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-		case FP_VERTEX_COLOR_NOISE :  return QString("Vertex Color Noise"); 
-		default : assert(0); 
+	switch(filterId) {
+	case FP_VERTEX_COLOR_NOISE :  return QString("Vertex Color Noise");
+	default : assert(0);
 	}
 	return {};
 }
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
- QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId) const
+QString ExtraSampleDynPlugin::filterInfo(ActionIDType filterId) const
 {
-  switch(filterId) {
-		case FP_VERTEX_COLOR_NOISE :  return QString("Randomly add a small amount of a random base color to the mesh"); 
-		default : assert(0); 
+	switch(filterId) {
+	case FP_VERTEX_COLOR_NOISE :  return QString("Randomly add a small amount of a random base color to the mesh");
+	default : assert(0);
 	}
 	return {};
 }
@@ -71,7 +75,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // In this case this sample belong to the class of filters that change the vertex colors
- FilterPluginInterface::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const { return FilterPluginInterface::VertexColoring; }
+FilterPlugin::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const { return FilterPlugin::VertexColoring; }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
@@ -94,51 +98,57 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 
 void ExtraSampleDynPlugin::initParameterList(const QAction *action,MeshModel &/*m*/, RichParameterList & parlst)
 {
-	 switch(ID(action))	 {
-		case FP_VERTEX_COLOR_NOISE :  
-		  parlst.addParam(RichColor ("baseColor",
-											 Color4b::Black,
-											"BaseColor",
-											"The base color that is added to the mesh."));
-			
-			parlst.addParam(RichDynamicFloat("percentage",
-												 0.5, 0, 1,
-												"Alpha",
-												"The random color is blended with the current one with the specified alpha"));
-														
-			parlst.addParam(RichDynamicFloat("frequency",
-														 20, 1, 200,
-														 "Noisy Frequency",
-														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots."));
-			break;
-			
-   default: break; // do not add any parameter for the other filters
-  }
+	switch(ID(action))	 {
+	case FP_VERTEX_COLOR_NOISE :
+		parlst.addParam(RichColor ("baseColor",
+								   Color4b::Black,
+								   "BaseColor",
+								   "The base color that is added to the mesh."));
+
+		parlst.addParam(RichDynamicFloat("percentage",
+										 0.5, 0, 1,
+										 "Alpha",
+										 "The random color is blended with the current one with the specified alpha"));
+
+		parlst.addParam(RichDynamicFloat("frequency",
+										 20, 1, 200,
+										 "Noisy Frequency",
+										 "The frequency of the Noise on the mesh. Higher numbers means smaller spots."));
+		break;
+
+	default: break; // do not add any parameter for the other filters
+	}
 }
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(const QAction *, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *)
+std::map<std::string, QVariant> ExtraSampleDynPlugin::applyFilter(const QAction *action, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *)
 {
-    MeshModel &m=*(md.mm());
-    const Color4b baseColor = par.getColor4b("baseColor");
-	const float percentage  = par.getDynamicFloat("percentage");
-	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);
+	if (ID(action) == FP_VERTEX_COLOR_NOISE) {
+		MeshModel &m=*(md.mm());
+		const Color4b baseColor = par.getColor4b("baseColor");
+		const Scalarm percentage  = par.getDynamicFloat("percentage");
+		const Scalarm freq = par.getDynamicFloat("frequency");
+		const Scalarm frequency   = math::Clamp<Scalarm>(freq, 1.0, 1000.0);
 
-	CMeshO::VertexIterator vi;
-	
-	float scale = frequency/m.cm.bbox.Diag() ;
-	
-  //qDebug("Dynamic Apply percentage %f frequency %f",percentage,frequency);
- 	for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-		if(!(*vi).IsD()) 
-		{
-			float alpha = percentage *  (0.5f+math::Perlin::Noise((*vi).P()[0]*scale,(*vi).P()[1]*scale,(*vi).P()[2]*scale));
-			alpha=math::Clamp(alpha,0.0f,1.0f);
-			(*vi).C().lerp ( (*vi).C(), baseColor, alpha);
+		CMeshO::VertexIterator vi;
+
+		float scale = frequency/m.cm.bbox.Diag() ;
+
+		//qDebug("Dynamic Apply percentage %f frequency %f",percentage,frequency);
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) {
+			if(!(*vi).IsD())
+			{
+				float alpha = percentage *  (0.5f+math::Perlin::Noise((*vi).P()[0]*scale,(*vi).P()[1]*scale,(*vi).P()[2]*scale));
+				alpha=math::Clamp(alpha,0.0f,1.0f);
+				(*vi).C().lerp ( (*vi).C(), baseColor, alpha);
+			}
 		}
-			
-	return true;
+	}
+	else {
+		wrongActionCalled(action);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSampleDynPlugin)

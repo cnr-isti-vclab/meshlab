@@ -473,7 +473,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
                 shared->getRenderInfoPerMeshView(context(),dt);
 
-                iRenderer->Render(currentShader, *this->md(),dt,this);
+                iRenderer->render(currentShader, *this->md(),dt,this);
 
                 MLDefaultMeshDecorators defdec(mw());
 
@@ -484,7 +484,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
-                            DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>((*it)->parent());
+                            DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>((*it)->parent());
                             decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,this,&painter,md()->Log);
                         }
                         MLRenderingData meshdt;
@@ -546,7 +546,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                     for (QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end(); ++it)
                     {
-                        DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>((*it)->parent());
+                        DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>((*it)->parent());
                         decorInterface->decorateMesh(*it, *mp, this->glas.currentGlobalParamSet, this, &painter, md()->Log);
                     }
                 }
@@ -554,7 +554,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         }
         if (iEdit) {
             iEdit->setLog(&md()->Log);
-            iEdit->Decorate(*mm(), this, &painter);
+            iEdit->decorate(*mm(), this, &painter);
         }
 
         glPopAttrib();
@@ -567,7 +567,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     foreach(QAction * p, iPerDocDecoratorlist)
     {
-        DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
+        DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>(p->parent());
         decorInterface->decorateDoc(p, *this->md(), this->glas.currentGlobalParamSet, this, &painter, md()->Log);
     }
 
@@ -949,7 +949,7 @@ void GLArea::displayHelp()
         tableText.replace("Ctrl","Command");
 #endif
     }
-    md()->Log.RealTimeLog("Quick Help","",tableText);
+    md()->Log.realTimeLog("Quick Help","",tableText);
 }
 
 
@@ -1007,7 +1007,7 @@ void GLArea::manageCurrentMeshChange()
             assert(lastModelEdited);  // if there is an editor that works on a single mesh
         // last model edited should always be set when start edit is called
 
-        iEdit->LayerChanged(*this->md(), *lastModelEdited, this,parentmultiview->sharedDataContext());
+        iEdit->layerChanged(*this->md(), *lastModelEdited, this,parentmultiview->sharedDataContext());
 
         //now update the last model edited
         //TODO this is not the best design....   iEdit should maybe keep track of the model on its own
@@ -1067,7 +1067,7 @@ void GLArea::updateAllDecorators()
 		return;
 	foreach(QAction * p, iPerDocDecoratorlist)
 	{
-		DecoratePluginInterface * decorInterface = qobject_cast<DecoratePluginInterface *>(p->parent());
+		DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>(p->parent());
 		decorInterface->endDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
 		decorInterface->setLog(&md()->Log);
 		decorInterface->startDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
@@ -1122,7 +1122,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	}
 	if (mw() != NULL)
 		mw()->updateLayerDialog();
-    if (!iEdit->StartEdit(*this->md(), this,parentmultiview->sharedDataContext()))
+    if (!iEdit->startEdit(*this->md(), this,parentmultiview->sharedDataContext()))
     {
         //iEdit->EndEdit(*(this->md()->mm()), this);
         endEdit();
@@ -1148,12 +1148,12 @@ bool GLArea::readyToClose()
 		md()->meshDocStateData().clear();
 	}
     if (iRenderer)
-        iRenderer->Finalize(currentShader, this->md(), this);
+        iRenderer->finalize(currentShader, this->md(), this);
 
     // Now manage the closing of the decorator set;
     foreach(QAction* act, iPerDocDecoratorlist)
     {
-        DecoratePluginInterface* mdec = qobject_cast<DecoratePluginInterface*>(act->parent());
+        DecoratePlugin* mdec = qobject_cast<DecoratePlugin*>(act->parent());
         mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
         mdec->setLog(NULL);
     }
@@ -1167,7 +1167,7 @@ bool GLArea::readyToClose()
 
     for(QSet<QAction *>::iterator it = dectobeclose.begin();it != dectobeclose.end();++it)
     {
-        DecoratePluginInterface* mdec = qobject_cast<DecoratePluginInterface*>((*it)->parent());
+        DecoratePlugin* mdec = qobject_cast<DecoratePlugin*>((*it)->parent());
         if (mdec != NULL)
         {
             mdec->endDecorate(*it,*md(),glas.currentGlobalParamSet,this);
@@ -1312,7 +1312,14 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		switch(e->modifiers())
 		{
 		case Qt::ControlModifier:
-			clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f, 500.0f);
+			if (isRaster()){
+				trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				trackball.MouseWheel(notchY);
+				trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+			}
+			else {
+				clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notchY),0.01f,500.0f);
+			}
 			break;
 		case Qt::ControlModifier | Qt::ShiftModifier:
 			clipRatioFar = math::Clamp(clipRatioFar*powf(1.1f, notchY),0.01f, 500.0f);
@@ -1408,11 +1415,11 @@ void GLArea::toggleDecorator(QString name)
 void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 {
 	makeCurrent();
-    DecoratePluginInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
+    DecoratePlugin *iDecorateTemp = this->mw()->PM.getDecoratePlugin(name);
     if (!iDecorateTemp) {
         this->Logf(GLLogStream::SYSTEM,"Could not get Decorate interface %s", qUtf8Printable(name));
         this->Log(GLLogStream::SYSTEM,"Known decorate interfaces:");
-        for (auto tt : this->mw()->PM.meshDecoratePlugins()) {
+        for (auto tt : this->mw()->PM.decoratePluginIterator()) {
             for (auto action : tt->actions()) {
                 this->Logf(GLLogStream::SYSTEM,"- %s", qUtf8Printable(tt->decorationName(action)));
             }
@@ -1421,7 +1428,7 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
     }
     QAction *action = iDecorateTemp->action(name);
 
-    if(iDecorateTemp->getDecorationClass(action)== DecoratePluginInterface::PerDocument)
+    if(iDecorateTemp->getDecorationClass(action)== DecoratePlugin::PerDocument)
     {
         bool found=this->iPerDocDecoratorlist.removeOne(action);
         if(found)
@@ -1447,7 +1454,7 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
         }
     }
 
-    if(iDecorateTemp->getDecorationClass(action)== DecoratePluginInterface::PerMesh)
+    if(iDecorateTemp->getDecorationClass(action)== DecoratePlugin::PerMesh)
     {
         MeshModel &currentMeshModel = *mm();
         bool found=this->iCurPerMeshDecoratorList().removeOne(action);

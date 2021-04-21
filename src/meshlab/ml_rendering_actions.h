@@ -25,7 +25,7 @@
 #define ML_RENDERING_ACTIONS_H
 
 #include <QAction>
-#include "../common/ml_shared_data_context.h"
+#include "../common/ml_shared_data_context/ml_scene_gl_shared_data_context.h"
 
 
 class MLRenderingAction : public QAction

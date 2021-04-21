@@ -36,13 +36,13 @@ using namespace vcg;
 
 PlyMCPlugin::PlyMCPlugin()
 {
-	typeList 
-			<< FP_PLYMC
-			<< FP_MC_SIMPLIFY
-			   ;
+	typeList = {
+		FP_PLYMC,
+		FP_MC_SIMPLIFY
+	};
 	
-	foreach(FilterIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString PlyMCPlugin::pluginName() const
@@ -52,7 +52,7 @@ QString PlyMCPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString PlyMCPlugin::filterName(FilterIDType filterId) const
+QString PlyMCPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -65,7 +65,7 @@ QString PlyMCPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
+QString PlyMCPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -87,11 +87,11 @@ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
-	case FP_PLYMC :  return FilterPluginInterface::Remeshing;
-	case FP_MC_SIMPLIFY :  return FilterPluginInterface::Remeshing;
+	case FP_PLYMC :  return FilterPlugin::Remeshing;
+	case FP_MC_SIMPLIFY :  return FilterPlugin::Remeshing;
 	default : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -123,7 +123,12 @@ void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
+std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
+		const QAction *filter,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos * cb)
 {
 	switch(ID(filter))
 	{
@@ -136,8 +141,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 		if (!file.open()) 
 		{
 			log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
-			errorMessage = "current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
-			return false;
+			throw MLException("current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.");
 		}
 		
 		tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
@@ -181,9 +185,9 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 				if(retVal!=0)
 				{
 					qDebug("Failed to write vmi temp file %s",qUtf8Printable(mshTmpPath));
-					errorMessage = "Failed to write vmi temp file " + mshTmpPath;
+
 					log("ERROR - Failed to write vmi temp file %s", qUtf8Printable(mshTmpPath));
-					return false;
+					throw MLException("Failed to write vmi temp file " + mshTmpPath);
 				}
 				pmc.MP.AddSingleMesh(qUtf8Printable(mshTmpPath));
 				log("Preprocessing mesh %s",qUtf8Printable(mm->shortName()));
@@ -192,8 +196,7 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 		
 		if(pmc.Process(cb)==false)
 		{
-			this->errorMessage = pmc.errorMessage;
-			return false; 
+			throw MLException(pmc.errorMessage);
 		}
 		
 		
@@ -222,18 +225,16 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 		if (mm.cm.fn == 0)
 		{
 			log("Cannot simplify: no faces.");
-			errorMessage = "Cannot simplify: no faces.";
-			return false;
+			throw MLException("Cannot simplify: no faces.");
 		}
 		mm.updateDataMask(MeshModel::MM_VERTFACETOPO+MeshModel::MM_FACEFACETOPO+MeshModel::MM_VERTMARK);
 		int res = tri::MCSimplify<CMeshO>(mm.cm,0.0f,false);
 		if (res !=1)
 		{
 			log("Cannot simplify: this is not a Marching Cube -generated mesh. Mesh should have some of its edges 'straight' along axes.");
-			errorMessage = "Cannot simplify: this is not a Marching Cube -generated mesh.";
 			mm.clearDataMask(MeshModel::MM_VERTFACETOPO);
 			mm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-			return false;
+			throw MLException("Cannot simplify: this is not a Marching Cube -generated mesh.");
 		}
 		
 		tri::Allocator<CMeshO>::CompactFaceVector(mm.cm);
@@ -241,19 +242,20 @@ bool PlyMCPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<
 		tri::Clean<CMeshO>::RemoveFaceFoldByFlip(mm.cm);
 		mm.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		mm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+	} break;
+	default:
+		wrongActionCalled(filter);
 	}
-		
-	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
-FilterPluginInterface::FILTER_ARITY PlyMCPlugin::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity PlyMCPlugin::filterArity(const QAction * filter ) const
 {
 	switch(ID(filter)) 
 	{
-	case FP_PLYMC :       return FilterPluginInterface::VARIABLE;
-	case FP_MC_SIMPLIFY : return FilterPluginInterface::SINGLE_MESH;
-	default:              return FilterPluginInterface::NONE;
+	case FP_PLYMC :       return FilterPlugin::VARIABLE;
+	case FP_MC_SIMPLIFY : return FilterPlugin::SINGLE_MESH;
+	default:              return FilterPlugin::NONE;
 	}
 }
 

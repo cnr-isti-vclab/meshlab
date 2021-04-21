@@ -24,7 +24,7 @@
 #include <meshlab/glarea.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
-#include <common/pluginmanager.h>
+#include <common/globals.h>
 
 
 ShadowMapping::ShadowMapping(float intensity):DecorateShader()
@@ -58,7 +58,7 @@ bool ShadowMapping::init()
         this->_shadowMappingProgram,
         this->_shadowMappingVert,
         this->_shadowMappingFrag,
-        PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/sm/object")));
+        meshlab::defaultShadersPath() + "/decorate_shadow/sm/object");
 }
 
 void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){

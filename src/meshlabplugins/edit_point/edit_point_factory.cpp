@@ -26,37 +26,36 @@
 
 PointEditFactory::PointEditFactory()
 {
-        editPoint = new QAction(QIcon(":/images/select_vertex_geodesic.png"),"Select Vertex Clusters", this);
-        editPointFittingPlane = new QAction(QIcon(":/images/select_vertex_plane.png"),"Select Vertices on a Plane", this);
-	
-        actionList << editPoint;
-        actionList << editPointFittingPlane;
+	editPoint = new QAction(QIcon(":/images/select_vertex_geodesic.png"),"Select Vertex Clusters", this);
+	editPointFittingPlane = new QAction(QIcon(":/images/select_vertex_plane.png"),"Select Vertices on a Plane", this);
+
+	actionList.push_back(editPoint);
+	actionList.push_back(editPointFittingPlane);
 	
 	foreach(QAction *editAction, actionList)
-                editAction->setCheckable(true);
+		editAction->setCheckable(true);
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> PointEditFactory::actions() const
+
+QString PointEditFactory::pluginName() const
 {
-	return actionList;
+	return "EditPoint";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* PointEditFactory::getMeshEditInterface(const QAction *action)
+EditTool* PointEditFactory::getEditTool(const QAction *action)
 {
-        if(action == editPoint)
-            return new EditPointPlugin(EditPointPlugin::SELECT_DEFAULT_MODE);
-        else if (action == editPointFittingPlane)
-            return new EditPointPlugin(EditPointPlugin::SELECT_FITTING_PLANE_MODE);
+	if(action == editPoint)
+		return new EditPointPlugin(EditPointPlugin::SELECT_DEFAULT_MODE);
+	else if (action == editPointFittingPlane)
+		return new EditPointPlugin(EditPointPlugin::SELECT_FITTING_PLANE_MODE);
 
-        assert(0); //should never be asked for an action that isn't here
-        return nullptr;
+	assert(0); //should never be asked for an action that isn't here
+	return nullptr;
 }
 
 QString PointEditFactory::getEditToolDescription(const QAction *)
 {
-        return EditPointPlugin::Info();
+	return EditPointPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PointEditFactory)

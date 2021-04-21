@@ -1,5 +1,5 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
+* MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
 * Copyright(C) 2004-2020                                           \/)\/    *
@@ -34,8 +34,8 @@
 #include <QComboBox>
 #include <QSlider>
 
-#include "common/filter_parameter/rich_parameter_list.h"
-#include "common/ml_mesh_type.h"
+#include <common/parameters/rich_parameter_list.h>
+#include <common/ml_document/cmesh.h>
 
 class RichParameterWidget : public QWidget
 {

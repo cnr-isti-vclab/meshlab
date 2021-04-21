@@ -36,14 +36,14 @@ add sampleplugins
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include "alignset.h"
 
-class FilterMutualGlobal : public QObject, public FilterPluginInterface
+class FilterMutualGlobal : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
 	enum { FP_IMAGE_GLOBALIGN} ;
@@ -52,13 +52,19 @@ public:
 
 	QString pluginName() const;
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	void initParameterList(const QAction*, MeshDocument & md, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction*) const { return MeshModel::MM_NONE; };
 	FilterClass getClass(const QAction* a) const;
-	QString filterScriptFunctionName(FilterIDType filterID);
+	bool requiresGLContext(const QAction* action) const;
+	QString filterScriptFunctionName(ActionIDType filterID);
 	bool preAlignment(MeshDocument &md, const RichParameterList& par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
 	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);
@@ -69,7 +75,7 @@ public:
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points);
-	FILTER_ARITY filterArity(const QAction *) const { return SINGLE_MESH; }
+	FilterArity filterArity(const QAction *) const { return SINGLE_MESH; }
 
 
 

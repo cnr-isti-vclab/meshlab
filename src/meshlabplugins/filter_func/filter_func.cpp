@@ -36,31 +36,30 @@ using namespace vcg;
 // Constructor
 FilterFunctionPlugin::FilterFunctionPlugin()
 {
-	typeList
-			<< FF_VERT_SELECTION
-			<< FF_FACE_SELECTION
-			<< FF_GEOM_FUNC
-			<< FF_WEDGE_TEXTURE_FUNC
-			<< FF_VERT_TEXTURE_FUNC
-			<< FF_FACE_COLOR
-			<< FF_VERT_COLOR
-			<< FF_VERT_QUALITY
-			<< FF_VERT_NORMAL
-			<< FF_FACE_QUALITY
-			<< FF_DEF_VERT_ATTRIB
-			<< FF_DEF_FACE_ATTRIB
-			<< FF_GRID
-			<< FF_ISOSURFACE
-			<< FF_REFINE;
+	typeList = {
+		FF_VERT_SELECTION,
+		FF_FACE_SELECTION,
+		FF_GEOM_FUNC,
+		FF_WEDGE_TEXTURE_FUNC,
+		FF_VERT_TEXTURE_FUNC,
+		FF_FACE_COLOR,
+		FF_VERT_COLOR,
+		FF_VERT_QUALITY,
+		FF_VERT_NORMAL,
+		FF_FACE_QUALITY,
+		FF_DEF_VERT_ATTRIB,
+		FF_DEF_FACE_ATTRIB,
+		FF_GRID,
+		FF_ISOSURFACE,
+		FF_REFINE
+	};
 	
-	foreach(FilterIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 FilterFunctionPlugin::~FilterFunctionPlugin()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
 }
 
 QString FilterFunctionPlugin::pluginName() const
@@ -69,7 +68,7 @@ QString FilterFunctionPlugin::pluginName() const
 }
 
 // short string describing each filtering action
-QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
+QString FilterFunctionPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FF_VERT_SELECTION:     return QString("Conditional Vertex Selection");
@@ -103,12 +102,12 @@ const QString PerVertexAttributeString(	"It's possible to use the following per-
 
 const QString PerFaceAttributeString("It's possible to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
 									 "<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex position, <b>x2,y2,z2</b> for the third vertex position, "
-									 "<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, "
+									 "<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, <b>vi0, vi1, vi2</b> for vertex indices, "
 									 "<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> for per-wedge texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex selection (1 yes, 0 no) "
-									 "<b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
+									 "<b>fi</b> for face index, <b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
 
 // long string describing each filtering action
-QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
+QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FF_VERT_SELECTION : return tr(	"Boolean function using muparser lib to perform vertex selection over current mesh.<br>")
@@ -166,22 +165,22 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(const QAction *
 	switch(ID(a))
 	{
 	case FF_FACE_SELECTION:
-	case FF_VERT_SELECTION: return FilterPluginInterface::Selection;
+	case FF_VERT_SELECTION: return FilterPlugin::Selection;
 	case FF_FACE_QUALITY: return FilterClass(Quality + FaceColoring);
 	case FF_VERT_QUALITY: return FilterClass(Quality + VertexColoring);
-	case FF_VERT_TEXTURE_FUNC: return FilterPluginInterface::Texture;
-	case FF_VERT_COLOR:	return FilterPluginInterface::VertexColoring;
-	case FF_VERT_NORMAL:	return FilterPluginInterface::Normal;
-	case FF_FACE_COLOR: return FilterPluginInterface::FaceColoring;
-	case FF_WEDGE_TEXTURE_FUNC: return FilterPluginInterface::Texture;
-	case FF_ISOSURFACE: return FilterPluginInterface::MeshCreation;
-	case FF_GRID: return FilterPluginInterface::MeshCreation;
-	case FF_REFINE: return FilterPluginInterface::Remeshing;
-	case FF_GEOM_FUNC: return FilterPluginInterface::Smoothing;
-	case FF_DEF_VERT_ATTRIB: return FilterPluginInterface::Layer;
-	case FF_DEF_FACE_ATTRIB: return FilterPluginInterface::Layer;
+	case FF_VERT_TEXTURE_FUNC: return FilterPlugin::Texture;
+	case FF_VERT_COLOR:	return FilterPlugin::VertexColoring;
+	case FF_VERT_NORMAL:	return FilterPlugin::Normal;
+	case FF_FACE_COLOR: return FilterPlugin::FaceColoring;
+	case FF_WEDGE_TEXTURE_FUNC: return FilterPlugin::Texture;
+	case FF_ISOSURFACE: return FilterPlugin::MeshCreation;
+	case FF_GRID: return FilterPlugin::MeshCreation;
+	case FF_REFINE: return FilterPlugin::Remeshing;
+	case FF_GEOM_FUNC: return FilterPlugin::Smoothing;
+	case FF_DEF_VERT_ATTRIB: return FilterPlugin::Layer;
+	case FF_DEF_FACE_ATTRIB: return FilterPlugin::Layer;
 		
-	default: return FilterPluginInterface::Generic;
+	default: return FilterPlugin::Generic;
 	}
 }
 
@@ -373,9 +372,15 @@ void FilterFunctionPlugin::initParameterList(const QAction *action,MeshModel &m,
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
+		const QAction *filter,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos *cb)
 {
-	if(this->getClass(filter) == FilterPluginInterface::MeshCreation)
+	errorMsg = "";
+	if(this->getClass(filter) == FilterPlugin::MeshCreation)
 		md.addNewMesh("",this->filterName(ID(filter)));
 	MeshModel &m=*(md.mm());
 	Q_UNUSED(cb);
@@ -408,8 +413,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			try {
 				selected = p.Eval();
 			} catch(Parser::exception_type &e) {
-				errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-				return false;
+				throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 			}
 			
 			// set vertex as selected or clear selection
@@ -421,8 +425,6 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// if succeeded log stream contains number of vertices and time elapsed
 		log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
 	}
 		break;
 		
@@ -439,7 +441,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		int numface = 0;
 		time_t start = clock();
-		
+
 		// every parser variables is related to face attributes.
 		CMeshO::FaceIterator fi;
 		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)if(!(*fi).IsD())
@@ -453,8 +455,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			try {
 				selected = p.Eval();
 			} catch(Parser::exception_type &e) {
-				errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-				return false;
+				throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 			}
 			
 			// set face as selected or clear selection
@@ -463,11 +464,10 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 				numface++;
 			} else (*fi).ClearS();
 		}
-		
+
 		// if succeeded log stream contains number of vertices and time elapsed
 		log( "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
+
 	}
 		break;
 		
@@ -488,8 +488,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
 		{
@@ -512,7 +511,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		p4.SetExpr(conversion::fromStringToWString(func_a));
 		
 		double newx=0,newy=0,newz=0,newa=255;
-		errorMessage = "";
+		QString errorMsg = "";
 		
 		time_t start = clock();
 		
@@ -533,7 +532,8 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 					{
 						try { newa = p4.Eval(); } catch(Parser::exception_type &e) { showParserError("4th func : ",e); }
 					}
-					if(errorMessage != "") return false;
+					if(errorMsg != "")
+						throw MLException(errorMsg);
 					
 					if (ID(filter) == FF_GEOM_FUNC)  // set new vertex coord for this iteration
 						(*vi).P() = Point3m(newx, newy, newz);
@@ -556,8 +556,6 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// if succeeded log stream contains number of vertices processed and time elapsed
 		log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
 	}
 		break;
 		
@@ -569,8 +567,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
 		{
@@ -601,8 +598,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 					try {
 						(*vi).Q() = p.Eval();
 					} catch(Parser::exception_type &e) {
-						errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-						return false;
+						throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 					}
 				}
 		
@@ -617,8 +613,6 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		}
 		// if succeeded log stream contains number of vertices and time elapsed
 		log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
 	}
 		break;
 	case FF_VERT_TEXTURE_FUNC:
@@ -630,8 +624,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
 		{
@@ -670,13 +663,11 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 						(*vi).T().U() = pu.Eval();
 						(*vi).T().V() = pv.Eval();
 					} catch(Parser::exception_type &e) {
-						errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-						return false;
+						throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 					}
 				}
 		
 		log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		return true;
 	}
 		break;
 	case FF_WEDGE_TEXTURE_FUNC:
@@ -692,8 +683,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.sfn == 0) // if no selection, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		
 		m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -724,13 +714,11 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 						(*fi).WT(1).U() = pu1.Eval(); (*fi).WT(1).V() = pv1.Eval();
 						(*fi).WT(2).U() = pu2.Eval(); (*fi).WT(2).V() = pv2.Eval();
 					} catch(Parser::exception_type &e) {
-						errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-						return false;
+						throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 					}
 				}
 		
 		log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		return true;
 	}
 		break;
 	case FF_FACE_COLOR:
@@ -744,8 +732,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.sfn == 0) // if no selection, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		
 		m.updateDataMask(MeshModel::MM_FACECOLOR);
@@ -767,7 +754,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		// RGB is related to every face
 		CMeshO::FaceIterator fi;
 		double newr=0,newg=0,newb=0,newa=255;
-		errorMessage = "";
+		errorMsg = "";
 		
 		time_t start = clock();
 		
@@ -785,17 +772,16 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 					try { newb = p3.Eval(); } catch(Parser::exception_type &e) { showParserError("func b: ",e); 	}
 					try { newa = p4.Eval(); } catch(Parser::exception_type &e) { showParserError("func a: ",e); 	}
 					
-					if(errorMessage != "") return false;
+					if(errorMsg != "")
+						throw MLException(errorMsg);
 					
 					// set new color for this iteration
 					(*fi).C() = Color4b(newr,newg,newb,newa);
 				}
-		
+
 		// if succeeded log stream contains number of vertices processed and time elapsed
 		log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
-		
+
 	}
 		break;
 		
@@ -807,8 +793,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		if (onSelected && m.cm.sfn == 0) // if no selection, fail
 		{
 			log("Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		
 		m.updateDataMask(MeshModel::MM_FACEQUALITY);
@@ -821,7 +806,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		pf.SetExpr(conversion::fromStringToWString(func_q));
 		
 		time_t start = clock();
-		errorMessage = "";
+		errorMsg = "";
 		
 		// every parser variables is related to face attributes.
 		CMeshO::FaceIterator fi;
@@ -837,7 +822,8 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 					catch(Parser::exception_type &e) {
 						showParserError("func q: ",e);
 					}
-					if(errorMessage != "") return false;
+					if(errorMsg != "")
+						throw MLException(errorMsg);
 				}
 		
 		// normalize quality with values in [0..1]
@@ -852,8 +838,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// if succeeded log stream contains number of faces processed and time elapsed
 		log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
+
 	}
 		break;
 		
@@ -863,22 +848,21 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		std::string expr = par.getString("expr").toStdString();
 		
 		// add per-vertex attribute with type float and name specified by user
-		CMeshO::PerVertexAttributeHandle<float> h;
+		CMeshO::PerVertexAttributeHandle<Scalarm> h;
 		if(tri::HasPerVertexAttribute(m.cm,name))
 		{
-			h = tri::Allocator<CMeshO>::FindPerVertexAttribute<float>(m.cm, name);
-			if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+			h = tri::Allocator<CMeshO>::FindPerVertexAttribute<Scalarm>(m.cm, name);
+			if(!tri::Allocator<CMeshO>::IsValidHandle<Scalarm>(m.cm,h))
 			{
-				errorMessage = "attribute already exists with a different type";
-				return false;
+				throw MLException("attribute already exists with a different type");
 			}
 		}
 		else
-			h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
+			h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm> (m.cm,name);
 		
 		std::vector<std::string> AllVertexAttribName;
-		tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm,AllVertexAttribName);
-		qDebug("Now mesh has %lu vertex float attribute",AllVertexAttribName.size());
+		tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(m.cm,AllVertexAttribName);
+		qDebug("Now mesh has %lu vertex scalar attribute",AllVertexAttribName.size());
 		Parser p;
 		setPerVertexVariables(p,m.cm);
 		p.SetExpr(conversion::fromStringToWString(expr));
@@ -895,8 +879,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			try {
 				h[vi] = p.Eval();
 			} catch(Parser::exception_type &e) {
-				errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-				return false;
+				throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 			}
 		}
 		
@@ -909,8 +892,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// if succeeded log stream contains number of vertices processed and time elapsed
 		log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
+
 	}
 		break;
 		
@@ -921,18 +903,17 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// add per-face attribute with type float and name specified by user
 		// add per-vertex attribute with type float and name specified by user
-		CMeshO::PerFaceAttributeHandle<float> h;
+		CMeshO::PerFaceAttributeHandle<Scalarm> h;
 		if(tri::HasPerFaceAttribute(m.cm,name))
 		{
-			h = tri::Allocator<CMeshO>::FindPerFaceAttribute<float>(m.cm, name);
-			if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+			h = tri::Allocator<CMeshO>::FindPerFaceAttribute<Scalarm>(m.cm, name);
+			if(!tri::Allocator<CMeshO>::IsValidHandle<Scalarm>(m.cm,h))
 			{
-				errorMessage = "attribute already exists with a different type";
-				return false;
+				throw MLException("attribute already exists with a different type");
 			}
 		}
 		else
-			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
+			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm> (m.cm,name);
 		Parser p;
 		setPerFaceVariables(p,m.cm);
 		p.SetExpr(conversion::fromStringToWString(expr));
@@ -949,8 +930,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 			try {
 				h[fi] = p.Eval();
 			} catch(Parser::exception_type &e) {
-				errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-				return false;
+				throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 			}
 		}
 		
@@ -963,8 +943,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		
 		// if succeeded log stream contains number of vertices processed and time elapsed
 		log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
-		
-		return true;
+
 	}
 		break;
 		
@@ -973,12 +952,11 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		// obtain parameters to generate 2D Grid
 		int w = par.getInt("numVertX");
 		int h = par.getInt("numVertY");
-		float wl = par.getFloat("absScaleX");
-		float hl = par.getFloat("absScaleY");
+		Scalarm wl = par.getFloat("absScaleX");
+		Scalarm hl = par.getFloat("absScaleY");
 		
 		if(w <= 0 || h <= 0) {
-			errorMessage = "number of vertices must be positive";
-			return false;
+			throw MLException("number of vertices must be positive");
 		}
 		
 		// use Grid function to generate Grid
@@ -1004,7 +982,6 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		Matrix44m rot; rot.SetScale(-1,1,-1);
 		tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
 		m.UpdateBoxAndNormals();
-		return true;
 	}
 		break;
 	case FF_ISOSURFACE :
@@ -1044,8 +1021,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 					try {
 						volume.Val(i,j,k)=p.Eval();
 					} catch(Parser::exception_type &e) {
-						errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
-						return false;
+						throw MLException(conversion::fromWStringToString(e.GetMsg()).c_str());
 					}
 				}
 		
@@ -1060,7 +1036,6 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		//    tri::UpdatePosition<CMeshO>::Matrix(m.cm,tr);
 		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-		return true;
 		
 	}
 		break;
@@ -1083,8 +1058,7 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		CustomEdge<CMeshO> edge = CustomEdge<CMeshO>(condSelect,errorEdgePred,msg);
 		if(errorMidPoint || errorEdgePred)
 		{
-			errorMessage = msg.c_str();
-			return false;
+			throw MLException(msg.c_str());
 		}
 		
 		// Refine current mesh.
@@ -1095,22 +1069,21 @@ bool FilterFunctionPlugin::applyFilter(const QAction *filter, MeshDocument &md, 
 		m.UpdateBoxAndNormals();
 		m.clearDataMask( MeshModel::MM_VERTMARK);
 		//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		
-		return true;
 	}
 		break;
 		
-	default : assert (0);
+	default :
+		wrongActionCalled(filter);
 	}
-	return false;
+	return std::map<std::string, QVariant>();
 }
 
 // display parsing error in dialog
 void FilterFunctionPlugin::showParserError(const QString &s, Parser::exception_type &e)
 {
-	errorMessage += s;
-	errorMessage += conversion::fromWStringToString(e.GetMsg()).c_str();
-	errorMessage += "\n";
+	errorMsg += s;
+	errorMsg += conversion::fromWStringToString(e.GetMsg()).c_str();
+	errorMsg += "\n";
 }
 
 // set per-vertex attributes associated to parser variables
@@ -1296,10 +1269,10 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	v3_attrNames.clear();
 	v3_attrValue.clear();
 	std::vector<std::string> AllVertexAttribName;
-	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m,AllVertexAttribName);
+	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(m,AllVertexAttribName);
 	for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
 	{
-		CMeshO::PerVertexAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m, AllVertexAttribName[i]);
+		CMeshO::PerVertexAttributeHandle<Scalarm> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(m, AllVertexAttribName[i]);
 		v_handlers.push_back(hh);
 		v_attrNames.push_back(AllVertexAttribName[i]);
 		v_attrValue.push_back(0);
@@ -1310,7 +1283,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m,AllVertexAttribName);
 	for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
 	{
-		CMeshO::PerVertexAttributeHandle<Point3f> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, AllVertexAttribName[i]);
+		CMeshO::PerVertexAttributeHandle<Point3m> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m, AllVertexAttribName[i]);
 		
 		v3_handlers.push_back(hh3);
 		
@@ -1423,7 +1396,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	f_attrValue.clear();
 	for(int i = 0; i < (int) AllFaceAttribName.size(); i++)
 	{
-		CMeshO::PerFaceAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m, AllFaceAttribName[i]);
+		CMeshO::PerFaceAttributeHandle<Scalarm> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(m, AllFaceAttribName[i]);
 		f_handlers.push_back(hh);
 		f_attrNames.push_back(AllFaceAttribName[i]);
 		f_attrValue.push_back(0);
@@ -1432,7 +1405,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	
 }
 
-FilterPluginInterface::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAction* filter ) const
+FilterPlugin::FilterArity FilterFunctionPlugin::filterArity(const QAction* filter ) const
 {
 	switch(ID(filter)) 
 	{
@@ -1449,12 +1422,12 @@ FilterPluginInterface::FILTER_ARITY FilterFunctionPlugin::filterArity(const QAct
 	case FF_DEF_VERT_ATTRIB:    
 	case FF_DEF_FACE_ATTRIB:    
 	case FF_REFINE:
-		return FilterPluginInterface::SINGLE_MESH;
+		return FilterPlugin::SINGLE_MESH;
 	case FF_GRID:                            
 	case FF_ISOSURFACE:         
-		return FilterPluginInterface::NONE;
+		return FilterPlugin::NONE;
 	}
-	return FilterPluginInterface::NONE;
+	return FilterPlugin::NONE;
 }
 
 

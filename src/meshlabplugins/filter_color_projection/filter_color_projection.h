@@ -25,35 +25,34 @@
 #define FILTER_COLORPROJ_H
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterColorProjectionPlugin : public QObject, public FilterPluginInterface
+class FilterColorProjectionPlugin : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
-public:
-    enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
+	public:
+		enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
 
-    FilterColorProjectionPlugin();
+	FilterColorProjectionPlugin();
 
-    QString pluginName() const;
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
-    int postCondition( const QAction* ) const;
+	QString pluginName() const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	int postCondition( const QAction* ) const;
 
-    virtual FilterClass getClass(const QAction*) const;
-    virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
-    virtual int getRequirements(const QAction*);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb);
+	FilterClass getClass(const QAction*) const;
+	void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	int getRequirements(const QAction*);
+	bool requiresGLContext(const QAction* action) const;
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 
 private:
-
-    int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
-
+	int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
 };
 
 #endif

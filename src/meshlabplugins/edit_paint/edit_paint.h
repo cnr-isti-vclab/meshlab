@@ -29,7 +29,7 @@
 #include <QDockWidget>
 
 #include <meshlab/glarea.h>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include <wrap/gl/pick.h>
 
 #include "paintbox.h"
@@ -49,21 +49,19 @@ enum PaintOptions {
 /**
  * EditPaint plugin main class (MeshEditing plugin)
  */
-class EditPaintPlugin : public QObject, public EditPluginInterface {
+class EditPaintPlugin : public QObject, public EditTool {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
 
 public:
 	EditPaintPlugin();
 	virtual ~EditPaintPlugin();
 
-	static const QString Info();
-	QString pluginName() const;
+	static const QString info();
 
 	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
-	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);

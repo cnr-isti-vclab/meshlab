@@ -29,12 +29,12 @@
 
 #include <meshlab/glarea.h>
 #include <common/GLExtensionsManager.h>
-#include <common/pluginmanager.h>
+#include <common/plugins/plugin_manager.h>
 
 
 using namespace vcg;
 
-QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationName(ActionIDType id) const
 {
     switch (id)
     {
@@ -45,7 +45,7 @@ QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
     return QString();
 }
 
-QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationInfo(ActionIDType id) const
 {
     switch(id)
     {
@@ -58,7 +58,7 @@ QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 
 QString DecorateBackgroundPlugin::pluginName() const
 {
-    return "DecorateBackGround";
+	return "DecorateBackGround";
 }
 
 void DecorateBackgroundPlugin::initGlobalParameterList(const QAction* action, RichParameterList &parset)
@@ -66,11 +66,6 @@ void DecorateBackgroundPlugin::initGlobalParameterList(const QAction* action, Ri
     switch(ID(action))
     {
     case DP_SHOW_CUBEMAPPED_ENV :
-        if(!parset.hasParameter(CubeMapPathParam()))
-        {
-            QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-            //parset.addParam(RichString(CubeMapPathParam(), cubemapDirPath,"",""));
-        }
         break;
     case DP_SHOW_GRID :
       parset.addParam(RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
@@ -149,16 +144,16 @@ void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, co
         {
             emit this->askViewerShot("backGrid");
 
-            float scaleBB = parset->getFloat(BoxRatioParam());
-            float majorTick = fabs(parset->getFloat(GridMajorParam()));
-            float minorTick = fabs(parset->getFloat(GridMinorParam()));
+            Scalarm scaleBB = parset->getFloat(BoxRatioParam());
+            Scalarm majorTick = fabs(parset->getFloat(GridMajorParam()));
+            Scalarm minorTick = fabs(parset->getFloat(GridMinorParam()));
             bool backFlag = parset->getBool(GridBackParam());
             bool shadowFlag = parset->getBool(ShowShadowParam());
             Color4b backColor = parset->getColor4b(GridColorBackParam());
             Color4b frontColor = parset->getColor4b(GridColorFrontParam());
-            float baseLineWidth = parset->getFloat(GridBaseLineWidthParam());
+            Scalarm baseLineWidth = parset->getFloat(GridBaseLineWidthParam());
             Box3m bb = m.bbox();
-            float scalefactor = std::max(0.1, (scaleBB - 1.0));
+            Scalarm scalefactor = std::max(0.1, (scaleBB - 1.0));
             bb.Offset((bb.max - bb.min)*(scalefactor/2.0));
 
 			// minortick should never be more than majortick

@@ -27,7 +27,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
 	validcache = false;
 	curAction = action;
@@ -44,7 +44,7 @@ bool MeshlabStdDialog::showAutoDialog(FilterPluginInterface *mfi, MeshModel *mm,
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
 	createFrame();
-	loadFrameContent(mdp);
+	loadFrameContent();
 	if (isPreviewable())
 	{
 		meshState.create(curmask, curModel);
@@ -69,7 +69,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != FilterPluginInterface::SINGLE_MESH))
+	if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != FilterPlugin::SINGLE_MESH))
 		return false;
 
 	if ((curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE))
@@ -113,7 +113,7 @@ void MeshlabStdDialog::resetValues()
 	stdParFrame->resetValues();
 }
 
-void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
+void MeshlabStdDialog::loadFrameContent()
 {
 	assert(qf);
 	qf->hide();
@@ -196,11 +196,11 @@ void MeshlabStdDialog::applyClick()
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
-	if ((q != nullptr) && (curMeshDoc != nullptr) && (curMeshDoc->filterHistory != nullptr))
+	if ((q != nullptr) && (curMeshDoc != nullptr))
 	{
 		FilterNameParameterValuesPair oldpair;
 		oldpair.first = q->text(); oldpair.second = curParSet;
-		curMeshDoc->filterHistory->append(oldpair);
+		curMeshDoc->filterHistory.append(oldpair);
 	}
 
 	bool isEqual = (curParSet == prevParSet);

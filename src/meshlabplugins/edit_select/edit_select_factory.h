@@ -25,34 +25,31 @@
 #ifndef EditSelectFactoryPLUGIN_H
 #define EditSelectFactoryPLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
-class EditSelectFactory : public QObject, public EditPluginInterfaceFactory
+class EditSelectFactory : public QObject, public EditPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
-	Q_INTERFACES(EditPluginInterfaceFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_IID)
+	Q_INTERFACES(EditPlugin)
 
 public:
 	EditSelectFactory();
 	virtual ~EditSelectFactory() { delete editSelect; }
 
-	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const;
-	
+	virtual QString pluginName() const;
+
 	//get the edit tool for the given action
-	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
-    
+	virtual EditTool* getEditTool(const QAction*);
+
 	//get the description for the given action
 	virtual QString getEditToolDescription(const QAction*);
-	
+
 private:
-	QList <QAction *> actionList;
-	
-  QAction *editSelect;
-  QAction *editSelectVert;
-  QAction *editSelectConnected;
-  QAction *editSelectArea;
+	QAction *editSelect;
+	QAction *editSelectVert;
+	QAction *editSelectConnected;
+	QAction *editSelectArea;
 };
 
 #endif

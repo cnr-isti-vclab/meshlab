@@ -14,9 +14,8 @@ INCLUDEPATH *= \
 	. \
 	.. \
 	../.. \
-	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif \
 	$$VCGDIR \
-	$$EIGENDIR 
+	$$EIGENDIR
 
 !CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 
@@ -28,13 +27,15 @@ DEPENDPATH += \
 HEADERS += \
 	mainwindow.h \
 	glarea.h \
-	meshlab_settings/meshlabsettingsdialog.h \
-	meshlab_settings/settingdialog.h \
+	dialogs/about_dialog.h \
+	dialogs/congrats_dialog.h \
+	dialogs/filter_script_dialog.h \
+	dialogs/options_dialog.h \
+	dialogs/plugin_info_dialog.h \
+	dialogs/save_snapshot_dialog.h \
+	dialogs/setting_dialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
-	plugindialog.h \
-	filterScriptDialog.h \
-	saveSnapshotDialog.h \
 	savemaskexporter.h \
 	changetexturename.h \
 	layerDialog.h \
@@ -56,12 +57,14 @@ SOURCES += \
 	mainwindow_Init.cpp \
 	mainwindow_RunTime.cpp \
 	glarea.cpp \
-	meshlab_settings/meshlabsettingsdialog.cpp \
-	meshlab_settings/settingdialog.cpp \
+	dialogs/about_dialog.cpp \
+	dialogs/congrats_dialog.cpp \
+	dialogs/filter_script_dialog.cpp \
+	dialogs/options_dialog.cpp \
+	dialogs/plugin_info_dialog.cpp \
+	dialogs/save_snapshot_dialog.cpp \
+	dialogs/setting_dialog.cpp \
 	multiViewer_Container.cpp \
-	plugindialog.cpp \
-	filterScriptDialog.cpp \
-	saveSnapshotDialog.cpp \
 	layerDialog.cpp \
 	savemaskexporter.cpp \
 	changetexturename.cpp \
@@ -76,17 +79,17 @@ SOURCES += \
 	glarea_setting.cpp \
 	rich_parameter_gui/richparameterlistdialog.cpp \
 	rich_parameter_gui/richparameterlistframe.cpp \
-	rich_parameter_gui/richparameterwidgets.cpp 
+	rich_parameter_gui/richparameterwidgets.cpp
 
 FORMS += \
+  dialogs/about_dialog.ui \
+  dialogs/congrats_dialog.ui \
+	dialogs/filter_script_dialog.ui \
+	dialogs/plugin_info_dialog.ui \
+	dialogs/save_snapshot_dialog.ui \
 	ui/layerDialog.ui \
-	ui/filterScriptDialog.ui \
-	ui/savesnapshotDialog.ui \
-	ui/aboutDialog.ui \
 	ui/renametexture.ui \
-	ui/savemaskexporter.ui \
-	ui/congratsDialog.ui \
-	ui/filtergui.ui
+	ui/savemaskexporter.ui
 
 RESOURCES += \
 	meshlab.qrc

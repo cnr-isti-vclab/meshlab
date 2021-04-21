@@ -39,9 +39,12 @@ then
     exit -1
 fi
 
+
 if [ -e $QTDIR/bin/macdeployqt ]
 then
-    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+    MACDEPLOYQT_EXE=$QTDIR/bin/macdeployqt
 else
-    macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+    MACDEPLOYQT_EXE=macdeployqt
 fi
+
+${MACDEPLOYQT_EXE} $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libedit_align.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_globalregistration.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so

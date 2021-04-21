@@ -24,7 +24,7 @@
 #define SAMPLE_DECORATE_PLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/decorate_plugin_interface.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
 
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
@@ -32,11 +32,11 @@
 #include "variance_shadow_mapping_blur.h"
 #include "ssao.h"
 
-class DecorateShadowPlugin : public QObject, public DecoratePluginInterface
+class DecorateShadowPlugin : public QObject, public DecoratePlugin
 {
   Q_OBJECT
-      MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(DecoratePluginInterface)
+  MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
+  Q_INTERFACES(DecoratePlugin)
 
     enum {
         DP_SHOW_SHADOW,
@@ -57,8 +57,8 @@ class DecorateShadowPlugin : public QObject, public DecoratePluginInterface
                 <<"Variance shadow mapping with blur";
     }
 
-    virtual QString decorationInfo(FilterIDType filter) const;
-    virtual QString decorationName(FilterIDType filter) const;
+    virtual QString decorationInfo(ActionIDType filter) const;
+    virtual QString decorationName(ActionIDType filter) const;
 
 public:
      
@@ -67,7 +67,7 @@ public:
         DP_SHOW_SHADOW <<
         DP_SHOW_SSAO;
 
-        FilterIDType tt;
+        ActionIDType tt;
         foreach(tt , types()){
           actionList << new QAction(decorationName(tt), this);
         }
@@ -93,7 +93,7 @@ public:
 	void decorateDoc(const QAction *a, MeshDocument &m,  const RichParameterList*, GLArea *gla, QPainter *p, GLLogStream &);
 	void endDecorate(const QAction *,   MeshDocument &, const RichParameterList *, GLArea *);
 	void initGlobalParameterList(const QAction *, RichParameterList  & globalparam);
-	int getDecorationClass(const QAction * /*action*/) const { return DecoratePluginInterface::PerDocument; }
+	int getDecorationClass(const QAction * /*action*/) const { return DecoratePlugin::PerDocument; }
 
 private:
     DecorateShader* smShader, *vsmShader, *vsmbShader;

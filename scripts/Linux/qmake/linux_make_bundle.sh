@@ -39,11 +39,11 @@ mkdir -p usr/share/icons/hicolor/512x512/apps/
 mkdir -p usr/share/icons/Yaru/512x512/apps/
 
 cp $INSTALL_PATH/resources/meshlab_appimage.desktop usr/share/applications/meshlab.desktop
-cp $INSTALL_PATH/resources/meshlab_server_appimage.desktop usr/share/applications/meshlab_server.desktop
+#cp $INSTALL_PATH/resources/meshlab_server_appimage.desktop usr/share/applications/meshlab_server.desktop
 cp meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
 mv meshlab.png usr/share/icons/Yaru/512x512/apps/meshlab.png
 mv meshlab usr/bin
-mv meshlabserver usr/bin
+#mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
@@ -55,4 +55,4 @@ mv shaders/ usr/share/meshlab/
 rm -r lib
 
 patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlab
-patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver
+#patchelf --set-rpath '$ORIGIN/../lib/meshlab/' usr/bin/meshlabserver

@@ -35,18 +35,15 @@
 
 FilterScreenedPoissonPlugin::FilterScreenedPoissonPlugin()
 {
-	typeList << FP_SCREENED_POISSON;
+	typeList = {FP_SCREENED_POISSON};
 
-	for (FilterIDType tt : types()){
-		actionList << new QAction(filterName(tt), this);
+	for (ActionIDType tt : types()){
+		actionList.push_back(new QAction(filterName(tt), this));
 	}
 }
 
 FilterScreenedPoissonPlugin::~FilterScreenedPoissonPlugin()
 {
-	for (QAction* a : actionList){
-		delete a;
-	}
 }
 
 QString FilterScreenedPoissonPlugin::pluginName() const
@@ -54,7 +51,7 @@ QString FilterScreenedPoissonPlugin::pluginName() const
 	return "FilterScreenedPoisson";
 }
 
-QString FilterScreenedPoissonPlugin::filterName(FilterIDType filter) const
+QString FilterScreenedPoissonPlugin::filterName(ActionIDType filter) const
 {
 	if (filter == FP_SCREENED_POISSON)
 		return "Surface Reconstruction: Screened Poisson";
@@ -63,7 +60,7 @@ QString FilterScreenedPoissonPlugin::filterName(FilterIDType filter) const
 	}
 }
 
-QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
+QString FilterScreenedPoissonPlugin::filterInfo(ActionIDType filter) const
 {
 	if (filter == FP_SCREENED_POISSON)
 		return	"This surface reconstruction algorithm creates watertight surfaces "
@@ -71,24 +68,20 @@ QString FilterScreenedPoissonPlugin::filterInfo(FilterIDType filter) const
 				"The filter uses the original code of Michael Kazhdan and Matthew Bolitho "
 				"implementing the algorithm described in the following paper:<br>"
 				"<i>Michael Kazhdan, Hugues Hoppe</i>,<br>"
-				"<b>\"Screened Poisson surface reconstruction\"</b><br>"
-				"ACM Trans. Graphics, 32(3), 2013<br><br>"
-				"<b>WARNING:</b> this filter saves intermediate cache files in the \"working\" "
-				"folder (last folder used when loading/saving). Be sure you are not working in "
-				"a READ-ONLY location.<br>";
+				"<b>\"Screened Poisson surface reconstruction\"</b><br>";
 	else {
 		return "Error!";
 	}
 }
 
-FilterPluginInterface::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
+FilterPlugin::FilterClass FilterScreenedPoissonPlugin::getClass(const QAction* a) const
 {
 	if (ID(a) == FP_SCREENED_POISSON){
-		return FilterScreenedPoissonPlugin::FilterClass(FilterPluginInterface::Remeshing);
+		return FilterPlugin::Remeshing;
 	}
 	else {
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -103,12 +96,11 @@ int FilterScreenedPoissonPlugin::getRequirements(const QAction* a)
 	}
 }
 
-bool FilterScreenedPoissonPlugin::applyFilter(
+std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 		const QAction* filter,
-		MeshDocument& md,
-		std::map<std::string, QVariant>&,
-		unsigned int& /*postConditionMask*/,
 		const RichParameterList& params,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos* cb)
 {
 	bool currDirChanged=false;
@@ -124,8 +116,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 			QTemporaryFile file2("./_tmp_XXXXXX.tmp"); //try to create a file in the meshlab folder
 			if (!file2.open()){ //if a file cannot be created in the tmp and in the meshlab folder, we cannot run the filter
 				log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the tmp working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
-				errorMessage = "current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
-				return false;
+				throw MLException("current and tmp folder are not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.");
 			}
 		}
 		else { //if the tmp folder is writable, we will use it
@@ -152,7 +143,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 			goodColor = md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR);
 		}
 		else {
-			MeshModel *_mm=md.nextVisibleMesh(_mm);
+			MeshModel *_mm=md.nextVisibleMesh();
 			while(_mm != nullptr) {
 				PoissonClean(_mm->cm,  pp.ConfidenceFlag, pp.CleanFlag);
 				goodNormal &= HasGoodNormal(_mm->cm);
@@ -162,14 +153,13 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 		}
 
 		if(!goodNormal) {
-			this->errorMessage = "Filter requires correct per vertex normals.<br>"
+			throw MLException("Filter requires correct per vertex normals.<br>"
 								 "E.g. it is necessary that your <b>ALL</b> the input vertices have a proper, not-null normal.<br> "
 								 "Try enabling the <i>pre-clean<i> option and retry.<br><br>"
 								 "To permanently remove this problem:<br>"
 								 "If you encounter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> filter"
 								 "If you encounter this error on a pointcloud try to use the <i>Conditional Vertex Selection</i> filter"
-								 "with function '(nx==0.0) && (ny==0.0) && (nz==0.0)', and then <i>delete selected vertices</i>.<br>";
-			return false;
+								 "with function '(nx==0.0) && (ny==0.0) && (nz==0.0)', and then <i>delete selected vertices</i>.<br>");
 		}
 
 		MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
@@ -180,7 +170,7 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 
 		if(params.getBool("visibleLayer")) {
 			Box3m bb;
-			MeshModel *_mm=md.nextVisibleMesh(_mm);
+			MeshModel *_mm=md.nextVisibleMesh();
 			while(_mm != nullptr){
 				bb.Add(_mm->cm.Tr,_mm->cm.bbox);
 				_mm=md.nextVisibleMesh(_mm);
@@ -198,9 +188,11 @@ bool FilterScreenedPoissonPlugin::applyFilter(
 		md.setCurrentMesh(pm->id());
 		if(currDirChanged)
 			QDir::setCurrent(currDir.path());
-		return true;
 	}
-	return false;
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 void FilterScreenedPoissonPlugin::initParameterList(
@@ -233,7 +225,7 @@ int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const
 }
 
 
-FilterPluginInterface::FILTER_ARITY FilterScreenedPoissonPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterScreenedPoissonPlugin::filterArity(const QAction*) const
 {
 	return VARIABLE;
 }

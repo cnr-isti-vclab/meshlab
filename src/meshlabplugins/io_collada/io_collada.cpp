@@ -98,117 +98,84 @@
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
 
-#include <QMessageBox>
 using namespace std;
 using namespace vcg;
 
-bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget * /*parent*/)
+void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb)
 {
 	// initializing mask
-  mask = 0;
+	mask = 0;
 	
 	// initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();
-  //std::string filename = fileName.toUtf8().data();
+	//std::string filename = fileName.toUtf8().data();
 
 	bool normalsUpdated = false;
 
 	if(formatName.toUpper() == tr("DAE"))
 	{
 		//m.addinfo = NULL;
-        tri::io::InfoDAE  info;
-		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
-			return false;
+		tri::io::InfoDAE  info;
+		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info)){
+			throw MLException("Error while loading DAE mask.");
+		}
 
-        m.Enable(info.mask);
-	//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
-	//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
+		m.Enable(info.mask);
+		//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
+		//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
 		
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),info);
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
-			//QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
-			qDebug() << "DAE Opening Error" << vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result) << endl;
-			return false;
+			throw MLException("DAE Opening Error" + QString(vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
 		}
 		else _mp.push_back(&m);
 
-        if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+		if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
-        mask = info.mask;
+		mask = info.mask;
+
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+		if (!normalsUpdated)
+			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
+
+		if (cb != NULL)	(*cb)(99, "Done");
 	}
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-	if (!normalsUpdated) 
-		vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
-
-	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
-void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, RichParameterList & parlst)
+void ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
-	QElapsedTimer t;
-	t.start();
-	
-	QDomDocument* doc = new QDomDocument(filename);
-	QFile file(filename);
-	if (!file.open(QIODevice::ReadOnly))
-				return;
-	if (!doc->setContent(&file)) 
-	{
-				file.close();
-				return;
-	}
-	file.close();
-	
-	QDomNodeList geomList = doc->elementsByTagName("geometry");
-	QStringList idList;
-	idList.push_back("Full Scene");
-	for(int i=0;i<geomList.size();++i)
-	{
-		QString idVal = geomList.at(i).toElement().attribute("id");
-		idList.push_back(idVal);
-		qDebug("Node %i geom id = '%s'",i,qUtf8Printable(idVal));
-	}
-	parlst.addParam(RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
-	qDebug("Time elapsed: %llu ms", t.elapsed());
-}
-
-
-
-bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
-{
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	string filename = QFile::encodeName(fileName).constData ();
-  //std::string filename = fileName.toUtf8().data();
-	std::string ex = formatName.toUtf8().data();
-	int result;
-  tri::Allocator<CMeshO>::CompactVertexVector(m.cm);  
-  tri::Allocator<CMeshO>::CompactFaceVector(m.cm);  
-	// Collada exporting function do not manage very correctly the case
-    // of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
-    // so we convert it to a more standard mesh adding a fake notexture.png texture.
-	if(tri::HasPerWedgeTexCoord(m.cm))
+	if (formatName.toUpper() == tr("DAE")){
+		QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+		string filename = QFile::encodeName(fileName).constData ();
+		//std::string filename = fileName.toUtf8().data();
+		std::string ex = formatName.toUtf8().data();
+		int result;
+		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+		// Collada exporting function do not manage very correctly the case
+		// of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
+		// so we convert it to a more standard mesh adding a fake notexture.png texture.
+		if(tri::HasPerWedgeTexCoord(m.cm))
 			tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
-	
-	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
-	//else 
-		//result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 
-	if(result!=0)
-	{
-		//QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-		qDebug() << "Saving Error" << vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result) << endl;
-		return false;
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
+
+		if(result!=0)
+		{
+			throw MLException("Saving Error" + QString(vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		}
 	}
-	return true;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*
@@ -219,28 +186,24 @@ QString ColladaIOPlugin::pluginName() const
 	return "IOCollada";
 }
 
-QList<IOPluginInterface::Format> ColladaIOPlugin::importFormats() const
+std::list<FileFormat> ColladaIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
-	return formatList;
+	return {FileFormat("Collada File Format"	,tr("DAE")) };
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> ColladaIOPlugin::exportFormats() const
+std::list<FileFormat> ColladaIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("Collada File Format"	,tr("DAE"));
-	return formatList;
+	return {FileFormat("Collada File Format" ,tr("DAE"))};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void ColladaIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits)  const
+void ColladaIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits)  const
 {
 	if(format.toUpper() == tr("DAE")){
 		capability = defaultBits = vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();

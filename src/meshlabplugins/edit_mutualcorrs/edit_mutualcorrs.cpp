@@ -58,14 +58,9 @@ EditMutualCorrsPlugin::EditMutualCorrsPlugin() {
 
     }
 
-const QString EditMutualCorrsPlugin::Info()
+const QString EditMutualCorrsPlugin::info()
 {
     return tr("Registration of images on 3D models using mutual correspondences");
-}
-
-QString EditMutualCorrsPlugin::pluginName() const
-{
-    return "EditMutualCorrs";
 }
  
 void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -74,7 +69,7 @@ void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
   
-void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
+void EditMutualCorrsPlugin::decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
 	if (gla->md()->rasterList.size() == 0 || !gla->isRaster())
 	{
@@ -199,7 +194,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 
 }
 
-bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditMutualCorrsPlugin::startEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -247,7 +242,7 @@ bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLS
     return true;
 }
 
-void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditMutualCorrsPlugin::endEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     assert(mutualcorrsDialog);

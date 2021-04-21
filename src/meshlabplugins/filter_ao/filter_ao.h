@@ -26,14 +26,14 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <wrap/gl/gl_surface.h>
 class AOGLWidget;
-class AmbientOcclusionPlugin : public QObject, public FilterPluginInterface
+class AmbientOcclusionPlugin : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
         // Attributes
 protected:
@@ -69,15 +69,16 @@ public:
     ~AmbientOcclusionPlugin();
 
     QString pluginName() const;
-    QString filterName(FilterIDType filter) const;
-    QString	filterInfo(FilterIDType filterId) const;
-    FILTER_ARITY filterArity(const QAction*) const;
+    QString filterName(ActionIDType filter) const;
+    QString	filterInfo(ActionIDType filterId) const;
+    FilterArity filterArity(const QAction*) const;
 	int getRequirements (const QAction* action);
+	bool requiresGLContext(const QAction* action) const;
     FilterClass getClass(const QAction* filter) const;
 
     void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-    bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
-    void initTextures(void);
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+	void initTextures(void);
     void initGL(vcg::CallBackPos *cb,unsigned int numVertices);
     bool processGL(MeshModel &m, std::vector<vcg::Point3f> &posVect);
     bool checkFramebuffer();

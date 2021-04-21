@@ -27,25 +27,50 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/io_plugin_interface.h>
+#include <common/plugins/interfaces/io_plugin.h>
 
-class ExtraMeshIOPlugin : public QObject, public IOPluginInterface
+class ExtraMeshIOPlugin : public QObject, public IOPlugin
 {
-  Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
-  
 public:
-
-
-	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
-
 	QString pluginName() const;
-	void GetExportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+
+	std::list<FileFormat> importFormats() const;
+	std::list<FileFormat> exportFormats() const;
+
+
+	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
+
+	unsigned int numberMeshesContainedInFile(
+			const QString& format,
+			const QString& fileName) const;
+
+	void open(
+			const QString &formatName,
+			const QString &fileName,
+			MeshModel& m,
+			int& mask,
+			const RichParameterList& params,
+			vcg::CallBackPos *cb=0);
+
+	void open(
+			const QString &formatName,
+			const QString &fileName,
+			const std::list<MeshModel *>& meshList,
+			std::list<int>& maskList,
+			const RichParameterList& params,
+			vcg::CallBackPos *cb=0);
+
+	void save(
+			const QString &formatName,
+			const QString &fileName,
+			MeshModel &m,
+			const int mask,
+			const RichParameterList &,
+			vcg::CallBackPos *cb=0);
 };
 
 #endif

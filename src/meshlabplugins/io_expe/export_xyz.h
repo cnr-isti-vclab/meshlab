@@ -41,15 +41,15 @@ template <class SaveMeshType>
 class ExporterXYZ
 {
   public:
-    typedef typename SaveMeshType::VertexPointer VertexPointer;
+    typedef typename SaveMeshType::ConstVertexPointer VertexPointer;
     typedef typename SaveMeshType::ScalarType ScalarType;
     typedef typename SaveMeshType::VertexType VertexType;
     typedef typename SaveMeshType::FaceType FaceType;
-    typedef typename SaveMeshType::FacePointer FacePointer;
-    typedef typename SaveMeshType::VertexIterator VertexIterator;
-    typedef typename SaveMeshType::FaceIterator FaceIterator;
+    typedef typename SaveMeshType::ConstFacePointer FacePointer;
+    typedef typename SaveMeshType::ConstVertexIterator VertexIterator;
+    typedef typename SaveMeshType::ConstFaceIterator FaceIterator;
 
-  static int Save(SaveMeshType &m, const char * filename, int mask=0 )
+  static int Save(const SaveMeshType &m, const char * filename, int mask=0 )
   {
     bool savenormals = false;
 

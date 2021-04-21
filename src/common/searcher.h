@@ -16,6 +16,7 @@ public:
 	void addWordsPerAction(QAction& act,const QStringList& words);
 	void removeActionReferences(QAction& act);
 	bool getActionsPerWord( const QString& word,QList<QAction*>& res ) const;
+	void clear();
 private:
     QMap<QString,QList<QAction*> > wordacts;
 };
@@ -33,6 +34,7 @@ public:
 	int rankedMatchesPerInputString(const QString& input,RankedMatches& rm) const;
 	inline QRegExp separtor() const {return sepexp;}
 	inline QRegExp ignored() const {return ignexp;}
+	void clear() {map.clear(); sepexp = QRegExp(); ignexp = QRegExp();}
 
 private:
 	void purifiedSplit(const QString& input,QStringList& res) const;

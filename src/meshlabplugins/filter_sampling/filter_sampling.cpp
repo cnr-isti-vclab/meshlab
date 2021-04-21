@@ -350,25 +350,25 @@ public:
 
 FilterDocSampling::FilterDocSampling()
 {
-  typeList
-      << FP_ELEMENT_SUBSAMPLING
-      << FP_MONTECARLO_SAMPLING
-      << FP_STRATIFIED_SAMPLING
-      << FP_CLUSTERED_SAMPLING
-      << FP_POISSONDISK_SAMPLING
-      << FP_HAUSDORFF_DISTANCE
-	  << FP_DISTANCE_REFERENCE
-      << FP_TEXEL_SAMPLING
-      << FP_VERTEX_RESAMPLING
-      << FP_UNIFORM_MESH_RESAMPLING
-      << FP_VORONOI_COLORING
-      << FP_DISK_COLORING
-      << FP_REGULAR_RECURSIVE_SAMPLING
-      << FP_POINTCLOUD_SIMPLIFICATION
-         ;
+	typeList = {
+		FP_ELEMENT_SUBSAMPLING,
+		FP_MONTECARLO_SAMPLING,
+		FP_STRATIFIED_SAMPLING,
+		FP_CLUSTERED_SAMPLING,
+		FP_POISSONDISK_SAMPLING,
+		FP_HAUSDORFF_DISTANCE,
+		FP_DISTANCE_REFERENCE,
+		FP_TEXEL_SAMPLING,
+		FP_VERTEX_RESAMPLING,
+		FP_UNIFORM_MESH_RESAMPLING,
+		FP_VORONOI_COLORING,
+		FP_DISK_COLORING,
+		FP_REGULAR_RECURSIVE_SAMPLING,
+		FP_POINTCLOUD_SIMPLIFICATION
+	};
 
-  foreach(FilterIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterDocSampling::pluginName() const
@@ -378,7 +378,7 @@ QString FilterDocSampling::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString FilterDocSampling::filterName(FilterIDType filterId) const
+QString FilterDocSampling::filterName(ActionIDType filterId) const
 {
   switch(filterId) {
   case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Sampling");
@@ -402,7 +402,7 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString FilterDocSampling::filterInfo(FilterIDType filterId) const
+QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.");
@@ -698,14 +698,14 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
   }
 }
 
-bool FilterDocSampling::applyFilter(
+std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		const QAction *action, 
-		MeshDocument &md, std::map<std::string, 
-		QVariant>& outputValues, 
+		const RichParameterList & par,
+		MeshDocument &md,
 		unsigned int& /*postConditionMask*/, 
-		const RichParameterList & par, 
 		vcg::CallBackPos *cb)
 {
+	std::map<std::string, QVariant> outputValues;
 	switch(ID(action))
 	{
 	case FP_ELEMENT_SUBSAMPLING :
@@ -713,13 +713,11 @@ bool FilterDocSampling::applyFilter(
 		MeshModel *curMM = md.mm();
 		if (par.getInt("SampleNum") == 0) {
 			log("Mesh Element Sampling: Number of Samples is  0, cannot do anything");
-			errorMessage = "Number of Samples is  0, cannot do anything";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Number of Samples is  0, cannot do anything");
 		}
 		if ((par.getEnum("Sampling")>0) && (curMM->cm.fn == 0)) {
 			log("Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces");
-			errorMessage = "Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces");
 		}
 		
 		MeshModel *mm= md.addNewMesh("", "Element samples", true); // The new mesh is the current one
@@ -742,8 +740,7 @@ bool FilterDocSampling::applyFilter(
 		MeshModel *curMM= md.mm();
 		if (!tri::HasPerWedgeTexCoord(curMM->cm)) {
 			log("Texel Sampling requires a mesh with Per Wedge UV parametrization");
-			errorMessage = "Texel Sampling requires a mesh with Per Wedge UV parametrization";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Texel Sampling requires a mesh with Per Wedge UV parametrization");
 		}
 		
 		MeshModel *mm= md.addNewMesh("", "Texel samples", true); // The new mesh is the current one
@@ -771,18 +768,15 @@ bool FilterDocSampling::applyFilter(
 		MeshModel *curMM = md.mm();
 		if (curMM->cm.fn == 0) {
 			log("Montecarlo Sampling requires a mesh with faces, it does not work on Point Clouds");
-			errorMessage = "Montecarlo Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Montecarlo Sampling requires a mesh with faces,<br> it does not work on Point Clouds");
 		}
 		if (par.getInt("SampleNum") == 0) {
 			log("Montecarlo Sampling: Number of Samples is 0, cannot do anything");
-			errorMessage = "Number of Samples is 0, cannot do anything";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Number of Samples is 0, cannot do anything");
 		}
 		if (par.getBool("Weighted") && !curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
 			log("Montecarlo Sampling: cannot do weighted samplimg, layer has no Vertex Quality value");
-			errorMessage = "Cannot do weighted samplimg, layer has no Vertex Quality value";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Cannot do weighted samplimg, layer has no Vertex Quality value");
 		}
 		
 		MeshModel *mm= md.addNewMesh("","Montecarlo Samples", true); // The new mesh is the current one
@@ -814,13 +808,11 @@ bool FilterDocSampling::applyFilter(
 		MeshModel *curMM = md.mm();
 		if (curMM->cm.fn == 0) {
 			log("Stratified Sampling requires a mesh with faces, it does not work on Point Clouds");
-			errorMessage = "Stratified Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Stratified Sampling requires a mesh with faces,<br> it does not work on Point Clouds");
 		}
 		if (par.getInt("SampleNum") == 0) {
 			log("Stratified Sampling: Number of Samples is  0, cannot do anything");
-			errorMessage = "Number of Samples is  0, cannot do anything";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Number of Samples is  0, cannot do anything");
 		}
 		
 		MeshModel *mm= md.addNewMesh("","Subdiv Samples", true); // The new mesh is the current one
@@ -857,14 +849,13 @@ bool FilterDocSampling::applyFilter(
 	{
 		MeshModel *curMM= md.mm();
 		int samplingMethod = par.getEnum("Sampling");
-		float threshold = par.getAbsPerc("Threshold");
+		Scalarm threshold = par.getAbsPerc("Threshold");
 		bool selected = par.getBool("Selected");
 		
 		if (selected && curMM->cm.svn == 0 && curMM->cm.sfn == 0) // if no selection at all, fail
 		{
 			log("Clustered Sampling: Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		if (selected && (curMM->cm.svn == 0 && curMM->cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
 		{
@@ -910,8 +901,7 @@ bool FilterDocSampling::applyFilter(
 		
 		if ((radius == 0.0) && (sampleNum == 0)){
 			log("Point Cloud Simplification: Number of Samples AND Radius are both 0, cannot do anything");
-			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Number of Samples AND Radius are both 0, cannot do anything");
 		}
 		
 		MeshModel *mm= md.addNewMesh("", "Simplified cloud", true); // The new mesh is the current one
@@ -944,8 +934,7 @@ bool FilterDocSampling::applyFilter(
 		
 		if ((radius == 0.0) && (sampleNum == 0)){
 			log("Poisson disk Sampling: Number of Samples AND Radius are both 0, cannot do anything");
-			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Number of Samples AND Radius are both 0, cannot do anything");
 		}
 		
 		if (radius == 0)
@@ -957,8 +946,7 @@ bool FilterDocSampling::applyFilter(
 		{
 			if (!curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
 				log("Poisson disk Sampling: Variable radius requires per-Vertex quality for biasing the distribution");
-				errorMessage = "Variable radius requires per-Vertex Quality for biasing the distribution";
-				return false; // cannot continue
+				throw MLException("Variable radius requires per-Vertex Quality for biasing the distribution");
 			}
 			pp.adaptiveRadiusFlag = true;
 			log("Variable Density variance is %f, radius can vary from %f to %f", pp.radiusVariance, radius / pp.radiusVariance, radius*pp.radiusVariance);
@@ -967,8 +955,7 @@ bool FilterDocSampling::applyFilter(
 		if (curMM->cm.fn == 0 && subsampleFlag == false)
 		{
 			log("Poisson disk Sampling: Current mesh has no triangles. We cannot create a montecarlo sampling of the surface. Please select the Subsample flag");
-			errorMessage = "Current mesh has no triangles. We cannot create a montecarlo sampling of the surface.<br> Please select the Subsample flag";
-			return false; // cannot continue
+			throw MLException("Current mesh has no triangles. We cannot create a montecarlo sampling of the surface.<br> Please select the Subsample flag");
 		}
 		
 		MeshModel *mm= md.addNewMesh("","Poisson-disk Samples", true); // The new mesh is the current one
@@ -1034,12 +1021,11 @@ bool FilterDocSampling::applyFilter(
 		bool sampleEdge=par.getBool("SampleEdge");
 		bool sampleFauxEdge=par.getBool("SampleFauxEdge");
 		bool sampleFace=par.getBool("SampleFace");
-		float distUpperBound = par.getAbsPerc("MaxDist");
+		Scalarm distUpperBound = par.getAbsPerc("MaxDist");
 		
 		if (mm0 == mm1){
 			log("Hausdorff Distance: cannot compute, it is the same mesh");
-			errorMessage = "Cannot compute, it is the same mesh";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Cannot compute, it is the same mesh");
 		}
 		
 		if(sampleEdge && mm0->cm.fn==0) {
@@ -1101,13 +1087,13 @@ bool FilterDocSampling::applyFilter(
 		log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
 		
 		outputValues.clear();
-		outputValues["n_samples"] = QVariant(hs.n_total_samples);
-		outputValues["min"] = QVariant(hs.getMinDist());
-		outputValues["max"] = QVariant(hs.getMaxDist());
-		outputValues["mean"] = QVariant(hs.getMeanDist());
-		outputValues["RMS"] = QVariant(hs.getRMSDist());
-		outputValues["diag_mesh_0"] = QVariant(d);
-		outputValues["diag_mesh_1"] = QVariant(mm1->cm.bbox.Diag());
+		outputValues["n_samples"] = hs.n_total_samples;
+		outputValues["min"] = hs.getMinDist();
+		outputValues["max"] = hs.getMaxDist();
+		outputValues["mean"] = hs.getMeanDist();
+		outputValues["RMS"] = hs.getRMSDist();
+		outputValues["diag_mesh_0"] = d;
+		outputValues["diag_mesh_1"] = mm1->cm.bbox.Diag();
 		
 		if(saveSampleFlag)
 		{
@@ -1124,12 +1110,11 @@ bool FilterDocSampling::applyFilter(
 		MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
 		MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
 		bool useSigned = par.getBool("SignedDist");
-		float maxDistABS = par.getAbsPerc("MaxDist");
+		Scalarm maxDistABS = par.getAbsPerc("MaxDist");
 		
 		if (mm0 == mm1){
 			log("Distance from Reference: cannot compute, it is the same mesh");
-			errorMessage = "Cannot compute, it is the same mesh";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Cannot compute, it is the same mesh");
 		}
 		
 		// the meshes have to return to their original position
@@ -1168,7 +1153,7 @@ bool FilterDocSampling::applyFilter(
 	{
 		MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
 		MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
-		float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
+		Scalarm upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 		bool onlySelected = par.getBool("onSelected");
 		bool colorT = par.getBool("ColorTransfer");
 		bool geomT = par.getBool("GeomTransfer");
@@ -1179,21 +1164,18 @@ bool FilterDocSampling::applyFilter(
 		
 		if (srcMesh == trgMesh){
 			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
-			errorMessage = "Cannot compute, it is the same mesh";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Cannot compute, it is the same mesh");
 		}
 		if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
 		{
 			log("Vertex Attribute Transfer: you have to choose at least one attribute to be sampled");
-			errorMessage = QString("You have to choose at least one attribute to be sampled");
-			return false;
+			throw MLException("You have to choose at least one attribute to be sampled");
 		}
 		
 		if (onlySelected && trgMesh->cm.svn == 0 && trgMesh->cm.sfn == 0) // if no selection at all, fail
 		{
 			log("Vertex Attribute Transfer: Cannot apply only on selection: there is no selection");
-			errorMessage = "Cannot apply only on selection: there is no selection";
-			return false;
+			throw MLException("Cannot apply only on selection: there is no selection");
 		}
 		if (onlySelected && (trgMesh->cm.svn == 0 && trgMesh->cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
 		{
@@ -1243,12 +1225,11 @@ bool FilterDocSampling::applyFilter(
 	{
 		if (md.mm()->cm.fn==0) {
 			log("Uniform Mesh Resampling: requires a mesh with faces, it does not work on Point Clouds");
-			errorMessage = "Uniform Mesh Resampling requires a mesh with faces,<br> it does not work on Point Clouds";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Uniform Mesh Resampling requires a mesh with faces,<br> it does not work on Point Clouds");
 		}
 		
 		CMeshO::ScalarType voxelSize = par.getAbsPerc("CellSize");
-		float offsetThr = par.getAbsPerc("Offset");
+		Scalarm offsetThr = par.getAbsPerc("Offset");
 		bool discretizeFlag = par.getBool("discretize");
 		bool multiSampleFlag = par.getBool("multisample");
 		bool absDistFlag = par.getBool("absDist");
@@ -1317,7 +1298,7 @@ bool FilterDocSampling::applyFilter(
 		bool sampleRadiusFlag = par.getBool("SampleRadius");
 		sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());
 		std::vector<CMeshO::VertexType*> closests;
-		float radius = par.getDynamicFloat("Radius");
+		Scalarm radius = par.getDynamicFloat("Radius");
 		
 		for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
 		{
@@ -1347,11 +1328,10 @@ bool FilterDocSampling::applyFilter(
 	{
 		if (md.mm()->cm.fn==0) {
 			log("Regular Recursive Sampling: requires a mesh with faces, it does not work on Point Clouds");
-			errorMessage = "Regular Recursive Sampling requires a mesh with  faces,<br> it does not work on Point Clouds";
-			return false; // can't continue, mesh can't be processed
+			throw MLException("Regular Recursive Sampling requires a mesh with  faces,<br> it does not work on Point Clouds");
 		}
-		float CellSize = par.getAbsPerc("CellSize");
-		float offset=par.getAbsPerc("Offset");
+		Scalarm CellSize = par.getAbsPerc("CellSize");
+		Scalarm offset=par.getAbsPerc("Offset");
 		
 		MeshModel *mmM= md.mm();
 		MeshModel *mm= md.addNewMesh("","Recursive Samples",true); // the new mesh is the current one
@@ -1367,12 +1347,13 @@ bool FilterDocSampling::applyFilter(
 		tri::BuildMeshFromCoordVector(mm->cm,pvec);
 	} break;
 		
-	default : assert(0);
+	default :
+		wrongActionCalled(action);
 	}
-	return true;
+	return outputValues;
 }
 
-FilterPluginInterface::FilterClass FilterDocSampling::getClass(const QAction *action) const
+FilterPlugin::FilterClass FilterDocSampling::getClass(const QAction *action) const
 {
   switch(ID(action))
   {
@@ -1388,8 +1369,8 @@ FilterPluginInterface::FilterClass FilterDocSampling::getClass(const QAction *ac
   case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling;
   case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
   case FP_DISK_COLORING:
-  case FP_VORONOI_COLORING: return FilterPluginInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
-  case FP_POINTCLOUD_SIMPLIFICATION : return FilterPluginInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::PointSet);
+  case FP_VORONOI_COLORING: return FilterPlugin::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
+  case FP_POINTCLOUD_SIMPLIFICATION : return FilterPlugin::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::PointSet);
   default: assert(0);
   }
   return FilterClass(0);
@@ -1412,7 +1393,7 @@ int FilterDocSampling::postCondition(const QAction* a ) const
   return MeshModel::MM_ALL;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction * filter ) const
+FilterPlugin::FilterArity FilterDocSampling::filterArity(const QAction * filter ) const
 {
     switch(ID(filter))
     {
@@ -1424,15 +1405,15 @@ FilterPluginInterface::FILTER_ARITY FilterDocSampling::filterArity(const QAction
     case FP_REGULAR_RECURSIVE_SAMPLING :
     case FP_UNIFORM_MESH_RESAMPLING:
     case FP_POINTCLOUD_SIMPLIFICATION :
-        return FilterPluginInterface::SINGLE_MESH;
+        return FilterPlugin::SINGLE_MESH;
     case FP_DISTANCE_REFERENCE :
     case FP_HAUSDORFF_DISTANCE :
     case FP_POISSONDISK_SAMPLING :
     case FP_DISK_COLORING :
     case FP_VORONOI_COLORING :
-        return FilterPluginInterface::FIXED;
+        return FilterPlugin::FIXED;
     }
-    return FilterPluginInterface::NONE;
+    return FilterPlugin::NONE;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDocSampling)

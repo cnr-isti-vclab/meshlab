@@ -41,101 +41,98 @@ using namespace vcg;
 
 FilterCreateIso::FilterCreateIso()
 {
-  typeList << FP_CREATEISO;
+	typeList = {FP_CREATEISO};
 
-  FilterIDType tt;
-  foreach(tt , types())
-        actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 
 }
 
 FilterCreateIso::~FilterCreateIso() {
-    for (int i = 0; i < actionList.count() ; i++ )
-        delete actionList.at(i);
 }
 
 QString FilterCreateIso::pluginName() const
 {
-    return "FilterCreateIso";
+	return "FilterCreateIso";
 }
 
- QString FilterCreateIso::filterName(FilterIDType filter) const
+QString FilterCreateIso::filterName(ActionIDType filter) const
 {
-    switch(filter)
-  {
-      case FP_CREATEISO :								return QString("Noisy Isosurface");
-    default: assert(0);
-  }
-  return QString("error!");
+	switch(filter)
+	{
+	case FP_CREATEISO :								return QString("Noisy Isosurface");
+	default: assert(0);
+	}
+	return QString("error!");
 }
 
- QString FilterCreateIso::filterInfo(FilterIDType filterId) const
+QString FilterCreateIso::filterInfo(ActionIDType filterId) const
 {
-  switch(filterId)
-  {
-        case FP_CREATEISO:	     return tr("Create a isosurface perturbed by a noisy isosurface.");
-    default: assert(0);
-  }
-  return QString("error!");
+	switch(filterId)
+	{
+	case FP_CREATEISO:	     return tr("Create a isosurface perturbed by a noisy isosurface.");
+	default: assert(0);
+	}
+	return QString("error!");
 }
 
- FilterCreateIso::FilterClass FilterCreateIso::getClass(const QAction *a) const
+FilterCreateIso::FilterClass FilterCreateIso::getClass(const QAction *a) const
 {
-  switch(ID(a))
-  {
-    case FP_CREATEISO : return FilterPluginInterface::MeshCreation;
-    default					  : return FilterPluginInterface::Generic;
-  }
+	switch(ID(a))
+	{
+	case FP_CREATEISO : return FilterPlugin::MeshCreation;
+	default					  : return FilterPlugin::Generic;
+	}
 }
 
- int FilterCreateIso::getRequirements(const QAction *action)
+int FilterCreateIso::getRequirements(const QAction *action)
 {
-  switch(ID(action))
-  {
-    case FP_CREATEISO :	return MeshModel::MM_NONE;
-    default: assert(0);
-  }
-  return 0;
+	switch(ID(action))
+	{
+	case FP_CREATEISO :	return MeshModel::MM_NONE;
+	default: assert(0);
+	}
+	return 0;
 }
 
- bool FilterCreateIso::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * cb)
- {
-   md.addNewMesh("",this->filterName(ID(filter)));
-   MeshModel &m=*(md.mm());
-   if(filter->text() == filterName(FP_CREATEISO) )
-   {
-
-     SimpleVolume<SimpleVoxel<Scalarm> > 	volume;
-
-     typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel<Scalarm> >	> MyWalker;
-     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
-     MyWalker walker;
-
-     const int gridSize=par.getInt("Resolution");
-     // Simple initialization of the volume with some cool perlin noise
-     volume.Init(Point3i(gridSize,gridSize,gridSize), Box3m(Point3m(0,0,0),Point3m(1,1,1)));
-     for(int i=0;i<gridSize;i++)
-       for(int j=0;j<gridSize;j++)
-         for(int k=0;k<gridSize;k++)
-           volume.Val(i,j,k)=(j-gridSize/2)*(j-gridSize/2)+(k-gridSize/2)*(k-gridSize/2) + i*gridSize/5*(float)math::Perlin::Noise(i*.2,j*.2,k*.2);
-
-     printf("[MARCHING CUBES] Building mesh...");
-     MyMarchingCubes mc(m.cm, walker);
-     walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10,cb);
-     m.UpdateBoxAndNormals();
-   }
-   return true;
- }
- void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
+std::map<std::string, QVariant> FilterCreateIso::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos * cb)
 {
-    pair<float,float> qualityRange;
-  switch(ID(action))
-  {
-    case FP_CREATEISO :
-          parlst.addParam(RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
-          break;
-  default: break; // do not add any parameter for the other filters
-  }
+	if (ID(filter) == FP_CREATEISO) {
+		md.addNewMesh("",this->filterName(ID(filter)));
+		MeshModel &m=*(md.mm());
+		SimpleVolume<SimpleVoxel<Scalarm> > volume;
+
+		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel<Scalarm> >	> MyWalker;
+		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
+		MyWalker walker;
+
+		const int gridSize=par.getInt("Resolution");
+		// Simple initialization of the volume with some cool perlin noise
+		volume.Init(Point3i(gridSize,gridSize,gridSize), Box3m(Point3m(0,0,0),Point3m(1,1,1)));
+		for(int i=0;i<gridSize;i++)
+			for(int j=0;j<gridSize;j++)
+				for(int k=0;k<gridSize;k++)
+					volume.Val(i,j,k)=(j-gridSize/2)*(j-gridSize/2)+(k-gridSize/2)*(k-gridSize/2) + i*gridSize/5*(float)math::Perlin::Noise(i*.2,j*.2,k*.2);
+
+		printf("[MARCHING CUBES] Building mesh...");
+		MyMarchingCubes mc(m.cm, walker);
+		walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10,cb);
+		m.UpdateBoxAndNormals();
+	}
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
+}
+void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
+{
+	switch(ID(action))
+	{
+	case FP_CREATEISO :
+		parlst.addParam(RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
+		break;
+	default: break; // do not add any parameter for the other filters
+	}
 }
 
 

@@ -26,14 +26,14 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include "alignset.h"
 
-class FilterMutualInfoPlugin : public QObject, public FilterPluginInterface
+class FilterMutualInfoPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
 
@@ -43,25 +43,31 @@ public:
 
 	QString pluginName() const;
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
-	FILTER_ARITY filterArity(const QAction*) const;
+	bool requiresGLContext(const QAction* action) const;
+	FilterArity filterArity(const QAction*) const;
 	void initParameterList(const QAction*, MeshDocument &, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction*) const;
 
 private:
 	AlignSet align;
 
 	//mutualInfo
-	bool imageMutualInfoAlign(
+	void imageMutualInfoAlign(
 			MeshDocument &md,
 			int rendmode,
 			bool estimateFocal,
 			bool fine,
-			float expectedVariance,
-			float tolerance,
+			Scalarm expectedVariance,
+			Scalarm tolerance,
 			int numIterations,
 			int backGroundWeight,
 			Shotm shot);

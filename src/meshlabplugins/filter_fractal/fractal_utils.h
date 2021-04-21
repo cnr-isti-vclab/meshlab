@@ -2,7 +2,7 @@
 #define FRACTAL_UTILS_H
 
 #include <vcg/math/perlin_noise.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include "filter_functors.h"
 #include <vector>
@@ -161,7 +161,7 @@ public:
     /* Generates a squared grid of triangles whose side will be passed back in the
        gridSide parameter. The subSteps parameter represents the number of subdivision
        steps during the grid generation. */
-    static void GenerateGrid(MeshType& m, int subSteps, float& gridSide)
+    static void GenerateGrid(MeshType& m, int subSteps, ScalarType& gridSide)
     {
         m.Clear();
         int k = (int)(pow(2.0f, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;

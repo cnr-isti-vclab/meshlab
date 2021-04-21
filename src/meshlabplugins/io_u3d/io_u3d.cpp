@@ -27,14 +27,11 @@
 #include <Qt>
 
 #include "io_u3d.h"
-#include <common/pluginmanager.h>
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/export_idtf.h>
 #include <wrap/io_trimesh/io_mask.h>
 
-#include <QMessageBox>
-#include <qapplication.h>
 #include <QSettings>
 #include "Converter.h"
 
@@ -43,45 +40,28 @@ using namespace vcg;
 
 
 U3DIOPlugin::U3DIOPlugin() :
-	QObject(), IOPluginInterface(), _param()
+	QObject(), IOPlugin(), _param()
 {
 }
 
-bool U3DIOPlugin::open(
-		const QString &, 
+void U3DIOPlugin::open(
+		const QString& format,
 		const QString &, 
 		MeshModel &, 
 		int&, 
 		const RichParameterList &, 
-		CallBackPos *, 
-		QWidget *)
+		CallBackPos *)
 {
-	return false;
+	wrongOpenFormat(format);
 }
 
-QString U3DIOPlugin::computePluginsPath()
-{
-	QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
-		#if defined(Q_OS_WIN)
-			pluginsDir.cd("U3D_W32");
-		#elif defined(Q_OS_MAC)
-				pluginsDir.cd("U3D_OSX");
-		#elif defined(Q_OS_LINUX)
-				pluginsDir.cd("U3D_LINUX");
-		#endif
-		qDebug("U3D plugins dir %s", qUtf8Printable(pluginsDir.absolutePath()));
-		return pluginsDir.absolutePath();
-}
-
-
-bool U3DIOPlugin::save(
+void U3DIOPlugin::save(
 		const QString &formatName, 
 		const QString &fileName, 
 		MeshModel &m, 
 		const int mask, 
 		const RichParameterList & par, 
-		vcg::CallBackPos *, 
-		QWidget *parent)
+		vcg::CallBackPos *)
 {
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -96,7 +76,6 @@ bool U3DIOPlugin::save(
 			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
 				m.cm, QDir::tempPath(), textures_to_be_restored);
 	if(formatName.toUpper() == tr("U3D")) {
-		qApp->restoreOverrideCursor();
 		saveParameters(par);
 		QSettings settings;
 		
@@ -111,14 +90,11 @@ bool U3DIOPlugin::save(
 		vcg::tri::io::ExporterIDTF<CMeshO>::Save(m.cm,qPrintable(tmp),mask);
 
 		//conversion from idtf to u3d
-		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, _param.positionQuality);
+		int resCode = 0;
+		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, resCode, _param.positionQuality);
 
 		if(result==false) {
-			QMessageBox::warning(
-						parent, 
-						tr("Saving Error"), 
-						errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(!result)));
-			return false;
+			throw MLException("Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")");
 		}
 		
 		//saving latex:
@@ -130,14 +106,19 @@ bool U3DIOPlugin::save(
 		dir.remove(tmp);
 
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
+		vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
+					m.cm,
+					textures_to_be_restored);
 	}
-	
-	if(formatName.toUpper() == tr("IDTF")) 
+	else if(formatName.toUpper() == tr("IDTF")) {
 		tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);
-	vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
-				m.cm,
-				textures_to_be_restored);
-	return true;
+		vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
+					m.cm,
+					textures_to_be_restored);
+	}
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*
@@ -148,20 +129,21 @@ QString U3DIOPlugin::pluginName() const
 	return "IOU3D";
 }
 
-QList<IOPluginInterface::Format> U3DIOPlugin::importFormats() const
+std::list<FileFormat> U3DIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
+	std::list<FileFormat> formatList;
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<IOPluginInterface::Format> U3DIOPlugin::exportFormats() const
+std::list<FileFormat> U3DIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("U3D File Format"	,tr("U3D"));
-	formatList << Format("IDTF File Format"	,tr("IDTF"));
+	std::list<FileFormat> formatList = {
+		FileFormat("U3D File Format" ,tr("U3D")),
+		FileFormat("IDTF File Format" ,tr("IDTF"))
+	};
 	return formatList;
 }
 
@@ -169,7 +151,7 @@ QList<IOPluginInterface::Format> U3DIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void U3DIOPlugin::GetExportMaskCapability(
+void U3DIOPlugin::exportMaskCapability(
 		const QString &format, 
 		int &capability, 
 		int &defaultBits) const
@@ -194,7 +176,7 @@ void U3DIOPlugin::GetExportMaskCapability(
 	assert(0);
 }
 
-void U3DIOPlugin::initSaveParameter(const QString &, MeshModel &m, RichParameterList &par) 
+void U3DIOPlugin::initSaveParameter(const QString &, const MeshModel &m, RichParameterList &par)
 {
 	_param._campar = 
 			new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(

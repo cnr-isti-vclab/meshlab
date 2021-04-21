@@ -67,8 +67,10 @@ namespace IDTFConverter {
 bool IDTFToU3d(
 		const std::string& inputFileName,
 		const std::string& outputFileName,
+		int& resCode,
 		int positionQuality)
 {
+	std::string pq(std::to_string(positionQuality));
 	const char* argv[] = {
 	#ifndef WIN32
 		"IDTFConverter",
@@ -80,7 +82,7 @@ bool IDTFToU3d(
 		"-rzf",
 		"0",
 		"-pq",
-		std::to_string(positionQuality).c_str(),
+		pq.c_str(),
 		"-input",
 		inputFileName.c_str(),
 		"-output",
@@ -220,6 +222,7 @@ bool IDTFToU3d(
 
 	IFXDEBUG_SHUTDOWN();
 
+	resCode = result;
 	return result == IFX_OK;
 }
 

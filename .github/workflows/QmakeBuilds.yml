@@ -17,6 +17,8 @@ jobs:
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
        sudo apt-get install -y libxkbcommon-x11-0 patchelf
+       #needed by qt 5.15 on linux
+       sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
       id: envs
       run: |
@@ -38,11 +40,6 @@ jobs:
       with:
         name: meshlab_linux_portable
         path: distrib/
-    - name: Upload MeshlabServer AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlabserver_linux_appimage
-        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
@@ -94,7 +91,7 @@ jobs:
         submodules: true
     - name: Download Jom
       run: |
-        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
+        Invoke-WebRequest -Uri "http://mirrors.ukfast.co.uk/sites/qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         echo "$(Get-Location)\jom" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -122,9 +119,6 @@ jobs:
       uses: joncloud/makensis-action@v1
       with:
         script-file: "scripts/windows/resources/meshlab_final.nsi"
-    - name: Rename Installer
-      run: |
-        Rename-Item -Path scripts\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:

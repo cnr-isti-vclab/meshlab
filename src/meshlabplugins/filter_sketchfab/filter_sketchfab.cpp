@@ -22,10 +22,10 @@
 ****************************************************************************/
 
 #include "filter_sketchfab.h"
+#include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QJSEngine>
 #include <QSettings>
 #include <QApplication>
 #include <QDir>
@@ -34,10 +34,10 @@
 
 FilterSketchFabPlugin::FilterSketchFabPlugin()
 { 
-	typeList << FP_SKETCHFAB;
+	typeList = {FP_SKETCHFAB};
 
-	for(FilterIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterSketchFabPlugin::pluginName() const
@@ -45,7 +45,7 @@ QString FilterSketchFabPlugin::pluginName() const
 	return "FilterSketchFab";
 }
 
-QString FilterSketchFabPlugin::filterName(FilterIDType filterId) const
+QString FilterSketchFabPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_SKETCHFAB :
@@ -56,7 +56,7 @@ QString FilterSketchFabPlugin::filterName(FilterIDType filterId) const
 	}
 }
 
-QString FilterSketchFabPlugin::filterInfo(FilterIDType filterId) const
+QString FilterSketchFabPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_SKETCHFAB :
@@ -71,14 +71,14 @@ FilterSketchFabPlugin::FilterClass FilterSketchFabPlugin::getClass(const QAction
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
-		return FilterPluginInterface::Smoothing;
+		return FilterPlugin::Smoothing;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
-FilterPluginInterface::FILTER_ARITY FilterSketchFabPlugin::filterArity(const QAction* a) const
+FilterPlugin::FilterArity FilterSketchFabPlugin::filterArity(const QAction* a) const
 {
 	switch(ID(a)) {
 	case FP_SKETCHFAB :
@@ -111,7 +111,7 @@ void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&,
 	}
 	switch(ID(action)) {
 	case FP_SKETCHFAB :
-		parlst.addParam(RichString("sketchFabKeyCode", sketchFabAPIValue, "Sketch Fab Code", "Mandatory."));
+		parlst.addParam(RichString("sketchFabKeyCode", sketchFabAPIValue, "SketchFab Account API token", "The API token of the account on which to upload the model.<br>You can find it by going on Settings -> Password and API -> API token."));
 		parlst.addParam(RichString("title", "MeshLabModel", "Title", "Mandatory."));
 		parlst.addParam(RichString("description", "A model generated with meshlab", "Description", "Mandatory. A short description of the model that is uploaded."));
 		parlst.addParam(RichString("tags", "meshlab", "Tags", "Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry."));
@@ -125,22 +125,31 @@ void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&,
 	}
 }
 
-bool FilterSketchFabPlugin::applyFilter(const QAction * action, MeshDocument& md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList& par, vcg::CallBackPos* cb)
+std::map<std::string, QVariant> FilterSketchFabPlugin::applyFilter(
+		const QAction * action,
+		const RichParameterList& par,
+		MeshDocument& md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos* cb)
 {
+	std::map<std::string, QVariant> outValues;
+	std::string url;
 	switch (ID(action)) {
 	case FP_SKETCHFAB:
-		return sketchfab(md, cb,
+		url = sketchfab(md, cb,
 						 par.getString("sketchFabKeyCode"), par.getString("title"),
 						 par.getString("description"), par.getString("tags"),
 						 par.getBool("isPrivate"), par.getBool("isPublished"),
 						 par.getBool("autoRotate"), par.getBool("saveApiSetting"));
+		outValues["url_model"] = QVariant::fromValue(QString::fromStdString(url));
+		break;
 	default:
-		assert(0);
-		return false;
+		wrongActionCalled(action);
 	}
+	return outValues;
 }
 
-bool FilterSketchFabPlugin::sketchfab(
+std::string FilterSketchFabPlugin::sketchfab(
 		MeshDocument& md,
 		vcg::CallBackPos* cb,
 		const QString& apiToken,
@@ -160,8 +169,7 @@ bool FilterSketchFabPlugin::sketchfab(
 	Matrix44m rotI; rot.SetRotateDeg(90,Point3m(1,0,0));
 
 	if(apiToken.isEmpty() || apiToken == DEFAULT_API) {
-		this->errorMessage = QString("Please set in the MeshLab preferences your private API Token string that you can find on the<a href=\"https://sketchfab.com/settings/password\">Sketchfab Password Settings.");
-		return false;
+		throw MLException("Please set in the MeshLab preferences your private API Token string that you can find on the<a href=\"https://sketchfab.com/settings/password\">Sketchfab Password Settings.");
 	}
 
 	QSettings settings;
@@ -190,13 +198,12 @@ bool FilterSketchFabPlugin::sketchfab(
 	std::string urlModel;
 	bool ret = upload(tmpZipFileName, apiToken, name, description, tags, QString::number(isPrivate), QString::number(isPublished), urlModel);
 	if(!ret){
-		qDebug("Upload FAILED");
-		return false;
+		throw MLException("Upload FAILED");
 	}
 
 	this->log("Upload Completed; you can access the uploaded model at the following URL:\n");
 	this->log("<a href=\"%s\">%s</a>\n",qUtf8Printable(QString::fromStdString(urlModel)),qUtf8Printable(QString::fromStdString(urlModel)));
-	return true;
+	return urlModel;
 }
 
 bool FilterSketchFabPlugin::upload(
@@ -255,11 +262,17 @@ bool FilterSketchFabPlugin::upload(
 
 	// get the api answer
 	QByteArray result = reply->readAll();
-	QJSValue sc;
-	QJSEngine engine;
-	qDebug() << "Result:" << result;
-	sc = engine.evaluate("(" + QString(result) + ")");
-	QString uid = sc.property("uid").toString();
+	QStringList sp = QString(result).split("\"");
+	std::cerr << "result:\n";
+	for (int i = 0; i < sp.size(); ++i)
+		std::cerr << std::to_string(i) + ": " << sp[i].toStdString() << "\n";
+	
+	
+	//QJSValue sc;
+	//QJSEngine engine;
+	//qDebug() << "Result:" << result;
+	//sc = engine.evaluate("(" + QString(result) + ")");
+	QString uid = sp[3];
 	if(uid.isEmpty())
 		return false;
 	qDebug() << "Model uploaded with id" << uid;

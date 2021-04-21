@@ -26,30 +26,27 @@
 #define EditPickPointsFactoryPLUGIN_H
 
 #include <QObject>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
-class EditPickPointsFactory : public QObject, public EditPluginInterfaceFactory
+class EditPickPointsFactory : public QObject, public EditPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_INTERFACE_FACTORY_IID)
-	Q_INTERFACES(EditPluginInterfaceFactory)
+	MESHLAB_PLUGIN_IID_EXPORTER(EDIT_PLUGIN_IID)
+	Q_INTERFACES(EditPlugin)
 
 public:
 	EditPickPointsFactory();
 	virtual ~EditPickPointsFactory() { delete editPickPoints; }
 
-	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const;
-	
+	virtual QString pluginName() const;
+
 	//get the edit tool for the given action
-	virtual EditPluginInterface* getMeshEditInterface(const QAction*);
-    
+	virtual EditTool* getEditTool(const QAction*);
+
 	//get the description for the given action
 	QString getEditToolDescription(const QAction*);
-	
+
 private:
-	QList <QAction *> actionList;
-	
 	QAction *editPickPoints;
 };
 

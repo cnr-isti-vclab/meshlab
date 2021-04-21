@@ -26,14 +26,19 @@
 /**
  * @brief Constructor usually performs only two simple tasks of filling the two lists
  *  - typeList: with all the possible id of the filtering actions
- *  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+ *  - actionList with the corresponding actions. If you want to add icons to
+ *  your filtering actions you can do here by construction the QActions accordingly
  */
 FilterSamplePlugin::FilterSamplePlugin() 
 { 
-	typeList << FP_MOVE_VERTEX;
+	typeList = {FP_MOVE_VERTEX};
 
-	for(FilterIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
+}
+
+FilterSamplePlugin::~FilterSamplePlugin()
+{
 }
 
 QString FilterSamplePlugin::pluginName() const
@@ -47,7 +52,7 @@ QString FilterSamplePlugin::pluginName() const
  * @param filterId: the id of the filter
  * @return the name of the filter
  */
-QString FilterSamplePlugin::filterName(FilterIDType filterId) const
+QString FilterSamplePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_MOVE_VERTEX :
@@ -65,7 +70,7 @@ QString FilterSamplePlugin::filterName(FilterIDType filterId) const
  * @param filterId: the id of the filter
  * @return an info string of the filter
  */
- QString FilterSamplePlugin::filterInfo(FilterIDType filterId) const
+ QString FilterSamplePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_MOVE_VERTEX :
@@ -87,10 +92,10 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
 {
 	switch(ID(a)) {
 	case FP_MOVE_VERTEX :
-		return FilterPluginInterface::Smoothing;
+		return FilterPlugin::Smoothing;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -98,7 +103,7 @@ FilterSamplePlugin::FilterClass FilterSamplePlugin::getClass(const QAction *a) c
  * @brief FilterSamplePlugin::filterArity
  * @return
  */
-FilterPluginInterface::FILTER_ARITY FilterSamplePlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterSamplePlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
@@ -153,22 +158,23 @@ void FilterSamplePlugin::initParameterList(const QAction *action,MeshModel &m, R
  * @param cb: callback object to tell MeshLab the percentage of execution of the filter
  * @return true if the filter has been applied correctly, false otherwise
  */
-bool FilterSamplePlugin::applyFilter(const QAction * action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos *cb)
+std::map<std::string, QVariant> FilterSamplePlugin::applyFilter(const QAction * action, const RichParameterList & parameters, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
-		return vertexDisplacement(md, cb, par.getBool("UpdateNormals"), par.getAbsPerc("Displacement"));
+		vertexDisplacement(md, cb, parameters.getBool("UpdateNormals"), parameters.getAbsPerc("Displacement"));
+		break;
 	default :
-		assert(0);
-		return false;
+		wrongActionCalled(action);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 bool FilterSamplePlugin::vertexDisplacement(
 		MeshDocument &md,
 		vcg::CallBackPos *cb,
 		bool updateNormals,
-		float max_displacement)
+		Scalarm max_displacement)
 {
 	CMeshO &m = md.mm()->cm;
 	srand(time(NULL));

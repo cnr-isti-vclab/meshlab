@@ -23,8 +23,8 @@
 #ifndef IOBREPLUGIN_H
 #define IOBREPLUGIN_H
 
-#include <common/interfaces/io_plugin_interface.h>
-#include <common/meshmodel.h>
+#include <common/plugins/interfaces/io_plugin.h>
+#include <common/ml_document/mesh_model.h>
 
 namespace vcg {
 namespace tri {
@@ -150,28 +150,28 @@ namespace io  {
 }//namespace tri
 }//namespace vcg
 
-class BreMeshIOPlugin : public QObject, public IOPluginInterface
+class BreMeshIOPlugin : public QObject, public IOPlugin
 {
-  Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_INTERFACE_IID)
-  Q_INTERFACES(IOPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
   
 public:
 	
-  BreMeshIOPlugin() : IOPluginInterface() {}
+  BreMeshIOPlugin() : IOPlugin() {}
   QString pluginName() const;
 
-  QList<Format> importFormats() const;
-  QList<Format> exportFormats() const;
+  std::list<FileFormat> importFormats() const;
+  std::list<FileFormat> exportFormats() const;
 
-  void GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+  void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
 
-  bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-  bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+  void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb);
+  void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb);
   virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
   virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par);
-  void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
-  virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+  void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
+  virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 
 };
 

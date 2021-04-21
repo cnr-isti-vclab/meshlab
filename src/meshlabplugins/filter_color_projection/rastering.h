@@ -27,7 +27,7 @@
 #include <QtGui>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
-#include <common/meshmodel.h>
+#include <common/ml_document/mesh_model.h>
 
 
 // texel descriptor---------------------------------

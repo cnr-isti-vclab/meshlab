@@ -27,12 +27,11 @@
 #include <QStringList>
 #include <QList>
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
-class EditManipulatorsPlugin : public QObject, public EditPluginInterface
+class EditManipulatorsPlugin : public QObject, public EditTool
 {
-  Q_OBJECT
-  Q_INTERFACES(EditPluginInterface)
+	Q_OBJECT
 
 public:
 
@@ -41,11 +40,10 @@ public:
 
   EditManipulatorsPlugin();
   virtual ~EditManipulatorsPlugin() {}
-  static const QString Info();
-  QString pluginName() const;
-  virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-  virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-  virtual void Decorate(MeshModel &, GLArea *,QPainter*);
+  static const QString info();
+  virtual bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+  virtual void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+  virtual void decorate(MeshModel &, GLArea *,QPainter*);
   virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );

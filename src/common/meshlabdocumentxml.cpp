@@ -80,6 +80,10 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					visible = (mesh.attributes().namedItem("visible").nodeValue().toInt() == 1);
 				MeshModel* mm = md.addNewMesh(filen, label);
 				mm->visible = visible;
+
+				if (mesh.attributes().contains("idInFile"))
+					mm->setIdInFile(mesh.attributes().namedItem("idInFile").nodeValue().toInt());
+
 				QDomNode tr = mesh.firstChildElement("MLMatrix44");
 
 				if (!tr.isNull())
@@ -89,10 +93,21 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					{
 						if (!binary)
 						{
-							QStringList values = tr.firstChild().nodeValue().split(" ", QString::SkipEmptyParts);
-							for (int y = 0; y < 4; y++)
-								for (int x = 0; x < 4; x++)
-									md.mm()->cm.Tr[y][x] = values[x + 4 * y].toFloat();
+							QStringList rows = tr.firstChild().nodeValue().split("\n", QString::SkipEmptyParts);
+							int i = 0;
+							for (const QString& row : qAsConst(rows)){
+								if (rows.size() > 0) {
+									QStringList values = row.split(" ", QString::SkipEmptyParts);
+									int j = 0;
+									for (const QString& value : qAsConst(values)) {
+										if (i < 4 && j < 4) {
+											md.mm()->cm.Tr[i][j] = value.toFloat();
+											j++;
+										}
+									}
+									i++;
+								}
+							}
 						}
 						else
 						{
@@ -162,7 +177,7 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					QFileInfo fi(filen);
 					QString sem = el.attribute("semantic");
 					QString nm = fi.absoluteFilePath();
-					md.rm()->addPlane(new Plane(fi.absoluteFilePath(), Plane::RGBA));
+					md.rm()->addPlane(new RasterPlane(fi.absoluteFilePath(), RasterPlane::RGBA));
 					el = node.nextSiblingElement("Plane");
 				}
 				raster = raster.nextSibling();
@@ -182,6 +197,7 @@ QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, bool binary, bool s
 	meshElem.setAttribute("label", mp->label());
 	meshElem.setAttribute("filename", mp->relativePathName());
 	meshElem.setAttribute("visible", saveViewState?mp->isVisible():true);
+	meshElem.setAttribute("idInFile", mp->idInFile());
 	if (binary)
 		meshElem.appendChild(Matrix44mToBinaryXML(mp->cm.Tr, doc));
 	else
@@ -223,7 +239,7 @@ QDomElement RasterModelToXML(RasterModel *mp, QDomDocument &doc, bool binary)
 	return rasterElem;
 }
 
-QDomElement PlaneToXML(Plane* pl, const QString& basePath, QDomDocument& doc)
+QDomElement PlaneToXML(RasterPlane* pl, const QString& basePath, QDomDocument& doc)
 {
 	QDomElement planeElem = doc.createElement("Plane");
 	QDir dir(basePath);
@@ -240,7 +256,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 	ddoc.appendChild(root);
 	QDomElement mgroot = ddoc.createElement("MeshGroup");
 
-	foreach(MeshModel *mmp, md.meshList)
+	for(MeshModel *mmp : md.meshList)
 	{
 		if ((!onlyVisibleLayers) || (mmp->visible))
 		{

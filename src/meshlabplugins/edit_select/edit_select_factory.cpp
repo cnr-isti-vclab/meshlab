@@ -26,28 +26,27 @@
 
 EditSelectFactory::EditSelectFactory()
 {
-    editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
-    editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
-    editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertices", this);
+	editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
+	editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
+	editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertices", this);
 	editSelectArea = new QAction(QIcon(":/images/select_area.png"), "Select Faces/Vertices inside polyline area", this);
 
-    actionList << editSelectVert;
-    actionList << editSelect;
-    actionList << editSelectConnected;
-	actionList << editSelectArea;
+	actionList.push_back(editSelectVert);
+	actionList.push_back(editSelect);
+	actionList.push_back(editSelectConnected);
+	actionList.push_back(editSelectArea);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditSelectFactory::actions() const
+
+QString EditSelectFactory::pluginName() const
 {
-	return actionList;
+	return "EditSelect";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditSelectFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditSelectFactory::getEditTool(const QAction *action)
 {
 	if(action == editSelect)
 		return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);
@@ -64,7 +63,7 @@ EditPluginInterface* EditSelectFactory::getMeshEditInterface(const QAction *acti
 
 QString EditSelectFactory::getEditToolDescription(const QAction * /*a*/)
 {
-  return EditSelectPlugin::Info();
+	return EditSelectPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditSelectFactory)

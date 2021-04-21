@@ -1,4 +1,4 @@
- /****************************************************************************
+/****************************************************************************
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
@@ -28,36 +28,35 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include "craters_utils.h"
 
-class FilterFractal : public QObject, public FilterPluginInterface
+class FilterFractal : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(FilterPluginInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
-public:
-    FilterFractal();
-    ~FilterFractal(){}
+	public:
+		FilterFractal();
+	~FilterFractal(){}
 
-    QString pluginName() const;
-    QString filterName(FilterIDType filter) const;
-    QString filterInfo(FilterIDType filter) const;
+	QString pluginName() const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
-    int getRequirements(const QAction*);
-    void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
+	int getRequirements(const QAction*);
+	void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
 
-    bool applyFilter (const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
-
-    int postCondition(const QAction *action) const;
-    FilterClass getClass(const QAction*) const;
-    FILTER_ARITY filterArity(const QAction* act) const;
+	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
+	int postCondition(const QAction *action) const;
+	FilterClass getClass(const QAction*) const;
+	FilterArity filterArity(const QAction* act) const;
 private:
-    void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
-    void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
+	void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
+	void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
 
-    enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
+	enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 };
 
 #endif

@@ -28,99 +28,109 @@
 
 
 #include <QObject>
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 #include <vcg/math/similarity2.h>
 #include "Patch.h"
 #include <wrap/glw/glw.h>
 class VisibleSet;
 
 
-class FilterImgPatchParamPlugin : public QObject, public FilterPluginInterface
+class FilterImgPatchParamPlugin : public QObject, public FilterPlugin
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES( FilterPluginInterface )
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES( FilterPlugin )
 
-    enum
-    {
-        FP_PATCH_PARAM_ONLY             ,
-        FP_PATCH_PARAM_AND_TEXTURING    ,
-        FP_RASTER_VERT_COVERAGE         ,
-        FP_RASTER_FACE_COVERAGE         ,
-    };
+	enum
+	{
+		FP_PATCH_PARAM_ONLY,
+		FP_PATCH_PARAM_AND_TEXTURING,
+		FP_RASTER_VERT_COVERAGE,
+		FP_RASTER_FACE_COVERAGE
+	};
 
-    typedef std::set<CFaceO*> NeighbSet;
-    glw::Context        *m_Context;
+	typedef std::set<CFaceO*> NeighbSet;
+	glw::Context        *m_Context;
 
 
-    void                getNeighbors( CVertexO *v,
-                                      NeighbSet &neighb ) const;
-    void                getFaceNeighbors( CFaceO *f,
-                                      NeighbSet &neighb ) const;
+	void getNeighbors(
+			CVertexO *v,
+			NeighbSet &neighb) const;
+	void getFaceNeighbors(
+			CFaceO *f,
+			NeighbSet &neighb) const;
 
-    void                boundaryOptimization( CMeshO &mesh,
-                                              VisibleSet &faceVis,
-                                              bool mostFrontFacing );
+	void boundaryOptimization(
+			CMeshO &mesh,
+			VisibleSet &faceVis,
+			bool mostFrontFacing);
 
-    int                 cleanIsolatedTriangles( CMeshO &mesh,
-                                                VisibleSet &faceVis );
+	int cleanIsolatedTriangles(
+			CMeshO &mesh,
+			VisibleSet &faceVis);
 
-    int                 extractPatches( RasterPatchMap &patches,
-                                        PatchVec &nullPatches,
-                                        CMeshO &mesh,
-                                        VisibleSet &faceVis,
-                                        QList<RasterModel*> &rasterList );
+	int extractPatches(
+			RasterPatchMap &patches,
+			PatchVec &nullPatches,
+			CMeshO &mesh,
+			VisibleSet &faceVis,
+			QList<RasterModel*> &rasterList);
 
-    void                constructPatchBoundary( Patch &p,
-                                                VisibleSet &faceVis );
+	void constructPatchBoundary(
+			Patch &p,
+			VisibleSet &faceVis );
 
-    void                computePatchUV( CMeshO &mesh,
-                                        RasterModel *rm,
-                                        PatchVec &patches );
+	void computePatchUV(
+			CMeshO &mesh,
+			RasterModel *rm,
+			PatchVec &patches);
 
-    void                mergeOverlappingPatches( PatchVec &patches );
+	void mergeOverlappingPatches( PatchVec &patches );
 
-    void                patchPacking( RasterPatchMap &patches,
-                                      int textureGutter,
-                                      bool allowUVStretching );
+	void patchPacking(
+			RasterPatchMap &patches,
+			int textureGutter,
+			bool allowUVStretching);
 
-    void                patchBasedTextureParameterization(RasterPatchMap &patches,
-                                                           PatchVec &nullPatches,
-                                                           int meshid,
-                                                           CMeshO &mesh,
-                                                           QList<RasterModel*> &rasterList,
-                                                           const RichParameterList& par );
+	void patchBasedTextureParameterization(
+			RasterPatchMap &patches,
+			PatchVec &nullPatches,
+			int meshid,
+			CMeshO &mesh,
+			QList<RasterModel*> &rasterList,
+			const RichParameterList& par);
 
-    float               computeTotalPatchArea( RasterPatchMap &patches );
-    int                 computePatchCount( RasterPatchMap &patches );
+	float computeTotalPatchArea(const RasterPatchMap& patches );
+	int computePatchCount(const RasterPatchMap& patches );
 
 
 public:
-    FilterImgPatchParamPlugin();
-    ~FilterImgPatchParamPlugin();
+	FilterImgPatchParamPlugin();
+	~FilterImgPatchParamPlugin();
 
-    QString pluginName() const;
-    virtual QString     filterName( FilterIDType id ) const;
-    virtual QString     filterInfo( FilterIDType id ) const;
+	QString pluginName() const;
+	virtual QString filterName( ActionIDType id ) const;
+	virtual QString filterInfo( ActionIDType id ) const;
 
-    virtual FilterClass getClass(const QAction* act ) const;
+	virtual FilterClass getClass(const QAction* act ) const;
 
-    virtual void        initParameterList(const QAction* act,
-                                          MeshDocument &md,
-                                          RichParameterList &par );
-
-    virtual int         getRequirements(const QAction* act );
-    //virtual int         postCondition( QAction *act ) const;
-
-	virtual bool applyFilter(
+	virtual void initParameterList(
 			const QAction* act,
 			MeshDocument &md,
-			std::map<std::string, QVariant>& outputValues,
-			unsigned int& postConditionMask,
-			const RichParameterList &par,
-			vcg::CallBackPos *cb );
+			RichParameterList &par );
 
-    FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	virtual int getRequirements(const QAction* act );
+	bool requiresGLContext(const QAction* action) const;
+	//virtual int postCondition( QAction *act ) const;
+
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
 
