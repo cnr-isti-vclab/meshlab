@@ -276,14 +276,14 @@ public:
 	 * (initPreOpenParameters, load...) whenever you receive as parameter a
 	 * format that is not supported by your plugin
 	 */
-	void wrongOpenFormat(const QString& format);
+	void wrongOpenFormat(const QString& format) const;
 
 	/**
 	 * @brief call this function in any of the export functions
 	 * (exportMaskCapability, save...) whenever you receive as parameter a
 	 * format that is not supported by your plugin
 	 */
-	void wrongSaveFormat(const QString& format);
+	void wrongSaveFormat(const QString& format) const;
 
 	/**
 	 * @brief The warningMessageString is invoked by the framework after the

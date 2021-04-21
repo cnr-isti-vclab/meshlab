@@ -71,6 +71,7 @@ HEADERS += 	\
 	python/function_set.h \
 	python/python_utils.h \
 	utilities/file_format.h \
+	utilities/load_save.h \
 	GLExtensionsManager.h \
 	filterscript.h \
 	GLLogStream.h \
@@ -111,6 +112,7 @@ SOURCES += \
 	python/function_parameter.cpp \
 	python/function_set.cpp \
 	python/python_utils.cpp \
+	utilities/load_save.cpp \
 	GLExtensionsManager.cpp \
 	filterscript.cpp \
 	GLLogStream.cpp \

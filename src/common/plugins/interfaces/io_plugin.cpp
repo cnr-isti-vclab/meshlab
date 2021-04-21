@@ -39,16 +39,18 @@ void IOPlugin::open(
 
 void IOPlugin::reportWarning(const QString& warningMessage) const
 {
-	MeshLabPluginLogger::log(GLLogStream::WARNING, warningMessage.toStdString());
-	warnString += "\n" + warningMessage;
+	if (!warningMessage.isEmpty()){
+		MeshLabPluginLogger::log(GLLogStream::WARNING, warningMessage.toStdString());
+		warnString += "\n" + warningMessage;
+	}
 }
 
-void IOPlugin::wrongOpenFormat(const QString& format)
+void IOPlugin::wrongOpenFormat(const QString& format) const
 {
 	throw MLException("Internal error: unknown open format " + format + " to " + pluginName() + " plugin.");
 }
 
-void IOPlugin::wrongSaveFormat(const QString& format)
+void IOPlugin::wrongSaveFormat(const QString& format) const
 {
 	throw MLException("Internal error: unknown save format " + format + " to " + pluginName() + " plugin.");
 }
