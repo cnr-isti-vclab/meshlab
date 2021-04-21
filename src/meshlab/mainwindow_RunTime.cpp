@@ -2949,7 +2949,10 @@ void MainWindow::updateTexture(int meshid)
 	MeshModel* mymesh = meshDoc()->getMesh(meshid);
 	if (mymesh  == NULL)
 		return;
-	
+
+	QString cwd = QDir::currentPath();
+	QDir::setCurrent(mymesh->pathName());
+
 	shared->deAllocateTexturesPerMesh(mymesh->id());
 	
 	int textmemMB = int(mwsettings.maxTextureMemory / ((float) 1024 * 1024));
@@ -3003,6 +3006,8 @@ void MainWindow::updateTexture(int meshid)
 	}
 	if (sometextfailed)
 		QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
+
+	QDir::setCurrent(cwd);
 }
 
 void MainWindow::updateProgressBar( const int pos,const QString& text )
