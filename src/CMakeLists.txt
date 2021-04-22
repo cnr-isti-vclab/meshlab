@@ -5,9 +5,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(MeshLab)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 ### Build options
 option(ALLOW_BUNDLED_EXTERNAL_MESHLAB_LIBRARIES "Allow to build bundled external libraries sources" ON)
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
