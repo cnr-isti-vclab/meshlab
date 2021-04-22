@@ -130,8 +130,7 @@ set(SOURCES
 	ml_selection_buffers.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
-	searcher.cpp
-	${EXTERNAL_DIR}/easyexif/exif.cpp)
+	searcher.cpp)
 
 set(TARGET_TYPE SHARED)
 if(WIN32)
@@ -145,8 +144,6 @@ target_compile_definitions(meshlab-common
 		MESHLAB_SCALAR=${MESHLAB_SCALAR})
 
 target_include_directories(meshlab-common
-	PRIVATE
-		${EXTERNAL_DIR}/easyexif/
 	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/..)
 
@@ -160,6 +157,7 @@ target_link_libraries(
 		Qt5::Network
 		vcglib
 		external-glew
+		external-exif
 )
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)

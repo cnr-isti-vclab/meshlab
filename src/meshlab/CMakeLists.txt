@@ -29,8 +29,7 @@ set(SOURCES
 	rich_parameter_gui/richparameterwidgets.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
-	${VCGDIR}/wrap/gui/coordinateframe.cpp
-	${EXTERNAL_DIR}/easyexif/exif.cpp)
+	${VCGDIR}/wrap/gui/coordinateframe.cpp)
 
 set(HEADERS
 	additionalgui.h

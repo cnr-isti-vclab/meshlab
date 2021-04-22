@@ -24,8 +24,10 @@ endif()
 ## REQUIRED EXTERNAL LIBS ##
 
 # GLEW - required
-include(${EXTERNAL_DIR}/glew.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/glew.cmake)
 
+# EasyExif - required
+include(${CMAKE_CURRENT_SOURCE_DIR}/easyexif.cmake)
 
 
 ## OPTIONAL EXTERNAL LIBS ##

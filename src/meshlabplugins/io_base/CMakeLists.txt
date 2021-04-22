@@ -6,8 +6,7 @@ set(SOURCES
 	baseio.cpp
 	${VCGDIR}/wrap/openfbx/src/miniz.c
 	${VCGDIR}/wrap/openfbx/src/ofbx.cpp
-	${VCGDIR}/wrap/ply/plylib.cpp
-	${EXTERNAL_DIR}/easyexif/exif.cpp)
+	${VCGDIR}/wrap/ply/plylib.cpp)
 
 set(HEADERS
 	baseio.h
@@ -25,6 +24,6 @@ set(HEADERS
 
 add_meshlab_plugin(io_base ${SOURCES} ${HEADERS})
 
-target_include_directories(io_base PRIVATE ${EXTERNAL_DIR}/easyexif/)
+#target_include_directories(io_base PRIVATE ${EXTERNAL_DIR}/easyexif/)
 
 target_link_libraries(io_base PRIVATE OpenGL::GLU)
