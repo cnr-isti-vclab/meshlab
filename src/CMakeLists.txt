@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.13)
 project(MeshLab)
 
 ### Build options
-option(ALLOW_BUNDLED_EXTERNAL_MESHLAB_LIBRARIES "Allow to build bundled external libraries sources" ON)
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
 option(BUILD_SERVER "Build a command-line server application" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
@@ -109,10 +108,7 @@ endif()
 
 # External
 set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-include(${EXTERNAL_DIR}/external_common.cmake)
-if((NOT BUILD_MINI) AND (ALLOW_BUNDLED_EXTERNAL_MESHLAB_LIBRARIES))
-	add_subdirectory(${EXTERNAL_DIR})
-endif()
+add_subdirectory(${EXTERNAL_DIR})
 
 add_subdirectory(common)
 
