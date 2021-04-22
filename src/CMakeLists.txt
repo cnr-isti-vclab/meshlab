@@ -193,6 +193,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/filter_sketchfab
 			meshlabplugins/filter_ssynth
 			meshlabplugins/filter_texture
+			meshlabplugins/filter_texture_defragmentation
 			meshlabplugins/filter_trioptimize
 			meshlabplugins/filter_unsharp
 			meshlabplugins/filter_voronoi
