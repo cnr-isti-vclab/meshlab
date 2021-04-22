@@ -5,7 +5,7 @@
 option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
 
-set(GLEW_DIR ${EXTERNAL_DIR}/glew-2.1.0)
+set(GLEW_DIR ${CMAKE_CURRENT_LIST_DIR}/glew-2.1.0)
 
 unset(HAVE_SYSTEM_GLEW)
 if(DEFINED GLEW_VERSION)

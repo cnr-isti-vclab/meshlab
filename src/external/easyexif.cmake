@@ -4,7 +4,7 @@
 
 option(ALLOW_BUNDLED_EXIF "Allow use of bundled EasyExif source" ON)
 
-set(EXIF_DIR ${EXTERNAL_DIR}/easyexif)
+set(EXIF_DIR ${CMAKE_CURRENT_LIST_DIR}/easyexif)
 
 if(ALLOW_BUNDLED_EXIF AND EXISTS "${EXIF_DIR}/exif.h")
 	message(STATUS "- exif - using bundled source")
