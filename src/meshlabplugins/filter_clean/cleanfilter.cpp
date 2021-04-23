@@ -277,6 +277,7 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 	{
 	case FP_BALL_PIVOTING:
 	{
+		vcg::tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 		Scalarm Radius = par.getAbsPerc("BallRadius");
 		Scalarm Clustering = par.getFloat("Clustering") / 100.0f;
 		Scalarm CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
