@@ -82,7 +82,6 @@ set(HEADERS
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
-	mainwindow_interface.h
 	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
 	ml_selection_buffers.h

@@ -29,7 +29,6 @@
 
 #include <GL/glew.h>
 
-#include "common/mainwindow_interface.h"
 #include "common/plugins/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
@@ -89,7 +88,7 @@ public:
 	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
 };
 
-class MainWindow : public QMainWindow, public MainWindowInterface
+class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 

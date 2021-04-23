@@ -75,7 +75,6 @@ HEADERS += 	\
 	GLExtensionsManager.h \
 	filterscript.h \
 	GLLogStream.h \
-	mainwindow_interface.h \
 	mlexception.h \
 	mlapplication.h \
 	meshlabdocumentxml.h \
