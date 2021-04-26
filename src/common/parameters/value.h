@@ -53,7 +53,7 @@ public:
 	virtual QColor getColor() const { assert(0); return QColor(); }
 	virtual Scalarm getAbsPerc() const { assert(0); return Scalarm(); }
 	virtual int getEnum() const { assert(0); return int(); }
-	virtual unsigned int getMeshIndex() const { assert(0); return 0; }
+	virtual unsigned int getMeshId() const { assert(0); return 0; }
 	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
@@ -278,10 +278,10 @@ public:
 	MeshValue(unsigned int meshind) : pval(meshind) {};
 	~MeshValue() {}
 
-	inline unsigned int getMeshIndex() const { return pval; }
+	inline unsigned int getMeshId() const { return pval; }
 	inline bool isMesh() const { return true; }
 	inline QString typeName() const { return QString("Mesh"); }
-	inline void	set(const Value& p) { pval = p.getMeshIndex(); }
+	inline void	set(const Value& p) { pval = p.getMeshId(); }
 	inline MeshValue* clone() const {return new MeshValue(*this);}
 	void fillToXMLElement(QDomElement& element) const;
 

@@ -995,7 +995,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		if(par.getBool("RefineFlag"))
 		{
 			pp.preGenFlag=true;
-			pp.preGenMesh=&(md.getMesh(par.getMeshIndex("RefineMesh"))->cm);
+			pp.preGenMesh=&(md.getMesh(par.getMeshId("RefineMesh"))->cm);
 		}
 		pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
 		pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
@@ -1014,8 +1014,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_HAUSDORFF_DISTANCE :
 	{
-		MeshModel* mm0 = md.getMesh(par.getMeshIndex("SampledMesh"));  // surface where we choose the random samples
-		MeshModel* mm1 = md.getMesh(par.getMeshIndex("TargetMesh"));   // surface that is sought for the closest point to each sample.
+		MeshModel* mm0 = md.getMesh(par.getMeshId("SampledMesh"));  // surface where we choose the random samples
+		MeshModel* mm1 = md.getMesh(par.getMeshId("TargetMesh"));   // surface that is sought for the closest point to each sample.
 		bool saveSampleFlag=par.getBool("SaveSample");
 		bool sampleVert=par.getBool("SampleVert");
 		bool sampleEdge=par.getBool("SampleEdge");
@@ -1107,8 +1107,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_DISTANCE_REFERENCE:
 	{
-		MeshModel* mm0 = md.getMesh(par.getMeshIndex("MeasureMesh"));  // this mesh gets measured.
-		MeshModel* mm1 = md.getMesh(par.getMeshIndex("RefMesh"));      // this is the reference mesh
+		MeshModel* mm0 = md.getMesh(par.getMeshId("MeasureMesh"));  // this mesh gets measured.
+		MeshModel* mm1 = md.getMesh(par.getMeshId("RefMesh"));      // this is the reference mesh
 		bool useSigned = par.getBool("SignedDist");
 		Scalarm maxDistABS = par.getAbsPerc("MaxDist");
 		
@@ -1151,8 +1151,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_VERTEX_RESAMPLING :
 	{
-		MeshModel* srcMesh = md.getMesh(par.getMeshIndex("SourceMesh")); // mesh whose attribute are read
-		MeshModel* trgMesh = md.getMesh(par.getMeshIndex("TargetMesh")); // this whose surface is sought for the closest point to each sample.
+		MeshModel* srcMesh = md.getMesh(par.getMeshId("SourceMesh")); // mesh whose attribute are read
+		MeshModel* trgMesh = md.getMesh(par.getMeshId("TargetMesh")); // this whose surface is sought for the closest point to each sample.
 		Scalarm upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 		bool onlySelected = par.getBool("onSelected");
 		bool colorT = par.getBool("ColorTransfer");
@@ -1261,8 +1261,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_VORONOI_COLORING :
 	{
-		MeshModel* mmM = md.getMesh(par.getMeshIndex("ColoredMesh"));  // surface where we choose the random samples
-		MeshModel* mmV = md.getMesh(par.getMeshIndex("VertexMesh"));   // surface that is sought for the closest point to each sample.
+		MeshModel* mmM = md.getMesh(par.getMeshId("ColoredMesh"));  // surface where we choose the random samples
+		MeshModel* mmV = md.getMesh(par.getMeshId("VertexMesh"));   // surface that is sought for the closest point to each sample.
 		bool backwardFlag = par.getBool("backward");
 		
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
@@ -1286,8 +1286,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_DISK_COLORING :
 	{
-		MeshModel* mmM = md.getMesh(par.getMeshIndex("ColoredMesh"));
-		MeshModel* mmV = md.getMesh(par.getMeshIndex("VertexMesh"));
+		MeshModel* mmM = md.getMesh(par.getMeshId("ColoredMesh"));
+		MeshModel* mmV = md.getMesh(par.getMeshId("VertexMesh"));
 		typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
 		SampleSHT sht;
 		tri::EmptyTMark<CMeshO> markerFunctor;

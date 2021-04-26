@@ -573,7 +573,7 @@ bool RichSaveFile::operator==( const RichParameter& rb )
 RichMesh::RichMesh(
 		const QString& nm,
 		unsigned int meshind,
-		MeshDocument* doc,
+		const MeshDocument* doc,
 		const QString& desc,
 		const QString& tltip ):
 	RichParameter(nm,MeshValue(meshind), desc, tltip), meshdoc(doc)
@@ -603,7 +603,7 @@ QString RichMesh::stringType() const
 QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
 	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
-	parElem.setAttribute("value", QString::number(val->getMeshIndex()));
+	parElem.setAttribute("value", QString::number(val->getMeshId()));
 	return parElem;
 }
 
@@ -614,7 +614,7 @@ RichMesh* RichMesh::clone() const
 
 bool RichMesh::operator==( const RichParameter& rb )
 {
-	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMeshIndex() == rb.value().getMeshIndex()));
+	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMeshId() == rb.value().getMeshId()));
 }
 
 /**** RichParameterAdapter Class ****/

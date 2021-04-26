@@ -802,8 +802,8 @@ void MainWindow::runFilterScript()
 				//if this is a mesh parameter and the index is valid
 				if(parameter.value().isMesh()) {
 					RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
-					if(!(md.value().getMeshIndex() < (unsigned int)meshDoc()->size())) {
-						printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.value().getMeshIndex() );
+					if(!(md.value().getMeshId() < (unsigned int)meshDoc()->size())) {
+						printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.value().getMeshId() );
 						printf("One of the filters in the script needs more meshes than you have loaded.\n");
 						return;
 					}
@@ -1270,7 +1270,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			{
 				if (p.value().isMesh())
 				{
-					MeshModel* mm = meshDoc()->getMesh(p.value().getMeshIndex());
+					MeshModel* mm = meshDoc()->getMesh(p.value().getMeshId());
 					if (mm != NULL)
 						tmp.push_back(mm);
 				}

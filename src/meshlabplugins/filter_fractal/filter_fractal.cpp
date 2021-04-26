@@ -308,11 +308,11 @@ std::map<std::string, QVariant> FilterFractal::applyFilter(
 			throw MLException("There must be at least two layers to apply the craters generation filter.");
 		}
 
-		CMeshO* samples = &(md.getMesh(par.getMeshIndex("samples_mesh"))->cm);
+		CMeshO* samples = &(md.getMesh(par.getMeshId("samples_mesh"))->cm);
 		if (samples->face.size() > 0) {
 			throw MLException("The sample layer selected should be a points cloud.");
 		}
-		CMeshO* target = &(md.getMesh(par.getMeshIndex("target_mesh"))->cm);
+		CMeshO* target = &(md.getMesh(par.getMeshId("target_mesh"))->cm);
 		if (samples == target) {
 			throw MLException("The sample layer and the target layer must be different.");
 		}
@@ -330,7 +330,7 @@ std::map<std::string, QVariant> FilterFractal::applyFilter(
 		}
 
 		// reads parameters
-		CratersUtils<CMeshO>::CratersArgs args(md.getMesh(par.getMeshIndex("target_mesh")), md.getMesh(par.getMeshIndex("samples_mesh")), par.getEnum("rbf"),
+		CratersUtils<CMeshO>::CratersArgs args(md.getMesh(par.getMeshId("target_mesh")), md.getMesh(par.getMeshId("samples_mesh")), par.getEnum("rbf"),
 											   par.getInt("seed"), minRadius, maxRadius, minDepth, maxDepth,
 											   par.getInt("smoothingSteps"), par.getBool("save_as_quality"), par.getBool("invert"),
 											   par.getBool("ppNoise"), par.getBool("successiveImpacts"),

@@ -108,7 +108,7 @@ public:
 	vcg::Color4b getColor4b(const QString& name) const;
 	Scalarm getAbsPerc(const QString& name) const;
 	int getEnum(const QString& name) const;
-	unsigned int getMeshIndex(const QString& name) const;
+	unsigned int getMeshId(const QString& name) const;
 	Scalarm getDynamicFloat(const QString& name) const;
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;

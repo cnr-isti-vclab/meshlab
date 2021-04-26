@@ -1079,7 +1079,7 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 	for(unsigned int i=0; i< (unsigned int)md->meshList.size(); ++i) {
 		QString shortName = md->meshList.at(i)->label();
 		meshNames.push_back(shortName);
-		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshIndex()) {
+		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshId()) {
 			currentmeshindex = i;
 		}
 	}
@@ -1114,7 +1114,7 @@ void MeshWidget::resetWidgetValue()
 {
 	int meshindex = -1;
 	for(unsigned int i=0; i<(unsigned int)md->meshList.size(); ++i) {
-		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshIndex()) {
+		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshId()) {
 			meshindex = i;
 		}
 	}
@@ -1125,7 +1125,7 @@ void MeshWidget::setWidgetValue( const Value& nv )
 {
 	int meshindex = -1;
 	for(unsigned int i=0; i< (unsigned int)md->meshList.size(); ++i) {
-		if((unsigned int) md->meshList.at(i)->id() == nv.getMeshIndex()) {
+		if((unsigned int) md->meshList.at(i)->id() == nv.getMeshId()) {
 			meshindex = i;
 		}
 	}

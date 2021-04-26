@@ -414,8 +414,8 @@ std::map<std::string, QVariant> FilterIsoParametrization::applyFilter(
 		//  }
 	case ISOP_TRANSFER:
 	{
-		MeshModel *mmtrg = md.getMesh(par.getMeshIndex("targetMesh"));
-		MeshModel *mmsrc = md.getMesh(par.getMeshIndex("sourceMesh"));
+		MeshModel *mmtrg = md.getMesh(par.getMeshId("targetMesh"));
+		MeshModel *mmsrc = md.getMesh(par.getMeshId("sourceMesh"));
 		CMeshO *trgMesh=&mmtrg->cm;
 		CMeshO *srcMesh=&mmsrc->cm;
 		

@@ -121,8 +121,8 @@ std::map<std::string, QVariant> FilterCSG::applyFilter(const QAction *filter, co
 	switch(ID(filter)) {
 	case FP_CSG:
 	{
-		MeshModel *firstMesh = md.getMesh(par.getMeshIndex("FirstMesh"));
-		MeshModel *secondMesh = md.getMesh(par.getMeshIndex("SecondMesh"));
+		MeshModel *firstMesh = md.getMesh(par.getMeshId("FirstMesh"));
+		MeshModel *secondMesh = md.getMesh(par.getMeshId("SecondMesh"));
 		if ((firstMesh == NULL) || (secondMesh == NULL))
 		{
 			log("CSG filter: cannot compute, mesh does not exist");
