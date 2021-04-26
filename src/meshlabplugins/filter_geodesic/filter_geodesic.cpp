@@ -232,7 +232,7 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
 	return std::map<std::string, QVariant>();
 }
 
-void FilterGeodesic::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
+void FilterGeodesic::initParameterList(const QAction *action, const MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action))
 	{

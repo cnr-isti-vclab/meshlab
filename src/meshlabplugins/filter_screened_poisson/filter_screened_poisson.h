@@ -54,7 +54,7 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 
-	void initParameterList(const QAction* a, MeshModel&, RichParameterList& parlist);
+	void initParameterList(const QAction* a, const MeshModel&, RichParameterList& parlist);
 	int postCondition(const QAction* filter) const;
 	FilterArity filterArity(const QAction*) const;
 };

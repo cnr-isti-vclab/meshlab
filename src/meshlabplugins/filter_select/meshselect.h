@@ -74,7 +74,7 @@ public:
 	virtual QString filterName(ActionIDType filter) const;
 
 	virtual FilterClass getClass(const QAction*) const;
-	void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
+	void initParameterList(const QAction* action, const MeshModel &m, RichParameterList &parlst);
 	int getPreConditions(const QAction*) const;
 	int postCondition(const QAction* ) const;
 	int getRequirements(const QAction*);

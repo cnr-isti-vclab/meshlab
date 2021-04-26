@@ -350,7 +350,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 // return
 //		true if has some parameters
 //		false is has no params
-void ExtraMeshFilterPlugin::initParameterList(const QAction * action, MeshModel & m, RichParameterList & parlst)
+void ExtraMeshFilterPlugin::initParameterList(const QAction * action, const MeshModel & m, RichParameterList & parlst)
 {
 	float maxVal;
 	QStringList curvCalcMethods;
@@ -556,7 +556,7 @@ void ExtraMeshFilterPlugin::initParameterList(const QAction * action, MeshModel 
 		traslMethod.push_back("Center on Layer BBox");
 		traslMethod.push_back("Set new Origin");
 		parlst.addParam(RichEnum("traslMethod", 0, traslMethod, tr("Transformation:"), tr("[XYZ translation] adds X,Y and Z offset to Layer transformation, [Center on BBox] moves Layer Origin to the Bounding Box center, [Set new Origin] moves Layer Origin to a specific point")));
-		Box3m &bb=m.cm.bbox;
+		const Box3m &bb=m.cm.bbox;
 		parlst.addParam(RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","when using [XYZ translation], amount of translation along the X axis (in model units)"));
 		parlst.addParam(RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","when using [XYZ translation], amount of translation along the Y axis (in model units)"));
 		parlst.addParam(RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","when using [XYZ translation], amount of translation along the Z axis (in model units)"));

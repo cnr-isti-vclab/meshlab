@@ -203,7 +203,7 @@ public:
 	 * it is always called. If a filter does not need parameter it leave it empty and the framework
 	 * will not create a dialog (unless for previewing)
 	 */
-	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*par*/) {}
+	virtual void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*par*/) {}
 	virtual void initParameterList(const QAction* filter, MeshDocument &md, RichParameterList &par)
 	{
 		initParameterList(filter, *(md.mm()), par);

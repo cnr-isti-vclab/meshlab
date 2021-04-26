@@ -197,7 +197,7 @@ std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 
 void FilterScreenedPoissonPlugin::initParameterList(
 		const QAction* filter,
-		MeshModel&,
+		const MeshModel&,
 		RichParameterList& parlist)
 {
 	if (ID(filter) == FP_SCREENED_POISSON) {

@@ -132,7 +132,7 @@ FilterPlugin::FilterArity FilterVoronoiPlugin::filterArity(const QAction* a) con
 	}
 }
 
-void FilterVoronoiPlugin::initParameterList(const QAction* action, MeshModel& m, RichParameterList& par)
+void FilterVoronoiPlugin::initParameterList(const QAction* action, const MeshModel& m, RichParameterList& par)
 {
 	 switch(ID(action))	 {
 	 case VORONOI_SAMPLING :

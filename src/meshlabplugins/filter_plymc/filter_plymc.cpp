@@ -101,7 +101,7 @@ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(const QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
+void PlyMCPlugin::initParameterList(const QAction *action,const MeshModel &m, RichParameterList & parlst)
 {
 	switch(ID(action))
 	{

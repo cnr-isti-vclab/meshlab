@@ -155,7 +155,7 @@ int FilterMeasurePlugin::getPreConditions(const QAction* action) const
 	}
 }
 
-void FilterMeasurePlugin::initParameterList(const QAction *action, MeshModel &m, RichParameterList & parlst)
+void FilterMeasurePlugin::initParameterList(const QAction *action, const MeshModel &m, RichParameterList & parlst)
 {
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_HISTOGRAM:

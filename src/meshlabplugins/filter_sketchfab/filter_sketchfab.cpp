@@ -98,7 +98,7 @@ int FilterSketchFabPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterList(const QAction* action, MeshModel&, RichParameterList& parlst)
+void FilterSketchFabPlugin::initParameterList(const QAction* action, const MeshModel&, RichParameterList& parlst)
 {
 	QSettings settings;
 	QVariant v = settings.value("SketchFab Code");

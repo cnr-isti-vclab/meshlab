@@ -47,7 +47,7 @@ using namespace vcg;
 
 #define CheckError(x,y); if ((x)) {throw MLException((y));}
 
-static QString extractFilenameWOExt(MeshModel* mm)
+static QString extractFilenameWOExt(const MeshModel* mm)
 {
     QFileInfo fi(mm->fullName());
     return fi.baseName();

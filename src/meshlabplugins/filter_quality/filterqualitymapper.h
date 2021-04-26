@@ -74,7 +74,7 @@ public:
 	virtual QString filterInfo(ActionIDType filter) const;
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;
-	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	virtual void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

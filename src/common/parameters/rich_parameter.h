@@ -262,7 +262,7 @@ public:
 
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);
-	MeshDocument* meshdoc;
+	const MeshDocument* meshdoc;
 	int meshindex;
 };
 
