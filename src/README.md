@@ -46,3 +46,6 @@ On __Windows__, we suggest to build meshlab using QtCreator. Before trying to bu
  * install Qt >= 5.12 and QtCreator.
 
 then, open the CMakeLists.txt file and try to build MeshLab.
+
+
+Qt5_DIR: C:/Qt/Qt5.12.10/5.12.10/msvc2017_64/lib/cmake/Qt5
