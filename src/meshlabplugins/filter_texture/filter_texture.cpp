@@ -226,9 +226,9 @@ void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument 
 	}
 		break;
 	case FP_TRANSFER_TO_TEXTURE : {
-		parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+		parlst.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",
 								  "The mesh that contains the source data that we want to transfer"));
-		parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+		parlst.addParam(RichMesh ("targetMesh",md.mm()->id(),&md, "Target Mesh",
 								  "The mesh whose texture will be filled according to source mesh data"));
 		parlst.addParam(RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
 								 "Choose what attribute has to be transferred onto the target texture. You can choose bettween Per vertex attributes (color,normal,quality) or to transfer color information from source mesh texture"));
@@ -243,9 +243,9 @@ void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument 
 	}
 		break;
 	case FP_TEX_TO_VCOLOR_TRANSFER : {
-		parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+		parlst.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",
 								  "The mesh with associated texture that we want to sample from"));
-		parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+		parlst.addParam(RichMesh ("targetMesh",md.mm()->id(),&md, "Target Mesh",
 								  "The mesh whose vertex color will be filled according to source mesh texture"));
 		parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
 									tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering color")));

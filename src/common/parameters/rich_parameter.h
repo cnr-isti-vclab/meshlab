@@ -251,10 +251,9 @@ public:
 class RichMesh : public RichParameter
 {
 public:
-	RichMesh(const QString& nm, MeshModel* defval, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
-	RichMesh(const QString& nm, int meshindex, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
+	RichMesh(const QString& nm, unsigned int meshindex, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString& nm, int meshind, const QString& desc = QString(), const QString& tltip = QString());
+	RichMesh(const QString& nm, unsigned int meshind, const QString& desc = QString(), const QString& tltip = QString());
 	~RichMesh();
 
 	QString stringType() const;
@@ -262,8 +261,7 @@ public:
 
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);
-	const MeshDocument* meshdoc;
-	int meshindex;
+	MeshDocument* meshdoc;
 };
 
 class RichParameterAdapter

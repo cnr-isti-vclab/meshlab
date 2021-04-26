@@ -87,9 +87,9 @@ void FilterCSG::initParameterList(const QAction *action, MeshDocument & md, Rich
 		CMeshO::ScalarType mindim = min(md.mm()->cm.bbox.Dim().V(md.mm()->cm.bbox.MinDim()),
 										target->cm.bbox.Dim().V(target->cm.bbox.MinDim()));
 
-		parlst.addParam(RichMesh("FirstMesh", md.mm(), &md, "First Mesh",
+		parlst.addParam(RichMesh("FirstMesh", md.mm()->id(), &md, "First Mesh",
 								 "The first operand of the CSG operation"));
-		parlst.addParam(RichMesh("SecondMesh", target, &md, "Second Mesh",
+		parlst.addParam(RichMesh("SecondMesh", target->id(), &md, "Second Mesh",
 								 "The second operand of the CSG operation"));
 		parlst.addParam(RichAbsPerc("Delta", mindim / 100.0, 0, mindim,
 									"Spacing between sampling lines",

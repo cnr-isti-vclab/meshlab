@@ -387,7 +387,7 @@ void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, R
         break;
         case FP_LINEAR_MORPH :
         {
-            parlst.addParam(RichMesh ("TargetMesh", md.mm(), &md,"Target Mesh", "The mesh that is the morph target."));
+			parlst.addParam(RichMesh ("TargetMesh", md.mm()->id(), &md,"Target Mesh", "The mesh that is the morph target."));
             parlst.addParam(RichDynamicFloat("PercentMorph", 0.0, -150, 250,
             "% Morph", tr("The percent you want to morph towards (or away from) the target. <br>"
             "0 means current mesh <br>"

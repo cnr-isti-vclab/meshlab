@@ -24,6 +24,7 @@
 #include "rich_parameter_list.h"
 
 #include "../mlexception.h"
+#include "../ml_document/mesh_document.h"
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
@@ -196,7 +197,10 @@ int RichParameterList::getEnum(const QString& name) const
  */
 MeshModel * RichParameterList::getMesh(const QString& name) const
 {
-	return getParameterByName(name).value().getMesh();
+	const RichMesh* rp = dynamic_cast<const RichMesh*>(&(getParameterByName(name)));
+	if (!rp)
+		throw MLException("The given parameter name is not a RichMesh.");
+	return rp->meshdoc->getMesh(rp->value().getMeshIndex());
 }
 
 /**

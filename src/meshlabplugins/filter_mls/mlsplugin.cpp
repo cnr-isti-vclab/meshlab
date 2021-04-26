@@ -208,9 +208,9 @@ void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichP
 
 	if ((id & _PROJECTION_))
 	{
-		parlst.addParam(RichMesh( "ControlMesh", target,&md, "Point set",
+		parlst.addParam(RichMesh( "ControlMesh", target->id(),&md, "Point set",
 								  "The point set (or mesh) which defines the MLS surface."));
-		parlst.addParam(RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
+		parlst.addParam(RichMesh( "ProxyMesh", target->id(), &md, "Proxy Mesh",
 								  "The mesh that will be projected/resampled onto the MLS surface."));
 	}
 	if ((id & _PROJECTION_) || (id & _COLORIZE_))

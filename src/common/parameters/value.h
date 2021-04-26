@@ -53,7 +53,7 @@ public:
 	virtual QColor getColor() const { assert(0); return QColor(); }
 	virtual Scalarm getAbsPerc() const { assert(0); return Scalarm(); }
 	virtual int getEnum() const { assert(0); return int(); }
-	virtual MeshModel* getMesh() const { assert(0); return NULL; }
+	virtual unsigned int getMeshIndex() const { assert(0); return 0; }
 	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
@@ -275,19 +275,18 @@ private:
 class MeshValue : public Value
 {
 public:
-	MeshValue(MeshModel* mesh) : pval(mesh) {}
-	MeshValue(MeshDocument* doc, int meshind);
+	MeshValue(unsigned int meshind) : pval(meshind) {};
 	~MeshValue() {}
 
-	inline MeshModel* getMesh() const { return pval; }
+	inline unsigned int getMeshIndex() const { return pval; }
 	inline bool isMesh() const { return true; }
 	inline QString typeName() const { return QString("Mesh"); }
-	inline void	set(const Value& p) { pval = p.getMesh(); }
+	inline void	set(const Value& p) { pval = p.getMeshIndex(); }
 	inline MeshValue* clone() const {return new MeshValue(*this);}
 	void fillToXMLElement(QDomElement& element) const;
 
 private:
-	MeshModel* pval;
+	unsigned int pval;
 };
 
 #endif //MESHLAB_VALUE_H

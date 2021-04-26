@@ -153,8 +153,8 @@ void FilterIsoParametrization::initParameterList(const QAction *a, MeshDocument&
 	}
 	case ISOP_TRANSFER:
 	{
-		par.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
-		par.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
+		par.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
+		par.addParam(RichMesh ("targetMesh",md.mm()->id(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
 	}
 	}
 }

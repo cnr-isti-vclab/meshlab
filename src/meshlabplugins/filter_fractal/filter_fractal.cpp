@@ -233,8 +233,8 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 		}
 	}
 
-	par.addParam(RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
-	par.addParam(RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
+	par.addParam(RichMesh("target_mesh", target->id(), &md, "Target mesh:", "The mesh on which craters will be generated."));
+	par.addParam(RichMesh("samples_mesh", samples->id(), &md, "Samples layer:", "The samples that represent the central points of craters."));
 	par.addParam(RichInt("seed", 0, "Seed:", "The seed with which the random number generator is initialized. The random generator generates radius and depth for each crater into the given range."));
 	par.addParam(RichInt("smoothingSteps", 5, "Normals smoothing steps:", "Vertex normals are smoothed this number of times before generating craters."));
 

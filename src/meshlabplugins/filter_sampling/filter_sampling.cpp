@@ -541,7 +541,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
     parlst.addParam(RichBool("ApproximateGeodesicDistance", false, "Approximate Geodesic Distance", "If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."));
     parlst.addParam(RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
     parlst.addParam(RichBool("RefineFlag", false, "Refine Existing Samples", "If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "));
-    parlst.addParam(RichMesh("RefineMesh", md.mm(),&md, "Samples to be refined", "Used only if the above option is checked. "));
+	parlst.addParam(RichMesh("RefineMesh", md.mm()->id(),&md, "Samples to be refined", "Used only if the above option is checked. "));
     parlst.addParam(RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "));
     parlst.addParam(RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
     parlst.addParam(RichBool("ExactNumFlag", false, "Exact number of samples", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer."));
@@ -566,9 +566,9 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 		foreach(vertexMesh, md.meshList)
 		if (vertexMesh != md.mm())  break;
 
-		parlst.addParam(RichMesh("SampledMesh", md.mm(), &md, "Sampled Mesh",
+		parlst.addParam(RichMesh("SampledMesh", md.mm()->id(), &md, "Sampled Mesh",
 			"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
-		parlst.addParam(RichMesh("TargetMesh", vertexMesh, &md, "Target Mesh",
+		parlst.addParam(RichMesh("TargetMesh", vertexMesh->id(), &md, "Target Mesh",
 			"The mesh that is sampled for the comparison."));
 		parlst.addParam(RichBool("SaveSample", false, "Save Samples",
 			"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));
@@ -592,9 +592,9 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 		foreach(vertexMesh, md.meshList)
 		if (vertexMesh != md.mm())  break;
 
-		parlst.addParam(RichMesh("MeasureMesh", md.mm(), &md, "Measured Mesh/PointCloud",
+		parlst.addParam(RichMesh("MeasureMesh", md.mm()->id(), &md, "Measured Mesh/PointCloud",
 			"The Mesh/Pointcloud that is measured, vertex by vertex, computing distance from the REFERENCE mesh/pointcloud."));
-		parlst.addParam(RichMesh("RefMesh", vertexMesh, &md, "Reference Mesh/PointCloud",
+		parlst.addParam(RichMesh("RefMesh", vertexMesh->id(), &md, "Reference Mesh/PointCloud",
 			"The Mesh/Pointcloud that is used as a reference, to measure distance from."));
 
 		parlst.addParam(RichBool("SignedDist", true, "Compute Signed Distance",
@@ -610,9 +610,9 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
     foreach (vertexMesh, md.meshList)
       if (vertexMesh != md.mm())  break;
 
-    parlst.addParam(RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+	parlst.addParam(RichMesh ("SourceMesh", md.mm()->id(),&md, "Source Mesh",
                                   "The mesh that contains the source data that we want to transfer."));
-    parlst.addParam(RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
+	parlst.addParam(RichMesh ("TargetMesh", vertexMesh->id(),&md, "Target Mesh",
                                   "The mesh whose vertices will receive the data from the source."));
     parlst.addParam(RichBool ("GeomTransfer", false, "Transfer Geometry",
                                   "if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));
@@ -667,9 +667,9 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
     foreach (vertexMesh, md.meshList) // Search another mesh
       if (vertexMesh != colorMesh)  break;
 
-    parlst.addParam(RichMesh ("ColoredMesh", colorMesh,&md, "To be Colored Mesh",
+	parlst.addParam(RichMesh ("ColoredMesh", colorMesh->id(),&md, "To be Colored Mesh",
                                   "The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."));
-    parlst.addParam(RichMesh ("VertexMesh", vertexMesh,&md, "Vertex Mesh",
+	parlst.addParam(RichMesh ("VertexMesh", vertexMesh->id(),&md, "Vertex Mesh",
                                   "The mesh whose vertices are used as seed points for the color computation. These seeds point are projected onto the above mesh."));
     if(ID(action) ==	FP_DISK_COLORING) {
       float Diag = md.mm()->cm.bbox.Diag();

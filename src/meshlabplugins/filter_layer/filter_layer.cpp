@@ -157,11 +157,11 @@ void FilterLayerPlugin::initParameterList(const QAction *action, MeshDocument &m
 									"New Label for the raster"));
 		break;
 	case FP_SELECTCURRENT :
-		parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name",
+		parlst.addParam(RichMesh ("layer",md.mm()->id(),&md, "Layer Name",
 								  "The name of the current layer"));
 		break;
 	case FP_MESH_VISIBILITY :
-		parlst.addParam(RichMesh ("layer",md.mm(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
+		parlst.addParam(RichMesh ("layer",md.mm()->id(),&md, "Layer Name", "The name of the layer that has to change visibility. If second parameter is not empty, this parameter is ignored"));
 		parlst.addParam(RichString("lName", "", "Substring match", "Apply visibility to all layers with name substring matching the entered string. If not empty, the first parameter is ignored."));
 		parlst.addParam(RichBool ("isMeshVisible", true,  "Visible", "It makes the selected layer(s) visible or invisible."));
 		break;

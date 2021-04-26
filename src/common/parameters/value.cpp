@@ -31,14 +31,6 @@ void BoolValue::fillToXMLElement(QDomElement& element) const
 	element.setAttribute("value", v);
 }
 
-MeshValue::MeshValue(MeshDocument* doc, int meshind)
-{
-	if (doc != nullptr)
-		pval = doc->meshList.at(meshind);
-	else
-		pval = nullptr;
-}
-
 void IntValue::fillToXMLElement(QDomElement& element) const
 {
 	element.setAttribute("value", QString::number(pval));

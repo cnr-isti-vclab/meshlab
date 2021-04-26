@@ -645,11 +645,8 @@ public:
 				//if this is a mesh parameter and the index is valid
 				if(parameter.value().isMesh()) {
 					RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
-					if(md.meshindex < meshDocument.size() && md.meshindex >= 0) {
-						parameterSet.setValue(md.name(), MeshValue(&meshDocument, md.meshindex));
-					}
-					else {
-						fprintf(fp,"Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md.meshindex );
+					if(!(md.value().getMeshIndex() < (unsigned int) meshDocument.size())) {
+						fprintf(fp,"Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md.value().getMeshIndex() );
 						fprintf(fp,"One of the filters in the script needs more meshes than you have loaded.\n");
 						exit(-1);
 					}
