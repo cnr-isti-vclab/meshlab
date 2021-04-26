@@ -195,12 +195,9 @@ int RichParameterList::getEnum(const QString& name) const
  * @return the mesh of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MeshModel * RichParameterList::getMesh(const QString& name) const
+unsigned int RichParameterList::getMeshIndex(const QString& name) const
 {
-	const RichMesh* rp = dynamic_cast<const RichMesh*>(&(getParameterByName(name)));
-	if (!rp)
-		throw MLException("The given parameter name is not a RichMesh.");
-	return rp->meshdoc->getMesh(rp->value().getMeshIndex());
+	return getParameterByName(name).value().getMeshIndex();
 }
 
 /**

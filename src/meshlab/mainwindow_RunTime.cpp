@@ -1270,7 +1270,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 			{
 				if (p.value().isMesh())
 				{
-					MeshModel* mm =((RichMesh&)p).meshdoc->getMesh(p.value().getMeshIndex());
+					MeshModel* mm = meshDoc()->getMesh(p.value().getMeshIndex());
 					if (mm != NULL)
 						tmp.push_back(mm);
 				}

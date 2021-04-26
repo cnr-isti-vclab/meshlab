@@ -208,14 +208,14 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 	} break;
 
-	case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("layer")); break;
+	case  FP_SELECTCURRENT:   md.setCurrent(md.getMesh(par.getMeshIndex("layer"))); break;
 
 	case  FP_MESH_VISIBILITY:
 	{
 		QString match = par.getString("lName");
 		if (match == "")
 		{
-			MeshModel *mm = par.getMesh("layer");
+			MeshModel *mm = md.getMesh(par.getMeshIndex("layer"));
 			if (mm)
 				md.setVisible(mm->id(), par.getBool("isMeshVisible"));
 		}

@@ -410,10 +410,10 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_)
 		{
-			if (par.getMesh("ControlMesh") == par.getMesh("ProxyMesh"))
+			if (par.getMeshIndex("ControlMesh") == par.getMeshIndex("ProxyMesh"))
 			{
 				// clone the control mesh
-				MeshModel* ref = par.getMesh("ControlMesh");
+				MeshModel* ref = md.getMesh(par.getMeshIndex("ControlMesh"));
 				pPoints = md.addNewMesh("","TempMesh");
 				pPoints->updateDataMask(ref);
 				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm);  // the last true means "copy all vertices"
@@ -421,7 +421,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 				pPoints->cm.Tr = ref->cm.Tr;
 			}
 			else
-				pPoints = par.getMesh("ControlMesh");
+				pPoints = md.getMesh(par.getMeshIndex("ControlMesh"));
 		}
 		else // for curvature
 			pPoints = md.mm();
@@ -464,7 +464,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 
 		if (id & _PROJECTION_)
 		{
-			mesh = par.getMesh("ProxyMesh");
+			mesh = md.getMesh(par.getMeshIndex("ProxyMesh"));
 			bool selectionOnly = par.getBool("SelectionOnly");
 
 			if (selectionOnly)
@@ -614,7 +614,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		}
 
 		delete mls;
-		if ( (id & _PROJECTION_) && par.getMesh("ControlMesh")!=pPoints)
+		if ( (id & _PROJECTION_) && md.getMesh(par.getMeshIndex("ControlMesh"))!=pPoints)
 		{
 			md.delMesh(pPoints);
 		}

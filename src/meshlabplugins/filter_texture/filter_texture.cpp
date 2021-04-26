@@ -845,8 +845,8 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		
 	case FP_TRANSFER_TO_TEXTURE : 
 	{
-		MeshModel *srcMesh = par.getMesh("sourceMesh");
-		MeshModel *trgMesh = par.getMesh("targetMesh");
+		MeshModel *srcMesh = md.getMesh(par.getMeshIndex("sourceMesh"));
+		MeshModel *trgMesh = md.getMesh(par.getMeshIndex("targetMesh"));
 		bool vertexSampling=false;
 		bool textureSampling=false;
 		int  vertexMode= -1;
@@ -1060,8 +1060,8 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		
 	case FP_TEX_TO_VCOLOR_TRANSFER :
 	{
-		MeshModel *srcMesh = par.getMesh("sourceMesh");
-		MeshModel *trgMesh = par.getMesh("targetMesh");
+		MeshModel *srcMesh = md.getMesh(par.getMeshIndex("sourceMesh"));
+		MeshModel *trgMesh = md.getMesh(par.getMeshIndex("targetMesh"));
 		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		
 		assert(srcMesh!=NULL);

@@ -695,7 +695,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 
 	case FP_LINEAR_MORPH:
 	{
-		CMeshO &targetMesh = par.getMesh("TargetMesh")->cm;
+		CMeshO &targetMesh = md.getMesh(par.getMeshIndex("TargetMesh"))->cm;
 		CMeshO &sourceMesh = m.cm;
 
 		//if the numbers of vertices don't match up
