@@ -312,7 +312,7 @@ int FilterUnsharp::postCondition(const QAction *a) const
   return MeshModel::MM_NONE;
 }
 
-void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterUnsharp::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
 {
     switch(ID(action))
     {

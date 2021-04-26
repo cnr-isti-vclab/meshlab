@@ -174,7 +174,7 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a)
 	return FilterPlugin::Generic;
 }
 	
-static QString extractFilenameTexture(MeshModel* mm)
+static QString extractFilenameTexture(const MeshModel* mm)
 {
 	QFileInfo fi(mm->fullName());
 	QString fileName = fi.baseName().append("_tex.png");
@@ -190,7 +190,7 @@ static QString extractFilenameTexture(MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterTexturePlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
 {
 	QString fileName = extractFilenameTexture(md.mm());
 	switch(ID(action)) {

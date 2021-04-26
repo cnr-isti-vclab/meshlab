@@ -462,7 +462,7 @@ int FilterDocSampling::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & md, RichParameterList & parlst)
+void FilterDocSampling::initParameterList(const QAction *action, const MeshDocument & md, RichParameterList & parlst)
 {
   switch(ID(action))	 {
   case FP_MONTECARLO_SAMPLING :
@@ -562,7 +562,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 
   case FP_HAUSDORFF_DISTANCE:
   {
-		MeshModel *vertexMesh = md.mm();
+		const MeshModel *vertexMesh = md.mm();
 		foreach(vertexMesh, md.meshList)
 		if (vertexMesh != md.mm())  break;
 
@@ -588,7 +588,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 
   case FP_DISTANCE_REFERENCE:
   {
-		MeshModel *vertexMesh = md.mm();
+		const MeshModel *vertexMesh = md.mm();
 		foreach(vertexMesh, md.meshList)
 		if (vertexMesh != md.mm())  break;
 
@@ -606,9 +606,9 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 
   case FP_VERTEX_RESAMPLING:
   {
-    MeshModel *vertexMesh= md.mm();
-    foreach (vertexMesh, md.meshList)
-      if (vertexMesh != md.mm())  break;
+	const MeshModel *vertexMesh= md.mm();
+	foreach (vertexMesh, md.meshList)
+		if (vertexMesh != md.mm())  break;
 
 	parlst.addParam(RichMesh ("SourceMesh", md.mm()->id(),&md, "Source Mesh",
                                   "The mesh that contains the source data that we want to transfer."));
@@ -659,7 +659,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
   case FP_VORONOI_COLORING :
   case FP_DISK_COLORING :
   {
-    MeshModel *colorMesh= md.mm();
+	const MeshModel *colorMesh= md.mm();
     foreach (colorMesh, md.meshList) // Search a mesh with some faces..
       if (colorMesh->cm.fn>0)  break;
 

@@ -99,7 +99,7 @@ int FilterIsoParametrization::getRequirements(const QAction *)
 	return MeshModel::MM_NONE;
 }
 
-void FilterIsoParametrization::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
+void FilterIsoParametrization::initParameterList(const QAction *a, const MeshDocument& md, RichParameterList & par)
 {
 	
 	switch(ID(a))

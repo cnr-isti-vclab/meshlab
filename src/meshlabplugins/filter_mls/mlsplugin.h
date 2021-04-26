@@ -66,7 +66,7 @@ public:
 	virtual QString filterName(ActionIDType filter) const;
 	virtual QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction *a) const;
-	virtual void initParameterList(const QAction*, MeshDocument &md, RichParameterList &parent);
+	virtual void initParameterList(const QAction*, const MeshDocument &md, RichParameterList &parent);
 	virtual int getRequirements(const QAction* action);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,

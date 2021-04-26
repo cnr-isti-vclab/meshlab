@@ -204,7 +204,7 @@ public:
 	 * will not create a dialog (unless for previewing)
 	 */
 	virtual void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*par*/) {}
-	virtual void initParameterList(const QAction* filter, MeshDocument &md, RichParameterList &par)
+	virtual void initParameterList(const QAction* filter, const MeshDocument &md, RichParameterList &par)
 	{
 		initParameterList(filter, *(md.mm()), par);
 	}

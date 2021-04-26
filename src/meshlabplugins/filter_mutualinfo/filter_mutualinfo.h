@@ -48,7 +48,7 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	bool requiresGLContext(const QAction* action) const;
 	FilterArity filterArity(const QAction*) const;
-	void initParameterList(const QAction*, MeshDocument &, RichParameterList & /*parent*/);
+	void initParameterList(const QAction*, const MeshDocument &, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

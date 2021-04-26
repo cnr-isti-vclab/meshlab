@@ -140,9 +140,10 @@ FilterPlugin::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act
 //}
 
 
-void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
-												  MeshDocument &/*md*/,
-												  RichParameterList &par )
+void FilterImgPatchParamPlugin::initParameterList(
+		const QAction *act,
+		const MeshDocument &/*md*/,
+		RichParameterList &par )
 {
 	switch( ID(act) )
 	{

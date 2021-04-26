@@ -179,10 +179,10 @@ QString MlsPlugin::filterInfo(ActionIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichParameterList& parlst)
+void MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md, RichParameterList& parlst)
 {
 	int id = ID(action);
-	MeshModel *target = md.mm();
+	const MeshModel *target = md.mm();
 
 	if (id == FP_SELECT_SMALL_COMPONENTS)
 	{

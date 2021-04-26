@@ -169,7 +169,7 @@ QString FilterFractal::filterInfo(ActionIDType filterId) const
 	return description;
 }
 
-void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterList(const QAction* filter, const MeshDocument &md, RichParameterList &par)
 {
 	switch(ID(filter))
 	{
@@ -183,7 +183,7 @@ void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, Ri
 	}
 }
 
-void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, const MeshDocument &md, RichParameterList &par)
 {
 	bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
 
@@ -213,13 +213,13 @@ void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter
 	par.addParam(RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
 }
 
-void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForCratersGeneration(const MeshDocument &md, RichParameterList &par)
 {
 	int meshCount = md.meshList.size();
 
 	// tries to detect the target mesh
-	MeshModel* target = md.mm();
-	MeshModel* samples = md.mm();
+	const MeshModel* target = md.mm();
+	const MeshModel* samples = md.mm();
 	MeshModel* tmpMesh;
 	if (samples->cm.fn != 0){ // this is probably not the samples layer
 		for(int i=0; i<meshCount; i++)

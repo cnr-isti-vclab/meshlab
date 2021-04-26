@@ -44,7 +44,7 @@ class FilterColorProjectionPlugin : public QObject, public FilterPlugin
 	int postCondition( const QAction* ) const;
 
 	FilterClass getClass(const QAction*) const;
-	void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	void initParameterList(const QAction*, const MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	int getRequirements(const QAction*);
 	bool requiresGLContext(const QAction* action) const;
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);

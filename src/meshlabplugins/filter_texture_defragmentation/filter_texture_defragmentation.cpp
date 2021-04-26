@@ -132,7 +132,7 @@ FilterTextureDefragPlugin::FilterClass FilterTextureDefragPlugin::getClass(const
 	return FilterPlugin::Generic;
 }
 
-void FilterTextureDefragPlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterTextureDefragPlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
 {
 	switch (ID(action)) {
 	case FP_TEXTURE_DEFRAG:

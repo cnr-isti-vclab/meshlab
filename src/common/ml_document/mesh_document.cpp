@@ -230,6 +230,11 @@ RasterModel* MeshDocument::rm()
 	return currentRaster;
 }
 
+const RasterModel* MeshDocument::rm() const
+{
+	return currentRaster;
+}
+
 unsigned int MeshDocument::newMeshId()
 {
 	return meshIdCounter++;
@@ -438,7 +443,7 @@ int MeshDocument::fn()
 	return tot;
 }
 
-Box3m MeshDocument::bbox()
+Box3m MeshDocument::bbox() const
 {
 	Box3m FullBBox;
 	for(MeshModel * mp : meshList)

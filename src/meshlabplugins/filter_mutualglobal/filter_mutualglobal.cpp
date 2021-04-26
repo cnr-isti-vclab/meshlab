@@ -114,7 +114,7 @@ bool FilterMutualGlobal::requiresGLContext(const QAction* action) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterMutualGlobal::initParameterList(const QAction *action,MeshDocument & md, RichParameterList & parlst)
+void FilterMutualGlobal::initParameterList(const QAction *action, const MeshDocument & md, RichParameterList & parlst)
 {
 	QStringList rendList;
 	switch(ID(action))	 {

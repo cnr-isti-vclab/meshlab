@@ -51,7 +51,7 @@ class FilterTextureDefragPlugin : public QObject, public FilterPlugin
 	QString pluginName() const;
 	virtual QString filterName(ActionIDType filter) const;
 	virtual QString filterInfo(ActionIDType filter) const;
-	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	virtual void initParameterList(const QAction*, const MeshDocument &/*m*/, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action,
 	                                            const RichParameterList & parameters,
 	                                            MeshDocument &md,

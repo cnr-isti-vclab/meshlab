@@ -71,6 +71,7 @@ public:
 	
 	//Could return 0 if no raster has been selected
 	RasterModel *rm();
+	const RasterModel* rm() const;
 
 	void requestUpdatingPerMeshDecorators(int mesh_id);
 	
@@ -105,7 +106,7 @@ public:
 
 	int fn();
 	
-	Box3m bbox();
+	Box3m bbox() const;
 	
 	bool hasBeenModified();
 	

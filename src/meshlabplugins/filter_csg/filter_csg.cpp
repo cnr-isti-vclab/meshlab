@@ -74,12 +74,12 @@ QString FilterCSG::filterInfo(ActionIDType filterId) const
 	}
 }
 
-void FilterCSG::initParameterList(const QAction *action, MeshDocument & md, RichParameterList & parlst)
+void FilterCSG::initParameterList(const QAction *action, const MeshDocument & md, RichParameterList & parlst)
 {
 	switch (ID(action)) {
 	case FP_CSG:
 	{
-		MeshModel *target = md.mm();
+		const MeshModel *target = md.mm();
 		foreach (target, md.meshList)
 			if (target != md.mm())
 				break;

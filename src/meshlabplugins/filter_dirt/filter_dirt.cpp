@@ -99,7 +99,7 @@ QString FilterDirt::filterInfo(ActionIDType filterId) const
 	}
 }
 
-void FilterDirt::initParameterList(const QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
+void FilterDirt::initParameterList(const QAction* filter, const MeshDocument & /*md*/, RichParameterList &par){
 
 	switch(ID(filter)){
 

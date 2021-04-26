@@ -116,10 +116,10 @@ QString FilterLayerPlugin::filterInfo(ActionIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+void FilterLayerPlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
 {
-	MeshModel *mm=md.mm();
-	RasterModel *rm=md.rm();
+	const MeshModel *mm=md.mm();
+	const RasterModel *rm=md.rm();
 	switch(ID(action))
 	{
 	case FP_SPLITSELECTEDVERTICES:

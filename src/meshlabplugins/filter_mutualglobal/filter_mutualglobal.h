@@ -54,7 +54,7 @@ public:
 
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
-	void initParameterList(const QAction*, MeshDocument & md, RichParameterList & /*parent*/);
+	void initParameterList(const QAction*, const MeshDocument & md, RichParameterList & /*parent*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

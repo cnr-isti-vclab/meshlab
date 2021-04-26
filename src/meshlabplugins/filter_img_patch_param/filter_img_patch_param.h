@@ -116,7 +116,7 @@ public:
 
 	virtual void initParameterList(
 			const QAction* act,
-			MeshDocument &md,
+			const MeshDocument &md,
 			RichParameterList &par );
 
 	virtual int getRequirements(const QAction* act );
