@@ -29,6 +29,7 @@
 #include "containers/filter_plugin_container.h"
 #include "containers/io_plugin_container.h"
 #include "containers/render_plugin_container.h"
+#include "meshlab_plugin_type.h"
 
 #include <QPluginLoader>
 #include <QObject>
@@ -45,7 +46,7 @@ public:
 	class PluginRangeIterator;
 
 	/** Member functions **/
-	static void checkPlugin(const QString& filename);
+	static MeshLabPluginType checkPlugin(const QString& filename);
 
 	void loadPlugins();
 	void loadPlugins(QDir pluginsDirectory);

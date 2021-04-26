@@ -29,7 +29,6 @@
 
 #include <vcg/complex/algorithms/create/platonic.h>
 
-#include "meshlab_plugin_type.h"
 #include "../mlexception.h"
 #include "../globals.h"
 
@@ -68,7 +67,7 @@ PluginManager::~PluginManager()
  * 
  * Throws a MLException if the file is not a valid MeshLab plugin.
  */
-void PluginManager::checkPlugin(const QString& filename)
+MeshLabPluginType PluginManager::checkPlugin(const QString& filename)
 {
 	QFileInfo fin(filename);
 	if (!fin.exists()){
@@ -126,6 +125,7 @@ void PluginManager::checkPlugin(const QString& filename)
 	}
 
 	loader.unload();
+	return type;
 }
 
 /**
