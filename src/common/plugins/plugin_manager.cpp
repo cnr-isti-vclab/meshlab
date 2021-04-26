@@ -184,7 +184,7 @@ void PluginManager::loadPlugins(QDir pluginsDirectory)
  * 
  * Throws a MLException if the load of the plugin fails.
  */
-void PluginManager::loadPlugin(const QString& fileName)
+MeshLabPlugin* PluginManager::loadPlugin(const QString& fileName)
 {
 	QFileInfo fin(fileName);
 	if (pluginFiles.find(fin.absoluteFilePath()) != pluginFiles.end())
@@ -220,6 +220,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	allPlugins.push_back(ifp);
 	allPluginLoaders.push_back(loader);
 	pluginFiles.insert(fin.absoluteFilePath());
+	return ifp;
 }
 
 void PluginManager::unloadPlugin(MeshLabPlugin* ifp)

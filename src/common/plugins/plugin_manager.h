@@ -50,7 +50,7 @@ public:
 
 	void loadPlugins();
 	void loadPlugins(QDir pluginsDirectory);
-	void loadPlugin(const QString& filename);
+	MeshLabPlugin* loadPlugin(const QString& filename);
 	void unloadPlugin(MeshLabPlugin* ifp);
 
 	void enablePlugin(MeshLabPlugin* ifp);
