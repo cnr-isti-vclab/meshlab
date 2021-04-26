@@ -36,94 +36,102 @@ pymeshlab::FunctionSet::FunctionSet(const PluginManager& pm)
 {
 	//dummy MeshDocument use to compute default value parameters
 	//the mesh used is a 1x1x1 cube (with extremes [-0.5; 0.5])
-	MeshDocument dummyMeshDocument;
-	Box3m b(Point3m(-0.5,-0.5,-0.5),Point3m(0.5,0.5,0.5));
-	CMeshO dummyMesh;
-	vcg::tri::Box<CMeshO>(dummyMesh,b);
-	dummyMeshDocument.addNewMesh(dummyMesh, "cube");
-	int mask = 0;
-	mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-	mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-	dummyMeshDocument.mm()->Enable(mask);
+	initDummyMeshDocument();
 
-	for (auto inputFormat : pm.inputMeshFormatList()){
-		QString originalFilterName = inputFormat;
-		QString pythonFilterName = inputFormat.toLower();
-		Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
-		IOPlugin* plugin = pm.inputMeshPlugin(inputFormat);
-		RichParameterList rps;
-		plugin->initPreOpenParameter(inputFormat, rps);
-		plugin->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
-
-		//filename parameter
-		QString sv = "file_name." + inputFormat;
-		QStringList sl(inputFormat);
-		RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
-		FunctionParameter par(of);
-		f.addParameter(par);
-
-		for (const RichParameter& rp : rps){
-			FunctionParameter par(rp);
-			f.addParameter(par);
-		}
-		loadMeshSet.insert(f);
-	}
-
-	for (auto outputFormat : pm.outputMeshFormatList()){
-		QString originalFilterName = outputFormat;
-		QString pythonFilterName = outputFormat.toLower();
-		Function f(pythonFilterName, originalFilterName, "Save " + outputFormat + " format.");
-		IOPlugin* plugin = pm.outputMeshPlugin(outputFormat);
-		RichParameterList rps;
-		plugin->initSaveParameter(outputFormat, *dummyMeshDocument.mm(), rps);
-
-		//filename parameter
-		QString sv = "file_name." + outputFormat;
-		RichSaveFile of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
-		FunctionParameter par(of);
-		f.addParameter(par);
-
-		for (const RichParameter& rp : rps){
-			FunctionParameter par(rp);
-			f.addParameter(par);
-		}
-
-		//data to save
-		updateSaveParameters(plugin, outputFormat, f);
-
-		saveMeshSet.insert(f);
-	}
-
-	for (auto inputRasterFormat : pm.inputRasterFormatList()){
-		QString originalFilterName = inputRasterFormat;
-		QString pythonFilterName = inputRasterFormat.toLower();
-		Function f(pythonFilterName, originalFilterName, "Load " + inputRasterFormat + " format.");
-
-		//filename parameter
-		QString sv = "file_name." + inputRasterFormat;
-		QStringList sl(inputRasterFormat);
-		RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
-		FunctionParameter par(of);
-		f.addParameter(par);
-
-		loadRasterSet.insert(f);
+	for (IOPlugin* iop : pm.ioPluginIterator()){
+		loadIOPlugin(iop);
 	}
 
 	for (FilterPlugin* fp : pm.filterPluginIterator()){
-		for (QAction* act : fp->actions()) {
-			QString originalFilterName = fp->filterName(act);
-			QString description = fp->filterInfo(act);
-			QString pythonFilterName = fp->pythonFilterName(act);
-			Function f(pythonFilterName, originalFilterName, description);
+		loadFilterPlugin(fp);
+	}
+}
 
+void pymeshlab::FunctionSet::loadFilterPlugin(FilterPlugin* fp)
+{
+	for (QAction* act : fp->actions()) {
+		QString originalFilterName = fp->filterName(act);
+		QString description = fp->filterInfo(act);
+		QString pythonFilterName = fp->pythonFilterName(act);
+		Function f(pythonFilterName, originalFilterName, description);
+
+		RichParameterList rps;
+		fp->initParameterList(act, dummyMeshDocument, rps);
+
+		for (const RichParameter& rp : rps){
+			FunctionParameter par(rp);
+			f.addParameter(par);
+		}
+		filterSet.insert(f);
+	}
+}
+
+void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
+{
+	for (const FileFormat& ff : iop->importFormats()){
+		for (const QString& inputFormat : ff.extensions){
+			QString originalFilterName = inputFormat.toLower();
+			QString pythonFilterName = inputFormat.toLower();
+			Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
 			RichParameterList rps;
-			fp->initParameterList(act, dummyMeshDocument, rps);
+			iop->initPreOpenParameter(inputFormat, rps);
+			iop->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
+
+			//filename parameter
+			QString sv = "file_name." + inputFormat;
+			QStringList sl(inputFormat);
+			RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
+			FunctionParameter par(of);
+			f.addParameter(par);
 
 			for (const RichParameter& rp : rps){
 				FunctionParameter par(rp);
 				f.addParameter(par);
 			}
-			filterSet.insert(f);
+			loadMeshSet.insert(f);
+		}
+	}
+
+	for (const FileFormat& ff : iop->exportFormats()){
+		for (const QString& outputFormat : ff.extensions){
+			QString originalFilterName = outputFormat.toLower();
+			QString pythonFilterName = outputFormat.toLower();
+			Function f(pythonFilterName, originalFilterName, "Save " + outputFormat + " format.");
+			RichParameterList rps;
+			iop->initSaveParameter(outputFormat, *dummyMeshDocument.mm(), rps);
+
+			//filename parameter
+			QString sv = "file_name." + outputFormat;
+			RichSaveFile of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
+			FunctionParameter par(of);
+			f.addParameter(par);
+
+			for (const RichParameter& rp : rps){
+				FunctionParameter par(rp);
+				f.addParameter(par);
+			}
+
+			//data to save
+			updateSaveParameters(iop, outputFormat, f);
+
+			saveMeshSet.insert(f);
+		}
+	}
+
+	for (const FileFormat& ff : iop->importRasterFormats()){
+		for (const QString& inputRasterFormat : ff.extensions){
+			QString originalFilterName = inputRasterFormat;
+			QString pythonFilterName = inputRasterFormat.toLower();
+			Function f(pythonFilterName, originalFilterName, "Load " + inputRasterFormat + " format.");
+
+			//filename parameter
+			QString sv = "file_name." + inputRasterFormat;
+			QStringList sl(inputRasterFormat);
+			RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
+			FunctionParameter par(of);
+			f.addParameter(par);
+
+			loadRasterSet.insert(f);
 		}
 	}
 }
@@ -229,4 +237,17 @@ void pymeshlab::FunctionSet::updateSaveParameters(IOPlugin* plugin,
 	}
 
 
+}
+
+void pymeshlab::FunctionSet::initDummyMeshDocument()
+{
+	dummyMeshDocument.clear();
+	Box3m b(Point3m(-0.5,-0.5,-0.5),Point3m(0.5,0.5,0.5));
+	CMeshO dummyMesh;
+	vcg::tri::Box<CMeshO>(dummyMesh,b);
+	dummyMeshDocument.addNewMesh(dummyMesh, "cube");
+	int mask = 0;
+	mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+	mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+	dummyMeshDocument.mm()->Enable(mask);
 }

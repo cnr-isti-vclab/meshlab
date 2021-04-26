@@ -50,6 +50,10 @@ public:
 	FunctionSet();
 	FunctionSet(const PluginManager& pm);
 
+	//load plugins
+	void loadFilterPlugin(FilterPlugin* fp);
+	void loadIOPlugin(IOPlugin* iop);
+
 	std::list<std::string> pythonFilterFunctionNames() const;
 
 	const Function& filterFunction(const QString& pythonFunctionName) const;
@@ -86,6 +90,10 @@ private:
 			IOPlugin* plugin,
 			const QString& outputFormat,
 			Function& f);
+
+	void initDummyMeshDocument();
+
+	MeshDocument dummyMeshDocument;
 
 	std::set<Function> filterSet;
 	std::set<Function> loadMeshSet;
