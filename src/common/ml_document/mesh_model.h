@@ -71,99 +71,99 @@ class MeshDocument;
 class MeshModel
 {
 public:
-    /*
-    This enum specify the various simplex components
-    It is used in various parts of the framework:
-    - to know what elements are currently active and therefore can be saved on a file
-    - to know what elements are required by a filter and therefore should be made ready before starting the filter (e.g. if a
-    - to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
-    */
-    enum MeshElement{
-        MM_NONE             = 0x00000000,
-        MM_VERTCOORD        = 0x00000001,
-        MM_VERTNORMAL       = 0x00000002,
-        MM_VERTFLAG         = 0x00000004,
-        MM_VERTCOLOR        = 0x00000008,
-        MM_VERTQUALITY      = 0x00000010,
-        MM_VERTMARK	        = 0x00000020,
-        MM_VERTFACETOPO     = 0x00000040,
-        MM_VERTCURV	        = 0x00000080,
-        MM_VERTCURVDIR      = 0x00000100,
-        MM_VERTRADIUS       = 0x00000200,
-        MM_VERTTEXCOORD     = 0x00000400,
-        MM_VERTNUMBER       = 0x00000800,
+	/*
+	This enum specify the various simplex components
+	It is used in various parts of the framework:
+	- to know what elements are currently active and therefore can be saved on a file
+	- to know what elements are required by a filter and therefore should be made ready before starting the filter (e.g. if a
+	- to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
+	*/
+	enum MeshElement{
+		MM_NONE         = 0x00000000,
+		MM_VERTCOORD    = 0x00000001,
+		MM_VERTNORMAL   = 0x00000002,
+		MM_VERTFLAG     = 0x00000004,
+		MM_VERTCOLOR    = 0x00000008,
+		MM_VERTQUALITY  = 0x00000010,
+		MM_VERTMARK	    = 0x00000020,
+		MM_VERTFACETOPO = 0x00000040,
+		MM_VERTCURV	    = 0x00000080,
+		MM_VERTCURVDIR  = 0x00000100,
+		MM_VERTRADIUS   = 0x00000200,
+		MM_VERTTEXCOORD = 0x00000400,
+		MM_VERTNUMBER   = 0x00000800,
 
-        MM_FACEVERT         = 0x00001000,
-        MM_FACENORMAL       = 0x00002000,
-        MM_FACEFLAG	        = 0x00004000,
-        MM_FACECOLOR        = 0x00008000,
-        MM_FACEQUALITY      = 0x00010000,
-        MM_FACEMARK	        = 0x00020000,
-        MM_FACEFACETOPO     = 0x00040000,
-        MM_FACENUMBER       = 0x00080000,
-        MM_FACECURVDIR      = 0x00100000,
+		MM_FACEVERT     = 0x00001000,
+		MM_FACENORMAL   = 0x00002000,
+		MM_FACEFLAG	    = 0x00004000,
+		MM_FACECOLOR    = 0x00008000,
+		MM_FACEQUALITY  = 0x00010000,
+		MM_FACEMARK	    = 0x00020000,
+		MM_FACEFACETOPO = 0x00040000,
+		MM_FACENUMBER   = 0x00080000,
+		MM_FACECURVDIR  = 0x00100000,
 
-        MM_WEDGTEXCOORD     = 0x00200000,
-        MM_WEDGNORMAL       = 0x00400000,
-        MM_WEDGCOLOR        = 0x00800000,
+		MM_WEDGTEXCOORD = 0x00200000,
+		MM_WEDGNORMAL   = 0x00400000,
+		MM_WEDGCOLOR    = 0x00800000,
 
-        // 	Selection
-        MM_VERTFLAGSELECT   = 0x01000000,
-        MM_FACEFLAGSELECT   = 0x02000000,
+		// 	Selection
+		MM_VERTFLAGSELECT = 0x01000000,
+		MM_FACEFLAGSELECT = 0x02000000,
 
-        // Per Mesh Stuff....
-        MM_CAMERA			= 0x08000000,
-        MM_TRANSFMATRIX     = 0x10000000,
-        MM_COLOR            = 0x20000000,
-        MM_POLYGONAL        = 0x40000000,
+		// Per Mesh Stuff....
+		MM_CAMERA         = 0x08000000,
+		MM_TRANSFMATRIX   = 0x10000000,
+		MM_COLOR          = 0x20000000,
+		MM_POLYGONAL      = 0x40000000,
 
 		// unknown - will raise exceptions, to be avoided, here just for compatibility
-        MM_UNKNOWN          = 0x80000000,
+		MM_UNKNOWN        = 0x80000000,
 
 		// geometry change (for filters that remove stuff or modify geometry or topology, but not touch face/vertex color or face/vertex quality)
-		MM_GEOMETRY_AND_TOPOLOGY_CHANGE  = 0x431e7be7,
+		MM_GEOMETRY_AND_TOPOLOGY_CHANGE = 0x431e7be7,
 
 		// everything - dangerous, will add unwanted data to layer (e.g. if you use MM_ALL it could means that it could add even color or quality)
-        MM_ALL				= 0xffffffff
-    };
+		MM_ALL				= 0xffffffff
+	};
 
-    MeshModel(MeshDocument *parent, unsigned int id, const QString& fullFileName, const QString& labelName);
-    ~MeshModel()
-    {
-    }
+	MeshModel(MeshDocument *parent, unsigned int id, const QString& fullFileName, const QString& labelName);
+	~MeshModel()
+	{
+	}
 
 	MeshDocument *parent;
 
-    CMeshO cm;
+	CMeshO cm;
 
 
 
 
-    /*vcg::GlTrimesh<CMeshO> glw;*/
-    
-    
-    
-    /*
-    Bitmask denoting what fields are currently used in the mesh
-    it is composed by MeshElement enums.
-    it should be changed by only mean the following functions:
+	/*vcg::GlTrimesh<CMeshO> glw;*/
 
-    updateDataMask(neededStuff)
-    clearDataMask(no_needed_stuff)
-    hasDataMask(stuff)
 
-    Note that if an element is active means that is also allocated
-    Some unactive elements (vertex color) are usually already allocated
-    other elements (FFAdj or curvature data) not necessarily.
 
-    */
+	/*
+	Bitmask denoting what fields are currently used in the mesh
+	it is composed by MeshElement enums.
+	it should be changed by only mean the following functions:
+
+	updateDataMask(neededStuff)
+	clearDataMask(no_needed_stuff)
+	hasDataMask(stuff)
+
+	Note that if an element is active means that is also allocated
+	Some unactive elements (vertex color) are usually already allocated
+	other elements (FFAdj or curvature data) not necessarily.
+
+	*/
 
 private:
-    int currentDataMask;
-    QString fullPathFileName;
-    QString _label;
-    unsigned int _id;
-    bool modified;
+	int currentDataMask;
+	QString fullPathFileName;
+	QString _label;
+	unsigned int _id;
+	bool modified;
 
 	//this is an id used for meshes that are loaded from files
 	//that can store more than one mesh. For meshes loaded from
@@ -171,65 +171,66 @@ private:
 	int idInsideFile;
 
 public:
-    void Clear();
-    void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
-    inline int id() const {return _id;}
+	void Clear();
+	void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
+	inline int id() const {return _id;}
 
 	int idInFile() const {return idInsideFile;}
 	void setIdInFile(int id) {idInsideFile = id;}
-    
-    
-    // Some notes about the files and naming.
-    // Each mesh when shown in the layer dialog has a label.
-    // By default the label is just the name of the file, but the
 
-    // in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
-    // currently we just fix the interface and make the pathname private for avoiding future hassles.
 
-    QString label() const { if(_label.isEmpty()) return shortName(); else return _label;}
+	// Some notes about the files and naming.
+	// Each mesh when shown in the layer dialog has a label.
+	// By default the label is just the name of the file, but the
 
-    /// The whole full path name of the mesh
-    QString fullName() const {return fullPathFileName;}
+	// in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
+	// currently we just fix the interface and make the pathname private for avoiding future hassles.
 
-    /// just the name of the file
-    QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
+	QString label() const { if(_label.isEmpty()) return shortName(); else return _label;}
 
-    /// the full path without the name of the file (e.g. the dir where the mesh and often its textures are)
-    QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();}
+	/// The whole full path name of the mesh
+	QString fullName() const {return fullPathFileName;}
 
-    /// just the extension.
-    QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
+	/// just the name of the file
+	QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
 
-    /// the relative path with respect to the current project
-    QString relativePathName() const;
+	/// the full path without the name of the file (e.g. the dir where the mesh and often its textures are)
+	QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();}
 
-    /// the absolute path of the current project
-    QString documentPathName() const;
+	/// just the extension.
+	QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
 
-    void setFileName(QString newFileName) {
-        QFileInfo fi(newFileName);
-        if(!fi.isAbsolute()) qWarning("Someone is trying to put a non relative filename");
-        fullPathFileName = fi.absoluteFilePath();
-    }
-    void setLabel(QString newName) {_label=newName;}
+	/// the relative path with respect to the current project
+	QString relativePathName() const;
 
-    bool visible; // used in rendering; Needed for toggling on and off the meshes
+	/// the absolute path of the current project
+	QString documentPathName() const;
+
+	void setFileName(QString newFileName) {
+		QFileInfo fi(newFileName);
+		if(!fi.isAbsolute()) qWarning("Someone is trying to put a non relative filename");
+		fullPathFileName = fi.absoluteFilePath();
+	}
+	void setLabel(QString newName) {_label=newName;}
+
+	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	bool isVisible() const { return visible; }
 
-    // This function is roughly equivalent to the updateDataMask,
-    // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
-    void Enable(int openingFileMask);
+	// This function is roughly equivalent to the updateDataMask,
+	// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
+	void Enable(int openingFileMask);
 
-    bool hasDataMask(const int maskToBeTested) const;
-    void updateDataMask(MeshModel *m);
-    void updateDataMask(int neededDataMask);
-    void clearDataMask(int unneededDataMask);
-    int dataMask() const;
+	bool hasDataMask(const int maskToBeTested) const;
+	void updateDataMask();
+	void updateDataMask(MeshModel *m);
+	void updateDataMask(int neededDataMask);
+	void clearDataMask(int unneededDataMask);
+	int dataMask() const;
 
 
 	bool meshModified() const;
 	void setMeshModified(bool b = true);
-    static int io2mm(int single_iobit);
+	static int io2mm(int single_iobit);
 };// end class MeshModel
 
 
