@@ -76,8 +76,6 @@ public:
 
 private:
 	std::list<FileFormat> rasterFormatList;
-
-	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
 };
 
 #endif

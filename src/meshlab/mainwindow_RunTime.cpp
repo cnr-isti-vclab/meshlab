@@ -2420,7 +2420,16 @@ bool MainWindow::importMesh(QString fileName)
 			// the user does not want to see the parameter dialog
 			// need to take the default values from the currentGlobalParams
 			else {
-				//TODO
+				for (RichParameter& p : prePar){
+					QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
+					if (currentGlobalParams.hasParameter(prefixName + p.name())){
+						const RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
+						p.setValue(cp.value());
+					}
+					else {
+						qDebug() << "ERROR!!! " + prefixName + p.name() + " not found in global params.";
+					}
+				}
 			}
 		}
 
