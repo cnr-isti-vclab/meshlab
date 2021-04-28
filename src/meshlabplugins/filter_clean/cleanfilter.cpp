@@ -264,7 +264,7 @@ void CleanFilter::initParameterList(const QAction *action, const MeshDocument &m
 							"Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence"));
 		break;
 	case FP_REMOVE_NON_MANIF_VERT :
-		parlst.addParam(RichFloat("VertDispRatio", 0, "Vertex Displacement Ratio", "When a vertex is split it is moved along the average vector going from its position to the baricyenter of the FF connected faces sharing it"));
+		parlst.addParam(RichFloat("VertDispRatio", 0, "Vertex Displacement Ratio", "This parameter denote the ratio ⍺ of displacement of a vertex. When a vertex <i>v</i> is split, it is moved towards the barycenter <i>b</i> of the FF connected faces sharing it of a (<i>v</i>-<i>b</i>)*⍺. When ⍺ is zero vertex is not displaced. When ⍺ is 0.5 the new vertex is half away toward the barycenter of the face. Reasonable values are in the [0 .. 0.1] range. "));
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
