@@ -2170,7 +2170,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList,RichParameterList* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
+bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList, const RichParameterList& prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
 {
 	if ((GLA() == NULL))
 		return false;
@@ -2198,7 +2198,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	meshDoc()->setBusy(true);
 	pCurrentIOPlugin->setLog(&meshDoc()->Log);
 	
-	unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileNameSansDir);
+	unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileNameSansDir, prePar);
 	if (nMeshes != meshList.size()) {
 		QMessageBox::warning(
 					this,
@@ -2210,7 +2210,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	}
 
 	try {
-		pCurrentIOPlugin->open(extension, fileNameSansDir, meshList ,maskList,*prePar,QCallBack);
+		pCurrentIOPlugin->open(extension, fileNameSansDir, meshList ,maskList, prePar, QCallBack);
 	}
 	catch(const MLException& e) {
 		QMessageBox::warning(
@@ -2434,7 +2434,7 @@ bool MainWindow::importMesh(QString fileName)
 		}
 
 		//check how many meshes are going to be loaded from the file
-		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName);
+		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
 
 		QFileInfo info(fileName);
 		std::list<MeshModel*> meshList;
@@ -2529,7 +2529,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		std::list<MeshModel*> ml;
 		std::list<int> masks;
 		ml.push_back(mm);
-		bool open = loadMesh(fullPath,pCurrentIOPlugin,ml,masks,&prePar,mtr,isreload, rendOpt);
+		bool open = loadMesh(fullPath,pCurrentIOPlugin,ml,masks,prePar,mtr,isreload, rendOpt);
 		if(open)
 		{
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());

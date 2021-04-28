@@ -75,41 +75,59 @@ void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capabil
 	return;
 }
 
+void ExtraMeshIOPlugin::initPreOpenParameter(const QString& format, RichParameterList& parameters)
+{
+	if(format.toUpper() == tr("3DS"))
+		parameters.addParam(RichBool(
+				"load_in_a_single_layer", false, "Load in a single layer",
+				"3DS files may contain more than one mesh. If this parameter is "
+				"set to false, all the meshes contained in the file will be "
+				"merged in a single mesh."));
+}
+
 unsigned int ExtraMeshIOPlugin::numberMeshesContainedInFile(
 		const QString& format,
-		const QString& fileName) const
+		const QString& fileName,
+		const RichParameterList& preParams) const
 {
 	if (format.toUpper() == tr("3DS")) {
-		Lib3dsFile *file = NULL;
-		file = lib3ds_file_load(fileName.toStdString().c_str());
-		if (!file)
-			throw MLException("Malformed file.");
-		// No nodes?  Fabricate nodes to display all the meshes.
-		if( !file->nodes && file->meshes) {
-			Lib3dsMesh *mesh;
-			Lib3dsNode *node;
+		if (preParams.getBool("load_in_a_single_layer")){
+			//all the meshes loaded from the file must be placed in a single layer
+			return 1;
+		}
+		else {
+			//multiple layers from the same file, check how many layers...
+			Lib3dsFile *file = NULL;
+			file = lib3ds_file_load(fileName.toStdString().c_str());
+			if (!file)
+				throw MLException("Malformed file.");
+			// No nodes?  Fabricate nodes to display all the meshes.
+			if( !file->nodes && file->meshes) {
+				Lib3dsMesh *mesh;
+				Lib3dsNode *node;
 
-			for (mesh = file->meshes; mesh != NULL; mesh = mesh->next) {
-				node = lib3ds_node_new_object();
-				strcpy(node->name, mesh->name);
-				node->parent_id = LIB3DS_NO_PARENT;
-				lib3ds_file_insert_node(file, node);
+				for (mesh = file->meshes; mesh != NULL; mesh = mesh->next) {
+					node = lib3ds_node_new_object();
+					strcpy(node->name, mesh->name);
+					node->parent_id = LIB3DS_NO_PARENT;
+					lib3ds_file_insert_node(file, node);
+				}
 			}
-		}
-		if( !file->nodes) {
+			if( !file->nodes) {
+				lib3ds_file_free(file);
+				throw MLException("Malformed file.");
+			}
+			lib3ds_file_eval(file, 0);
+			unsigned int i = 0;
+			Lib3dsNode *p = file->nodes;
+			while (p) {
+				i++;
+				p = p->next;
+			}
+			log("Expected meshes in file: " + std::to_string(i) );
 			lib3ds_file_free(file);
-			throw MLException("Malformed file.");
+			return i;
 		}
-		lib3ds_file_eval(file, 0);
-		unsigned int i = 0;
-		Lib3dsNode *p = file->nodes;
-		while (p) {
-			i++;
-			p = p->next;
-		}
-		log("Expected meshes in file: " + std::to_string(i) );
-		lib3ds_file_free(file);
-		return i;
 	}
 	else {
 		wrongOpenFormat(format);
@@ -128,47 +146,96 @@ void ExtraMeshIOPlugin::open(
 	wrongOpenFormat(formatName);
 }
 
+void ExtraMeshIOPlugin::loadFromNode(MeshModel& mm, int& mask, vcg::tri::io::_3dsInfo& info, Lib3dsFile *file, Lib3dsNode *p)
+{
+	bool normalsUpdated = false;
+
+	if (p)
+		mm.setLabel(QString(p->name));
+
+	vcg::tri::io::Importer3DS<CMeshO>::LoadMask(file, p, info);
+	mm.Enable(info.mask);
+
+	int result = vcg::tri::io::Importer3DS<CMeshO>::Load(mm.cm, file, p, info);
+
+	if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR) {
+		reportWarning("3DS Opening Error: " + QString(vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
+	}
+	else {
+
+		if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+			normalsUpdated = true;
+
+		mask |= info.mask;
+
+		// verify if texture files are present
+		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+		bool someTextureNotFound = false;
+		for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
+		{
+			FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
+			if (pFile == nullptr) {
+				missingTextureFilesMsg.append("\n");
+				missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
+				someTextureNotFound = true;
+			}
+			else {
+				fclose (pFile);
+			}
+		}
+		if (someTextureNotFound){
+			reportWarning("Missing texture files: " + missingTextureFilesMsg);
+		}
+
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm); // updates bounding box
+		if (!normalsUpdated)
+			vcg::tri::UpdateNormal<CMeshO>::PerVertex(mm.cm); // updates normals
+	}
+}
+
 void ExtraMeshIOPlugin::open(
 		const QString &formatName,
 		const QString &fileName,
 		const std::list<MeshModel *>& meshList,
 		std::list<int>& maskList,
-		const RichParameterList&,
+		const RichParameterList& preParams,
 		CallBackPos *cb)
 {
+	bool singleLayer = preParams.getBool("load_in_a_single_layer");
+
 	// initializing mask
 	maskList.clear();
 	for (unsigned int i = 0; i < meshList.size(); i++)
 		maskList.push_back(0);
-	
+
 	// initializing progress bar status
 	if (cb != nullptr)
 		(*cb)(0, "Loading...");
-	
+
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 	//QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
-	
+
 	string filename = QFile::encodeName(fileName).constData ();
 	//string filename = fileName.toUtf8().data();
-	
+
 	if (formatName.toUpper() == tr("3DS")) {
-		vcg::tri::io::_3dsInfo info;	
+		vcg::tri::io::_3dsInfo info;
 		info.cb = cb;
 		Lib3dsFile *file = NULL;
-		
-		
+
+
 		file = lib3ds_file_load(filename.c_str());
 		if (!file) {
 			int result = vcg::tri::io::Importer3DS<CMeshO>::E_CANTOPEN;
 			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
 		}
-		
+
 		// No nodes?  Fabricate nodes to display all the meshes.
 		if( !file->nodes && file->meshes)
 		{
 			Lib3dsMesh *mesh;
 			Lib3dsNode *node;
-			
+
 			for (mesh = file->meshes; mesh != NULL; mesh = mesh->next)
 			{
 				node = lib3ds_node_new_object();
@@ -177,66 +244,33 @@ void ExtraMeshIOPlugin::open(
 				lib3ds_file_insert_node(file, node);
 			}
 		}
-		
+
 		if( !file->nodes) {
 			throw MLException("Malformed file.");
 		}
-		
+
 		lib3ds_file_eval(file, 0);
 
-		Lib3dsNode *p;
-		int i=1;
-		auto iter = meshList.begin();
-		auto miter = maskList.begin();
-		for (p=file->nodes; p!=nullptr; p=p->next, ++iter, ++miter)
-		{
-			bool normalsUpdated = false;
-
-			MeshModel &mm = *(*iter);
-			mm.setLabel(QString(p->name));
+		if (singleLayer){
+			MeshModel* m = *meshList.begin();
 			if (cb != nullptr)
-				(*cb)(i/meshList.size() * 100, (QString("Loading Mesh ")+QString(p->name)).toStdString().c_str());
-
-			vcg::tri::io::Importer3DS<CMeshO>::LoadMask(file, p, info);
-			mm.Enable(info.mask);
-
-			int result = vcg::tri::io::Importer3DS<CMeshO>::Load(mm.cm, file, p, info);
-			if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR) {
-				reportWarning("3DS Opening Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
-				continue;
+				(*cb)(20, (QString("Loading Mesh ")+QString(file->name)).toStdString().c_str());
+			loadFromNode(*m, *maskList.begin(), info, file, 0);
+		}
+		else {
+			Lib3dsNode *p;
+			int i=1;
+			auto iter = meshList.begin();
+			auto miter = maskList.begin();
+			for (p=file->nodes; p!=nullptr; p=p->next, ++iter, ++miter) {
+				if (cb != nullptr)
+					(*cb)(i/meshList.size() * 100, (QString("Loading Mesh ")+QString(p->name)).toStdString().c_str());
+				loadFromNode(**iter, *miter, info, file, p);
 			}
-
-			if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
-				normalsUpdated = true;
-
-			(*miter) |= info.mask;
-
-			// verify if texture files are present
-			QString missingTextureFilesMsg = "The following texture files were not found:\n";
-			bool someTextureNotFound = false;
-			for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
-			{
-				FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
-				if (pFile == nullptr) {
-					missingTextureFilesMsg.append("\n");
-					missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
-					someTextureNotFound = true;
-				}
-				else {
-					fclose (pFile);
-				}
-			}
-			if (someTextureNotFound){
-				reportWarning("Missing texture files: " + missingTextureFilesMsg);
-			}
-
-			vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm); // updates bounding box
-			if (!normalsUpdated)
-				vcg::tri::UpdateNormal<CMeshO>::PerVertex(mm.cm); // updates normals
 		}
 
 		if (cb != NULL)	(*cb)(99, "Done");
-		
+
 		// freeing memory
 		lib3ds_file_free(file);
 	}
@@ -257,7 +291,7 @@ void ExtraMeshIOPlugin::save(
 	string filename = QFile::encodeName(fileName).constData ();
 	//string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
-	
+
 	if(formatName.toUpper() == tr("3DS")) {
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0) {

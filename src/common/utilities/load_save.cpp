@@ -119,7 +119,7 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 	prePar.join(meshlab::defaultGlobalParameterList());
 
 
-	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename);
+	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename, prePar);
 	std::list<MeshModel*> meshList;
 	for (unsigned int i = 0; i < nMeshes; i++) {
 		MeshModel *mm = md.addNewMesh(filename, fi.fileName());
@@ -166,7 +166,7 @@ void reloadMesh(
 	ioPlugin->initPreOpenParameter(extension, prePar);
 	prePar.join(meshlab::defaultGlobalParameterList());
 
-	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename);
+	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename, prePar);
 
 	if (meshList.size() != nMeshes){
 		throw MLException(

@@ -3,7 +3,8 @@
 
 unsigned int IOPlugin::numberMeshesContainedInFile(
 		const QString&,
-		const QString&) const
+		const QString&,
+		const RichParameterList&) const
 {
 	return 1;
 }

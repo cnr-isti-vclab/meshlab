@@ -29,6 +29,16 @@
 
 #include <common/plugins/interfaces/io_plugin.h>
 
+namespace vcg{
+namespace tri {
+namespace io {
+class _3dsInfo;
+}
+}
+}
+class Lib3dsFile;
+class Lib3dsNode;
+
 class ExtraMeshIOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
@@ -44,9 +54,14 @@ public:
 
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
 
+	void initPreOpenParameter(
+			const QString& format,
+			RichParameterList& parameters);
+
 	unsigned int numberMeshesContainedInFile(
 			const QString& format,
-			const QString& fileName) const;
+			const QString& fileName,
+			const RichParameterList& preParams) const;
 
 	void open(
 			const QString &formatName,
@@ -71,6 +86,9 @@ public:
 			const int mask,
 			const RichParameterList &,
 			vcg::CallBackPos *cb=0);
+
+private:
+	void loadFromNode(MeshModel& mm, int& mask, vcg::tri::io::_3dsInfo& info, Lib3dsFile *file, Lib3dsNode *p);
 };
 
 #endif

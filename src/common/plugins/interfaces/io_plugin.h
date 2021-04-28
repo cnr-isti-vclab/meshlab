@@ -132,7 +132,8 @@ public:
 	 */
 	virtual unsigned int numberMeshesContainedInFile(
 			const QString& format,
-			const QString& fileName) const;
+			const QString& fileName,
+			const RichParameterList& preParams) const;
 
 	/**
 	 * @brief The open function is called by the framework everytime a mesh is
