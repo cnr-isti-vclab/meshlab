@@ -130,14 +130,6 @@ void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capabili
 	return;
 }
 
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
-{
-	/*
-	if(format.toUpper() == tr("STL"))
-		par.addBool("Unify",true, "Unify Duplicated Vertices",
-								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
-	*/
-}
 void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
 {
 	/*
@@ -145,14 +137,6 @@ void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel 
 		par.addBool("Binary",true, "Binary encoding",
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
   */
-}
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
-{
-  /*
-	if(format.toUpper() == tr("STL"))
-		if(par.getBool("Unify"))
-			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-	*/
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)

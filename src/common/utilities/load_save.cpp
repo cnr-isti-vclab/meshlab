@@ -135,9 +135,6 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 
 	try{
 		loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
-		RichParameterList par;
-		ioPlugin->initOpenParameter(extension, meshList, par);
-		ioPlugin->applyOpenParameter(extension, meshList, par);
 	}
 	catch(const MLException& e){
 		for (MeshModel* mm : meshList)
@@ -182,9 +179,6 @@ void reloadMesh(
 		mm->Clear();
 	}
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
-	RichParameterList par;
-	ioPlugin->initOpenParameter(extension, meshList, par);
-	ioPlugin->applyOpenParameter(extension, meshList, par);
 }
 
 void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)

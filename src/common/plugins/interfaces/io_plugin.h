@@ -70,7 +70,7 @@ public:
 
 	/**
 	 * @brief The initPreOpenParameter function is called to initialize the list
-	 * of additional parameters that a OPENING filter could require. It is
+	 * of additional parameters that a OPENING plugin could require. It is
 	 * called by the framework BEFORE the actual mesh loading to determine how
 	 * to parse the input file. The instanced parameters are then passed to the
 	 * open at the loading time.
@@ -81,45 +81,6 @@ public:
 	virtual void initPreOpenParameter(
 			const QString& /*format*/,
 			RichParameterList& /*parameters*/)
-	{
-	}
-
-	virtual void initOpenParameter(
-			const QString& /*format*/,
-			const std::list<MeshModel*>& /*m*/,
-			RichParameterList& /*parameters*/);
-
-	/**
-	 * @brief The initOpenParameter function is called to initialize the list
-	 * of additional parameters that a OPENING filter could require.
-	 * It is called by the framework AFTER the mesh is already loaded to
-	 * perform more or less standard processing on the mesh.
-	 * typical example: unifying vertices in stl models.
-	 * If you do not need any additional processing do nothing.
-	 */
-	virtual void initOpenParameter(
-			const QString& /*format*/,
-			MeshModel& /*m*/,
-			RichParameterList& /*parameters*/)
-	{
-	}
-
-	virtual void applyOpenParameter(
-			const QString& /*format*/,
-			const std::list<MeshModel*>& /*m*/,
-			const RichParameterList& /*parameters*/);
-
-	/**
-	 * @brief The applyOpenParameter function is the corrispondent function to
-	 * the initOpenParameter. It is called after the mesh is loaded,
-	 * and it should apply the given parameters to the loaded mesh.
-	 * If you haven't implemented the initOpenParameter member function,
-	 * you do not need to implement this.
-	 */
-	virtual void applyOpenParameter(
-			const QString& /*format*/,
-			MeshModel& /*m*/,
-			const RichParameterList& /*parameters*/)
 	{
 	}
 

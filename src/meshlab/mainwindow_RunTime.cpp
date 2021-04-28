@@ -2465,18 +2465,6 @@ bool MainWindow::importMesh(QString fileName)
 				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
 			}
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
-			RichParameterList par;
-
-			pCurrentIOPlugin->initOpenParameter(extension, *meshList.front(), par);
-
-			if(!par.isEmpty())
-			{
-				RichParameterListDialog postOpenDialog(this, par, tr("Post-Open Processing"));
-				postOpenDialog.setFocus();
-				postOpenDialog.exec();
-				for (MeshModel* mm : meshList)
-					pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
-			}
 		}
 		catch (const MLException& e){
 			for (MeshModel* mm : meshList)
@@ -2545,9 +2533,6 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		if(open)
 		{
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());
-			RichParameterList par;
-			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-			pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
 			ret = true;
 		}
 		else

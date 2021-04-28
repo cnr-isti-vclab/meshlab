@@ -75,7 +75,6 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			Function f(pythonFilterName, originalFilterName, "Load " + inputFormat + " format.");
 			RichParameterList rps;
 			iop->initPreOpenParameter(inputFormat, rps);
-			iop->initOpenParameter(inputFormat, *dummyMeshDocument.mm(), rps);
 
 			//filename parameter
 			QString sv = "file_name." + inputFormat;

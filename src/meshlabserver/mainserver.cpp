@@ -418,14 +418,7 @@ public:
             //prePar = prePar.join(currentGlobalParams);
             int mask = 0;
             QElapsedTimer t;t.start();
-            bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr, md, stdout);
-            if(open)
-            {
-                RichParameterList par;
-                pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-                pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
-                ret = true;
-            }
+            ret = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr, md, stdout);
         }
         return ret;
     }

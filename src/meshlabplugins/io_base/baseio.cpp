@@ -136,7 +136,11 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParam
 		parlst.addParam(RichFloat("angle", 85.0, "Angle limit for face culling", "short"));
 	}
 	if (formatName.toUpper() == tr("STL")) {
-		parlst.addParam(RichBool("unify_vertices", true, "Unify Duplicated Vertices in STL files", "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
+		parlst.addParam(RichBool(
+			"unify_vertices", true, "Unify Duplicated Vertices in STL files",
+			"The STL format is not an vertex-indexed format. Each triangle is "
+			"composed by independent vertices, so, usually, duplicated vertices "
+			"should be unified"));
 	}
 }
 
