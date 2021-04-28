@@ -1787,7 +1787,7 @@ void GLArea::updateCustomSettingValues( const RichParameterList& rps )
     this->update();
 }
 
-void GLArea::initGlobalParameterList( RichParameterList * defaultGlobalParamList)
+void GLArea::initGlobalParameterList( RichParameterList& defaultGlobalParamList)
 {
     GLAreaSetting::initGlobalParameterList(defaultGlobalParamList);
 }

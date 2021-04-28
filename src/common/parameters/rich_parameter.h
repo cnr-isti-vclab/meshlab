@@ -59,6 +59,7 @@ public:
 
 	virtual QString stringType() const = 0;
 
+	void setName(const QString& newName);
 	void setValue(const Value& ov);
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;

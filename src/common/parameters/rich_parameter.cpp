@@ -73,6 +73,11 @@ const QString& RichParameter::toolTip() const
 	return tooltip;
 }
 
+void RichParameter::setName(const QString& newName)
+{
+	pName = newName;
+}
+
 void RichParameter::setValue(const Value& ov)
 {
 	assert(val->typeName() == ov.typeName());

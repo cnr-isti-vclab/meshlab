@@ -143,18 +143,18 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 	int numVertices = 0;
 	int numFaces		= 0;
 
-        if (!node)
-        {
-  for (p=file->nodes; p!=0; p=p->next)
-      if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
-                    return E_ABORTED;
-        }
-        else
-			{
-            if (ReadNode(m, file, node, vi, fi, info, numVertices, numFaces) == E_ABORTED)
-				return E_ABORTED;
-			}
-	
+    if (!node)
+    {
+        for (p=file->nodes; p!=0; p=p->next)
+            if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+                return E_ABORTED;
+    }
+    else
+    {
+        if (ReadNode(m, file, node, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+            return E_ABORTED;
+    }
+
 	return result;
 } // end of Open
 
@@ -212,7 +212,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 				lib3ds_matrix_inv(inverseMatrix);
 				lib3ds_matrix_translate_xyz(matrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
 				lib3ds_matrix_mult(matrix, inverseMatrix);
-				
+				//
 
 				lib3ds_mesh_calculate_normals(mesh, normalL);
 

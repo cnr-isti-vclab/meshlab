@@ -66,7 +66,7 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterList(RichParameterList* gbllist);
+	static void initGlobalParameterList(RichParameterList& gbllist);
 	void updateGlobalParameterList(const RichParameterList& rpl );
 
 	std::ptrdiff_t maxgpumem;
@@ -86,6 +86,9 @@ public:
 
 	std::ptrdiff_t maxTextureMemory;
 	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
+
+	bool showPreOpenParameterDialog;
+	inline static QString showPreOpenParameterDialogParam()  {return "MeshLab::System::showPreOpenParameterDialog";}
 };
 
 class MainWindow : public QMainWindow
@@ -263,6 +266,7 @@ private:
 	void clearMenu(QMenu* menu);
 	void updateAllPluginsActions();
 	void createToolBars();
+	void loadDefaultSettingsFromPlugins();
 	void loadMeshLabSettings();
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();

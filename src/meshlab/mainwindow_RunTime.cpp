@@ -2410,13 +2410,19 @@ bool MainWindow::importMesh(QString fileName)
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		RichParameterList prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
-		if(!prePar.isEmpty())
-		{
-			RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
-			preOpenDialog.setFocus();
-			preOpenDialog.exec();
+		if(!prePar.isEmpty()) {
+			// the user wants to see each time the pre parameters dialog:
+			if (currentGlobalParams.getBool(MainWindowSetting::showPreOpenParameterDialogParam())){
+				RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
+				preOpenDialog.setFocus();
+				preOpenDialog.exec();
+			}
+			// the user does not want to see the parameter dialog
+			// need to take the default values from the currentGlobalParams
+			else {
+				//TODO
+			}
 		}
-		prePar.join(currentGlobalParams);
 
 		//check how many meshes are going to be loaded from the file
 		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName);
