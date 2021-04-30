@@ -298,7 +298,13 @@ public:
                     rr = gg = bb = q;
                 } break;
             }
-			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(rr, gg, bb, 255));
+            int cx = tp.X();
+            int cy = trgImgs[f.cWT(0).N()].height() - 1 - tp.Y();
+            if (cx >= 0 && cx < trgImgs[f.cWT(0).N()].size().width()) {
+                if (cy >= 0 && cy < trgImgs[f.cWT(0).N()].size().height()){
+                    trgImgs[f.cWT(0).N()].setPixel(cx, cy, qRgba(rr, gg, bb, 255));
+                }
+            }
         }
         else // sampling from a mesh
         {

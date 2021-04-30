@@ -70,6 +70,9 @@ public:
 	virtual int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction *a) const;
 	FilterArity filterArity(const QAction* filter) const;
+
+private:
+	void transferToTexture(MeshDocument &md, const RichParameterList & parameters, vcg::CallBackPos * cb);
 };
 
 #endif
