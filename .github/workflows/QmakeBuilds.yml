@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   ubuntu_build:
     name: Build MeshLab (Ubuntu - QMake)
-    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+    runs-on: ubuntu-18.04 #in order to deploy, need to use oldest supported version
 
     steps:
     - uses: actions/checkout@v2

@@ -40,7 +40,7 @@ jobs:
   linux_build:
     needs: [update_ml_version]
     name: Build MeshLab (Linux)
-    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+    runs-on: ubuntu-18.04 #in order to deploy, need to use oldest supported version
     strategy:
       matrix:
         precision: [single_precision, double_precision]
