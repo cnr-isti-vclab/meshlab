@@ -267,6 +267,8 @@ public:
         startPt[1] = bary[0]*f.cV(0)->cP().Y()+bary[1]*f.cV(1)->cP().Y()+bary[2]*f.cV(2)->cP().Y();
         startPt[2] = bary[0]*f.cV(0)->cP().Z()+bary[1]*f.cV(1)->cP().Z()+bary[2]*f.cV(2)->cP().Z();
 
+        if (!srcMesh->bbox.IsInEx(startPt)) return;
+
         // Retrieve closest point on source mesh
 
         if(usePointCloudSampling)
@@ -274,7 +276,7 @@ public:
             CMeshO::VertexType   *nearestV=0;
             CMeshO::ScalarType dist=dist_upper_bound;
             nearestV =  vcg::tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*srcMesh,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-        //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+            //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
             //if(storeDistanceAsQualityFlag)  p.Q() = dist;
             if(dist == dist_upper_bound) return ;
 

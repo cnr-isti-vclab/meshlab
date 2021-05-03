@@ -1019,6 +1019,7 @@ void FilterTexturePlugin::transferToTexture(
 			CheckError(!img.save(textName, "PNG"), "Specified file cannot be saved: " + textName);
 			log("Dummy Texture \"%s\" Created ", textName.toStdString().c_str());
 			assert(textFile.exists());
+			textFile.remove();
 		}
 
 		//Assign texture
