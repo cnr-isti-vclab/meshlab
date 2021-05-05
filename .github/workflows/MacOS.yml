@@ -51,12 +51,12 @@ jobs:
     - name: Sign
       run: |
         codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_ID }} src/install/meshlab.app
-    - name: "Notarize Release"
-        uses: devbotsxyz/xcode-notarize@v1
-        with:
-          product-path: "src/install/meshlab.app"
-          appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
-          appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
+    - name: Notarize Release
+      uses: devbotsxyz/xcode-notarize@v1
+      with:
+        product-path: "src/install/meshlab.app"
+        appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
+        appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
     - name: Create DMG
       shell: bash
       run: |
