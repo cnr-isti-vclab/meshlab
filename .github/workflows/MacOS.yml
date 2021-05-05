@@ -45,7 +45,7 @@ jobs:
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
     - name: Sign and Notarize
       run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_ID }} src/install/MeshLab*.app
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_ID }} src/install/meshlab.app
     - name: Create DMG
       shell: bash
       run: |
