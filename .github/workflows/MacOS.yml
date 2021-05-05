@@ -38,6 +38,14 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
+    - name: Import Cert and Key
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+    - name: Sign and Notarize
+      run: |
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_ID }} src/install/MeshLab*.app
     - name: Create DMG
       shell: bash
       run: |
