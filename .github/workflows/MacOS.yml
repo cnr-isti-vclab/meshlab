@@ -52,6 +52,10 @@ jobs:
         product-path: "src/install/meshlab.app"
         appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
         appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
+    - name: "Staple Release"
+      uses: devbotsxyz/xcode-staple@v1
+      with:
+        product-path: "src/install/meshlab.app"
     - name: Create DMG
       shell: bash
       run: |
