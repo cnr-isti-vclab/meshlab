@@ -43,14 +43,9 @@ jobs:
       with:
         p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-#    - name: Import Notarize Cert and Key
-#      uses: apple-actions/import-codesign-certs@v1
-#      with:
-#        p12-file-base64: ${{ secrets.MACOS_NOTAR_CERTIFICATE }}
-#        p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
     - name: Sign
       run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_ID }} src/install/meshlab.app
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} src/install/meshlab.app
     - name: Notarize Release
       uses: devbotsxyz/xcode-notarize@v1
       with:
