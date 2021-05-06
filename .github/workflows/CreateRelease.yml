@@ -320,7 +320,6 @@ jobs:
       run: |
         mv meshlab_macos_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.app
         zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.app/
-        rm -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app
         mv meshlab_macos_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.app
         zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.app/
 
