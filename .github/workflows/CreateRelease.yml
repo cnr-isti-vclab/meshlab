@@ -200,10 +200,18 @@ jobs:
           echo ::set-output name=rc_option::""
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+    - name: Set Certificate
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
+        certutil -decode certificate\certificate.txt certificate\certificate.pfx
     - name: Configure and Build
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+    - name: Sign Portable content
+      run: |
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\install\'
     - name: Deploy
       shell: bash
       run: |
@@ -221,6 +229,9 @@ jobs:
       run: |
         mkdir src/installer
         mv src/install/MeshLab*-windows.exe  src/installer
+    - name: Sign Installer
+      run: |
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\installer\'
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
