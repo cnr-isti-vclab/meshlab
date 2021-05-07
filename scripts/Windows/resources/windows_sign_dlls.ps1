@@ -4,7 +4,7 @@ if ([string]::IsNullOrEmpty($cert_path)) {
     $cert_path = Join-Path $PSScriptRoot ..\..\..\certificate\certificate.pfx
 }
 
-$files = Get-ChildItem $path -include ('*.exe', '*.dll', '*.lib') -Recurse
+$files = Get-ChildItem $path -include ('*.exe', '*.dll') -Recurse
 
 for ($i=0; $i -lt $files.Count; $i++) {
     $file = $files[$i].FullName
