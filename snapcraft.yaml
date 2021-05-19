@@ -28,29 +28,12 @@ apps:
       - mount-observe
 
 parts:
-  cmake:
-    source: https://github.com/Kitware/CMake
-    source-type: git
-    source-depth: 1
-    plugin: cmake
-    stage-packages:
-      - libssl-dev
-    override-build: |
-      mkdir -p build
-      cd build
-      cmake \
-        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_STAGE/cmake \
-        $SNAPCRAFT_PART_SRC
-      make -j 4
-      make install
-
   meshlab:
-    after: [cmake]
     plugin: qmake
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
     build-packages:
-      #- cmake
+      - cmake
       - qt5-default
       - qttools5-dev-tools
       - qtdeclarative5-dev
