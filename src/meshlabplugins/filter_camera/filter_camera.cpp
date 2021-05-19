@@ -74,13 +74,13 @@ QString FilterCameraPlugin::filterName(ActionIDType filterId) const
 QString FilterCameraPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
-	case FP_SET_MESH_CAMERA :     return QString("This filter allows one to set a shot for the current mesh");
-	case FP_SET_RASTER_CAMERA :   return QString("This filter allows one to set a shot for the current mesh");
-	case FP_QUALITY_FROM_CAMERA : return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
-	case FP_CAMERA_ROTATE :       return QString("Rotate the camera, or all the cameras of the project. The selected raster is the reference if viewpoint rotation is selected.");
-	case FP_CAMERA_SCALE :        return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
-	case FP_CAMERA_TRANSLATE :    return QString("Translate the camera, or all the cameras of the project.");
-	case FP_CAMERA_TRANSFORM :    return QString("Transform the camera extrinsics, or all the cameras of the project.");
+	case FP_SET_MESH_CAMERA :           return QString("This filter allows one to set a shot for the current mesh");
+	case FP_SET_RASTER_CAMERA :         return QString("This filter allows one to set a shot for the current mesh");
+	case FP_QUALITY_FROM_CAMERA :       return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
+	case FP_CAMERA_ROTATE :             return QString("Rotate the camera, or all the cameras of the project. The selected raster is the reference if viewpoint rotation is selected.");
+	case FP_CAMERA_SCALE :              return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
+	case FP_CAMERA_TRANSLATE :          return QString("Translate the camera, or all the cameras of the project.");
+	case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project.");
 	case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras. For this  filter to work the mesh needs to have the attribute 'correspondences' which is only created when loading Bundler files (.out projects)");
 	default : assert(0);
 	}
