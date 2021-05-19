@@ -25,6 +25,7 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <string>
 
 #include <GL/glew.h>
 
