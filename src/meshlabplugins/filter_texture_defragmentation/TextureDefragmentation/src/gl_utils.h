@@ -26,12 +26,7 @@
 #include <memory>
 #include <cstdint>
 
-#include <QOpenGLFunctions_4_1_Core>
-
-using OpenGLFunctionsVersion = QOpenGLFunctions_4_1_Core;
-using OpenGLFunctionsHandle = OpenGLFunctionsVersion*;
-
-OpenGLFunctionsHandle GetOpenGLFunctionsHandle();
+#include <GL/glew.h>
 
 
 /* Prints the last OpenGL error code */

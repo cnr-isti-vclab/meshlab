@@ -32,6 +32,8 @@
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/normal.h>
 
+#include <common/GLExtensionsManager.h>
+
 #include "TextureDefragmentation/src/mesh.h"
 #include "TextureDefragmentation/src/texture_object.h"
 #include "TextureDefragmentation/src/mesh_attribute.h"
@@ -114,7 +116,7 @@ int FilterTextureDefragPlugin::postCondition(const QAction *a) const
 {
 	switch (ID(a)) {
 	case FP_TEXTURE_DEFRAG:
-		return MeshModel::MM_WEDGTEXCOORD;
+		return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE; // just to disable preview...
 	default:
 		assert(0);
 	}
@@ -182,12 +184,16 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
         unsigned int& /*postConditionMask*/,
         CallBackPos *cb)
 {
-	MeshModel &mm = *(md.mm());
+	MeshModel &currentModel = *(md.mm());
 	switch(ID(filter)) {
 	case FP_TEXTURE_DEFRAG:
 	{
-		if (mm.fullName().isEmpty())
-			throw MLException("Mesh must be saved to disk before proceeding.");
+		MeshModel& mm = *(md.addNewMesh(currentModel.cm, "texdefrag_" + currentModel.label(), false));
+		mm.setMeshModified();
+
+		GLExtensionsManager::initializeGLextensions();
+
+		QString path = currentModel.pathName();
 
 		tri::UpdateTopology<CMeshO>::FaceFace(mm.cm);
 		if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(mm.cm) > 0)
@@ -195,7 +201,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 
 		// switch working directory
 		QDir wd = QDir::current();
-		QDir::setCurrent(mm.pathName());
+		QDir::setCurrent(path);
 
 		tri::Allocator<CMeshO>::CompactEveryVector(mm.cm);
 
@@ -352,14 +358,15 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 
 		const char *imageFormat = "png";
 		const int quality = 66;
-		std::string textureBase = QFileInfo(mm.fullName()).baseName().toStdString() + "_optimized_texture_";
+		QString textureBase = QFileInfo(currentModel.fullName()).baseName() + "_optimized_texture_";
 		for (unsigned i = 0; i < newTextures.size(); ++i) {
-			std::string tname = textureBase + std::to_string(i) + "." + imageFormat;
-			if (!newTextures[i]->save(tname.c_str(), imageFormat, quality)) {
-				std::string err = "Texture file " + tname + " cannot be saved on disk";
+			QString tname = textureBase + QString(std::to_string(i).c_str()) + "." + imageFormat;
+			std::string fullTextureName = QDir(currentModel.pathName()).filePath(tname).toStdString();
+			if (!newTextures[i]->save(fullTextureName.c_str(), imageFormat, quality)) {
+				std::string err = "Texture file " + fullTextureName + " cannot be saved on disk";
 				throw MLException(err.c_str());
 			}
-			mm.cm.textures.push_back(tname);
+			mm.cm.textures.push_back(fullTextureName);
 		}
 
 		cb(100, "Done!");

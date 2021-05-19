@@ -55,7 +55,6 @@ bool TextureObject::AddImage(std::string path)
 
 void TextureObject::Bind(int i)
 {
-    OpenGLFunctionsHandle glFuncs = GetOpenGLFunctionsHandle();
     ensure(i >= 0 && i < (int) texInfoVec.size());
     // load texture from qimage on first use
     if (texNameVec[i] == 0) {
@@ -65,25 +64,25 @@ void TextureObject::Bind(int i)
             QImage glimg = img.convertToFormat(QImage::Format_ARGB32);
             img = glimg;
         }
-        glFuncs->glGenTextures(1, &texNameVec[i]);
+        glGenTextures(1, &texNameVec[i]);
 
         Mirror(img);
-        glFuncs->glBindTexture(GL_TEXTURE_2D, texNameVec[i]);
+        glBindTexture(GL_TEXTURE_2D, texNameVec[i]);
         int miplevels = std::log2((float) img.width());
         int width = img.width();
         int height = img.height();
         for (int m = 0; m < miplevels; m++) {
-            glFuncs->glTexImage2D(GL_TEXTURE_2D, m, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, m, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
             width = std::max(1, (width / 2));
             height = std::max(1, (height / 2));
         }
-        //glFuncs->glTexStorage2D(GL_TEXTURE_2D, miplevels, GL_RGBA8, img.width(), img.height());
-        glFuncs->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, img.constBits());
-        glFuncs->glGenerateMipmap(GL_TEXTURE_2D);
+        //glTexStorage2D(GL_TEXTURE_2D, miplevels, GL_RGBA8, img.width(), img.height());
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, img.constBits());
+        glGenerateMipmap(GL_TEXTURE_2D);
         CheckGLError();
     }
     else {
-        glFuncs->glBindTexture(GL_TEXTURE_2D, texNameVec[i]);
+        glBindTexture(GL_TEXTURE_2D, texNameVec[i]);
         CheckGLError();
     }
 }
@@ -92,8 +91,7 @@ void TextureObject::Release(int i)
 {
     ensure(i >= 0 && i < (int) texInfoVec.size());
     if (texNameVec[i]) {
-        OpenGLFunctionsHandle glFuncs = GetOpenGLFunctionsHandle();
-        glFuncs->glDeleteTextures(1, &texNameVec[i]);
+        glDeleteTextures(1, &texNameVec[i]);
         texNameVec[i] = 0;
     }
 }
