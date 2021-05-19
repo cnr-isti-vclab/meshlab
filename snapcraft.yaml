@@ -29,10 +29,10 @@ apps:
 
 parts:
   meshlab:
+    plugin: [qmake, cmake]
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
     build-snaps: [cmake]
-    plugin: cmake
     build-packages:
       - cmake
       - qt5-default
