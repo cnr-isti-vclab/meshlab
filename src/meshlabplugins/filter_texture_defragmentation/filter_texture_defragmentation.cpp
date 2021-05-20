@@ -56,7 +56,7 @@ FilterTextureDefragPlugin::FilterTextureDefragPlugin()
 	for(ActionIDType tt: types())
 		actionList.push_back(new QAction(filterName(tt), this));
 
-	LOG_INIT(logging::Level::Warning);
+	LOG_INIT(logging::Level::Debug);
 	LOG_SET_THREAD_NAME("TextureDefrag");
 }
 
