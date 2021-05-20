@@ -30,11 +30,9 @@ then
 fi
 
 mkdir -p $INSTALL_PATH/usr/share/doc/meshlab
-mkdir -p $INSTALL_PATH/usr/share/icons/hicolor/512x512/apps/
 mkdir -p $INSTALL_PATH/usr/share/icons/Yaru/512x512/apps/
 
 cp $SCRIPTS_PATH/resources/meshlab_appimage.desktop $INSTALL_PATH/usr/share/applications/meshlab.desktop
-cp $DISTRIB_PATH/meshlab.png $INSTALL_PATH/usr/share/icons/hicolor/512x512/apps/meshlab.png
 cp $DISTRIB_PATH/meshlab.png $INSTALL_PATH/usr/share/icons/Yaru/512x512/apps/meshlab.png
 cp $DISTRIB_PATH/LICENSE.txt $INSTALL_PATH/usr/share/doc/meshlab/
 cp $DISTRIB_PATH/privacy.txt $INSTALL_PATH/usr/share/doc/meshlab/
