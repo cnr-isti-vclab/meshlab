@@ -188,8 +188,11 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 	switch(ID(filter)) {
 	case FP_TEXTURE_DEFRAG:
 	{
-		MeshModel& mm = *(md.addNewMesh(currentModel.cm, "texdefrag_" + currentModel.label(), false));
-		mm.setMeshModified();
+		MeshModel& mm = *(md.addNewMesh("", "texdefrag_" + currentModel.label(), false));
+		mm.updateDataMask(&currentModel);
+		tri::Append<CMeshO, CMeshO>::Mesh(mm.cm, currentModel.cm);
+		mm.UpdateBoxAndNormals();
+		mm.cm.Tr = currentModel.cm.Tr;
 
 		GLExtensionsManager::initializeGLextensions();
 
