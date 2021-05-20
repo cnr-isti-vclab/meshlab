@@ -1130,6 +1130,8 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 						delete fauxaction;
 						/****************************************************************************************************/
 					}
+					if (!mm->cm.textures.empty())
+						updateTexture(mm->id());
 					foreach(GLArea* gla,mvc->viewerList)
 					{
 						if (gla != NULL)

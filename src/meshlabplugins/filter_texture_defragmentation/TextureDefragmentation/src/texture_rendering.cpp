@@ -37,20 +37,14 @@
 
 #include <QImage>
 
-#include <QOpenGLContext>
-#include <QSurfaceFormat>
-#include <QOffscreenSurface>
-
 
 
 static const char *vs_text[] = {
-    "#version 410 core                                           \n"
-    "                                                            \n"
-    "in vec2 position;                                           \n"
-    "in vec2 texcoord;                                           \n"
-    "in vec4 color;                                              \n"
-    "out vec2 uv;                                                \n"
-    "out vec4 fcolor;                                            \n"
+    "attribute vec2 position;                                    \n"
+    "attribute vec2 texcoord;                                    \n"
+    "attribute vec4 color;                                       \n"
+    "varying vec2 uv;                                            \n"
+    "varying vec4 fcolor;                                        \n"
     "                                                            \n"
     "void main(void)                                             \n"
     "{                                                           \n"
@@ -63,25 +57,21 @@ static const char *vs_text[] = {
 };
 
 static const char *fs_text[] = {
-    "#version 410 core                                                     \n"
-    "                                                                      \n"
     "uniform sampler2D img0;                                               \n"
     "                                                                      \n"
     "uniform vec2 texture_size;                                            \n"
     "uniform int render_mode;                                              \n"
     "                                                                      \n"
-    "in vec2 uv;                                                           \n"
-    "in vec4 fcolor;                                                       \n"
-    "                                                                      \n"
-    "out vec4 texelColor;                                                  \n"
+    "varying vec2 uv;                                                      \n"
+    "varying vec4 fcolor;                                                  \n"
     "                                                                      \n"
     "void main(void)                                                       \n"
     "{                                                                     \n"
     "    if (render_mode == 0) {                                           \n"
-    "        if (uv.s < 0)                                                 \n"
-    "            texelColor = vec4(0, 1, 0, 1);                            \n"
+    "        if (uv.s < float(0))                                          \n"
+    "            gl_FragColor = vec4(0, 1, 0, 1);                          \n"
     "        else                                                          \n"
-    "            texelColor = vec4(texture2D(img0, uv).rgb, 1);            \n"
+    "            gl_FragColor = vec4(texture2D(img0, uv).rgb, 1);          \n"
     "    } else if (render_mode == 1) {                                    \n"
     "        vec2 coord = uv * texture_size - vec2(0.5, 0.5);              \n"
     "        vec2 idx = floor(coord);                                      \n"
@@ -103,9 +93,9 @@ static const char *fs_text[] = {
     "        vec4 tex11 = texture2D(img0, vec2(h1.x, h1.y) / texture_size);\n"
     "        tex00 = mix(tex00, tex01, g1.y);                              \n"
     "        tex10 = mix(tex10, tex11, g1.y);                              \n"
-    "        texelColor = mix(tex00, tex10, g1.x);                         \n"
+    "        gl_FragColor = mix(tex00, tex10, g1.x);                       \n"
     "    } else {                                                          \n"
-    "        texelColor = fcolor;                                          \n"
+    "        gl_FragColor = fcolor;                                        \n"
     "    }                                                                 \n"
     "}                                                                     \n"
 };
@@ -170,50 +160,21 @@ static std::shared_ptr<QImage> RenderTexture(std::vector<Mesh::FacePointer>& fve
 
     std::sort(fvec.begin(), fvec.end(), FaceComparatorByInputTexIndex);
 
-    bool contextAvailable = (QOpenGLContext::currentContext() != nullptr);
-
-    QOpenGLContext context;
-    QOffscreenSurface surface;
-
-    if (!contextAvailable) {
-        LOG_DEBUG << "Creating context";
-        QSurfaceFormat format;
-        format.setVersion(4, 1);
-        format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
-
-        context.setFormat(format);
-
-        if (!context.create()) {
-            LOG_ERR << "Failed to create opengl context";
-            std::exit(-1);
-        }
-
-        surface.setFormat(context.format());
-        surface.create();
-
-        if (!context.makeCurrent(&surface)) {
-            LOG_ERR << "Failed to make OpenGL context current";
-            std::exit(-1);
-        }
-    }
-
-    OpenGLFunctionsHandle glFuncs = GetOpenGLFunctionsHandle();
-
     // OpenGL setup
 
     GLuint vao;
-    glFuncs->glGenVertexArrays(1, &vao);
-    glFuncs->glBindVertexArray(vao);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     GLint program = CompileShaders(vs_text, fs_text);
-    glFuncs->glUseProgram(program);
+    glUseProgram(program);
 
     CheckGLError();
 
     // Allocate vertex data
 
     GLuint vertexbuf;
-    glFuncs->glGenBuffers(1, &vertexbuf);
+    glGenBuffers(1, &vertexbuf);
 
     std::vector<TextureSize> inTexSizes;
     for (std::size_t i = 0; i < textureObject->ArraySize(); ++i) {
@@ -222,9 +183,9 @@ static std::shared_ptr<QImage> RenderTexture(std::vector<Mesh::FacePointer>& fve
         inTexSizes.push_back({iw, ih});
     }
 
-    glFuncs->glBindBuffer(GL_ARRAY_BUFFER, vertexbuf);
-    glFuncs->glBufferData(GL_ARRAY_BUFFER, m.FN()*15*sizeof(float), NULL, GL_STATIC_DRAW);
-    float *p = (float *) glFuncs->glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuf);
+    glBufferData(GL_ARRAY_BUFFER, m.FN()*15*sizeof(float), NULL, GL_STATIC_DRAW);
+    float *p = (float *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     for (auto fptr : fvec) {
         int ti = WTCSh[fptr].tc[0].N();
         for (int i = 0; i < 3; ++i) {
@@ -242,60 +203,60 @@ static std::shared_ptr<QImage> RenderTexture(std::vector<Mesh::FacePointer>& fve
 
         }
     }
-    glFuncs->glUnmapBuffer(GL_ARRAY_BUFFER);
+    glUnmapBuffer(GL_ARRAY_BUFFER);
 
-    GLint pos_location = glFuncs->glGetAttribLocation(program, "position");
-    glFuncs->glVertexAttribPointer(pos_location, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
-    glFuncs->glEnableVertexAttribArray(pos_location);
+    GLint pos_location = glGetAttribLocation(program, "position");
+    glVertexAttribPointer(pos_location, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
+    glEnableVertexAttribArray(pos_location);
 
-    GLint tc_location = glFuncs->glGetAttribLocation(program, "texcoord");
-    glFuncs->glVertexAttribPointer(tc_location, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *) (2*sizeof(float)));
-    glFuncs->glEnableVertexAttribArray(tc_location);
+    GLint tc_location = glGetAttribLocation(program, "texcoord");
+    glVertexAttribPointer(tc_location, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *) (2*sizeof(float)));
+    glEnableVertexAttribArray(tc_location);
 
-    GLint color_location = glFuncs->glGetAttribLocation(program, "color");
-    glFuncs->glVertexAttribPointer(color_location, 4, GL_UNSIGNED_BYTE, GL_TRUE, 5*sizeof(float), (void *) (4*sizeof(float)));
-    glFuncs->glEnableVertexAttribArray(color_location);
+    GLint color_location = glGetAttribLocation(program, "color");
+    glVertexAttribPointer(color_location, 4, GL_UNSIGNED_BYTE, GL_TRUE, 5*sizeof(float), (void *) (4*sizeof(float)));
+    glEnableVertexAttribArray(color_location);
 
     p = nullptr;
-    glFuncs->glBindBuffer(GL_ARRAY_BUFFER, 0); // done, unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // done, unbind
 
     int renderedTexWidth = textureWidth;
     int renderedTexHeight = textureHeight;
 
-    GLuint fbo;
-    glFuncs->glGenFramebuffers(1, &fbo);
-    glFuncs->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    GLint drawBuffer;
+    glGetIntegerv(GL_DRAW_BUFFER, &drawBuffer);
 
-    glFuncs->glViewport(0, 0, renderedTexWidth, renderedTexHeight);
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glViewport(0, 0, renderedTexWidth, renderedTexHeight);
 
     GLuint renderTarget;
-    glFuncs->glGenTextures(1, &renderTarget);
-    glFuncs->glBindTexture(GL_TEXTURE_2D, renderTarget);
-    glFuncs->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderedTexWidth, renderedTexHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-    glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFuncs->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTarget, 0);
-    glFuncs->glBindTexture(GL_TEXTURE_2D, 0);
+    glGenTextures(1, &renderTarget);
+    glBindTexture(GL_TEXTURE_2D, renderTarget);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderedTexWidth, renderedTexHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTarget, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (glFuncs->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERR << "Framebuffer is not complete " << glFuncs->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERR << "Framebuffer is not complete " << glCheckFramebufferStatus(GL_FRAMEBUFFER);
         std::exit(-1);
     }
 
     std::shared_ptr<QImage> textureImage = std::make_shared<QImage>(renderedTexWidth, renderedTexHeight, QImage::Format_ARGB32);
 
     // disable depth and stencil test (if they were enabled) as the render target does not have the buffers attached
-    glFuncs->glDisable(GL_DEPTH_TEST);
-    glFuncs->glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
 
-    GLint drawBuffer;
-    glFuncs->glGetIntegerv(GL_DRAW_BUFFER, &drawBuffer);
-    glFuncs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-    glFuncs->glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-    glFuncs->glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 1.0f, 0.0f, 128 / float(255));
 
-    glFuncs->glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     auto f0 = fvec.begin();
     auto fbase = f0;
@@ -308,44 +269,44 @@ static std::shared_ptr<QImage> RenderTexture(std::vector<Mesh::FacePointer>& fve
         int count = std::distance(fbase, fcurr) * 3;
 
         // Load texture image
-        glFuncs->glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0);
         LOG_DEBUG << "Binding texture unit " << currTexIndex;
         textureObject->Bind(currTexIndex);
 
-        GLint loc_img0 = glFuncs->glGetUniformLocation(program, "img0");
-        glFuncs->glUniform1i(loc_img0, 0);
-        GLint loc_texture_size = glFuncs->glGetUniformLocation(program, "texture_size");
-        glFuncs->glUniform2f(loc_texture_size, float(textureObject->TextureWidth(currTexIndex)), float(textureObject->TextureHeight(currTexIndex)));
+        GLint loc_img0 = glGetUniformLocation(program, "img0");
+        glUniform1i(loc_img0, 0);
+        GLint loc_texture_size = glGetUniformLocation(program, "texture_size");
+        glUniform2f(loc_texture_size, float(textureObject->TextureWidth(currTexIndex)), float(textureObject->TextureHeight(currTexIndex)));
 
 
-        GLint loc_render_mode = glFuncs->glGetUniformLocation(program, "render_mode");
-        glFuncs->glUniform1i(loc_render_mode, 0);
+        GLint loc_render_mode = glGetUniformLocation(program, "render_mode");
+        glUniform1i(loc_render_mode, 0);
         switch (imode) {
         case Cubic:
-            glFuncs->glUniform1i(loc_render_mode, 1);
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glFuncs->glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+            glUniform1i(loc_render_mode, 1);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
             break;
         case Linear:
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glFuncs->glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
-            //glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            //glFuncs->glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
             break;
         case Nearest:
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glFuncs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             break;
         case FaceColor:
-            glFuncs->glUniform1i(loc_render_mode, 2);
+            glUniform1i(loc_render_mode, 2);
             break;
         default:
             ensure(0 && "Should never happen");
         }
 
-        glFuncs->glDrawArrays(GL_TRIANGLES, baseIndex, count);
+        glDrawArrays(GL_TRIANGLES, baseIndex, count);
         CheckGLError();
 
         textureObject->Release(currTexIndex);
@@ -353,25 +314,24 @@ static std::shared_ptr<QImage> RenderTexture(std::vector<Mesh::FacePointer>& fve
         fbase = fcurr;
     }
 
-    glFuncs->glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glFuncs->glReadPixels(0, 0, renderedTexWidth, renderedTexHeight, GL_BGRA, GL_UNSIGNED_BYTE, textureImage->bits());
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadPixels(0, 0, renderedTexWidth, renderedTexHeight, GL_BGRA, GL_UNSIGNED_BYTE, textureImage->bits());
 
     // clean up
-    glFuncs->glUseProgram(0);
-    glFuncs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glFuncs->glBindVertexArray(0);
+    glUseProgram(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindVertexArray(0);
 
-    glFuncs->glDeleteTextures(1, &renderTarget);
-    glFuncs->glDeleteFramebuffers(1, &fbo);
-    glFuncs->glDeleteBuffers(1, &vertexbuf);
-    glFuncs->glDeleteProgram(program);
-    glFuncs->glDeleteVertexArrays(1, &vao);
+    glDeleteTextures(1, &renderTarget);
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteBuffers(1, &vertexbuf);
+    glDeleteProgram(program);
+    glDeleteVertexArrays(1, &vao);
 
-    //if (contextAvailable)
-    //    glFuncs->glDrawBuffer(drawBuffer);
+    glDrawBuffer(drawBuffer);
 
     if (filter)
-        vcg::PullPush(*textureImage, qRgba(0, 255, 0, 255));
+        vcg::PullPush(*textureImage, qRgba(0, 255, 0, 128));
 
     Mirror(*textureImage);
 

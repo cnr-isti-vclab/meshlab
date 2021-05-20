@@ -29,27 +29,9 @@
 #include <QImage>
 #include <QFileInfo>
 
-#include <QOpenGLContext>
-
-OpenGLFunctionsHandle GetOpenGLFunctionsHandle()
-{
-    QOpenGLContext *currentContext = QOpenGLContext::currentContext();
-    if (!currentContext) {
-        LOG_ERR << "OpenGL context not initialized";
-        std::exit(-1);
-    }
-    OpenGLFunctionsHandle glFuncs = currentContext->versionFunctions<OpenGLFunctionsVersion>();
-    if (!glFuncs) {
-        LOG_ERR << "Could not obtain required OpenGL context version";
-        exit(-1);
-    }
-    return glFuncs;
-}
-
 void CheckGLError()
 {
-    OpenGLFunctionsHandle glFuncs = GetOpenGLFunctionsHandle();
-    GLenum error = glFuncs->glGetError();
+    GLenum error = glGetError();
     if (error != GL_NO_ERROR)
     {
         std::stringstream ss;
@@ -79,53 +61,51 @@ std::string ReadShader(const char *path)
 
 uint32_t CompileShaders(const char **vs_text, const char **fs_text)
 {
-    OpenGLFunctionsHandle glFuncs = GetOpenGLFunctionsHandle();
-
     GLint status;
     char infoLog[1024] = {0};
 
-    GLuint vs = glFuncs->glCreateShader(GL_VERTEX_SHADER);
-    glFuncs->glShaderSource(vs, 1, vs_text, NULL);
-    glFuncs->glCompileShader(vs);
-    glFuncs->glGetShaderInfoLog(vs, 1024, NULL, infoLog);
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, vs_text, NULL);
+    glCompileShader(vs);
+    glGetShaderInfoLog(vs, 1024, NULL, infoLog);
     if (*infoLog) {
         LOG_DEBUG << infoLog;
         memset(infoLog, 0, 1024);
     }
-    glFuncs->glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
         LOG_ERR << "Vertex shader compilation failed";
     }
 
-    GLuint fs = glFuncs->glCreateShader(GL_FRAGMENT_SHADER);
-    glFuncs->glShaderSource(fs, 1, fs_text, NULL);
-    glFuncs->glCompileShader(fs);
-    glFuncs->glGetShaderInfoLog(fs, 1024, NULL, infoLog);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, fs_text, NULL);
+    glCompileShader(fs);
+    glGetShaderInfoLog(fs, 1024, NULL, infoLog);
     if (*infoLog) {
         LOG_DEBUG << infoLog;
         memset(infoLog, 0, 1024);
     }
-    glFuncs->glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
+    glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
         LOG_ERR << "Fragment shader compilation failed";
     }
 
-    GLuint program = glFuncs->glCreateProgram();
-    glFuncs->glAttachShader(program, vs);
-    glFuncs->glAttachShader(program, fs);
-    glFuncs->glLinkProgram(program);
-    glFuncs->glValidateProgram(program);
-    glFuncs->glGetProgramInfoLog(program, 1024, NULL, infoLog);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glValidateProgram(program);
+    glGetProgramInfoLog(program, 1024, NULL, infoLog);
     if (*infoLog) {
         LOG_DEBUG << infoLog;
     }
-    glFuncs->glGetProgramiv(program, GL_LINK_STATUS, &status);
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE) {
         LOG_ERR << "Shader program link failed";
     }
 
-    glFuncs->glDeleteShader(vs);
-    glFuncs->glDeleteShader(fs);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
 
     CheckGLError();
 
