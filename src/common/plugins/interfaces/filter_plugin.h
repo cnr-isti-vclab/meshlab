@@ -128,7 +128,7 @@ public:
 	 * to MeshModel::updateDataMask(...)
 	 */
 	virtual int getRequirements(const QAction*) { return MeshModel::MM_NONE; }
-	
+
 	/**
 	 * @brief This function should require true if the glContext is used by the
 	 * filter. Without this, the glContext will remain set to nullptr on non-GUI
@@ -155,6 +155,20 @@ public:
 	 * TO BE REPLACED WITH = 0
 	 */
 	virtual int postCondition(const QAction*) const { return MeshModel::MM_ALL; }
+
+	/**
+	 * @brief This function is called to initialized the list of parameters.
+	 * If a filter does not need parameters, return an empty list and the framework
+	 * will not create a dialog (unless for previewing)
+	 */
+	virtual RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/)
+	{
+		return RichParameterList();
+	}
+	virtual RichParameterList initParameterList(const QAction* filter, const MeshDocument &md)
+	{
+		return initParameterList(filter, *(md.mm()));
+	}
 
 	/**
 	 * @brief applies the selected filter with the already stabilished parameters
@@ -197,17 +211,6 @@ public:
 	 * - VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
 	 */
 	virtual FilterArity filterArity(const QAction *act) const = 0;
-
-	/**
-	 * @brief This function is called to initialized the list of parameters.
-	 * it is always called. If a filter does not need parameter it leave it empty and the framework
-	 * will not create a dialog (unless for previewing)
-	 */
-	virtual void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*par*/) {}
-	virtual void initParameterList(const QAction* filter, const MeshDocument &md, RichParameterList &par)
-	{
-		initParameterList(filter, *(md.mm()), par);
-	}
 
 	virtual QString filterInfo(const QAction* a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(const QAction* a) const { return this->filterName(ID(a)); }

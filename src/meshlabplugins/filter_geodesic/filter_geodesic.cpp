@@ -232,8 +232,9 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
 	return std::map<std::string, QVariant>();
 }
 
-void FilterGeodesic::initParameterList(const QAction *action, const MeshModel &m, RichParameterList & parlst)
+RichParameterList FilterGeodesic::initParameterList(const QAction *action, const MeshModel &m)
 {
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 	case FP_QUALITY_POINT_GEODESIC :
@@ -245,7 +246,7 @@ void FilterGeodesic::initParameterList(const QAction *action, const MeshModel &m
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
-	return;
+	return parlst;
 }
 
 int FilterGeodesic::postCondition(const QAction * filter) const

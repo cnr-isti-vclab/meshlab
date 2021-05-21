@@ -55,8 +55,7 @@ void pymeshlab::FunctionSet::loadFilterPlugin(FilterPlugin* fp)
 		QString pythonFilterName = fp->pythonFilterName(act);
 		Function f(pythonFilterName, originalFilterName, description);
 
-		RichParameterList rps;
-		fp->initParameterList(act, dummyMeshDocument, rps);
+		RichParameterList rps = fp->initParameterList(act, dummyMeshDocument);
 
 		for (const RichParameter& rp : rps){
 			FunctionParameter par(rp);

@@ -54,7 +54,7 @@ public:
 
 	virtual int getRequirements(const QAction*);
 
-	virtual void initParameterList(const QAction*, const MeshDocument&, RichParameterList & /*parent*/);
+	RichParameterList initParameterList(const QAction*, const MeshDocument&);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

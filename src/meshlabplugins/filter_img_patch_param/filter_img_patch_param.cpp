@@ -140,11 +140,11 @@ FilterPlugin::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act
 //}
 
 
-void FilterImgPatchParamPlugin::initParameterList(
+RichParameterList FilterImgPatchParamPlugin::initParameterList(
 		const QAction *act,
-		const MeshDocument &/*md*/,
-		RichParameterList &par )
+		const MeshDocument &/*md*/)
 {
+	RichParameterList par;
 	switch( ID(act) )
 	{
 	case FP_PATCH_PARAM_AND_TEXTURING:
@@ -204,6 +204,7 @@ void FilterImgPatchParamPlugin::initParameterList(
 		break;
 	}
 	}
+	return par;
 }
 
 

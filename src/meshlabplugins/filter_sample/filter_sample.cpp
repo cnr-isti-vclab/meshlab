@@ -138,8 +138,9 @@ int FilterSamplePlugin::postCondition(const QAction*) const
  * @param m
  * @param parlst
  */
-void FilterSamplePlugin::initParameterList(const QAction *action,const MeshModel &m, RichParameterList & parlst)
+RichParameterList FilterSamplePlugin::initParameterList(const QAction *action,const MeshModel &m)
 {
+	RichParameterList parlst;
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
 		parlst.addParam(RichBool ("UpdateNormals", true, "Recompute normals", "Toggle the recomputation of the normals after the random displacement.\n\nIf disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
@@ -148,6 +149,7 @@ void FilterSamplePlugin::initParameterList(const QAction *action,const MeshModel
 	default :
 		assert(0);
 	}
+	return parlst;
 }
 
 /**

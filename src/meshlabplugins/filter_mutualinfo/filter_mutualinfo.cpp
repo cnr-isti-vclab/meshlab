@@ -96,8 +96,9 @@ FilterPlugin::FilterArity FilterMutualInfoPlugin::filterArity(const QAction*) co
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterList(const QAction *action, const MeshDocument & /*md*/, RichParameterList & parlst)
+RichParameterList FilterMutualInfoPlugin::initParameterList(const QAction *action, const MeshDocument & /*md*/)
 {
+	RichParameterList parlst;
 	QStringList rendList;
 	rendList.push_back("Combined");
 	rendList.push_back("Normal map");
@@ -119,6 +120,7 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action, const Mesh
 	default :
 		assert(0);
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> FilterMutualInfoPlugin::applyFilter(

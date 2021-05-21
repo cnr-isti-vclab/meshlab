@@ -56,10 +56,10 @@ public:
 	FilterLayerPlugin();
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual FilterClass getClass(const QAction*) const;
-	virtual void initParameterList(const QAction*, const MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction*) const;
+	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

@@ -223,8 +223,9 @@ int CleanFilter::postCondition(const QAction* action) const
 	return MeshModel::MM_ALL;
 }
 
-void CleanFilter::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
+RichParameterList CleanFilter::initParameterList(const QAction *action, const MeshDocument &md)
 {
+	RichParameterList parlst;
 	pair<float,float> qualityRange;
 	switch(ID(action))
 	{
@@ -268,6 +269,7 @@ void CleanFilter::initParameterList(const QAction *action, const MeshDocument &m
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb)

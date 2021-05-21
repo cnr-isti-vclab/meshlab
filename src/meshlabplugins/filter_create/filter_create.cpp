@@ -108,8 +108,9 @@ QString FilterCreate::filterInfo(ActionIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterList(const QAction *action, const MeshModel & /*m*/, RichParameterList & parlst)
+RichParameterList FilterCreate::initParameterList(const QAction *action, const MeshModel & /*m*/)
 {
+	RichParameterList parlst;
 	switch(ID(action))	 {
 
 	case CR_SPHERE :
@@ -172,8 +173,10 @@ void FilterCreate::initParameterList(const QAction *action, const MeshModel & /*
 		  "<b>-- Parallel</b>: The fitting plane will be oriented with a side parallel with the chosen plane. WARNING: do not use if the selection is exactly parallel to a plane.<br>"
 		  )));
 		break;
-	default : return;
+	default :
+		assert(0);
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.

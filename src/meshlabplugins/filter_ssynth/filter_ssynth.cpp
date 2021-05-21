@@ -57,12 +57,13 @@ QString FilterSSynth::filterInfo(ActionIDType filterId) const
     }
 }
 
-void FilterSSynth::initParameterList(const QAction* /*filter*/,const MeshDocument &/*md*/, RichParameterList &par)
+RichParameterList FilterSSynth::initParameterList(const QAction* /*filter*/,const MeshDocument &/*md*/)
 {
+    RichParameterList par;
     par.addParam(RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
     par.addParam(RichInt("seed",1,"seed for random construction","Seed needed to build the mesh"));
     par.addParam(RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));
-    return;
+    return par;
 }
 
 void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget* /*parent*/)

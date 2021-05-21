@@ -195,11 +195,11 @@ std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 
-void FilterScreenedPoissonPlugin::initParameterList(
+RichParameterList FilterScreenedPoissonPlugin::initParameterList(
 		const QAction* filter,
-		const MeshModel&,
-		RichParameterList& parlist)
+		const MeshModel&)
 {
+	RichParameterList parlist;
 	if (ID(filter) == FP_SCREENED_POISSON) {
 		parlist.addParam(RichBool("visibleLayer", false, "Merge all visible layers", "Enabling this flag means that all the visible layers will be used for providing the points."));
 		parlist.addParam(RichInt("depth", 8, "Reconstruction Depth", "This integer is the maximum depth of the tree that will be used for surface reconstruction. Running at depth d corresponds to solving on a voxel grid whose resolution is no larger than 2^d x 2^d x 2^d. Note that since the reconstructor adapts the octree to the sampling density, the specified reconstruction depth is only an upper bound. The default value for this parameter is 8."));
@@ -212,6 +212,7 @@ void FilterScreenedPoissonPlugin::initParameterList(
 		parlist.addParam(RichBool("confidence", false, "Confidence Flag", "Enabling this flag tells the reconstructor to use the quality as confidence information; this is done by scaling the unit normals with the quality values. When the flag is not enabled, all normals are normalized to have unit-length prior to reconstruction."));
 		parlist.addParam(RichBool("preClean", false, "Pre-Clean", "Enabling this flag force a cleaning pre-pass on the data removing all unreferenced vertices or vertices with null normals."));
 	}
+	return parlist;
 }
 
 int FilterScreenedPoissonPlugin::postCondition(const QAction* filter) const

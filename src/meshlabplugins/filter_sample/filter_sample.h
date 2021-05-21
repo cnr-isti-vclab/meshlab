@@ -61,7 +61,7 @@ public:
 	FilterArity filterArity(const QAction*) const;
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;
-	void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*parent*/);
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,

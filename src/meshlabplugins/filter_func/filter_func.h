@@ -76,11 +76,11 @@ public:
 	~FilterFunctionPlugin();
 	
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual FilterClass getClass(const QAction*) const;
-	virtual int postCondition(const QAction *action) const;
-	virtual void initParameterList(const QAction*, const MeshModel &/*m*/, RichParameterList & /*parent*/);
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction*) const;
+	int postCondition(const QAction *action) const;
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	virtual int getRequirements(const QAction*);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,

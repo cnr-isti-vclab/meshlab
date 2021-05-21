@@ -116,8 +116,9 @@ QString FilterLayerPlugin::filterInfo(ActionIDType filterId) const
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterLayerPlugin::initParameterList(const QAction *action, const MeshDocument &md)
 {
+	RichParameterList parlst;
 	const MeshModel *mm=md.mm();
 	const RasterModel *rm=md.rm();
 	switch(ID(action))
@@ -178,6 +179,7 @@ void FilterLayerPlugin::initParameterList(const QAction *action, const MeshDocum
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 // Core Function doing the actual mesh processing.

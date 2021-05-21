@@ -124,8 +124,10 @@ std::map<std::string, QVariant> FilterCreateIso::applyFilter(const QAction *filt
 	}
 	return std::map<std::string, QVariant>();
 }
-void FilterCreateIso::initParameterList(const QAction *action, const MeshModel & /*m*/, RichParameterList & parlst)
+
+RichParameterList FilterCreateIso::initParameterList(const QAction *action, const MeshModel & /*m*/)
 {
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 	case FP_CREATEISO :
@@ -133,6 +135,7 @@ void FilterCreateIso::initParameterList(const QAction *action, const MeshModel &
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 

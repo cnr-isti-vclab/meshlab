@@ -33,13 +33,12 @@ bool MeshlabStdDialog::showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocu
 	curAction = action;
 	curmfi = mfi;
 	curmwi = mwi;
-	curParSet.clear();
 	prevParSet.clear();
 	curModel = mm;
 	curMeshDoc = mdp;
 	curgla = gla;
 
-	mfi->initParameterList(action, *mdp, curParSet);
+	curParSet = mfi->initParameterList(action, *mdp);
 	curmask = mfi->postCondition(action);
 	if (curParSet.isEmpty() && !isPreviewable()) return false;
 
@@ -104,8 +103,7 @@ void MeshlabStdDialog::createFrame()
 // update the values of the widgets with the values in the paramlist;
 void MeshlabStdDialog::resetValues()
 {
-	curParSet.clear();
-	curmfi->initParameterList(curAction, *curMeshDoc, curParSet);
+	curParSet = curmfi->initParameterList(curAction, *curMeshDoc);
 
 	assert(qf);
 	assert(qf->isVisible());

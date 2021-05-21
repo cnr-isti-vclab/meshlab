@@ -107,10 +107,9 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterList(const QAction * action, const MeshModel & m, RichParameterList & parlst)
+RichParameterList ExtraSampleGPUPlugin::initParameterList(const QAction * action, const MeshModel &)
 {
-	(void)m;
-
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 		case FP_GPU_EXAMPLE :
@@ -124,6 +123,7 @@ void ExtraSampleGPUPlugin::initParameterList(const QAction * action, const MeshM
 		}
 		default : assert(0);
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.

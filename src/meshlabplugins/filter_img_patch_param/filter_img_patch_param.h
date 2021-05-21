@@ -109,17 +109,16 @@ public:
 	~FilterImgPatchParamPlugin();
 
 	QString pluginName() const;
-	virtual QString filterName( ActionIDType id ) const;
-	virtual QString filterInfo( ActionIDType id ) const;
+	QString filterName( ActionIDType id ) const;
+	QString filterInfo( ActionIDType id ) const;
 
-	virtual FilterClass getClass(const QAction* act ) const;
+	FilterClass getClass(const QAction* act ) const;
 
-	virtual void initParameterList(
+	RichParameterList initParameterList(
 			const QAction* act,
-			const MeshDocument &md,
-			RichParameterList &par );
+			const MeshDocument &md);
 
-	virtual int getRequirements(const QAction* act );
+	int getRequirements(const QAction* act );
 	bool requiresGLContext(const QAction* action) const;
 	//virtual int postCondition( QAction *act ) const;
 

@@ -350,8 +350,9 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 // return
 //		true if has some parameters
 //		false is has no params
-void ExtraMeshFilterPlugin::initParameterList(const QAction * action, const MeshModel & m, RichParameterList & parlst)
+RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * action, const MeshModel & m)
 {
+	RichParameterList parlst;
 	float maxVal;
 	QStringList curvCalcMethods;
 	QStringList curvColorMethods;
@@ -642,6 +643,7 @@ void ExtraMeshFilterPlugin::initParameterList(const QAction * action, const Mesh
 	default:
 		break;
 	}
+	return parlst;
 }
 
 

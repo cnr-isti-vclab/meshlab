@@ -312,8 +312,9 @@ int FilterUnsharp::postCondition(const QAction *a) const
   return MeshModel::MM_NONE;
 }
 
-void FilterUnsharp::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterUnsharp::initParameterList(const QAction *action, const MeshDocument &md)
 {
+    RichParameterList parlst;
     switch(ID(action))
     {
         case FP_RECOMPUTE_VERTEX_NORMAL :
@@ -403,6 +404,7 @@ void FilterUnsharp::initParameterList(const QAction *action, const MeshDocument 
         parlst.addParam(RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
 		break;
   }
+    return parlst;
 }
 
 std::map<std::string, QVariant> FilterUnsharp::applyFilter(

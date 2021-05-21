@@ -53,16 +53,16 @@ public:
 	~FilterCSG() {};
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
-	virtual bool autoDialog(QAction *) { return true; }
+	bool autoDialog(QAction *) { return true; }
 
-	virtual void initParameterList(const QAction*, const MeshDocument &, RichParameterList &);
+	RichParameterList initParameterList(const QAction*, const MeshDocument &);
 
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 
-	virtual FilterClass getClass(const QAction *) const { return FilterPlugin::FilterClass( FilterPlugin::Layer + FilterPlugin::Remeshing ); }
+	FilterClass getClass(const QAction *) const { return FilterPlugin::FilterClass( FilterPlugin::Layer + FilterPlugin::Remeshing ); }
 	FilterArity filterArity(const QAction*) const {return FIXED;}
 };
 

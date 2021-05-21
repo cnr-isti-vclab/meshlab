@@ -39,8 +39,9 @@ QString SdfGpuPlugin::pluginName() const
 	return "FilterSDFGPU";
 }
 
-void SdfGpuPlugin::initParameterList(const QAction *action, const MeshModel &/*m*/, RichParameterList &par)
+RichParameterList SdfGpuPlugin::initParameterList(const QAction *action, const MeshModel &/*m*/)
 {
+	RichParameterList par;
 	QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
 	par.addParam( RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
 						   "Choose whether to trace rays from faces or from vertices. " ));
@@ -92,6 +93,7 @@ void SdfGpuPlugin::initParameterList(const QAction *action, const MeshModel &/*m
             "For each ray that we trace, we take multiple depth values near the point of intersection and we output only the median of these values. "
             "Some mesh can benefit from this additional calculation. "));
 	}
+	return par;
 }
 
 QString SdfGpuPlugin::filterName(ActionIDType filterId) const

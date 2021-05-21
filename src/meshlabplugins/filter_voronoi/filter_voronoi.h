@@ -49,7 +49,7 @@ public:
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction* a) const;
-	void initParameterList(const QAction* action, const MeshModel& m, RichParameterList& par);
+	RichParameterList initParameterList(const QAction* action, const MeshModel& m);
 	int getPreConditions(const QAction* action) const;
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,

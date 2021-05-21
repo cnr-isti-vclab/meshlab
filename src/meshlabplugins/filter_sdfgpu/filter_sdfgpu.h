@@ -47,7 +47,7 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 			vcg::CallBackPos * cb);
 	
 	//Parameters init for user interface
-	virtual void initParameterList(const QAction* action, const MeshModel &m, RichParameterList &parlst);
+	RichParameterList initParameterList(const QAction* action, const MeshModel &m);
 	
 	//Draw the mesh
 	void fillFrameBuffer(bool front,  MeshModel* mm);

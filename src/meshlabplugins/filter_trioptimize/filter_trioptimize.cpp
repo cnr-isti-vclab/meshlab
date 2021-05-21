@@ -202,8 +202,9 @@ int TriOptimizePlugin::postCondition(const QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterList(const QAction *action, const MeshModel &m, RichParameterList & parlst)
+RichParameterList TriOptimizePlugin::initParameterList(const QAction *action, const MeshModel &m)
 {
+	RichParameterList parlst;
 	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
 		parlst.addParam(RichBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only")));
 		parlst.addParam(RichFloat("pthreshold", 1.0f,
@@ -259,6 +260,7 @@ void TriOptimizePlugin::initParameterList(const QAction *action, const MeshModel
 		parlst.addParam(RichFloat("AngleDeg", 0.5f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces")));
 		parlst.addParam(RichInt("iterations", 1, "Iterations", tr("number of laplacian smooth iterations in every run")));
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.

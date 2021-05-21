@@ -254,9 +254,9 @@ int FilterFunctionPlugin::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterFunctionPlugin::initParameterList(const QAction *action,const MeshModel &m, RichParameterList & parlst)
+RichParameterList FilterFunctionPlugin::initParameterList(const QAction *action,const MeshModel &)
 {
-	Q_UNUSED(m);
+	RichParameterList parlst;
 	switch(ID(action))	 {
 	
 	case FF_VERT_SELECTION :
@@ -369,6 +369,7 @@ void FilterFunctionPlugin::initParameterList(const QAction *action,const MeshMod
 		
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.

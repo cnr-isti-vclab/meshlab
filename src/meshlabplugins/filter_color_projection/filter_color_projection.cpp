@@ -122,8 +122,9 @@ bool FilterColorProjectionPlugin::requiresGLContext(const QAction* action) const
 
 
 // This function define the needed parameters for each filter.
-void FilterColorProjectionPlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterColorProjectionPlugin::initParameterList(const QAction *action, const MeshDocument &md)
 {
+    RichParameterList parlst;
     switch(ID(action))
     {
     case FP_SINGLEIMAGEPROJ :
@@ -229,6 +230,7 @@ void FilterColorProjectionPlugin::initParameterList(const QAction *action, const
 
     default: break; // do not add any parameter for the other filters
     }
+    return parlst;
 }
 
 // Core Function doing the actual mesh processing.

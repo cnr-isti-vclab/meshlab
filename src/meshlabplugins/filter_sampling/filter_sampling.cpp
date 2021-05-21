@@ -462,8 +462,9 @@ int FilterDocSampling::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterList(const QAction *action, const MeshDocument & md, RichParameterList & parlst)
+RichParameterList FilterDocSampling::initParameterList(const QAction *action, const MeshDocument & md)
 {
+  RichParameterList parlst;
   switch(ID(action))	 {
   case FP_MONTECARLO_SAMPLING :
     parlst.addParam(RichInt ("SampleNum", md.mm()->cm.vn,
@@ -696,6 +697,7 @@ void FilterDocSampling::initParameterList(const QAction *action, const MeshDocum
   } break;
   default: break; // do not add any parameter for the other filters
   }
+  return parlst;
 }
 
 std::map<std::string, QVariant> FilterDocSampling::applyFilter(

@@ -74,8 +74,9 @@ QString FilterCSG::filterInfo(ActionIDType filterId) const
 	}
 }
 
-void FilterCSG::initParameterList(const QAction *action, const MeshDocument & md, RichParameterList & parlst)
+RichParameterList FilterCSG::initParameterList(const QAction *action, const MeshDocument & md)
 {
+	RichParameterList parlst;
 	switch (ID(action)) {
 	case FP_CSG:
 	{
@@ -114,6 +115,7 @@ void FilterCSG::initParameterList(const QAction *action, const MeshDocument & md
 	default:
 		assert(0);
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> FilterCSG::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)

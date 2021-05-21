@@ -99,9 +99,9 @@ int FilterIsoParametrization::getRequirements(const QAction *)
 	return MeshModel::MM_NONE;
 }
 
-void FilterIsoParametrization::initParameterList(const QAction *a, const MeshDocument& md, RichParameterList & par)
+RichParameterList FilterIsoParametrization::initParameterList(const QAction *a, const MeshDocument& md)
 {
-	
+	RichParameterList par;
 	switch(ID(a))
 	{
 	case ISOP_PARAM:
@@ -157,6 +157,7 @@ void FilterIsoParametrization::initParameterList(const QAction *a, const MeshDoc
 		par.addParam(RichMesh ("targetMesh",md.mm()->id(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
 	}
 	}
+	return par;
 }
 
 void FilterIsoParametrization::PrintStats(CMeshO *mesh)

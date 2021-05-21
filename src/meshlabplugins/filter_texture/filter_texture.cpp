@@ -196,8 +196,9 @@ static QString extractFilenameTexture(const MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterList(const QAction *action, const MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, const MeshDocument &md)
 {
+	RichParameterList parlst;
 	const MeshModel* trg = md.mm();
 	for (const MeshModel* tmp : md.meshList){
 		if (tmp != trg && tmp != nullptr){
@@ -267,6 +268,7 @@ void FilterTexturePlugin::initParameterList(const QAction *action, const MeshDoc
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 	
 	

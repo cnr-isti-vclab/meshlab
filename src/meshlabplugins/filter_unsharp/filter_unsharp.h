@@ -78,7 +78,7 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	void initParameterList(const QAction* action, const MeshDocument &/*m*/, RichParameterList & parlst);
+	RichParameterList initParameterList(const QAction* action, const MeshDocument &/*m*/);
 	int postCondition(const QAction* ) const;
 	int getPreConditions(const QAction*) const;
 	FilterArity filterArity(const QAction* filter) const;

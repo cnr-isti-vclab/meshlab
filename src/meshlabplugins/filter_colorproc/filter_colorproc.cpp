@@ -189,8 +189,9 @@ int FilterColorProc::getRequirements(const QAction *action)
 	assert(0);
 }
 
-void FilterColorProc::initParameterList(const QAction *a, const MeshDocument& md, RichParameterList & par)
+RichParameterList FilterColorProc::initParameterList(const QAction *a, const MeshDocument& md)
 {
+	RichParameterList par;
 	switch(ID(a))
 	{
 	case CP_FILLING:
@@ -380,6 +381,7 @@ void FilterColorProc::initParameterList(const QAction *a, const MeshDocument& md
 
 	default: break; // do not add any parameter for the other filters
 	}
+	return par;
 }
 
 std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filter, const RichParameterList &par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)

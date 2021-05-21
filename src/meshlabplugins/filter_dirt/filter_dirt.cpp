@@ -99,8 +99,9 @@ QString FilterDirt::filterInfo(ActionIDType filterId) const
 	}
 }
 
-void FilterDirt::initParameterList(const QAction* filter, const MeshDocument & /*md*/, RichParameterList &par){
-
+RichParameterList FilterDirt::initParameterList(const QAction* filter, const MeshDocument & /*md*/)
+{
+	RichParameterList par;
 	switch(ID(filter)){
 
 	case FP_DIRT:{
@@ -126,6 +127,7 @@ void FilterDirt::initParameterList(const QAction* filter, const MeshDocument & /
 		break;
 	}
 	}
+	return par;
 }
 
 int FilterDirt::getRequirements(const QAction * /*action*/)

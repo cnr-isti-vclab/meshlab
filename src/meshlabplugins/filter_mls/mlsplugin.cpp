@@ -179,8 +179,9 @@ QString MlsPlugin::filterInfo(ActionIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md, RichParameterList& parlst)
+RichParameterList MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md)
 {
+	RichParameterList parlst;
 	int id = ID(action);
 	const MeshModel *target = md.mm();
 
@@ -195,7 +196,7 @@ void MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md,
 								  false,
 								  "Select only non closed components",
 								  ""));
-		return;
+		return parlst;
 	}
 	else if (id == FP_RADIUS_FROM_DENSITY)
 	{
@@ -203,7 +204,7 @@ void MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md,
 								16,
 								"Number of neighbors",
 								"Number of neighbors used to estimate the local density. Larger values lead to smoother variations."));
-		return;
+		return parlst;
 	}
 
 	if ((id & _PROJECTION_))
@@ -313,6 +314,7 @@ void MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md,
 								  "The resolution of the grid on which we run the marching cubes."
                                         "This marching cube is memory friendly, so you can safely set large values up to 1000 or even more."));
 	}
+	return parlst;
 }
 
 int MlsPlugin::getRequirements(const QAction *)

@@ -192,10 +192,11 @@ QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
  return QString("Unknown filter");
 }
 
-void SelectionFilterPlugin::initParameterList(const QAction *action, const MeshModel &m, RichParameterList &parlst)
+RichParameterList SelectionFilterPlugin::initParameterList(const QAction *action, const MeshModel &m)
 {
- switch(ID(action))
- {
+	RichParameterList parlst;
+	switch(ID(action))
+	{
 	case FP_SELECT_FACES_BY_EDGE:
 	{
 		float maxVal = m.cm.bbox.Diag()/2.0f;
@@ -302,6 +303,7 @@ void SelectionFilterPlugin::initParameterList(const QAction *action, const MeshM
 		parlst.addParam(RichBool("allLayers", false, "Apply to all visible Layers", "If selected, the filter will be applied to all visible mesh Layers."));
 	} break;
  }
+ return parlst;
 }
 
 std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(

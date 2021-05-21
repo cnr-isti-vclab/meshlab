@@ -155,8 +155,9 @@ int FilterMeasurePlugin::getPreConditions(const QAction* action) const
 	}
 }
 
-void FilterMeasurePlugin::initParameterList(const QAction *action, const MeshModel &m, RichParameterList & parlst)
+RichParameterList FilterMeasurePlugin::initParameterList(const QAction *action, const MeshModel &m)
 {
+	RichParameterList parlst;
 	switch (ID(action)) {
 	case PER_VERTEX_QUALITY_HISTOGRAM:
 		parlst.addParam(RichFloat("HistMin", vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm).first, "Hist Min", "The vertex are displaced of a vector whose norm is bounded by this value"));
@@ -173,6 +174,7 @@ void FilterMeasurePlugin::initParameterList(const QAction *action, const MeshMod
 	default:
 		break;
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> FilterMeasurePlugin::applyFilter(

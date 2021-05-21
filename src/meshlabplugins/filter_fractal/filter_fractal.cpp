@@ -169,8 +169,9 @@ QString FilterFractal::filterInfo(ActionIDType filterId) const
 	return description;
 }
 
-void FilterFractal::initParameterList(const QAction* filter, const MeshDocument &md, RichParameterList &par)
+RichParameterList FilterFractal::initParameterList(const QAction* filter, const MeshDocument &md)
 {
+	RichParameterList par;
 	switch(ID(filter))
 	{
 	case CR_FRACTAL_TERRAIN:
@@ -181,6 +182,7 @@ void FilterFractal::initParameterList(const QAction* filter, const MeshDocument 
 		initParameterSetForCratersGeneration(md, par);
 		break;
 	}
+	return par;
 }
 
 void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, const MeshDocument &md, RichParameterList &par)

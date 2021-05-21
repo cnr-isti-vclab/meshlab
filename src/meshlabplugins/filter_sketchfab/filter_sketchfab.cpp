@@ -98,8 +98,9 @@ int FilterSketchFabPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-void FilterSketchFabPlugin::initParameterList(const QAction* action, const MeshModel&, RichParameterList& parlst)
+RichParameterList FilterSketchFabPlugin::initParameterList(const QAction* action, const MeshModel&)
 {
+	RichParameterList parlst;
 	QSettings settings;
 	QVariant v = settings.value("SketchFab Code");
 	QString sketchFabAPIValue;
@@ -123,6 +124,7 @@ void FilterSketchFabPlugin::initParameterList(const QAction* action, const MeshM
 	default :
 		assert(0);
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> FilterSketchFabPlugin::applyFilter(
