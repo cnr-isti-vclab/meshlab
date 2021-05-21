@@ -158,8 +158,11 @@ public:
 
 	/**
 	 * @brief This function is called to initialized the list of parameters.
-	 * If a filter does not need parameters, return an empty list and the framework
-	 * will not create a dialog (unless for previewing)
+	 * If a filter does not need parameters, do not implement this function and
+	 * the framework will not create a dialog (unless for previewing).
+	 * You can implement the one which takes the MeshModel or the one that
+	 * takes the MeshDocument, depending of your needings, but do not re-implement
+	 * both the functions.
 	 */
 	virtual RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/)
 	{
