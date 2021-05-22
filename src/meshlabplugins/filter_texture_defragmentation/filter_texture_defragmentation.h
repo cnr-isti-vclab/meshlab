@@ -59,6 +59,7 @@ class FilterTextureDefragPlugin : public QObject, public FilterPlugin
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	virtual int getRequirements(const QAction*);
+	bool requiresGLContext(const QAction*) const;
 	virtual int getPreConditions(const QAction*) const;
 	virtual int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction *a) const;

@@ -174,7 +174,7 @@ RichParameterList FilterCreate::initParameterList(const QAction *action, const M
 		  )));
 		break;
 	default :
-		assert(0);
+		;
 	}
 	return parlst;
 }

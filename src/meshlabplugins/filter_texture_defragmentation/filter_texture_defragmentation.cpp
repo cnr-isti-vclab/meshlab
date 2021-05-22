@@ -112,6 +112,17 @@ int FilterTextureDefragPlugin::getRequirements(const QAction *a)
 	return MeshModel::MM_NONE;
 }
 
+bool FilterTextureDefragPlugin::requiresGLContext(const QAction* a) const
+{
+	switch (ID(a)) {
+	case FP_TEXTURE_DEFRAG:
+		return true;
+	default:
+		assert(0);
+		return false;
+	}
+}
+
 int FilterTextureDefragPlugin::postCondition(const QAction *a) const
 {
 	switch (ID(a)) {
