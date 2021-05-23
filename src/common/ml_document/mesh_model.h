@@ -222,7 +222,7 @@ public:
 
 	bool hasDataMask(const int maskToBeTested) const;
 	void updateDataMask();
-	void updateDataMask(MeshModel *m);
+	void updateDataMask(const MeshModel* m);
 	void updateDataMask(int neededDataMask);
 	void clearDataMask(int unneededDataMask);
 	int dataMask() const;

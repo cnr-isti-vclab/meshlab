@@ -197,15 +197,12 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
         unsigned int& /*postConditionMask*/,
         CallBackPos *cb)
 {
-	MeshModel &currentModel = *(md.mm());
+	const MeshModel &currentModel = *(md.mm());
 	switch(ID(filter)) {
 	case FP_TEXTURE_DEFRAG:
 	{
-		MeshModel& mm = *(md.addNewMesh("", "texdefrag_" + currentModel.label(), false));
+		MeshModel& mm = *(md.addNewMesh(md.mm()->cm, "texdefrag_" + currentModel.label()));
 		mm.updateDataMask(&currentModel);
-		tri::Append<CMeshO, CMeshO>::Mesh(mm.cm, currentModel.cm);
-		mm.UpdateBoxAndNormals();
-		mm.cm.Tr = currentModel.cm.Tr;
 
 		GLExtensionsManager::initializeGLextensions();
 

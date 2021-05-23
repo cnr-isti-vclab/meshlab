@@ -168,7 +168,7 @@ void MeshModel::updateDataMask()
 		currentDataMask |= MM_WEDGTEXCOORD;
 }
 
-void MeshModel::updateDataMask(MeshModel *m)
+void MeshModel::updateDataMask(const MeshModel *m)
 {
 	updateDataMask(m->currentDataMask);
 }
