@@ -248,7 +248,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 			QFileInfo textureFile(textureName.c_str());
 			textureFile.makeAbsolute();
 			if (!textureFile.exists() || !textureFile.isReadable())
-				throw MLException((std::string("Texture file ") + textureName.c_str() + std::string(" does not exist or is not readable.")).c_str());
+				throw MLException((std::string("Texture file ") + textureFile.absoluteFilePath().toStdString() + std::string(" does not exist or is not readable.")).c_str());
 
 			textureObject->AddImage(textureFile.absoluteFilePath().toStdString());
 		}
