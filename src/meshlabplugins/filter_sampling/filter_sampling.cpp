@@ -409,7 +409,7 @@ QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
 		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
 		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertices of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
-		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud.");
+		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud. The simplification is performed by subsampling the original point cloud using a Poisson Disk strategy.");
 		case FP_POISSONDISK_SAMPLING       :  return QString("Create a new layer populated with a point sampling of the current mesh;"
 													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
 													"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
