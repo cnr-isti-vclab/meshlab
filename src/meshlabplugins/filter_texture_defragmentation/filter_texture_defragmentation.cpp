@@ -350,6 +350,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		IntegerShift(defragMesh, chartsToPack, texszVec, anchorMap, flipped);
 
 		glContext->makeCurrent();
+		GLExtensionsManager::initializeGLextensions();
 		std::vector<std::shared_ptr<QImage>> newTextures = RenderTexture(defragMesh, textureObject, texszVec, true, RenderMode::Linear);
 		glContext->doneCurrent();
 
