@@ -204,8 +204,6 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		MeshModel& mm = *(md.addNewMesh(md.mm()->cm, "texdefrag_" + currentModel.label()));
 		mm.updateDataMask(&currentModel);
 
-		GLExtensionsManager::initializeGLextensions();
-
 		QString path = currentModel.pathName();
 
 		tri::UpdateTopology<CMeshO>::FaceFace(mm.cm);
@@ -351,7 +349,9 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 
 		IntegerShift(defragMesh, chartsToPack, texszVec, anchorMap, flipped);
 
+		glContext->makeCurrent();
 		std::vector<std::shared_ptr<QImage>> newTextures = RenderTexture(defragMesh, textureObject, texszVec, true, RenderMode::Linear);
+		glContext->doneCurrent();
 
 		// Copy wedge tex coords from defragMesh to cm
 		if (mm.cm.FN() != defragMesh.FN())
