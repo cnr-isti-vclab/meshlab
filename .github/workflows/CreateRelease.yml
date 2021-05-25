@@ -8,10 +8,6 @@ on:
         description: 'New MeshLab Version'
         required: true
         default: 'YYYY.MM'
-      release_candidate:
-        description: 'Is release candidate'
-        required: true
-        default: 'false'
 
 
 jobs:
@@ -66,15 +62,10 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Deploy
       shell: bash
       run: |
@@ -122,15 +113,10 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Deploy
       shell: bash
       run: |
@@ -194,11 +180,6 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
     - name: Set Certificate
       run: |
@@ -208,7 +189,7 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Sign Portable content
       run: |
         .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\install\'
