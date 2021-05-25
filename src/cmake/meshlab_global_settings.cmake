@@ -2,7 +2,7 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-# Prefer GLVND
+# Prefer OpenGL GLVND
 if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
