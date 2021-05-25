@@ -25,8 +25,8 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH
 #check if we have an exec in distrib
 if ! [ -f $INSTALL_PATH/usr/bin/meshlab ]
 then
-  echo "ERROR: meshlab bin not found inside $INSTALL_PATH/usr/bin/"
-  exit 1
+    echo "ERROR: meshlab bin not found inside $INSTALL_PATH/usr/bin/"
+    exit 1
 fi
 
 mkdir -p $INSTALL_PATH/usr/share/doc/meshlab
