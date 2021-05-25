@@ -14,7 +14,6 @@ option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scala
 option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
 option(USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)
 
-option(MESHLAB_IS_RELEASE_CANDIDATE_VERSION "" OFF)
 option(MESHLAB_IS_NIGHTLY_VERSION "" OFF)
 
 ### Dependencies
