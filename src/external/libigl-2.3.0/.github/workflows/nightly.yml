@@ -1,0 +1,190 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron:  '0 4 * * *'
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: ON
+  CTEST_PARALLEL_LEVEL: 2
+
+jobs:
+  ####################
+  # Linux / macOS
+  ####################
+
+  # Part of this file is inspired from
+  # https://github.com/onqtam/doctest/blob/dev/.github/workflows/main.yml
+
+  Unix:
+    name: ${{ matrix.name }} (${{ matrix.config }}, ${{ fromJSON('["Static", "HeaderOnly"]')[matrix.static == 'ON'] }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [
+          ubuntu-20.04-gcc-8,
+          ubuntu-20.04-gcc-9,
+          ubuntu-20.04-gcc-10,
+          ubuntu-20.04-clang-8,
+          ubuntu-20.04-clang-9,
+          ubuntu-20.04-clang-10,
+          macOS-latest,
+        ]
+        config: [Debug, Release]
+        static: [ON, OFF]
+        include:
+          - name: ubuntu-20.04-gcc-8
+            os: ubuntu-20.04
+            compiler: gcc
+            version: "8"
+
+          - name: ubuntu-20.04-gcc-9
+            os: ubuntu-20.04
+            compiler: gcc
+            version: "9"
+
+          - name: ubuntu-20.04-gcc-10
+            os: ubuntu-20.04
+            compiler: gcc
+            version: "10"
+
+          - name: ubuntu-20.04-clang-8
+            os: ubuntu-20.04
+            compiler: clang
+            version: "8"
+
+          - name: ubuntu-20.04-clang-9
+            os: ubuntu-20.04
+            compiler: clang
+            version: "9"
+
+          - name: ubuntu-20.04-clang-10
+            os: ubuntu-20.04
+            compiler: clang
+            version: "10"
+
+          - name: macOS-latest
+            os: macOS-latest
+
+            # Build tutorials for most configurations
+          - tutorials: ON
+
+            # Except with Debug mode
+          - config: Debug
+            tutorials: OFF
+    env:
+      LIBIGL_NUM_THREADS: 1  # See https://github.com/libigl/libigl/pull/996
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 10
+
+      - name: Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+            sudo apt-get update
+
+            if [ "${{ matrix.compiler }}" = "gcc" ]; then
+              sudo apt-get install -y g++-${{ matrix.version }}
+              echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
+              echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
+            else
+              sudo apt-get install -y clang-${{ matrix.version }}
+              echo "CC=clang-${{ matrix.version }}" >> $GITHUB_ENV
+              echo "CXX=clang++-${{ matrix.version }}" >> $GITHUB_ENV
+            fi
+
+            sudo apt-get install \
+              libblas-dev \
+              libboost-filesystem-dev \
+              libboost-system-dev \
+              libboost-thread-dev \
+              libglu1-mesa-dev \
+              liblapack-dev \
+              libmpfr-dev \
+              xorg-dev
+
+      - name: Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install boost gmp mpfr
+
+      - name: Configure
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=${{ matrix.config }} \
+            -DLIBIGL_USE_STATIC_LIBRARY=${{ matrix.static }} \
+            -DLIBIGL_BUILD_TUTORIALS=${{ matrix.tutorials }} \
+            -DLIBIGL_WITH_CGAL=ON \
+            -DLIBIGL_WITH_COMISO=ON
+
+      - name: Free Disk Space
+        if: runner.os == 'Linux'
+        run: |
+            sudo swapoff -a
+            sudo apt clean
+            sudo rm -rf /swapfile /usr/share/dotnet /usr/local/lib/android /opt/ghc
+            df -h
+
+      - name: Build
+        run: cd build; make -j1
+
+      - name: Tests
+        run: cd build; ctest --verbose
+
+  ####################
+  # Windows
+  ####################
+
+  Windows:
+    name: Windows (${{ matrix.config }}, ${{ fromJSON('["Static", "HeaderOnly"]')[matrix.static == 'ON'] }})
+    runs-on: windows-2019
+    env:
+      CC: cl.exe
+      CXX: cl.exe
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug, Release]
+        static: [ON, OFF]
+        include:
+          - config: Debug
+            tutorials: OFF
+          - config: Release
+            tutorials: ON
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 10
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Set env
+        run: |
+          echo "BOOST_ROOT=$env:BOOST_ROOT_1_72_0" >> ${env:GITHUB_ENV}
+
+        # We run configure + build in the same step, since they both need to call VsDevCmd
+        # Also, cmd uses ^ to break commands into multiple lines (in powershell this is `)
+      - name: Configure and build
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+          cmake -G Ninja ^
+            -DCMAKE_BUILD_TYPE=${{ matrix.config }} ^
+            -DLIBIGL_USE_STATIC_LIBRARY=${{ matrix.static }} ^
+            -DLIBIGL_BUILD_TUTORIALS=${{ matrix.tutorials }} ^
+            -DLIBIGL_WITH_CGAL=ON ^
+            -DLIBIGL_WITH_COMISO=OFF ^
+            -DCMAKE_JOB_POOLS=job-pool=1 ^
+            -DCMAKE_JOB_POOL_COMPILE:STRING=job-pool ^
+            -DCMAKE_JOB_POOL_LINK:STRING=job-pool ^
+            -B build ^
+            -S .
+          cd build
+          ninja -j 1 -k 10
+
+      - name: Tests
+        run: cd build; ctest --verbose

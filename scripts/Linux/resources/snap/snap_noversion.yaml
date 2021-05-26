@@ -48,6 +48,8 @@ parts:
       - patchelf
       - rsync
       - libqt5opengl5-dev
+      - libcgal-dev
+      - libboost-all-dev
     stage-packages:
       - lib3ds-1-3
       - libgomp1

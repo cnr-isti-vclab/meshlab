@@ -19,6 +19,8 @@
 .DS_Store
 distrib*
 src/install/*
+src/external/boost_1_75_0
+src/external/CGAL-5.2.1
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe
@@ -95,7 +97,7 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# QtCreator 4.8< compilation database 
+# QtCreator 4.8< compilation database
 compile_commands.json
 
 # QtCreator local machine specific files for imported projects
