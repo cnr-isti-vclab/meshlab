@@ -29,12 +29,6 @@ done
 
 bash $SCRIPTS_PATH/resources/make_bundle.sh $INSTALL_PATH
 
-# libOpenGL.so is not deployed by linuxdeployqt
-if [ -f /usr/lib/x86_64-linux-gnu/libOpenGL.so.0 ]
-then
-    cp "$(readlink -f /usr/lib/x86_64-linux-gnu/libOpenGL.so.0)" $INSTALL_PATH/usr/lib/libOpenGL.so.0
-fi
-
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
 $SCRIPTS_PATH/resources/linuxdeployqt $INSTALL_PATH/usr/share/applications/meshlab.desktop \
   -bundle-non-qt-libs \
