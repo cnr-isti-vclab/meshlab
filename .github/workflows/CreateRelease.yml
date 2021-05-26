@@ -50,7 +50,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev
+       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev libcgal-dev libboost-all-dev
        #needed by qt 5.15 on linux
        sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
@@ -100,7 +100,7 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-        brew install libomp
+        brew install libomp cgal
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -181,11 +181,18 @@ jobs:
           echo  ::set-output name=artifact_suffix::""
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+    - name: Expand PATH for wget
+      run: |
+        echo "C:\msys64\usr\bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Set Certificate
       run: |
         New-Item -ItemType directory -Path certificate
         Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
         certutil -decode certificate\certificate.txt certificate\certificate.pfx
+    - name: Download external libraries
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_download_ext.sh
     - name: Configure and Build
       shell: bash
       run: |
