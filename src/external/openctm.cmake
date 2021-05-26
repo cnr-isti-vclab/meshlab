@@ -6,7 +6,7 @@ option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
 option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 
 find_package(OpenCTM)
-set(OPENCTM_DIR ${EXTERNAL_DIR}/OpenCTM-1.0.3)
+set(OPENCTM_DIR ${CMAKE_CURRENT_LIST_DIR}/OpenCTM-1.0.3)
 
 if(ALLOW_SYSTEM_OPENCTM AND TARGET OpenCTM::OpenCTM)
 	message(STATUS "- OpenCTM - using system-provided library")

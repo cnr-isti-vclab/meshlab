@@ -8,7 +8,6 @@ if(TARGET external-IDTFConverter)
 	set(SOURCES io_u3d.cpp)
 
 	set(HEADERS io_u3d.h)
-	include_directories("${EXTERNAL_DIR}/u3d/src/IDTF")
 
 	add_meshlab_plugin(io_u3d ${SOURCES} ${HEADERS})
 

@@ -34,7 +34,8 @@ $SCRIPTS_PATH/resources/linuxdeployqt $INSTALL_PATH/usr/share/applications/meshl
   -bundle-non-qt-libs \
   -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libfilter_sketchfab.so \
   -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_3ds.so \
-  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_ctm.so
+  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_ctm.so \
+  -executable=$INSTALL_PATH/usr/lib/meshlab/plugins/libfilter_mesh_booleans.so
 
 
 chmod +x $INSTALL_PATH/usr/bin/meshlab

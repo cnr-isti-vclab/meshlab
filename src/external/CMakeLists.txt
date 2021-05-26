@@ -36,6 +36,12 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 
 	message(STATUS "Searching for optional components")
 
+	# boost - optional for filter_mesh_booleans
+	include(${CMAKE_CURRENT_SOURCE_DIR}/boost.cmake)
+
+	# cgal - optional for filter_mesh_booleans
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cgal.cmake)
+
 	# gmp or mpir - optional, for filter_csg
 	include(${CMAKE_CURRENT_SOURCE_DIR}/gmp-mpir.cmake)
 
@@ -44,6 +50,9 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 
 	# lib3ds - optional, for io_3ds
 	include(${CMAKE_CURRENT_SOURCE_DIR}/lib3ds.cmake)
+
+	# libigl - optional for filter_mesh_booleans
+	include(${CMAKE_CURRENT_SOURCE_DIR}/libigl.cmake)
 
 	# muparser - optional, for filter_func
 	include(${CMAKE_CURRENT_SOURCE_DIR}/muparser.cmake)

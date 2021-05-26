@@ -6,7 +6,7 @@ option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
 option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 
 find_package(muparser)
-set(MUPARSER_DIR ${EXTERNAL_DIR}/muparser_v225)
+set(MUPARSER_DIR ${CMAKE_CURRENT_LIST_DIR}/muparser_v225)
 
 if(ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
 	message(STATUS "- muparser - using system-provided library")
