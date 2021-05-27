@@ -42,9 +42,6 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 	# cgal - optional for filter_mesh_booleans
 	include(${CMAKE_CURRENT_SOURCE_DIR}/cgal.cmake)
 
-	# gmp or mpir - optional, for filter_csg
-	include(${CMAKE_CURRENT_SOURCE_DIR}/gmp-mpir.cmake)
-
 	# levmar - optional, for several plugins
 	include(${CMAKE_CURRENT_SOURCE_DIR}/levmar.cmake)
 

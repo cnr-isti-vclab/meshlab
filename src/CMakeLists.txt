@@ -163,7 +163,6 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/filter_color_projection
 			meshlabplugins/filter_colorproc
 			meshlabplugins/filter_create
-			meshlabplugins/filter_csg
 			meshlabplugins/filter_dirt
 			meshlabplugins/filter_fractal
 			meshlabplugins/filter_func
