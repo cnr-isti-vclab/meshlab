@@ -197,6 +197,9 @@ private:
 	//that can store more than one mesh. For meshes loaded from
 	//files containing just this mesh, this id will be -1.
 	int idInsideFile;
+
+	//textures associated to mesh
+	std::map<std::string, QImage> textures;
 };// end class MeshModel
 
 #endif

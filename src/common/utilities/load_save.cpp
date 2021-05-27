@@ -204,4 +204,9 @@ void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
 
 }
 
+QImage loadTexture(const QString filename)
+{
+
+}
+
 }

@@ -487,6 +487,9 @@ void BaseMeshIOPlugin::openRaster(const QString& format, const QString& filename
 		}
 
 		rm.setLabel(filename);
+		//here the image is actually loaded
+		//todo: change this
+		//RasterPlane should take a QImage as parameter
 		rm.addPlane(new RasterPlane(filename,RasterPlane::RGBA));
 
 		// Read the JPEG file into a buffer
