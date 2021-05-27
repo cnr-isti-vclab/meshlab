@@ -63,7 +63,13 @@ QString QualityMapperFilter::filterName(ActionIDType filterId) const
 QString QualityMapperFilter::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
-	case FP_QUALITY_MAPPER :  return QString("The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertices. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping");
+	case FP_QUALITY_MAPPER :
+		return QString(
+				"The filter maps quality levels into colors using a colorband "
+				"built from a transfer function (may be loaded from an external "
+				"file) and colorizes the mesh vertices. The minimum, medium and "
+				"maximum quality values can be set by user to obtain a custom "
+				"quality range for mapping");
 	default : assert(0);
 	}
 	return QString("");
@@ -73,8 +79,8 @@ FilterPlugin::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 {
 	switch(ID(a))
 	{
-	case FP_QUALITY_MAPPER :           return FilterPlugin::Quality;
-	default :  assert(0);			return FilterPlugin::Generic;
+	case FP_QUALITY_MAPPER : return FilterPlugin::Quality;
+	default : assert(0);     return FilterPlugin::Generic;
 	}
 }
 
@@ -89,7 +95,7 @@ FilterPlugin::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 RichParameterList QualityMapperFilter::initParameterList(const QAction *action,const MeshModel &m)
 {
 	RichParameterList parlst;
-	switch(ID(action))	 {
+	switch(ID(action)) {
 	case FP_QUALITY_MAPPER :
 	{
 		_meshMinMaxQuality = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);

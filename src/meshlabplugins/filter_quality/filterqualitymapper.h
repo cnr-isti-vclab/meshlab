@@ -81,7 +81,7 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	virtual FilterClass getClass(const QAction*) const;
+	FilterClass getClass(const QAction*) const;
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 
