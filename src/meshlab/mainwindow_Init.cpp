@@ -1121,7 +1121,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	if (settings.contains(checkForMonthlyAndBetasVar))
 		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();
 	if (checkForMonthlyAndBetasVal){
-		urlCheck = "https://github.com/cnr-isti-vclab/meshlab/blob/master/ML_VERSION";
+		urlCheck = "https://raw.githubusercontent.com/cnr-isti-vclab/meshlab/master/ML_VERSION";
 	}
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
