@@ -76,7 +76,7 @@ QString FilterCreate::filterName(ActionIDType filterId) const
 	case CR_FITPLANE: return QString("Fit a plane to selection");
 	default : assert(0);
 	}
-	return NULL;
+	return "";
 }
 
 // Info() must return the longer string describing each filtering action
@@ -98,7 +98,7 @@ QString FilterCreate::filterInfo(ActionIDType filterId) const
 	case CR_FITPLANE: return QString("Create a quad on the plane fitting the selection");
 	default : assert(0);
 	}
-	return NULL;
+	return "";
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -115,14 +115,16 @@ RichParameterList FilterCreate::initParameterList(const QAction *action, const M
 
 	case CR_SPHERE :
 		parlst.addParam(RichFloat("radius",1,"Radius","Radius of the sphere"));
-		parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
-                                "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
+		parlst.addParam(RichInt("subdiv",3,"Subdiv. Level",
+								"Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+								"Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
 		break;
 
 	case CR_SPHERE_CAP :
 		parlst.addParam(RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
-		parlst.addParam(RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
-                                "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
+		parlst.addParam(RichInt("subdiv",3,"Subdiv. Level",
+								"Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+								"Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
 		break;
 	case CR_ANNULUS :
 		parlst.addParam(RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
@@ -135,12 +137,11 @@ RichParameterList FilterCreate::initParameterList(const QAction *action, const M
 								 QStringList() << "Montecarlo" << "Poisson Sampling" << "DiscoBall" << "Octahedron" << "Fibonacci",
 								 tr("Generation Technique:"),
 								 tr("Generation Technique:"
-                                        "<b>Montecarlo</b>: The points are randomly generated with an uniform distribution.<br>"
-                                        "<b>Poisson Disk</b>: The points are to follow a poisson disk distribution.<br>"
-                                        "<b>Disco Ball</b> Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used. <br>"
-                                        "<b>Recursive Octahedron</b> Points are generated on the vertex of a recursively subdivided octahedron <br>"
-                                        "<b>Fibonacci</b> . "
-                                        )));
+									"<b>Montecarlo</b>: The points are randomly generated with an uniform distribution.<br>"
+									"<b>Poisson Disk</b>: The points are to follow a poisson disk distribution.<br>"
+									"<b>Disco Ball</b> Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used. <br>"
+									"<b>Recursive Octahedron</b> Points are generated on the vertex of a recursively subdivided octahedron <br>"
+									"<b>Fibonacci</b> . ")));
 
 		break;
 	case CR_BOX :
@@ -168,10 +169,9 @@ RichParameterList FilterCreate::initParameterList(const QAction *action, const M
 								 QStringList() << "quasi-Straight Fit" << "Best Fit" << "XZ Parallel" << "YZ Parallel" << "YX Parallel",
 								 tr("Plane orientation"),
 								 tr("Orientation:"
-		  "<b>quasi-Straight Fit</b>: The fitting plane will be oriented (as much as possible) straight with the axeses.<br>"
-		  "<b>Best Fit</b>: The fitting plane will be oriented and sized trying to best fit to the selected area.<br>"
-		  "<b>-- Parallel</b>: The fitting plane will be oriented with a side parallel with the chosen plane. WARNING: do not use if the selection is exactly parallel to a plane.<br>"
-		  )));
+									"<b>quasi-Straight Fit</b>: The fitting plane will be oriented (as much as possible) straight with the axeses.<br>"
+									"<b>Best Fit</b>: The fitting plane will be oriented and sized trying to best fit to the selected area.<br>"
+									"<b>-- Parallel</b>: The fitting plane will be oriented with a side parallel with the chosen plane. WARNING: do not use if the selection is exactly parallel to a plane.<br>")));
 		break;
 	default :
 		;
@@ -448,7 +448,6 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		m->cm.Clear();
 		std::vector<Point3m> sampleVec;
 
-
 		switch(sphereGenTech)
 		{
 		case 0: // Montecarlo
@@ -536,8 +535,10 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 
 	}//CASE FILTER
 
-	tri::UpdateBounding<CMeshO>::Box(m->cm);
-	tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
+	if (m != nullptr){
+		tri::UpdateBounding<CMeshO>::Box(m->cm);
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
+	}
 	return std::map<std::string, QVariant>();
 }
 
