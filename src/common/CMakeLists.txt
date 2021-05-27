@@ -7,7 +7,7 @@ if (MESHLAB_IS_NIGHTLY_VERSION)
 	# YYYY and mm are computed by cmake and not read from file
 	find_package(Git)
 	execute_process(COMMAND
-		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=6
+		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=7
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		OUTPUT_VARIABLE GIT_SHA1
 		ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
