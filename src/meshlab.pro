@@ -103,10 +103,7 @@ SUBDIRS += \ #sub projects names
 	edit_pickpoints
 
 }
-linux{
-	SUBDIRS += \
-		filter_csg #filter_csg is supported only on linux with qmake
-}
+
 meshlab_mini {
 	message(Compiling only MeshLab Mini!)
 }
