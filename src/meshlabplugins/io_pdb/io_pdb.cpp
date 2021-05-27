@@ -81,7 +81,7 @@ void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	{
 		
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		m.Enable(mask);
+		m.enable(mask);
 
 		if (!parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb))
 			throw MLException("Error while opening PDB file");

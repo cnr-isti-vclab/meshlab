@@ -392,7 +392,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		if(pp.overlap==false)
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
 		
-		paraModel->UpdateBoxAndNormals();
+		paraModel->updateBoxAndNormals();
 		baseModel->clearDataMask(bitToBeCleared);
 		log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
 		log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);

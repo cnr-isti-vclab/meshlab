@@ -292,7 +292,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 
 		// init new layer
-		destModel->UpdateBoxAndNormals();
+		destModel->updateBoxAndNormals();
 		destModel->cm.Tr = currentModel->cm.Tr;
 		destModel->updateDataMask(currentModel);
 	} break;
@@ -338,7 +338,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		vcg::tri::UpdateFlags<CMeshO>::FaceClear(destModel->cm, CMeshO::FaceType::SELECTED);
 
 		// init new layer
-		destModel->UpdateBoxAndNormals();
+		destModel->updateBoxAndNormals();
 		destModel->cm.Tr = currentModel->cm.Tr;
 		destModel->updateDataMask(currentModel);
 	} break;
@@ -359,7 +359,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		log("Duplicated current model to layer %i", md.meshList.size());
 
 		// init new layer
-		destModel->UpdateBoxAndNormals();
+		destModel->updateBoxAndNormals();
 		destModel->cm.Tr = currentModel->cm.Tr;
 	} break;
 
@@ -411,7 +411,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			log( "Removed %d duplicated vertices", delvert);
 		}
 
-		destModel->UpdateBoxAndNormals();
+		destModel->updateBoxAndNormals();
 		log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
 	} break;
 
@@ -437,7 +437,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, cm, true);
 
 			// init new layer
-			destModel->UpdateBoxAndNormals();
+			destModel->updateBoxAndNormals();
 			destModel->cm.Tr = currentModel->cm.Tr;
 		}
 	} break;

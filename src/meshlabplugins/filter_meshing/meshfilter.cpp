@@ -776,7 +776,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REORIENT:
@@ -790,7 +790,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		tri::Clean<CMeshO>::OrientCoherentlyMesh(m.cm, oriented,orientable);
 		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_CLUSTERING:
@@ -804,7 +804,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			ClusteringGrid.AddMesh(m.cm);
 
 		ClusteringGrid.ExtractMesh(m.cm);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;
 
@@ -817,7 +817,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			tri::Clean<CMeshO>::FlipMesh(m.cm,onlySelected);
 		else
 			flipped =  tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;
 
@@ -905,7 +905,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		}
 
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 		tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
@@ -941,7 +941,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		lastq_Selected = par.getBool("Selected");
 
 		QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 		tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
@@ -956,7 +956,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 
 		CMeshO toProjectCopy;
 
@@ -1003,7 +1003,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			log(excp.what());
 			throw MLException(excp.what());
 		}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 
 		//		m.clearDataMask(MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
 
@@ -1374,7 +1374,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		outputValues["closed_holes"] = holeCnt;
 		outputValues["new_faces"] = (int)(m.cm.fn-OriginalSize);
 		assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 
 		// hole filling filter does not correctly update the border flags (but the topology is still ok!)
 		if(NewFaceSelectedFlag)
@@ -1479,7 +1479,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 					loopIndex++;
 				}
 			}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REFINE_HALF_CATMULL:
@@ -1537,7 +1537,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 	case FP_MAKE_PURE_TRI:
 	{
 		vcg::tri::BitQuadCreation<CMeshO>::MakeBitTriOnly(m.cm);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_POLYGONAL);
 	} break;
 
@@ -1623,7 +1623,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		// new layer
 		QString newLayerName = QFileInfo(m.shortName()).baseName() + "_perimeter";
 		MeshModel* perimeter = md.addNewMesh("", newLayerName, true);
-		perimeter->Clear();
+		perimeter->clear();
 
 		Matrix44m rotM = m.cm.Tr;
 		rotM.SetColumn(3, Point3m(0.0, 0.0, 0.0));
@@ -1721,7 +1721,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		{
 			MeshModel* cap2= md.addNewMesh("",sectionName+"_filled");
 			tri::CapEdgeMesh(cap->cm, cap2->cm);
-			cap2->UpdateBoxAndNormals();
+			cap2->updateBoxAndNormals();
 		}
 
 		if(par.getBool("splitSurfaceWithSection"))
@@ -1760,8 +1760,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 					if(!(*vi).IsD() && (*vi).IsS())
 						tri::Allocator<CMeshO>::DeleteVertex(underM->cm,*vi);
 
-				underM->UpdateBoxAndNormals();
-				overM->UpdateBoxAndNormals();
+				underM->updateBoxAndNormals();
+				overM->updateBoxAndNormals();
 			}
 		}
 

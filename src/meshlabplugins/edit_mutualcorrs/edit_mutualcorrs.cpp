@@ -469,7 +469,7 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
             QTextStream openFileTS(&openFile);
 
             openFileTS << "-------RASTER ALIGNMENT DATA---------" << "\n";
-			openFileTS << "3D Model: " << glArea->md()->mm()->relativePathName() << "\n";
+			openFileTS << "3D Model: " << glArea->md()->mm()->relativePathName(glArea->md()->pathName()) << "\n";
 			openFileTS << "Raster: " << glArea->md()->rm()->currentPlane->fullPathFileName << "\n";
 
             // writing reference

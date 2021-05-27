@@ -176,7 +176,7 @@ void reloadMesh(
 
 	std::list<int> masks;
 	for (MeshModel* mm : meshList){
-		mm->Clear();
+		mm->clear();
 	}
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 }

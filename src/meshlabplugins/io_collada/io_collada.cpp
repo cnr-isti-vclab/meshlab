@@ -123,7 +123,7 @@ void ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 			throw MLException("Error while loading DAE mask.");
 		}
 
-		m.Enable(info.mask);
+		m.enable(info.mask);
 		//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
 		//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
 		

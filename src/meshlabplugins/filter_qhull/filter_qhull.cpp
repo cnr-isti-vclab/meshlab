@@ -216,7 +216,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
 		pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-		pm.UpdateBoxAndNormals();
+		pm.updateBoxAndNormals();
 		if (!result)
 			throw MLException("Failed computing convex hull.");
 	} break;
@@ -285,7 +285,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 
 			int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
 			qh_freeqhull(!qh_ALL);
@@ -315,7 +315,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 			log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
 
@@ -365,7 +365,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 			log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 			log("Alpha = %f ",alpha);
 			//m.cm.Clear();

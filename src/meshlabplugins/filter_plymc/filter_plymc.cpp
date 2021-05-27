@@ -214,7 +214,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 				tri::io::ImporterPLY<CMeshO>::Open(mp->cm,name.c_str(),loadMask);
 				if(p.MergeColor) mp->updateDataMask(MeshModel::MM_VERTCOLOR);
 				mp->updateDataMask(MeshModel::MM_VERTQUALITY);
-				mp->UpdateBoxAndNormals();
+				mp->updateBoxAndNormals();
 			}
 		}
 		

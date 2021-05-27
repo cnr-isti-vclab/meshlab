@@ -70,11 +70,11 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
 {
     vcg::tri::io::AdditionalInfoX3D* info = NULL;
     /*int result = */vcg::tri::io::ImporterX3D<CMeshO>::LoadMask(fileName.toStdString().c_str(), info);
-    m.Enable(info->mask);
+    m.enable(info->mask);
     /*result = */vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, fileName.toStdString().c_str(), info, cb);
     /*vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);*/
-    m.UpdateBoxAndNormals();
+    m.updateBoxAndNormals();
     mask=info->mask;
     delete(info);
 }

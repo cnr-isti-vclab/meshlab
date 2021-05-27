@@ -183,7 +183,7 @@ std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 			MeshModelPointStream<Scalarm> meshStream(md.mm()->cm);
 			_Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,md.mm()->cm.bbox,pm->cm,pp,cb);
 		}
-		pm->UpdateBoxAndNormals();
+		pm->updateBoxAndNormals();
 		md.setVisible(pm->id(),true);
 		md.setCurrentMesh(pm->id());
 		if(currDirChanged)

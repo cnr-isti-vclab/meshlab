@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,13 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
-
 #include <QString>
 #include <QtGlobal>
 #include <QFileInfo>
 
 #include "mesh_model.h"
-#include "mesh_document.h"
 
 #include <wrap/gl/math.h>
 
@@ -36,18 +34,17 @@
 
 using namespace vcg;
 
-MeshModel::MeshModel(MeshDocument *_parent, unsigned int id, const QString& fullFileName, const QString& labelName) :
+MeshModel::MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName) :
 	idInsideFile(-1)
 {
 	/*glw.m = &(cm);*/
-	Clear();
-	parent=_parent;
+	clear();
 	_id=id;
 	if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
 	if(!labelName.isEmpty())	 this->_label=labelName;
 }
 
-void MeshModel::Clear()
+void MeshModel::clear()
 {
 	setMeshModified(false);
 	// These data are always active on the mesh
@@ -61,7 +58,7 @@ void MeshModel::Clear()
 	cm.svn=0;
 }
 
-void MeshModel::UpdateBoxAndNormals()
+void MeshModel::updateBoxAndNormals()
 {
 	tri::UpdateBounding<CMeshO>::Box(cm);
 	if(cm.fn>0) {
@@ -70,20 +67,15 @@ void MeshModel::UpdateBoxAndNormals()
 	}
 }
 
-QString MeshModel::relativePathName() const
+QString MeshModel::relativePathName(const QString& path) const
 {
-	QDir documentDir (documentPathName());
+	QDir documentDir (path);
 	QString relPath=documentDir.relativeFilePath(this->fullPathFileName);
 
-	if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
-		qDebug("Error we have a mesh that is not in the same folder of the project: %s ", qUtf8Printable(relPath));
+	//if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
+	//	qDebug("Error we have a mesh that is not in the same folder of the project: %s ", qUtf8Printable(relPath));
 
 	return relPath;
-}
-
-QString MeshModel::documentPathName() const
-{
-	return parent->pathName();
 }
 
 int MeshModel::io2mm(int single_iobit)
@@ -120,12 +112,6 @@ int MeshModel::io2mm(int single_iobit)
 
 
 /**** DATAMASK STUFF ****/
-
-void MeshDocument::setVisible(int meshId, bool val)
-{
-	getMesh(meshId)->visible=val;
-	emit meshSetChanged();
-}
 
 bool MeshModel::hasDataMask(const int maskToBeTested) const
 {
@@ -230,7 +216,7 @@ void MeshModel::clearDataMask(int unneededDataMask)
 	currentDataMask = currentDataMask & (~unneededDataMask);
 }
 
-void MeshModel::Enable(int openingFileMask)
+void MeshModel::enable(int openingFileMask)
 {
 	if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD )
 		updateDataMask(MM_VERTTEXCOORD);

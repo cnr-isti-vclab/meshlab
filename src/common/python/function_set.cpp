@@ -247,5 +247,5 @@ void pymeshlab::FunctionSet::initDummyMeshDocument()
 	int mask = 0;
 	mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-	dummyMeshDocument.mm()->Enable(mask);
+	dummyMeshDocument.mm()->enable(mask);
 }
