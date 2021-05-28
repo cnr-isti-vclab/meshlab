@@ -1582,7 +1582,7 @@ void MainWindow::saveProject()
 
 	bool firstNotSaved = true;
 	//if a mesh has been created by a create filter we must before to save it. Otherwise the project will refer to a mesh without file name path.
-	for(MeshModel * mp : qAsConst(meshDoc()->meshList))
+	foreach(MeshModel * mp, meshDoc()->meshList)
 	{
 		if ((mp != NULL) && (mp->fullName().isEmpty()))
 		{
