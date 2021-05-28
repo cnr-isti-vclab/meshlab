@@ -1011,53 +1011,47 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 				//Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
 				if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & FilterPlugin::FaceColoring ))
 					postcondmask = postcondmask | MeshModel::MM_FACECOLOR;
-				
+
 				if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & FilterPlugin::VertexColoring ))
 					postcondmask = postcondmask | MeshModel::MM_VERTCOLOR;
-				
+
 				if ((mm->hasDataMask(MeshModel::MM_COLOR)) && (fclasses & FilterPlugin::MeshColoring ))
 					postcondmask = postcondmask | MeshModel::MM_COLOR;
-				
+
 				if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & FilterPlugin::Quality ))
 					postcondmask = postcondmask | MeshModel::MM_FACEQUALITY;
-				
+
 				if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & FilterPlugin::Quality ))
 					postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
-				
+
 				MLRenderingData dttoberendered;
 				QMap<int,MeshModelStateData>::Iterator existit = meshDoc()->meshDocStateData().find(mm->id());
 				if (existit != meshDoc()->meshDocStateData().end())
 				{
-					
 					shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),dttoberendered);
-					int updatemask = MeshModel::MM_NONE;
+
+					//masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
+					//this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask
+					int updatemask = (existit->_mask ^ mm->dataMask()) | postcondmask;
 					bool connectivitychanged = false;
 					if (((unsigned int)mm->cm.VN() != existit->_nvert) || ((unsigned int)mm->cm.FN() != existit->_nface) ||
 							bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) ||
 							bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
 							bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
 					{
-						updatemask = MeshModel::MM_ALL;
 						connectivitychanged = true;
 					}
-					else
-					{
-						//masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
-						//this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask
-						updatemask = (existit->_mask ^ mm->dataMask()) | postcondmask;
-						connectivitychanged = false;
-					}
-					
+
 					MLRenderingData::RendAtts dttoupdate;
 					//1) we convert the meshmodel updating mask to a RendAtts structure
 					MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts(updatemask,dttoupdate);
 					//2) The correspondent bos to the updated rendering attributes are set to invalid
 					shared->meshAttributesUpdated(mm->id(),connectivitychanged,dttoupdate);
-					
+
 					//3) we took the current rendering modality for the mesh in the active gla
 					MLRenderingData curr;
 					shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),curr);
-					
+
 					//4) we add to the current rendering modality in the current GLArea just the minimum attributes having been updated
 					//   WARNING!!!! There are priority policies
 					//               ex1) suppose that the current rendering modality is PR_POINTS and ATT_VERTPOSITION, ATT_VERTNORMAL,ATT_VERTCOLOR
@@ -1072,8 +1066,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 						bool wasprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo((existit->_nvert > 0),(existit->_nface > 0),(existit->_nedge > 0),existit->_mask,pm);
 						bool isprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(mm,pm);
 						bool isworthtobevisualized = MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(pm,curr.isPrimitiveActive(pm),wasprimitivemodalitymeaningful,isprimitivemodalitymeaningful);
-						
-						
+
 						MLRenderingData::RendAtts rd;
 						curr.get(pm, rd);
 						MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(pm, dttoupdate, rd, rd);
@@ -1089,7 +1082,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 						opts._perpoint_mesh_color_enabled = hasmeshcolor;
 						opts._perwire_mesh_color_enabled = hasmeshcolor;
 						opts._persolid_mesh_color_enabled = hasmeshcolor;
-						
+
 						for (MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0); pm < MLRenderingData::PR_ARITY; pm = MLRenderingData::next(pm))
 						{
 							MLRenderingData::RendAtts atts;
@@ -1102,7 +1095,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 					}
 					MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm, curr);
 					MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(curr);
-					
+
 					if (mm == meshDoc()->mm())
 					{
 						/*HORRIBLE TRICK IN ORDER TO HAVE VALID ACTIONS ASSOCIATED WITH THE CURRENT WIRE RENDERING MODALITY*/
@@ -1112,8 +1105,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 						delete fauxaction;
 						/****************************************************************************************************/
 					}
-					
-					
+
 					shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
 				}
 				else
@@ -2575,9 +2567,8 @@ void MainWindow::reloadAllMesh()
 				}
 				try {
 					meshlab::reloadMesh(fileName, meshList, QCallBack);
-					i = 0;
 					for (MeshModel* m : meshList){
-						computeRenderingDataOnLoading(m, i++, nullptr);
+						computeRenderingDataOnLoading(m, true, nullptr);
 					}
 				}
 				catch (const MLException& e) {
@@ -2623,9 +2614,8 @@ void MainWindow::reload()
 		QElapsedTimer t;
 		t.start();
 		meshlab::reloadMesh(fileName, meshList, QCallBack);
-		i = 0;
 		for (MeshModel* m : meshList){
-			computeRenderingDataOnLoading(m, i++, nullptr);
+			computeRenderingDataOnLoading(m, true, nullptr);
 		}
 		GLA()->Log(0, ("File reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	}
