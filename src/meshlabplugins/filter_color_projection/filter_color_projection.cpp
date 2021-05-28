@@ -403,16 +403,18 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammaxdepth =  -1000000;
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
-				for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
+				cam_ind = 0;
+				for(RasterModel* rm : md.rasterList)
 				{
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
 					if(my_near[cam_ind] < allcammindepth)
 						allcammindepth = my_near[cam_ind];
 	
-					float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
+					float imgdiag = sqrt(double(rm->shot.Intrinsics.ViewportPx[0] * rm->shot.Intrinsics.ViewportPx[1]));
 					if (imgdiag > allcammaximagesize)
 						allcammaximagesize = imgdiag;
+					cam_ind++;
 				}
 	
 				//-- cycle all cameras
@@ -718,16 +720,18 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammaxdepth =  -1000000;
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
-				for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
+				cam_ind = 0;
+				for(RasterModel* rm : md.rasterList)
 				{
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
 					if(my_near[cam_ind] < allcammindepth)
 						allcammindepth = my_near[cam_ind];
 	
-					float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
+					float imgdiag = sqrt(double(rm->shot.Intrinsics.ViewportPx[0] * rm->shot.Intrinsics.ViewportPx[1]));
 					if (imgdiag > allcammaximagesize)
 						allcammaximagesize = imgdiag;
+					cam_ind++;
 				}
 	
 				//-- cycle all cameras

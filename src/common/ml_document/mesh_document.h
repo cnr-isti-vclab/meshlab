@@ -114,8 +114,8 @@ public:
 	{
 		friend class MeshDocument;
 	public:
-		QList<MeshModel*>::iterator begin() {return md->meshList.begin();}
-		QList<MeshModel*>::iterator end() {return md->meshList.end();}
+		std::list<MeshModel*>::iterator begin() {return md->meshList.begin();}
+		std::list<MeshModel*>::iterator end() {return md->meshList.end();}
 	private:
 		MeshRangeIterator(MeshDocument* md) : md(md){}
 		MeshDocument* md;
@@ -128,9 +128,9 @@ public:
 	
 	/// The very important member:
 	/// The list of MeshModels.
-	QList<MeshModel *> meshList;
+	std::list<MeshModel *> meshList;
 	/// The list of the raster models of the project
-	QList<RasterModel *> rasterList;
+	std::list<RasterModel *> rasterList;
 	
 private:
 	int meshIdCounter;

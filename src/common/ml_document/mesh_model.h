@@ -173,7 +173,7 @@ private:
 public:
 	void Clear();
 	void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
-	inline int id() const {return _id;}
+	inline unsigned int id() const {return _id;}
 
 	int idInFile() const {return idInsideFile;}
 	void setIdInFile(int id) {idInsideFile = id;}

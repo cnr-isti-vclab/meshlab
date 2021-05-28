@@ -1110,7 +1110,7 @@ void LayerDialog::updatePerMeshItemVisibility()
 		}
 	}
 
-	if ((!md->meshList.isEmpty()) && allhidden)
+	if ((!md->meshList.empty()) && allhidden)
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_close.png"));
 	else
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_open.png"));

@@ -217,16 +217,14 @@ void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter
 
 void FilterFractal::initParameterSetForCratersGeneration(const MeshDocument &md, RichParameterList &par)
 {
-	int meshCount = md.meshList.size();
-
 	// tries to detect the target mesh
 	const MeshModel* target = md.mm();
 	const MeshModel* samples = md.mm();
 	MeshModel* tmpMesh;
 	if (samples->cm.fn != 0){ // this is probably not the samples layer
-		for(int i=0; i<meshCount; i++)
+		for(MeshModel* mm : md.meshList)
 		{
-			tmpMesh = md.meshList.at(i);
+			tmpMesh = mm;
 			if (tmpMesh->cm.fn == 0)
 			{
 				samples = tmpMesh;

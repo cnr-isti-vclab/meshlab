@@ -24,10 +24,10 @@
 #include "mesh_document.h"
 
 template <class LayerElement>
-QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
+QString NameDisambiguator(std::list<LayerElement*> &elemList, QString meshLabel )
 {
 	QString newName=std::move(meshLabel);
-	typename QList<LayerElement*>::iterator mmi;
+	typename std::list<LayerElement*>::iterator mmi;
 	
 	for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
 	{
@@ -193,26 +193,31 @@ MeshModel* MeshDocument::nextVisibleMesh(MeshModel* _m)
 MeshModel* MeshDocument::nextMesh(MeshModel* _m)
 {
 	if(_m==0 && meshList.size()>0)
-		return meshList.at(0);
-	for (int i = 0; i < meshList.size(); ++i) {
-		if (meshList.at(i) == _m) {
-			if(i+1 < meshList.size())
-				return meshList.at(i+1);
+		return meshList.front();
+	for (auto it = meshList.begin(); it != meshList.end(); ++it) {
+		if (*it == _m) {
+			auto next = it;
+			next++;
+			if(next != meshList.end())
+				return *next;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 RasterModel* MeshDocument::nextRaster(RasterModel* _rm)
 {
-	for (int i = 0; i < rasterList.size(); ++i) {
-		if (rasterList.at(i) == _rm)
-		{
-			if(i+1 < rasterList.size())
-				return rasterList.at(i+1);
+	if(_rm==0 && rasterList.size()>0)
+		return rasterList.front();
+	for (auto it = rasterList.begin(); it != rasterList.end(); ++it) {
+		if (*it == _rm) {
+			auto next = it;
+			next++;
+			if(next != rasterList.end())
+				return *next;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 MeshModel* MeshDocument::mm()
@@ -367,10 +372,13 @@ std::list<MeshModel*> MeshDocument::getMeshesLoadedFromSameFile(MeshModel* mm)
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
-	if(!meshList.removeOne(mmToDel))
+	auto pos = std::find(meshList.begin(), meshList.end(), mmToDel);
+	if (pos == meshList.end())
 		return false;
+	meshList.erase(pos);
+
 	if((currentMesh == mmToDel) && (!meshList.empty()))
-		setCurrentMesh(this->meshList.at(0)->id());
+		setCurrentMesh(this->meshList.front()->id());
 	else if (meshList.empty())
 		setCurrentMesh(-1);
 	
@@ -403,26 +411,17 @@ RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 
 bool MeshDocument::delRaster(RasterModel *rasterToDel)
 {
-	QMutableListIterator<RasterModel *> i(rasterList);
-	
-	while (i.hasNext())
-	{
-		RasterModel *r = i.next();
-		
-		if (r==rasterToDel)
-		{
-			i.remove();
-			delete rasterToDel;
-		}
-	}
-	
-	if(currentRaster == rasterToDel)
-	{
-		if (!rasterList.empty())
-			setCurrentRaster(rasterList.at(0)->id());
-		else
-			setCurrentRaster(-1);
-	}
+	auto pos = std::find(rasterList.begin(), rasterList.end(), rasterToDel);
+	if (pos == rasterList.end())
+		return false;
+	rasterList.erase(pos);
+
+	if((currentRaster == rasterToDel) && (!rasterList.empty()))
+		setCurrentRaster(this->rasterList.front()->id());
+	else if (rasterList.empty())
+		setCurrentRaster(-1);
+
+	delete rasterToDel;
 	emit rasterSetChanged();
 	
 	return true;

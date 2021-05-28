@@ -196,9 +196,9 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 		myVec.push_back(md.mm()->cm.vert[i].P());
 	}
 	std::vector<Shotm> oldShots;
-	for (int r=0; r<md.rasterList.size();r++)
+	for (RasterModel* rm : md.rasterList)
 	{
-		oldShots.push_back(md.rasterList[r]->shot);
+		oldShots.push_back(rm->shot);
 	}
 
 	log("Sampled has %i vertices",myVec.size());
@@ -237,9 +237,9 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 					if (diff<thresDiff)
 						break;
 					oldShots.clear();
-					for (int r=0; r<md.rasterList.size();r++)
+					for (RasterModel* rm : md.rasterList)
 					{
-						oldShots.push_back(md.rasterList[r]->shot);
+						oldShots.push_back(rm->shot);
 					}
 				}
 			}
@@ -265,15 +265,17 @@ float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shot
 	std::vector<float> distances;
 	for (int i=0; i<points.size(); i++)
 	{
-		for(int j=0; j<md.rasterList.size(); j++)
+		unsigned int j = 0;
+		for(RasterModel* rm : md.rasterList)
 		{
-			vcg::Point2f pp=md.rasterList[j]->shot.Project(points[i]);
-			if(pp[0]>0 && pp[1]>0 && pp[0]<md.rasterList[j]->shot.Intrinsics.ViewportPx[0] && pp[1]<md.rasterList[j]->shot.Intrinsics.ViewportPx[1])
+			vcg::Point2f pp=rm->shot.Project(points[i]);
+			if(pp[0]>0 && pp[1]>0 && pp[0]<rm->shot.Intrinsics.ViewportPx[0] && pp[1]<rm->shot.Intrinsics.ViewportPx[1])
 			{
 				vcg::Point2f ppOld=oldShots[j].Project(points[i]);
 				vcg::Point2f d=pp-ppOld;
 				distances.push_back(vcg::math::Sqrt( d[0]*d[0] + d[1]*d[1] ));
 			}
+			++j;
 		}
 	}
 	float totErr=0.0;
@@ -366,86 +368,87 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 	MutualInfo mutual;
 	if (md.rasterList.size()==0)
 	{
-		 log("You need a Raster Model to apply this filter!");
-		 return false;
+		log("You need a Raster Model to apply this filter!");
+		return false;
 	}
 	else {
 
-	alignset.mesh=&md.mm()->cm;
+		alignset.mesh=&md.mm()->cm;
 
-	solver.optimize_focal=par.getBool("Estimate Focal");
-	solver.fine_alignment=par.getBool("Fine");
+		solver.optimize_focal=par.getBool("Estimate Focal");
+		solver.fine_alignment=par.getBool("Fine");
 
-	int rendmode= par.getEnum("RenderingMode");
+		int rendmode= par.getEnum("RenderingMode");
 
-			switch(rendmode){
-				case 0:
-					alignset.mode=AlignSet::COMBINE;
-					break;
-				case 1:
-					alignset.mode=AlignSet::NORMALMAP;
-					break;
-				case 2:
-					alignset.mode=AlignSet::COLOR;
-					break;
-				case 3:
-					alignset.mode=AlignSet::SPECULAR;
-					break;
-				case 4:
-					alignset.mode=AlignSet::SILHOUETTE;
-					break;
-				case 5:
-					alignset.mode=AlignSet::SPECAMB;
-					break;
-				default:
-					alignset.mode=AlignSet::COMBINE;
-					break;
-			}
+		switch(rendmode){
+		case 0:
+			alignset.mode=AlignSet::COMBINE;
+			break;
+		case 1:
+			alignset.mode=AlignSet::NORMALMAP;
+			break;
+		case 2:
+			alignset.mode=AlignSet::COLOR;
+			break;
+		case 3:
+			alignset.mode=AlignSet::SPECULAR;
+			break;
+		case 4:
+			alignset.mode=AlignSet::SILHOUETTE;
+			break;
+		case 5:
+			alignset.mode=AlignSet::SPECAMB;
+			break;
+		default:
+			alignset.mode=AlignSet::COMBINE;
+			break;
+		}
 
-    vcg::Point3f *vertices = new vcg::Point3f[alignset.mesh->vn];
-  vcg::Point3f *normals = new vcg::Point3f[alignset.mesh->vn];
-  vcg::Color4b *colors = new vcg::Color4b[alignset.mesh->vn];
-  unsigned int *indices = new unsigned int[alignset.mesh->fn*3];
+		vcg::Point3f *vertices = new vcg::Point3f[alignset.mesh->vn];
+		vcg::Point3f *normals = new vcg::Point3f[alignset.mesh->vn];
+		vcg::Color4b *colors = new vcg::Color4b[alignset.mesh->vn];
+		unsigned int *indices = new unsigned int[alignset.mesh->fn*3];
 
-  for(int i = 0; i < alignset.mesh->vn; i++) {
-    vertices[i] = alignset.mesh->vert[i].P();
-    normals[i] = alignset.mesh->vert[i].N();
-    colors[i] = alignset.mesh->vert[i].C();
-  }
+		for(int i = 0; i < alignset.mesh->vn; i++) {
+			vertices[i] = alignset.mesh->vert[i].P();
+			normals[i] = alignset.mesh->vert[i].N();
+			colors[i] = alignset.mesh->vert[i].C();
+		}
 
-  for(int i = 0; i < alignset.mesh->fn; i++)
-    for(int k = 0; k < 3; k++)
-      indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
+		for(int i = 0; i < alignset.mesh->fn; i++)
+			for(int k = 0; k < 3; k++)
+				indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
-                  vertices, GL_STATIC_DRAW_ARB);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
-                  normals, GL_STATIC_DRAW_ARB);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
-                  colors, GL_STATIC_DRAW_ARB);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
+						vertices, GL_STATIC_DRAW_ARB);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.nbo);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
+						normals, GL_STATIC_DRAW_ARB);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.cbo);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Color4b),
+						colors, GL_STATIC_DRAW_ARB);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
-  glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
-                  indices, GL_STATIC_DRAW_ARB);
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.ibo);
+		glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, alignset.mesh->fn*3*sizeof(unsigned int),
+						indices, GL_STATIC_DRAW_ARB);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
 
-  // it is safe to delete after copying data to VBO
-  delete []vertices;
-  delete []normals;
-  delete []colors;
-  delete []indices;
+		// it is safe to delete after copying data to VBO
+		delete []vertices;
+		delete []normals;
+		delete []colors;
+		delete []indices;
 
-	for (int r=0; r<md.rasterList.size();r++)
-	{
-		if(md.rasterList[r]->visible)
+		unsigned int r = 0;
+		for (RasterModel* rm : md.rasterList)
 		{
-				alignset.image=&md.rasterList[r]->currentPlane->image;
-				alignset.shot=md.rasterList[r]->shot;
+			if(rm->visible)
+			{
+				alignset.image=&rm->currentPlane->image;
+				alignset.shot=rm->shot;
 
 				alignset.resize(800);
 
@@ -453,27 +456,29 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 				alignset.shot.Intrinsics.CenterPx[0]=(int)(alignset.shot.Intrinsics.ViewportPx[0]/2);
 
 				if (solver.fine_alignment)
-				solver.optimize(&alignset, &mutual, alignset.shot);
+					solver.optimize(&alignset, &mutual, alignset.shot);
 				else
 				{
-				solver.iterative(&alignset, &mutual, alignset.shot);
-				log("Vado di rough",r);
+					solver.iterative(&alignset, &mutual, alignset.shot);
+					log("Vado di rough",r);
 				}
 
-				md.rasterList[r]->shot=alignset.shot;
-				float ratio=(float)md.rasterList[r]->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
-				md.rasterList[r]->shot.Intrinsics.ViewportPx[0]=md.rasterList[r]->currentPlane->image.width();
-				md.rasterList[r]->shot.Intrinsics.ViewportPx[1]=md.rasterList[r]->currentPlane->image.height();
-				md.rasterList[r]->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-				md.rasterList[r]->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-				md.rasterList[r]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[0]/2.0);
-				md.rasterList[r]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[1]/2.0);
+				rm->shot=alignset.shot;
+				float ratio=(float)rm->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
+				rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
+				rm->shot.Intrinsics.ViewportPx[1]=rm->currentPlane->image.height();
+				rm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+				rm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+				rm->shot.Intrinsics.CenterPx[0]=(int)((float)rm->shot.Intrinsics.ViewportPx[0]/2.0);
+				rm->shot.Intrinsics.CenterPx[1]=(int)((float)rm->shot.Intrinsics.ViewportPx[1]/2.0);
 
 				log("Image %d completed",r);
 
-		}
-		else
-			log("Image %d skipped",r);
+			}
+			else{
+				log("Image %d skipped",r);
+			}
+			++r;
 		}
 	}
 
@@ -545,13 +550,14 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 	//alignset.mode=AlignSet::PROJIMG;
 
 	//this->glContext->makeCurrent();
-	for (int r=0; r<md.rasterList.size(); r++)
+	unsigned int r = 0;
+	for (RasterModel* rm : md.rasterList)
 	{
-		if(md.rasterList[r]->visible)
+		if(rm->visible)
 		{
 			AlignPair pair;
-			alignset.image=&md.rasterList[r]->currentPlane->image;
-			alignset.shot=md.rasterList[r]->shot;
+			alignset.image=&rm->currentPlane->image;
+			alignset.shot=rm->shot;
 
 			//this->initGL();
 			alignset.resize(800);
@@ -567,13 +573,14 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 			QImage covered=alignset.comb;
 			std::vector<AlignPair> weightList;
 
-			for (int p=0; p<md.rasterList.size(); p++)
+			unsigned int p = 0;
+			for (RasterModel* pm : md.rasterList)
 			{
-				if (p!=r)
+				if (pm!=rm)
 				{
 					alignset.mode=AlignSet::PROJIMG;
-					alignset.shotPro=md.rasterList[p]->shot;
-					alignset.imagePro=&md.rasterList[p]->currentPlane->image;
+					alignset.shotPro=pm->shot;
+					alignset.imagePro=&pm->currentPlane->image;
 					alignset.ProjectedImageChanged(*alignset.imagePro);
 					float countTot=0.0;
 					float countCol=0.0;
@@ -595,18 +602,19 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 								}
 							}
 						}
-						pair.area=countCol/countTot;
+					pair.area=countCol/countTot;
 
-						if (pair.area>0.2)
-						{
-							pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
-							pair.imageId=r;
-							pair.projId=p;
-							pair.weight=pair.area*pair.mutual;
-							weightList.push_back(pair);
+					if (pair.area>0.2)
+					{
+						pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
+						pair.imageId=r;
+						pair.projId=p;
+						pair.weight=pair.area*pair.mutual;
+						weightList.push_back(pair);
 
-						}
+					}
 				}
+				++p;
 			}
 
 			log("Image %d completed",r);
@@ -625,8 +633,6 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 			}
 			else
 			{
-
-
 				std::sort(weightList.begin(), weightList.end(), orderingW());
 
 				///////////////////////////////////////7
@@ -634,8 +640,8 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 				{
 					int p=weightList[i].projId;
 					alignset.mode=AlignSet::PROJIMG;
-					alignset.shotPro=md.rasterList[p]->shot;
-					alignset.imagePro=&md.rasterList[p]->currentPlane->image;
+					alignset.shotPro=rm->shot;
+					alignset.imagePro=&rm->currentPlane->image;
 					alignset.ProjectedImageChanged(*alignset.imagePro);
 					float countTot=0.0;
 					float countCol=0.0;
@@ -662,31 +668,32 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 								}
 							}
 						}
-						pair.area=countCol/countTot;
-						/*covered.save("covered.jpg");
-						alignset.rend.save("rend.jpg");
-						alignset.comb.save("comb.jpg");*/
+					pair.area=countCol/countTot;
+					/*covered.save("covered.jpg");
+					alignset.rend.save("rend.jpg");
+					alignset.comb.save("comb.jpg");*/
 
-						pair.area*=countCov/countTot;
-						pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
-						pair.imageId=r;
-						pair.projId=p;
-						pair.weight=weightList[i].weight;
-						list.push_back(pair);
-						log("Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
-					}
+					pair.area*=countCov/countTot;
+					pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
+					pair.imageId=r;
+					pair.projId=p;
+					pair.weight=weightList[i].weight;
+					list.push_back(pair);
+					log("Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
+				}
 			}
 
 		}
-		}
-//////////////////////////////////////////////////////
+		++r;
+	}
+	//////////////////////////////////////////////////////
 
 
 
 	log("Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
 
 
-		//emit md.rasterSetChanged();
+	//emit md.rasterSetChanged();
 	//this->glContext->doneCurrent();
 	return list;
 
@@ -772,6 +779,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 	{
 		SubGraph graph;
 		graph.id=i;
+		auto rmit = md.rasterList.begin();
 		for (int j=0; j<numNodes; j++)
 		{
 			log("Node %d of %d",j,numNodes);
@@ -779,7 +787,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 			{
 				Node n;
 				double mut=0.0; double are=0.00001;
-				if(md.rasterList[j]->visible)
+				if((*rmit)->visible)
 					n.active=false;
 				else
 					n.active=true;
@@ -807,6 +815,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 				graph.nodes.push_back(n);
 				log("Node %d of %d: not used",j,numNodes);
 			}
+			++rmit;
 		}
 		Gr.push_back(graph);
 	}
@@ -898,15 +907,19 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	alignset.mode=AlignSet::NODE;
 	//alignset.node=&node;
 
-	alignset.image=&md.rasterList[node.id]->currentPlane->image;
-	alignset.shot=md.rasterList[node.id]->shot;
+	auto it= md.rasterList.begin(); std::advance(it, node.id);
+	RasterModel* rm = *it;
+	alignset.image=&rm->currentPlane->image;
+	alignset.shot=rm->shot;
 
 	alignset.mesh=&md.mm()->cm;
 
 	for (int l=0; l<node.arcs.size(); l++)
 	{
-		alignset.arcImages.push_back(&md.rasterList[node.arcs[l].projId]->currentPlane->image);
-		alignset.arcShots.push_back(&md.rasterList[node.arcs[l].projId]->shot);
+		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[l].projId);
+		RasterModel* lrm  =*lit;
+		alignset.arcImages.push_back(&lrm->currentPlane->image);
+		alignset.arcShots.push_back(&lrm->shot);
 		alignset.arcMI.push_back(node.arcs[l].mutual);
 
 	}
@@ -915,17 +928,21 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 		return true;
 	else if(alignset.arcImages.size()==1)
 	{
-		alignset.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
-		alignset.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[0].projId);
+		RasterModel* lrm  =*lit;
+		alignset.arcImages.push_back(&lrm->currentPlane->image);
+		alignset.arcShots.push_back(&lrm->shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
-		alignset.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
-		alignset.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		alignset.arcImages.push_back(&lrm->currentPlane->image);
+		alignset.arcShots.push_back(&lrm->shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
 	}
 	else if(alignset.arcImages.size()==2)
 	{
-		alignset.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
-		alignset.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[0].projId);
+		RasterModel* lrm  =*lit;
+		alignset.arcImages.push_back(&lrm->currentPlane->image);
+		alignset.arcShots.push_back(&lrm->shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
 	}
 
@@ -944,14 +961,14 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	unsigned int *indices = new unsigned int[alignset.mesh->fn*3];
 
 	for(int i = 0; i < alignset.mesh->vn; i++) {
-	vertices[i] = alignset.mesh->vert[i].P();
-	normals[i] = alignset.mesh->vert[i].N();
-	colors[i] = alignset.mesh->vert[i].C();
+		vertices[i] = alignset.mesh->vert[i].P();
+		normals[i] = alignset.mesh->vert[i].N();
+		colors[i] = alignset.mesh->vert[i].C();
 	}
 
 	for(int i = 0; i < alignset.mesh->fn; i++)
-	for(int k = 0; k < 3; k++)
-	indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
+		for(int k = 0; k < 3; k++)
+			indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
@@ -991,14 +1008,14 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 
 
 	//md.rasterList[node.id]->shot=alignset.shot;
-	md.rasterList[node.id]->shot=alignset.shot;
-	float ratio=(float)md.rasterList[node.id]->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
-	md.rasterList[node.id]->shot.Intrinsics.ViewportPx[0]=md.rasterList[node.id]->currentPlane->image.width();
-	md.rasterList[node.id]->shot.Intrinsics.ViewportPx[1]=md.rasterList[node.id]->currentPlane->image.height();
-	md.rasterList[node.id]->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-	md.rasterList[node.id]->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-	md.rasterList[node.id]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[node.id]->shot.Intrinsics.ViewportPx[0]/2.0);
-	md.rasterList[node.id]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[node.id]->shot.Intrinsics.ViewportPx[1]/2.0);
+	rm->shot=alignset.shot;
+	float ratio=(float)rm->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
+	rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
+	rm->shot.Intrinsics.ViewportPx[1]=rm->currentPlane->image.height();
+	rm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+	rm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+	rm->shot.Intrinsics.CenterPx[0]=(int)((float)rm->shot.Intrinsics.ViewportPx[0]/2.0);
+	rm->shot.Intrinsics.CenterPx[1]=(int)((float)rm->shot.Intrinsics.ViewportPx[1]/2.0);
 	//this->glContext->doneCurrent();
 	//emit md.rasterSetChanged();
 	for (int l=0; l<alignset.arcImages.size(); l++)
@@ -1028,14 +1045,14 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 	unsigned int *indices = new unsigned int[alignset.mesh->fn*3];
 
 	for(int i = 0; i < alignset.mesh->vn; i++) {
-	vertices[i] = alignset.mesh->vert[i].P();
-	normals[i] = alignset.mesh->vert[i].N();
-	colors[i] = alignset.mesh->vert[i].C();
+		vertices[i] = alignset.mesh->vert[i].P();
+		normals[i] = alignset.mesh->vert[i].N();
+		colors[i] = alignset.mesh->vert[i].C();
 	}
 
 	for(int i = 0; i < alignset.mesh->fn; i++)
-	for(int k = 0; k < 3; k++)
-	indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
+		for(int k = 0; k < 3; k++)
+			indices[k+i*3] = alignset.mesh->face[i].V(k) - &*alignset.mesh->vert.begin();
 
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, alignset.vbo);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, alignset.mesh->vn*sizeof(vcg::Point3f),
@@ -1068,11 +1085,12 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 //////////////////
 				int imageId=graph.nodes[h].arcs[l].imageId;
 				int imageProj=graph.nodes[h].arcs[l].projId;
-
+				auto it= md.rasterList.begin(); std::advance(it, imageId);
+				RasterModel* rm = *it;
 				//this->glContext->makeCurrent();
 
-				alignset.image=&md.rasterList[imageId]->currentPlane->image;
-				alignset.shot=md.rasterList[imageId]->shot;
+				alignset.image=&rm->currentPlane->image;
+				alignset.shot=rm->shot;
 
 				//this->initGL();
 				alignset.resize(800);
@@ -1089,8 +1107,8 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 				alignset.comb=alignset.rend;*/
 
 				alignset.mode=AlignSet::PROJIMG;
-				alignset.shotPro=md.rasterList[imageProj]->shot;
-				alignset.imagePro=&md.rasterList[imageProj]->currentPlane->image;
+				alignset.shotPro=rm->shot;
+				alignset.imagePro=&rm->currentPlane->image;
 				alignset.ProjectedImageChanged(*alignset.imagePro);
 				float countTot=0.0;
 				float countCol=0.0;

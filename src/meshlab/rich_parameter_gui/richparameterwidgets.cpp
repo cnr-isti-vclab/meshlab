@@ -1076,12 +1076,14 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 	//defaultMeshIndex = -1;
 
 	int currentmeshindex = -1;
-	for(unsigned int i=0; i< (unsigned int)md->meshList.size(); ++i) {
-		QString shortName = md->meshList.at(i)->label();
+	unsigned int i = 0;
+	for(MeshModel* mm : md->meshList) {
+		QString shortName = mm->label();
 		meshNames.push_back(shortName);
-		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshId()) {
+		if((unsigned int) mm->id() == rp->value().getMeshId()) {
 			currentmeshindex = i;
 		}
+		++i;
 	}
 
 	Init(p,currentmeshindex,meshNames);
@@ -1090,33 +1092,41 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 MeshModel * MeshWidget::getMesh()
 {
 	//test to make sure index is in bounds
-	int index = enumCombo->currentIndex();
+	unsigned int index = enumCombo->currentIndex();
 	if(index < md->meshList.size() && index > -1) {
-		return md->meshList.at(enumCombo->currentIndex());
+		auto it = md->meshList.begin();
+		std::advance(it, index);
+		return *it;
 	}
-	else return NULL;
+	else return nullptr;
 }
 
 void MeshWidget::setMesh(MeshModel * newMesh)
 {
-	for(int i=0; i < md->meshList.size(); ++i) {
-		if(md->meshList.at(i) == newMesh)
+	unsigned int i = 0;
+	for(MeshModel* mm : md->meshList) {
+		if(mm == newMesh)
 			setIndex(i);
+		i++;
 	}
 }
 
 void MeshWidget::collectWidgetValue()
 {
-	rp->setValue(MeshValue(md->meshList.at(enumCombo->currentIndex())->id()));
+	auto it = md->meshList.begin();
+	std::advance(it, enumCombo->currentIndex());
+	rp->setValue(MeshValue((*it)->id()));
 }
 
 void MeshWidget::resetWidgetValue()
 {
 	int meshindex = -1;
-	for(unsigned int i=0; i<(unsigned int)md->meshList.size(); ++i) {
-		if((unsigned int) md->meshList.at(i)->id() == rp->value().getMeshId()) {
+	unsigned int i = 0;
+	for(MeshModel* mm : md->meshList) {
+		if(mm->id() == rp->value().getMeshId()) {
 			meshindex = i;
 		}
+		++i;
 	}
 	enumCombo->setCurrentIndex(meshindex);
 }
@@ -1124,10 +1134,12 @@ void MeshWidget::resetWidgetValue()
 void MeshWidget::setWidgetValue( const Value& nv )
 {
 	int meshindex = -1;
-	for(unsigned int i=0; i< (unsigned int)md->meshList.size(); ++i) {
-		if((unsigned int) md->meshList.at(i)->id() == nv.getMeshId()) {
+	unsigned int i = 0;
+	for(MeshModel* mm : md->meshList) {
+		if(mm->id() == nv.getMeshId()) {
 			meshindex = i;
 		}
+		++i;
 	}
 	enumCombo->setCurrentIndex(meshindex);
 }

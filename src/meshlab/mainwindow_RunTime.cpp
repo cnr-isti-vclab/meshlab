@@ -746,9 +746,8 @@ void MainWindow::endEdit()
 		return;
 	
 	
-	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		MeshModel* mm = meshDoc()->meshList[ii];
 		if (mm != NULL)
 			addRenderingDataIfNewlyGeneratedMesh(mm->id());
 	}
@@ -839,9 +838,8 @@ void MainWindow::runFilterScript()
 				}
 				else
 				{
-					for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+					for(MeshModel* mm : meshDoc()->meshList)
 					{
-						MeshModel* mm = meshDoc()->meshList[ii];
 						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
 						if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
 						{
@@ -1157,7 +1155,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
 	int req=iFilter->getRequirements(action);
-	if (!meshDoc()->meshList.isEmpty())
+	if (!meshDoc()->meshList.empty())
 		meshDoc()->mm()->updateDataMask(req);
 	qApp->restoreOverrideCursor();
 	
@@ -1200,9 +1198,8 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		}
 		else
 		{
-			for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+			for(MeshModel* mm : meshDoc()->meshList)
 			{
-				MeshModel* mm = meshDoc()->meshList[ii];
 				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
 				if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
 				{
@@ -1688,12 +1685,11 @@ void MainWindow::saveProject()
 	
 	if (saveAllFile->isChecked())
 	{
-		for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
+		for(MeshModel* mm : meshDoc()->meshList)
 		{
-			MeshModel* mp = meshDoc()->meshList[ii];
-			if((!onlyVisibleLayers->isChecked()) || (mp->visible))
+			if((!onlyVisibleLayers->isChecked()) || (mm->visible))
 			{
-				ret |= exportMesh(mp->fullName(),mp,true);
+				ret |= exportMesh(mm->fullName(),mm,true);
 			}
 		}
 	}
@@ -1768,16 +1764,16 @@ bool MainWindow::openProject(QString fileName)
 			return false;
 		}
 		GLA()->updateMeshSetVisibilities();
-		for (int i=0; i<meshDoc()->meshList.size(); i++)
+		for (MeshModel* mm : meshDoc()->meshList)
 		{
-			QString fullPath = meshDoc()->meshList[i]->fullName();
+			QString fullPath = mm->fullName();
 			//meshDoc()->setBusy(true);
-			Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+			Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
 			MLRenderingData* ptr = NULL;
-			if (rendOpt.find(meshDoc()->meshList[i]->id()) != rendOpt.end())
-				ptr = &rendOpt[meshDoc()->meshList[i]->id()];
-			if (!loadMeshWithStandardParams(fullPath, this->meshDoc()->meshList[i], trm, false, ptr))
-				meshDoc()->delMesh(meshDoc()->meshList[i]);
+			if (rendOpt.find(mm->id()) != rendOpt.end())
+				ptr = &rendOpt[mm->id()];
+			if (!loadMeshWithStandardParams(fullPath, mm, trm, false, ptr))
+				meshDoc()->delMesh(mm);
 		}
 	}
 	
@@ -1914,16 +1910,20 @@ bool MainWindow::appendProject(QString fileName)
 				return false;
 			}
 			GLA()->updateMeshSetVisibilities();
-			for (int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
+			auto it = meshDoc()->meshList.begin();
+			std::advance(it, alreadyLoadedNum);
+			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
 			{
-				QString fullPath = meshDoc()->meshList[i]->fullName();
+				MeshModel* mm = *it;
+				QString fullPath = mm->fullName();
 				meshDoc()->setBusy(true);
-				Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+				Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
 				MLRenderingData* ptr = NULL;
-				if (rendOpt.find(meshDoc()->meshList[i]->id()) != rendOpt.end())
-					ptr = &rendOpt[meshDoc()->meshList[i]->id()];
-				if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm, false, ptr))
-					meshDoc()->delMesh(meshDoc()->meshList[i]);
+				if (rendOpt.find(mm->id()) != rendOpt.end())
+					ptr = &rendOpt[mm->id()];
+				if(!loadMeshWithStandardParams(fullPath,mm,trm, false, ptr))
+					meshDoc()->delMesh(mm);
+				++it;
 			}
 		}
 		
@@ -2034,10 +2034,9 @@ void MainWindow::documentUpdateRequested()
 {
 	if (meshDoc() == NULL)
 		return;
-	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		MeshModel* mm = meshDoc()->meshList[ii];
-		if (mm != NULL)
+		if (mm != nullptr)
 		{
 			addRenderingDataIfNewlyGeneratedMesh(mm->id());
 			updateLayerDialog();
@@ -3299,9 +3298,8 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 {
 	if (meshDoc() == NULL)
 		return;
-	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		MeshModel* mm = meshDoc()->meshList[ii];
 		if ((mm != NULL) && (mm->isVisible()))
 		{
 			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
@@ -3329,10 +3327,10 @@ void MainWindow::updateRenderingDataAccordingToActions(int /*meshid*/, MLRenderi
 		}
 	}
 	
-	for (int hh = 0; hh < meshDoc()->meshList.size(); ++hh)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		if (meshDoc()->meshList[hh] != NULL)
-			updateRenderingDataAccordingToActionsCommonCode(meshDoc()->meshList[hh]->id(), tmpacts);
+		if (mm != NULL)
+			updateRenderingDataAccordingToActionsCommonCode(mm->id(), tmpacts);
 	}
 	
 	for (int ii = 0; ii < tmpacts.size(); ++ii)
@@ -3384,9 +3382,8 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 	if (meshDoc() == NULL)
 		return;
 	
-	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		MeshModel* mm = meshDoc()->meshList[ii];
 		if ((mm != NULL) && (mm->isVisible()))
 		{
 			updateRenderingDataAccordingToActionCommonCode(mm->id(), act);
@@ -3402,9 +3399,8 @@ void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalA
 	if (meshDoc() == NULL)
 		return;
 	
-	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	for (MeshModel* mm : meshDoc()->meshList)
 	{
-		MeshModel* mm = meshDoc()->meshList[ii];
 		if (mm != NULL)
 		{
 			foreach(MLRenderingGlobalAction* act, actlist)
