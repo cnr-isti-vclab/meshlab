@@ -1587,11 +1587,19 @@ void MainWindow::saveProject()
 {
 	if (meshDoc() == NULL)
 		return;
+
+	bool firstNotSaved = true;
 	//if a mesh has been created by a create filter we must before to save it. Otherwise the project will refer to a mesh without file name path.
-	foreach(MeshModel * mp, meshDoc()->meshList)
+	for(MeshModel * mp : qAsConst(meshDoc()->meshList))
 	{
 		if ((mp != NULL) && (mp->fullName().isEmpty()))
 		{
+			if (firstNotSaved){
+				QMessageBox::information(this, "Layer(s) not saved",
+						"Layers must be saved into files before saving the project.\n"
+						"Opening save dialog(s) to save the layer(s)...");
+				firstNotSaved = false;
+			}
 			bool saved = exportMesh(tr(""),mp,false);
 			if (!saved)
 			{
@@ -2677,17 +2685,15 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 	}
 	
-	
-	bool ret = false;
-	
 	QStringList fs = fileName.split(".");
 	
 	if(!fileName.isEmpty() && fs.size() < 2)
 	{
 		QMessageBox::warning(this,"Save Error","You must specify file extension!!");
-		return ret;
+		return false;
 	}
-	
+
+	bool saved = true;
 	if (!fileName.isEmpty())
 	{
 		//save path away so we can use it again
@@ -2739,6 +2745,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		qb->show();
 		QElapsedTimer tt; tt.start();
 		qb->reset();
+
 		try {
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
@@ -2751,14 +2758,15 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		{
 			GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
 			QMessageBox::critical(this, tr("Meshlab Saving Error"),  e.what());
+			saved = false;
 		}
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();
 		
-		if (ret)
+		if (saved)
 			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
 	}
-	return ret;
+	return saved;
 }
 
 void MainWindow::changeFileExtension(const QString& st)
