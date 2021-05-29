@@ -81,8 +81,8 @@ public:
 	QString pathName() const;
 	void setFileName(const QString& newFileName);
 
-	int size() const;
-	int sizeRasters() const;
+	unsigned int size() const;
+	unsigned int sizeRasters() const;
 	bool isBusy();  // used in processing. To disable access to the mesh by the rendering thread
 	void setBusy(bool _busy);
 

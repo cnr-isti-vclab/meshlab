@@ -345,7 +345,7 @@ void MainWindow::updateMenus()
 {
 	
 	bool activeDoc = !(mdiarea->subWindowList().empty()) && (mdiarea->currentSubWindow() != NULL);
-	bool notEmptyActiveDoc = activeDoc && (meshDoc() != NULL) && !(meshDoc()->meshList.empty());
+	bool notEmptyActiveDoc = activeDoc && (meshDoc() != NULL) && !(meshDoc()->size() == 0);
 	
 	//std::cout << "SubWindowsList empty: " << mdiarea->subWindowList().empty() << " Valid Current Sub Windows: " << (mdiarea->currentSubWindow() != NULL) << " MeshList empty: " << meshDoc()->meshList.empty() << "\n";
 	
@@ -735,7 +735,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
 				importMesh(path);
 			}
 		}
-		showLayerDlg(layervis || meshDoc()->meshList.size() > 0);
+		showLayerDlg(layervis || meshDoc()->size() > 0);
 	}
 }
 
@@ -746,7 +746,7 @@ void MainWindow::endEdit()
 		return;
 	
 	
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if (mm != NULL)
 			addRenderingDataIfNewlyGeneratedMesh(mm->id());
@@ -825,7 +825,7 @@ void MainWindow::runFilterScript()
 				}
 				else
 				{
-					for(MeshModel* mm : meshDoc()->meshList)
+					for(MeshModel* mm : meshDoc()->meshIterator())
 					{
 						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
 						if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
@@ -1142,7 +1142,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
 	int req=iFilter->getRequirements(action);
-	if (!meshDoc()->meshList.empty())
+	if (!(meshDoc()->size() == 0))
 		meshDoc()->mm()->updateDataMask(req);
 	qApp->restoreOverrideCursor();
 	
@@ -1185,7 +1185,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		}
 		else
 		{
-			for(MeshModel* mm : meshDoc()->meshList)
+			for(MeshModel* mm : meshDoc()->meshIterator())
 			{
 				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
 				if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
@@ -1566,7 +1566,7 @@ void MainWindow::saveProject()
 
 	bool firstNotSaved = true;
 	//if a mesh has been created by a create filter we must before to save it. Otherwise the project will refer to a mesh without file name path.
-	foreach(MeshModel * mp, meshDoc()->meshList)
+	for(MeshModel * mp : meshDoc()->meshIterator())
 	{
 		if ((mp != NULL) && (mp->fullName().isEmpty()))
 		{
@@ -1648,7 +1648,7 @@ void MainWindow::saveProject()
 		vector<string> meshNameVector;
 		vector<Matrix44m> transfVector;
 		
-		foreach(MeshModel * mp, meshDoc()->meshList)
+		for(MeshModel * mp : meshDoc()->meshIterator())
 		{
 			if((!onlyVisibleLayers->isChecked()) || (mp->visible))
 			{
@@ -1661,7 +1661,7 @@ void MainWindow::saveProject()
 	else
 	{
 		std::map<int, MLRenderingData> rendOpt;
-		foreach(MeshModel * mp, meshDoc()->meshList)
+		for(MeshModel * mp : meshDoc()->meshIterator())
 		{
 			MLRenderingData ml;
 			getRenderingData(mp->id(), ml);
@@ -1672,7 +1672,7 @@ void MainWindow::saveProject()
 	
 	if (saveAllFile->isChecked())
 	{
-		for(MeshModel* mm : meshDoc()->meshList)
+		for(MeshModel * mm : meshDoc()->meshIterator())
 		{
 			if((!onlyVisibleLayers->isChecked()) || (mm->visible))
 			{
@@ -1704,7 +1704,7 @@ bool MainWindow::openProject(QString fileName)
 	
 	// Common Part: init a Doc if necessary, and
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
+	bool activeEmpty = activeDoc && (meshDoc()->size() == 0);
 	
 	if (!activeEmpty)  newProject(fileName);
 	
@@ -1751,7 +1751,7 @@ bool MainWindow::openProject(QString fileName)
 			return false;
 		}
 		GLA()->updateMeshSetVisibilities();
-		for (MeshModel* mm : meshDoc()->meshList)
+		for (MeshModel* mm : meshDoc()->meshIterator())
 		{
 			QString fullPath = mm->fullName();
 			//meshDoc()->setBusy(true);
@@ -1821,7 +1821,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
 	qb->reset();
 	saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
-	showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 0));
+	showLayerDlg(visiblelayer || (meshDoc()->size() > 0));
 	
 	return true;
 }
@@ -1839,7 +1839,7 @@ bool MainWindow::appendProject(QString fileName)
 	
 	// Ccheck if we have a doc and if it is empty
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	if (!activeDoc || meshDoc()->meshList.empty())  // it is wrong to try appending to an empty project, even if it is possible
+	if (!activeDoc || (meshDoc()->size() == 0))  // it is wrong to try appending to an empty project, even if it is possible
 	{
 		QMessageBox::critical(this, tr("Meshlab Opening Error"), "Current project is empty, cannot append");
 		return false;
@@ -1889,7 +1889,7 @@ bool MainWindow::appendProject(QString fileName)
 		
 		if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
 		{
-			int alreadyLoadedNum = meshDoc()->meshList.size();
+			int alreadyLoadedNum = meshDoc()->size();
 			std::map<int, MLRenderingData> rendOpt;
 			if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
 			{
@@ -1899,7 +1899,7 @@ bool MainWindow::appendProject(QString fileName)
 			GLA()->updateMeshSetVisibilities();
 			auto it = meshDoc()->meshList.begin();
 			std::advance(it, alreadyLoadedNum);
-			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
+			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->size(); i++)
 			{
 				MeshModel* mm = *it;
 				QString fullPath = mm->fullName();
@@ -2021,7 +2021,7 @@ void MainWindow::documentUpdateRequested()
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if (mm != nullptr)
 		{
@@ -2341,7 +2341,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 	bool res = importMesh(fileName);
 	globrendtoolbar->setEnabled(true);
 	if (layerDialog != NULL)
-		showLayerDlg(layervisible || meshDoc()->meshList.size());
+		showLayerDlg(layervisible || meshDoc()->size());
 	setCurrentMeshBestTab();
 	return res;
 }
@@ -2941,7 +2941,7 @@ void MainWindow::updateTexture(int meshid)
 	int textmemMB = int(mwsettings.maxTextureMemory / ((float) 1024 * 1024));
 	
 	size_t totalTextureNum = 0;
-	foreach (MeshModel *mp, meshDoc()->meshList)
+	for (MeshModel *mp : meshDoc()->meshIterator())
 		totalTextureNum+=mp->cm.textures.size();
 	
 	int singleMaxTextureSizeMpx = int(textmemMB/((totalTextureNum != 0)? totalTextureNum : 1));
@@ -3285,7 +3285,7 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if ((mm != NULL) && (mm->isVisible()))
 		{
@@ -3314,7 +3314,7 @@ void MainWindow::updateRenderingDataAccordingToActions(int /*meshid*/, MLRenderi
 		}
 	}
 	
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if (mm != NULL)
 			updateRenderingDataAccordingToActionsCommonCode(mm->id(), tmpacts);
@@ -3369,7 +3369,7 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if ((mm != NULL) && (mm->isVisible()))
 		{
@@ -3386,7 +3386,7 @@ void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalA
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshList)
+	for (MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if (mm != NULL)
 		{
@@ -3410,7 +3410,7 @@ void MainWindow::updateRenderingDataAccordingToAction(int /*meshid*/, MLRenderin
 	MLRenderingAction* sisteract = NULL;
 	act->createSisterAction(sisteract, NULL);
 	sisteract->setChecked(check);
-	foreach(MeshModel* mm, meshDoc()->meshList)
+	for(MeshModel* mm : meshDoc()->meshIterator())
 	{
 		if (mm != NULL)
 			updateRenderingDataAccordingToActionCommonCode(mm->id(), sisteract);

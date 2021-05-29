@@ -269,12 +269,12 @@ void MeshDocument::setFileName(const QString& newFileName)
 	fullPathFilename = newFileName;
 }
 
-int MeshDocument::size() const
+unsigned int MeshDocument::size() const
 {
 	return meshList.size();
 }
 
-int MeshDocument::sizeRasters() const
+unsigned int MeshDocument::sizeRasters() const
 {
 	return rasterList.size();
 }
@@ -286,7 +286,7 @@ bool MeshDocument::isBusy()
 
 void MeshDocument::setBusy(bool _busy)
 {
-	busy=_busy;
+    busy=_busy;
 }
 
 /**

@@ -256,7 +256,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 	ddoc.appendChild(root);
 	QDomElement mgroot = ddoc.createElement("MeshGroup");
 
-	for(MeshModel *mmp : md.meshList)
+	for(MeshModel *mmp : md.meshIterator())
 	{
 		if ((!onlyVisibleLayers) || (mmp->visible))
 		{
