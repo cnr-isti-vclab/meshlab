@@ -797,19 +797,6 @@ void MainWindow::runFilterScript()
 			iFilter->setLog(&meshDoc()->Log);
 			RichParameterList &parameterSet = pair.second;
 
-			for(RichParameter& parameter : parameterSet) {
-				//if this is a mesh parameter and the index is valid
-				if(parameter.value().isMesh()) {
-					RichMesh& md = reinterpret_cast<RichMesh&>(parameter);
-					if(!(md.value().getMeshId() < (unsigned int)meshDoc()->size())) {
-						printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md.value().getMeshId() );
-						printf("One of the filters in the script needs more meshes than you have loaded.\n");
-						return;
-					}
-				}
-			}
-			//iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
-
 			bool created = false;
 			MLSceneGLSharedDataContext* shar = NULL;
 			if (currentViewContainer() != NULL)

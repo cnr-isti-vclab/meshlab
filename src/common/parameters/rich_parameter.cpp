@@ -583,17 +583,11 @@ RichMesh::RichMesh(
 		const QString& tltip ):
 	RichParameter(nm,MeshValue(meshind), desc, tltip), meshdoc(doc)
 {
-	assert(meshind < meshdoc->size() && meshind >= 0);
-	if (meshdoc != nullptr)
-		val = new MeshValue(meshind);
-	else
-		val = nullptr;
 }
 
 RichMesh::RichMesh(const QString& nm, unsigned int meshind, const QString& desc, const QString& tltip):
-	RichParameter(nm, MeshValue(meshind), desc, tltip)
+	RichParameter(nm, MeshValue(meshind), desc, tltip), meshdoc(nullptr)
 {
-	meshdoc = nullptr;
 }
 
 RichMesh::~RichMesh()
