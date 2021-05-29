@@ -56,6 +56,9 @@ void loadRaster(
 		const QString& filename,
 		MeshDocument& md,
 		vcg::CallBackPos *cb);
+
+QImage loadTexture(
+		const QString filename);
 }
 
 #endif // MESHLAB_LOAD_SAVE_H

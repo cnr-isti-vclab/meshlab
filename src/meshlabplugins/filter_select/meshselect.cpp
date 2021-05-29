@@ -334,7 +334,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
 	} break;
 
@@ -351,7 +351,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 						tri::Allocator<CMeshO>::DeleteFace(ml->cm, *fi);
 				ml->clearDataMask(MeshModel::MM_FACEFACETOPO);
 				ml->clearDataMask(MeshModel::MM_VERTFACETOPO);
-				ml->UpdateBoxAndNormals();
+				ml->updateBoxAndNormals();
 				log("Layer %i: deleted all %i faces.", ml->id(), ffn - ml->cm.fn);
 			}
 		}
@@ -363,7 +363,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 					tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-			m.UpdateBoxAndNormals();
+			m.updateBoxAndNormals();
 			log("Deleted all %i faces.", ffn - m.cm.fn);
 		}
 	} break;
@@ -377,7 +377,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		log("Deleted %i faces.", ffn - m.cm.fn);
 	} break;
 
@@ -396,7 +396,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
 	} break;
 

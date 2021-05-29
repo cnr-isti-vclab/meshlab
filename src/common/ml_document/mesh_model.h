@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef MESHMODEL_H
-#define MESHMODEL_H
+#ifndef MESH_MODEL_H
+#define MESH_MODEL_H
 #include <GL/glew.h>
 
 #include <stdio.h>
@@ -30,6 +30,9 @@
 #include <map>
 
 #include "cmesh.h"
+#include "../GLLogStream.h"
+#include "../filterscript.h"
+#include "../ml_shared_data_context/ml_plugin_gl_context.h"
 
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/color.h>
@@ -39,11 +42,6 @@
 #include <vcg/complex/algorithms/update/quality.h>
 #include <vcg/complex/algorithms/update/selection.h>
 #include <vcg/complex/algorithms/update/topology.h>
-
-
-//#include <wrap/gl/trimesh.h>
-
-
 
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
@@ -56,10 +54,6 @@
 #include <QReadWriteLock>
 #include <QImage>
 #include <QAction>
-#include "../GLLogStream.h"
-#include "../filterscript.h"
-#include "../ml_shared_data_context/ml_plugin_gl_context.h"
-
 /*
 MeshModel Class
 The base class for representing a single mesh.
@@ -79,33 +73,33 @@ public:
 	- to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
 	*/
 	enum MeshElement{
-		MM_NONE         = 0x00000000,
-		MM_VERTCOORD    = 0x00000001,
-		MM_VERTNORMAL   = 0x00000002,
-		MM_VERTFLAG     = 0x00000004,
-		MM_VERTCOLOR    = 0x00000008,
-		MM_VERTQUALITY  = 0x00000010,
-		MM_VERTMARK	    = 0x00000020,
-		MM_VERTFACETOPO = 0x00000040,
-		MM_VERTCURV	    = 0x00000080,
-		MM_VERTCURVDIR  = 0x00000100,
-		MM_VERTRADIUS   = 0x00000200,
-		MM_VERTTEXCOORD = 0x00000400,
-		MM_VERTNUMBER   = 0x00000800,
+		MM_NONE           = 0x00000000,
+		MM_VERTCOORD      = 0x00000001,
+		MM_VERTNORMAL     = 0x00000002,
+		MM_VERTFLAG       = 0x00000004,
+		MM_VERTCOLOR      = 0x00000008,
+		MM_VERTQUALITY    = 0x00000010,
+		MM_VERTMARK	      = 0x00000020,
+		MM_VERTFACETOPO   = 0x00000040,
+		MM_VERTCURV	      = 0x00000080,
+		MM_VERTCURVDIR    = 0x00000100,
+		MM_VERTRADIUS     = 0x00000200,
+		MM_VERTTEXCOORD   = 0x00000400,
+		MM_VERTNUMBER     = 0x00000800,
 
-		MM_FACEVERT     = 0x00001000,
-		MM_FACENORMAL   = 0x00002000,
-		MM_FACEFLAG	    = 0x00004000,
-		MM_FACECOLOR    = 0x00008000,
-		MM_FACEQUALITY  = 0x00010000,
-		MM_FACEMARK	    = 0x00020000,
-		MM_FACEFACETOPO = 0x00040000,
-		MM_FACENUMBER   = 0x00080000,
-		MM_FACECURVDIR  = 0x00100000,
+		MM_FACEVERT       = 0x00001000,
+		MM_FACENORMAL     = 0x00002000,
+		MM_FACEFLAG	      = 0x00004000,
+		MM_FACECOLOR      = 0x00008000,
+		MM_FACEQUALITY    = 0x00010000,
+		MM_FACEMARK	      = 0x00020000,
+		MM_FACEFACETOPO   = 0x00040000,
+		MM_FACENUMBER     = 0x00080000,
+		MM_FACECURVDIR    = 0x00100000,
 
-		MM_WEDGTEXCOORD = 0x00200000,
-		MM_WEDGNORMAL   = 0x00400000,
-		MM_WEDGCOLOR    = 0x00800000,
+		MM_WEDGTEXCOORD   = 0x00200000,
+		MM_WEDGNORMAL     = 0x00400000,
+		MM_WEDGCOLOR      = 0x00800000,
 
 		// 	Selection
 		MM_VERTFLAGSELECT = 0x01000000,
@@ -124,55 +118,16 @@ public:
 		MM_GEOMETRY_AND_TOPOLOGY_CHANGE = 0x431e7be7,
 
 		// everything - dangerous, will add unwanted data to layer (e.g. if you use MM_ALL it could means that it could add even color or quality)
-		MM_ALL				= 0xffffffff
+		MM_ALL            = 0xffffffff
 	};
 
-	MeshModel(MeshDocument *parent, unsigned int id, const QString& fullFileName, const QString& labelName);
+	MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName);
 	~MeshModel()
 	{
 	}
 
-	MeshDocument *parent;
-
-	CMeshO cm;
-
-
-
-
-	/*vcg::GlTrimesh<CMeshO> glw;*/
-
-
-
-	/*
-	Bitmask denoting what fields are currently used in the mesh
-	it is composed by MeshElement enums.
-	it should be changed by only mean the following functions:
-
-	updateDataMask(neededStuff)
-	clearDataMask(no_needed_stuff)
-	hasDataMask(stuff)
-
-	Note that if an element is active means that is also allocated
-	Some unactive elements (vertex color) are usually already allocated
-	other elements (FFAdj or curvature data) not necessarily.
-
-	*/
-
-private:
-	int currentDataMask;
-	QString fullPathFileName;
-	QString _label;
-	unsigned int _id;
-	bool modified;
-
-	//this is an id used for meshes that are loaded from files
-	//that can store more than one mesh. For meshes loaded from
-	//files containing just this mesh, this id will be -1.
-	int idInsideFile;
-
-public:
-	void Clear();
-	void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
+	void clear();
+	void updateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
 	inline unsigned int id() const {return _id;}
 
 	int idInFile() const {return idInsideFile;}
@@ -201,10 +156,7 @@ public:
 	QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
 
 	/// the relative path with respect to the current project
-	QString relativePathName() const;
-
-	/// the absolute path of the current project
-	QString documentPathName() const;
+	QString relativePathName(const QString& path) const;
 
 	void setFileName(QString newFileName) {
 		QFileInfo fi(newFileName);
@@ -218,7 +170,7 @@ public:
 
 	// This function is roughly equivalent to the updateDataMask,
 	// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
-	void Enable(int openingFileMask);
+	void enable(int openingFileMask);
 
 	bool hasDataMask(const int maskToBeTested) const;
 	void updateDataMask();
@@ -231,10 +183,23 @@ public:
 	bool meshModified() const;
 	void setMeshModified(bool b = true);
 	static int io2mm(int single_iobit);
+
+	CMeshO cm;
+
+private:
+	int currentDataMask;
+	QString fullPathFileName;
+	QString _label;
+	unsigned int _id;
+	bool modified;
+
+	//this is an id used for meshes that are loaded from files
+	//that can store more than one mesh. For meshes loaded from
+	//files containing just this mesh, this id will be -1.
+	int idInsideFile;
+
+	//textures associated to mesh
+	std::map<std::string, QImage> textures;
 };// end class MeshModel
-
-
-
-
 
 #endif

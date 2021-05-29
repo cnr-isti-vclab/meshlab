@@ -393,7 +393,7 @@ void FilterVoronoiPlugin::voronoiSampling(
 	for(auto vi =seedVec.begin();vi!=seedVec.end();++vi)
 		(*vi)->SetS();
 
-	om->UpdateBoxAndNormals();
+	om->updateBoxAndNormals();
 }
 
 void FilterVoronoiPlugin::volumeSampling(
@@ -472,7 +472,7 @@ void FilterVoronoiPlugin::voronoiScaffolding(
 	vvs.BuildScaffoldingMesh(sm->cm,par);
 	cb(90, "Final Smoothing...");
 	tri::Smooth<CMeshO>::VertexCoordLaplacian(sm->cm, smoothStep);
-	sm->UpdateBoxAndNormals();
+	sm->updateBoxAndNormals();
 	tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
 	tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
 }
@@ -508,7 +508,7 @@ void FilterVoronoiPlugin::createSolidWireframe(
 	if(vertSphFlag) tri::BuildSphereVertexShell(m->cm,sm->cm,vertSphRadius);
 	if(faceExtFlag) tri::BuildPrismFaceShell(m->cm,sm->cm,faceExtHeight,faceExtInset);
 
-	sm->UpdateBoxAndNormals();
+	sm->updateBoxAndNormals();
 }
 
 void FilterVoronoiPlugin::crossFieldCreation(

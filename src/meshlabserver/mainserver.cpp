@@ -213,7 +213,7 @@ public:
                 vcg::tri::UpdateNormal<CMeshO>::PerFace(mm.cm);
                 vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
             }
-            else mm.UpdateBoxAndNormals(); // the very standard case
+            else mm.updateBoxAndNormals(); // the very standard case
         }
 
         if(mm.cm.fn==0)
@@ -402,11 +402,11 @@ public:
         bool ret = false;
         if (!mm->isVisible())
         {
-            mm->Clear();
+            mm->clear();
             mm->visible = false;
         }
         else
-            mm->Clear();
+            mm->clear();
         QFileInfo fi(fullPath);
         QString extension = fi.suffix();
         IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);

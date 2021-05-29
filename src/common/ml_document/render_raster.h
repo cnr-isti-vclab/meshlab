@@ -58,7 +58,6 @@ public:
     int semantic;
     QString fullPathFileName;
     QImage image;
-    QImage thumb;
     float *buf;
 
     bool IsInCore() { return !image.isNull(); }

@@ -32,7 +32,27 @@
 #include "../../ml_document/raster_model.h"
 
 /** 
- * @brief The IOPlugin is the base class for all the single mesh loading plugins.
+ * @brief The IOPlugin is the base class for mesh or image loading and saving.
+ *
+ * Provides the base functions to open:
+ * - a mesh file (open);
+ * - [todo] a project file;
+ * - a raster file (openRaster);
+ * - an image file (openImage);
+ *
+ * and the base functions to save:
+ * - a mesh file (save);
+ * - [todo] a project file;
+ * - an image file (saveImage);
+ *
+ * You can implement just a subset of these functions.
+ * Provide the list of file formats supported by your plugin by implementing
+ * the functions:
+ * - importFormats()
+ * - exportFormats()
+ * - importRasterFormats()
+ * - importImageFormats()
+ * - exportImageFormats()
  */
 class IOPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
@@ -59,7 +79,27 @@ public:
 	virtual std::list<FileFormat> exportFormats() const = 0;
 
 	/**
-	 * @brief If yout plugin supports loading also raster formats, re-implement
+	 * @brief If your plugin supports loading also image formats, re-implement
+	 * this function, returning the list of image formats supported by
+	 * your openImage function.
+	 */
+	virtual std::list<FileFormat> importImageFormats() const
+	{
+		return std::list<FileFormat>();
+	}
+
+	/**
+	 * @brief If your plugin supports saving also image formats, re-implement
+	 * this function, returning the list of image formats supported by
+	 * your saveImage function.
+	 */
+	virtual std::list<FileFormat> exportImageFormats() const
+	{
+		return std::list<FileFormat>();
+	}
+
+	/**
+	 * @brief If your plugin supports loading also raster formats, re-implement
 	 * this function, returning the list of raster formats supported by
 	 * your openRaster function.
 	 */
@@ -208,6 +248,24 @@ public:
 		const RichParameterList & par,
 		vcg::CallBackPos *cb) = 0;
 
+	virtual QImage openImage(
+		const QString& format,
+		const QString& /*fileName*/,
+		vcg::CallBackPos* /*cb*/ = nullptr)
+	{
+		wrongOpenFormat(format);
+		return QImage();
+	};
+
+	virtual void saveImage(
+			const QString& format,
+			const QString& /*fileName*/,
+			const QImage& /*image*/,
+			vcg::CallBackPos* /*cb*/ = nullptr)
+	{
+		wrongSaveFormat(format);
+	}
+
 	/**
 	 * @brief If your plugin supports raster formats, re-implement this
 	 * function.
@@ -217,11 +275,13 @@ public:
 	 * @param cb: standard callback for reporting progress while opening
 	 */
 	virtual void openRaster(
-			const QString& /*format*/,
+			const QString& format,
 			const QString& /*fileName*/,
 			RasterModel& /*rm*/,
 			vcg::CallBackPos* /*cb*/ = nullptr)
-	{};
+	{
+		wrongOpenFormat(format);
+	};
 
 	/**
 	 * @brief The reportWarning function should be used everytime that a

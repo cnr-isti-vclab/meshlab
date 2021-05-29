@@ -168,7 +168,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask);
 		// small patch to allow the loading of per wedge color into faces.
 		if (mask & tri::io::Mask::IOM_WEDGCOLOR) mask |= tri::io::Mask::IOM_FACECOLOR;
-		m.Enable(mask);
+		m.enable(mask);
 
 
 		int result = tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
@@ -186,7 +186,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		{
 			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED)));
 		}
-		m.Enable(mask);
+		m.enable(mask);
 		int result = tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
@@ -208,7 +208,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi)){
 			throw MLException("Error while loading OBJ mask.");
 		}
-		m.Enable(oi.mask);
+		m.enable(oi.mask);
 
 		int result = tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 		if (result != tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
@@ -223,7 +223,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 
 //		if (oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
 //			normalsUpdated = true;
-		m.Enable(oi.mask);
+		m.enable(oi.mask);
 		if (m.hasDataMask(MeshModel::MM_POLYGONAL)) qDebug("Mesh is Polygonal!");
 		mask = oi.mask;
 	}
@@ -248,7 +248,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		// reflectance is stored in quality
 		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
 
-		m.Enable(importparams.mask);
+		m.enable(importparams.mask);
 
 		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
 		if (result == 1)
@@ -266,7 +266,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		{
 			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile)));
 		}
-		m.Enable(loadMask);
+		m.enable(loadMask);
 
 		int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
@@ -280,7 +280,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(), loadMask)) {
 			throw MLException("Error while loading VMI mask.");
 		}
-		m.Enable(loadMask);
+		m.enable(loadMask);
 
 		int result = tri::io::ImporterVMI<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
@@ -294,7 +294,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(), loadMask)){
 			throw MLException("Error while loading GTS mask.");
 		}
-		m.Enable(loadMask);
+		m.enable(loadMask);
 
 		tri::io::ImporterGTS<CMeshO>::Options opt;
 		opt.flipFaces = true;
@@ -307,7 +307,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	}
 	else if (formatName.toUpper() == tr("FBX"))
 	{
-		m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
+		m.enable(tri::io::Mask::IOM_WEDGTEXCOORD);
 
 		int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
 		if(m.cm.textures.empty())
@@ -487,6 +487,9 @@ void BaseMeshIOPlugin::openRaster(const QString& format, const QString& filename
 		}
 
 		rm.setLabel(filename);
+		//here the image is actually loaded
+		//todo: change this
+		//RasterPlane should take a QImage as parameter
 		rm.addPlane(new RasterPlane(filename,RasterPlane::RGBA));
 
 		// Read the JPEG file into a buffer

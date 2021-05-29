@@ -154,7 +154,7 @@ void ExtraMeshIOPlugin::loadFromNode(MeshModel& mm, int& mask, vcg::tri::io::_3d
 		mm.setLabel(QString(p->name));
 
 	vcg::tri::io::Importer3DS<CMeshO>::LoadMask(file, p, info);
-	mm.Enable(info.mask);
+	mm.enable(info.mask);
 
 	int result = vcg::tri::io::Importer3DS<CMeshO>::Load(mm.cm, file, p, info);
 

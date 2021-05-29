@@ -73,7 +73,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
   {
     //enable colors and quality
     mask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY | vcg::tri::io::Mask::IOM_VERTTEXCOORD; 
-    meshModel.Enable(mask);
+    meshModel.enable(mask);
     
     //Add camera position and image width and height
     m.shot.Extrinsics.Tra() = header.CameraPosition();

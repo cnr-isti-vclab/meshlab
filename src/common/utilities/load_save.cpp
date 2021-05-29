@@ -176,7 +176,7 @@ void reloadMesh(
 
 	std::list<int> masks;
 	for (MeshModel* mm : meshList){
-		mm->Clear();
+		mm->clear();
 	}
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 }
@@ -201,6 +201,11 @@ void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
 		md.delRaster(rm);
 		throw e;
 	}
+
+}
+
+QImage loadTexture(const QString filename)
+{
 
 }
 

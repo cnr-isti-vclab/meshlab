@@ -982,7 +982,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		//    Matrix44m rot; rot.SetRotateDeg(180,Point3m(0,1,0));
 		Matrix44m rot; rot.SetScale(-1,1,-1);
 		tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FF_ISOSURFACE :
@@ -1067,7 +1067,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		//  and the new vertex is chosen with MidPointCustom created above
 		vcg::tri::RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
 				(m.cm, mid, edge, false, cb);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		m.clearDataMask( MeshModel::MM_VERTMARK);
 		//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}

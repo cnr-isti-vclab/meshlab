@@ -191,11 +191,11 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 	return true;
 }
 
-QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, bool binary, bool saveViewState, const MLRenderingData& rendOpt = MLRenderingData())
+QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, const QString& path, bool binary, bool saveViewState, const MLRenderingData& rendOpt = MLRenderingData())
 {
 	QDomElement meshElem = doc.createElement("MLMesh");
 	meshElem.setAttribute("label", mp->label());
-	meshElem.setAttribute("filename", mp->relativePathName());
+	meshElem.setAttribute("filename", mp->relativePathName(path));
 	meshElem.setAttribute("visible", saveViewState?mp->isVisible():true);
 	meshElem.setAttribute("idInFile", mp->idInFile());
 	if (binary)
@@ -262,9 +262,9 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 		{
 			QDomElement meshElem;
 			if (rendOpt.find(mmp->id()) != rendOpt.end())
-				meshElem = MeshModelToXML(mmp, ddoc, binary, saveViewState, rendOpt.at(mmp->id()));
+				meshElem = MeshModelToXML(mmp, ddoc, md.pathName(), binary, saveViewState, rendOpt.at(mmp->id()));
 			else
-				meshElem = MeshModelToXML(mmp, ddoc, binary, saveViewState);
+				meshElem = MeshModelToXML(mmp, ddoc, md.pathName(), binary, saveViewState);
 			mgroot.appendChild(meshElem);
 		}
 	}

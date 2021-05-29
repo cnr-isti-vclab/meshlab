@@ -117,7 +117,7 @@ std::map<std::string, QVariant> FilterCreateIso::applyFilter(const QAction *filt
 		printf("[MARCHING CUBES] Building mesh...");
 		MyMarchingCubes mc(m.cm, walker);
 		walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10,cb);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 	else {
 		wrongActionCalled(filter);

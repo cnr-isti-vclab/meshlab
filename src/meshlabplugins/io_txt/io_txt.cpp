@@ -75,7 +75,7 @@ void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		if((dataFormat==3) || (dataFormat==4) || (dataFormat==5) || (dataFormat>=8))
 			mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 
-		m.Enable(mask);
+		m.enable(mask);
 
 		if (!parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError))
 			throw MLException("Error while opening TXT file.");

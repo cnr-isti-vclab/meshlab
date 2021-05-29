@@ -63,7 +63,7 @@ void IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGCOLOR);
 		if (info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGNORMAL);
-		m.Enable(info->mask);
+		m.enable(info->mask);
 		
 		errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nLine number: %3\nError details: %4";
 		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info, cb);

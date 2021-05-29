@@ -622,7 +622,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		}
 
 		if (mesh)
-			mesh->UpdateBoxAndNormals();
+			mesh->updateBoxAndNormals();
 
 	} // end MLS based stuff
 

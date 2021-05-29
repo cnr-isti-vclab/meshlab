@@ -308,7 +308,7 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			log("Removed %d unreferenced vertices", delvert);
 		}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}break;
 	case FP_REMOVE_ISOLATED_COMPLEXITY:
 	{
@@ -320,7 +320,7 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			log("Removed %d unreferenced vertices", delvert);
 		}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_WRT_Q:
@@ -346,7 +346,7 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_TVERTEX_COLLAPSE :
@@ -395,21 +395,21 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 		m.updateDataMask(MeshModel::MM_FACECOLOR);
 		int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
 		log("Successfully flipped %d folded faces", total);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_NON_MANIF_EDGE :
 	{
 		int total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
 		log("Successfully removed %d non-manifold faces", total);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_NON_MANIF_EDGE_SPLIT :
 	{
 		int total = tri::Clean<CMeshO>::SplitManifoldComponents(m.cm);
 		log("Successfully split the mesh into %d edge manifold components", total);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 		if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 			postConditionMask = MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_WEDGTEXCOORD;
 	} break;
@@ -419,7 +419,7 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 		Scalarm threshold = par.getFloat("VertDispRatio");
 		int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
 		log("Successfully split %d non manifold vertices faces", total);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_FACE_ZERO_AREA:
@@ -433,14 +433,14 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 	{
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		log("Removed %d unreferenced vertices", delvert);
-		if (delvert != 0) m.UpdateBoxAndNormals();
+		if (delvert != 0) m.updateBoxAndNormals();
 	} break;
 
 	case FP_REMOVE_DUPLICATED_VERTEX:
 	{
 		int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 		log("Removed %d duplicated vertices", delvert);
-		if (delvert != 0) m.UpdateBoxAndNormals();
+		if (delvert != 0) m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 	} break;

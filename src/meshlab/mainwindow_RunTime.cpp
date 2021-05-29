@@ -1665,7 +1665,7 @@ void MainWindow::saveProject()
 		{
 			if((!onlyVisibleLayers->isChecked()) || (mp->visible))
 			{
-				meshNameVector.push_back(qUtf8Printable(mp->relativePathName()));
+				meshNameVector.push_back(qUtf8Printable(mp->relativePathName(meshDoc()->pathName())));
 				transfVector.push_back(mp->cm.Tr);
 			}
 		}
@@ -2510,11 +2510,11 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 	bool ret = false;
 	if (!mm->isVisible())
 	{
-		mm->Clear();
+		mm->clear();
 		mm->visible = false;
 	}
 	else
-		mm->Clear();
+		mm->clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
 	IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);

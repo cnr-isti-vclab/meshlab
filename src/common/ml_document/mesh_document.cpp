@@ -137,6 +137,12 @@ void MeshDocument::setCurrentMesh(int new_curr_id)
 	assert(currentMesh);
 }
 
+void MeshDocument::setVisible(int meshId, bool val)
+{
+	getMesh(meshId)->visible=val;
+	emit meshSetChanged();
+}
+
 //returns the raster at a given position in the list
 RasterModel *MeshDocument::getRaster(int i)
 {
@@ -309,7 +315,7 @@ MeshModel* MeshDocument::addNewMesh(const CMeshO& mesh, QString label, bool setA
 {
 	MeshModel* m = addNewMesh("", label, setAsCurrent);
 	m->cm = mesh;
-	m->UpdateBoxAndNormals();
+	m->updateBoxAndNormals();
 	m->updateDataMask();
 	return m;
 }
@@ -324,7 +330,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 		fullPath = fi.absoluteFilePath();
 	}
 	
-	MeshModel *newMesh = new MeshModel(this, newMeshId(), fullPath,newlabel);
+	MeshModel *newMesh = new MeshModel(newMeshId(), fullPath,newlabel);
 	meshList.push_back(newMesh);
 	
 	if(setAsCurrent)

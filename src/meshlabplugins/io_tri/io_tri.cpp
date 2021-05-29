@@ -49,14 +49,14 @@ void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	if(formatName.toUpper() == tr("TRI"))
 	{
 		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
-		m.Enable(mask);
+		m.enable(mask);
 		if (!parseTRI(qUtf8Printable(fileName), m.cm))
 			throw MLException("Error while opening TRI file");
 	}
 	else if(formatName.toUpper() == tr("ASC"))
 	{
 		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-		m.Enable(mask);
+		m.enable(mask);
 		bool triangulate = parlst.getBool("triangulate");
 		int rowToSkip = parlst.getInt("rowToSkip");
 		int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);

@@ -334,7 +334,7 @@ std::map<std::string, QVariant> FilterIsoParametrization::applyFilter(
 		mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 		PrintStats(rem);
-		mm->UpdateBoxAndNormals();
+		mm->updateBoxAndNormals();
 		break;
 	}
 	case ISOP_DIAMPARAM :
