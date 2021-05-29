@@ -201,12 +201,6 @@ void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
 		md.delRaster(rm);
 		throw e;
 	}
-
-}
-
-QImage loadTexture(const QString filename)
-{
-
 }
 
 }
