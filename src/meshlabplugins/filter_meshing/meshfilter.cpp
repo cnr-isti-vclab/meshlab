@@ -669,7 +669,7 @@ void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool 
 			if(freeze) Freeze(m);
 		}
 
-		for (RasterModel* rm : md.rasterList)
+		for (RasterModel* rm : md.rasterIterator())
 			if (rm->visible)
 				rm->shot.ApplyRigidTransformation(tr);
 	}

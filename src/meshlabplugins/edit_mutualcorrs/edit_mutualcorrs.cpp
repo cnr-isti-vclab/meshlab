@@ -71,7 +71,7 @@ void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
   
 void EditMutualCorrsPlugin::decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
-	if (gla->md()->rasterList.size() == 0 || !gla->isRaster())
+	if (gla->md()->rasterNumber() == 0 || !gla->isRaster())
 	{
 		return;
 	}
@@ -204,7 +204,7 @@ bool EditMutualCorrsPlugin::startEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLS
     {
         mutualcorrsDialog = new edit_mutualcorrsDialog(gla->window(), this);
 
-		if (glArea->md()->rasterList.size() == 0 || !glArea->isRaster())
+		if (glArea->md()->rasterNumber() == 0 || !glArea->isRaster())
 		{
 			QMessageBox::warning(gla, tr("Mutual Correspondences"), tr("You need at least a raster layer, and to be in Current Raster View mode!"), QMessageBox::Ok);
 			return false;

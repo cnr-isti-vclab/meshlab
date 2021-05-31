@@ -250,7 +250,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 	case  FP_DELETE_NON_SELECTED_RASTER:
 	{
-		foreach(RasterModel *rmp, md.rasterList)
+		for(RasterModel *rmp: md.rasterIterator())
 		{
 			if (!rmp->visible)
 				md.delRaster(rmp);
@@ -459,7 +459,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			}
 
 			int active = 0;
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					active++;
@@ -468,7 +468,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			fprintf(outfile, "# Bundle file v0.3\n");
 			fprintf(outfile, "%d %d\n", active, 0);
 
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 				{
@@ -516,7 +516,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			xmlWriter.writeStartElement("sensors");
 			
 			unsigned int i = 0;
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 				{
@@ -581,7 +581,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			xmlWriter.writeEndElement();
 			xmlWriter.writeStartElement("cameras");
 			i = 0;
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 				{
@@ -651,7 +651,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			
 			///// Check if the number of active rasters and cameras is the same
 			unsigned active = 0;
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					active++;
@@ -664,7 +664,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 			//// Import cameras
 			unsigned int i = 0;
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible) {
 					float f, k1, k2;
@@ -803,7 +803,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 				QString name = n.attributes().namedItem("label").nodeValue();
 
 				RasterModel* rasterId = nullptr;
-				for (RasterModel* rm : md.rasterList)
+				for (RasterModel* rm : md.rasterIterator())
 				{
 					if (rm->currentPlane->shortName() == name)
 					{

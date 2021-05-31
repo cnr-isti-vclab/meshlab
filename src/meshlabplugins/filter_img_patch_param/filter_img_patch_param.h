@@ -74,7 +74,7 @@ class FilterImgPatchParamPlugin : public QObject, public FilterPlugin
 			PatchVec &nullPatches,
 			CMeshO &mesh,
 			VisibleSet &faceVis,
-			QList<RasterModel*> &rasterList);
+			std::list<RasterModel*>& rasterList);
 
 	void constructPatchBoundary(
 			Patch &p,
@@ -97,7 +97,7 @@ class FilterImgPatchParamPlugin : public QObject, public FilterPlugin
 			PatchVec &nullPatches,
 			int meshid,
 			CMeshO &mesh,
-			QList<RasterModel*> &rasterList,
+			std::list<RasterModel*>& rasterList,
 			const RichParameterList& par);
 
 	float computeTotalPatchArea(const RasterPatchMap& patches );

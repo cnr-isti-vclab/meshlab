@@ -270,7 +270,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 				}
 				
 			}
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplyRigidTransformation(transf);
@@ -278,7 +278,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
 		{
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplyRigidTransformation(transf);
@@ -368,7 +368,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 				}
 				
 			}
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 				{
@@ -380,7 +380,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
 		{
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 				{
@@ -462,7 +462,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 					mm->cm.shot.ApplyRigidTransformation(trTran);
 				}
 			}
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplyRigidTransformation(trTran);
@@ -471,7 +471,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
 		{
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplyRigidTransformation(trTran);
@@ -536,7 +536,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 					mm->cm.shot.ApplySimilarity(mat);
 				}
 			}
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplySimilarity(mat);
@@ -545,7 +545,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
 		{
-			for (RasterModel* rm : md.rasterList)
+			for (RasterModel* rm : md.rasterIterator())
 			{
 				if (rm->visible)
 					rm->shot.ApplySimilarity(mat);
@@ -657,9 +657,9 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		for(CMeshO::VertexIterator vi= cm->vert.begin(); vi != cm->vert.end();++vi)
 		{
 			unsigned int camera_id = ch[*vi][0].id_img;
-			auto it = md.rasterList.begin();
+			auto it = md.rasterBegin();
 			std::advance(it, camera_id);
-			if (it != md.rasterList.end() && *it != nullptr)
+			if (it != md.rasterEnd() && *it != nullptr)
 			{
 				Point3m n=(*it)->shot.GetViewPoint()-(*vi).P() ;
 				if( n*(*vi).cN()<0)

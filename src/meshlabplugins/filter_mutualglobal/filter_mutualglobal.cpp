@@ -196,7 +196,7 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 		myVec.push_back(md.mm()->cm.vert[i].P());
 	}
 	std::vector<Shotm> oldShots;
-	for (RasterModel* rm : md.rasterList)
+	for (RasterModel* rm : md.rasterIterator())
 	{
 		oldShots.push_back(rm->shot);
 	}
@@ -208,7 +208,7 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 	switch(ID(action))	 {
 		case FP_IMAGE_GLOBALIGN :
 			/// Building of the graph of images
-			if (md.rasterList.size()==0)
+			if (md.rasterNumber()==0)
 			{
 				 log("You need a Raster Model to apply this filter!");
 				 throw MLException("You need a Raster Model to apply this filter!");
@@ -237,7 +237,7 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 					if (diff<thresDiff)
 						break;
 					oldShots.clear();
-					for (RasterModel* rm : md.rasterList)
+					for (RasterModel* rm : md.rasterIterator())
 					{
 						oldShots.push_back(rm->shot);
 					}
@@ -266,7 +266,7 @@ float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shot
 	for (int i=0; i<points.size(); i++)
 	{
 		unsigned int j = 0;
-		for(RasterModel* rm : md.rasterList)
+		for(RasterModel* rm : md.rasterIterator())
 		{
 			vcg::Point2f pp=rm->shot.Project(points[i]);
 			if(pp[0]>0 && pp[1]>0 && pp[0]<rm->shot.Intrinsics.ViewportPx[0] && pp[1]<rm->shot.Intrinsics.ViewportPx[1])
@@ -366,7 +366,7 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 {
 	Solver solver;
 	MutualInfo mutual;
-	if (md.rasterList.size()==0)
+	if (md.rasterNumber()==0)
 	{
 		log("You need a Raster Model to apply this filter!");
 		return false;
@@ -443,7 +443,7 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 		delete []indices;
 
 		unsigned int r = 0;
-		for (RasterModel* rm : md.rasterList)
+		for (RasterModel* rm : md.rasterIterator())
 		{
 			if(rm->visible)
 			{
@@ -551,7 +551,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 
 	//this->glContext->makeCurrent();
 	unsigned int r = 0;
-	for (RasterModel* rm : md.rasterList)
+	for (RasterModel* rm : md.rasterIterator())
 	{
 		if(rm->visible)
 		{
@@ -574,7 +574,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 			std::vector<AlignPair> weightList;
 
 			unsigned int p = 0;
-			for (RasterModel* pm : md.rasterList)
+			for (RasterModel* pm : md.rasterIterator())
 			{
 				if (pm!=rm)
 				{
@@ -690,7 +690,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 
 
 
-	log("Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
+	log("Tot arcs %d, Valid arcs %d",(md.rasterNumber())*(md.rasterNumber()-1),list.size());
 
 
 	//emit md.rasterSetChanged();
@@ -703,7 +703,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 {
 	std::vector<SubGraph> Gr;
 	SubGraph allNodes;
-	int numNodes=md.rasterList.size();
+	int numNodes=md.rasterNumber();
 	for (int s=0; s<numNodes; s++)
 	{
 		Node n;
@@ -779,7 +779,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 	{
 		SubGraph graph;
 		graph.id=i;
-		auto rmit = md.rasterList.begin();
+		auto rmit = md.rasterBegin();
 		for (int j=0; j<numNodes; j++)
 		{
 			log("Node %d of %d",j,numNodes);
@@ -907,7 +907,7 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	alignset.mode=AlignSet::NODE;
 	//alignset.node=&node;
 
-	auto it= md.rasterList.begin(); std::advance(it, node.id);
+	auto it= md.rasterBegin(); std::advance(it, node.id);
 	RasterModel* rm = *it;
 	alignset.image=&rm->currentPlane->image;
 	alignset.shot=rm->shot;
@@ -916,7 +916,7 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 
 	for (int l=0; l<node.arcs.size(); l++)
 	{
-		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[l].projId);
+		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[l].projId);
 		RasterModel* lrm  =*lit;
 		alignset.arcImages.push_back(&lrm->currentPlane->image);
 		alignset.arcShots.push_back(&lrm->shot);
@@ -928,7 +928,7 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 		return true;
 	else if(alignset.arcImages.size()==1)
 	{
-		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[0].projId);
+		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[0].projId);
 		RasterModel* lrm  =*lit;
 		alignset.arcImages.push_back(&lrm->currentPlane->image);
 		alignset.arcShots.push_back(&lrm->shot);
@@ -939,7 +939,7 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	}
 	else if(alignset.arcImages.size()==2)
 	{
-		auto lit = md.rasterList.begin(); std::advance(lit, node.arcs[0].projId);
+		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[0].projId);
 		RasterModel* lrm  =*lit;
 		alignset.arcImages.push_back(&lrm->currentPlane->image);
 		alignset.arcShots.push_back(&lrm->shot);
@@ -1085,7 +1085,7 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 //////////////////
 				int imageId=graph.nodes[h].arcs[l].imageId;
 				int imageProj=graph.nodes[h].arcs[l].projId;
-				auto it= md.rasterList.begin(); std::advance(it, imageId);
+				auto it= md.rasterBegin(); std::advance(it, imageId);
 				RasterModel* rm = *it;
 				//this->glContext->makeCurrent();
 

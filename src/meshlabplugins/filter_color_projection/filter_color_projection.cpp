@@ -404,7 +404,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
 				cam_ind = 0;
-				for(RasterModel* rm : md.rasterList)
+				for(RasterModel* rm : md.rasterIterator())
 				{
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
@@ -419,7 +419,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 	
 				//-- cycle all cameras
 				cam_ind = 0;
-				for(RasterModel *raster : md.rasterList){
+				for(RasterModel *raster : md.rasterIterator()){
 					if(raster->visible)
 					{
 						do_project = true;
@@ -721,7 +721,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
 				cam_ind = 0;
-				for(RasterModel* rm : md.rasterList)
+				for(RasterModel* rm : md.rasterIterator())
 				{
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
@@ -736,7 +736,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 	
 				//-- cycle all cameras
 				cam_ind = 0;
-				for(RasterModel *raster : md.rasterList)
+				for(RasterModel *raster : md.rasterIterator())
 				{
 					if(raster->visible)
 					{
@@ -987,7 +987,7 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
     if(near_acc != NULL)
     {
         near_acc->clear();
-        near_acc->resize(md.rasterList.size());
+        near_acc->resize(md.rasterNumber());
     }
     else
         return -1;
@@ -995,13 +995,13 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
     if(far_acc != NULL)
     {
         far_acc->clear();
-        far_acc->resize(md.rasterList.size());
+        far_acc->resize(md.rasterNumber());
     }
     else
         return -1;
 
     // init near and far vectors
-    for(rasterindex = 0; rasterindex < md.rasterList.size(); rasterindex++)
+    for(unsigned int rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++)
     {
         (*near_acc)[rasterindex] =  1000000;
         (*far_acc)[rasterindex]  = -1000000;
@@ -1017,7 +1017,7 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
         {
             // check against all cameras
             rasterindex = 0;
-            foreach(RasterModel *raster, md.rasterList)
+            for(RasterModel *raster: md.rasterIterator())
             {
                 if(raster->shot.IsValid())
                 {
@@ -1042,7 +1042,7 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
         }
     }
 
-    for(rasterindex = 0; rasterindex < md.rasterList.size(); rasterindex++) // set to 0 0 invalid and "strange" cameras
+    for(unsigned rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++) // set to 0 0 invalid and "strange" cameras
     {
         if ( ((*near_acc)[rasterindex] == 1000000)  ||  ((*far_acc)[rasterindex] == -1000000) )
         {

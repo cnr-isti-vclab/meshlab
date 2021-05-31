@@ -171,7 +171,7 @@ void FilterMutualInfoPlugin::imageMutualInfoAlign(
 		throw MLException("Error: shot not valid. Press 'Get Shot' button before applying!");
 	}
 
-	if (md.rasterList.size()==0) {
+	if (md.rasterNumber()==0) {
 		log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
 		throw MLException("You need a Raster Model to apply this filter!");
 	}

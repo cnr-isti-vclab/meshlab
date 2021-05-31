@@ -29,12 +29,11 @@
 
 
 
-VisibleSet::VisibleSet(
-		glw::Context &ctx,
+VisibleSet::VisibleSet(glw::Context &ctx,
 		MLPluginGLContext* plugctx,
 		int meshid,
 		CMeshO &mesh,
-		QList<RasterModel*> &rasterList,
+		std::list<RasterModel*>& rasterList,
 		int weightMask) :
 	m_Mesh(mesh),
 	m_FaceVis(mesh.fn),
@@ -48,7 +47,7 @@ VisibleSet::VisibleSet(
 	float depthMin =  std::numeric_limits<float>::max();
 	m_DepthMax = -std::numeric_limits<float>::max();
 
-	for(RasterModel *rm: qAsConst(rasterList)) {
+	for(RasterModel *rm: rasterList) {
 		CMeshO::ScalarType zNear, zFar;
 		GlShot< Shotm >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
 
@@ -66,7 +65,7 @@ VisibleSet::VisibleSet(
 	m_DepthRangeInv = 1.0f / (m_DepthMax-depthMin);
 
 
-	for( RasterModel *rm : qAsConst(rasterList))
+	for( RasterModel *rm : rasterList)
 	{
 		visibility.setRaster( rm );
 		visibility.checkVisibility();
