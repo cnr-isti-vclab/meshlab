@@ -171,7 +171,6 @@ public:
 	ConstRasterIterator rasterBegin() const;
 	ConstRasterIterator rasterEnd() const;
 
-
 	MeshRangeIterator meshIterator();
 	ConstMeshRangeIterator meshIterator() const;
 	RasterRangeIterator rasterIterator();
@@ -180,13 +179,13 @@ public:
 	GLLogStream Log;
 	FilterScript filterHistory;
 
+private:
 	/// The very important member:
 	/// The list of MeshModels.
 	std::list<MeshModel *> meshList;
 	/// The list of the raster models of the project
 	std::list<RasterModel *> rasterList;
 
-private:
 	int meshIdCounter;
 	int rasterIdCounter;
 

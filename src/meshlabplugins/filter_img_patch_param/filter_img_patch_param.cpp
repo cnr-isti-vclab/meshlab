@@ -387,7 +387,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 			wrongActionCalled(act);
 		}
 
-		for( RasterModel *rm: md.rasterList )
+		for( RasterModel *rm: md.rasterIterator() )
 		{
 			rm->shot = *initialShots.begin();
 			initialShots.erase( initialShots.begin() );
