@@ -305,12 +305,16 @@ jobs:
       with:
         name: meshlab_macos_portable_double
         path: meshlab_macos_portable_double
+    - name: Change Permissions
+      run: |
+        chmod +x meshlab_macos_portable/MeshLab*.app/Contents/MacOS/meshlab
+        chmod +x meshlab_macos_portable_double/MeshLab*.app/Contents/MacOS/meshlab
     - name: Create MeshLab Portable MacOS
       run: |
         cd meshlab_macos_portable
-        zip -r ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
         cd ../meshlab_macos_portable_double
-        zip -r ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
         cd ..
 
     #Download Windows Packages
@@ -423,8 +427,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip
+        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     - name: Upload ReleaseMacOSPortable-d
       id: upload-release-macos-portable-d
@@ -433,8 +437,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip
+        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     #Windows
     - name: Upload ReleaseWindowsPortable
