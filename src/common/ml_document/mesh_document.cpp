@@ -454,24 +454,64 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
+MeshDocument::MeshIterator MeshDocument::meshBegin()
+{
+	return meshList.begin();
+}
+
+MeshDocument::MeshIterator MeshDocument::meshEnd()
+{
+	return meshList.end();
+}
+
+MeshDocument::RasterIterator MeshDocument::rasterBegin()
+{
+	return rasterList.begin();
+}
+
+MeshDocument::RasterIterator MeshDocument::rasterEnd()
+{
+	return rasterList.end();
+}
+
+MeshDocument::ConstMeshIterator MeshDocument::meshBegin() const
+{
+	return (reinterpret_cast<const std::list<const MeshModel*>* >(&meshList))->begin();
+}
+
+MeshDocument::ConstMeshIterator MeshDocument::meshEnd() const
+{
+	return (reinterpret_cast<const std::list<const MeshModel*>* >(&meshList))->end();
+}
+
+MeshDocument::ConstRasterIterator MeshDocument::rasterBegin() const
+{
+	return (reinterpret_cast<const std::list<const RasterModel*>* >(&rasterList))->begin();
+}
+
+MeshDocument::ConstRasterIterator MeshDocument::rasterEnd() const
+{
+	return (reinterpret_cast<const std::list<const RasterModel*>* >(&rasterList))->end();
+}
+
 MeshDocument::MeshRangeIterator MeshDocument::meshIterator()
 {
-	return MeshRangeIterator(this);
+	return MeshRangeIterator(*this);
 }
 
 MeshDocument::ConstMeshRangeIterator MeshDocument::meshIterator() const
 {
-	return ConstMeshRangeIterator(this);
+	return ConstMeshRangeIterator(*this);
 }
 
 MeshDocument::RasterRangeIterator MeshDocument::rasterIterator()
 {
-	return RasterRangeIterator(this);
+	return RasterRangeIterator(*this);
 }
 
 MeshDocument::ConstRasterRangeIterator MeshDocument::rasterIterator() const
 {
-	return ConstRasterRangeIterator(this);
+	return ConstRasterRangeIterator(*this);
 }
 
 unsigned int MeshDocument::newMeshId()

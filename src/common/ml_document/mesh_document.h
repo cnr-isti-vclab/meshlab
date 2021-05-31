@@ -34,6 +34,57 @@ class MeshDocument : public QObject
 	Q_OBJECT
 
 public:
+
+	// Iterators
+	typedef std::list<MeshModel*>::iterator MeshIterator;
+	typedef std::list<const MeshModel*>::const_iterator ConstMeshIterator;
+	typedef std::list<RasterModel*>::iterator RasterIterator;
+	typedef std::list<const RasterModel*>::const_iterator ConstRasterIterator;
+
+	class MeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		MeshIterator begin() {return md.meshBegin();}
+		MeshIterator end() {return md.meshEnd();}
+	private:
+		MeshRangeIterator(MeshDocument& md) : md(md){}
+		MeshDocument& md;
+	};
+
+	class ConstMeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		ConstMeshIterator begin() {return md.meshBegin();}
+		ConstMeshIterator end()   {return md.meshEnd();}
+	private:
+		ConstMeshRangeIterator(const MeshDocument& md) : md(md){}
+		const MeshDocument& md;
+	};
+
+	class RasterRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		RasterIterator begin() {return md.rasterBegin();}
+		RasterIterator end()   {return md.rasterEnd();}
+	private:
+		RasterRangeIterator(MeshDocument& md) : md(md){}
+		MeshDocument& md;
+	};
+
+	class ConstRasterRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		ConstRasterIterator begin() {return md.rasterBegin();}
+		ConstRasterIterator end()   {return md.rasterEnd();}
+	private:
+		ConstRasterRangeIterator(const MeshDocument& md) : md(md){}
+		const MeshDocument& md;
+	};
+
 	MeshDocument();
 
 	//deletes each meshModel
@@ -110,61 +161,16 @@ public:
 
 	bool hasBeenModified();
 
-	class MeshRangeIterator
-	{
-		friend class MeshDocument;
-	public:
-		std::list<MeshModel*>::iterator begin() {return md->meshList.begin();}
-		std::list<MeshModel*>::iterator end() {return md->meshList.end();}
-	private:
-		MeshRangeIterator(MeshDocument* md) : md(md){}
-		MeshDocument* md;
-	};
+	//iterator member functions
+	MeshIterator meshBegin();
+	MeshIterator meshEnd();
+	RasterIterator rasterBegin();
+	RasterIterator rasterEnd();
+	ConstMeshIterator meshBegin() const;
+	ConstMeshIterator meshEnd() const;
+	ConstRasterIterator rasterBegin() const;
+	ConstRasterIterator rasterEnd() const;
 
-	class ConstMeshRangeIterator
-	{
-		friend class MeshDocument;
-	public:
-		std::list<const MeshModel*>::const_iterator begin()
-		{
-			return (reinterpret_cast<const std::list<const MeshModel*>* >(&md->meshList))->begin();
-		}
-		std::list<const MeshModel*>::const_iterator end()
-		{
-			return (reinterpret_cast<const std::list<const MeshModel*>* >(&md->meshList))->end();
-		}
-	private:
-		ConstMeshRangeIterator(const MeshDocument* md) : md(md){}
-		const MeshDocument* md;
-	};
-
-	class RasterRangeIterator
-	{
-		friend class MeshDocument;
-	public:
-		std::list<RasterModel*>::iterator begin() {return md->rasterList.begin();}
-		std::list<RasterModel*>::iterator end() {return md->rasterList.end();}
-	private:
-		RasterRangeIterator(MeshDocument* md) : md(md){}
-		MeshDocument* md;
-	};
-
-	class ConstRasterRangeIterator
-	{
-		friend class MeshDocument;
-	public:
-		std::list<const RasterModel*>::const_iterator begin()
-		{
-			return (reinterpret_cast<const std::list<const RasterModel*>* >(&md->rasterList))->begin();
-		}
-		std::list<const RasterModel*>::const_iterator end()
-		{
-			return (reinterpret_cast<const std::list<const RasterModel*>* >(&md->rasterList))->end();
-		}
-	private:
-		ConstRasterRangeIterator(const MeshDocument* md) : md(md){}
-		const MeshDocument* md;
-	};
 
 	MeshRangeIterator meshIterator();
 	ConstMeshRangeIterator meshIterator() const;

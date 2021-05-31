@@ -106,14 +106,14 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-    foreach(MeshModel *m, md.meshList)
-    {
-        if ((m != NULL) && (m->visible))
-        {
+	for(MeshModel *m: md.meshIterator())
+	{
+		if ((m != NULL) && (m->visible))
+		{
 			ctx->drawAllocatedAttributesSubset(m->id(),gla->context(),dt);
-        }
-    }
-    glDisable(GL_POLYGON_OFFSET_FILL);
+		}
+	}
+	glDisable(GL_POLYGON_OFFSET_FILL);
 
     this->renderingFromLightUnsetup();
 

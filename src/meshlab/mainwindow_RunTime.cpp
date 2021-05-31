@@ -1897,7 +1897,7 @@ bool MainWindow::appendProject(QString fileName)
 				return false;
 			}
 			GLA()->updateMeshSetVisibilities();
-			auto it = meshDoc()->meshList.begin();
+			auto it = meshDoc()->meshBegin();
 			std::advance(it, alreadyLoadedNum);
 			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshNumber(); i++)
 			{

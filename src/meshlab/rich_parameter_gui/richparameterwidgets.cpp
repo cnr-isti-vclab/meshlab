@@ -1091,7 +1091,7 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 
 void MeshWidget::collectWidgetValue()
 {
-	auto it = md->meshList.begin();
+	auto it = md->meshBegin();
 	std::advance(it, enumCombo->currentIndex());
 	rp->setValue(MeshValue((*it)->id()));
 }
