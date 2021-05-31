@@ -345,7 +345,7 @@ void MainWindow::updateMenus()
 {
 	
 	bool activeDoc = !(mdiarea->subWindowList().empty()) && (mdiarea->currentSubWindow() != NULL);
-	bool notEmptyActiveDoc = activeDoc && (meshDoc() != NULL) && !(meshDoc()->size() == 0);
+	bool notEmptyActiveDoc = activeDoc && (meshDoc() != NULL) && !(meshDoc()->meshNumber() == 0);
 	
 	//std::cout << "SubWindowsList empty: " << mdiarea->subWindowList().empty() << " Valid Current Sub Windows: " << (mdiarea->currentSubWindow() != NULL) << " MeshList empty: " << meshDoc()->meshList.empty() << "\n";
 	
@@ -735,7 +735,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
 				importMesh(path);
 			}
 		}
-		showLayerDlg(layervis || meshDoc()->size() > 0);
+		showLayerDlg(layervis || meshDoc()->meshNumber() > 0);
 	}
 }
 
@@ -1142,7 +1142,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
 	int req=iFilter->getRequirements(action);
-	if (!(meshDoc()->size() == 0))
+	if (!(meshDoc()->meshNumber() == 0))
 		meshDoc()->mm()->updateDataMask(req);
 	qApp->restoreOverrideCursor();
 	
@@ -1321,7 +1321,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 	}
 
 	qb->reset();
-	layerDialog->setVisible(layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->size() > 0)));
+	layerDialog->setVisible(layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->meshNumber() > 0)));
 	updateLayerDialog();
 	updateMenus();
 	MultiViewer_Container* mvc = currentViewContainer();
@@ -1704,7 +1704,7 @@ bool MainWindow::openProject(QString fileName)
 	
 	// Common Part: init a Doc if necessary, and
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	bool activeEmpty = activeDoc && (meshDoc()->size() == 0);
+	bool activeEmpty = activeDoc && (meshDoc()->meshNumber() == 0);
 	
 	if (!activeEmpty)  newProject(fileName);
 	
@@ -1821,7 +1821,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
 	qb->reset();
 	saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
-	showLayerDlg(visiblelayer || (meshDoc()->size() > 0));
+	showLayerDlg(visiblelayer || (meshDoc()->meshNumber() > 0));
 	
 	return true;
 }
@@ -1839,7 +1839,7 @@ bool MainWindow::appendProject(QString fileName)
 	
 	// Ccheck if we have a doc and if it is empty
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	if (!activeDoc || (meshDoc()->size() == 0))  // it is wrong to try appending to an empty project, even if it is possible
+	if (!activeDoc || (meshDoc()->meshNumber() == 0))  // it is wrong to try appending to an empty project, even if it is possible
 	{
 		QMessageBox::critical(this, tr("Meshlab Opening Error"), "Current project is empty, cannot append");
 		return false;
@@ -1889,7 +1889,7 @@ bool MainWindow::appendProject(QString fileName)
 		
 		if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
 		{
-			int alreadyLoadedNum = meshDoc()->size();
+			int alreadyLoadedNum = meshDoc()->meshNumber();
 			std::map<int, MLRenderingData> rendOpt;
 			if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
 			{
@@ -1899,7 +1899,7 @@ bool MainWindow::appendProject(QString fileName)
 			GLA()->updateMeshSetVisibilities();
 			auto it = meshDoc()->meshList.begin();
 			std::advance(it, alreadyLoadedNum);
-			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->size(); i++)
+			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshNumber(); i++)
 			{
 				MeshModel* mm = *it;
 				QString fullPath = mm->fullName();
@@ -2341,7 +2341,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 	bool res = importMesh(fileName);
 	globrendtoolbar->setEnabled(true);
 	if (layerDialog != NULL)
-		showLayerDlg(layervisible || meshDoc()->size());
+		showLayerDlg(layervisible || meshDoc()->meshNumber());
 	setCurrentMeshBestTab();
 	return res;
 }

@@ -240,7 +240,7 @@ void DecorateRasterProjPlugin::updateCurrentMesh(MeshDocument &m,
         QMap<int,MeshDrawer> tmpScene = m_Scene;
         m_Scene.clear();
 
-        foreach( MeshModel *md, m.meshList )
+        for( MeshModel *md : m.meshIterator() )
         {
             QMap<int,MeshDrawer>::iterator t = tmpScene.find( md->id() );
             if( t != tmpScene.end() )

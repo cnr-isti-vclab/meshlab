@@ -364,7 +364,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     if (datacont == NULL)
         return -1;
 
-    int sz = int( md()->size())*5;
+    int sz = int( md()->meshNumber())*5;
     GLuint *selectBuf =new GLuint[sz];
     glSelectBuffer(sz, selectBuf);
     glRenderMode(GL_SELECT);
@@ -794,9 +794,9 @@ void GLArea::displayInfo(QPainter *painter)
 
     QString col1Text,col0Text;
 
-    if(this->md()->size()>0)
+    if(this->md()->meshNumber()>0)
     {
-        if(this->md()->size()==1)
+        if(this->md()->meshNumber()==1)
         {
             QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             col1Text += QString("Mesh: %1\n").arg(mm()->label());
@@ -852,7 +852,7 @@ void GLArea::renderingFacilityString()
 	
 	renderfacility.clear();
 	makeCurrent();
-	if (md()->size() > 0)
+	if (md()->meshNumber() > 0)
 	{
 		enum RenderingType { FULL_BO, MIXED, FULL_IMMEDIATE_MODE };
 		RenderingType rendtype = FULL_IMMEDIATE_MODE;
@@ -868,7 +868,7 @@ void GLArea::renderingFacilityString()
 					if (shared->isBORenderingAvailable(meshmod->id()))
 					{
 						rendtype = MIXED;
-						if ((rendtype == MIXED) && (hh == md()->size() - 1))
+						if ((rendtype == MIXED) && (hh == md()->meshNumber() - 1))
 							rendtype = FULL_BO;
 					}
 					++hh;
@@ -965,7 +965,7 @@ void GLArea::saveSnapshot()
 
 	if(ss.snapAllLayers)
 	{
-		while(currSnapLayer<md()->size())
+		while(currSnapLayer<md()->meshNumber())
 		{
 			tileRow=tileCol=0;
 			qDebug("Snapping layer %i",currSnapLayer);

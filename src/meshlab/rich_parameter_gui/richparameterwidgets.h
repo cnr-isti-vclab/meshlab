@@ -380,9 +380,6 @@ public:
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
-
-	MeshModel * getMesh();
-	void setMesh(MeshModel * newMesh);
 };
 
 class IOFileWidget : public RichParameterWidget

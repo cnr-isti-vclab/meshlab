@@ -188,7 +188,7 @@ std::map<std::string, QVariant> FilterDirt::applyFilter(const QAction *filter, c
 		break;
 	}
 	case FP_CLOUD_MOVEMENT:{
-		if(md.size()!=2){
+		if(md.meshNumber()!=2){
 			throw MLException("This filter requires two mesh");
 		}
 

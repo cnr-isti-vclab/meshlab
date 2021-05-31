@@ -269,12 +269,12 @@ void MeshDocument::setFileName(const QString& newFileName)
 	fullPathFilename = newFileName;
 }
 
-unsigned int MeshDocument::size() const
+unsigned int MeshDocument::meshNumber() const
 {
 	return meshList.size();
 }
 
-unsigned int MeshDocument::sizeRasters() const
+unsigned int MeshDocument::rasterNumber() const
 {
 	return rasterList.size();
 }
@@ -286,7 +286,7 @@ bool MeshDocument::isBusy()
 
 void MeshDocument::setBusy(bool _busy)
 {
-    busy=_busy;
+	busy=_busy;
 }
 
 /**
@@ -459,9 +459,19 @@ MeshDocument::MeshRangeIterator MeshDocument::meshIterator()
 	return MeshRangeIterator(this);
 }
 
+MeshDocument::ConstMeshRangeIterator MeshDocument::meshIterator() const
+{
+	return ConstMeshRangeIterator(this);
+}
+
 MeshDocument::RasterRangeIterator MeshDocument::rasterIterator()
 {
 	return RasterRangeIterator(this);
+}
+
+MeshDocument::ConstRasterRangeIterator MeshDocument::rasterIterator() const
+{
+	return ConstRasterRangeIterator(this);
 }
 
 unsigned int MeshDocument::newMeshId()

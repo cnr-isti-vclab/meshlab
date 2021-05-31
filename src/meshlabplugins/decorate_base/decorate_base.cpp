@@ -95,7 +95,7 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 		// draw all visible mesh cameras
 		if(rm->getBool(ShowMeshCameras()))
 		{
-			foreach(MeshModel *meshm,  md.meshList)
+			for(MeshModel *meshm : md.meshIterator())
 			{
 				if (meshm != md.mm() || (!showCameraDetails))   // non-selected meshes, only draw 
 				{
@@ -108,7 +108,7 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 				}
 			}
 			
-			if (md.meshList.size() == 0)
+			if (md.meshNumber() == 0)
 				this->realTimeLog("Show Mesh Camera", md.mm()->label(), "There are no Mesh Layers");
 		}
 		

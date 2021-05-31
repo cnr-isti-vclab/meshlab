@@ -81,8 +81,9 @@ public:
 	QString pathName() const;
 	void setFileName(const QString& newFileName);
 
-	unsigned int size() const;
-	unsigned int sizeRasters() const;
+	unsigned int meshNumber() const;
+	unsigned int rasterNumber() const;
+
 	bool isBusy();  // used in processing. To disable access to the mesh by the rendering thread
 	void setBusy(bool _busy);
 
@@ -120,6 +121,23 @@ public:
 		MeshDocument* md;
 	};
 
+	class ConstMeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		std::list<const MeshModel*>::const_iterator begin()
+		{
+			return (reinterpret_cast<const std::list<const MeshModel*>* >(&md->meshList))->begin();
+		}
+		std::list<const MeshModel*>::const_iterator end()
+		{
+			return (reinterpret_cast<const std::list<const MeshModel*>* >(&md->meshList))->end();
+		}
+	private:
+		ConstMeshRangeIterator(const MeshDocument* md) : md(md){}
+		const MeshDocument* md;
+	};
+
 	class RasterRangeIterator
 	{
 		friend class MeshDocument;
@@ -131,8 +149,27 @@ public:
 		MeshDocument* md;
 	};
 
+	class ConstRasterRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		std::list<const RasterModel*>::const_iterator begin()
+		{
+			return (reinterpret_cast<const std::list<const RasterModel*>* >(&md->rasterList))->begin();
+		}
+		std::list<const RasterModel*>::const_iterator end()
+		{
+			return (reinterpret_cast<const std::list<const RasterModel*>* >(&md->rasterList))->end();
+		}
+	private:
+		ConstRasterRangeIterator(const MeshDocument* md) : md(md){}
+		const MeshDocument* md;
+	};
+
 	MeshRangeIterator meshIterator();
+	ConstMeshRangeIterator meshIterator() const;
 	RasterRangeIterator rasterIterator();
+	ConstRasterRangeIterator rasterIterator() const;
 
 	GLLogStream Log;
 	FilterScript filterHistory;

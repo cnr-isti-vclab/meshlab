@@ -958,7 +958,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 			}
 		}
 	}
-	if (md->size() == 0)
+	if (md->meshNumber() == 0)
 		_renderingtabcontainer->setTitle(QString());
 }
 
@@ -1110,7 +1110,7 @@ void LayerDialog::updatePerMeshItemVisibility()
 		}
 	}
 
-	if ((!(md->size() == 0)) && allhidden)
+	if ((!(md->meshNumber() == 0)) && allhidden)
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_close.png"));
 	else
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_open.png"));
