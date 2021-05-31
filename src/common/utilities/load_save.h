@@ -54,7 +54,7 @@ void reloadMesh(
 
 void loadRaster(
 		const QString& filename,
-		MeshDocument& md,
+		RasterModel& rm,
 		vcg::CallBackPos *cb);
 
 }

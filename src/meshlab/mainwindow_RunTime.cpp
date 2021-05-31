@@ -2125,11 +2125,12 @@ bool MainWindow::importRaster(const QString& fileImg)
 	allFileTime.start();
 	
 	for(const QString& fileName : fileNameList) {
-
+		RasterModel *rm = nullptr;
 		try {
 			QElapsedTimer t;
 			t.start();
-			meshlab::loadRaster(fileName, *meshDoc(), QCallBack);
+			rm = meshDoc()->addNewRaster();
+			meshlab::loadRaster(fileName, *rm, QCallBack);
 			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
 			GLA()->fov = meshDoc()->rm()->shot.GetFovFromFocal();
@@ -2140,6 +2141,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 		}
 		catch(const MLException& e){
+			meshDoc()->delRaster(rm);
 			QMessageBox::warning(
 						this,
 						tr("Opening Failure"),

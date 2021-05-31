@@ -181,7 +181,7 @@ void reloadMesh(
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 }
 
-void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
+void loadRaster(const QString& filename, RasterModel& rm, vcg::CallBackPos* cb)
 {
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
@@ -193,14 +193,7 @@ void loadRaster(const QString& filename, MeshDocument& md, vcg::CallBackPos* cb)
 				"Raster " + filename + " cannot be opened. Your MeshLab version "
 				"has not plugin to read " + extension + " file format.");
 
-	RasterModel *rm = md.addNewRaster();
-	try {
-		ioPlugin->openRaster(extension, filename, *rm, cb);
-	}
-	catch(const MLException& e){
-		md.delRaster(rm);
-		throw e;
-	}
+	ioPlugin->openRaster(extension, filename, rm, cb);
 }
 
 }
