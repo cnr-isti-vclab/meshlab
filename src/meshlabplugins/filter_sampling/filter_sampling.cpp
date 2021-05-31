@@ -564,8 +564,12 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
   case FP_HAUSDORFF_DISTANCE:
   {
 		const MeshModel *vertexMesh = md.mm();
-		foreach(vertexMesh, md.meshList)
-		if (vertexMesh != md.mm())  break;
+		for(const MeshModel * vm: md.meshIterator()){
+			if (vm != md.mm()) {
+				vertexMesh = vm;
+				break;
+			}
+		}
 
 		parlst.addParam(RichMesh("SampledMesh", md.mm()->id(), &md, "Sampled Mesh",
 			"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
@@ -585,13 +589,17 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
 		parlst.addParam(RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
 			tr("Max Distance"), tr("Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max.")));
-  } break;
+	} break;
 
-  case FP_DISTANCE_REFERENCE:
-  {
+	case FP_DISTANCE_REFERENCE:
+	{
 		const MeshModel *vertexMesh = md.mm();
-		foreach(vertexMesh, md.meshList)
-		if (vertexMesh != md.mm())  break;
+		for(const MeshModel * vm: md.meshIterator()){
+			if (vm != md.mm()) {
+				vertexMesh = vm;
+				break;
+			}
+		}
 
 		parlst.addParam(RichMesh("MeasureMesh", md.mm()->id(), &md, "Measured Mesh/PointCloud",
 			"The Mesh/Pointcloud that is measured, vertex by vertex, computing distance from the REFERENCE mesh/pointcloud."));
@@ -605,11 +613,14 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 			tr("Max Distance [abs]"), tr("Search is interrupted when nothing is found within this distance range [+maxDistance -maxDistance].")));
   } break;
 
-  case FP_VERTEX_RESAMPLING:
-  {
+	case FP_VERTEX_RESAMPLING:
+	{
 	const MeshModel *vertexMesh= md.mm();
-	foreach (vertexMesh, md.meshList)
-		if (vertexMesh != md.mm())  break;
+	for (const MeshModel* vm: md.meshIterator())
+		if (vm != md.mm()) {
+			vertexMesh = vm;
+			break;
+		}
 
 	parlst.addParam(RichMesh ("SourceMesh", md.mm()->id(),&md, "Source Mesh",
                                   "The mesh that contains the source data that we want to transfer."));
@@ -657,16 +668,23 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
                                   "In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
                                   "Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t"));
   } break;
-  case FP_VORONOI_COLORING :
-  case FP_DISK_COLORING :
-  {
-	const MeshModel *colorMesh= md.mm();
-    foreach (colorMesh, md.meshList) // Search a mesh with some faces..
-      if (colorMesh->cm.fn>0)  break;
 
-    MeshModel *vertexMesh;
-    foreach (vertexMesh, md.meshList) // Search another mesh
-      if (vertexMesh != colorMesh)  break;
+	case FP_VORONOI_COLORING :
+	case FP_DISK_COLORING :
+	{
+		const MeshModel *colorMesh= md.mm();
+		for (const MeshModel* colm: md.meshIterator()) // Search a mesh with some faces..
+			if (colm->cm.fn>0){
+				colorMesh = colm;
+				break;
+			}
+
+		const MeshModel *vertexMesh= md.mm();
+		for (const MeshModel* vm : md.meshIterator()) // Search another mesh
+			if (vm != colorMesh) {
+				vertexMesh = vm;
+				break;
+			}
 
 	parlst.addParam(RichMesh ("ColoredMesh", colorMesh->id(),&md, "To be Colored Mesh",
                                   "The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."));

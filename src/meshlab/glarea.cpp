@@ -1812,7 +1812,7 @@ void GLArea::updateRasterSetVisibilities()
     while (i.hasNext()) {
         i.next();
         bool found =false;
-        foreach(RasterModel * rp, this->md()->rasterList)
+        for(RasterModel * rp: md()->rasterIterator())
         {
             if(rp->id() == i.key())
             {
@@ -1824,7 +1824,7 @@ void GLArea::updateRasterSetVisibilities()
             rasterVisibilityMap.remove(i.key());
     }
 
-    foreach(RasterModel * rp, this->md()->rasterList)
+    for(RasterModel * rp: md()->rasterIterator())
     {
         //Insert the new pair in the map;If the key is already in the map, its value will be overwritten
         rasterVisibilityMap.insert(rp->id(),rp->visible);
@@ -1879,7 +1879,7 @@ void GLArea::showRaster(bool resetViewFlag)
 void GLArea::loadRaster(int id)
 {
 	lastloadedraster = id;
-    foreach(RasterModel *rm, this->md()->rasterList)
+	for(RasterModel *rm: md()->rasterIterator())
         if(rm->id()==id)
         {
             this->md()->setCurrentRaster(id);

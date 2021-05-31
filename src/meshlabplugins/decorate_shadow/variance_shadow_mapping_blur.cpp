@@ -188,7 +188,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
 
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_FALSE); // to avoid the fact that when saving a snapshot we get semitransparent shadowed areas.
-    foreach(MeshModel *m, md.meshList)
+    for(MeshModel *m: md.meshIterator())
     {
         if ((m != NULL) && (m->visible))
         {

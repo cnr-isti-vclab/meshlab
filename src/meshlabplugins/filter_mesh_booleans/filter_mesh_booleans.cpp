@@ -181,7 +181,7 @@ RichParameterList FilterMeshBooleans::initParameterList(
 	{
 		const MeshModel *target = md.mm();
 		//looking for a second mesh different that the current one
-		for (const MeshModel * t : md.meshList){
+		for (const MeshModel * t : md.meshIterator()){
 			if (t != md.mm()) {
 				target = t;
 				break;

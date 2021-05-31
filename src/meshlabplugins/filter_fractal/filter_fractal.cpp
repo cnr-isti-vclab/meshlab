@@ -220,9 +220,9 @@ void FilterFractal::initParameterSetForCratersGeneration(const MeshDocument &md,
 	// tries to detect the target mesh
 	const MeshModel* target = md.mm();
 	const MeshModel* samples = md.mm();
-	MeshModel* tmpMesh;
+	const MeshModel* tmpMesh;
 	if (samples->cm.fn != 0){ // this is probably not the samples layer
-		for(MeshModel* mm : md.meshList)
+		for(const MeshModel* mm : md.meshIterator())
 		{
 			tmpMesh = mm;
 			if (tmpMesh->cm.fn == 0)
@@ -304,7 +304,7 @@ std::map<std::string, QVariant> FilterFractal::applyFilter(
 		break;
 	case FP_CRATERS:
 	{
-		if (md.meshList.size() < 2) {
+		if (md.meshNumber() < 2) {
 			throw MLException("There must be at least two layers to apply the craters generation filter.");
 		}
 

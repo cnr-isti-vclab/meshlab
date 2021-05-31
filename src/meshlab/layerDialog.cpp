@@ -457,7 +457,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				//
 				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = false;
 					}
@@ -476,7 +476,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				// clicking on all of them...
 				if(QApplication::keyboardModifiers() == Qt::AltModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = true;
 					}
@@ -484,7 +484,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 
 				if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = !rp->visible;
 					}
@@ -712,7 +712,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	//}
 	//tabsrelatedtodeletedmeshes.clear();
 
-	if (md->rasterList.size() > 0)
+	if (md->rasterNumber() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
@@ -723,7 +723,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
 	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
 	ui->rasterTreeWidget->header()->hide();
-	foreach(RasterModel* rmd, md->rasterList)
+	for(RasterModel* rmd: md->rasterIterator())
 	{
 		//Restore raster visibility according to the current visibility map
 		//very good to keep viewer state consistent

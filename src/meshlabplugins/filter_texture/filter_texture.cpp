@@ -200,7 +200,7 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 {
 	RichParameterList parlst;
 	const MeshModel* trg = md.mm();
-	for (const MeshModel* tmp : md.meshList){
+	for (const MeshModel* tmp : md.meshIterator()){
 		if (tmp != trg && tmp != nullptr){
 			trg = tmp;
 			break;

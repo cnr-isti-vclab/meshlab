@@ -272,7 +272,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool sa
 
 	QDomElement rgroot = ddoc.createElement("RasterGroup");
 
-	foreach(RasterModel *rmp, md.rasterList)
+	for(RasterModel *rmp: md.rasterIterator())
 	{
 		QDomElement rasterElem = RasterModelToXML(rmp, ddoc, binary);
 		rgroot.appendChild(rasterElem);

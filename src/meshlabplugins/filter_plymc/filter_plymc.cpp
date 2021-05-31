@@ -165,7 +165,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		p.FullyPreprocessedFlag=true;
 		p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
 		p.SimplificationFlag = par.getBool("simplification");
-		foreach(MeshModel*mm, md.meshList)
+		for(MeshModel*mm: md.meshIterator())
 		{
 			if(mm->visible)
 			{

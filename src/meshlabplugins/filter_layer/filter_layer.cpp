@@ -223,7 +223,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		}
 		else
 		{
-			foreach(MeshModel *mmp, md.meshList)
+			for(MeshModel *mmp: md.meshIterator())
 			{
 				if (mmp->label().contains(match))
 					md.setVisible(mmp->id(), par.getBool("isMeshVisible"));
@@ -239,7 +239,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 	case  FP_DELETE_NON_VISIBLE_MESH:
 	{
-		foreach(MeshModel *mmp, md.meshList)
+		for(MeshModel *mmp: md.meshIterator())
 		{
 			if (!mmp->visible)
 				md.delMesh(mmp);
@@ -283,11 +283,11 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
+			log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, currentModel->id(), delfaces);
 		}
-		else								// keep original faces
+		else // keep original faces
 		{
-			log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
+			log("Copied %i vertices to layer %i", numVertSel, currentModel->id());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 
@@ -328,11 +328,11 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			tri::UpdateSelection<CMeshO>::FaceClear(currentModel->cm);
 			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-			log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, currentModel->id());
 		}
 		else								// keep original faces
 		{
-			log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, currentModel->id());
 		}
 		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
 		vcg::tri::UpdateFlags<CMeshO>::FaceClear(destModel->cm, CMeshO::FaceType::SELECTED);
@@ -356,7 +356,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			tex = fullPath.toStdString();
 		}
 
-		log("Duplicated current model to layer %i", md.meshList.size());
+		log("Duplicated current model to layer %i", destModel->id());
 
 		// init new layer
 		destModel->updateBoxAndNormals();
@@ -375,14 +375,14 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		QList<MeshModel *> toBeDeletedList;
 
 		int cnt=0;
-		foreach(MeshModel *mmp, md.meshList)
+		for(MeshModel *mmp: md.meshIterator())
 		{
 			++cnt;
 			if(mmp->visible || !mergeVisible)
 			{
 				if (mmp != destModel)
 				{
-					cb(cnt*100/md.meshList.size(), "Merging layers...");
+					cb(cnt*100/md.meshNumber(), "Merging layers...");
 					tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
 					toBeDeletedList.push_back(mmp);
 					if(!alsoUnreferenced)
