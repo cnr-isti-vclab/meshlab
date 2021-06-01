@@ -76,9 +76,12 @@ QString FilterColorProjectionPlugin::pluginName() const
 QString FilterColorProjectionPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
-    case FP_SINGLEIMAGEPROJ	:	return QString("Project current raster color to current mesh");
-    case FP_MULTIIMAGETRIVIALPROJ	:	return QString("Project active rasters color to current mesh");
-    case FP_MULTIIMAGETRIVIALPROJTEXTURE	:	return QString("Project active rasters color to current mesh, filling the texture");
+    case FP_SINGLEIMAGEPROJ	:
+        return QString("Project current raster color to current mesh");
+    case FP_MULTIIMAGETRIVIALPROJ :
+        return QString("Project active rasters color to current mesh");
+    case FP_MULTIIMAGETRIVIALPROJTEXTURE :
+        return QString("Project active rasters color to current mesh, filling the texture");
     default : assert(0);
     }
 	return NULL;
@@ -922,14 +925,15 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				}
 	
 				// Save texture
-				cb(90, "Saving texture ...");
-				CheckError(!img.save(filePath), "Texture file cannot be saved");
-				log( "Texture \"%s\" Created", filePath.toStdString().c_str());
-				assert(QFile(filePath).exists());
+				//cb(90, "Saving texture ...");
+				//CheckError(!img.save(filePath), "Texture file cannot be saved");
+				//log( "Texture \"%s\" Created", filePath.toStdString().c_str());
+				//assert(QFile(filePath).exists());
 	
 				// Assign texture
-				model->cm.textures.clear();
-				model->cm.textures.push_back(textName.toStdString());
+				cb(90, "Assigning texture ...");
+				model->clearTextures();
+				model->addTexture(textName.toStdString(), img);
 	
 				// the mesh has to return to its original position
 				tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
