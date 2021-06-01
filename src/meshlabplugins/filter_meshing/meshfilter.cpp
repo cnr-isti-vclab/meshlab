@@ -1402,7 +1402,10 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 		MeshModel *um=md.addNewMesh("","Unrolled Mesh");
 		um->updateDataMask(&m);
-		um->cm.textures = m.cm.textures;
+		for (const std::string& tex: m.cm.textures) {
+			um->addTexture(tex, m.getTexture(tex));
+		}
+		//um->cm.textures = m.cm.textures;
 		float avgZ=0;
 		CMeshO::VertexIterator vi;
 		// First loop duplicate accordingly the vertices.
