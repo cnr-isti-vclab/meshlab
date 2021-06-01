@@ -53,6 +53,17 @@ void reloadMesh(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos* cb = nullptr);
 
+QImage loadImage(
+		const QString& filename,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+void saveImage(
+		const QString& filename,
+		const QImage& image,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
 void loadRaster(
 		const QString& filename,
 		RasterModel& rm,
