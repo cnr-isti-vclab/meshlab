@@ -172,6 +172,7 @@ public:
 	QImage getTexture(const std::string& tn) const;
 	void clearTextures();
 	void addTexture(std::string name, const QImage& txt);
+	void setTexture(std::string name, const QImage& txt);
 
 	// This function is roughly equivalent to the updateDataMask,
 	// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)

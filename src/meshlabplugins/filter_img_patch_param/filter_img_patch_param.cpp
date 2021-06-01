@@ -318,11 +318,13 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 					log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
 
 					QImage tex = painter.getTexture();
-					if( tex.save(texName) )
-					{
-						mesh.textures.clear();
-						mesh.textures.push_back( texName.toStdString() );
-					}
+					md.mm()->clearTextures();
+					md.mm()->addTexture(texName.toStdString(), tex);
+					//if( tex.save(texName) )
+					//{
+					//	mesh.textures.clear();
+					//	mesh.textures.push_back( texName.toStdString() );
+					//}
 				}
 			}
 			if (!retValue)

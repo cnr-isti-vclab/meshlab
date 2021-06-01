@@ -153,6 +153,13 @@ void MeshModel::addTexture(std::string name, const QImage& txt)
 	textures[name]=txt;
 }
 
+void MeshModel::setTexture(std::string name, const QImage& txt)
+{
+	auto it = textures.find(name);
+	if (it != textures.end())
+		it->second = txt;
+}
+
 int MeshModel::io2mm(int single_iobit)
 {
 	switch(single_iobit)
