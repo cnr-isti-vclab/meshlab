@@ -116,6 +116,7 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 				"has not plugin to read " + extension + " file format");
 
 
+	ioPlugin->setLog(&md.Log);
 	RichParameterList prePar;
 	ioPlugin->initPreOpenParameter(extension, prePar);
 	prePar.join(meshlab::defaultGlobalParameterList());
@@ -149,9 +150,9 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 void reloadMesh(
 		const QString& filename,
 		const std::list<MeshModel*>& meshList,
+		GLLogStream* log,
 		vcg::CallBackPos* cb)
 {
-
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
@@ -165,6 +166,7 @@ void reloadMesh(
 	}
 
 	RichParameterList prePar;
+	ioPlugin->setLog(log);
 	ioPlugin->initPreOpenParameter(extension, prePar);
 	prePar.join(meshlab::defaultGlobalParameterList());
 

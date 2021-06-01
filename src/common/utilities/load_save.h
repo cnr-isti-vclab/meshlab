@@ -50,7 +50,8 @@ void loadMeshWithStandardParameters(
 void reloadMesh(
 		const QString& filename,
 		const std::list<MeshModel*>& meshList,
-		vcg::CallBackPos* cb);
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
 
 void loadRaster(
 		const QString& filename,

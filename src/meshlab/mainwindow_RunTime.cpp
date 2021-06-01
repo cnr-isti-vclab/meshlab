@@ -2554,7 +2554,7 @@ void MainWindow::reloadAllMesh()
 					i++;
 				}
 				try {
-					meshlab::reloadMesh(fileName, meshList, QCallBack);
+					meshlab::reloadMesh(fileName, meshList, &meshDoc()->Log, QCallBack);
 					for (MeshModel* m : meshList){
 						computeRenderingDataOnLoading(m, true, nullptr);
 					}
@@ -2601,7 +2601,7 @@ void MainWindow::reload()
 	try {
 		QElapsedTimer t;
 		t.start();
-		meshlab::reloadMesh(fileName, meshList, QCallBack);
+		meshlab::reloadMesh(fileName, meshList, &meshDoc()->Log, QCallBack);
 		for (MeshModel* m : meshList){
 			computeRenderingDataOnLoading(m, true, nullptr);
 		}
