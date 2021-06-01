@@ -133,7 +133,6 @@ public:
 	int idInFile() const {return idInsideFile;}
 	void setIdInFile(int id) {idInsideFile = id;}
 
-
 	// Some notes about the files and naming.
 	// Each mesh when shown in the layer dialog has a label.
 	// By default the label is just the name of the file, but the
@@ -167,6 +166,10 @@ public:
 
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	bool isVisible() const { return visible; }
+
+	std::list<std::string> loadTextures(GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
+
+	QImage getTexture(const std::string& tn);
 
 	// This function is roughly equivalent to the updateDataMask,
 	// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)

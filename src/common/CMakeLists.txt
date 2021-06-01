@@ -125,6 +125,8 @@ set(SOURCES
 	mlapplication.cpp
 	searcher.cpp)
 
+set(RESOURCES meshlab-common.qrc)
+
 set(TARGET_TYPE SHARED)
 if(WIN32)
 	set(TARGET_TYPE STATIC)

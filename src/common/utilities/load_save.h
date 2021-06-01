@@ -34,7 +34,7 @@
 
 namespace meshlab {
 
-void loadMesh(
+std::list<std::string> loadMesh(
 		const QString& fileName,
 		IOPlugin* ioPlugin,
 		const RichParameterList& prePar,

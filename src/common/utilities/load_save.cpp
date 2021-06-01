@@ -33,8 +33,15 @@
 
 namespace meshlab {
 
-void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterList& prePar, const std::list<MeshModel*>& meshList, std::list<int>& maskList, vcg::CallBackPos *cb)
+std::list<std::string> loadMesh(
+		const QString& fileName,
+		IOPlugin* ioPlugin,
+		const RichParameterList& prePar,
+		const std::list<MeshModel*>& meshList,
+		std::list<int>& maskList,
+		vcg::CallBackPos *cb)
 {
+	std::list<std::string> unloadedTextures;
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
 
@@ -60,6 +67,9 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 	for (unsigned int i = 0; i < meshList.size(); ++i){
 		MeshModel* mm = *itmesh;
 		int mask = *itmask;
+
+		std::list<std::string> tmp = mm->loadTextures(nullptr, cb);
+		unloadedTextures.insert(unloadedTextures.end(), tmp.begin(), tmp.end());
 
 		// In case of polygonal meshes the normal should be updated accordingly
 		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) {
@@ -100,6 +110,7 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 		++itmask;
 	}
 	QDir::setCurrent(origDir); // undo the change of directory before leaving
+	return unloadedTextures;
 }
 
 
