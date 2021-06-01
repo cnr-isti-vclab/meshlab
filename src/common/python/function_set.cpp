@@ -116,20 +116,20 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 		}
 	}
 
-	for (const FileFormat& ff : iop->importRasterFormats()){
-		for (const QString& inputRasterFormat : ff.extensions){
-			QString originalFilterName = inputRasterFormat;
-			QString pythonFilterName = inputRasterFormat.toLower();
-			Function f(pythonFilterName, originalFilterName, "Load " + inputRasterFormat + " format.");
+	for (const FileFormat& ff : iop->importImageFormats()){
+		for (const QString& inputImageFormat : ff.extensions){
+			QString originalFilterName = inputImageFormat;
+			QString pythonFilterName = inputImageFormat.toLower();
+			Function f(pythonFilterName, originalFilterName, "Load " + inputImageFormat + " format.");
 
 			//filename parameter
-			QString sv = "file_name." + inputRasterFormat;
-			QStringList sl(inputRasterFormat);
+			QString sv = "file_name." + inputImageFormat;
+			QStringList sl(inputImageFormat);
 			RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
 			FunctionParameter par(of);
 			f.addParameter(par);
 
-			loadRasterSet.insert(f);
+			loadImageSet.insert(f);
 		}
 	}
 }
@@ -184,15 +184,15 @@ bool pymeshlab::FunctionSet::containsSaveMeshFunction(const QString& pythonFunct
 
 const pymeshlab::Function& pymeshlab::FunctionSet::loadRasterFunction(const QString& pythonFunctionName) const
 {
-	auto it = loadRasterSet.find(Function(pythonFunctionName, "", ""));
-	if (it == loadRasterSet.end())
+	auto it = loadImageSet.find(Function(pythonFunctionName, "", ""));
+	if (it == loadImageSet.end())
 		throw MLException(pythonFunctionName + " format for loading raster not found.");
 	return *it;
 }
 
 bool pymeshlab::FunctionSet::containsLoadRasterFunction(const QString& pythonFunctionName) const
 {
-	return loadRasterSet.find(Function(pythonFunctionName, "", "")) != loadRasterSet.end();
+	return loadImageSet.find(Function(pythonFunctionName, "", "")) != loadImageSet.end();
 }
 
 pymeshlab::FunctionSet::FunctionRangeIterator pymeshlab::FunctionSet::filterFunctionIterator() const
@@ -212,7 +212,7 @@ pymeshlab::FunctionSet::FunctionRangeIterator pymeshlab::FunctionSet::saveMeshFu
 
 pymeshlab::FunctionSet::FunctionRangeIterator pymeshlab::FunctionSet::loadRasterFunctionIterator() const
 {
-	return FunctionRangeIterator(loadRasterSet);
+	return FunctionRangeIterator(loadImageSet);
 }
 
 void pymeshlab::FunctionSet::updateSaveParameters(IOPlugin* plugin,

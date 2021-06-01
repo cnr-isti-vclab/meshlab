@@ -301,9 +301,14 @@ IOPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 	return ioPlugins.outputMeshPlugin(outputFormat);
 }
 
-IOPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
+IOPlugin* PluginManager::inputImagePlugin(const QString inputFormat) const
 {
-	return ioPlugins.inputRasterPlugin(inputFormat);
+	return ioPlugins.inputImagePlugin(inputFormat);
+}
+
+IOPlugin* PluginManager::outputImagePlugin(const QString& outputFormat) const
+{
+	return ioPlugins.outputImagePlugin(outputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
@@ -316,9 +321,14 @@ bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) cons
 	return ioPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
-bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
+bool PluginManager::isInputImageFormatSupported(const QString inputFormat) const
 {
-	return ioPlugins.isInputRasterFormatSupported(inputFormat);
+	return ioPlugins.isInputImageFormatSupported(inputFormat);
+}
+
+bool PluginManager::isOutputImageFormatSupported(const QString outputFormat) const
+{
+	return ioPlugins.isOutputImageFormatSupported(outputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
@@ -331,9 +341,14 @@ QStringList PluginManager::outputMeshFormatList() const
 	return ioPlugins.outputMeshFormatList();
 }
 
-QStringList PluginManager::inputRasterFormatList() const
+QStringList PluginManager::inputImageFormatList() const
 {
-	return ioPlugins.inputRasterFormatList();
+	return ioPlugins.inputImageFormatList();
+}
+
+QStringList PluginManager::outputImageFormatList() const
+{
+	return ioPlugins.outputImageFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
@@ -346,9 +361,9 @@ QStringList PluginManager::outputMeshFormatListDialog() const
 	return outputFormatListDialog(ioPluginIterator());
 }
 
-QStringList PluginManager::inputRasterFormatListDialog() const
+QStringList PluginManager::inputImageFormatListDialog() const
 {
-	return inputRasterFormatListDialog(ioPluginIterator());
+	return inputImageFormatListDialog(ioPluginIterator());
 }
 
 MeshLabPlugin* PluginManager::operator[](unsigned int i) const
@@ -453,13 +468,13 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 }
 
 template<typename RangeIterator>
-QStringList PluginManager::inputRasterFormatListDialog(RangeIterator iterator)
+QStringList PluginManager::inputImageFormatListDialog(RangeIterator iterator)
 {
 	QString allKnownFormats = QObject::tr("All known formats (");
 	QStringList inputRasterFormatsDialogStringList;
 	for (auto io : iterator){
 		QString allKnownFormatsFilter;
-		for (const FileFormat& currentFormat : io->importRasterFormats()){
+		for (const FileFormat& currentFormat : io->importImageFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();

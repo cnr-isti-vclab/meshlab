@@ -55,7 +55,8 @@ void reloadMesh(
 void loadRaster(
 		const QString& filename,
 		RasterModel& rm,
-		vcg::CallBackPos *cb);
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
 
 }
 

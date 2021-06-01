@@ -40,7 +40,8 @@ public:
 
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
-	std::list<FileFormat> importRasterFormats() const;
+	std::list<FileFormat> importImageFormats() const;
+	std::list<FileFormat> exportImageFormats() const;
 
 	void exportMaskCapability(
 			const QString& format,
@@ -63,19 +64,21 @@ public:
 			const RichParameterList& par,
 			vcg::CallBackPos* cb);
 
-	void openRaster(
+	QImage openImage(
 			const QString& format,
-			const QString& filename,
-			RasterModel& rm,
-			vcg::CallBackPos*);
+			const QString& fileName,
+			vcg::CallBackPos* cb);
+
+	void saveImage(
+			const QString& format,
+			const QString& fileName,
+			const QImage& image,
+			vcg::CallBackPos* cb);
 
 	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
 	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
-
-private:
-	std::list<FileFormat> rasterFormatList;
 };
 
 #endif

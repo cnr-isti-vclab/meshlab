@@ -2108,7 +2108,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputRasterFormatListDialog().join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputImageFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 	
@@ -2130,7 +2130,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			QElapsedTimer t;
 			t.start();
 			rm = meshDoc()->addNewRaster();
-			meshlab::loadRaster(fileName, *rm, QCallBack);
+			meshlab::loadRaster(fileName, *rm, &meshDoc()->Log, QCallBack);
 			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
 			GLA()->fov = meshDoc()->rm()->shot.GetFovFromFocal();

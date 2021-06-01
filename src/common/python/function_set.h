@@ -98,7 +98,7 @@ private:
 	std::set<Function> filterSet;
 	std::set<Function> loadMeshSet;
 	std::set<Function> saveMeshSet;
-	std::set<Function> loadRasterSet;
+	std::set<Function> loadImageSet;
 };
 
 }

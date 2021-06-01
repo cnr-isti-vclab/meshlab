@@ -99,16 +99,6 @@ public:
 	}
 
 	/**
-	 * @brief If your plugin supports loading also raster formats, re-implement
-	 * this function, returning the list of raster formats supported by
-	 * your openRaster function.
-	 */
-	virtual std::list<FileFormat> importRasterFormats() const
-	{
-		return std::list<FileFormat>();
-	}
-
-	/**
 	 * @brief The initPreOpenParameter function is called to initialize the list
 	 * of additional parameters that a OPENING plugin could require. It is
 	 * called by the framework BEFORE the actual mesh loading to determine how
@@ -265,23 +255,6 @@ public:
 	{
 		wrongSaveFormat(format);
 	}
-
-	/**
-	 * @brief If your plugin supports raster formats, re-implement this
-	 * function.
-	 * @param format: the extension of the format e.g. "JPG"
-	 * @param filename: the name of the file to be opened (including its path)
-	 * @param rm: the raster model on which save the loaded raster
-	 * @param cb: standard callback for reporting progress while opening
-	 */
-	virtual void openRaster(
-			const QString& format,
-			const QString& /*fileName*/,
-			RasterModel& /*rm*/,
-			vcg::CallBackPos* /*cb*/ = nullptr)
-	{
-		wrongOpenFormat(format);
-	};
 
 	/**
 	 * @brief The reportWarning function should be used everytime that a

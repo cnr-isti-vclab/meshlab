@@ -42,7 +42,7 @@
 #include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
 
-#include "exif.h"
+
 
 using namespace std;
 using namespace vcg;
@@ -68,14 +68,26 @@ class PFace :public vcg::Face<
 
 class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
+const static std::list<FileFormat> importImageFormatList = {
+	FileFormat("BMP", "BMP"),
+	FileFormat("JPG", "JPG"),
+	FileFormat("JPEG", "JPEG"),
+	FileFormat("PNG", "PNG"),
+	FileFormat("XBM", "XBM"),
+	FileFormat("XPM", "XPM")
+};
+
+const static std::list<FileFormat> exportImageFormatList = {
+	FileFormat("BMP", "BMP"),
+	FileFormat("JPG", "JPG"),
+	FileFormat("JPEG", "JPEG"),
+	FileFormat("PNG", "PNG"),
+	FileFormat("XBM", "XBM"),
+	FileFormat("XPM", "XPM")
+};
+
 BaseMeshIOPlugin::BaseMeshIOPlugin() : IOPlugin()
 {
-	rasterFormatList = {
-		FileFormat("JPEG", tr("JPEG")),
-		FileFormat("JPG", tr("JPG")),
-		FileFormat("PNG", tr("PNG")),
-		FileFormat("XPM", tr("XPM"))
-	};
 }
 
 QString BaseMeshIOPlugin::pluginName() const
@@ -117,9 +129,14 @@ std::list<FileFormat> BaseMeshIOPlugin::exportFormats() const
 	return formatList;
 }
 
-std::list<FileFormat> BaseMeshIOPlugin::importRasterFormats() const
+std::list<FileFormat> BaseMeshIOPlugin::importImageFormats() const
 {
-	return rasterFormatList;
+	return importImageFormatList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::exportImageFormats() const
+{
+	return exportImageFormatList;
 }
 
 // initialize importing parameters
@@ -466,79 +483,60 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	}
 }
 
-void BaseMeshIOPlugin::openRaster(const QString& format, const QString& filename, RasterModel& rm, CallBackPos*)
+QImage BaseMeshIOPlugin::openImage(
+		const QString& format,
+		const QString& fileName,
+		vcg::CallBackPos*)
 {
+	QImage loadedImage;
 	bool supportedFormat = false;
-	for (const FileFormat& f : rasterFormatList){
+	for (const FileFormat& f : importImageFormatList){
 		if (f.extensions.first().toUpper() == format.toUpper())
 			supportedFormat = true;
 	}
 
 	if (supportedFormat) {
-		QFileInfo fi(filename);
+		QFileInfo fi(fileName);
 
-		if(!fi.exists()) 	{
+		if(!fi.exists()) {
 			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
-			throw MLException(errorMsgFormat.arg(filename));
+			throw MLException(errorMsgFormat.arg(fileName));
 		}
-		if(!fi.isReadable()) 	{
+		if(!fi.isReadable()) {
 			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-			throw MLException(errorMsgFormat.arg(filename));
+			throw MLException(errorMsgFormat.arg(fileName));
 		}
 
-		rm.setLabel(filename);
-		//here the image is actually loaded
-		//todo: change this
-		//RasterPlane should take a QImage as parameter
-		rm.addPlane(new RasterPlane(filename,RasterPlane::RGBA));
-
-		// Read the JPEG file into a buffer
-		FILE *fp = fopen(qUtf8Printable(filename), "rb");
-		if (!fp) {
-			QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-			throw MLException(errorMsgFormat.arg(filename));
+		loadedImage.load(fileName);
+		if (loadedImage.isNull()){
+			throw MLException("Failed to load the image " + fileName);
 		}
-		fseek(fp, 0, SEEK_END);
-		unsigned long fsize = ftell(fp);
-		rewind(fp);
-		unsigned char *buf = new unsigned char[fsize];
-		if (fread(buf, 1, fsize, fp) != fsize) {
-			QString errorMsgFormat = "Exif Parsing: Unable to read the content of the opened file:\n\"%1\"\n\nError details: file %1 is not readable.";
-			delete[] buf;
-			fclose(fp);
-			throw MLException(errorMsgFormat.arg(filename));
-		}
-		fclose(fp);
-
-		// Parse EXIF
-		easyexif::EXIFInfo ImageInfo;
-		int code = ImageInfo.parseFrom(buf, fsize);
-		delete[] buf;
-		if (!code) {
-			log(GLLogStream::FILTER, "Warning unable to parse exif for file  %s", qPrintable(filename));
-		}
-
-		if (code && ImageInfo.FocalLengthIn35mm==0.0f)
-		{
-			rm.shot.Intrinsics.ViewportPx = vcg::Point2i(rm.currentPlane->image.width(), rm.currentPlane->image.height());
-			rm.shot.Intrinsics.CenterPx   = Point2m(float(rm.currentPlane->image.width()/2.0), float(rm.currentPlane->image.width()/2.0));
-			rm.shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm.currentPlane->image.width();
-			rm.shot.Intrinsics.PixelSizeMm[1]=rm.shot.Intrinsics.PixelSizeMm[0];
-			rm.shot.Intrinsics.FocalMm = 50.0f;
-		}
-		else
-		{
-			rm.shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.ImageWidth, ImageInfo.ImageHeight);
-			rm.shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.ImageWidth/2.0), float(ImageInfo.ImageHeight/2.0));
-			float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLengthIn35mm;
-			rm.shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.ImageWidth;
-			rm.shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.ImageHeight;
-			rm.shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
-		}
-		// End of EXIF reading
 	}
 	else {
 		wrongOpenFormat(format);
+	}
+	return loadedImage;
+}
+
+void BaseMeshIOPlugin::saveImage(
+		const QString& format,
+		const QString& fileName,
+		const QImage& image,
+		CallBackPos*)
+{
+	bool supportedFormat = false;
+	for (const FileFormat& f : exportImageFormatList){
+		if (f.extensions.first().toUpper() == format.toUpper())
+			supportedFormat = true;
+	}
+	if (supportedFormat){
+		bool ok = image.save(fileName);
+		if (!ok){
+			throw MLException("Failed to save the image " + fileName);
+		}
+	}
+	else{
+		wrongSaveFormat(format);
 	}
 }
 

@@ -47,14 +47,17 @@ public:
 
 	bool isInputMeshFormatSupported(const QString& inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString& outputFormat) const;
-	bool isInputRasterFormatSupported(const QString& inputFormat) const;
+	bool isInputImageFormatSupported(const QString& inputFormat) const;
+	bool isOutputImageFormatSupported(const QString& outputFormat) const;
 	IOPlugin* inputMeshPlugin(const QString& inputFormat) const;
 	IOPlugin* outputMeshPlugin(const QString& outputFormat) const;
-	IOPlugin* inputRasterPlugin(const QString& inputFormat) const;
+	IOPlugin* inputImagePlugin(const QString& inputFormat) const;
+	IOPlugin* outputImagePlugin(const QString& outputFormat) const;
 
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
-	QStringList inputRasterFormatList() const;
+	QStringList inputImageFormatList() const;
+	QStringList outputImageFormatList() const;
 
 	IOPluginRangeIterator ioPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
@@ -62,7 +65,8 @@ private:
 	std::vector<IOPlugin*> ioPlugins;
 	QMap<QString,IOPlugin*> inputMeshFormatToPluginMap;
 	QMap<QString,IOPlugin*> outputMeshFormatToPluginMap;
-	QMap<QString,IOPlugin*> inputRasterFormatToPluginMap;
+	QMap<QString,IOPlugin*> inputImageFormatToPluginMap;
+	QMap<QString,IOPlugin*> outputImageFormatToPluginMap;
 };
 
 class IOPluginContainer::IOPluginRangeIterator

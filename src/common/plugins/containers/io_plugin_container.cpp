@@ -14,7 +14,7 @@ void IOPluginContainer::clear()
 	ioPlugins.clear();
 	inputMeshFormatToPluginMap.clear();
 	outputMeshFormatToPluginMap.clear();
-	inputRasterFormatToPluginMap.clear();
+	inputImageFormatToPluginMap.clear();
 }
 
 void IOPluginContainer::pushIOPlugin(IOPlugin* iIO)
@@ -40,10 +40,10 @@ void IOPluginContainer::pushIOPlugin(IOPlugin* iIO)
 	}
 
 	//add input raster formats to inputFormatMap
-	for (const FileFormat& ff : iIO->importRasterFormats()){
+	for (const FileFormat& ff : iIO->importImageFormats()){
 		for (const QString& currentExtension : ff.extensions) {
-			if (! inputRasterFormatToPluginMap.contains(currentExtension.toLower())) {
-				inputRasterFormatToPluginMap.insert(currentExtension.toLower(), iIO);
+			if (! inputImageFormatToPluginMap.contains(currentExtension.toLower())) {
+				inputImageFormatToPluginMap.insert(currentExtension.toLower(), iIO);
 			}
 		}
 	}
@@ -62,9 +62,9 @@ void IOPluginContainer::eraseIOPlugin(IOPlugin* iIO)
 			outputMeshFormatToPluginMap.remove(currentExtension.toLower());
 		}
 	}
-	for (const FileFormat& ff : iIO->importRasterFormats()){
+	for (const FileFormat& ff : iIO->importImageFormats()){
 		for (const QString& currentExtension : ff.extensions) {
-			inputRasterFormatToPluginMap.remove(currentExtension.toLower());
+			inputImageFormatToPluginMap.remove(currentExtension.toLower());
 		}
 	}
 }
@@ -79,9 +79,14 @@ bool IOPluginContainer::isOutputMeshFormatSupported(const QString& outputFormat)
 	return outputMeshFormatToPluginMap.find(outputFormat.toLower()) != outputMeshFormatToPluginMap.end();
 }
 
-bool IOPluginContainer::isInputRasterFormatSupported(const QString& inputFormat) const
+bool IOPluginContainer::isInputImageFormatSupported(const QString& inputFormat) const
 {
-	return inputRasterFormatToPluginMap.find(inputFormat.toLower()) != inputRasterFormatToPluginMap.end();
+	return inputImageFormatToPluginMap.find(inputFormat.toLower()) != inputImageFormatToPluginMap.end();
+}
+
+bool IOPluginContainer::isOutputImageFormatSupported(const QString& outputFormat) const
+{
+	return outputImageFormatToPluginMap.find(outputFormat.toLower()) != outputImageFormatToPluginMap.end();
 }
 
 IOPlugin* IOPluginContainer::inputMeshPlugin(const QString& inputFormat) const
@@ -100,10 +105,18 @@ IOPlugin* IOPluginContainer::outputMeshPlugin(const QString& outputFormat) const
 	return nullptr;
 }
 
-IOPlugin* IOPluginContainer::inputRasterPlugin(const QString& inputFormat) const
+IOPlugin* IOPluginContainer::inputImagePlugin(const QString& inputFormat) const
 {
-	auto it = inputRasterFormatToPluginMap.find(inputFormat.toLower());
-	if (it != inputRasterFormatToPluginMap.end())
+	auto it = inputImageFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputImageFormatToPluginMap.end())
+		return *it;
+	return nullptr;
+}
+
+IOPlugin* IOPluginContainer::outputImagePlugin(const QString& outputFormat) const
+{
+	auto it = outputImageFormatToPluginMap.find(outputFormat.toLower());
+	if (it != outputImageFormatToPluginMap.end())
 		return *it;
 	return nullptr;
 }
@@ -118,9 +131,14 @@ QStringList IOPluginContainer::outputMeshFormatList() const
 	return outputMeshFormatToPluginMap.keys();
 }
 
-QStringList IOPluginContainer::inputRasterFormatList() const
+QStringList IOPluginContainer::inputImageFormatList() const
 {
-	return inputRasterFormatToPluginMap.keys();
+	return inputImageFormatToPluginMap.keys();
+}
+
+QStringList IOPluginContainer::outputImageFormatList() const
+{
+	return outputImageFormatToPluginMap.keys();
 }
 
 IOPluginContainer::IOPluginRangeIterator IOPluginContainer::ioPluginIterator(bool iterateAlsoDisabledPlugins) const
