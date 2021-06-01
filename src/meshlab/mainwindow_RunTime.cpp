@@ -2694,7 +2694,6 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
-		//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		
 		int capability=0,defaultBits=0;
@@ -2705,7 +2704,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 		
-		SaveMaskExporterDialog maskDialog(new QWidget(),mod,capability,defaultBits,&savePar,this->GLA());
+		SaveMaskExporterDialog maskDialog(this,mod,capability,defaultBits,&savePar,this->GLA());
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else

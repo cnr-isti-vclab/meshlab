@@ -130,13 +130,27 @@ std::list<std::string> MeshModel::loadTextures(
 	return unloadedTextures;
 }
 
-QImage MeshModel::getTexture(const std::string& tn)
+QImage MeshModel::getTexture(const std::string& tn) const
 {
 	auto it = textures.find(tn);
 	if (it != textures.end())
 		return it->second;
 	else
 		return QImage();
+}
+
+void MeshModel::clearTextures()
+{
+	textures.clear();
+	cm.textures.clear();
+}
+
+void MeshModel::addTexture(std::string name, const QImage& txt)
+{
+	if (name.front() != ':')
+		name = ":" + name;
+	cm.textures.push_back(name);
+	textures[name]=txt;
 }
 
 int MeshModel::io2mm(int single_iobit)

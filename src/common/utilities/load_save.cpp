@@ -55,7 +55,7 @@ std::list<std::string> loadMesh(
 	QString fileNameSansDir = fi.fileName();
 
 	try {
-		ioPlugin->open(extension, fileNameSansDir, meshList ,maskList, prePar, cb);
+		ioPlugin->open(extension, fileNameSansDir, meshList, maskList, prePar, cb);
 	}
 	catch(const MLException& e) {
 		QDir::setCurrent(origDir); // undo the change of directory before leaving

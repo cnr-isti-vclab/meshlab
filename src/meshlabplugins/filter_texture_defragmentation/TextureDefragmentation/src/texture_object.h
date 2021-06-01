@@ -27,6 +27,8 @@
 #include <cstdint>
 #include <string>
 
+#include <QImage>
+
 class QImage;
 class TextureObject;
 
@@ -38,8 +40,9 @@ struct TextureSize {
 };
 
 struct TextureImageInfo {
-    std::string path;
-    TextureSize size;
+    QImage texture;
+    //std::string path;
+    //TextureSize size;
 };
 
 /* wrapper to an array of textures */
@@ -56,6 +59,7 @@ struct TextureObject {
 
     /* Add QImage ref to the texture object */
     bool AddImage(std::string path);
+    bool AddImage(const QImage& image);
 
     /* Binds the texture at index i */
     void Bind(int i);
