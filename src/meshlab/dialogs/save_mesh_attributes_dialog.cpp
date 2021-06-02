@@ -23,8 +23,8 @@
 
 #include "ui_save_mesh_attributes_dialog.h"
 #include "save_mesh_attributes_dialog.h"
-#include "changetexturename.h"
 
+#include <QInputDialog>
 #include <QFileInfo>
 
 SaveMeshAttributesDialog::SaveMeshAttributesDialog(
@@ -123,13 +123,17 @@ void SaveMeshAttributesDialog::on_check_help_stateChanged(int)
 void SaveMeshAttributesDialog::on_renametextureButton_clicked()
 {
 	int row = ui->listTextureName->currentRow();
-	ChangeTextureNameDialog dialog(this, textureNames[row].c_str());
-	dialog.exec();
-	std::string newtexture = dialog.GetTextureName();
-	dialog.close();
-	if(newtexture.size()>0) {
-		textureNames[row] = newtexture;
-		ui->listTextureName->currentItem()->setText(newtexture.c_str());
+	//ChangeTextureNameDialog dialog(this, textureNames[row].c_str());
+	//dialog.exec();
+	bool ok;
+	QString newtexture =
+			QInputDialog::getText(this, "New Texture Name",
+						"Enter the new texture name:", QLineEdit::Normal,
+						QString::fromStdString(textureNames[row]), &ok);
+	//dialog.close();
+	if(ok && newtexture.size()>0 ) {
+		textureNames[row] = newtexture.toStdString();
+		ui->listTextureName->currentItem()->setText(newtexture);
 	}
 }
 

@@ -37,7 +37,6 @@ HEADERS += \
 	dialogs/setting_dialog.h \
 	multiViewer_Container.h \
 	glarea_setting.h \
-	changetexturename.h \
 	layerDialog.h \
 	ml_std_par_dialog.h \
 	additionalgui.h \
@@ -67,7 +66,6 @@ SOURCES += \
 	dialogs/setting_dialog.cpp \
 	multiViewer_Container.cpp \
 	layerDialog.cpp \
-	changetexturename.cpp \
 	ml_std_par_dialog.cpp \
 	additionalgui.cpp \
 	ml_render_gui.cpp \
@@ -88,8 +86,7 @@ FORMS += \
 	dialogs/plugin_info_dialog.ui \
 	dialogs/save_mesh_attributes_dialog.ui \
 	dialogs/save_snapshot_dialog.ui \
-	ui/layerDialog.ui \
-	ui/renametexture.ui
+	ui/layerDialog.ui
 
 RESOURCES += \
 	meshlab.qrc

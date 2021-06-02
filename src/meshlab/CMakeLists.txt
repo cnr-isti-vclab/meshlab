@@ -4,7 +4,6 @@
 
 set(SOURCES
 	additionalgui.cpp
-	changetexturename.cpp
 	glarea.cpp
 	glarea_setting.cpp
 	layerDialog.cpp
@@ -33,7 +32,6 @@ set(SOURCES
 
 set(HEADERS
 	additionalgui.h
-	changetexturename.h
 	glarea.h
 	glarea_setting.h
 	layerDialog.h
@@ -68,8 +66,7 @@ set(UI
 	dialogs/plugin_info_dialog.ui
 	dialogs/save_mesh_attributes_dialog.ui
 	dialogs/save_snapshot_dialog.ui
-	ui/layerDialog.ui
-	ui/renametexture.ui)
+	ui/layerDialog.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
