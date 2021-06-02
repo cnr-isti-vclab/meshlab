@@ -2705,6 +2705,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 		
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
+		int quality = 66;
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else
@@ -2716,7 +2717,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		int mask = maskDialog.getNewMask();
 		savePar = maskDialog.getNewAdditionalSaveParameters();
+		quality = maskDialog.getTextureQuality();
 		std::vector<std::string> textureNames = maskDialog.getTextureNames();
+
 		for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
 			if (textureNames[i].find('.') == std::string::npos){
 				textureNames[i] += ".png";
@@ -2740,7 +2743,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		try {
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
 			QFileInfo finfo(fileName);
-			mod->saveTextures(finfo.absolutePath(), &meshDoc()->Log, QCallBack);
+			mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 			mod->setFileName(fileName);
 			QSettings settings;

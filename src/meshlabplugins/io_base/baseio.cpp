@@ -522,6 +522,7 @@ void BaseMeshIOPlugin::saveImage(
 		const QString& format,
 		const QString& fileName,
 		const QImage& image,
+		int quality,
 		CallBackPos*)
 {
 	bool supportedFormat = false;
@@ -530,7 +531,7 @@ void BaseMeshIOPlugin::saveImage(
 			supportedFormat = true;
 	}
 	if (supportedFormat){
-		bool ok = image.save(fileName);
+		bool ok = image.save(fileName, nullptr, quality);
 		if (!ok){
 			throw MLException("Failed to save the image " + fileName);
 		}

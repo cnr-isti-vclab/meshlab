@@ -40,6 +40,7 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	capability(capability),
 	defaultBits(defaultBits),
 	mask(0),
+	textureQuality(66),
 	additionalSaveParametrs(additionalSaveParams),
 	glar(glar)
 {
@@ -104,10 +105,16 @@ std::vector<std::string> SaveMeshAttributesDialog::getTextureNames() const
 	return textureNames;
 }
 
+int SaveMeshAttributesDialog::getTextureQuality() const
+{
+	return textureQuality;
+}
+
 void SaveMeshAttributesDialog::on_okButton_clicked()
 {
 	updateMask();
 	additionalParametersFrame->writeValuesOnParameterList(additionalSaveParametrs);
+	textureQuality = ui->textureQualitySpinBox->value();
 }
 
 void SaveMeshAttributesDialog::on_cancelButton_clicked()

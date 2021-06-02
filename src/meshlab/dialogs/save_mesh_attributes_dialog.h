@@ -64,6 +64,7 @@ public:
 	int getNewMask() const;
 	RichParameterList getNewAdditionalSaveParameters() const;
 	std::vector<std::string> getTextureNames() const;
+	int getTextureQuality() const;
 
 private slots:
 	void on_okButton_clicked();
@@ -87,6 +88,7 @@ private:
 	const int defaultBits;
 
 	int mask;
+	int textureQuality;
 
 	RichParameterList additionalSaveParametrs;
 	std::vector<std::string> textureNames;

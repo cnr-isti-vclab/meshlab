@@ -132,13 +132,14 @@ std::list<std::string> MeshModel::loadTextures(
 
 void MeshModel::saveTextures(
 		const QString& basePath,
+		int quality,
 		GLLogStream* log,
 		CallBackPos* cb)
 {
 	for (const std::string& tname : cm.textures){
 		meshlab::saveImage(
 				basePath + "/" + QString::fromStdString(tname),
-				textures.at(tname), log, cb);
+				textures.at(tname), quality, log, cb);
 	}
 }
 

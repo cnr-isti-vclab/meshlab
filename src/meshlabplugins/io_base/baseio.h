@@ -73,6 +73,7 @@ public:
 			const QString& format,
 			const QString& fileName,
 			const QImage& image,
+			int quality,
 			vcg::CallBackPos* cb);
 
 	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);

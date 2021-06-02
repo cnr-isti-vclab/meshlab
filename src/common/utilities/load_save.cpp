@@ -218,6 +218,7 @@ QImage loadImage(
 void saveImage(
 		const QString& filename,
 		const QImage& image,
+		int quality,
 		GLLogStream* log,
 		vcg::CallBackPos* cb)
 {
@@ -232,7 +233,7 @@ void saveImage(
 				"has not plugin to save " + extension + " file format.");
 
 	ioPlugin->setLog(log);
-	ioPlugin->saveImage(extension, filename, image, cb);
+	ioPlugin->saveImage(extension, filename, image, quality, cb);
 }
 
 void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg::CallBackPos* cb)
