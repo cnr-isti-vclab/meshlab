@@ -320,11 +320,6 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 					QImage tex = painter.getTexture();
 					md.mm()->clearTextures();
 					md.mm()->addTexture(texName.toStdString(), tex);
-					//if( tex.save(texName) )
-					//{
-					//	mesh.textures.clear();
-					//	mesh.textures.push_back( texName.toStdString() );
-					//}
 				}
 			}
 			if (!retValue)

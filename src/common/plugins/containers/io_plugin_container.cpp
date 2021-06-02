@@ -48,7 +48,7 @@ void IOPluginContainer::pushIOPlugin(IOPlugin* iIO)
 		}
 	}
 
-	//add input raster formats to inputFormatMap
+	//add output image formats to inputFormatMap
 	for (const FileFormat& ff : iIO->exportImageFormats()){
 		for (const QString& currentExtension : ff.extensions) {
 			if (! outputImageFormatToPluginMap.contains(currentExtension.toLower())) {

@@ -45,8 +45,6 @@ bool TextureObject::AddImage(std::string path)
     QImageReader qir(QString(path.c_str()));
     if (qir.canRead()) {
         TextureImageInfo tii = {QImage(path.c_str())};
-        //tii.path = path;
-        //tii.size = { qir.size().width(), qir.size().height() };
         texInfoVec.push_back(tii);
         texNameVec.push_back(0);
         return true;

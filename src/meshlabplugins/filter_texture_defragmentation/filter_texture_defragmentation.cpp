@@ -248,10 +248,6 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		TextureObjectHandle textureObject = std::make_shared<TextureObject>();
 
 		for (const string& textureName : mm.cm.textures) {
-			//QFileInfo textureFile(textureName.c_str());
-			//textureFile.makeAbsolute();
-			//if (!textureFile.exists() || !textureFile.isReadable())
-			//	throw MLException((std::string("Texture file ") + textureFile.absoluteFilePath().toStdString() + std::string(" does not exist or is not readable.")).c_str());
 			textureObject->AddImage(mm.getTexture(textureName));
 		}
 
@@ -313,7 +309,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		if (colorize)
 			tri::UpdateColor<Mesh>::PerFaceConstant(defragMesh, vcg::Color4b(91, 130, 200, 255));
 
-		for (auto entry : graph->charts) {
+		for (auto& entry : graph->charts) {
 			ChartHandle chart = entry.second;
 			double zeroResamplingChartArea;
 			int anchor = RotateChartForResampling(chart, state->changeSet, flipped, colorize, &zeroResamplingChartArea);
@@ -373,16 +369,9 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		mm.clearTextures();
 
 		const char *imageFormat = "png";
-		//const int quality = 66;
 		QString textureBase = QFileInfo(currentModel.fullName()).baseName() + "_optimized_texture_";
 		for (unsigned i = 0; i < newTextures.size(); ++i) {
 			QString tname = textureBase + QString(std::to_string(i).c_str()) + "." + imageFormat;
-			//std::string fullTextureName = QDir(currentModel.pathName()).filePath(tname).toStdString();
-			//if (!newTextures[i]->save(fullTextureName.c_str(), imageFormat, quality)) {
-			//	std::string err = "Texture file " + fullTextureName + " cannot be saved on disk";
-			//	throw MLException(err.c_str());
-			//}
-			//mm.cm.textures.push_back(tname.toStdString());
 			mm.addTexture(tname.toStdString(), *newTextures[i]);
 		}
 

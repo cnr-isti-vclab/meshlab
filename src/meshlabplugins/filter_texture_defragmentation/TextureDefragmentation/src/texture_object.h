@@ -29,8 +29,7 @@
 
 #include <QImage>
 
-class QImage;
-class TextureObject;
+struct TextureObject;
 
 typedef std::shared_ptr<TextureObject> TextureObjectHandle;
 
@@ -41,8 +40,6 @@ struct TextureSize {
 
 struct TextureImageInfo {
     QImage texture;
-    //std::string path;
-    //TextureSize size;
 };
 
 /* wrapper to an array of textures */
