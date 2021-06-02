@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MaskExporterDialog</class>
- <widget class="QDialog" name="MaskExporterDialog">
+ <class>SaveMeshAttributesDialog</class>
+ <widget class="QDialog" name="SaveMeshAttributesDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>687</width>
-    <height>337</height>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -354,7 +354,7 @@
   <connection>
    <sender>okButton</sender>
    <signal>clicked()</signal>
-   <receiver>MaskExporterDialog</receiver>
+   <receiver>SaveMeshAttributesDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -370,7 +370,7 @@
   <connection>
    <sender>cancelButton</sender>
    <signal>clicked()</signal>
-   <receiver>MaskExporterDialog</receiver>
+   <receiver>SaveMeshAttributesDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

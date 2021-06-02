@@ -1,14 +1,14 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -43,15 +43,15 @@
 
 namespace Ui 
 {
-	class MaskExporterDialog;
-} 
+	class SaveMeshAttributesDialog;
+}
 
-class SaveMaskExporterDialog : public QDialog
+class SaveMeshAttributesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterList *par,GLArea* glar = NULL);
-	~SaveMaskExporterDialog();
+	SaveMeshAttributesDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterList *par,GLArea* glar = NULL);
+	~SaveMeshAttributesDialog();
 	
 	void InitDialog();
 	void SetTextureName();
@@ -68,13 +68,13 @@ public slots:
 	void SlotSelectionNoneButton();
 	void SlotSelectionAllButton();
 private:
-	Ui::MaskExporterDialog* ui;
+	Ui::SaveMeshAttributesDialog* ui;
 	MeshModel *m;
 	int mask;
 	int type;
 	int capability;
 	int defaultBits;
-    RichParameterList *parSet;
+	RichParameterList *parSet;
 	RichParameterListFrame *stdParFrame;
 	GLArea* glar;
 	

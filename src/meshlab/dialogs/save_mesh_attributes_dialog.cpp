@@ -1,8 +1,8 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,48 +21,60 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "ui_savemaskexporter.h"
-#include "savemaskexporter.h"
+#include "ui_save_mesh_attributes_dialog.h"
+#include "save_mesh_attributes_dialog.h"
 #include "changetexturename.h"
 
 #include <QFileInfo>
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterList *_parSet,GLArea* glar):
-QDialog(parent),m(m),mask(0),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
+SaveMeshAttributesDialog::SaveMeshAttributesDialog(
+		QWidget *parent,
+		MeshModel *m,
+		int capability,
+		int defaultBits,
+		RichParameterList *_parSet,
+		GLArea* glar):
+	QDialog(parent),
+	m(m),
+	mask(0),
+	capability(capability),
+	defaultBits(defaultBits),
+	parSet(_parSet),
+	glar(glar)
 {
-    ui = new Ui::MaskExporterDialog();
-    InitDialog();
+	ui = new Ui::SaveMeshAttributesDialog();
+	InitDialog();
 }
 
-void SaveMaskExporterDialog::InitDialog()
+void SaveMeshAttributesDialog::InitDialog()
 {
-    SaveMaskExporterDialog::ui->setupUi(this);
-    connect(ui->okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-    connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-    connect(ui->renametextureButton,SIGNAL(clicked()),this,SLOT(SlotRenameTexture()));
-    connect(ui->listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
-    connect(ui->AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
-    connect(ui->NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
-    ui->renametextureButton->setDisabled(true);
+	SaveMeshAttributesDialog::ui->setupUi(this);
+	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
+	connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui->renametextureButton,SIGNAL(clicked()),this,SLOT(SlotRenameTexture()));
+	connect(ui->listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	connect(ui->AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
+	connect(ui->NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
+	ui->renametextureButton->setDisabled(true);
 
-    stdParFrame = new RichParameterListFrame(*parSet, this,glar);
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(stdParFrame);
-    ui->saveParBox->setLayout(vbox);
-    QFileInfo fi(m->fullName());
-    this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
-    // Show the additional parameters only for formats that have some.
-    if(parSet->isEmpty()) ui->saveParBox->hide();
-                                else ui->saveParBox->show();
-    //all - none
-    ui->AllButton->setChecked(true);
-    //ui->NoneButton->setChecked(true);
+	stdParFrame = new RichParameterListFrame(*parSet, this,glar);
+	QVBoxLayout *vbox = new QVBoxLayout(this);
+	vbox->addWidget(stdParFrame);
+	ui->saveParBox->setLayout(vbox);
+	QFileInfo fi(m->fullName());
+	this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
+	// Show the additional parameters only for formats that have some.
+	if(parSet->isEmpty()) ui->saveParBox->hide();
+	else ui->saveParBox->show();
+	//all - none
+	ui->AllButton->setChecked(true);
+	//ui->NoneButton->setChecked(true);
 
-    SetTextureName();
-    SetMaskCapability();
+	SetTextureName();
+	SetMaskCapability();
 }
 
-void SaveMaskExporterDialog::SetTextureName()
+void SaveMeshAttributesDialog::SetTextureName()
 {
     if( m->cm.textures.size() == 0 )
     {
@@ -77,7 +89,7 @@ void SaveMaskExporterDialog::SetTextureName()
     }
 }
 
-int SaveMaskExporterDialog::GetNewMask()
+int SaveMeshAttributesDialog::GetNewMask()
 {
     return this->mask;
 }
@@ -101,7 +113,7 @@ int SaveMaskExporterDialog::GetNewMask()
     false : otherwise.
 
 */
-bool SaveMaskExporterDialog::shouldBeChecked(int bit, int /*capabilityBits*/, int defaultBits)
+bool SaveMeshAttributesDialog::shouldBeChecked(int bit, int /*capabilityBits*/, int defaultBits)
 {
     if(!m->hasDataMask(MeshModel::io2mm(bit))) return false;
     //if( (bit & meshBits) == 0 ) return false;
@@ -109,7 +121,7 @@ bool SaveMaskExporterDialog::shouldBeChecked(int bit, int /*capabilityBits*/, in
     return true;
 }
 
-bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int /*defaultBits*/)
+bool SaveMeshAttributesDialog::shouldBeEnabled(int iobit, int capabilityBits, int /*defaultBits*/)
 {
     if( (iobit & capabilityBits) == 0 ) return false;
     int mmbit = MeshModel::io2mm(iobit);
@@ -117,13 +129,13 @@ bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int 
     return true;
 }
 
-void SaveMaskExporterDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits)
+void SaveMeshAttributesDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits)
 {
- qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits) );
- qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits) );
+    qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits) );
+    qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits) );
 }
 
-void SaveMaskExporterDialog::SetMaskCapability()
+void SaveMeshAttributesDialog::SetMaskCapability()
 {
     //vert
     checkAndEnable(ui->check_iom_vertquality,  vcg::tri::io::Mask::IOM_VERTQUALITY,  capability, defaultBits );
@@ -133,9 +145,9 @@ void SaveMaskExporterDialog::SetMaskCapability()
     checkAndEnable(ui->check_iom_vertnormal,   vcg::tri::io::Mask::IOM_VERTNORMAL,   capability, defaultBits);
     checkAndEnable(ui->check_iom_vertradius,   vcg::tri::io::Mask::IOM_VERTRADIUS,   capability, defaultBits);
 
-	// point cloud fix: if a point cloud, probably you'd want to save vertex normals
-	if ((m->cm.fn == 0) && (m->cm.en == 0))
-		ui->check_iom_vertnormal->setChecked(true);
+    // point cloud fix: if a point cloud, probably you'd want to save vertex normals
+    if ((m->cm.fn == 0) && (m->cm.en == 0))
+        ui->check_iom_vertnormal->setChecked(true);
 
     //face
     checkAndEnable(ui->check_iom_facequality, vcg::tri::io::Mask::IOM_FACEQUALITY, capability, defaultBits );
@@ -161,7 +173,7 @@ void SaveMaskExporterDialog::SetMaskCapability()
 }
 
 
-void SaveMaskExporterDialog::updateMask()
+void SaveMeshAttributesDialog::updateMask()
 {
     int newmask = 0;
 
@@ -190,18 +202,18 @@ void SaveMaskExporterDialog::updateMask()
 }
 
 //slot
-void SaveMaskExporterDialog::SlotOkButton()
+void SaveMeshAttributesDialog::SlotOkButton()
 {
     updateMask();
     stdParFrame->writeValuesOnParameterList(*parSet);
 }
 
-void SaveMaskExporterDialog::SlotCancelButton()
+void SaveMeshAttributesDialog::SlotCancelButton()
 {
     this->mask=-1;
 }
 
-void SaveMaskExporterDialog::SlotRenameTexture()
+void SaveMeshAttributesDialog::SlotRenameTexture()
 {
     int row = ui->listTextureName->currentRow();
     ChangeTextureNameDialog dialog(this,m->cm.textures[row].c_str());
@@ -215,12 +227,12 @@ void SaveMaskExporterDialog::SlotRenameTexture()
     }
 }
 
-void SaveMaskExporterDialog::SlotSelectionTextureName()
+void SaveMeshAttributesDialog::SlotSelectionTextureName()
 {
     ui->renametextureButton->setDisabled(false);
 }
 
-void SaveMaskExporterDialog::SlotSelectionAllButton()
+void SaveMeshAttributesDialog::SlotSelectionAllButton()
 {
     //vert
     ui->check_iom_vertquality->setChecked(ui->check_iom_vertquality->isEnabled());
@@ -245,7 +257,7 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
     ui->check_iom_camera->setChecked(ui->check_iom_camera->isEnabled());
 }
 
-void SaveMaskExporterDialog::SlotSelectionNoneButton()
+void SaveMeshAttributesDialog::SlotSelectionNoneButton()
 {
     //vert
     ui->check_iom_vertquality->setChecked(false);
@@ -270,12 +282,12 @@ void SaveMaskExporterDialog::SlotSelectionNoneButton()
     ui->check_iom_camera->setChecked(false);
 }
 
-void SaveMaskExporterDialog::on_check_help_stateChanged(int)
+void SaveMeshAttributesDialog::on_check_help_stateChanged(int)
 {
     stdParFrame->toggleHelp();
 }
 
-SaveMaskExporterDialog::~SaveMaskExporterDialog()
+SaveMeshAttributesDialog::~SaveMeshAttributesDialog()
 {
     delete ui;
 }

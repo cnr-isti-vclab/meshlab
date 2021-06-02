@@ -24,7 +24,6 @@
 
 
 #include "mainwindow.h"
-#include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
 
@@ -55,6 +54,7 @@
 #include "dialogs/filter_script_dialog.h"
 #include "dialogs/options_dialog.h"
 #include "dialogs/plugin_info_dialog.h"
+#include "dialogs/save_mesh_attributes_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 
 using namespace std;
@@ -2704,7 +2704,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 		
-		SaveMaskExporterDialog maskDialog(this,mod,capability,defaultBits,&savePar,this->GLA());
+		SaveMeshAttributesDialog maskDialog(this,mod,capability,defaultBits,&savePar,this->GLA());
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else

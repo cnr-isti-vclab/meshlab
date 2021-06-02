@@ -16,12 +16,12 @@ set(SOURCES
 	ml_rendering_actions.cpp
 	ml_std_par_dialog.cpp
 	multiViewer_Container.cpp
-	savemaskexporter.cpp
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
 	dialogs/filter_script_dialog.cpp
 	dialogs/options_dialog.cpp
 	dialogs/plugin_info_dialog.cpp
+	dialogs/save_mesh_attributes_dialog.cpp
 	dialogs/save_snapshot_dialog.cpp
 	dialogs/setting_dialog.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
@@ -43,13 +43,13 @@ set(HEADERS
 	ml_rendering_actions.h
 	ml_std_par_dialog.h
 	multiViewer_Container.h
-	savemaskexporter.h
 	snapshotsetting.h
 	dialogs/about_dialog.h
 	dialogs/congrats_dialog.h
 	dialogs/filter_script_dialog.h
 	dialogs/options_dialog.h
 	dialogs/plugin_info_dialog.h
+	dialogs/save_mesh_attributes_dialog.h
 	dialogs/save_snapshot_dialog.h
 	dialogs/setting_dialog.h
 	rich_parameter_gui/richparameterlistdialog.h
@@ -66,10 +66,10 @@ set(UI
 	dialogs/congrats_dialog.ui
 	dialogs/filter_script_dialog.ui
 	dialogs/plugin_info_dialog.ui
+	dialogs/save_mesh_attributes_dialog.ui
 	dialogs/save_snapshot_dialog.ui
 	ui/layerDialog.ui
-	ui/renametexture.ui
-	ui/savemaskexporter.ui)
+	ui/renametexture.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
