@@ -2718,6 +2718,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		savePar = maskDialog.getNewAdditionalSaveParameters();
 		std::vector<std::string> textureNames = maskDialog.getTextureNames();
 		for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
+			if (textureNames[i].find('.') == std::string::npos){
+				textureNames[i] += ".png";
+			}
 			mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 		}
 		if (!saveAllPossibleAttributes)

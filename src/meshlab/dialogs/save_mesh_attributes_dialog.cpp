@@ -71,8 +71,8 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	textureNames.reserve(m->cm.textures.size());
 	for(const std::string& tname : m->cm.textures)
 	{
-		textureNames.push_back(tname.substr(1));
-		QString item(tname.substr(1).c_str());
+		textureNames.push_back(tname);
+		QString item(tname.c_str());
 		ui->listTextureName->addItem(item);
 	}
 	setMaskCapability();

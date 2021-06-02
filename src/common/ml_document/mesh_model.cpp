@@ -98,18 +98,18 @@ std::list<std::string> MeshModel::loadTextures(
 {
 	std::list<std::string> unloadedTextures;
 	for (std::string& textName : cm.textures){
-		if (textName.front() != ':'){
+		if (textures.find(textName) == textures.end()){
 			QImage img(":/img/dummy.png");
 			QFileInfo finfo(QString::fromStdString(textName));
 			try {
 				img = meshlab::loadImage(finfo.absoluteFilePath(), log, cb);
-				textName = ":" + finfo.fileName().toStdString();
+				textName = finfo.fileName().toStdString();
 			} catch (const MLException& e) {
 				try { //could be relative to the meshmodel
 					QFileInfo mfi(fullName());
 					QString fn2 = mfi.absolutePath() + "/" + finfo.fileName();
 					img = meshlab::loadImage(fn2, log, cb);
-					textName = ":" + finfo.fileName().toStdString();
+					textName = finfo.fileName().toStdString();
 				} catch (const MLException& e) {
 					if (log){
 						log->log(
@@ -121,7 +121,7 @@ std::list<std::string> MeshModel::loadTextures(
 							"Failed loading " + textName + "; using a dummy texture\n";
 					}
 					unloadedTextures.push_back(textName);
-					textName = ":dummy.png";
+					textName = "dummy.png";
 				}
 			}
 			textures[textName] = img;
@@ -137,7 +137,7 @@ void MeshModel::saveTextures(
 {
 	for (const std::string& tname : cm.textures){
 		meshlab::saveImage(
-				basePath + "/" + QString::fromStdString(tname.substr(1)),
+				basePath + "/" + QString::fromStdString(tname),
 				textures.at(tname), log, cb);
 	}
 }
@@ -159,8 +159,6 @@ void MeshModel::clearTextures()
 
 void MeshModel::addTexture(std::string name, const QImage& txt)
 {
-	if (name.front() != ':')
-		name = ":" + name;
 	cm.textures.push_back(name);
 	textures[name]=txt;
 }
@@ -179,8 +177,6 @@ void MeshModel::changeTextureName(
 	auto mit = textures.find(oldName);
 	auto tit = std::find(cm.textures.begin(), cm.textures.end(), oldName);
 	if (mit != textures.end() && tit != cm.textures.end()){
-		if (newName.front() != ':')
-			newName = ":" + newName;
 		*tit = newName;
 
 		textures[newName] = mit->second;

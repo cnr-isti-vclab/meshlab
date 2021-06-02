@@ -665,7 +665,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		QFileInfo finfo(textName);
 		//Assign texture
 		m.clearTextures();
-		m.addTexture(":" + finfo.fileName().toStdString(), textFile);
+		m.addTexture(finfo.fileName().toStdString(), textFile);
 	}
 		break;
 		
@@ -727,9 +727,9 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			else
 			{
 				if (texNum==1)
-					texFileNames[texInd] = ":" + baseName + ".png";
+					texFileNames[texInd] = baseName + ".png";
 				else
-					texFileNames[texInd] = ":" + baseName + "_" + QString::number(texInd) + ".png";
+					texFileNames[texInd] = baseName + "_" + QString::number(texInd) + ".png";
 			}
 
 			trgImgs.push_back(QImage(QSize(textW, textH), QImage::Format_ARGB32));
@@ -960,9 +960,9 @@ void FilterTexturePlugin::transferToTexture(
 		else
 		{
 			if (numTrgTex == 1)
-				trgTextureFileNames[trgTexInd] = ":" + baseName + ".png";
+				trgTextureFileNames[trgTexInd] = baseName + ".png";
 			else
-				trgTextureFileNames[trgTexInd] = ":" + baseName + "_" + QString::number(trgTexInd) + ".png";
+				trgTextureFileNames[trgTexInd] = baseName + "_" + QString::number(trgTexInd) + ".png";
 		}
 
 		trgImgs.push_back(QImage(QSize(textW, textH), QImage::Format_ARGB32));
