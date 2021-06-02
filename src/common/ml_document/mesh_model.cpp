@@ -130,6 +130,18 @@ std::list<std::string> MeshModel::loadTextures(
 	return unloadedTextures;
 }
 
+void MeshModel::saveTextures(
+		const QString& basePath,
+		GLLogStream* log,
+		CallBackPos* cb)
+{
+	for (const std::string& tname : cm.textures){
+		meshlab::saveImage(
+				basePath + "/" + QString::fromStdString(tname.substr(1)),
+				textures.at(tname), log, cb);
+	}
+}
+
 QImage MeshModel::getTexture(const std::string& tn) const
 {
 	auto it = textures.find(tn);
@@ -158,6 +170,22 @@ void MeshModel::setTexture(std::string name, const QImage& txt)
 	auto it = textures.find(name);
 	if (it != textures.end())
 		it->second = txt;
+}
+
+void MeshModel::changeTextureName(
+		const std::string& oldName,
+		std::string newName)
+{
+	auto mit = textures.find(oldName);
+	auto tit = std::find(cm.textures.begin(), cm.textures.end(), oldName);
+	if (mit != textures.end() && tit != cm.textures.end()){
+		if (newName.front() != ':')
+			newName = ":" + newName;
+		*tit = newName;
+
+		textures[newName] = mit->second;
+		textures.erase(mit);
+	}
 }
 
 int MeshModel::io2mm(int single_iobit)

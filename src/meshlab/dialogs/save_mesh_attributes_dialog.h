@@ -50,37 +50,49 @@ class SaveMeshAttributesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMeshAttributesDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterList *par,GLArea* glar = NULL);
+	SaveMeshAttributesDialog(
+			QWidget* parent,
+			MeshModel* m,
+			int capability,
+			int defaultBits,
+			const RichParameterList& additionalSaveParams,
+			GLArea* glar = NULL);
 	~SaveMeshAttributesDialog();
-	
-	void InitDialog();
-	void SetTextureName();
-	int GetNewMask();
-	void SetMaskCapability();
-	void updateMask();
 
-public slots:
+	void selectAllPossibleBits();
+
+	int getNewMask() const;
+	RichParameterList getNewAdditionalSaveParameters() const;
+	std::vector<std::string> getTextureNames() const;
+
+private slots:
+	void on_okButton_clicked();
+	void on_cancelButton_clicked();
 	void on_check_help_stateChanged(int);
-	void SlotOkButton();
-	void SlotCancelButton();
-	void SlotRenameTexture();
-	void SlotSelectionTextureName();
-	void SlotSelectionNoneButton();
-	void SlotSelectionAllButton();
+	void on_renametextureButton_clicked();
+	void on_listTextureName_itemSelectionChanged();
+	void on_AllButton_clicked();
+	void on_NoneButton_clicked();
+
 private:
-	Ui::SaveMeshAttributesDialog* ui;
-	MeshModel *m;
-	int mask;
-	int type;
-	int capability;
-	int defaultBits;
-	RichParameterList *parSet;
-	RichParameterListFrame *stdParFrame;
-	GLArea* glar;
-	
+	void setMaskCapability();
 	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);
 	bool shouldBeEnabled(int bit, int capabilityBits, int defaultBits);
 	bool shouldBeChecked(int bit, int capabilityBits, int defaultBits);
+	void updateMask();
+
+	Ui::SaveMeshAttributesDialog* ui;
+	MeshModel *m;
+	const int capability;
+	const int defaultBits;
+
+	int mask;
+
+	RichParameterList additionalSaveParametrs;
+	std::vector<std::string> textureNames;
+
+	RichParameterListFrame *additionalParametersFrame;
+	GLArea* glar;
 };//end class
 
 #endif

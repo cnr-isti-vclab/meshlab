@@ -2704,15 +2704,22 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 		
-		SaveMeshAttributesDialog maskDialog(this,mod,capability,defaultBits,&savePar,this->GLA());
+		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else
 		{
-			maskDialog.SlotSelectionAllButton();
-			maskDialog.updateMask();
+			//this is horrible: creating a dialog object but then not showing the
+			//dialog.. And using it just to select all the possible options..
+			//to be removed soon
+			maskDialog.selectAllPossibleBits();
 		}
-		int mask = maskDialog.GetNewMask();
+		int mask = maskDialog.getNewMask();
+		savePar = maskDialog.getNewAdditionalSaveParameters();
+		std::vector<std::string> textureNames = maskDialog.getTextureNames();
+		for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
+			mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
+		}
 		if (!saveAllPossibleAttributes)
 		{
 			maskDialog.close();
@@ -2729,6 +2736,8 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 
 		try {
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
+			QFileInfo finfo(fileName);
+			mod->saveTextures(finfo.absolutePath(), &meshDoc()->Log, QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 			mod->setFileName(fileName);
 			QSettings settings;
