@@ -771,7 +771,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 		if(RecoverColor && curMM->cm.textures.size()>0)
 		{
-			mps.tex= new QImage(curMM->cm.textures[0].c_str());
+			mps.tex= new QImage(curMM->getTexture(curMM->cm.textures[0]));
 			if(mps.texSamplingWidth==0)  mps.texSamplingWidth  = mps.tex->width();
 			if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
 		}

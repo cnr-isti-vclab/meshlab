@@ -26,6 +26,7 @@
 #include <QFileInfo>
 
 #include "mesh_model.h"
+#include "../utilities/load_save.h"
 
 #include <wrap/gl/math.h>
 
@@ -76,6 +77,112 @@ QString MeshModel::relativePathName(const QString& path) const
 	//	qDebug("Error we have a mesh that is not in the same folder of the project: %s ", qUtf8Printable(relPath));
 
 	return relPath;
+}
+
+/**
+ * @brief Starting from the (still unloaded) textures contained in the contained
+ * CMeshO, loads the textures in the map of QImages contained in the MeshModel.
+ *
+ * The contained CMeshO will have a list of texture names like ":filename.png",
+ * and these names will be mapped with the actual loaded image in the map
+ * "textures".
+ *
+ * When a texture is not found, a dummy texture will be used (":dummy.png").
+ *
+ * Returns the list of non-loaded textures that have been modified with
+ * ":dummy.png" in the contained mesh.
+ */
+std::list<std::string> MeshModel::loadTextures(
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	std::list<std::string> unloadedTextures;
+	for (std::string& textName : cm.textures){
+		if (textures.find(textName) == textures.end()){
+			QImage img(":/img/dummy.png");
+			QFileInfo finfo(QString::fromStdString(textName));
+			try {
+				img = meshlab::loadImage(finfo.absoluteFilePath(), log, cb);
+				textName = finfo.fileName().toStdString();
+			} catch (const MLException& e) {
+				try { //could be relative to the meshmodel
+					QFileInfo mfi(fullName());
+					QString fn2 = mfi.absolutePath() + "/" + finfo.fileName();
+					img = meshlab::loadImage(fn2, log, cb);
+					textName = finfo.fileName().toStdString();
+				} catch (const MLException& e) {
+					if (log){
+						log->log(
+							GLLogStream::WARNING, "Failed loading " + textName +
+							"; using a dummy texture");
+					}
+					else {
+						std::cerr <<
+							"Failed loading " + textName + "; using a dummy texture\n";
+					}
+					unloadedTextures.push_back(textName);
+					textName = "dummy.png";
+				}
+			}
+			textures[textName] = img;
+		}
+	}
+	return unloadedTextures;
+}
+
+void MeshModel::saveTextures(
+		const QString& basePath,
+		int quality,
+		GLLogStream* log,
+		CallBackPos* cb)
+{
+	for (const std::string& tname : cm.textures){
+		meshlab::saveImage(
+				basePath + "/" + QString::fromStdString(tname),
+				textures.at(tname), quality, log, cb);
+	}
+}
+
+QImage MeshModel::getTexture(const std::string& tn) const
+{
+	auto it = textures.find(tn);
+	if (it != textures.end())
+		return it->second;
+	else
+		return QImage();
+}
+
+void MeshModel::clearTextures()
+{
+	textures.clear();
+	cm.textures.clear();
+}
+
+void MeshModel::addTexture(std::string name, const QImage& txt)
+{
+	cm.textures.push_back(name);
+	textures[name]=txt;
+}
+
+void MeshModel::setTexture(std::string name, const QImage& txt)
+{
+	auto it = textures.find(name);
+	if (it != textures.end())
+		it->second = txt;
+}
+
+void MeshModel::changeTextureName(
+		const std::string& oldName,
+		std::string newName)
+{
+	auto mit = textures.find(oldName);
+	auto tit = std::find(cm.textures.begin(), cm.textures.end(), oldName);
+	if (mit != textures.end() && tit != cm.textures.end()){
+		*tit = newName;
+
+		textures[newName] = mit->second;
+		textures.erase(mit);
+	}
 }
 
 int MeshModel::io2mm(int single_iobit)

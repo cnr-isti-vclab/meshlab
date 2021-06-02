@@ -33,8 +33,15 @@
 
 namespace meshlab {
 
-void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterList& prePar, const std::list<MeshModel*>& meshList, std::list<int>& maskList, vcg::CallBackPos *cb)
+std::list<std::string> loadMesh(
+		const QString& fileName,
+		IOPlugin* ioPlugin,
+		const RichParameterList& prePar,
+		const std::list<MeshModel*>& meshList,
+		std::list<int>& maskList,
+		vcg::CallBackPos *cb)
 {
+	std::list<std::string> unloadedTextures;
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
 
@@ -48,7 +55,7 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 	QString fileNameSansDir = fi.fileName();
 
 	try {
-		ioPlugin->open(extension, fileNameSansDir, meshList ,maskList, prePar, cb);
+		ioPlugin->open(extension, fileNameSansDir, meshList, maskList, prePar, cb);
 	}
 	catch(const MLException& e) {
 		QDir::setCurrent(origDir); // undo the change of directory before leaving
@@ -60,6 +67,9 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 	for (unsigned int i = 0; i < meshList.size(); ++i){
 		MeshModel* mm = *itmesh;
 		int mask = *itmask;
+
+		std::list<std::string> tmp = mm->loadTextures(nullptr, cb);
+		unloadedTextures.insert(unloadedTextures.end(), tmp.begin(), tmp.end());
 
 		// In case of polygonal meshes the normal should be updated accordingly
 		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) {
@@ -100,6 +110,7 @@ void loadMesh(const QString& fileName, IOPlugin* ioPlugin, const RichParameterLi
 		++itmask;
 	}
 	QDir::setCurrent(origDir); // undo the change of directory before leaving
+	return unloadedTextures;
 }
 
 
@@ -185,7 +196,10 @@ void reloadMesh(
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 }
 
-void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg::CallBackPos* cb)
+QImage loadImage(
+		const QString& filename,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
 {
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
@@ -194,15 +208,41 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 
 	if (ioPlugin == nullptr)
 		throw MLException(
-				"Raster " + filename + " cannot be opened. Your MeshLab version "
+				"Image " + filename + " cannot be opened. Your MeshLab version "
 				"has not plugin to read " + extension + " file format.");
 
 	ioPlugin->setLog(log);
-	QImage loadedImage = ioPlugin->openImage(extension, filename, cb);
+	return ioPlugin->openImage(extension, filename, cb);
+}
+
+void saveImage(
+		const QString& filename,
+		const QImage& image,
+		int quality,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(filename);
+	QString extension = fi.suffix();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.outputImagePlugin(extension);
+
+	if (ioPlugin == nullptr)
+		throw MLException(
+				"Image " + filename + " cannot be saved. Your MeshLab version "
+				"has not plugin to save " + extension + " file format.");
+
+	ioPlugin->setLog(log);
+	ioPlugin->saveImage(extension, filename, image, quality, cb);
+}
+
+void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg::CallBackPos* cb)
+{
+	QImage loadedImage = loadImage(filename, log, cb);
 	rm.setLabel(filename);
 	rm.addPlane(new RasterPlane(loadedImage, filename, RasterPlane::RGBA));
 
-	// Read the JPEG file into a buffer
+	// Read the file into a buffer
 	FILE *fp = fopen(qUtf8Printable(filename), "rb");
 	if (!fp) {
 		QString errorMsgFormat = "Exif Parsing: Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
@@ -225,7 +265,7 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 	int code = ImageInfo.parseFrom(buf, fsize);
 	delete[] buf;
 	if (!code) {
-		ioPlugin->log(GLLogStream::FILTER, "Warning: unable to parse exif for file  %s", qPrintable(filename));
+		log->log(GLLogStream::FILTER, "Warning: unable to parse exif for file " + filename);
 	}
 
 	if (code && ImageInfo.FocalLengthIn35mm==0.0f)

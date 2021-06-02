@@ -351,9 +351,8 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		destModel->updateDataMask(currentModel);
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm);
 
-		for (std::string& tex: destModel->cm.textures) {
-			QString fullPath = currentModel->pathName() + QDir::separator() + QString(tex.c_str());
-			tex = fullPath.toStdString();
+		for (const std::string& tex: destModel->cm.textures) {
+			destModel->addTexture(tex, currentModel->getTexture(tex));
 		}
 
 		log("Duplicated current model to layer %i", destModel->id());

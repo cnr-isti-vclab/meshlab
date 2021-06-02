@@ -39,11 +39,20 @@ void IOPluginContainer::pushIOPlugin(IOPlugin* iIO)
 		}
 	}
 
-	//add input raster formats to inputFormatMap
+	//add input image formats to inputFormatMap
 	for (const FileFormat& ff : iIO->importImageFormats()){
 		for (const QString& currentExtension : ff.extensions) {
 			if (! inputImageFormatToPluginMap.contains(currentExtension.toLower())) {
 				inputImageFormatToPluginMap.insert(currentExtension.toLower(), iIO);
+			}
+		}
+	}
+
+	//add output image formats to inputFormatMap
+	for (const FileFormat& ff : iIO->exportImageFormats()){
+		for (const QString& currentExtension : ff.extensions) {
+			if (! outputImageFormatToPluginMap.contains(currentExtension.toLower())) {
+				outputImageFormatToPluginMap.insert(currentExtension.toLower(), iIO);
 			}
 		}
 	}

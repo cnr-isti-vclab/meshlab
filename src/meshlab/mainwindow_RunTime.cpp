@@ -24,7 +24,6 @@
 
 
 #include "mainwindow.h"
-#include "savemaskexporter.h"
 #include <exception>
 #include "ml_default_decorators.h"
 
@@ -55,6 +54,7 @@
 #include "dialogs/filter_script_dialog.h"
 #include "dialogs/options_dialog.h"
 #include "dialogs/plugin_info_dialog.h"
+#include "dialogs/save_mesh_attributes_dialog.h"
 #include "dialogs/save_snapshot_dialog.h"
 
 using namespace std;
@@ -2164,19 +2164,19 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 {
 	if ((GLA() == NULL))
 		return false;
-	
+
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
-	
+
 	// the original directory path before we switch it
 	QString origDir = QDir::current().path();
-	
+
 	// this change of dir is needed for subsequent textures/materials loading
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
-	
+
 	// Adjust the file name after changing the directory
 	QString fileNameSansDir = fi.fileName();
-	
+
 	// retrieving corresponding IO plugin
 	if (pCurrentIOPlugin == 0)
 	{
@@ -2187,7 +2187,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	}
 	meshDoc()->setBusy(true);
 	pCurrentIOPlugin->setLog(&meshDoc()->Log);
-	
+
 	unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileNameSansDir, prePar);
 	if (nMeshes != meshList.size()) {
 		QMessageBox::warning(
@@ -2200,7 +2200,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	}
 
 	try {
-		pCurrentIOPlugin->open(extension, fileNameSansDir, meshList ,maskList, prePar, QCallBack);
+		meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, maskList, QCallBack);
 	}
 	catch(const MLException& e) {
 		QMessageBox::warning(
@@ -2211,8 +2211,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 		QDir::setCurrent(origDir); // undo the change of directory before leaving
 		return false;
 	}
-	
-	
+
 	//std::cout << "Opened mesh: in " << tm.elapsed() << " secs\n";
 	// After opening the mesh lets ask to the io plugin if this format
 	// requires some optional, or userdriven post-opening processing.
@@ -2221,15 +2220,15 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	//RichParameterSet par;
 	//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 	//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
-	
+
 	QString err = pCurrentIOPlugin->warningMessageString();
 	if (!err.isEmpty())
 	{
 		QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+ err);
 	}
-	
+
 	saveRecentFileList(fileName);
-	
+
 	auto itmesh = meshList.begin();
 	auto itmask = maskList.begin();
 	for (unsigned int i = 0; i < meshList.size(); ++i){
@@ -2284,12 +2283,11 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	}
 
 	updateLayerDialog();
-	
-	
+
 	meshDoc()->setBusy(false);
-	
+
 	QDir::setCurrent(origDir); // undo the change of directory before leaving
-	
+
 	return true;
 }
 
@@ -2442,7 +2440,8 @@ bool MainWindow::importMesh(QString fileName)
 		try {
 			QElapsedTimer t;
 			t.start();
-			meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, masks, QCallBack);
+			std::list<std::string> unloadedTextures =
+					meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, masks, QCallBack);
 			saveRecentFileList(fileName);
 			updateLayerDialog();
 			for (MeshModel* mm : meshList) {
@@ -2451,6 +2450,11 @@ bool MainWindow::importMesh(QString fileName)
 					updateTexture(mm->id());
 			}
 			QString warningString = pCurrentIOPlugin->warningMessageString();
+			if (unloadedTextures.size() > 0){
+				warningString += "\n\nThe following textures have not been loaded: \n";
+				for (const std::string& txt : unloadedTextures)
+					warningString += QString::fromStdString(txt) + "\n";
+			}
 			if (!warningString.isEmpty()){
 				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
 			}
@@ -2690,7 +2694,6 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
-		//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		
 		int capability=0,defaultBits=0;
@@ -2701,15 +2704,28 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		
 		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
 		
-		SaveMaskExporterDialog maskDialog(new QWidget(),mod,capability,defaultBits,&savePar,this->GLA());
+		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
+		int quality = 66;
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else
 		{
-			maskDialog.SlotSelectionAllButton();
-			maskDialog.updateMask();
+			//this is horrible: creating a dialog object but then not showing the
+			//dialog.. And using it just to select all the possible options..
+			//to be removed soon
+			maskDialog.selectAllPossibleBits();
 		}
-		int mask = maskDialog.GetNewMask();
+		int mask = maskDialog.getNewMask();
+		savePar = maskDialog.getNewAdditionalSaveParameters();
+		quality = maskDialog.getTextureQuality();
+		std::vector<std::string> textureNames = maskDialog.getTextureNames();
+
+		for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
+			if (textureNames[i].find('.') == std::string::npos){
+				textureNames[i] += ".png";
+			}
+			mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
+		}
 		if (!saveAllPossibleAttributes)
 		{
 			maskDialog.close();
@@ -2726,6 +2742,8 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 
 		try {
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
+			QFileInfo finfo(fileName);
+			mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 			mod->setFileName(fileName);
 			QSettings settings;
@@ -2947,39 +2965,15 @@ void MainWindow::updateTexture(int meshid)
 		totalTextureNum+=mp->cm.textures.size();
 	
 	int singleMaxTextureSizeMpx = int(textmemMB/((totalTextureNum != 0)? totalTextureNum : 1));
-	bool sometextfailed = false;
-	QString unexistingtext = "In mesh file <i>" + mymesh->fullName() + "</i> : Failure loading textures:<br>";
-	for(size_t i =0; i< mymesh->cm.textures.size();++i)
+
+	bool sometextnotfound = false;
+	for(const std::string& textname : mymesh->cm.textures)
 	{
-		QImage img;
-		QFileInfo fi(mymesh->cm.textures[i].c_str());
-		QFileInfo mfi(mymesh->fullName());
-		QString filename = fi.absoluteFilePath();
-		bool res = img.load(filename);
-		if(!res)
-		{
-			QString fn2 = mfi.absolutePath() + "/" + fi.fileName();
-			res = img.load(fn2);
-			if(!res)
-			{
-				QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
-				meshDoc()->Log.log(GLLogStream::WARNING,qUtf8Printable(errmsg));
-				unexistingtext += "<font color=red>" + fi.fileName() + "</font><br>";
-				sometextfailed = sometextfailed || !res;
-			}
-		}
-		
-		/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
-		//if(!res && filename.endsWith("dds",Qt::CaseInsensitive))
-		//{
-		//    qDebug("DDS binding!");
-		//    int newTexId = shared->bindTexture(filename);
-		//    shared->txtcont.push_back(newTexId);
-		//}
-		/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
-		
-		if (!res)
+		QImage img = mymesh->getTexture(textname);
+
+		if (img.isNull()){
 			img.load(":/images/dummy.png");
+		}
 		GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
 		
 		for(int tt = 0;tt < mvc->viewerCounter();++tt)
@@ -2989,8 +2983,8 @@ void MainWindow::updateTexture(int meshid)
 				ar->setupTextureEnv(textid);
 		}
 	}
-	if (sometextfailed)
-		QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
+	if (sometextnotfound)
+		QMessageBox::warning(this,"Texture error", "Some texture has not been found. Using dummy texture.");
 
 	QDir::setCurrent(cwd);
 }

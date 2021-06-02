@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MaskExporterDialog</class>
- <widget class="QDialog" name="MaskExporterDialog">
+ <class>SaveMeshAttributesDialog</class>
+ <widget class="QDialog" name="SaveMeshAttributesDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>687</width>
-    <height>337</height>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -237,6 +237,53 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Texture Quality:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="textureQualitySpinBox">
+             <property name="minimum">
+              <number>-1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>66</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -354,7 +401,7 @@
   <connection>
    <sender>okButton</sender>
    <signal>clicked()</signal>
-   <receiver>MaskExporterDialog</receiver>
+   <receiver>SaveMeshAttributesDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -370,7 +417,7 @@
   <connection>
    <sender>cancelButton</sender>
    <signal>clicked()</signal>
-   <receiver>MaskExporterDialog</receiver>
+   <receiver>SaveMeshAttributesDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

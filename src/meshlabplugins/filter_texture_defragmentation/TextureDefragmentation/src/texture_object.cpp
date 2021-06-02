@@ -44,13 +44,19 @@ bool TextureObject::AddImage(std::string path)
 {
     QImageReader qir(QString(path.c_str()));
     if (qir.canRead()) {
-        TextureImageInfo tii = {};
-        tii.path = path;
-        tii.size = { qir.size().width(), qir.size().height() };
+        TextureImageInfo tii = {QImage(path.c_str())};
         texInfoVec.push_back(tii);
         texNameVec.push_back(0);
         return true;
     } else return false;
+}
+
+bool TextureObject::AddImage(const QImage& image)
+{
+    TextureImageInfo tii = {QImage(image)};
+    texInfoVec.push_back(tii);
+    texNameVec.push_back(0);
+    return true;
 }
 
 void TextureObject::Bind(int i)
@@ -58,7 +64,7 @@ void TextureObject::Bind(int i)
     ensure(i >= 0 && i < (int) texInfoVec.size());
     // load texture from qimage on first use
     if (texNameVec[i] == 0) {
-        QImage img(texInfoVec[i].path.c_str());
+        QImage& img = texInfoVec[i].texture;
         ensure(!img.isNull());
         if ((img.format() != QImage::Format_RGB32) || (img.format() != QImage::Format_ARGB32)) {
             QImage glimg = img.convertToFormat(QImage::Format_ARGB32);
@@ -99,13 +105,13 @@ void TextureObject::Release(int i)
 int TextureObject::TextureWidth(std::size_t i)
 {
     ensure(i < texInfoVec.size());
-    return texInfoVec[i].size.w;
+    return texInfoVec[i].texture.width();
 }
 
 int TextureObject::TextureHeight(std::size_t i)
 {
     ensure(i < texInfoVec.size());
-    return texInfoVec[i].size.h;
+    return texInfoVec[i].texture.height();
 }
 
 int TextureObject::MaxSize()

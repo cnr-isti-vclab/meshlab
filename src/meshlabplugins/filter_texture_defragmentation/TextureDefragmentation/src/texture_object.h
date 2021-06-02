@@ -27,8 +27,9 @@
 #include <cstdint>
 #include <string>
 
-class QImage;
-class TextureObject;
+#include <QImage>
+
+struct TextureObject;
 
 typedef std::shared_ptr<TextureObject> TextureObjectHandle;
 
@@ -38,8 +39,7 @@ struct TextureSize {
 };
 
 struct TextureImageInfo {
-    std::string path;
-    TextureSize size;
+    QImage texture;
 };
 
 /* wrapper to an array of textures */
@@ -56,6 +56,7 @@ struct TextureObject {
 
     /* Add QImage ref to the texture object */
     bool AddImage(std::string path);
+    bool AddImage(const QImage& image);
 
     /* Binds the texture at index i */
     void Bind(int i);

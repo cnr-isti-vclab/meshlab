@@ -34,7 +34,7 @@
 
 namespace meshlab {
 
-void loadMesh(
+std::list<std::string> loadMesh(
 		const QString& fileName,
 		IOPlugin* ioPlugin,
 		const RichParameterList& prePar,
@@ -50,6 +50,18 @@ void loadMeshWithStandardParameters(
 void reloadMesh(
 		const QString& filename,
 		const std::list<MeshModel*>& meshList,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+QImage loadImage(
+		const QString& filename,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+void saveImage(
+		const QString& filename,
+		const QImage& image,
+		int quality = 66,
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos* cb = nullptr);
 

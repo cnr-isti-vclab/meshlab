@@ -1,14 +1,14 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -43,44 +43,58 @@
 
 namespace Ui 
 {
-	class MaskExporterDialog;
-} 
+	class SaveMeshAttributesDialog;
+}
 
-class SaveMaskExporterDialog : public QDialog
+class SaveMeshAttributesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterList *par,GLArea* glar = NULL);
-	~SaveMaskExporterDialog();
-	
-	void InitDialog();
-	void SetTextureName();
-	int GetNewMask();
-	void SetMaskCapability();
-	void updateMask();
+	SaveMeshAttributesDialog(
+			QWidget* parent,
+			MeshModel* m,
+			int capability,
+			int defaultBits,
+			const RichParameterList& additionalSaveParams,
+			GLArea* glar = NULL);
+	~SaveMeshAttributesDialog();
 
-public slots:
+	void selectAllPossibleBits();
+
+	int getNewMask() const;
+	RichParameterList getNewAdditionalSaveParameters() const;
+	std::vector<std::string> getTextureNames() const;
+	int getTextureQuality() const;
+
+private slots:
+	void on_okButton_clicked();
+	void on_cancelButton_clicked();
 	void on_check_help_stateChanged(int);
-	void SlotOkButton();
-	void SlotCancelButton();
-	void SlotRenameTexture();
-	void SlotSelectionTextureName();
-	void SlotSelectionNoneButton();
-	void SlotSelectionAllButton();
+	void on_renametextureButton_clicked();
+	void on_listTextureName_itemSelectionChanged();
+	void on_AllButton_clicked();
+	void on_NoneButton_clicked();
+
 private:
-	Ui::MaskExporterDialog* ui;
-	MeshModel *m;
-	int mask;
-	int type;
-	int capability;
-	int defaultBits;
-    RichParameterList *parSet;
-	RichParameterListFrame *stdParFrame;
-	GLArea* glar;
-	
+	void setMaskCapability();
 	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);
 	bool shouldBeEnabled(int bit, int capabilityBits, int defaultBits);
 	bool shouldBeChecked(int bit, int capabilityBits, int defaultBits);
+	void updateMask();
+
+	Ui::SaveMeshAttributesDialog* ui;
+	MeshModel *m;
+	const int capability;
+	const int defaultBits;
+
+	int mask;
+	int textureQuality;
+
+	RichParameterList additionalSaveParametrs;
+	std::vector<std::string> textureNames;
+
+	RichParameterListFrame *additionalParametersFrame;
+	GLArea* glar;
 };//end class
 
 #endif

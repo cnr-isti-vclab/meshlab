@@ -122,6 +122,9 @@ SOURCES += \
 	ml_selection_buffers.cpp \
 	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif/exif.cpp
 
+RESOURCES += \
+	meshlab-common.qrc
+
 macx:QMAKE_POST_LINK = "\
 	if [ -d  $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/Frameworks/ ]; \
 	then  \
