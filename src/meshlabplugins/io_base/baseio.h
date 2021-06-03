@@ -42,6 +42,8 @@ public:
 	std::list<FileFormat> exportFormats() const;
 	std::list<FileFormat> importImageFormats() const;
 	std::list<FileFormat> exportImageFormats() const;
+	std::list<FileFormat> importProjectFormats() const;
+	std::list<FileFormat> exportProjectFormats() const;
 
 	void exportMaskCapability(
 			const QString& format,
@@ -76,10 +78,35 @@ public:
 			int quality,
 			vcg::CallBackPos* cb);
 
-	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
-	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
+	std::list<MeshModel*> openProject(
+			const QString& format,
+			const QStringList& filenames,
+			MeshDocument& md,
+			vcg::CallBackPos* cb);
+
+	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+				const QString& format,
+				const QString& filename);
+
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
+
+private:
+	std::list<MeshModel*> loadALN(
+			const QString& filename,
+			MeshDocument& md,
+			vcg::CallBackPos* cb);
+
+	std::list<MeshModel*> loadOUT(
+			const QString& filename,
+			const QString& imageListFile,
+			MeshDocument& md,
+			vcg::CallBackPos* cb);
+
+	std::list<MeshModel*> loadNVM(
+			const QString& filename,
+			MeshDocument& md,
+			vcg::CallBackPos* cb);
 };
 
 #endif

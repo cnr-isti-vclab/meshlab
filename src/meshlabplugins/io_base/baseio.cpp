@@ -22,7 +22,9 @@
 ****************************************************************************/
 
 #include "baseio.h"
+
 #include <QTextStream>
+#include <QDir>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
@@ -42,7 +44,11 @@
 #include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
 
+#include <wrap/io_trimesh/alnParser.h>
 
+#include <common/utilities/load_save.h>
+#include <common/ml_document/mesh_document.h>
+#include <common/meshlabdocumentbundler.h>
 
 using namespace std;
 using namespace vcg;
@@ -69,21 +75,21 @@ class PFace :public vcg::Face<
 class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
 const static std::list<FileFormat> importImageFormatList = {
-	FileFormat("BMP", "BMP"),
-	FileFormat("JPG", "JPG"),
-	FileFormat("JPEG", "JPEG"),
-	FileFormat("PNG", "PNG"),
-	FileFormat("XBM", "XBM"),
-	FileFormat("XPM", "XPM")
+	FileFormat("Windows Bitmap", "BMP"),
+	FileFormat("Joint Photographic Experts Group", "JPG"),
+	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("X11 Bitmap", "XBM"),
+	FileFormat("X11 Bitmap", "XPM")
 };
 
 const static std::list<FileFormat> exportImageFormatList = {
-	FileFormat("BMP", "BMP"),
-	FileFormat("JPG", "JPG"),
-	FileFormat("JPEG", "JPEG"),
-	FileFormat("PNG", "PNG"),
-	FileFormat("XBM", "XBM"),
-	FileFormat("XPM", "XPM")
+	FileFormat("Windows Bitmap", "BMP"),
+	FileFormat("Joint Photographic Experts Group", "JPG"),
+	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("X11 Bitmap", "XBM"),
+	FileFormat("X11 Bitmap", "XPM")
 };
 
 BaseMeshIOPlugin::BaseMeshIOPlugin() : IOPlugin()
@@ -137,6 +143,28 @@ std::list<FileFormat> BaseMeshIOPlugin::importImageFormats() const
 std::list<FileFormat> BaseMeshIOPlugin::exportImageFormats() const
 {
 	return exportImageFormatList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::importProjectFormats() const
+{
+	std::list<FileFormat> formatList = {
+		FileFormat("MeshLab Project", tr("MLP")),
+		FileFormat("MeshLab Binary Project", tr("MLB")),
+		FileFormat("Align Project", tr("ALN")),
+		FileFormat("Bundler Output", tr("OUT")),
+		FileFormat("VisualSFM Output", tr("NVM"))
+	};
+	return formatList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::exportProjectFormats() const
+{
+	std::list<FileFormat> formatList = {
+		FileFormat("MeshLab Project", tr("MLP")),
+		FileFormat("MeshLab Binary Project", tr("MLB")),
+		FileFormat("Align Project", tr("ALN"))
+	};
+	return formatList;
 }
 
 // initialize importing parameters
@@ -541,6 +569,39 @@ void BaseMeshIOPlugin::saveImage(
 	}
 }
 
+std::list<MeshModel*> BaseMeshIOPlugin::openProject(
+		const QString& format,
+		const QStringList& filenames,
+		MeshDocument& md,
+		CallBackPos* cb)
+{
+	std::list<MeshModel*> meshList;
+	if (format.toUpper() == "ALN") {
+		meshList = loadALN(filenames.first(), md, cb);
+	}
+	else if (format.toUpper() == "OUT") {
+		meshList = loadOUT(filenames.first(), filenames[1], md, cb);
+	}
+	else  if (format.toUpper() == "NVM") {
+		meshList =  loadNVM(filenames.first(), md, cb);
+	}
+	else {
+		wrongOpenFormat(format);
+	}
+	return meshList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::projectFileRequiresAdditionalFiles(
+		const QString& format,
+		const QString&)
+{
+	if (format.toUpper() == "OUT"){
+		return {FileFormat("Image List File", "TXT")};
+	}
+	else
+		return {};
+}
+
 /*
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
@@ -567,13 +628,6 @@ void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capabili
 	if (format.toUpper() == tr("DXF")) { capability = defaultBits = tri::io::Mask::IOM_VERTCOORD | tri::io::Mask::IOM_FACEINDEX;}
 
 }
-
-//void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par)
-//{
-//    if(format.toUpper() == tr("STL"))
-//        par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
-//                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
-//}
 
 void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m, RichParameterList &par)
 {
@@ -614,14 +668,70 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 	}
 }
 
-//void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
-//{
-//    if(format.toUpper() == tr("STL"))
-//		if (par.findParameter(stlUnifyParName())->value().getBool())
-//		{
-//			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-//			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
-//		}
-//}
+std::list<MeshModel*> BaseMeshIOPlugin::loadALN(
+		const QString& filename,
+		MeshDocument& md,
+		CallBackPos* cb)
+{
+	std::list<MeshModel*> meshList;
+	std::vector<RangeMap> rmv;
+	int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(filename));
+	if(retVal != ALNParser::NoError) {
+		throw MLException("Unable to open ALN file");
+	}
+	QFileInfo fi(filename);
+
+	for(const RangeMap& rm : rmv) {
+		QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+		try {
+			std::list<MeshModel*> tmp =
+					meshlab::loadMeshWithStandardParameters(relativeToProj, md, cb);
+			md.mm()->cm.Tr.Import(rm.transformation);
+			meshList.insert(meshList.end(), tmp.begin(), tmp.end());
+		}
+		catch (const MLException& e){
+			for (MeshModel* m : meshList)
+				md.delMesh(m);
+			throw e;
+		}
+	}
+	return meshList;
+}
+
+std::list<MeshModel*> BaseMeshIOPlugin::loadOUT(
+		const QString& filename,
+		const QString& imageListFile,
+		MeshDocument& md,
+		CallBackPos*)
+{
+	std::list<MeshModel*> meshList;
+
+	QString model_filename;
+	QFileInfo fi(filename);
+
+	//todo: move here this function...
+	if(!MeshDocumentFromBundler(md, filename, imageListFile, fi.baseName())){
+		throw MLException("Unable to open OUTs file");
+	}
+
+	return meshList;
+}
+
+std::list<MeshModel*> BaseMeshIOPlugin::loadNVM(
+		const QString& filename,
+		MeshDocument& md,
+		CallBackPos*)
+{
+	std::list<MeshModel*> meshList;
+
+	QString model_filename;
+	QFileInfo fi(filename);
+
+	if(!MeshDocumentFromNvm(md, filename, model_filename)){
+		throw MLException("Unable to open NVMs file");
+	}
+
+	return meshList;
+}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)
