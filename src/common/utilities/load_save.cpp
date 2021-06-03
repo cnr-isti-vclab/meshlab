@@ -350,4 +350,44 @@ std::list<MeshModel*> loadProject(
 	return ioPlugin->openProject(extension, filenames, md, cb);
 }
 
+std::list<MeshModel*> loadProject(
+		const QStringList& filenames,
+		MeshDocument& md,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(filenames.first());
+	QString extension = fi.suffix();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.outputImagePlugin(extension);
+
+	if (ioPlugin == nullptr)
+		throw MLException(
+				"Project " + filenames.first() + " cannot be loaded. Your MeshLab version "
+				"has not plugin to load " + extension + " file format.");
+
+	std::list<FileFormat> additionalFiles =
+			ioPlugin->projectFileRequiresAdditionalFiles(extension, filenames.first());
+
+	if (additionalFiles.size() +1 != (unsigned int)filenames.size()){
+		throw MLException(
+				"The number of input files given (" + QString::number(filenames.size()) +
+				") is different from the expected one (" +
+				QString::number(additionalFiles.size() +1));
+	}
+
+	return loadProject(filenames, ioPlugin, md, log, cb);
+}
+
+std::list<MeshModel*> loadProject(
+		const QString& filename,
+		MeshDocument& md,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QStringList fnms;
+	fnms.push_back(filename);
+	return loadProject(fnms, md, log, cb);
+}
+
 }

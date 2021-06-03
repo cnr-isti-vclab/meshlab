@@ -79,6 +79,18 @@ std::list<MeshModel*> loadProject(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
 
+std::list<MeshModel*> loadProject(
+		const QStringList& filenames,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::list<MeshModel*> loadProject(
+		const QString& filename,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
 }
 
 #endif // MESHLAB_LOAD_SAVE_H
