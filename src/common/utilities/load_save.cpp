@@ -33,6 +33,25 @@
 
 namespace meshlab {
 
+/**
+ * @brief This function assumes that you already have the followind data:
+ * - the plugin that is needed to load the mesh
+ * - the number of meshes that will be loaded from the file
+ * - the list of MeshModel(s) that will contain the loaded mesh(es)
+ * - the open parameters that will be used to load the mesh(es)
+ *
+ * The function will take care to loat the mesh, load textures if needed
+ * and make all the clean operations after loading the meshes.
+ * If load fails, throws a MLException.
+ *
+ * @param[i] fileName: the filename
+ * @param[i] ioPlugin: the plugin that supports the file format to load
+ * @param[i] prePar: the pre open parameters
+ * @param[i/o] meshList: the list of meshes that will be loaded from the file
+ * @param[o] maskList: masks of loaded components for each loaded mesh
+ * @param cb: callback
+ * @return the list of texture names that could not be loaded
+ */
 std::list<std::string> loadMesh(
 		const QString& fileName,
 		IOPlugin* ioPlugin,
@@ -113,8 +132,29 @@ std::list<std::string> loadMesh(
 	return unloadedTextures;
 }
 
-
-void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, vcg::CallBackPos *cb)
+/**
+ * @brief loads the given filename and puts the loaded mesh(es) into the
+ * given MeshDocument. Returns the list of loaded meshes.
+ *
+ * If you already know the open parameters that could be used to load the mesh,
+ * you can pass a RichParameterList containing them.
+ * Note: only parameters of your RPL that are actually required by the plugin
+ * will be given as input to the load function.
+ * If you don't know any parameter, leave the RichParameterList parameter empty.
+ *
+ * The function takes care to:
+ * - find the plugin that loads the format of the file
+ * - create the required MeshModels into the MeshDocument
+ * - load the meshes and their textures, with standard parameters
+ *
+ * if an error occurs, an exception will be thrown, and MeshDocument won't
+ * contain new meshes.
+ */
+std::list<MeshModel*> loadMeshWithStandardParameters(
+		const QString& filename,
+		MeshDocument& md,
+		vcg::CallBackPos *cb,
+		RichParameterList prePar)
 {
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
@@ -126,10 +166,16 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 				"Mesh " + filename + " cannot be opened. Your MeshLab version "
 				"has not plugin to read " + extension + " file format");
 
-
 	ioPlugin->setLog(&md.Log);
-	RichParameterList prePar;
-	ioPlugin->initPreOpenParameter(extension, prePar);
+	RichParameterList openParams;
+	ioPlugin->initPreOpenParameter(extension, openParams);
+
+	for (RichParameter& rp : prePar){
+		auto it = openParams.findParameter(rp.name());
+		if (it != openParams.end()){
+			it->setValue(rp.value());
+		}
+	}
 	prePar.join(meshlab::defaultGlobalParameterList());
 
 
@@ -155,6 +201,8 @@ void loadMeshWithStandardParameters(const QString& filename, MeshDocument& md, v
 			md.delMesh(mm);
 		throw e;
 	}
+
+	return meshList;
 }
 
 

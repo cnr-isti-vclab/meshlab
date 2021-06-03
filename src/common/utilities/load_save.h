@@ -42,10 +42,11 @@ std::list<std::string> loadMesh(
 		std::list<int>& maskList,
 		vcg::CallBackPos *cb);
 
-void loadMeshWithStandardParameters(
+std::list<MeshModel*> loadMeshWithStandardParameters(
 		const QString& filename,
 		MeshDocument& md,
-		vcg::CallBackPos *cb);
+		vcg::CallBackPos *cb = nullptr,
+		RichParameterList prePar = RichParameterList());
 
 void reloadMesh(
 		const QString& filename,
