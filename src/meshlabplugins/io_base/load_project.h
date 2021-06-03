@@ -8,10 +8,10 @@ std::list<MeshModel*> loadALN(
 		MeshDocument& md,
 		vcg::CallBackPos* cb);
 
-std::list<MeshModel*> loadOUT(
-		const QString& filename,
+std::list<MeshModel*> loadOUT(const QString& filename,
 		const QString& imageListFile,
 		MeshDocument& md,
+		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos* cb);
 
 std::list<MeshModel*> loadNVM(

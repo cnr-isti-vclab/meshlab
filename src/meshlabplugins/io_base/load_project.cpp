@@ -3,6 +3,8 @@
 #include <QDir>
 
 #include <wrap/io_trimesh/alnParser.h>
+#include <wrap/io_trimesh/import_out.h>
+
 #include <common/ml_document/mesh_document.h>
 #include <common/utilities/load_save.h>
 #include <common/meshlabdocumentbundler.h>
@@ -41,16 +43,63 @@ std::list<MeshModel*> loadOUT(
 		const QString& filename,
 		const QString& imageListFile,
 		MeshDocument& md,
+		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos*)
 {
 	std::list<MeshModel*> meshList;
-
+	unloadedImgList.clear();
 	QFileInfo fi(filename);
 
-	//todo: move here this function...
-	if(!MeshDocumentFromBundler(md, filename, imageListFile, fi.baseName())){
-		throw MLException("Unable to open OUTs file");
+	MeshModel* newMesh = md.addNewMesh("", fi.baseName());
+	std::vector<Shotm> shots;
+	const QString path_im = QFileInfo(imageListFile).absolutePath()+QString("/");
+
+	std::vector<std::string> image_filenames;
+	vcg::tri::io::ImporterOUT<CMeshO>::Open(newMesh->cm, shots, image_filenames, qUtf8Printable(filename), qUtf8Printable(imageListFile));
+	newMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+
+	QString curr_path = QDir::currentPath();
+	QFileInfo imi(imageListFile);
+
+	//
+	QStringList image_filenames_q;
+	for(unsigned int i  = 0; i < image_filenames.size(); ++i)
+	{
+		QImageReader sizeImg(QString::fromStdString(image_filenames[i]));
+		if(sizeImg.size()==QSize(-1,-1))
+			image_filenames_q.push_back(path_im+QString::fromStdString(image_filenames[i]));
+		else
+			image_filenames_q.push_back(QString::fromStdString(image_filenames[i]));
 	}
+	QDir::setCurrent(imi.absoluteDir().absolutePath());
+
+	for(size_t i=0 ; i<shots.size() ; i++)
+	{
+		md.addNewRaster();
+		const QString fullpath_image_filename = image_filenames_q[int(i)];
+
+		QImage img(":/img/dummy.png");
+		try {
+			img = meshlab::loadImage(fullpath_image_filename);
+		}
+		catch(const MLException& e){
+			unloadedImgList.push_back(fullpath_image_filename.toStdString());
+		}
+
+		md.rm()->addPlane(new RasterPlane(img, fullpath_image_filename, RasterPlane::RGBA));
+		int count=fullpath_image_filename.count('\\');
+		if (count==0)
+		{
+			count=fullpath_image_filename.count('/');
+			md.rm()->setLabel(fullpath_image_filename.section('/',count,1));
+		}
+		else
+			md.rm()->setLabel(fullpath_image_filename.section('\\',count,1));
+		md.rm()->shot = shots[i];
+	}
+	QDir::setCurrent(curr_path);
+
+	meshList.push_back(newMesh);
 
 	return meshList;
 }

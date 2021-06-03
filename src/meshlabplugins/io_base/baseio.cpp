@@ -574,9 +574,28 @@ std::list<MeshModel*> BaseMeshIOPlugin::openProject(
 		meshList = loadALN(filenames.first(), md, cb);
 	}
 	else if (format.toUpper() == "OUT") {
-		meshList = loadOUT(filenames.first(), filenames[1], md, cb);
+		std::vector<std::string> unloadedImgs;
+		meshList = loadOUT(filenames.first(), filenames[1], md, unloadedImgs, cb);
+		if (unloadedImgs.size() > 0){
+			QString msg = "Unable to load the following " +
+				QString::number(unloadedImgs.size()) + " images (using dummy images): \n";
+
+			unsigned int size = unloadedImgs.size();
+			if (size > 5)
+				size = 5;
+
+			for (unsigned int i = 0; i < size; ++i)
+				msg += QString::fromStdString(unloadedImgs[i]) + "\n";
+
+			if (unloadedImgs.size() > 5){
+				msg += "\n...\n\n";
+				msg += QString::fromStdString(unloadedImgs[unloadedImgs.size()-1]) + "\n";
+			}
+
+			reportWarning(msg);
+		}
 	}
-	else  if (format.toUpper() == "NVM") {
+	else if (format.toUpper() == "NVM") {
 		meshList =  loadNVM(filenames.first(), md, cb);
 	}
 	else {

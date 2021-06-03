@@ -15,52 +15,6 @@
 #include <wrap/io_trimesh/import_out.h>
 #include <wrap/io_trimesh/import_nvm.h>
 
-bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString image_list_filename, QString model_filename)
-{
-    md.addNewMesh(model_filename,QString("model"));
-    std::vector<Shotm> shots;
-    const QString path = QFileInfo(filename_out).absolutePath();
-    const QString path_im = QFileInfo(image_list_filename).absolutePath()+QString("/");
-
-    std::vector<std::string>   image_filenames;
-    vcg::tri::io::ImporterOUT<CMeshO>::Open(md.mm()->cm,shots,image_filenames, qUtf8Printable(filename_out), qUtf8Printable(image_list_filename));
-    md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-
-    QString curr_path = QDir::currentPath();
-    QFileInfo imi(image_list_filename);
-
-    //
-    QStringList image_filenames_q;
-    for(unsigned int i  = 0; i < image_filenames.size(); ++i)
-    {
-        QImageReader sizeImg(QString::fromStdString(image_filenames[i]));
-        if(sizeImg.size()==QSize(-1,-1))
-            image_filenames_q.push_back(path_im+QString::fromStdString(image_filenames[i]));
-        else
-            image_filenames_q.push_back(QString::fromStdString(image_filenames[i]));
-    }
-    QDir::setCurrent(imi.absoluteDir().absolutePath());
-
-    for(size_t i=0 ; i<shots.size() ; i++)
-    {
-        md.addNewRaster();
-        const QString fullpath_image_filename = image_filenames_q[int(i)];
-        md.rm()->addPlane(new RasterPlane(fullpath_image_filename,RasterPlane::RGBA));
-        int count=fullpath_image_filename.count('\\');
-        if (count==0)
-        {
-            count=fullpath_image_filename.count('/');
-            md.rm()->setLabel(fullpath_image_filename.section('/',count,1));
-        }
-        else
-            md.rm()->setLabel(fullpath_image_filename.section('\\',count,1));
-        md.rm()->shot = shots[i];
-    }
-    QDir::setCurrent(curr_path);
-
-    return true;
-}
-
 bool MeshDocumentFromNvm(MeshDocument &md, QString filename_nvm, QString model_filename)
 {
     md.addNewMesh(model_filename,QString("model"));

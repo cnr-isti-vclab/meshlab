@@ -1684,7 +1684,7 @@ void MainWindow::saveProject()
 		QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
 }
 
-bool MainWindow::openProject(QString fileName)
+bool MainWindow::openProject(QString fileName, bool append)
 {
 	bool visiblelayer = layerDialog->isVisible();
 	globrendtoolbar->setEnabled(false);
@@ -1738,9 +1738,9 @@ bool MainWindow::openProject(QString fileName)
 
 	// Common Part: init a Doc if necessary, and
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	bool activeEmpty = activeDoc && (meshDoc()->meshNumber() == 0);
+	bool activeEmpty = activeDoc && ((meshDoc()->meshNumber() == 0));
 
-	if (!activeEmpty)
+	if (!activeEmpty && !append)
 		newProject(fileName);
 
 	mdiarea->currentSubWindow()->setWindowTitle(fileName);
@@ -1762,6 +1762,10 @@ bool MainWindow::openProject(QString fileName)
 		QMessageBox::critical(this, tr("Meshlab Opening Error"), e.what());
 		return false;
 	}
+	QString warningString = ioPlugin->warningMessageString();
+	if (!warningString.isEmpty()){
+		QMessageBox::warning(this, "Warning", warningString);
+	}
 
 	for (MeshModel* mm : meshList){
 		computeRenderingDataOnLoading(mm, false, nullptr);
@@ -1769,27 +1773,27 @@ bool MainWindow::openProject(QString fileName)
 			updateTexture(mm->id());
 	}
 
-//	if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
-//	{
-//		std::map<int, MLRenderingData> rendOpt;
-//		if (!MeshDocumentFromXML(*meshDoc(), fileName, (QString(fi.suffix()).toLower() == "mlb"), rendOpt))
-//		{
-//			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
-//			return false;
-//		}
-//		GLA()->updateMeshSetVisibilities();
-//		for (MeshModel* mm : meshDoc()->meshIterator())
-//		{
-//			QString fullPath = mm->fullName();
-//			//meshDoc()->setBusy(true);
-//			Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
-//			MLRenderingData* ptr = NULL;
-//			if (rendOpt.find(mm->id()) != rendOpt.end())
-//				ptr = &rendOpt[mm->id()];
-//			if (!loadMeshWithStandardParams(fullPath, mm, trm, false, ptr))
-//				meshDoc()->delMesh(mm);
-//		}
-//	}
+	if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
+	{
+		std::map<int, MLRenderingData> rendOpt;
+		if (!MeshDocumentFromXML(*meshDoc(), fileName, (QString(fi.suffix()).toLower() == "mlb"), rendOpt))
+		{
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
+			return false;
+		}
+		GLA()->updateMeshSetVisibilities();
+		for (MeshModel* mm : meshDoc()->meshIterator())
+		{
+			QString fullPath = mm->fullName();
+			//meshDoc()->setBusy(true);
+			Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
+			MLRenderingData* ptr = NULL;
+			if (rendOpt.find(mm->id()) != rendOpt.end())
+				ptr = &rendOpt[mm->id()];
+			if (!loadMeshWithStandardParams(fullPath, mm, trm, false, ptr))
+				meshDoc()->delMesh(mm);
+		}
+	}
 
 	meshDoc()->setBusy(false);
 	if(this->GLA() == 0)  return false;
@@ -1821,7 +1825,7 @@ bool MainWindow::appendProject(QString fileName)
 	
 	if (fileNameList.isEmpty()) return false;
 	
-	// Ccheck if we have a doc and if it is empty
+	// Check if we have a doc and if it is empty
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
 	if (!activeDoc || (meshDoc()->meshNumber() == 0))  // it is wrong to try appending to an empty project, even if it is possible
 	{
@@ -1834,100 +1838,70 @@ bool MainWindow::appendProject(QString fileName)
 	// load all projects
 	foreach(fileName,fileNameList)
 	{
-		QFileInfo fi(fileName);
-		lastUsedDirectory = fi.absoluteDir();
+		openProject(fileName, true);
+//		QFileInfo fi(fileName);
+//		lastUsedDirectory = fi.absoluteDir();
 		
-		if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") && (fi.suffix().toLower() != "mlb") && (fi.suffix().toLower() != "out") && (fi.suffix().toLower() != "nvm"))
-		{
-			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
-			return false;
-		}
+//		if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") && (fi.suffix().toLower() != "mlb") && (fi.suffix().toLower() != "out") && (fi.suffix().toLower() != "nvm"))
+//		{
+//			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
+//			return false;
+//		}
 		
-		// this change of dir is needed for subsequent textures/materials loading
-		QDir::setCurrent(fi.absoluteDir().absolutePath());
-		qb->show();
+//		// this change of dir is needed for subsequent textures/materials loading
+//		QDir::setCurrent(fi.absoluteDir().absolutePath());
+//		qb->show();
 		
-		if (QString(fi.suffix()).toLower() == "aln")
-		{
-			vector<RangeMap> rmv;
-			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-			if(retVal != ALNParser::NoError) {
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
-				return false;
-			}
+//		if (QString(fi.suffix()).toLower() == "aln")
+//		{
+//			vector<RangeMap> rmv;
+//			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
+//			if(retVal != ALNParser::NoError) {
+//				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
+//				return false;
+//			}
 			
-			for(const RangeMap& rm : rmv) {
-				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
-				try {
-					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
-					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
-					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
-					if (!(meshDoc()->mm()->cm.textures.empty()))
-						updateTexture(meshDoc()->mm()->id());
-				}
-				catch (const MLException& e){
-					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
-				}
-			}
-		}
+//			for(const RangeMap& rm : rmv) {
+//				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
+//				try {
+//					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
+//					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
+//					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
+//					if (!(meshDoc()->mm()->cm.textures.empty()))
+//						updateTexture(meshDoc()->mm()->id());
+//				}
+//				catch (const MLException& e){
+//					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
+//				}
+//			}
+//		}
 		
-		if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
-		{
-			int alreadyLoadedNum = meshDoc()->meshNumber();
-			std::map<int, MLRenderingData> rendOpt;
-			if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
-			{
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
-				return false;
-			}
-			GLA()->updateMeshSetVisibilities();
-			auto it = meshDoc()->meshBegin();
-			std::advance(it, alreadyLoadedNum);
-			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshNumber(); i++)
-			{
-				MeshModel* mm = *it;
-				QString fullPath = mm->fullName();
-				meshDoc()->setBusy(true);
-				Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
-				MLRenderingData* ptr = NULL;
-				if (rendOpt.find(mm->id()) != rendOpt.end())
-					ptr = &rendOpt[mm->id()];
-				if(!loadMeshWithStandardParams(fullPath,mm,trm, false, ptr))
-					meshDoc()->delMesh(mm);
-				++it;
-			}
-		}
-		
-		if (QString(fi.suffix()).toLower() == "out") {
-			
-			QString cameras_filename = fileName;
-			QString image_list_filename;
-			QString model_filename;
-			
-			image_list_filename = QFileDialog::getOpenFileName(
-					this, 
-					tr("Open image list file"),
-					QFileInfo(fileName).absolutePath(),
-					tr("Bundler images list file (*.txt)"));
-			if (image_list_filename.isEmpty())
-				return false;
-			
-			if (!MeshDocumentFromBundler(*meshDoc(), cameras_filename, image_list_filename, model_filename)) {
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
-				return false;
-			}
-		}
-		
-		if (QString(fi.suffix()).toLower() == "nvm") {
-			
-			QString cameras_filename = fileName;
-			QString model_filename;
-			
-			if (!MeshDocumentFromNvm(*meshDoc(), cameras_filename, model_filename)) {
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
-				return false;
-			}
-		}
+//		if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
+//		{
+//			int alreadyLoadedNum = meshDoc()->meshNumber();
+//			std::map<int, MLRenderingData> rendOpt;
+//			if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
+//			{
+//				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
+//				return false;
+//			}
+//			GLA()->updateMeshSetVisibilities();
+//			auto it = meshDoc()->meshBegin();
+//			std::advance(it, alreadyLoadedNum);
+//			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshNumber(); i++)
+//			{
+//				MeshModel* mm = *it;
+//				QString fullPath = mm->fullName();
+//				meshDoc()->setBusy(true);
+//				Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
+//				MLRenderingData* ptr = NULL;
+//				if (rendOpt.find(mm->id()) != rendOpt.end())
+//					ptr = &rendOpt[mm->id()];
+//				if(!loadMeshWithStandardParams(fullPath,mm,trm, false, ptr))
+//					meshDoc()->delMesh(mm);
+//				++it;
+//			}
+//		}
 	}
 	
 	globrendtoolbar->setEnabled(true);
