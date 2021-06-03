@@ -336,4 +336,18 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 	// End of EXIF reading
 }
 
+std::list<MeshModel*> loadProject(
+		const QStringList& filenames,
+		IOPlugin* ioPlugin,
+		MeshDocument& md,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(filenames.first());
+	QString extension = fi.suffix();
+
+	ioPlugin->setLog(log);
+	return ioPlugin->openProject(extension, filenames, md, cb);
+}
+
 }

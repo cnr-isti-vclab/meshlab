@@ -297,6 +297,13 @@ public:
 	 * @brief The openProject function is called by the framework everytime a
 	 * project needs to be loaded.
 	 *
+	 * The function takes an list of filenames because some project files
+	 * are composed by more than one file. In this specific case, you should
+	 * re-implement the function projectFileRequiresAdditionalFiles.
+	 * The number of filenames contained in the input list will be
+	 * 1 + number of elements in the list returned by the function
+	 *     projectFileRequiresAdditionalFiles (default: 0).
+	 *
 	 * If the meshes contained in the project are saved in separate files and not
 	 * into the project, you should use the functions provided into the file
 	 * "common/utilities/load_save.h". These functions will take care to load
@@ -311,13 +318,34 @@ public:
 	 */
 	virtual std::list<MeshModel*> openProject(
 			const QString& format,
-			const QString& /*filename*/,
+			const QStringList& /*filenames*/,
 			MeshDocument& /*md*/,
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongOpenFormat(format);
 		return std::list<MeshModel*>();
 	}
+
+	/**
+	 * @brief some project file formats require the load of more than one file
+	 * (e.g. bundler.out requires also a txt containing raster infos).
+	 *
+	 * If this is your case, you should implement this returning a list of
+	 * *FileFormats* for each additional file that should be loaded.
+	 * Then, the framework will ask the user to select the additional required
+	 * files. Leaving the returned list empty means that the format of the
+	 * project does not need additional files to be loaded.
+	 *
+	 * The list of files will then passed to the user in the openProject.
+	 *
+	 * @return
+	 */
+	virtual std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& /*format*/,
+			const QString& /*filename*/)
+	{
+		return std::list<FileFormat>();
+	};
 
 	/**
 	 * @brief The reportWarning function should be used everytime that a

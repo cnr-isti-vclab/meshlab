@@ -56,6 +56,24 @@ void IOPluginContainer::pushIOPlugin(IOPlugin* iIO)
 			}
 		}
 	}
+
+	//add input project formats to inputFormatMap
+	for (const FileFormat& ff : iIO->importProjectFormats()){
+		for (const QString& currentExtension : ff.extensions) {
+			if (! inputProjectFormatToPluginMap.contains(currentExtension.toLower())) {
+				inputProjectFormatToPluginMap.insert(currentExtension.toLower(), iIO);
+			}
+		}
+	}
+
+	//add output project formats to inputFormatMap
+	for (const FileFormat& ff : iIO->exportProjectFormats()){
+		for (const QString& currentExtension : ff.extensions) {
+			if (! outputProjectFormatToPluginMap.contains(currentExtension.toLower())) {
+				outputProjectFormatToPluginMap.insert(currentExtension.toLower(), iIO);
+			}
+		}
+	}
 }
 
 void IOPluginContainer::eraseIOPlugin(IOPlugin* iIO)
