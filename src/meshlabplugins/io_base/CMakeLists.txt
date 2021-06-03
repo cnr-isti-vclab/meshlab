@@ -4,12 +4,14 @@
 
 set(SOURCES
 	baseio.cpp
+	load_project.cpp
 	${VCGDIR}/wrap/openfbx/src/miniz.c
 	${VCGDIR}/wrap/openfbx/src/ofbx.cpp
 	${VCGDIR}/wrap/ply/plylib.cpp)
 
 set(HEADERS
 	baseio.h
+	load_project.h
 	${VCGDIR}/wrap/io_trimesh/export_obj.h
 	${VCGDIR}/wrap/io_trimesh/export_off.h
 	${VCGDIR}/wrap/io_trimesh/export_ply.h

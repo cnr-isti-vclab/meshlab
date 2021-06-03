@@ -22,9 +22,9 @@
 ****************************************************************************/
 
 #include "baseio.h"
+#include "load_project.h"
 
 #include <QTextStream>
-#include <QDir>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
@@ -43,12 +43,6 @@
 #include <wrap/io_trimesh/export_vmi.h>
 #include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
-
-#include <wrap/io_trimesh/alnParser.h>
-
-#include <common/utilities/load_save.h>
-#include <common/ml_document/mesh_document.h>
-#include <common/meshlabdocumentbundler.h>
 
 using namespace std;
 using namespace vcg;
@@ -666,72 +660,6 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
 		}
 	}
-}
-
-std::list<MeshModel*> BaseMeshIOPlugin::loadALN(
-		const QString& filename,
-		MeshDocument& md,
-		CallBackPos* cb)
-{
-	std::list<MeshModel*> meshList;
-	std::vector<RangeMap> rmv;
-	int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(filename));
-	if(retVal != ALNParser::NoError) {
-		throw MLException("Unable to open ALN file");
-	}
-	QFileInfo fi(filename);
-
-	for(const RangeMap& rm : rmv) {
-		QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
-		try {
-			std::list<MeshModel*> tmp =
-					meshlab::loadMeshWithStandardParameters(relativeToProj, md, cb);
-			md.mm()->cm.Tr.Import(rm.transformation);
-			meshList.insert(meshList.end(), tmp.begin(), tmp.end());
-		}
-		catch (const MLException& e){
-			for (MeshModel* m : meshList)
-				md.delMesh(m);
-			throw e;
-		}
-	}
-	return meshList;
-}
-
-std::list<MeshModel*> BaseMeshIOPlugin::loadOUT(
-		const QString& filename,
-		const QString& imageListFile,
-		MeshDocument& md,
-		CallBackPos*)
-{
-	std::list<MeshModel*> meshList;
-
-	QString model_filename;
-	QFileInfo fi(filename);
-
-	//todo: move here this function...
-	if(!MeshDocumentFromBundler(md, filename, imageListFile, fi.baseName())){
-		throw MLException("Unable to open OUTs file");
-	}
-
-	return meshList;
-}
-
-std::list<MeshModel*> BaseMeshIOPlugin::loadNVM(
-		const QString& filename,
-		MeshDocument& md,
-		CallBackPos*)
-{
-	std::list<MeshModel*> meshList;
-
-	QString model_filename;
-	QFileInfo fi(filename);
-
-	if(!MeshDocumentFromNvm(md, filename, model_filename)){
-		throw MLException("Unable to open NVMs file");
-	}
-
-	return meshList;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)
