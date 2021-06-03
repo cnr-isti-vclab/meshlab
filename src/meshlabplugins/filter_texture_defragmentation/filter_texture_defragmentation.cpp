@@ -201,6 +201,11 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 	switch(ID(filter)) {
 	case FP_TEXTURE_DEFRAG:
 	{
+		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm) > 0 ||
+				vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(md.mm()->cm) > 0) {
+			throw MLException("Mesh has non-manifold vertices and/or faces. Texture map defragmentation filter requires manifoldness.");
+		}
+
 		MeshModel& mm = *(md.addNewMesh(md.mm()->cm, "texdefrag_" + currentModel.label()));
 		mm.updateDataMask(&currentModel);
 		for (const std::string& txtname : currentModel.cm.textures){
