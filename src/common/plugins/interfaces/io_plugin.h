@@ -79,7 +79,7 @@ public:
 	virtual std::list<FileFormat> exportFormats() const = 0;
 
 	/**
-	 * @brief If your plugin supports loading also image formats, re-implement
+	 * @brief If your plugin supports loading also images, re-implement
 	 * this function, returning the list of image formats supported by
 	 * your openImage function.
 	 */
@@ -89,11 +89,31 @@ public:
 	}
 
 	/**
-	 * @brief If your plugin supports saving also image formats, re-implement
+	 * @brief If your plugin supports saving also images, re-implement
 	 * this function, returning the list of image formats supported by
 	 * your saveImage function.
 	 */
 	virtual std::list<FileFormat> exportImageFormats() const
+	{
+		return std::list<FileFormat>();
+	}
+
+	/**
+	 * @brief If your plugin supports loading also projects, re-implement
+	 * this function, returning the list of project formats supported by
+	 * your openProject function.
+	 */
+	virtual std::list<FileFormat> importProjectFormats() const
+	{
+		return std::list<FileFormat>();
+	}
+
+	/**
+	 * @brief If your plugin supports saving also projects, re-implement
+	 * this function, returning the list of project formats supported by
+	 * your saveProject function.
+	 */
+	virtual std::list<FileFormat> exportProjectFormats() const
 	{
 		return std::list<FileFormat>();
 	}
@@ -236,8 +256,16 @@ public:
 		MeshModel &m, /** NOTE: this is going to be const MeshModel&: try to use only const functions!! **/
 		const int mask,
 		const RichParameterList & par,
-		vcg::CallBackPos *cb) = 0;
+		vcg::CallBackPos* cb = nullptr) = 0;
 
+	/**
+	 * @brief The openImage function is called by the framework everytime an image
+	 * needs to be loaded. Could be called when loading textures or rasters.
+	 * @param format: the extension of the format, e.g. "PNG"
+	 * @param fileName: the name of the file from which load the image (including its path)
+	 * @param cb: standard callback for reporting progresso in the loading
+	 * @return the loaded QImage
+	 */
 	virtual QImage openImage(
 		const QString& format,
 		const QString& /*fileName*/,
@@ -247,6 +275,14 @@ public:
 		return QImage();
 	};
 
+	/**
+	 * @brief The saveImage function is called by the framework everytime an image
+	 * needs to be saved (e.g. when saving a texture).
+	 * @param format: the extension of the format, e.g. "PNG"
+	 * @param fileName: the name of the file on which save the image (including its path)
+	 * @param image: the image to save in the given fileName
+	 * @param cb: standard callback for reporting progresso in the loading
+	 */
 	virtual void saveImage(
 			const QString& format,
 			const QString& /*fileName*/,
@@ -255,6 +291,32 @@ public:
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongSaveFormat(format);
+	}
+
+	/**
+	 * @brief The openProject function is called by the framework everytime a
+	 * project needs to be loaded.
+	 *
+	 * If the meshes contained in the project are saved in separate files and not
+	 * into the project, you should use the functions provided into the file
+	 * "common/utilities/load_save.h". These functions will take care to load
+	 * a mesh with any of the formats supported by meshlab.
+	 *
+	 * @param format: the extension of the format, e.g. "MLP"
+	 * @param fileName: the name of the file from which load the project (including its path)
+	 * @param md: MeshDocument on which store the content of the loaded project
+	 *            note: the document could not be empty!
+	 * @param cb: standard callback for reporting progresso in the loading
+	 * @return the list of MeshModel that have been loaded from the given project
+	 */
+	virtual std::list<MeshModel*> openProject(
+			const QString& format,
+			const QString& /*filename*/,
+			MeshDocument& /*md*/,
+			vcg::CallBackPos* /*cb*/ = nullptr)
+	{
+		wrongOpenFormat(format);
+		return std::list<MeshModel*>();
 	}
 
 	/**

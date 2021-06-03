@@ -98,6 +98,16 @@ bool IOPluginContainer::isOutputImageFormatSupported(const QString& outputFormat
 	return outputImageFormatToPluginMap.find(outputFormat.toLower()) != outputImageFormatToPluginMap.end();
 }
 
+bool IOPluginContainer::isInputProjectFormatSupported(const QString& inputFormat) const
+{
+	return inputProjectFormatToPluginMap.find(inputFormat.toLower()) != inputProjectFormatToPluginMap.end();
+}
+
+bool IOPluginContainer::isOutputProjectFormatSupported(const QString& outputFormat) const
+{
+	return outputImageFormatToPluginMap.find(outputFormat.toLower()) != outputProjectFormatToPluginMap.end();
+}
+
 IOPlugin* IOPluginContainer::inputMeshPlugin(const QString& inputFormat) const
 {
 	auto it = inputMeshFormatToPluginMap.find(inputFormat.toLower());
@@ -130,6 +140,22 @@ IOPlugin* IOPluginContainer::outputImagePlugin(const QString& outputFormat) cons
 	return nullptr;
 }
 
+IOPlugin* IOPluginContainer::inputProjectPlugin(const QString& inputFormat) const
+{
+	auto it = inputProjectFormatToPluginMap.find(inputFormat.toLower());
+	if (it != inputProjectFormatToPluginMap.end())
+		return *it;
+	return nullptr;
+}
+
+IOPlugin* IOPluginContainer::outputProjectPlugin(const QString& outputFormat) const
+{
+	auto it = outputProjectFormatToPluginMap.find(outputFormat.toLower());
+	if (it != outputProjectFormatToPluginMap.end())
+		return *it;
+	return nullptr;
+}
+
 QStringList IOPluginContainer::inputMeshFormatList() const
 {
 	return inputMeshFormatToPluginMap.keys();
@@ -148,6 +174,16 @@ QStringList IOPluginContainer::inputImageFormatList() const
 QStringList IOPluginContainer::outputImageFormatList() const
 {
 	return outputImageFormatToPluginMap.keys();
+}
+
+QStringList IOPluginContainer::inputProjectFormatList() const
+{
+	return inputProjectFormatToPluginMap.keys();
+}
+
+QStringList IOPluginContainer::outputProjectFormatList() const
+{
+	return outputProjectFormatToPluginMap.keys();
 }
 
 IOPluginContainer::IOPluginRangeIterator IOPluginContainer::ioPluginIterator(bool iterateAlsoDisabledPlugins) const

@@ -67,17 +67,25 @@ public:
 	IOPlugin* outputMeshPlugin(const QString& outputFormat) const;
 	IOPlugin* inputImagePlugin(const QString inputFormat) const;
 	IOPlugin* outputImagePlugin(const QString& outputFormat) const;
+	IOPlugin* inputProjectPlugin(const QString& inputFormat) const;
+	IOPlugin* outputProjectPlugin(const QString& outputFormat) const;
 	bool isInputMeshFormatSupported(const QString inputFormat) const;
 	bool isOutputMeshFormatSupported(const QString outputFormat) const;
 	bool isInputImageFormatSupported(const QString inputFormat) const;
 	bool isOutputImageFormatSupported(const QString outputFormat) const;
+	bool isInputProjectFormatSupported(const QString inputFormat) const;
+	bool isOutputProjectFormatSupported(const QString outputFormat) const;
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
 	QStringList inputImageFormatList() const;
 	QStringList outputImageFormatList() const;
+	QStringList inputProjectFormatList() const;
+	QStringList outputProjectFormatList() const;
 	QStringList inputMeshFormatListDialog() const;
 	QStringList outputMeshFormatListDialog() const;
 	QStringList inputImageFormatListDialog() const;
+	QStringList inputProjectFormatListDialog() const;
+	QStringList outputProjectFormatListDialog() const;
 	
 	MeshLabPlugin* operator [](unsigned int i) const;
 
@@ -113,6 +121,12 @@ private:
 
 	template <typename RangeIterator>
 	static QStringList inputImageFormatListDialog(RangeIterator iterator);
+
+	template <typename RangeIterator>
+	static QStringList inputProjectFormatListDialog(RangeIterator iterator);
+
+	template <typename RangeIterator>
+	static QStringList outputProjectFormatListDialog(RangeIterator iterator);
 };
 
 class PluginManager::PluginRangeIterator
