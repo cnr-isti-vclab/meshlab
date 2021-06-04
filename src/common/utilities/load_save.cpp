@@ -336,10 +336,11 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 	// End of EXIF reading
 }
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QStringList& filenames,
 		IOPlugin* ioPlugin,
 		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
 		GLLogStream* log,
 		vcg::CallBackPos* cb)
 {
@@ -347,10 +348,10 @@ std::list<MeshModel*> loadProject(
 	QString extension = fi.suffix();
 
 	ioPlugin->setLog(log);
-	return ioPlugin->openProject(extension, filenames, md, cb);
+	return ioPlugin->openProject(extension, filenames, md, rendOpt, cb);
 }
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QStringList& filenames,
 		MeshDocument& md,
 		GLLogStream* log,
@@ -375,11 +376,11 @@ std::list<MeshModel*> loadProject(
 				") is different from the expected one (" +
 				QString::number(additionalFiles.size() +1));
 	}
-
-	return loadProject(filenames, ioPlugin, md, log, cb);
+	std::vector<MLRenderingData> rendOpt;
+	return loadProject(filenames, ioPlugin, md, rendOpt, log, cb);
 }
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QString& filename,
 		MeshDocument& md,
 		GLLogStream* log,

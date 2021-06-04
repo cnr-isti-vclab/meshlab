@@ -10,12 +10,12 @@
 #include <common/ml_document/mesh_document.h>
 #include <common/utilities/load_save.h>
 
-std::list<MeshModel*> loadALN(
+std::vector<MeshModel*> loadALN(
 		const QString& filename,
 		MeshDocument& md,
 		vcg::CallBackPos* cb)
 {
-	std::list<MeshModel*> meshList;
+	std::vector<MeshModel*> meshList;
 	std::vector<RangeMap> rmv;
 	int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(filename));
 	if(retVal != ALNParser::NoError) {
@@ -40,14 +40,14 @@ std::list<MeshModel*> loadALN(
 	return meshList;
 }
 
-std::list<MeshModel*> loadOUT(
+std::vector<MeshModel*> loadOUT(
 		const QString& filename,
 		const QString& imageListFile,
 		MeshDocument& md,
 		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos*)
 {
-	std::list<MeshModel*> meshList;
+	std::vector<MeshModel*> meshList;
 	unloadedImgList.clear();
 	QFileInfo fi(filename);
 
@@ -105,13 +105,13 @@ std::list<MeshModel*> loadOUT(
 	return meshList;
 }
 
-std::list<MeshModel*> loadNVM(
+std::vector<MeshModel*> loadNVM(
 		const QString& filename,
 		MeshDocument& md,
 		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos*)
 {
-	std::list<MeshModel*> meshList;
+	std::vector<MeshModel*> meshList;
 	unloadedImgList.clear();
 
 	QFileInfo fi(filename);
@@ -153,13 +153,14 @@ std::list<MeshModel*> loadNVM(
 	return meshList;
 }
 
-std::list<MeshModel*> loadMLP(
+std::vector<MeshModel*> loadMLP(
 		const QString& filename,
 		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
 		std::vector<std::string>& unloadedImgList,
-		vcg::CallBackPos* cb)
+		vcg::CallBackPos*)
 {
-	std::list<MeshModel*> meshList;
+	std::vector<MeshModel*> meshList;
 	unloadedImgList.clear();
 
 	QFile qf(filename);
@@ -170,8 +171,6 @@ std::list<MeshModel*> loadMLP(
 
 	if (!qf.open(QIODevice::ReadOnly))
 		throw MLException("File not found.");
-
-	QString project_path = qfInfo.absoluteFilePath();
 
 	QDomDocument doc("MeshLabDocument");    //It represents the XML document
 
@@ -187,7 +186,8 @@ std::list<MeshModel*> loadMLP(
 	//Devices
 	while (!node.isNull()) {
 		if (QString::compare(node.nodeName(), "MeshGroup") == 0) {
-			QDomNode mesh; QString filen, label;
+			QDomNode mesh;
+			QString filen, label;
 			mesh = node.firstChild();
 			while (!mesh.isNull()) {
 				//return true;
@@ -252,6 +252,41 @@ std::list<MeshModel*> loadMLP(
 					}
 				}
 
+				QDomNode renderingOpt = mesh.firstChildElement("RenderingOption");
+				if (!renderingOpt.isNull())
+				{
+					QString value = renderingOpt.firstChild().nodeValue();
+					MLRenderingData::GLOptionsType opt;
+					if (renderingOpt.attributes().contains("pointSize"))
+						opt._perpoint_pointsize = renderingOpt.attributes().namedItem("pointSize").nodeValue().toFloat();
+					if (renderingOpt.attributes().contains("wireWidth"))
+						opt._perwire_wirewidth = renderingOpt.attributes().namedItem("wireWidth").nodeValue().toFloat();
+					if (renderingOpt.attributes().contains("boxColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("boxColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perbbox_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("pointColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("pointColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perpoint_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("wireColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("wireColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perwire_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("solidColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("solidColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._persolid_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					MLRenderingData data;
+					data.set(opt);
+					if (data.deserialize(value.toStdString()))
+						rendOpt.push_back(data);
+				}
+
 				mesh = mesh.nextSibling();
 			}
 		}
@@ -293,6 +328,10 @@ std::list<MeshModel*> loadMLP(
 
 	QDir::setCurrent(tmpDir.absolutePath());
 	qf.close();
+
+	if (rendOpt.size() != meshList.size()){
+		std::cerr << "cannot load rend options\n";
+	}
 
 	return meshList;
 }

@@ -31,6 +31,8 @@
 #include "../../utilities/file_format.h"
 #include "../../ml_document/raster_model.h"
 
+class MLRenderingData;
+
 /** 
  * @brief The IOPlugin is the base class for meshes, images and projects loading
  * and saving.
@@ -341,17 +343,22 @@ public:
 	 * @param fileName: the name of the file from which load the project (including its path)
 	 * @param md: MeshDocument on which store the content of the loaded project
 	 *            note: the document could not be empty!
+	 * @param rendOpt: rendering options that may be loaded from the project file,
+	 *        if it supports them. They are not required. If you can support
+	 *        rendering options, the rendOpt vector must have the same size of
+	 *        the MeshModel vector returned by the openProject function.
 	 * @param cb: standard callback for reporting progresso in the loading
 	 * @return the list of MeshModel that have been loaded from the given project
 	 */
-	virtual std::list<MeshModel*> openProject(
+	virtual std::vector<MeshModel*> openProject(
 			const QString& format,
 			const QStringList& /*filenames*/,
 			MeshDocument& /*md*/,
+			std::vector<MLRenderingData>& /*rendOpt*/,
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongOpenFormat(format);
-		return std::list<MeshModel*>();
+		return std::vector<MeshModel*>();
 	}
 
 	/**************************

@@ -78,15 +78,18 @@ public:
 			int quality,
 			vcg::CallBackPos* cb);
 
-	std::list<MeshModel*> openProject(
+	std::vector<MeshModel*> openProject(
 			const QString& format,
 			const QStringList& filenames,
 			MeshDocument& md,
+			std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* cb);
 
 	std::list<FileFormat> projectFileRequiresAdditionalFiles(
-				const QString& format,
-				const QString& filename);
+			const QString& format,
+			const QString& filename);
+
+
 
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);

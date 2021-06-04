@@ -72,20 +72,21 @@ void loadRaster(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QStringList& filenames,
 		IOPlugin* ioPlugin,
 		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QStringList& filenames,
 		MeshDocument& md,
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
 
-std::list<MeshModel*> loadProject(
+std::vector<MeshModel*> loadProject(
 		const QString& filename,
 		MeshDocument& md,
 		GLLogStream* log = nullptr,

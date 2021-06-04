@@ -563,13 +563,15 @@ void BaseMeshIOPlugin::saveImage(
 	}
 }
 
-std::list<MeshModel*> BaseMeshIOPlugin::openProject(
+std::vector<MeshModel*> BaseMeshIOPlugin::openProject(
 		const QString& format,
 		const QStringList& filenames,
 		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
 		CallBackPos* cb)
 {
-	std::list<MeshModel*> meshList;
+	std::vector<MeshModel*> meshList;
+	rendOpt.clear();
 	if (format.toUpper() == "ALN") {
 		meshList = loadALN(filenames.first(), md, cb);
 	}
@@ -583,7 +585,7 @@ std::list<MeshModel*> BaseMeshIOPlugin::openProject(
 			meshList = loadNVM(filenames.first(), md, unloadedImgs, cb);
 		}
 		else if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
-			meshList = loadMLP(filenames.first(), md, unloadedImgs, cb);
+			meshList = loadMLP(filenames.first(), md, rendOpt, unloadedImgs, cb);
 		}
 		if (unloadedImgs.size() > 0){
 			QString msg = "Unable to load the following " +
