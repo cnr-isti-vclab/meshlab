@@ -405,6 +405,7 @@ public:
 			const QString& /*fileName*/,
 			const RichParameterList& /*params*/,
 			const MeshDocument& /*md*/,
+			const std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongSaveFormat(format);

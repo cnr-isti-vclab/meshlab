@@ -78,6 +78,10 @@ public:
 			int quality,
 			vcg::CallBackPos* cb);
 
+	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& format,
+			const QString& filename);
+
 	std::vector<MeshModel*> openProject(
 			const QString& format,
 			const QStringList& filenames,
@@ -85,11 +89,17 @@ public:
 			std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* cb);
 
-	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+	RichParameterList initSaveProjectParameter(
+				const QString& format,
+				const MeshDocument& md);
+
+	virtual void saveProject(
 			const QString& format,
-			const QString& filename);
-
-
+			const QString& fileName,
+			const RichParameterList& params,
+			const MeshDocument& md,
+			const std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* /*cb*/ = nullptr);
 
 	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);

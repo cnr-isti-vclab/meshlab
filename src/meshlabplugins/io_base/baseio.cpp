@@ -23,6 +23,7 @@
 
 #include "baseio.h"
 #include "load_project.h"
+#include "save_project.h"
 
 #include <QTextStream>
 
@@ -563,6 +564,17 @@ void BaseMeshIOPlugin::saveImage(
 	}
 }
 
+std::list<FileFormat> BaseMeshIOPlugin::projectFileRequiresAdditionalFiles(
+		const QString& format,
+		const QString&)
+{
+	if (format.toUpper() == "OUT"){
+		return {FileFormat("Image List File", "TXT")};
+	}
+	else
+		return {};
+}
+
 std::vector<MeshModel*> BaseMeshIOPlugin::openProject(
 		const QString& format,
 		const QStringList& filenames,
@@ -612,15 +624,27 @@ std::vector<MeshModel*> BaseMeshIOPlugin::openProject(
 	return meshList;
 }
 
-std::list<FileFormat> BaseMeshIOPlugin::projectFileRequiresAdditionalFiles(
+RichParameterList BaseMeshIOPlugin::initSaveProjectParameter(
 		const QString& format,
-		const QString&)
+		const MeshDocument& md)
 {
-	if (format.toUpper() == "OUT"){
-		return {FileFormat("Image List File", "TXT")};
+	return RichParameterList();
+}
+
+void BaseMeshIOPlugin::saveProject(
+		const QString& format,
+		const QString& fileName,
+		const RichParameterList& params,
+		const MeshDocument& md,
+		const std::vector<MLRenderingData>& rendOpt,
+		CallBackPos* cb)
+{
+	if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
+		saveMLP(fileName, md, false, false, rendOpt, cb);
 	}
-	else
-		return {};
+	else {
+		wrongSaveFormat(format);
+	}
 }
 
 /*

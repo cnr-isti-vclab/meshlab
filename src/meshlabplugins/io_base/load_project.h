@@ -8,7 +8,8 @@ std::vector<MeshModel*> loadALN(
 		MeshDocument& md,
 		vcg::CallBackPos* cb);
 
-std::vector<MeshModel*> loadOUT(const QString& filename,
+std::vector<MeshModel*> loadOUT(
+		const QString& filename,
 		const QString& imageListFile,
 		MeshDocument& md,
 		std::vector<std::string>& unloadedImgList,
@@ -20,7 +21,8 @@ std::vector<MeshModel*> loadNVM(
 		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos* cb);
 
-std::vector<MeshModel*> loadMLP(const QString& filename,
+std::vector<MeshModel*> loadMLP(
+		const QString& filename,
 		MeshDocument& md,
 		std::vector<MLRenderingData>& rendOpt,
 		std::vector<std::string>& unloadedImgList,

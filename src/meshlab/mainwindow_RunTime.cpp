@@ -1666,7 +1666,9 @@ void MainWindow::saveProject()
 			getRenderingData(mp->id(), ml);
 			rendOpt.insert(std::pair<int, MLRenderingData>(mp->id(), ml));
 		}
-		ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
+		meshlab::saveProject(fileName, *meshDoc());
+		ret = true;
+		//ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
 	}
 	
 	if (saveAllFile->isChecked())

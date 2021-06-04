@@ -92,6 +92,10 @@ std::vector<MeshModel*> loadProject(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
 
+void saveProject(
+		const QString& filename,
+		const MeshDocument& md);
+
 }
 
 #endif // MESHLAB_LOAD_SAVE_H

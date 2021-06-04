@@ -360,7 +360,7 @@ std::vector<MeshModel*> loadProject(
 	QFileInfo fi(filenames.first());
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	IOPlugin *ioPlugin = pm.outputImagePlugin(extension);
+	IOPlugin *ioPlugin = pm.inputProjectPlugin(extension);
 
 	if (ioPlugin == nullptr)
 		throw MLException(
@@ -389,6 +389,26 @@ std::vector<MeshModel*> loadProject(
 	QStringList fnms;
 	fnms.push_back(filename);
 	return loadProject(fnms, md, log, cb);
+}
+
+void saveProject(
+		const QString& filename,
+		const MeshDocument& md)
+{
+	QFileInfo fi(filename);
+	QString extension = fi.suffix();
+
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.outputProjectPlugin(extension);
+
+	if (ioPlugin == nullptr)
+		throw MLException(
+				"Project " + filename + " cannot be loaded. Your MeshLab version "
+				"has not plugin to load " + extension + " file format.");
+
+	RichParameterList rpl;
+	std::vector<MLRenderingData> renderData;
+	ioPlugin->saveProject(extension, filename, rpl, md, renderData);
 }
 
 }
