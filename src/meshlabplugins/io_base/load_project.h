@@ -17,6 +17,7 @@ std::list<MeshModel*> loadOUT(const QString& filename,
 std::list<MeshModel*> loadNVM(
 		const QString& filename,
 		MeshDocument& md,
+		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos* cb);
 
 #endif // LOAD_PROJECT_H

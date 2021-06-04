@@ -76,7 +76,6 @@ set(HEADERS
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
-	meshlabdocumentbundler.h
 	meshlabdocumentxml.h
 	ml_selection_buffers.h
 	ml_thread_safe_memory_info.h
@@ -118,7 +117,6 @@ set(SOURCES
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
-	meshlabdocumentbundler.cpp
 	meshlabdocumentxml.cpp
 	ml_selection_buffers.cpp
 	ml_thread_safe_memory_info.cpp

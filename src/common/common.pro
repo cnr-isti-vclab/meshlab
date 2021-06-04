@@ -118,7 +118,6 @@ SOURCES += \
 	mlapplication.cpp \
 	searcher.cpp \
 	meshlabdocumentxml.cpp \
-	meshlabdocumentbundler.cpp \
 	ml_selection_buffers.cpp \
 	$$MESHLAB_EXTERNAL_DIRECTORY/easyexif/exif.cpp
 
