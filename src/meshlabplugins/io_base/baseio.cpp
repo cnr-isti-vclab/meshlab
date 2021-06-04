@@ -573,13 +573,17 @@ std::list<MeshModel*> BaseMeshIOPlugin::openProject(
 	if (format.toUpper() == "ALN") {
 		meshList = loadALN(filenames.first(), md, cb);
 	}
-	else if (format.toUpper() == "OUT" || format.toUpper() == "NVM") {
+	else if (format.toUpper() == "OUT" || format.toUpper() == "NVM" ||
+			 format.toUpper() =="MLP" || format.toUpper() == "MLB") {
 		std::vector<std::string> unloadedImgs;
 		if (format.toUpper() == "OUT") {
 			meshList = loadOUT(filenames.first(), filenames[1], md, unloadedImgs, cb);
 		}
 		else if (format.toUpper() == "NVM"){
 			meshList = loadNVM(filenames.first(), md, unloadedImgs, cb);
+		}
+		else if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
+			meshList = loadMLP(filenames.first(), md, unloadedImgs, cb);
 		}
 		if (unloadedImgs.size() > 0){
 			QString msg = "Unable to load the following " +
@@ -599,6 +603,7 @@ std::list<MeshModel*> BaseMeshIOPlugin::openProject(
 			reportWarning(msg);
 		}
 	}
+
 	else {
 		wrongOpenFormat(format);
 	}

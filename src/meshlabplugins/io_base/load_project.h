@@ -20,4 +20,10 @@ std::list<MeshModel*> loadNVM(
 		std::vector<std::string>& unloadedImgList,
 		vcg::CallBackPos* cb);
 
+std::list<MeshModel*> loadMLP(
+		const QString& filename,
+		MeshDocument& md,
+		std::vector<std::string>& unloadedImgList,
+		vcg::CallBackPos* cb);
+
 #endif // LOAD_PROJECT_H

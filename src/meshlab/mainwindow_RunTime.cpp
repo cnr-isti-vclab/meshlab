@@ -1774,24 +1774,8 @@ bool MainWindow::openProject(QString fileName, bool append)
 
 	if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
 	{
-		std::map<int, MLRenderingData> rendOpt;
-		if (!MeshDocumentFromXML(*meshDoc(), fileName, (QString(fi.suffix()).toLower() == "mlb"), rendOpt))
-		{
-			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
-			return false;
-		}
+		loadMLPRenderingOptions(fileName, meshList);
 		GLA()->updateMeshSetVisibilities();
-		for (MeshModel* mm : meshDoc()->meshIterator())
-		{
-			QString fullPath = mm->fullName();
-			//meshDoc()->setBusy(true);
-			Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
-			MLRenderingData* ptr = NULL;
-			if (rendOpt.find(mm->id()) != rendOpt.end())
-				ptr = &rendOpt[mm->id()];
-			if (!loadMeshWithStandardParams(fullPath, mm, trm, false, ptr))
-				meshDoc()->delMesh(mm);
-		}
 	}
 
 	meshDoc()->setBusy(false);
@@ -1811,6 +1795,83 @@ bool MainWindow::openProject(QString fileName, bool append)
 	showLayerDlg(visiblelayer || (meshDoc()->meshNumber() > 0));
 	
 	return true;
+}
+
+void MainWindow::loadMLPRenderingOptions(QString fileName, const std::list<MeshModel*>& meshLsit)
+{
+	std::map<int, MLRenderingData> rendOpt;
+	QFile qf(fileName);
+	QFileInfo qfInfo(fileName);
+	QDir tmpDir = QDir::current();
+	QDir::setCurrent(qfInfo.absoluteDir().absolutePath());
+	if (!qf.open(QIODevice::ReadOnly))
+		return;
+	QString project_path = qfInfo.absoluteFilePath();
+
+	QDomDocument doc("MeshLabDocument");    //It represents the XML document
+	if (!doc.setContent(&qf))
+		return;
+
+	QDomElement root = doc.documentElement();
+
+	QDomNode node;
+
+	node = root.firstChild();
+	//Devices
+	while (!node.isNull()) {
+		if (QString::compare(node.nodeName(), "MeshGroup") == 0)
+		{
+			QDomNode mesh;
+			mesh = node.firstChild();
+			auto it = meshLsit.begin();
+			while (!mesh.isNull()) {
+				QDomNode renderingOpt = mesh.firstChildElement("RenderingOption");
+				if (!renderingOpt.isNull())
+				{
+					QString value = renderingOpt.firstChild().nodeValue();
+					MLRenderingData::GLOptionsType opt;
+					if (renderingOpt.attributes().contains("pointSize"))
+						opt._perpoint_pointsize = renderingOpt.attributes().namedItem("pointSize").nodeValue().toFloat();
+					if (renderingOpt.attributes().contains("wireWidth"))
+						opt._perwire_wirewidth = renderingOpt.attributes().namedItem("wireWidth").nodeValue().toFloat();
+					if (renderingOpt.attributes().contains("boxColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("boxColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perbbox_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("pointColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("pointColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perpoint_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("wireColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("wireColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._perwire_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					if (renderingOpt.attributes().contains("solidColor"))
+					{
+						QStringList values = renderingOpt.attributes().namedItem("solidColor").nodeValue().split(" ", QString::SkipEmptyParts);
+						opt._persolid_fixed_color = vcg::Color4b(values[0].toInt(), values[1].toInt(), values[2].toInt(), values[3].toInt());
+					}
+					MLRenderingData data;
+					data.set(opt);
+					if (data.deserialize(value.toStdString()))
+						rendOpt.insert(std::pair<int, MLRenderingData>((*it)->id(), data));
+				}
+				mesh = mesh.nextSibling();
+				++it;
+			}
+		}
+		node = node.nextSibling();
+	}
+	for (MeshModel* mm : meshDoc()->meshIterator())
+	{
+		MLRenderingData* ptr = nullptr;
+		if (rendOpt.find(mm->id()) != rendOpt.end())
+			ptr = &rendOpt[mm->id()];
+		computeRenderingDataOnLoading(mm, false, ptr);
+	}
 }
 
 bool MainWindow::appendProject(QString fileName)
