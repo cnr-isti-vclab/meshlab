@@ -32,33 +32,34 @@
 #include "../../ml_document/raster_model.h"
 
 /** 
- * @brief The IOPlugin is the base class for mesh or image loading and saving.
+ * @brief The IOPlugin is the base class for meshes, images and projects loading
+ * and saving.
  *
  * Provides the base functions to open:
  * - a mesh file (open);
- * - [todo] a project file;
- * - a raster file (openRaster);
+ * - a project file (openProject);
  * - an image file (openImage);
  *
  * and the base functions to save:
  * - a mesh file (save);
- * - [todo] a project file;
+ * - a project file (saveProject);
  * - an image file (saveImage);
  *
- * You can implement just a subset of these functions.
- * Provide the list of file formats supported by your plugin by implementing
- * the functions:
- * - importFormats()
- * - exportFormats()
- * - importRasterFormats()
- * - importImageFormats()
- * - exportImageFormats()
+ * You can tell which formats your plugin will be able to open or save by
+ * re-implementing the following functions
+ * - import<type>Formats()
+ * - export<type>Formats()
+ * where <type> can be [todo] Mesh, Image or Project.
  */
 class IOPlugin : virtual public MeshLabPlugin, virtual public MeshLabPluginLogger
 {
 public:
 	IOPlugin() : MeshLabPluginLogger() { }
 	virtual ~IOPlugin() { }
+
+	/***********************
+	 * Open Mesh Functions *
+	 ***********************/
 
 	/**
 	 * @brief The importFormats function returns a list of all the
@@ -70,57 +71,8 @@ public:
 	virtual std::list<FileFormat> importFormats() const = 0;
 
 	/**
-	 * @brief The exportFormats function returns a list of all the
-	 * output file formats supported by the plugin.
-	 * This function must be implemented on any IO plugin.
-	 * If yout plugin does not export any mesh format, just return an
-	 * empty list.
-	 */
-	virtual std::list<FileFormat> exportFormats() const = 0;
-
-	/**
-	 * @brief If your plugin supports loading also images, re-implement
-	 * this function, returning the list of image formats supported by
-	 * your openImage function.
-	 */
-	virtual std::list<FileFormat> importImageFormats() const
-	{
-		return std::list<FileFormat>();
-	}
-
-	/**
-	 * @brief If your plugin supports saving also images, re-implement
-	 * this function, returning the list of image formats supported by
-	 * your saveImage function.
-	 */
-	virtual std::list<FileFormat> exportImageFormats() const
-	{
-		return std::list<FileFormat>();
-	}
-
-	/**
-	 * @brief If your plugin supports loading also projects, re-implement
-	 * this function, returning the list of project formats supported by
-	 * your openProject function.
-	 */
-	virtual std::list<FileFormat> importProjectFormats() const
-	{
-		return std::list<FileFormat>();
-	}
-
-	/**
-	 * @brief If your plugin supports saving also projects, re-implement
-	 * this function, returning the list of project formats supported by
-	 * your saveProject function.
-	 */
-	virtual std::list<FileFormat> exportProjectFormats() const
-	{
-		return std::list<FileFormat>();
-	}
-
-	/**
 	 * @brief The initPreOpenParameter function is called to initialize the list
-	 * of additional parameters that a OPENING plugin could require. It is
+	 * of additional parameters that opening a mesh could require. It is
 	 * called by the framework BEFORE the actual mesh loading to determine how
 	 * to parse the input file. The instanced parameters are then passed to the
 	 * open at the loading time.
@@ -133,33 +85,6 @@ public:
 			RichParameterList& /*parameters*/)
 	{
 	}
-
-	/**
-	 * @brief The initSaveParameter function is called to initialize the list
-	 * of additional parameters that a SAVING filter could require. It is called
-	 * by the framework after the output format is selected by the user.
-	 * typical example: ascii or binary format for ply or stl
-	 * If you do not need any additional parameters, simply do not implement
-	 * this function.
-	 */
-	virtual void initSaveParameter(
-			const QString& /*format*/,
-			const MeshModel& /*m*/,
-			RichParameterList& /*par*/)
-	{
-	}
-
-	/**
-	 * @brief The exportMaskCapability function tells to the framework which
-	 * export capabilities are supported by the given format (e.g. if the format
-	 * supports saving face colors, vertex quality...).
-	 * It also tells to the framework which of these export capabilities are
-	 * set by default.
-	 */
-	virtual void exportMaskCapability(
-			const QString &format,
-			int& capability,
-			int& defaultBits) const = 0;
 
 	/**
 	 * @brief this function returns the number of meshes that the open function
@@ -207,12 +132,12 @@ public:
 	 * @param cb: standard callback for reporting progress in the loading
 	 */
 	virtual void open(
-		const QString &format,
-		const QString &fileName,
-		const std::list<MeshModel*>& meshModelList,
-		std::list<int>& maskList,
-		const RichParameterList & par,
-		vcg::CallBackPos *cb = nullptr);
+			const QString &format,
+			const QString &fileName,
+			const std::list<MeshModel*>& meshModelList,
+			std::list<int>& maskList,
+			const RichParameterList & par,
+			vcg::CallBackPos *cb = nullptr);
 
 	/**
 	 * @brief The open function is called by the framework everytime a mesh is
@@ -230,12 +155,52 @@ public:
 	 * @param cb: standard callback for reporting progress in the loading
 	 */
 	virtual void open(
-		const QString &format,
-		const QString &fileName,
-		MeshModel &m,
-		int &mask,
-		const RichParameterList & par,
-		vcg::CallBackPos *cb = nullptr) = 0;
+			const QString &format,
+			const QString &fileName,
+			MeshModel &m,
+			int &mask,
+			const RichParameterList & par,
+			vcg::CallBackPos *cb = nullptr) = 0;
+
+	/***********************
+	 * Save Mesh Functions *
+	 ***********************/
+
+	/**
+	 * @brief The exportFormats function returns a list of all the
+	 * output file formats supported by the plugin.
+	 * This function must be implemented on any IO plugin.
+	 * If yout plugin does not export any mesh format, just return an
+	 * empty list.
+	 */
+	virtual std::list<FileFormat> exportFormats() const = 0;
+
+	/**
+	 * @brief The exportMaskCapability function tells to the framework which
+	 * export capabilities are supported by the given format (e.g. if the format
+	 * supports saving face colors, vertex quality...).
+	 * It also tells to the framework which of these export capabilities are
+	 * set by default.
+	 */
+	virtual void exportMaskCapability(
+			const QString &format,
+			int& capability,
+			int& defaultBits) const = 0;
+
+	/**
+	 * @brief The initSaveParameter function is called to initialize the list
+	 * of additional parameters that saving a mesh could require. It is called
+	 * by the framework after the output format is selected by the user.
+	 * typical example: ascii or binary format for ply or stl
+	 * If you do not need any additional parameters, simply do not implement
+	 * this function.
+	 */
+	virtual void initSaveParameter(
+			const QString& /*format*/,
+			const MeshModel& /*m*/,
+			RichParameterList& /*par*/)
+	{
+	}
 
 	/**
 	 * @brief The save function is called by the framework everytime a mesh is
@@ -251,12 +216,26 @@ public:
 	 * @param cb: standard callback for reporting progress in the saving
 	 */
 	virtual void save(
-		const QString &format,
-		const QString &fileName,
-		MeshModel &m, /** NOTE: this is going to be const MeshModel&: try to use only const functions!! **/
-		const int mask,
-		const RichParameterList & par,
-		vcg::CallBackPos* cb = nullptr) = 0;
+			const QString &format,
+			const QString &fileName,
+			MeshModel &m, /** NOTE: this is going to be const MeshModel&: try to use only const functions!! **/
+			const int mask,
+			const RichParameterList & par,
+			vcg::CallBackPos* cb = nullptr) = 0;
+
+	/************************
+	 * Open Image Functions *
+	 ************************/
+
+	/**
+	 * @brief If your plugin supports loading also images, re-implement
+	 * this function, returning the list of image formats supported by
+	 * your openImage function.
+	 */
+	virtual std::list<FileFormat> importImageFormats() const
+	{
+		return std::list<FileFormat>();
+	}
 
 	/**
 	 * @brief The openImage function is called by the framework everytime an image
@@ -267,13 +246,27 @@ public:
 	 * @return the loaded QImage
 	 */
 	virtual QImage openImage(
-		const QString& format,
-		const QString& /*fileName*/,
-		vcg::CallBackPos* /*cb*/ = nullptr)
+			const QString& format,
+			const QString& /*fileName*/,
+			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongOpenFormat(format);
 		return QImage();
 	};
+
+	/************************
+	 * Save Image Functions *
+	 ************************/
+
+	/**
+	 * @brief If your plugin supports saving also images, re-implement
+	 * this function, returning the list of image formats supported by
+	 * your saveImage function.
+	 */
+	virtual std::list<FileFormat> exportImageFormats() const
+	{
+		return std::list<FileFormat>();
+	}
 
 	/**
 	 * @brief The saveImage function is called by the framework everytime an image
@@ -292,6 +285,41 @@ public:
 	{
 		wrongSaveFormat(format);
 	}
+
+	/**************************
+	 * Open Project Functions *
+	 **************************/
+
+	/**
+	 * @brief If your plugin supports loading also projects, re-implement
+	 * this function, returning the list of project formats supported by
+	 * your openProject function.
+	 */
+	virtual std::list<FileFormat> importProjectFormats() const
+	{
+		return std::list<FileFormat>();
+	}
+
+	/**
+	 * @brief some project file formats require the load of more than one file
+	 * (e.g. bundler.out requires also a txt containing raster infos).
+	 *
+	 * If this is your case, you should implement this returning a list of
+	 * *FileFormats* for each additional file that should be loaded.
+	 * Then, the framework will ask the user to select the additional required
+	 * files. Leaving the returned list empty means that the format of the
+	 * project does not need additional files to be loaded.
+	 *
+	 * The list of files will then passed to the user in the openProject.
+	 *
+	 * @return
+	 */
+	virtual std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& /*format*/,
+			const QString& /*filename*/)
+	{
+		return std::list<FileFormat>();
+	};
 
 	/**
 	 * @brief The openProject function is called by the framework everytime a
@@ -326,26 +354,58 @@ public:
 		return std::list<MeshModel*>();
 	}
 
+	/**************************
+	 * Save Project Functions *
+	 **************************/
+
 	/**
-	 * @brief some project file formats require the load of more than one file
-	 * (e.g. bundler.out requires also a txt containing raster infos).
-	 *
-	 * If this is your case, you should implement this returning a list of
-	 * *FileFormats* for each additional file that should be loaded.
-	 * Then, the framework will ask the user to select the additional required
-	 * files. Leaving the returned list empty means that the format of the
-	 * project does not need additional files to be loaded.
-	 *
-	 * The list of files will then passed to the user in the openProject.
-	 *
-	 * @return
+	 * @brief If your plugin supports saving also projects, re-implement
+	 * this function, returning the list of project formats supported by
+	 * your saveProject function.
 	 */
-	virtual std::list<FileFormat> projectFileRequiresAdditionalFiles(
-			const QString& /*format*/,
-			const QString& /*filename*/)
+	virtual std::list<FileFormat> exportProjectFormats() const
 	{
 		return std::list<FileFormat>();
-	};
+	}
+
+	/**
+	 * @brief The initSaveProjectParameter function is called to initialize the
+	 * list of additional parameters that saving a project could require. It is
+	 * called by the framework after the output format is selected by the user.
+	 * typical example: saving or not saving non-visible layers
+	 * If you do not need any additional parameters, simply do not implement
+	 * this function.
+	 */
+	virtual RichParameterList initSaveProjectParameter(
+			const QString& /*format*/,
+			const MeshDocument& /*md*/)
+	{
+		return RichParameterList();
+	}
+
+	/**
+	 * @brief The saveProject function is called by the framework everytime a
+	 * project is saved.
+	 * @param format: the extension of the format e.g. "MLP"
+	 * @param fileName: the name of the file on which save the project md
+	 *        (including its path)
+	 * @param params: the parameters that have been set in the initSaveProjectParameter()
+	 * @param md: the MeshDocument to be saved in the file
+	 * @param cb: standard callback for reporting progress in the saving
+	 */
+	virtual void saveProject(
+			const QString& format,
+			const QString& /*fileName*/,
+			const RichParameterList& /*params*/,
+			const MeshDocument& /*md*/,
+			vcg::CallBackPos* /*cb*/ = nullptr)
+	{
+		wrongSaveFormat(format);
+	}
+
+	/***************************
+	 * Other utility Functions *
+	 ***************************/
 
 	/**
 	 * @brief The reportWarning function should be used everytime that a
@@ -373,14 +433,13 @@ public:
 
 	/**
 	 * @brief The warningMessageString is invoked by the framework after the
-	 * execution of load/save function. It returns the warning string containing
+	 * execution of load/save functions. It returns the warning string containing
 	 * all the warinings produced by the function, and it clears the string.
 	 */
 	QString warningMessageString() const;
 
 private:
 	mutable QString warnString;
-
 };
 
 #define IO_PLUGIN_IID "vcg.meshlab.IOPlugin/1.0"
