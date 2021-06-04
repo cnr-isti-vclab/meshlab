@@ -8,7 +8,6 @@
 
 #include <common/ml_document/mesh_document.h>
 #include <common/utilities/load_save.h>
-#include <common/meshlabdocumentbundler.h>
 
 std::list<MeshModel*> loadALN(
 		const QString& filename,
