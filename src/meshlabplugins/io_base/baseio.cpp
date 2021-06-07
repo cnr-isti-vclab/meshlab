@@ -624,23 +624,19 @@ std::vector<MeshModel*> BaseMeshIOPlugin::openProject(
 	return meshList;
 }
 
-RichParameterList BaseMeshIOPlugin::initSaveProjectParameter(
-		const QString& format,
-		const MeshDocument& md)
-{
-	return RichParameterList();
-}
-
 void BaseMeshIOPlugin::saveProject(
 		const QString& format,
 		const QString& fileName,
-		const RichParameterList& params,
 		const MeshDocument& md,
+		bool onlyVisibleMeshes,
 		const std::vector<MLRenderingData>& rendOpt,
 		CallBackPos* cb)
 {
-	if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
-		saveMLP(fileName, md, false, rendOpt, cb);
+	if (format.toUpper() == "MLP" || format.toUpper() == "MLB") {
+		saveMLP(fileName, md, onlyVisibleMeshes, rendOpt, cb);
+	}
+	else if (format.toUpper() == "ALN") {
+		saveALN(fileName, md, onlyVisibleMeshes, cb);
 	}
 	else {
 		wrongSaveFormat(format);

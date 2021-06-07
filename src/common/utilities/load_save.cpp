@@ -159,7 +159,7 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
+	IOPlugin* ioPlugin = pm.inputMeshPlugin(extension);
 
 	if (ioPlugin == nullptr)
 		throw MLException(
@@ -215,7 +215,7 @@ void reloadMesh(
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
+	IOPlugin* ioPlugin = pm.inputMeshPlugin(extension);
 
 	if (ioPlugin == nullptr) {
 		throw MLException(
@@ -242,6 +242,62 @@ void reloadMesh(
 		mm->clear();
 	}
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
+}
+
+void saveMeshWithStandardParameters(
+		const QString& fileName,
+		MeshModel& m,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(fileName);
+	QString extension = "*." + fi.suffix().toLower();
+
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
+	if (ioPlugin == nullptr) {
+		throw MLException(
+				"Mesh " + fileName + " cannot be saved. Your MeshLab "
+				"version has not plugin to save " + extension +
+				" file format");
+	}
+	ioPlugin->setLog(log);
+	int capability=0,defaultBits=0;
+	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
+	RichParameterList saveParams;
+
+	ioPlugin->initSaveParameter(extension, m, saveParams);
+
+	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
+	m.saveTextures(fi.absolutePath(), 66, log, cb);
+}
+
+void saveAllMeshes(
+		const QString& basePath,
+		MeshDocument& md,
+		bool onlyVisible,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	PluginManager& pm = meshlab::pluginManagerInstance();
+
+	for (MeshModel* m : md.meshIterator()){
+		if (m->isVisible() || !onlyVisible) {
+			QFileInfo fi(m->fullName());
+			QString extension = fi.suffix();
+			IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
+			QString filename = basePath;
+			if (ioPlugin == nullptr){
+				std::cerr << "Warning: extension " + extension.toStdString() +
+						"Not supported. Saving " + fi.baseName().toStdString() + ".ply.";
+				filename += ("/" + fi.baseName());
+			}
+			else {
+				filename += ("/" + fi.fileName());
+			}
+			saveMeshWithStandardParameters(filename, *m, log, cb);
+		}
+	}
 }
 
 QImage loadImage(
@@ -394,6 +450,7 @@ std::vector<MeshModel*> loadProject(
 void saveProject(
 		const QString& filename,
 		const MeshDocument& md,
+		bool onlyVisibleMeshes,
 		std::vector<MLRenderingData> renderData)
 {
 	QFileInfo fi(filename);
@@ -415,7 +472,7 @@ void saveProject(
 	}
 
 	RichParameterList rpl;
-	ioPlugin->saveProject(extension, filename, rpl, md, renderData);
+	ioPlugin->saveProject(extension, filename, md, onlyVisibleMeshes, renderData);
 }
 
 }

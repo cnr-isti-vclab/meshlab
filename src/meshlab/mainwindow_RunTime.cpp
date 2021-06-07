@@ -1583,7 +1583,12 @@ void MainWindow::saveProject()
 			}
 		}
 	}
-	QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln)"));
+	QFileDialog* saveDiag = new QFileDialog(
+				this,
+				tr("Save Project File"),
+				lastUsedDirectory.path().append(""),
+				tr("MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln)"));
+	saveDiag->setOption(QFileDialog::DontUseNativeDialog);
 #if defined(Q_OS_WIN)
 	saveDiag->setOption(QFileDialog::DontUseNativeDialog);
 #endif
@@ -1632,7 +1637,6 @@ void MainWindow::saveProject()
 	
 	
 	bool ret;
-	qDebug("Saving aln file %s\n", qUtf8Printable(fileName));
 	if (fileName.isEmpty()) return;
 	else
 	{
@@ -1641,34 +1645,17 @@ void MainWindow::saveProject()
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-	if (QString(fi.suffix()).toLower() == "aln")
+
+	std::vector<MLRenderingData> rendData;
+	for(MeshModel * mp : meshDoc()->meshIterator())
 	{
-		vector<string> meshNameVector;
-		vector<Matrix44m> transfVector;
-		
-		for(MeshModel * mp : meshDoc()->meshIterator())
-		{
-			if((!onlyVisibleLayers->isChecked()) || (mp->visible))
-			{
-				meshNameVector.push_back(qUtf8Printable(mp->relativePathName(meshDoc()->pathName())));
-				transfVector.push_back(mp->cm.Tr);
-			}
-		}
-		ret = ALNParser::SaveALN(qUtf8Printable(fileName), meshNameVector, transfVector);
+		MLRenderingData ml;
+		getRenderingData(mp->id(), ml);
+		rendData.push_back(ml);
 	}
-	else
-	{
-		std::vector<MLRenderingData> rendData;
-		for(MeshModel * mp : meshDoc()->meshIterator())
-		{
-			MLRenderingData ml;
-			getRenderingData(mp->id(), ml);
-			rendData.push_back(ml);
-		}
-		meshlab::saveProject(fileName, *meshDoc(), rendData);
-		ret = true;
-		//ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
-	}
+	meshlab::saveProject(fileName, *meshDoc(), onlyVisibleLayers->isChecked(), rendData);
+	ret = true;
+	//ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
 	
 	if (saveAllFile->isChecked())
 	{
@@ -2589,7 +2576,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	QStringList matchingExtensions=suffixList.filter(defaultExt);
 	if(!matchingExtensions.isEmpty())
 		saveDialog->selectNameFilter(matchingExtensions.last());
-	connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+	//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
 	
 	if (fileName.isEmpty()){
 		saveDialog->selectFile(meshDoc()->mm()->fullName());

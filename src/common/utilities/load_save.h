@@ -54,6 +54,19 @@ void reloadMesh(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos* cb = nullptr);
 
+void saveMeshWithStandardParameters(
+		const QString& fileName,
+		MeshModel& m,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+void saveAllMeshes(
+		const QString& basePath,
+		MeshDocument& md,
+		bool onlyVisible = false,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
 QImage loadImage(
 		const QString& filename,
 		GLLogStream* log = nullptr,
@@ -95,6 +108,7 @@ std::vector<MeshModel*> loadProject(
 void saveProject(
 		const QString& filename,
 		const MeshDocument& md,
+		bool onlyVisibleMeshes,
 		std::vector<MLRenderingData> renderData = std::vector<MLRenderingData>());
 
 }

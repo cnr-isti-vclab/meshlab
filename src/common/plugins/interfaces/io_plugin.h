@@ -376,36 +376,22 @@ public:
 	}
 
 	/**
-	 * @brief The initSaveProjectParameter function is called to initialize the
-	 * list of additional parameters that saving a project could require. It is
-	 * called by the framework after the output format is selected by the user.
-	 * typical example: saving or not saving non-visible layers
-	 * If you do not need any additional parameters, simply do not implement
-	 * this function.
-	 */
-	virtual RichParameterList initSaveProjectParameter(
-			const QString& /*format*/,
-			const MeshDocument& /*md*/)
-	{
-		return RichParameterList();
-	}
-
-	/**
 	 * @brief The saveProject function is called by the framework everytime a
 	 * project is saved.
 	 * @param format: the extension of the format e.g. "MLP"
 	 * @param fileName: the name of the file on which save the project md
 	 *        (including its path)
-	 * @param params: the parameters that have been set in the initSaveProjectParameter()
 	 * @param md: the MeshDocument to be saved in the file
+	 * @param onlyVisibleMesh: if this parameter is set to true, only the meshes
+	 *        marked visible should be saved into the project
 	 * @param cb: standard callback for reporting progress in the saving
 	 */
 	virtual void saveProject(
 			const QString& format,
 			const QString& /*fileName*/,
-			const RichParameterList& /*params*/,
 			const MeshDocument& /*md*/,
-			const std::vector<MLRenderingData>& rendOpt,
+			bool /*onlyVisibleMeshes*/,
+			const std::vector<MLRenderingData>& /*rendOpt*/,
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongSaveFormat(format);

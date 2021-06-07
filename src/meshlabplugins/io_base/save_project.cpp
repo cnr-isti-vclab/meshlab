@@ -4,6 +4,8 @@
 #include <QTextStream>
 
 #include <wrap/qt/shot_qt.h>
+#include <wrap/io_trimesh/alnParser.h>
+#include <common/mlexception.h>
 
 namespace mlp {
 
@@ -142,4 +144,26 @@ void saveMLP(
 	doc.save(qstream, 1);
 	file.close();
 	QDir::setCurrent(tmpDir.absolutePath());
+}
+
+void saveALN(
+		const QString& filename,
+		const MeshDocument& md,
+		bool onlyVisibleLayers,
+		vcg::CallBackPos* cb)
+{
+	std::vector<std::string> meshNameVector;
+	std::vector<Matrix44m> transfVector;
+
+	for(const MeshModel * mp : md.meshIterator())
+	{
+		if((!onlyVisibleLayers) || (mp->visible))
+		{
+			meshNameVector.push_back(qUtf8Printable(mp->relativePathName(md.pathName())));
+			transfVector.push_back(mp->cm.Tr);
+		}
+	}
+	bool ret = ALNParser::SaveALN(qUtf8Printable(filename), meshNameVector, transfVector);
+	if (!ret)
+		throw MLException("Impossible to save " + filename);
 }

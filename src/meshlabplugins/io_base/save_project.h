@@ -10,4 +10,10 @@ void saveMLP(
 		const std::vector<MLRenderingData>& rendOpt,
 		vcg::CallBackPos* cb);
 
+void saveALN(
+		const QString& filename,
+		const MeshDocument& md,
+		bool onlyVisibleLayers,
+		vcg::CallBackPos* cb);
+
 #endif // SAVE_PROJECT_H

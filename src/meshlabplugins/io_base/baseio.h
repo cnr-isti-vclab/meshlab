@@ -89,15 +89,11 @@ public:
 			std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* cb);
 
-	RichParameterList initSaveProjectParameter(
-				const QString& format,
-				const MeshDocument& md);
-
 	virtual void saveProject(
 			const QString& format,
 			const QString& fileName,
-			const RichParameterList& params,
 			const MeshDocument& md,
+			bool onlyVisibleMeshes,
 			const std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* /*cb*/ = nullptr);
 
