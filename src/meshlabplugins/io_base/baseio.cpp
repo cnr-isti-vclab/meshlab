@@ -640,7 +640,7 @@ void BaseMeshIOPlugin::saveProject(
 		CallBackPos* cb)
 {
 	if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
-		saveMLP(fileName, md, false, false, rendOpt, cb);
+		saveMLP(fileName, md, false, rendOpt, cb);
 	}
 	else {
 		wrongSaveFormat(format);

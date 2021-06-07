@@ -7,7 +7,6 @@ void saveMLP(
 		const QString& filename,
 		const MeshDocument& md,
 		bool onlyVisibleLayers,
-		bool binary,
 		const std::vector<MLRenderingData>& rendOpt,
 		vcg::CallBackPos* cb);
 

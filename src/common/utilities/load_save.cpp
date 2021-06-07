@@ -393,7 +393,8 @@ std::vector<MeshModel*> loadProject(
 
 void saveProject(
 		const QString& filename,
-		const MeshDocument& md)
+		const MeshDocument& md,
+		std::vector<MLRenderingData> renderData)
 {
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
@@ -406,8 +407,14 @@ void saveProject(
 				"Project " + filename + " cannot be loaded. Your MeshLab version "
 				"has not plugin to load " + extension + " file format.");
 
+	if (renderData.size() != 0 && md.meshNumber() != renderData.size()){
+		std::cerr << "Warning: renderData vector has different size from "
+				"MeshDocument number meshes. Ignoring render data when saving " +
+				filename.toStdString() << " project.";
+		renderData.clear();
+	}
+
 	RichParameterList rpl;
-	std::vector<MLRenderingData> renderData;
 	ioPlugin->saveProject(extension, filename, rpl, md, renderData);
 }
 

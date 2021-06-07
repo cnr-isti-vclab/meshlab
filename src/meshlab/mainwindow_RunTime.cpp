@@ -39,7 +39,6 @@
 #include <QElapsedTimer>
 #include <QMimeData>
 
-#include <common/meshlabdocumentxml.h>
 #include <common/mlapplication.h>
 #include <common/filterscript.h>
 #include <common/mlexception.h>
@@ -1659,14 +1658,14 @@ void MainWindow::saveProject()
 	}
 	else
 	{
-		std::map<int, MLRenderingData> rendOpt;
+		std::vector<MLRenderingData> rendData;
 		for(MeshModel * mp : meshDoc()->meshIterator())
 		{
 			MLRenderingData ml;
 			getRenderingData(mp->id(), ml);
-			rendOpt.insert(std::pair<int, MLRenderingData>(mp->id(), ml));
+			rendData.push_back(ml);
 		}
-		meshlab::saveProject(fileName, *meshDoc());
+		meshlab::saveProject(fileName, *meshDoc(), rendData);
 		ret = true;
 		//ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
 	}

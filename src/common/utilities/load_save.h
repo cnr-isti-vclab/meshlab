@@ -94,7 +94,8 @@ std::vector<MeshModel*> loadProject(
 
 void saveProject(
 		const QString& filename,
-		const MeshDocument& md);
+		const MeshDocument& md,
+		std::vector<MLRenderingData> renderData = std::vector<MLRenderingData>());
 
 }
 
