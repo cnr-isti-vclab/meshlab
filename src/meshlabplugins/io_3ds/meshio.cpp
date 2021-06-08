@@ -75,14 +75,16 @@ void ExtraMeshIOPlugin::exportMaskCapability(const QString &format, int &capabil
 	return;
 }
 
-void ExtraMeshIOPlugin::initPreOpenParameter(const QString& format, RichParameterList& parameters)
+RichParameterList ExtraMeshIOPlugin::initPreOpenParameter(const QString& format) const
 {
+	RichParameterList parameters;
 	if(format.toUpper() == tr("3DS"))
 		parameters.addParam(RichBool(
 				"load_in_a_single_layer", false, "Load in a single layer",
 				"3DS files may contain more than one mesh. If this parameter is "
 				"set to false, all the meshes contained in the file will be "
 				"merged in a single mesh."));
+	return parameters;
 }
 
 unsigned int ExtraMeshIOPlugin::numberMeshesContainedInFile(

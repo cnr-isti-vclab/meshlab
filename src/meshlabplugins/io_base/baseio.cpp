@@ -163,8 +163,9 @@ std::list<FileFormat> BaseMeshIOPlugin::exportProjectFormats() const
 }
 
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PTX")) {
 		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",
 			"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
@@ -182,6 +183,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParam
 			"composed by independent vertices, so, usually, duplicated vertices "
 			"should be unified"));
 	}
+	return parlst;
 }
 
 void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)

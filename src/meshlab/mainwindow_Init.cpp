@@ -968,8 +968,7 @@ void MainWindow::loadDefaultSettingsFromPlugins()
 	for (IOPlugin* iop : PM.ioPluginIterator()){
 		for (const FileFormat& ff : iop->importFormats()) {
 			for (const QString& format : ff.extensions) {
-				RichParameterList tmplist;
-				iop->initPreOpenParameter(format, tmplist);
+				RichParameterList tmplist = iop->initPreOpenParameter(format);
 				if (!tmplist.isEmpty()){
 					for (RichParameter& rp : tmplist){
 						QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";

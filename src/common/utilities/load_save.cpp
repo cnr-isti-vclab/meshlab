@@ -167,8 +167,7 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 				"has not plugin to read " + extension + " file format");
 
 	ioPlugin->setLog(&md.Log);
-	RichParameterList openParams;
-	ioPlugin->initPreOpenParameter(extension, openParams);
+	RichParameterList openParams =ioPlugin->initPreOpenParameter(extension);
 
 	for (RichParameter& rp : prePar){
 		auto it = openParams.findParameter(rp.name());
@@ -224,9 +223,9 @@ void reloadMesh(
 				" file format");
 	}
 
-	RichParameterList prePar;
+
 	ioPlugin->setLog(log);
-	ioPlugin->initPreOpenParameter(extension, prePar);
+	RichParameterList prePar = ioPlugin->initPreOpenParameter(extension);
 	prePar.join(meshlab::defaultGlobalParameterList());
 
 	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename, prePar);

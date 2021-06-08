@@ -2248,8 +2248,7 @@ bool MainWindow::importMesh(QString fileName)
 		}
 		
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
-		RichParameterList prePar;
-		pCurrentIOPlugin->initPreOpenParameter(extension,prePar);
+		RichParameterList prePar = pCurrentIOPlugin->initPreOpenParameter(extension);
 		if(!prePar.isEmpty()) {
 			// the user wants to see each time the pre parameters dialog:
 			if (currentGlobalParams.getBool(MainWindowSetting::showPreOpenParameterDialogParam())){
@@ -2366,8 +2365,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 	
 	if(pCurrentIOPlugin != NULL)
 	{
-		RichParameterList prePar;
-		pCurrentIOPlugin->initPreOpenParameter(extension, prePar);
+		RichParameterList prePar = pCurrentIOPlugin->initPreOpenParameter(extension);
 		prePar.join(currentGlobalParams);
 
 		QElapsedTimer t;t.start();

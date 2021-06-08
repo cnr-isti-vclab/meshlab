@@ -40,8 +40,9 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList PDBIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PDB"))
 	{
 		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
@@ -62,6 +63,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterL
 		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
+	return parlst;
 }
 
 void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)

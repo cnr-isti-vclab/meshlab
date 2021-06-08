@@ -54,9 +54,8 @@ public:
 
 	void exportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
 
-	void initPreOpenParameter(
-			const QString& format,
-			RichParameterList& parameters);
+	RichParameterList initPreOpenParameter(
+			const QString& format) const;
 
 	unsigned int numberMeshesContainedInFile(
 			const QString& format,

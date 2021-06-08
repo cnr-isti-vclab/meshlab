@@ -44,7 +44,7 @@ public:
 
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0);
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
 
 	virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 

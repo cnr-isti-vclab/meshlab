@@ -225,11 +225,14 @@ void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, 
 
 void FilterSSynth::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
-void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, RichParameterList &parlst){
+RichParameterList FilterSSynth::initPreOpenParameter(const QString &/*formatName*/) const
+{
+    RichParameterList parlst;
     parlst.addParam(RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
     parlst.addParam(RichInt("maxrec",0,"set the maximum recursion","the mesh is built recursively according to the productions of the grammar, so a limit is needed. If set to 0 meshlab will generate the mesh according to the maximum recursion set in the file"));
     parlst.addParam(RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));
     parlst.addParam(RichInt("maxobj",0,"set the maximum number of object to be rendered","you can set a limit to the maximum number of primitives rendered. If set to 0 meshlab will generate the mesh according to the input file"));
+    return parlst;
 }
 
 QString FilterSSynth::GetTemplate(int sphereres){

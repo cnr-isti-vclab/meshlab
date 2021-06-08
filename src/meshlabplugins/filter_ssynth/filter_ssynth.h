@@ -58,7 +58,7 @@ class FilterSSynth : public QObject, public IOPlugin, public FilterPlugin{
 	std::list<FileFormat> exportFormats() const;
 
 	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
+	RichParameterList initPreOpenParameter(const QString&formatName) const;
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb);
 	FilterPlugin::FilterArity filterArity(const QAction *) const {return NONE;}

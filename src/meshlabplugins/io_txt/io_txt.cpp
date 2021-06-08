@@ -30,8 +30,9 @@ using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
-void TxtIOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
+RichParameterList TxtIOPlugin::initPreOpenParameter(const QString &format) const
 {
+	RichParameterList parlst;
 	if(format.toUpper() == tr("TXT"))
 	{
             QStringList separator = (QStringList() << ";" << "," << "SPACE");
@@ -57,6 +58,7 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, RichParameterList 
             parlst.addParam(RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
             parlst.addParam(RichEnum("onerror", 0, onerror, "On Parsing Error", "When a line is not properly parsed, it is possible to 'skip' it and continue with the following lines, or 'stop' importing at that point"));
     }
+    return parlst;
 }
 
 void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/)

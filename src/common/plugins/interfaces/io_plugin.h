@@ -74,7 +74,7 @@ public:
 
 	/**
 	 * @brief The initPreOpenParameter function is called to initialize the list
-	 * of additional parameters that opening a mesh could require. It is
+	 * of additional parameters that opening a mesh format could require. It is
 	 * called by the framework BEFORE the actual mesh loading to determine how
 	 * to parse the input file. The instanced parameters are then passed to the
 	 * open at the loading time.
@@ -82,10 +82,10 @@ public:
 	 * load. If you do not need any additional processing simply do not override
 	 * this and ignore the parameterList in the open member function
 	 */
-	virtual void initPreOpenParameter(
-			const QString& /*format*/,
-			RichParameterList& /*parameters*/)
+	virtual RichParameterList initPreOpenParameter(
+			const QString& /*format*/) const
 	{
+		return RichParameterList();
 	}
 
 	/**

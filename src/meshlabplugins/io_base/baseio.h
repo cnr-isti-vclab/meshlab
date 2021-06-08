@@ -97,7 +97,7 @@ public:
 			const std::vector<MLRenderingData>& rendOpt,
 			vcg::CallBackPos* /*cb*/ = nullptr);
 
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
 	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
 };
 
