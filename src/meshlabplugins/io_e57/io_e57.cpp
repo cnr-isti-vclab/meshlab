@@ -152,6 +152,21 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
             continue;
         }
 
+        auto transformMatrix = vcg::Matrix44f::Identity();
+        auto quaternion = vcg::Quaternion<float>{
+            static_cast<float>(scanHeader.pose.rotation.x),
+            static_cast<float>(scanHeader.pose.rotation.y),
+            static_cast<float>(scanHeader.pose.rotation.z),
+            static_cast<float>(scanHeader.pose.rotation.w),
+        };
+
+        quaternion.ToMatrix(transformMatrix);
+        transformMatrix.ElementAt(0, 3) = static_cast<float>(scanHeader.pose.translation.x);
+        transformMatrix.ElementAt(1, 3) = static_cast<float>(scanHeader.pose.translation.y);
+        transformMatrix.ElementAt(2, 3) = static_cast<float>(scanHeader.pose.translation.z);
+
+        meshModel->cm.Tr = transformMatrix;
+
         try {
             loadMesh(*meshModel, mask, scanIndex,
                      ((rows > 0) ? rows : BUFF_SIZE), numberPointSize, fileReader, scanHeader, cb);
@@ -178,7 +193,7 @@ void E57IOPlugin::extractImages(const e57::Reader &fileReader, vcg::CallBackPos*
 
         QImage img;
         e57::Image2D imageHeader;
-        e57::Image2DProjection  imageProjection;
+        e57::Image2DProjection imageProjection;
         e57::Image2DType imageType, imageMaskType, imageVisualType;
 
         int64_t width = 0, height = 0, size = 0;
@@ -250,7 +265,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
     scanIndex = fileWriter.NewData3D(scanHeader);
 
-    const size_t buffSize = (totalPoints < BUFF_SIZE) ? totalPoints : BUFF_SIZE;
+    const std::size_t buffSize = (totalPoints < BUFF_SIZE) ? totalPoints : BUFF_SIZE;
 
     vcg::tri::io::E57Data3DPoints data3DPoints{buffSize, scanHeader};
     e57::CompressedVectorWriter dataWriter = fileWriter.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
