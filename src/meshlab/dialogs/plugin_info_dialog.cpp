@@ -192,6 +192,30 @@ void PluginInfoDialog::populateTreeWidget()
 						formats+="Exporter_"+s+" ";
 					tmplist.push_back(formats);
 				}
+				for(const FileFormat& f: iopi->importImageFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="IMG_Importer_"+s+" ";
+					tmplist.push_back(formats);
+				}
+				for(const FileFormat& f: iopi->exportImageFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="IMG_Exporter_"+s+" ";
+					tmplist.push_back(formats);
+				}
+				for(const FileFormat& f: iopi->importProjectFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="PRJ_Importer_"+s+" ";
+					tmplist.push_back(formats);
+				}
+				for(const FileFormat& f: iopi->exportProjectFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="PRJ_Exporter_"+s+" ";
+					tmplist.push_back(formats);
+				}
 			}
 			if (type.isRenderPlugin()){
 				RenderPlugin* rpi = dynamic_cast<RenderPlugin*>(fp);

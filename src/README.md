@@ -8,7 +8,6 @@ The source code of MeshLab is structured in the following directories:
  * [external](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/external): it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding system library is not found and then linked; other are header-only libraries that are just included;
  * [common](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/common): a series of utility classes and functions used by MeshLab and its plugins;
  * [meshlab](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlab): GUI and core of MeshLab;
- * [meshlabserver](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabserver): a tool that allows to compute mesh operations through command line;
  * [meshlabplugins](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabplugins): all the plugins that can be added to MeshLab;
  * [use_cpu_opengl](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/use_cpu_opengl): a tool compiled only under windows that allows to use non-GPU accelerated OpenGL calls;
  * [vcglib](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/vcglib): submodule containing the vcglib.

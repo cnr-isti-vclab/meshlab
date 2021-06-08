@@ -49,15 +49,22 @@ public:
 	bool isOutputMeshFormatSupported(const QString& outputFormat) const;
 	bool isInputImageFormatSupported(const QString& inputFormat) const;
 	bool isOutputImageFormatSupported(const QString& outputFormat) const;
+	bool isInputProjectFormatSupported(const QString& inputFormat) const;
+	bool isOutputProjectFormatSupported(const QString& outputFormat) const;
 	IOPlugin* inputMeshPlugin(const QString& inputFormat) const;
 	IOPlugin* outputMeshPlugin(const QString& outputFormat) const;
 	IOPlugin* inputImagePlugin(const QString& inputFormat) const;
 	IOPlugin* outputImagePlugin(const QString& outputFormat) const;
+	IOPlugin* inputProjectPlugin(const QString& inputFormat) const;
+	IOPlugin* outputProjectPlugin(const QString& outputFormat) const;
+
 
 	QStringList inputMeshFormatList() const;
 	QStringList outputMeshFormatList() const;
 	QStringList inputImageFormatList() const;
 	QStringList outputImageFormatList() const;
+	QStringList inputProjectFormatList() const;
+	QStringList outputProjectFormatList() const;
 
 	IOPluginRangeIterator ioPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 
@@ -67,6 +74,8 @@ private:
 	QMap<QString,IOPlugin*> outputMeshFormatToPluginMap;
 	QMap<QString,IOPlugin*> inputImageFormatToPluginMap;
 	QMap<QString,IOPlugin*> outputImageFormatToPluginMap;
+	QMap<QString,IOPlugin*> inputProjectFormatToPluginMap;
+	QMap<QString,IOPlugin*> outputProjectFormatToPluginMap;
 };
 
 class IOPluginContainer::IOPluginRangeIterator

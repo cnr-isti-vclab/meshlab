@@ -25,7 +25,6 @@ SUBDIRS = \ #sub projects names
 	external \
 	common \
 	meshlab \
-	#meshlabserver \
 	io_base \ # a few basic file formats (ply, obj, off), without this you cannot open anything
 	decorate_base \
 	filter_measure \
@@ -118,7 +117,6 @@ win32 {
 external.subdir = external
 common.subdir = common
 meshlab.subdir = meshlab
-meshlabserver.subdir = meshlabserver
 io_base.subdir = meshlabplugins/io_base
 decorate_base.subdir = meshlabplugins/decorate_base
 filter_measure.subdir = meshlabplugins/filter_measure
@@ -195,7 +193,6 @@ edit_pickpoints.subdir = meshlabplugins/edit_pickpoints
 # meshlab_mini subdirs
 #common.depends = external
 meshlab.depends = common
-meshlabserver.depends = common
 io_base.depends = common
 decorate_base.depends = common
 filter_measure.depends = common

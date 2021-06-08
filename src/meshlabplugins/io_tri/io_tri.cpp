@@ -35,13 +35,15 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst)
+RichParameterList TriIOPlugin::initPreOpenParameter(const QString &format) const
 {
+	RichParameterList parlst;
 	if(format.toUpper() == tr("ASC"))
 	{
 			parlst.addParam(RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
 			parlst.addParam(RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Length of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
 	}
+	return parlst;
 }
 
 void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)

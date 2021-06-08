@@ -159,7 +159,7 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
+	IOPlugin* ioPlugin = pm.inputMeshPlugin(extension);
 
 	if (ioPlugin == nullptr)
 		throw MLException(
@@ -167,8 +167,7 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 				"has not plugin to read " + extension + " file format");
 
 	ioPlugin->setLog(&md.Log);
-	RichParameterList openParams;
-	ioPlugin->initPreOpenParameter(extension, openParams);
+	RichParameterList openParams =ioPlugin->initPreOpenParameter(extension);
 
 	for (RichParameter& rp : prePar){
 		auto it = openParams.findParameter(rp.name());
@@ -215,7 +214,7 @@ void reloadMesh(
 	QFileInfo fi(filename);
 	QString extension = fi.suffix();
 	PluginManager& pm = meshlab::pluginManagerInstance();
-	IOPlugin *ioPlugin = pm.inputMeshPlugin(extension);
+	IOPlugin* ioPlugin = pm.inputMeshPlugin(extension);
 
 	if (ioPlugin == nullptr) {
 		throw MLException(
@@ -224,9 +223,9 @@ void reloadMesh(
 				" file format");
 	}
 
-	RichParameterList prePar;
+
 	ioPlugin->setLog(log);
-	ioPlugin->initPreOpenParameter(extension, prePar);
+	RichParameterList prePar = ioPlugin->initPreOpenParameter(extension);
 	prePar.join(meshlab::defaultGlobalParameterList());
 
 	unsigned int nMeshes = ioPlugin->numberMeshesContainedInFile(extension, filename, prePar);
@@ -242,6 +241,76 @@ void reloadMesh(
 		mm->clear();
 	}
 	loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
+}
+
+void saveMeshWithStandardParameters(
+		const QString& fileName,
+		MeshModel& m,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(fileName);
+	QString extension = fi.suffix().toLower();
+
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
+	if (ioPlugin == nullptr) {
+		throw MLException(
+				"Mesh " + fileName + " cannot be saved. Your MeshLab "
+				"version has not plugin to save " + extension +
+				" file format");
+	}
+	ioPlugin->setLog(log);
+	int capability=0,defaultBits=0;
+	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
+	RichParameterList saveParams = ioPlugin->initSaveParameter(extension, m);
+
+	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
+	m.setFileName(fileName);
+	m.saveTextures(fi.absolutePath(), 66, log, cb);
+}
+
+void saveAllMeshes(
+		const QString& basePath,
+		MeshDocument& md,
+		bool onlyVisible,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	PluginManager& pm = meshlab::pluginManagerInstance();
+
+	for (MeshModel* m : md.meshIterator()){
+		if (m->isVisible() || !onlyVisible) {
+			QString filename, extension;
+			if (m->fullName().isEmpty()){
+				if (m->label().contains('.')){
+					extension = QFileInfo(m->label()).suffix();
+					filename = QFileInfo(m->label()).baseName();
+				}
+				else {
+					extension = "ply";
+					filename = m->label();
+				}
+			}
+			else {
+				QFileInfo fi(m->fullName());
+				extension = fi.suffix();
+				filename = fi.baseName();
+			}
+			filename.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),QString("_"));
+			IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
+			if (ioPlugin == nullptr){
+				std::cerr << "Warning: extension " + extension.toStdString() +
+						" not supported. Saving " + filename.toStdString() + ".ply.";
+				filename += ".ply";
+			}
+			else {
+				filename += ("." + extension.toLower());
+			}
+			filename = basePath + "/" + filename;
+			saveMeshWithStandardParameters(filename, *m, log, cb);
+		}
+	}
 }
 
 QImage loadImage(
@@ -334,6 +403,89 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 		rm.shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
 	}
 	// End of EXIF reading
+}
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		IOPlugin* ioPlugin,
+		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(filenames.first());
+	QString extension = fi.suffix();
+
+	ioPlugin->setLog(log);
+	return ioPlugin->openProject(extension, filenames, md, rendOpt, cb);
+}
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		MeshDocument& md,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QFileInfo fi(filenames.first());
+	QString extension = fi.suffix();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.inputProjectPlugin(extension);
+
+	if (ioPlugin == nullptr)
+		throw MLException(
+				"Project " + filenames.first() + " cannot be loaded. Your MeshLab version "
+				"has not plugin to load " + extension + " file format.");
+
+	std::list<FileFormat> additionalFiles =
+			ioPlugin->projectFileRequiresAdditionalFiles(extension, filenames.first());
+
+	if (additionalFiles.size() +1 != (unsigned int)filenames.size()){
+		throw MLException(
+				"The number of input files given (" + QString::number(filenames.size()) +
+				") is different from the expected one (" +
+				QString::number(additionalFiles.size() +1));
+	}
+	std::vector<MLRenderingData> rendOpt;
+	return loadProject(filenames, ioPlugin, md, rendOpt, log, cb);
+}
+
+std::vector<MeshModel*> loadProject(
+		const QString& filename,
+		MeshDocument& md,
+		GLLogStream* log,
+		vcg::CallBackPos* cb)
+{
+	QStringList fnms;
+	fnms.push_back(filename);
+	return loadProject(fnms, md, log, cb);
+}
+
+void saveProject(
+		const QString& filename,
+		const MeshDocument& md,
+		bool onlyVisibleMeshes,
+		std::vector<MLRenderingData> renderData)
+{
+	QFileInfo fi(filename);
+	QString extension = fi.suffix();
+
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	IOPlugin *ioPlugin = pm.outputProjectPlugin(extension);
+
+	if (ioPlugin == nullptr)
+		throw MLException(
+				"Project " + filename + " cannot be loaded. Your MeshLab version "
+				"has not plugin to load " + extension + " file format.");
+
+	if (renderData.size() != 0 && md.meshNumber() != renderData.size()){
+		std::cerr << "Warning: renderData vector has different size from "
+				"MeshDocument number meshes. Ignoring render data when saving " +
+				filename.toStdString() << " project.";
+		renderData.clear();
+	}
+
+	RichParameterList rpl;
+	ioPlugin->saveProject(extension, filename, md, onlyVisibleMeshes, renderData);
 }
 
 }

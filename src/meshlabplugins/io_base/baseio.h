@@ -42,6 +42,8 @@ public:
 	std::list<FileFormat> exportFormats() const;
 	std::list<FileFormat> importImageFormats() const;
 	std::list<FileFormat> exportImageFormats() const;
+	std::list<FileFormat> importProjectFormats() const;
+	std::list<FileFormat> exportProjectFormats() const;
 
 	void exportMaskCapability(
 			const QString& format,
@@ -76,10 +78,27 @@ public:
 			int quality,
 			vcg::CallBackPos* cb);
 
-	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
-	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
-	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
+	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& format,
+			const QString& filename);
+
+	std::vector<MeshModel*> openProject(
+			const QString& format,
+			const QStringList& filenames,
+			MeshDocument& md,
+			std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* cb);
+
+	virtual void saveProject(
+			const QString& format,
+			const QString& fileName,
+			const MeshDocument& md,
+			bool onlyVisibleMeshes,
+			const std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* /*cb*/ = nullptr);
+
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
+	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
 };
 
 #endif

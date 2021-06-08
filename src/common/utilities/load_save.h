@@ -54,6 +54,19 @@ void reloadMesh(
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos* cb = nullptr);
 
+void saveMeshWithStandardParameters(
+		const QString& fileName,
+		MeshModel& m,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+void saveAllMeshes(
+		const QString& basePath,
+		MeshDocument& md,
+		bool onlyVisible = false,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
 QImage loadImage(
 		const QString& filename,
 		GLLogStream* log = nullptr,
@@ -71,6 +84,32 @@ void loadRaster(
 		RasterModel& rm,
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		IOPlugin* ioPlugin,
+		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QString& filename,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+void saveProject(
+		const QString& filename,
+		const MeshDocument& md,
+		bool onlyVisibleMeshes,
+		std::vector<MLRenderingData> renderData = std::vector<MLRenderingData>());
 
 }
 

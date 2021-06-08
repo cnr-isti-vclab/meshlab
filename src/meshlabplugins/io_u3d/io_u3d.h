@@ -51,15 +51,13 @@ public:
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb=0);
 
-	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList &par);
+	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
 
 private:
-	void saveParameters(const RichParameterList &par);
+	void saveParameters(const RichParameterList &par, vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& _param);
 
 	void saveLatex(const QString& file,const vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& mov_par);
 	void substituteChar(QString& st, const QChar& ch_remove, const QString& sub);
-
-	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
 };
 
 #endif

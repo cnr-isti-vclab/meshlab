@@ -121,8 +121,9 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList BreMeshIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("BRE")) {
 		parlst.addParam(RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
 		parlst.addParam(RichBool(
@@ -131,6 +132,7 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParame
 			"composed by independent vertices, so, usually, duplicated vertices "
 			"should be unified"));
 	}
+	return parlst;
 }
 
 void BreMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
@@ -188,20 +190,6 @@ std::list<FileFormat> BreMeshIOPlugin::exportFormats() const
 */
 void BreMeshIOPlugin::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
-	/*if(format.toUpper() == tr("BRE"))
-  {
-    capability = 0;
-    defaultBits = 0;
-  }*/
-}
-
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList &/*par*/)
-{
-  /*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addParam(new RichBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));		
-  */
 }
 
 /////////////////////////////////////////////////////////////////////////////////

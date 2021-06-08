@@ -40,8 +40,9 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList PDBIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PDB"))
 	{
 		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
@@ -62,6 +63,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterL
 		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
+	return parlst;
 }
 
 void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
@@ -126,17 +128,6 @@ std::list<FileFormat> PDBIOPlugin::exportFormats() const
 */
 void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
-	return;
-}
-
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
-{
-	/*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
-  */
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)

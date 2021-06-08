@@ -7,7 +7,6 @@ project(MeshLab)
 
 ### Build options
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
-option(BUILD_SERVER "Build a command-line server application" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 
@@ -113,9 +112,6 @@ add_subdirectory(common)
 
 if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	add_subdirectory(meshlab)
-	if(BUILD_SERVER)
-		add_subdirectory(meshlabserver)
-	endif()
 	if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/use_cpu_opengl")
 		add_subdirectory(use_cpu_opengl)
 	endif()

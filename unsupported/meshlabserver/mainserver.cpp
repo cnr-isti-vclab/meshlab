@@ -27,8 +27,6 @@
 #include <common/plugins/plugin_manager.h>
 #include <common/globals.h>
 #include <common/filterscript.h>
-#include <common/meshlabdocumentxml.h>
-#include <common/meshlabdocumentbundler.h>
 #include <common/mlexception.h>
 #include <common/parameters/rich_parameter_list.h>
 #include <wrap/qt/qt_thread_safe_memory_info.h>

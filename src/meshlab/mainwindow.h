@@ -124,7 +124,7 @@ private slots:
 public slots:
 	bool importMeshWithLayerManagement(QString fileName=QString());
 	bool importRaster(const QString& fileImg = QString());
-	bool openProject(QString fileName=QString());
+	bool openProject(QString fileName=QString(), bool append = false);
 	bool appendProject(QString fileName=QString());
 	void updateCustomSettings();
 	void updateLayerDialog();

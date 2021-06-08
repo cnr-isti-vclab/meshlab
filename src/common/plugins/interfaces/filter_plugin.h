@@ -98,7 +98,8 @@ public:
 	 * This string is printed in the top of the parameter window
 	 * so it should be at least one or two paragraphs long. The more the better.
 	 * you can use simple html formatting tags (like "<br>" "<b>" and "<i>") to improve readability.
-	 * This string is used in the 'About plugin' dialog and by meshlabserver to create the filter list wiki page and the doxygen documentation of the filters.
+	 * This string is used in the 'About plugin' dialog and by pymeshlab to create
+	 * the filter list documentation page of the filters.
 	 * Here is the place where you should put you bibliographic references in a form like this:
 	 * <br>
 	 * See: <br />

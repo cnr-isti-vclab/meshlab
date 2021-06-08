@@ -22,6 +22,9 @@
 ****************************************************************************/
 
 #include "baseio.h"
+#include "load_project.h"
+#include "save_project.h"
+
 #include <QTextStream>
 
 #include <wrap/io_trimesh/import_ply.h>
@@ -41,8 +44,6 @@
 #include <wrap/io_trimesh/export_vmi.h>
 #include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
-
-
 
 using namespace std;
 using namespace vcg;
@@ -69,21 +70,21 @@ class PFace :public vcg::Face<
 class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
 const static std::list<FileFormat> importImageFormatList = {
-	FileFormat("BMP", "BMP"),
-	FileFormat("JPG", "JPG"),
-	FileFormat("JPEG", "JPEG"),
-	FileFormat("PNG", "PNG"),
-	FileFormat("XBM", "XBM"),
-	FileFormat("XPM", "XPM")
+	FileFormat("Windows Bitmap", "BMP"),
+	FileFormat("Joint Photographic Experts Group", "JPG"),
+	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("X11 Bitmap", "XBM"),
+	FileFormat("X11 Bitmap", "XPM")
 };
 
 const static std::list<FileFormat> exportImageFormatList = {
-	FileFormat("BMP", "BMP"),
-	FileFormat("JPG", "JPG"),
-	FileFormat("JPEG", "JPEG"),
-	FileFormat("PNG", "PNG"),
-	FileFormat("XBM", "XBM"),
-	FileFormat("XPM", "XPM")
+	FileFormat("Windows Bitmap", "BMP"),
+	FileFormat("Joint Photographic Experts Group", "JPG"),
+	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("X11 Bitmap", "XBM"),
+	FileFormat("X11 Bitmap", "XPM")
 };
 
 BaseMeshIOPlugin::BaseMeshIOPlugin() : IOPlugin()
@@ -139,9 +140,32 @@ std::list<FileFormat> BaseMeshIOPlugin::exportImageFormats() const
 	return exportImageFormatList;
 }
 
-// initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+std::list<FileFormat> BaseMeshIOPlugin::importProjectFormats() const
 {
+	std::list<FileFormat> formatList = {
+		FileFormat("MeshLab Project", tr("MLP")),
+		FileFormat("MeshLab Binary Project", tr("MLB")),
+		FileFormat("Align Project", tr("ALN")),
+		FileFormat("Bundler Output", tr("OUT")),
+		FileFormat("VisualSFM Output", tr("NVM"))
+	};
+	return formatList;
+}
+
+std::list<FileFormat> BaseMeshIOPlugin::exportProjectFormats() const
+{
+	std::list<FileFormat> formatList = {
+		FileFormat("MeshLab Project", tr("MLP")),
+		FileFormat("MeshLab Binary Project", tr("MLB")),
+		FileFormat("Align Project", tr("ALN"))
+	};
+	return formatList;
+}
+
+// initialize importing parameters
+RichParameterList BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName) const
+{
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PTX")) {
 		parlst.addParam(RichInt("meshindex", 0, "Index of Range Map to be Imported",
 			"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
@@ -159,6 +183,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParam
 			"composed by independent vertices, so, usually, duplicated vertices "
 			"should be unified"));
 	}
+	return parlst;
 }
 
 void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
@@ -541,6 +566,85 @@ void BaseMeshIOPlugin::saveImage(
 	}
 }
 
+std::list<FileFormat> BaseMeshIOPlugin::projectFileRequiresAdditionalFiles(
+		const QString& format,
+		const QString&)
+{
+	if (format.toUpper() == "OUT"){
+		return {FileFormat("Image List File", "TXT")};
+	}
+	else
+		return {};
+}
+
+std::vector<MeshModel*> BaseMeshIOPlugin::openProject(
+		const QString& format,
+		const QStringList& filenames,
+		MeshDocument& md,
+		std::vector<MLRenderingData>& rendOpt,
+		CallBackPos* cb)
+{
+	std::vector<MeshModel*> meshList;
+	rendOpt.clear();
+	if (format.toUpper() == "ALN") {
+		meshList = loadALN(filenames.first(), md, cb);
+	}
+	else if (format.toUpper() == "OUT" || format.toUpper() == "NVM" ||
+			 format.toUpper() =="MLP" || format.toUpper() == "MLB") {
+		std::vector<std::string> unloadedImgs;
+		if (format.toUpper() == "OUT") {
+			meshList = loadOUT(filenames.first(), filenames[1], md, unloadedImgs, cb);
+		}
+		else if (format.toUpper() == "NVM"){
+			meshList = loadNVM(filenames.first(), md, unloadedImgs, cb);
+		}
+		else if (format.toUpper() =="MLP" || format.toUpper() == "MLB") {
+			meshList = loadMLP(filenames.first(), md, rendOpt, unloadedImgs, cb);
+		}
+		if (unloadedImgs.size() > 0){
+			QString msg = "Unable to load the following " +
+				QString::number(unloadedImgs.size()) + " images (using dummy images): \n";
+
+			unsigned int size = unloadedImgs.size();
+			if (size > 5)
+				size = 5;
+
+			for (unsigned int i = 0; i < size; ++i)
+				msg += QString::fromStdString(unloadedImgs[i]) + "\n";
+
+			if (unloadedImgs.size() > 5){
+				msg += "\n...\n\n";
+				msg += QString::fromStdString(unloadedImgs[unloadedImgs.size()-1]) + "\n";
+			}
+			reportWarning(msg);
+		}
+	}
+
+	else {
+		wrongOpenFormat(format);
+	}
+	return meshList;
+}
+
+void BaseMeshIOPlugin::saveProject(
+		const QString& format,
+		const QString& fileName,
+		const MeshDocument& md,
+		bool onlyVisibleMeshes,
+		const std::vector<MLRenderingData>& rendOpt,
+		CallBackPos* cb)
+{
+	if (format.toUpper() == "MLP" || format.toUpper() == "MLB") {
+		saveMLP(fileName, md, onlyVisibleMeshes, rendOpt, cb);
+	}
+	else if (format.toUpper() == "ALN") {
+		saveALN(fileName, md, onlyVisibleMeshes, cb);
+	}
+	else {
+		wrongSaveFormat(format);
+	}
+}
+
 /*
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
@@ -568,15 +672,9 @@ void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capabili
 
 }
 
-//void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par)
-//{
-//    if(format.toUpper() == tr("STL"))
-//        par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
-//                                "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
-//}
-
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m, RichParameterList &par)
+RichParameterList BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m) const
 {
+	RichParameterList par;
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(RichBool("Binary", true, "Binary encoding",
 		"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
@@ -612,16 +710,7 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
 		}
 	}
+	return par;
 }
-
-//void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
-//{
-//    if(format.toUpper() == tr("STL"))
-//		if (par.findParameter(stlUnifyParName())->value().getBool())
-//		{
-//			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-//			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
-//		}
-//}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)
