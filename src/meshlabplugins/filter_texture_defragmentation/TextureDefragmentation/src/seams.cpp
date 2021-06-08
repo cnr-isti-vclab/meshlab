@@ -135,7 +135,7 @@ void ExtractUVCoordinates(ClusteredSeamHandle csh, std::vector<Point2d>& uva, st
     }
 }
 
-void BuildSeamMesh(Mesh& m, SeamMesh& seamMesh)
+void BuildSeamMesh(Mesh& m, SeamMesh& seamMesh, GraphHandle graph)
 {
     seamMesh.Clear();
 
@@ -145,18 +145,22 @@ void BuildSeamMesh(Mesh& m, SeamMesh& seamMesh)
     tri::UpdateFlags<Mesh>::FaceClearFaceEdgeS(m);
     for (auto& f : m.face) {
         for (int i = 0; i < 3; ++i) {
-            if (face::IsBorder(f, i) && f.IsFaceEdgeS(i) == false){
+            if (IsEdgeManifold3D(m, f, i, ffadj) && face::IsBorder(f, i) && f.IsFaceEdgeS(i) == false) {
                 PosF pa(&f, i);
                 PosF pb = GetDualPos(m, pa, ffadj);
-                if (pa.F()->id > pb.F()->id)
-                    std::swap(pa, pb);
-                auto ei = tri::Allocator<SeamMesh>::AddEdge(seamMesh, pa.V()->P(), pa.VFlip()->P());
-                ei->fa = pa.F();
-                ei->ea = pa.E();
-                ei->fb = pb.F();
-                ei->eb = pb.E();
-                pa.F()->SetFaceEdgeS(pa.E());
-                pb.F()->SetFaceEdgeS(pb.E());
+                ChartHandle ca = graph->GetChart(pa.F()->id);
+                ChartHandle cb = graph->GetChart(pb.F()->id);
+                if (ca == cb || ca->adj.count(cb) > 0) {
+                    if (pa.F()->id > pb.F()->id)
+                        std::swap(pa, pb);
+                    auto ei = tri::Allocator<SeamMesh>::AddEdge(seamMesh, pa.V()->P(), pa.VFlip()->P());
+                    ei->fa = pa.F();
+                    ei->ea = pa.E();
+                    ei->fb = pb.F();
+                    ei->eb = pb.E();
+                    pa.F()->SetFaceEdgeS(pa.E());
+                    pb.F()->SetFaceEdgeS(pb.E());
+                }
             }
         }
     }
