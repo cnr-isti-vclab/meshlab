@@ -251,7 +251,7 @@ void saveMeshWithStandardParameters(
 		vcg::CallBackPos* cb)
 {
 	QFileInfo fi(fileName);
-	QString extension = "*." + fi.suffix().toLower();
+	QString extension = fi.suffix().toLower();
 
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
@@ -269,6 +269,7 @@ void saveMeshWithStandardParameters(
 	ioPlugin->initSaveParameter(extension, m, saveParams);
 
 	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
+	m.setFileName(fileName);
 	m.saveTextures(fi.absolutePath(), 66, log, cb);
 }
 
@@ -283,18 +284,33 @@ void saveAllMeshes(
 
 	for (MeshModel* m : md.meshIterator()){
 		if (m->isVisible() || !onlyVisible) {
-			QFileInfo fi(m->fullName());
-			QString extension = fi.suffix();
-			IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
-			QString filename = basePath;
-			if (ioPlugin == nullptr){
-				std::cerr << "Warning: extension " + extension.toStdString() +
-						"Not supported. Saving " + fi.baseName().toStdString() + ".ply.";
-				filename += ("/" + fi.baseName());
+			QString filename, extension;
+			if (m->fullName().isEmpty()){
+				if (m->label().contains('.')){
+					extension = QFileInfo(m->label()).suffix();
+					filename = QFileInfo(m->label()).baseName();
+				}
+				else {
+					extension = "ply";
+					filename = m->label();
+				}
 			}
 			else {
-				filename += ("/" + fi.fileName());
+				QFileInfo fi(m->fullName());
+				extension = fi.suffix();
+				filename = fi.baseName();
 			}
+			filename.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),QString("_"));
+			IOPlugin* ioPlugin = pm.outputMeshPlugin(extension);
+			if (ioPlugin == nullptr){
+				std::cerr << "Warning: extension " + extension.toStdString() +
+						" not supported. Saving " + filename.toStdString() + ".ply.";
+				filename += ".ply";
+			}
+			else {
+				filename += ("." + extension.toLower());
+			}
+			filename = basePath + "/" + filename;
 			saveMeshWithStandardParameters(filename, *m, log, cb);
 		}
 	}

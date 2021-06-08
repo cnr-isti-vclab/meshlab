@@ -713,25 +713,33 @@ void MainWindow::dropEvent ( QDropEvent * event )
 	{
 		QList< QUrl > url_list = data->urls();
 		bool layervis = false;
-		if (layerDialog != NULL)
-		{
+		if (layerDialog != NULL) {
 			layervis = layerDialog->isVisible();
 			showLayerDlg(false);
 		}
-		for (int i=0, size=url_list.size(); i<size; i++)
-		{
+		for (int i=0, size=url_list.size(); i<size; i++) {
 			QString path = url_list.at(i).toLocalFile();
-			if( (event->keyboardModifiers () == Qt::ControlModifier ) || ( QApplication::keyboardModifiers () == Qt::ControlModifier ))
-			{
+			if( (event->keyboardModifiers () == Qt::ControlModifier ) || ( QApplication::keyboardModifiers () == Qt::ControlModifier )) {
 				this->newProject();
 			}
-			
-			if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("mlb", Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive) || path.endsWith("out",Qt::CaseInsensitive) || path.endsWith("nvm",Qt::CaseInsensitive) )
+
+			QString extension = QFileInfo(path).suffix();
+			if (PM.isInputProjectFormatSupported(extension)){
 				openProject(path);
-			else
-			{
+			}
+			else if (PM.isInputMeshFormatSupported(extension)){
 				importMesh(path);
 			}
+			else if (PM.isInputImageFormatSupported(extension)){
+				importRaster(path);
+			}
+			else {
+				QMessageBox::warning(
+						this, "File format not supported",
+						extension + " file format is not supported by MeshLab.");
+			}
+			
+
 		}
 		showLayerDlg(layervis || meshDoc()->meshNumber() > 0);
 	}
@@ -1562,113 +1570,94 @@ void MainWindow::saveProject()
 	if (meshDoc() == NULL)
 		return;
 
-	bool firstNotSaved = true;
-	//if a mesh has been created by a create filter we must before to save it. Otherwise the project will refer to a mesh without file name path.
-	for(MeshModel * mp : meshDoc()->meshIterator())
-	{
-		if ((mp != NULL) && (mp->fullName().isEmpty()))
-		{
-			if (firstNotSaved){
-				QMessageBox::information(this, "Layer(s) not saved",
-						"Layers must be saved into files before saving the project.\n"
-						"Opening save dialog(s) to save the layer(s)...");
-				firstNotSaved = false;
-			}
-			bool saved = exportMesh(tr(""),mp,false);
-			if (!saved)
-			{
-				QString msg = "Mesh layer " + mp->label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
-				QMessageBox::warning(this,tr("Project Saving Aborted"),msg);
-				return;
-			}
-		}
-	}
 	QFileDialog* saveDiag = new QFileDialog(
 				this,
 				tr("Save Project File"),
-				lastUsedDirectory.path().append(""),
-				tr("MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln)"));
+				lastUsedDirectory.path().append(""));
+	saveDiag->setNameFilters(PM.outputProjectFormatListDialog());
 	saveDiag->setOption(QFileDialog::DontUseNativeDialog);
-#if defined(Q_OS_WIN)
-	saveDiag->setOption(QFileDialog::DontUseNativeDialog);
-#endif
-	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
-	saveAllFile->setCheckState(Qt::Unchecked);
-	QCheckBox* onlyVisibleLayers = new QCheckBox(QString("Only Visible Layers"),saveDiag);
-	onlyVisibleLayers->setCheckState(Qt::Unchecked);
-	QCheckBox* saveViewState = new QCheckBox(QString("Save View State"), saveDiag);
-	saveViewState->setCheckState(Qt::Checked);
+	QCheckBox* saveAllFilesCheckBox = new QCheckBox(QString("Save All Files"),saveDiag);
+	saveAllFilesCheckBox->setCheckState(Qt::Unchecked);
+	QCheckBox* onlyVisibleLayersCheckBox = new QCheckBox(QString("Only Visible Layers"),saveDiag);
+	onlyVisibleLayersCheckBox->setCheckState(Qt::Unchecked);
+	QCheckBox* saveViewStateCheckBox = new QCheckBox(QString("Save View State"), saveDiag);
+	saveViewStateCheckBox->setCheckState(Qt::Checked);
 	QGridLayout* layout = qobject_cast<QGridLayout*>(saveDiag->layout());
-	if (layout != NULL)
-	{
-		layout->addWidget(onlyVisibleLayers, 4, 0);
-		layout->addWidget(saveViewState, 4, 1);
-		layout->addWidget(saveAllFile, 4, 2);
+	if (layout != NULL) {
+		layout->addWidget(onlyVisibleLayersCheckBox, 4, 0);
+		layout->addWidget(saveViewStateCheckBox, 4, 1);
+		layout->addWidget(saveAllFilesCheckBox, 4, 2);
 	}
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
-	saveDiag->exec();
-	QStringList files = saveDiag->selectedFiles();
-	if (files.size() != 1)
-		return;
-	QString fileName = files[0];
-	// this change of dir is needed for subsequent textures/materials loading
-	QFileInfo fi(fileName);
-	if (fi.isDir())
-		return;
-	if (fi.suffix().isEmpty())
-	{
-		QRegExp reg("\\.\\w+");
-		saveDiag->selectedNameFilter().indexOf(reg);
-		QString ext = reg.cap();
-		fileName.append(ext);
-		fi.setFile(fileName);
-	}
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	int res = saveDiag->exec();
 
-	/*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
-	meshDoc()->setDocLabel(fileName);
-	QMdiSubWindow* sub = mdiarea->currentSubWindow();
-	if (sub != NULL)
-	{
-		sub->setWindowTitle(meshDoc()->docLabel());
-		layerDialog->setWindowTitle(meshDoc()->docLabel());
-	}
-	/****************************************************************************/
-	
-	
-	bool ret;
-	if (fileName.isEmpty()) return;
-	else
-	{
+	if (res == QFileDialog::AcceptSave){
+		if (!saveAllFilesCheckBox->isChecked()){
+			bool firstNotSaved = true;
+			//if a mesh has been created by a create filter we must before to save it.
+			//Otherwise the project will refer to a mesh without file name path.
+			for(MeshModel * mp : meshDoc()->meshIterator()) {
+				if ((mp != nullptr) && (mp->fullName().isEmpty())) {
+					if (firstNotSaved) {
+						QMessageBox::information(this, "Layer(s) not saved",
+								"Layers must be saved into files before saving the project.\n"
+								"Opening save dialog(s) to save the layer(s)...");
+						firstNotSaved = false;
+					}
+					bool saved = exportMesh(tr(""), mp, false);
+					if (!saved) {
+						QString msg = "Mesh layer " + mp->label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
+						QMessageBox::warning(this,tr("Project Saving Aborted"),msg);
+						return;
+					}
+				}
+			}
+		}
+
+		QString fileName = saveDiag->selectedFiles().first();
+		// this change of dir is needed for subsequent textures/materials loading
+		QFileInfo fi(fileName);
+		if (fi.suffix().isEmpty()) {
+			QRegExp reg("\\.\\w+");
+			saveDiag->selectedNameFilter().indexOf(reg);
+			QString ext = reg.cap();
+			fileName.append(ext);
+			fi.setFile(fileName);
+		}
+		QDir::setCurrent(fi.absoluteDir().absolutePath());
+
 		//save path away so we can use it again
 		QString path = fileName;
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
-	}
 
-	std::vector<MLRenderingData> rendData;
-	for(MeshModel * mp : meshDoc()->meshIterator())
-	{
-		MLRenderingData ml;
-		getRenderingData(mp->id(), ml);
-		rendData.push_back(ml);
-	}
-	meshlab::saveProject(fileName, *meshDoc(), onlyVisibleLayers->isChecked(), rendData);
-	ret = true;
-	//ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
-	
-	if (saveAllFile->isChecked())
-	{
-		for(MeshModel * mm : meshDoc()->meshIterator())
-		{
-			if((!onlyVisibleLayers->isChecked()) || (mm->visible))
-			{
-				ret |= exportMesh(mm->fullName(),mm,true);
+		std::vector<MLRenderingData> rendData;
+		for(MeshModel * mp : meshDoc()->meshIterator()) {
+			MLRenderingData ml;
+			getRenderingData(mp->id(), ml);
+			rendData.push_back(ml);
+		}
+
+		try {
+			if (saveAllFilesCheckBox->isChecked()) {
+				meshlab::saveAllMeshes(path, *meshDoc(), onlyVisibleLayersCheckBox->isChecked());
 			}
+			meshlab::saveProject(fileName, *meshDoc(), onlyVisibleLayersCheckBox->isChecked(), rendData);
+			/*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
+			meshDoc()->setDocLabel(fileName);
+			QMdiSubWindow* sub = mdiarea->currentSubWindow();
+			if (sub != nullptr) {
+				sub->setWindowTitle(meshDoc()->docLabel());
+				layerDialog->setWindowTitle(meshDoc()->docLabel());
+			}
+			/****************************************************************************/
+		}
+		catch (const MLException& e) {
+			QMessageBox::critical(
+					this, "Meshlab Saving Error",
+					"Unable to save project file " + fileName + "\nDetails:\n" + e.what());
 		}
 	}
-	if(!ret)
-		QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
 }
 
 bool MainWindow::openProject(QString fileName, bool append)
@@ -1805,72 +1794,8 @@ bool MainWindow::appendProject(QString fileName)
 	meshDoc()->setBusy(true);
 	
 	// load all projects
-	foreach(fileName,fileNameList)
-	{
+	for(QString fileName: fileNameList) {
 		openProject(fileName, true);
-//		QFileInfo fi(fileName);
-//		lastUsedDirectory = fi.absoluteDir();
-		
-//		if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") && (fi.suffix().toLower() != "mlb") && (fi.suffix().toLower() != "out") && (fi.suffix().toLower() != "nvm"))
-//		{
-//			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
-//			return false;
-//		}
-		
-//		// this change of dir is needed for subsequent textures/materials loading
-//		QDir::setCurrent(fi.absoluteDir().absolutePath());
-//		qb->show();
-		
-//		if (QString(fi.suffix()).toLower() == "aln")
-//		{
-//			vector<RangeMap> rmv;
-//			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
-//			if(retVal != ALNParser::NoError) {
-//				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
-//				return false;
-//			}
-			
-//			for(const RangeMap& rm : rmv) {
-//				QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
-//				try {
-//					meshlab::loadMeshWithStandardParameters(relativeToProj, *meshDoc(), QCallBack);
-//					meshDoc()->mm()->cm.Tr.Import(rm.transformation);
-//					computeRenderingDataOnLoading(meshDoc()->mm(), false, nullptr);
-//					if (!(meshDoc()->mm()->cm.textures.empty()))
-//						updateTexture(meshDoc()->mm()->id());
-//				}
-//				catch (const MLException& e){
-//					QMessageBox::critical(this, "Meshlab Opening Error", e.what());
-//				}
-//			}
-//		}
-		
-//		if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
-//		{
-//			int alreadyLoadedNum = meshDoc()->meshNumber();
-//			std::map<int, MLRenderingData> rendOpt;
-//			if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
-//			{
-//				QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
-//				return false;
-//			}
-//			GLA()->updateMeshSetVisibilities();
-//			auto it = meshDoc()->meshBegin();
-//			std::advance(it, alreadyLoadedNum);
-//			for (unsigned int i = alreadyLoadedNum; i<meshDoc()->meshNumber(); i++)
-//			{
-//				MeshModel* mm = *it;
-//				QString fullPath = mm->fullName();
-//				meshDoc()->setBusy(true);
-//				Matrix44m trm = mm->cm.Tr; // save the matrix, because loadMeshClear it...
-//				MLRenderingData* ptr = NULL;
-//				if (rendOpt.find(mm->id()) != rendOpt.end())
-//					ptr = &rendOpt[mm->id()];
-//				if(!loadMeshWithStandardParams(fullPath,mm,trm, false, ptr))
-//					meshDoc()->delMesh(mm);
-//				++it;
-//			}
-//		}
 	}
 	
 	globrendtoolbar->setEnabled(true);
@@ -2566,9 +2491,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	QString laylabel = "Save \"" + mod->label() + "\" Layer";
 	QString ss = fi.absoluteFilePath();
 	QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());
-#if defined(Q_OS_WIN)
 	saveDialog->setOption(QFileDialog::DontUseNativeDialog);
-#endif
 	saveDialog->setNameFilters(suffixList);
 	saveDialog->setAcceptMode(QFileDialog::AcceptSave);
 	saveDialog->setFileMode(QFileDialog::AnyFile);
@@ -2578,15 +2501,14 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		saveDialog->selectNameFilter(matchingExtensions.last());
 	//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
 	
-	if (fileName.isEmpty()){
+	if (fileName.isEmpty()) {
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
-		if(dialogRet==QDialog::Rejected	)
+		if(dialogRet==QDialog::Rejected)
 			return false;
 		fileName=saveDialog->selectedFiles ().first();
 		QFileInfo fni(fileName);
-		if(fni.suffix().isEmpty())
-		{
+		if(fni.suffix().isEmpty()) {
 			QString ext = saveDialog->selectedNameFilter();
 			ext.chop(1); ext = ext.right(4);
 			fileName = fileName + ext;
@@ -2596,15 +2518,13 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	
 	QStringList fs = fileName.split(".");
 	
-	if(!fileName.isEmpty() && fs.size() < 2)
-	{
+	if(!fileName.isEmpty() && fs.size() < 2) {
 		QMessageBox::warning(this,"Save Error","You must specify file extension!!");
 		return false;
 	}
 
 	bool saved = true;
-	if (!fileName.isEmpty())
-	{
+	if (!fileName.isEmpty()) {
 		//save path away so we can use it again
 		QString path = fileName;
 		path.truncate(path.lastIndexOf("/"));
@@ -2616,8 +2536,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QStringListIterator itFilter(suffixList);
 		
 		IOPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
-		if (pCurrentIOPlugin == 0)
-		{
+		if (pCurrentIOPlugin == 0) {
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
@@ -2635,8 +2554,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		int quality = 66;
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
-		else
-		{
+		else {
 			//this is horrible: creating a dialog object but then not showing the
 			//dialog.. And using it just to select all the possible options..
 			//to be removed soon
@@ -2653,8 +2571,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			}
 			mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 		}
-		if (!saveAllPossibleAttributes)
-		{
+		if (!saveAllPossibleAttributes) {
 			maskDialog.close();
 			if(maskDialog.result() == QDialog::Rejected)
 				return false;
@@ -2677,8 +2594,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
 			settings.setValue("savedMeshCounter", savedMeshCounter + 1);
 		}
-		catch(const MLException& e)
-		{
+		catch(const MLException& e) {
 			GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
 			QMessageBox::critical(this, tr("Meshlab Saving Error"),  e.what());
 			saved = false;
