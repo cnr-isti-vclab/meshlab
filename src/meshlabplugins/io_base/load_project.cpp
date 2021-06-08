@@ -22,6 +22,8 @@ std::vector<MeshModel*> loadALN(
 		throw MLException("Unable to open ALN file");
 	}
 	QFileInfo fi(filename);
+	QString curr_path = QDir::currentPath();
+	QDir::setCurrent(fi.absolutePath());
 
 	for(const RangeMap& rm : rmv) {
 		QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + rm.filename.c_str();
@@ -37,6 +39,7 @@ std::vector<MeshModel*> loadALN(
 			throw e;
 		}
 	}
+	QDir::setCurrent(curr_path);
 	return meshList;
 }
 
@@ -61,7 +64,7 @@ std::vector<MeshModel*> loadOUT(
 
 	QString curr_path = QDir::currentPath();
 	QFileInfo imi(imageListFile);
-
+	QDir::setCurrent(imi.absoluteDir().absolutePath());
 	//
 	QStringList image_filenames_q;
 	for(unsigned int i  = 0; i < image_filenames.size(); ++i)
@@ -72,7 +75,7 @@ std::vector<MeshModel*> loadOUT(
 		else
 			image_filenames_q.push_back(QString::fromStdString(image_filenames[i]));
 	}
-	QDir::setCurrent(imi.absoluteDir().absolutePath());
+
 
 	for(size_t i=0 ; i<shots.size() ; i++)
 	{
@@ -124,9 +127,8 @@ std::vector<MeshModel*> loadNVM(
 	md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 
 	QString curr_path = QDir::currentPath();
-	//QFileInfo imi(image_list_filename);
 
-	//QDir::setCurrent(imi.absoluteDir().absolutePath());
+	QDir::setCurrent(fi.absolutePath());
 	QStringList image_filenames_q;
 	for(size_t i  = 0; i < image_filenames.size(); ++i)
 		image_filenames_q.push_back(QString::fromStdString(image_filenames[int(i)]));
@@ -166,8 +168,6 @@ std::vector<MeshModel*> loadMLP(
 	QFile qf(filename);
 	QFileInfo qfInfo(filename);
 	bool binary = (QString(qfInfo.suffix()).toLower() == "mlb");
-	QDir tmpDir = QDir::current();
-	QDir::setCurrent(qfInfo.absoluteDir().absolutePath());
 
 	if (!qf.open(QIODevice::ReadOnly))
 		throw MLException("File not found.");
@@ -183,6 +183,8 @@ std::vector<MeshModel*> loadMLP(
 
 	node = root.firstChild();
 
+	QDir tmpDir = QDir::current();
+	QDir::setCurrent(qfInfo.absoluteDir().absolutePath());
 	//Devices
 	while (!node.isNull()) {
 		if (QString::compare(node.nodeName(), "MeshGroup") == 0) {
