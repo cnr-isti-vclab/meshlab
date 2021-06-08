@@ -682,8 +682,8 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
     QString tableText;
     for(int i=0;i<4;i++)
         tableText+=QString("\t%1\t%2\t%3\t%4\n")
-                .arg(mm()->cm.Tr[i][0],5,'f',2).arg(mm()->cm.Tr[i][1],5,'f',2)
-                .arg(mm()->cm.Tr[i][2],5,'f',2).arg(mm()->cm.Tr[i][3],5,'f',2);
+                .arg(mm()->cm.Tr[i][0],5,'f',4).arg(mm()->cm.Tr[i][1],5,'f',4)
+                .arg(mm()->cm.Tr[i][2],5,'f',4).arg(mm()->cm.Tr[i][3],5,'f',4);
 
     QTextOption TO;
     QTextOption::Tab ttt;
