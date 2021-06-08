@@ -197,6 +197,7 @@ RichParameterList U3DIOPlugin::initSaveParameter(const QString &, const MeshMode
 		"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));
 	par.addParam(RichInt("compression_val",500,"U3D quality 0..1000",
 		"U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500."));
+	delete _param._campar;
 	return par;
 }
 
