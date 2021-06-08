@@ -197,11 +197,11 @@ public:
 	 * If you do not need any additional parameters, simply do not implement
 	 * this function.
 	 */
-	virtual void initSaveParameter(
+	virtual RichParameterList initSaveParameter(
 			const QString& /*format*/,
-			const MeshModel& /*m*/,
-			RichParameterList& /*par*/)
+			const MeshModel& /*m*/) const
 	{
+		return RichParameterList();
 	}
 
 	/**

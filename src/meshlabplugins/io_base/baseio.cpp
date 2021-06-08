@@ -672,8 +672,9 @@ void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capabili
 
 }
 
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m, RichParameterList &par)
+RichParameterList BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel &m) const
 {
+	RichParameterList par;
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(RichBool("Binary", true, "Binary encoding",
 		"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
@@ -709,6 +710,7 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, const MeshModel 
 			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
 		}
 	}
+	return par;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)

@@ -263,9 +263,7 @@ void saveMeshWithStandardParameters(
 	ioPlugin->setLog(log);
 	int capability=0,defaultBits=0;
 	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
-	RichParameterList saveParams;
-
-	ioPlugin->initSaveParameter(extension, m, saveParams);
+	RichParameterList saveParams = ioPlugin->initSaveParameter(extension, m);
 
 	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
 	m.setFileName(fileName);

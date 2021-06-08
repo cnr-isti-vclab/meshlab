@@ -190,20 +190,6 @@ std::list<FileFormat> BreMeshIOPlugin::exportFormats() const
 */
 void BreMeshIOPlugin::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
-	/*if(format.toUpper() == tr("BRE"))
-  {
-    capability = 0;
-    defaultBits = 0;
-  }*/
-}
-
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList &/*par*/)
-{
-  /*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addParam(new RichBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));		
-  */
 }
 
 /////////////////////////////////////////////////////////////////////////////////

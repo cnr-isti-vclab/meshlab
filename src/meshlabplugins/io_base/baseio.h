@@ -98,7 +98,7 @@ public:
 			vcg::CallBackPos* /*cb*/ = nullptr);
 
 	RichParameterList initPreOpenParameter(const QString &formatName) const;
-	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
+	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
 };
 
 #endif

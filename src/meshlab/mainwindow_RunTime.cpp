@@ -2544,9 +2544,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		pCurrentIOPlugin->exportMaskCapability(extension,capability,defaultBits);
 		
 		// optional saving parameters (like ascii/binary encoding)
-		RichParameterList savePar;
-		
-		pCurrentIOPlugin->initSaveParameter(extension,*(mod),savePar);
+		RichParameterList savePar = pCurrentIOPlugin->initSaveParameter(extension,*(mod));
 		
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
 		int quality = 66;

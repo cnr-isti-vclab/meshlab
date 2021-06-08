@@ -128,17 +128,6 @@ std::list<FileFormat> PDBIOPlugin::exportFormats() const
 */
 void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
-	return;
-}
-
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
-{
-	/*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
-  */
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)

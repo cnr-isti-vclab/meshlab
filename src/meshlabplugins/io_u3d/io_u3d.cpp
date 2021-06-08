@@ -40,7 +40,7 @@ using namespace vcg;
 
 
 U3DIOPlugin::U3DIOPlugin() :
-	QObject(), IOPlugin(), _param()
+	QObject(), IOPlugin()
 {
 }
 
@@ -76,13 +76,16 @@ void U3DIOPlugin::save(
 			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
 				m.cm, QDir::tempPath(), textures_to_be_restored);
 	if(formatName.toUpper() == tr("U3D")) {
-		saveParameters(par);
+		vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
+		_param._campar =
+				new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(
+					m.cm.bbox.Center(),m.cm.bbox.Diag());
+		saveParameters(par, _param);
 		QSettings settings;
 		
 		//tmp idtf
 		QString tmp(QDir::tempPath());
 		QString curr = QDir::currentPath();
-		QString out(fileName);
 		QStringList out_trim;
 		vcg::tri::io::QtUtilityFunctions::splitFilePath(fileName,out_trim);
 		tmp = tmp + "/" +
@@ -109,6 +112,7 @@ void U3DIOPlugin::save(
 		vcg::tri::io::ExporterIDTF<CMeshO>::restoreConvertedTextures(
 					m.cm,
 					textures_to_be_restored);
+		delete _param._campar;
 	}
 	else if(formatName.toUpper() == tr("IDTF")) {
 		tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);
@@ -176,9 +180,11 @@ void U3DIOPlugin::exportMaskCapability(
 	assert(0);
 }
 
-void U3DIOPlugin::initSaveParameter(const QString &, const MeshModel &m, RichParameterList &par)
+RichParameterList U3DIOPlugin::initSaveParameter(const QString &, const MeshModel &m) const
 {
-	_param._campar = 
+	RichParameterList par;
+	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
+	_param._campar =
 			new vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters(
 				m.cm.bbox.Center(),m.cm.bbox.Diag());
 	Point3m pos = _param._campar->_obj_pos;
@@ -191,9 +197,10 @@ void U3DIOPlugin::initSaveParameter(const QString &, const MeshModel &m, RichPar
 		"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));
 	par.addParam(RichInt("compression_val",500,"U3D quality 0..1000",
 		"U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500."));
+	return par;
 }
 
-void U3DIOPlugin::saveParameters(const RichParameterList &par)
+void U3DIOPlugin::saveParameters(const RichParameterList &par, vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>& _param)
 {
 	Point3m from_target_to_camera = 
 			Point3m(par.getPoint3m(QString("position_val")) - par.getPoint3m(QString("target_val")));
