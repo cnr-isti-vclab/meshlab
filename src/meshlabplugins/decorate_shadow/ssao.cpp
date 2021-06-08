@@ -132,8 +132,8 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     mProj.transposeInPlace();
     mInverseProj = vcg::Inverse(mProj);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	MLRenderingData dt;
 	MLRenderingData::RendAtts atts;
 	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
@@ -141,14 +141,14 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-	foreach(MeshModel *m, md.meshList)
+	for(MeshModel *m: md.meshIterator())
 	{
 		if ((m != NULL) && (m->visible))
 		{
 			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
 		}
 	}
-    glUseProgram(0);
+	glUseProgram(0);
 
     /***********************************************************/
     //SSAO PASS

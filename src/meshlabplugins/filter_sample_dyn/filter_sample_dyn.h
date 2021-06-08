@@ -41,12 +41,12 @@ class ExtraSampleDynPlugin : public QObject, public FilterPlugin
 	virtual ~ExtraSampleDynPlugin();
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	virtual int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
+	int postCondition(const QAction* ) const {return MeshModel::MM_VERTCOLOR;};
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
-	virtual FilterClass getClass(const QAction*) const;
+	FilterClass getClass(const QAction*) const;
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 

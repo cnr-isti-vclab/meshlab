@@ -99,8 +99,9 @@ QString FilterDirt::filterInfo(ActionIDType filterId) const
 	}
 }
 
-void FilterDirt::initParameterList(const QAction* filter,MeshDocument & /*md*/, RichParameterList &par){
-
+RichParameterList FilterDirt::initParameterList(const QAction* filter, const MeshDocument & /*md*/)
+{
+	RichParameterList par;
 	switch(ID(filter)){
 
 	case FP_DIRT:{
@@ -126,6 +127,7 @@ void FilterDirt::initParameterList(const QAction* filter,MeshDocument & /*md*/, 
 		break;
 	}
 	}
+	return par;
 }
 
 int FilterDirt::getRequirements(const QAction * /*action*/)
@@ -186,7 +188,7 @@ std::map<std::string, QVariant> FilterDirt::applyFilter(const QAction *filter, c
 		break;
 	}
 	case FP_CLOUD_MOVEMENT:{
-		if(md.size()!=2){
+		if(md.meshNumber()!=2){
 			throw MLException("This filter requires two mesh");
 		}
 

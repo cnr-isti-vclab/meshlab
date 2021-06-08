@@ -96,8 +96,9 @@ FilterPlugin::FilterArity FilterMutualInfoPlugin::filterArity(const QAction*) co
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocument & /*md*/, RichParameterList & parlst)
+RichParameterList FilterMutualInfoPlugin::initParameterList(const QAction *action, const MeshDocument & /*md*/)
 {
+	RichParameterList parlst;
 	QStringList rendList;
 	rendList.push_back("Combined");
 	rendList.push_back("Normal map");
@@ -119,6 +120,7 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	default :
 		assert(0);
 	}
+	return parlst;
 }
 
 std::map<std::string, QVariant> FilterMutualInfoPlugin::applyFilter(
@@ -169,7 +171,7 @@ void FilterMutualInfoPlugin::imageMutualInfoAlign(
 		throw MLException("Error: shot not valid. Press 'Get Shot' button before applying!");
 	}
 
-	if (md.rasterList.size()==0) {
+	if (md.rasterNumber()==0) {
 		log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
 		throw MLException("You need a Raster Model to apply this filter!");
 	}

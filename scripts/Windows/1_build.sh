@@ -18,7 +18,6 @@ BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
-RC_OPTION=""
 
 #check parameters
 for i in "$@"
@@ -38,10 +37,6 @@ case $i in
         ;;
     -n|--nightly)
         NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
-        shift # past argument=value
-        ;;
-    -rc|--release_candidate)
-        RC_OPTION="-DMESHLAB_IS_RELEASE_CANDIDATE_VERSION=ON"
         shift # past argument=value
         ;;
     *)
@@ -70,6 +65,6 @@ echo "INSTALL PATH: "$INSTALL_PATH
 echo "SCRIPTS PATH: "$SCRIPTS_PATH
 
 cd $BUILD_PATH
-cmake -GNinja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $RC_OPTION $SOURCE_PATH
+cmake -GNinja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 ninja
 ninja install

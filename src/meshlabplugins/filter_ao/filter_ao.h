@@ -76,7 +76,7 @@ public:
 	bool requiresGLContext(const QAction* action) const;
     FilterClass getClass(const QAction* filter) const;
 
-    void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	void initTextures(void);
     void initGL(vcg::CallBackPos *cb,unsigned int numVertices);

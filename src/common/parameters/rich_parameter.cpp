@@ -73,6 +73,11 @@ const QString& RichParameter::toolTip() const
 	return tooltip;
 }
 
+void RichParameter::setName(const QString& newName)
+{
+	pName = newName;
+}
+
 void RichParameter::setValue(const Value& ov)
 {
 	assert(val->typeName() == ov.typeName());
@@ -572,39 +577,17 @@ bool RichSaveFile::operator==( const RichParameter& rb )
 
 RichMesh::RichMesh(
 		const QString& nm,
-		MeshModel* defval,
-		MeshDocument* doc,
+		unsigned int meshind,
+		const MeshDocument* doc,
 		const QString& desc,
 		const QString& tltip ):
-	RichParameter(nm, MeshValue(defval), desc, tltip), meshdoc(doc)
+	RichParameter(nm,MeshValue(meshind), desc, tltip), meshdoc(doc)
 {
-	meshindex = -1;
-	if (meshdoc != nullptr)
-		meshindex = meshdoc->meshList.indexOf(defval);
-	assert((meshindex != -1) || (meshdoc == nullptr));
 }
 
-RichMesh::RichMesh(
-		const QString& nm,
-		int meshind,
-		MeshDocument* doc,
-		const QString& desc,
-		const QString& tltip ):
-	RichParameter(nm,MeshValue(doc, meshind), desc, tltip), meshdoc(doc)
+RichMesh::RichMesh(const QString& nm, unsigned int meshind, const QString& desc, const QString& tltip):
+	RichParameter(nm, MeshValue(meshind), desc, tltip), meshdoc(nullptr)
 {
-	assert(meshind < meshdoc->size() && meshind >= 0);
-	meshindex = meshind;
-	if (meshdoc != nullptr)
-		val = new MeshValue(meshdoc->meshList.at(meshindex));
-	else
-		val = nullptr;
-}
-
-RichMesh::RichMesh(const QString& nm, int meshind, const QString& desc, const QString& tltip):
-	RichParameter(nm, MeshValue(nullptr), desc, tltip)
-{
-	meshdoc = nullptr;
-	meshindex = meshind;
 }
 
 RichMesh::~RichMesh()
@@ -619,7 +602,7 @@ QString RichMesh::stringType() const
 QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
 	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
-	parElem.setAttribute("value", QString::number(meshindex));
+	parElem.setAttribute("value", QString::number(val->getMeshId()));
 	return parElem;
 }
 
@@ -630,7 +613,7 @@ RichMesh* RichMesh::clone() const
 
 bool RichMesh::operator==( const RichParameter& rb )
 {
-	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMesh() == rb.value().getMesh()));
+	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMeshId() == rb.value().getMeshId()));
 }
 
 /**** RichParameterAdapter Class ****/

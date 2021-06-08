@@ -62,7 +62,7 @@ class GLArea : public QGLWidget
 public:
     GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterList *current);
     ~GLArea();
-    static void initGlobalParameterList( RichParameterList * /*globalparam*/);
+    static void initGlobalParameterList(RichParameterList& /*globalparam*/);
 
 private:
     int id;  //the very important unique id of each subwindow.

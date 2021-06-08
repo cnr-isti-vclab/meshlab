@@ -99,9 +99,9 @@ int FilterIsoParametrization::getRequirements(const QAction *)
 	return MeshModel::MM_NONE;
 }
 
-void FilterIsoParametrization::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
+RichParameterList FilterIsoParametrization::initParameterList(const QAction *a, const MeshDocument& md)
 {
-	
+	RichParameterList par;
 	switch(ID(a))
 	{
 	case ISOP_PARAM:
@@ -153,10 +153,11 @@ void FilterIsoParametrization::initParameterList(const QAction *a, MeshDocument&
 	}
 	case ISOP_TRANSFER:
 	{
-		par.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
-		par.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
+		par.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
+		par.addParam(RichMesh ("targetMesh",md.mm()->id(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
 	}
 	}
+	return par;
 }
 
 void FilterIsoParametrization::PrintStats(CMeshO *mesh)
@@ -333,7 +334,7 @@ std::map<std::string, QVariant> FilterIsoParametrization::applyFilter(
 		mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 		PrintStats(rem);
-		mm->UpdateBoxAndNormals();
+		mm->updateBoxAndNormals();
 		break;
 	}
 	case ISOP_DIAMPARAM :
@@ -414,8 +415,8 @@ std::map<std::string, QVariant> FilterIsoParametrization::applyFilter(
 		//  }
 	case ISOP_TRANSFER:
 	{
-		MeshModel *mmtrg = par.getMesh("targetMesh");
-		MeshModel *mmsrc = par.getMesh("sourceMesh");
+		MeshModel *mmtrg = md.getMesh(par.getMeshId("targetMesh"));
+		MeshModel *mmsrc = md.getMesh(par.getMeshId("sourceMesh"));
 		CMeshO *trgMesh=&mmtrg->cm;
 		CMeshO *srcMesh=&mmsrc->cm;
 		

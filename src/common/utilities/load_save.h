@@ -34,7 +34,7 @@
 
 namespace meshlab {
 
-void loadMesh(
+std::list<std::string> loadMesh(
 		const QString& fileName,
 		IOPlugin* ioPlugin,
 		const RichParameterList& prePar,
@@ -42,20 +42,75 @@ void loadMesh(
 		std::list<int>& maskList,
 		vcg::CallBackPos *cb);
 
-void loadMeshWithStandardParameters(
+std::list<MeshModel*> loadMeshWithStandardParameters(
 		const QString& filename,
 		MeshDocument& md,
-		vcg::CallBackPos *cb);
+		vcg::CallBackPos *cb = nullptr,
+		RichParameterList prePar = RichParameterList());
 
 void reloadMesh(
 		const QString& filename,
 		const std::list<MeshModel*>& meshList,
-		vcg::CallBackPos* cb);
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+void saveMeshWithStandardParameters(
+		const QString& fileName,
+		MeshModel& m,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+void saveAllMeshes(
+		const QString& basePath,
+		MeshDocument& md,
+		bool onlyVisible = false,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
+
+QImage loadImage(
+		const QString& filename,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+void saveImage(
+		const QString& filename,
+		const QImage& image,
+		int quality = 66,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos* cb = nullptr);
 
 void loadRaster(
 		const QString& filename,
+		RasterModel& rm,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		IOPlugin* ioPlugin,
 		MeshDocument& md,
-		vcg::CallBackPos *cb);
+		std::vector<MLRenderingData>& rendOpt,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QStringList& filenames,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+std::vector<MeshModel*> loadProject(
+		const QString& filename,
+		MeshDocument& md,
+		GLLogStream* log = nullptr,
+		vcg::CallBackPos *cb = nullptr);
+
+void saveProject(
+		const QString& filename,
+		const MeshDocument& md,
+		bool onlyVisibleMeshes,
+		std::vector<MLRenderingData> renderData = std::vector<MLRenderingData>());
+
 }
 
 #endif // MESHLAB_LOAD_SAVE_H

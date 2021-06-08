@@ -73,7 +73,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
   {
     //enable colors and quality
     mask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY | vcg::tri::io::Mask::IOM_VERTTEXCOORD; 
-    meshModel.Enable(mask);
+    meshModel.enable(mask);
     
     //Add camera position and image width and height
     m.shot.Extrinsics.Tra() = header.CameraPosition();
@@ -121,28 +121,39 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // initialize importing parameters
-void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList BreMeshIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
-  
-	if (formatName.toUpper() == tr("BRE"))
-	{
+	RichParameterList parlst;
+	if (formatName.toUpper() == tr("BRE")) {
 		parlst.addParam(RichBool("pointsonly",false,"only import points","Just import points, without triangulation"));
+		parlst.addParam(RichBool(
+			"unify_vertices", true, "Unify Duplicated Vertices in BRE files",
+			"The BRE format is not an vertex-indexed format. Each triangle is "
+			"composed by independent vertices, so, usually, duplicated vertices "
+			"should be unified"));
 	}
-  
+	return parlst;
 }
 
-void BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
+void BreMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
-	// initializing progress bar status
-	if (cb != NULL)
-		(*cb)(0, "Loading...");
-	mask = 0;
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-	bool points = parlst.getBool("pointsonly");
-	int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
-	if (result != 0) // all the importers return 0 on success
-	{
-		throw MLException(errorMsgFormat.arg(fileName, ErrorMsg(result)));
+	if (formatName.toUpper() == tr("BRE")) {
+		if (cb != NULL)
+			(*cb)(0, "Loading...");
+		mask = 0;
+		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+		bool points = parlst.getBool("pointsonly");
+		int result = vcg::tri::io::ImporterBRE<CMeshO>::Open(m, m.cm, mask, fileName,points, cb);
+		if (result != 0) // all the importers return 0 on success
+		{
+			throw MLException(errorMsgFormat.arg(fileName, ErrorMsg(result)));
+		}
+		if (parlst.getBool("unify_vertices")){
+			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+		}
+	}
+	else {
+		wrongOpenFormat(formatName);
 	}
 }
 
@@ -179,38 +190,6 @@ std::list<FileFormat> BreMeshIOPlugin::exportFormats() const
 */
 void BreMeshIOPlugin::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
-	/*if(format.toUpper() == tr("BRE"))
-  {
-    capability = 0;
-    defaultBits = 0;
-  }*/
-}
-
-void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList &par) 
-{
-	if(format.toUpper() == tr("BRE"))
-		par.addParam(RichBool("Unify",true, "Unify Duplicated Vertices",
-								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
-  
-}
-void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList &/*par*/)
-{
-  /*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addParam(new RichBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));		
-  */
-}
-
-void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par) 
-{
-	if(format.toUpper() == tr("BRE"))
-  {
-		if(par.getBool("Unify"))
-    {
-			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-    }
-  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

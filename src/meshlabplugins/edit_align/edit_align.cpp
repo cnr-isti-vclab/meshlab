@@ -114,23 +114,23 @@ void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData&
 
 bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedDataContext* cont)
 {
-    _md=&md;
-    _gla= gla;
+	_md=&md;
+	_gla= gla;
 	_shared = cont;
 
-	if ((_gla == NULL) || (_shared == NULL) || (md.meshList.size() < 1))
+	if ((_gla == NULL) || (_shared == NULL) || (md.meshNumber() < 1))
 		return false;
 
 	//mainW->addDockWidget(Qt::LeftDockWidgetArea,alignDialog);
 	mode = ALIGN_IDLE;
-    int numOfMeshes = _md->meshList.size();
-    meshTree.clear();
-    foreach(MeshModel *mm, _md->meshList)
-    {
+	int numOfMeshes = _md->meshNumber();
+	meshTree.clear();
+	for(MeshModel *mm: _md->meshIterator())
+	{
 
-        // assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
-        // if above 50, truly unique color would generate too similar colors, so total number of unique color
-        // is capped to 50 and the color reused, id that are close will have different color anyway
+		// assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
+		// if above 50, truly unique color would generate too similar colors, so total number of unique color
+		// is capped to 50 and the color reused, id that are close will have different color anyway
 		if (mm != NULL)
 		{
 			if (numOfMeshes < 50)
@@ -139,12 +139,12 @@ bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 				mm->cm.C() = Color4b::Scatter(51, mm->id() % 50, .2f, .7f);
 			mm->updateDataMask(MeshModel::MM_COLOR);
 //			meshTree.nodeList.push_back(new MeshNode(mm));
-            meshTree.nodeMap[mm->id()]=new MeshNode(mm);
+			meshTree.nodeMap[mm->id()]=new MeshNode(mm);
 		}
-    }
+	}
 
-//for(QMap<int,RenderMode>::iterator it = _gla->rendermodemap.begin();it != _gla->rendermodemap.end();++it)
-//    it.value().colorMode=GLW::CMPerMesh;
+//	for(QMap<int,RenderMode>::iterator it = _gla->rendermodemap.begin();it != _gla->rendermodemap.end();++it)
+//		it.value().colorMode=GLW::CMPerMesh;
 
     _gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
     if(alignDialog==0)

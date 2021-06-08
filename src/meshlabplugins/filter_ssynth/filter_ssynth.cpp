@@ -57,23 +57,24 @@ QString FilterSSynth::filterInfo(ActionIDType filterId) const
     }
 }
 
-void FilterSSynth::initParameterList(const QAction* /*filter*/,MeshDocument &/*md*/, RichParameterList &par)
+RichParameterList FilterSSynth::initParameterList(const QAction* /*filter*/,const MeshDocument &/*md*/)
 {
+    RichParameterList par;
     par.addParam(RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
     par.addParam(RichInt("seed",1,"seed for random construction","Seed needed to build the mesh"));
     par.addParam(RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));
-    return;
+    return par;
 }
 
 void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget* /*parent*/)
 {
     vcg::tri::io::AdditionalInfoX3D* info = NULL;
     /*int result = */vcg::tri::io::ImporterX3D<CMeshO>::LoadMask(fileName.toStdString().c_str(), info);
-    m.Enable(info->mask);
+    m.enable(info->mask);
     /*result = */vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, fileName.toStdString().c_str(), info, cb);
     /*vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);*/
-    m.UpdateBoxAndNormals();
+    m.updateBoxAndNormals();
     mask=info->mask;
     delete(info);
 }
@@ -224,11 +225,14 @@ void FilterSSynth::save(const QString &formatName, const QString &/*fileName*/, 
 
 void FilterSSynth::exportMaskCapability(const QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const {}
 
-void FilterSSynth::initPreOpenParameter(const QString &/*formatName*/, RichParameterList &parlst){
+RichParameterList FilterSSynth::initPreOpenParameter(const QString &/*formatName*/) const
+{
+    RichParameterList parlst;
     parlst.addParam(RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
     parlst.addParam(RichInt("maxrec",0,"set the maximum recursion","the mesh is built recursively according to the productions of the grammar, so a limit is needed. If set to 0 meshlab will generate the mesh according to the maximum recursion set in the file"));
     parlst.addParam(RichInt("sphereres",1,"set maximum resolution of sphere primitives, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));
     parlst.addParam(RichInt("maxobj",0,"set the maximum number of object to be rendered","you can set a limit to the maximum number of primitives rendered. If set to 0 meshlab will generate the mesh according to the input file"));
+    return parlst;
 }
 
 QString FilterSSynth::GetTemplate(int sphereres){

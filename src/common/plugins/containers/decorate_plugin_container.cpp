@@ -35,9 +35,6 @@ void DecoratePluginContainer::clear()
 void DecoratePluginContainer::pushDecoratePlugin(DecoratePlugin* iDecorate)
 {
 	decoratePlugins.push_back(iDecorate);
-	for(QAction *decoratorAction : iDecorate->actions()) {
-		iDecorate->initGlobalParameterList(decoratorAction, meshlab::defaultGlobalParameterList());
-	}
 }
 
 void DecoratePluginContainer::eraseDecoratePlugin(DecoratePlugin* iDecorate)

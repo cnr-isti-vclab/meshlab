@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -32,150 +32,203 @@
 class MeshDocument : public QObject
 {
 	Q_OBJECT
-	
+
 public:
+
+	// Iterators
+	typedef std::list<MeshModel*>::iterator MeshIterator;
+	typedef std::list<const MeshModel*>::const_iterator ConstMeshIterator;
+	typedef std::list<RasterModel*>::iterator RasterIterator;
+	typedef std::list<const RasterModel*>::const_iterator ConstRasterIterator;
+
+	class MeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		MeshIterator begin() {return md.meshBegin();}
+		MeshIterator end() {return md.meshEnd();}
+	private:
+		MeshRangeIterator(MeshDocument& md) : md(md){}
+		MeshDocument& md;
+	};
+
+	class ConstMeshRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		ConstMeshIterator begin() {return md.meshBegin();}
+		ConstMeshIterator end()   {return md.meshEnd();}
+	private:
+		ConstMeshRangeIterator(const MeshDocument& md) : md(md){}
+		const MeshDocument& md;
+	};
+
+	class RasterRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		RasterIterator begin() {return md.rasterBegin();}
+		RasterIterator end()   {return md.rasterEnd();}
+	private:
+		RasterRangeIterator(MeshDocument& md) : md(md){}
+		MeshDocument& md;
+	};
+
+	class ConstRasterRangeIterator
+	{
+		friend class MeshDocument;
+	public:
+		ConstRasterIterator begin() {return md.rasterBegin();}
+		ConstRasterIterator end()   {return md.rasterEnd();}
+	private:
+		ConstRasterRangeIterator(const MeshDocument& md) : md(md){}
+		const MeshDocument& md;
+	};
+
 	MeshDocument();
-	
+
 	//deletes each meshModel
 	~MeshDocument();
-	
+
 	void clear();
-	
+
 	///returns the mesh with the given unique id
-	const MeshModel* getMesh(int id) const;
-	MeshModel* getMesh(int id);
-	
+	const MeshModel* getMesh(unsigned int id) const;
+	MeshModel* getMesh(unsigned int id);
+
 	//set the current mesh to be the one with the given ID
 	void setCurrentMesh( int new_curr_id );
 	
 	void setVisible(int meshId, bool val);
-	
+
 	/// returns the raster with the given unique id
 	RasterModel *getRaster(int i);
-	
+
 	//set the current raster to be the one with the given ID
 	void setCurrentRaster( int new_curr_id );
 	void setCurrent(MeshModel   *newCur);
 	void setCurrent(RasterModel *newCur);
-	
+
 	/// methods to access the set of Meshes in a ordered fashion.
 	MeshModel   *nextVisibleMesh(MeshModel *_m = nullptr);
-	
+
 	MeshModel   *nextMesh(MeshModel *_m = nullptr);
 	/// methods to access the set of Meshes in a ordered fashion.
 	RasterModel   *nextRaster(RasterModel *_rm = nullptr);
-	
+
 	MeshModel* mm();
-	
+
 	const MeshModel* mm() const;
-	
+
 	//Could return 0 if no raster has been selected
 	RasterModel *rm();
+	const RasterModel* rm() const;
 
 	void requestUpdatingPerMeshDecorators(int mesh_id);
-	
+
 	MeshDocumentStateData& meshDocStateData();
 	void setDocLabel(const QString& docLb);
 	QString docLabel() const;
 	QString pathName() const;
 	void setFileName(const QString& newFileName);
-	
-	
-	int size() const;
-	int sizeRasters() const;
+
+	unsigned int meshNumber() const;
+	unsigned int rasterNumber() const;
+
 	bool isBusy();  // used in processing. To disable access to the mesh by the rendering thread
 	void setBusy(bool _busy);
 
 	///add a new mesh with the given name
-	MeshModel* addNewMesh(const CMeshO& mesh, QString Label, bool setAsCurrent=true);
-	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
-	MeshModel *addOrGetMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
+	MeshModel* addNewMesh(const CMeshO& mesh, const QString& Label, bool setAsCurrent=true);
+	MeshModel *addNewMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
+	MeshModel *addOrGetMesh(const QString& fullPath, const QString& Label, bool setAsCurrent=true);
 	std::list<MeshModel*> getMeshesLoadedFromSameFile(MeshModel* mm);
-	
+
 	///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
-	
+
 	///add a new raster model
 	RasterModel *addNewRaster(/*QString rasterName*/);
-	
+
 	///remove the raster from the list and delete it from memory
 	bool delRaster(RasterModel *rasterToDel);
-	
+
 	int vn(); /// Sum of all the vertices of all the meshes
 
 	int fn();
-	
-	Box3m bbox();
-	
+
+	Box3m bbox() const;
+
 	bool hasBeenModified();
-	
-	class MeshRangeIterator
-	{
-		friend class MeshDocument;
-	public:
-		QList<MeshModel*>::iterator begin() {return md->meshList.begin();}
-		QList<MeshModel*>::iterator end() {return md->meshList.end();}
-	private:
-		MeshRangeIterator(MeshDocument* md) : md(md){}
-		MeshDocument* md;
-	};
-	
+
+	//iterator member functions
+	MeshIterator meshBegin();
+	MeshIterator meshEnd();
+	RasterIterator rasterBegin();
+	RasterIterator rasterEnd();
+	ConstMeshIterator meshBegin() const;
+	ConstMeshIterator meshEnd() const;
+	ConstRasterIterator rasterBegin() const;
+	ConstRasterIterator rasterEnd() const;
+
 	MeshRangeIterator meshIterator();
-	
+	ConstMeshRangeIterator meshIterator() const;
+	RasterRangeIterator rasterIterator();
+	ConstRasterRangeIterator rasterIterator() const;
+
 	GLLogStream Log;
 	FilterScript filterHistory;
-	
+
+private:
 	/// The very important member:
 	/// The list of MeshModels.
-	QList<MeshModel *> meshList;
+	std::list<MeshModel *> meshList;
 	/// The list of the raster models of the project
-	QList<RasterModel *> rasterList;
-	
-private:
+	std::list<RasterModel *> rasterList;
+
 	int meshIdCounter;
 	int rasterIdCounter;
-	
+
 	/**
 	All the files referred in a document are relative to the folder containing the project file.
 	this is the full path to the document.
 	*/
 	QString fullPathFilename;
-	
+
 	//it is the label of the document. it should only be something like Project_n (a temporary name for a new empty document) or the fullPathFilename.
 	QString documentLabel;
-	
+
 	MeshDocumentStateData mdstate;
-	
+
 	bool busy;
-	
+
 	MeshModel *currentMesh;
 	//the current raster model
 	RasterModel* currentRaster;
-	
+
 	unsigned int newMeshId();
 	unsigned int newRasterId();
-	
+
 signals:
 	///whenever the current mesh is changed (e.g. the user click on a different mesh)
 	// this signal will send out with the index of the newest mesh
 	void currentMeshChanged(int index);
-	
+
 	/// whenever the document (or even a single mesh) is modified by a filter
 	void meshDocumentModified();
-	
+
 	///whenever the meshList is changed
 	void meshSetChanged();
-	
+
 	void meshAdded(int index);
 	void meshRemoved(int index);
-	
+
 	///whenever the rasterList is changed
 	void rasterSetChanged();
-	
+
 	//this signal is emitted when a filter request to update the mesh in the renderingState
 	void documentUpdated();
 	void updateDecorators(int mesh_id);
-	
 };// end class MeshDocument
 
 

@@ -1,15 +1,13 @@
 #version management
 string(TIMESTAMP MESHLAB_VERSION "%Y.%m")
-if (MESHLAB_IS_RELEASE_CANDIDATE_VERSION AND MESHLAB_IS_NIGHTLY_VERSION)
-	message(FATAL_ERROR "Both nightly and release candidate options are set to ON. Choose one.")
-endif()
+
 if (MESHLAB_IS_NIGHTLY_VERSION)
 	# nightly version is in the form:
 	# YYYY.mm[d]_nightly_GIT_SHA1
 	# YYYY and mm are computed by cmake and not read from file
 	find_package(Git)
 	execute_process(COMMAND
-		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=6
+		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=7
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		OUTPUT_VARIABLE GIT_SHA1
 		ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -23,12 +21,8 @@ else()
 		file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
 	endif()
 	# if double precision version, "d" is appended
-	# if release candidate, "_rc" is appended
 	if (BUILD_WITH_DOUBLE_SCALAR)
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
-	endif()
-	if (MESHLAB_IS_RELEASE_CANDIDATE_VERSION)
-		set(MESHLAB_VERSION "${MESHLAB_VERSION}_rc")
 	endif()
 endif()
 message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
@@ -82,9 +76,6 @@ set(HEADERS
 	GLExtensionsManager.h
 	GLLogStream.h
 	filterscript.h
-	mainwindow_interface.h
-	meshlabdocumentbundler.h
-	meshlabdocumentxml.h
 	ml_selection_buffers.h
 	ml_thread_safe_memory_info.h
 	mlapplication.h
@@ -125,13 +116,12 @@ set(SOURCES
 	GLExtensionsManager.cpp
 	GLLogStream.cpp
 	filterscript.cpp
-	meshlabdocumentbundler.cpp
-	meshlabdocumentxml.cpp
 	ml_selection_buffers.cpp
 	ml_thread_safe_memory_info.cpp
 	mlapplication.cpp
-	searcher.cpp
-	${EXTERNAL_DIR}/easyexif/exif.cpp)
+	searcher.cpp)
+
+set(RESOURCES meshlab-common.qrc)
 
 set(TARGET_TYPE SHARED)
 if(WIN32)
@@ -145,8 +135,6 @@ target_compile_definitions(meshlab-common
 		MESHLAB_SCALAR=${MESHLAB_SCALAR})
 
 target_include_directories(meshlab-common
-	PRIVATE
-		${EXTERNAL_DIR}/easyexif/
 	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/..)
 
@@ -160,6 +148,7 @@ target_link_libraries(
 		Qt5::Network
 		vcglib
 		external-glew
+		external-exif
 )
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)

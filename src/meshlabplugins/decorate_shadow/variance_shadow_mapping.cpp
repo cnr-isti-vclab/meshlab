@@ -103,7 +103,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-	foreach(MeshModel *m, md.meshList)
+	for(MeshModel *m: md.meshIterator())
 	{
 		if ((m != NULL) && (m->visible))
 		{
@@ -144,7 +144,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	foreach(MeshModel *m, md.meshList)
+	for(MeshModel *m: md.meshIterator())
 	{
 		if ((m != NULL) && (m->visible))
 		{

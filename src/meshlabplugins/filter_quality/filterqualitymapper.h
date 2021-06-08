@@ -70,18 +70,18 @@ public:
 	QualityMapperFilter();
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;
-	virtual void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	virtual FilterClass getClass(const QAction*) const;
+	FilterClass getClass(const QAction*) const;
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 };
 

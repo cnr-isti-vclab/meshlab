@@ -189,8 +189,9 @@ int FilterColorProc::getRequirements(const QAction *action)
 	assert(0);
 }
 
-void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, RichParameterList & par)
+RichParameterList FilterColorProc::initParameterList(const QAction *a, const MeshDocument& md)
 {
+	RichParameterList par;
 	switch(ID(a))
 	{
 	case CP_FILLING:
@@ -380,6 +381,7 @@ void FilterColorProc::initParameterList(const QAction *a, MeshDocument& md, Rich
 
 	default: break; // do not add any parameter for the other filters
 	}
+	return par;
 }
 
 std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filter, const RichParameterList &par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
@@ -452,13 +454,13 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 
 			if (all_levels)
 			{
-			foreach(MeshModel *mm, md.meshList)
+			for(MeshModel *mm: md.meshIterator())
 				if (mm->isVisible())
-				vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+					vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
 			}
 			else
 			{
-			vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+				vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
 			}
 			break;
 		}
@@ -518,9 +520,9 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 
 			if(seed==0) seed = time(NULL);
 			math::MarsenneTwisterRNG myrnd(seed);
-			int numOfMeshes = md.meshList.size();
+			int numOfMeshes = md.meshNumber();
 			int id = myrnd.generate(numOfMeshes);
-			foreach(MeshModel *mm, md.meshList)
+			for(MeshModel *mm: md.meshIterator())
 			{
 				if (mm->isVisible())
 					mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
@@ -864,7 +866,7 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 
 		case CP_MESH_TO_FACE:
 		{
-			foreach(MeshModel *mmi, md.meshList)
+			for(MeshModel *mmi: md.meshIterator())
 			{
 				if (mmi->visible)
 				{

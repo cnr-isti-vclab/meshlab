@@ -223,7 +223,7 @@ void LayerDialog::clickV1()
 	if (isRecording)
 	{
 		visibilityState[0].clear();
-		foreach(MeshModel *mp, md->meshList)
+		for(MeshModel *mp : md->meshIterator())
 		{
 			visibilityState[0].insert(mp->id(), mp->isVisible());
 		}
@@ -253,7 +253,7 @@ void LayerDialog::clickV2()
 	if (isRecording)
 	{
 		visibilityState[1].clear();
-		foreach(MeshModel *mp, md->meshList)
+		for(MeshModel *mp : md->meshIterator())
 		{
 			visibilityState[1].insert(mp->id(), mp->isVisible());
 		}
@@ -283,7 +283,7 @@ void LayerDialog::clickV3()
 	if (isRecording)
 	{
 		visibilityState[2].clear();
-		foreach(MeshModel *mp, md->meshList)
+		for(MeshModel *mp : md->meshIterator())
 		{
 			visibilityState[2].insert(mp->id(), mp->isVisible());
 		}
@@ -313,7 +313,7 @@ void LayerDialog::clickV4()
 	if (isRecording)
 	{
 		visibilityState[3].clear();
-		foreach(MeshModel *mp, md->meshList)
+		for(MeshModel *mp : md->meshIterator())
 		{
 			visibilityState[3].insert(mp->id(), mp->isVisible());
 		}
@@ -375,7 +375,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			// Very useful for comparing meshes
 			if(QApplication::keyboardModifiers() == Qt::ControlModifier)
 			{
-				foreach(MeshModel *mp, md->meshList)
+				for(MeshModel *mp : md->meshIterator())
 					mw->GLA()->meshSetVisibility(mp, false);
 			}
 
@@ -389,7 +389,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			// clicking on all of them...
 			if(QApplication::keyboardModifiers() == Qt::AltModifier)
 			{
-				foreach(MeshModel *mp, md->meshList)
+				for(MeshModel *mp : md->meshIterator())
 				{
 					mw->GLA()->meshSetVisibility(mp, true);
 				}
@@ -397,7 +397,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
 			if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
 			{
-				foreach(MeshModel *mp, md->meshList)
+				for(MeshModel *mp : md->meshIterator())
 				{
 					mw->GLA()->meshSetVisibility(mp, !mp->visible);
 				}
@@ -457,7 +457,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				//
 				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = false;
 					}
@@ -476,7 +476,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				// clicking on all of them...
 				if(QApplication::keyboardModifiers() == Qt::AltModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = true;
 					}
@@ -484,7 +484,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 
 				if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
 				{
-					foreach(RasterModel *rp, md->rasterList)
+					for(RasterModel *rp: md->rasterIterator())
 					{
 						rp->visible = !rp->visible;
 					}
@@ -657,7 +657,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	updateProjectName(md->docLabel());
 
 	QList<QTreeWidgetItem*> itms;
-	for (MeshModel* mmd : md->meshList)
+	for (MeshModel* mmd : md->meshIterator())
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
@@ -712,7 +712,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	//}
 	//tabsrelatedtodeletedmeshes.clear();
 
-	if (md->rasterList.size() > 0)
+	if (md->rasterNumber() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
@@ -723,7 +723,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
 	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
 	ui->rasterTreeWidget->header()->hide();
-	foreach(RasterModel* rmd, md->rasterList)
+	for(RasterModel* rmd: md->rasterIterator())
 	{
 		//Restore raster visibility according to the current visibility map
 		//very good to keep viewer state consistent
@@ -958,7 +958,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 			}
 		}
 	}
-	if (md->meshList.size() == 0)
+	if (md->meshNumber() == 0)
 		_renderingtabcontainer->setTitle(QString());
 }
 
@@ -1110,7 +1110,7 @@ void LayerDialog::updatePerMeshItemVisibility()
 		}
 	}
 
-	if ((!md->meshList.isEmpty()) && allhidden)
+	if ((!(md->meshNumber() == 0)) && allhidden)
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_close.png"));
 	else
 		_docitem->setIcon(0,QIcon(":/images/layer_eye_open.png"));

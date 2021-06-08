@@ -8,10 +8,6 @@ on:
         description: 'New MeshLab Version'
         required: true
         default: 'YYYY.MM'
-      release_candidate:
-        description: 'Is release candidate'
-        required: true
-        default: 'false'
 
 
 jobs:
@@ -40,7 +36,7 @@ jobs:
   linux_build:
     needs: [update_ml_version]
     name: Build MeshLab (Linux)
-    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+    runs-on: ubuntu-18.04 #in order to deploy, need to use oldest supported version
     strategy:
       matrix:
         precision: [single_precision, double_precision]
@@ -54,7 +50,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev
+       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev libcgal-dev libboost-all-dev
        #needed by qt 5.15 on linux
        sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
@@ -66,15 +62,10 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Deploy
       shell: bash
       run: |
@@ -109,7 +100,7 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-        brew install libomp xerces-c
+        brew install libomp cgal xerces-c
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -122,19 +113,32 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Deploy
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
+    - name: Import Cert and Key
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+    - name: Sign
+      run: |
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} src/install/meshlab.app
+    - name: Notarize
+      uses: devbotsxyz/xcode-notarize@v1
+      with:
+        product-path: "src/install/meshlab.app"
+        appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
+        appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
+    - name: "Staple Release"
+      uses: devbotsxyz/xcode-staple@v1
+      with:
+        product-path: "src/install/meshlab.app"
     - name: Create MeshLab DMG
       shell: bash
       run: |
@@ -176,16 +180,26 @@ jobs:
         else
           echo  ::set-output name=artifact_suffix::""
         fi
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_option::"-rc"
-        else
-          echo ::set-output name=rc_option::""
-        fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+    - name: Expand PATH for wget
+      run: |
+        echo "C:\msys64\usr\bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Set Certificate
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
+        certutil -decode certificate\certificate.txt certificate\certificate.pfx
+    - name: Download external libraries
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_download_ext.sh
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} ${{steps.envs.outputs.rc_option}}
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
+    - name: Sign Portable content
+      run: |
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\install\'
     - name: Deploy
       shell: bash
       run: |
@@ -201,7 +215,11 @@ jobs:
     - name: Move Installer
       shell: bash
       run: |
-        mv src/install/MeshLab*-windows.exe  src/
+        mkdir src/installer
+        mv src/install/MeshLab*-windows.exe  src/installer
+    - name: Sign Installer
+      run: |
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\installer\'
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
@@ -211,7 +229,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: src/MeshLab*-windows.exe
+        path: src/installer/MeshLab*-windows.exe
 
   #after building MeshLab for the three platforms, we create a release in github
   create_release:
@@ -259,10 +277,11 @@ jobs:
         chmod +x meshlab_linux_portable_double/AppRun
     - name: Create MeshLab Portable Linux Archive
       run: |
-        mv meshlab_linux_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
-        tar -cvzf MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}/
-        mv meshlab_linux_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}
-        tar -cvzf MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}/
+        cd meshlab_linux_portable
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz *
+        cd ../meshlab_linux_portable_double
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz *
+        cd ..
 
     #Download MacOS Package
     - name: Download MacOS DMG
@@ -285,13 +304,17 @@ jobs:
       with:
         name: meshlab_macos_portable_double
         path: meshlab_macos_portable_double
+    - name: Change Permissions
+      run: |
+        chmod +x meshlab_macos_portable/MeshLab*.app/Contents/MacOS/meshlab
+        chmod +x meshlab_macos_portable_double/MeshLab*.app/Contents/MacOS/meshlab
     - name: Create MeshLab Portable MacOS
       run: |
-        mv meshlab_macos_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app
-        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app/
-        rm -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}.app
-        mv meshlab_macos_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}.app
-        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}.app/
+        cd meshlab_macos_portable
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
+        cd ../meshlab_macos_portable_double
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
+        cd ..
 
     #Download Windows Packages
     - name: Download Windows ZIP
@@ -316,10 +339,11 @@ jobs:
         path: meshlab_windows_installer_double
     - name: Create MeshLab Portable Windows Archive
       run: |
-        mv meshlab_windows_portable MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
-        zip -r MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}/
-        mv meshlab_windows_portable_double MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}
-        zip -r MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}/
+        cd meshlab_windows_portable
+        zip -r ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip *
+        cd ../meshlab_windows_portable_double
+        zip -r ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip *
+        cd ..
 
 
     #Create release and upload
@@ -402,8 +426,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.zip
+        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     - name: Upload ReleaseMacOSPortable-d
       id: upload-release-macos-portable-d
@@ -412,8 +436,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.zip
+        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     #Windows
     - name: Upload ReleaseWindowsPortable

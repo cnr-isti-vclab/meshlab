@@ -123,10 +123,11 @@ FilterPlugin::FilterClass AmbientOcclusionPlugin::getClass(const QAction * /*fil
 	//return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
 };
 
-void AmbientOcclusionPlugin::initParameterList(const QAction *action, MeshModel & /*m*/, RichParameterList &parlst)
+RichParameterList AmbientOcclusionPlugin::initParameterList(const QAction *action, const MeshModel & /*m*/)
 {
-    switch(ID(action))
-    {
+	RichParameterList parlst;
+	switch(ID(action))
+	{
 		case FP_AMBIENT_OCCLUSION:
 			parlst.addParam(RichEnum("occMode", 0,	QStringList() << "per-Vertex" << "per-Face (deprecated)", tr("Occlusion mode:"), tr("Occlusion may be calculated per-vertex or per-face, color and quality will be saved in the chosen component.")));
 			parlst.addParam(RichFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
@@ -134,15 +135,17 @@ void AmbientOcclusionPlugin::initParameterList(const QAction *action, MeshModel 
 				" - 1 means that all the light cames from the specified cone of directions <br>"
 				" - other values mix the two set of lighting directions "));
 			parlst.addParam(RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-			parlst.addParam(RichPoint3f("coneDir",Point3f(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
+			parlst.addParam(RichPoint3f("coneDir",Point3m(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","Only works for per-vertex AO. In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
 			//parlst.addParam(RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
 			parlst.addParam(RichInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance"));
-        break;
+		break;
 		default: break; // do not add any parameter for the other filters
-    }
+	}
+	return parlst;
 }
+
 std::map<std::string, QVariant> AmbientOcclusionPlugin::applyFilter(const QAction * filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	if (ID(filter) == FP_AMBIENT_OCCLUSION) {

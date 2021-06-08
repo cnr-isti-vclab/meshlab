@@ -160,7 +160,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 	}
 	if (parameter->value().isMesh()){
 		const RichMesh* rm = dynamic_cast<const RichMesh*>(parameter);
-		o << rm->meshindex;
+		o << rm->value().getMeshId();
 		return;
 	}
 	if (parameter->value().isFileName()){

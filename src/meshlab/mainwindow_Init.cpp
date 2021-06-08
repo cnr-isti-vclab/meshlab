@@ -85,7 +85,7 @@ MainWindow::MainWindow():
 	catch (const MLException& e) {
 		QMessageBox::warning(this, "Error while loading plugins.", e.what());
 	}
-	
+
 	//disable previously disabled plugins
 	QStringList disabledPlugins = settings.value("DisabledPlugins").value<QStringList>();
 	for (MeshLabPlugin* fp : PM.pluginIterator(true)){
@@ -115,7 +115,11 @@ MainWindow::MainWindow():
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(), MeshLabApplication::appVer());
 		settings.setValue(MeshLabApplication::wordSizeKeyName(), QSysInfo::WordSize);
 	}
-	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
+
+	//load default params from plugins
+	loadDefaultSettingsFromPlugins();
+	// Now load from the registry the settings and  merge the hardwired values
+	// got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	mwsettings.updateGlobalParameterList(currentGlobalParams);
 	createActions();
@@ -951,14 +955,40 @@ void MainWindow::updateAllPluginsActions()
 	*/
 }
 
+void MainWindow::loadDefaultSettingsFromPlugins()
+{
+	//decorate settings
+	for (DecoratePlugin* dp : PM.decoratePluginIterator()){
+		for(QAction *decoratorAction : dp->actions()) {
+			dp->initGlobalParameterList(decoratorAction, defaultGlobalParams);
+		}
+	}
+
+	//io settings
+	for (IOPlugin* iop : PM.ioPluginIterator()){
+		for (const FileFormat& ff : iop->importFormats()) {
+			for (const QString& format : ff.extensions) {
+				RichParameterList tmplist = iop->initPreOpenParameter(format);
+				if (!tmplist.isEmpty()){
+					for (RichParameter& rp : tmplist){
+						QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
+						rp.setName(prefixName + rp.name());
+					}
+					defaultGlobalParams.join(tmplist);
+				}
+			}
+		}
+	}
+}
+
 
 void MainWindow::loadMeshLabSettings()
 {
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
-	MainWindowSetting::initGlobalParameterList(&defaultGlobalParams);
-	GLArea::initGlobalParameterList(&defaultGlobalParams);
+	MainWindowSetting::initGlobalParameterList(defaultGlobalParams);
+	GLArea::initGlobalParameterList(defaultGlobalParams);
 
 	QSettings settings;
 	QStringList klist = settings.allKeys();
@@ -978,12 +1008,14 @@ void MainWindow::loadMeshLabSettings()
 			bool b = RichParameterAdapter::create(docElem, &rp);
 			if (b && defaultGlobalParams.hasParameter(rp->name()))
 				currentGlobalParams.pushFromQDomElement(docElem);
+			if (b)
+				delete rp;
 		}
 	}
 
 	// 2) eventually fill missing values with the hardwired defaults
 	for (const RichParameter& p : defaultGlobalParams) {
-		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
+		// qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
 		if (!currentGlobalParams.hasParameter(p.name())) {
 			//qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
 			RichParameter& v = currentGlobalParams.addParam(p);
@@ -1088,7 +1120,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	if (settings.contains(checkForMonthlyAndBetasVar))
 		checkForMonthlyAndBetasVal = settings.value(checkForMonthlyAndBetasVar).toBool();
 	if (checkForMonthlyAndBetasVal){
-		urlCheck = "https://github.com/cnr-isti-vclab/meshlab/blob/master/ML_VERSION";
+		urlCheck = "https://raw.githubusercontent.com/cnr-isti-vclab/meshlab/master/ML_VERSION";
 	}
 	int totalKV = settings.value("totalKV", 0).toInt();
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
@@ -1292,28 +1324,30 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterList(RichParameterList* gbllist)
+void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 {
-	gbllist->addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
-	gbllist->addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	gbllist->addParam(RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist.addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+	gbllist.addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+	gbllist.addParam(RichInt(minFaceNumberPerSmoothRendering(), 5000000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 //	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		gbllist->addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
-	gbllist->addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+		gbllist.addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
+	gbllist.addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+	gbllist.addParam(RichBool(showPreOpenParameterDialogParam(), false, "Show Open Parameter Dialog", "If true, each time that a mesh is imported, a dialog asking for extra parameters (if applicable), is shown."));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 {
 	maxgpumem = (std::ptrdiff_t)rpl.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
 	perbatchprimitives = (size_t)rpl.getInt(perBatchPrimitives());
-	minpolygonpersmoothrendering = (size_t)rpl.getInt(minPolygonNumberPerSmoothRendering());
+	minpolygonpersmoothrendering = (size_t)rpl.getInt(minFaceNumberPerSmoothRendering());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rpl.getBool(highPrecisionRendering());
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
+	showPreOpenParameterDialog = rpl.getBool(showPreOpenParameterDialogParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

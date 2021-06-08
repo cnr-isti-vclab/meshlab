@@ -32,9 +32,14 @@
 #include <vcg/complex/algorithms/update/texture.h>
 #include<wrap/io_trimesh/export_ply.h>
 #include <vcg/complex/algorithms/parametrization/voronoi_atlas.h>
+#include <common/utilities/load_save.h>
 #include <QStandardPaths>
 
 using namespace vcg;
+
+// ERROR CHECKING UTILITY
+#define CheckError(x,y); if ((x)) {throw MLException((y));}
+///////////////////////////////////////////////////////
 
 FilterTexturePlugin::FilterTexturePlugin()
 {
@@ -90,7 +95,7 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 	case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
-	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else a dummy texture will be created and saved in the same directory of the mesh if exists, or in the default system picture directory.");
+	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else the filter will fail with no further actions.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture color, vertex color or normal from one mesh the texture of another mesh. This may be useful to restore detail lost in simplification, or resample a texture in a different parametrization.");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from a texture (same mesh or another mesh).");
@@ -174,12 +179,14 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a)
 	return FilterPlugin::Generic;
 }
 	
-static QString extractFilenameTexture(MeshModel* mm)
+static QString extractFilenameTexture(const MeshModel* mm)
 {
+	if (mm->fullName().isEmpty()){
+		return "texture.png";
+	}
 	QFileInfo fi(mm->fullName());
 	QString fileName = fi.baseName().append("_tex.png");
-	fileName = fileName.append(".png");
-	fileName = fi.absolutePath() + "/" + fileName;
+	//fileName = fi.absolutePath() + "/" + fileName;
 	return fileName;
 }
 	
@@ -190,9 +197,18 @@ static QString extractFilenameTexture(MeshModel* mm)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, const MeshDocument &md)
 {
+	RichParameterList parlst;
+	const MeshModel* trg = md.mm();
+	for (const MeshModel* tmp : md.meshIterator()){
+		if (tmp != trg && tmp != nullptr){
+			trg = tmp;
+			break;
+		}
+	}
 	QString fileName = extractFilenameTexture(md.mm());
+	QString trgFileName = extractFilenameTexture(trg);
 	switch(ID(action)) {
 	case FP_VORONOI_ATLAS :
 		parlst.addParam(RichInt("regionNum", 10, "Approx. Region Num", "An estimation of the number of regions that must be generated. Smaller regions could lead to parametrizations with smaller distortion."));
@@ -211,41 +227,37 @@ void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument 
 		parlst.addParam(RichInt("border", 2, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
 		parlst.addParam(RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
 		break;
-	case FP_SET_TEXTURE : {
+	case FP_SET_TEXTURE :
 		parlst.addParam(RichOpenFile("textName", fileName, QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
-		parlst.addParam(RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this size"));
-	}
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", fileName, "Texture file", "The texture file to be created"));
 		parlst.addParam(RichInt("textW", 1024, "Texture width (px)", "The texture width"));
 		parlst.addParam(RichInt("textH", 1024, "Texture height (px)", "The texture height"));
 		parlst.addParam(RichBool("overwrite", false, "Overwrite texture", "if current mesh has a texture will be overwritten (with provided texture dimension)"));
-		parlst.addParam(RichBool("assign", false, "Assign texture", "assign the newly created texture"));
 		parlst.addParam(RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
 	}
 		break;
 	case FP_TRANSFER_TO_TEXTURE : {
-		parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+		parlst.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",
 								  "The mesh that contains the source data that we want to transfer"));
-		parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+		parlst.addParam(RichMesh ("targetMesh",trg->id(),&md, "Target Mesh",
 								  "The mesh whose texture will be filled according to source mesh data"));
 		parlst.addParam(RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
 								 "Choose what attribute has to be transferred onto the target texture. You can choose bettween Per vertex attributes (color,normal,quality) or to transfer color information from source mesh texture"));
 		parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
 									tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering data")));
-		parlst.addParam(RichString("textName", fileName, "Texture file", "The texture file to be created"));
+		parlst.addParam(RichString("textName", trgFileName, "Texture file", "The texture file to be created"));
 		parlst.addParam(RichInt("textW", 1024, "Texture width (px)", "The texture width"));
 		parlst.addParam(RichInt("textH", 1024, "Texture height (px)", "The texture height"));
 		parlst.addParam(RichBool("overwrite", false, "Overwrite Target Mesh Texture", "if target mesh has a texture will be overwritten (with provided texture dimension)"));
-		parlst.addParam(RichBool("assign", false, "Assign Texture", "assign the newly created texture to target mesh"));
 		parlst.addParam(RichBool("pullpush", true, "Fill texture", "if enabled the unmapped texture space is colored using a pull push filling algorithm, if false is set to black"));
 	}
 		break;
 	case FP_TEX_TO_VCOLOR_TRANSFER : {
-		parlst.addParam(RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
+		parlst.addParam(RichMesh ("sourceMesh",md.mm()->id(),&md, "Source Mesh",
 								  "The mesh with associated texture that we want to sample from"));
-		parlst.addParam(RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
+		parlst.addParam(RichMesh ("targetMesh",trg->id(),&md, "Target Mesh",
 								  "The mesh whose vertex color will be filled according to source mesh texture"));
 		parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
 									tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering color")));
@@ -253,6 +265,7 @@ void FilterTexturePlugin::initParameterList(const QAction *action, MeshDocument 
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 	
 	
@@ -330,10 +343,6 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 	buildTrianglesCache (arr, maxLevels, border, quadSize, 2*idx+2);
 	buildTrianglesCache (arr, maxLevels, border, quadSize, 2*idx+3);
 }
-	
-// ERROR CHECKING UTILITY
-#define CheckError(x,y); if ((x)) {throw MLException((y));}
-///////////////////////////////////////////////////////
 
 template<typename T>
 T log_2(const T num)
@@ -380,7 +389,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		if(pp.overlap==false)
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
 		
-		paraModel->UpdateBoxAndNormals();
+		paraModel->updateBoxAndNormals();
 		baseModel->clearDataMask(bitToBeCleared);
 		log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
 		log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
@@ -647,58 +656,16 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		break;
 		
 	case FP_SET_TEXTURE : {
-		
-		const int CHECKERDIM=64;
-		
 		// Get parameters
 		QString textName = par.getOpenFileName("textName");
-		int textDim = par.getInt("textDim");
 		
-		CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
 		CheckError(textName.length() == 0, "Texture file not specified");
 		
-		QFile textFile(textName);
-		if (!textFile.exists())
-		{
-			// Creates path to texture file
-			QString fileName(m.fullName());
-			QFileInfo finfo(fileName);
-			if (!finfo.exists()) {
-				fileName = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).first() + "/" + textName;
-			}
-			else {
-				fileName = finfo.absolutePath();
-				fileName.append("/"+ textName);
-			}
-			textName = fileName;
-			
-			// Create dummy checkers texture image
-			QImage img(textDim, textDim, QImage::Format_RGB32);
-			img.fill(qRgb(255,255,255)); // white
-			QPainter p(&img);
-			QBrush gray(Qt::gray);
-			QRect rect(0,0,CHECKERDIM,CHECKERDIM);
-			bool odd = true;
-			for (int y=0; y<textDim; y+=CHECKERDIM, odd=!odd)
-			{
-				rect.moveTop(y);
-				for (int x=odd?0:CHECKERDIM; x<textDim; x+=2*CHECKERDIM)
-				{
-					rect.moveLeft(x);
-					p.fillRect(rect, gray);
-				}
-			}
-			
-			// Save texture
-			CheckError(!img.save(fileName, NULL), "Specified file cannot be saved");
-			log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
-			QFile newTextFile(fileName);
-			assert(newTextFile.exists());
-		}
-		
+		QImage textFile = meshlab::loadImage(textName, &md.Log, cb);
+		QFileInfo finfo(textName);
 		//Assign texture
-		m.cm.textures.clear();
-		m.cm.textures.push_back(textName.toStdString());
+		m.clearTextures();
+		m.addTexture(finfo.fileName().toStdString(), textFile);
 	}
 		break;
 		
@@ -708,10 +675,8 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		int textW = par.getInt("textW");
 		int textH = par.getInt("textH");
 		bool overwrite = par.getBool("overwrite");
-		bool assign = par.getBool("assign");
 		bool pp = par.getBool("pullpush");
-		
-		CheckError(!QFile(m.fullName()).exists(), "Save the mesh before creating a texture");
+
 		CheckError(textW <= 0, "Texture Width has an incorrect value");
 		CheckError(textH <= 0, "Texture Height has an incorrect value");
 		if (overwrite)
@@ -723,32 +688,14 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			CheckError(textName.length() == 0, "Texture file not specified");
 			//CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 		}
-		
+
 		if (m.cm.textures.empty())
 		{
-			// Creates path to texture file
-			QString fileName = textName;
-			if (std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) == -1){
-				fileName = m.fullName();
-				fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
-			}
+			QImage img(textW, textH, QImage::Format_RGB32);
+			img.fill(qRgb(255, 255, 255)); // white
+			m.addTexture(textName.toStdString(), img);
 
-			QFile textFile(fileName);
-			if (!textFile.exists())
-			{
-				// Create dummy checkers texture image
-				QImage img(textW, textH, QImage::Format_RGB32);
-				img.fill(qRgb(255, 255, 255)); // white
-				
-				// Save texture
-				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
-				assert(textFile.exists());
-			}
-			
 			//Assign texture
-			m.cm.textures.clear();
-			m.cm.textures.push_back(fileName.toStdString());
 			for(auto fi=m.cm.face.begin();fi!=m.cm.face.end();++fi){
 				if(!(*fi).IsD()) if((*fi).WT(0).N()==-1) {
 					(*fi).WT(0).N() = 0;
@@ -757,56 +704,52 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 				}
 			}
 		}
-		
-		QString filePath(m.fullName());
-		filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
+
 		QString baseName(textName);
 		if (baseName.lastIndexOf(".") != -1)
 			if (baseName.endsWith("bmp", Qt::CaseInsensitive) || baseName.endsWith("jpg", Qt::CaseInsensitive) || baseName.endsWith("png", Qt::CaseInsensitive)
 					|| baseName.endsWith("jpeg", Qt::CaseInsensitive) || baseName.endsWith("tif", Qt::CaseInsensitive) || baseName.endsWith("tiff", Qt::CaseInsensitive))
 				baseName.truncate(baseName.lastIndexOf("."));
-		
-		int texInd;
-		int texNum;
-		texNum = m.cm.textures.size();
+
+		unsigned int texNum = m.cm.textures.size();
 		vector <QString> texFileNames;
 		texFileNames.resize(texNum);
 		vector <QImage> trgImgs;
-		trgImgs.reserve(m.cm.textures.size());
-		
+		trgImgs.reserve(texNum);
+
 		// Image texture creation
-		for (texInd = 0; texInd < texNum; texInd++)
+		for (unsigned int texInd = 0; texInd < texNum; texInd++)
 		{
 			if (overwrite)
 			{
-				texFileNames[texInd] = filePath + QString(m.cm.textures[texInd].c_str());
+				texFileNames[texInd] = QString(m.cm.textures[texInd].c_str());
 			}
 			else
 			{
 				if (texNum==1)
-					texFileNames[texInd] = filePath + baseName + ".png";
+					texFileNames[texInd] = baseName + ".png";
 				else
-					texFileNames[texInd] = filePath + baseName + "_" + QString::number(texInd) + ".png";
+					texFileNames[texInd] = baseName + "_" + QString::number(texInd) + ".png";
 			}
-			
+
 			trgImgs.push_back(QImage(QSize(textW, textH), QImage::Format_ARGB32));
 			trgImgs[texInd].fill(qRgba(0, 0, 0, 0)); // transparent black
 		}
-		
+
 		// Compute (texture-space) border edges
 		tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
 		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		
+
 		// Rasterizing triangles
 		RasterSampler rs(trgImgs);
 		rs.InitCallback(cb, m.cm.fn, 0, 80);
 		tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH,true);
-		
+
 		// Undo topology changes
 		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		
-		for (texInd = 0; texInd < texNum; texInd++)
+
+		for (unsigned int texInd = 0; texInd < texNum; texInd++)
 		{
 			// Revert alpha values for border edge pixels to 255
 			cb(81, "Cleaning up texture ...");
@@ -817,251 +760,37 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 					if (qAlpha(px) < 255 && (!pp || qAlpha(px) > 0))
 						trgImgs[texInd].setPixel(x, y, px | 0xff000000);
 				}
-			
+
 			// PullPush
 			if (pp)
 			{
 				cb(85, "Filling texture holes...");
 				PullPush(trgImgs[texInd], qRgba(0, 0, 0, 0));
 			}
-			
-			// Save texture
-			cb(90, "Saving texture ...");
-			CheckError(!trgImgs[texInd].save(texFileNames[texInd]), "Texture file cannot be saved");
-			log("Texture \"%s\" Created", texFileNames[texInd].toStdString().c_str());
-			assert(QFile(texFileNames[texInd]).exists());
 		}
-		
-		if (assign && !overwrite) 
-		{
-			m.cm.textures.clear();
-			for (texInd = 0; texInd < texNum; texInd++)
-				m.cm.textures.push_back(textName.toStdString());
+
+		if (overwrite) {
+			for (unsigned int texInd = 0; texInd < texNum; texInd++)
+				m.setTexture(texFileNames[texInd].toStdString(), trgImgs[texInd]);
 		}
-		
+		else  {
+			m.clearTextures();
+			for (unsigned int texInd = 0; texInd < texNum; texInd++)
+				m.addTexture(texFileNames[texInd].toStdString(), trgImgs[texInd]);
+		}
+
 		cb(100, "Done");
 	}
 	break;
-		
+
 	case FP_TRANSFER_TO_TEXTURE : 
-	{
-		MeshModel *srcMesh = par.getMesh("sourceMesh");
-		MeshModel *trgMesh = par.getMesh("targetMesh");
-		bool vertexSampling=false;
-		bool textureSampling=false;
-		int  vertexMode= -1;
-		switch (par.getEnum("AttributeEnum")) 
-		{
-		case 0: vertexSampling= true; vertexMode=0; break;  // Color
-		case 1: vertexSampling= true; vertexMode=1; break;  // Normal
-		case 2: vertexSampling= true; vertexMode=2; break;  // Quality
-		case 3: textureSampling = true; break;
-		default: assert(0);
-		}
-		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
-		QString textName = par.getString("textName");
-		int textW = par.getInt("textW");
-		int textH = par.getInt("textH");
-		bool overwrite = par.getBool("overwrite");
-		bool assign = par.getBool("assign");
-		bool pp = par.getBool("pullpush");
-		
-		assert (srcMesh != NULL);
-		assert (trgMesh != NULL);
-		CheckError(!QFile(trgMesh->fullName()).exists(), "Save the target mesh before creating a texture");
-		CheckError(trgMesh->cm.fn == 0, "Target mesh needs to have faces");
-		CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh does not have Per-Wedge Texture Coordinates");
-		CheckError(textW <= 0, "Texture Width has an incorrect value");
-		CheckError(textH <= 0, "Texture Height has an incorrect value");
-		
-		if (vertexSampling) {
-			if (vertexMode == 0) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per-Vertex Color"); }
-			if (vertexMode == 1) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per-Vertex Normal"); }
-			if (vertexMode == 2) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTQUALITY), "Source mesh doesn't have Per-Vertex Quality"); }
-		}
-		else
-		{
-			CheckError(srcMesh->cm.fn == 0, "Source mesh needs to have faces");
-			CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh does not have Per-Wedge Texture Coordinates");
-			CheckError(srcMesh->cm.textures.empty(), "Source mesh does not have any associated texture");
-		}
-		
-		if (overwrite)
-		{
-			CheckError(trgMesh->cm.textures.empty(), "Mesh has no associated texture to overwrite");
-		}
-		else
-		{
-			CheckError(textName.length() == 0, "Texture file not specified");
-			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-		}
-		
-		if (m.cm.textures.empty())
-		{
-			// Creates path to texture file
-			QString fileName(m.fullName());
-			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
-			
-			QFile textFile(fileName);
-			if (!textFile.exists())
-			{
-				// Create dummy checkers texture image
-				QImage img(textW, textH, QImage::Format_RGB32);
-				img.fill(qRgb(255, 255, 255)); // white
-				
-				// Save texture
-				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
-				assert(textFile.exists());
-			}
-			
-			//Assign texture
-			m.cm.textures.clear();
-			m.cm.textures.push_back(textName.toStdString());
-			
-			
-		}
-		
-		// Source images (for texture to texture transfer)
-		int numSrcTex = srcMesh->cm.textures.size();
-		QString srcPath(srcMesh->fullName());
-		srcPath = srcPath.left(std::max<int>(srcPath.lastIndexOf('\\'), srcPath.lastIndexOf('/')) + 1);
-		vector <QImage> srcImgs;
-		vector <QString> srcTextureFileNames;
-		srcImgs.resize(numSrcTex);
-		srcTextureFileNames.resize(numSrcTex);
-		int srcTexInd = 0;
-		// Target images 
-		int numTrgTex = trgMesh->cm.textures.size();
-		QString trgPath(trgMesh->fullName());
-		trgPath = trgPath.left(std::max<int>(trgPath.lastIndexOf('\\'), trgPath.lastIndexOf('/')) + 1);
-		QString baseName(textName);
-		if (baseName.lastIndexOf(".") != -1)
-			if (baseName.endsWith("bmp", Qt::CaseInsensitive) || baseName.endsWith("jpg", Qt::CaseInsensitive) || baseName.endsWith("png", Qt::CaseInsensitive)
-					|| baseName.endsWith("jpeg", Qt::CaseInsensitive) || baseName.endsWith("tif", Qt::CaseInsensitive) || baseName.endsWith("tiff", Qt::CaseInsensitive))
-				baseName.truncate(baseName.lastIndexOf("."));
-		vector <QImage> trgImgs;
-		vector <QString> trgTextureFileNames;
-		trgImgs.reserve(numTrgTex);
-		trgTextureFileNames.resize(numTrgTex);
-		int trgTexInd = 0;
-		
-		// Check whether is possible to access source mesh textures, and load them
-		if (textureSampling)
-		{
-			for (srcTexInd = 0; srcTexInd < numSrcTex; srcTexInd++)
-			{
-				srcTextureFileNames[srcTexInd] = srcPath + srcMesh->cm.textures[srcTexInd].c_str();
-				CheckError(!QFile(srcTextureFileNames[srcTexInd]).exists(), QString("Source texture \"").append(srcTextureFileNames[srcTexInd]).append("\" doesn't exists"));
-				CheckError(!srcImgs[srcTexInd].load(srcTextureFileNames[srcTexInd]), QString("Source texture \"").append(srcTextureFileNames[srcTexInd]).append("\" cannot be opened"));
-			}
-		}
-		
-		// target textures naming and creation
-		for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
-		{
-			if (overwrite)
-			{
-				trgTextureFileNames[trgTexInd] = trgPath + QString(m.cm.textures[trgTexInd].c_str());
-			}
-			else
-			{
-				if (numTrgTex == 1)
-					trgTextureFileNames[trgTexInd] = trgPath + baseName + ".png";
-				else
-					trgTextureFileNames[trgTexInd] = trgPath + baseName + "_" + QString::number(trgTexInd) + ".png";
-			}
-			
-			trgImgs.push_back(QImage(QSize(textW, textH), QImage::Format_ARGB32));
-			trgImgs[trgTexInd].fill(qRgba(0, 0, 0, 0)); // transparent black
-		}
-		
-		// Compute (texture-space) border edges
-		trgMesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(trgMesh->cm);
-		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
-		
-		// the meshes have to be transformed
-		// only if source different from target (if single mesh, it does not matter)
-		if (srcMesh != trgMesh)
-		{
-			if (srcMesh->cm.Tr != Matrix44m::Identity())
-				tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, srcMesh->cm.Tr, true);
-			if (trgMesh->cm.Tr != Matrix44m::Identity())
-				tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, trgMesh->cm.Tr, true);
-		}
-		
-		// Rasterizing faces
-		srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-		tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
-		if (vertexSampling)
-		{
-			TransferColorSampler sampler(srcMesh->cm, trgImgs, upperbound, vertexMode); // color sampling
-			sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-			tri::SurfaceSampling<CMeshO, TransferColorSampler>::Texture(trgMesh->cm, sampler, textW, textH, false);
-		} 
-		else 
-		{ 
-			TransferColorSampler sampler(srcMesh->cm, trgImgs, &srcImgs, upperbound); // texture sampling
-			sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-			tri::SurfaceSampling<CMeshO, TransferColorSampler>::Texture(trgMesh->cm, sampler, textW, textH, false);
-		}
-		
-		// the meshes have to return to their original position
-		// only if source different from target (if single mesh, it does not matter)
-		if (srcMesh != trgMesh)
-		{
-			if (srcMesh->cm.Tr != Matrix44m::Identity())
-				tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, Inverse(srcMesh->cm.Tr), true);
-			if (trgMesh->cm.Tr != Matrix44m::Identity())
-				tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, Inverse(trgMesh->cm.Tr), true);
-		}
-		
-		// Undo topology changes
-		tri::UpdateTopology<CMeshO>::FaceFace(trgMesh->cm);
-		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
-		
-		for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
-		{
-			// Revert alpha values for border edge pixels to 255
-			cb(81, "Cleaning up texture ...");
-			for (int y = 0; y<textH; ++y)
-				for (int x = 0; x<textW; ++x)
-				{
-					QRgb px = trgImgs[trgTexInd].pixel(x, y);
-					if (qAlpha(px) < 255 && (!pp || qAlpha(px) > 0))
-						trgImgs[trgTexInd].setPixel(x, y, px | 0xff000000);
-				}
-			
-			// PullPush
-			if (pp)
-			{
-				cb(85, "Filling texture holes...");
-				PullPush(trgImgs[trgTexInd], qRgba(0, 0, 0, 0));
-			}
-			
-			// Save texture
-			cb(90, "Saving texture ...");
-			CheckError(!trgImgs[trgTexInd].save(trgTextureFileNames[trgTexInd]), "Texture file cannot be saved");
-			log("Texture \"%s\" Created", trgTextureFileNames[trgTexInd].toStdString().c_str());
-			assert(QFile(trgTextureFileNames[trgTexInd]).exists());
-		}
-		
-		if (assign && !overwrite)
-		{
-			m.cm.textures.clear();
-			for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
-				m.cm.textures.push_back(trgTextureFileNames[trgTexInd].toStdString());
-		}
-		
-		cb(100, "Done");
-	}
+		transferToTexture(md, par, cb);
 		break;
-		
+
 	case FP_TEX_TO_VCOLOR_TRANSFER :
 	{
-		MeshModel *srcMesh = par.getMesh("sourceMesh");
-		MeshModel *trgMesh = par.getMesh("targetMesh");
+		MeshModel *srcMesh = md.getMesh(par.getMeshId("sourceMesh"));
+		MeshModel *trgMesh = md.getMesh(par.getMeshId("targetMesh"));
 		Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
 		
 		assert(srcMesh!=NULL);
@@ -1075,14 +804,10 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		
 		vector <QImage> srcImgs;
 		srcImgs.resize(srcMesh->cm.textures.size());
-		QString path;
 		
 		for (size_t textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
 		{
-			path = m.fullName();
-			path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(srcMesh->cm.textures[textInd].c_str());
-			CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
-			CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+			srcImgs[textInd] = srcMesh->getTexture(srcMesh->cm.textures[textInd]);
 		}
 		
 		trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
@@ -1142,6 +867,184 @@ FilterPlugin::FilterArity FilterTexturePlugin::filterArity(const QAction * filte
 		return FilterPlugin::FIXED;
 	}
 	return FilterPlugin::NONE;
+}
+
+void FilterTexturePlugin::transferToTexture(
+			MeshDocument &md,
+			const RichParameterList & par,
+			vcg::CallBackPos * cb)
+{
+	MeshModel *srcMesh = md.getMesh(par.getMeshId("sourceMesh"));
+	MeshModel *trgMesh = md.getMesh(par.getMeshId("targetMesh"));
+	bool vertexSampling=false;
+	bool textureSampling=false;
+	int  vertexMode= -1;
+	switch (par.getEnum("AttributeEnum"))
+	{
+		case 0: vertexSampling= true; vertexMode=0; break;  // Color
+		case 1: vertexSampling= true; vertexMode=1; break;  // Normal
+		case 2: vertexSampling= true; vertexMode=2; break;  // Quality
+		case 3: textureSampling = true; break;
+		default: assert(0);
+	}
+	Scalarm upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
+	QString textName = par.getString("textName");
+	int textW = par.getInt("textW");
+	int textH = par.getInt("textH");
+	bool overwrite = par.getBool("overwrite");
+	bool pp = par.getBool("pullpush");
+
+	assert (srcMesh != NULL);
+	assert (trgMesh != NULL);
+	CheckError(trgMesh->cm.fn == 0, "Target mesh needs to have faces");
+	CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh does not have Per-Wedge Texture Coordinates");
+	CheckError(textW <= 0, "Texture Width has an incorrect value");
+	CheckError(textH <= 0, "Texture Height has an incorrect value");
+
+	if (vertexSampling) {
+		if (vertexMode == 0) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per-Vertex Color"); }
+		if (vertexMode == 1) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per-Vertex Normal"); }
+		if (vertexMode == 2) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTQUALITY), "Source mesh doesn't have Per-Vertex Quality"); }
+	}
+	else {
+		CheckError(srcMesh->cm.fn == 0, "Source mesh needs to have faces");
+		CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh does not have Per-Wedge Texture Coordinates");
+		CheckError(srcMesh->cm.textures.empty(), "Source mesh does not have any associated texture");
+	}
+
+	if (overwrite) {
+		CheckError(trgMesh->cm.textures.empty(), "Mesh has no associated texture to overwrite");
+	}
+	else {
+		CheckError(textName.length() == 0, "Texture file not specified");
+	}
+
+	// Source images (for texture to texture transfer)
+	int numSrcTex = srcMesh->cm.textures.size();
+	vector <QImage> srcImgs;
+	vector <QString> srcTextureFileNames;
+	srcImgs.resize(numSrcTex);
+	srcTextureFileNames.resize(numSrcTex);
+	int srcTexInd = 0;
+	// Target images
+	int numTrgTex = 1;
+	if (trgMesh->cm.textures.size()> 0)
+		numTrgTex = trgMesh->cm.textures.size();
+	QString baseName(textName);
+	if (baseName.lastIndexOf(".") != -1){
+		if (baseName.endsWith("bmp", Qt::CaseInsensitive) || baseName.endsWith("jpg", Qt::CaseInsensitive) || baseName.endsWith("png", Qt::CaseInsensitive)
+				|| baseName.endsWith("jpeg", Qt::CaseInsensitive) || baseName.endsWith("tif", Qt::CaseInsensitive) || baseName.endsWith("tiff", Qt::CaseInsensitive))
+			baseName.truncate(baseName.lastIndexOf("."));
+	}
+	vector <QImage> trgImgs;
+	vector <QString> trgTextureFileNames;
+	trgImgs.reserve(numTrgTex);
+	trgTextureFileNames.resize(numTrgTex);
+	int trgTexInd = 0;
+
+	if (textureSampling)
+	{
+		for (srcTexInd = 0; srcTexInd < numSrcTex; srcTexInd++)
+		{
+			srcTextureFileNames[srcTexInd] = srcMesh->cm.textures[srcTexInd].c_str();
+		}
+	}
+
+	// target textures naming and creation
+	for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
+	{
+		if (overwrite)
+		{
+			trgTextureFileNames[trgTexInd] = QString(trgMesh->cm.textures[trgTexInd].c_str());
+		}
+		else
+		{
+			if (numTrgTex == 1)
+				trgTextureFileNames[trgTexInd] = baseName + ".png";
+			else
+				trgTextureFileNames[trgTexInd] = baseName + "_" + QString::number(trgTexInd) + ".png";
+		}
+
+		trgImgs.push_back(QImage(QSize(textW, textH), QImage::Format_ARGB32));
+		trgImgs[trgTexInd].fill(qRgba(0, 0, 0, 0)); // transparent black
+	}
+
+	// Compute (texture-space) border edges
+	trgMesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(trgMesh->cm);
+	tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
+
+	// the meshes have to be transformed
+	// only if source different from target (if single mesh, it does not matter)
+	if (srcMesh != trgMesh)
+	{
+		if (srcMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, srcMesh->cm.Tr, true);
+		if (trgMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, trgMesh->cm.Tr, true);
+	}
+
+	// Rasterizing faces
+	srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
+	tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
+	if (vertexSampling)
+	{
+		TransferColorSampler sampler(srcMesh->cm, trgImgs, upperbound, vertexMode); // color sampling
+		sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
+		tri::SurfaceSampling<CMeshO, TransferColorSampler>::Texture(trgMesh->cm, sampler, textW, textH, false);
+	}
+	else
+	{
+		TransferColorSampler sampler(srcMesh->cm, trgImgs, &srcImgs, upperbound); // texture sampling
+		sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
+		tri::SurfaceSampling<CMeshO, TransferColorSampler>::Texture(trgMesh->cm, sampler, textW, textH, false);
+	}
+
+	// the meshes have to return to their original position
+	// only if source different from target (if single mesh, it does not matter)
+	if (srcMesh != trgMesh)
+	{
+		if (srcMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, Inverse(srcMesh->cm.Tr), true);
+		if (trgMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, Inverse(trgMesh->cm.Tr), true);
+	}
+
+	// Undo topology changes
+	tri::UpdateTopology<CMeshO>::FaceFace(trgMesh->cm);
+	tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
+
+	for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
+	{
+		// Revert alpha values for border edge pixels to 255
+		cb(81, "Cleaning up texture ...");
+		for (int y = 0; y<textH; ++y)
+			for (int x = 0; x<textW; ++x)
+			{
+				QRgb px = trgImgs[trgTexInd].pixel(x, y);
+				if (qAlpha(px) < 255 && (!pp || qAlpha(px) > 0))
+					trgImgs[trgTexInd].setPixel(x, y, px | 0xff000000);
+			}
+
+		// PullPush
+		if (pp)
+		{
+			cb(85, "Filling texture holes...");
+			PullPush(trgImgs[trgTexInd], qRgba(0, 0, 0, 0));
+		}
+	}
+
+	if (overwrite){
+		for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
+			trgMesh->setTexture(trgTextureFileNames[trgTexInd].toStdString(), trgImgs[trgTexInd]);
+	}
+	else{
+		trgMesh->clearTextures();
+		for (trgTexInd = 0; trgTexInd < numTrgTex; trgTexInd++)
+			trgMesh->addTexture(trgTextureFileNames[trgTexInd].toStdString(), trgImgs[trgTexInd]);
+	}
+
+	cb(100, "Done");
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterTexturePlugin)

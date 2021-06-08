@@ -35,18 +35,22 @@ CMeshO::CMeshO(const CMeshO& oth) :
 {
 	enableOCFComponentsFromOtherMesh(oth);
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
+	textures = oth.textures;
+	normalmaps = oth.normalmaps;
 }
 
 /// TODO: make a proper implementation of a move constructor.
 /// Even if almost never used, this is very inefficient.
 CMeshO::CMeshO(CMeshO&& oth): 
-	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
+	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn),
 	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
 {
 	enableOCFComponentsFromOtherMesh(oth);
 	//I could take everything from oth and place it in
 	//this mesh
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
+	textures = oth.textures;
+	normalmaps = oth.normalmaps;
 }
 
 /// TODO: change this and use the copy&swap idiom
@@ -60,6 +64,8 @@ CMeshO& CMeshO::operator=(const CMeshO& oth)
 	pvn = oth.pvn;
 	pfn = oth.pfn;
 	Tr = oth.Tr;
+	textures = oth.textures;
+	normalmaps = oth.normalmaps;
 	return *this;
 }
 

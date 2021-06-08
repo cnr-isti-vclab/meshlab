@@ -117,15 +117,17 @@ std::map<std::string, QVariant> FilterCreateIso::applyFilter(const QAction *filt
 		printf("[MARCHING CUBES] Building mesh...");
 		MyMarchingCubes mc(m.cm, walker);
 		walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10,cb);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 	else {
 		wrongActionCalled(filter);
 	}
 	return std::map<std::string, QVariant>();
 }
-void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/, RichParameterList & parlst)
+
+RichParameterList FilterCreateIso::initParameterList(const QAction *action, const MeshModel & /*m*/)
 {
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 	case FP_CREATEISO :
@@ -133,6 +135,7 @@ void FilterCreateIso::initParameterList(const QAction *action,MeshModel & /*m*/,
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 

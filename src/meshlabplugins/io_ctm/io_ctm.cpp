@@ -98,12 +98,14 @@ void IOMPlugin::exportMaskCapability(const QString &/*format*/, int &capability,
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
-void IOMPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList & par)
+RichParameterList IOMPlugin::initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/) const
 {
+  RichParameterList par;
   par.addParam(RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));
   par.addParam(RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
                              "It is a number relative to the average edge length. (e.g. the default means that the error should be roughly 1/10000 of the average edge length)"));
+  return par;
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(IOMPlugin)

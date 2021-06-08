@@ -312,8 +312,9 @@ int FilterUnsharp::postCondition(const QAction *a) const
   return MeshModel::MM_NONE;
 }
 
-void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, RichParameterList & parlst)
+RichParameterList FilterUnsharp::initParameterList(const QAction *action, const MeshDocument &md)
 {
+    RichParameterList parlst;
     switch(ID(action))
     {
         case FP_RECOMPUTE_VERTEX_NORMAL :
@@ -387,7 +388,7 @@ void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, R
         break;
         case FP_LINEAR_MORPH :
         {
-            parlst.addParam(RichMesh ("TargetMesh", md.mm(), &md,"Target Mesh", "The mesh that is the morph target."));
+			parlst.addParam(RichMesh ("TargetMesh", md.mm()->id(), &md,"Target Mesh", "The mesh that is the morph target."));
             parlst.addParam(RichDynamicFloat("PercentMorph", 0.0, -150, 250,
             "% Morph", tr("The percent you want to morph towards (or away from) the target. <br>"
             "0 means current mesh <br>"
@@ -403,6 +404,7 @@ void FilterUnsharp::initParameterList(const QAction *action, MeshDocument &md, R
         parlst.addParam(RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
 		break;
   }
+    return parlst;
 }
 
 std::map<std::string, QVariant> FilterUnsharp::applyFilter(
@@ -450,7 +452,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
 		log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_DEPTH_SMOOTH :
@@ -463,7 +465,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		Point3m viewpoint = par.getPoint3m("viewPoint");
 		tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm, viewpoint, delta, stepSmoothNum, Selected,true);
 		log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_DIRECTIONAL_PRESERVATION:
@@ -502,7 +504,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 				float s = d * ( (*vi).cP() - h[vi] );
 				(*vi).P() = h[vi] + d * (s*alpha);
 			}
-			m.UpdateBoxAndNormals();
+			m.updateBoxAndNormals();
 			log(  "Projected smoothed Position %d vertices", m.cm.vn);
 		}
 			break;
@@ -519,7 +521,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		Scalarm delta = par.getAbsPerc("delta");
 		tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
 		log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_HC_LAPLACIAN_SMOOTH:
@@ -527,7 +529,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_TWO_STEP_SMOOTH:
@@ -548,7 +550,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 			tri::UpdateNormal<CMeshO>::PerFaceNormalized(m.cm);
 			tri::Smooth<CMeshO>::VertexCoordPasoDoble(m.cm, stepNormalNum, sigma, stepFitNum,selectedFlag);
 		}
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_TAUBIN_SMOOTH :
@@ -561,7 +563,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
 		log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	}
 		break;
 	case FP_RECOMPUTE_FACE_NORMAL :
@@ -648,7 +650,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		for(int i=0;i<m.cm.vn;++i)
 			m.cm.vert[i].P()=geomOrig[i]*alphaorig + (geomOrig[i] - m.cm.vert[i].P())*alpha;
 
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 
 	}	break;
 	case FP_UNSHARP_VERTEX_COLOR:
@@ -695,7 +697,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 
 	case FP_LINEAR_MORPH:
 	{
-		CMeshO &targetMesh = par.getMesh("TargetMesh")->cm;
+		CMeshO &targetMesh = md.getMesh(par.getMeshId("TargetMesh"))->cm;
 		CMeshO &sourceMesh = m.cm;
 
 		//if the numbers of vertices don't match up
@@ -716,7 +718,7 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 			srcP = srcP + (trgP-srcP)*percentage;
 		}
 
-		m.UpdateBoxAndNormals();
+		m.updateBoxAndNormals();
 	} break;
 	case FP_SCALAR_HARMONIC_FIELD:
 	{

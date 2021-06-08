@@ -17,7 +17,7 @@ jobs:
         submodules: true
     - name: Install dependencies
       run: |
-        brew install libomp xerces-c
+        brew install libomp cgal xerces-c
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2

@@ -343,9 +343,9 @@ bool EditReferencingPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
     status_error = "";
 
 	// reading current transformations for all layers
-	layersOriginalTransf.resize(glArea->md()->meshList.size());
+	layersOriginalTransf.resize(glArea->md()->meshNumber());
 	int lind = 0;
-	foreach(MeshModel *mmp, glArea->md()->meshList)
+	for(MeshModel *mmp: glArea->md()->meshIterator())
 	{
 		layersOriginalTransf[lind].Import(mmp->cm.Tr);
 		lind++;
@@ -808,30 +808,30 @@ void EditReferencingPlugin::calculateMatrix()
 
 void EditReferencingPlugin::applyMatrix()
 {
-    status_error = "";
+	status_error = "";
 
-    Matrix44m newMat;
+	Matrix44m newMat;
 
-    newMat.Import(transfMatrix);
+	newMat.Import(transfMatrix);
 
-    if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
-    {
+	if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
+	{
 		int lind = 0;
-        foreach(MeshModel *mmp, glArea->md()->meshList)
-        {
-            if(mmp->visible)
-            {
+		for(MeshModel *mmp: glArea->md()->meshIterator())
+		{
+			if(mmp->visible)
+			{
 				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
-            }
+			}
 			lind++;
-        }
-    }
-    else
-    {
+		}
+	}
+	else
+	{
 		glArea->mm()->cm.Tr = newMat * originalTransf;
-    }
+	}
 
-    glArea->update();
+	glArea->update();
 }
 
 void EditReferencingPlugin::updateDistances()
@@ -997,7 +997,7 @@ void EditReferencingPlugin::applyScale()
 	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
 	{
 		int lind = 0;
-		foreach(MeshModel *mmp, glArea->md()->meshList)
+		for(MeshModel *mmp: glArea->md()->meshIterator())
 		{
 			if (mmp->visible)
 			{

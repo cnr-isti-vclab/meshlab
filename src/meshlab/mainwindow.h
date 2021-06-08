@@ -29,7 +29,6 @@
 
 #include <GL/glew.h>
 
-#include "common/mainwindow_interface.h"
 #include "common/plugins/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>
@@ -67,7 +66,7 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterList(RichParameterList* gbllist);
+	static void initGlobalParameterList(RichParameterList& gbllist);
 	void updateGlobalParameterList(const RichParameterList& rpl );
 
 	std::ptrdiff_t maxgpumem;
@@ -83,13 +82,16 @@ public:
 	inline static QString perBatchPrimitives() {return "MeshLab::System::perBatchPrimitives";}
 
 	size_t minpolygonpersmoothrendering;
-	inline static QString minPolygonNumberPerSmoothRendering() { return "MeshLab::System::minPolygonNumberPerSmoothRendering"; }
+	inline static QString minFaceNumberPerSmoothRendering() { return "MeshLab::System::minFaceNumberPerSmoothRendering"; }
 
 	std::ptrdiff_t maxTextureMemory;
 	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
+
+	bool showPreOpenParameterDialog;
+	inline static QString showPreOpenParameterDialogParam()  {return "MeshLab::System::showPreOpenParameterDialog";}
 };
 
-class MainWindow : public QMainWindow, public MainWindowInterface
+class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
@@ -122,7 +124,7 @@ private slots:
 public slots:
 	bool importMeshWithLayerManagement(QString fileName=QString());
 	bool importRaster(const QString& fileImg = QString());
-	bool openProject(QString fileName=QString());
+	bool openProject(QString fileName=QString(), bool append = false);
 	bool appendProject(QString fileName=QString());
 	void updateCustomSettings();
 	void updateLayerDialog();
@@ -150,7 +152,7 @@ private slots:
 public:
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool loadMesh(const QString& fileName,IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList,RichParameterList* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
+	bool loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList, const RichParameterList& prePar, const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
 	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
@@ -264,6 +266,7 @@ private:
 	void clearMenu(QMenu* menu);
 	void updateAllPluginsActions();
 	void createToolBars();
+	void loadDefaultSettingsFromPlugins();
 	void loadMeshLabSettings();
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();

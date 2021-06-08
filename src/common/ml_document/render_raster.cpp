@@ -38,6 +38,16 @@ RasterPlane::RasterPlane(const QString& pathName, const int _semantic)
     image = QImage(pathName);
 }
 
+RasterPlane::RasterPlane(
+        const QImage& img,
+        const QString& pathName,
+        const int _semantic)
+{
+    semantic =_semantic;
+    fullPathFileName = pathName;
+    image = img;
+}
+
 MeshLabRenderRaster::MeshLabRenderRaster()
 {
 

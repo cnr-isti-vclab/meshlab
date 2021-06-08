@@ -135,8 +135,9 @@ QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
+RichParameterList QhullPlugin::initParameterList(const QAction *action,const MeshModel &m)
 {
+	RichParameterList parlst;
 	switch(ID(action))	 {
 	case FP_QHULL_CONVEX_HULL :
 	{
@@ -195,6 +196,7 @@ void QhullPlugin::initParameterList(const QAction *action,MeshModel &m, RichPara
 	}
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.
@@ -214,7 +216,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
 		pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-		pm.UpdateBoxAndNormals();
+		pm.updateBoxAndNormals();
 		if (!result)
 			throw MLException("Failed computing convex hull.");
 	} break;
@@ -283,7 +285,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 
 			int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
 			qh_freeqhull(!qh_ALL);
@@ -313,7 +315,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 			log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
 
@@ -363,7 +365,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.UpdateBoxAndNormals();
+			pm.updateBoxAndNormals();
 			log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 			log("Alpha = %f ",alpha);
 			//m.cm.Clear();

@@ -40,8 +40,9 @@ using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterList &parlst)
+RichParameterList PDBIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PDB"))
 	{
 		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
@@ -62,6 +63,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, RichParameterL
 		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
+	return parlst;
 }
 
 void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
@@ -81,7 +83,7 @@ void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	{
 		
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		m.Enable(mask);
+		m.enable(mask);
 
 		if (!parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb))
 			throw MLException("Error while opening PDB file");
@@ -126,33 +128,6 @@ std::list<FileFormat> PDBIOPlugin::exportFormats() const
 */
 void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
-	return;
-}
-
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
-{
-	/*
-	if(format.toUpper() == tr("STL"))
-		par.addBool("Unify",true, "Unify Duplicated Vertices",
-								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
-	*/
-}
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/)
-{
-	/*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
-  */
-}
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
-{
-  /*
-	if(format.toUpper() == tr("STL"))
-		if(par.getBool("Unify"))
-			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-	*/
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)

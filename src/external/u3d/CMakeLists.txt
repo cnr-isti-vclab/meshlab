@@ -1459,6 +1459,7 @@ ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
 	ADD_LIBRARY( external-IDTFConverter STATIC ${IDTFConverter_SRCS} ${IDTFConverter_HDRS} )
 ENDIF(UNIX AND NOT APPLE)
+target_include_directories(external-IDTFConverter PUBLIC ${U3D_DIR}/src/IDTF)
 
 IF(UNIX AND NOT APPLE)
 	set(U3D_LIB_RELATIVE_PATH "../external/u3d/")
