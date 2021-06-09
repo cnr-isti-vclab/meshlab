@@ -117,10 +117,14 @@ void TrimTexture(Mesh& m, std::vector<TextureSize>& texszVec, bool unsafeMip)
     std::vector<std::vector<Mesh::FacePointer>> facesByTexture;
     unsigned ntex = FacesByTextureIndex(m, facesByTexture);
 
+    auto IsZero = [] (const Mesh::FacePointer fptr) {
+        return fptr->WT(0).P() == vcg::Point2d::Zero() && fptr->WT(1).P() == vcg::Point2d::Zero() && fptr->WT(2).P() == vcg::Point2d::Zero();
+    };
+
     for (unsigned ti = 0; ti < ntex; ++ti) {
         vcg::Box2d uvBox;
         for (auto fptr : facesByTexture[ti]) {
-            if (AreaUV(*fptr) != 0) {
+            if (!IsZero(fptr)) {
                 for (int i = 0; i < 3; ++i) {
                     uvBox.Add(fptr->WT(i).P());
                 }
@@ -158,7 +162,7 @@ void TrimTexture(Mesh& m, std::vector<TextureSize>& texszVec, bool unsafeMip)
         vcg::Point2d t(uvBox.min.X() / texszVec[ti].w, uvBox.min.Y() / texszVec[ti].h);
 
         for (auto fptr : facesByTexture[ti]) {
-            if (AreaUV(*fptr) != 0) {
+            if (!IsZero(fptr)) {
                 for (int i = 0; i < 3; ++i) {
                     fptr->WT(i).P() -= t;
                     fptr->WT(i).P().Scale(uscale, vscale);
@@ -171,7 +175,7 @@ void TrimTexture(Mesh& m, std::vector<TextureSize>& texszVec, bool unsafeMip)
         {
             vcg::Box2d uvBoxCheck;
             for (auto fptr : facesByTexture[ti]) {
-                if (AreaUV(*fptr) != 0) {
+                if (!IsZero(fptr)) {
                     for (int i = 0; i < 3; ++i) {
                         uvBoxCheck.Add(fptr->WT(i).P());
                     }
