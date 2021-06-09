@@ -958,11 +958,9 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 		m.updateBoxAndNormals();
 
-		CMeshO toProjectCopy;
+		CMeshO toProjectCopy = m.cm;
 
 		toProjectCopy.face.EnableMark();
-
-		tri::Append<CMeshO, CMeshO>::MeshCopy(toProjectCopy, m.cm);
 
 		tri::IsotropicRemeshing<CMeshO>::Params params;
 		params.SetTargetLen(par.getAbsPerc("TargetLen"));
