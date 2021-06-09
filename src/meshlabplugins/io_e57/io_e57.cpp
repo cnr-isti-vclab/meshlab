@@ -152,20 +152,22 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
             continue;
         }
 
-        auto transformMatrix = vcg::Matrix44f::Identity();
+        auto rotationMatrix = vcg::Matrix44f::Identity();
+        auto translateMatrix = vcg::Matrix44f::Identity();
+
         auto quaternion = vcg::Quaternion<float>{
+            static_cast<float>(scanHeader.pose.rotation.w),
             static_cast<float>(scanHeader.pose.rotation.x),
             static_cast<float>(scanHeader.pose.rotation.y),
             static_cast<float>(scanHeader.pose.rotation.z),
-            static_cast<float>(scanHeader.pose.rotation.w),
         };
 
-        quaternion.ToMatrix(transformMatrix);
-        transformMatrix.ElementAt(0, 3) = static_cast<float>(scanHeader.pose.translation.x);
-        transformMatrix.ElementAt(1, 3) = static_cast<float>(scanHeader.pose.translation.y);
-        transformMatrix.ElementAt(2, 3) = static_cast<float>(scanHeader.pose.translation.z);
+        quaternion.ToMatrix(rotationMatrix);
+        translateMatrix.ElementAt(0, 3) = static_cast<float>(scanHeader.pose.translation.x);
+        translateMatrix.ElementAt(1, 3) = static_cast<float>(scanHeader.pose.translation.y);
+        translateMatrix.ElementAt(2, 3) = static_cast<float>(scanHeader.pose.translation.z);
 
-        meshModel->cm.Tr = transformMatrix;
+        meshModel->cm.Tr = translateMatrix * rotationMatrix;
 
         try {
             loadMesh(*meshModel, mask, scanIndex,
