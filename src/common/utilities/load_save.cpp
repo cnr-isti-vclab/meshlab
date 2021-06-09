@@ -64,22 +64,10 @@ std::list<std::string> loadMesh(
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
 
-	// the original directory path before we switch it
-	QString origDir = QDir::current().path();
-
-	// this change of dir is needed for subsequent textures/materials loading
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
-
-	// Adjust the file name after changing the directory
-	QString fileNameSansDir = fi.fileName();
-
-	try {
-		ioPlugin->open(extension, fileNameSansDir, meshList, maskList, prePar, cb);
-	}
-	catch(const MLException& e) {
-		QDir::setCurrent(origDir); // undo the change of directory before leaving
-		throw e;
-	}
+	QDir oldDir = QDir::current();
+	QDir::setCurrent(fi.absolutePath());
+	ioPlugin->open(extension, fileName, meshList, maskList, prePar, cb);
+	QDir::setCurrent(oldDir.absolutePath());
 
 	auto itmesh = meshList.begin();
 	auto itmask = maskList.begin();
@@ -128,7 +116,6 @@ std::list<std::string> loadMesh(
 		++itmesh;
 		++itmask;
 	}
-	QDir::setCurrent(origDir); // undo the change of directory before leaving
 	return unloadedTextures;
 }
 
@@ -193,7 +180,7 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 	std::list<int> masks;
 
 	try{
-		loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
+		loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 	}
 	catch(const MLException& e){
 		for (MeshModel* mm : meshList)

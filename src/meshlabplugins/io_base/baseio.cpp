@@ -369,20 +369,20 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		std::replace(i->begin(), i->end(), '\\', '/');
 	}
-	// verify if texture files are present
-	QString missingTextureFilesMsg = "The following texture files were not found:\n";
-	bool someTextureNotFound = false;
-	for (unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
-	{
-		if (!QFile::exists(m.cm.textures[textureIdx].c_str()))
-		{
-			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
-			someTextureNotFound = true;
-		}
-	}
-	if (someTextureNotFound)
-		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
+//	// verify if texture files are present
+//	QString missingTextureFilesMsg = "The following texture files were not found:\n";
+//	bool someTextureNotFound = false;
+//	for (unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+//	{
+//		if (!QFile::exists(m.cm.textures[textureIdx].c_str()))
+//		{
+//			missingTextureFilesMsg.append("\n");
+//			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+//			someTextureNotFound = true;
+//		}
+//	}
+//	if (someTextureNotFound)
+//		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
 }
