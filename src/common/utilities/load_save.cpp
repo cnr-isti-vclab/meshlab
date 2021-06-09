@@ -100,11 +100,6 @@ std::list<std::string> loadMesh(
 				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 		}
 
-		if(mm->cm.fn==0 && mm->cm.en>0) {
-			if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-		}
-
 		//updateMenus();
 		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
@@ -252,7 +247,7 @@ void saveMeshWithStandardParameters(
 	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
 	RichParameterList saveParams = ioPlugin->initSaveParameter(extension, m);
 
-	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
+	ioPlugin->save(extension, fileName, m, capability, saveParams, cb);
 	m.setFileName(fileName);
 	m.saveTextures(fi.absolutePath(), 66, log, cb);
 }
