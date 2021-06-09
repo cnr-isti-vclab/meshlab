@@ -52,11 +52,11 @@ FilterTextureDefragPlugin::FilterTextureDefragPlugin()
 	typeList = {
 	    FP_TEXTURE_DEFRAG,
 	};
-	
+
 	for(ActionIDType tt: types())
 		actionList.push_back(new QAction(filterName(tt), this));
 
-	LOG_INIT(logging::Level::Warning);
+	LOG_INIT(logging::Level::Error);
 	LOG_SET_THREAD_NAME("TextureDefrag");
 }
 
@@ -171,6 +171,14 @@ RichParameterList FilterTextureDefragPlugin::initParameterList(const QAction *ac
 		                    0.025,
 		                    "Global ARAP distortion tolerance",
 		                    "Global ARAP distortion tolerance when merging a seam. If the global atlas energy is higher than this value, the operation is reverted."));
+		parlst.addParam(RichDynamicFloat(
+		                    "uvReductionLimit",
+		                    0.0,
+		                    0.0,
+		                    100.0,
+		                    "UV Length Target (percentage)",
+		                    "Target UV length as percentage of the input length. The algorithm halts if the target UV length has be    en reached, or if no futher "
+		                    "seams can be merged."));
 		parlst.addParam(RichFloat(
 		                    "offsetFactor",
 		                    5.0,
@@ -201,18 +209,16 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 	switch(ID(filter)) {
 	case FP_TEXTURE_DEFRAG:
 	{
-		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm) > 0 ||
-				vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(md.mm()->cm) > 0) {
-			throw MLException("Mesh has non-manifold vertices and/or faces. Texture map defragmentation filter requires manifoldness.");
-		}
+		cb(0, "Initializing layer...");
 
 		MeshModel& mm = *(md.addNewMesh(md.mm()->cm, "texdefrag_" + currentModel.label()));
 		mm.updateDataMask(&currentModel);
-		for (const std::string& txtname : currentModel.cm.textures){
-			mm.addTexture(txtname, currentModel.getTexture(txtname));
-		}
 
 		QString path = currentModel.pathName();
+
+		tri::Clean<CMeshO>::RemoveZeroAreaFace(mm.cm);
+		tri::Clean<CMeshO>::RemoveDuplicateVertex(mm.cm);
+		tri::Allocator<CMeshO>::CompactEveryVector(mm.cm);
 
 		tri::UpdateTopology<CMeshO>::FaceFace(mm.cm);
 		if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(mm.cm) > 0)
@@ -221,8 +227,6 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		// switch working directory
 		QDir wd = QDir::current();
 		QDir::setCurrent(path);
-
-		tri::Allocator<CMeshO>::CompactEveryVector(mm.cm);
 
 		// build mesh object
 		Mesh defragMesh;
@@ -252,8 +256,8 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		// build textureobjecthandle object
 		TextureObjectHandle textureObject = std::make_shared<TextureObject>();
 
-		for (const string& textureName : mm.cm.textures) {
-			textureObject->AddImage(mm.getTexture(textureName));
+		for (const string& textureName : currentModel.cm.textures) {
+			textureObject->AddImage(currentModel.getTexture(textureName));
 		}
 
 		AlgoParameters ap;
@@ -262,7 +266,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		ap.boundaryTolerance = par.getFloat("boundaryTolerance");
 		ap.distortionTolerance = par.getFloat("distortionTolerance");
 		ap.globalDistortionThreshold = par.getFloat("globalDistortionTolerance");
-		ap.UVBorderLengthReduction = 0.0;
+		ap.UVBorderLengthReduction = par.getFloat("uvReductionLimit") / 100.0f;
 		ap.offsetFactor = par.getFloat("offsetFactor");
 		ap.timelimit = par.getFloat("timelimit");
 
@@ -273,23 +277,21 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		ScaleTextureCoordinatesToImage(defragMesh, textureObject);
 
 		// setup proxy mesh
-		{
-			Compute3DFaceAdjacencyAttribute(defragMesh);
-
-			CutAlongSeams(defragMesh);
-			tri::Allocator<Mesh>::CompactEveryVector(defragMesh);
-
-			tri::UpdateTopology<Mesh>::FaceFace(defragMesh);
-			while (tri::Clean<Mesh>::SplitNonManifoldVertex(defragMesh, 0))
-				;
-			tri::UpdateTopology<Mesh>::VertexFace(defragMesh);
-
-			tri::Allocator<Mesh>::CompactEveryVector(defragMesh);
-		}
-
-		ComputeWedgeTexCoordStorageAttribute(defragMesh);
+		Compute3DFaceAdjacencyAttribute(defragMesh);
+		CutAlongSeams(defragMesh);
 
 		GraphHandle graph = ComputeGraph(defragMesh, textureObject);
+
+		while (tri::Clean<Mesh>::SplitNonManifoldVertex(defragMesh, 0))
+			;
+		tri::Allocator<Mesh>::CompactEveryVector(defragMesh);
+
+		DisconnectCharts(graph);
+		tri::UpdateTopology<Mesh>::FaceFace(defragMesh);
+		tri::UpdateTopology<Mesh>::VertexFace(defragMesh);
+
+
+		ComputeWedgeTexCoordStorageAttribute(defragMesh);
 
 		std::map<RegionID, bool> flipped;
 		for (auto& c : graph->charts)
@@ -323,7 +325,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 			}
 		}
 
-		cb(70, "Packing new atlas...");
+		cb(70, "Packing atlas...");
 		// clear texture coordinates of empty-area charts
 		std::vector<ChartHandle> chartsToPack;
 		for (auto& entry : graph->charts) {
@@ -337,6 +339,16 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 						fptr->WT(j).P() = Point2d::Zero();
 						fptr->WT(j).N() = 0;
 					}
+				}
+			}
+		}
+
+		// Set non-manifold edges as border, otherwise outline extraction fails
+		for (auto& f : graph->mesh.face) {
+			for (int i = 0; i < 3; ++i) {
+				if (!face::IsManifold(f, i)) {
+					f.FFp(i) = &f;
+					f.FFi(i) = i;
 				}
 			}
 		}
@@ -374,7 +386,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		mm.clearTextures();
 
 		const char *imageFormat = "png";
-		QString textureBase = QFileInfo(currentModel.fullName()).baseName() + "_optimized_texture_";
+		QString textureBase = mm.label() + "_optimized_texture_";
 		for (unsigned i = 0; i < newTextures.size(); ++i) {
 			QString tname = textureBase + QString(std::to_string(i).c_str()) + "." + imageFormat;
 			mm.addTexture(tname.toStdString(), *newTextures[i]);
@@ -390,7 +402,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 	default:
 		wrongActionCalled(filter);
 	}
-	
+
 	return std::map<std::string, QVariant>();
 }
 

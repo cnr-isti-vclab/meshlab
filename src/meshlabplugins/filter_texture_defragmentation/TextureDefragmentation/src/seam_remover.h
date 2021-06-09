@@ -65,11 +65,11 @@ struct SeamData {
     std::vector<int> vertexinda;
     std::vector<int> vertexindb;
 
+    std::unordered_set<Mesh::VertexPointer> seamVertices;
+    std::unordered_set<Mesh::FacePointer> vfTopologyFaceSet;
+
     std::map<Mesh::VertexPointer, Mesh::VertexPointer> mrep;
     std::map<SeamMesh::VertexPointer, std::vector<Mesh::VertexPointer>> evec;
-
-    typedef std::pair<std::vector<Mesh::FacePointer>, std::vector<int>> FanInfo;
-    std::map<Mesh::VertexPointer, FanInfo> vfmap;
 
     std::unordered_set<Mesh::VertexPointer> verticesWithinThreshold;
     std::unordered_set<Mesh::FacePointer> optimizationArea;

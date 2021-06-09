@@ -57,7 +57,7 @@ double ComputeSeamLength3D(SeamHandle sh);
 // a is a set of ids that logically describe one side of the seam (whose coordinates are inserted in uva)
 void ExtractUVCoordinates(ClusteredSeamHandle csh, std::vector<Point2d>& uva, std::vector<Point2d>& uvb, const std::unordered_set<RegionID>& a);
 
-void BuildSeamMesh(Mesh& m, SeamMesh& seamMesh);
+void BuildSeamMesh(Mesh& m, SeamMesh& seamMesh, GraphHandle graph);
 std::vector<SeamHandle> GenerateSeams(SeamMesh& seamMesh);
 std::vector<ClusteredSeamHandle> ClusterSeamsByChartId(const std::vector<SeamHandle>& seams);
 ClusteredSeamHandle Flatten(const std::vector<ClusteredSeamHandle>& cshVec);

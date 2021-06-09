@@ -268,7 +268,7 @@ AlgoStateHandle InitializeState(GraphHandle graph, const AlgoParameters& algoPar
     state->inputUVBorderLength = 0;
     state->currentUVBorderLength = 0;
 
-    BuildSeamMesh(graph->mesh, state->sm);
+    BuildSeamMesh(graph->mesh, state->sm, graph);
     std::vector<SeamHandle> seams = GenerateSeams(state->sm);
 
     // disconnecting seams are (initially) clustered by chart adjacency
@@ -392,15 +392,9 @@ void GreedyOptimization(GraphHandle graph, AlgoStateHandle state, const AlgoPara
             }
         }
     }
-
     PrintStateInfo(state, graph, params);
-
     LogExecutionStats();
-
-    Mesh shell;
-
     LOG_INFO << "Atlas energy after optimization is " << ARAP::ComputeEnergyFromStoredWedgeTC(graph->mesh, nullptr, nullptr);
-
 }
 
 void Finalize(GraphHandle graph, int *vndup)
@@ -684,6 +678,11 @@ static OffsetMap AlignAndMerge(ClusteredSeamHandle csh, SeamData& sd, const Matc
             Mesh::VertexPointer v0b = edge.fb->V0(edge.eb);
             Mesh::VertexPointer v1b = edge.fb->V1(edge.eb);
 
+            sd.seamVertices.insert(v0a);
+            sd.seamVertices.insert(v1a);
+            sd.seamVertices.insert(v0b);
+            sd.seamVertices.insert(v1b);
+
             if (v0a->P() != edge.V(0)->P())
                 std::swap(v0a, v1a);
             if (v0b->P() != edge.V(0)->P())
@@ -707,9 +706,11 @@ static OffsetMap AlignAndMerge(ClusteredSeamHandle csh, SeamData& sd, const Matc
         }
     }
 
-    // for each vertex merged, store its original vfadj fan
-    for (auto& entry : sd.mrep) {
-        face::VFStarVF(entry.first, sd.vfmap[entry.first].first, sd.vfmap[entry.first].second);
+    for (auto vp : sd.seamVertices) {
+        std::vector<Mesh::FacePointer> faces;
+        std::vector<int> indices;
+        face::VFStarVF(vp, faces, indices);
+        sd.vfTopologyFaceSet.insert(faces.begin(), faces.end());
     }
 
     // update vertex references
@@ -726,8 +727,7 @@ static OffsetMap AlignAndMerge(ClusteredSeamHandle csh, SeamData& sd, const Matc
         }
     }
 
-    // update topologies. face-face is trivial, for vertex-face we
-    // merge the VF lists
+    // update topologies. face-face is trivial
 
     // face-face
     for (SeamHandle sh : csh->seams) {
@@ -740,19 +740,20 @@ static OffsetMap AlignAndMerge(ClusteredSeamHandle csh, SeamData& sd, const Matc
         }
     }
 
-    //tri::UpdateTopology<Mesh>::VertexFace(graph->mesh);
+    {
+        for (Mesh::VertexPointer vp : sd.seamVertices) {
+            vp->VFp() = 0;
+            vp->VFi() = 0;
+        }
 
-    // iterate over emap, and concatenate vf adjacencies
-    // ugly... essentially we have a list of vfadj fans stored in vfmap,
-    // and we concatenate the end of a fan with the beginning of the next
-    // note that we only change the data stored in the faces (i.e. the list) and
-    // never touch the data stored on the vertices
-    for (auto& entry : sd.evec) {
-        if (entry.second.size() > 1) {
-            std::vector<Mesh::VertexPointer>& verts = entry.second;
-            for (unsigned i = 0; i < entry.second.size() - 1; ++i) {
-                sd.vfmap[verts[i]].first.back()->VFp(sd.vfmap[verts[i]].second.back()) = sd.vfmap[verts[i+1]].first.front();
-                sd.vfmap[verts[i]].first.back()->VFi(sd.vfmap[verts[i]].second.back()) = sd.vfmap[verts[i+1]].second.front();
+        for (Mesh::FacePointer fptr : sd.vfTopologyFaceSet) {
+            for (int i = 0; i < 3; ++i) {
+                if (sd.seamVertices.find(fptr->V(i)) != sd.seamVertices.end()) {
+                    (*fptr).VFp(i) = (*fptr).V(i)->VFp();
+                    (*fptr).VFi(i) = (*fptr).V(i)->VFi();
+                    (*fptr).V(i)->VFp() = &(*fptr);
+                    (*fptr).V(i)->VFi() = i;
+                }
             }
         }
     }
@@ -789,12 +790,21 @@ static void ComputeOptimizationArea(SeamData& sd, Mesh& mesh, OffsetMap& om)
     sd.verticesWithinThreshold = ComputeVerticesWithinOffsetThreshold(mesh, om, sd);
     sd.optimizationArea.clear();
 
+    auto ffadj = Get3DFaceAdjacencyAttribute(mesh);
     for (auto fptr : fpvec) {
+        bool addFace = false;
+        bool edgeManifold = true;
         for (int i = 0; i < 3; ++i) {
-            if (sd.verticesWithinThreshold.find(fptr->V(i)) != sd.verticesWithinThreshold.end()) {
-                sd.optimizationArea.insert(fptr);
-                break;
-            }
+            edgeManifold &= IsEdgeManifold3D(mesh, *fptr, i, ffadj);
+            if (sd.verticesWithinThreshold.find(fptr->V(i)) != sd.verticesWithinThreshold.end())
+                addFace = true;
+        }
+        if (addFace && edgeManifold)
+            sd.optimizationArea.insert(fptr);
+        if (addFace && !edgeManifold) {
+            sd.verticesWithinThreshold.erase(fptr->V(0));
+            sd.verticesWithinThreshold.erase(fptr->V(1));
+            sd.verticesWithinThreshold.erase(fptr->V(2));
         }
     }
 
@@ -859,6 +869,7 @@ static std::unordered_set<Mesh::VertexPointer> ComputeVerticesWithinOffsetThresh
             std::vector<Mesh::FacePointer> faces;
             std::vector<int> indices;
             face::VFStarVF(node.first, faces, indices);
+
             for (unsigned i = 0; i < faces.size(); ++i) {
                 if(faces[i]->id != sd.a->id && faces[i]->id != sd.b->id){
                     LOG_ERR << "issue at face " << tri::Index(m, faces[i]);
@@ -882,7 +893,7 @@ static std::unordered_set<Mesh::VertexPointer> ComputeVerticesWithinOffsetThresh
                 Mesh::VertexPointer v2 = faces[i]->V2(indices[i]);
                 double d2 = dist[node.first] - EdgeLengthUV(*faces[i], e2);
 
-               if (d2 >= 0 && (dist.find(v2) == dist.end() || dist[v2] < d2)) {
+                if (d2 >= 0 && (dist.find(v2) == dist.end() || dist[v2] < d2)) {
                     dist[v2] = d2;
                     h.push_back(std::make_pair(v2, d2));
                     std::push_heap(h.begin(), h.end(), cmp);
@@ -1142,6 +1153,7 @@ static CheckStatus OptimizeChart(SeamData& sd, GraphHandle graph, bool fixInters
     // split non manifold vertices
     while (tri::Clean<Mesh>::SplitNonManifoldVertex(sd.shell, 0.3))
         ;
+    ensure(tri::Clean<Mesh>::CountNonManifoldEdgeFF(sd.shell) == 0);
 
     CutAlongSeams(sd.shell);
 
@@ -1449,12 +1461,21 @@ static void RejectMove(const SeamData& sd, AlgoStateHandle state, GraphHandle gr
     // restore vertex-face topology
     // iterate over emap, and split the lists according to the original topology
     // recall that we never touched any vertex topology attribute
-    for (auto& entry : sd.evec) {
-        //ensure(entry.second.size() > 1); not true for self seams at the cone vertex
-        const std::vector<Mesh::VertexPointer>& verts = entry.second;
-        for (unsigned i = 0; i < entry.second.size() - 1; ++i) {
-            sd.vfmap.at(verts[i]).first.back()->VFp(sd.vfmap.at(verts[i]).second.back()) = 0;
-            sd.vfmap.at(verts[i]).first.back()->VFi(sd.vfmap.at(verts[i]).second.back()) = 0;
+    {
+        for (Mesh::VertexPointer vp : sd.seamVertices) {
+            vp->VFp() = 0;
+            vp->VFi() = 0;
+        }
+
+        for (Mesh::FacePointer fptr : sd.vfTopologyFaceSet) {
+            for (int i = 0; i < 3; ++i) {
+                if (sd.seamVertices.find(fptr->V(i)) != sd.seamVertices.end()) {
+                    (*fptr).VFp(i) = (*fptr).V(i)->VFp();
+                    (*fptr).VFi(i) = (*fptr).V(i)->VFi();
+                    (*fptr).V(i)->VFp() = &(*fptr);
+                    (*fptr).V(i)->VFi() = i;
+                }
+            }
         }
     }
 
