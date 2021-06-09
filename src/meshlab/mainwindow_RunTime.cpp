@@ -801,7 +801,6 @@ void MainWindow::runFilterScript()
 			if (meshDoc()->mm() != NULL)
 				meshDoc()->mm()->updateDataMask(req);
 			iFilter->setLog(&meshDoc()->Log);
-			RichParameterList &parameterSet = pair.second;
 
 			bool created = false;
 			MLSceneGLSharedDataContext* shar = NULL;
@@ -865,11 +864,6 @@ void MainWindow::runFilterScript()
 				}
 				if(classes & FilterPlugin::VertexColoring )
 				{
-
-
-
-
-
 					meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 				}
 				if(classes & MeshModel::MM_COLOR)
@@ -2475,7 +2469,7 @@ void MainWindow::reload()
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
 	const QStringList& suffixList = PM.outputMeshFormatListDialog();
-	
+
 	//QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);
 	//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
@@ -2487,7 +2481,6 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		return false;
 	mod->setMeshModified(false);
 	QString laylabel = "Save \"" + mod->label() + "\" Layer";
-	QString ss = fi.absoluteFilePath();
 	QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());
 	saveDialog->setOption(QFileDialog::DontUseNativeDialog);
 	saveDialog->setNameFilters(suffixList);
@@ -2498,13 +2491,13 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	if(!matchingExtensions.isEmpty())
 		saveDialog->selectNameFilter(matchingExtensions.last());
 	//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
-	
+
 	if (fileName.isEmpty()) {
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected)
 			return false;
-		fileName=saveDialog->selectedFiles ().first();
+		fileName=saveDialog->selectedFiles().at(0);
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty()) {
 			QString ext = saveDialog->selectedNameFilter();
@@ -2513,9 +2506,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			qDebug("File without extension adding it by hand '%s'", qUtf8Printable(fileName));
 		}
 	}
-	
+
 	QStringList fs = fileName.split(".");
-	
+
 	if(!fileName.isEmpty() && fs.size() < 2) {
 		QMessageBox::warning(this,"Save Error","You must specify file extension!!");
 		return false;
@@ -2527,25 +2520,25 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QString path = fileName;
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
-		
+
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
-		
+
 		QStringListIterator itFilter(suffixList);
-		
+
 		IOPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0) {
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
-		
+
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->exportMaskCapability(extension,capability,defaultBits);
-		
+
 		// optional saving parameters (like ascii/binary encoding)
 		RichParameterList savePar = pCurrentIOPlugin->initSaveParameter(extension,*(mod));
-		
+
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
 		int quality = 66;
 		if (!saveAllPossibleAttributes)
@@ -2574,7 +2567,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		if(mask == -1)
 			return false;
-		
+
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		QElapsedTimer tt; tt.start();
@@ -2597,7 +2590,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();
-		
+
 		if (saved)
 			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
 	}
