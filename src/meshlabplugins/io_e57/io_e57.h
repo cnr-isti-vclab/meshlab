@@ -136,9 +136,8 @@ public:
 	std::list<FileFormat> exportFormats() const;
 
 	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-	virtual void initPreOpenParameter(const QString &/*format*/, RichParameterList & /*par*/);
 
-    unsigned int numberMeshesContainedInFile(const QString& format, const QString& fileName) const;
+	unsigned int numberMeshesContainedInFile(const QString& format, const QString& fileName, const RichParameterList& preParams) const;
 
 	void open(const QString &formatName, const QString &fileName, MeshModel &m,
            int& mask, const RichParameterList &, vcg::CallBackPos *cb = 0);

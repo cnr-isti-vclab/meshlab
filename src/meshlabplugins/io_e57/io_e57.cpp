@@ -70,9 +70,7 @@ static inline std::string filenameToString(const QString& fileName) noexcept;
  */
 static inline QString formatImageFilename(const std::string& fileName) noexcept;
 
-void E57IOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst) {}
-
-unsigned int E57IOPlugin::numberMeshesContainedInFile(const QString& format, const QString& fileName) const {
+unsigned int E57IOPlugin::numberMeshesContainedInFile(const QString& format, const QString& fileName, const RichParameterList&) const {
 
     unsigned int count;
 
@@ -152,20 +150,20 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
             continue;
         }
 
-        auto rotationMatrix = vcg::Matrix44f::Identity();
-        auto translateMatrix = vcg::Matrix44f::Identity();
+        auto rotationMatrix = Matrix44m::Identity();
+        auto translateMatrix = Matrix44m::Identity();
 
-        auto quaternion = vcg::Quaternion<float>{
-            static_cast<float>(scanHeader.pose.rotation.w),
-            static_cast<float>(scanHeader.pose.rotation.x),
-            static_cast<float>(scanHeader.pose.rotation.y),
-            static_cast<float>(scanHeader.pose.rotation.z),
+        auto quaternion = vcg::Quaternion<Scalarm>{
+            static_cast<Scalarm>(scanHeader.pose.rotation.w),
+            static_cast<Scalarm>(scanHeader.pose.rotation.x),
+            static_cast<Scalarm>(scanHeader.pose.rotation.y),
+            static_cast<Scalarm>(scanHeader.pose.rotation.z),
         };
 
         quaternion.ToMatrix(rotationMatrix);
-        translateMatrix.ElementAt(0, 3) = static_cast<float>(scanHeader.pose.translation.x);
-        translateMatrix.ElementAt(1, 3) = static_cast<float>(scanHeader.pose.translation.y);
-        translateMatrix.ElementAt(2, 3) = static_cast<float>(scanHeader.pose.translation.z);
+        translateMatrix.ElementAt(0, 3) = static_cast<Scalarm>(scanHeader.pose.translation.x);
+        translateMatrix.ElementAt(1, 3) = static_cast<Scalarm>(scanHeader.pose.translation.y);
+        translateMatrix.ElementAt(2, 3) = static_cast<Scalarm>(scanHeader.pose.translation.z);
 
         meshModel->cm.Tr = translateMatrix * rotationMatrix;
 
@@ -365,7 +363,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
     }
 
     // set the mask
-    m.Enable(mask);
+    m.enable(mask);
 
     // read the data from the E57 file
     try {
