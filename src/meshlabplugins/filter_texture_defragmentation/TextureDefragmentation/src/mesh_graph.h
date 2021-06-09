@@ -107,6 +107,11 @@ void CopyToMesh(FaceGroup& fg, Mesh& m);
  * to determine chart adjacency relations */
 GraphHandle ComputeGraph(Mesh &m, TextureObjectHandle textureObject);
 
+/* This function ensures that the vertices referenced by each chart are unique
+ * to the chart. Necessary because non-manifold vertices adjacent to
+ * non-manifold edges cannot be split by the VCG's SplitNonManifoldVertices() */
+void DisconnectCharts(GraphHandle graph);
+
 /*
  * MeshGraph class
  *

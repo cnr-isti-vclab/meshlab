@@ -175,13 +175,15 @@ void MeshModel::changeTextureName(
 		const std::string& oldName,
 		std::string newName)
 {
-	auto mit = textures.find(oldName);
-	auto tit = std::find(cm.textures.begin(), cm.textures.end(), oldName);
-	if (mit != textures.end() && tit != cm.textures.end()){
-		*tit = newName;
+	if (oldName != newName) {
+		auto mit = textures.find(oldName);
+		auto tit = std::find(cm.textures.begin(), cm.textures.end(), oldName);
+		if (mit != textures.end() && tit != cm.textures.end()){
+			*tit = newName;
 
-		textures[newName] = mit->second;
-		textures.erase(mit);
+			textures[newName] = mit->second;
+			textures.erase(mit);
+		}
 	}
 }
 

@@ -386,9 +386,11 @@ GraphHandle ComputeGraph(Mesh &m, TextureObjectHandle textureObject)
         RegionID regionId = f.id;
         graph->GetChart_Insert(regionId)->AddFace(&f);
         for (int i = 0; i < f.VN(); ++i) {
-            RegionID adjId = m.face[ffadj[f].f[i]].id;
-            if (regionId != adjId) {
-                (graph->GetChart_Insert(regionId)->adj).insert(graph->GetChart_Insert(adjId));
+            if (IsEdgeManifold3D(m, f, i, ffadj)) {
+                RegionID adjId = m.face[ffadj[f].f[i]].id;
+                if (regionId != adjId) {
+                    (graph->GetChart_Insert(regionId)->adj).insert(graph->GetChart_Insert(adjId));
+                }
             }
         }
     }
@@ -396,4 +398,73 @@ GraphHandle ComputeGraph(Mesh &m, TextureObjectHandle textureObject)
     return graph;
 }
 
+void DisconnectCharts(GraphHandle graph)
+{
+    typedef std::pair<int, RegionID> VertexRID;
 
+    Mesh& m = graph->mesh;
+
+    int numExtraVertices = 0;
+    std::map<VertexRID, int> remap;
+
+    tri::UpdateFlags<Mesh>::VertexClearV(m);
+    for (auto& c : graph->charts) {
+        std::set<Mesh::VertexPointer> vset;
+        for (auto fptr : c.second->fpVec) {
+            for (int i = 0; i < 3; ++i) {
+                vset.insert(fptr->V(i));
+            }
+        }
+        for (auto vp : vset) {
+            if (vp->IsV()) {
+                numExtraVertices++;
+                remap[std::make_pair(tri::Index(m, vp), c.first)] = -1;
+            }
+            vp->SetV();
+        }
+    }
+
+    auto vi = tri::Allocator<Mesh>::AddVertices(m, numExtraVertices);
+
+    tri::UpdateFlags<Mesh>::VertexClearV(m);
+
+    for (auto& entry : remap) {
+        VertexRID vrid = entry.first;
+        vi->ImportData(m.vert[vrid.first]);
+        m.vert[vrid.first].SetV();
+
+        ensure(entry.second == -1);
+        entry.second = tri::Index(m, *vi);
+        vi++;
+    }
+    int updated = 0;
+    int iters = 0;
+    for (auto& c : graph->charts) {
+        for (auto fptr : c.second->fpVec) {
+            for (int i = 0; i < 3; ++i) {
+                VertexRID vrid = std::make_pair(tri::Index(m, fptr->V(i)), c.first);
+                iters++;
+                if (fptr->V(i)->IsV() && remap.count(vrid) > 0) {
+                    int vind = remap[vrid];
+                    fptr->V(i) = &m.vert[vind];
+                    updated++;
+                }
+            }
+        }
+    }
+
+    // safety check
+    tri::UpdateFlags<Mesh>::VertexClearV(m);
+    for (auto& c : graph->charts) {
+        std::set<Mesh::VertexPointer> vset;
+        for (auto fptr : c.second->fpVec) {
+            for (int i = 0; i < 3; ++i) {
+                vset.insert(fptr->V(i));
+            }
+        }
+        for (auto vp : vset) {
+            ensure(!vp->IsV());
+            vp->SetV();
+        }
+    }
+}
