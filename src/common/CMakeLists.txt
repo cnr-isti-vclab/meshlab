@@ -125,7 +125,6 @@ set(RESOURCES meshlab-common.qrc)
 
 set(TARGET_TYPE SHARED)
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
-add_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
 
 target_compile_definitions(meshlab-common
 	PUBLIC
@@ -158,6 +157,7 @@ set_property(TARGET meshlab-common
 	PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 
 if (WIN32)
+	add_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
 	set_property(TARGET meshlab-common
 		PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 endif()
