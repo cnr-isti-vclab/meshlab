@@ -42,6 +42,7 @@ elseif(ALLOW_BUNDLED_GLEW AND EXISTS "${GLEW_DIR}/src/glew.c")
 	set_property(TARGET external-glew PROPERTY FOLDER External)
 
 	target_link_libraries(external-glew PRIVATE external-disable-warnings)
+	install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 else()
 	message(
 		FATAL_ERROR
