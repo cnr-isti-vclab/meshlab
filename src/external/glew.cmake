@@ -41,6 +41,12 @@ elseif(ALLOW_BUNDLED_GLEW AND EXISTS "${GLEW_DIR}/src/glew.c")
 	endif()
 	set_property(TARGET external-glew PROPERTY FOLDER External)
 
+	set_property(TARGET external-glew
+		PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+
+	set_property(TARGET external-glew
+		PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+
 	target_link_libraries(external-glew PRIVATE external-disable-warnings)
 	install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 else()
