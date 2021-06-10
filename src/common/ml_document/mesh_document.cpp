@@ -114,7 +114,6 @@ const MeshModel* MeshDocument::getMesh(unsigned int id) const
 	return nullptr;
 }
 
-//returns the mesh ata given position in the list
 MeshModel* MeshDocument::getMesh(unsigned int id)
 {
 	for (MeshModel* m : meshList)

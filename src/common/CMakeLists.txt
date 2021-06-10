@@ -124,10 +124,8 @@ set(SOURCES
 set(RESOURCES meshlab-common.qrc)
 
 set(TARGET_TYPE SHARED)
-if(WIN32)
-	set(TARGET_TYPE STATIC)
-endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+add_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
 
 target_compile_definitions(meshlab-common
 	PUBLIC

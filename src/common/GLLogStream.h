@@ -31,11 +31,18 @@
 #include <QPair>
 #include <QString>
 #include <QObject>
+
+#ifdef ML_EXPORT_SYMBOLS
+#define ML_DLL_EXPORT Q_DECL_EXPORT
+#else
+#define ML_DLL_EXPORT Q_DECL_IMPORT
+#endif
+
 /**
 This is the logging class.
 One for each document. Responsible of getting an history of the logging message printed out by filters.
 */
-class GLLogStream : public QObject
+class ML_DLL_EXPORT GLLogStream : public QObject
 {
 	Q_OBJECT
 public:

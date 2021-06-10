@@ -25,6 +25,7 @@ if(WIN32)
 		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	endif()
 endif()
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	# Make sure that our shared libraries were appropriately linked
