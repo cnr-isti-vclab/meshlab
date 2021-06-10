@@ -32,10 +32,14 @@
 #include <QString>
 #include <QObject>
 
+#ifdef WIN32
 #ifdef ML_EXPORT_SYMBOLS
 #define ML_DLL_EXPORT Q_DECL_EXPORT
 #else
 #define ML_DLL_EXPORT Q_DECL_IMPORT
+#endif
+#else //WIN32
+#define ML_DLL_EXPORT
 #endif
 
 /**
