@@ -157,7 +157,7 @@ EigenMatrixX3m meshlab::vertexMatrix(const CMeshO& mesh)
 	// copy vertices
 	for (int i = 0; i < mesh.VN(); i++){
 		for (int j = 0; j < 3; j++){
-			vert(i,j) = mesh.vert[i].cP()[j];
+			vert(i,j) = mesh.vert[i].P()[j];
 		}
 	}
 
@@ -183,13 +183,22 @@ Eigen::MatrixX3i meshlab::faceMatrix(const CMeshO& mesh)
 	// copy faces
 	for (int i = 0; i < mesh.FN(); i++){
 		for (int j = 0; j < 3; j++){
-			faces(i,j) = (int)vcg::tri::Index(mesh,mesh.face[i].cV(j));
+			faces(i,j) = (int)vcg::tri::Index(mesh,mesh.face[i].V(j));
 		}
 	}
 
 	return faces;
 }
 
+/**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
+ * vertex normals of a CMeshO.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (vertex normals)
+ */
 EigenMatrixX3m meshlab::vertexNormalMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
@@ -200,13 +209,22 @@ EigenMatrixX3m meshlab::vertexNormalMatrix(const CMeshO& mesh)
 	// per vertices normals
 	for (int i = 0; i < mesh.VN(); i++){
 		for (int j = 0; j < 3; j++){
-			vertexNormals(i,j) = mesh.vert[i].cN()[j];
+			vertexNormals(i,j) = mesh.vert[i].N()[j];
 		}
 	}
 
 	return vertexNormals;
 }
 
+/**
+ * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
+ * face normals of a CMeshO.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of scalars (face normals)
+ */
 EigenMatrixX3m meshlab::faceNormalMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
@@ -217,17 +235,26 @@ EigenMatrixX3m meshlab::faceNormalMatrix(const CMeshO& mesh)
 	// per face normals
 	for (int i = 0; i < mesh.FN(); i++){
 		for (int j = 0; j < 3; j++){
-			faceNormals(i,j) = mesh.face[i].cN()[j];
+			faceNormals(i,j) = mesh.face[i].N()[j];
 		}
 	}
 
 	return faceNormals;
 }
 
-EigenMatrixX3m meshlab::vertexColorMatrix(const CMeshO& mesh)
+/**
+ * @brief Get a #V*4 Eigen matrix of scalars containing the values of the
+ * vertex colors of a CMeshO, each value in an interval [0, 1].
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*4 matrix of scalars (vertex colors)
+ */
+EigenMatrixX4m meshlab::vertexColorMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
-	EigenMatrixX3m vertexColors(mesh.VN(), 4);
+	EigenMatrixX4m vertexColors(mesh.VN(), 4);
 
 	for (int i = 0; i < mesh.VN(); i++){
 		for (int j = 0; j < 4; j++){
@@ -238,12 +265,21 @@ EigenMatrixX3m meshlab::vertexColorMatrix(const CMeshO& mesh)
 	return vertexColors;
 }
 
-EigenMatrixX3m meshlab::faceColorMatrix(const CMeshO& mesh)
+/**
+ * @brief Get a #F*4 Eigen matrix of scalars containing the values of the
+ * face colors of a CMeshO, each value in an interval [0, 1].
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*4 matrix of scalars (face colors)
+ */
+EigenMatrixX4m meshlab::faceColorMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	vcg::tri::RequirePerFaceColor(mesh);
 
-	EigenMatrixX3m faceColors(mesh.FN(), 4);
+	EigenMatrixX4m faceColors(mesh.FN(), 4);
 
 	for (int i = 0; i < mesh.FN(); i++){
 		for (int j = 0; j < 4; j++){
@@ -254,11 +290,21 @@ EigenMatrixX3m meshlab::faceColorMatrix(const CMeshO& mesh)
 	return faceColors;
 }
 
-Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> meshlab::vertexColorArray(
+/**
+ * @brief Get a #V Eigen vector of unsigned integers containing the values of the
+ * vertex colors of a CMeshO. Each value is a packed ARGB color in a 32 bit
+ * unsigned int (8 bits per component).
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V vector of unsigned integers (vertex colors)
+ */
+EigenVectorXui meshlab::vertexColorArray(
 		const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
-	Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> vertexColors(mesh.VN());
+	EigenVectorXui vertexColors(mesh.VN());
 
 	for (int i = 0; i < mesh.VN(); i++){
 		vertexColors(i) =
@@ -268,13 +314,23 @@ Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> meshlab::vertexColorArray(
 	return vertexColors;
 }
 
-Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> meshlab::faceColorArray(
+/**
+ * @brief Get a #F Eigen vector of unsigned integers containing the values of the
+ * face colors of a CMeshO. Each value is a packed ARGB color in a 32 bit
+ * unsigned int (8 bits per component).
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F vector of unsigned integers (face colors)
+ */
+EigenVectorXui meshlab::faceColorArray(
 		const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	vcg::tri::RequirePerFaceColor(mesh);
 
-	Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> faceColors(mesh.FN());
+	EigenVectorXui faceColors(mesh.FN());
 
 	for (int i = 0; i < mesh.FN(); i++){
 		faceColors(i) =
@@ -284,6 +340,15 @@ Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> meshlab::faceColorArray(
 	return faceColors;
 }
 
+/**
+ * @brief Get a #V Eigen vector of scalars containing the values of the
+ * vertex quality of a CMeshO.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V matrix of scalars (vertex quality)
+ */
 EigenVectorXm meshlab::vertexQualityArray(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
@@ -291,11 +356,20 @@ EigenVectorXm meshlab::vertexQualityArray(const CMeshO& mesh)
 
 	EigenVectorXm qv(mesh.VN());
 	for (int i = 0; i < mesh.VN(); i++){
-		qv(i) = mesh.vert[i].cQ();
+		qv(i) = mesh.vert[i].Q();
 	}
 	return qv;
 }
 
+/**
+ * @brief Get a #F Eigen vector of scalars containing the values of the
+ * face quality of a CMeshO.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F matrix of scalars (face quality)
+ */
 EigenVectorXm meshlab::faceQualityArray(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
@@ -303,11 +377,20 @@ EigenVectorXm meshlab::faceQualityArray(const CMeshO& mesh)
 
 	EigenVectorXm qf(mesh.FN());
 	for (int i = 0; i < mesh.FN(); i++){
-		qf(i) = mesh.face[i].cQ();
+		qf(i) = mesh.face[i].Q();
 	}
 	return qf;
 }
 
+/**
+ * @brief Get a #V*2 Eigen matrix of scalars containing the values of the
+ * vertex texture coordinates of a CMeshO.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*2 matrix of scalars (vertex exture coordinates)
+ */
 EigenMatrixX2m meshlab::vertexTexCoordMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
@@ -317,17 +400,27 @@ EigenMatrixX2m meshlab::vertexTexCoordMatrix(const CMeshO& mesh)
 
 	// per vertices uv
 	for (int i = 0; i < mesh.VN(); i++) {
-		uv(i,0) = mesh.vert[i].cT().U();
-		uv(i,1) = mesh.vert[i].cT().V();
+		uv(i,0) = mesh.vert[i].T().U();
+		uv(i,1) = mesh.vert[i].T().V();
 	}
 
 	return uv;
 }
 
+/**
+ * @brief Get a (#F*3)*2 Eigen matrix of scalars containing the values of the
+ * wedge texture coordinates of a CMeshO. The matrix is organized as consecutive
+ * #F triplets of uv coordinates.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #(#F*3)*2 matrix of scalars (wedge texture coordinates)
+ */
 EigenMatrixX2m meshlab::wedgeTexCoordMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
-	vcg::tri::RequirePerVertexTexCoord(mesh);
+	vcg::tri::RequirePerFaceWedgeTexCoord(mesh);
 	EigenMatrixX2m m(mesh.FN()*3, 2);
 
 	for (int i = 0; i < mesh.FN(); i++) {
@@ -338,4 +431,155 @@ EigenMatrixX2m meshlab::wedgeTexCoordMatrix(const CMeshO& mesh)
 		}
 	}
 	return m;
+}
+
+/**
+ * @brief Get a #F*3 Eigen matrix of integers containing the indices of the
+ * adjacent faces for each face in a CMeshO.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of integers (face-face adjacency)
+ */
+Eigen::MatrixX3i meshlab::faceFaceAdjacencyMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+	vcg::tri::RequireFFAdjacency(mesh);
+
+	Eigen::MatrixX3i faceFaceMatrix(mesh.FN(),3);
+
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			auto AdjF= mesh.face[i].FFp(j);
+			if (AdjF==&mesh.face[i]) {
+				faceFaceMatrix(i,j)=-1;
+			}
+			else{
+				faceFaceMatrix(i,j)=mesh.face[i].FFi(j);
+			}
+		}
+	}
+
+	return faceFaceMatrix;
+}
+
+/**
+ * @brief Get a #V Eigen vector of scalars containing the values of the
+ * custom per-vertex attribute having the given name.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V vector of scalars (custom scalar vertex attribute)
+ */
+EigenVectorXm meshlab::vertexScalarAttributeArray(
+		const CMeshO& mesh,
+		const std::string& attributeName)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+	CMeshO::ConstPerVertexAttributeHandle<Scalarm> attributeHandle =
+			vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		EigenVectorXm attrVector(mesh.VN());
+		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i){
+			attrVector[i] = attributeHandle[i];
+		}
+		return attrVector;
+	}
+	else {
+		throw MLException("No valid per vertex scalar attribute named " +
+						  QString::fromStdString(attributeName) + " was found.");
+	}
+}
+
+/**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
+ * custom per-vertex attribute having the given name.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (custom Point3 vertex attribute)
+ */
+EigenMatrixX3m meshlab::vertexVectorAttributeMatrix(
+		const CMeshO& mesh,
+		const std::string& attributeName)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+	CMeshO::ConstPerVertexAttributeHandle<Point3m> attributeHandle =
+			vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		EigenMatrixX3m attrMatrix(mesh.VN(), 3);
+		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i){
+			attrMatrix(i,0) = attributeHandle[i][0];
+			attrMatrix(i,1) = attributeHandle[i][1];
+			attrMatrix(i,2) = attributeHandle[i][2];
+		}
+		return attrMatrix;
+	}
+	else {
+		throw MLException("No valid per vertex vector attribute named " +
+						  QString::fromStdString(attributeName) + " was found.");
+	}
+}
+
+/**
+ * @brief Get a #F Eigen vector of scalars containing the values of the
+ * custom per-face attribute having the given name.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F vector of scalars (custom scalar face attribute)
+ */
+EigenVectorXm meshlab::faceScalarAttributeArray(
+		const CMeshO& mesh,
+		const std::string& attributeName)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+	CMeshO::ConstPerFaceAttributeHandle<Scalarm> attributeHandle =
+			vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		EigenVectorXm attrMatrix(mesh.FN());
+		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i){
+			attrMatrix[i] = attributeHandle[i];
+		}
+		return attrMatrix;
+	}
+	else {
+		throw MLException("No valid per face scalar attribute named " +
+						  QString::fromStdString(attributeName) + " was found.");
+	}
+}
+
+/**
+ * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
+ * custom per-face attribute having the given name.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of scalars (custom Point3 face attribute)
+ */
+EigenMatrixX3m meshlab::faceVectorAttributeMatrix(
+		const CMeshO& mesh,
+		const std::string& attributeName)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+	CMeshO::ConstPerFaceAttributeHandle<Point3m> attributeHandle =
+			vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		EigenMatrixX3m attrMatrix(mesh.FN(), 3);
+		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i){
+			attrMatrix(i,0) = attributeHandle[i][0];
+			attrMatrix(i,1) = attributeHandle[i][1];
+			attrMatrix(i,2) = attributeHandle[i][2];
+		}
+		return attrMatrix;
+	}
+	else {
+		throw MLException("No valid per face vector attribute named " +
+						  QString::fromStdString(attributeName) + " was found.");
+	}
 }

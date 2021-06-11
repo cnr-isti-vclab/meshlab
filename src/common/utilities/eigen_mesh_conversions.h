@@ -27,12 +27,15 @@
 #include <Eigen/Core>
 #include "../ml_document/cmesh.h"
 
-typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 3> EigenMatrixX3m;
-typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 2> EigenMatrixX2m;
 typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 1> EigenVectorXm;
+typedef Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> EigenVectorXui;
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 2> EigenMatrixX2m;
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 3> EigenMatrixX3m;
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 4> EigenMatrixX4m;
 
 namespace meshlab {
 
+// From eigen to CMeshO
 CMeshO meshFromMatrices(
 		const EigenMatrixX3m& vertices,
 		const Eigen::MatrixX3i& faces = Eigen::MatrixX3i(),
@@ -41,18 +44,34 @@ CMeshO meshFromMatrices(
 		const EigenVectorXm& vertexQuality = EigenVectorXm(),
 		const EigenVectorXm& faceQuality = EigenVectorXm());
 
+//From CMeshO to Eigen
 EigenMatrixX3m vertexMatrix(const CMeshO& mesh);
 Eigen::MatrixX3i faceMatrix(const CMeshO& mesh);
 EigenMatrixX3m vertexNormalMatrix(const CMeshO& mesh);
 EigenMatrixX3m faceNormalMatrix(const CMeshO& mesh);
-EigenMatrixX3m vertexColorMatrix(const CMeshO& mesh);
-EigenMatrixX3m faceColorMatrix(const CMeshO& mesh);
-Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> vertexColorArray(const CMeshO& mesh);
-Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> faceColorArray(const CMeshO& mesh);
+EigenMatrixX4m vertexColorMatrix(const CMeshO& mesh);
+EigenMatrixX4m faceColorMatrix(const CMeshO& mesh);
+EigenVectorXui vertexColorArray(const CMeshO& mesh);
+EigenVectorXui faceColorArray(const CMeshO& mesh);
 EigenVectorXm vertexQualityArray(const CMeshO& mesh);
 EigenVectorXm faceQualityArray(const CMeshO& mesh);
 EigenMatrixX2m vertexTexCoordMatrix(const CMeshO& mesh);
 EigenMatrixX2m wedgeTexCoordMatrix(const CMeshO& mesh);
+
+Eigen::MatrixX3i faceFaceAdjacencyMatrix(const CMeshO& mesh);
+
+EigenVectorXm vertexScalarAttributeArray(
+		const CMeshO& mesh,
+		const std::string& attributeName);
+EigenMatrixX3m vertexVectorAttributeMatrix(
+		const CMeshO& mesh,
+		const std::string& attributeName);
+EigenVectorXm faceScalarAttributeArray(
+		const CMeshO& mesh,
+		const std::string& attributeName);
+EigenMatrixX3m faceVectorAttributeMatrix(
+		const CMeshO& mesh,
+		const std::string& attributeName);
 }
 
 #endif // MESHLAB_EIGEN_MESH_CONVERSIONS_H
