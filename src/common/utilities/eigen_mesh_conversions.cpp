@@ -138,6 +138,78 @@ CMeshO meshlab::meshFromMatrices(
 	return m;
 }
 
+void meshlab::addVertexScalarAttribute(
+		CMeshO& mesh,
+		const EigenVectorXm& attributeValues,
+		const std::string& attributeName)
+{
+	if (mesh.VN() != attributeValues.size())
+		throw MLException("");
+	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
+		throw MLException("");
+	}
+	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm>(mesh, attributeName);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+		h[i] = attributeValues(i);
+	}
+}
+
+void meshlab::addFaceScalarAttribute(
+		CMeshO& mesh,
+		const EigenVectorXm& attributeValues,
+		const std::string& attributeName)
+{
+	if (mesh.FN() != attributeValues.size())
+		throw MLException("");
+	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
+		throw MLException("");
+	}
+	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(mesh, attributeName);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+		h[i] = attributeValues(i);
+	}
+}
+
+void meshlab::addVertexVectorAttribute(
+		CMeshO& mesh,
+		const EigenMatrixX3m& attributeValues,
+		const std::string& attributeName)
+{
+	if (mesh.VN() != attributeValues.rows())
+		throw MLException("");
+	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
+		throw MLException("");
+	}
+	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m>(mesh, attributeName);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+		h[i][0] = attributeValues(i,0);
+		h[i][1] = attributeValues(i,1);
+		h[i][2] = attributeValues(i,2);
+	}
+}
+
+void meshlab::addFaceVectorAttribute(
+		CMeshO& mesh,
+		const EigenMatrixX3m& attributeValues,
+		const std::string& attributeName)
+{
+	if (mesh.FN() != attributeValues.rows())
+		throw MLException("");
+	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
+		throw MLException("");
+	}
+	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(mesh, attributeName);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+		h[i][0] = attributeValues(i,0);
+		h[i][1] = attributeValues(i,1);
+		h[i][2] = attributeValues(i,2);
+	}
+}
+
 /**
  * @brief Get a #V*3 Eigen matrix of scalars containing the coordinates of the
  * vertices of a CMeshO.

@@ -44,6 +44,26 @@ CMeshO meshFromMatrices(
 		const EigenVectorXm& vertexQuality = EigenVectorXm(),
 		const EigenVectorXm& faceQuality = EigenVectorXm());
 
+void addVertexScalarAttribute(
+		CMeshO& mesh,
+		const EigenVectorXm& attributeValues,
+		const std::string& attributeName);
+
+void addFaceScalarAttribute(
+		CMeshO& mesh,
+		const EigenVectorXm& attributeValues,
+		const std::string& attributeName);
+
+void addVertexVectorAttribute(
+		CMeshO& mesh,
+		const EigenMatrixX3m& attributeValues,
+		const std::string& attributeName);
+
+void addFaceVectorAttribute(
+		CMeshO& mesh,
+		const EigenMatrixX3m& attributeValues,
+		const std::string& attributeName);
+
 //From CMeshO to Eigen
 EigenMatrixX3m vertexMatrix(const CMeshO& mesh);
 Eigen::MatrixX3i faceMatrix(const CMeshO& mesh);
