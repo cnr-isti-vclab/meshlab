@@ -27,6 +27,10 @@ if(WIN32)
 endif()
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+if(APPLE)
+	add_definitions(-DGL_SILENCE_DEPRECATION)
+endif()
+
 if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	# Make sure that our shared libraries were appropriately linked
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
