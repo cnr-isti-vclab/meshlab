@@ -70,6 +70,7 @@ set(HEADERS
 	python/function_parameter.h
 	python/function_set.h
 	python/python_utils.h
+	utilities/eigen_mesh_conversions.h
 	utilities/file_format.h
 	utilities/load_save.h
 	globals.h
@@ -111,6 +112,7 @@ set(SOURCES
 	python/function_parameter.cpp
 	python/function_set.cpp
 	python/python_utils.cpp
+	utilities/eigen_mesh_conversions.cpp
 	utilities/load_save.cpp
 	globals.cpp
 	GLExtensionsManager.cpp

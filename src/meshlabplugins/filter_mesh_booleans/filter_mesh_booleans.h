@@ -74,15 +74,6 @@ public:
 			vcg::CallBackPos * cb);
 
 private:
-	//conversion functions
-	static void CMeshOToEigen(
-			const CMeshO& m,
-			Eigen::MatrixX3d& V,
-			Eigen::MatrixX3i& F);
-	static CMeshO EigenToCMeshO(
-			const Eigen::MatrixX3d& V,
-			const Eigen::MatrixX3i& F);
-
 	//generic boolean operation function
 	static void booleanOperation(
 			MeshDocument& md,
