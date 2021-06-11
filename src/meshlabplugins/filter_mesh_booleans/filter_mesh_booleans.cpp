@@ -23,6 +23,8 @@
 
 #include "filter_mesh_booleans.h"
 
+#include <common/utilities/eigen_mesh_conversions.h>
+
 #include <igl/copyleft/cgal/CSGTree.h>
 
 /**
@@ -295,68 +297,6 @@ std::map<std::string, QVariant> FilterMeshBooleans::applyFilter(
 }
 
 /**
- * @brief Puts coords and triangle indices of m into V and F matrices
- * @param m
- * @param V
- * @param F
- */
-void FilterMeshBooleans::CMeshOToEigen(const CMeshO& m, Eigen::MatrixX3d& V, Eigen::MatrixX3i& F)
-{
-	vcg::tri::RequireVertexCompactness(m);
-	vcg::tri::RequireFaceCompactness(m);
-	V.resize(m.VN(), 3);
-	for (int i = 0; i < m.VN(); i++){
-		for (int j = 0; j < 3; j++){
-			V(i,j) = m.vert[i].P()[j];
-		}
-	}
-	F.resize(m.FN(), 3);
-	for (int i = 0; i < m.FN(); i++){
-		for (int j = 0; j < 3; j++){
-			F(i,j) = (int) vcg::tri::Index(m,m.face[i].cV(j));
-		}
-	}
-}
-
-/**
- * @brief Returns a CMeshO containing the triangle mesh contained in V and F
- * @param V
- * @param F
- * @return
- */
-CMeshO FilterMeshBooleans::EigenToCMeshO(const Eigen::MatrixX3d& V, const Eigen::MatrixX3i& F)
-{
-	CMeshO m;
-	CMeshO::VertexIterator vi =
-			vcg::tri::Allocator<CMeshO>::AddVertices(m, V.rows());
-	std::vector<CMeshO::VertexPointer> ivp(V.rows());
-	for (unsigned int i = 0; i < V.rows(); ++i, ++vi) {
-		ivp[i] = &*vi;
-		vi->P() = CMeshO::CoordType(V(i,0), V(i,1), V(i,2));
-	}
-
-	CMeshO::FaceIterator fi =
-			vcg::tri::Allocator<CMeshO>::AddFaces(m, F.rows());
-	for (unsigned int i = 0; i < F.rows(); ++i, ++fi) {
-		for (unsigned int j = 0; j < 3; j++){
-			if ((unsigned int)F(i,j) >= ivp.size()) {
-				throw MLException(
-						"Error while creating mesh: bad vertex index " +
-						QString::number(F(i,j)) + " in face " +
-						QString::number(i) + "; vertex " + QString::number(j) + ".");
-			}
-		}
-		fi->V(0)=ivp[F(i,0)];
-		fi->V(1)=ivp[F(i,1)];
-		fi->V(2)=ivp[F(i,2)];
-	}
-	vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
-	vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
-
-	return m;
-}
-
-/**
  * @brief Executes the boolean operation between m1 and m2, and puts the result
  * as a new mesh into md.
  * @param md: mesh document
@@ -394,13 +334,15 @@ void FilterMeshBooleans::booleanOperation(
 		throw MLException("Boolean Operation not found! Please report this issue on https://github.com/cnr-isti-vclab/meshlab/issues");
 	}
 
-	Eigen::MatrixX3d V1, V2, VR;
-	Eigen::MatrixX3i F1, F2, FR;
-	Eigen::VectorXi indices; //mapping indices for birth faces
-
 	//vcg to eigen meshes
-	CMeshOToEigen(m1.cm, V1, F1);
-	CMeshOToEigen(m2.cm, V2, F2);
+	EigenMatrixX3m V1 = meshlab::vertexMatrix(m1.cm);
+	Eigen::MatrixX3i F1 = meshlab::faceMatrix(m1.cm);
+	EigenMatrixX3m V2 = meshlab::vertexMatrix(m2.cm);
+	Eigen::MatrixX3i F2 = meshlab::faceMatrix(m2.cm);
+
+	EigenMatrixX3m VR;
+	Eigen::MatrixX3i FR;
+	Eigen::VectorXi indices; //mapping indices for birth faces
 
 	bool result = igl::copyleft::cgal::mesh_boolean(V1, F1, V2, F2, (igl::MeshBooleanType)op, VR, FR, indices);
 
@@ -412,7 +354,7 @@ void FilterMeshBooleans::booleanOperation(
 	else {
 		//everything ok, create new mesh into md
 		MeshModel* mesh = md.addNewMesh("", name);
-		mesh->cm = EigenToCMeshO(VR, FR);
+		mesh->cm = meshlab::meshFromMatrices(VR, FR);
 
 		//if transfer option enabled
 		if (transfFaceColor || transfFaceQuality)
