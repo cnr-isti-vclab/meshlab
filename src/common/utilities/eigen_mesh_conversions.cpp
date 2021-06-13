@@ -138,16 +138,29 @@ CMeshO meshlab::meshFromMatrices(
 	return m;
 }
 
+/**
+ * @brief Adds a new custom vertex attribute of scalars to the given mesh.
+ *
+ * The vector of values must have the same size of the number of vertices of the
+ * mesh, and if an attribute with the give name already exists, a MLException
+ * will be raised.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: the input mesh
+ * @param attributeValues: #V vector of values
+ * @param attributeName: the name of the new attribute
+ */
 void meshlab::addVertexScalarAttribute(
 		CMeshO& mesh,
 		const EigenVectorXm& attributeValues,
 		const std::string& attributeName)
 {
 	if (mesh.VN() != attributeValues.size())
-		throw MLException("");
+		throw MLException("The given vector has different number of elements than the number of vertices of the mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Scalarm>(mesh, attributeName);
 	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("");
+		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm>(mesh, attributeName);
 	for (unsigned int i = 0; i < attributeValues.size(); ++i){
@@ -155,16 +168,29 @@ void meshlab::addVertexScalarAttribute(
 	}
 }
 
+/**
+ * @brief Adds a new custom face attribute of scalars to the given mesh.
+ *
+ * The vector of values must have the same size of the number of faces of the
+ * mesh, and if an attribute with the give name already exists, a MLException
+ * will be raised.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: the input mesh
+ * @param attributeValues: #F vector of values
+ * @param attributeName: the name of the new attribute
+ */
 void meshlab::addFaceScalarAttribute(
 		CMeshO& mesh,
 		const EigenVectorXm& attributeValues,
 		const std::string& attributeName)
 {
 	if (mesh.FN() != attributeValues.size())
-		throw MLException("");
+		throw MLException("The given vector has different number of elements than the number of faces of the mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Scalarm>(mesh, attributeName);
 	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("");
+		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(mesh, attributeName);
 	for (unsigned int i = 0; i < attributeValues.size(); ++i){
@@ -172,16 +198,29 @@ void meshlab::addFaceScalarAttribute(
 	}
 }
 
+/**
+ * @brief Adds a new custom vertex attribute of vectors to the given mesh.
+ *
+ * The matrix of values must have the same number of rows of the number of vertices of the
+ * mesh (and 3 columns), and if an attribute with the give name already exists, a MLException
+ * will be raised.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: the input mesh
+ * @param attributeValues: #V*3 matrix of values
+ * @param attributeName: the name of the new attribute
+ */
 void meshlab::addVertexVectorAttribute(
 		CMeshO& mesh,
 		const EigenMatrixX3m& attributeValues,
 		const std::string& attributeName)
 {
 	if (mesh.VN() != attributeValues.rows())
-		throw MLException("");
+		throw MLException("The given vector has different number of rows than the number of vertices of the mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Point3m>(mesh, attributeName);
 	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("");
+		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m>(mesh, attributeName);
 	for (unsigned int i = 0; i < attributeValues.size(); ++i){
@@ -191,16 +230,29 @@ void meshlab::addVertexVectorAttribute(
 	}
 }
 
+/**
+ * @brief Adds a new custom faces attribute of vectors to the given mesh.
+ *
+ * The matrix of values must have the same number of rows of the number of faces of the
+ * mesh (and 3 columns), and if an attribute with the give name already exists, a MLException
+ * will be raised.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: the input mesh
+ * @param attributeValues: #F*3 matrix of values
+ * @param attributeName: the name of the new attribute
+ */
 void meshlab::addFaceVectorAttribute(
 		CMeshO& mesh,
 		const EigenMatrixX3m& attributeValues,
 		const std::string& attributeName)
 {
 	if (mesh.FN() != attributeValues.rows())
-		throw MLException("");
+		throw MLException("The given vector has different number of rows than the number of faces of the mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Point3m>(mesh, attributeName);
 	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("");
+		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(mesh, attributeName);
 	for (unsigned int i = 0; i < attributeValues.size(); ++i){
