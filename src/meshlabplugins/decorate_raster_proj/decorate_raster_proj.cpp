@@ -29,7 +29,7 @@
 
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
-    if ((m_Mesh == NULL) || ( !m_Mesh->visible ) || (ctx == NULL))
+    if ((m_Mesh == NULL) || ( !m_Mesh->isVisible() ) || (ctx == NULL))
         return;
 
     glPushAttrib( GL_TRANSFORM_BIT );
@@ -65,7 +65,7 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneG
 
 void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
-	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->visible))
+	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->isVisible()))
 		return;
 
     glPushAttrib( GL_TRANSFORM_BIT );

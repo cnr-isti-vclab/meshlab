@@ -819,7 +819,7 @@ void EditReferencingPlugin::applyMatrix()
 		int lind = 0;
 		for(MeshModel *mmp: glArea->md()->meshIterator())
 		{
-			if(mmp->visible)
+			if(mmp->isVisible())
 			{
 				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
 			}
@@ -999,7 +999,7 @@ void EditReferencingPlugin::applyScale()
 		int lind = 0;
 		for(MeshModel *mmp: glArea->md()->meshIterator())
 		{
-			if (mmp->visible)
+			if (mmp->isVisible())
 			{
 				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
 			}

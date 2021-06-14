@@ -2349,7 +2349,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 	if (!mm->isVisible())
 	{
 		mm->clear();
-		mm->visible = false;
+		mm->setVisibile(false);
 	}
 	else
 		mm->clear();

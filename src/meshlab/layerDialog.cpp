@@ -381,7 +381,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
 			//Toggle visibility of current mesh
 			if (mItem != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 
 			// EVEN NICER TRICK.
 			// If the user has pressed alt when clicking on the eye icon, all layers will get visible
@@ -399,9 +399,9 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			{
 				for(MeshModel *mp : md->meshIterator())
 				{
-					mw->GLA()->meshSetVisibility(mp, !mp->visible);
+					mw->GLA()->meshSetVisibility(mp, !mp->isVisible());
 				}
-				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 			}
 			if (mItem != NULL)
 				mw->meshDoc()->setCurrentMesh(clickedId);
@@ -662,11 +662,11 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
 		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
-			mmd->visible = mw->GLA()->meshVisibilityMap.value(mmd->id());
+			mmd->setVisibile(mw->GLA()->meshVisibilityMap.value(mmd->id()));
 		else
 		{
 			mw->GLA()->meshVisibilityMap[mmd->id()]=true;
-			mmd->visible=true;
+			mmd->setVisibile(true);
 		}
 		MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator rdit = dtf.find(mmd->id());
 		if (rdit != dtf.end())
@@ -1166,7 +1166,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
 	QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar)
 {
 	if (meshmodel != NULL) {
-		updateVisibilityIcon(meshmodel->visible);
+		updateVisibilityIcon(meshmodel->isVisible());
 		setText(1, QString::number(meshmodel->id()));
 
 		QFileInfo inf = meshmodel->label();

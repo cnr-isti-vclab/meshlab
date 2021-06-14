@@ -167,7 +167,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		p.SimplificationFlag = par.getBool("simplification");
 		for(MeshModel*mm: md.meshIterator())
 		{
-			if(mm->visible)
+			if(mm->isVisible())
 			{
 				SMesh sm;
 				mm->updateDataMask(MeshModel::MM_FACEQUALITY);

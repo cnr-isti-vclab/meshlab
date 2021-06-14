@@ -241,7 +241,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	{
 		for(MeshModel *mmp: md.meshIterator())
 		{
-			if (!mmp->visible)
+			if (!mmp->isVisible())
 				md.delMesh(mmp);
 		}
 	} break;
@@ -377,7 +377,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		for(MeshModel *mmp: md.meshIterator())
 		{
 			++cnt;
-			if(mmp->visible || !mergeVisible)
+			if(mmp->isVisible() || !mergeVisible)
 			{
 				if (mmp != destModel)
 				{

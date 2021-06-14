@@ -39,9 +39,8 @@ class RasterModel : public MeshLabRenderRaster
 {
 public:
 	RasterModel();
-	RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName=QString());
+	RasterModel(unsigned int id, QString _rasterName=QString());
 	
-	MeshDocument* par;
 	bool visible;
 	inline int id() const {return _id;}
 	

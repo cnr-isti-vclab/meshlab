@@ -71,7 +71,7 @@ QDomElement planeToXML(const RasterPlane* pl, const QString& basePath, QDomDocum
 	return planeElem;
 }
 
-QDomElement rasterModelToXML(const RasterModel *mp, QDomDocument &doc, bool binary)
+QDomElement rasterModelToXML(const RasterModel *mp, QDomDocument &doc, const QString& pathName, bool binary)
 {
 	QDomElement rasterElem = doc.createElement("MLRaster");
 	rasterElem.setAttribute("label", mp->label());
@@ -80,7 +80,7 @@ QDomElement rasterModelToXML(const RasterModel *mp, QDomDocument &doc, bool bina
 	else
 		rasterElem.appendChild(WriteShotToQDomNode(mp->shot, doc));
 	for (int ii = 0; ii < mp->planeList.size(); ++ii)
-		rasterElem.appendChild(planeToXML(mp->planeList[ii], mp->par->pathName(), doc));
+		rasterElem.appendChild(planeToXML(mp->planeList[ii], pathName, doc));
 	return rasterElem;
 }
 
@@ -99,7 +99,7 @@ QDomDocument meshDocumentToXML(
 	unsigned int i = 0;
 	for(const MeshModel *mmp : md.meshIterator())
 	{
-		if ((!onlyVisibleLayers) || (mmp->visible))
+		if ((!onlyVisibleLayers) || (mmp->isVisible()))
 		{
 			QDomElement meshElem;
 			if (rendOpt.size() == md.meshNumber())
@@ -116,7 +116,7 @@ QDomDocument meshDocumentToXML(
 
 	for(const RasterModel *rmp: md.rasterIterator())
 	{
-		QDomElement rasterElem = mlp::rasterModelToXML(rmp, ddoc, binary);
+		QDomElement rasterElem = mlp::rasterModelToXML(rmp, ddoc, md.pathName(), binary);
 		rgroot.appendChild(rasterElem);
 	}
 
@@ -157,7 +157,7 @@ void saveALN(
 
 	for(const MeshModel * mp : md.meshIterator())
 	{
-		if((!onlyVisibleLayers) || (mp->visible))
+		if((!onlyVisibleLayers) || (mp->isVisible()))
 		{
 			meshNameVector.push_back(qUtf8Printable(mp->relativePathName(md.pathName())));
 			transfVector.push_back(mp->cm.Tr);

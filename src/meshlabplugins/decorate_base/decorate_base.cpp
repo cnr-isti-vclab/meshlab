@@ -99,7 +99,7 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 			{
 				if (meshm != md.mm() || (!showCameraDetails))   // non-selected meshes, only draw 
 				{
-					if (meshm->visible) DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter, qf);
+					if (meshm->isVisible()) DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter, qf);
 				}
 				else                          // selected mesh, draw & display data
 				{

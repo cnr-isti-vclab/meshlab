@@ -105,7 +105,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 
 	for(MeshModel *m: md.meshIterator())
 	{
-		if ((m != NULL) && (m->visible))
+		if ((m != NULL) && (m->isVisible()))
 		{
 			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
 		}
@@ -146,7 +146,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 
 	for(MeshModel *m: md.meshIterator())
 	{
-		if ((m != NULL) && (m->visible))
+		if ((m != NULL) && (m->isVisible()))
 		{
 			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
 		}

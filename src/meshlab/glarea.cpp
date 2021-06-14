@@ -1799,7 +1799,7 @@ void GLArea::updateMeshSetVisibilities()
     for(MeshModel *mp : md()->meshIterator())
     {
         //Insert the new pair in the map; If the key is already in the map, its value will be overwritten
-        meshVisibilityMap.insert(mp->id(),mp->visible);
+        meshVisibilityMap.insert(mp->id(),mp->isVisible());
     }
 }
 
@@ -1833,7 +1833,7 @@ void GLArea::updateRasterSetVisibilities()
 
 void GLArea::meshSetVisibility(MeshModel *mp, bool visibility)
 {
-    mp->visible=visibility;
+    mp->setVisibile(visibility);
     meshVisibilityMap[mp->id()]=visibility;
 }
 

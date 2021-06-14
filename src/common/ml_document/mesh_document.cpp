@@ -135,7 +135,7 @@ void MeshDocument::setCurrentMesh(int new_curr_id)
 
 void MeshDocument::setVisible(int meshId, bool val)
 {
-	getMesh(meshId)->visible=val;
+	getMesh(meshId)->setVisibile(val);
 	emit meshSetChanged();
 }
 
@@ -391,7 +391,7 @@ RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 	QFileInfo info(fullPathFilename);
 	QString newLabel=info.fileName();
 
-	RasterModel *newRaster=new RasterModel(this, newRasterId(), newLabel);
+	RasterModel *newRaster=new RasterModel(newRasterId(), newLabel);
 	rasterList.push_back(newRaster);
 
 	//Add new plane

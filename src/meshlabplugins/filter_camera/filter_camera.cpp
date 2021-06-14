@@ -258,7 +258,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (MeshModel* mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm->isVisible())
 				{
 					mm->cm.Tr=transf * mm->cm.Tr;
 					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
@@ -354,7 +354,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (MeshModel* mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm->isVisible())
 				{
 					mm->cm.Tr=trTran*trScale*trTranInv;
 					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
@@ -451,7 +451,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (MeshModel* mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm->isVisible())
 				{
 					mm->cm.Tr=trTran;
 					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
@@ -526,7 +526,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (MeshModel* mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm->isVisible())
 				{
 					mm->cm.Tr = mat;
 					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);

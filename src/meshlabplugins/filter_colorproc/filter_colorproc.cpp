@@ -868,7 +868,7 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 		{
 			for(MeshModel *mmi: md.meshIterator())
 			{
-				if (mmi->visible)
+				if (mmi->isVisible())
 				{
 					mmi->updateDataMask(MeshModel::MM_FACECOLOR);
 					tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm, mmi->cm.C());

@@ -147,7 +147,7 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
 	for(MeshModel *m: md.meshIterator())
 	{
-		if ((m != NULL) && (m->visible))
+		if ((m != NULL) && (m->isVisible()))
 		{
 			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
 		}
@@ -184,7 +184,7 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for(MeshModel *m: md.meshIterator())
 	{
-		if ((m != NULL) && (m->visible))
+		if ((m != NULL) && (m->isVisible()))
 		{
 			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(),dt);
 		}
