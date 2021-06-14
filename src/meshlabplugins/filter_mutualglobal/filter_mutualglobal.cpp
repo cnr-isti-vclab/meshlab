@@ -787,7 +787,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 			{
 				Node n;
 				double mut=0.0; double are=0.00001;
-				if((*rmit)->visible)
+				if((*rmit)->isVisible())
 					n.active=false;
 				else
 					n.active=true;
@@ -806,8 +806,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 				graph.nodes.push_back(n);
 				log("Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
 			}
-			else
-				{
+			else {
 				Node n;
 				n.active=true;
 				n.id=j;
