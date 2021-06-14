@@ -632,16 +632,9 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	if (md == NULL)
 		return;
 
-	/*int previd = currentMeshItemId();
-	QSet<int> tabsrelatedtodeletedmeshes;
-	for(QMap<int,MLRenderingParametersTab*>::const_iterator pit = _partabs.begin(); pit != _partabs.end(); ++pit)
-		tabsrelatedtodeletedmeshes.insert(pit.key());*/
-	
-	/*for(int ii = 0;ii < tobedel.size();++ii)
-		delete tobedel[ii];*/
 	ui->meshTreeWidget->clear();
 
-	ui->meshTreeWidget->setColumnCount(4);
+	ui->meshTreeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
 	ui->meshTreeWidget->header()->hide();
 
 	_docitem = new QTreeWidgetItem();
@@ -655,10 +648,10 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
-		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
+		if( mw->GLA()->meshVisibilityMap.contains(mmd->id())) {
 			mmd->setVisible(mw->GLA()->meshVisibilityMap.value(mmd->id()));
-		else
-		{
+		}
+		else {
 			mw->GLA()->meshVisibilityMap[mmd->id()]=true;
 			mmd->setVisible(true);
 		}
@@ -678,44 +671,24 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 			addDefaultNotes(item,mmd);
 			itms.push_back(item);
 			//Adding default annotations
-
 		}
 		else
 			throw MLException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
 	}
 	_docitem->addChildren(itms);
 
-	int wid = 0;
-	for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
-	{
-		ui->meshTreeWidget->resizeColumnToContents(i);
-		wid += ui->meshTreeWidget->columnWidth(i);
-	}
-	ui->meshTreeWidget->setMinimumWidth(wid);
+	updateTreeWidgetSizes(ui->meshTreeWidget);
 	updatePerMeshItemVisibility();
 	updatePerMeshItemSelectionStatus();
-
-	//for(QSet<int>::const_iterator tit = tabsrelatedtodeletedmeshes.begin();tit != tabsrelatedtodeletedmeshes.end();++tit)
-	//{
-	//    QMap<int,MLRenderingParametersTab*>::iterator it = _partabs.find((*tit));
-	//    if ((it != _partabs.end()) && (it.key() != -1))
-	//    {
-	//        //the current MLParametersTab refers to a deleted mesh, i have to delete the MLParametersTab
-	//        delete it.value();
-	//    }
-	//}
-	//tabsrelatedtodeletedmeshes.clear();
 
 	if (md->rasterNumber() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 	ui->rasterTreeWidget->clear();
-	ui->rasterTreeWidget->setColumnCount(4);
 	ui->rasterTreeWidget->setColumnWidth(0,40);
 	ui->rasterTreeWidget->setColumnWidth(1,20);
-	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
-	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
+	ui->rasterTreeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
 	ui->rasterTreeWidget->header()->hide();
 	for(RasterModel* rmd: md->rasterIterator())
 	{
@@ -733,8 +706,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		//item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
 	}
 
-	for(int i=2; i< ui->rasterTreeWidget->columnCount(); i++)
-		ui->rasterTreeWidget->resizeColumnToContents(i);
+	updateTreeWidgetSizes(ui->rasterTreeWidget);
 }
 
 //Reconstruct the correct layout of the treewidget after updating the main table. It is necessary to keep the changing
@@ -742,8 +714,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 {
 	item->setExpanded(item->isExpanded());
-	for(int i=3; i< ui->meshTreeWidget->columnCount(); i++)
-		ui->meshTreeWidget->resizeColumnToContents(i);
+	updateTreeWidgetSizes(ui->meshTreeWidget);
 
 	//Update expandedMap
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
@@ -771,68 +742,101 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel)
 {
 	QTreeWidgetItem *fileItem = new QTreeWidgetItem();
-	fileItem->setText(2, QString("File"));
+	fileItem->setText(1, QString("File"));
 	if(!meshModel->fullName().isEmpty())
-		fileItem->setText(3, meshModel->shortName());
+		fileItem->setText(2, meshModel->shortName());
 	parent->addChild(fileItem);
 	updateColumnNumber(fileItem);
 
 	QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-	vertItem->setText(2, QString("Vertices"));
-	vertItem->setText(3, QString::number(meshModel->cm.vn));
+	vertItem->setText(1, QString("Vertices"));
+	vertItem->setText(2, QString::number(meshModel->cm.vn));
 	parent->addChild(vertItem);
 	updateColumnNumber(vertItem);
 
 	if(meshModel->cm.en>0){
 		QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
-		edgeItem->setText(2, QString("Edges"));
-		edgeItem->setText(3, QString::number(meshModel->cm.en));
+		edgeItem->setText(1, QString("Edges"));
+		edgeItem->setText(2, QString::number(meshModel->cm.en));
 		parent->addChild(edgeItem);
 		updateColumnNumber(edgeItem);
 	}
 
 	QTreeWidgetItem *faceItem = new QTreeWidgetItem();
-	faceItem->setText(2, QString("Faces"));
-	faceItem->setText(3, QString::number(meshModel->cm.fn));
+	faceItem->setText(1, QString("Faces"));
+	faceItem->setText(2, QString::number(meshModel->cm.fn));
 	parent->addChild(faceItem);
 	updateColumnNumber(faceItem);
 
-	std::vector<std::string> AttribNameVector;
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(meshModel->cm,AttribNameVector);
-	for(int i = 0; i < (int) AttribNameVector.size(); i++)
-	{
+	std::vector<std::string> vertScalarNames;
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(meshModel->cm,vertScalarNames);
+	std::vector<std::string> vertPointNames;
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(meshModel->cm,vertPointNames);
+	std::vector<std::string> faceScalarNames;
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(meshModel->cm,faceScalarNames);
+	std::vector<std::string> facePointNames;
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(meshModel->cm,facePointNames);
+
+	unsigned int totAttributes = vertScalarNames.size() + vertPointNames.size() +
+			faceScalarNames.size() + facePointNames.size();
+	if (totAttributes > 0){
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Vert Attr."));
-		vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+		QFont f;
+		f.setBold(true);
+		vertItem->setFont(1, f);
+		vertItem->setText(1, QString("Custom Attrs:"));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
-	AttribNameVector.clear();
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(meshModel->cm,AttribNameVector);
-	for(int i = 0; i < (int) AttribNameVector.size(); i++)
-	{
+
+	for(const std::string& name: vertScalarNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Vert Attr."));
-		vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+		vertItem->setText(1, QString("Vert (scalar):"));
+		vertItem->setText(2, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(meshModel->cm,AttribNameVector);
-	for(int i = 0; i < (int) AttribNameVector.size(); i++)
-	{
+
+	for(const std::string& name: vertPointNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Face Attr."));
-		vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+		vertItem->setText(1, QString("Vert (point):"));
+		vertItem->setText(2, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
-	AttribNameVector.clear();
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(meshModel->cm,AttribNameVector);
-	for(int i = 0; i < (int) AttribNameVector.size(); i++)
-	{
+
+	for(const std::string& name: faceScalarNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Face Attr."));
-		vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+		vertItem->setText(1, QString("Face (scalar):"));
+		vertItem->setText(2, QString(name.c_str()));
+		parent->addChild(vertItem);
+		updateColumnNumber(vertItem);
+	}
+
+	for(const std::string& name: facePointNames) {
+		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+		vertItem->setText(1, QString("Face (point):"));
+		vertItem->setText(2, QString(name.c_str()));
+		parent->addChild(vertItem);
+		updateColumnNumber(vertItem);
+	}
+
+	if (meshModel->cm.textures.size() > 0){
+		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+		QFont f;
+		f.setBold(true);
+		vertItem->setFont(1, f);
+		vertItem->setText(1, QString("Textures:"));
+		parent->addChild(vertItem);
+		updateColumnNumber(vertItem);
+	}
+
+	for(const std::string& name: meshModel->cm.textures) {
+		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+		vertItem->setText(2, QString(name.c_str()));
+		const QImage& img = meshModel->getTexture(name);
+		QString size = QString::number(img.width()) + "x" + QString::number(img.height());
+		vertItem->setText(3, QString(size));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
@@ -923,7 +927,6 @@ void LayerDialog::updateDecoratorParsView()
 			res[0]->setExpanded(true);
 	}
 	ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
-	//ui->decParsTree->expandAll();
 }
 
 void LayerDialog::updatePerMeshItemSelectionStatus()
@@ -936,13 +939,13 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
 		for(int ii = 0; ii < ui->meshTreeWidget->topLevelItemCount();++ii) {
 			MeshTreeWidgetItem* item = dynamic_cast<MeshTreeWidgetItem*>(ui->meshTreeWidget->topLevelItem(ii));
 			if ((item != NULL)) {
-				if(item->_meshid == mm->id()) {
+				if((unsigned int)item->_meshid == mm->id()) {
 					ui->meshTreeWidget->setCurrentItem(item);
 					_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
 					QString meshLabel = mm->label();
-					if (meshLabel.size() > 30){
+					if (meshLabel.size() > 40){
 						QString fin = meshLabel.right(6);
-						meshLabel.truncate(20);
+						meshLabel.truncate(30);
 						meshLabel += "...";
 						meshLabel += fin;
 					}
@@ -967,24 +970,8 @@ void LayerDialog::updatePerRasterItemSelectionStatus()
 		RasterModel* rm = md->rm();
 		if ((item != NULL) && (rm != NULL))
 		{
-			if(item->_rasterid == rm->id())
-			{
-				item->setBackground(1,QBrush(Qt::yellow));
-				item->setForeground(1,QBrush(Qt::blue));
-				item->setBackground(2,QBrush(Qt::yellow));
-				item->setForeground(2,QBrush(Qt::blue));
-				item->setBackground(3,QBrush(Qt::yellow));
-				item->setForeground(3,QBrush(Qt::blue));
+			if(item->_rasterid == rm->id()) {
 				ui->rasterTreeWidget->setCurrentItem(item);
-			}
-			else
-			{
-				item->setBackground(1,QBrush());
-				item->setForeground(1,QBrush());
-				item->setBackground(2,QBrush());
-				item->setForeground(2,QBrush());
-				item->setBackground(3,QBrush());
-				item->setForeground(3,QBrush());
 			}
 		}
 	}
@@ -1067,6 +1054,17 @@ MLRenderingParametersTab* LayerDialog::createRenderingParametersTab()
 	_tabw->setVisible(false);
 	delete tmptool;
 	return _tabw;
+}
+
+void LayerDialog::updateTreeWidgetSizes(QTreeWidget* tree)
+{
+	for(int i=0; i< tree->columnCount(); i++) {
+		int oldSize = tree->columnWidth(i);
+		tree->resizeColumnToContents(i);
+		if (tree->columnWidth(i) > 200){
+			tree->setColumnWidth(i, oldSize);
+		}
+	}
 }
 
 void LayerDialog::updateProjectName( const QString& name )
@@ -1165,12 +1163,6 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
 
 		QFileInfo inf = meshmodel->label();
 		QString meshName = inf.completeBaseName();
-		if (meshName.size() > 30){
-			QString fin = meshName.right(6);
-			meshName.truncate(20);
-			meshName += "...";
-			meshName += fin;
-		}
 		if (meshmodel->meshModified())
 			meshName += " *";
 		if (_rendertoolbar != NULL)
@@ -1201,7 +1193,8 @@ RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 		updateVisibilityIcon(rasterModel->isVisible());
 		setText(1, QString::number(rasterModel->id()));
 
-		QString rasterName = rasterModel->label();
+		QFileInfo fi(rasterModel->label());
+		QString rasterName = fi.fileName();
 		setText(2, rasterName);
 
 		_rasterid =rasterModel->id();
