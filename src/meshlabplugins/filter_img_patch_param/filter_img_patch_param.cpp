@@ -243,7 +243,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 		for(RasterModel *rm : md.rasterIterator()) {
 			initialShots.push_back(rm->shot);
 			rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
-			if( rm->visible )
+			if( rm->isVisible() )
 				activeRasters.push_back( rm );
 		}
 

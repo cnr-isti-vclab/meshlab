@@ -212,7 +212,7 @@ std::vector<MeshModel*> loadMLP(
 					try {
 						auto tmp = meshlab::loadMeshWithStandardParameters(filen, md);
 						for (auto m : tmp){
-							m->setVisibile(visible);
+							m->setVisible(visible);
 							m->setLabel(label);
 						}
 						meshList.insert(meshList.end(), tmp.begin(), tmp.end());

@@ -1827,13 +1827,13 @@ void GLArea::updateRasterSetVisibilities()
     for(RasterModel * rp: md()->rasterIterator())
     {
         //Insert the new pair in the map;If the key is already in the map, its value will be overwritten
-        rasterVisibilityMap.insert(rp->id(),rp->visible);
+        rasterVisibilityMap.insert(rp->id(),rp->isVisible());
     }
 }
 
 void GLArea::meshSetVisibility(MeshModel *mp, bool visibility)
 {
-    mp->setVisibile(visibility);
+    mp->setVisible(visibility);
     meshVisibilityMap[mp->id()]=visibility;
 }
 

@@ -165,7 +165,7 @@ public:
 	void setLabel(QString newName) {_label=newName;}
 
 	bool isVisible() const { return visible; }
-	void setVisibile(bool vis = true) { visible = vis;}
+	void setVisible(bool vis = true) { visible = vis;}
 
 	std::list<std::string> loadTextures(GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
 	void saveTextures(const QString& basePath, int quality = 66, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);

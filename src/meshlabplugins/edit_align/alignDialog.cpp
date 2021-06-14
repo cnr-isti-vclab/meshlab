@@ -272,7 +272,7 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column)
 	if (nn) {
 		if (column == 1)
 		{
-			nn->m->setVisibile(!nn->m->isVisible());
+			nn->m->setVisible(!nn->m->isVisible());
 			emit updateMeshSetVisibilities();
 			if (nn->m->isVisible()) mItem->setIcon(1, QIcon(":/layer_eye_open.png"));
 			else mItem->setIcon(1, QIcon(":/layer_eye_close.png"));

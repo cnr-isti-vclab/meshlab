@@ -445,7 +445,7 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 		unsigned int r = 0;
 		for (RasterModel* rm : md.rasterIterator())
 		{
-			if(rm->visible)
+			if(rm->isVisible())
 			{
 				alignset.image=&rm->currentPlane->image;
 				alignset.shot=rm->shot;
@@ -553,7 +553,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 	unsigned int r = 0;
 	for (RasterModel* rm : md.rasterIterator())
 	{
-		if(rm->visible)
+		if(rm->isVisible())
 		{
 			AlignPair pair;
 			alignset.image=&rm->currentPlane->image;

@@ -421,7 +421,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				//-- cycle all cameras
 				cam_ind = 0;
 				for(RasterModel *raster : md.rasterIterator()){
-					if(raster->visible)
+					if(raster->isVisible())
 					{
 						do_project = true;
 
@@ -739,7 +739,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				cam_ind = 0;
 				for(RasterModel *raster : md.rasterIterator())
 				{
-					if(raster->visible)
+					if(raster->isVisible())
 					{
 						do_project = true;
 

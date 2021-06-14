@@ -272,7 +272,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 			}
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplyRigidTransformation(transf);
 			}
 		}
@@ -280,7 +280,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplyRigidTransformation(transf);
 			}
 		}
@@ -370,7 +370,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 			}
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 				{
 					rm->shot.ApplyRigidTransformation(trTran);
 					rm->shot.RescalingWorld(trScale[0][0], false);
@@ -382,7 +382,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 				{
 					rm->shot.ApplyRigidTransformation(trTran);
 					rm->shot.RescalingWorld(trScale[0][0], false);
@@ -464,7 +464,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 			}
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplyRigidTransformation(trTran);
 				
 			}
@@ -473,7 +473,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplyRigidTransformation(trTran);
 			}
 		}
@@ -538,7 +538,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 			}
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplySimilarity(mat);
 				
 			}
@@ -547,7 +547,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					rm->shot.ApplySimilarity(mat);
 			}
 		}

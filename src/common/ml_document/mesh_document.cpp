@@ -135,7 +135,7 @@ void MeshDocument::setCurrentMesh(int new_curr_id)
 
 void MeshDocument::setVisible(int meshId, bool val)
 {
-	getMesh(meshId)->setVisibile(val);
+	getMesh(meshId)->setVisible(val);
 	emit meshSetChanged();
 }
 

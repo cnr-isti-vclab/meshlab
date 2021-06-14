@@ -233,7 +233,7 @@ void EditAlignPlugin::hideRevealGluedMesh()
   for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
   { 
     MeshNode *mn=ni->second;
-        if(!mn->glued) mn->m->setVisibile(!(mn->m->isVisible()));
+        if(!mn->glued) mn->m->setVisible(!(mn->m->isVisible()));
   }
     alignDialog->rebuildTree();
     _gla->update();
@@ -323,7 +323,7 @@ void EditAlignPlugin::glueManual()
 		{
 			emit suspendEditToggle();
 			mode = ALIGN_MOVE;
-			mm->setVisibile(false);
+			mm->setVisible(false);
 			trackball.Reset();
 			trackball.center.Import(mm->cm.trBB().Center());
 			trackball.radius = mm->cm.trBB().Diag() / 2.0;
@@ -342,7 +342,7 @@ void EditAlignPlugin::glueManual()
 			mtran.SetTranslate(-trackball.center);
 			tmp.Import(mm->cm.Tr);
 			mm->cm.Tr.Import((tran)* trackball.track.Matrix()*(mtran)* tmp);
-			mm->setVisibile(true);
+			mm->setVisible(true);
 			alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			currentNode()->glued = true;
 			alignDialog->rebuildTree();

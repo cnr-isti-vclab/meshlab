@@ -252,7 +252,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	{
 		for(RasterModel *rmp: md.rasterIterator())
 		{
-			if (!rmp->visible)
+			if (!rmp->isVisible())
 				md.delRaster(rmp);
 		}
 	} break;
@@ -460,7 +460,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			int active = 0;
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					active++;
 			}
 
@@ -469,7 +469,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 				{
 					fprintf(outfile, "%f %d %d\n", rm->shot.Intrinsics.FocalMm / rm->shot.Intrinsics.PixelSizeMm[0], 0, 0);
 
@@ -517,7 +517,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			unsigned int i = 0;
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 				{
 					float focal, pixelX, pixelY;
 					if (rm->shot.Intrinsics.FocalMm > 1000)
@@ -582,7 +582,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			i = 0;
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 				{
 					xmlWriter.writeStartElement("camera");
 					xmlWriter.writeAttribute("id", QString::number(i));
@@ -652,7 +652,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			unsigned active = 0;
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible)
+				if (rm->isVisible())
 					active++;
 			}
 
@@ -665,7 +665,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			unsigned int i = 0;
 			for (RasterModel* rm : md.rasterIterator())
 			{
-				if (rm->visible) {
+				if (rm->isVisible()) {
 					float f, k1, k2;
 					float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 					vcg::Point3f t;

@@ -455,40 +455,34 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				// NICE TRICK.
 				// If the user has pressed ctrl when clicking on the icon, only that layer will remain visible
 				//
-				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
-				{
-					for(RasterModel *rp: md->rasterIterator())
-					{
-						rp->visible = false;
+				if(QApplication::keyboardModifiers() == Qt::ControlModifier) {
+					for(RasterModel *rp: md->rasterIterator()) {
+						rp->setVisible(false);
 					}
 				}
 
-				if(rm->visible){
-					rm->visible = false;
+				if(rm->isVisible()){
+					rm->setVisible(false);
 				}
 				else{
-					rm->visible = true;
+					rm->setVisible(true);
 				}
 
 				// EVEN NICER TRICK.
 				// If the user has pressed alt when clicking on the icon, all layers will get visible
 				// Very useful after you turned all layer invis using the previous option and want to avoid
 				// clicking on all of them...
-				if(QApplication::keyboardModifiers() == Qt::AltModifier)
-				{
-					for(RasterModel *rp: md->rasterIterator())
-					{
-						rp->visible = true;
+				if(QApplication::keyboardModifiers() == Qt::AltModifier) {
+					for(RasterModel *rp: md->rasterIterator()) {
+						rp->setVisible(true);
 					}
 				}
 
-				if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
-				{
-					for(RasterModel *rp: md->rasterIterator())
-					{
-						rp->visible = !rp->visible;
+				if(QApplication::keyboardModifiers() == Qt::ShiftModifier) {
+					for(RasterModel *rp: md->rasterIterator()) {
+						rp->setVisible(!rp->isVisible());
 					}
-					rm->visible = !rm->visible;
+					rm->setVisible(!rm->isVisible());
 				}
 
 				mw->GLA()->updateRasterSetVisibilities( );
@@ -662,11 +656,11 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
 		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
-			mmd->setVisibile(mw->GLA()->meshVisibilityMap.value(mmd->id()));
+			mmd->setVisible(mw->GLA()->meshVisibilityMap.value(mmd->id()));
 		else
 		{
 			mw->GLA()->meshVisibilityMap[mmd->id()]=true;
-			mmd->setVisibile(true);
+			mmd->setVisible(true);
 		}
 		MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator rdit = dtf.find(mmd->id());
 		if (rdit != dtf.end())
@@ -728,7 +722,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		//Restore raster visibility according to the current visibility map
 		//very good to keep viewer state consistent
 		if( mw->GLA()->rasterVisibilityMap.contains(rmd->id()))
-			rmd->visible =mw->GLA()->rasterVisibilityMap.value(rmd->id());
+			rmd->setVisible(mw->GLA()->rasterVisibilityMap.value(rmd->id()));
 
 		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
 		ui->rasterTreeWidget->addTopLevelItem(item);
@@ -1129,7 +1123,7 @@ void LayerDialog::updatePerRasterItemVisibility()
 		if (mitm != NULL) {
 			RasterModel* mm = md->getRaster(mitm->_rasterid);
 			if (mm != NULL)
-				mitm->updateVisibilityIcon(mm->visible);
+				mitm->updateVisibilityIcon(mm->isVisible());
 		}
 	}
 }
@@ -1204,7 +1198,7 @@ RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 {
 	if (rasterModel != NULL)
 	{
-		updateVisibilityIcon(rasterModel->visible);
+		updateVisibilityIcon(rasterModel->isVisible());
 		setText(1, QString::number(rasterModel->id()));
 
 		QString rasterName = rasterModel->label();
