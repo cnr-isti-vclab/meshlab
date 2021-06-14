@@ -798,7 +798,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 	updateColumnNumber(faceItem);
 
 	std::vector<std::string> AttribNameVector;
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(meshModel->cm,AttribNameVector);
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(meshModel->cm,AttribNameVector);
 	for(int i = 0; i < (int) AttribNameVector.size(); i++)
 	{
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
@@ -808,7 +808,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		updateColumnNumber(vertItem);
 	}
 	AttribNameVector.clear();
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(meshModel->cm,AttribNameVector);
 	for(int i = 0; i < (int) AttribNameVector.size(); i++)
 	{
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
@@ -817,7 +817,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(meshModel->cm,AttribNameVector);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(meshModel->cm,AttribNameVector);
 	for(int i = 0; i < (int) AttribNameVector.size(); i++)
 	{
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
@@ -827,7 +827,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		updateColumnNumber(vertItem);
 	}
 	AttribNameVector.clear();
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(meshModel->cm,AttribNameVector);
 	for(int i = 0; i < (int) AttribNameVector.size(); i++)
 	{
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
