@@ -2684,10 +2684,32 @@ void MainWindow::showToolbarFile(){
 	mainToolBar->setVisible(!mainToolBar->isVisible());
 }
 
-void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
-void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
-void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
-void MainWindow::showRaster()    {if(GLA() != 0)	GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));}
+void MainWindow::showInfoPane()
+{
+	if(GLA() != 0) {
+		GLA()->infoAreaVisible = !(GLA()->infoAreaVisible);
+		GLA()->update();
+	}
+}
+
+void MainWindow::showTrackBall()
+{
+	if(GLA() != 0)
+		GLA()->showTrackBall(!GLA()->isTrackBallVisible());
+}
+
+void MainWindow::resetTrackBall()
+{
+	if(GLA() != 0)
+		GLA()->resetTrackBall();
+}
+
+void MainWindow::showRaster()
+{
+	if(GLA() != 0)
+		GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));
+}
+
 void MainWindow::showLayerDlg(bool visible)
 {
 	if ((GLA() != 0) && (layerDialog != NULL))
