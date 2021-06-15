@@ -2137,7 +2137,7 @@ bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, c
 	return true;
 }
 
-void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt)
+void MainWindow::computeRenderingDataOnLoading(MeshModel* mm, bool isareload, MLRenderingData* rendOpt)
 {
 	MultiViewer_Container* mv = currentViewContainer();
 	if (mv != NULL)
@@ -2146,7 +2146,7 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLR
 		if ((shared != NULL) && (mm != NULL))
 		{
 			MLRenderingData defdt;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt,mwsettings.minpolygonpersmoothrendering);
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt, 0);
 			if (rendOpt != NULL)
 				defdt = *rendOpt;
 			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
@@ -3261,7 +3261,7 @@ bool MainWindow::addRenderingDataIfNewlyGeneratedMesh(int meshid)
 		if ((meshDoc()->meshDocStateData().find(meshid) == meshDoc()->meshDocStateData().end()) && (mm != NULL))
 		{
 			MLRenderingData dttoberendered;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, dttoberendered,mwsettings.minpolygonpersmoothrendering);
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, dttoberendered, 0);
 			foreach(GLArea* gla, mvc->viewerList)
 			{
 				if (gla != NULL)
