@@ -673,32 +673,35 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 {
 	makeCurrent();
-    painter->save();
-    qFont.setFamily("Helvetica");
-    qFont.setPixelSize(10);
-    qFont.setStyleStrategy(QFont::PreferAntialias);
-    painter->setFont(qFont);
+	painter->save();
+	qFont.setFamily("Helvetica");
+	qFont.setPixelSize(10);
+	qFont.setStyleStrategy(QFont::PreferAntialias);
+	painter->setFont(qFont);
+	int precision = glas.matrixDecimalPrecision;
+	if (precision < 0)
+		precision = 0;
 
-    QString tableText;
-    for(int i=0;i<4;i++)
-        tableText+=QString("\t%1\t%2\t%3\t%4\n")
-                .arg(mm()->cm.Tr[i][0],5,'f',2).arg(mm()->cm.Tr[i][1],5,'f',2)
-                .arg(mm()->cm.Tr[i][2],5,'f',2).arg(mm()->cm.Tr[i][3],5,'f',2);
+	QString tableText;
+	for(int i=0;i<4;i++)
+		tableText+=QString("\t%1\t%2\t%3\t%4\n")
+				.arg(mm()->cm.Tr[i][0],5,'f',precision).arg(mm()->cm.Tr[i][1],5,'f',precision)
+				.arg(mm()->cm.Tr[i][2],5,'f',precision).arg(mm()->cm.Tr[i][3],5,'f',precision);
 
-    QTextOption TO;
-    QTextOption::Tab ttt;
-    ttt.type=QTextOption::DelimiterTab;
-    ttt.delimiter = '.';
-    const int columnSpacing = 40;
-    ttt.position=columnSpacing;
-    QList<QTextOption::Tab> TabList;
-    for(int i=0;i<4;++i){
-        TabList.push_back(ttt);
-        ttt.position+=columnSpacing;
-    }
-    TO.setTabs(TabList);
-    painter->drawText(areaRect, tableText, TO);
-    painter->restore();
+	QTextOption TO;
+	QTextOption::Tab ttt;
+	ttt.type=QTextOption::DelimiterTab;
+	ttt.delimiter = '.';
+	const int columnSpacing = 40;
+	ttt.position=columnSpacing;
+	QList<QTextOption::Tab> TabList;
+	for(int i=0;i<4;++i){
+		TabList.push_back(ttt);
+		ttt.position+=columnSpacing;
+	}
+	TO.setTabs(TabList);
+	painter->drawText(areaRect, tableText, TO);
+	painter->restore();
 }
 void GLArea::displayRealTimeLog(QPainter *painter)
 {
