@@ -349,6 +349,8 @@ connectRenderModeActionList(rendlist);*/
 	connect(linkViewersAct, SIGNAL(triggered()), this, SLOT(linkViewers()));
 
 	viewFromGroupAct = new QActionGroup(this); viewFromGroupAct->setExclusive(true);
+	trackballStepGroupAct = new QActionGroup(this); trackballStepGroupAct->setExclusive(true);
+
 	viewFrontAct = new QAction(tr("Front"), viewFromGroupAct);
 	viewBackAct = new QAction(tr("Back"), viewFromGroupAct);
 	viewRightAct = new QAction(tr("Right"), viewFromGroupAct);
@@ -362,7 +364,18 @@ connectRenderModeActionList(rendlist);*/
 	viewLeftYAct = new QAction(tr("Left (Z is up)"), viewFromGroupAct);
 	viewTopYAct = new QAction(tr("Top (Z is up)"), viewFromGroupAct);
 	viewBottomYAct = new QAction(tr("Bottom (Z is up)"), viewFromGroupAct);
+	//ortho
+	toggleOrthoAct = new QAction(tr("Toggle Orthographic Camera"), this);
+	toggleOrthoAct->setShortcutContext(Qt::ApplicationShortcut);
+	//trackball
+	trackballStepHP = new QAction(tr("Horizontal +"), trackballStepGroupAct);
+	trackballStepHM = new QAction(tr("Horizontal -"), trackballStepGroupAct);
+	trackballStepVP = new QAction(tr("Vertical +"), trackballStepGroupAct);
+	trackballStepVM = new QAction(tr("Vertical -"), trackballStepGroupAct);
+	trackballStepSP = new QAction(tr("Axial +"), trackballStepGroupAct);
+	trackballStepSM = new QAction(tr("Axial -"), trackballStepGroupAct);
 
+#ifdef WIN32 //these shortcuts work only on windows, and they result in conflicts on macos
 	// keyboard shortcuts for canonical viewdirections, blender style
 	viewFrontAct->setShortcut(Qt::KeypadModifier + Qt::Key_1);
 	viewBackAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_1);
@@ -377,29 +390,21 @@ connectRenderModeActionList(rendlist);*/
 	viewLeftYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_3);
 	viewTopYAct->setShortcut(Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
 	viewBottomYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
-
-	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
-
 	// other view-changing acts
-	toggleOrthoAct = new QAction(tr("Toggle Orthographic Camera"), this);
-	toggleOrthoAct->setShortcutContext(Qt::ApplicationShortcut);
 	toggleOrthoAct->setShortcut(Qt::KeypadModifier + Qt::Key_5);
-	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
-
-	trackballStepGroupAct = new QActionGroup(this); trackballStepGroupAct->setExclusive(true);
-	trackballStepHP = new QAction(tr("Horizontal +"), trackballStepGroupAct);
-	trackballStepHM = new QAction(tr("Horizontal -"), trackballStepGroupAct);
-	trackballStepVP = new QAction(tr("Vertical +"), trackballStepGroupAct);
-	trackballStepVM = new QAction(tr("Vertical -"), trackballStepGroupAct);
-	trackballStepSP = new QAction(tr("Axial +"), trackballStepGroupAct);
-	trackballStepSM = new QAction(tr("Axial -"), trackballStepGroupAct);
+	//trackball
 	trackballStepHP->setShortcut(Qt::KeypadModifier + Qt::Key_4);
 	trackballStepHM->setShortcut(Qt::KeypadModifier + Qt::Key_6);
 	trackballStepVP->setShortcut(Qt::KeypadModifier + Qt::Key_8);
 	trackballStepVM->setShortcut(Qt::KeypadModifier + Qt::Key_2);
 	trackballStepSP->setShortcut(Qt::KeypadModifier + Qt::Key_9);
 	trackballStepSM->setShortcut(Qt::CTRL +  Qt::KeypadModifier + Qt::Key_9);
-	connect(trackballStepGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(trackballStep(QAction *)));
+#endif //WIN32
+	connect(viewFromGroupAct, SIGNAL(triggered(QAction*)), this, SLOT(viewFrom(QAction*)));
+
+	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
+
+	connect(trackballStepGroupAct, SIGNAL(triggered(QAction*)), this, SLOT(trackballStep(QAction*)));
 
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
