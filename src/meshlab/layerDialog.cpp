@@ -791,32 +791,32 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 
 	for(const std::string& name: vertScalarNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(1, QString("Vert (scalar):"));
-		vertItem->setText(2, QString(name.c_str()));
+		vertItem->setText(2, QString("Vert (scalar):"));
+		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
 	for(const std::string& name: vertPointNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(1, QString("Vert (point):"));
-		vertItem->setText(2, QString(name.c_str()));
+		vertItem->setText(2, QString("Vert (point):"));
+		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
 	for(const std::string& name: faceScalarNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(1, QString("Face (scalar):"));
-		vertItem->setText(2, QString(name.c_str()));
+		vertItem->setText(2, QString("Face (scalar):"));
+		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
 	for(const std::string& name: facePointNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(1, QString("Face (point):"));
-		vertItem->setText(2, QString(name.c_str()));
+		vertItem->setText(2, QString("Face (point):"));
+		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
