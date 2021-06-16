@@ -75,7 +75,7 @@ QImage loadImage(
 void saveImage(
 		const QString& filename,
 		const QImage& image,
-		int quality = 66,
+		int quality = -1,
 		GLLogStream* log = nullptr,
 		vcg::CallBackPos* cb = nullptr);
 

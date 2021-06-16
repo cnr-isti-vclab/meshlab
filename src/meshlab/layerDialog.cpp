@@ -799,7 +799,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 
 	for(const std::string& name: vertPointNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Vert (point):"));
+		vertItem->setText(2, QString("Vert (vec3):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
@@ -815,7 +815,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 
 	for(const std::string& name: facePointNames) {
 		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Face (point):"));
+		vertItem->setText(2, QString("Face (vec3):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);

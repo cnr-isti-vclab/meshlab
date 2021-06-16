@@ -64,6 +64,7 @@ public:
 	int getNewMask() const;
 	RichParameterList getNewAdditionalSaveParameters() const;
 	std::vector<std::string> getTextureNames() const;
+	bool saveTextures() const;
 	int getTextureQuality() const;
 
 private slots:
@@ -74,6 +75,10 @@ private slots:
 	void on_listTextureName_itemSelectionChanged();
 	void on_AllButton_clicked();
 	void on_NoneButton_clicked();
+
+	void on_saveTextureCheckBox_stateChanged(int arg1);
+
+	void on_textureQualitySpinBox_valueChanged(int arg1);
 
 private:
 	void setMaskCapability();

@@ -168,7 +168,7 @@ public:
 	void setVisible(bool vis = true) { visible = vis;}
 
 	std::list<std::string> loadTextures(GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
-	void saveTextures(const QString& basePath, int quality = 66, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
+	void saveTextures(const QString& basePath, int quality = -1, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
 
 	QImage getTexture(const std::string& tn) const;
 	void clearTextures();

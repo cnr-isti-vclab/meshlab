@@ -238,6 +238,19 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="saveTextureCheckBox">
+          <property name="text">
+           <string>Save Texture File(s)</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QFrame" name="frame">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -270,6 +283,9 @@
            </item>
            <item>
             <widget class="QSpinBox" name="textureQualitySpinBox">
+             <property name="suffix">
+              <string/>
+             </property>
              <property name="minimum">
               <number>-1</number>
              </property>
@@ -277,7 +293,7 @@
               <number>100</number>
              </property>
              <property name="value">
-              <number>66</number>
+              <number>-1</number>
              </property>
             </widget>
            </item>

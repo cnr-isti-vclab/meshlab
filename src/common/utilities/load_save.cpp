@@ -249,7 +249,7 @@ void saveMeshWithStandardParameters(
 
 	ioPlugin->save(extension, fileName, m, capability, saveParams, cb);
 	m.setFileName(fileName);
-	m.saveTextures(fi.absolutePath(), 66, log, cb);
+	m.saveTextures(fi.absolutePath(), -1, log, cb);
 }
 
 void saveAllMeshes(
