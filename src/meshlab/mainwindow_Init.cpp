@@ -1333,7 +1333,7 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 {
 	gbllist.addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
 	gbllist.addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	gbllist.addParam(RichInt(minFaceNumberPerSmoothRendering(), 5000000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist.addParam(RichInt(minFaceNumberPerSmoothRendering(), 2000000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 //	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
