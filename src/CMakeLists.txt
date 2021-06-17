@@ -141,6 +141,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/io_ctm
 			meshlabplugins/io_expe
 			meshlabplugins/io_json
+			meshlabplugins/io_nxs
 			meshlabplugins/io_pdb
 			meshlabplugins/io_tri
 			meshlabplugins/io_txt

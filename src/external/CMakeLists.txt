@@ -54,6 +54,9 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 	# muparser - optional, for filter_func
 	include(${CMAKE_CURRENT_SOURCE_DIR}/muparser.cmake)
 
+	# nexus - optional. for io_nxs
+	include(${CMAKE_CURRENT_SOURCE_DIR}/nexus.cmake)
+
 	# newuoa - optional and header-only, for several plugins including all that use levmar
 	include(${CMAKE_CURRENT_SOURCE_DIR}/newuoa.cmake)
 
