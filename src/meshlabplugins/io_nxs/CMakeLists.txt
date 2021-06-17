@@ -4,9 +4,9 @@
 # Only build if we have nexus
 if (TARGET nexus)
 
-	set(SOURCES sampleio.cpp)
+	set(SOURCES io_nxs.cpp)
 
-	set(HEADERS sampleio.h)
+	set(HEADERS io_nxs.h)
 
 	add_meshlab_plugin(io_nxs MODULE ${SOURCES} ${HEADERS})
 

@@ -21,65 +21,44 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/ml_document/mesh_model.h>
-#include "sampleio.h"
+#ifndef IO_NXS_PLUGIN_H
+#define IO_NXS_PLUGIN_H
 
-QString SampleIOPlugin::pluginName() const
-{
-	return "IONXS";
-}
+#include <common/plugins/interfaces/io_plugin.h>
 
-/*
-	returns the list of the file's type which can be imported
-*/
-std::list<FileFormat> SampleIOPlugin::importFormats() const
-{
-	return {};
-}
+class IONXSPlugin : public QObject, public IOPlugin
+{ 
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
-/*
-	returns the list of the file's type which can be exported
-*/
-std::list<FileFormat> SampleIOPlugin::exportFormats() const
-{
-	return {};
-}
+public:
 
-/*
-	returns the mask on the basis of the file's type.
-	otherwise it returns 0 if the file format is unknown
-*/
-void SampleIOPlugin::exportMaskCapability(
-		const QString&,
-		int &capability,
-		int &defaultBits) const
-{
-	capability=defaultBits=0;
-	return;
-}
+	QString pluginName() const;
 
+	std::list<FileFormat> importFormats() const;
+	std::list<FileFormat> exportFormats() const;
 
-void SampleIOPlugin::open(
-		const QString& fileFormat,
-		const QString&fileName,
-		MeshModel &m,
-		int& ,
-		const RichParameterList & ,
-		vcg::CallBackPos *)
-{
-	wrongOpenFormat(fileFormat);
-}
+	void exportMaskCapability(
+			const QString &format,
+			int &capability,
+			int &defaultBits) const;
 
-void SampleIOPlugin::save(
-		const QString& fileFormat,
-		const QString&fileName,
-		MeshModel &m,
-		const int mask,
-		const RichParameterList &,
-		vcg::CallBackPos *)
-{
+	void open(
+			const QString &format, /// the extension of the format e.g. "PLY"
+			const QString &fileName, /// The name of the file to be opened
+			MeshModel &m, /// The mesh that is filled with the file content
+			int &mask, /// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
+			const RichParameterList & par, /// The parameters that have been set up in the initPreOpenParameter()
+			vcg::CallBackPos *cb = nullptr); /// standard callback for reporting progress in the loading
 
-	wrongSaveFormat(fileFormat);
-}
+	void save(
+			const QString &format, // the extension of the format e.g. "PLY"
+			const QString &fileName,
+			MeshModel &m,
+			const int mask,// a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
+			const RichParameterList & par,
+			vcg::CallBackPos *cb = 0);
+};
 
-MESHLAB_PLUGIN_NAME_EXPORTER(SampleIOPlugin)
+#endif //IO_NXS_PLUGIN_H

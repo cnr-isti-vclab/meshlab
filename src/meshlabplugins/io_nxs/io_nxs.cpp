@@ -21,44 +21,69 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef IO_EXAMPLE_PLUGIN_H
-#define IO_EXAMPLE_PLUGIN_H
+#include <common/ml_document/mesh_model.h>
+#include "io_nxs.h"
 
-#include <common/plugins/interfaces/io_plugin.h>
+QString IONXSPlugin::pluginName() const
+{
+	return "IONXS";
+}
 
-class SampleIOPlugin : public QObject, public IOPlugin
-{ 
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
-	Q_INTERFACES(IOPlugin)
+/*
+	returns the list of the file's type which can be imported
+*/
+std::list<FileFormat> IONXSPlugin::importFormats() const
+{
+	return {};
+}
 
-public:
+/*
+	returns the list of the file's type which can be exported
+*/
+std::list<FileFormat> IONXSPlugin::exportFormats() const
+{
+	return {FileFormat("Multiresolution Nexus Model", "NXS")};
+}
 
-	QString pluginName() const;
+/*
+	returns the mask on the basis of the file's type.
+	otherwise it returns 0 if the file format is unknown
+*/
+void IONXSPlugin::exportMaskCapability(
+		const QString&,
+		int& capability,
+		int& defaultBits) const
+{
+	capability=defaultBits=0;
+	return;
+}
 
-	std::list<FileFormat> importFormats() const;
-	std::list<FileFormat> exportFormats() const;
 
-	void exportMaskCapability(
-			const QString &format,
-			int &capability,
-			int &defaultBits) const;
+void IONXSPlugin::open(
+		const QString& fileFormat,
+		const QString& fileName,
+		MeshModel& m,
+		int& ,
+		const RichParameterList& ,
+		vcg::CallBackPos*)
+{
+	wrongOpenFormat(fileFormat);
+}
 
-	void open(
-			const QString &format, /// the extension of the format e.g. "PLY"
-			const QString &fileName, /// The name of the file to be opened
-			MeshModel &m, /// The mesh that is filled with the file content
-			int &mask, /// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-			const RichParameterList & par, /// The parameters that have been set up in the initPreOpenParameter()
-			vcg::CallBackPos *cb = nullptr); /// standard callback for reporting progress in the loading
+void IONXSPlugin::save(
+		const QString& fileFormat,
+		const QString& fileName,
+		MeshModel& m,
+		const int mask,
+		const RichParameterList&,
+		vcg::CallBackPos*)
+{
+	if (fileFormat.toUpper() == "NXS"){
 
-	void save(
-			const QString &format, // the extension of the format e.g. "PLY"
-			const QString &fileName,
-			MeshModel &m,
-			const int mask,// a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
-			const RichParameterList & par,
-			vcg::CallBackPos *cb = 0);
-};
+	}
+	else {
+		wrongSaveFormat(fileFormat);
+	}
+}
 
-#endif
+MESHLAB_PLUGIN_NAME_EXPORTER(IONXSPlugin)
