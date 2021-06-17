@@ -45,7 +45,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: master
-        submodules: true
+        submodules: recursive
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
@@ -97,7 +97,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: master
-        submodules: true
+        submodules: recursive
     - name: Install dependencies
       run: |
         brew install libomp cgal
@@ -166,7 +166,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: master
-        submodules: true
+        submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
