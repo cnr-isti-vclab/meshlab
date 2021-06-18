@@ -67,6 +67,7 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	{
 		ui->check_iom_wedgtexcoord->setDisabled(true);
 		ui->check_iom_wedgtexcoord->setChecked(false);
+		ui->saveTextureCheckBox->setDisabled(true);
 		ui->textureQualitySpinBox->setDisabled(true);
 		ui->textureQualityLabel->setDisabled(true);
 	}

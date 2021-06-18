@@ -284,7 +284,7 @@
            <item>
             <widget class="QSpinBox" name="textureQualitySpinBox">
              <property name="suffix">
-              <string/>
+              <string> (default)</string>
              </property>
              <property name="minimum">
               <number>-1</number>
