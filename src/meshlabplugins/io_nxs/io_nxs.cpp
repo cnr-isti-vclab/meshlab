@@ -35,35 +35,15 @@ QString IONXSPlugin::pluginName() const
 	return "IONXS";
 }
 
-/*
-	returns the list of the file's type which can be imported
-*/
 std::list<FileFormat> IONXSPlugin::importFormats() const
 {
 	return {};
 }
 
-/*
-	returns the list of the file's type which can be exported
-*/
 std::list<FileFormat> IONXSPlugin::exportFormats() const
 {
 	return {FileFormat("Multiresolution Nexus Model", "NXS")};
 }
-
-/*
-	returns the mask on the basis of the file's type.
-	otherwise it returns 0 if the file format is unknown
-*/
-void IONXSPlugin::exportMaskCapability(
-		const QString&,
-		int& capability,
-		int& defaultBits) const
-{
-	capability=defaultBits=0;
-	return;
-}
-
 
 void IONXSPlugin::open(
 		const QString& fileFormat,
@@ -76,37 +56,85 @@ void IONXSPlugin::open(
 	wrongOpenFormat(fileFormat);
 }
 
+void IONXSPlugin::exportMaskCapability(
+		const QString&,
+		int& capability,
+		int& defaultBits) const
+{
+	capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+	defaultBits = capability;
+}
+
+RichParameterList IONXSPlugin::initSaveParameter(
+		const QString& format,
+		const MeshModel&) const
+{
+	RichParameterList params;
+	if (format.toUpper() == "NXS"){
+		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
+		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
+		params.addParam(RichFloat("vertex_quantization", 0, "Vertex Quantization", "Vertex quantization grid size (might be approximated)"));
+		params.addParam(RichInt("tex_quality", 92, "Texture quality [0-100]", "jpg texture quality"));
+		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)"));
+		params.addParam(RichInt("workers", 4, "N. Threads", "number of workers"));
+		//params.addParam(RichFloat("scaling", 0.5, "Scaling", "Simplification ratio"));
+		//params.addParam(RichString("decimation", "quadric", "", ""));
+		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
+		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
+		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center"));
+		params.addParam(RichBool("original_textures", false, "Original Textures", "Use original textures, no repacking"));
+		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2"));
+		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file"));
+	}
+	return params;
+}
+
 void IONXSPlugin::save(
 		const QString& fileFormat,
 		const QString& fileName,
 		MeshModel& m,
 		const int mask,
-		const RichParameterList&,
+		const RichParameterList& params,
 		vcg::CallBackPos*)
 {
 	if (fileFormat.toUpper() == "NXS"){
-		int node_size = 1<<15;
-		int top_node_size = 4096;
-		float vertex_quantization = 0.0f;   //optionally quantize vertices position.
-		int tex_quality(92);                //default jpg texture quality
-		//QString decimation("quadric");      //simplification method
-		int ram_buffer(2000);               //Mb of ram to use
-		int n_threads = 4;
+		//parameters:
+		bool has_colors = mask & vcg::tri::io::Mask::IOM_VERTCOLOR;
+		bool has_normals = mask & vcg::tri::io::Mask::IOM_VERTNORMAL;
+		bool has_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+
+		int node_size = params.getInt("node_faces");
+		int top_node_size = params.getInt("top_node_faces");
+		float vertex_quantization = params.getFloat("vertex_quantization");
+		int tex_quality = params.getInt("tex_quality");
 		float scaling(0.5);                 //simplification ratio
-		int skiplevels = 0;
-		vcg::Point3d origin(0, 0, 0);
-		bool center = false;
+		//QString decimation("quadric");      //simplification method
+		int skiplevels = params.getInt("skiplevels");
+		int ram_buffer = params.getInt("ram");
+		int n_threads = params.getInt("workers");
 
 
-		bool point_cloud = false;
-		bool normals = false;
-		bool no_normals = false;
-		bool colors = false;
-		bool no_colors = false;
-		bool no_texcoords = false;
-		bool useOrigTex = false;
-		bool create_pow_two_tex = false;
-		bool deepzoom = false;
+		vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
+		bool center = params.getBool("center");
+
+
+		bool point_cloud = m.cm.fn == 0;
+		bool useOrigTex = params.getBool("original_textures");
+		bool create_pow_two_tex = params.getBool("pow_2_textures");
+		bool deepzoom = params.getBool("deepzoom");
+
+		quint32 components = 0;
+		if(!point_cloud) components |= NexusBuilder::FACES;
+
+		if(has_normals) {
+			components |= NexusBuilder::NORMALS;
+		}
+		if(has_colors) {
+			components |= NexusBuilder::COLORS;
+		}
+		if(has_textures) {
+			components |= NexusBuilder::TEXTURES;
+		}
 
 		QVariant adaptive(0.333f);
 
@@ -143,26 +171,9 @@ void IONXSPlugin::save(
 			}
 
 			loader = new VcgLoader<CMeshO>;
-			//todo
-			bool has_colors = false, has_normals  = false, has_textures  = false;
+
 			loader->load(&m.cm, has_colors, has_normals, has_textures);
 			stream->load(loader);
-
-			quint32 components = 0;
-			if(!point_cloud) components |= NexusBuilder::FACES;
-
-			if((!no_normals && (!point_cloud || has_normals)) || normals) {
-				components |= NexusBuilder::NORMALS;
-				cout << "Normals enabled\n";
-			}
-			if((has_colors  && !no_colors ) || colors ) {
-				components |= NexusBuilder::COLORS;
-				cout << "Colors enabled\n";
-			}
-			if(has_textures && !no_texcoords) {
-				components |= NexusBuilder::TEXTURES;
-				cout << "Textures enabled\n";
-			}
 
 			//WORKAROUND to save loading textures not needed
 			if(!(components & NexusBuilder::TEXTURES)) {

@@ -39,11 +39,6 @@ public:
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
 
-	void exportMaskCapability(
-			const QString &format,
-			int &capability,
-			int &defaultBits) const;
-
 	void open(
 			const QString &format, /// the extension of the format e.g. "PLY"
 			const QString &fileName, /// The name of the file to be opened
@@ -51,6 +46,15 @@ public:
 			int &mask, /// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
 			const RichParameterList & par, /// The parameters that have been set up in the initPreOpenParameter()
 			vcg::CallBackPos *cb = nullptr); /// standard callback for reporting progress in the loading
+
+	void exportMaskCapability(
+			const QString &format,
+			int &capability,
+			int &defaultBits) const;
+
+	RichParameterList initSaveParameter(
+			const QString &format,
+			const MeshModel &/*m*/) const;
 
 	void save(
 			const QString &format, // the extension of the format e.g. "PLY"
