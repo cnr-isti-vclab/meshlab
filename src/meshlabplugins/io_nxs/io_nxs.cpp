@@ -25,10 +25,15 @@
 #include "io_nxs.h"
 
 #include <QTextStream>
+#include <QTemporaryDir>
 #include <nxsbuild/nexusbuilder.h>
 #include <nxsbuild/meshstream.h>
 #include <nxsbuild/vcgloader.h>
 #include <nxsbuild/kdtree.h>
+
+#include <nxsbuild/nexusbuilder.h>
+#include <common/traversal.h>
+#include <nxsedit/extractor.h>
 
 QString IONXSPlugin::pluginName() const
 {
@@ -92,7 +97,14 @@ RichParameterList IONXSPlugin::initSaveParameter(
 		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
 	}
 	if (format.toUpper() == "NXZ") { //additional parameters for nxz
-
+		params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)"));
+		params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)"));
+		params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error"));
+		params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel"));
+		params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel"));
+		params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel"));
+		params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals"));
+		params.addParam(RichFloat("textures_bits", 0.25, "Textures bits", "Quantization of textures"));
 	}
 	return params;
 }
@@ -253,7 +265,82 @@ void IONXSPlugin::saveNxz(
 		const int mask,
 		const RichParameterList& params)
 {
+	QFileInfo finfo(fileName);
+	QTemporaryDir tmpdir;
+	QString nxsFileName = tmpdir.path() + "/"+ finfo.baseName() + ".nxs";
+	saveNxs(nxsFileName, m, mask, params);
 
+	float coord_step = params.getFloat("nxz_vertex_quantization");
+	int position_bits = params.getInt("vertex_bits");
+	float error_q = params.getFloat("quantization_factor");
+	int luma_bits = params.getInt("luma_bits");
+	int chroma_bits = params.getInt("chroma_bits");
+	int alpha_bits = params.getInt("alpha_bits");
+	int norm_bits = params.getInt("normal_bits");
+	float tex_step = params.getFloat("textures_bits");
+
+	bool compress = true;
+
+	nx::NexusData nexus;
+	try {
+		nexus.open(nxsFileName.toStdString().c_str());
+		Extractor extractor(&nexus);
+
+		nx::Signature signature = nexus.header.signature;
+		if(compress) {
+			signature.flags &= ~(nx::Signature::MECO | nx::Signature::CORTO);
+			signature.flags |= nx::Signature::CORTO;
+
+			if(coord_step) {  //global precision, absolute value
+				extractor.error_factor = 0.0; //ignore error factor.
+				//do nothing
+			} else if(position_bits) {
+				vcg::Sphere3f &sphere = nexus.header.sphere;
+				coord_step = sphere.Radius()/pow(2.0f, position_bits);
+				extractor.error_factor = 0.0;
+
+			} else if(error_q) {
+				//take node 0:
+				uint32_t sink = nexus.header.n_nodes -1;
+				coord_step = error_q*nexus.nodes[0].error/2;
+				for(unsigned int i = 0; i < sink; i++){
+					nx::Node &n = nexus.nodes[i];
+					nx::Patch &patch = nexus.patches[n.first_patch];
+					if(patch.node != sink)
+						continue;
+					double e = error_q*n.error/2;
+					if(e < coord_step && e > 0)
+						coord_step = e; //we are looking at level1 error, need level0 estimate.
+				}
+				extractor.error_factor = error_q;
+			}
+			//cout << "Vertex quantization step: " << coord_step << endl;
+			//cout << "Texture quantization step: " << tex_step << endl;
+			extractor.coord_q =(int)log2(coord_step);
+			extractor.norm_bits = norm_bits;
+			extractor.color_bits[0] = luma_bits;
+			extractor.color_bits[1] = chroma_bits;
+			extractor.color_bits[2] = chroma_bits;
+			extractor.color_bits[3] = alpha_bits;
+			extractor.tex_step = tex_step; //was (int)log2(tex_step * pow(2, -12));, moved to per node value
+			//cout << "Texture step: " << extractor.tex_step << endl;
+		}
+
+		//cout << "Saving with flag: " << signature.flags;
+		//if (signature.flags & nx::Signature::MECO) cout << " (compressed with MECO)";
+		//else if (signature.flags & nx::Signature::CORTO) cout << " (compressed with CORTO)";
+		//else cout << " (not compressed)";
+		//cout << endl;
+
+		extractor.save(fileName, signature);
+		QFile::remove(nxsFileName);
+	}
+	catch (QString error) {
+		throw MLException("Fatal error: " + error);
+	}
+	catch (const char *error) {
+		throw MLException("Fatal error: " + QString(error));
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(IONXSPlugin)
