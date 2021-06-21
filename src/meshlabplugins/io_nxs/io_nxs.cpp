@@ -42,13 +42,16 @@ std::list<FileFormat> IONXSPlugin::importFormats() const
 
 std::list<FileFormat> IONXSPlugin::exportFormats() const
 {
-	return {FileFormat("Multiresolution Nexus Model", "NXS")};
+	return {
+		FileFormat("Multiresolution Nexus Model", "NXS"),
+		FileFormat("Compressed Multiresolution Nexus Model", "NXZ")
+	};
 }
 
 void IONXSPlugin::open(
 		const QString& fileFormat,
-		const QString& fileName,
-		MeshModel& m,
+		const QString&,
+		MeshModel&,
 		int& ,
 		const RichParameterList& ,
 		vcg::CallBackPos*)
@@ -57,12 +60,14 @@ void IONXSPlugin::open(
 }
 
 void IONXSPlugin::exportMaskCapability(
-		const QString&,
+		const QString& format,
 		int& capability,
 		int& defaultBits) const
 {
-	capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
-	defaultBits = capability;
+	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
+		capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+		defaultBits = capability;
+	}
 }
 
 RichParameterList IONXSPlugin::initSaveParameter(
@@ -70,7 +75,7 @@ RichParameterList IONXSPlugin::initSaveParameter(
 		const MeshModel&) const
 {
 	RichParameterList params;
-	if (format.toUpper() == "NXS"){
+	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
 		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
 		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
 		params.addParam(RichFloat("vertex_quantization", 0, "Vertex Quantization", "Vertex quantization grid size (might be approximated)"));
@@ -86,6 +91,9 @@ RichParameterList IONXSPlugin::initSaveParameter(
 		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file"));
 		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
 	}
+	if (format.toUpper() == "NXZ") { //additional parameters for nxz
+
+	}
 	return params;
 }
 
@@ -98,133 +106,154 @@ void IONXSPlugin::save(
 		vcg::CallBackPos*)
 {
 	if (fileFormat.toUpper() == "NXS"){
-		bool has_colors = mask & vcg::tri::io::Mask::IOM_VERTCOLOR;
-		bool has_normals = mask & vcg::tri::io::Mask::IOM_VERTNORMAL;
-		bool has_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
-
-		//parameters:
-		int node_size = params.getInt("node_faces");
-		int top_node_size = params.getInt("top_node_faces");
-		float vertex_quantization = params.getFloat("vertex_quantization");
-		int tex_quality = params.getInt("tex_quality");
-		float scaling = params.getFloat("scaling");
-		int skiplevels = params.getInt("skiplevels");
-		int ram_buffer = params.getInt("ram");
-		int n_threads = params.getInt("workers");
-
-		vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
-		bool center = params.getBool("center");
-
-		bool point_cloud = m.cm.fn == 0;
-		bool useOrigTex = params.getBool("original_textures");
-		bool create_pow_two_tex = params.getBool("pow_2_textures");
-		bool deepzoom = params.getBool("deepzoom");
-		QVariant adaptive = params.getDynamicFloat("adaptive");
-
-		quint32 components = 0;
-		if(!point_cloud) components |= NexusBuilder::FACES;
-
-		if(has_normals) {
-			components |= NexusBuilder::NORMALS;
-		}
-		if(has_colors) {
-			components |= NexusBuilder::COLORS;
-		}
-		if(has_textures) {
-			components |= NexusBuilder::TEXTURES;
-		}
-
-		Stream* stream = nullptr;
-		VcgLoader<CMeshO>* loader = nullptr;
-		KDTree* tree = nullptr;
-		try {
-			quint64 max_memory = (1<<20)*(uint64_t)ram_buffer/4; //hack 4 is actually an estimate...
-			std::string input = "mesh";
-			if (point_cloud) {
-				input = "pointcloud";
-				stream = new StreamCloud("cache_stream");
-			}
-			else
-				stream = new StreamSoup("cache_stream");
-			stream->setVertexQuantization(vertex_quantization);
-			stream->setMaxMemory(max_memory);
-			if(center) {
-				stream->origin = m.cm.bbox.Center();
-			} else
-				stream->origin = origin;
-
-			vcg::Point3d &o = stream->origin;
-			if(o[0] != 0.0 || o[1] != 0.0 || o[2] != 0.0) {
-				int lastPoint = fileName.lastIndexOf(".");
-				QString ref = fileName.left(lastPoint) + ".js";
-				QFile file(ref);
-				if(!file.open(QFile::ReadWrite)) {
-					throw MLException("Could not save reference file: " + ref);
-				}
-				QTextStream stream(&file);
-				stream.setRealNumberPrecision(12);
-				stream << "{ \"origin\": [" << o[0] << ", " << o[1] << ", " << o[2] << "] }\n";
-			}
-
-			loader = new VcgLoader<CMeshO>;
-
-			loader->load(&m.cm, has_colors, has_normals, has_textures);
-			stream->load(loader);
-
-			//WORKAROUND to save loading textures not needed
-			if(!(components & NexusBuilder::TEXTURES)) {
-				stream->textures.clear();
-			}
-
-			NexusBuilder builder(components);
-			builder.skipSimplifyLevels = skiplevels;
-			builder.setMaxMemory(max_memory);
-			builder.n_threads = n_threads;
-			builder.setScaling(scaling);
-			builder.useNodeTex = !useOrigTex;
-			builder.createPowTwoTex = create_pow_two_tex;
-			if(deepzoom)
-				builder.header.signature.flags |= nx::Signature::Flags::DEEPZOOM;
-			builder.tex_quality = tex_quality;
-			bool success = builder.initAtlas(stream->textures);
-			if(!success) {
-				throw MLException("Fail");
-			}
-			if(point_cloud)
-				tree = new KDTreeCloud("cache_tree", adaptive.toFloat());
-			else
-				tree = new KDTreeSoup("cache_tree", adaptive.toFloat());
-
-			tree->setMaxMemory((1<<20)*(uint64_t)ram_buffer/2);
-			KDTreeSoup *treesoup = dynamic_cast<KDTreeSoup *>(tree);
-			if(treesoup)
-				treesoup->setTrianglesPerBlock(node_size);
-
-			KDTreeCloud *treecloud = dynamic_cast<KDTreeCloud *>(tree);
-			if(treecloud)
-				treecloud->setTrianglesPerBlock(node_size);
-
-			builder.create(tree, stream,  top_node_size);
-			builder.save(fileName);
-			delete tree;
-			delete loader;
-			delete stream;
-		}
-		catch(QString error) {
-			delete tree;
-			delete loader;
-			delete stream;
-			throw MLException("Fatal error: " + error);
-		} catch(const char *error) {
-			delete tree;
-			delete loader;
-			delete stream;
-			throw MLException("Fatal error: " + QString(error));
-		}
+		saveNxs(fileName, m, mask, params);
+	}
+	else if (fileFormat.toUpper() == "NXZ") {
+		saveNxz(fileName, m, mask, params);
 	}
 	else {
 		wrongSaveFormat(fileFormat);
 	}
+}
+
+void IONXSPlugin::saveNxs(
+		const QString& fileName,
+		const MeshModel& m,
+		const int mask,
+		const RichParameterList& params)
+{
+	bool has_colors = mask & vcg::tri::io::Mask::IOM_VERTCOLOR;
+	bool has_normals = mask & vcg::tri::io::Mask::IOM_VERTNORMAL;
+	bool has_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+
+	//parameters:
+	int node_size = params.getInt("node_faces");
+	int top_node_size = params.getInt("top_node_faces");
+	float vertex_quantization = params.getFloat("vertex_quantization");
+	int tex_quality = params.getInt("tex_quality");
+	float scaling = params.getFloat("scaling");
+	int skiplevels = params.getInt("skiplevels");
+	int ram_buffer = params.getInt("ram");
+	int n_threads = params.getInt("workers");
+
+	vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
+	bool center = params.getBool("center");
+
+	bool point_cloud = m.cm.fn == 0;
+	bool useOrigTex = params.getBool("original_textures");
+	bool create_pow_two_tex = params.getBool("pow_2_textures");
+	bool deepzoom = params.getBool("deepzoom");
+	QVariant adaptive = params.getDynamicFloat("adaptive");
+
+	quint32 components = 0;
+	if(!point_cloud) components |= NexusBuilder::FACES;
+
+	if(has_normals) {
+		components |= NexusBuilder::NORMALS;
+	}
+	if(has_colors) {
+		components |= NexusBuilder::COLORS;
+	}
+	if(has_textures) {
+		components |= NexusBuilder::TEXTURES;
+	}
+
+	Stream* stream = nullptr;
+	VcgLoader<CMeshO>* loader = nullptr;
+	KDTree* tree = nullptr;
+	try {
+		quint64 max_memory = (1<<20)*(uint64_t)ram_buffer/4; //hack 4 is actually an estimate...
+		std::string input = "mesh";
+		if (point_cloud) {
+			input = "pointcloud";
+			stream = new StreamCloud("cache_stream");
+		}
+		else
+			stream = new StreamSoup("cache_stream");
+		stream->setVertexQuantization(vertex_quantization);
+		stream->setMaxMemory(max_memory);
+		if(center) {
+			stream->origin = m.cm.bbox.Center();
+		} else
+			stream->origin = origin;
+
+		vcg::Point3d &o = stream->origin;
+		if(o[0] != 0.0 || o[1] != 0.0 || o[2] != 0.0) {
+			int lastPoint = fileName.lastIndexOf(".");
+			QString ref = fileName.left(lastPoint) + ".js";
+			QFile file(ref);
+			if(!file.open(QFile::ReadWrite)) {
+				throw MLException("Could not save reference file: " + ref);
+			}
+			QTextStream stream(&file);
+			stream.setRealNumberPrecision(12);
+			stream << "{ \"origin\": [" << o[0] << ", " << o[1] << ", " << o[2] << "] }\n";
+		}
+
+		loader = new VcgLoader<CMeshO>;
+
+		loader->load(&m.cm, has_colors, has_normals, has_textures);
+		stream->load(loader);
+
+		//WORKAROUND to save loading textures not needed
+		if(!(components & NexusBuilder::TEXTURES)) {
+			stream->textures.clear();
+		}
+
+		NexusBuilder builder(components);
+		builder.skipSimplifyLevels = skiplevels;
+		builder.setMaxMemory(max_memory);
+		builder.n_threads = n_threads;
+		builder.setScaling(scaling);
+		builder.useNodeTex = !useOrigTex;
+		builder.createPowTwoTex = create_pow_two_tex;
+		if(deepzoom)
+			builder.header.signature.flags |= nx::Signature::Flags::DEEPZOOM;
+		builder.tex_quality = tex_quality;
+		bool success = builder.initAtlas(stream->textures);
+		if(!success) {
+			throw MLException("Fail");
+		}
+		if(point_cloud)
+			tree = new KDTreeCloud("cache_tree", adaptive.toFloat());
+		else
+			tree = new KDTreeSoup("cache_tree", adaptive.toFloat());
+
+		tree->setMaxMemory((1<<20)*(uint64_t)ram_buffer/2);
+		KDTreeSoup *treesoup = dynamic_cast<KDTreeSoup *>(tree);
+		if(treesoup)
+			treesoup->setTrianglesPerBlock(node_size);
+
+		KDTreeCloud *treecloud = dynamic_cast<KDTreeCloud *>(tree);
+		if(treecloud)
+			treecloud->setTrianglesPerBlock(node_size);
+
+		builder.create(tree, stream,  top_node_size);
+		builder.save(fileName);
+		delete tree;
+		delete loader;
+		delete stream;
+	}
+	catch(QString error) {
+		delete tree;
+		delete loader;
+		delete stream;
+		throw MLException("Fatal error: " + error);
+	} catch(const char *error) {
+		delete tree;
+		delete loader;
+		delete stream;
+		throw MLException("Fatal error: " + QString(error));
+	}
+}
+
+void IONXSPlugin::saveNxz(
+		const QString& fileName,
+		const MeshModel& m,
+		const int mask,
+		const RichParameterList& params)
+{
+
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(IONXSPlugin)

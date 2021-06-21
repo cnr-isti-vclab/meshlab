@@ -63,6 +63,19 @@ public:
 			const int mask,// a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
 			const RichParameterList & par,
 			vcg::CallBackPos *cb = 0);
+
+private:
+	void saveNxs(
+			const QString &fileName,
+			const MeshModel& m,
+			const int mask,
+			const RichParameterList& params);
+
+	void saveNxz(
+			const QString &fileName,
+			const MeshModel& m,
+			const int mask,
+			const RichParameterList& params);
 };
 
 #endif //IO_NXS_PLUGIN_H
