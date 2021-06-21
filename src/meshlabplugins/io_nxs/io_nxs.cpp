@@ -77,14 +77,14 @@ RichParameterList IONXSPlugin::initSaveParameter(
 		params.addParam(RichInt("tex_quality", 92, "Texture quality [0-100]", "jpg texture quality"));
 		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)"));
 		params.addParam(RichInt("workers", 4, "N. Threads", "number of workers"));
-		//params.addParam(RichFloat("scaling", 0.5, "Scaling", "Simplification ratio"));
-		//params.addParam(RichString("decimation", "quadric", "", ""));
+		params.addParam(RichFloat("scaling", 0.5, "Scaling", "Simplification ratio"));
 		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
 		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
 		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center"));
 		params.addParam(RichBool("original_textures", false, "Original Textures", "Use original textures, no repacking"));
 		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2"));
 		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file"));
+		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
 	}
 	return params;
 }
@@ -98,30 +98,28 @@ void IONXSPlugin::save(
 		vcg::CallBackPos*)
 {
 	if (fileFormat.toUpper() == "NXS"){
-		//parameters:
 		bool has_colors = mask & vcg::tri::io::Mask::IOM_VERTCOLOR;
 		bool has_normals = mask & vcg::tri::io::Mask::IOM_VERTNORMAL;
 		bool has_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
 
+		//parameters:
 		int node_size = params.getInt("node_faces");
 		int top_node_size = params.getInt("top_node_faces");
 		float vertex_quantization = params.getFloat("vertex_quantization");
 		int tex_quality = params.getInt("tex_quality");
-		float scaling(0.5);                 //simplification ratio
-		//QString decimation("quadric");      //simplification method
+		float scaling = params.getFloat("scaling");
 		int skiplevels = params.getInt("skiplevels");
 		int ram_buffer = params.getInt("ram");
 		int n_threads = params.getInt("workers");
 
-
 		vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
 		bool center = params.getBool("center");
-
 
 		bool point_cloud = m.cm.fn == 0;
 		bool useOrigTex = params.getBool("original_textures");
 		bool create_pow_two_tex = params.getBool("pow_2_textures");
 		bool deepzoom = params.getBool("deepzoom");
+		QVariant adaptive = params.getDynamicFloat("adaptive");
 
 		quint32 components = 0;
 		if(!point_cloud) components |= NexusBuilder::FACES;
@@ -135,8 +133,6 @@ void IONXSPlugin::save(
 		if(has_textures) {
 			components |= NexusBuilder::TEXTURES;
 		}
-
-		QVariant adaptive(0.333f);
 
 		Stream* stream = nullptr;
 		VcgLoader<CMeshO>* loader = nullptr;
