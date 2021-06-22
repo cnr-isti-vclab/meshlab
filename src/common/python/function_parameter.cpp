@@ -111,9 +111,9 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << perc << "%";
 		return;
 	}
-	if (parameter->value().isDynamicFloat()) {
+	if (parameter->isOfType<RichDynamicFloat>()) {
 		RichDynamicFloat* rdyn = dynamic_cast<RichDynamicFloat*>(parameter);
-		o << parameter->value().getDynamicFloat() <<
+		o << parameter->value().getFloat() <<
 			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
 		return;
 	}

@@ -957,7 +957,7 @@ int DynamicFloatWidget::floatToInt(float val)
 
 void DynamicFloatWidget::collectWidgetValue()
 {
-	rp->setValue(DynamicFloatValue(valueLE->text().toFloat()));
+	rp->setValue(FloatValue(valueLE->text().toFloat()));
 }
 
 void DynamicFloatWidget::resetWidgetValue()

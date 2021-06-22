@@ -480,7 +480,7 @@ RichDynamicFloat::RichDynamicFloat(
 		const Scalarm maxval,
 		const QString& desc,
 		const QString& tltip ) :
-	RichParameter(nm, DynamicFloatValue(defval),desc, tltip), min(minval), max(maxval)
+	RichParameter(nm, FloatValue(defval),desc, tltip), min(minval), max(maxval)
 {
 }
 
@@ -508,7 +508,7 @@ RichDynamicFloat* RichDynamicFloat::clone() const
 
 bool RichDynamicFloat::operator==( const RichParameter& rb )
 {
-	return (rb.value().isDynamicFloat() &&(pName == rb.name()) && (value().getDynamicFloat() == rb.value().getDynamicFloat()));
+	return (rb.isOfType<RichDynamicFloat>() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }
 
 /**** RichOpenFile Class ****/

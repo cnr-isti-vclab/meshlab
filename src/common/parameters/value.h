@@ -52,7 +52,6 @@ public:
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
 	virtual unsigned int getMeshId() const { assert(0); return 0; }
-	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
@@ -64,7 +63,6 @@ public:
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
 	virtual bool isMesh() const { return false; }
-	virtual bool isDynamicFloat() const { return false; }
 	virtual bool isFileName() const { return false; }
 
 	virtual QString typeName() const = 0;
@@ -208,20 +206,6 @@ public:
 
 private:
 	QColor pval;
-};
-
-class DynamicFloatValue : public FloatValue
-{
-public:
-	DynamicFloatValue(const float val) :FloatValue(val) {}
-	~DynamicFloatValue() {}
-
-	inline Scalarm getDynamicFloat() const { return getFloat(); }
-	inline bool isDynamicFloat() const { return true; }
-	inline QString typeName() const { return QString("DynamicFloat"); }
-	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
-	using FloatValue::fillToXMLElement;
-
 };
 
 class FileValue : public Value

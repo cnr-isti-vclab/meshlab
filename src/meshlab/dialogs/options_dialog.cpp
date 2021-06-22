@@ -114,8 +114,8 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	if (pd.isOfType<RichAbsPerc>()){
 		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
-	else if (pd.value().isDynamicFloat()){
-		return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));
+	else if (pd.isOfType<RichDynamicFloat>()){
+		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
 	else if (pd.isOfType<RichEnum>()){
 		return new QTableWidgetItem(QString::number(pd.value().getInt()));

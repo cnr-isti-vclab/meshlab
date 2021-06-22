@@ -153,7 +153,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	if (pd.isOfType<RichAbsPerc>()){
 		return new AbsPercWidget(parent, (const RichAbsPerc&)pd, (const RichAbsPerc&)def);
 	}
-	else if (pd.value().isDynamicFloat()){
+	else if (pd.isOfType<RichDynamicFloat>()){
 		return new DynamicFloatWidget(parent, (const RichDynamicFloat&)pd, (const RichDynamicFloat&)def);
 	}
 	else if (pd.isOfType<RichEnum>()){

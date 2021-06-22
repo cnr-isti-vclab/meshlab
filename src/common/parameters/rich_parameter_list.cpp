@@ -206,7 +206,7 @@ unsigned int RichParameterList::getMeshId(const QString& name) const
  */
 Scalarm RichParameterList::getDynamicFloat(const QString& name) const
 {
-	return getParameterByName(name).value().getDynamicFloat();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
