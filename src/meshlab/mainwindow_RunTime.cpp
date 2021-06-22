@@ -1246,9 +1246,9 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		{
 			for(const RichParameter& p : mergedenvironment)
 			{
-				if (p.value().isMesh())
+				if (p.isOfType<RichMesh>())
 				{
-					MeshModel* mm = meshDoc()->getMesh(p.value().getMeshId());
+					MeshModel* mm = meshDoc()->getMesh(p.value().getInt());
 					if (mm != NULL)
 						tmp.push_back(mm);
 				}

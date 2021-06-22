@@ -111,7 +111,22 @@ void MeshLabOptionsDialog::updateSingleSetting(const RichParameter& rp)
 
 QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
 {
-	if (pd.isOfType<RichAbsPerc>()){
+	if (pd.isOfType<RichBool>()){
+		if (pd.value().getBool())
+			return new QTableWidgetItem("true"/*,lst*/);
+		else
+			return new QTableWidgetItem("false"/*,lst*/);
+	}
+	else if (pd.isOfType<RichInt>()){
+		return new QTableWidgetItem(QString::number(pd.value().getInt()));
+	}
+	else if (pd.isOfType<RichFloat>()){
+		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
+	}
+	else if (pd.isOfType<RichString>()){
+		return new QTableWidgetItem(pd.value().getString());
+	}
+	else if (pd.isOfType<RichAbsPerc>()){
 		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
 	else if (pd.isOfType<RichDynamicFloat>()){
@@ -120,48 +135,33 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.isOfType<RichEnum>()){
 		return new QTableWidgetItem(QString::number(pd.value().getInt()));
 	}
-	else if (pd.value().isBool()){
-		if (pd.value().getBool())
-			return new QTableWidgetItem("true"/*,lst*/);
-		else
-			return new QTableWidgetItem("false"/*,lst*/);
-	}
-	else if (pd.value().isInt()){
-		return new QTableWidgetItem(QString::number(pd.value().getInt()));
-	}
-	else if (pd.value().isFloat()){
-		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
-	}
-	else if (pd.value().isString()){
-		return new QTableWidgetItem(pd.value().getString());
-	}
-	else if (pd.value().isMatrix44f()){
+	else if (pd.isOfType<RichMatrix44f>()){
 		assert(0);
 		return nullptr;
 	}
-	else if (pd.value().isPoint3f()){
+	else if (pd.isOfType<RichPoint3f>()){
 		vcg::Point3f pp = pd.value().getPoint3f();
 		QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
 		return new QTableWidgetItem(pst);
 	}
-	else if (pd.value().isShotf()){
+	else if (pd.isOfType<RichShotf>()){
 		assert(0); ///
 		return new QTableWidgetItem(QString("TODO"));
 	}
-	else if (pd.value().isColor()){
+	else if (pd.isOfType<RichColor>()){
 		QPixmap pix(10,10);
 		pix.fill(pd.value().getColor());
 		QIcon ic(pix);
 		return new QTableWidgetItem(ic,"");
 	}
-	else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+	else if (pd.isOfType<RichOpenFile>()){
 		new QTableWidgetItem(pd.value().getFileName());
 	}
-	else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+	else if (pd.isOfType<RichSaveFile>()){
 		assert(0);
 		return nullptr;
 	}
-	else if (pd.value().isMesh()){
+	else if (pd.isOfType<RichMesh>()){
 		assert(0);
 		return nullptr;
 	}

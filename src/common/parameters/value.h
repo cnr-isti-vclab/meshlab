@@ -51,7 +51,6 @@ public:
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual unsigned int getMeshId() const { assert(0); return 0; }
 	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
@@ -62,7 +61,6 @@ public:
 	virtual bool isPoint3f() const { return false; }
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
-	virtual bool isMesh() const { return false; }
 	virtual bool isFileName() const { return false; }
 
 	virtual QString typeName() const = 0;
@@ -223,23 +221,6 @@ public:
 
 private:
 	QString pval;
-};
-
-class MeshValue : public Value
-{
-public:
-	MeshValue(unsigned int meshind) : pval(meshind) {};
-	~MeshValue() {}
-
-	inline unsigned int getMeshId() const { return pval; }
-	inline bool isMesh() const { return true; }
-	inline QString typeName() const { return QString("Mesh"); }
-	inline void	set(const Value& p) { pval = p.getMeshId(); }
-	inline MeshValue* clone() const {return new MeshValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
-
-private:
-	unsigned int pval;
 };
 
 #endif //MESHLAB_VALUE_H

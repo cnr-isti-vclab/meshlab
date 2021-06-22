@@ -160,9 +160,9 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			std::to_string(c.alpha()) + "]";
 		return;
 	}
-	if (parameter->value().isMesh()){
+	if (parameter->isOfType<RichMesh>()){
 		const RichMesh* rm = dynamic_cast<const RichMesh*>(parameter);
-		o << rm->value().getMeshId();
+		o << rm->value().getInt();
 		return;
 	}
 	if (parameter->value().isFileName()){

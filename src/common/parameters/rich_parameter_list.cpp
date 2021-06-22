@@ -197,7 +197,7 @@ int RichParameterList::getEnum(const QString& name) const
  */
 unsigned int RichParameterList::getMeshId(const QString& name) const
 {
-	return getParameterByName(name).value().getMeshId();
+	return getParameterByName(name).value().getInt();
 }
 
 /**

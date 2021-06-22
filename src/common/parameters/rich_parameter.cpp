@@ -597,12 +597,12 @@ RichMesh::RichMesh(
 		const MeshDocument* doc,
 		const QString& desc,
 		const QString& tltip ):
-	RichParameter(nm,MeshValue(meshind), desc, tltip), meshdoc(doc)
+	RichParameter(nm,IntValue(meshind), desc, tltip), meshdoc(doc)
 {
 }
 
 RichMesh::RichMesh(const QString& nm, unsigned int meshind, const QString& desc, const QString& tltip):
-	RichParameter(nm, MeshValue(meshind), desc, tltip), meshdoc(nullptr)
+	RichParameter(nm, IntValue(meshind), desc, tltip), meshdoc(nullptr)
 {
 }
 
@@ -615,13 +615,6 @@ QString RichMesh::stringType() const
 	return "RichMesh";
 }
 
-QDomElement RichMesh::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
-{
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
-	parElem.setAttribute("value", QString::number(val->getMeshId()));
-	return parElem;
-}
-
 RichMesh* RichMesh::clone() const
 {
 	return new RichMesh(*this);
@@ -629,7 +622,7 @@ RichMesh* RichMesh::clone() const
 
 bool RichMesh::operator==( const RichParameter& rb )
 {
-	return (rb.value().isMesh() &&(pName == rb.name()) && (value().getMeshId() == rb.value().getMeshId()));
+	return (rb.isOfType<RichMesh>() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
 }
 
 /**** RichParameterAdapter Class ****/

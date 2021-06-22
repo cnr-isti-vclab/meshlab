@@ -159,37 +159,37 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	else if (pd.isOfType<RichEnum>()){
 		return new EnumWidget(parent, (const RichEnum&)pd, (const RichEnum&)def);
 	}
-	else if (pd.value().isBool()){
+	else if (pd.isOfType<RichBool>()){
 		return new BoolWidget(parent, (const RichBool&)pd, (const RichBool&)def);
 	}
-	else if (pd.value().isInt()){
+	else if (pd.isOfType<RichInt>()){
 		return new IntWidget(parent, (const RichInt&)pd, (const RichInt&)def);
 	}
-	else if (pd.value().isFloat()){
+	else if (pd.isOfType<RichFloat>()){
 		return new FloatWidget(parent, (const RichFloat&)pd, (const RichFloat&)def);
 	}
-	else if (pd.value().isString()){
+	else if (pd.isOfType<RichString>()){
 		return new StringWidget(parent, (const RichString&)pd, (const RichString&)def);
 	}
-	else if (pd.value().isMatrix44f()){
+	else if (pd.isOfType<RichMatrix44f>()){
 		return new Matrix44fWidget(parent, (const RichMatrix44f&)pd, (const RichMatrix44f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.value().isPoint3f()){
+	else if (pd.isOfType<RichPoint3f>()){
 		return new Point3fWidget(parent, (const RichPoint3f&)pd, (const RichPoint3f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.value().isShotf()){
+	else if (pd.isOfType<RichShotf>()){
 		return new ShotfWidget(parent, (const RichShotf&)pd, (const RichShotf&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.value().isColor()){
+	else if (pd.isOfType<RichColor>()){
 		return new ColorWidget(parent, (const RichColor&)pd, (const RichColor&)def);
 	}
-	else if (pd.value().isFileName() && pd.stringType() == "RichOpenFile"){
+	else if (pd.isOfType<RichOpenFile>()){
 		return new OpenFileWidget(parent, (const RichOpenFile&)pd, (const RichOpenFile&)def);
 	}
-	else if (pd.value().isFileName() && pd.stringType() == "RichSaveFile"){
+	else if (pd.isOfType<RichSaveFile>()){
 		return new SaveFileWidget(parent, (const RichSaveFile&)pd, (const RichSaveFile&)def);
 	}
-	else if (pd.value().isMesh()){
+	else if (pd.isOfType<RichMesh>()){
 		return new MeshWidget(parent, (const RichMesh&)pd, (const RichMesh&)def);
 	}
 	else {

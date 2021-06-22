@@ -273,7 +273,6 @@ public:
 	~RichMesh();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);
