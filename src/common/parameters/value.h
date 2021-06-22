@@ -51,7 +51,6 @@ public:
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual int getEnum() const { assert(0); return int(); }
 	virtual unsigned int getMeshId() const { assert(0); return 0; }
 	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
 	virtual QString getFileName() const { assert(0); return QString(); }
@@ -64,7 +63,6 @@ public:
 	virtual bool isPoint3f() const { return false; }
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
-	virtual bool isEnum() const { return false; }
 	virtual bool isMesh() const { return false; }
 	virtual bool isDynamicFloat() const { return false; }
 	virtual bool isFileName() const { return false; }
@@ -210,19 +208,6 @@ public:
 
 private:
 	QColor pval;
-};
-
-class EnumValue : public IntValue
-{
-public:
-	EnumValue(const int val) :IntValue(val) {}
-	~EnumValue() {}
-
-	inline int getEnum() const { return getInt(); }
-	inline bool isEnum() const { return true; }
-	inline QString typeName() const { return QString("Enum"); }
-	inline EnumValue* clone() const {return new EnumValue(*this);}
-	using IntValue::fillToXMLElement;
 };
 
 class DynamicFloatValue : public FloatValue

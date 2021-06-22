@@ -188,7 +188,7 @@ Scalarm RichParameterList::getAbsPerc(const QString& name) const
  */
 int RichParameterList::getEnum(const QString& name) const
 {
-	return getParameterByName(name).value().getEnum();
+	return getParameterByName(name).value().getInt();
 }
 
 /**

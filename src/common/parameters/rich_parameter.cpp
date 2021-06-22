@@ -439,7 +439,7 @@ RichEnum::RichEnum(
 		const QStringList& values,
 		const QString& desc,
 		const QString& tltip) :
-	RichParameter(nm, EnumValue(defval),desc, tltip), enumvalues(values)
+	RichParameter(nm, IntValue(defval),desc, tltip), enumvalues(values)
 {
 }
 
@@ -468,7 +468,7 @@ RichEnum* RichEnum::clone() const
 
 bool RichEnum::operator==( const RichParameter& rb )
 {
-	return (rb.value().isEnum() &&(pName == rb.name()) && (value().getEnum() == rb.value().getEnum()));
+	return (rb.isOfType<RichEnum>() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
 }
 
 /**** RichDynamicFloat Class ****/

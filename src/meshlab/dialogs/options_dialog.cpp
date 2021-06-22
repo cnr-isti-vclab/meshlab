@@ -117,8 +117,8 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.value().isDynamicFloat()){
 		return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));
 	}
-	else if (pd.value().isEnum()){
-		return new QTableWidgetItem(QString::number(pd.value().getEnum()));
+	else if (pd.isOfType<RichEnum>()){
+		return new QTableWidgetItem(QString::number(pd.value().getInt()));
 	}
 	else if (pd.value().isBool()){
 		if (pd.value().getBool())

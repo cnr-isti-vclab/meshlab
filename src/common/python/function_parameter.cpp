@@ -95,11 +95,13 @@ const RichParameter& pymeshlab::FunctionParameter::richParameter() const
 
 void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 {
-	if (!parameter)
+	if (!parameter) {
 		o << "no_value";
-	if (parameter->value().isEnum()) {
+		return;
+	}
+	if (parameter->isOfType<RichEnum>()) {
 		RichEnum* ren = dynamic_cast<RichEnum*>(parameter);
-		o << "'" << ren->enumvalues.at(ren->value().getEnum()).toStdString() << "'";
+		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
 		return;
 	}
 	if (parameter->isOfType<RichAbsPerc>()) {

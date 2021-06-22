@@ -1036,7 +1036,7 @@ EnumWidget::EnumWidget(QWidget *p, const RichEnum& rpar, const RichEnum& rdef) :
 	ComboWidget(p,rpar, rdef)
 {
 	//you MUST call it!!!!
-	Init(p,rpar.value().getEnum(),rpar.enumvalues);
+	Init(p,rpar.value().getInt(),rpar.enumvalues);
 	//assert(enumCombo != NULL);
 }
 
@@ -1047,18 +1047,17 @@ int EnumWidget::getSize()
 
 void EnumWidget::collectWidgetValue()
 {
-	rp->setValue(EnumValue(enumCombo->currentIndex()));
+	rp->setValue(IntValue(enumCombo->currentIndex()));
 }
 
 void EnumWidget::resetWidgetValue()
 {
-	//lned->setText(QString::number(rp->value().getFloat(),'g',3));
-	enumCombo->setCurrentIndex(rp->value().getEnum());
+	enumCombo->setCurrentIndex(rp->value().getInt());
 }
 
 void EnumWidget::setWidgetValue( const Value& nv )
 {
-	enumCombo->setCurrentIndex(nv.getEnum());
+	enumCombo->setCurrentIndex(nv.getInt());
 }
 
 /******************************************/

@@ -156,7 +156,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	else if (pd.value().isDynamicFloat()){
 		return new DynamicFloatWidget(parent, (const RichDynamicFloat&)pd, (const RichDynamicFloat&)def);
 	}
-	else if (pd.value().isEnum()){
+	else if (pd.isOfType<RichEnum>()){
 		return new EnumWidget(parent, (const RichEnum&)pd, (const RichEnum&)def);
 	}
 	else if (pd.value().isBool()){

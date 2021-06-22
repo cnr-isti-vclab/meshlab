@@ -29,7 +29,7 @@
 QString pymeshlab::computePythonTypeString(const RichParameter& par)
 {
 	const Value& v = par.value();
-	if (v.isEnum())
+	if (par.isOfType<RichEnum>())
 		return PYTHON_TYPE_ENUM;
 	if (par.isOfType<RichAbsPerc>())
 		return PYTHON_TYPE_ABSPERC;
