@@ -53,7 +53,6 @@ public:
 	bool operator==(const FunctionParameter& oth) const;
 	void swap(FunctionParameter& oth);
 private:
-	QString computePythonTypeString(const RichParameter& par);
 	RichParameter* parameter;
 };
 

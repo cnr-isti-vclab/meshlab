@@ -371,7 +371,7 @@ AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc& rabs, const RichAbsP
 	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	absSB->setDecimals(decimals);
 	absSB->setSingleStep((m_max-m_min)/100.0);
-	float initVal = rp->value().getAbsPerc();
+	float initVal = rp->value().getFloat();
 	absSB->setValue(initVal);
 
 	percSB->setMinimum(-200);
@@ -433,21 +433,21 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 
 void AbsPercWidget::collectWidgetValue()
 {
-	rp->setValue(AbsPercValue(float(absSB->value())));
+	rp->setValue(FloatValue(absSB->value()));
 }
 
 void AbsPercWidget::resetWidgetValue()
 {
 	//const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(rp);
-	setValue(rp->value().getAbsPerc(),ap->min,ap->max);
+	setValue(rp->value().getFloat(),ap->min,ap->max);
 }
 
 void AbsPercWidget::setWidgetValue( const Value& nv )
 {
 	//const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(rp);
-	setValue(nv.getAbsPerc(),ap->min,ap->max);
+	setValue(nv.getFloat(),ap->min,ap->max);
 }
 
 void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )

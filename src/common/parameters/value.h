@@ -51,7 +51,6 @@ public:
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual Scalarm getAbsPerc() const { assert(0); return Scalarm(); }
 	virtual int getEnum() const { assert(0); return int(); }
 	virtual unsigned int getMeshId() const { assert(0); return 0; }
 	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
@@ -65,7 +64,6 @@ public:
 	virtual bool isPoint3f() const { return false; }
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
-	virtual bool isAbsPerc() const { return false; }
 	virtual bool isEnum() const { return false; }
 	virtual bool isMesh() const { return false; }
 	virtual bool isDynamicFloat() const { return false; }
@@ -212,20 +210,6 @@ public:
 
 private:
 	QColor pval;
-};
-
-class AbsPercValue : public FloatValue
-{
-public:
-	AbsPercValue(const float val) :FloatValue(val) {}
-	~AbsPercValue() {}
-
-	inline Scalarm getAbsPerc() const { return getFloat(); }
-	inline QString typeName() const { return QString("AbsPerc"); }
-	inline bool isAbsPerc() const { return true; }
-	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
-	using FloatValue::fillToXMLElement;
-
 };
 
 class EnumValue : public IntValue

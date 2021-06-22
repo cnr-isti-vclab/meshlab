@@ -102,9 +102,9 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << "'" << ren->enumvalues.at(ren->value().getEnum()).toStdString() << "'";
 		return;
 	}
-	if (parameter->value().isAbsPerc()) {
+	if (parameter->isOfType<RichAbsPerc>()) {
 		RichAbsPerc* rabs = dynamic_cast<RichAbsPerc*>(parameter);
-		float abs = parameter->value().getAbsPerc();
+		float abs = parameter->value().getFloat();
 		float perc = (abs - rabs->min) / (rabs->max - rabs->min) * 100;
 		o << perc << "%";
 		return;
@@ -195,36 +195,4 @@ bool pymeshlab::FunctionParameter::operator==(const pymeshlab::FunctionParameter
 void pymeshlab::FunctionParameter::swap(pymeshlab::FunctionParameter& oth)
 {
 	std::swap(parameter, oth.parameter);
-}
-
-QString pymeshlab::FunctionParameter::computePythonTypeString(const RichParameter& par)
-{
-	const Value& v = par.value();
-	if (v.isEnum())
-		return PYTHON_TYPE_ENUM;
-	if (v.isAbsPerc())
-		return PYTHON_TYPE_ABSPERC;
-	if (v.isDynamicFloat())
-		return PYTHON_TYPE_DYNAMIC_FLOAT;
-	if (v.isBool())
-		return PYTHON_TYPE_BOOL;
-	if (v.isInt())
-		return PYTHON_TYPE_INT;
-	if (v.isFloat())
-		return PYTHON_TYPE_FLOAT;
-	if (v.isString())
-		return PYTHON_TYPE_STRING;
-	if (v.isMatrix44f())
-		return PYTHON_TYPE_MATRIX44F;
-	if (v.isPoint3f())
-		return PYTHON_TYPE_POINT3F;
-	if (v.isShotf())
-		return PYTHON_TYPE_SHOTF;
-	if (v.isColor())
-		return PYTHON_TYPE_COLOR;
-	if (v.isMesh())
-		return PYTHON_TYPE_MESH;
-	if (v.isFileName())
-		return PYTHON_TYPE_FILENAME;
-	return "still_unsupported";
 }

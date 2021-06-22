@@ -63,6 +63,13 @@ public:
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
 
+	template <class RichParam>
+	bool isOfType() const
+	{
+		const RichParam* t = dynamic_cast<const RichParam*>(this);
+		return (t != nullptr);
+	}
+
 	virtual QString stringType() const = 0;
 
 	void setName(const QString& newName);

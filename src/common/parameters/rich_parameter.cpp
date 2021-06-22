@@ -400,7 +400,7 @@ RichAbsPerc::RichAbsPerc(
 		const Scalarm maxval,
 		const QString& desc,
 		const QString& tltip) :
-	RichParameter(nm, AbsPercValue(defval), desc, tltip), min(minval), max(maxval)
+	RichParameter(nm, FloatValue(defval), desc, tltip), min(minval), max(maxval)
 {
 }
 
@@ -428,7 +428,7 @@ RichAbsPerc* RichAbsPerc::clone() const
 
 bool RichAbsPerc::operator==( const RichParameter& rb )
 {
-	return (rb.value().isAbsPerc() &&(pName == rb.name()) && (value().getAbsPerc() == rb.value().getAbsPerc()));
+	return (rb.isOfType<RichAbsPerc>() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }
 
 /**** RichEnum Class ****/

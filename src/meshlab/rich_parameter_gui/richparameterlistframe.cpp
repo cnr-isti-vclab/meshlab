@@ -150,7 +150,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		const RichParameter& pd,
 		const RichParameter& def)
 {
-	if (pd.value().isAbsPerc()){
+	if (pd.isOfType<RichAbsPerc>()){
 		return new AbsPercWidget(parent, (const RichAbsPerc&)pd, (const RichAbsPerc&)def);
 	}
 	else if (pd.value().isDynamicFloat()){

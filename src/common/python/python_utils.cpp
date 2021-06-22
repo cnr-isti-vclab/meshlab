@@ -31,7 +31,7 @@ QString pymeshlab::computePythonTypeString(const RichParameter& par)
 	const Value& v = par.value();
 	if (v.isEnum())
 		return PYTHON_TYPE_ENUM;
-	if (v.isAbsPerc())
+	if (par.isOfType<RichAbsPerc>())
 		return PYTHON_TYPE_ABSPERC;
 	if (v.isDynamicFloat())
 		return PYTHON_TYPE_DYNAMIC_FLOAT;

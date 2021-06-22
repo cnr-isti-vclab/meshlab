@@ -111,8 +111,8 @@ void MeshLabOptionsDialog::updateSingleSetting(const RichParameter& rp)
 
 QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(const RichParameter& pd)
 {
-	if (pd.value().isAbsPerc()){
-		return new QTableWidgetItem(QString::number(pd.value().getAbsPerc()));
+	if (pd.isOfType<RichAbsPerc>()){
+		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
 	else if (pd.value().isDynamicFloat()){
 		return new QTableWidgetItem(QString::number(pd.value().getDynamicFloat()));

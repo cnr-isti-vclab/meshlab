@@ -179,7 +179,7 @@ Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
  */
 Scalarm RichParameterList::getAbsPerc(const QString& name) const
 {
-	return getParameterByName(name).value().getAbsPerc();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
