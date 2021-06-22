@@ -23,6 +23,7 @@
 
 #include <common/ml_document/mesh_model.h>
 #include "io_nxs.h"
+#include <thread>
 
 #include <QTextStream>
 #include <QTemporaryDir>
@@ -83,15 +84,11 @@ RichParameterList IONXSPlugin::initSaveParameter(
 	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
 		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
 		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
-		params.addParam(RichFloat("vertex_quantization", 0, "Vertex Quantization", "Vertex quantization grid size (might be approximated)"));
-		params.addParam(RichInt("tex_quality", 92, "Texture quality [0-100]", "jpg texture quality"));
+		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
 		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)"));
-		params.addParam(RichInt("workers", 4, "N. Threads", "number of workers"));
-		params.addParam(RichFloat("scaling", 0.5, "Scaling", "Simplification ratio"));
 		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
 		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
 		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center"));
-		params.addParam(RichBool("original_textures", false, "Original Textures", "Use original textures, no repacking"));
 		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2"));
 		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file"));
 		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
@@ -104,7 +101,7 @@ RichParameterList IONXSPlugin::initSaveParameter(
 		params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel"));
 		params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel"));
 		params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals"));
-		params.addParam(RichFloat("textures_bits", 0.25, "Textures bits", "Quantization of textures"));
+		params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit"));
 	}
 	return params;
 }
@@ -141,18 +138,20 @@ void IONXSPlugin::saveNxs(
 	//parameters:
 	int node_size = params.getInt("node_faces");
 	int top_node_size = params.getInt("top_node_faces");
-	float vertex_quantization = params.getFloat("vertex_quantization");
+	float vertex_quantization = 0;
 	int tex_quality = params.getInt("tex_quality");
-	float scaling = params.getFloat("scaling");
+	float scaling = 0.5;
 	int skiplevels = params.getInt("skiplevels");
 	int ram_buffer = params.getInt("ram");
-	int n_threads = params.getInt("workers");
+	int n_threads = std::thread::hardware_concurrency() / 2;
+	if (n_threads == 0)
+		n_threads = 1;
 
 	vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
 	bool center = params.getBool("center");
 
 	bool point_cloud = m.cm.fn == 0;
-	bool useOrigTex = params.getBool("original_textures");
+	bool useOrigTex = false;
 	bool create_pow_two_tex = params.getBool("pow_2_textures");
 	bool deepzoom = params.getBool("deepzoom");
 	QVariant adaptive = params.getDynamicFloat("adaptive");
