@@ -9,5 +9,5 @@ if(ALLOW_BUNDLED_NEXUS AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/nexus/CMakeLists.tx
 	set (BUILD_NXS_BUILD OFF)
 	set (BUILD_NXS_EDIT OFF)
 	set (BUILD_NXS_VIEW OFF)
-	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/nexus)
+	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/nexus EXCLUDE_FROM_ALL)
 endif()
