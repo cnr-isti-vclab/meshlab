@@ -49,7 +49,13 @@ class RichParameter
 public:
 	RichParameter(const RichParameter& rp);
 	RichParameter(RichParameter&& rp);
-	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
+	RichParameter(
+			const QString& nm,
+			const Value& v,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	virtual ~RichParameter();
 
 	const QString& name() const;
@@ -78,6 +84,8 @@ protected:
 	Value* val;
 	QString fieldDesc;
 	QString tooltip;
+	bool hidden;
+	QString category;
 };
 
 

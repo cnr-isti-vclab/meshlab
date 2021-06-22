@@ -28,23 +28,39 @@
 /**** RichParameter Class ****/
 
 RichParameter::RichParameter(const RichParameter& rp) :
-	pName(rp.pName), val(rp.value().clone()), fieldDesc(rp.fieldDesc), tooltip(rp.tooltip)
+	pName(rp.pName),
+	val(rp.value().clone()),
+	fieldDesc(rp.fieldDesc),
+	tooltip(rp.tooltip),
+	hidden(rp.hidden),
+	category(rp.category)
 {
 }
 
 RichParameter::RichParameter(RichParameter&& rp) :
-	pName(std::move(rp.pName)), fieldDesc(std::move(rp.fieldDesc)), tooltip(std::move(rp.tooltip))
+	pName(std::move(rp.pName)),
+	fieldDesc(std::move(rp.fieldDesc)),
+	tooltip(std::move(rp.tooltip)),
+	category(std::move(rp.category))
 {
 	val = rp.val;
 	rp.val = nullptr;
+	hidden = rp.hidden;
 }
 
 RichParameter::RichParameter(
 		const QString& nm,
 		const Value& v,
 		const QString& desc,
-		const QString& tltip) :
-	pName(nm), val(v.clone()), fieldDesc(desc), tooltip(tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	pName(nm),
+	val(v.clone()),
+	fieldDesc(desc),
+	tooltip(tltip),
+	hidden(hidden),
+	category(category)
 {
 }
 
