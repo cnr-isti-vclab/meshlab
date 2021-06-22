@@ -390,7 +390,7 @@ protected:
 	IOFileWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~IOFileWidget();
 
-	void  updateFileName(const FileValue& file);
+	void  updateFileName(const StringValue& file);
 
 public:
 	void addWidgetToGridLayout(QGridLayout* lay,const int r);

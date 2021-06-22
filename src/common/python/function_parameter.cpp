@@ -99,6 +99,22 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << "no_value";
 		return;
 	}
+	if (parameter->isOfType<RichBool>()) {
+		o << (parameter->value().getBool() ? "True" : "False");
+		return;
+	}
+	if (parameter->isOfType<RichInt>()) {
+		o << parameter->value().getInt();
+		return;
+	}
+	if (parameter->isOfType<RichFloat>()){
+		o << parameter->value().getFloat();
+		return;
+	}
+	if (parameter->isOfType<RichString>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
+		return;
+	}
 	if (parameter->isOfType<RichEnum>()) {
 		RichEnum* ren = dynamic_cast<RichEnum*>(parameter);
 		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
@@ -117,23 +133,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
 		return;
 	}
-	if (parameter->value().isBool()) {
-		o << (parameter->value().getBool() ? "True" : "False");
-		return;
-	}
-	if (parameter->value().isInt()) {
-		o << parameter->value().getInt();
-		return;
-	}
-	if (parameter->value().isFloat()){
-		o << parameter->value().getFloat();
-		return;
-	}
-	if (parameter->value().isString()){
-		o << "'" << parameter->value().getString().toStdString() << "'";
-		return;
-	}
-	if (parameter->value().isMatrix44f()){
+	if (parameter->isOfType<RichMatrix44f>()){
 		const MESHLAB_SCALAR* v = parameter->value().getMatrix44f().V();
 		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
 			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
@@ -141,17 +141,17 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			<< "[" << v[12] << ", " << v[13] << ", " << v[14] << ", " << v[15] << "]]";
 		return;
 	}
-	if (parameter->value().isPoint3f()) {
+	if (parameter->isOfType<RichPoint3f>()) {
 		o << "[" << parameter->value().getPoint3f().X() << ", "
 			<< parameter->value().getPoint3f().Y() << ", "
 			<< parameter->value().getPoint3f().Z() << "]";
 		return;
 	}
-	if (parameter->value().isShotf()) {
+	if (parameter->isOfType<RichShotf>()) {
 		o << "None";
 		return;
 	}
-	if (parameter->value().isColor()) {
+	if (parameter->isOfType<RichColor>()) {
 		QColor c = parameter->value().getColor();
 		o <<
 			"[" + std::to_string(c.red()) + "; " +
@@ -165,8 +165,8 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << rm->value().getInt();
 		return;
 	}
-	if (parameter->value().isFileName()){
-		o << "'" << parameter->value().getFileName().toStdString() << "'";
+	if (parameter->isOfType<RichSaveFile>() || parameter->isOfType<RichOpenFile>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
 		return;
 	}
 }

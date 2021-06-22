@@ -215,7 +215,7 @@ Scalarm RichParameterList::getDynamicFloat(const QString& name) const
  */
 QString RichParameterList::getOpenFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**
@@ -224,7 +224,7 @@ QString RichParameterList::getOpenFileName(const QString& name) const
  */
 QString RichParameterList::getSaveFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**

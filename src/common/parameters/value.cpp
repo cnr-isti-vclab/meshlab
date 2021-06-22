@@ -73,8 +73,3 @@ void ColorValue::fillToXMLElement(QDomElement& element) const
 	element.setAttribute("a",QString::number(pval.alpha()));
 }
 
-void FileValue::fillToXMLElement(QDomElement& element) const
-{
-	element.setAttribute("value", pval);
-}
-

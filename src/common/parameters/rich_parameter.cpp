@@ -519,7 +519,7 @@ RichOpenFile::RichOpenFile(
 		const QStringList& exts,
 		const QString& desc,
 		const QString& tltip) :
-	RichParameter(nm, FileValue(directorydefval), desc, tltip), exts(exts)
+	RichParameter(nm, StringValue(directorydefval), desc, tltip), exts(exts)
 {
 }
 
@@ -548,7 +548,7 @@ RichOpenFile* RichOpenFile::clone() const
 
 bool RichOpenFile::operator==( const RichParameter& rb )
 {
-	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
+	return (rb.isOfType<RichOpenFile>() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
 }
 
 /**** RichSaveFile Class ****/
@@ -559,7 +559,7 @@ RichSaveFile::RichSaveFile(
 		const QString& ext,
 		const QString& desc,
 		const QString& tltip) :
-	RichParameter(nm, FileValue(filedefval), desc, tltip), ext(ext)
+	RichParameter(nm, StringValue(filedefval), desc, tltip), ext(ext)
 {
 }
 
@@ -586,7 +586,7 @@ RichSaveFile* RichSaveFile::clone() const
 
 bool RichSaveFile::operator==( const RichParameter& rb )
 {
-	return (rb.value().isFileName() &&(pName == rb.name()) && (value().getFileName() == rb.value().getFileName()));
+	return (rb.isOfType<RichSaveFile>() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
 }
 
 /**** RichMesh Class ****/

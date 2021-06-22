@@ -155,7 +155,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 		return new QTableWidgetItem(ic,"");
 	}
 	else if (pd.isOfType<RichOpenFile>()){
-		new QTableWidgetItem(pd.value().getFileName());
+		new QTableWidgetItem(pd.value().getString());
 	}
 	else if (pd.isOfType<RichSaveFile>()){
 		assert(0);

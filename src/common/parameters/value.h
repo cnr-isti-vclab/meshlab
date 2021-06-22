@@ -51,7 +51,6 @@ public:
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
 	virtual bool isInt() const { return false; }
@@ -61,7 +60,6 @@ public:
 	virtual bool isPoint3f() const { return false; }
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
-	virtual bool isFileName() const { return false; }
 
 	virtual QString typeName() const = 0;
 	virtual void set(const Value& p) = 0;
@@ -204,23 +202,6 @@ public:
 
 private:
 	QColor pval;
-};
-
-class FileValue : public Value
-{
-public:
-	FileValue(const QString& filename) :pval(filename) {}
-	~FileValue() {}
-
-	inline QString getFileName() const { return pval; }
-	inline bool isFileName() const { return true; }
-	inline QString typeName() const { return QString("FileName"); }
-	inline void	set(const Value& p) { pval = p.getFileName(); }
-	inline FileValue* clone() const {return new FileValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
-
-private:
-	QString pval;
 };
 
 #endif //MESHLAB_VALUE_H

@@ -1154,24 +1154,24 @@ IOFileWidget::~IOFileWidget()
 
 void IOFileWidget::collectWidgetValue()
 {
-	rp->setValue(FileValue(filename->text()));
+	rp->setValue(StringValue(filename->text()));
 }
 
 void IOFileWidget::resetWidgetValue()
 {
-	QString fle = rp->value().getFileName();
+	QString fle = rp->value().getString();
 	updateFileName(fle);
 }
 
 void IOFileWidget::setWidgetValue(const Value& nv)
 {
-	QString fle = nv.getFileName();
+	QString fle = nv.getString();
 	updateFileName(fle);
 }
 
-void IOFileWidget::updateFileName( const FileValue& file )
+void IOFileWidget::updateFileName( const StringValue& file )
 {
-	filename->setText(file.getFileName());
+	filename->setText(file.getString());
 }
 
 void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
@@ -1191,8 +1191,8 @@ void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 SaveFileWidget::SaveFileWidget(QWidget* p, const RichSaveFile& rpar , const RichSaveFile& rdef) :
 	IOFileWidget(p,rpar, rdef)
 {
-	filename->setText(rp->value().getFileName());
-	QString tmp = rp->value().getFileName();
+	filename->setText(rp->value().getString());
+	QString tmp = rp->value().getString();
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -1204,10 +1204,10 @@ void SaveFileWidget::selectFile()
 	//SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(rp);
 	QString ext;
-	QString fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getFileName(),dec->ext);
+	QString fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getString(),dec->ext);
 	collectWidgetValue();
 	updateFileName(fl);
-	FileValue fileName(fl);
+	StringValue fileName(fl);
 	rp->setValue(fileName);
 	emit dialogParamChanged();
 }
@@ -1226,10 +1226,10 @@ void OpenFileWidget::selectFile()
 	//OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(rp);
 	QString ext;
-	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getFileName(), dec->exts.join(" "));
+	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getString(), dec->exts.join(" "));
 	collectWidgetValue();
 	updateFileName(fl);
-	FileValue fileName(fl);
+	StringValue fileName(fl);
 	rp->setValue(fileName);
 	emit dialogParamChanged();
 }
