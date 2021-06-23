@@ -99,6 +99,9 @@ public:
 
 	RichParameterList initPreOpenParameter(const QString &formatName) const;
 	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
+
+private:
+	QImage loadTga(const char* filePath);
 };
 
 #endif
