@@ -92,7 +92,8 @@ void MeshlabStdDialog::clearValues()
 
 void MeshlabStdDialog::createFrame()
 {
-	if (qf) delete qf;
+	if (qf)
+		delete qf;
 
 	QFrame *newqf = new QFrame(this);
 	setWidget(newqf);
@@ -143,15 +144,15 @@ void MeshlabStdDialog::loadFrameContent()
 	defaultButton->setMinimumSize(100, 25);
 #endif
 
-	if (isPreviewable())
-	{
+	gridLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding), buttonRow++, 0);
+
+	if (isPreviewable()) {
 		previewCB = new QCheckBox("Preview", qf);
 		previewCB->setCheckState(Qt::Unchecked);
 		gridLayout->addWidget(previewCB, buttonRow + 0, 0, Qt::AlignBottom);
 		connect(previewCB, SIGNAL(toggled(bool)), this, SLOT(togglePreview()));
 		buttonRow++;
 	}
-
 	gridLayout->addWidget(helpButton, buttonRow + 0, 1, Qt::AlignBottom);
 	gridLayout->addWidget(defaultButton, buttonRow + 0, 0, Qt::AlignBottom);
 	gridLayout->addWidget(closeButton, buttonRow + 1, 0, Qt::AlignBottom);

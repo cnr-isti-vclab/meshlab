@@ -50,7 +50,6 @@ RichParameterWidget::~RichParameterWidget()
 {
 	delete rp;
 	delete defp;
-	delete helpLab;
 }
 
 void RichParameterWidget::resetValue()

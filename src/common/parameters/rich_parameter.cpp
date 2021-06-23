@@ -33,7 +33,7 @@ RichParameter::RichParameter(const RichParameter& rp) :
 	fieldDesc(rp.fieldDesc),
 	tooltip(rp.tooltip),
 	hidden(rp.hidden),
-	category(rp.category)
+	pCategory(rp.pCategory)
 {
 }
 
@@ -41,7 +41,7 @@ RichParameter::RichParameter(RichParameter&& rp) :
 	pName(std::move(rp.pName)),
 	fieldDesc(std::move(rp.fieldDesc)),
 	tooltip(std::move(rp.tooltip)),
-	category(std::move(rp.category))
+	pCategory(std::move(rp.pCategory))
 {
 	val = rp.val;
 	rp.val = nullptr;
@@ -60,7 +60,7 @@ RichParameter::RichParameter(
 	fieldDesc(desc),
 	tooltip(tltip),
 	hidden(hidden),
-	category(category)
+	pCategory(category)
 {
 }
 
@@ -87,6 +87,16 @@ const QString& RichParameter::fieldDescription() const
 const QString& RichParameter::toolTip() const
 {
 	return tooltip;
+}
+
+bool RichParameter::isHidden() const
+{
+	return hidden;
+}
+
+const QString& RichParameter::category() const
+{
+	return pCategory;
 }
 
 void RichParameter::setName(const QString& newName)
@@ -160,8 +170,10 @@ RichBool::RichBool(
 		const QString& nm,
 		const bool defval,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, BoolValue(defval), desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, BoolValue(defval), desc, tltip, hidden, category)
 {
 }
 
@@ -190,8 +202,10 @@ RichInt::RichInt(
 		const QString& nm,
 		const int defval,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, IntValue(defval),desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, IntValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -220,8 +234,10 @@ RichFloat::RichFloat(
 		const QString& nm,
 		const Scalarm defval,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, FloatValue(defval),desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, FloatValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -250,8 +266,10 @@ RichString::RichString(
 		const QString& nm,
 		const QString& defval,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, StringValue(defval),desc,tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, StringValue(defval),desc,tltip, hidden, category)
 {
 }
 
@@ -280,8 +298,10 @@ RichMatrix44f::RichMatrix44f(
 		const QString& nm,
 		const Matrix44m& defval,
 		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, Matrix44fValue(defval),desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, Matrix44fValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -310,8 +330,10 @@ RichPoint3f::RichPoint3f(
 		const QString& nm,
 		const Point3m& defval,
 		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, Point3fValue(defval),desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, Point3fValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -336,8 +358,14 @@ bool RichPoint3f::operator==( const RichParameter& rb )
 
 /**** RichShotf Class ****/
 
-RichShotf::RichShotf( const QString& nm,const Shotm& defval,const QString& desc,const QString& tltip ) :
-	RichParameter(nm, ShotfValue(defval),desc, tltip)
+RichShotf::RichShotf(
+		const QString& nm,
+		const Shotm& defval,
+		const QString& desc,
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, ShotfValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -367,8 +395,10 @@ RichColor::RichColor(
 		const QString& nm,
 		const QColor& defval,
 		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, ColorValue(defval),desc, tltip)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, ColorValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -399,8 +429,10 @@ RichAbsPerc::RichAbsPerc(
 		const Scalarm minval,
 		const Scalarm maxval,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, FloatValue(defval), desc, tltip), min(minval), max(maxval)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, FloatValue(defval), desc, tltip, hidden, category), min(minval), max(maxval)
 {
 }
 
@@ -438,8 +470,10 @@ RichEnum::RichEnum(
 		const int defval,
 		const QStringList& values,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, IntValue(defval),desc, tltip), enumvalues(values)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, IntValue(defval),desc, tltip, hidden, category), enumvalues(values)
 {
 }
 
@@ -479,8 +513,10 @@ RichDynamicFloat::RichDynamicFloat(
 		const Scalarm minval,
 		const Scalarm maxval,
 		const QString& desc,
-		const QString& tltip ) :
-	RichParameter(nm, FloatValue(defval),desc, tltip), min(minval), max(maxval)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, FloatValue(defval),desc, tltip, hidden, category), min(minval), max(maxval)
 {
 }
 
@@ -518,8 +554,10 @@ RichOpenFile::RichOpenFile(
 		const QString& directorydefval,
 		const QStringList& exts,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, StringValue(directorydefval), desc, tltip), exts(exts)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, StringValue(directorydefval), desc, tltip, hidden, category), exts(exts)
 {
 }
 
@@ -558,8 +596,10 @@ RichSaveFile::RichSaveFile(
 		const QString& filedefval,
 		const QString& ext,
 		const QString& desc,
-		const QString& tltip) :
-	RichParameter(nm, StringValue(filedefval), desc, tltip), ext(ext)
+		const QString& tltip,
+		bool hidden,
+		const QString& category) :
+	RichParameter(nm, StringValue(filedefval), desc, tltip, hidden, category), ext(ext)
 {
 }
 
@@ -596,13 +636,21 @@ RichMesh::RichMesh(
 		unsigned int meshind,
 		const MeshDocument* doc,
 		const QString& desc,
-		const QString& tltip ):
-	RichParameter(nm,IntValue(meshind), desc, tltip), meshdoc(doc)
+		const QString& tltip,
+		bool hidden,
+		const QString& category):
+	RichParameter(nm,IntValue(meshind), desc, tltip, hidden, category), meshdoc(doc)
 {
 }
 
-RichMesh::RichMesh(const QString& nm, unsigned int meshind, const QString& desc, const QString& tltip):
-	RichParameter(nm, IntValue(meshind), desc, tltip), meshdoc(nullptr)
+RichMesh::RichMesh(
+		const QString& nm,
+		unsigned int meshind,
+		const QString& desc,
+		const QString& tltip,
+		bool hidden,
+		const QString& category):
+	RichParameter(nm, IntValue(meshind), desc, tltip, hidden, category), meshdoc(nullptr)
 {
 }
 

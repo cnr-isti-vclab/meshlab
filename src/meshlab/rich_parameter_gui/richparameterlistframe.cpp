@@ -40,7 +40,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& defParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla)
+	QFrame(p), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet, defParSet);
 }
@@ -108,6 +108,14 @@ unsigned int RichParameterListFrame::size() const
 	return stdfieldwidgets.size();
 }
 
+void RichParameterListFrame::showAdvancedParameters(bool b)
+{
+	if (hiddenFrame) { //should be always true
+		hiddenFrame->setVisible(b);
+		adjustSize();
+	}
+}
+
 void RichParameterListFrame::loadFrameContent(
 		const RichParameterList& curParSet,
 		const RichParameterList& defParSet)
@@ -115,13 +123,64 @@ void RichParameterListFrame::loadFrameContent(
 	if(layout())
 		delete layout();
 	QGridLayout* glay = new QGridLayout();
-	int i = 0;
+
+
+	//collect parameters per category
+	std::map<QString, std::vector<const RichParameter*>> visibleParameters;
+	std::map<QString, std::vector<const RichParameter*>> hiddenParameters;
+
 	for(const RichParameter& fpi : curParSet) {
-		const RichParameter& defrp = defParSet.getParameterByName(fpi.name());
-		RichParameterWidget* wd = createWidgetFromRichParameter(this, fpi, defrp);
-		stdfieldwidgets.push_back(wd);
-		helpList.push_back(wd->helpLab);
-		wd->addWidgetToGridLayout(glay,i++);
+		if (!fpi.isHidden()){
+			visibleParameters[fpi.category()].push_back(&fpi);
+		}
+		else {
+			hiddenParameters[fpi.category()].push_back(&fpi);
+		}
+	}
+
+	int i = 0;
+	for (const auto& p : visibleParameters) {
+		if (!p.first.isEmpty()) {
+			QString labltext = "<P><b>" + p.first + ":</b></P>";
+			QLabel* l = new QLabel(labltext, this);
+			glay->addWidget(l,i++,0,Qt::AlignLeft);
+		}
+		for (const RichParameter* fpi : p.second){
+			const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
+			RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
+			stdfieldwidgets.push_back(wd);
+			helpList.push_back(wd->helpLab);
+			wd->addWidgetToGridLayout(glay,i++);
+		}
+	}
+	if (hiddenParameters.size() > 0){
+		QCheckBox* cb = new QCheckBox("Show advanced parameters", this);
+		cb->setChecked(false);
+		glay->addWidget(cb,i++,0,Qt::AlignLeft);
+
+		hiddenFrame = new QFrame(this);
+		QGridLayout* flay = new QGridLayout();
+		hiddenFrame->setLayout(flay);
+
+		int j = 0;
+		for (const auto& p : hiddenParameters) {
+			if (!p.first.isEmpty()) {
+				QString labltext = "<P><b>" + p.first + ":</b></P>";
+				QLabel* l = new QLabel(labltext, this);
+				flay->addWidget(l,i++,0,Qt::AlignLeft);
+			}
+			for (const RichParameter* fpi : p.second){
+				const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
+				RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
+				stdfieldwidgets.push_back(wd);
+				helpList.push_back(wd->helpLab);
+				wd->addWidgetToGridLayout(flay,j++);
+			}
+		}
+		flay->setSizeConstraint(QLayout::SetMinimumSize);
+		glay->addWidget(hiddenFrame,i++,0,Qt::AlignLeft);
+		hiddenFrame->setVisible(false);
+		connect(cb, SIGNAL(clicked(bool)), this, SLOT(showAdvancedParameters(bool)));
 	}
 	setLayout(glay);
 	this->setMinimumSize(glay->sizeHint());

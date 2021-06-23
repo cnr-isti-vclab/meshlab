@@ -64,6 +64,9 @@ public:
 signals:
 	void parameterChanged();
 
+public slots:
+	void showAdvancedParameters(bool b);
+
 private:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
 	void loadFrameContent(const RichParameterList& curParSet);
@@ -79,6 +82,7 @@ private:
 	QVector<QLabel *> helpList;
 
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
+	QFrame* hiddenFrame;
 };
 
 #endif //RICHPARAMETERLISTFRAME_H
