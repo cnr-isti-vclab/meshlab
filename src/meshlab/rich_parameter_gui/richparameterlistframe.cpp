@@ -159,6 +159,7 @@ void RichParameterListFrame::loadFrameContent(
 		glay->addWidget(cb,i++,0,Qt::AlignLeft);
 
 		hiddenFrame = new QFrame(this);
+		hiddenFrame->setContentsMargins(0,0,0,0);
 		QGridLayout* flay = new QGridLayout();
 		hiddenFrame->setLayout(flay);
 
@@ -177,8 +178,7 @@ void RichParameterListFrame::loadFrameContent(
 				wd->addWidgetToGridLayout(flay,j++);
 			}
 		}
-		flay->setSizeConstraint(QLayout::SetMinimumSize);
-		glay->addWidget(hiddenFrame,i++,0,Qt::AlignLeft);
+		glay->addWidget(hiddenFrame,i++,0, 1, 2, Qt::AlignLeft);
 		hiddenFrame->setVisible(false);
 		connect(cb, SIGNAL(clicked(bool)), this, SLOT(showAdvancedParameters(bool)));
 	}
