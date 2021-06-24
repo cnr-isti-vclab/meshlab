@@ -4,4 +4,4 @@
 	branch = devel
 [submodule "src/external/nexus"]
 	path = src/external/nexus
-	url = https://github.com/alemuntoni/nexus
+	url = https://github.com/cnr-isti-vclab/nexus
