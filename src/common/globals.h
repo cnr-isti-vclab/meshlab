@@ -53,7 +53,7 @@ PluginManager& pluginManagerInstance();
 inline std::string meshlabVersion() 
 {
 	return std::string(meshlab_xstr(MESHLAB_VERSION));
-};
+}
 
 inline bool builtWithDoublePrecision()
 {

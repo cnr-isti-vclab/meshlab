@@ -7,6 +7,9 @@ if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
 
+#enable setting options with SET cmake command
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
 ### Build settings
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 14)
