@@ -84,24 +84,24 @@ RichParameterList IONXSPlugin::initSaveParameter(
 	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
 		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
 		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
-		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
-		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)"));
+		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality", true));
+		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)", true));
 		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
 		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
-		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center"));
-		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2"));
-		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file"));
+		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center", true));
+		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2", true));
+		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file", true));
 		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
 	}
 	if (format.toUpper() == "NXZ") { //additional parameters for nxz
-		params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)"));
-		params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)"));
-		params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error"));
-		params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel"));
-		params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel"));
-		params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel"));
-		params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals"));
-		params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit"));
+		params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)", false, "NXZ parameters"));
+		params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)", false, "NXZ parameters"));
+		params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error", false, "NXZ parameters"));
+		params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel", true, "NXZ parameters"));
+		params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel", true, "NXZ parameters"));
+		params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel", true, "NXZ parameters"));
+		params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals", true, "NXZ parameters"));
+		params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit", true, "NXZ parameters"));
 	}
 	return params;
 }
@@ -276,7 +276,7 @@ void IONXSPlugin::saveNxz(
 	int chroma_bits = params.getInt("chroma_bits");
 	int alpha_bits = params.getInt("alpha_bits");
 	int norm_bits = params.getInt("normal_bits");
-	float tex_step = params.getFloat("textures_bits");
+	float tex_step = params.getFloat("textures_precision");
 
 	bool compress = true;
 

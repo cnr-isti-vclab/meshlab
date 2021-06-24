@@ -148,8 +148,6 @@ LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& rpar , const Ric
 
 LineEditWidget::~LineEditWidget()
 {
-	delete lned;
-	delete lab;
 }
 
 void LineEditWidget::changeChecker()
