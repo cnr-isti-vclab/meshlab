@@ -203,12 +203,15 @@ void IONXSPlugin::saveNxs(
 
 		loader = new VcgLoader<CMeshO>;
 
+		std::vector<QImage> textures;
+
 		loader->load(&m.cm, has_colors, has_normals, has_textures);
 		stream->load(loader);
 
-		//WORKAROUND to save loading textures not needed
-		if(!(components & NexusBuilder::TEXTURES)) {
-			stream->textures.clear();
+		if((components & NexusBuilder::TEXTURES)) {
+			for (const std::string& tn : m.cm.textures){
+				textures.push_back(m.getTexture(tn));
+			}
 		}
 
 		NexusBuilder builder(components);
@@ -221,10 +224,7 @@ void IONXSPlugin::saveNxs(
 		if(deepzoom)
 			builder.header.signature.flags |= nx::Signature::Flags::DEEPZOOM;
 		builder.tex_quality = tex_quality;
-		bool success = builder.initAtlas(stream->textures);
-		if(!success) {
-			throw MLException("Fail");
-		}
+		builder.initAtlas(textures);
 		if(point_cloud)
 			tree = new KDTreeCloud("cache_tree", adaptive.toFloat());
 		else
