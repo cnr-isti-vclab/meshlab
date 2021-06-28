@@ -31,6 +31,12 @@
 
 #include <tiny_gltf.h>
 
+//function declaration
+void loadVAttributes(
+		MeshModel& m,
+		const tinygltf::Model& model,
+		const tinygltf::Primitive& p);
+
 QString IOglTFPlugin::pluginName() const
 {
 	return "IOglTF";
@@ -67,9 +73,9 @@ void IOglTFPlugin::open(
 		const QString& fileFormat,
 		const QString&fileName,
 		MeshModel &m,
-		int& ,
-		const RichParameterList & ,
-		vcg::CallBackPos *)
+		int& mask,
+		const RichParameterList & params,
+		vcg::CallBackPos* cb)
 {
 	if (fileFormat.toUpper() == "GLTF"){
 		tinygltf::Model model;
@@ -83,12 +89,13 @@ void IOglTFPlugin::open(
 		if (!warn.empty())
 			reportWarning(QString::fromStdString(warn));
 
-		for (const tinygltf::Mesh& m : model.meshes){
-			log("Mesh name: " + m.name + "; prim number: " + std::to_string(m.primitives.size()));
+		const tinygltf::Mesh& tm = model.meshes[0];
+		for (const tinygltf::Primitive& p : tm.primitives){
+			loadVAttributes(m, model, p);
 		}
 
 		//todo remove this
-		throw MLException("gltf still not supported");
+		//throw MLException("gltf still not supported");
 	}
 	else {
 		wrongOpenFormat(fileFormat);
@@ -104,6 +111,51 @@ void IOglTFPlugin::save(
 		vcg::CallBackPos*)
 {
 	wrongSaveFormat(fileFormat);
+}
+
+
+template <typename Scalar>
+void populateVertices(MeshModel&m, const Scalar* posArray, unsigned int vertNumber)
+{
+	CMeshO::VertexIterator vi =
+			vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, vertNumber);
+	for (unsigned int i = 0; i < vertNumber*3; i+= 3, ++vi){
+		vi->P() = CMeshO::CoordType(posArray[i], posArray[i+1], posArray[i+2]);
+	}
+}
+
+
+//import
+void loadVAttributes(
+		MeshModel& m,
+		const tinygltf::Model& model,
+		const tinygltf::Primitive& p)
+{
+	const auto it = p.attributes.find("POSITION");
+
+	if (it == p.attributes.end())
+		throw MLException("File has not 'Position' attribute");
+	int positionAccessorID = it->second;
+
+	const tinygltf::Accessor& posAccessor = model.accessors[positionAccessorID];
+
+	if (posAccessor.type != TINYGLTF_TYPE_VEC3)
+		throw MLException("File positions are not 3D coordinates!");
+
+
+	const tinygltf::BufferView bw = model.bufferViews[posAccessor.bufferView];
+	const std::vector<unsigned char>& data = model.buffers[bw.buffer].data;
+	unsigned int offset = bw.byteOffset;
+
+	if (posAccessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+		const float * posArray = (const float*) (data.data() + offset);
+		populateVertices(m, posArray, posAccessor.count);
+
+	}
+	else if (posAccessor.componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE) {
+		const double * posArray = (const double*) (data.data() + offset);
+		populateVertices(m, posArray, posAccessor.count);
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(IOglTFPlugin)

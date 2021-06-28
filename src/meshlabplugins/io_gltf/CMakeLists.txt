@@ -4,9 +4,11 @@
 # Only build if we have tiny glTF
 if(TARGET external-tinygltf)
 
-	set(SOURCES io_gltf.cpp)
+	set(SOURCES
+		io_gltf.cpp)
 
-	set(HEADERS io_gltf.h)
+	set(HEADERS
+		io_gltf.h)
 
 	add_meshlab_plugin(io_gltf MODULE ${SOURCES} ${HEADERS})
 
