@@ -32,7 +32,7 @@
 #include <tiny_gltf.h>
 
 //function declaration
-void loadVAttributes(
+void loadMesh(
 		MeshModel& m,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p);
@@ -91,7 +91,7 @@ void IOglTFPlugin::open(
 
 		const tinygltf::Mesh& tm = model.meshes[0];
 		for (const tinygltf::Primitive& p : tm.primitives){
-			loadVAttributes(m, model, p);
+			loadMesh(m, model, p);
 		}
 
 		//todo remove this
@@ -115,18 +115,41 @@ void IOglTFPlugin::save(
 
 
 template <typename Scalar>
-void populateVertices(MeshModel&m, const Scalar* posArray, unsigned int vertNumber)
+void populateVertices(
+		MeshModel&m,
+		std::vector<CMeshO::VertexPointer>& ivp,
+		const Scalar* posArray,
+		unsigned int vertNumber)
 {
+	ivp.clear();
+	ivp.resize(vertNumber);
 	CMeshO::VertexIterator vi =
 			vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, vertNumber);
 	for (unsigned int i = 0; i < vertNumber*3; i+= 3, ++vi){
+		ivp[i/3] = &*vi;
 		vi->P() = CMeshO::CoordType(posArray[i], posArray[i+1], posArray[i+2]);
+	}
+}
+
+template <typename Scalar>
+void populateTriangles(
+		MeshModel&m,
+		const std::vector<CMeshO::VertexPointer>& ivp,
+		const Scalar* triArray,
+		unsigned int triNumber)
+{
+	CMeshO::FaceIterator fi =
+			vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, triNumber);
+	for (unsigned int i = 0; i < triNumber*3; i+=3, ++fi) {
+		fi->V(0) = ivp[triArray[i]];
+		fi->V(1) = ivp[triArray[i+1]];
+		fi->V(2) = ivp[triArray[i+2]];
 	}
 }
 
 
 //import
-void loadVAttributes(
+void loadMesh(
 		MeshModel& m,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p)
@@ -143,18 +166,51 @@ void loadVAttributes(
 		throw MLException("File positions are not 3D coordinates!");
 
 
-	const tinygltf::BufferView bw = model.bufferViews[posAccessor.bufferView];
-	const std::vector<unsigned char>& data = model.buffers[bw.buffer].data;
-	unsigned int offset = bw.byteOffset;
+	const tinygltf::BufferView posbw = model.bufferViews[posAccessor.bufferView];
+	const std::vector<unsigned char>& posdata = model.buffers[posbw.buffer].data;
+	unsigned int posOffset = posbw.byteOffset;
+	std::vector<CMeshO::VertexPointer> ivp;
 
 	if (posAccessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
-		const float * posArray = (const float*) (data.data() + offset);
-		populateVertices(m, posArray, posAccessor.count);
+		const float * posArray = (const float*) (posdata.data() + posOffset);
+		populateVertices(m, ivp, posArray, posAccessor.count);
 
 	}
 	else if (posAccessor.componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE) {
-		const double * posArray = (const double*) (data.data() + offset);
-		populateVertices(m, posArray, posAccessor.count);
+		const double * posArray = (const double*) (posdata.data() + posOffset);
+		populateVertices(m, ivp, posArray, posAccessor.count);
+	}
+	else {
+		throw MLException("Coord type not supported");
+	}
+
+	//triangles
+	if (p.indices >= 0 && p.indices < model.accessors.size()) {
+
+		const tinygltf::Accessor& triAccessor = model.accessors[p.indices];
+
+		if (triAccessor.type != TINYGLTF_TYPE_SCALAR)
+			throw MLException("Primitive indices must be scalars!");
+
+		const tinygltf::BufferView tribw = model.bufferViews[triAccessor.bufferView];
+		const std::vector<unsigned char>& tridata = model.buffers[tribw.buffer].data;
+		unsigned int triOffset = tribw.byteOffset;
+
+		if (triAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+			const unsigned char* triArray = (const unsigned char*) (tridata.data() + triOffset);
+			populateTriangles(m, ivp, triArray, triAccessor.count/3);
+		}
+		else if (triAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+			const unsigned short* triArray = (const unsigned short*) (tridata.data() + triOffset);
+			populateTriangles(m, ivp, triArray, triAccessor.count/3);
+		}
+		else if (triAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+			const unsigned int* triArray = (const unsigned int*) (tridata.data() + triOffset);
+			populateTriangles(m, ivp, triArray, triAccessor.count/3);
+		}
+		else {
+			throw MLException("Malformed GLTF: wrong primitive indices component type.");
+		}
 	}
 }
 
