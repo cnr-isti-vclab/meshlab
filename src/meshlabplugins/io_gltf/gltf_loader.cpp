@@ -93,6 +93,31 @@ void visitNode(
 		curr.transposeInPlace();
 		m = m * Matrix44m::Construct(curr);
 	}
+	else {
+		vcg::Matrix44d rot;   rot.SetIdentity();
+		vcg::Matrix44d scale; scale.SetIdentity();
+		vcg::Matrix44d trans; trans.SetIdentity();
+		if (model.nodes[i].rotation.size() == 4) {
+			vcg::Quaterniond qr(
+					model.nodes[i].rotation[3],
+					model.nodes[i].rotation[0],
+					model.nodes[i].rotation[1],
+					model.nodes[i].rotation[2]);
+			qr.ToMatrix(rot);
+		}
+		if (model.nodes[i].scale.size() == 3) {
+			scale.ElementAt(0,0) = model.nodes[i].scale[0];
+			scale.ElementAt(1,1) = model.nodes[i].scale[1];
+			scale.ElementAt(2,2) = model.nodes[i].scale[2];
+		}
+		if (model.nodes[i].translation.size() == 3) {
+			trans.ElementAt(0,3) = model.nodes[i].translation[0];
+			trans.ElementAt(1,3) = model.nodes[i].translation[1];
+			trans.ElementAt(2,3) = model.nodes[i].translation[2];
+		}
+		vcg::Matrix44d curr = trans * rot * scale;
+		m = m * Matrix44m::Construct(curr);
+	}
 
 	if (model.nodes[i].mesh >= 0){
 		trm[model.nodes[i].mesh] = m;
