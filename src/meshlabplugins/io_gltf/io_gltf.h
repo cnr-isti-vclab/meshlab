@@ -44,13 +44,26 @@ public:
 			int& capability,
 			int& defaultBits) const;
 
+	unsigned int numberMeshesContainedInFile(
+			const QString& format,
+			const QString& fileName,
+			const RichParameterList& preParams) const;
+
 	void open(
 			const QString& format,
 			const QString& fileName,
-			MeshModel& m,
-			int& mask,
+			const std::list<MeshModel*>& meshModelList,
+			std::list<int>& maskList,
 			const RichParameterList& par,
 			vcg::CallBackPos* cb = nullptr);
+
+	void open(
+			const QString& format,
+			const QString&,
+			MeshModel&,
+			int&,
+			const RichParameterList&,
+			vcg::CallBackPos*);
 
 	void save(
 			const QString& format,
@@ -59,6 +72,7 @@ public:
 			const int mask,
 			const RichParameterList& par,
 			vcg::CallBackPos* cb = nullptr);
+
 };
 
 #endif

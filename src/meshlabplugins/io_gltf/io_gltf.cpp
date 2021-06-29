@@ -58,12 +58,35 @@ void IOglTFPlugin::exportMaskCapability(
 	return;
 }
 
+unsigned int IOglTFPlugin::numberMeshesContainedInFile(
+		const QString& format,
+		const QString& fileName,
+		const RichParameterList&) const
+{
+	if (format.toUpper() == "GLTF"){
+		tinygltf::Model model;
+		tinygltf::TinyGLTF loader;
+		std::string err;
+		std::string warn;
+		loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
+		if (err.empty()) {
+			return model.meshes.size();
+		}
+		else {
+			throw MLException("Failed opening gltf file: " + QString::fromStdString(err));
+		}
+	}
+	else {
+		wrongOpenFormat(format);
+	}
+	return 0;
+}
 
 void IOglTFPlugin::open(
 		const QString& fileFormat,
-		const QString&fileName,
-		MeshModel &m,
-		int& mask,
+		const QString& fileName,
+		const std::list<MeshModel*>& meshModelList,
+		std::list<int>& maskList,
 		const RichParameterList & params,
 		vcg::CallBackPos* cb)
 {
@@ -75,16 +98,34 @@ void IOglTFPlugin::open(
 		loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
 
 		if (!err.empty())
-			throw MLException("Failed opening gltf file");
+			throw MLException("Failed opening gltf file: " + QString::fromStdString(err));
 		if (!warn.empty())
 			reportWarning(QString::fromStdString(warn));
 
-		for (const tinygltf::Mesh& tm : model.meshes)
-			gltf::loadMesh(m, tm, model);
+		if (model.meshes.size() != meshModelList.size()) {
+			throw MLException("Mesh number is different from the expected number!");
+		}
+
+		unsigned int i = 0;
+		for (MeshModel* m : meshModelList) {
+			const tinygltf::Mesh& tm = model.meshes[i++];
+			gltf::loadMesh(*m, tm, model);
+		}
 	}
 	else {
 		wrongOpenFormat(fileFormat);
 	}
+}
+
+void IOglTFPlugin::open(
+		const QString& format,
+		const QString&,
+		MeshModel& ,
+		int&,
+		const RichParameterList &,
+		vcg::CallBackPos*)
+{
+	wrongOpenFormat(format);
 }
 
 void IOglTFPlugin::save(
