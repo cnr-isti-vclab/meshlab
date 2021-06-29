@@ -78,6 +78,8 @@ void loadMeshPrimitive(
 		const tinygltf::Primitive& p)
 {
 	int textureImg = -1;
+	bool vCol = false;
+	vcg::Color4b col;
 	if (p.material >= 0) {
 		const tinygltf::Material& mat = model.materials[p.material];
 		auto it = mat.values.find("baseColorTexture");
@@ -86,6 +88,13 @@ void loadMeshPrimitive(
 			if (it2 != it->second.json_double_value.end()){
 				textureImg = it->second.number_value;
 			}
+		}
+		it = mat.values.find("baseColorFactor");
+		if (it != mat.values.end()) { //vertex color, the same for a primitive
+			vCol = true;
+			const std::vector<double>& vc = it->second.number_array;
+			for (unsigned int i = 0; i < 4; i++)
+				col[i] = vc[i] * 255.0;
 		}
 	}
 	if (textureImg != -1) {
@@ -97,6 +106,11 @@ void loadMeshPrimitive(
 	loadAttribute(m, ivp, model, p, NORMAL);
 	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
 	loadAttribute(m, ivp, model, p, INDICES);
+	if (vCol) {
+		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
+		for (auto v : ivp)
+			v->C() = col;
+	}
 }
 
 void loadAttribute(
