@@ -156,7 +156,7 @@ void loadMeshPrimitive(
 		if (it != mat.values.end()){ //the material is a texture
 			auto it2 = it->second.json_double_value.find("index");
 			if (it2 != it->second.json_double_value.end()){
-				textureImg = it->second.number_value;
+				textureImg = it2->second;
 			}
 		}
 		it = mat.values.find("baseColorFactor");
