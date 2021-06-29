@@ -1,5 +1,6 @@
 #include "gltf_loader.h"
 
+#include <regex>
 #include <common/mlexception.h>
 
 /***************
@@ -239,7 +240,9 @@ void loadMeshPrimitive(
 	}
 	if (textureImg != -1) { //if we found a texture
 		//add the path of the texture to the mesh
-		m.cm.textures.push_back(model.images[textureImg].uri);
+		std::string uri = model.images[textureImg].uri;
+		uri = std::regex_replace(uri, std::regex("\\%20"), " ");
+		m.cm.textures.push_back(uri);
 		//set the id of the texture: we need it when set uv coords
 		textureImg = m.cm.textures.size()-1;
 	}
