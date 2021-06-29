@@ -1775,7 +1775,7 @@ static bool Equals(const std::vector<double> &one,
   return true;
 }
 
-bool Accessor::operator==(const Accessor &other) const {
+stbi_inline bool Accessor::operator==(const Accessor &other) const {
   return this->bufferView == other.bufferView &&
          this->byteOffset == other.byteOffset &&
          this->componentType == other.componentType &&
@@ -1785,35 +1785,35 @@ bool Accessor::operator==(const Accessor &other) const {
          Equals(this->minValues, other.minValues) && this->name == other.name &&
          this->normalized == other.normalized && this->type == other.type;
 }
-bool Animation::operator==(const Animation &other) const {
+stbi_inline bool Animation::operator==(const Animation &other) const {
   return this->channels == other.channels &&
          this->extensions == other.extensions && this->extras == other.extras &&
          this->name == other.name && this->samplers == other.samplers;
 }
-bool AnimationChannel::operator==(const AnimationChannel &other) const {
+stbi_inline bool AnimationChannel::operator==(const AnimationChannel &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->target_node == other.target_node &&
          this->target_path == other.target_path &&
          this->sampler == other.sampler;
 }
-bool AnimationSampler::operator==(const AnimationSampler &other) const {
+stbi_inline bool AnimationSampler::operator==(const AnimationSampler &other) const {
   return this->extras == other.extras && this->extensions == other.extensions &&
          this->input == other.input &&
          this->interpolation == other.interpolation &&
          this->output == other.output;
 }
-bool Asset::operator==(const Asset &other) const {
+stbi_inline bool Asset::operator==(const Asset &other) const {
   return this->copyright == other.copyright &&
          this->extensions == other.extensions && this->extras == other.extras &&
          this->generator == other.generator &&
          this->minVersion == other.minVersion && this->version == other.version;
 }
-bool Buffer::operator==(const Buffer &other) const {
+stbi_inline bool Buffer::operator==(const Buffer &other) const {
   return this->data == other.data && this->extensions == other.extensions &&
          this->extras == other.extras && this->name == other.name &&
          this->uri == other.uri;
 }
-bool BufferView::operator==(const BufferView &other) const {
+stbi_inline bool BufferView::operator==(const BufferView &other) const {
   return this->buffer == other.buffer && this->byteLength == other.byteLength &&
          this->byteOffset == other.byteOffset &&
          this->byteStride == other.byteStride && this->name == other.name &&
@@ -1821,13 +1821,13 @@ bool BufferView::operator==(const BufferView &other) const {
          this->extras == other.extras &&
          this->dracoDecoded == other.dracoDecoded;
 }
-bool Camera::operator==(const Camera &other) const {
+stbi_inline bool Camera::operator==(const Camera &other) const {
   return this->name == other.name && this->extensions == other.extensions &&
          this->extras == other.extras &&
          this->orthographic == other.orthographic &&
          this->perspective == other.perspective && this->type == other.type;
 }
-bool Image::operator==(const Image &other) const {
+stbi_inline bool Image::operator==(const Image &other) const {
   return this->bufferView == other.bufferView &&
          this->component == other.component &&
          this->extensions == other.extensions && this->extras == other.extras &&
@@ -1835,11 +1835,11 @@ bool Image::operator==(const Image &other) const {
          this->mimeType == other.mimeType && this->name == other.name &&
          this->uri == other.uri && this->width == other.width;
 }
-bool Light::operator==(const Light &other) const {
+stbi_inline bool Light::operator==(const Light &other) const {
   return Equals(this->color, other.color) && this->name == other.name &&
          this->type == other.type;
 }
-bool Material::operator==(const Material &other) const {
+stbi_inline bool Material::operator==(const Material &other) const {
   return (this->pbrMetallicRoughness == other.pbrMetallicRoughness) &&
          (this->normalTexture == other.normalTexture) &&
          (this->occlusionTexture == other.occlusionTexture) &&
@@ -1853,12 +1853,12 @@ bool Material::operator==(const Material &other) const {
          (this->additionalValues == other.additionalValues) &&
          (this->name == other.name);
 }
-bool Mesh::operator==(const Mesh &other) const {
+stbi_inline bool Mesh::operator==(const Mesh &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->name == other.name && Equals(this->weights, other.weights) &&
          this->primitives == other.primitives;
 }
-bool Model::operator==(const Model &other) const {
+stbi_inline bool Model::operator==(const Model &other) const {
   return this->accessors == other.accessors &&
          this->animations == other.animations && this->asset == other.asset &&
          this->buffers == other.buffers &&
@@ -1874,7 +1874,7 @@ bool Model::operator==(const Model &other) const {
          this->samplers == other.samplers && this->scenes == other.scenes &&
          this->skins == other.skins && this->textures == other.textures;
 }
-bool Node::operator==(const Node &other) const {
+stbi_inline bool Node::operator==(const Node &other) const {
   return this->camera == other.camera && this->children == other.children &&
          this->extensions == other.extensions && this->extras == other.extras &&
          Equals(this->matrix, other.matrix) && this->mesh == other.mesh &&
@@ -1883,19 +1883,19 @@ bool Node::operator==(const Node &other) const {
          Equals(this->translation, other.translation) &&
          Equals(this->weights, other.weights);
 }
-bool SpotLight::operator==(const SpotLight &other) const {
+stbi_inline bool SpotLight::operator==(const SpotLight &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          TINYGLTF_DOUBLE_EQUAL(this->innerConeAngle, other.innerConeAngle) &&
          TINYGLTF_DOUBLE_EQUAL(this->outerConeAngle, other.outerConeAngle);
 }
-bool OrthographicCamera::operator==(const OrthographicCamera &other) const {
+stbi_inline bool OrthographicCamera::operator==(const OrthographicCamera &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          TINYGLTF_DOUBLE_EQUAL(this->xmag, other.xmag) &&
          TINYGLTF_DOUBLE_EQUAL(this->ymag, other.ymag) &&
          TINYGLTF_DOUBLE_EQUAL(this->zfar, other.zfar) &&
          TINYGLTF_DOUBLE_EQUAL(this->znear, other.znear);
 }
-bool Parameter::operator==(const Parameter &other) const {
+stbi_inline bool Parameter::operator==(const Parameter &other) const {
   if (this->bool_value != other.bool_value ||
       this->has_number_value != other.has_number_value)
     return false;
@@ -1918,19 +1918,19 @@ bool Parameter::operator==(const Parameter &other) const {
 
   return true;
 }
-bool PerspectiveCamera::operator==(const PerspectiveCamera &other) const {
+stbi_inline bool PerspectiveCamera::operator==(const PerspectiveCamera &other) const {
   return TINYGLTF_DOUBLE_EQUAL(this->aspectRatio, other.aspectRatio) &&
          this->extensions == other.extensions && this->extras == other.extras &&
          TINYGLTF_DOUBLE_EQUAL(this->yfov, other.yfov) &&
          TINYGLTF_DOUBLE_EQUAL(this->zfar, other.zfar) &&
          TINYGLTF_DOUBLE_EQUAL(this->znear, other.znear);
 }
-bool Primitive::operator==(const Primitive &other) const {
+stbi_inline bool Primitive::operator==(const Primitive &other) const {
   return this->attributes == other.attributes && this->extras == other.extras &&
          this->indices == other.indices && this->material == other.material &&
          this->mode == other.mode && this->targets == other.targets;
 }
-bool Sampler::operator==(const Sampler &other) const {
+stbi_inline bool Sampler::operator==(const Sampler &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->magFilter == other.magFilter &&
          this->minFilter == other.minFilter && this->name == other.name &&
@@ -1938,36 +1938,36 @@ bool Sampler::operator==(const Sampler &other) const {
 
          //this->wrapR == other.wrapR && this->wrapS == other.wrapS &&
 }
-bool Scene::operator==(const Scene &other) const {
+stbi_inline bool Scene::operator==(const Scene &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->name == other.name && this->nodes == other.nodes;
 }
-bool Skin::operator==(const Skin &other) const {
+stbi_inline bool Skin::operator==(const Skin &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->inverseBindMatrices == other.inverseBindMatrices &&
          this->joints == other.joints && this->name == other.name &&
          this->skeleton == other.skeleton;
 }
-bool Texture::operator==(const Texture &other) const {
+stbi_inline bool Texture::operator==(const Texture &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->name == other.name && this->sampler == other.sampler &&
          this->source == other.source;
 }
-bool TextureInfo::operator==(const TextureInfo &other) const {
+stbi_inline bool TextureInfo::operator==(const TextureInfo &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->index == other.index && this->texCoord == other.texCoord;
 }
-bool NormalTextureInfo::operator==(const NormalTextureInfo &other) const {
+stbi_inline bool NormalTextureInfo::operator==(const NormalTextureInfo &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->index == other.index && this->texCoord == other.texCoord &&
          TINYGLTF_DOUBLE_EQUAL(this->scale, other.scale);
 }
-bool OcclusionTextureInfo::operator==(const OcclusionTextureInfo &other) const {
+stbi_inline bool OcclusionTextureInfo::operator==(const OcclusionTextureInfo &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          this->index == other.index && this->texCoord == other.texCoord &&
          TINYGLTF_DOUBLE_EQUAL(this->strength, other.strength);
 }
-bool PbrMetallicRoughness::operator==(const PbrMetallicRoughness &other) const {
+stbi_inline bool PbrMetallicRoughness::operator==(const PbrMetallicRoughness &other) const {
   return this->extensions == other.extensions && this->extras == other.extras &&
          (this->baseColorTexture == other.baseColorTexture) &&
          (this->metallicRoughnessTexture == other.metallicRoughnessTexture) &&
@@ -1975,7 +1975,7 @@ bool PbrMetallicRoughness::operator==(const PbrMetallicRoughness &other) const {
          TINYGLTF_DOUBLE_EQUAL(this->metallicFactor, other.metallicFactor) &&
          TINYGLTF_DOUBLE_EQUAL(this->roughnessFactor, other.roughnessFactor);
 }
-bool Value::operator==(const Value &other) const {
+stbi_inline bool Value::operator==(const Value &other) const {
   return Equals(*this, other);
 }
 
@@ -2085,7 +2085,7 @@ static inline bool is_base64(unsigned char c) {
   return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-std::string base64_encode(unsigned char const *bytes_to_encode,
+stbi_inline std::string base64_encode(unsigned char const *bytes_to_encode,
                           unsigned int in_len) {
   std::string ret;
   int i = 0;
@@ -2130,7 +2130,7 @@ std::string base64_encode(unsigned char const *bytes_to_encode,
   return ret;
 }
 
-std::string base64_decode(std::string const &encoded_string) {
+stbi_inline std::string base64_decode(std::string const &encoded_string) {
   int in_len = static_cast<int>(encoded_string.size());
   int i = 0;
   int j = 0;
@@ -2334,13 +2334,13 @@ static bool LoadExternalFile(std::vector<unsigned char> *out, std::string *err,
   return true;
 }
 
-void TinyGLTF::SetImageLoader(LoadImageDataFunction func, void *user_data) {
+stbi_inline void TinyGLTF::SetImageLoader(LoadImageDataFunction func, void *user_data) {
   LoadImageData = func;
   load_image_user_data_ = user_data;
   user_image_loader_ = true;
 }
 
-void TinyGLTF::RemoveImageLoader() {
+stbi_inline void TinyGLTF::RemoveImageLoader() {
   LoadImageData =
 #ifndef TINYGLTF_NO_STB_IMAGE
       &tinygltf::LoadImageData;
@@ -2353,7 +2353,7 @@ void TinyGLTF::RemoveImageLoader() {
 }
 
 #ifndef TINYGLTF_NO_STB_IMAGE
-bool LoadImageData(Image *image, const int image_idx, std::string *err,
+stbi_inline bool LoadImageData(Image *image, const int image_idx, std::string *err,
                    std::string *warn, int req_width, int req_height,
                    const unsigned char *bytes, int size, void *user_data) {
   (void)warn;
@@ -2460,7 +2460,7 @@ bool LoadImageData(Image *image, const int image_idx, std::string *err,
 }
 #endif
 
-void TinyGLTF::SetImageWriter(WriteImageDataFunction func, void *user_data) {
+stbi_inline void TinyGLTF::SetImageWriter(WriteImageDataFunction func, void *user_data) {
   WriteImageData = func;
   write_image_user_data_ = user_data;
 }
@@ -2475,7 +2475,7 @@ static void WriteToMemory_stbi(void *context, void *data, int size) {
   buffer->insert(buffer->end(), pData, pData + size);
 }
 
-bool WriteImageData(const std::string *basepath, const std::string *filename,
+stbi_inline bool WriteImageData(const std::string *basepath, const std::string *filename,
                     Image *image, bool embedImages, void *fsPtr) {
   const std::string ext = GetFilePathExtension(*filename);
 
@@ -2545,7 +2545,7 @@ bool WriteImageData(const std::string *basepath, const std::string *filename,
 }
 #endif
 
-void TinyGLTF::SetFsCallbacks(FsCallbacks callbacks) { fs = callbacks; }
+stbi_inline void TinyGLTF::SetFsCallbacks(FsCallbacks callbacks) { fs = callbacks; }
 
 #ifdef _WIN32
 static inline std::wstring UTF8ToWchar(const std::string &str) {
@@ -2570,7 +2570,7 @@ static inline std::string WcharToUTF8(const std::wstring &wstr) {
 #ifndef TINYGLTF_NO_FS
 // Default implementations of filesystem functions
 
-bool FileExists(const std::string &abs_filename, void *) {
+stbi_inline bool FileExists(const std::string &abs_filename, void *) {
   bool ret;
 #ifdef TINYGLTF_ANDROID_LOAD_FROM_ASSETS
   if (asset_manager) {
@@ -2614,7 +2614,7 @@ bool FileExists(const std::string &abs_filename, void *) {
   return ret;
 }
 
-std::string ExpandFilePath(const std::string &filepath, void *) {
+stbi_inline std::string ExpandFilePath(const std::string &filepath, void *) {
 #ifdef _WIN32
   // Assume input `filepath` is encoded in UTF-8
   std::wstring wfilepath = UTF8ToWchar(filepath);
@@ -2664,7 +2664,7 @@ std::string ExpandFilePath(const std::string &filepath, void *) {
 #endif
 }
 
-bool ReadWholeFile(std::vector<unsigned char> *out, std::string *err,
+stbi_inline bool ReadWholeFile(std::vector<unsigned char> *out, std::string *err,
                    const std::string &filepath, void *) {
 #ifdef TINYGLTF_ANDROID_LOAD_FROM_ASSETS
   if (asset_manager) {
@@ -2744,7 +2744,7 @@ bool ReadWholeFile(std::vector<unsigned char> *out, std::string *err,
 #endif
 }
 
-bool WriteWholeFile(std::string *err, const std::string &filepath,
+stbi_inline bool WriteWholeFile(std::string *err, const std::string &filepath,
                     const std::vector<unsigned char> &contents, void *) {
 #ifdef _WIN32
 #if defined(__GLIBCXX__)  // mingw
@@ -2826,7 +2826,7 @@ static void UpdateImageObject(Image &image, std::string &baseDir, int index,
   }
 }
 
-bool IsDataURI(const std::string &in) {
+stbi_inline bool IsDataURI(const std::string &in) {
   std::string header = "data:application/octet-stream;base64,";
   if (in.find(header) == 0) {
     return true;
@@ -2865,7 +2865,7 @@ bool IsDataURI(const std::string &in) {
   return false;
 }
 
-bool DecodeDataURI(std::vector<unsigned char> *out, std::string &mime_type,
+stbi_inline bool DecodeDataURI(std::vector<unsigned char> *out, std::string &mime_type,
                    const std::string &in, size_t reqBytes, bool checkSize) {
   std::string header = "data:application/octet-stream;base64,";
   std::string data;
@@ -5445,7 +5445,7 @@ static bool ParseLight(Light *light, std::string *err, const json &o,
   return true;
 }
 
-bool TinyGLTF::LoadFromString(Model *model, std::string *err, std::string *warn,
+stbi_inline bool TinyGLTF::LoadFromString(Model *model, std::string *err, std::string *warn,
                               const char *json_str,
                               unsigned int json_str_length,
                               const std::string &base_dir,
@@ -6137,7 +6137,7 @@ bool TinyGLTF::LoadFromString(Model *model, std::string *err, std::string *warn,
   return true;
 }
 
-bool TinyGLTF::LoadASCIIFromString(Model *model, std::string *err,
+stbi_inline bool TinyGLTF::LoadASCIIFromString(Model *model, std::string *err,
                                    std::string *warn, const char *str,
                                    unsigned int length,
                                    const std::string &base_dir,
@@ -6150,7 +6150,7 @@ bool TinyGLTF::LoadASCIIFromString(Model *model, std::string *err,
                         check_sections);
 }
 
-bool TinyGLTF::LoadASCIIFromFile(Model *model, std::string *err,
+stbi_inline bool TinyGLTF::LoadASCIIFromFile(Model *model, std::string *err,
                                  std::string *warn, const std::string &filename,
                                  unsigned int check_sections) {
   std::stringstream ss;
@@ -6193,7 +6193,7 @@ bool TinyGLTF::LoadASCIIFromFile(Model *model, std::string *err,
   return ret;
 }
 
-bool TinyGLTF::LoadBinaryFromMemory(Model *model, std::string *err,
+stbi_inline bool TinyGLTF::LoadBinaryFromMemory(Model *model, std::string *err,
                                     std::string *warn,
                                     const unsigned char *bytes,
                                     unsigned int size,
@@ -6263,7 +6263,7 @@ bool TinyGLTF::LoadBinaryFromMemory(Model *model, std::string *err,
   return true;
 }
 
-bool TinyGLTF::LoadBinaryFromFile(Model *model, std::string *err,
+stbi_inline bool TinyGLTF::LoadBinaryFromFile(Model *model, std::string *err,
                                   std::string *warn,
                                   const std::string &filename,
                                   unsigned int check_sections) {
@@ -7608,7 +7608,7 @@ static void WriteBinaryGltfFile(const std::string &output,
   WriteBinaryGltfStream(gltfFile, content, binBuffer);
 }
 
-bool TinyGLTF::WriteGltfSceneToStream(Model *model, std::ostream &stream,
+stbi_inline bool TinyGLTF::WriteGltfSceneToStream(Model *model, std::ostream &stream,
                                       bool prettyPrint = true,
                                       bool writeBinary = false) {
   JsonDocument output;
@@ -7661,7 +7661,7 @@ bool TinyGLTF::WriteGltfSceneToStream(Model *model, std::ostream &stream,
   return true;
 }
 
-bool TinyGLTF::WriteGltfSceneToFile(Model *model, const std::string &filename,
+stbi_inline bool TinyGLTF::WriteGltfSceneToFile(Model *model, const std::string &filename,
                                     bool embedImages = false,
                                     bool embedBuffers = false,
                                     bool prettyPrint = true,

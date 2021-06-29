@@ -5,10 +5,12 @@
 if(TARGET external-tinygltf)
 
 	set(SOURCES
-		io_gltf.cpp)
+		io_gltf.cpp
+		gltf_loader.cpp)
 
 	set(HEADERS
-		io_gltf.h)
+		io_gltf.h
+		gltf_loader.h)
 
 	add_meshlab_plugin(io_gltf MODULE ${SOURCES} ${HEADERS})
 
