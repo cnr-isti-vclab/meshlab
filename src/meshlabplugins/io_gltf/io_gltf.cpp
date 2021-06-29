@@ -111,6 +111,12 @@ void IOglTFPlugin::open(
 			const tinygltf::Mesh& tm = model.meshes[i++];
 			gltf::loadMesh(*m, tm, model);
 		}
+
+		std::vector<Matrix44m> trm = gltf::loadTrMatrices(model);
+		i = 0;
+		for (MeshModel* m : meshModelList){
+			m->cm.Tr = trm[i++];
+		}
 	}
 	else {
 		wrongOpenFormat(fileFormat);

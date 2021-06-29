@@ -1,7 +1,13 @@
 #include "gltf_loader.h"
 
-#include <common/ml_document/mesh_model.h>
 #include <common/mlexception.h>
+
+void visitNode(
+		const tinygltf::Model& model,
+		unsigned int i,
+		Matrix44m m,
+		std::vector<bool>& visited,
+		std::vector<Matrix44m>& trm);
 
 //declarations
 enum GLTF_ATTR_TYPE {POSITION, NORMAL, TEXCOORD_0, INDICES};
@@ -59,6 +65,45 @@ void populateTriangles(
  /**************
  * Definitions *
  **************/
+
+std::vector<Matrix44m> gltf::loadTrMatrices(
+		const tinygltf::Model& model)
+{
+	std::vector<Matrix44m> trm(model.meshes.size());
+	std::vector<bool> visited(model.nodes.size(), false);
+	for (unsigned int i = 0; i < model.nodes.size(); ++i){
+		if (!visited[i]){
+			Matrix44m startM = Matrix44m::Identity();
+			visitNode(model, i, startM, visited, trm);
+			visited[i] = true;
+		}
+	}
+	return trm;
+}
+
+void visitNode(
+		const tinygltf::Model& model,
+		unsigned int i,
+		Matrix44m m,
+		std::vector<bool>& visited,
+		std::vector<Matrix44m>& trm)
+{
+	if (model.nodes[i].matrix.size() == 16) {
+		vcg::Matrix44d curr(model.nodes[i].matrix.data());
+		curr.transposeInPlace();
+		m = m * Matrix44m::Construct(curr);
+	}
+
+	if (model.nodes[i].mesh >= 0){
+		trm[model.nodes[i].mesh] = m;
+	}
+	for (int c : model.nodes[i].children){
+		if (c>=0){
+			visitNode(model, c, m, visited, trm);
+			visited[c] = true;
+		}
+	}
+}
 
 void gltf::loadMesh(
 		MeshModel& m,
@@ -263,5 +308,3 @@ void populateTriangles(
 		}
 	}
 }
-
-

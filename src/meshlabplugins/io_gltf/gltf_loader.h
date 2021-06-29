@@ -6,10 +6,12 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <tiny_gltf.h>
-
-class MeshModel;
+#include <common/ml_document/mesh_model.h>
 
 namespace gltf {
+
+std::vector<Matrix44m> loadTrMatrices(
+		const tinygltf::Model& model);
 
 void loadMesh(
 		MeshModel& m,
