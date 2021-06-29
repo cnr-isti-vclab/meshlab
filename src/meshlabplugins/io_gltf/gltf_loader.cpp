@@ -10,8 +10,8 @@ void visitNode(
 		std::vector<Matrix44m>& trm);
 
 //declarations
-enum GLTF_ATTR_TYPE {POSITION, NORMAL, TEXCOORD_0, INDICES};
-const std::array<std::string, 3> GLTF_ATTR_STR {"POSITION", "NORMAL", "TEXCOORD_0"};
+enum GLTF_ATTR_TYPE {POSITION, NORMAL, COLOR_0, TEXCOORD_0, INDICES};
+const std::array<std::string, 4> GLTF_ATTR_STR {"POSITION", "NORMAL", "COLOR_0", "TEXCOORD_0"};
 
 void loadMeshPrimitive(
 		MeshModel& m,
@@ -47,6 +47,13 @@ void populateVNormals(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* normArray,
 		unsigned int vertNumber);
+
+template <typename Scalar>
+void populateVColors(
+		const std::vector<CMeshO::VertexPointer>& ivp,
+		const Scalar* colorArray,
+		unsigned int vertNumber,
+		int nElemns);
 
 template <typename Scalar>
 void populateVTextCoords(
@@ -173,14 +180,18 @@ void loadMeshPrimitive(
 	}
 	std::vector<CMeshO::VertexPointer> ivp;
 	loadAttribute(m, ivp, model, p, POSITION);
-	loadAttribute(m, ivp, model, p, NORMAL);
-	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
-	loadAttribute(m, ivp, model, p, INDICES);
+
 	if (vCol) {
 		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
 		for (auto v : ivp)
 			v->C() = col;
 	}
+
+	loadAttribute(m, ivp, model, p, NORMAL);
+	loadAttribute(m, ivp, model, p, COLOR_0);
+	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
+	loadAttribute(m, ivp, model, p, INDICES);
+
 }
 
 void loadAttribute(
@@ -214,7 +225,14 @@ void loadAttribute(
 		const tinygltf::BufferView& posbw = model.bufferViews[accessor->bufferView];
 		const std::vector<unsigned char>& posdata = model.buffers[posbw.buffer].data;
 		unsigned int posOffset = posbw.byteOffset + accessor->byteOffset;
-
+		//if the attribute is a color, textid is used to tell the size of the
+		//color (3 or 4 components)
+		if (attr == COLOR_0){
+			if (accessor->type == TINYGLTF_TYPE_VEC3)
+				textID = 3;
+			else if (accessor->type == TINYGLTF_TYPE_VEC4)
+				textID = 4;
+		}
 
 		if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
 			const float* posArray = (const float*) (posdata.data() + posOffset);
@@ -257,6 +275,9 @@ void populateAttr(
 		populateVertices(m, ivp, array, number); break;
 	case NORMAL:
 		populateVNormals(ivp, array, number); break;
+	case COLOR_0:
+		populateVColors(ivp, array, number, textID); break;
+		break;
 	case TEXCOORD_0:
 		m.enable(vcg::tri::io::Mask::IOM_VERTTEXCOORD);
 		populateVTextCoords(ivp, array, number, textID); break;
@@ -291,6 +312,25 @@ void populateVNormals(
 {
 	for (unsigned int i = 0; i < vertNumber*3; i+= 3){
 		ivp[i/3]->N() = CMeshO::CoordType(normArray[i], normArray[i+1], normArray[i+2]);
+	}
+}
+
+template <typename Scalar>
+void populateVColors(
+		const std::vector<CMeshO::VertexPointer>& ivp,
+		const Scalar* colorArray,
+		unsigned int vertNumber,
+		int nElemns)
+{
+	for (unsigned int i = 0; i < vertNumber*nElemns; i+= nElemns){
+		if (!std::is_floating_point<Scalar>::value) {
+			int alpha = nElemns == 4 ? colorArray[i+3] : 255;
+			ivp[i/nElemns]->C() = vcg::Color4b(colorArray[i], colorArray[i+1], colorArray[i+2], alpha);
+		}
+		else {
+			int alpha = nElemns == 4 ? colorArray[i+3] * 255 : 255;
+			ivp[i/nElemns]->C() = vcg::Color4b(colorArray[i] * 255, colorArray[i+1]*255, colorArray[i+2]*255, alpha);
+		}
 	}
 }
 
