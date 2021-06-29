@@ -166,9 +166,9 @@ void loadMesh(
 		throw MLException("File positions are not 3D coordinates!");
 
 
-	const tinygltf::BufferView posbw = model.bufferViews[posAccessor.bufferView];
+	const tinygltf::BufferView& posbw = model.bufferViews[posAccessor.bufferView];
 	const std::vector<unsigned char>& posdata = model.buffers[posbw.buffer].data;
-	unsigned int posOffset = posbw.byteOffset;
+	unsigned int posOffset = posbw.byteOffset + posAccessor.byteOffset;
 	std::vector<CMeshO::VertexPointer> ivp;
 
 	if (posAccessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
@@ -185,7 +185,8 @@ void loadMesh(
 	}
 
 	//triangles
-	if (p.indices >= 0 && p.indices < model.accessors.size()) {
+	if (p.mode == 4 && p.indices >= 0 &&
+			(unsigned int)p.indices < model.accessors.size()) {
 
 		const tinygltf::Accessor& triAccessor = model.accessors[p.indices];
 
