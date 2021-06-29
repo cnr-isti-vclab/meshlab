@@ -2,6 +2,10 @@
 
 #include <common/mlexception.h>
 
+/***************
+* Declarations *
+***************/
+
 void visitNode(
 		const tinygltf::Model& model,
 		unsigned int i,
@@ -9,7 +13,6 @@ void visitNode(
 		std::vector<bool>& visited,
 		std::vector<Matrix44m>& trm);
 
-//declarations
 enum GLTF_ATTR_TYPE {POSITION, NORMAL, COLOR_0, TEXCOORD_0, INDICES};
 const std::array<std::string, 4> GLTF_ATTR_STR {"POSITION", "NORMAL", "COLOR_0", "TEXCOORD_0"};
 
@@ -69,25 +72,46 @@ void populateTriangles(
 		const Scalar* triArray,
 		unsigned int triNumber);
 
- /**************
- * Definitions *
- **************/
+/**************
+* Definitions *
+**************/
 
+/**
+ * @brief Loads the list of rotation matrices for each mesh contained in the
+ * gltf file.
+ * @param model
+ * @return a vector containing N 4x4 matrices
+ */
 std::vector<Matrix44m> gltf::loadTrMatrices(
 		const tinygltf::Model& model)
 {
 	std::vector<Matrix44m> trm(model.meshes.size());
 	std::vector<bool> visited(model.nodes.size(), false);
+
+	//this for will visit all the root nodes of the file
 	for (unsigned int i = 0; i < model.nodes.size(); ++i){
-		if (!visited[i]){
+		if (!visited[i]){ //if not visited, it is a root node
 			Matrix44m startM = Matrix44m::Identity();
+
+			//recursive call: it will visit all the children of ith node
 			visitNode(model, i, startM, visited, trm);
-			visited[i] = true;
 		}
 	}
 	return trm;
 }
 
+/**
+ * @brief Recursive function that visits a node and calls the visit on all its
+ * children nodes.
+ * Then, if a node is associated to a mesh, the combination of the matrices
+ * of the current node and all its parents is set to trm vector
+ *
+ * @param model
+ * @param i: id of the node that is currently visited
+ * @param m: the combination of the matrices of all the parents of i
+ * @param visited: vector of visited flags
+ * @param trm: vector of matrices: it will be updated when a mesh node is found
+ */
 void visitNode(
 		const tinygltf::Model& model,
 		unsigned int i,
@@ -95,48 +119,78 @@ void visitNode(
 		std::vector<bool>& visited,
 		std::vector<Matrix44m>& trm)
 {
+	visited[i] = true; //current node is visited
+	//if the current node contains a 4x4 matrix
 	if (model.nodes[i].matrix.size() == 16) {
 		vcg::Matrix44d curr(model.nodes[i].matrix.data());
 		curr.transposeInPlace();
 		m = m * Matrix44m::Construct(curr);
 	}
+	//if the current node contains rotation quaternion, scale vector or
+	// translation vector
 	else {
+		//note: if one or more of these are missing, identity is used.
+		//note: final matrix is computed as M = T * R * S, as specified by
+		//gltf docs: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_004_ScenesNodes.md
+		//4x4 matrices associated to rotation, translation and scale
 		vcg::Matrix44d rot;   rot.SetIdentity();
 		vcg::Matrix44d scale; scale.SetIdentity();
 		vcg::Matrix44d trans; trans.SetIdentity();
+
+		//if node contains rotation quaternion
 		if (model.nodes[i].rotation.size() == 4) {
 			vcg::Quaterniond qr(
 					model.nodes[i].rotation[3],
 					model.nodes[i].rotation[0],
 					model.nodes[i].rotation[1],
 					model.nodes[i].rotation[2]);
-			qr.ToMatrix(rot);
+			qr.ToMatrix(rot); //set 4x4 matrix quaternion
 		}
+		//if node contains scale
 		if (model.nodes[i].scale.size() == 3) {
+			//set 4x4 matrix scale
 			scale.ElementAt(0,0) = model.nodes[i].scale[0];
 			scale.ElementAt(1,1) = model.nodes[i].scale[1];
 			scale.ElementAt(2,2) = model.nodes[i].scale[2];
 		}
+		//if node contains translation
 		if (model.nodes[i].translation.size() == 3) {
+			//set 4x4 matrix translation
 			trans.ElementAt(0,3) = model.nodes[i].translation[0];
 			trans.ElementAt(1,3) = model.nodes[i].translation[1];
 			trans.ElementAt(2,3) = model.nodes[i].translation[2];
 		}
+
+		//M = T * R * S
 		vcg::Matrix44d curr = trans * rot * scale;
+
+		//combine current matrix with parents
 		m = m * Matrix44m::Construct(curr);
 	}
 
+	//if this node represents a mesh
 	if (model.nodes[i].mesh >= 0){
+		//set the m matrix to trm vector
 		trm[model.nodes[i].mesh] = m;
 	}
+
+	//for each child
 	for (int c : model.nodes[i].children){
-		if (c>=0){
+		if (c>=0){ //if it is valid
+			//visit child, passing the current matrix
 			visitNode(model, c, m, visited, trm);
-			visited[c] = true;
 		}
 	}
 }
 
+/**
+ * @brief loads a mesh from gltf file.
+ * It merges all the primitives in the loaded mesh.
+ *
+ * @param m: the mesh that will contain the loaded mesh
+ * @param tm: tinygltf structure of the mesh to load
+ * @param model: tinygltf file
+ */
 void gltf::loadMesh(
 		MeshModel& m,
 		const tinygltf::Mesh& tm,
@@ -144,56 +198,91 @@ void gltf::loadMesh(
 {
 	if (!tm.name.empty())
 		m.setLabel(QString::fromStdString(tm.name));
+
+	//for each primitive, load it into the mesh
 	for (const tinygltf::Primitive& p : tm.primitives){
 		loadMeshPrimitive(m, model, p);
 	}
 }
 
+/**
+ * @brief loads the given primitive into the mesh
+ * @param m
+ * @param model
+ * @param p
+ */
 void loadMeshPrimitive(
 		MeshModel& m,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p)
 {
-	int textureImg = -1;
-	bool vCol = false;
-	vcg::Color4b col;
-	if (p.material >= 0) {
+	int textureImg = -1; //id of the texture associated to the material
+	bool vCol = false; //used if a material has a base color for all the primitive
+	vcg::Color4b col; //the base color, to be set to all the vertices
+
+	if (p.material >= 0) { //if the primitive has a material
 		const tinygltf::Material& mat = model.materials[p.material];
 		auto it = mat.values.find("baseColorTexture");
 		if (it != mat.values.end()){ //the material is a texture
 			auto it2 = it->second.json_double_value.find("index");
 			if (it2 != it->second.json_double_value.end()){
-				textureImg = it2->second;
+				textureImg = it2->second; //get the id of the texture
 			}
 		}
 		it = mat.values.find("baseColorFactor");
-		if (it != mat.values.end()) { //vertex color, the same for a primitive
+		if (it != mat.values.end()) { //vertex base color, the same for a primitive
 			vCol = true;
 			const std::vector<double>& vc = it->second.number_array;
 			for (unsigned int i = 0; i < 4; i++)
 				col[i] = vc[i] * 255.0;
 		}
 	}
-	if (textureImg != -1) {
+	if (textureImg != -1) { //if we found a texture
+		//add the path of the texture to the mesh
 		m.cm.textures.push_back(model.images[textureImg].uri);
+		//set the id of the texture: we need it when set uv coords
 		textureImg = m.cm.textures.size()-1;
 	}
+	//vector of vertex pointers added to the mesh
+	//this vector is modified only when adding vertex position attributes
 	std::vector<CMeshO::VertexPointer> ivp;
+
+	//load vertex position attribute, sets also the ivp vector
 	loadAttribute(m, ivp, model, p, POSITION);
 
+	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
 		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
 		for (auto v : ivp)
 			v->C() = col;
 	}
 
+	//load all the other vertex attributes (ivp is not modified by these calls)
 	loadAttribute(m, ivp, model, p, NORMAL);
 	loadAttribute(m, ivp, model, p, COLOR_0);
 	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
+
+	//load triangles
 	loadAttribute(m, ivp, model, p, INDICES);
 
 }
 
+/**
+ * @brief loads the attribute attr from the primitive p contained in the
+ * gltf model. If the attribute is vertex position, sets also vertex pointers
+ * vector ivp. For all the other parameters, ivp is a const input.
+ *
+ * If the primitive does not contain the primitive p, nothing is done.
+ * Howerver, id the attribute is POSITION, then a MLException will be thrown.
+ *
+ *
+ * @param m
+ * @param ivp
+ * @param model
+ * @param p
+ * @param attr
+ * @param textID: id of the texture in case of the attr is TEXCOORD_0
+ */
 void loadAttribute(
 		MeshModel& m,
 		std::vector<CMeshO::VertexPointer>& ivp,
@@ -204,27 +293,38 @@ void loadAttribute(
 {
 	const tinygltf::Accessor* accessor = nullptr;
 
+	//get the accessor associated to the attribute
 	if (attr != INDICES) {
 		auto it = p.attributes.find(GLTF_ATTR_STR[attr]);
 
-		if (it != p.attributes.end()) {
+		if (it != p.attributes.end()) { //accessor found
 			accessor = &model.accessors[it->second];
 		}
-		else if (attr == POSITION) {
+		else if (attr == POSITION) { //if we were looking for POSITION and didn't find any
 			throw MLException("File has not 'Position' attribute");
 		}
 	}
-	else {
+	else { //if the attribute is triangle indices
+
+		//if the mode is GL_TRIANGLES and we have triangle indices
 		if (p.mode == 4 && p.indices >= 0 &&
 				(unsigned int)p.indices < model.accessors.size()) {
 			accessor = &model.accessors[p.indices];
 		}
 	}
 
+	//if we found an accessor of the attribute
 	if (accessor) {
+		//bufferview: contains infos on how to access buffer with the accessor
 		const tinygltf::BufferView& posbw = model.bufferViews[accessor->bufferView];
+
+		//data of the whole buffer (vector of bytes);
+		//may contain also other data not associated to our attribute
 		const std::vector<unsigned char>& posdata = model.buffers[posbw.buffer].data;
+
+		//offset where the data of the attribute starts
 		unsigned int posOffset = posbw.byteOffset + accessor->byteOffset;
+		//hack:
 		//if the attribute is a color, textid is used to tell the size of the
 		//color (3 or 4 components)
 		if (attr == COLOR_0){
@@ -234,33 +334,60 @@ void loadAttribute(
 				textID = 4;
 		}
 
+		//if data is float
 		if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+			//get the starting point of the data as float pointer
 			const float* posArray = (const float*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
 		}
+		//if data is double
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE) {
+			//get the starting point of the data as double pointer
 			const double* posArray = (const double*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
 		}
+		//if data is ubyte
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+			//get the starting point of the data as uchar pointer
 			const unsigned char* triArray = (const unsigned char*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
 		}
+		//if data is ushort
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+			//get the starting point of the data as ushort pointer
 			const unsigned short* triArray = (const unsigned short*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
 		}
+		//if data is uint
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+			//get the starting point of the data as uint pointer
 			const unsigned int* triArray = (const unsigned int*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
 		}
 	}
+	//if accessor not found and attribute is indices, it means that
+	//the mesh is not indexed, and triplets of contiguous vertices
+	//generate triangles
 	else if (attr == INDICES) {
+		//this case is managed when passing nullptr as data
 		populateAttr<unsigned char>(attr, m, ivp, nullptr, 0);
 	}
 
 }
 
+/**
+ * @brief given the attribute and the pointer to the data,
+ * it calls the appropriate functions that put the data into the mesh
+ * appropriately
+ * @param attr
+ * @param m
+ * @param ivp: modified only if attr
+ * @param array: plain vector containing the data
+ * @param number: number of elements contained in the data
+ * @param textID:
+ *     if attr is texcoord, it is the texture id
+ *     if attr is color, tells if color has 3 or 4 components
+ */
 template <typename Scalar>
 void populateAttr(
 		GLTF_ATTR_TYPE attr,
