@@ -1,6 +1,3 @@
-# Copyright 2019-2020, Collabora, Ltd.
-# SPDX-License-Identifier: BSL-1.0
-
 # Only build if we have tiny glTF
 if(TARGET external-tinygltf)
 
@@ -10,6 +7,7 @@ if(TARGET external-tinygltf)
 
 	set(HEADERS
 		io_gltf.h
+		tinygltf_include.h
 		gltf_loader.h)
 
 	add_meshlab_plugin(io_gltf MODULE ${SOURCES} ${HEADERS})

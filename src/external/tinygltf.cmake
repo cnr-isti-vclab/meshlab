@@ -1,5 +1,5 @@
 # Copyright 2019, 2020, Collabora, Ltd.
-# Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
+# Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
 option(ALLOW_BUNDLED_TINY_GLTF "Allow use of bundled tiny glTF source" ON)
