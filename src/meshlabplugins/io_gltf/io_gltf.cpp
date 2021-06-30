@@ -70,7 +70,7 @@ unsigned int IOglTFPlugin::numberMeshesContainedInFile(
 		std::string warn;
 		loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
 		if (err.empty()) {
-			return model.meshes.size();
+			return gltf::getNumberMeshes(model);
 		}
 		else {
 			throw MLException("Failed opening gltf file: " + QString::fromStdString(err));
@@ -102,21 +102,7 @@ void IOglTFPlugin::open(
 		if (!warn.empty())
 			reportWarning(QString::fromStdString(warn));
 
-		if (model.meshes.size() != meshModelList.size()) {
-			throw MLException("Mesh number is different from the expected number!");
-		}
-
-		unsigned int i = 0;
-		for (MeshModel* m : meshModelList) {
-			const tinygltf::Mesh& tm = model.meshes[i++];
-			gltf::loadMesh(*m, tm, model);
-		}
-
-		std::vector<Matrix44m> trm = gltf::loadTrMatrices(model);
-		i = 0;
-		for (MeshModel* m : meshModelList){
-			m->cm.Tr = trm[i++];
-		}
+		gltf::loadMeshes(meshModelList, maskList, model);
 	}
 	else {
 		wrongOpenFormat(fileFormat);

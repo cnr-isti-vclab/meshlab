@@ -6,27 +6,189 @@
 namespace gltf {
 
 /**
- * @brief Loads the list of rotation matrices for each mesh contained in the
+ * @brief returns the number of meshes referred by the nodes contained in the
  * gltf file.
- * @param model
- * @return a vector containing N 4x4 matrices
+ *
+ * Note: this number may differ from model.meshes.size().
+ * This is because some gltf file may duplicate a mesh in the scene, and place
+ * it in different positions using the node hierarchy.
+ *
+ * This function actually returns how many (referenced) nodes contain a mesh.
+ *
+ * @param model: the tinygltf content of the file
+ * @return
  */
-std::vector<Matrix44m> loadTrMatrices(
+unsigned int getNumberMeshes(
 		const tinygltf::Model& model)
 {
-	std::vector<Matrix44m> trm(model.meshes.size());
-	std::vector<bool> visited(model.nodes.size(), false);
-
-	//this for will visit all the root nodes of the file
-	for (unsigned int i = 0; i < model.nodes.size(); ++i){
-		if (!visited[i]){ //if not visited, it is a root node
-			Matrix44m startM = Matrix44m::Identity();
-
-			//recursive call: it will visit all the children of ith node
-			internal::visitNodeAndGetTrMatrix(model, i, startM, visited, trm);
+	unsigned int nMeshes = 0;
+	for (unsigned int s = 0; s < model.scenes.size(); ++s){
+		const tinygltf::Scene& scene = model.scenes[s];
+		for (unsigned int n = 0; n < scene.nodes.size(); ++n){
+			nMeshes += internal::getNumberMeshes(model, scene.nodes[n]);
 		}
 	}
-	return trm;
+	return nMeshes;
+}
+
+/**
+ * @brief Loads all the meshes referred in the scene of the gltf file into
+ * the list of meshes.
+ *
+ * @param meshModelList
+ * @param maskList
+ * @param model
+ */
+void loadMeshes(
+		const std::list<MeshModel*>& meshModelList,
+		std::list<int>& maskList,
+		const tinygltf::Model& model)
+{
+	maskList.resize(meshModelList.size(), 0);
+	std::list<MeshModel*>::const_iterator meshit = meshModelList.begin();
+	std::list<int>::iterator maskit = maskList.begin();
+	for (unsigned int s = 0; s < model.scenes.size(); ++s){
+		const tinygltf::Scene& scene = model.scenes[s];
+		for (unsigned int n = 0; n < scene.nodes.size(); ++n){
+			internal::loadMeshesWhileTraversingNodes(
+						model,
+						meshit,
+						maskit,
+						Matrix44m::Identity(),
+						scene.nodes[n]);
+		}
+	}
+}
+
+namespace internal {
+
+/**
+ * @brief Recursive function that returns the number of meshes contained
+ * in the current node (0 or 1) plus the number of meshes contained in the
+ * children of the node.
+ *
+ * Call this function from a root node to know how many meshes are referred
+ * in the scene.
+ *
+ * @param model
+ * @param node
+ * @return
+ */
+unsigned int getNumberMeshes(
+		const tinygltf::Model& model,
+		unsigned int node)
+{
+	unsigned int nMeshes = 0;
+	if (model.nodes[node].mesh >= 0){
+		nMeshes = 1;
+	}
+	for (int c : model.nodes[node].children){
+		if (c>=0){
+			nMeshes += getNumberMeshes(model, c);
+		}
+	}
+	return nMeshes;
+}
+
+/**
+ * @brief Recursive function that loads a mesh if the current node contains one,
+ * and then calls itself on the children of the node.
+ *
+ * @param model
+ * @param currentMesh
+ * @param currentMask
+ * @param currentMatrix
+ * @param currentNode
+ */
+void loadMeshesWhileTraversingNodes(
+		const tinygltf::Model& model,
+		std::list<MeshModel*>::const_iterator& currentMesh,
+		std::list<int>::iterator& currentMask,
+		Matrix44m currentMatrix,
+		unsigned int currentNode)
+{
+	currentMatrix = currentMatrix * getCurrentNodeTrMatrix(model, currentNode);
+	if (model.nodes[currentNode].mesh >= 0) {
+		int meshid = model.nodes[currentNode].mesh;
+		loadMesh(**currentMesh, model.meshes[meshid], model);
+		(*currentMesh)->cm.Tr = currentMatrix;
+		++currentMesh;
+		++currentMask;
+	}
+
+	//for each child
+	for (int c : model.nodes[currentNode].children){
+		if (c>=0){ //if it is valid
+			//visit child
+			loadMeshesWhileTraversingNodes(
+						model,
+						currentMesh,
+						currentMask,
+						currentMatrix,
+						c);
+		}
+	}
+}
+
+/**
+ * @brief Gets the 4x4 transformation matrix contained in the node itself,
+ * without taking into account parent transformations of the node.
+ *
+ * @param model
+ * @param currentNode
+ * @return
+ */
+Matrix44m getCurrentNodeTrMatrix(
+		const tinygltf::Model& model,
+		unsigned int currentNode)
+{
+	Matrix44m currentMatrix = Matrix44m::Identity();
+	//if the current node contains a 4x4 matrix
+	if (model.nodes[currentNode].matrix.size() == 16) {
+		vcg::Matrix44d curr(model.nodes[currentNode].matrix.data());
+		curr.transposeInPlace();
+		currentMatrix = Matrix44m::Construct(curr);
+	}
+	//if the current node contains rotation quaternion, scale vector or
+	// translation vector
+	else {
+		//note: if one or more of these are missing, identity is used.
+		//note: final matrix is computed as M = T * R * S, as specified by
+		//gltf docs: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_004_ScenesNodes.md
+		//4x4 matrices associated to rotation, translation and scale
+		vcg::Matrix44d rot;   rot.SetIdentity();
+		vcg::Matrix44d scale; scale.SetIdentity();
+		vcg::Matrix44d trans; trans.SetIdentity();
+
+		//if node contains rotation quaternion
+		if (model.nodes[currentNode].rotation.size() == 4) {
+			vcg::Quaterniond qr(
+					model.nodes[currentNode].rotation[3],
+					model.nodes[currentNode].rotation[0],
+					model.nodes[currentNode].rotation[1],
+					model.nodes[currentNode].rotation[2]);
+			qr.ToMatrix(rot); //set 4x4 matrix quaternion
+		}
+		//if node contains scale
+		if (model.nodes[currentNode].scale.size() == 3) {
+			//set 4x4 matrix scale
+			scale.ElementAt(0,0) = model.nodes[currentNode].scale[0];
+			scale.ElementAt(1,1) = model.nodes[currentNode].scale[1];
+			scale.ElementAt(2,2) = model.nodes[currentNode].scale[2];
+		}
+		//if node contains translation
+		if (model.nodes[currentNode].translation.size() == 3) {
+			//set 4x4 matrix translation
+			trans.ElementAt(0,3) = model.nodes[currentNode].translation[0];
+			trans.ElementAt(1,3) = model.nodes[currentNode].translation[1];
+			trans.ElementAt(2,3) = model.nodes[currentNode].translation[2];
+		}
+
+		//M = T * R * S
+		vcg::Matrix44d curr = trans * rot * scale;
+		currentMatrix = Matrix44m::Construct(curr);
+	}
+	return currentMatrix;
 }
 
 /**
@@ -48,91 +210,6 @@ void loadMesh(
 	//for each primitive, load it into the mesh
 	for (const tinygltf::Primitive& p : tm.primitives){
 		internal::loadMeshPrimitive(m, model, p);
-	}
-}
-
-namespace internal {
-
-/**
- * @brief Recursive function that visits a node and calls the visit on all its
- * children nodes.
- * Then, if a node is associated to a mesh, the combination of the matrices
- * of the current node and all its parents is set to trm vector
- *
- * @param model
- * @param i: id of the node that is currently visited
- * @param m: the combination of the matrices of all the parents of i
- * @param visited: vector of visited flags
- * @param trm: vector of matrices: it will be updated when a mesh node is found
- */
-void visitNodeAndGetTrMatrix(
-		const tinygltf::Model& model,
-		unsigned int i,
-		Matrix44m m,
-		std::vector<bool>& visited,
-		std::vector<Matrix44m>& trm)
-{
-	visited[i] = true; //current node is visited
-	//if the current node contains a 4x4 matrix
-	if (model.nodes[i].matrix.size() == 16) {
-		vcg::Matrix44d curr(model.nodes[i].matrix.data());
-		curr.transposeInPlace();
-		m = m * Matrix44m::Construct(curr);
-	}
-	//if the current node contains rotation quaternion, scale vector or
-	// translation vector
-	else {
-		//note: if one or more of these are missing, identity is used.
-		//note: final matrix is computed as M = T * R * S, as specified by
-		//gltf docs: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_004_ScenesNodes.md
-		//4x4 matrices associated to rotation, translation and scale
-		vcg::Matrix44d rot;   rot.SetIdentity();
-		vcg::Matrix44d scale; scale.SetIdentity();
-		vcg::Matrix44d trans; trans.SetIdentity();
-
-		//if node contains rotation quaternion
-		if (model.nodes[i].rotation.size() == 4) {
-			vcg::Quaterniond qr(
-					model.nodes[i].rotation[3],
-					model.nodes[i].rotation[0],
-					model.nodes[i].rotation[1],
-					model.nodes[i].rotation[2]);
-			qr.ToMatrix(rot); //set 4x4 matrix quaternion
-		}
-		//if node contains scale
-		if (model.nodes[i].scale.size() == 3) {
-			//set 4x4 matrix scale
-			scale.ElementAt(0,0) = model.nodes[i].scale[0];
-			scale.ElementAt(1,1) = model.nodes[i].scale[1];
-			scale.ElementAt(2,2) = model.nodes[i].scale[2];
-		}
-		//if node contains translation
-		if (model.nodes[i].translation.size() == 3) {
-			//set 4x4 matrix translation
-			trans.ElementAt(0,3) = model.nodes[i].translation[0];
-			trans.ElementAt(1,3) = model.nodes[i].translation[1];
-			trans.ElementAt(2,3) = model.nodes[i].translation[2];
-		}
-
-		//M = T * R * S
-		vcg::Matrix44d curr = trans * rot * scale;
-
-		//combine current matrix with parents
-		m = m * Matrix44m::Construct(curr);
-	}
-
-	//if this node represents a mesh
-	if (model.nodes[i].mesh >= 0){
-		//set the m matrix to trm vector
-		trm[model.nodes[i].mesh] = m;
-	}
-
-	//for each child
-	for (int c : model.nodes[i].children){
-		if (c>=0){ //if it is valid
-			//visit child, passing the current matrix
-			visitNodeAndGetTrMatrix(model, c, m, visited, trm);
-		}
 	}
 }
 

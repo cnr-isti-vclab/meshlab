@@ -10,12 +10,12 @@
 
 namespace gltf {
 
-std::vector<Matrix44m> loadTrMatrices(
+unsigned int getNumberMeshes(
 		const tinygltf::Model& model);
 
-void loadMesh(
-		MeshModel& m,
-		const tinygltf::Mesh& tm,
+void loadMeshes(
+		const std::list<MeshModel*>& meshModelList,
+		std::list<int>& maskList,
 		const tinygltf::Model& model);
 
 namespace internal {
@@ -23,12 +23,25 @@ namespace internal {
 enum GLTF_ATTR_TYPE {POSITION, NORMAL, COLOR_0, TEXCOORD_0, INDICES};
 const std::array<std::string, 4> GLTF_ATTR_STR {"POSITION", "NORMAL", "COLOR_0", "TEXCOORD_0"};
 
-void visitNodeAndGetTrMatrix(
+unsigned int getNumberMeshes(
 		const tinygltf::Model& model,
-		unsigned int i,
-		Matrix44m m,
-		std::vector<bool>& visited,
-		std::vector<Matrix44m>& trm);
+		unsigned int node);
+
+void loadMeshesWhileTraversingNodes(
+		const tinygltf::Model& model,
+		std::list<MeshModel*>::const_iterator& currentMesh,
+		std::list<int>::iterator& currentMask,
+		Matrix44m currentMatrix,
+		unsigned int currentNode);
+
+Matrix44m getCurrentNodeTrMatrix(
+		const tinygltf::Model& model,
+		unsigned int currentNode);
+
+void loadMesh(
+		MeshModel& m,
+		const tinygltf::Mesh& tm,
+		const tinygltf::Model& model);
 
 void loadMeshPrimitive(
 		MeshModel& m,
