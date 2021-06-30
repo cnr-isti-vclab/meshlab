@@ -102,7 +102,7 @@ void IOglTFPlugin::open(
 		if (!warn.empty())
 			reportWarning(QString::fromStdString(warn));
 
-		gltf::loadMeshes(meshModelList, maskList, model);
+		gltf::loadMeshes(meshModelList, maskList, model, cb);
 	}
 	else {
 		wrongOpenFormat(fileFormat);

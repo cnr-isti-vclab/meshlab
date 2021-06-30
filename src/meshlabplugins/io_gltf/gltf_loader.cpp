@@ -65,8 +65,10 @@ unsigned int getNumberMeshes(
 void loadMeshes(
 		const std::list<MeshModel*>& meshModelList,
 		std::list<int>& maskList,
-		const tinygltf::Model& model)
+		const tinygltf::Model& model,
+		vcg::CallBackPos* cb)
 {
+	CallBackProgress progress(100.0/meshModelList.size());
 	maskList.resize(meshModelList.size(), 0);
 	std::list<MeshModel*>::const_iterator meshit = meshModelList.begin();
 	std::list<int>::iterator maskit = maskList.begin();
@@ -78,9 +80,13 @@ void loadMeshes(
 						meshit,
 						maskit,
 						Matrix44m::Identity(),
-						scene.nodes[n]);
+						scene.nodes[n],
+						cb,
+						progress);
 		}
 	}
+	if (cb)
+		cb(100, "GLTF File loaded");
 }
 
 namespace internal {
@@ -128,12 +134,15 @@ void loadMeshesWhileTraversingNodes(
 		std::list<MeshModel*>::const_iterator& currentMesh,
 		std::list<int>::iterator& currentMask,
 		Matrix44m currentMatrix,
-		unsigned int currentNode)
+		unsigned int currentNode,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress)
 {
 	currentMatrix = currentMatrix * getCurrentNodeTrMatrix(model, currentNode);
 	if (model.nodes[currentNode].mesh >= 0) {
+
 		int meshid = model.nodes[currentNode].mesh;
-		loadMesh(**currentMesh, model.meshes[meshid], model);
+		loadMesh(**currentMesh, model.meshes[meshid], model, cb, progress);
 		(*currentMesh)->cm.Tr = currentMatrix;
 		++currentMesh;
 		++currentMask;
@@ -148,7 +157,9 @@ void loadMeshesWhileTraversingNodes(
 						currentMesh,
 						currentMask,
 						currentMatrix,
-						c);
+						c,
+						cb,
+						progress);
 		}
 	}
 }
@@ -225,15 +236,23 @@ Matrix44m getCurrentNodeTrMatrix(
 void loadMesh(
 		MeshModel& m,
 		const tinygltf::Mesh& tm,
-		const tinygltf::Model& model)
+		const tinygltf::Model& model,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress)
 {
 	if (!tm.name.empty())
 		m.setLabel(QString::fromStdString(tm.name));
 
+	double oldStep = progress.step();
+	progress.setStep(oldStep / tm.primitives.size());
+
 	//for each primitive, load it into the mesh
 	for (const tinygltf::Primitive& p : tm.primitives){
-		internal::loadMeshPrimitive(m, model, p);
+		internal::loadMeshPrimitive(m, model, p, cb, progress);
 	}
+	if (cb)
+		cb(progress.progress(), "Loaded all primitives for current mesh.");
+	progress.setStep(oldStep);
 }
 
 /**
@@ -245,8 +264,13 @@ void loadMesh(
 void loadMeshPrimitive(
 		MeshModel& m,
 		const tinygltf::Model& model,
-		const tinygltf::Primitive& p)
+		const tinygltf::Primitive& p,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress)
 {
+	double oldStep = progress.step();
+	progress.setStep(oldStep/GLTF_ATTR_STR.size()+1);
+
 	int textureImg = -1; //id of the texture associated to the material
 	bool vCol = false; //used if a material has a base color for all the primitive
 	vcg::Color4b col; //the base color, to be set to all the vertices
@@ -281,7 +305,10 @@ void loadMeshPrimitive(
 	std::vector<CMeshO::VertexPointer> ivp;
 
 	//load vertex position attribute, sets also the ivp vector
+	if (cb)
+		cb(progress.progress(), "Loading vertex coordinates");
 	loadAttribute(m, ivp, model, p, POSITION);
+	progress.increment();
 
 	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
@@ -290,14 +317,32 @@ void loadMeshPrimitive(
 			v->C() = col;
 	}
 
+	if (cb)
+		cb(progress.progress(), "Loading vertex normals");
 	//load all the other vertex attributes (ivp is not modified by these calls)
 	loadAttribute(m, ivp, model, p, NORMAL);
+	progress.increment();
+
+	if (cb)
+		cb(progress.progress(), "Loading vertex colors");
 	loadAttribute(m, ivp, model, p, COLOR_0);
+	progress.increment();
+	if (cb)
+		cb(progress.progress(), "Loading vertex texcoords");
 	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
+	progress.increment();
+
 
 	//load triangles
+	if (cb)
+		cb(progress.progress(), "Loading triangle indices");
 	loadAttribute(m, ivp, model, p, INDICES);
+	progress.increment();
 
+	if (cb)
+		cb(progress.progress(), "Loaded all attributes of current mesh");
+
+	progress.setStep(oldStep);
 }
 
 /**

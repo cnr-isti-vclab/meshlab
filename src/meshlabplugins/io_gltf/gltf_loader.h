@@ -25,6 +25,7 @@
 #define GLTF_LOADER_H
 
 #include "tinygltf_include.h"
+#include "callback_progress.h"
 
 #include <common/ml_document/mesh_model.h>
 
@@ -36,7 +37,8 @@ unsigned int getNumberMeshes(
 void loadMeshes(
 		const std::list<MeshModel*>& meshModelList,
 		std::list<int>& maskList,
-		const tinygltf::Model& model);
+		const tinygltf::Model& model,
+		vcg::CallBackPos* cb = nullptr);
 
 namespace internal {
 
@@ -52,7 +54,9 @@ void loadMeshesWhileTraversingNodes(
 		std::list<MeshModel*>::const_iterator& currentMesh,
 		std::list<int>::iterator& currentMask,
 		Matrix44m currentMatrix,
-		unsigned int currentNode);
+		unsigned int currentNode,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress);
 
 Matrix44m getCurrentNodeTrMatrix(
 		const tinygltf::Model& model,
@@ -61,12 +65,16 @@ Matrix44m getCurrentNodeTrMatrix(
 void loadMesh(
 		MeshModel& m,
 		const tinygltf::Mesh& tm,
-		const tinygltf::Model& model);
+		const tinygltf::Model& model,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress);
 
 void loadMeshPrimitive(
 		MeshModel& m,
 		const tinygltf::Model& model,
-		const tinygltf::Primitive& p);
+		const tinygltf::Primitive& p,
+		vcg::CallBackPos* cb,
+		CallBackProgress& progress);
 
 void loadAttribute(
 		MeshModel& m,

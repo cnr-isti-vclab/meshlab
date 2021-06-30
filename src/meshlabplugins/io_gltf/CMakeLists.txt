@@ -7,6 +7,7 @@ if(TARGET external-tinygltf)
 
 	set(HEADERS
 		io_gltf.h
+		callback_progress.h
 		tinygltf_include.h
 		gltf_loader.h)
 
