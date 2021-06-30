@@ -142,7 +142,7 @@ void loadMeshesWhileTraversingNodes(
 	if (model.nodes[currentNode].mesh >= 0) {
 
 		int meshid = model.nodes[currentNode].mesh;
-		loadMesh(**currentMesh, model.meshes[meshid], model, cb, progress);
+		loadMesh(**currentMesh, *currentMask, model.meshes[meshid], model, cb, progress);
 		(*currentMesh)->cm.Tr = currentMatrix;
 		++currentMesh;
 		++currentMask;
@@ -235,6 +235,7 @@ Matrix44m getCurrentNodeTrMatrix(
  */
 void loadMesh(
 		MeshModel& m,
+		int& mask,
 		const tinygltf::Mesh& tm,
 		const tinygltf::Model& model,
 		vcg::CallBackPos* cb,
@@ -248,7 +249,7 @@ void loadMesh(
 
 	//for each primitive, load it into the mesh
 	for (const tinygltf::Primitive& p : tm.primitives){
-		internal::loadMeshPrimitive(m, model, p, cb, progress);
+		internal::loadMeshPrimitive(m, mask, model, p, cb, progress);
 	}
 	if (cb)
 		cb(progress.progress(), "Loaded all primitives for current mesh.");
@@ -263,6 +264,7 @@ void loadMesh(
  */
 void loadMeshPrimitive(
 		MeshModel& m,
+		int& mask,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p,
 		vcg::CallBackPos* cb,
@@ -312,6 +314,7 @@ void loadMeshPrimitive(
 
 	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
+		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
 		for (auto v : ivp)
 			v->C() = col;
@@ -320,16 +323,22 @@ void loadMeshPrimitive(
 	if (cb)
 		cb(progress.progress(), "Loading vertex normals");
 	//load all the other vertex attributes (ivp is not modified by these calls)
-	loadAttribute(m, ivp, model, p, NORMAL);
+	bool res = loadAttribute(m, ivp, model, p, NORMAL);
+	if (res)
+		mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 	progress.increment();
 
 	if (cb)
 		cb(progress.progress(), "Loading vertex colors");
-	loadAttribute(m, ivp, model, p, COLOR_0);
+	res = loadAttribute(m, ivp, model, p, COLOR_0);
+	if (res)
+		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 	progress.increment();
 	if (cb)
 		cb(progress.progress(), "Loading vertex texcoords");
-	loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
+	res = loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
+	if (res)
+		mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
 	progress.increment();
 
 
@@ -360,8 +369,9 @@ void loadMeshPrimitive(
  * @param p
  * @param attr
  * @param textID: id of the texture in case of the attr is TEXCOORD_0
+ * @return true if the attribute has been loaded
  */
-void loadAttribute(
+bool loadAttribute(
 		MeshModel& m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const tinygltf::Model& model,
@@ -369,6 +379,7 @@ void loadAttribute(
 		GLTF_ATTR_TYPE attr,
 		int textID)
 {
+	bool attrLoaded = false;
 	const tinygltf::Accessor* accessor = nullptr;
 
 	//get the accessor associated to the attribute
@@ -417,30 +428,35 @@ void loadAttribute(
 			//get the starting point of the data as float pointer
 			const float* posArray = (const float*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
+			attrLoaded = true;
 		}
 		//if data is double
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE) {
 			//get the starting point of the data as double pointer
 			const double* posArray = (const double*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
+			attrLoaded = true;
 		}
 		//if data is ubyte
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
 			//get the starting point of the data as uchar pointer
 			const unsigned char* triArray = (const unsigned char*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			attrLoaded = true;
 		}
 		//if data is ushort
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
 			//get the starting point of the data as ushort pointer
 			const unsigned short* triArray = (const unsigned short*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			attrLoaded = true;
 		}
 		//if data is uint
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
 			//get the starting point of the data as uint pointer
 			const unsigned int* triArray = (const unsigned int*) (posdata.data() + posOffset);
 			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			attrLoaded = true;
 		}
 	}
 	//if accessor not found and attribute is indices, it means that
@@ -449,8 +465,9 @@ void loadAttribute(
 	else if (attr == INDICES) {
 		//this case is managed when passing nullptr as data
 		populateAttr<unsigned char>(attr, m, ivp, nullptr, 0);
+		attrLoaded = true;
 	}
-
+	return attrLoaded;
 }
 
 /**

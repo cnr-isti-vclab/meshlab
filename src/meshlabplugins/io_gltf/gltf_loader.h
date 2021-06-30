@@ -64,6 +64,7 @@ Matrix44m getCurrentNodeTrMatrix(
 
 void loadMesh(
 		MeshModel& m,
+		int& mask,
 		const tinygltf::Mesh& tm,
 		const tinygltf::Model& model,
 		vcg::CallBackPos* cb,
@@ -71,12 +72,13 @@ void loadMesh(
 
 void loadMeshPrimitive(
 		MeshModel& m,
+		int& mask,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress);
 
-void loadAttribute(
+bool loadAttribute(
 		MeshModel& m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const tinygltf::Model& model,
