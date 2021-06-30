@@ -3,79 +3,7 @@
 #include <regex>
 #include <common/mlexception.h>
 
-/***************
-* Declarations *
-***************/
-
-void visitNode(
-		const tinygltf::Model& model,
-		unsigned int i,
-		Matrix44m m,
-		std::vector<bool>& visited,
-		std::vector<Matrix44m>& trm);
-
-enum GLTF_ATTR_TYPE {POSITION, NORMAL, COLOR_0, TEXCOORD_0, INDICES};
-const std::array<std::string, 4> GLTF_ATTR_STR {"POSITION", "NORMAL", "COLOR_0", "TEXCOORD_0"};
-
-void loadMeshPrimitive(
-		MeshModel& m,
-		const tinygltf::Model& model,
-		const tinygltf::Primitive& p);
-
-void loadAttribute(
-		MeshModel& m,
-		std::vector<CMeshO::VertexPointer>& ivp,
-		const tinygltf::Model& model,
-		const tinygltf::Primitive& p,
-		GLTF_ATTR_TYPE attr,
-		int textID = -1);
-
-template <typename Scalar>
-void populateAttr(
-		GLTF_ATTR_TYPE attr,
-		MeshModel&m,
-		std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* array,
-		unsigned int number,
-		int textID = -1);
-
-template <typename Scalar>
-void populateVertices(
-		MeshModel& m,
-		std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* posArray,
-		unsigned int vertNumber);
-
-template <typename Scalar>
-void populateVNormals(
-		const std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* normArray,
-		unsigned int vertNumber);
-
-template <typename Scalar>
-void populateVColors(
-		const std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* colorArray,
-		unsigned int vertNumber,
-		int nElemns);
-
-template <typename Scalar>
-void populateVTextCoords(
-		const std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* textCoordArray,
-		unsigned int vertNumber,
-		int textID);
-
-template <typename Scalar>
-void populateTriangles(
-		MeshModel&m,
-		const std::vector<CMeshO::VertexPointer>& ivp,
-		const Scalar* triArray,
-		unsigned int triNumber);
-
-/**************
-* Definitions *
-**************/
+namespace gltf {
 
 /**
  * @brief Loads the list of rotation matrices for each mesh contained in the
@@ -83,7 +11,7 @@ void populateTriangles(
  * @param model
  * @return a vector containing N 4x4 matrices
  */
-std::vector<Matrix44m> gltf::loadTrMatrices(
+std::vector<Matrix44m> loadTrMatrices(
 		const tinygltf::Model& model)
 {
 	std::vector<Matrix44m> trm(model.meshes.size());
@@ -95,11 +23,35 @@ std::vector<Matrix44m> gltf::loadTrMatrices(
 			Matrix44m startM = Matrix44m::Identity();
 
 			//recursive call: it will visit all the children of ith node
-			visitNode(model, i, startM, visited, trm);
+			internal::visitNodeAndGetTrMatrix(model, i, startM, visited, trm);
 		}
 	}
 	return trm;
 }
+
+/**
+ * @brief loads a mesh from gltf file.
+ * It merges all the primitives in the loaded mesh.
+ *
+ * @param m: the mesh that will contain the loaded mesh
+ * @param tm: tinygltf structure of the mesh to load
+ * @param model: tinygltf file
+ */
+void loadMesh(
+		MeshModel& m,
+		const tinygltf::Mesh& tm,
+		const tinygltf::Model& model)
+{
+	if (!tm.name.empty())
+		m.setLabel(QString::fromStdString(tm.name));
+
+	//for each primitive, load it into the mesh
+	for (const tinygltf::Primitive& p : tm.primitives){
+		internal::loadMeshPrimitive(m, model, p);
+	}
+}
+
+namespace internal {
 
 /**
  * @brief Recursive function that visits a node and calls the visit on all its
@@ -113,7 +65,7 @@ std::vector<Matrix44m> gltf::loadTrMatrices(
  * @param visited: vector of visited flags
  * @param trm: vector of matrices: it will be updated when a mesh node is found
  */
-void visitNode(
+void visitNodeAndGetTrMatrix(
 		const tinygltf::Model& model,
 		unsigned int i,
 		Matrix44m m,
@@ -179,30 +131,8 @@ void visitNode(
 	for (int c : model.nodes[i].children){
 		if (c>=0){ //if it is valid
 			//visit child, passing the current matrix
-			visitNode(model, c, m, visited, trm);
+			visitNodeAndGetTrMatrix(model, c, m, visited, trm);
 		}
-	}
-}
-
-/**
- * @brief loads a mesh from gltf file.
- * It merges all the primitives in the loaded mesh.
- *
- * @param m: the mesh that will contain the loaded mesh
- * @param tm: tinygltf structure of the mesh to load
- * @param model: tinygltf file
- */
-void gltf::loadMesh(
-		MeshModel& m,
-		const tinygltf::Mesh& tm,
-		const tinygltf::Model& model)
-{
-	if (!tm.name.empty())
-		m.setLabel(QString::fromStdString(tm.name));
-
-	//for each primitive, load it into the mesh
-	for (const tinygltf::Primitive& p : tm.primitives){
-		loadMeshPrimitive(m, model, p);
 	}
 }
 
@@ -503,3 +433,6 @@ void populateTriangles(
 		}
 	}
 }
+
+} //namespace gltf::internal
+} //namespace gltf
