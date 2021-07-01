@@ -38,6 +38,7 @@ void loadMeshes(
 		const std::list<MeshModel*>& meshModelList,
 		std::list<int>& maskList,
 		const tinygltf::Model& model,
+		bool loadInSingleLayer,
 		vcg::CallBackPos* cb = nullptr);
 
 namespace internal {
@@ -55,6 +56,7 @@ void loadMeshesWhileTraversingNodes(
 		std::list<int>::iterator& currentMask,
 		Matrix44m currentMatrix,
 		unsigned int currentNode,
+		bool loadInSingleLayer,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress);
 
@@ -67,6 +69,8 @@ void loadMesh(
 		int& mask,
 		const tinygltf::Mesh& tm,
 		const tinygltf::Model& model,
+		bool loadInSingleLayer,
+		const Matrix44m& transf,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress);
 
@@ -75,6 +79,8 @@ void loadMeshPrimitive(
 		int& mask,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p,
+		bool loadInSingleLayer,
+		const Matrix44m& transf,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress);
 

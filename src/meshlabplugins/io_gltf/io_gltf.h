@@ -44,6 +44,9 @@ public:
 			int& capability,
 			int& defaultBits) const;
 
+	RichParameterList initPreOpenParameter(
+			const QString& format) const;
+
 	unsigned int numberMeshesContainedInFile(
 			const QString& format,
 			const QString& fileName,

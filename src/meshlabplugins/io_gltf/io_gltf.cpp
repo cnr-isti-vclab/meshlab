@@ -58,12 +58,29 @@ void IOglTFPlugin::exportMaskCapability(
 	return;
 }
 
+RichParameterList IOglTFPlugin::initPreOpenParameter(
+		const QString& format) const
+{
+	RichParameterList parameters;
+	if(format.toUpper() == tr("GLTF"))
+		parameters.addParam(RichBool(
+				"load_in_a_single_layer", false, "Load in a single layer",
+				"GLTF files may contain more than one mesh. If this parameter is "
+				"set to false, all the meshes contained in the file will be "
+				"merged in a single mesh."));
+	return parameters;
+}
+
 unsigned int IOglTFPlugin::numberMeshesContainedInFile(
 		const QString& format,
 		const QString& fileName,
-		const RichParameterList&) const
+		const RichParameterList& parameters) const
 {
 	if (format.toUpper() == "GLTF"){
+		if (parameters.getBool("load_in_a_single_layer")){
+			//all the meshes loaded from the file must be placed in a single layer
+			return 1;
+		}
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
 		std::string err;
@@ -91,6 +108,8 @@ void IOglTFPlugin::open(
 		vcg::CallBackPos* cb)
 {
 	if (fileFormat.toUpper() == "GLTF"){
+		bool loadInSingleLayer = params.getBool("load_in_a_single_layer");
+
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
 		std::string err;
@@ -102,7 +121,7 @@ void IOglTFPlugin::open(
 		if (!warn.empty())
 			reportWarning(QString::fromStdString(warn));
 
-		gltf::loadMeshes(meshModelList, maskList, model, cb);
+		gltf::loadMeshes(meshModelList, maskList, model, loadInSingleLayer, cb);
 	}
 	else {
 		wrongOpenFormat(fileFormat);

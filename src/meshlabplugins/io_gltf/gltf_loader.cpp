@@ -66,6 +66,7 @@ void loadMeshes(
 		const std::list<MeshModel*>& meshModelList,
 		std::list<int>& maskList,
 		const tinygltf::Model& model,
+		bool loadInSingleLayer,
 		vcg::CallBackPos* cb)
 {
 	CallBackProgress progress(100.0/meshModelList.size());
@@ -81,6 +82,7 @@ void loadMeshes(
 						maskit,
 						Matrix44m::Identity(),
 						scene.nodes[n],
+						loadInSingleLayer,
 						cb,
 						progress);
 		}
@@ -135,6 +137,7 @@ void loadMeshesWhileTraversingNodes(
 		std::list<int>::iterator& currentMask,
 		Matrix44m currentMatrix,
 		unsigned int currentNode,
+		bool loadInSingleLayer,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress)
 {
@@ -142,10 +145,20 @@ void loadMeshesWhileTraversingNodes(
 	if (model.nodes[currentNode].mesh >= 0) {
 
 		int meshid = model.nodes[currentNode].mesh;
-		loadMesh(**currentMesh, *currentMask, model.meshes[meshid], model, cb, progress);
-		(*currentMesh)->cm.Tr = currentMatrix;
-		++currentMesh;
-		++currentMask;
+		loadMesh(
+				**currentMesh,
+				*currentMask,
+				model.meshes[meshid],
+				model,
+				loadInSingleLayer,
+				currentMatrix,
+				cb,
+				progress);
+		if (!loadInSingleLayer) {
+			(*currentMesh)->cm.Tr = currentMatrix;
+			++currentMesh;
+			++currentMask;
+		}
 	}
 
 	//for each child
@@ -158,6 +171,7 @@ void loadMeshesWhileTraversingNodes(
 						currentMask,
 						currentMatrix,
 						c,
+						loadInSingleLayer,
 						cb,
 						progress);
 		}
@@ -238,6 +252,8 @@ void loadMesh(
 		int& mask,
 		const tinygltf::Mesh& tm,
 		const tinygltf::Model& model,
+		bool loadInSingleLayer,
+		const Matrix44m& transf,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress)
 {
@@ -249,7 +265,15 @@ void loadMesh(
 
 	//for each primitive, load it into the mesh
 	for (const tinygltf::Primitive& p : tm.primitives){
-		internal::loadMeshPrimitive(m, mask, model, p, cb, progress);
+		internal::loadMeshPrimitive(
+					m,
+					mask,
+					model,
+					p,
+					loadInSingleLayer,
+					transf,
+					cb,
+					progress);
 	}
 	if (cb)
 		cb(progress.progress(), "Loaded all primitives for current mesh.");
@@ -267,6 +291,8 @@ void loadMeshPrimitive(
 		int& mask,
 		const tinygltf::Model& model,
 		const tinygltf::Primitive& p,
+		bool loadInSingleLayer,
+		const Matrix44m& transf,
 		vcg::CallBackPos* cb,
 		CallBackProgress& progress)
 {
@@ -312,6 +338,14 @@ void loadMeshPrimitive(
 	loadAttribute(m, ivp, model, p, POSITION);
 	progress.increment();
 
+	//if all the meshes are loaded in a single layer, I need to apply
+	//the transformation matrix to the loaded coordinates
+	if (loadInSingleLayer){
+		for (CMeshO::VertexPointer p : ivp){
+			p->P() = transf * p->P();
+		}
+	}
+
 	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
@@ -324,8 +358,17 @@ void loadMeshPrimitive(
 		cb(progress.progress(), "Loading vertex normals");
 	//load all the other vertex attributes (ivp is not modified by these calls)
 	bool res = loadAttribute(m, ivp, model, p, NORMAL);
-	if (res)
+	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+		//if all the meshes are loaded in a single layer, I need to apply
+		//the transformation matrix to the loaded coordinates
+		if (loadInSingleLayer){
+			Matrix33m mat33(transf,3);
+			for (CMeshO::VertexPointer p : ivp){
+				p->N() = mat33 * p->N();
+			}
+		}
+	}
 	progress.increment();
 
 	if (cb)
