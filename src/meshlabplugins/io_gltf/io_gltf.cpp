@@ -34,7 +34,7 @@ QString IOglTFPlugin::pluginName() const
 
 std::list<FileFormat> IOglTFPlugin::importFormats() const
 {
-	return { FileFormat("GL Transmission Format", tr("GLTF")) };
+	return { FileFormat("GL Transmission Format 2.0", tr("GLTF")) };
 }
 
 /*
