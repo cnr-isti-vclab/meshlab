@@ -58,17 +58,9 @@ FilterLayerPlugin::FilterLayerPlugin()
 		FP_IMPORT_CAMERAS
 	};
 
-	QCoreApplication* app = QCoreApplication::instance();
-
 	for(ActionIDType tt: types()) {
 		QAction* act = new QAction(filterName(tt), this);
 		actionList.push_back(act);
-
-		if (app != nullptr) {
-			if(tt==FP_DELETE_MESH){
-				act->setShortcut(Qt::CTRL + Qt::Key_D);
-			}
-		}
 	}
 }
 
