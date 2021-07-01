@@ -58,8 +58,10 @@ FilterLayerPlugin::FilterLayerPlugin()
 		FP_IMPORT_CAMERAS
 	};
 
-	for(ActionIDType tt: types())
-		actionList.push_back(new QAction(filterName(tt), this));
+	for(ActionIDType tt: types()) {
+		QAction* act = new QAction(filterName(tt), this);
+		actionList.push_back(act);
+	}
 }
 
 QString FilterLayerPlugin::pluginName() const

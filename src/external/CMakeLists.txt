@@ -69,6 +69,9 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 	# structure-synth - optional, for filter_ssynth
 	include(${CMAKE_CURRENT_SOURCE_DIR}/ssynth.cmake)
 
+	# tiny glTF - optional, for io_gltf
+	include(${CMAKE_CURRENT_SOURCE_DIR}/tinygltf.cmake)
+
 	# u3d - optional, for io_u3d
 	include(${CMAKE_CURRENT_SOURCE_DIR}/u3d.cmake)
 
