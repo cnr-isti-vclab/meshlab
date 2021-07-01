@@ -46,6 +46,8 @@ class RichParameterListFrame : public QFrame
 {
 	Q_OBJECT
 public:
+	typedef std::map<QString, RichParameterWidget *>::iterator iterator;
+
 	RichParameterListFrame(const RichParameterList& curParSet, const RichParameterList& defParSet, QWidget *p, QWidget *gla=0);
 	RichParameterListFrame(const RichParameterList& curParSet, QWidget *p, QWidget *gla=0);
 	RichParameterListFrame(const RichParameter& curPar, const RichParameter& defPar, QWidget *p, QWidget *gla=0);
@@ -58,8 +60,10 @@ public:
 
 	void toggleHelp();
 
-	RichParameterWidget* at(unsigned int i);
 	unsigned int size() const;
+
+	iterator begin();
+	iterator end();
 
 signals:
 	void parameterChanged();
@@ -78,7 +82,7 @@ private:
 			const RichParameter& pd,
 			const RichParameter& def);
 
-	QVector<RichParameterWidget *> stdfieldwidgets;
+	std::map<QString, RichParameterWidget *> stdfieldwidgets;
 	QVector<QLabel *> helpList;
 
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.

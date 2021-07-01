@@ -76,17 +76,15 @@ RichParameterListFrame::~RichParameterListFrame()
 void RichParameterListFrame::writeValuesOnParameterList(RichParameterList &curParSet)
 {
 	assert(curParSet.size() == (unsigned int)stdfieldwidgets.size());
-	QVector<RichParameterWidget*>::iterator it = stdfieldwidgets.begin();
-	for(const RichParameter& p : curParSet) {
-		curParSet.setValue(p.name(),(*it)->widgetValue());
-		++it;
+	for(auto& p : stdfieldwidgets) {
+		curParSet.setValue(p.first,(p.second)->widgetValue());
 	}
 }
 
 void RichParameterListFrame::resetValues()
 {
-	for(unsigned int i  =0; i < (unsigned int)stdfieldwidgets.size(); ++i) {
-		stdfieldwidgets[i]->resetValue();
+	for(auto& p : stdfieldwidgets) {
+		p.second->resetValue();
 	}
 }
 
@@ -98,14 +96,19 @@ void RichParameterListFrame::toggleHelp()
 	adjustSize();
 }
 
-RichParameterWidget* RichParameterListFrame::at(unsigned int i)
-{
-	return stdfieldwidgets.at(i);
-}
-
 unsigned int RichParameterListFrame::size() const
 {
 	return stdfieldwidgets.size();
+}
+
+RichParameterListFrame::iterator RichParameterListFrame::begin()
+{
+	return stdfieldwidgets.begin();
+}
+
+RichParameterListFrame::iterator RichParameterListFrame::end()
+{
+	return stdfieldwidgets.end();
 }
 
 void RichParameterListFrame::showAdvancedParameters(bool b)
@@ -148,7 +151,7 @@ void RichParameterListFrame::loadFrameContent(
 		for (const RichParameter* fpi : p.second){
 			const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 			RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
-			stdfieldwidgets.push_back(wd);
+			stdfieldwidgets[fpi->name()] = wd;
 			helpList.push_back(wd->helpLab);
 			wd->addWidgetToGridLayout(glay,i++);
 		}
@@ -173,7 +176,7 @@ void RichParameterListFrame::loadFrameContent(
 			for (const RichParameter* fpi : p.second){
 				const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 				RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
-				stdfieldwidgets.push_back(wd);
+				stdfieldwidgets[fpi->name()] = wd;
 				helpList.push_back(wd->helpLab);
 				wd->addWidgetToGridLayout(flay,j++);
 			}

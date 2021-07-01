@@ -1278,8 +1278,8 @@ void DecoratorParamsTreeWidget::save()
 {
 	apply();
 	RichParameterList& current = mainWin->currentGlobalPars();
-	for(unsigned int ii = 0; ii < frame->size();++ii) {
-		RichParameter& rp = current.getParameterByName(frame->at(ii)->parameterName());
+	for(auto& p : *frame) {
+		RichParameter& rp = current.getParameterByName(p.first);
 		QDomDocument doc("MeshLabSettings");
 		doc.appendChild(rp.fillToXMLDocument(doc));
 		QString docstring =  doc.toString();
@@ -1291,18 +1291,18 @@ void DecoratorParamsTreeWidget::save()
 
 void DecoratorParamsTreeWidget::reset()
 {
-	for(unsigned int ii = 0;ii < frame->size();++ii)
-		frame->at(ii)->resetValue();
+	for(auto& p : *frame)
+		p.second->resetValue();
 	apply();
 }
 
 void DecoratorParamsTreeWidget::apply()
 {
 	RichParameterList& current = mainWin->currentGlobalPars();
-	for(unsigned int ii = 0;ii < frame->size();++ii) {
+	for(auto& p : *frame) {
 		current.setValue(
-					frame->at(ii)->parameterName(),
-					frame->at(ii)->widgetValue());
+					p.first,
+					p.second->widgetValue());
 	}
 	mainWin->updateCustomSettings();
 	if (mainWin->GLA())
@@ -1311,9 +1311,9 @@ void DecoratorParamsTreeWidget::apply()
 
 void DecoratorParamsTreeWidget::load()
 {
-	for(unsigned int ii = 0; ii < frame->size();++ii) {
-		QString pn = frame->at(ii)->parameterName();
-		frame->at(ii)->setWidgetValue(tmpSet.getParameterByName(pn).value());
+	for(auto& p : *frame) {
+		QString pn = p.first;
+		p.second->setWidgetValue(tmpSet.getParameterByName(pn).value());
 	}
 	apply();
 }

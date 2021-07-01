@@ -87,7 +87,7 @@ void SettingDialog::save()
 void SettingDialog::apply()
 {
 	assert(frame.size() == 1);
-	currentParameter->setValue(frame.at(0)->widgetValue());
+	currentParameter->setValue(frame.begin()->second->widgetValue());
 	emit applySettingSignal(*currentParameter);
 }
 
@@ -96,13 +96,13 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(currentParameter->name()));
 
 	assert(frame.size() == 1);
-	frame.at(0)->setValue(defaultParameter.value());
+	frame.begin()->second->setValue(defaultParameter.value());
 	apply();
 }
 
 void SettingDialog::load()
 {
 	assert(frame.size() == 1);
-	frame.at(0)->setWidgetValue(savedParameter->value());
+	frame.begin()->second->setWidgetValue(savedParameter->value());
 	apply();
 }
