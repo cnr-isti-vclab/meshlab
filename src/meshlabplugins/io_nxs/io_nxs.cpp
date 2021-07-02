@@ -84,7 +84,7 @@ RichParameterList IONXSPlugin::initSaveParameter(
 	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
 		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
 		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
-		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality", true));
+		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
 		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)", true));
 		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
 		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
