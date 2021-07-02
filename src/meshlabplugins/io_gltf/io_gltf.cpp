@@ -34,7 +34,10 @@ QString IOglTFPlugin::pluginName() const
 
 std::list<FileFormat> IOglTFPlugin::importFormats() const
 {
-	return { FileFormat("GL Transmission Format 2.0", tr("GLTF")) };
+	return {
+		FileFormat("GL Transmission Format 2.0", tr("GLTF")),
+		FileFormat("Binary GL Transmission Format 2.0", tr("GLB")),
+	};
 }
 
 /*
@@ -62,7 +65,7 @@ RichParameterList IOglTFPlugin::initPreOpenParameter(
 		const QString& format) const
 {
 	RichParameterList parameters;
-	if(format.toUpper() == tr("GLTF"))
+	if(format.toUpper() == tr("GLTF") || format.toUpper() == tr("GLB"))
 		parameters.addParam(RichBool(
 				"load_in_a_single_layer", false, "Load in a single layer",
 				"GLTF files may contain more than one mesh. If this parameter is "
@@ -76,7 +79,7 @@ unsigned int IOglTFPlugin::numberMeshesContainedInFile(
 		const QString& fileName,
 		const RichParameterList& parameters) const
 {
-	if (format.toUpper() == "GLTF"){
+	if (format.toUpper() == "GLTF" || format.toUpper() == tr("GLB")){
 		if (parameters.getBool("load_in_a_single_layer")){
 			//all the meshes loaded from the file must be placed in a single layer
 			return 1;
@@ -85,7 +88,10 @@ unsigned int IOglTFPlugin::numberMeshesContainedInFile(
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
-		loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
+		if (format.toUpper() == "GLTF")
+			loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
+		else
+			loader.LoadBinaryFromFile(&model, &err, &warn, fileName.toStdString().c_str());
 		if (err.empty()) {
 			return gltf::getNumberMeshes(model);
 		}
@@ -107,14 +113,17 @@ void IOglTFPlugin::open(
 		const RichParameterList & params,
 		vcg::CallBackPos* cb)
 {
-	if (fileFormat.toUpper() == "GLTF"){
+	if (fileFormat.toUpper() == "GLTF" || fileFormat.toUpper() == tr("GLB")){
 		bool loadInSingleLayer = params.getBool("load_in_a_single_layer");
 
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
-		loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
+		if (fileFormat.toUpper() == "GLTF")
+			loader.LoadASCIIFromFile(&model, &err, &warn, fileName.toStdString().c_str());
+		else
+			loader.LoadBinaryFromFile(&model, &err, &warn, fileName.toStdString().c_str());
 
 		if (!err.empty())
 			throw MLException("Failed opening gltf file: " + QString::fromStdString(err));

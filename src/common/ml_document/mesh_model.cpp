@@ -84,14 +84,14 @@ QString MeshModel::relativePathName(const QString& path) const
  * @brief Starting from the (still unloaded) textures contained in the contained
  * CMeshO, loads the textures in the map of QImages contained in the MeshModel.
  *
- * The contained CMeshO will have a list of texture names like ":filename.png",
+ * The contained CMeshO will have a list of texture names like "filename.png",
  * and these names will be mapped with the actual loaded image in the map
  * "textures".
  *
- * When a texture is not found, a dummy texture will be used (":dummy.png").
+ * When a texture is not found, a dummy texture will be used (":/img/dummy.png").
  *
  * Returns the list of non-loaded textures that have been modified with
- * ":dummy.png" in the contained mesh.
+ * ":/img/dummy.png" in the contained mesh.
  */
 std::list<std::string> MeshModel::loadTextures(
 		GLLogStream* log,

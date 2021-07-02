@@ -321,10 +321,30 @@ void loadMeshPrimitive(
 		}
 	}
 	if (textureImg != -1) { //if we found a texture
+		const tinygltf::Image& img = model.images[model.textures[textureImg].source];
 		//add the path of the texture to the mesh
-		std::string uri = model.images[model.textures[textureImg].source].uri;
+		std::string uri = img.uri;
 		uri = std::regex_replace(uri, std::regex("\\%20"), " ");
-		m.cm.textures.push_back(uri);
+
+		if (img.image.size() > 0) {
+			if (img.bits == 8 || img.component == 4) {
+				QImage qimg(img.image.data(), img.width, img.height, QImage::Format_RGBA8888);
+				if (!qimg.isNull()){
+					QImage copy = qimg.copy();
+					m.addTexture(uri, copy);
+				}
+				else {
+					m.cm.textures.push_back(uri);
+				}
+			}
+			else {
+				m.cm.textures.push_back(uri);
+			}
+		}
+		else {
+			//set to load later (could be format non-supported by tinygltf)
+			m.cm.textures.push_back(uri);
+		}
 		//set the id of the texture: we need it when set uv coords
 		textureImg = m.cm.textures.size()-1;
 	}
