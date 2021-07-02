@@ -72,7 +72,7 @@ void IONXSPlugin::exportMaskCapability(
 {
 	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
 		capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
-		defaultBits = capability;
+		defaultBits = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
 	}
 }
 
