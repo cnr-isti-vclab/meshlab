@@ -52,22 +52,25 @@ bool VarianceShadowMappingBlur::init()
     if(!this->initGlew() || !this->initSetup())
         return false;
 
-    if(!compileAndLink(
-            this->_depthShaderProgram,
-            this->_depthVert,
-            this->_depthFrag,
-            meshlab::defaultShadersPath() + "/decorate_shadow/vsmb/depthVSM") ||
-       !compileAndLink(
-            this->_shadowMappingProgram,
-            this->_shadowMappingVert,
-            this->_shadowMappingFrag,
-            meshlab::defaultShadersPath() + "/shaders/decorate_shadow/vsmb/objectVSM") ||
-       !compileAndLink(
-            this->_blurShaderProgram,
-            this->_blurVert,
-            this->_blurFrag,
-            meshlab::defaultShadersPath() + "/shaders/decorate_shadow/vsmb/blurVSM"))
+    bool comp_depth = compileAndLink(
+                this->_depthShaderProgram,
+                this->_depthVert,
+                this->_depthFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/vsmb/depthVSM");
+    bool comp_object = compileAndLink(
+                this->_shadowMappingProgram,
+                this->_shadowMappingVert,
+                this->_shadowMappingFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/vsmb/objectVSM");
+    bool comp_blur = compileAndLink(
+                this->_blurShaderProgram,
+                this->_blurVert,
+                this->_blurFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/vsmb/blurVSM");
+
+    if(!comp_depth || !comp_object || !comp_blur){
         return false;
+    }
     return true;
 }
 

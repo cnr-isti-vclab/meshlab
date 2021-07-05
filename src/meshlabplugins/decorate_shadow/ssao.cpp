@@ -89,22 +89,25 @@ bool SSAO::init()
     if(!this->initGlew() || !this->initSetup())
         return false;
 
-    if(!compileAndLink(
-        this->_ssaoShaderProgram,
-        this->_ssaoVert,
-        this->_ssaoFrag,
-        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/ssao") ||
-        !compileAndLink(
-        this->_normalMapShaderProgram,
-        this->_normalMapVert,
-        this->_normalMapFrag,
-        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/normalMap") ||
-        !compileAndLink(
-        this->_blurShaderProgram,
-        this->_blurVert,
-        this->_blurFrag,
-        meshlab::defaultShadersPath() + "/decorate_shadow/ssao/blur"))
+    bool comp_ssao = compileAndLink(
+                this->_ssaoShaderProgram,
+                this->_ssaoVert,
+                this->_ssaoFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/ssao/ssao");
+    bool comp_normalMap = compileAndLink(
+                this->_normalMapShaderProgram,
+                this->_normalMapVert,
+                this->_normalMapFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/ssao/normalMap");
+    bool comp_blur = compileAndLink(
+                this->_blurShaderProgram,
+                this->_blurVert,
+                this->_blurFrag,
+                meshlab::defaultShadersPath() + "/decorate_shadow/ssao/blur");
+
+    if(!comp_ssao || !comp_normalMap || !comp_blur) {
         return false;
+    }
     return true;
 }
 
