@@ -71,8 +71,8 @@ void IONXSPlugin::exportMaskCapability(
 		int& defaultBits) const
 {
 	if (format.toUpper() == "NXS" || format.toUpper() == "NXZ"){
-		capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
-		defaultBits = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+		capability = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL | vcg::tri::io::Mask::IOM_VERTTEXCOORD | vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		defaultBits = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTTEXCOORD | vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 	}
 }
 
@@ -133,7 +133,8 @@ void IONXSPlugin::saveNxs(
 {
 	bool has_colors = mask & vcg::tri::io::Mask::IOM_VERTCOLOR;
 	bool has_normals = mask & vcg::tri::io::Mask::IOM_VERTNORMAL;
-	bool has_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+	bool has_v_textures = mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+	bool has_f_textures = mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 
 	//parameters:
 	int node_size = params.getInt("node_faces");
@@ -165,7 +166,7 @@ void IONXSPlugin::saveNxs(
 	if(has_colors) {
 		components |= NexusBuilder::COLORS;
 	}
-	if(has_textures) {
+	if(has_v_textures || has_f_textures) {
 		components |= NexusBuilder::TEXTURES;
 	}
 
@@ -205,7 +206,7 @@ void IONXSPlugin::saveNxs(
 
 		std::vector<QImage> textures;
 
-		loader->load(&m.cm, has_colors, has_normals, has_textures);
+		loader->load(&m.cm, has_colors, has_normals, has_v_textures, has_f_textures);
 		stream->load(loader);
 
 		if((components & NexusBuilder::TEXTURES)) {
