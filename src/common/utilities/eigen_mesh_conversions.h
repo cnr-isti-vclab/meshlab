@@ -25,6 +25,7 @@
 #define MESHLAB_EIGEN_MESH_CONVERSIONS_H
 
 #include <Eigen/Core>
+#include <list>
 #include "../ml_document/cmesh.h"
 
 typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 1> EigenVectorXm;
@@ -39,6 +40,15 @@ namespace meshlab {
 CMeshO meshFromMatrices(
 		const EigenMatrixX3m& vertices,
 		const Eigen::MatrixX3i& faces = Eigen::MatrixX3i(),
+		const EigenMatrixX3m& vertexNormals = EigenMatrixX3m(),
+		const EigenMatrixX3m& faceNormals = EigenMatrixX3m(),
+		const EigenVectorXm& vertexQuality = EigenVectorXm(),
+		const EigenVectorXm& faceQuality = EigenVectorXm());
+
+// From eigen to polygonal CMeshO
+CMeshO polyMeshFromMatrices(
+		const EigenMatrixX3m& vertices,
+		const std::list<EigenVectorXui>& faces,
 		const EigenMatrixX3m& vertexNormals = EigenMatrixX3m(),
 		const EigenMatrixX3m& faceNormals = EigenMatrixX3m(),
 		const EigenVectorXm& vertexQuality = EigenVectorXm(),

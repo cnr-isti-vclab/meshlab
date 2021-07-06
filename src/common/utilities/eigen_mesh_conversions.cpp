@@ -23,6 +23,43 @@
 
 #include "eigen_mesh_conversions.h"
 #include "../mlexception.h"
+#include <vcg/complex/algorithms/polygon_support.h>
+
+namespace vcg {
+class PEdge;
+class PFace;
+class PVertex;
+struct PUsedTypes : public UsedTypes<
+		Use<PVertex>   ::AsVertexType,
+		Use<PEdge>     ::AsEdgeType,
+		Use<PFace>     ::AsFaceType> {};
+
+class PVertex : public Vertex<
+		PUsedTypes,
+		vertex::Coord3f,
+		vertex::Normal3f,
+		vertex::Qualityf,
+		vertex::Color4b,
+		vertex::BitFlags
+> {};
+class PEdge : public Edge<
+		PUsedTypes,
+		edge::VertexRef,
+		edge::BitFlags
+> {};
+class PFace :public vcg::Face<
+		PUsedTypes,
+		face::PolyInfo, // this is necessary  if you use component in vcg/simplex/face/component_polygon.h
+		face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
+		face::Qualityf,
+		face::Color4b,
+		face::BitFlags, // bit flags
+		face::Normal3f, // normal
+		face::WedgeTexCoord2f
+> {};
+
+} //namespace vcg
+class PolyMesh : public vcg::tri::TriMesh< std::vector<vcg::PVertex>, std::vector<vcg::PEdge>, std::vector<vcg::PFace>   > {};
 
 /**
  * @brief Creates a CMeshO mesh from the data contained in the given matrices.
@@ -124,6 +161,106 @@ CMeshO meshlab::meshFromMatrices(
 				fi->Q() = faceQuality(i);
 			}
 		}
+		if (!hasFNormals){
+			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
+		}
+		if (!hasVNormals){
+			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
+		}
+	}
+	else {
+		throw MLException("Error while creating mesh: Vertex matrix is empty.");
+	}
+
+	return m;
+}
+
+CMeshO meshlab::polyMeshFromMatrices(
+		const EigenMatrixX3m& vertices,
+		const std::list<EigenVectorXui>& faces,
+		const EigenMatrixX3m& vertexNormals,
+		const EigenMatrixX3m& faceNormals,
+		const EigenVectorXm& vertexQuality,
+		const EigenVectorXm& faceQuality)
+{
+	PolyMesh pm;
+	CMeshO m;
+	if (vertices.rows() > 0) {
+		//add vertices and their associated normals and quality if any
+		std::vector<PolyMesh::VertexPointer> ivp(vertices.rows());
+
+		bool hasVNormals = vertexNormals.rows() > 0;
+		bool hasVQuality = vertexQuality.rows() > 0;
+		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
+			throw MLException(
+					"Error while creating mesh: the number of vertex normals "
+					"is different from the number of vertices.");
+		}
+		if (hasVQuality && (vertices.rows() != vertexQuality.size())) {
+			throw MLException(
+					"Error while creating mesh: the number of vertex quality "
+					"values is different from the number of vertices.");
+		}
+		PolyMesh::VertexIterator vi =
+				vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
+		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
+			ivp[i] = &*vi;
+			vi->P() = PolyMesh::CoordType(vertices(i,0), vertices(i,1), vertices(i,2));
+			if (hasVNormals) {
+				vi->N() = PolyMesh::CoordType(
+							vertexNormals(i,0),
+							vertexNormals(i,1),
+							vertexNormals(i,2));
+			}
+			if (hasVQuality) {
+				vi->Q() = vertexQuality(i);
+			}
+		}
+
+		//add faces and their associated normals and quality if any
+
+		bool hasFNormals = faceNormals.rows() > 0;
+		bool hasFQuality = faceQuality.rows() > 0;
+		if (hasFNormals && (faces.size() != (size_t)faceNormals.rows())) {
+			throw MLException(
+					"Error while creating mesh: the number of face normals "
+					"is different from the number of faces.");
+		}
+		if (hasFQuality) {
+			if (faces.size() != (size_t)faceQuality.size()) {
+				throw MLException(
+						"Error while creating mesh: the number of face quality "
+						"values is different from the number of faces.");
+			}
+		}
+		PolyMesh::FaceIterator fi =
+				vcg::tri::Allocator<PolyMesh>::AddFaces(pm, faces.size());
+		auto it = faces.begin();
+		for (unsigned int i = 0; i < faces.size(); ++i, ++fi, ++it) {
+			fi->Alloc(it->size());
+			const EigenVectorXui& iface = *it;
+			for (unsigned int j = 0; j < iface.size(); ++j){
+				if ((unsigned int)iface(j) >= ivp.size()) {
+					throw MLException(
+							"Error while creating mesh: bad vertex index " +
+							QString::number(iface(j)) + " in face " +
+							QString::number(i) + "; vertex " + QString::number(j) + ".");
+				}
+				fi->V(j) = ivp[iface(j)];
+			}
+			if (hasFNormals){
+				fi->N() = PolyMesh::CoordType(
+							faceNormals(i,0),
+							faceNormals(i,1),
+							faceNormals(i,2));
+			}
+			if (hasFQuality) {
+				fi->Q() = faceQuality(i);
+			}
+		}
+
+		vcg::tri::PolygonSupport<CMeshO, PolyMesh>::ImportFromPolyMesh(m, pm);
+
 		if (!hasFNormals){
 			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
 		}
