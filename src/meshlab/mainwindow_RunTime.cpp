@@ -2461,6 +2461,8 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		qb->reset();
 
 		try {
+			if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+				mod->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
 			QFileInfo finfo(fileName);
 			if (saveTextures)

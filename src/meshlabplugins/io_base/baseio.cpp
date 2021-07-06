@@ -459,8 +459,6 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
-		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
-			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		int result = tri::io::ExporterOFF<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
 		{
@@ -474,7 +472,6 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 
 		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 		{
-			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
 			tri::PolygonSupport<CMeshO, PMesh>::ImportFromTriMesh(pm, m.cm);
 			result = tri::io::ExporterOBJ<PMesh>::Save(pm, filename.c_str(), mask, cb);

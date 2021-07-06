@@ -247,7 +247,9 @@ void saveMeshWithStandardParameters(
 	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
 	RichParameterList saveParams = ioPlugin->initSaveParameter(extension, m);
 
-	ioPlugin->save(extension, fileName, m, capability, saveParams, cb);
+	if (defaultBits & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	ioPlugin->save(extension, fileName, m, defaultBits, saveParams, cb);
 	m.setFileName(fileName);
 	m.saveTextures(fi.absolutePath(), -1, log, cb);
 }
