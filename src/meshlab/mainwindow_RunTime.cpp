@@ -2131,24 +2131,64 @@ bool MainWindow::importMesh(QString fileName)
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		RichParameterList prePar = pCurrentIOPlugin->initPreOpenParameter(extension);
 		if(!prePar.isEmpty()) {
-			// the user wants to see each time the pre parameters dialog:
-			if (currentGlobalParams.getBool(MainWindowSetting::showPreOpenParameterDialogParam())){
-				RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
-				preOpenDialog.setFocus();
-				preOpenDialog.exec();
+			// take the default values of the plugin and overwrite to the settings
+			// default values
+			for (RichParameter& p : prePar){
+				QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
+				if (currentGlobalParams.hasParameter(prefixName + p.name())){
+					const RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
+					p.setValue(cp.value());
+				}
 			}
-			// the user does not want to see the parameter dialog
-			// need to take the default values from the currentGlobalParams
-			else {
-				for (RichParameter& p : prePar){
-					QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
-					if (currentGlobalParams.hasParameter(prefixName + p.name())){
-						const RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
-						p.setValue(cp.value());
+
+			bool showPreOpenParameterDialog = true;
+			QString showDialogParamName = "MeshLab::IO::" + extension.toUpper() + "::showPreOpenParameterDialog";
+			if (currentGlobalParams.hasParameter(showDialogParamName)){
+				showPreOpenParameterDialog = currentGlobalParams.getBool(showDialogParamName);
+			}
+			// the user wants to see each time the pre parameters dialog:
+			if (showPreOpenParameterDialog){
+				RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
+				preOpenDialog.addVerticalSpacer();
+
+				QString cbDoNotShow = "Do not show this dialog next time";
+				preOpenDialog.addCheckBox(cbDoNotShow, false);
+				QString cbRememberOptions = "Remember these values for the next time";
+				preOpenDialog.addCheckBox(cbRememberOptions, true);
+				preOpenDialog.setFocus();
+				int res = preOpenDialog.exec();
+				if (res == QDialog::Accepted){
+					if (preOpenDialog.isCheckBoxChecked(cbDoNotShow)){
+						RichBool rp(showDialogParamName, false, "", "");
+						if (currentGlobalParams.hasParameter(showDialogParamName))
+							currentGlobalParams.setValue(rp.name(), BoolValue(false));
+						else
+							currentGlobalParams.addParam(rp);
+						QSettings settings;
+						QDomDocument doc("MeshLabSettings");
+						doc.appendChild(rp.fillToXMLDocument(doc));
+						QString docstring =  doc.toString();
+						settings.setValue(rp.name(), QVariant(docstring));
 					}
-					else {
-						qDebug() << "ERROR!!! " + prefixName + p.name() + " not found in global params.";
+					if (preOpenDialog.isCheckBoxChecked(cbRememberOptions)){
+						QSettings settings;
+						for (const RichParameter& p : prePar){
+
+							QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
+							RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
+							cp.setValue(p.value());
+							RichParameter* pp = p.clone();
+							pp->setName(prefixName + p.name());
+							QDomDocument doc("MeshLabSettings");
+							doc.appendChild(pp->fillToXMLDocument(doc));
+							QString docstring =  doc.toString();
+							settings.setValue(pp->name(), QVariant(docstring));
+							delete pp;
+						}
 					}
+				}
+				else {
+					return false;
 				}
 			}
 		}
@@ -2695,92 +2735,6 @@ void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
 	this->QCallBack(pos,qUtf8Printable(text));
 }
-
-//WARNING!!!! Probably it's useless
-//void MainWindow::updateRenderMode( )
-//{
-//    if ((GLA() == NULL) || (meshDoc() == NULL))
-//        return;
-//    QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
-//
-//    RenderModeAction* act = qobject_cast<RenderModeAction*>(sender());
-//    RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(act);
-//
-//    //act->data contains the meshid to which the action is referred.
-//    //if the meshid is -1 the action is intended to be per-document and not per mesh
-//    bool isvalidid = true;
-//    int meshid = act->data().toInt(&isvalidid);
-//    if (!isvalidid)
-//        throw MeshLabException("A RenderModeAction contains a non-integer data id.");
-//
-//    if (meshid == -1)
-//    {
-//        for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
-//        {
-//            RenderMode& rm = it.value();
-//            RenderMode old = rm;
-//
-//            act->updateRenderMode(rm);
-//            //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-//            //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-//            //The enum-value depends from the enabled attributes of input mesh.
-//            if (textact != NULL)
-//                setBestTextureModePerMesh(textact,it.key(),rm);
-//
-//            MeshModel* mmod = meshDoc()->getMesh(it.key());
-//            if (mmod != NULL)
-//            {
-//                throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//                act->updateRenderMode(rm);
-//                if (textact != NULL)
-//                    setBestTextureModePerMesh(textact,it.key(),rm);
-//
-////                deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm;)
-//                
-//                GLA()->setupRequestedAttributesPerMesh(it.key());
-//            }
-//            else throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//
-//			GLA()->setupRequestedAttributesPerMesh(it.key());
-//        }
-//    }
-//    else
-//    {
-//        QMap<int,RenderMode>::iterator it = rmode.find(meshid);
-//        RenderMode& rm = it.value();
-//        RenderMode old = rm;
-//        if (it == rmode.end())
-//            throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
-//        MeshModel* mmod = meshDoc()->getMesh(it.key());
-//        if (mmod == NULL)
-//            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//        act->updateRenderMode(rm);
-//        updateMenus();
-//        //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-//        //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-//        //The enum-value depends from the enabled attributes of input mesh.
-//        if (textact != NULL)
-///*setBestTextureModePerMesh(textact,meshid,rm)*/;
-//
-////        deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
-//        GLA()->setupRequestedAttributesPerMesh(it.key());
-//    }
-//    GLA()->update();
-//}
-
-//WARNING!!!!!! I suppose it should not be useful anymore, but....
-//void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm)
-//{
-//    MeshModel* mesh = NULL;
-//    if ((meshDoc() == NULL) || ((mesh  = meshDoc()->getMesh(meshid)) == NULL))
-//    {
-//        bool clicked = (textact != NULL) && (textact->isChecked());
-//        MLPoliciesStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mesh,rm.pmmask,rm.atts,rm.pmmask,rm.atts);
-//        rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] && clicked;
-//        rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] && clicked;
-//    }
-//}
-
 
 void MainWindow::showEvent(QShowEvent * event)
 {

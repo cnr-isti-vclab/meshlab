@@ -125,7 +125,7 @@ void RichParameterListFrame::loadFrameContent(
 {
 	if(layout())
 		delete layout();
-	QGridLayout* glay = new QGridLayout();
+	QGridLayout* glay = new QGridLayout(this);
 
 
 	//collect parameters per category

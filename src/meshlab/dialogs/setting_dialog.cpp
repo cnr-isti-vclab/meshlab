@@ -79,7 +79,6 @@ void SettingDialog::save()
 	QDomDocument doc("MeshLabSettings");
 	doc.appendChild(currentParameter->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(currentParameter->name()), qUtf8Printable(docstring));
 	QSettings setting;
 	setting.setValue(currentParameter->name(),QVariant(docstring));
 }

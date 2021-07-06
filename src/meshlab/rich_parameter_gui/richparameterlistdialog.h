@@ -47,6 +47,10 @@ public:
 
 	void createFrame();
 
+	void addVerticalSpacer();
+	void addCheckBox(const QString& name, bool checked);
+	bool isCheckBoxChecked(const QString& name);
+
 public slots:
 	void getAccept();
 	void toggleHelp();
@@ -57,6 +61,8 @@ public slots:
 private:
 	RichParameterList& curParList;
 	RichParameterListFrame *stdParFrame;
+
+	std::map<QString, QCheckBox*> additionalCheckBoxes;
 
 };
 

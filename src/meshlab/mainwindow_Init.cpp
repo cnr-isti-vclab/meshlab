@@ -975,10 +975,12 @@ void MainWindow::loadDefaultSettingsFromPlugins()
 			for (const QString& format : ff.extensions) {
 				RichParameterList tmplist = iop->initPreOpenParameter(format);
 				if (!tmplist.isEmpty()){
+					QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 					for (RichParameter& rp : tmplist){
-						QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 						rp.setName(prefixName + rp.name());
 					}
+					RichBool rp(prefixName + "showPreOpenParameterDialog", true, "", "");
+					tmplist.addParam(rp);
 					defaultGlobalParams.join(tmplist);
 				}
 			}
@@ -1340,7 +1342,6 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		gbllist.addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
 	gbllist.addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
-	gbllist.addParam(RichBool(showPreOpenParameterDialogParam(), false, "Show Open Parameter Dialog", "If true, each time that a mesh is imported, a dialog asking for extra parameters (if applicable), is shown."));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1352,7 +1353,6 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rpl.getBool(highPrecisionRendering());
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
-	showPreOpenParameterDialog = rpl.getBool(showPreOpenParameterDialogParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

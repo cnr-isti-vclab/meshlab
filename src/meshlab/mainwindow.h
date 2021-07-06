@@ -86,9 +86,6 @@ public:
 
 	std::ptrdiff_t maxTextureMemory;
 	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
-
-	bool showPreOpenParameterDialog;
-	inline static QString showPreOpenParameterDialogParam()  {return "MeshLab::System::showPreOpenParameterDialog";}
 };
 
 class MainWindow : public QMainWindow
