@@ -32,7 +32,7 @@ RichParameter::RichParameter(const RichParameter& rp) :
 	val(rp.value().clone()),
 	fieldDesc(rp.fieldDesc),
 	tooltip(rp.tooltip),
-	hidden(rp.hidden),
+	advanced(rp.advanced),
 	pCategory(rp.pCategory)
 {
 }
@@ -45,7 +45,7 @@ RichParameter::RichParameter(RichParameter&& rp) :
 {
 	val = rp.val;
 	rp.val = nullptr;
-	hidden = rp.hidden;
+	advanced = rp.advanced;
 }
 
 RichParameter::RichParameter(
@@ -53,13 +53,13 @@ RichParameter::RichParameter(
 		const Value& v,
 		const QString& desc,
 		const QString& tltip,
-		bool hidden,
+		bool isAdvanced,
 		const QString& category) :
 	pName(nm),
 	val(v.clone()),
 	fieldDesc(desc),
 	tooltip(tltip),
-	hidden(hidden),
+	advanced(isAdvanced),
 	pCategory(category)
 {
 }
@@ -89,9 +89,9 @@ const QString& RichParameter::toolTip() const
 	return tooltip;
 }
 
-bool RichParameter::isHidden() const
+bool RichParameter::isAdvanced() const
 {
-	return hidden;
+	return advanced;
 }
 
 const QString& RichParameter::category() const

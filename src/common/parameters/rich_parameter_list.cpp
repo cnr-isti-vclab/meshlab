@@ -316,6 +316,16 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 	return **it;
 }
 
+unsigned int RichParameterList::numberAdvancedParameters() const
+{
+	unsigned int n = 0;
+	for (const RichParameter& rp : *this){
+		if (rp.isAdvanced())
+			++n;
+	}
+	return n;
+}
+
 /**
  * @brief sets the value of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list

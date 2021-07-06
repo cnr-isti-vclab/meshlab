@@ -133,7 +133,7 @@ void RichParameterListFrame::loadFrameContent(
 	std::map<QString, std::vector<const RichParameter*>> hiddenParameters;
 
 	for(const RichParameter& fpi : curParSet) {
-		if (!fpi.isHidden()){
+		if (!fpi.isAdvanced()){
 			visibleParameters[fpi.category()].push_back(&fpi);
 		}
 		else {

@@ -54,7 +54,7 @@ public:
 			const Value& v,
 			const QString& desc = QString(),
 			const QString& tltip = QString(),
-			bool hidden = false,
+			bool isAdvanced = false,
 			const QString& category = QString());
 	virtual ~RichParameter();
 
@@ -62,7 +62,7 @@ public:
 	const Value& value() const;
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
-	bool isHidden() const;
+	bool isAdvanced() const;
 	const QString& category() const;
 
 	template <class RichParam>
@@ -93,7 +93,7 @@ protected:
 	Value* val;
 	QString fieldDesc;
 	QString tooltip;
-	bool hidden;
+	bool advanced;
 	QString pCategory;
 };
 
