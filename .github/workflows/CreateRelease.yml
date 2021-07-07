@@ -12,8 +12,8 @@ on:
 
 jobs:
   update_ml_version:
-    name: Update ML_VERSION, snapcraft.yaml and Info.plist
-    runs-on: macos-latest
+    name: Update ML_VERSION and snapcraft.yaml
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
@@ -21,17 +21,13 @@ jobs:
     - name: Update MeshLab version
       run : |
         echo ${{ github.event.inputs.version }} | tr -d '\n'> ML_VERSION
-    - name: Update Info.plist
-      run: |
-        /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{ github.event.inputs.version }}" src/meshlab/Info.plist
-        /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{ github.event.inputs.version }}" src/meshlab/Info.plist
     - name: Update Snap file
       run: |
         sed "s%MESHLAB_VERSION%$(cat ML_VERSION)%g" scripts/Linux/resources/snap/snap_noversion.yaml > snapcraft.yaml
-    - name: commit ML_VERSION, snapcraft.yaml and Info.plist change
+    - name: commit ML_VERSION and snapcraft.yaml change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: Apply automatic ML_VERSION, snapcraft.yaml and Info.plist change
+        commit_message: Apply automatic ML_VERSION and snapcraft.yaml change
 
   linux_build:
     needs: [update_ml_version]

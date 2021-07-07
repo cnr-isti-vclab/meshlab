@@ -25,6 +25,7 @@ else()
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
 endif()
+set(MESHLAB_VERSION ${MESHLAB_VERSION} PARENT_SCOPE)
 message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 
 if (BUILD_WITH_DOUBLE_SCALAR)
