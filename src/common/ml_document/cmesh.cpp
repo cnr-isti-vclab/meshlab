@@ -33,7 +33,7 @@ CMeshO::CMeshO(const CMeshO& oth) :
 	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn), 
 	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
 {
-	enableOCFComponentsFromOtherMesh(oth);
+	enableComponentsFromOtherMesh(oth);
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
 	textures = oth.textures;
 	normalmaps = oth.normalmaps;
@@ -45,7 +45,7 @@ CMeshO::CMeshO(CMeshO&& oth):
 	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn),
 	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
 {
-	enableOCFComponentsFromOtherMesh(oth);
+	enableComponentsFromOtherMesh(oth);
 	//I could take everything from oth and place it in
 	//this mesh
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
@@ -57,7 +57,7 @@ CMeshO::CMeshO(CMeshO&& oth):
 CMeshO& CMeshO::operator=(const CMeshO& oth)
 {
 	Clear();
-	enableOCFComponentsFromOtherMesh(oth);
+	enableComponentsFromOtherMesh(oth);
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshCopyConst(*this, oth);
 	sfn = oth.sfn;
 	svn = oth.svn;
@@ -81,7 +81,7 @@ Box3m CMeshO::trBB() const
  * all the optional fields that are enabled on the other mesh, otherwise
  * they won't be copied on this mesh...........
  */
-void CMeshO::enableOCFComponentsFromOtherMesh(const CMeshO& oth)
+void CMeshO::enableComponentsFromOtherMesh(const CMeshO& oth)
 {
 	//vertex
 	if (oth.vert.IsVFAdjacencyEnabled())
@@ -112,6 +112,23 @@ void CMeshO::enableOCFComponentsFromOtherMesh(const CMeshO& oth)
 		this->face.EnableCurvatureDir();
 	if (oth.face.IsWedgeTexCoordEnabled())
 		this->face.EnableWedgeTexCoord();
+
+	std::vector<std::string> perVScalarAttrs, perVPointAttrs;
+	std::vector<std::string> perFScalarAttrs, perFPointAttrs;
+
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(oth, perVScalarAttrs);
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Point3m>(oth, perVPointAttrs);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Scalarm>(oth, perFScalarAttrs);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Point3m>(oth, perFPointAttrs);
+
+	for(const std::string& attr : perVScalarAttrs)
+		vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm>(*this, attr);
+	for(const std::string& attr : perVPointAttrs)
+		vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m>(*this, attr);
+	for(const std::string& attr : perFScalarAttrs)
+		vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(*this, attr);
+	for(const std::string& attr : perFPointAttrs)
+		vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(*this, attr);
 }
 
 

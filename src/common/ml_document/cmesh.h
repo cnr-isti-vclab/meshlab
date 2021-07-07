@@ -153,7 +153,7 @@ public :
 	Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 
 private:
-	void enableOCFComponentsFromOtherMesh(const CMeshO& oth);
+	void enableComponentsFromOtherMesh(const CMeshO& oth);
 };
 
 #endif //CMESH_H

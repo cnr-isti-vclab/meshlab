@@ -175,6 +175,27 @@ CMeshO meshlab::meshFromMatrices(
 	return m;
 }
 
+/**
+ * @brief Creates a CMeshO mesh from the data contained in the given matrices,
+ * which may describe also a polygonal mesh.
+ * At least vertices and faces parameters are required.
+ *
+ * If normals and quality matrices are give, their sizes must be coherent with
+ * the sizes of vertex and face matrix/list. If this requirement is not satisfied,
+ * a MLException will be thrown.
+ *
+ * This function stores in the returned mesh a custom per face scalar attribute
+ * called 'poly_birth_faces', which stores for each triangle of the mesh, the id
+ * of its polygonal birth face of the polygon mesh given in input.
+ *
+ * @param vertices: #V*3 matrix of scalars (vertex coordinates)
+ * @param faces: #F list of vector of integers (vertex indices composing the faces)
+ * @param vertexNormals: #V*3 matrix of scalars (vertex normals)
+ * @param faceNormals: #F*3 matrix of scalars (face normals)
+ * @param vertexQuality: #V vector of scalars (vertex quality)
+ * @param faceQuality: #F vector of scalars (face quality)
+ * @return a CMeshO made of the given components
+ */
 CMeshO meshlab::polyMeshFromMatrices(
 		const EigenMatrixX3m& vertices,
 		const std::list<EigenVectorXui>& faces,
@@ -259,7 +280,12 @@ CMeshO meshlab::polyMeshFromMatrices(
 			}
 		}
 
-		vcg::tri::PolygonSupport<CMeshO, PolyMesh>::ImportFromPolyMesh(m, pm);
+		std::vector<unsigned int> birthFaces;
+		vcg::tri::PolygonSupport<CMeshO, PolyMesh>::ImportFromPolyMesh(m, pm, birthFaces);
+
+		auto h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(m, "poly_birth_faces");
+		for (unsigned int i = 0; i < m.face.size(); ++i)
+			h[i] = birthFaces[i];
 
 		if (!hasFNormals){
 			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
