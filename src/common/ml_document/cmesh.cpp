@@ -37,35 +37,23 @@ CMeshO::CMeshO(const CMeshO& oth) :
 	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshAppendConst(*this, oth);
 	textures = oth.textures;
 	normalmaps = oth.normalmaps;
+	imark = oth.imark;
 }
 
-/// TODO: make a proper implementation of a move constructor.
-/// Even if almost never used, this is very inefficient.
-CMeshO::CMeshO(CMeshO&& oth): 
-	vcgTriMesh(), sfn(oth.sfn), svn(oth.svn),
-	pvn(oth.pvn), pfn(oth.pfn), Tr(oth.Tr)
+CMeshO::CMeshO(CMeshO&& oth)
+	: CMeshO()
 {
-	enableComponentsFromOtherMesh(oth);
-	//I could take everything from oth and place it in
-	//this mesh
-	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::Mesh(*this, oth);
-	textures = oth.textures;
-	normalmaps = oth.normalmaps;
+	swap(*this, oth);
 }
 
-/// TODO: change this and use the copy&swap idiom
-CMeshO& CMeshO::operator=(const CMeshO& oth)
+CMeshO::~CMeshO()
 {
-	Clear();
-	enableComponentsFromOtherMesh(oth);
-	vcg::tri::Append<vcgTriMesh, vcgTriMesh>::MeshCopyConst(*this, oth);
-	sfn = oth.sfn;
-	svn = oth.svn;
-	pvn = oth.pvn;
-	pfn = oth.pfn;
-	Tr = oth.Tr;
-	textures = oth.textures;
-	normalmaps = oth.normalmaps;
+	//no need to call base class destructor. It is called automatically
+}
+
+CMeshO& CMeshO::operator=(CMeshO oth)
+{
+	swap(*this, oth);
 	return *this;
 }
 
@@ -130,5 +118,3 @@ void CMeshO::enableComponentsFromOtherMesh(const CMeshO& oth)
 	for(const std::string& attr : perFPointAttrs)
 		vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(*this, attr);
 }
-
-
