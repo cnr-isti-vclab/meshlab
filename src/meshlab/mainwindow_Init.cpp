@@ -51,6 +51,7 @@ MainWindow::MainWindow():
 	httpReq(this), 
 	gpumeminfo(NULL),
 	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
+	lastUsedDirectory(QDir::home()),
 	PM(meshlab::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {

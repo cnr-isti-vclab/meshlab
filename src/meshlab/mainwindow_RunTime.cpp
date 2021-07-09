@@ -2351,30 +2351,26 @@ void MainWindow::reload()
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
 	const QStringList& suffixList = PM.outputMeshFormatListDialog();
-
-	//QHash<QString, MeshIOInterface*> allKnownFormats;
-	QFileInfo fi(fileName);
-	//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
-	//QString defaultExt = "*." + mod->suffixName().toLower();
-	QString defaultExt = "*." + fi.suffix().toLower();
-	if(defaultExt == "*.")
-		defaultExt = "*.ply";
-	if (mod == NULL)
-		return false;
-	mod->setMeshModified(false);
-	QString laylabel = "Save \"" + mod->label() + "\" Layer";
-	QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());
-	//saveDialog->setOption(QFileDialog::DontUseNativeDialog);
-	saveDialog->setNameFilters(suffixList);
-	saveDialog->setAcceptMode(QFileDialog::AcceptSave);
-	saveDialog->setFileMode(QFileDialog::AnyFile);
-	saveDialog->selectFile(fileName);
-	QStringList matchingExtensions=suffixList.filter(defaultExt);
-	if(!matchingExtensions.isEmpty())
-		saveDialog->selectNameFilter(matchingExtensions.last());
-	//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
-
 	if (fileName.isEmpty()) {
+		//QHash<QString, MeshIOInterface*> allKnownFormats;
+		//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
+		//QString defaultExt = "*." + mod->suffixName().toLower();
+		QString defaultExt = "*.ply";
+		if (mod == NULL)
+			return false;
+		mod->setMeshModified(false);
+		QString laylabel = "Save \"" + mod->label() + "\" Layer";
+		QFileDialog* saveDialog = new QFileDialog(this,laylabel, lastUsedDirectory.path());
+		//saveDialog->setOption(QFileDialog::DontUseNativeDialog);
+		saveDialog->setNameFilters(suffixList);
+		saveDialog->setAcceptMode(QFileDialog::AcceptSave);
+		saveDialog->setFileMode(QFileDialog::AnyFile);
+		saveDialog->selectFile(fileName);
+		QStringList matchingExtensions=suffixList.filter(defaultExt);
+		if(!matchingExtensions.isEmpty())
+			saveDialog->selectNameFilter(matchingExtensions.last());
+		//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected)
@@ -2388,6 +2384,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			qDebug("File without extension adding it by hand '%s'", qUtf8Printable(fileName));
 		}
 	}
+	QFileInfo fi(fileName);
 
 	QStringList fs = fileName.split(".");
 
