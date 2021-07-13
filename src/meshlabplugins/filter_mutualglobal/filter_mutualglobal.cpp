@@ -196,9 +196,8 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 		myVec.push_back(md.mm()->cm.vert[i].P());
 	}
 	std::vector<Shotm> oldShots;
-	for (RasterModel* rm : md.rasterIterator())
-	{
-		oldShots.push_back(rm->shot);
+	for (const RasterModel& rm : md.rasterIterator()) {
+		oldShots.push_back(rm.shot);
 	}
 
 	log("Sampled has %i vertices",myVec.size());
@@ -208,8 +207,7 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 	switch(ID(action))	 {
 		case FP_IMAGE_GLOBALIGN :
 			/// Building of the graph of images
-			if (md.rasterNumber()==0)
-			{
+			if (md.rasterNumber()==0) {
 				 log("You need a Raster Model to apply this filter!");
 				 throw MLException("You need a Raster Model to apply this filter!");
 
@@ -219,27 +217,22 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 
 			this->initGL();
 
-			if (par.getBool("Pre-alignment"))
-			{
+			if (par.getBool("Pre-alignment")) {
 				preAlignment(md, par, cb);
 			}
 
-			if (par.getInt("Max number of refinement steps")!=0)
-			{
-
+			if (par.getInt("Max number of refinement steps")!=0) {
 				Graphs=buildGraph(md);
 				log("BuildGraph completed");
-				for (int i=0; i<par.getInt("Max number of refinement steps"); i++)
-				{
+				for (int i=0; i<par.getInt("Max number of refinement steps"); i++) {
 					AlignGlobal(md, Graphs);
 					float diff=calcShotsDifference(md,oldShots,myVec);
 					log("AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
 					if (diff<thresDiff)
 						break;
 					oldShots.clear();
-					for (RasterModel* rm : md.rasterIterator())
-					{
-						oldShots.push_back(rm->shot);
+					for (const RasterModel& rm : md.rasterIterator()) {
+						oldShots.push_back(rm.shot);
 					}
 				}
 			}
@@ -263,14 +256,11 @@ std::map<std::string, QVariant> FilterMutualGlobal::applyFilter(
 float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shotm> oldShots, std::vector<vcg::Point3f> points)
 {
 	std::vector<float> distances;
-	for (int i=0; i<points.size(); i++)
-	{
+	for (unsigned int i=0; i<points.size(); i++) {
 		unsigned int j = 0;
-		for(RasterModel* rm : md.rasterIterator())
-		{
-			vcg::Point2f pp=rm->shot.Project(points[i]);
-			if(pp[0]>0 && pp[1]>0 && pp[0]<rm->shot.Intrinsics.ViewportPx[0] && pp[1]<rm->shot.Intrinsics.ViewportPx[1])
-			{
+		for(const RasterModel& rm : md.rasterIterator()) {
+			vcg::Point2f pp=rm.shot.Project(points[i]);
+			if(pp[0]>0 && pp[1]>0 && pp[0]<rm.shot.Intrinsics.ViewportPx[0] && pp[1]<rm.shot.Intrinsics.ViewportPx[1]) {
 				vcg::Point2f ppOld=oldShots[j].Project(points[i]);
 				vcg::Point2f d=pp-ppOld;
 				distances.push_back(vcg::math::Sqrt( d[0]*d[0] + d[1]*d[1] ));
@@ -279,13 +269,11 @@ float FilterMutualGlobal::calcShotsDifference(MeshDocument &md, std::vector<Shot
 		}
 	}
 	float totErr=0.0;
-	for (int i=0; i<distances.size(); i++)
-	{
+	for (unsigned int i=0; i<distances.size(); i++) {
 		totErr+=(distances[i]*distances[i]);
 	}
 
 	return totErr/(float)distances.size();
-
 }
 
 void FilterMutualGlobal::initGL()
@@ -443,12 +431,10 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 		delete []indices;
 
 		unsigned int r = 0;
-		for (RasterModel* rm : md.rasterIterator())
-		{
-			if(rm->isVisible())
-			{
-				alignset.image=&rm->currentPlane->image;
-				alignset.shot=rm->shot;
+		for (RasterModel& rm : md.rasterIterator()) {
+			if(rm.isVisible()) {
+				alignset.image=&rm.currentPlane->image;
+				alignset.shot=rm.shot;
 
 				alignset.resize(800);
 
@@ -457,20 +443,19 @@ bool FilterMutualGlobal::preAlignment(MeshDocument &md, const RichParameterList 
 
 				if (solver.fine_alignment)
 					solver.optimize(&alignset, &mutual, alignset.shot);
-				else
-				{
+				else {
 					solver.iterative(&alignset, &mutual, alignset.shot);
 					log("Vado di rough",r);
 				}
 
-				rm->shot=alignset.shot;
-				float ratio=(float)rm->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
-				rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
-				rm->shot.Intrinsics.ViewportPx[1]=rm->currentPlane->image.height();
-				rm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-				rm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-				rm->shot.Intrinsics.CenterPx[0]=(int)((float)rm->shot.Intrinsics.ViewportPx[0]/2.0);
-				rm->shot.Intrinsics.CenterPx[1]=(int)((float)rm->shot.Intrinsics.ViewportPx[1]/2.0);
+				rm.shot=alignset.shot;
+				float ratio= (float) rm.currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
+				rm.shot.Intrinsics.ViewportPx[0]=rm.currentPlane->image.width();
+				rm.shot.Intrinsics.ViewportPx[1]=rm.currentPlane->image.height();
+				rm.shot.Intrinsics.PixelSizeMm[1]/=ratio;
+				rm.shot.Intrinsics.PixelSizeMm[0]/=ratio;
+				rm.shot.Intrinsics.CenterPx[0]=(int)((float)rm.shot.Intrinsics.ViewportPx[0]/2.0);
+				rm.shot.Intrinsics.CenterPx[1]=(int)((float)rm.shot.Intrinsics.ViewportPx[1]/2.0);
 
 				log("Image %d completed",r);
 
@@ -551,13 +536,11 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 
 	//this->glContext->makeCurrent();
 	unsigned int r = 0;
-	for (RasterModel* rm : md.rasterIterator())
-	{
-		if(rm->isVisible())
-		{
+	for (RasterModel& rm : md.rasterIterator()) {
+		if(rm.isVisible()) {
 			AlignPair pair;
-			alignset.image=&rm->currentPlane->image;
-			alignset.shot=rm->shot;
+			alignset.image=&rm.currentPlane->image;
+			alignset.shot=rm.shot;
 
 			//this->initGL();
 			alignset.resize(800);
@@ -574,38 +557,32 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 			std::vector<AlignPair> weightList;
 
 			unsigned int p = 0;
-			for (RasterModel* pm : md.rasterIterator())
-			{
-				if (pm!=rm)
-				{
+			for (RasterModel& pm : md.rasterIterator()) {
+				if (pm.id()!=rm.id()) {
 					alignset.mode=AlignSet::PROJIMG;
-					alignset.shotPro=pm->shot;
-					alignset.imagePro=&pm->currentPlane->image;
+					alignset.shotPro=pm.shot;
+					alignset.imagePro=&pm.currentPlane->image;
 					alignset.ProjectedImageChanged(*alignset.imagePro);
 					float countTot=0.0;
 					float countCol=0.0;
-					float countCov=0.0;
 					alignset.RenderShadowMap();
 					alignset.renderScene(alignset.shot, 2, true);
 					//alignset.readRender(1);
-					for (int x=0; x<alignset.wt; x++)
-						for (int y=0; y<alignset.ht; y++)
-						{
+					for (int x=0; x<alignset.wt; x++) {
+						for (int y=0; y<alignset.ht; y++) {
 							QColor color;
 							color.setRgb(alignset.comb.pixel(x,y));
-							if (color!=qRgb(0,0,0))
-							{
+							if (color!=qRgb(0,0,0)) {
 								countTot++;
-								if (alignset.comb.pixel(x,y)!=alignset.rend.pixel(x,y))
-								{
+								if (alignset.comb.pixel(x,y)!=alignset.rend.pixel(x,y)) {
 									countCol++;
 								}
 							}
 						}
+					}
 					pair.area=countCol/countTot;
 
-					if (pair.area>0.2)
-					{
+					if (pair.area>0.2) {
 						pair.mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
 						pair.imageId=r;
 						pair.projId=p;
@@ -618,30 +595,25 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 			}
 
 			log("Image %d completed",r);
-			if (!globalign)
-			{
-				for (int i=0; i<weightList.size(); i++)
-				{
+			if (!globalign) {
+				for (unsigned int i=0; i<weightList.size(); i++) {
 					log("Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
 					list.push_back(weightList[i]);
-
 				}
 
 				//Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
 				//return list;
 
 			}
-			else
-			{
+			else {
 				std::sort(weightList.begin(), weightList.end(), orderingW());
 
 				///////////////////////////////////////7
-				for (int i=0; i<weightList.size(); i++)
-				{
+				for (unsigned int i=0; i<weightList.size(); i++) {
 					int p=weightList[i].projId;
 					alignset.mode=AlignSet::PROJIMG;
-					alignset.shotPro=rm->shot;
-					alignset.imagePro=&rm->currentPlane->image;
+					alignset.shotPro=rm.shot;
+					alignset.imagePro=&rm.currentPlane->image;
 					alignset.ProjectedImageChanged(*alignset.imagePro);
 					float countTot=0.0;
 					float countCol=0.0;
@@ -649,18 +621,14 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 					alignset.RenderShadowMap();
 					alignset.renderScene(alignset.shot, 2, true);
 					//alignset.readRender(1);
-					for (int x=0; x<alignset.wt; x++)
-						for (int y=0; y<alignset.ht; y++)
-						{
+					for (int x=0; x<alignset.wt; x++) {
+						for (int y=0; y<alignset.ht; y++) {
 							QColor color;
 							color.setRgb(alignset.comb.pixel(x,y));
-							if (color!=qRgb(0,0,0))
-							{
+							if (color!=qRgb(0,0,0)) {
 								countTot++;
-								if (alignset.comb.pixel(x,y)!=alignset.rend.pixel(x,y))
-								{
-									if (covered.pixel(x,y)!=qRgb(255,0,0))
-									{
+								if (alignset.comb.pixel(x,y)!=alignset.rend.pixel(x,y)) {
+									if (covered.pixel(x,y)!=qRgb(255,0,0)) {
 										countCov++;
 										covered.setPixel(x,y,qRgb(255,0,0));
 									}
@@ -668,6 +636,7 @@ std::vector<AlignPair> FilterMutualGlobal::CalcPairs(MeshDocument &md, bool glob
 								}
 							}
 						}
+					}
 					pair.area=countCol/countTot;
 					/*covered.save("covered.jpg");
 					alignset.rend.save("rend.jpg");
@@ -704,8 +673,7 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 	std::vector<SubGraph> Gr;
 	SubGraph allNodes;
 	int numNodes=md.rasterNumber();
-	for (int s=0; s<numNodes; s++)
-	{
+	for (int s=0; s<numNodes; s++) {
 		Node n;
 		n.active=false;
 		n.assigned=false;
@@ -716,52 +684,41 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 	int totGr=1;
 	bool done=false;
 	std::vector<int> nod;
-	for (int i=0; i<arcs.size(); i++)
-		{
-			int cand=arcs[i].imageId;
-			bool insert=true;
-			for (int j=0; j<nod.size(); j++)
-			{
-				if(nod[j]==cand)
-				{
-					insert=false;
-					break;
-				}
+	for (unsigned int i=0; i<arcs.size(); i++) {
+		int cand=arcs[i].imageId;
+		bool insert=true;
+		for (unsigned int j=0; j<nod.size(); j++) {
+			if(nod[j]==cand) {
+				insert=false;
+				break;
 			}
-			if(insert)
-				nod.push_back(cand);
-			int cand2=arcs[i].projId;
-			insert=true;
-			for (int j=0; j<nod.size(); j++)
-			{
-				if(nod[j]==cand2)
-				{
-					insert=false;
-					break;
-				}
-			}
-			if(insert)
-				nod.push_back(cand2);
-
 		}
+		if(insert)
+			nod.push_back(cand);
+		int cand2=arcs[i].projId;
+		insert=true;
+		for (unsigned int j=0; j<nod.size(); j++) {
+			if(nod[j]==cand2) {
+				insert=false;
+				break;
+			}
+		}
+		if(insert)
+			nod.push_back(cand2);
+
+	}
 	int involvedNodes=nod.size();
 	int totNodes=0;
-	while (!done)
-	{
-		for (int i=0; i<arcs.size(); i++)
-		{
+	while (!done) {
+		for (unsigned int i=0; i<arcs.size(); i++) {
 			int candidate=arcs[i].imageId;
-			if(allNodes.nodes[candidate].assigned==false)
-			{
+			if(allNodes.nodes[candidate].assigned==false) {
 				allNodes.nodes[candidate].assigned=true;
 				allNodes.nodes[candidate].grNum=totGr;
 				totNodes++;
-				for (int j=0; j<arcs.size(); j++)
-				{
-					if (arcs[j].imageId==candidate)
-					{
-						if (allNodes.nodes[arcs[j].projId].assigned==false)
-						{
+				for (unsigned int j=0; j<arcs.size(); j++) {
+					if (arcs[j].imageId==candidate) {
+						if (allNodes.nodes[arcs[j].projId].assigned==false) {
 							allNodes.nodes[arcs[j].projId].assigned=true;
 							allNodes.nodes[arcs[j].projId].grNum=totGr;
 							totNodes++;
@@ -775,31 +732,24 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 		else totGr++;
 	}
 
-	for (int i=1; i<totGr+1; i++)
-	{
+	for (int i=1; i<totGr+1; i++) {
 		SubGraph graph;
 		graph.id=i;
 		auto rmit = md.rasterBegin();
-		for (int j=0; j<numNodes; j++)
-		{
+		for (int j=0; j<numNodes; j++) {
 			log("Node %d of %d",j,numNodes);
-			if (allNodes.nodes[j].grNum==i)
-			{
+			if (allNodes.nodes[j].grNum==i) {
 				Node n;
-				double mut=0.0; double are=0.00001;
-				if((*rmit)->isVisible())
+				if((*rmit).isVisible())
 					n.active=false;
 				else
 					n.active=true;
 				n.id=j;
 				n.avMut=0.0;
-				for (int k=0; k<arcs.size(); k++)
-				{
-					if(arcs[k].imageId==j)
-					{
+				for (unsigned int k=0; k<arcs.size(); k++) {
+					if(arcs[k].imageId==j) {
 						n.avMut+=arcs[k].weight;
 						n.arcs.push_back(arcs[k]);
-
 					}
 				}
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
@@ -825,30 +775,24 @@ std::vector<SubGraph> FilterMutualGlobal::CreateGraphs(MeshDocument &md, std::ve
 
 bool FilterMutualGlobal::AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs)
 {
-	for (int j=0; j<1; j++)
-	{
-	for (int i=0; i<graphs.size(); i++)
-	{
-		int n=0;
-		while (!allActive(graphs[i]))
-		{
-			//Log(0, "Round %d of %d: get the right node",n+1,graphs[i].nodes.size());
-			int curr= getTheRightNode(graphs[i]);
-			graphs[i].nodes[curr].active=true;
-			//Log(0, "Round %d of %d: alignset the node",n+1,graphs[i].nodes.size());
-			AlignNode(md, graphs[i].nodes[curr]);
-			//Log(0, "Round %d of %d: update the graph",n+1,graphs[i].nodes.size());
-			UpdateGraph(md, graphs[i], curr);
-			//Log(0, "Image %d completed",curr);
-			n++;
-
+	for (int j=0; j<1; j++) {
+		for (unsigned int i=0; i<graphs.size(); i++) {
+			int n=0;
+			while (!allActive(graphs[i])) {
+				//Log(0, "Round %d of %d: get the right node",n+1,graphs[i].nodes.size());
+				int curr= getTheRightNode(graphs[i]);
+				graphs[i].nodes[curr].active=true;
+				//Log(0, "Round %d of %d: alignset the node",n+1,graphs[i].nodes.size());
+				AlignNode(md, graphs[i].nodes[curr]);
+				//Log(0, "Round %d of %d: update the graph",n+1,graphs[i].nodes.size());
+				UpdateGraph(md, graphs[i], curr);
+				//Log(0, "Image %d completed",curr);
+				n++;
+			}
+			for (unsigned int l=0; l<graphs[i].nodes.size(); l++) {
+				graphs[i].nodes[l].active=false;
+			}
 		}
-		for (int l=0; l<graphs[i].nodes.size(); l++)
-		{
-			graphs[i].nodes[l].active=false;
-		}
-
-	}
 	}
 
 	return true;
@@ -856,26 +800,22 @@ bool FilterMutualGlobal::AlignGlobal(MeshDocument &md, std::vector<SubGraph> gra
 
 int FilterMutualGlobal::getTheRightNode(SubGraph graph)
 {
-	int bestLinks=0; int bestActive=-1;
+	unsigned int bestLinks=0;
+	int bestActive=-1;
 	int cand;
-	for (int k=0; k<graph.nodes.size(); k++)
-	{
+	for (unsigned int k=0; k<graph.nodes.size(); k++) {
 		int act=0;
-		if (graph.nodes[k].arcs.size()>=bestLinks && !graph.nodes[k].active)
-		{
-			for (int l=0; l<graph.nodes[k].arcs.size(); l++)
-			{
+		if (graph.nodes[k].arcs.size()>=bestLinks && !graph.nodes[k].active) {
+			for (unsigned int l=0; l<graph.nodes[k].arcs.size(); l++) {
 				if (graph.nodes[graph.nodes[k].arcs[l].projId].active)
 					act++;
 			}
-			if (act>bestActive)
-			{
+			if (act>bestActive) {
 				bestActive=act;
 				bestLinks=graph.nodes[k].arcs.size();
 				cand=k;
 			}
-			else if (act==bestActive && graph.nodes[k].avMut>graph.nodes[cand].avMut)
-			{
+			else if (act==bestActive && graph.nodes[k].avMut>graph.nodes[cand].avMut) {
 				bestActive=act;
 				bestLinks=graph.nodes[k].arcs.size();
 				cand=k;
@@ -888,11 +828,9 @@ int FilterMutualGlobal::getTheRightNode(SubGraph graph)
 
 bool FilterMutualGlobal::allActive(SubGraph graph)
 {
-	for (int k=0; k<graph.nodes.size(); k++)
-	{
+	for (unsigned int k=0; k<graph.nodes.size(); k++) {
 		if (!graph.nodes[k].active)
 			return false;
-
 	}
 	return true;
 
@@ -907,41 +845,37 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 	//alignset.node=&node;
 
 	auto it= md.rasterBegin(); std::advance(it, node.id);
-	RasterModel* rm = *it;
-	alignset.image=&rm->currentPlane->image;
-	alignset.shot=rm->shot;
+	RasterModel& rm = *it;
+	alignset.image=&rm.currentPlane->image;
+	alignset.shot=rm.shot;
 
 	alignset.mesh=&md.mm()->cm;
 
-	for (int l=0; l<node.arcs.size(); l++)
-	{
+	for (unsigned int l=0; l<node.arcs.size(); l++) {
 		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[l].projId);
-		RasterModel* lrm  =*lit;
-		alignset.arcImages.push_back(&lrm->currentPlane->image);
-		alignset.arcShots.push_back(&lrm->shot);
+		RasterModel& lrm  =*lit;
+		alignset.arcImages.push_back(&lrm.currentPlane->image);
+		alignset.arcShots.push_back(&lrm.shot);
 		alignset.arcMI.push_back(node.arcs[l].mutual);
-
 	}
 
 	if(alignset.arcImages.size()==0)
 		return true;
-	else if(alignset.arcImages.size()==1)
-	{
+	else if(alignset.arcImages.size()==1) {
 		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[0].projId);
-		RasterModel* lrm  =*lit;
-		alignset.arcImages.push_back(&lrm->currentPlane->image);
-		alignset.arcShots.push_back(&lrm->shot);
+		RasterModel& lrm  =*lit;
+		alignset.arcImages.push_back(&lrm.currentPlane->image);
+		alignset.arcShots.push_back(&lrm.shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
-		alignset.arcImages.push_back(&lrm->currentPlane->image);
-		alignset.arcShots.push_back(&lrm->shot);
+		alignset.arcImages.push_back(&lrm.currentPlane->image);
+		alignset.arcShots.push_back(&lrm.shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
 	}
-	else if(alignset.arcImages.size()==2)
-	{
+	else if(alignset.arcImages.size()==2) {
 		auto lit = md.rasterBegin(); std::advance(lit, node.arcs[0].projId);
-		RasterModel* lrm  =*lit;
-		alignset.arcImages.push_back(&lrm->currentPlane->image);
-		alignset.arcShots.push_back(&lrm->shot);
+		RasterModel& lrm  =*lit;
+		alignset.arcImages.push_back(&lrm.currentPlane->image);
+		alignset.arcShots.push_back(&lrm.shot);
 		alignset.arcMI.push_back(node.arcs[0].mutual);
 	}
 
@@ -1007,18 +941,17 @@ bool FilterMutualGlobal::AlignNode(MeshDocument &md, Node node)
 
 
 	//md.rasterList[node.id]->shot=alignset.shot;
-	rm->shot=alignset.shot;
-	float ratio=(float)rm->currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
-	rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
-	rm->shot.Intrinsics.ViewportPx[1]=rm->currentPlane->image.height();
-	rm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-	rm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-	rm->shot.Intrinsics.CenterPx[0]=(int)((float)rm->shot.Intrinsics.ViewportPx[0]/2.0);
-	rm->shot.Intrinsics.CenterPx[1]=(int)((float)rm->shot.Intrinsics.ViewportPx[1]/2.0);
+	rm.shot=alignset.shot;
+	float ratio=(float)rm.currentPlane->image.height()/(float)alignset.shot.Intrinsics.ViewportPx[1];
+	rm.shot.Intrinsics.ViewportPx[0]=rm.currentPlane->image.width();
+	rm.shot.Intrinsics.ViewportPx[1]=rm.currentPlane->image.height();
+	rm.shot.Intrinsics.PixelSizeMm[1]/=ratio;
+	rm.shot.Intrinsics.PixelSizeMm[0]/=ratio;
+	rm.shot.Intrinsics.CenterPx[0]=(int)((float)rm.shot.Intrinsics.ViewportPx[0]/2.0);
+	rm.shot.Intrinsics.CenterPx[1]=(int)((float)rm.shot.Intrinsics.ViewportPx[1]/2.0);
 	//this->glContext->doneCurrent();
 	//emit md.rasterSetChanged();
-	for (int l=0; l<alignset.arcImages.size(); l++)
-	{
+	for (unsigned int l=0; l<alignset.arcImages.size(); l++) {
 		alignset.arcImages.pop_back();
 		alignset.arcMI.pop_back();
 		alignset.arcShots.pop_back();
@@ -1076,25 +1009,21 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 	delete []colors;
 	delete []indices;
 
-	for (int h=0; h<graph.nodes.size(); h++)
-		for (int l=0; l<graph.nodes[h].arcs.size(); l++)
-		{
-			if(graph.nodes[h].arcs[l].imageId==n || graph.nodes[h].arcs[l].projId==n)
-			{
-//////////////////
+	for (unsigned int h=0; h<graph.nodes.size(); h++) {
+		for (unsigned int l=0; l<graph.nodes[h].arcs.size(); l++) {
+			if(graph.nodes[h].arcs[l].imageId==n || graph.nodes[h].arcs[l].projId==n) {
+				//////////////////
 				int imageId=graph.nodes[h].arcs[l].imageId;
 				int imageProj=graph.nodes[h].arcs[l].projId;
 				auto it= md.rasterBegin(); std::advance(it, imageId);
-				RasterModel* rm = *it;
+				RasterModel& rm = *it;
 				//this->glContext->makeCurrent();
 
-				alignset.image=&rm->currentPlane->image;
-				alignset.shot=rm->shot;
+				alignset.image=&rm.currentPlane->image;
+				alignset.shot=rm.shot;
 
 				//this->initGL();
 				alignset.resize(800);
-
-
 
 				//alignset.shot=par.getShotf("Shot");
 
@@ -1106,36 +1035,20 @@ bool FilterMutualGlobal::UpdateGraph(MeshDocument &md, SubGraph graph, int n)
 				alignset.comb=alignset.rend;*/
 
 				alignset.mode=AlignSet::PROJIMG;
-				alignset.shotPro=rm->shot;
-				alignset.imagePro=&rm->currentPlane->image;
+				alignset.shotPro=rm.shot;
+				alignset.imagePro=&rm.currentPlane->image;
 				alignset.ProjectedImageChanged(*alignset.imagePro);
-				float countTot=0.0;
-				float countCol=0.0;
 				alignset.RenderShadowMap();
 				alignset.renderScene(alignset.shot, 1, true);
-				//alignset.readRender(1);
-				/*for (int x=0; x<alignset.wt; x++)
-					for (int y=0; y<alignset.ht; y++)
-					{
-						QColor color;
-						color.setRgb(alignset.comb.pixel(x,y));
-						if (color!=qRgb(0,0,0))
-						{
-							countTot++;
-							if (alignset.comb.pixel(x,y)!=alignset.rend.pixel(x,y))
-								countCol++;
-						}
-					}
-				graph.nodes[h].arcs[l].area=countCol/countTot;*/
 				graph.nodes[h].arcs[l].mutual=mutual.info(alignset.wt,alignset.ht,alignset.target,alignset.render);
 
 
 				//this->glContext->doneCurrent();
 
-//////////////////////////77
-
+				//////////////////////////77
 			}
 		}
+	}
 
 
 	return true;

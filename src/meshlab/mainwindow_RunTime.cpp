@@ -1970,7 +1970,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 		}
 		catch(const MLException& e){
-			meshDoc()->delRaster(rm);
+			meshDoc()->delRaster(rm->id());
 			QMessageBox::warning(
 						this,
 						tr("Opening Failure"),

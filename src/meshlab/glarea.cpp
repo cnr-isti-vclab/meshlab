@@ -1777,40 +1777,36 @@ void GLArea::initGlobalParameterList( RichParameterList& defaultGlobalParamList)
 //Don't alter the state of the other elements in the visibility map
 void GLArea::updateMeshSetVisibilities()
 {
-    meshVisibilityMap.clear();
-    for(MeshModel& mp : md()->meshIterator())
-    {
-        //Insert the new pair in the map; If the key is already in the map, its value will be overwritten
-        meshVisibilityMap.insert(mp.id(), mp.isVisible());
-    }
+	meshVisibilityMap.clear();
+	for(MeshModel& mp : md()->meshIterator()) {
+		//Insert the new pair in the map; If the key is already in the map, its value will be overwritten
+		meshVisibilityMap.insert(mp.id(), mp.isVisible());
+	}
 }
 
 //Don't alter the state of the other elements in the visibility map
 void GLArea::updateRasterSetVisibilities()
 {
-    //Align rasterVisibilityMap state with rasterList state
-    //Deleting from the map the visibility of the deleted rasters
-    QMapIterator<int, bool> i(rasterVisibilityMap);
-    while (i.hasNext()) {
-        i.next();
-        bool found =false;
-        for(RasterModel * rp: md()->rasterIterator())
-        {
-            if(rp->id() == i.key())
-            {
-                found = true;
-                break;
-            }
-        }
-        if(!found)
-            rasterVisibilityMap.remove(i.key());
-    }
+	//Align rasterVisibilityMap state with rasterList state
+	//Deleting from the map the visibility of the deleted rasters
+	QMapIterator<int, bool> i(rasterVisibilityMap);
+	while (i.hasNext()) {
+		i.next();
+		bool found =false;
+		for(const RasterModel& rp: md()->rasterIterator()) {
+			if(rp.id() == i.key()) {
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+			rasterVisibilityMap.remove(i.key());
+	}
 
-    for(RasterModel * rp: md()->rasterIterator())
-    {
-        //Insert the new pair in the map;If the key is already in the map, its value will be overwritten
-        rasterVisibilityMap.insert(rp->id(),rp->isVisible());
-    }
+	for(RasterModel& rp: md()->rasterIterator()) {
+		//Insert the new pair in the map;If the key is already in the map, its value will be overwritten
+		rasterVisibilityMap.insert(rp.id(), rp.isVisible());
+	}
 }
 
 void GLArea::meshSetVisibility(MeshModel& mp, bool visibility)
@@ -1861,27 +1857,24 @@ void GLArea::showRaster(bool resetViewFlag)
 void GLArea::loadRaster(int id)
 {
 	lastloadedraster = id;
-	for(RasterModel *rm: md()->rasterIterator())
-        if(rm->id()==id)
-        {
-            this->md()->setCurrentRaster(id);
-            if (rm->currentPlane->image.isNull())
-            {
-                Logf(0,"Image file %s has not been correctly loaded, a fake image is going to be shown.",rm->currentPlane->fullPathFileName.toUtf8().constData());
-                rm->currentPlane->image.load(":/images/dummy.png");
-            }
-            setTarget(rm->currentPlane->image);
-            //load his shot or a default shot
+	for(RasterModel& rm: md()->rasterIterator()) {
+		if(rm.id() == id) {
+			this->md()->setCurrentRaster(id);
+			if (rm.currentPlane->image.isNull()) {
+				Logf(0,"Image file %s has not been correctly loaded, a fake image is going to be shown.",rm.currentPlane->fullPathFileName.toUtf8().constData());
+				rm.currentPlane->image.load(":/images/dummy.png");
+			}
+			setTarget(rm.currentPlane->image);
+			//load his shot or a default shot
 
-            if (rm->shot.IsValid())
-            {
-				fov = (rm->shot.Intrinsics.cameraType == 0) ? rm->shot.GetFovFromFocal() : 5.0;
+			if (rm.shot.IsValid()) {
+				fov = (rm.shot.Intrinsics.cameraType == 0) ? rm.shot.GetFovFromFocal() : 5.0;
 
 				// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
 				//float cameraDist = getCameraDistance();
 				//Matrix44f rotFrom;
 				//rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
-                //Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+				//Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
 				//Point3f p2 = (Point3f(0,0,cameraDist));
 				//trackball.track.sca =fabs(p2.Z()/p1.Z());
 
@@ -1896,11 +1889,12 @@ void GLArea::loadRaster(int id)
 				trackball.track.sca = 1.0f / sceneCamSize; // hack, we reset the trackball scale factor to the size of the mesh object + viewpoint DOES NOT WORK !
 				*/
 
-                loadShot(QPair<Shotm, float> (rm->shot,trackball.track.sca));
-            }
-            else
-                createOrthoView("Front");
-        }
+				loadShot(QPair<Shotm, float> (rm.shot,trackball.track.sca));
+			}
+			else
+				createOrthoView("Front");
+		}
+	}
 }
 
 void GLArea::drawTarget()

@@ -240,26 +240,23 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 
 		std::list<Shotm> initialShots;
 		std::list<RasterModel*> activeRasters;
-		for(RasterModel *rm : md.rasterIterator()) {
-			initialShots.push_back(rm->shot);
-			rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
-			if( rm->isVisible() )
-				activeRasters.push_back( rm );
+		for(RasterModel& rm : md.rasterIterator()) {
+			initialShots.push_back(rm.shot);
+			rm.shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
+			if( rm.isVisible() )
+				activeRasters.push_back(&rm );
 		}
 
 		if( activeRasters.empty() ) {
-			{
-				glContext->doneCurrent();
-				throw MLException("You need to have at least one valid raster layer in your project, to apply this filter"); // text
-			}
+			glContext->doneCurrent();
+			throw MLException("You need to have at least one valid raster layer in your project, to apply this filter"); // text
 		}
 
 		switch( ID(act) )
 		{
 		case FP_PATCH_PARAM_ONLY:
 		{
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) {
 				glContext->doneCurrent();
 				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
@@ -282,8 +279,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 		}
 		case FP_PATCH_PARAM_AND_TEXTURING:
 		{
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) {
 				glContext->doneCurrent();
 				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
@@ -296,8 +292,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 			if( pathEnd != -1 )
 				texName = texName.right( texName.size()-pathEnd-1 );
 
-			if( (retValue = texName.size()!=0) )
-			{
+			if( (retValue = texName.size()!=0) ) {
 				RasterPatchMap patches;
 				PatchVec nullPatches;
 				patchBasedTextureParameterization(
@@ -309,8 +304,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 							par);
 
 				TexturePainter painter( *m_Context, par.getInt("textureSize") );
-				if( (retValue = painter.isInitialized()) )
-				{
+				if( (retValue = painter.isInitialized()) ) {
 					QElapsedTimer t; t.start();
 					painter.paint( patches );
 					if( par.getBool("colorCorrection") )
@@ -335,8 +329,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
 				vi->Q() = 0.0f;
 
-			for( RasterModel *rm: activeRasters )
-			{
+			for( RasterModel *rm: activeRasters ) {
 				visibility.setRaster( rm );
 				visibility.checkVisibility();
 				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
@@ -344,8 +337,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 						vi->Q() += 1.0f;
 			}
 
-			if( par.getBool("normalizeQuality") )
-			{
+			if( par.getBool("normalizeQuality") ) {
 				const float normFactor = 1.0f / md.rasterNumber();
 				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
 					vi->Q() *= normFactor;
@@ -353,8 +345,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 
 			break;
 		}
-		case FP_RASTER_FACE_COVERAGE:
-		{
+		case FP_RASTER_FACE_COVERAGE: {
 			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
 			visibility.setMesh(md.mm()->id(),&mesh );
 			visibility.m_plugcontext = glContext;
@@ -362,8 +353,7 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 			for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
 				fi->Q() = 0.0f;
 
-			for( RasterModel *rm: activeRasters )
-			{
+			for( RasterModel *rm: activeRasters ) {
 				visibility.setRaster( rm );
 				visibility.checkVisibility();
 				for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
@@ -384,9 +374,8 @@ std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 			wrongActionCalled(act);
 		}
 
-		for( RasterModel *rm: md.rasterIterator() )
-		{
-			rm->shot = *initialShots.begin();
+		for(RasterModel& rm: md.rasterIterator() ) {
+			rm.shot = *initialShots.begin();
 			initialShots.erase( initialShots.begin() );
 		}
 

@@ -38,8 +38,8 @@ public:
 	// Iterators
 	typedef std::list<MeshModel>::iterator MeshIterator;
 	typedef std::list<MeshModel>::const_iterator ConstMeshIterator;
-	typedef std::list<RasterModel*>::iterator RasterIterator;
-	typedef std::list<const RasterModel*>::const_iterator ConstRasterIterator;
+	typedef std::list<RasterModel>::iterator RasterIterator;
+	typedef std::list<RasterModel>::const_iterator ConstRasterIterator;
 
 	class MeshRangeIterator
 	{
@@ -152,7 +152,8 @@ public:
 	RasterModel *addNewRaster(/*QString rasterName*/);
 
 	///remove the raster from the list and delete it from memory
-	bool delRaster(RasterModel *rasterToDel);
+	bool delRaster(unsigned int id);
+	RasterIterator eraseRaster(RasterIterator it);
 
 	int vn() const; /// Sum of all the vertices of all the meshes
 
@@ -185,7 +186,7 @@ private:
 	/// The list of MeshModels.
 	std::list<MeshModel> meshList;
 	/// The list of the raster models of the project
-	std::list<RasterModel*> rasterList;
+	std::list<RasterModel> rasterList;
 
 	int meshIdCounter;
 	int rasterIdCounter;

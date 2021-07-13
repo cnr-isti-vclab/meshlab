@@ -238,21 +238,27 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 	case  FP_DELETE_NON_VISIBLE_MESH:
 	{
-		for(auto it = md.meshBegin(); it != md.meshEnd(); ++it) {
+		for(auto it = md.meshBegin(); it != md.meshEnd();) {
 			if (!it->isVisible()){
 				it = md.eraseMesh(it);
+			}
+			else {
+				++it;
 			}
 		}
 	} break;
 
-	case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm()); break;
+	case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm()->id()); break;
 
 	case  FP_DELETE_NON_SELECTED_RASTER:
 	{
-		for(RasterModel *rmp: md.rasterIterator())
-		{
-			if (!rmp->isVisible())
-				md.delRaster(rmp);
+		for(auto it = md.rasterBegin(); it != md.rasterEnd();) {
+			if (!it->isVisible()) {
+				it = md.eraseRaster(it);
+			}
+			else {
+				++it;
+			}
 		}
 	} break;
 
@@ -450,26 +456,23 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			}
 
 			int active = 0;
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible())
+			for (const RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
 					active++;
 			}
 
 			fprintf(outfile, "# Bundle file v0.3\n");
 			fprintf(outfile, "%d %d\n", active, 0);
 
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible())
-				{
-					fprintf(outfile, "%f %d %d\n", rm->shot.Intrinsics.FocalMm / rm->shot.Intrinsics.PixelSizeMm[0], 0, 0);
+			for (const RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
+					fprintf(outfile, "%f %d %d\n", rm.shot.Intrinsics.FocalMm / rm.shot.Intrinsics.PixelSizeMm[0], 0, 0);
 
-					Matrix44m mat = rm->shot.Extrinsics.Rot();
+					Matrix44m mat = rm.shot.Extrinsics.Rot();
 
 					Matrix33m Rt = Matrix33m(Matrix44m(mat), 3);
 
-					Point3f pos = Rt * rm->shot.Extrinsics.Tra();
+					Point3f pos = Rt * rm.shot.Extrinsics.Tra();
 					Rt.Transpose();
 
 					fprintf(outfile, "%f %f %f\n", Rt[0][0], Rt[1][0], Rt[2][0]);
@@ -484,8 +487,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			fclose(outfile);
 			
 		}
-		else if (output==1)
-		{
+		else if (output==1) {
 			name = name.append(".xml");
 			
 			QFileInfo fi(name);
@@ -507,22 +509,18 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			xmlWriter.writeStartElement("sensors");
 			
 			unsigned int i = 0;
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible())
-				{
+			for (const RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
 					float focal, pixelX, pixelY;
-					if (rm->shot.Intrinsics.FocalMm > 1000)
-					{
-						focal = rm->shot.Intrinsics.FocalMm / 500;
-						pixelX = rm->shot.Intrinsics.PixelSizeMm[0] / 500;
-						pixelY = rm->shot.Intrinsics.PixelSizeMm[1] / 500;
+					if (rm.shot.Intrinsics.FocalMm > 1000) {
+						focal = rm.shot.Intrinsics.FocalMm / 500;
+						pixelX = rm.shot.Intrinsics.PixelSizeMm[0] / 500;
+						pixelY = rm.shot.Intrinsics.PixelSizeMm[1] / 500;
 					}
-					else
-					{
-						focal = rm->shot.Intrinsics.FocalMm;
-						pixelX = rm->shot.Intrinsics.PixelSizeMm[0];
-						pixelY = rm->shot.Intrinsics.PixelSizeMm[1];
+					else {
+						focal = rm.shot.Intrinsics.FocalMm;
+						pixelX = rm.shot.Intrinsics.PixelSizeMm[0];
+						pixelY = rm.shot.Intrinsics.PixelSizeMm[1];
 					}
 
 					xmlWriter.writeStartElement("sensor");
@@ -530,8 +528,8 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 					xmlWriter.writeAttribute("label", "unknown"+QString::number(i));
 					xmlWriter.writeAttribute("type", "frame");
 					xmlWriter.writeStartElement("resolution");
-					xmlWriter.writeAttribute("width", QString::number(rm->shot.Intrinsics.ViewportPx[0]));
-					xmlWriter.writeAttribute("height", QString::number(rm->shot.Intrinsics.ViewportPx[1]));
+					xmlWriter.writeAttribute("width", QString::number(rm.shot.Intrinsics.ViewportPx[0]));
+					xmlWriter.writeAttribute("height", QString::number(rm.shot.Intrinsics.ViewportPx[1]));
 					xmlWriter.writeEndElement();
 					xmlWriter.writeStartElement("property");
 					xmlWriter.writeAttribute("name", "pixel_width");
@@ -553,13 +551,13 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 					xmlWriter.writeAttribute("type", "frame");
 					xmlWriter.writeAttribute("class", "adjusted");
 					xmlWriter.writeStartElement("resolution");
-					xmlWriter.writeAttribute("width", QString::number(rm->shot.Intrinsics.ViewportPx[0]));
-					xmlWriter.writeAttribute("height", QString::number(rm->shot.Intrinsics.ViewportPx[1]));
+					xmlWriter.writeAttribute("width", QString::number(rm.shot.Intrinsics.ViewportPx[0]));
+					xmlWriter.writeAttribute("height", QString::number(rm.shot.Intrinsics.ViewportPx[1]));
 					xmlWriter.writeEndElement();
-					xmlWriter.writeTextElement("fx", QString::number(rm->shot.Intrinsics.FocalMm / rm->shot.Intrinsics.PixelSizeMm[0]));
-					xmlWriter.writeTextElement("fy", QString::number(rm->shot.Intrinsics.FocalMm / rm->shot.Intrinsics.PixelSizeMm[1]));
-					xmlWriter.writeTextElement("cx", QString::number(rm->shot.Intrinsics.CenterPx[0]));
-					xmlWriter.writeTextElement("cy", QString::number(rm->shot.Intrinsics.CenterPx[1]));
+					xmlWriter.writeTextElement("fx", QString::number(rm.shot.Intrinsics.FocalMm / rm.shot.Intrinsics.PixelSizeMm[0]));
+					xmlWriter.writeTextElement("fy", QString::number(rm.shot.Intrinsics.FocalMm / rm.shot.Intrinsics.PixelSizeMm[1]));
+					xmlWriter.writeTextElement("cx", QString::number(rm.shot.Intrinsics.CenterPx[0]));
+					xmlWriter.writeTextElement("cy", QString::number(rm.shot.Intrinsics.CenterPx[1]));
 					xmlWriter.writeTextElement("k1", "0");
 					xmlWriter.writeTextElement("k2", "0");
 					xmlWriter.writeTextElement("p1", "0");
@@ -572,17 +570,15 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			xmlWriter.writeEndElement();
 			xmlWriter.writeStartElement("cameras");
 			i = 0;
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible())
-				{
+			for (const RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
 					xmlWriter.writeStartElement("camera");
 					xmlWriter.writeAttribute("id", QString::number(i));
-					xmlWriter.writeAttribute("label", rm->currentPlane->shortName());
+					xmlWriter.writeAttribute("label", rm.currentPlane->shortName());
 					xmlWriter.writeAttribute("sensor_id", QString::number(i));
 					xmlWriter.writeAttribute("enabled", "true");
-					Matrix44m mat = rm->shot.Extrinsics.Rot();
-					Point3f pos = rm->shot.Extrinsics.Tra();
+					Matrix44m mat = rm.shot.Extrinsics.Rot();
+					Point3f pos = rm.shot.Extrinsics.Tra();
 					QString transform= QString::number(mat[0][0]);
 					transform.append(" " + QString::number(-mat[1][0]));
 					transform.append(" " + QString::number(-mat[2][0]));
@@ -642,22 +638,19 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			
 			///// Check if the number of active rasters and cameras is the same
 			unsigned active = 0;
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible())
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
 					active++;
 			}
 
-			if (active != num_cams)
-			{
+			if (active != num_cams) {
 				throw MLException("Wait! The number of active rasters and the number of cams in the Bundler file is not the same!");
 			}
 
 			//// Import cameras
 			unsigned int i = 0;
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->isVisible()) {
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
 					float f, k1, k2;
 					float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
 					vcg::Point3f t;
@@ -684,25 +677,24 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 					Point3f pos = Rt * Point3f(t[0], t[1], t[2]);
 
-					rm->shot.Extrinsics.SetTra(Point3f(-pos[0], -pos[1], -pos[2]));
-					rm->shot.Extrinsics.SetRot(mat);
+					rm.shot.Extrinsics.SetTra(Point3f(-pos[0], -pos[1], -pos[2]));
+					rm.shot.Extrinsics.SetRot(mat);
 
-					rm->shot.Intrinsics.FocalMm = f;
-					rm->shot.Intrinsics.k[0] = 0.0;//k1; To be uncommented when distortion is taken into account reliably
-					rm->shot.Intrinsics.k[1] = 0.0;//k2;
-					rm->shot.Intrinsics.PixelSizeMm = vcg::Point2f(1, 1);
+					rm.shot.Intrinsics.FocalMm = f;
+					rm.shot.Intrinsics.k[0] = 0.0;//k1; To be uncommented when distortion is taken into account reliably
+					rm.shot.Intrinsics.k[1] = 0.0;//k2;
+					rm.shot.Intrinsics.PixelSizeMm = vcg::Point2f(1, 1);
 					QSize size;
-					QImageReader sizeImg(rm->currentPlane->fullPathFileName);
+					QImageReader sizeImg(rm.currentPlane->fullPathFileName);
 					size = sizeImg.size();
-					rm->shot.Intrinsics.ViewportPx = vcg::Point2i(size.width(), size.height());
-					rm->shot.Intrinsics.CenterPx[0] = (int)((double)rm->shot.Intrinsics.ViewportPx[0] / 2.0f);
-					rm->shot.Intrinsics.CenterPx[1] = (int)((double)rm->shot.Intrinsics.ViewportPx[1] / 2.0f);
+					rm.shot.Intrinsics.ViewportPx = vcg::Point2i(size.width(), size.height());
+					rm.shot.Intrinsics.CenterPx[0] = (int)((double)rm.shot.Intrinsics.ViewportPx[0] / 2.0f);
+					rm.shot.Intrinsics.CenterPx[1] = (int)((double)rm.shot.Intrinsics.ViewportPx[1] / 2.0f);
 				}
 				++i;
 			}
 		}
-		else if ((fi.suffix().toLower() == "xml"))
-		{
+		else if ((fi.suffix().toLower() == "xml")) {
 			QDomDocument doc;
 			QFile file(fileName);
 			if (!file.open(QIODevice::ReadOnly) || !doc.setContent(&file))
@@ -712,29 +704,23 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			////// Read and store sensors list
 			QDomNodeList sensors = doc.elementsByTagName("sensor");
 
-			if (sensors.size() == 0)
-			{
+			if (sensors.size() == 0) {
 				throw MLException("Error!");
 			}
 
 			shots.resize(sensors.size());
-			for (int i = 0; i < sensors.size(); i++)
-			{
+			for (int i = 0; i < sensors.size(); i++) {
 				QDomNode n = sensors.item(i);
 				int id = n.attributes().namedItem("id").nodeValue().toInt();
 
 				QDomNode node = n.firstChild();
 				//Devices
-				while (!node.isNull())
-				{
-					if (QString::compare(node.nodeName(), "calibration") == 0)
-					{
+				while (!node.isNull()) {
+					if (QString::compare(node.nodeName(), "calibration") == 0) {
 						QDomNode node1 = node.firstChild();
 						//Devices
-						while (!node1.isNull())
-						{
-							if (QString::compare(node1.nodeName(), "resolution") == 0)
-							{
+						while (!node1.isNull()) {
+							if (QString::compare(node1.nodeName(), "resolution") == 0) {
 								int width = node1.attributes().namedItem("width").nodeValue().toInt();
 								int height = node1.attributes().namedItem("height").nodeValue().toInt();
 								shots[id].Intrinsics.ViewportPx[0] = width;
@@ -743,29 +729,24 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 								shots[id].Intrinsics.CenterPx[1] = (float)height / 2.0f;
 								//Log("Width %f, Height %f", shots[id].Intrinsics.CenterPx[0], shots[id].Intrinsics.CenterPx[1]);
 							}
-							else if (QString::compare(node1.nodeName(), "fx") == 0)
-							{
+							else if (QString::compare(node1.nodeName(), "fx") == 0) {
 								float fx = node1.toElement().text().toFloat();
-								if (fx > 100)
-								{
+								if (fx > 100) {
 									fx = fx / 100;
 									shots[id].Intrinsics.FocalMm = fx;
 									shots[id].Intrinsics.PixelSizeMm[0] = 0.01f;
 									shots[id].Intrinsics.PixelSizeMm[1] = 0.01f;
 								}
-								else
-								{
+								else {
 									shots[id].Intrinsics.FocalMm = fx;
 									shots[id].Intrinsics.PixelSizeMm[0] = 1;
 									shots[id].Intrinsics.PixelSizeMm[1] = 1;
 								}
 								//Log("Focal %f", fx);
 							}
-							else if (QString::compare(node1.nodeName(), "k1") == 0)
-							{
+							else if (QString::compare(node1.nodeName(), "k1") == 0) {
 								float k1 = node1.toElement().text().toFloat();
-								if (k1 != 0.0f)
-								{
+								if (k1 != 0.0f) {
 									log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
 								}
 
@@ -781,34 +762,28 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			///////// Read and import cameras
 			QDomNodeList cameras = doc.elementsByTagName("camera");
 
-			if (cameras.size() == 0)
-			{
+			if (cameras.size() == 0) {
 				throw MLException("Error!");
 			}
 
-			for (int i = 0; i < cameras.size(); i++)
-			{
+			for (int i = 0; i < cameras.size(); i++) {
 				QDomNode n = cameras.item(i);
 				//int id = n.attributes().namedItem("id").nodeValue().toInt();
 				int sensor_id = n.attributes().namedItem("sensor_id").nodeValue().toInt();
 				QString name = n.attributes().namedItem("label").nodeValue();
 
 				RasterModel* rasterId = nullptr;
-				for (RasterModel* rm : md.rasterIterator())
-				{
-					if (rm->currentPlane->shortName() == name)
-					{
-						rasterId = rm;
+				for (RasterModel& rm : md.rasterIterator()) {
+					if (rm.currentPlane->shortName() == name) {
+						rasterId = &rm;
 						break;
 					}
 				}
 
 				QDomNode node = n.firstChild();
 				
-				while (!node.isNull() && rasterId != nullptr)
-				{
-					if (QString::compare(node.nodeName(), "transform") == 0)
-					{
+				while (!node.isNull() && rasterId != nullptr) {
+					if (QString::compare(node.nodeName(), "transform") == 0) {
 						rasterId->shot.Intrinsics.FocalMm = shots[sensor_id].Intrinsics.FocalMm;
 						rasterId->shot.Intrinsics.ViewportPx[0] = shots[sensor_id].Intrinsics.ViewportPx[0];
 						rasterId->shot.Intrinsics.ViewportPx[1] = shots[sensor_id].Intrinsics.ViewportPx[1];
@@ -841,8 +816,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			}
 		}
 
-		else
-		{
+		else {
 			throw MLException("Unknown file type");
 		}
 	} break;

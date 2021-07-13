@@ -456,8 +456,8 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				// If the user has pressed ctrl when clicking on the icon, only that layer will remain visible
 				//
 				if(QApplication::keyboardModifiers() == Qt::ControlModifier) {
-					for(RasterModel *rp: md->rasterIterator()) {
-						rp->setVisible(false);
+					for(RasterModel& rp: md->rasterIterator()) {
+						rp.setVisible(false);
 					}
 				}
 
@@ -473,14 +473,14 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				// Very useful after you turned all layer invis using the previous option and want to avoid
 				// clicking on all of them...
 				if(QApplication::keyboardModifiers() == Qt::AltModifier) {
-					for(RasterModel *rp: md->rasterIterator()) {
-						rp->setVisible(true);
+					for(RasterModel& rp: md->rasterIterator()) {
+						rp.setVisible(true);
 					}
 				}
 
 				if(QApplication::keyboardModifiers() == Qt::ShiftModifier) {
-					for(RasterModel *rp: md->rasterIterator()) {
-						rp->setVisible(!rp->isVisible());
+					for(RasterModel& rp: md->rasterIterator()) {
+						rp.setVisible(!rp.isVisible());
 					}
 					rm->setVisible(!rm->isVisible());
 				}
@@ -492,8 +492,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 			case 1 :
 			case 2 :
 			case 3 :
-				if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
-				{
+				if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster()) {
 					mw->meshDoc()->setCurrentRaster(clickedId);
 					if(mw->GLA()->isRaster())
 						mw->GLA()->loadRaster(clickedId);
@@ -690,14 +689,13 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	ui->rasterTreeWidget->setColumnWidth(1,20);
 	ui->rasterTreeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
 	ui->rasterTreeWidget->header()->hide();
-	for(RasterModel* rmd: md->rasterIterator())
-	{
+	for(RasterModel& rmd: md->rasterIterator()) {
 		//Restore raster visibility according to the current visibility map
 		//very good to keep viewer state consistent
-		if( mw->GLA()->rasterVisibilityMap.contains(rmd->id()))
-			rmd->setVisible(mw->GLA()->rasterVisibilityMap.value(rmd->id()));
+		if( mw->GLA()->rasterVisibilityMap.contains(rmd.id()))
+			rmd.setVisible(mw->GLA()->rasterVisibilityMap.value(rmd.id()));
 
-		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
+		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(&rmd);
 		ui->rasterTreeWidget->addTopLevelItem(item);
 		updatePerRasterItemVisibility();
 		updatePerRasterItemSelectionStatus();

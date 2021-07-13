@@ -113,18 +113,14 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 		}
 		
 		// draw all visible raster cameras
-		if(rm->getBool(ShowRasterCameras()))
-		{
-			for(RasterModel *raster: md.rasterIterator())
-			{
-				if(raster != md.rm() || !showCameraDetails )   // non-selected raster, only draw
-				{
-					if(raster->isVisible()) DrawCamera(nullptr, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+		if(rm->getBool(ShowRasterCameras())) {
+			for(RasterModel& raster: md.rasterIterator()) {
+				if(&raster != md.rm() || !showCameraDetails ) { // non-selected raster, only draw
+					if(raster.isVisible()) DrawCamera(nullptr, raster.shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
 				}
-				else                          // selected raster, draw & display data
-				{
-					DrawCamera(nullptr, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter, qf);
-					DisplayCamera(raster->label(), raster->shot, 2);
+				else {                         // selected raster, draw & display data
+					DrawCamera(nullptr, raster.shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter, qf);
+					DisplayCamera(raster.label(), raster.shot, 2);
 				}
 			}
 			
