@@ -452,14 +452,12 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 			//if no channels are checked, we intend to work on all rgb channels, so...
 			if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
 
-			if (all_levels)
-			{
-			for(MeshModel *mm: md.meshIterator())
-				if (mm->isVisible())
-					vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+			if (all_levels) {
+				for(MeshModel& mm: md.meshIterator())
+					if (mm.isVisible())
+						vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm.cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
 			}
-			else
-			{
+			else {
 				vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
 			}
 			break;
@@ -522,10 +520,10 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 			math::MarsenneTwisterRNG myrnd(seed);
 			int numOfMeshes = md.meshNumber();
 			int id = myrnd.generate(numOfMeshes);
-			for(MeshModel *mm: md.meshIterator())
+			for(MeshModel& mm: md.meshIterator())
 			{
-				if (mm->isVisible())
-					mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
+				if (mm.isVisible())
+					mm.cm.C()=Color4b::Scatter(numOfMeshes,id);
 				id=(id+1)%numOfMeshes;
 			}
 			break;
@@ -866,12 +864,12 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 
 		case CP_MESH_TO_FACE:
 		{
-			for(MeshModel *mmi: md.meshIterator())
+			for(MeshModel& mmi: md.meshIterator())
 			{
-				if (mmi->isVisible())
+				if (mmi.isVisible())
 				{
-					mmi->updateDataMask(MeshModel::MM_FACECOLOR);
-					tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm, mmi->cm.C());
+					mmi.updateDataMask(MeshModel::MM_FACECOLOR);
+					tri::UpdateColor<CMeshO>::PerFaceConstant(mmi.cm, mmi.cm.C());
 				}
 			}
 			break;

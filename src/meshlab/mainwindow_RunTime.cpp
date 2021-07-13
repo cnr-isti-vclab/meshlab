@@ -752,10 +752,8 @@ void MainWindow::endEdit()
 		return;
 	
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			addRenderingDataIfNewlyGeneratedMesh(mm->id());
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		addRenderingDataIfNewlyGeneratedMesh(mm.id());
 	}
 	meshDoc()->meshDocStateData().clear();
 	
@@ -819,24 +817,19 @@ void MainWindow::runFilterScript()
 				atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
 
-				if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
-				{
+				if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
 					MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-					if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-					{
+					if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != nullptr)) {
 						dt.set(pm,atts);
 						shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
 					}
 				}
-				else
-				{
-					for(MeshModel* mm : meshDoc()->meshIterator())
-					{
-						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-						if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-						{
+				else {
+					for(const MeshModel& mm : meshDoc()->meshIterator()) {
+						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
+						if ((pm != MLRenderingData::PR_ARITY)) {
 							dt.set(pm,atts);
-							shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
+							shar->setRenderingDataPerMeshView(mm.id(),iFilter->glContext,dt);
 						}
 					}
 				}
@@ -1174,24 +1167,19 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 		
-		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
-		{
+		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
 			MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-			{
+			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL)) {
 				dt.set(pm,atts);
 				iFilter->glContext->initPerViewRenderingData(meshDoc()->mm()->id(),dt);
 			}
 		}
-		else
-		{
-			for(MeshModel* mm : meshDoc()->meshIterator())
-			{
-				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-				if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-				{
+		else {
+			for(const MeshModel& mm : meshDoc()->meshIterator()) {
+				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
+				if (pm != MLRenderingData::PR_ARITY) {
 					dt.set(pm,atts);
-					iFilter->glContext->initPerViewRenderingData(mm->id(),dt);
+					iFilter->glContext->initPerViewRenderingData(mm.id(),dt);
 				}
 			}
 		}
@@ -1590,17 +1578,17 @@ void MainWindow::saveProject()
 			bool firstNotSaved = true;
 			//if a mesh has been created by a create filter we must before to save it.
 			//Otherwise the project will refer to a mesh without file name path.
-			for(MeshModel * mp : meshDoc()->meshIterator()) {
-				if ((mp != nullptr) && (mp->fullName().isEmpty())) {
+			for(MeshModel& mp : meshDoc()->meshIterator()) {
+				if (mp.fullName().isEmpty()) {
 					if (firstNotSaved) {
 						QMessageBox::information(this, "Layer(s) not saved",
 								"Layers must be saved into files before saving the project.\n"
 								"Opening save dialog(s) to save the layer(s)...");
 						firstNotSaved = false;
 					}
-					bool saved = exportMesh(tr(""), mp, false);
+					bool saved = exportMesh(tr(""), &mp, false);
 					if (!saved) {
-						QString msg = "Mesh layer " + mp->label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
+						QString msg = "Mesh layer " + mp.label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
 						QMessageBox::warning(this,tr("Project Saving Aborted"),msg);
 						return;
 					}
@@ -1626,9 +1614,9 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 
 		std::vector<MLRenderingData> rendData;
-		for(MeshModel * mp : meshDoc()->meshIterator()) {
+		for(const MeshModel& mp : meshDoc()->meshIterator()) {
 			MLRenderingData ml;
-			getRenderingData(mp->id(), ml);
+			getRenderingData(mp.id(), ml);
 			rendData.push_back(ml);
 		}
 
@@ -1867,17 +1855,12 @@ void MainWindow::documentUpdateRequested()
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != nullptr)
-		{
-			addRenderingDataIfNewlyGeneratedMesh(mm->id());
-			updateLayerDialog();
-			if (currentViewContainer() != NULL)
-			{
-				currentViewContainer()->resetAllTrackBall();
-				currentViewContainer()->updateAllViewers();
-			}
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		addRenderingDataIfNewlyGeneratedMesh(mm.id());
+		updateLayerDialog();
+		if (currentViewContainer() != NULL) {
+			currentViewContainer()->resetAllTrackBall();
+			currentViewContainer()->updateAllViewers();
 		}
 	}
 }
@@ -2017,9 +2000,9 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLR
 			//count the number of faces contained in the whole meshdocument before the newly inserted mm
 			unsigned int totalSumFaces = 0;
 			bool found = false;
-			for (const MeshModel* m : meshDoc()->meshIterator()){
+			for (const MeshModel& m : meshDoc()->meshIterator()){
 				if (!found){
-					if (m != mm){
+					if (&m != mm){
 						totalSumFaces += mm->cm.FN();
 					}
 					else { //found mm: stop counting
@@ -2233,8 +2216,8 @@ bool MainWindow::importMesh(QString fileName)
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 		}
 		catch (const MLException& e){
-			for (MeshModel* mm : meshList)
-				meshDoc()->delMesh(mm);
+			for (const MeshModel* mm : meshList)
+				meshDoc()->delMesh(mm->id());
 			GLA()->Logf(0, "Error: File %s has not been loaded", qUtf8Printable(fileName));
 			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
@@ -2271,9 +2254,9 @@ void MainWindow::reloadAllMesh()
 	QElapsedTimer t;
 	t.start();
 	MeshDocument* md = meshDoc();
-	for(MeshModel *mmm : md->meshIterator()) {
-		if (mmm->idInFile() <= 0){
-			QString fileName = mmm->fullName();
+	for(MeshModel& mmm : md->meshIterator()) {
+		if (mmm.idInFile() <= 0){
+			QString fileName = mmm.fullName();
 			if (!fileName.isEmpty()){
 				std::list<MeshModel* > meshList = meshDoc()->getMeshesLoadedFromSameFile(mmm);
 				std::vector<bool> isReload(meshList.size(), true);
@@ -2319,7 +2302,7 @@ void MainWindow::reload()
 		return;
 	}
 
-	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(meshDoc()->mm());
+	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(*meshDoc()->mm());
 	std::vector<bool> isReload(meshList.size(), true);
 	unsigned int i = 0;
 	for (MeshModel* m : meshList){
@@ -2702,8 +2685,8 @@ void MainWindow::updateTexture(int meshid)
 	int textmemMB = int(mwsettings.maxTextureMemory / ((float) 1024 * 1024));
 	
 	size_t totalTextureNum = 0;
-	for (MeshModel *mp : meshDoc()->meshIterator())
-		totalTextureNum+=mp->cm.textures.size();
+	for (const MeshModel& mp : meshDoc()->meshIterator())
+		totalTextureNum+=mp.cm.textures.size();
 	
 	int singleMaxTextureSizeMpx = int(textmemMB/((totalTextureNum != 0)? totalTextureNum : 1));
 
@@ -2936,11 +2919,9 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if ((mm != NULL) && (mm->isVisible()))
-		{
-			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		if (mm.isVisible()) {
+			updateRenderingDataAccordingToActionsCommonCode(mm.id(), acts);
 		}
 	}
 	//updateLayerDialog();
@@ -2965,10 +2946,8 @@ void MainWindow::updateRenderingDataAccordingToActions(int /*meshid*/, MLRenderi
 		}
 	}
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			updateRenderingDataAccordingToActionsCommonCode(mm->id(), tmpacts);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		updateRenderingDataAccordingToActionsCommonCode(mm.id(), tmpacts);
 	}
 	
 	for (int ii = 0; ii < tmpacts.size(); ++ii)
@@ -3020,11 +2999,9 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if ((mm != NULL) && (mm->isVisible()))
-		{
-			updateRenderingDataAccordingToActionCommonCode(mm->id(), act);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		if (mm.isVisible()) {
+			updateRenderingDataAccordingToActionCommonCode(mm.id(), act);
 		}
 	}
 	updateLayerDialog();
@@ -3037,18 +3014,14 @@ void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalA
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
+	for (const MeshModel& mm : meshDoc()->meshIterator())
 	{
-		if (mm != NULL)
-		{
-			foreach(MLRenderingGlobalAction* act, actlist)
-			{
-				foreach(MLRenderingAction* ract, act->mainActions())
-					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
-				
-				foreach(MLRenderingAction* ract, act->relatedActions())
-					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
-			}
+		foreach(MLRenderingGlobalAction* act, actlist) {
+			foreach(MLRenderingAction* ract, act->mainActions())
+				updateRenderingDataAccordingToActionCommonCode(mm.id(), ract);
+
+			foreach(MLRenderingAction* ract, act->relatedActions())
+				updateRenderingDataAccordingToActionCommonCode(mm.id(), ract);
 		}
 	}
 	updateLayerDialog();
@@ -3061,10 +3034,8 @@ void MainWindow::updateRenderingDataAccordingToAction(int /*meshid*/, MLRenderin
 	MLRenderingAction* sisteract = NULL;
 	act->createSisterAction(sisteract, NULL);
 	sisteract->setChecked(check);
-	for(MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			updateRenderingDataAccordingToActionCommonCode(mm->id(), sisteract);
+	for(const MeshModel& mm : meshDoc()->meshIterator()) {
+		updateRenderingDataAccordingToActionCommonCode(mm.id(), sisteract);
 	}
 	delete sisteract;
 	if (GLA() != NULL)

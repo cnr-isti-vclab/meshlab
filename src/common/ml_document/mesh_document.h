@@ -36,8 +36,8 @@ class MeshDocument : public QObject
 public:
 
 	// Iterators
-	typedef std::list<MeshModel*>::iterator MeshIterator;
-	typedef std::list<const MeshModel*>::const_iterator ConstMeshIterator;
+	typedef std::list<MeshModel>::iterator MeshIterator;
+	typedef std::list<MeshModel>::const_iterator ConstMeshIterator;
 	typedef std::list<RasterModel*>::iterator RasterIterator;
 	typedef std::list<const RasterModel*>::const_iterator ConstRasterIterator;
 
@@ -142,10 +142,11 @@ public:
 	MeshModel* addNewMesh(const CMeshO& mesh, const QString& Label, bool setAsCurrent=true);
 	MeshModel *addNewMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
 	MeshModel *addOrGetMesh(const QString& fullPath, const QString& Label, bool setAsCurrent=true);
-	std::list<MeshModel*> getMeshesLoadedFromSameFile(MeshModel* mm);
+	std::list<MeshModel*> getMeshesLoadedFromSameFile(MeshModel& mm);
 
 	///remove the mesh from the list and delete it from memory
-	bool delMesh(MeshModel *mmToDel);
+	bool delMesh(unsigned int id);
+	MeshIterator eraseMesh(MeshIterator it);
 
 	///add a new raster model
 	RasterModel *addNewRaster(/*QString rasterName*/);
@@ -153,13 +154,13 @@ public:
 	///remove the raster from the list and delete it from memory
 	bool delRaster(RasterModel *rasterToDel);
 
-	int vn(); /// Sum of all the vertices of all the meshes
+	int vn() const; /// Sum of all the vertices of all the meshes
 
-	int fn();
+	int fn() const;
 
 	Box3m bbox() const;
 
-	bool hasBeenModified();
+	bool hasBeenModified() const;
 
 	//iterator member functions
 	MeshIterator meshBegin();
@@ -182,9 +183,9 @@ public:
 private:
 	/// The very important member:
 	/// The list of MeshModels.
-	std::list<MeshModel *> meshList;
+	std::list<MeshModel> meshList;
 	/// The list of the raster models of the project
-	std::list<RasterModel *> rasterList;
+	std::list<RasterModel*> rasterList;
 
 	int meshIdCounter;
 	int rasterIdCounter;
@@ -202,7 +203,7 @@ private:
 
 	bool busy;
 
-	MeshModel *currentMesh;
+	MeshModel* currentMesh;
 	//the current raster model
 	RasterModel* currentRaster;
 

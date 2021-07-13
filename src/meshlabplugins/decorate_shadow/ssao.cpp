@@ -113,27 +113,26 @@ bool SSAO::init()
 
 void SSAO::runShader(MeshDocument& md, GLArea* gla)
 {
+	/***********************************************************/
+	//NORMAL MAP and DEPTH MAP generation
+	/***********************************************************/
+	MLSceneGLSharedDataContext* ctx = NULL;
+	if ((gla == NULL) || (gla->mvc() == NULL))
+		return;
+	ctx = gla->mvc()->sharedDataContext();
+	if (ctx == NULL)
+		return;
 
-    /***********************************************************/
-    //NORMAL MAP and DEPTH MAP generation
-    /***********************************************************/
-    MLSceneGLSharedDataContext* ctx = NULL;
-    if ((gla == NULL) || (gla->mvc() == NULL)) 
-        return;
-    ctx = gla->mvc()->sharedDataContext();
-    if (ctx == NULL)
-        return;
+	this->bind();
+	glUseProgram(this->_normalMapShaderProgram);
 
-    this->bind();
-    glUseProgram(this->_normalMapShaderProgram);
+	vcg::Matrix44f mProj, mInverseProj;
+	glMatrixMode(GL_PROJECTION);
+	glGetFloatv(GL_PROJECTION_MATRIX, mProj.V());
+	glMatrixMode(GL_MODELVIEW);
 
-    vcg::Matrix44f mProj, mInverseProj;
-    glMatrixMode(GL_PROJECTION);
-    glGetFloatv(GL_PROJECTION_MATRIX, mProj.V());
-    glMatrixMode(GL_MODELVIEW);
-
-    mProj.transposeInPlace();
-    mInverseProj = vcg::Inverse(mProj);
+	mProj.transposeInPlace();
+	mInverseProj = vcg::Inverse(mProj);
 
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -144,106 +143,104 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-	for(MeshModel *m: md.meshIterator())
-	{
-		if ((m != NULL) && (m->isVisible()))
-		{
-			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+	for(const MeshModel& m: md.meshIterator()) {
+		if (m.isVisible()) {
+			ctx->drawAllocatedAttributesSubset(m.id(), gla->context(), dt);
 		}
 	}
 	glUseProgram(0);
 
-    /***********************************************************/
-    //SSAO PASS
-    /***********************************************************/
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-    glUseProgram(this->_ssaoShaderProgram);
+	/***********************************************************/
+	//SSAO PASS
+	/***********************************************************/
+	glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+	glUseProgram(this->_ssaoShaderProgram);
 
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, this->_noise);
-    GLuint noiseloc = glGetUniformLocation(this->_ssaoShaderProgram, "rnm");
-    glUniform1i(noiseloc, 0);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->_noise);
+	GLuint noiseloc = glGetUniformLocation(this->_ssaoShaderProgram, "rnm");
+	glUniform1i(noiseloc, 0);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, this->_color1);
-    GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
-    glUniform1i(loc, 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, this->_color1);
+	GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
+	glUniform1i(loc, 1);
 
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, this->_depthMap);
-    loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
-    glUniform1i(loc, 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, this->_depthMap);
+	loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
+	glUniform1i(loc, 2);
 
-    GLuint radiusLoc = glGetUniformLocation(this->_ssaoShaderProgram, "rad");
-    glUniform1f(radiusLoc, this->_radius);
+	GLuint radiusLoc = glGetUniformLocation(this->_ssaoShaderProgram, "rad");
+	glUniform1f(radiusLoc, this->_radius);
 
-    GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
-    glUniformMatrix4fv(matrixLoc, 1, 0, mProj.transpose().V());
+	GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
+	glUniformMatrix4fv(matrixLoc, 1, 0, mProj.transpose().V());
 
-    GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
-    glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj.transpose().V());
+	GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
+	glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj.transpose().V());
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBegin(GL_TRIANGLE_STRIP);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-    glVertex3f( 1.0f, -1.0f, 0.0f);
-    glVertex3f(-1.0f,  1.0f, 0.0f);
-    glVertex3f( 1.0f,  1.0f, 0.0f);
-    glEnd();
-    glUseProgram(0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex3f(-1.0f, -1.0f, 0.0f);
+	glVertex3f( 1.0f, -1.0f, 0.0f);
+	glVertex3f(-1.0f,  1.0f, 0.0f);
+	glVertex3f( 1.0f,  1.0f, 0.0f);
+	glEnd();
+	glUseProgram(0);
 
-    /***********************************************************/
-    //BLURRING horizontal
-    /***********************************************************/
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glUseProgram(this->_blurShaderProgram);
+	/***********************************************************/
+	//BLURRING horizontal
+	/***********************************************************/
+	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+	glUseProgram(this->_blurShaderProgram);
 
-    float blur_coef(0.8f);
-    GLfloat scale = 1/(this->_texW * blur_coef);
+	float blur_coef(0.8f);
+	GLfloat scale = 1/(this->_texW * blur_coef);
 
-    GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
-    glUniform2f(scaleLoc, scale, 0.0);
+	GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
+	glUniform2f(scaleLoc, scale, 0.0);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, this->_color2);
-    loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
-    glUniform1i(loc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->_color2);
+	loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
+	glUniform1i(loc, 0);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBegin(GL_TRIANGLE_STRIP);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-    glVertex3f( 1.0f, -1.0f, 0.0f);
-    glVertex3f(-1.0f,  1.0f, 0.0f);
-    glVertex3f( 1.0f,  1.0f, 0.0f);
-    glEnd();
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex3f(-1.0f, -1.0f, 0.0f);
+	glVertex3f( 1.0f, -1.0f, 0.0f);
+	glVertex3f(-1.0f,  1.0f, 0.0f);
+	glVertex3f( 1.0f,  1.0f, 0.0f);
+	glEnd();
 
-    /***********************************************************/
-    //BLURRING vertical
-    /***********************************************************/
-    this->unbind();
-    glUniform2f(scaleLoc, 0.0, scale);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, this->_color1);
-    loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
-    glUniform1i(loc, 0);
+	/***********************************************************/
+	//BLURRING vertical
+	/***********************************************************/
+	this->unbind();
+	glUniform2f(scaleLoc, 0.0, scale);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBindTexture(GL_TEXTURE_2D, this->_color1);
+	loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
+	glUniform1i(loc, 0);
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-    glVertex3f( 1.0f, -1.0f, 0.0f);
-    glVertex3f(-1.0f,  1.0f, 0.0f);
-    glVertex3f( 1.0f,  1.0f, 0.0f);
-    glEnd();
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex3f(-1.0f, -1.0f, 0.0f);
+	glVertex3f( 1.0f, -1.0f, 0.0f);
+	glVertex3f(-1.0f,  1.0f, 0.0f);
+	glVertex3f( 1.0f,  1.0f, 0.0f);
+	glEnd();
 
-    glUseProgram(0);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
+	glUseProgram(0);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
 }
 
 bool SSAO::setup()

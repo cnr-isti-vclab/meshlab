@@ -70,32 +70,32 @@ bool VarianceShadowMapping::init()
 
 void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 {
-    GLfloat g_mModelView[16];
-    GLfloat g_mProjection[16];
-    
-    MLSceneGLSharedDataContext* ctx = NULL;
-    if ((gla == NULL) || (gla->mvc()  == NULL)) 
-        return;
-    ctx = gla->mvc()->sharedDataContext();
-    if (ctx == NULL)
-        return;
+	GLfloat g_mModelView[16];
+	GLfloat g_mProjection[16];
 
-    this->renderingFromLightSetup(md, gla);
+	MLSceneGLSharedDataContext* ctx = NULL;
+	if ((gla == NULL) || (gla->mvc()  == NULL))
+		return;
+	ctx = gla->mvc()->sharedDataContext();
+	if (ctx == NULL)
+		return;
 
-    glMatrixMode(GL_PROJECTION);
-        glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-    glMatrixMode(GL_MODELVIEW);
-        glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
+	this->renderingFromLightSetup(md, gla);
 
-    /***********************************************************/
-    //SHADOW MAP Generation
-    /***********************************************************/
-    glEnable(GL_POLYGON_OFFSET_FILL);
-    glPolygonOffset(1.0, 1.0);
+	glMatrixMode(GL_PROJECTION);
+	glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+	glMatrixMode(GL_MODELVIEW);
+	glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
-    this->bind();
+	/***********************************************************/
+	//SHADOW MAP Generation
+	/***********************************************************/
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0, 1.0);
 
-    glUseProgram(this->_depthShaderProgram);
+	this->bind();
+
+	glUseProgram(this->_depthShaderProgram);
 	MLRenderingData dt;
 	MLRenderingData::RendAtts atts;
 	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
@@ -103,83 +103,79 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-	for(MeshModel *m: md.meshIterator())
-	{
-		if ((m != NULL) && (m->isVisible()))
-		{
-			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+	for(const MeshModel& m: md.meshIterator()) {
+		if (m.isVisible()) {
+			ctx->drawAllocatedAttributesSubset(m.id(), gla->context(), dt);
 		}
 	}
 
-    glDisable(GL_POLYGON_OFFSET_FILL);
+	glDisable(GL_POLYGON_OFFSET_FILL);
 
-    this->unbind();
+	this->unbind();
 
-    this->renderingFromLightUnsetup();
+	this->renderingFromLightUnsetup();
 
-    /***********************************************************/
-    //SHADOW MAP Generation finished
-    /***********************************************************/
+	/***********************************************************/
+	//SHADOW MAP Generation finished
+	/***********************************************************/
 
-    /***********************************************************/
-    //OBJECT PASS
-    /***********************************************************/
-    GLint depthFuncOld;
-    glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-    glDepthFunc(GL_LEQUAL);
-    vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
-    glUseProgram(this->_shadowMappingProgram);
+	/***********************************************************/
+	//OBJECT PASS
+	/***********************************************************/
+	GLint depthFuncOld;
+	glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
+	glDepthFunc(GL_LEQUAL);
+	vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
+	glUseProgram(this->_shadowMappingProgram);
 
-    GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
-    glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
+	GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
+	glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
-    GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
-    glUniform1f(shadowIntensityLoc, this->_intensity);
+	GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
+	glUniform1f(shadowIntensityLoc, this->_intensity);
 
-    GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
-    glUniform1i(loc, 0);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
+	glUniform1i(loc, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	for(MeshModel *m: md.meshIterator())
-	{
-		if ((m != NULL) && (m->isVisible()))
-		{
-			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+	for(const MeshModel& m: md.meshIterator()) {
+		if (m.isVisible()) {
+			ctx->drawAllocatedAttributesSubset(m.id(), gla->context(), dt);
 		}
 	}
 
-    glDisable(GL_BLEND);
-    glDepthFunc((GLenum)depthFuncOld);
-    glUseProgram(0);
+	glDisable(GL_BLEND);
+	glDepthFunc((GLenum)depthFuncOld);
+	glUseProgram(0);
 }
 
 bool VarianceShadowMapping::setup()
 {
-        if (!GLEW_EXT_framebuffer_object) {
-                qWarning("FBO not supported!");
-                return false;
-        }
+	if (!GLEW_EXT_framebuffer_object) {
+		qWarning("FBO not supported!");
+		return false;
+	}
 
-        if (_initOk)
-                return true;
+	if (_initOk)
+		return true;
 
-        //genero il frame buffer object
-        glGenFramebuffers(1, &_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+	//genero il frame buffer object
+	glGenFramebuffers(1, &_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-        //Generates texture color for variance shadow map
-        this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0);
+	//Generates texture color for variance shadow map
+	this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0);
 
-        //Generates render buffer for depth attachment
-        this->genDepthRenderBufferEXT(this->_depth);
+	//Generates render buffer for depth attachment
+	this->genDepthRenderBufferEXT(this->_depth);
 
-        //checks for errors
-        int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return _initOk;
+	//checks for errors
+	int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	_initOk = (err == GL_FRAMEBUFFER_COMPLETE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return _initOk;
 }

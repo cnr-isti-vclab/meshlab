@@ -410,7 +410,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		int result = pm2.cm.vert.size();
 
 		if(!triangVP)
-			md.delMesh(&pm2);
+			md.delMesh(pm2.id());
 		if(result>=0){
 			log("Selected %i visible points", result);
 		}

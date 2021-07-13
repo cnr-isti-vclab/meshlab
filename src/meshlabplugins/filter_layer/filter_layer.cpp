@@ -217,18 +217,15 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	case  FP_MESH_VISIBILITY:
 	{
 		QString match = par.getString("lName");
-		if (match == "")
-		{
+		if (match == "") {
 			MeshModel *mm = md.getMesh(par.getMeshId("layer"));
 			if (mm)
 				md.setVisible(mm->id(), par.getBool("isMeshVisible"));
 		}
-		else
-		{
-			for(MeshModel *mmp: md.meshIterator())
-			{
-				if (mmp->label().contains(match))
-					md.setVisible(mmp->id(), par.getBool("isMeshVisible"));
+		else {
+			for(const MeshModel& mmp: md.meshIterator()) {
+				if (mmp.label().contains(match))
+					md.setVisible(mmp.id(), par.getBool("isMeshVisible"));
 			}
 		}
 	} break;
@@ -236,15 +233,15 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	case  FP_DELETE_MESH:
 	{
 		if (md.mm())
-			md.delMesh(md.mm());
+			md.delMesh(md.mm()->id());
 	} break;
 
 	case  FP_DELETE_NON_VISIBLE_MESH:
 	{
-		for(MeshModel *mmp: md.meshIterator())
-		{
-			if (!mmp->isVisible())
-				md.delMesh(mmp);
+		for(auto it = md.meshBegin(); it != md.meshEnd(); ++it) {
+			if (!it->isVisible()){
+				it = md.eraseMesh(it);
+			}
 		}
 	} break;
 
@@ -373,41 +370,34 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 		MeshModel *destModel = md.addNewMesh("", "Merged Mesh", true);
 
-		QList<MeshModel *> toBeDeletedList;
+		std::list<unsigned int> toBeDeletedList;
 
 		int cnt=0;
-		for(MeshModel *mmp: md.meshIterator())
-		{
+		for(MeshModel& mmp: md.meshIterator()) {
 			++cnt;
-			if(mmp->isVisible() || !mergeVisible)
-			{
-				if (mmp != destModel)
-				{
+			if(mmp.isVisible() || !mergeVisible) {
+				if (mmp.id() != destModel->id()) {
 					cb(cnt*100/md.meshNumber(), "Merging layers...");
-					tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
-					toBeDeletedList.push_back(mmp);
-					if(!alsoUnreferenced)
-					{
-						vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
+					tri::UpdatePosition<CMeshO>::Matrix(mmp.cm, mmp.cm.Tr, true);
+					toBeDeletedList.push_back(mmp.id());
+					if(!alsoUnreferenced) {
+						vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp.cm);
 					}
-					destModel->updateDataMask(mmp);
-					tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, mmp->cm);
-					tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
-
+					destModel->updateDataMask(&mmp);
+					tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, mmp.cm);
+					tri::UpdatePosition<CMeshO>::Matrix(mmp.cm,Inverse(mmp.cm.Tr),true);
 				}
 			}
 		}
 
-		if( deleteLayer )
-		{
+		if( deleteLayer ) {
 			log( "Deleted %d merged layers", toBeDeletedList.size());
-			foreach(MeshModel *mmp,toBeDeletedList)
-				md.delMesh(mmp);
+			for (unsigned int id : toBeDeletedList)
+				md.delMesh(id);
 			md.setCurrent(destModel); // setting again newly created model as current
 		}
 		
-		if( mergeVertices )
-		{
+		if( mergeVertices ) {
 			int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(destModel->cm);
 			log( "Removed %d duplicated vertices", delvert);
 		}

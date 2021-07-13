@@ -45,20 +45,20 @@ class DecorateRasterProjPlugin : public QObject, public DecoratePlugin
     // Types.
     enum { DP_PROJECT_RASTER };
 
-    class MeshDrawer
-    {
-        MeshModel           *m_Mesh;
+	class MeshDrawer
+	{
+		const MeshModel           *m_Mesh;
 
-    public:
-        inline              MeshDrawer() : m_Mesh(NULL)                 {}
-        inline              MeshDrawer( MeshModel *mm ) : m_Mesh(mm)    {}
+	public:
+		inline              MeshDrawer() : m_Mesh(NULL)                 {}
+		inline              MeshDrawer(const MeshModel *mm ) : m_Mesh(mm)    {}
 
-        //void                update(MLSceneGLSharedDataContext* ctx);
-        void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
-        void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		//void                update(MLSceneGLSharedDataContext* ctx);
+		void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
-        inline MeshModel*   mm()                                        { return m_Mesh; }
-    };
+		inline const MeshModel*   mm()                                        { return m_Mesh; }
+	};
 
 
     // Class variables.

@@ -223,9 +223,9 @@ void LayerDialog::clickV1()
 	if (isRecording)
 	{
 		visibilityState[0].clear();
-		for(MeshModel *mp : md->meshIterator())
+		for(MeshModel& mp : md->meshIterator())
 		{
-			visibilityState[0].insert(mp->id(), mp->isVisible());
+			visibilityState[0].insert(mp.id(), mp.isVisible());
 		}
 		isRecording = false;
 		ui->bV1->setText(QChar(0x2460));
@@ -237,7 +237,7 @@ void LayerDialog::clickV1()
 		while (i.hasNext()) {
 			i.next();
 			if (md->getMesh(i.key()) != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+				mw->GLA()->meshSetVisibility(*md->getMesh(i.key()), i.value());
 		}
 		updatePerMeshItemVisibility();
 		updatePerMeshItemSelectionStatus();
@@ -253,9 +253,9 @@ void LayerDialog::clickV2()
 	if (isRecording)
 	{
 		visibilityState[1].clear();
-		for(MeshModel *mp : md->meshIterator())
+		for(MeshModel& mp : md->meshIterator())
 		{
-			visibilityState[1].insert(mp->id(), mp->isVisible());
+			visibilityState[1].insert(mp.id(), mp.isVisible());
 		}
 		isRecording = false;
 		ui->bV2->setText(QChar(0x2461));
@@ -267,7 +267,7 @@ void LayerDialog::clickV2()
 		while (i.hasNext()) {
 			i.next();
 			if (md->getMesh(i.key()) != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+				mw->GLA()->meshSetVisibility(*md->getMesh(i.key()), i.value());
 		}
 		updatePerMeshItemVisibility();
 		updatePerMeshItemSelectionStatus();
@@ -283,9 +283,9 @@ void LayerDialog::clickV3()
 	if (isRecording)
 	{
 		visibilityState[2].clear();
-		for(MeshModel *mp : md->meshIterator())
+		for(MeshModel& mp : md->meshIterator())
 		{
-			visibilityState[2].insert(mp->id(), mp->isVisible());
+			visibilityState[2].insert(mp.id(), mp.isVisible());
 		}
 		isRecording = false;
 		ui->bV3->setText(QChar(0x2462));
@@ -297,7 +297,7 @@ void LayerDialog::clickV3()
 		while (i.hasNext()) {
 			i.next();
 			if (md->getMesh(i.key()) != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+				mw->GLA()->meshSetVisibility(*md->getMesh(i.key()), i.value());
 		}
 		updatePerMeshItemVisibility();
 		updatePerMeshItemSelectionStatus();
@@ -313,9 +313,9 @@ void LayerDialog::clickV4()
 	if (isRecording)
 	{
 		visibilityState[3].clear();
-		for(MeshModel *mp : md->meshIterator())
+		for(MeshModel& mp : md->meshIterator())
 		{
-			visibilityState[3].insert(mp->id(), mp->isVisible());
+			visibilityState[3].insert(mp.id(), mp.isVisible());
 		}
 		isRecording = false;
 		ui->bV4->setText(QChar(0x2463));
@@ -327,7 +327,7 @@ void LayerDialog::clickV4()
 		while (i.hasNext()) {
 			i.next();
 			if (md->getMesh(i.key()) != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+				mw->GLA()->meshSetVisibility(*md->getMesh(i.key()), i.value());
 		}
 		updatePerMeshItemVisibility();
 		updatePerMeshItemSelectionStatus();
@@ -375,13 +375,13 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			// Very useful for comparing meshes
 			if(QApplication::keyboardModifiers() == Qt::ControlModifier)
 			{
-				for(MeshModel *mp : md->meshIterator())
+				for(MeshModel& mp : md->meshIterator())
 					mw->GLA()->meshSetVisibility(mp, false);
 			}
 
 			//Toggle visibility of current mesh
 			if (mItem != NULL)
-				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
+				mw->GLA()->meshSetVisibility(*md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 
 			// EVEN NICER TRICK.
 			// If the user has pressed alt when clicking on the eye icon, all layers will get visible
@@ -389,7 +389,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 			// clicking on all of them...
 			if(QApplication::keyboardModifiers() == Qt::AltModifier)
 			{
-				for(MeshModel *mp : md->meshIterator())
+				for(MeshModel& mp : md->meshIterator())
 				{
 					mw->GLA()->meshSetVisibility(mp, true);
 				}
@@ -397,11 +397,11 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
 			if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
 			{
-				for(MeshModel *mp : md->meshIterator())
+				for(MeshModel& mp : md->meshIterator())
 				{
-					mw->GLA()->meshSetVisibility(mp, !mp->isVisible());
+					mw->GLA()->meshSetVisibility(mp, !mp.isVisible());
 				}
-				mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
+				mw->GLA()->meshSetVisibility(*md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 			}
 			if (mItem != NULL)
 				mw->meshDoc()->setCurrentMesh(clickedId);
@@ -644,31 +644,31 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	updateProjectName(md->docLabel());
 
 	QList<QTreeWidgetItem*> itms;
-	for (MeshModel* mmd : md->meshIterator())
+	for (MeshModel& mmd : md->meshIterator())
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
-		if( mw->GLA()->meshVisibilityMap.contains(mmd->id())) {
-			mmd->setVisible(mw->GLA()->meshVisibilityMap.value(mmd->id()));
+		if( mw->GLA()->meshVisibilityMap.contains(mmd.id())) {
+			mmd.setVisible(mw->GLA()->meshVisibilityMap.value(mmd.id()));
 		}
 		else {
-			mw->GLA()->meshVisibilityMap[mmd->id()]=true;
-			mmd->setVisible(true);
+			mw->GLA()->meshVisibilityMap[mmd.id()]=true;
+			mmd.setVisible(true);
 		}
-		MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator rdit = dtf.find(mmd->id());
+		MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator rdit = dtf.find(mmd.id());
 		if (rdit != dtf.end())
 		{
-			MLRenderingSideToolbar* rendertb = new MLRenderingSideToolbar(mmd->id(),this);
+			MLRenderingSideToolbar* rendertb = new MLRenderingSideToolbar(mmd.id(),this);
 			rendertb->setIconSize(QSize(16,16));
 			rendertb->setAccordingToRenderingData((*rdit));
 			connect(rendertb,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 			connect(rendertb, SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)), this, SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 			connect(rendertb,SIGNAL(activatedAction(MLRenderingAction*)),this,SLOT(actionActivated(MLRenderingAction*)));
 
-			MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
+			MeshTreeWidgetItem* item = new MeshTreeWidgetItem(&mmd,ui->meshTreeWidget,rendertb);
 			item->setExpanded(expandedMap.value(qMakePair(item->_meshid,-1)));
 
-			addDefaultNotes(item,mmd);
+			addDefaultNotes(item,&mmd);
 			itms.push_back(item);
 			//Adding default annotations
 		}

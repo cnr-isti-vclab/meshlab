@@ -1738,7 +1738,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(underM->cm) > 0)
 			{
 				log("Mesh has some not 2 manifoldfaces, splitting surfaces requires manifoldness");
-				md.delMesh(underM);
+				md.delMesh(underM->id());
 			}
 			else
 			{

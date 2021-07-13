@@ -178,8 +178,8 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 		loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 	}
 	catch(const MLException& e){
-		for (MeshModel* mm : meshList)
-			md.delMesh(mm);
+		for (const MeshModel* mm : meshList)
+			md.delMesh(mm->id());
 		throw e;
 	}
 
@@ -263,21 +263,21 @@ void saveAllMeshes(
 {
 	PluginManager& pm = meshlab::pluginManagerInstance();
 
-	for (MeshModel* m : md.meshIterator()){
-		if (m->isVisible() || !onlyVisible) {
+	for (MeshModel& m : md.meshIterator()){
+		if (m.isVisible() || !onlyVisible) {
 			QString filename, extension;
-			if (m->fullName().isEmpty()){
-				if (m->label().contains('.')){
-					extension = QFileInfo(m->label()).suffix();
-					filename = QFileInfo(m->label()).baseName();
+			if (m.fullName().isEmpty()){
+				if (m.label().contains('.')){
+					extension = QFileInfo(m.label()).suffix();
+					filename = QFileInfo(m.label()).baseName();
 				}
 				else {
 					extension = "ply";
-					filename = m->label();
+					filename = m.label();
 				}
 			}
 			else {
-				QFileInfo fi(m->fullName());
+				QFileInfo fi(m.fullName());
 				extension = fi.suffix();
 				filename = fi.baseName();
 			}
@@ -292,7 +292,7 @@ void saveAllMeshes(
 				filename += ("." + extension.toLower());
 			}
 			filename = basePath + "/" + filename;
-			saveMeshWithStandardParameters(filename, *m, log, cb);
+			saveMeshWithStandardParameters(filename, m, log, cb);
 		}
 	}
 }

@@ -256,17 +256,17 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		Matrix44m transf=trTran*trRot*trTranInv;
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->isVisible())
+				if (mm.isVisible())
 				{
-					mm->cm.Tr=transf * mm->cm.Tr;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr=transf * mm.cm.Tr;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.shot.ApplyRigidTransformation(transf);
-					mm->cm.Tr.SetIdentity();
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.shot.ApplyRigidTransformation(transf);
+					mm.cm.Tr.SetIdentity();
 				}
 				
 			}
@@ -352,19 +352,19 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		trTranInv.SetTranslate(-tranVec);
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->isVisible())
+				if (mm.isVisible())
 				{
-					mm->cm.Tr=trTran*trScale*trTranInv;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr=trTran*trScale*trTranInv;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplyRigidTransformation(trTran);
-					mm->cm.shot.RescalingWorld(trScale[0][0], false);
-					mm->cm.shot.ApplyRigidTransformation(trTranInv);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplyRigidTransformation(trTran);
+					mm.cm.shot.RescalingWorld(trScale[0][0], false);
+					mm.cm.shot.ApplyRigidTransformation(trTranInv);
 				}
 				
 			}
@@ -449,17 +449,17 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->isVisible())
+				if (mm.isVisible())
 				{
-					mm->cm.Tr=trTran;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr=trTran;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplyRigidTransformation(trTran);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplyRigidTransformation(trTran);
 				}
 			}
 			for (RasterModel* rm : md.rasterIterator())
@@ -524,16 +524,16 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->isVisible())
+				if (mm.isVisible())
 				{
-					mm->cm.Tr = mat;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr = mat;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplySimilarity(mat);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplySimilarity(mat);
 				}
 			}
 			for (RasterModel* rm : md.rasterIterator())

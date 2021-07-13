@@ -34,8 +34,8 @@ std::vector<MeshModel*> loadALN(
 			meshList.insert(meshList.end(), tmp.begin(), tmp.end());
 		}
 		catch (const MLException& e){
-			for (MeshModel* m : meshList)
-				md.delMesh(m);
+			for (const MeshModel* m : meshList)
+				md.delMesh(m->id());
 			throw e;
 		}
 	}
@@ -219,7 +219,7 @@ std::vector<MeshModel*> loadMLP(
 					}
 					catch(const MLException& e) {
 						for (MeshModel* mm : meshList)
-							md.delMesh(mm);
+							md.delMesh(mm->id());
 						throw MLException(filen + " mesh file not found.");
 					}
 				}

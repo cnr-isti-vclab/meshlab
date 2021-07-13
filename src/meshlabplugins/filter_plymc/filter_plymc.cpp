@@ -165,14 +165,14 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		p.FullyPreprocessedFlag=true;
 		p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
 		p.SimplificationFlag = par.getBool("simplification");
-		for(MeshModel*mm: md.meshIterator())
+		for(MeshModel& mm: md.meshIterator())
 		{
-			if(mm->isVisible())
+			if(mm.isVisible())
 			{
 				SMesh sm;
-				mm->updateDataMask(MeshModel::MM_FACEQUALITY);
-				tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm/*,false,p.VertSplatFlag*/); // note the last parameter of the append to prevent removal of unreferenced vertices...
-				tri::UpdatePosition<SMesh>::Matrix(sm, Matrix44f::Construct(mm->cm.Tr),true);
+				mm.updateDataMask(MeshModel::MM_FACEQUALITY);
+				tri::Append<SMesh,CMeshO>::Mesh(sm, mm.cm/*,false,p.VertSplatFlag*/); // note the last parameter of the append to prevent removal of unreferenced vertices...
+				tri::UpdatePosition<SMesh>::Matrix(sm, Matrix44f::Construct(mm.cm.Tr),true);
 				tri::UpdateBounding<SMesh>::Box(sm);
 				tri::UpdateNormal<SMesh>::NormalizePerVertex(sm);
 				tri::UpdateTopology<SMesh>::VertexFace(sm);
@@ -181,7 +181,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 				for(int i=0;i<par.getInt("normalSmooth");++i)
 					tri::Smooth<SMesh>::FaceNormalLaplacianVF(sm);
 				//QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName())+QString(".vmi");
-				QString mshTmpPath=QString("__TMP")+QString(mm->shortName())+QString(".vmi");
+				QString mshTmpPath=QString("__TMP")+QString(mm.shortName())+QString(".vmi");
 				qDebug("Saving tmp file %s",qUtf8Printable(mshTmpPath));
 				int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qUtf8Printable(mshTmpPath) );
 				if(retVal!=0)
@@ -192,7 +192,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 					throw MLException("Failed to write vmi temp file " + mshTmpPath);
 				}
 				pmc.MP.AddSingleMesh(qUtf8Printable(mshTmpPath));
-				log("Preprocessing mesh %s",qUtf8Printable(mm->shortName()));
+				log("Preprocessing mesh %s",qUtf8Printable(mm.shortName()));
 			}
 		}
 		

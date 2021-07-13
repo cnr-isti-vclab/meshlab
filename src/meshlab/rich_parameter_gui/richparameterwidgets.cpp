@@ -1073,10 +1073,10 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 
 	int currentmeshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		QString shortName = mm->label();
+	for(const MeshModel& mm : md->meshIterator()) {
+		QString shortName = mm.label();
 		meshNames.push_back(shortName);
-		if(mm->id() == (unsigned int)rp->value().getInt()) {
+		if(mm.id() == (unsigned int)rp->value().getInt()) {
 			currentmeshindex = i;
 		}
 		++i;
@@ -1089,15 +1089,15 @@ void MeshWidget::collectWidgetValue()
 {
 	auto it = md->meshBegin();
 	std::advance(it, enumCombo->currentIndex());
-	rp->setValue(IntValue((*it)->id()));
+	rp->setValue(IntValue((*it).id()));
 }
 
 void MeshWidget::resetWidgetValue()
 {
 	int meshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		if(mm->id() == (unsigned int)rp->value().getInt()) {
+	for(const MeshModel& mm : md->meshIterator()) {
+		if(mm.id() == (unsigned int)rp->value().getInt()) {
 			meshindex = i;
 		}
 		++i;
@@ -1109,8 +1109,8 @@ void MeshWidget::setWidgetValue( const Value& nv )
 {
 	int meshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		if(mm->id() == (unsigned int)nv.getInt()) {
+	for(const MeshModel& mm : md->meshIterator()) {
+		if(mm.id() == (unsigned int)nv.getInt()) {
 			meshindex = i;
 		}
 		++i;
