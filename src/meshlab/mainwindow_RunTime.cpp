@@ -1212,8 +1212,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		if (meshDoc()->mm() != NULL)
 			meshDoc()->mm()->setMeshModified();
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-		if(GLA())
-		{
+		if(GLA()) {
 			GLA()->setLastAppliedFilter(action);
 		}
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -1259,11 +1258,9 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		if(iFilter->getClass(action) & FilterPlugin::MeshCreation )
 			GLA()->resetTrackBall();
 		
-		for(int jj = 0;jj < tmp.size();++jj)
-		{
+		for(int jj = 0;jj < tmp.size();++jj) {
 			MeshModel* mm = tmp[jj];
-			if (mm != NULL)
-			{
+			if (mm != NULL) {
 				// at the end for filters that change the color, or selection set the appropriate rendering mode
 				if(iFilter->getClass(action) & FilterPlugin::FaceColoring )
 					mm->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -1928,31 +1925,29 @@ void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati
 
 bool MainWindow::importRaster(const QString& fileImg)
 {
-	if (!GLA())
-	{
+	if (!GLA()) {
 		this->newProject();
 		if (!GLA())
 			return false;
 	}
-	
+
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputImageFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
-	
+
 	if (fileNameList.isEmpty())	return false;
-	else
-	{
+	else {
 		//save path away so we can use it again
 		QString path = fileNameList.first();
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-	
+
 	QElapsedTimer allFileTime;
 	allFileTime.start();
-	
+
 	for(const QString& fileName : fileNameList) {
 		RasterModel *rm = nullptr;
 		try {
@@ -1981,7 +1976,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 
 	if (_currviewcontainer != NULL)
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
-	
+
 	updateMenus();
 	updateLayerDialog();
 
@@ -2072,10 +2067,15 @@ bool MainWindow::importMesh(QString fileName)
 	}
 	
 	QStringList fileNameList;
-	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatListDialog().join(";;"));
-	else
+	if (fileName.isEmpty()) {
+		fileNameList = QFileDialog::getOpenFileNames(
+					this, tr("Import Mesh"),
+					lastUsedDirectory.path(),
+					PM.inputMeshFormatListDialog().join(";;"));
+	}
+	else {
 		fileNameList.push_back(fileName);
+	}
 	
 	if (fileNameList.isEmpty()) {
 		return false;
@@ -2176,6 +2176,8 @@ bool MainWindow::importMesh(QString fileName)
 			}
 		}
 
+		meshDoc()->setBusy(true);
+
 		//check how many meshes are going to be loaded from the file
 		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
 
@@ -2221,6 +2223,7 @@ bool MainWindow::importMesh(QString fileName)
 			GLA()->Logf(0, "Error: File %s has not been loaded", qUtf8Printable(fileName));
 			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
+		meshDoc()->setBusy(false);
 	}// end foreach file of the input list
 	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 	
@@ -2254,6 +2257,7 @@ void MainWindow::reloadAllMesh()
 	QElapsedTimer t;
 	t.start();
 	MeshDocument* md = meshDoc();
+	md->setBusy(true);
 	for(MeshModel& mmm : md->meshIterator()) {
 		if (mmm.idInFile() <= 0){
 			QString fileName = mmm.fullName();
@@ -2278,6 +2282,7 @@ void MainWindow::reloadAllMesh()
 			}
 		}
 	}
+	md->setBusy(false);
 	GLA()->Log(0, ("All meshes reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	qb->reset();
 	
@@ -2302,6 +2307,7 @@ void MainWindow::reload()
 		return;
 	}
 
+	meshDoc()->setBusy(true);
 	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(*meshDoc()->mm());
 	std::vector<bool> isReload(meshList.size(), true);
 	unsigned int i = 0;
@@ -2323,9 +2329,9 @@ void MainWindow::reload()
 	catch (const MLException& e) {
 		QMessageBox::critical(this, "Reload Error", e.what());
 	}
+	meshDoc()->setBusy(false);
 	qb->reset();
-	if (_currviewcontainer != NULL)
-	{
+	if (_currviewcontainer != NULL) {
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 		_currviewcontainer->updateAllViewers();
 	}
@@ -2404,8 +2410,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
 		int quality = -1;
 		bool saveTextures = true;
-		if (!saveAllPossibleAttributes)
+		if (!saveAllPossibleAttributes) {
 			maskDialog.exec();
+		}
 		else {
 			//this is horrible: creating a dialog object but then not showing the
 			//dialog.. And using it just to select all the possible options..
@@ -2440,6 +2447,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QElapsedTimer tt; tt.start();
 		qb->reset();
 
+		meshDoc()->setBusy(true);
 		try {
 			if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
 				mod->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -2460,6 +2468,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();
+		meshDoc()->setBusy(false);
 
 		if (saved)
 			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
