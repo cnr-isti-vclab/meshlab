@@ -93,7 +93,6 @@ void RichParameterListFrame::toggleHelp()
 	for(int i = 0; i < helpList.count(); i++)
 		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
 	updateGeometry();
-	adjustSize();
 }
 
 unsigned int RichParameterListFrame::size() const
@@ -111,11 +110,21 @@ RichParameterListFrame::iterator RichParameterListFrame::end()
 	return stdfieldwidgets.end();
 }
 
-void RichParameterListFrame::showAdvancedParameters(bool b)
+void RichParameterListFrame::toggleAdvancedParameters()
 {
-	if (hiddenFrame) { //should be always true
-		hiddenFrame->setVisible(b);
-		adjustSize();
+	if (hiddenFrame) {
+		if (hiddenFrame->isVisible()){
+			hiddenFrame->setVisible(false);
+			showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-ascending"));
+		}
+		else {
+			hiddenFrame->setVisible(true);
+			showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-descending"));
+		}
+		QFrame* p = dynamic_cast<QFrame*>(parent());
+		if (p){
+			p->setMinimumSize(p->sizeHint());
+		}
 	}
 }
 
@@ -142,12 +151,16 @@ void RichParameterListFrame::loadFrameContent(
 	}
 
 	int i = 0;
+	//parameters are organized into categories
 	for (const auto& p : visibleParameters) {
+		//if not the default category, the category name must be printed in the dialog
+		//before the list of parameter widgets
 		if (!p.first.isEmpty()) {
 			QString labltext = "<P><b>" + p.first + ":</b></P>";
 			QLabel* l = new QLabel(labltext, this);
 			glay->addWidget(l,i++,0,Qt::AlignLeft);
 		}
+		//put the parameter widgets into the grid layout
 		for (const RichParameter* fpi : p.second){
 			const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 			RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
@@ -157,10 +170,6 @@ void RichParameterListFrame::loadFrameContent(
 		}
 	}
 	if (hiddenParameters.size() > 0){
-		QCheckBox* cb = new QCheckBox("Show advanced parameters", this);
-		cb->setChecked(false);
-		glay->addWidget(cb,i++,0,Qt::AlignLeft);
-
 		hiddenFrame = new QFrame(this);
 		hiddenFrame->setContentsMargins(0,0,0,0);
 		QGridLayout* flay = new QGridLayout();
@@ -181,15 +190,16 @@ void RichParameterListFrame::loadFrameContent(
 				wd->addWidgetToGridLayout(flay,j++);
 			}
 		}
-		glay->addWidget(hiddenFrame,i++,0, 1, 2, Qt::AlignLeft);
+		//hiddenFrame->setMinimumSize(hiddenFrame->sizeHint());
+		glay->addWidget(hiddenFrame, i++, 0, 1, 3);
 		hiddenFrame->setVisible(false);
-		connect(cb, SIGNAL(clicked(bool)), this, SLOT(showAdvancedParameters(bool)));
+		showHiddenFramePushButton = new QPushButton("", this);
+		showHiddenFramePushButton->setFlat(true);
+		showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-ascending"));
+		glay->addWidget(showHiddenFramePushButton, i++, 0, 1, 3);
+		connect(showHiddenFramePushButton, SIGNAL(clicked()), this, SLOT(toggleAdvancedParameters()));
 	}
 	setLayout(glay);
-	this->setMinimumSize(glay->sizeHint());
-	glay->setSizeConstraint(QLayout::SetMinimumSize);
-	this->showNormal();
-	this->adjustSize();
 }
 
 /* creates widgets for the standard parameters */

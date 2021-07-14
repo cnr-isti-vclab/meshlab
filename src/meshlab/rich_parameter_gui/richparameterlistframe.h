@@ -69,7 +69,7 @@ signals:
 	void parameterChanged();
 
 public slots:
-	void showAdvancedParameters(bool b);
+	void toggleAdvancedParameters();
 
 private:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
@@ -87,6 +87,7 @@ private:
 
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
 	QFrame* hiddenFrame;
+	QPushButton* showHiddenFramePushButton;
 };
 
 #endif //RICHPARAMETERLISTFRAME_H

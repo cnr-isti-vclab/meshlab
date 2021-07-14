@@ -3,14 +3,11 @@
 
 static void updateRenderingData(MainWindow* curmwi, MeshModel* curmodel)
 {
-	if ((curmwi != NULL) && (curmodel != NULL))
-	{
+	if ((curmwi != nullptr) && (curmodel != nullptr)) {
 		MultiViewer_Container* mvcont = curmwi->currentViewContainer();
-		if (mvcont != NULL)
-		{
+		if (mvcont != nullptr) {
 			MLSceneGLSharedDataContext* shar = mvcont->sharedDataContext();
-			if (shar != NULL)
-			{
+			if (shar != nullptr) {
 				shar->meshAttributesUpdated(curmodel->id(), true, MLRenderingData::RendAtts(true));
 				shar->manageBuffers(curmodel->id());
 			}
@@ -18,12 +15,17 @@ static void updateRenderingData(MainWindow* curmwi, MeshModel* curmodel)
 	}
 }
 
-MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-	:QDockWidget(QString("Plugin"), p), previewCB(NULL), curmask(MeshModel::MM_UNKNOWN)
+MeshlabStdDialog::MeshlabStdDialog(QWidget *p) :
+	QDockWidget(QString("Plugin"), p),
+	qf(nullptr),
+	stdParFrame(nullptr),
+	curAction(nullptr),
+	previewCB(nullptr),
+	curmask(MeshModel::MM_UNKNOWN),
+	curModel(nullptr),
+	curmfi(nullptr),
+	curmwi(nullptr)
 {
-	qf = NULL;
-	stdParFrame = NULL;
-	clearValues();
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
@@ -79,15 +81,6 @@ bool MeshlabStdDialog::isPreviewable()
 		return false;
 
 	return true;
-}
-
-
-void MeshlabStdDialog::clearValues()
-{
-	curAction = NULL;
-	curModel = NULL;
-	curmfi = NULL;
-	curmwi = NULL;
 }
 
 void MeshlabStdDialog::createFrame()
@@ -167,9 +160,7 @@ void MeshlabStdDialog::loadFrameContent()
 	qf->adjustSize();
 
 	//set the minimum size so it will shrink down to the right size	after the help is toggled
-	this->setMinimumSize(qf->sizeHint());
-	this->showNormal();
-	this->adjustSize();
+	showNormal();
 }
 
 void MeshlabStdDialog::toggleHelp()
@@ -178,7 +169,6 @@ void MeshlabStdDialog::toggleHelp()
 	qf->updateGeometry();
 	qf->adjustSize();
 	this->updateGeometry();
-	this->adjustSize();
 }
 
 void MeshlabStdDialog::applyClick()
@@ -187,24 +177,21 @@ void MeshlabStdDialog::applyClick()
 	stdParFrame->writeValuesOnParameterList(curParSet);
 
 	// Note that curModel CAN BE NULL (for creation filters on empty docs...)
-	if (curmask && curModel)
-	{
+	if (curmask && curModel) {
 		meshState.apply(curModel);
 		updateRenderingData(curmwi, curModel);
 	}
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
-	if ((q != nullptr) && (curMeshDoc != nullptr))
-	{
+	if ((q != nullptr) && (curMeshDoc != nullptr)) {
 		FilterNameParameterValuesPair oldpair;
 		oldpair.first = q->text(); oldpair.second = curParSet;
 		curMeshDoc->filterHistory.append(oldpair);
 	}
 
 	bool isEqual = (curParSet == prevParSet);
-	if (curModel && (isEqual) && (validcache))
-	{
+	if (curModel && (isEqual) && (validcache)) {
 		meshCacheState.apply(curModel);
 		updateRenderingData(curmwi, curModel);
 	}
