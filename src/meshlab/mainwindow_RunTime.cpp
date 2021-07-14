@@ -2445,8 +2445,6 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		QElapsedTimer tt; tt.start();
-		qb->reset();
-
 		meshDoc()->setBusy(true);
 		try {
 			if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
@@ -2469,6 +2467,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();
 		meshDoc()->setBusy(false);
+		qb->reset();
 
 		if (saved)
 			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
