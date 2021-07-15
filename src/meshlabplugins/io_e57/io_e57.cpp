@@ -467,6 +467,9 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
                         continue;
                     }
                 }
+                else {
+                    continue;
+                }
 
                 auto vertex = vcg::tri::Allocator<CMeshO>::AddVertex(m.cm, coordinates);
 
