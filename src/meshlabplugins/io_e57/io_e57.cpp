@@ -447,15 +447,25 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
                         coordinates[1] = pointsData.cartesianY[i];
                         coordinates[2] = pointsData.cartesianZ[i];
                     }
-                }
-                else if (data3DPoints.areSphericalCoordinatesAvailable()) {
-
-                    if (pointsData.sphericalInvalidState == nullptr || pointsData.sphericalInvalidState[i] == 0) {
-                        coordinates.FromPolarRad(pointsData.sphericalRange[i], pointsData.sphericalAzimuth[i], pointsData.sphericalElevation[i]);
+                    else {
+                        continue;
                     }
                 }
-                else {
-                    continue;
+                else if (data3DPoints.areSphericalCoordinatesAvailable()) {
+                    if (pointsData.sphericalInvalidState == nullptr || pointsData.sphericalInvalidState[i] == 0) {
+
+                        auto range = pointsData.sphericalRange[i];
+                        auto phi = pointsData.sphericalElevation[i];
+                        auto theta = pointsData.sphericalAzimuth[i];
+
+                        coordinates[0] = range * std::cos(phi) * std::cos(theta);
+                        coordinates[1] = range * std::cos(phi) * std::sin(theta);
+                        coordinates[2] = range * sin(phi);
+
+                    }
+                    else {
+                        continue;
+                    }
                 }
 
                 auto vertex = vcg::tri::Allocator<CMeshO>::AddVertex(m.cm, coordinates);
