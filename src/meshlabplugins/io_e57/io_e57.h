@@ -35,6 +35,11 @@ typedef typename CMeshO::VertexIterator VertexIterator;
 namespace vcg {
     namespace tri {
         namespace io {
+
+            /**
+             * Wrapper RAII class for e57::Data3DPointsData. This wrapper class deallocates the used resources when
+             * the destructor is called.
+             */
             class E57Data3DPoints {
 
             private:
@@ -48,21 +53,26 @@ namespace vcg {
 
                     if (scanHeader.pointFields.cartesianXField && scanHeader.pointFields.cartesianYField &&
                         scanHeader.pointFields.cartesianZField) {
-                        data3DPointsData.cartesianX = new float[buffSize];
-                        data3DPointsData.cartesianY = new float[buffSize];
-                        data3DPointsData.cartesianZ = new float[buffSize];
+
+                        // XYZ coordinates
+                        data3DPointsData.cartesianX = new float [buffSize];
+                        data3DPointsData.cartesianY = new float [buffSize];
+                        data3DPointsData.cartesianZ = new float [buffSize];
+                        data3DPointsData.cartesianInvalidState = new int8_t [buffSize];
                     }
 
                     if (scanHeader.pointFields.intensityField) {
-                        data3DPointsData.intensity = new float[buffSize];
+                        data3DPointsData.intensity = new float [buffSize];
+                        data3DPointsData.isIntensityInvalid = new int8_t [buffSize];
                     }
 
                     if (scanHeader.pointFields.colorRedField && scanHeader.pointFields.colorGreenField &&
                         scanHeader.pointFields.colorBlueField) {
 
-                        data3DPointsData.colorRed = new uint8_t[buffSize];
-                        data3DPointsData.colorGreen = new uint8_t[buffSize];
-                        data3DPointsData.colorBlue = new uint8_t[buffSize];
+                        data3DPointsData.colorRed = new uint8_t [buffSize];
+                        data3DPointsData.colorGreen = new uint8_t [buffSize];
+                        data3DPointsData.colorBlue = new uint8_t [buffSize];
+                        data3DPointsData.isColorInvalid = new int8_t [buffSize];
                     }
 
                     if (scanHeader.pointFields.normalX && scanHeader.pointFields.normalY &&
@@ -77,13 +87,16 @@ namespace vcg {
                 ~E57Data3DPoints() {
 
                     if (areCoordinatesAvailable()) {
+
                         delete[] this->data3DPointsData.cartesianX;
                         delete[] this->data3DPointsData.cartesianY;
                         delete[] this->data3DPointsData.cartesianZ;
+                        delete[] this->data3DPointsData.cartesianInvalidState;
                     }
 
                     if (isQualityAvailable()) {
                         delete[] this->data3DPointsData.intensity;
+                        delete[] this->data3DPointsData.isIntensityInvalid;
                     }
 
                     if (areNormalsAvailable()) {
@@ -96,19 +109,20 @@ namespace vcg {
                         delete[] this->data3DPointsData.colorRed;
                         delete[] this->data3DPointsData.colorGreen;
                         delete[] this->data3DPointsData.colorBlue;
+                        delete[] this->data3DPointsData.isColorInvalid;
                     }
                 }
 
                 inline bool areCoordinatesAvailable() const {
-                    return this->data3DPointsData.cartesianX && this->data3DPointsData.cartesianY && this->data3DPointsData.cartesianZ;
+                    return this->data3DPointsData.cartesianX || this->data3DPointsData.cartesianY || this->data3DPointsData.cartesianZ;
                 }
 
                 inline bool areColorsAvailable() const {
-                    return this->data3DPointsData.colorRed && this->data3DPointsData.colorGreen && this->data3DPointsData.colorBlue;
+                    return this->data3DPointsData.colorRed || this->data3DPointsData.colorGreen || this->data3DPointsData.colorBlue;
                 }
 
                 inline bool areNormalsAvailable() const {
-                    return this->data3DPointsData.normalX && this->data3DPointsData.normalY && this->data3DPointsData.normalZ;
+                    return this->data3DPointsData.normalX || this->data3DPointsData.normalY || this->data3DPointsData.normalZ;
                 }
 
                 inline bool isQualityAvailable() const {
@@ -156,7 +170,7 @@ private:
      * @param fileReader The current file reader of the opened file
      * @param cb Callback to update the progressbar contained in MeshLab
      */
-    static void extractImages(const e57::Reader &fileReader, vcg::CallBackPos* cb);
+    std::pair<e57::Image2D, QImage> extractMeshImage(const e57::Reader &fileReader, int scanIndex, bool saveToDisk);
 
     /***
      * Load the cloud points read from the E57 file, inside the mesh to display.
@@ -168,13 +182,27 @@ private:
      * @param fileReader The file reader object used to scan the file
      * @param cb Callback to update the progressbar contained in MeshLab
      */
-    static void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
-                         const e57::Reader &fileReader, e57::Data3D& scanHeader, vcg::CallBackPos* positionCallback);
+    void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
+                  const e57::Reader &fileReader, e57::Data3D &scanHeader,
+                  std::pair<e57::Image2D, QImage> image, const RichParameterList &par);
 
-    // TODO: add function documentation
-    static void writeVertices(e57::CompressedVectorWriter &dataWriter, vcg::tri::io::E57Data3DPoints& data3DPoints,
+    /***
+     * Write verticies, contained inside the mesh, into the dataWriter
+     * @param dataWriter
+     * @param data3DPoints
+     * @param count How many verticies write
+     * @param remaining How many verticies remains
+     * @param vertices The verticies to write
+     */
+    void writeVertices(e57::CompressedVectorWriter &dataWriter, vcg::tri::io::E57Data3DPoints& data3DPoints,
                               int count, int remaining, vcgTriMesh::VertContainer &vertices);
 
+    /***
+     * Read the transform matrix inside the e57::Data3D and apply it to the mesh
+     * @param meshModel The mesh to apply the transform matrix
+     * @param scanHeader The meta information about the e57 mesh, from which extract the transformation matrix
+     */
+    void translatedAndRotateMesh(MeshModel *meshModel, const e57::Data3D &scanHeader) const;
 };
 
 #endif

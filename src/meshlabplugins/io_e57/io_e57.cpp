@@ -20,7 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include <Qt>
 #include <QUuid>
 
 #include <cmath>
@@ -35,12 +34,9 @@
 #define E57_FILE_DESCRIPTION    "E57 (E57 points cloud)"
 
 #define START_LOADING       "Loading E57 File..."
-#define READING_IMAGES      "Reading images from E57 file..."
 #define EXTRACTED_IMAGES    "Images from E57 file extracted to the file path..."
-#define LOADING_POINTS      "Loading points..."
+#define LOADING_MESH        "Loading mesh..."
 #define DONE_LOADING        "Done!"
-
-#define BUFF_SIZE 1024
 
 /**
  * [Macro] Throw MLException in case of failure using E57 functions.
@@ -68,7 +64,7 @@ static inline std::string filenameToString(const QString& fileName) noexcept;
  * @param fileName The filename to format
  * @return A QString formatted as "${fileName}.png"
  */
-static inline QString formatImageFilename(const std::string& fileName) noexcept;
+static inline QString formatImageFilename(const std::string& fileName, const char* format) noexcept;
 
 unsigned int E57IOPlugin::numberMeshesContainedInFile(const QString& format, const QString& fileName, const RichParameterList&) const {
 
@@ -102,23 +98,23 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
         wrongOpenFormat(formatName);
     }
 
-    e57::E57Root e57FileInfo{};
-    e57::Reader fileReader{filenameToString(fileName)};
+    e57::E57Root e57FileInfo{ };
+    e57::Reader  e57FileReader{filenameToString(fileName) };
 
     // check if the file is opened
-    E57_WRAPPER(fileReader.IsOpen(), "Error while opening E57 file!");
+    E57_WRAPPER(e57FileReader.IsOpen(), "Error while opening E57 file!");
     // read E57 root to explore the tree
-    E57_WRAPPER(fileReader.GetE57Root(e57FileInfo), "Error while reading E57 root info!");
+    E57_WRAPPER(e57FileReader.GetE57Root(e57FileInfo), "Error while reading E57 root info!");
 
-    if (fileReader.GetData3DCount() == 0) {
-        E57_WRAPPER(fileReader.Close(), "Error while closing the E57 file!");
+    int64_t data3DCount = e57FileReader.GetData3DCount();
+
+    // If there are no meshes inside the file warn the user!
+    if (data3DCount == 0) {
+        E57_WRAPPER(e57FileReader.Close(), "Error while closing the E57 file!");
         throw MLException{"No points cloud were found inside the E57 file!"};
     }
 
     UPDATE_PROGRESS(cb, 1, START_LOADING);
-
-    // Read images...
-    extractImages(fileReader, cb);
 
     // Read clouds...
     int scanIndex = 0;
@@ -132,90 +128,112 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
         int64_t rows = 0, cols = 0;
         int64_t numberPointSize = 0, numberGroupSize = 0, numberCountSize = 0;
 
+        UPDATE_PROGRESS(cb, (scanIndex * data3DCount) / 100, LOADING_MESH);
+
         // read 3D data
-        E57_WRAPPER(fileReader.ReadData3D(scanIndex, scanHeader), "Error while reading 3D from file!");
+        E57_WRAPPER(e57FileReader.ReadData3D(scanIndex, scanHeader), "Error while reading 3D from file!");
 
         // read scan's size information
-        E57_WRAPPER(fileReader.GetData3DSizes(scanIndex, rows, cols,
-                                              numberPointSize, numberGroupSize, numberCountSize, columnIndex),
-                    "Error while reading scan information!");
+        E57_WRAPPER(e57FileReader.GetData3DSizes(
+                scanIndex, rows, cols, numberPointSize, numberGroupSize, numberCountSize, columnIndex
+        ), "Error while reading scan information!");
 
-        // set the mesh label if the mesh has a name
+        // If the name is not empty then set a name for the mesh.
         if (!scanHeader.name.empty()) {
             meshModel->setLabel(QString::fromStdString(scanHeader.name));
         }
 
-        // is useless to load a mesh with no points...
-        if (numberPointSize == 0) {
-            continue;
-        }
-
-        auto rotationMatrix = Matrix44m::Identity();
-        auto translateMatrix = Matrix44m::Identity();
-
-        auto quaternion = vcg::Quaternion<Scalarm>{
-            static_cast<Scalarm>(scanHeader.pose.rotation.w),
-            static_cast<Scalarm>(scanHeader.pose.rotation.x),
-            static_cast<Scalarm>(scanHeader.pose.rotation.y),
-            static_cast<Scalarm>(scanHeader.pose.rotation.z),
-        };
-
-        quaternion.ToMatrix(rotationMatrix);
-        translateMatrix.ElementAt(0, 3) = static_cast<Scalarm>(scanHeader.pose.translation.x);
-        translateMatrix.ElementAt(1, 3) = static_cast<Scalarm>(scanHeader.pose.translation.y);
-        translateMatrix.ElementAt(2, 3) = static_cast<Scalarm>(scanHeader.pose.translation.z);
-
-        meshModel->cm.Tr = translateMatrix * rotationMatrix;
-
         try {
-            loadMesh(*meshModel, mask, scanIndex,
-                     ((rows > 0) ? rows : BUFF_SIZE), numberPointSize, fileReader, scanHeader, cb);
+
+
+            if (numberPointSize != 0) {
+
+                // Does the mesh have an imageMetaAndImage from which to extract colors?
+                std::pair<e57::Image2D, QImage> imageMetaAndImage = extractMeshImage(e57FileReader, scanIndex, false);
+
+                // Read points from file and load them inside the MeshLab's mesh.
+                loadMesh(*meshModel, mask, scanIndex, numberPointSize, numberPointSize, e57FileReader, scanHeader, imageMetaAndImage, par);
+
+                // Once the mesh is loaded apply a transformation matrix to translate and rotate the points.
+                translatedAndRotateMesh(meshModel, scanHeader);
+            }
+
+            // Put the modified mask into the mask list.
             maskList.push_back(mask);
+
+            // Increase the scanIndex to get info about the next mesh to parse from the file.
             scanIndex++;
         }
         catch (const std::exception& e) {
-            E57_WRAPPER(fileReader.Close(), "Error while closing the E57 file!");
+            E57_WRAPPER(e57FileReader.Close(), "Error while closing the E57 file!");
             throw MLException{e.what()};
         }
     }
 
     UPDATE_PROGRESS(cb, 100, DONE_LOADING);
-    E57_WRAPPER(fileReader.Close(), "Error while closing the E57 file!");
+    E57_WRAPPER(e57FileReader.Close(), "Error while closing the E57 file!");
 }
 
-void E57IOPlugin::extractImages(const e57::Reader &fileReader, vcg::CallBackPos* cb) {
+void E57IOPlugin::translatedAndRotateMesh(MeshModel *meshModel, const e57::Data3D &scanHeader) const {
 
-    int imagesCount = fileReader.GetImage2DCount();
+    auto rotationMatrix = Matrix44m::Identity();
+    auto translateMatrix = Matrix44m::Identity();
 
-    UPDATE_PROGRESS(cb, 2, READING_IMAGES);
+    auto quaternion = vcg::Quaternion<Scalarm>{
+        static_cast<Scalarm>(scanHeader.pose.rotation.w),
+        static_cast<Scalarm>(scanHeader.pose.rotation.x),
+        static_cast<Scalarm>(scanHeader.pose.rotation.y),
+        static_cast<Scalarm>(scanHeader.pose.rotation.z),
+    };
 
-    for (int imageIndex = 0; imageIndex < imagesCount; imageIndex++) {
+    quaternion.ToMatrix(rotationMatrix);
 
-        QImage img;
-        e57::Image2D imageHeader;
-        e57::Image2DProjection imageProjection;
-        e57::Image2DType imageType, imageMaskType, imageVisualType;
+    translateMatrix.ElementAt(0, 3) = static_cast<Scalarm>(scanHeader.pose.translation.x);
+    translateMatrix.ElementAt(1, 3) = static_cast<Scalarm>(scanHeader.pose.translation.y);
+    translateMatrix.ElementAt(2, 3) = static_cast<Scalarm>(scanHeader.pose.translation.z);
 
-        int64_t width = 0, height = 0, size = 0;
+    meshModel->cm.Tr = translateMatrix * rotationMatrix;
+}
 
-        E57_WRAPPER(fileReader.ReadImage2D(imageIndex, imageHeader), "Error while reading E57 images!");
+std::pair<e57::Image2D, QImage> E57IOPlugin::extractMeshImage(const e57::Reader &fileReader, int scanIndex, bool saveToDisk) {
 
-        E57_WRAPPER(fileReader.GetImage2DSizes(imageIndex, imageProjection, imageType, width, height, size,
-                                               imageMaskType, imageVisualType), "Error while getting image.");
+    QImage img;
+    e57::Image2D imageHeader;
+    e57::Image2DProjection imageProjection;
+    e57::Image2DType imageType, imageMaskType, imageVisualType;
 
-        auto imageBuffer = std::unique_ptr<char[]>(new char[size]);
-        int64_t bytesRead = fileReader.ReadImage2DData(imageIndex, imageProjection, imageType, imageBuffer.get(), 0, size);
+    int64_t width = 0, height = 0, size = 0;
 
-        const char* format = (imageType == e57::E57_JPEG_IMAGE) ? "jpeg" : "png";
-
-        QString imageFilename = formatImageFilename(imageHeader.name);
-
-        // load the data from the image and save it inside the file system
-        img.loadFromData(QByteArray(imageBuffer.get(), bytesRead), format);
-        img.save(imageFilename, "png", 100);
+    // If the image is not present then return an empty image
+    if (!fileReader.ReadImage2D(scanIndex, imageHeader)) {
+        return std::pair<e57::Image2D, QImage>{imageHeader, QImage{}};
     }
 
-    UPDATE_PROGRESS(cb, 20, EXTRACTED_IMAGES);
+    // Get sizes speces for the image
+    fileReader.GetImage2DSizes(scanIndex, imageProjection, imageType, width, height, size,
+                                           imageMaskType, imageVisualType);
+
+    // If no image is present...
+    if (imageType == e57::Image2DType::E57_NO_IMAGE) {
+        return std::pair<e57::Image2D, QImage>{imageHeader, QImage{}};
+    }
+
+    // Read the image data inside a byte buffer to create a QImage object
+    std::unique_ptr<char[]> imageBuffer = std::unique_ptr<char[]>(new char[size]);
+    int64_t bytesRead = fileReader.ReadImage2DData(scanIndex, imageProjection, imageType, imageBuffer.get(), 0, size);
+
+    // An image contained in a e57 file can be a JPEG or a PNG
+    const char* format = (imageType == e57::E57_JPEG_IMAGE) ? "jpeg" : "png";
+
+    // load the data from the image and save it inside the file system
+    img.loadFromData(QByteArray(imageBuffer.get(), bytesRead), format);
+
+    // Do we need to store the image inside the disk?
+    if (saveToDisk) {
+        img.save(formatImageFilename(imageHeader.name, format), format, 100);
+    }
+
+    return std::pair<e57::Image2D, QImage>{imageHeader, img.copy()};
 }
 
 void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshModel& m, const int mask,
@@ -223,6 +241,8 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 {
 
     using Mask = vcg::tri::io::Mask;
+
+    vcg::tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
 
     if (formatName.toUpper() != tr(E57_FILE_EXTENSION)) {
         wrongSaveFormat(formatName);
@@ -236,8 +256,34 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     e57::Data3D scanHeader{};
     e57::Writer fileWriter{filePath};
 
+    E57_WRAPPER(fileWriter.IsOpen(), "Error while opening E57 file for writing!");
+
     scanHeader.guid = QUuid::createUuid().toString(QUuid::WithBraces).toStdString();
     scanHeader.pointsSize = static_cast<int64_t>(totalPoints);
+
+    e57::Translation translation;
+    e57::Quaternion quaternion;
+
+    vcg::Point4f translationColumn = m.cm.Tr.GetColumn4(3);
+    translation.x = translationColumn.X();
+    translation.y = translationColumn.Y();
+    translation.z = translationColumn.Z();
+    scanHeader.pose.translation = translation;
+
+    vcg::Quaternion<Scalarm> q;
+
+    Matrix44m transformMatrixCopy = m.cm.Tr;
+    transformMatrixCopy[3][0] = 0;
+    transformMatrixCopy[3][1] = 0;
+    transformMatrixCopy[3][2] = 0;
+
+    q.FromMatrix(transformMatrixCopy);
+    quaternion.w = q[0];
+    quaternion.x = q[1];
+    quaternion.y = q[2];
+    quaternion.z = q[3];
+
+    scanHeader.pose.rotation = quaternion;
 
     scanHeader.pointFields.cartesianXField = true;
     scanHeader.pointFields.cartesianYField = true;
@@ -265,26 +311,46 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
     scanIndex = fileWriter.NewData3D(scanHeader);
 
-    const std::size_t buffSize = (totalPoints < BUFF_SIZE) ? totalPoints : BUFF_SIZE;
 
-    vcg::tri::io::E57Data3DPoints data3DPoints{buffSize, scanHeader};
-    e57::CompressedVectorWriter dataWriter = fileWriter.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
+    vcg::tri::io::E57Data3DPoints data3DPoints{totalPoints, scanHeader};
+    e57::Data3DPointsData& pointsData = data3DPoints.points();
+
+    e57::CompressedVectorWriter dataWriter = fileWriter.SetUpData3DPointsData(scanIndex, totalPoints, pointsData);
 
     try {
 
-        int count = 0;
-        std::size_t remainingVertices = totalPoints;
+        CMeshO::VertContainer& vertices = m.cm.vert;
 
-        while (remainingVertices > buffSize) {
-            writeVertices(dataWriter, data3DPoints, count, buffSize, m.cm.vert);
-            count += buffSize;
-            remainingVertices -= buffSize;
+        for (std::size_t i = 0; i < totalPoints; i++) {
+
+            pointsData.cartesianX[i] = vertices[i].P().X();
+            pointsData.cartesianY[i] = vertices[i].P().Y();
+            pointsData.cartesianZ[i] = vertices[i].P().Z();
+
+            pointsData.cartesianInvalidState[i] = 0;
+
+            if (data3DPoints.areColorsAvailable()) {
+                pointsData.colorRed[i] = static_cast<uint8_t>(vertices[i].C().X());
+                pointsData.colorGreen[i] = static_cast<uint8_t>(vertices[i].C().Y());
+                pointsData.colorBlue[i] = static_cast<uint8_t>(vertices[i].C().Z());
+                pointsData.isColorInvalid[i] = 0;
+            }
+
+            if (data3DPoints.areNormalsAvailable()) {
+                pointsData.normalX[i] = vertices[i].N().X();
+                pointsData.normalY[i] = vertices[i].N().Y();
+                pointsData.normalZ[i] = vertices[i].N().Z();
+            }
+
+            if (data3DPoints.isQualityAvailable()) {
+                pointsData.intensity[i] = vertices[i].Q();
+                pointsData.isIntensityInvalid[i] = 0;
+            }
         }
 
-        // write the remaining vertices
-        if (remainingVertices > 0) {
-            writeVertices(dataWriter, data3DPoints, count, remainingVertices, m.cm.vert);
-        }
+        // write the mesh data
+        dataWriter.write(totalPoints);
+
     }
     catch (const e57::E57Exception& e) {
         dataWriter.close();
@@ -337,18 +403,22 @@ void E57IOPlugin::exportMaskCapability(const QString& format, int &capability, i
 }
 
 void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
-              const e57::Reader &fileReader, e57::Data3D& scanHeader, vcg::CallBackPos* positionCallback) {
+                           const e57::Reader &fileReader, e57::Data3D &scanHeader,
+                           std::pair<e57::Image2D, QImage> image, const RichParameterList &par) {
 
     using Mask = vcg::tri::io::Mask;
 
+    e57::Image2D meshImageHeader = image.first;
+    QImage meshImage = image.second;
+
     // object holding data read from E57 file
     vcg::tri::io::E57Data3DPoints data3DPoints{buffSize, scanHeader};
+    if (!data3DPoints.areCoordinatesAvailable()) {
+        std::cerr << "No Coordinates!\n";
+        return;
+    }
 
-    auto currentLoadingPercentage = 20;
-    const auto loadingScale = ((100 - currentLoadingPercentage) / numberPointSize);
-
-    ulong size = 0;
-    auto vertexIterator = vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, static_cast<size_t>(numberPointSize));
+    size_t size = 0;
     auto dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
 
     // to enable colors, quality and normals inside the mesh
@@ -372,90 +442,78 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
         while ((size = dataReader.read()) > 0) {
 
-            for (auto i = 0UL; i < size; i++, vertexIterator++) {
+            for (std::size_t i = 0; i < size; i++) {
 
-                auto& currentPoint = (*vertexIterator).P();
-                if (data3DPoints.areCoordinatesAvailable()) {
-                    currentPoint[0] = pointsData.cartesianX[i];
-                    currentPoint[1] = pointsData.cartesianY[i];
-                    currentPoint[2] = pointsData.cartesianZ[i];
+                vcg::Point3f coordinates;
+
+                if (pointsData.cartesianInvalidState[i] == 0) {
+
+                    coordinates[0] = pointsData.cartesianX[i];
+                    coordinates[1] = pointsData.cartesianY[i];
+                    coordinates[2] = pointsData.cartesianZ[i];
+
+                    auto vertex = vcg::tri::Allocator<CMeshO>::AddVertex(m.cm, coordinates);
+
+                    // Set the normals.
+                    if (data3DPoints.areNormalsAvailable()) {
+                        vertex->N()[0] = pointsData.normalX[i];
+                        vertex->N()[1] = pointsData.normalY[i];
+                        vertex->N()[2] = pointsData.normalZ[i];
+                    }
+
+                    // Set the quality.
+                    if (data3DPoints.isQualityAvailable()) {
+                        vertex->Q() = pointsData.intensity[i];
+                    }
+
+                    // Set the point color.
+                    if (data3DPoints.areColorsAvailable()) {
+                        vertex->C()[0] = pointsData.colorRed[i];
+                        vertex->C()[1] = pointsData.colorGreen[i];
+                        vertex->C()[2] = pointsData.colorBlue[i];
+                        vertex->C()[3] = 0xFF;
+                    }
+                    else {
+                        // TODO: should we use the colors from the image 2D?
+                    }
+
                 }
-
-                auto& currentNormal = (*vertexIterator).N();
-                if (data3DPoints.areNormalsAvailable()) {
-                    currentNormal[0] = pointsData.normalX[i];
-                    currentNormal[1] = pointsData.normalY[i];
-                    currentNormal[2] = pointsData.normalZ[i];
+                else {
+                    std::cerr << "Invalid Point!\n";
                 }
-
-                auto& currentQuality = (*vertexIterator).Q();
-                if (data3DPoints.isQualityAvailable()) {
-                    currentQuality = pointsData.intensity[i];
-                }
-
-                vcg::Color4b& currentColor = (*vertexIterator).C();
-                if (data3DPoints.areColorsAvailable()) {
-
-                    currentColor[0] = pointsData.colorRed[i];
-                    currentColor[1] = pointsData.colorGreen[i];
-                    currentColor[2] = pointsData.colorBlue[i];
-                    currentColor[3] = 0xFF;
-                }
-
-                currentLoadingPercentage += loadingScale;
-                UPDATE_PROGRESS(positionCallback, currentLoadingPercentage, LOADING_POINTS);
             }
         }
+
+        /* If the colors are not available for the mesh use a gray scale */
+        if (!data3DPoints.areColorsAvailable()) {
+
+            const float percentile = 5.0f;
+            vcg::Histogram<Scalarm> histogram{};
+            vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, histogram);
+
+            const Scalarm minPercentile = histogram.Percentile(percentile / 100.0);
+            const Scalarm maxPercentile = histogram.Percentile(1.0 - (percentile / 100));
+
+            vcg::tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm, minPercentile, maxPercentile);
+
+            mask |= Mask::IOM_VERTCOLOR;
+        }
+
     }
     catch (const e57::E57Exception& e) {
         dataReader.close();
-        throw;
+        throw MLException{QString{"E57 Exception: %1.\nError Code: %2"}.arg(QString::fromStdString(e.context()), e.errorCode())};
     }
 
     dataReader.close();
-}
-
-void E57IOPlugin::writeVertices(e57::CompressedVectorWriter &dataWriter, vcg::tri::io::E57Data3DPoints& data3DPoints,
-                                int count, int remaining, vcgTriMesh::VertContainer &vertices) {
-
-    const int bound = count + remaining;
-    e57::Data3DPointsData& pointsData = data3DPoints.points();
-
-    for (int i = count, buffIndex = 0; i < bound; i++, buffIndex++) {
-
-        if (data3DPoints.areCoordinatesAvailable()) {
-            pointsData.cartesianX[buffIndex] = vertices[i].P().X();
-            pointsData.cartesianY[buffIndex] = vertices[i].P().Y();
-            pointsData.cartesianZ[buffIndex] = vertices[i].P().Z();
-        }
-
-        if (data3DPoints.areColorsAvailable()) {
-            pointsData.colorRed[buffIndex] = static_cast<uint8_t>(vertices[i].C().X());
-            pointsData.colorGreen[buffIndex] = static_cast<uint8_t>(vertices[i].C().Y());
-            pointsData.colorBlue[buffIndex] = static_cast<uint8_t>(vertices[i].C().Z());
-        }
-
-        if (data3DPoints.areNormalsAvailable()) {
-            pointsData.normalX[buffIndex] = vertices[i].N().X();
-            pointsData.normalY[buffIndex] = vertices[i].N().Y();
-            pointsData.normalZ[buffIndex] = vertices[i].N().Z();
-        }
-
-        if (data3DPoints.isQualityAvailable()) {
-            pointsData.intensity[buffIndex] = vertices[i].Q();
-        }
-    }
-
-    // write the mesh data
-    dataWriter.write(remaining);
 }
 
 static inline std::string filenameToString(const QString& fileName) noexcept {
     return QFile::encodeName(fileName).toStdString();
 }
 
-static inline QString formatImageFilename(const std::string &fileName) noexcept {
-    return QString{"%1.png"}.arg(QString::fromStdString(fileName));
+static inline QString formatImageFilename(const std::string &fileName, const char* format) noexcept {
+    return QString{"%1.%s"}.arg(QString::fromStdString(fileName), QString::fromStdString(format));
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(E57IOPlugin)
