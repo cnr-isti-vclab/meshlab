@@ -79,7 +79,7 @@ public:
 		MM_VERTFLAG       = 0x00000004,
 		MM_VERTCOLOR      = 0x00000008,
 		MM_VERTQUALITY    = 0x00000010,
-		MM_VERTMARK	      = 0x00000020,
+		MM_VERTMARK       = 0x00000020,
 		MM_VERTFACETOPO   = 0x00000040,
 		MM_VERTCURV	      = 0x00000080,
 		MM_VERTCURVDIR    = 0x00000100,
@@ -89,10 +89,10 @@ public:
 
 		MM_FACEVERT       = 0x00001000,
 		MM_FACENORMAL     = 0x00002000,
-		MM_FACEFLAG	      = 0x00004000,
+		MM_FACEFLAG       = 0x00004000,
 		MM_FACECOLOR      = 0x00008000,
 		MM_FACEQUALITY    = 0x00010000,
-		MM_FACEMARK	      = 0x00020000,
+		MM_FACEMARK       = 0x00020000,
 		MM_FACEFACETOPO   = 0x00040000,
 		MM_FACENUMBER     = 0x00080000,
 		MM_FACECURVDIR    = 0x00100000,
@@ -164,11 +164,11 @@ public:
 	}
 	void setLabel(QString newName) {_label=newName;}
 
-	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	bool isVisible() const { return visible; }
+	void setVisible(bool vis = true) { visible = vis;}
 
 	std::list<std::string> loadTextures(GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
-	void saveTextures(const QString& basePath, int quality = 66, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
+	void saveTextures(const QString& basePath, int quality = -1, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
 
 	QImage getTexture(const std::string& tn) const;
 	void clearTextures();
@@ -196,6 +196,7 @@ public:
 
 private:
 	int currentDataMask;
+	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	QString fullPathFileName;
 	QString _label;
 	unsigned int _id;

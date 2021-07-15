@@ -31,7 +31,7 @@ elseif(ALLOW_BUNDLED_CGAL AND EXISTS "${CGAL_DIR}/include/CGAL/version.h")
 	target_link_libraries(external-cgal INTERFACE mpfr gmp Threads::Threads)
 	
 	if (WIN32)
-		if (DEFINED MESHLAB_BUILD_DISTRIB_DIR)
+		if (DEFINED MESHLAB_LIB_OUTPUT_DIR)
 			file(
 				COPY
 					${CGAL_DIR}/auxiliary/gmp/lib/libmpfr-4.lib
@@ -39,7 +39,7 @@ elseif(ALLOW_BUNDLED_CGAL AND EXISTS "${CGAL_DIR}/include/CGAL/version.h")
 					${CGAL_DIR}/auxiliary/gmp/lib/libgmp-10.lib
 					${CGAL_DIR}/auxiliary/gmp/lib/libgmp-10.dll
 				DESTINATION
-					${MESHLAB_BUILD_DISTRIB_DIR})
+					${MESHLAB_LIB_OUTPUT_DIR})
 		endif()
 		if (DEFINED MESHLAB_LIB_INSTALL_DIR)
 			install(

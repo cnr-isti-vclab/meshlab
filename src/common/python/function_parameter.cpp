@@ -95,43 +95,45 @@ const RichParameter& pymeshlab::FunctionParameter::richParameter() const
 
 void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 {
-	if (!parameter)
+	if (!parameter) {
 		o << "no_value";
-	if (parameter->value().isEnum()) {
-		RichEnum* ren = dynamic_cast<RichEnum*>(parameter);
-		o << "'" << ren->enumvalues.at(ren->value().getEnum()).toStdString() << "'";
 		return;
 	}
-	if (parameter->value().isAbsPerc()) {
+	if (parameter->isOfType<RichBool>()) {
+		o << (parameter->value().getBool() ? "True" : "False");
+		return;
+	}
+	if (parameter->isOfType<RichInt>()) {
+		o << parameter->value().getInt();
+		return;
+	}
+	if (parameter->isOfType<RichFloat>()){
+		o << parameter->value().getFloat();
+		return;
+	}
+	if (parameter->isOfType<RichString>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
+		return;
+	}
+	if (parameter->isOfType<RichEnum>()) {
+		RichEnum* ren = dynamic_cast<RichEnum*>(parameter);
+		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
+		return;
+	}
+	if (parameter->isOfType<RichAbsPerc>()) {
 		RichAbsPerc* rabs = dynamic_cast<RichAbsPerc*>(parameter);
-		float abs = parameter->value().getAbsPerc();
+		float abs = parameter->value().getFloat();
 		float perc = (abs - rabs->min) / (rabs->max - rabs->min) * 100;
 		o << perc << "%";
 		return;
 	}
-	if (parameter->value().isDynamicFloat()) {
+	if (parameter->isOfType<RichDynamicFloat>()) {
 		RichDynamicFloat* rdyn = dynamic_cast<RichDynamicFloat*>(parameter);
-		o << parameter->value().getDynamicFloat() <<
+		o << parameter->value().getFloat() <<
 			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
 		return;
 	}
-	if (parameter->value().isBool()) {
-		o << (parameter->value().getBool() ? "True" : "False");
-		return;
-	}
-	if (parameter->value().isInt()) {
-		o << parameter->value().getInt();
-		return;
-	}
-	if (parameter->value().isFloat()){
-		o << parameter->value().getFloat();
-		return;
-	}
-	if (parameter->value().isString()){
-		o << "'" << parameter->value().getString().toStdString() << "'";
-		return;
-	}
-	if (parameter->value().isMatrix44f()){
+	if (parameter->isOfType<RichMatrix44f>()){
 		const MESHLAB_SCALAR* v = parameter->value().getMatrix44f().V();
 		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
 			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
@@ -139,17 +141,17 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			<< "[" << v[12] << ", " << v[13] << ", " << v[14] << ", " << v[15] << "]]";
 		return;
 	}
-	if (parameter->value().isPoint3f()) {
+	if (parameter->isOfType<RichPoint3f>()) {
 		o << "[" << parameter->value().getPoint3f().X() << ", "
 			<< parameter->value().getPoint3f().Y() << ", "
 			<< parameter->value().getPoint3f().Z() << "]";
 		return;
 	}
-	if (parameter->value().isShotf()) {
+	if (parameter->isOfType<RichShotf>()) {
 		o << "None";
 		return;
 	}
-	if (parameter->value().isColor()) {
+	if (parameter->isOfType<RichColor>()) {
 		QColor c = parameter->value().getColor();
 		o <<
 			"[" + std::to_string(c.red()) + "; " +
@@ -158,13 +160,13 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			std::to_string(c.alpha()) + "]";
 		return;
 	}
-	if (parameter->value().isMesh()){
+	if (parameter->isOfType<RichMesh>()){
 		const RichMesh* rm = dynamic_cast<const RichMesh*>(parameter);
-		o << rm->value().getMeshId();
+		o << rm->value().getInt();
 		return;
 	}
-	if (parameter->value().isFileName()){
-		o << "'" << parameter->value().getFileName().toStdString() << "'";
+	if (parameter->isOfType<RichSaveFile>() || parameter->isOfType<RichOpenFile>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
 		return;
 	}
 }
@@ -195,36 +197,4 @@ bool pymeshlab::FunctionParameter::operator==(const pymeshlab::FunctionParameter
 void pymeshlab::FunctionParameter::swap(pymeshlab::FunctionParameter& oth)
 {
 	std::swap(parameter, oth.parameter);
-}
-
-QString pymeshlab::FunctionParameter::computePythonTypeString(const RichParameter& par)
-{
-	const Value& v = par.value();
-	if (v.isEnum())
-		return PYTHON_TYPE_ENUM;
-	if (v.isAbsPerc())
-		return PYTHON_TYPE_ABSPERC;
-	if (v.isDynamicFloat())
-		return PYTHON_TYPE_DYNAMIC_FLOAT;
-	if (v.isBool())
-		return PYTHON_TYPE_BOOL;
-	if (v.isInt())
-		return PYTHON_TYPE_INT;
-	if (v.isFloat())
-		return PYTHON_TYPE_FLOAT;
-	if (v.isString())
-		return PYTHON_TYPE_STRING;
-	if (v.isMatrix44f())
-		return PYTHON_TYPE_MATRIX44F;
-	if (v.isPoint3f())
-		return PYTHON_TYPE_POINT3F;
-	if (v.isShotf())
-		return PYTHON_TYPE_SHOTF;
-	if (v.isColor())
-		return PYTHON_TYPE_COLOR;
-	if (v.isMesh())
-		return PYTHON_TYPE_MESH;
-	if (v.isFileName())
-		return PYTHON_TYPE_FILENAME;
-	return "still_unsupported";
 }

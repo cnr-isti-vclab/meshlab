@@ -405,14 +405,13 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
 				cam_ind = 0;
-				for(RasterModel* rm : md.rasterIterator())
-				{
+				for(const RasterModel& rm : md.rasterIterator()) {
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
 					if(my_near[cam_ind] < allcammindepth)
 						allcammindepth = my_near[cam_ind];
 
-					float imgdiag = sqrt(double(rm->shot.Intrinsics.ViewportPx[0] * rm->shot.Intrinsics.ViewportPx[1]));
+					float imgdiag = sqrt(double(rm.shot.Intrinsics.ViewportPx[0] * rm.shot.Intrinsics.ViewportPx[1]));
 					if (imgdiag > allcammaximagesize)
 						allcammaximagesize = imgdiag;
 					cam_ind++;
@@ -420,21 +419,19 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 
 				//-- cycle all cameras
 				cam_ind = 0;
-				for(RasterModel *raster : md.rasterIterator()){
-					if(raster->visible)
-					{
+				for(const RasterModel& raster : md.rasterIterator()){
+					if(raster.isVisible()) {
 						do_project = true;
 
 						// no drawing if camera not valid
-						if(!raster->shot.IsValid())
+						if(!raster.shot.IsValid())
 							do_project = false;
 
 						// no drawing if raster is not active
 						//if(!raster->shot.IsValid())
 						//  do_project = false;
 
-						if(do_project)
-						{
+						if(do_project) {
 							// making context current
 							glContext->makeCurrent();
 
@@ -452,7 +449,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 							Log("init Buffers");*/
 
 							// render normal & depth
-							rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
+							rendermanager->renderScene(raster.shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
 
 							// unmaking context current
 							glContext->doneCurrent();
@@ -464,8 +461,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 							// the weight is then applied later, per-vertex, when needed
 							floatbuffer *silhouette_buff=NULL;
 							float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
-							if(usesilhouettes)
-							{
+							if(usesilhouettes) {
 								silhouette_buff = new floatbuffer();
 								silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
 
@@ -482,35 +478,28 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 								//silhouette_buff->dumppfm(dumpFileName);
 							}
 
-							for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
-							{
-								if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
-								{
+							for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi) {
+								if(!(*vi).IsD() && (!onselection || (*vi).IsS())) {
 									// pp is the projected point in image space
-									Point2m pp = raster->shot.Project((*vi).P());
+									Point2m pp = raster.shot.Project((*vi).P());
 									// pray is the vector from the point-to-be-colored to the camera center
-									Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
+									Point3m pray = (raster.shot.GetViewPoint() - (*vi).P()).Normalize();
 
 									//if inside image
-									if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
-									{
-										if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
-										{
-
-											depth  = raster->shot.Depth((*vi).P());
+									if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster.shot.Intrinsics.ViewportPx[0] && pp[1]<raster.shot.Intrinsics.ViewportPx[1]) {
+										if((pray.dot(-raster.shot.Axis(2))) <= 0.0) {
+											depth  = raster.shot.Depth((*vi).P());
 											pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
 
-											if(depth <= (pdepth + eta))
-											{
+											if(depth <= (pdepth + eta)) {
 												// determine color
-												QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+												QRgb pcolor = raster.currentPlane->image.pixel(pp[0],raster.shot.Intrinsics.ViewportPx[1] - pp[1]);
 												// determine weight
 												pweight = 1.0;
 
-												if(useangle)
-												{
+												if(useangle) {
 													Point3m pixnorm = (*vi).N();
-													Point3m viewaxis  = raster->shot.GetViewPoint() - (*vi).P();
+													Point3m viewaxis  = raster.shot.GetViewPoint() - (*vi).P();
 													pixnorm.Normalize();
 													viewaxis.Normalize();
 
@@ -520,8 +509,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 													pweight *= ang;
 												}
 
-												if(usedistance)
-												{
+												if(usedistance) {
 													float distw = depth;
 													distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
 
@@ -529,10 +517,9 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 													pweight *= distw;
 												}
 
-												if(useborders)
-												{
-													double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-													double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+												if(useborders) {
+													double xdist = 1.0 - (abs(pp[0] - (raster.shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster.shot.Intrinsics.ViewportPx[0] / 2.0));
+													double ydist = 1.0 - (abs(pp[1] - (raster.shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster.shot.Intrinsics.ViewportPx[1] / 2.0));
 													double borderw = min (xdist , ydist);
 													//borderw = min(1.0,borderw); //debug debug
 													//borderw = max(0.0,borderw); //debug debug
@@ -540,8 +527,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 													pweight *= borderw;
 												}
 
-												if(usesilhouettes)
-												{
+												if(usesilhouettes) {
 													// here the silhouette weight is applied, but it is calculated before, on a per-image basis
 													float silw = 1.0;
 													silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
@@ -551,8 +537,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 													pweight *= silw;
 												}
 
-												if(usealphamask) //alpha channel of image is an additional mask
-												{
+												if(usealphamask) { //alpha channel of image is an additional mask
 													pweight *= (qAlpha(pcolor) / 255.0);
 												}
 
@@ -722,14 +707,13 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 				allcammindepth =   1000000;
 				allcammaximagesize = -1000000;
 				cam_ind = 0;
-				for(RasterModel* rm : md.rasterIterator())
-				{
+				for(const RasterModel& rm : md.rasterIterator()) {
 					if(my_far[cam_ind] > allcammaxdepth)
 						allcammaxdepth = my_far[cam_ind];
 					if(my_near[cam_ind] < allcammindepth)
 						allcammindepth = my_near[cam_ind];
 
-					float imgdiag = sqrt(double(rm->shot.Intrinsics.ViewportPx[0] * rm->shot.Intrinsics.ViewportPx[1]));
+					float imgdiag = sqrt(double(rm.shot.Intrinsics.ViewportPx[0] * rm.shot.Intrinsics.ViewportPx[1]));
 					if (imgdiag > allcammaximagesize)
 						allcammaximagesize = imgdiag;
 					cam_ind++;
@@ -737,22 +721,19 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 
 				//-- cycle all cameras
 				cam_ind = 0;
-				for(RasterModel *raster : md.rasterIterator())
-				{
-					if(raster->visible)
-					{
+				for(const RasterModel& raster : md.rasterIterator()) {
+					if(raster.isVisible()) {
 						do_project = true;
 
 						// no drawing if camera not valid
-						if(!raster->shot.IsValid())
+						if(!raster.shot.IsValid())
 							do_project = false;
 
 						// no drawing if raster is not active
 						//if(!raster->shot.IsValid())
 						//  do_project = false;
 
-						if(do_project)
-						{
+						if(do_project) {
 							// making context current
 							glContext->makeCurrent();
 
@@ -770,7 +751,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 							Log("init Buffers");*/
 
 							// render normal & depth
-							rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
+							rendermanager->renderScene(raster.shot, model, RenderHelper::NORMAL, glContext, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
 
 							// unmaking context current
 							glContext->doneCurrent();
@@ -780,8 +761,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 							// the weight is then applied later, per-vertex, when needed
 							floatbuffer *silhouette_buff=NULL;
 							float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
-							if(usesilhouettes)
-							{
+							if(usesilhouettes) {
 								silhouette_buff = new floatbuffer();
 								silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
 
@@ -798,34 +778,29 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 								//silhouette_buff->dumpbmp(dumpFileName);
 							}
 
-							for(size_t texcount=0; texcount < texels.size(); texcount++)
-							{
-								Point2m pp = raster->shot.Project(texels[texcount].meshpoint);
+							for(size_t texcount=0; texcount < texels.size(); texcount++) {
+								Point2m pp = raster.shot.Project(texels[texcount].meshpoint);
 								// pray is the vector from the point-to-be-colored to the camera center
-								Point3m pray = (raster->shot.GetViewPoint() - texels[texcount].meshpoint).Normalize();
+								Point3m pray = (raster.shot.GetViewPoint() - texels[texcount].meshpoint).Normalize();
 
 								//if inside image
-								if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
-								{
-									if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
-									{
+								if(pp[0]>0 && pp[1]>0 && pp[0]<raster.shot.Intrinsics.ViewportPx[0] && pp[1]<raster.shot.Intrinsics.ViewportPx[1]) {
+									if((pray.dot(-raster.shot.Axis(2))) <= 0.0) {
 
-										depth  = raster->shot.Depth(texels[texcount].meshpoint);
+										depth  = raster.shot.Depth(texels[texcount].meshpoint);
 										pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];
 
-										if(depth <= (pdepth + eta))
-										{
+										if(depth <= (pdepth + eta)) {
 											// determine color
-											QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+											QRgb pcolor = raster.currentPlane->image.pixel(pp[0],raster.shot.Intrinsics.ViewportPx[1] - pp[1]);
 											// determine weight
 											pweight = 1.0;
 
-											if(useangle)
-											{
+											if(useangle) {
 												Point3m pixnorm = texels[texcount].meshnormal;
 												pixnorm.Normalize();
 
-												Point3m viewaxis = raster->shot.GetViewPoint() - texels[texcount].meshpoint;
+												Point3m viewaxis = raster.shot.GetViewPoint() - texels[texcount].meshpoint;
 												viewaxis.Normalize();
 
 												float ang = abs(pixnorm * viewaxis);
@@ -834,8 +809,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 												pweight *= ang;
 											}
 
-											if(usedistance)
-											{
+											if(usedistance) {
 												float distw = depth;
 												distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99));
 
@@ -843,25 +817,22 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 												pweight *= distw;
 											}
 
-											if(useborders)
-											{
-												double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-												double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+											if(useborders) {
+												double xdist = 1.0 - (abs(pp[0] - (raster.shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster.shot.Intrinsics.ViewportPx[0] / 2.0));
+												double ydist = 1.0 - (abs(pp[1] - (raster.shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster.shot.Intrinsics.ViewportPx[1] / 2.0));
 												double borderw = min (xdist , ydist);
 
 												pweight *= borderw;
 											}
 
-											if(usesilhouettes)
-											{
+											if(usesilhouettes) {
 												// here the silhouette weight is applied, but it is calculated before, on a per-image basis
 												float silw = 1.0;
 												silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
 												pweight *= silw;
 											}
 
-											if(usealphamask) //alpha channel of image is an additional mask
-											{
+											if(usealphamask) { //alpha channel of image is an additional mask
 												pweight *= (qAlpha(pcolor) / 255.0);
 											}
 
@@ -876,8 +847,7 @@ std::map<std::string, QVariant> FilterColorProjectionPlugin::applyFilter(const Q
 							} // end foreach texel
 							cam_ind ++;
 
-							if(usesilhouettes)
-							{
+							if(usesilhouettes) {
 								delete silhouette_buff;
 							}
 
@@ -977,77 +947,67 @@ int FilterColorProjectionPlugin::postCondition( const QAction* a ) const{
 //--- this function calculates the near and far values
 int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near_acc, std::vector<float> *far_acc)
 {
-    CMeshO::VertexIterator vi;
-    int rasterindex;
+	CMeshO::VertexIterator vi;
+	int rasterindex;
 
-    if(near_acc != NULL)
-    {
-        near_acc->clear();
-        near_acc->resize(md.rasterNumber());
-    }
-    else
-        return -1;
+	if(near_acc != nullptr) {
+		near_acc->clear();
+		near_acc->resize(md.rasterNumber());
+	}
+	else
+		return -1;
 
-    if(far_acc != NULL)
-    {
-        far_acc->clear();
-        far_acc->resize(md.rasterNumber());
-    }
-    else
-        return -1;
+	if(far_acc != nullptr) {
+		far_acc->clear();
+		far_acc->resize(md.rasterNumber());
+	}
+	else
+		return -1;
 
-    // init near and far vectors
-    for(unsigned int rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++)
-    {
-        (*near_acc)[rasterindex] =  1000000;
-        (*far_acc)[rasterindex]  = -1000000;
-    }
+	// init near and far vectors
+	for(unsigned int rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++) {
+		(*near_acc)[rasterindex] =  1000000;
+		(*far_acc)[rasterindex]  = -1000000;
+	}
 
-    // current model
-    MeshModel *model = md.mm();
+	// current model
+	MeshModel *model = md.mm();
 
-    // scan all vertices
-    for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
-    {
-        if(!(*vi).IsD())
-        {
-            // check against all cameras
-            rasterindex = 0;
-            for(RasterModel *raster: md.rasterIterator())
-            {
-                if(raster->shot.IsValid())
-                {
-                    Point2m pp = raster->shot.Project((*vi).P());
+	// scan all vertices
+	for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi) {
+		if(!(*vi).IsD()) {
+			// check against all cameras
+			rasterindex = 0;
+			for(const RasterModel& raster: md.rasterIterator()) {
+				if(raster.shot.IsValid()) {
+					Point2m pp = raster.shot.Project((*vi).P());
 
-                    Point3m viewaxis = raster->shot.GetViewPoint() - (*vi).P();
-                    viewaxis.Normalize();
+					Point3m viewaxis = raster.shot.GetViewPoint() - (*vi).P();
+					viewaxis.Normalize();
 
-                    //if(viewaxis * raster->shot.GetViewDir() > 0.0)     // if facing
-                    if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1]) // if inside image
-                    {
-                        // then update near and far
-                        if(raster->shot.Depth((*vi).P()) < (*near_acc)[rasterindex])
-                            (*near_acc)[rasterindex] = raster->shot.Depth((*vi).P());
-                        if(raster->shot.Depth((*vi).P()) > (*far_acc)[rasterindex])
-                            (*far_acc)[rasterindex]  = raster->shot.Depth((*vi).P());
-                    }
+					//if(viewaxis * raster->shot.GetViewDir() > 0.0)     // if facing
+					if(pp[0]>0 && pp[1]>0 && pp[0]<raster.shot.Intrinsics.ViewportPx[0] && pp[1]<raster.shot.Intrinsics.ViewportPx[1]) { // if inside image
+						// then update near and far
+						if(raster.shot.Depth((*vi).P()) < (*near_acc)[rasterindex])
+							(*near_acc)[rasterindex] = raster.shot.Depth((*vi).P());
+						if(raster.shot.Depth((*vi).P()) > (*far_acc)[rasterindex])
+							(*far_acc)[rasterindex]  = raster.shot.Depth((*vi).P());
+					}
 
-                }
-                rasterindex++;
-            }
-        }
-    }
+				}
+				rasterindex++;
+			}
+		}
+	}
 
-    for(unsigned rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++) // set to 0 0 invalid and "strange" cameras
-    {
-        if ( ((*near_acc)[rasterindex] == 1000000)  ||  ((*far_acc)[rasterindex] == -1000000) )
-        {
-            (*near_acc)[rasterindex] = 0;
-            (*far_acc)[rasterindex]  = 0;
-        }
-    }
+	for(unsigned rasterindex = 0; rasterindex < md.rasterNumber(); rasterindex++) { // set to 0 0 invalid and "strange" cameras
+		if ( ((*near_acc)[rasterindex] == 1000000)  ||  ((*far_acc)[rasterindex] == -1000000) ) {
+			(*near_acc)[rasterindex] = 0;
+			(*far_acc)[rasterindex]  = 0;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProjectionPlugin)

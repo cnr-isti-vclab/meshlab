@@ -616,9 +616,9 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		}
 
 		delete mls;
-		if ( (id & _PROJECTION_) && md.getMesh(par.getMeshId("ControlMesh"))!=pPoints)
+		if ( (id & _PROJECTION_) && pPoints != nullptr && md.getMesh(par.getMeshId("ControlMesh"))!=pPoints)
 		{
-			md.delMesh(pPoints);
+			md.delMesh(pPoints->id());
 		}
 
 		if (mesh)

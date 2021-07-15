@@ -72,11 +72,29 @@ void RichParameterListDialog::createFrame()
 	connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
 
 	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+}
 
-	//set the minimum size so it will shrink down to the right size	after the help is toggled
-	this->setMinimumSize(stdParFrame->sizeHint());
-	this->showNormal();
-	this->adjustSize();
+void RichParameterListDialog::addVerticalSpacer()
+{
+	QGridLayout* lay = (QGridLayout*)stdParFrame->layout();
+	QSpacerItem *spacer = new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	lay->addItem(spacer, lay->rowCount(), 0);
+	lay->setRowMinimumHeight(lay->rowCount(), 10);
+}
+
+void RichParameterListDialog::addCheckBox(const QString& name, bool checked)
+{
+	QCheckBox* cb = new QCheckBox(stdParFrame);
+	cb->setText(name);
+	cb->setChecked(checked);
+	QGridLayout* lay = (QGridLayout*)stdParFrame->layout();
+	lay->addWidget(cb,lay->rowCount(), 0);
+	additionalCheckBoxes[name] = cb;
+}
+
+bool RichParameterListDialog::isCheckBoxChecked(const QString& name)
+{
+	return additionalCheckBoxes.at(name)->isChecked();
 }
 
 

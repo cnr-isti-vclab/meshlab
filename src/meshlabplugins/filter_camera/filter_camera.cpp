@@ -254,34 +254,28 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		trTranInv.SetTranslate(-tranVec);
 		//cm.Tr=trTran*trRot*trTranInv;
 		Matrix44m transf=trTran*trRot*trTranInv;
-		if (par.getBool("toall"))
-		{
-			for (MeshModel* mm : md.meshIterator())
-			{
-				if (mm->visible)
-				{
-					mm->cm.Tr=transf * mm->cm.Tr;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+		if (par.getBool("toall")) {
+			for (MeshModel& mm : md.meshIterator()) {
+				if (mm.isVisible()) {
+					mm.cm.Tr=transf * mm.cm.Tr;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.shot.ApplyRigidTransformation(transf);
-					mm->cm.Tr.SetIdentity();
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.shot.ApplyRigidTransformation(transf);
+					mm.cm.Tr.SetIdentity();
 				}
 				
 			}
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplyRigidTransformation(transf);
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplyRigidTransformation(transf);
 			}
 		}
-		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
-		{
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplyRigidTransformation(transf);
+		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0)) {
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplyRigidTransformation(transf);
 			}
 		}
 		else switch(par.getEnum("camera"))
@@ -350,43 +344,35 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		
 		trTran.SetTranslate(tranVec);
 		trTranInv.SetTranslate(-tranVec);
-		if (par.getBool("toall"))
-		{
-			for (MeshModel* mm : md.meshIterator())
-			{
-				if (mm->visible)
-				{
-					mm->cm.Tr=trTran*trScale*trTranInv;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+		if (par.getBool("toall")) {
+			for (MeshModel& mm : md.meshIterator()) {
+				if (mm.isVisible()) {
+					mm.cm.Tr=trTran*trScale*trTranInv;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplyRigidTransformation(trTran);
-					mm->cm.shot.RescalingWorld(trScale[0][0], false);
-					mm->cm.shot.ApplyRigidTransformation(trTranInv);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplyRigidTransformation(trTran);
+					mm.cm.shot.RescalingWorld(trScale[0][0], false);
+					mm.cm.shot.ApplyRigidTransformation(trTranInv);
 				}
 				
 			}
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-				{
-					rm->shot.ApplyRigidTransformation(trTran);
-					rm->shot.RescalingWorld(trScale[0][0], false);
-					rm->shot.ApplyRigidTransformation(trTranInv);
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
+					rm.shot.ApplyRigidTransformation(trTran);
+					rm.shot.RescalingWorld(trScale[0][0], false);
+					rm.shot.ApplyRigidTransformation(trTranInv);
 				}
 			}
 		}
-		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
-		{
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-				{
-					rm->shot.ApplyRigidTransformation(trTran);
-					rm->shot.RescalingWorld(trScale[0][0], false);
-					rm->shot.ApplyRigidTransformation(trTranInv);
+		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0)) {
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible()) {
+					rm.shot.ApplyRigidTransformation(trTran);
+					rm.shot.RescalingWorld(trScale[0][0], false);
+					rm.shot.ApplyRigidTransformation(trTranInv);
 				}
 			}
 		}
@@ -394,8 +380,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		{
 		case 0:
 		{
-			if (currentRaster == NULL)
-			{
+			if (currentRaster == NULL) {
 				throw MLException("You need a Raster Model to apply this filter!");
 			}
 			currentRaster->shot.ApplyRigidTransformation(trTran);
@@ -405,8 +390,7 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		case 1:
 		{
-			if (cm == NULL)
-			{
+			if (cm == NULL) {
 				throw MLException("You need a Mesh Model to apply this filter!");
 			}
 			cm->shot.ApplyRigidTransformation(trTran);
@@ -449,32 +433,29 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		}
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm.isVisible())
 				{
-					mm->cm.Tr=trTran;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr=trTran;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplyRigidTransformation(trTran);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplyRigidTransformation(trTran);
 				}
 			}
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplyRigidTransformation(trTran);
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplyRigidTransformation(trTran);
 				
 			}
 		}
-		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
-		{
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplyRigidTransformation(trTran);
+		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0)) {
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplyRigidTransformation(trTran);
 			}
 		}
 		else switch(par.getEnum("camera"))
@@ -524,31 +505,28 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		
 		if (par.getBool("toall"))
 		{
-			for (MeshModel* mm : md.meshIterator())
+			for (MeshModel& mm : md.meshIterator())
 			{
-				if (mm->visible)
+				if (mm.isVisible())
 				{
-					mm->cm.Tr = mat;
-					tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
+					mm.cm.Tr = mat;
+					tri::UpdatePosition<CMeshO>::Matrix(mm.cm, mm.cm.Tr);
 					//tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-					tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->cm.Tr.SetIdentity();
-					mm->cm.shot.ApplySimilarity(mat);
+					tri::UpdateBounding<CMeshO>::Box(mm.cm);
+					mm.cm.Tr.SetIdentity();
+					mm.cm.shot.ApplySimilarity(mat);
 				}
 			}
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplySimilarity(mat);
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplySimilarity(mat);
 				
 			}
 		}
-		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
-		{
-			for (RasterModel* rm : md.rasterIterator())
-			{
-				if (rm->visible)
-					rm->shot.ApplySimilarity(mat);
+		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0)) {
+			for (RasterModel& rm : md.rasterIterator()) {
+				if (rm.isVisible())
+					rm.shot.ApplySimilarity(mat);
 			}
 		}
 		else switch(par.getEnum("camera"))
@@ -654,14 +632,12 @@ std::map<std::string, QVariant> FilterCameraPlugin::applyFilter(const QAction *f
 		if(!vcg::tri::Allocator<CMeshO>::IsValidHandle<CorrVec>(*cm,ch)){
 			throw MLException("Vertices have no associated camera.\n This filter works only for point clouds loaded within a Bundler project (.out)");
 		}
-		for(CMeshO::VertexIterator vi= cm->vert.begin(); vi != cm->vert.end();++vi)
-		{
+		for(CMeshO::VertexIterator vi= cm->vert.begin(); vi != cm->vert.end();++vi) {
 			unsigned int camera_id = ch[*vi][0].id_img;
 			auto it = md.rasterBegin();
 			std::advance(it, camera_id);
-			if (it != md.rasterEnd() && *it != nullptr)
-			{
-				Point3m n=(*it)->shot.GetViewPoint()-(*vi).P() ;
+			if (it != md.rasterEnd()) {
+				Point3m n=(*it).shot.GetViewPoint()-(*vi).P() ;
 				if( n*(*vi).cN()<0)
 					(*vi). N()=-(*vi).cN();
 			}

@@ -24,7 +24,7 @@
 #ifndef _PUSHPULL_H
 #define _PUSHPULL_H
 
-typedef unsigned char byte;
+typedef unsigned char Byte;
 
 #include <QImage>
 #include <QRgb>
@@ -33,14 +33,14 @@ namespace vcg
 {
     /* pull push filling algorithm */
 
-    static int mean4w(int p1,byte w1,int p2,byte w2,int p3,byte w3,int p4,byte w4)
+    static int mean4w(int p1,Byte w1,int p2,Byte w2,int p3,Byte w3,int p4,Byte w4)
     {
         int result =(p1*int(w1) + p2*int(w2)  +p3*int(w3) + p4*int(w4) )
         / ( int(w1)+int(w2)+int(w3)+int(w4)  ) ;
         return result;
     }
 
-    static QRgb mean4Pixelw(QRgb p1,byte w1,QRgb p2,byte w2,QRgb p3,byte w3,QRgb p4,byte w4)
+    static QRgb mean4Pixelw(QRgb p1,Byte w1,QRgb p2,Byte w2,QRgb p3,Byte w3,QRgb p4,Byte w4)
     {
         int r= mean4w(qRed(p1),w1,qRed(p2),w2,qRed(p3),w3,qRed(p4),w4);
         int g= mean4w(qGreen(p1),w1,qGreen(p2),w2,qGreen(p3),w3,qGreen(p4),w4);
@@ -56,7 +56,7 @@ namespace vcg
     {
         assert(p.width()/2==mip.width());
         assert(p.height()/2==mip.height());
-        byte w1,w2,w3,w4;
+        Byte w1,w2,w3,w4;
         int x,y;
         for(y=0;y<mip.height();++y)
             for(x=0;x<mip.width();++x)
@@ -85,25 +85,25 @@ namespace vcg
             for(x=0;x<mip.width();++x)
             {
                 if(p.pixel(x*2 ,y*2)==bkg)
-                    p.setPixel(x*2 ,y*2 ,mean4Pixelw( mip.pixel(x  ,y  ) ,  byte(144),
-                                                     (x>0 ? mip.pixel(x-1,y  ) : bkg),  (x>0 ? byte( 48) : 0),
-                                                     (y>0 ? mip.pixel(x  ,y-1) : bkg),  (y>0 ? byte( 48) : 0),
-                                                     ((x>0 && y>0 )? mip.pixel(x-1,y-1) : bkg), ((x>0 && y>0 )? byte( 16) : 0)));
+                    p.setPixel(x*2 ,y*2 ,mean4Pixelw( mip.pixel(x  ,y  ) ,  Byte(144),
+                                                     (x>0 ? mip.pixel(x-1,y  ) : bkg),  (x>0 ? Byte( 48) : 0),
+                                                     (y>0 ? mip.pixel(x  ,y-1) : bkg),  (y>0 ? Byte( 48) : 0),
+                                                     ((x>0 && y>0 )? mip.pixel(x-1,y-1) : bkg), ((x>0 && y>0 )? Byte( 16) : 0)));
                 if(p.pixel(x*2+1,y*2  )==bkg)
-                    p.setPixel(x*2+1,y*2  ,mean4Pixelw(mip.pixel(x  ,y  ) ,byte(144),
-                                                       (x<mip.width()-1 ? mip.pixel(x+1,y) : bkg),  (x<mip.width()-1 ? byte( 48) : 0),
-                                                       (y>0  ? mip.pixel(x  ,y-1) : bkg),  (y>0  ? byte( 48) : 0),
-                                                       ((x<mip.width()-1 && y>0) ? mip.pixel(x+1,y-1) : bkg), ((x<mip.width()-1 && y>0) ? byte( 16) : 0)));
+                    p.setPixel(x*2+1,y*2  ,mean4Pixelw(mip.pixel(x  ,y  ) ,Byte(144),
+                                                       (x<mip.width()-1 ? mip.pixel(x+1,y) : bkg),  (x<mip.width()-1 ? Byte( 48) : 0),
+                                                       (y>0  ? mip.pixel(x  ,y-1) : bkg),  (y>0  ? Byte( 48) : 0),
+                                                       ((x<mip.width()-1 && y>0) ? mip.pixel(x+1,y-1) : bkg), ((x<mip.width()-1 && y>0) ? Byte( 16) : 0)));
                 if(p.pixel(x*2  ,y*2+1)==bkg)
-                    p.setPixel(x*2  ,y*2+1, mean4Pixelw( mip.pixel(x  ,y  ), byte(144),
-                                                        (x>0 ? mip.pixel(x-1,y  ) : bkg),  (x>0 ? byte( 48) : 0),
-                                                        (y<mip.height()-1  ? mip.pixel(x  ,y+1) : bkg),  (y<mip.height()-1  ? byte( 48) : 0),
-                                                        ((x>0 && y<mip.height()-1) ? mip.pixel(x-1,y+1) : bkg), ((x>0 && y<mip.height()-1 )? byte( 16) : 0)));
+                    p.setPixel(x*2  ,y*2+1, mean4Pixelw( mip.pixel(x  ,y  ), Byte(144),
+                                                        (x>0 ? mip.pixel(x-1,y  ) : bkg),  (x>0 ? Byte( 48) : 0),
+                                                        (y<mip.height()-1  ? mip.pixel(x  ,y+1) : bkg),  (y<mip.height()-1  ? Byte( 48) : 0),
+                                                        ((x>0 && y<mip.height()-1) ? mip.pixel(x-1,y+1) : bkg), ((x>0 && y<mip.height()-1 )? Byte( 16) : 0)));
                 if(p.pixel(x*2+1,y*2+1)==bkg)
-                    p.setPixel(x*2+1,y*2+1, mean4Pixelw(mip.pixel(x  ,y  ), byte(144),
-                                                        (x<mip.width()-1 ? mip.pixel(x+1,y  ) : bkg), (x<mip.width()-1 ? byte( 48) : 0),
-                                                        (y<mip.height()-1  ? mip.pixel(x  ,y+1) : bkg), ( y<mip.height()-1  ? byte( 48) : 0),
-                                                        ((x<mip.width()-1  && y<mip.height()-1) ? mip.pixel(x+1,y+1) : bkg), ((x<mip.width()-1  && y<mip.height()-1) ? byte( 16) : 0)));
+                    p.setPixel(x*2+1,y*2+1, mean4Pixelw(mip.pixel(x  ,y  ), Byte(144),
+                                                        (x<mip.width()-1 ? mip.pixel(x+1,y  ) : bkg), (x<mip.width()-1 ? Byte( 48) : 0),
+                                                        (y<mip.height()-1  ? mip.pixel(x  ,y+1) : bkg), ( y<mip.height()-1  ? Byte( 48) : 0),
+                                                        ((x<mip.width()-1  && y<mip.height()-1) ? mip.pixel(x+1,y+1) : bkg), ((x<mip.width()-1  && y<mip.height()-1) ? Byte( 16) : 0)));
 
             }
 

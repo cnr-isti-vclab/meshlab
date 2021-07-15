@@ -351,10 +351,24 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(const QAction *filter, 
 
 	case FP_REMOVE_TVERTEX_COLLAPSE :
 	{
+		bool hadFF = false;
+		bool hadVF = false;
+		if (m.hasDataMask(MeshModel::MM_FACEFACETOPO)){
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+			hadFF = true;
+		}
+		if (m.hasDataMask(MeshModel::MM_VERTFACETOPO)){
+			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+			hadVF = true;
+		}
 		Scalarm threshold = par.getFloat("Threshold");
 		bool repeat = par.getBool("Repeat");
 		int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
 		log("Successfully removed %d t-vertices", total);
+		if (hadFF)
+			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		if (hadVF)
+			m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 	} break;
 
 	case FP_REMOVE_TVERTEX_FLIP :

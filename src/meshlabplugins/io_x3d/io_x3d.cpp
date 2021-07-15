@@ -85,28 +85,28 @@ void IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			normalsUpdated = true;
 		mask = info->mask;
 		
-		QString missingTextureFilesMsg = "The following texture files were not found:\n";
-		bool someTextureNotFound = false;
-		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
-		{
-			FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
-			if (pFile == NULL)
-			{
-				missingTextureFilesMsg.append("\n");
-				missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
-				someTextureNotFound = true;
-			}
-			else
-			{
-				m.cm.textures.push_back(info->textureFile[tx].toStdString());
-				fclose (pFile);
-			}
-		}
+//		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+//		bool someTextureNotFound = false;
+//		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
+//		{
+//			FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
+//			if (pFile == NULL)
+//			{
+//				missingTextureFilesMsg.append("\n");
+//				missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
+//				someTextureNotFound = true;
+//			}
+//			else
+//			{
+//				m.cm.textures.push_back(info->textureFile[tx].toStdString());
+//				fclose (pFile);
+//			}
+//		}
 		
 		
-		if (someTextureNotFound){
-			reportWarning(missingTextureFilesMsg);
-		}
+//		if (someTextureNotFound){
+//			reportWarning(missingTextureFilesMsg);
+//		}
 		
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 		if (!normalsUpdated)

@@ -331,30 +331,29 @@ bool EditReferencingPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
 
         //connecting other actions
     }
-    referencingDialog->show();
+	referencingDialog->show();
 
-    // signals for asking clicked point
-    connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
-    connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
+	// signals for asking clicked point
+	connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
+	connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
 
-    status_line1 = "";
-    status_line2 = "";
-    status_line3 = "";
-    status_error = "";
+	status_line1 = "";
+	status_line2 = "";
+	status_line3 = "";
+	status_error = "";
 
 	// reading current transformations for all layers
 	layersOriginalTransf.resize(glArea->md()->meshNumber());
 	int lind = 0;
-	for(MeshModel *mmp: glArea->md()->meshIterator())
-	{
-		layersOriginalTransf[lind].Import(mmp->cm.Tr);
+	for(const MeshModel& mmp: glArea->md()->meshIterator()) {
+		layersOriginalTransf[lind].Import(mmp.cm.Tr);
 		lind++;
 	}
 	originalTransf.Import(m.cm.Tr);
 
-    glArea->update();
+	glArea->update();
 
-    return true;
+	return true;
 }
 
 void EditReferencingPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
@@ -814,20 +813,16 @@ void EditReferencingPlugin::applyMatrix()
 
 	newMat.Import(transfMatrix);
 
-	if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
-	{
+	if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked) {
 		int lind = 0;
-		for(MeshModel *mmp: glArea->md()->meshIterator())
-		{
-			if(mmp->visible)
-			{
-				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
+		for(MeshModel& mmp: glArea->md()->meshIterator()) {
+			if(mmp.isVisible()) {
+				mmp.cm.Tr = newMat * layersOriginalTransf[lind];
 			}
 			lind++;
 		}
 	}
-	else
-	{
+	else {
 		glArea->mm()->cm.Tr = newMat * originalTransf;
 	}
 
@@ -994,20 +989,16 @@ void EditReferencingPlugin::applyScale()
 	newMat.Identity();
 	newMat.SetScale(globalScale, globalScale, globalScale);
 
-	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
-	{
+	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked) {
 		int lind = 0;
-		for(MeshModel *mmp: glArea->md()->meshIterator())
-		{
-			if (mmp->visible)
-			{
-				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
+		for(MeshModel& mmp: glArea->md()->meshIterator()) {
+			if (mmp.isVisible()) {
+				mmp.cm.Tr = newMat * layersOriginalTransf[lind];
 			}
 			lind++;
 		}
 	}
-	else
-	{
+	else {
 		glArea->mm()->cm.Tr = newMat * originalTransf;
 	}
 

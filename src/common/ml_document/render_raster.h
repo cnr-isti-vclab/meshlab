@@ -58,7 +58,6 @@ public:
     int semantic;
     QString fullPathFileName;
     QImage image;
-    float *buf;
 
     bool IsInCore() { return !image.isNull(); }
     void Load();

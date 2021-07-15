@@ -164,7 +164,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 	QString labelText;
 	setText(0, QString::number(meshNode->Id()));
 	if (meshNode->glued)  	setText(2, "*");
-	if (meshNode->m->visible)  setIcon(1, QIcon(":/layer_eye_open.png"));
+	if (meshNode->m->isVisible())  setIcon(1, QIcon(":/layer_eye_open.png"));
 	else setIcon(1, QIcon(":/layer_eye_close.png"));
 
 	labelText.sprintf("%s", qUtf8Printable(meshName));
@@ -272,9 +272,9 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column)
 	if (nn) {
 		if (column == 1)
 		{
-			nn->m->visible = !nn->m->visible;
+			nn->m->setVisible(!nn->m->isVisible());
 			emit updateMeshSetVisibilities();
-			if (nn->m->visible) mItem->setIcon(1, QIcon(":/layer_eye_open.png"));
+			if (nn->m->isVisible()) mItem->setIcon(1, QIcon(":/layer_eye_open.png"));
 			else mItem->setIcon(1, QIcon(":/layer_eye_close.png"));
 		}
 		else {

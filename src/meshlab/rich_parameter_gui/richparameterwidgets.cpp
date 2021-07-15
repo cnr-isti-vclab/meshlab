@@ -50,7 +50,6 @@ RichParameterWidget::~RichParameterWidget()
 {
 	delete rp;
 	delete defp;
-	delete helpLab;
 }
 
 void RichParameterWidget::resetValue()
@@ -149,8 +148,6 @@ LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& rpar , const Ric
 
 LineEditWidget::~LineEditWidget()
 {
-	delete lned;
-	delete lab;
 }
 
 void LineEditWidget::changeChecker()
@@ -371,7 +368,7 @@ AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc& rabs, const RichAbsP
 	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	absSB->setDecimals(decimals);
 	absSB->setSingleStep((m_max-m_min)/100.0);
-	float initVal = rp->value().getAbsPerc();
+	float initVal = rp->value().getFloat();
 	absSB->setValue(initVal);
 
 	percSB->setMinimum(-200);
@@ -433,21 +430,21 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 
 void AbsPercWidget::collectWidgetValue()
 {
-	rp->setValue(AbsPercValue(float(absSB->value())));
+	rp->setValue(FloatValue(absSB->value()));
 }
 
 void AbsPercWidget::resetWidgetValue()
 {
 	//const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(rp);
-	setValue(rp->value().getAbsPerc(),ap->min,ap->max);
+	setValue(rp->value().getFloat(),ap->min,ap->max);
 }
 
 void AbsPercWidget::setWidgetValue( const Value& nv )
 {
 	//const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(rp);
-	setValue(nv.getAbsPerc(),ap->min,ap->max);
+	setValue(nv.getFloat(),ap->min,ap->max);
 }
 
 void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
@@ -957,7 +954,7 @@ int DynamicFloatWidget::floatToInt(float val)
 
 void DynamicFloatWidget::collectWidgetValue()
 {
-	rp->setValue(DynamicFloatValue(valueLE->text().toFloat()));
+	rp->setValue(FloatValue(valueLE->text().toFloat()));
 }
 
 void DynamicFloatWidget::resetWidgetValue()
@@ -1036,7 +1033,7 @@ EnumWidget::EnumWidget(QWidget *p, const RichEnum& rpar, const RichEnum& rdef) :
 	ComboWidget(p,rpar, rdef)
 {
 	//you MUST call it!!!!
-	Init(p,rpar.value().getEnum(),rpar.enumvalues);
+	Init(p,rpar.value().getInt(),rpar.enumvalues);
 	//assert(enumCombo != NULL);
 }
 
@@ -1047,18 +1044,17 @@ int EnumWidget::getSize()
 
 void EnumWidget::collectWidgetValue()
 {
-	rp->setValue(EnumValue(enumCombo->currentIndex()));
+	rp->setValue(IntValue(enumCombo->currentIndex()));
 }
 
 void EnumWidget::resetWidgetValue()
 {
-	//lned->setText(QString::number(rp->value().getFloat(),'g',3));
-	enumCombo->setCurrentIndex(rp->value().getEnum());
+	enumCombo->setCurrentIndex(rp->value().getInt());
 }
 
 void EnumWidget::setWidgetValue( const Value& nv )
 {
-	enumCombo->setCurrentIndex(nv.getEnum());
+	enumCombo->setCurrentIndex(nv.getInt());
 }
 
 /******************************************/
@@ -1077,10 +1073,10 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh& rpar, const RichMesh& rdef) :
 
 	int currentmeshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		QString shortName = mm->label();
+	for(const MeshModel& mm : md->meshIterator()) {
+		QString shortName = mm.label();
 		meshNames.push_back(shortName);
-		if((unsigned int) mm->id() == rp->value().getMeshId()) {
+		if(mm.id() == (unsigned int)rp->value().getInt()) {
 			currentmeshindex = i;
 		}
 		++i;
@@ -1093,15 +1089,15 @@ void MeshWidget::collectWidgetValue()
 {
 	auto it = md->meshBegin();
 	std::advance(it, enumCombo->currentIndex());
-	rp->setValue(MeshValue((*it)->id()));
+	rp->setValue(IntValue((*it).id()));
 }
 
 void MeshWidget::resetWidgetValue()
 {
 	int meshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		if(mm->id() == rp->value().getMeshId()) {
+	for(const MeshModel& mm : md->meshIterator()) {
+		if(mm.id() == (unsigned int)rp->value().getInt()) {
 			meshindex = i;
 		}
 		++i;
@@ -1113,8 +1109,8 @@ void MeshWidget::setWidgetValue( const Value& nv )
 {
 	int meshindex = -1;
 	unsigned int i = 0;
-	for(const MeshModel* mm : md->meshIterator()) {
-		if(mm->id() == nv.getMeshId()) {
+	for(const MeshModel& mm : md->meshIterator()) {
+		if(mm.id() == (unsigned int)nv.getInt()) {
 			meshindex = i;
 		}
 		++i;
@@ -1155,24 +1151,24 @@ IOFileWidget::~IOFileWidget()
 
 void IOFileWidget::collectWidgetValue()
 {
-	rp->setValue(FileValue(filename->text()));
+	rp->setValue(StringValue(filename->text()));
 }
 
 void IOFileWidget::resetWidgetValue()
 {
-	QString fle = rp->value().getFileName();
+	QString fle = rp->value().getString();
 	updateFileName(fle);
 }
 
 void IOFileWidget::setWidgetValue(const Value& nv)
 {
-	QString fle = nv.getFileName();
+	QString fle = nv.getString();
 	updateFileName(fle);
 }
 
-void IOFileWidget::updateFileName( const FileValue& file )
+void IOFileWidget::updateFileName( const StringValue& file )
 {
-	filename->setText(file.getFileName());
+	filename->setText(file.getString());
 }
 
 void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
@@ -1192,8 +1188,8 @@ void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 SaveFileWidget::SaveFileWidget(QWidget* p, const RichSaveFile& rpar , const RichSaveFile& rdef) :
 	IOFileWidget(p,rpar, rdef)
 {
-	filename->setText(rp->value().getFileName());
-	QString tmp = rp->value().getFileName();
+	filename->setText(rp->value().getString());
+	QString tmp = rp->value().getString();
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -1205,10 +1201,10 @@ void SaveFileWidget::selectFile()
 	//SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(rp);
 	QString ext;
-	QString fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getFileName(),dec->ext);
+	QString fl = QFileDialog::getSaveFileName(this,tr("Save"),rp->value().getString(),dec->ext);
 	collectWidgetValue();
 	updateFileName(fl);
-	FileValue fileName(fl);
+	StringValue fileName(fl);
 	rp->setValue(fileName);
 	emit dialogParamChanged();
 }
@@ -1227,10 +1223,10 @@ void OpenFileWidget::selectFile()
 	//OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(rp);
 	QString ext;
-	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getFileName(), dec->exts.join(" "));
+	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getString(), dec->exts.join(" "));
 	collectWidgetValue();
 	updateFileName(fl);
-	FileValue fileName(fl);
+	StringValue fileName(fl);
 	rp->setValue(fileName);
 	emit dialogParamChanged();
 }

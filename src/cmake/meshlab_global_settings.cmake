@@ -7,6 +7,9 @@ if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
 
+#enable setting options with SET cmake command
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
 ### Build settings
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 14)
@@ -24,6 +27,11 @@ if(WIN32)
 	if(MSVC)
 		add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	endif()
+endif()
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+if(APPLE)
+	add_definitions(-DGL_SILENCE_DEPRECATION)
 endif()
 
 if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)

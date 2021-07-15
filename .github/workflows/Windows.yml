@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt

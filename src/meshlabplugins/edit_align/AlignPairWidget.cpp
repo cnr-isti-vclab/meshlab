@@ -119,7 +119,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
         for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
         {
           MeshNode *mn=ni->second;
-          if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible)
+          if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->isVisible())
           {
             MLRenderingData dt;
             createRenderingData(mn->m, dt);
@@ -163,7 +163,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
           for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
           {
             MeshNode *mn=ni->second;
-			if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible)
+            if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->isVisible())
 			{
               shared->draw(mn->m->id(), context());
 			}

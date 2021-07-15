@@ -658,24 +658,21 @@ void Freeze(MeshModel *m)
 void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool freeze,
 					bool invertFlag=false, bool composeFlage=true)
 {
-	if(toAllFlag)
-	{
-		MeshModel   *m=NULL;
-		while ((m=md.nextVisibleMesh(m)))
-		{
+	if(toAllFlag) {
+		MeshModel* m = nullptr;
+		while ((m=md.nextVisibleMesh(m))) {
 			if(invertFlag) m->cm.Tr = Inverse(m->cm.Tr);
 			if(composeFlage) m->cm.Tr = tr * m->cm.Tr;
 			else m->cm.Tr=tr;
 			if(freeze) Freeze(m);
 		}
 
-		for (RasterModel* rm : md.rasterIterator())
-			if (rm->visible)
-				rm->shot.ApplyRigidTransformation(tr);
+		for (RasterModel& rm : md.rasterIterator())
+			if (rm.isVisible())
+				rm.shot.ApplyRigidTransformation(tr);
 	}
-	else
-	{
-		MeshModel   *m=md.mm();
+	else {
+		MeshModel* m = md.mm();
 		if(invertFlag) m->cm.Tr = Inverse(m->cm.Tr);
 		if(composeFlage) m->cm.Tr = tr * m->cm.Tr;
 		else m->cm.Tr=tr;
@@ -958,11 +955,9 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 		m.updateBoxAndNormals();
 
-		CMeshO toProjectCopy;
+		CMeshO toProjectCopy = m.cm;
 
 		toProjectCopy.face.EnableMark();
-
-		tri::Append<CMeshO, CMeshO>::MeshCopy(toProjectCopy, m.cm);
 
 		tri::IsotropicRemeshing<CMeshO>::Params params;
 		params.SetTargetLen(par.getAbsPerc("TargetLen"));
@@ -1740,7 +1735,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(underM->cm) > 0)
 			{
 				log("Mesh has some not 2 manifoldfaces, splitting surfaces requires manifoldness");
-				md.delMesh(underM);
+				md.delMesh(underM->id());
 			}
 			else
 			{

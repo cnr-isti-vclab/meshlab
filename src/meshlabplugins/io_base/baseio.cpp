@@ -75,7 +75,8 @@ const static std::list<FileFormat> importImageFormatList = {
 	FileFormat("Joint Photographic Experts Group", "JPEG"),
 	FileFormat("Portable Network Graphics", "PNG"),
 	FileFormat("X11 Bitmap", "XBM"),
-	FileFormat("X11 Bitmap", "XPM")
+	FileFormat("X11 Bitmap", "XPM"),
+	FileFormat("Truevision Graphics Adapter", "TGA")
 };
 
 const static std::list<FileFormat> exportImageFormatList = {
@@ -369,20 +370,20 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		std::replace(i->begin(), i->end(), '\\', '/');
 	}
-	// verify if texture files are present
-	QString missingTextureFilesMsg = "The following texture files were not found:\n";
-	bool someTextureNotFound = false;
-	for (unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
-	{
-		if (!QFile::exists(m.cm.textures[textureIdx].c_str()))
-		{
-			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
-			someTextureNotFound = true;
-		}
-	}
-	if (someTextureNotFound)
-		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
+//	// verify if texture files are present
+//	QString missingTextureFilesMsg = "The following texture files were not found:\n";
+//	bool someTextureNotFound = false;
+//	for (unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+//	{
+//		if (!QFile::exists(m.cm.textures[textureIdx].c_str()))
+//		{
+//			missingTextureFilesMsg.append("\n");
+//			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+//			someTextureNotFound = true;
+//		}
+//	}
+//	if (someTextureNotFound)
+//		log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
 }
@@ -458,8 +459,6 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
-		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
-			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		int result = tri::io::ExporterOFF<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
 		{
@@ -473,7 +472,6 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 
 		if (mask & tri::io::Mask::IOM_BITPOLYGONAL)
 		{
-			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			PMesh pm;
 			tri::PolygonSupport<CMeshO, PMesh>::ImportFromTriMesh(pm, m.cm);
 			result = tri::io::ExporterOBJ<PMesh>::Save(pm, filename.c_str(), mask, cb);
@@ -514,31 +512,37 @@ QImage BaseMeshIOPlugin::openImage(
 		vcg::CallBackPos*)
 {
 	QImage loadedImage;
-	bool supportedFormat = false;
-	for (const FileFormat& f : importImageFormatList){
-		if (f.extensions.first().toUpper() == format.toUpper())
-			supportedFormat = true;
+	//format not natively supported by QImage
+	if (format.toUpper() == "TGA") {
+		loadedImage = loadTga(fileName.toStdString().c_str());
 	}
-
-	if (supportedFormat) {
-		QFileInfo fi(fileName);
-
-		if(!fi.exists()) {
-			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
-			throw MLException(errorMsgFormat.arg(fileName));
-		}
-		if(!fi.isReadable()) {
-			QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-			throw MLException(errorMsgFormat.arg(fileName));
+	else { //check if it is a format supported natively by QImage
+		bool supportedFormat = false;
+		for (const FileFormat& f : importImageFormatList){
+			if (f.extensions.first().toUpper() == format.toUpper())
+				supportedFormat = true;
 		}
 
-		loadedImage.load(fileName);
-		if (loadedImage.isNull()){
-			throw MLException("Failed to load the image " + fileName);
+		if (supportedFormat) {
+			QFileInfo fi(fileName);
+
+			if(!fi.exists()) {
+				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+				throw MLException(errorMsgFormat.arg(fileName));
+			}
+			if(!fi.isReadable()) {
+				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+				throw MLException(errorMsgFormat.arg(fileName));
+			}
+
+			loadedImage.load(fileName);
+			if (loadedImage.isNull()){
+				throw MLException("Failed to load the image " + fileName);
+			}
 		}
-	}
-	else {
-		wrongOpenFormat(format);
+		else {
+			wrongOpenFormat(format);
+		}
 	}
 	return loadedImage;
 }
@@ -711,6 +715,125 @@ RichParameterList BaseMeshIOPlugin::initSaveParameter(const QString &format, con
 		}
 	}
 	return par;
+}
+
+/**
+ * @brief BaseMeshIOPlugin::loadTga
+ * source: https://forum.qt.io/topic/74712/qimage-from-tga-with-alpha/11
+ */
+QImage BaseMeshIOPlugin::loadTga(const char* filePath)
+{
+	QImage img;
+	if (!img.load(filePath)) {
+
+		// open the file
+		std::fstream fsPicture(filePath, std::ios::in | std::ios::binary);
+
+		if (!fsPicture.is_open()) {
+			throw MLException("Impossible to open the file");
+		}
+
+		// some variables
+		std::vector<std::uint8_t>* vui8Pixels;
+		std::uint32_t ui32BpP;
+		std::uint32_t ui32Width;
+		std::uint32_t ui32Height;
+
+		// read in the header
+		std::uint8_t ui8x18Header[19] = { 0 };
+		fsPicture.read(reinterpret_cast<char*>(&ui8x18Header), sizeof(ui8x18Header) - 1);
+
+		//get variables
+		vui8Pixels = new std::vector<std::uint8_t>;
+		bool bCompressed;
+		std::uint32_t ui32IDLength;
+		std::uint32_t ui32PicType;
+		std::uint32_t ui32PaletteLength;
+		std::uint32_t ui32Size;
+
+		// extract all information from header
+		ui32IDLength = ui8x18Header[0];
+		ui32PicType = ui8x18Header[2];
+		ui32PaletteLength = ui8x18Header[6] * 0x100 + ui8x18Header[5];
+		ui32Width = ui8x18Header[13] * 0x100 + ui8x18Header[12];
+		ui32Height = ui8x18Header[15] * 0x100 + ui8x18Header[14];
+		ui32BpP = ui8x18Header[16];
+
+		// calculate some more information
+		ui32Size = ui32Width * ui32Height * ui32BpP / 8;
+		bCompressed = ui32PicType == 9 || ui32PicType == 10;
+		vui8Pixels->resize(ui32Size);
+
+		// jump to the data block
+		fsPicture.seekg(ui32IDLength + ui32PaletteLength, std::ios_base::cur);
+
+		if (ui32PicType == 2 && (ui32BpP == 24 || ui32BpP == 32)) {
+			fsPicture.read(reinterpret_cast<char*>(vui8Pixels->data()), ui32Size);
+		}
+		// else if compressed 24 or 32 bit
+		else if (ui32PicType == 10 && (ui32BpP == 24 || ui32BpP == 32)) { // compressed
+			std::uint8_t tempChunkHeader;
+			std::uint8_t tempData[5];
+			unsigned int tempByteIndex = 0;
+
+			do {
+				fsPicture.read(reinterpret_cast<char*>(&tempChunkHeader), sizeof(tempChunkHeader));
+
+				if (tempChunkHeader >> 7) { // repeat count
+					// just use the first 7 bits
+					tempChunkHeader = (uint8_t(tempChunkHeader << 1) >> 1);
+
+					fsPicture.read(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
+
+					for (int i = 0; i <= tempChunkHeader; i++) {
+						vui8Pixels->at(tempByteIndex++) = tempData[0];
+						vui8Pixels->at(tempByteIndex++) = tempData[1];
+						vui8Pixels->at(tempByteIndex++) = tempData[2];
+						if (ui32BpP == 32) vui8Pixels->at(tempByteIndex++) = tempData[3];
+					}
+				}
+				else { // data count
+					// just use the first 7 bits
+					tempChunkHeader = (uint8_t(tempChunkHeader << 1) >> 1);
+
+					for (int i = 0; i <= tempChunkHeader; i++) {
+						fsPicture.read(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
+
+						vui8Pixels->at(tempByteIndex++) = tempData[0];
+						vui8Pixels->at(tempByteIndex++) = tempData[1];
+						vui8Pixels->at(tempByteIndex++) = tempData[2];
+						if (ui32BpP == 32) vui8Pixels->at(tempByteIndex++) = tempData[3];
+					}
+				}
+			} while (tempByteIndex < ui32Size);
+		}
+		// not useable format
+		else {
+			fsPicture.close();
+			throw MLException("Not useable TGA format");
+		}
+
+		fsPicture.close();
+
+		img = QImage(ui32Width, ui32Height, QImage::Format_RGB888);
+
+		int pixelSize = ui32BpP == 32 ? 4 : 3;
+		//TODO: write direct into img
+		for (unsigned int x = 0; x < ui32Width; x++) {
+			for (unsigned int y = 0; y < ui32Height; y++) {
+				int valr = vui8Pixels->at(y * ui32Width * pixelSize + x * pixelSize + 2);
+				int valg = vui8Pixels->at(y * ui32Width * pixelSize + x * pixelSize + 1);
+				int valb = vui8Pixels->at(y * ui32Width * pixelSize + x * pixelSize);
+
+				QColor value(valr, valg, valb);
+				img.setPixelColor(x, y, value);
+			}
+		}
+
+		img = img.mirrored();
+
+	}
+	return img;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)

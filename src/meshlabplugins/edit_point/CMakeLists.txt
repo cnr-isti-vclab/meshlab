@@ -10,4 +10,4 @@ set(RESOURCES edit_point.qrc)
 
 add_meshlab_plugin(edit_point ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_link_libraries(edit_point PUBLIC meshlab-common OpenGL::GLU)
+target_link_libraries(edit_point PUBLIC OpenGL::GLU)

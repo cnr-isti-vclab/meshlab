@@ -179,7 +179,7 @@ Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
  */
 Scalarm RichParameterList::getAbsPerc(const QString& name) const
 {
-	return getParameterByName(name).value().getAbsPerc();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
@@ -188,7 +188,7 @@ Scalarm RichParameterList::getAbsPerc(const QString& name) const
  */
 int RichParameterList::getEnum(const QString& name) const
 {
-	return getParameterByName(name).value().getEnum();
+	return getParameterByName(name).value().getInt();
 }
 
 /**
@@ -197,7 +197,7 @@ int RichParameterList::getEnum(const QString& name) const
  */
 unsigned int RichParameterList::getMeshId(const QString& name) const
 {
-	return getParameterByName(name).value().getMeshId();
+	return getParameterByName(name).value().getInt();
 }
 
 /**
@@ -206,7 +206,7 @@ unsigned int RichParameterList::getMeshId(const QString& name) const
  */
 Scalarm RichParameterList::getDynamicFloat(const QString& name) const
 {
-	return getParameterByName(name).value().getDynamicFloat();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
@@ -215,7 +215,7 @@ Scalarm RichParameterList::getDynamicFloat(const QString& name) const
  */
 QString RichParameterList::getOpenFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**
@@ -224,7 +224,7 @@ QString RichParameterList::getOpenFileName(const QString& name) const
  */
 QString RichParameterList::getSaveFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**
@@ -314,6 +314,16 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 	std::list<RichParameter*>::const_iterator it = paramList.begin();
 	std::advance(it, i);
 	return **it;
+}
+
+unsigned int RichParameterList::numberAdvancedParameters() const
+{
+	unsigned int n = 0;
+	for (const RichParameter& rp : *this){
+		if (rp.isAdvanced())
+			++n;
+	}
+	return n;
 }
 
 /**

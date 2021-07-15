@@ -68,6 +68,8 @@ public:
 	inline static QString pointSizeParam() {return "MeshLab::Appearance::pointSize";}
 	bool wheelDirection;
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}
+	int matrixDecimalPrecision;
+	inline static QString matrixDecimalPrecisionParam() {return "MeshLab::Appearance::matrixDecimalPrecision";}
 
 
 	void updateGlobalParameterSet(const RichParameterList& rps );

@@ -51,6 +51,7 @@ MainWindow::MainWindow():
 	httpReq(this), 
 	gpumeminfo(NULL),
 	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
+	lastUsedDirectory(QDir::home()),
 	PM(meshlab::pluginManagerInstance()),
 	_currviewcontainer(NULL)
 {
@@ -349,6 +350,8 @@ connectRenderModeActionList(rendlist);*/
 	connect(linkViewersAct, SIGNAL(triggered()), this, SLOT(linkViewers()));
 
 	viewFromGroupAct = new QActionGroup(this); viewFromGroupAct->setExclusive(true);
+	trackballStepGroupAct = new QActionGroup(this); trackballStepGroupAct->setExclusive(true);
+
 	viewFrontAct = new QAction(tr("Front"), viewFromGroupAct);
 	viewBackAct = new QAction(tr("Back"), viewFromGroupAct);
 	viewRightAct = new QAction(tr("Right"), viewFromGroupAct);
@@ -362,7 +365,18 @@ connectRenderModeActionList(rendlist);*/
 	viewLeftYAct = new QAction(tr("Left (Z is up)"), viewFromGroupAct);
 	viewTopYAct = new QAction(tr("Top (Z is up)"), viewFromGroupAct);
 	viewBottomYAct = new QAction(tr("Bottom (Z is up)"), viewFromGroupAct);
+	//ortho
+	toggleOrthoAct = new QAction(tr("Toggle Orthographic Camera"), this);
+	toggleOrthoAct->setShortcutContext(Qt::ApplicationShortcut);
+	//trackball
+	trackballStepHP = new QAction(tr("Horizontal +"), trackballStepGroupAct);
+	trackballStepHM = new QAction(tr("Horizontal -"), trackballStepGroupAct);
+	trackballStepVP = new QAction(tr("Vertical +"), trackballStepGroupAct);
+	trackballStepVM = new QAction(tr("Vertical -"), trackballStepGroupAct);
+	trackballStepSP = new QAction(tr("Axial +"), trackballStepGroupAct);
+	trackballStepSM = new QAction(tr("Axial -"), trackballStepGroupAct);
 
+#ifdef WIN32 //these shortcuts work only on windows, and they result in conflicts on macos
 	// keyboard shortcuts for canonical viewdirections, blender style
 	viewFrontAct->setShortcut(Qt::KeypadModifier + Qt::Key_1);
 	viewBackAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_1);
@@ -377,29 +391,21 @@ connectRenderModeActionList(rendlist);*/
 	viewLeftYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_3);
 	viewTopYAct->setShortcut(Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
 	viewBottomYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
-
-	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
-
 	// other view-changing acts
-	toggleOrthoAct = new QAction(tr("Toggle Orthographic Camera"), this);
-	toggleOrthoAct->setShortcutContext(Qt::ApplicationShortcut);
 	toggleOrthoAct->setShortcut(Qt::KeypadModifier + Qt::Key_5);
-	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
-
-	trackballStepGroupAct = new QActionGroup(this); trackballStepGroupAct->setExclusive(true);
-	trackballStepHP = new QAction(tr("Horizontal +"), trackballStepGroupAct);
-	trackballStepHM = new QAction(tr("Horizontal -"), trackballStepGroupAct);
-	trackballStepVP = new QAction(tr("Vertical +"), trackballStepGroupAct);
-	trackballStepVM = new QAction(tr("Vertical -"), trackballStepGroupAct);
-	trackballStepSP = new QAction(tr("Axial +"), trackballStepGroupAct);
-	trackballStepSM = new QAction(tr("Axial -"), trackballStepGroupAct);
+	//trackball
 	trackballStepHP->setShortcut(Qt::KeypadModifier + Qt::Key_4);
 	trackballStepHM->setShortcut(Qt::KeypadModifier + Qt::Key_6);
 	trackballStepVP->setShortcut(Qt::KeypadModifier + Qt::Key_8);
 	trackballStepVM->setShortcut(Qt::KeypadModifier + Qt::Key_2);
 	trackballStepSP->setShortcut(Qt::KeypadModifier + Qt::Key_9);
 	trackballStepSM->setShortcut(Qt::CTRL +  Qt::KeypadModifier + Qt::Key_9);
-	connect(trackballStepGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(trackballStep(QAction *)));
+#endif //WIN32
+	connect(viewFromGroupAct, SIGNAL(triggered(QAction*)), this, SLOT(viewFrom(QAction*)));
+
+	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
+
+	connect(trackballStepGroupAct, SIGNAL(triggered(QAction*)), this, SLOT(trackballStep(QAction*)));
 
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
@@ -970,10 +976,12 @@ void MainWindow::loadDefaultSettingsFromPlugins()
 			for (const QString& format : ff.extensions) {
 				RichParameterList tmplist = iop->initPreOpenParameter(format);
 				if (!tmplist.isEmpty()){
+					QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 					for (RichParameter& rp : tmplist){
-						QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 						rp.setName(prefixName + rp.name());
 					}
+					RichBool rp(prefixName + "showPreOpenParameterDialog", true, "", "");
+					tmplist.addParam(rp);
 					defaultGlobalParams.join(tmplist);
 				}
 			}
@@ -1328,14 +1336,13 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 {
 	gbllist.addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
 	gbllist.addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
-	gbllist.addParam(RichInt(minFaceNumberPerSmoothRendering(), 5000000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
+	gbllist.addParam(RichInt(minFaceNumberPerSmoothRendering(), 2000000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 //	glbset->addParam(RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		gbllist.addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
 	gbllist.addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
-	gbllist.addParam(RichBool(showPreOpenParameterDialogParam(), false, "Show Open Parameter Dialog", "If true, each time that a mesh is imported, a dialog asking for extra parameters (if applicable), is shown."));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1347,7 +1354,6 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rpl.getBool(highPrecisionRendering());
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
-	showPreOpenParameterDialog = rpl.getBool(showPreOpenParameterDialogParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

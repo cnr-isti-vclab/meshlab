@@ -79,7 +79,6 @@ void SettingDialog::save()
 	QDomDocument doc("MeshLabSettings");
 	doc.appendChild(currentParameter->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(currentParameter->name()), qUtf8Printable(docstring));
 	QSettings setting;
 	setting.setValue(currentParameter->name(),QVariant(docstring));
 }
@@ -87,7 +86,7 @@ void SettingDialog::save()
 void SettingDialog::apply()
 {
 	assert(frame.size() == 1);
-	currentParameter->setValue(frame.at(0)->widgetValue());
+	currentParameter->setValue(frame.begin()->second->widgetValue());
 	emit applySettingSignal(*currentParameter);
 }
 
@@ -96,13 +95,13 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(currentParameter->name()));
 
 	assert(frame.size() == 1);
-	frame.at(0)->setValue(defaultParameter.value());
+	frame.begin()->second->setValue(defaultParameter.value());
 	apply();
 }
 
 void SettingDialog::load()
 {
 	assert(frame.size() == 1);
-	frame.at(0)->setWidgetValue(savedParameter->value());
+	frame.begin()->second->setWidgetValue(savedParameter->value());
 	apply();
 }

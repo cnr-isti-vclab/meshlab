@@ -93,7 +93,7 @@ else()
 	get_filename_component(VCGDIR "${CMAKE_CURRENT_LIST_DIR}/vcglib" ABSOLUTE)
 	if(EXISTS ${VCGDIR})
 		add_subdirectory(${VCGDIR})
-		message(STATUS "- VCGLib - using using bundled source")
+		message(STATUS "- VCGLib - using bundled source")
 	else()
 		set(VCGDIR NOTFOUND)
 	endif()
@@ -140,7 +140,9 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/io_collada
 			meshlabplugins/io_ctm
 			meshlabplugins/io_expe
+			meshlabplugins/io_gltf
 			meshlabplugins/io_json
+			meshlabplugins/io_nxs
 			meshlabplugins/io_pdb
 			meshlabplugins/io_tri
 			meshlabplugins/io_txt

@@ -401,7 +401,7 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(M
 	dt.set(glopts);
 }
 
-MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh( MeshModel* m )
+MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(const MeshModel* m )
 {
     if (m != NULL)
     {

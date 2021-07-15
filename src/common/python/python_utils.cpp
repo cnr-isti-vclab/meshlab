@@ -28,32 +28,31 @@
 
 QString pymeshlab::computePythonTypeString(const RichParameter& par)
 {
-	const Value& v = par.value();
-	if (v.isEnum())
+	if (par.isOfType<RichEnum>())
 		return PYTHON_TYPE_ENUM;
-	if (v.isAbsPerc())
+	if (par.isOfType<RichAbsPerc>())
 		return PYTHON_TYPE_ABSPERC;
-	if (v.isDynamicFloat())
+	if (par.isOfType<RichDynamicFloat>())
 		return PYTHON_TYPE_DYNAMIC_FLOAT;
-	if (v.isBool())
+	if (par.isOfType<RichBool>())
 		return PYTHON_TYPE_BOOL;
-	if (v.isInt())
+	if (par.isOfType<RichInt>())
 		return PYTHON_TYPE_INT;
-	if (v.isFloat())
+	if (par.isOfType<RichFloat>())
 		return PYTHON_TYPE_FLOAT;
-	if (v.isString())
+	if (par.isOfType<RichString>())
 		return PYTHON_TYPE_STRING;
-	if (v.isMatrix44f())
+	if (par.isOfType<RichMatrix44f>())
 		return PYTHON_TYPE_MATRIX44F;
-	if (v.isPoint3f())
+	if (par.isOfType<RichPoint3f>())
 		return PYTHON_TYPE_POINT3F;
-	if (v.isShotf())
+	if (par.isOfType<RichShotf>())
 		return PYTHON_TYPE_SHOTF;
-	if (v.isColor())
+	if (par.isOfType<RichColor>())
 		return PYTHON_TYPE_COLOR;
-	if (v.isMesh())
+	if (par.isOfType<RichMesh>())
 		return PYTHON_TYPE_MESH;
-	if (v.isFileName())
+	if (par.isOfType<RichSaveFile>() || par.isOfType<RichOpenFile>())
 		return PYTHON_TYPE_FILENAME;
 	return "still_unsupported";
 }

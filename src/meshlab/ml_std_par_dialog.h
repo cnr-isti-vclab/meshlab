@@ -32,49 +32,48 @@
 class MainWindow;
 class MeshlabStdDialog : public QDockWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MeshlabStdDialog(QWidget *p = NULL);
-    ~MeshlabStdDialog();
+	MeshlabStdDialog(QWidget *p = NULL);
+	~MeshlabStdDialog();
 
-    void clearValues();
-    void createFrame();
-    void loadFrameContent();
+	void createFrame();
+	void loadFrameContent();
 
-    bool showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
-    bool isPreviewable();
+	bool showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
+	bool isPreviewable();
 
 public slots:
-    void closeClick();
+	void closeClick();
 
 private slots:
-    void applyClick();
-    void resetValues();
-    void toggleHelp();
-    void togglePreview();
-    void applyDynamic();
-    void changeCurrentMesh(int meshInd);
+	void applyClick();
+	void resetValues();
+	void toggleHelp();
+	void togglePreview();
+	void applyDynamic();
+	void changeCurrentMesh(int meshInd);
 
 public:
-    QFrame *qf;
-    RichParameterListFrame *stdParFrame;
-    QAction *curAction;
-    MeshModelState meshState;
-    MeshModelState meshCacheState;
-    QCheckBox *previewCB;
+	QFrame *qf;
+	RichParameterListFrame *stdParFrame;
+	QAction *curAction;
+	MeshModelState meshState;
+	MeshModelState meshCacheState;
+	QCheckBox *previewCB;
 
-    void closeEvent ( QCloseEvent * event );
+	void closeEvent ( QCloseEvent * event );
 
-    uint curmask;
-    MeshModel *curModel;
-    MeshDocument * curMeshDoc;
-    FilterPlugin *curmfi;
-    MainWindow *curmwi;
-    QWidget * curgla;
-    RichParameterList curParSet;
-    RichParameterList prevParSet;
-    bool validcache;
+	uint curmask;
+	MeshModel *curModel;
+	MeshDocument * curMeshDoc;
+	FilterPlugin *curmfi;
+	MainWindow *curmwi;
+	QWidget * curgla;
+	RichParameterList curParSet;
+	RichParameterList prevParSet;
+	bool validcache;
 
 };
 

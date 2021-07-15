@@ -119,6 +119,7 @@ public:
     void reset();
 	void setCurrentTab(const MLRenderingData& dt);
     MLRenderingParametersTab* createRenderingParametersTab();
+    static void updateTreeWidgetSizes(QTreeWidget* tree);
 protected:
     void keyPressEvent ( QKeyEvent * event );
 	void keyReleaseEvent(QKeyEvent * event);

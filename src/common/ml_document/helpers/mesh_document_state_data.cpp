@@ -16,9 +16,8 @@ MeshDocumentStateData::~MeshDocumentStateData()
 void MeshDocumentStateData::create(MeshDocument& md)
 {
 	QWriteLocker locker(&_lock);
-	for (MeshModel* mm : md.meshIterator()) {
-		if (mm != NULL)
-			insert(mm->id(), MeshModelStateData(mm->dataMask(), mm->cm.VN(), mm->cm.FN(), mm->cm.EN()));
+	for (MeshModel& mm : md.meshIterator()) {
+		insert(mm.id(), MeshModelStateData(mm.dataMask(), mm.cm.VN(), mm.cm.FN(), mm.cm.EN()));
 	}
 }
 
