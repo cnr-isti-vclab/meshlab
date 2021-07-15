@@ -460,7 +460,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
                         coordinates[0] = range * std::cos(phi) * std::cos(theta);
                         coordinates[1] = range * std::cos(phi) * std::sin(theta);
-                        coordinates[2] = range * sin(phi);
+                        coordinates[2] = range * std::sin(phi);
 
                     }
                     else {
