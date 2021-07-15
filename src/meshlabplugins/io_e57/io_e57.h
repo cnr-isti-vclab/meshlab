@@ -51,6 +51,9 @@ namespace vcg {
 
                 explicit E57Data3DPoints(size_t buffSize, e57::Data3D& scanHeader) {
 
+                    data3DPointsData.rowIndex = new int32_t [buffSize];
+                    data3DPointsData.columnIndex = new int32_t [buffSize];
+
                     if (scanHeader.pointFields.cartesianXField && scanHeader.pointFields.cartesianYField &&
                         scanHeader.pointFields.cartesianZField) {
 
@@ -87,6 +90,9 @@ namespace vcg {
                 }
 
                 ~E57Data3DPoints() {
+
+                    delete[] data3DPointsData.rowIndex;
+                    delete[] data3DPointsData.columnIndex;
 
                     if (areCoordinatesAvailable()) {
 
@@ -180,24 +186,12 @@ private:
      * @param mask
      * @param scanIndex Data block index given by the NewData3D
      * @param buffSize Dimension for buffer size
-     * @param numberPointSize How many points are contained inside the cloud
      * @param fileReader The file reader object used to scan the file
      * @param cb Callback to update the progressbar contained in MeshLab
      */
-    void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
+    void loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize,
                   const e57::Reader &fileReader, e57::Data3D &scanHeader,
                   std::pair<e57::Image2D, QImage> image, const RichParameterList &par);
-
-    /***
-     * Write verticies, contained inside the mesh, into the dataWriter
-     * @param dataWriter
-     * @param data3DPoints
-     * @param count How many verticies write
-     * @param remaining How many verticies remains
-     * @param vertices The verticies to write
-     */
-    void writeVertices(e57::CompressedVectorWriter &dataWriter, vcg::tri::io::E57Data3DPoints& data3DPoints,
-                              int count, int remaining, vcgTriMesh::VertContainer &vertices);
 
     /***
      * Read the transform matrix inside the e57::Data3D and apply it to the mesh

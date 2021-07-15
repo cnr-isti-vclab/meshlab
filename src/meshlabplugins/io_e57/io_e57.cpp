@@ -151,7 +151,7 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
                 std::pair<e57::Image2D, QImage> imageMetaAndImage = extractMeshImage(e57FileReader, scanIndex, false);
 
                 // Read points from file and load them inside the MeshLab's mesh.
-                loadMesh(*meshModel, mask, scanIndex, numberPointSize, numberPointSize, e57FileReader, scanHeader, imageMetaAndImage, par);
+                loadMesh(*meshModel, mask, scanIndex, numberPointSize, e57FileReader, scanHeader, imageMetaAndImage, par);
 
                 // Once the mesh is loaded apply a transformation matrix to translate and rotate the points.
                 translatedAndRotateMesh(meshModel, scanHeader);
@@ -402,7 +402,7 @@ void E57IOPlugin::exportMaskCapability(const QString& format, int &capability, i
     capability = defaultBits = mask;
 }
 
-void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize, int64_t numberPointSize,
+void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSize,
                            const e57::Reader &fileReader, e57::Data3D &scanHeader,
                            std::pair<e57::Image2D, QImage> image, const RichParameterList &par) {
 
@@ -414,7 +414,6 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
     // object holding data read from E57 file
     vcg::tri::io::E57Data3DPoints data3DPoints{buffSize, scanHeader};
     if (!data3DPoints.areCoordinatesAvailable()) {
-        std::cerr << "No Coordinates!\n";
         return;
     }
 
@@ -422,9 +421,8 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
     auto dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
 
     // to enable colors, quality and normals inside the mesh
-    if (data3DPoints.areColorsAvailable()) {
-        mask |= Mask::IOM_VERTCOLOR;
-    }
+    mask |= Mask::IOM_VERTCOLOR;
+
     if (data3DPoints.areNormalsAvailable()) {
         mask |= Mask::IOM_VERTNORMAL;
     }
@@ -444,7 +442,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
             for (std::size_t i = 0; i < size; i++) {
 
-                vcg::Point3f coordinates;
+                Point3m coordinates;
 
                 if (pointsData.cartesianInvalidState == nullptr || pointsData.cartesianInvalidState[i] == 0) {
 
@@ -474,7 +472,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
                         vertex->C()[3] = 0xFF;
                     }
                     else {
-                        // TODO: should we use the colors from the image 2D?
+                        // TODO: extract colors from the image?
                     }
 
                 }
@@ -493,7 +491,6 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
             vcg::tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm, minPercentile, maxPercentile);
 
-            mask |= Mask::IOM_VERTCOLOR;
         }
 
     }
