@@ -264,7 +264,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     e57::Translation translation;
     e57::Quaternion quaternion;
 
-    vcg::Point4f translationColumn = m.cm.Tr.GetColumn4(3);
+    Point4m translationColumn = m.cm.Tr.GetColumn4(3);
     translation.x = translationColumn.X();
     translation.y = translationColumn.Y();
     translation.z = translationColumn.Z();
