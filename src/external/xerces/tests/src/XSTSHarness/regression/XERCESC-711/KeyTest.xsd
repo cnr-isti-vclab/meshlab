@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:simpleType name="TName">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+			<xs:pattern value="[A-Z](-?[0-9a-zA-Z])+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TYesNo">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Y"/>
+			<xs:enumeration value="N"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Maxx">
+		<xs:annotation>
+			<xs:documentation>Root Element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Processes">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Process" type="TProcess" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+					<xs:key name="KProcessName">
+						<xs:selector xpath=".//Process"/>
+						<xs:field xpath="Name"/>
+					</xs:key>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="TProcess">
+		<xs:sequence>
+			<xs:element name="Name" type="TName"/>
+			<xs:element name="SubProcesses" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Process" type="TProcess" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

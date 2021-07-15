@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- tests that 2 fallbacks cause a failure when the include is successful -->
+   <!-- EXPECT FAILURE -->
+   <elem xmlns="http://www.schemaTest.org/xinclude-test" xml:base="../included/elem.xml"/>[Fatal Error] test11.xml:11:22

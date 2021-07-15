@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="SplitAndMerge" xmlns="SplitAndMerge" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:import schemaLocation="Schema1.xsd"/>
+	<xsd:element name="Messages">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Message1" form="qualified">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element ref="msg" xmlns=""/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

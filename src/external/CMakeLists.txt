@@ -75,4 +75,10 @@ if ((NOT BUILD_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 	# u3d - optional, for io_u3d
 	include(${CMAKE_CURRENT_SOURCE_DIR}/u3d.cmake)
 
+	# xerces library - optional, needed by libe57
+	include(${CMAKE_CURRENT_SOURCE_DIR}/xerces.cmake)
+
+	# libe57Format - optional, for io_e57
+	include(${CMAKE_CURRENT_SOURCE_DIR}/e57.cmake)
+
 endif()

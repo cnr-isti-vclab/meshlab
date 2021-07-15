@@ -17,7 +17,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install libomp cgal
+        brew install libomp cgal xerces-c
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2

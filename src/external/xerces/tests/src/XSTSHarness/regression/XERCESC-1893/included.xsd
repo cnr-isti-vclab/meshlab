@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://included">
+	<xs:simpleType name="Int32_Type">
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="-2147483648"/>
+			<xs:maxInclusive value="2147483647"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

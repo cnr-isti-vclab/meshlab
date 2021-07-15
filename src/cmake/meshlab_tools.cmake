@@ -25,6 +25,18 @@ function(add_meshlab_plugin target_name)
 		COMPONENT Plugins)
 endfunction()
 
+# make quiet some portions of cmake
+# usage
+#
+# set(MESSAGE_QUIET ON)
+# #everything here will be quiet
+# unset(MESSAGE_QUIET)
+function(message)
+	if (NOT MESSAGE_QUIET)
+		_message(${ARGN})
+	endif()
+endfunction()
+
 function(add_file_format_info_plist)
 	cmake_parse_arguments(ARG "" "TARGET;FILE;FORMAT" "" ${ARGN})
 	

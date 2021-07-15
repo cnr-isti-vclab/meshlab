@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+. ../scripts/run-test
+
+run_test Char16Test pass "" tests/Char16Test

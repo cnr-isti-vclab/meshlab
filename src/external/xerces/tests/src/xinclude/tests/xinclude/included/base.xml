@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<!-- redundant path structure -->
+<include xml:base="../included/" xmlns="http://www.w3.org/2001/XInclude"
+         href="../included/elem_base.xml"/>

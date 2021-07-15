@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="unique.xsd">
+
+  <child attr="1">1</child>
+  <child attr="2">2</child>
+  <child>4</child>
+
+</root>
+

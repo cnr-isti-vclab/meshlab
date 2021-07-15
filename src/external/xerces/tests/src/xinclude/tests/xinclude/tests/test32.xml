@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE x SYSTEM "tests.dtd">
+<x xmlns="http://www.schemaTest.org/xinclude-test"
+   xmlns:xi="http://www.w3.org/2001/XInclude"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- test including document with conflicting unparsed entity -->
+   <!-- Note: this actually fails because of the conflicting notation; I'm not
+        sure how to make a conflicting unparsed entity without having a conflicting
+        notation -->
+   <!-- EXPECT FAILURE -->
+   <elem foo="image"/>
+   <xi:include parse="xml"
+               href="../included/ue2.xml"/>
+</x>

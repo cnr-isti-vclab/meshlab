@@ -96,7 +96,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install libomp cgal
+        brew install libomp cgal xerces-c
         npm install -g appdmg
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -278,7 +278,6 @@ jobs:
         cd ../meshlab_linux_portable_double
         tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz *
         cd ..
-
 
     #Download MacOS Package
     - name: Download MacOS DMG

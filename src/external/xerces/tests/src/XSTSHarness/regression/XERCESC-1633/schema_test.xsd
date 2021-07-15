@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.quovadx.com/schema_test"
+    xmlns:st="http://www.quovadx.com/schema_test"
+    finalDefault="list union"
+    >
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="gst0" type="st:gst_explicit_none"></xs:element>
+                <xs:element name="gst1" type="st:gst_none"></xs:element>
+                <xs:element name="gst2" type="st:gst_r"></xs:element>
+                <xs:element name="gst3" type="st:gst_u"></xs:element>
+                <xs:element name="gst4" type="st:gst_rl"></xs:element>
+                <xs:element name="gst5" type="st:gst_ru"></xs:element>
+                <xs:element name="gst6" type="st:gst_lu"></xs:element>
+                <xs:element name="gst7" type="st:gst_rlu"></xs:element>
+                <xs:element name="gst8" type="st:gst_all"></xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:simpleType name="gst_explicit_none" final=""><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_none"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_r" final="restriction"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_l" final="list"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_u" final="union"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_rl" final="restriction list"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_ru" final="restriction union"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_lu" final="list union"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_rlu" final="restriction list union"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+    <xs:simpleType name="gst_all" final="#all"><xs:union memberTypes="xs:int"></xs:union></xs:simpleType>
+</xs:schema>

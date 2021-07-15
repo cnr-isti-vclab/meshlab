@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="msg">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DOC" type="xsd:string" maxOccurs="unbounded" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

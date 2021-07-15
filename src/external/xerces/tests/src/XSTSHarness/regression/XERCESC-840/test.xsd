@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:attributeGroup name="PaymentCardDateGroup">
+		<xsd:attribute name="random"/>
+	</xsd:attributeGroup>
+	<xsd:element name="user">
+		<xsd:complexType>
+			<xsd:attributeGroup ref="PaymentCardDateGroup">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">yada yada yada</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attributeGroup>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>
