@@ -169,7 +169,7 @@ namespace vcg {
                     return this->data3DPointsData.intensity;
                 }
 
-                inline e57::Data3DPointsData& points() noexcept {
+                inline e57::Data3DPointsData_t<Scalarm>& points() noexcept {
                     return data3DPointsData;
                 }
             };

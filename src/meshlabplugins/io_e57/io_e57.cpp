@@ -312,7 +312,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     scanIndex = fileWriter.NewData3D(scanHeader);
 
     vcg::tri::io::E57Data3DPoints data3DPoints{totalPoints, scanHeader};
-    e57::Data3DPointsData& pointsData = data3DPoints.points();
+    e57::Data3DPointsData_t<Scalarm>& pointsData = data3DPoints.points();
 
     e57::CompressedVectorWriter dataWriter = fileWriter.SetUpData3DPointsData(scanIndex, totalPoints, pointsData);
 
@@ -432,7 +432,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
     // read the data from the E57 file
     try {
 
-        e57::Data3DPointsData& pointsData = data3DPoints.points();
+        e57::Data3DPointsData_t<Scalarm>& pointsData = data3DPoints.points();
 
         while ((size = dataReader.read()) > 0) {
 
