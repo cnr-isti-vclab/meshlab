@@ -58,7 +58,9 @@ namespace vcg {
                         data3DPointsData.cartesianX = new float [buffSize];
                         data3DPointsData.cartesianY = new float [buffSize];
                         data3DPointsData.cartesianZ = new float [buffSize];
-                        data3DPointsData.cartesianInvalidState = new int8_t [buffSize];
+                        if (scanHeader.pointFields.cartesianInvalidStateField) {
+                            data3DPointsData.cartesianInvalidState = new int8_t [buffSize];
+                        }
                     }
 
                     if (scanHeader.pointFields.intensityField) {

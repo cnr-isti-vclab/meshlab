@@ -145,7 +145,6 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
 
         try {
 
-
             if (numberPointSize != 0) {
 
                 // Does the mesh have an imageMetaAndImage from which to extract colors?
@@ -446,7 +445,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
                 vcg::Point3f coordinates;
 
-                if (pointsData.cartesianInvalidState[i] == 0) {
+                if (pointsData.cartesianInvalidState == nullptr || pointsData.cartesianInvalidState[i] == 0) {
 
                     coordinates[0] = pointsData.cartesianX[i];
                     coordinates[1] = pointsData.cartesianY[i];
