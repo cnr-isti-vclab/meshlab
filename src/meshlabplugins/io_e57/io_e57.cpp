@@ -177,21 +177,21 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
 
 void E57IOPlugin::translatedAndRotateMesh(MeshModel *meshModel, const e57::Data3D &scanHeader) const {
 
-    vcg::Matrix44f rotationMatrix = vcg::Matrix44f::Identity();
-    vcg::Matrix44f translateMatrix = vcg::Matrix44f::Identity();
+    auto rotationMatrix = Matrix44m::Identity();
+    auto translateMatrix = Matrix44m::Identity();
 
-    vcg::Quaternion<float> quaternion = vcg::Quaternion<float>{
-        static_cast<float>(scanHeader.pose.rotation.w),
-        static_cast<float>(scanHeader.pose.rotation.x),
-        static_cast<float>(scanHeader.pose.rotation.y),
-        static_cast<float>(scanHeader.pose.rotation.z),
+    auto quaternion = vcg::Quaternion<Scalarm>{
+        static_cast<Scalarm>(scanHeader.pose.rotation.w),
+        static_cast<Scalarm>(scanHeader.pose.rotation.x),
+        static_cast<Scalarm>(scanHeader.pose.rotation.y),
+        static_cast<Scalarm>(scanHeader.pose.rotation.z),
     };
 
     quaternion.ToMatrix(rotationMatrix);
 
-    translateMatrix.ElementAt(0, 3) = static_cast<float>(scanHeader.pose.translation.x);
-    translateMatrix.ElementAt(1, 3) = static_cast<float>(scanHeader.pose.translation.y);
-    translateMatrix.ElementAt(2, 3) = static_cast<float>(scanHeader.pose.translation.z);
+    translateMatrix.ElementAt(0, 3) = static_cast<Scalarm>(scanHeader.pose.translation.x);
+    translateMatrix.ElementAt(1, 3) = static_cast<Scalarm>(scanHeader.pose.translation.y);
+    translateMatrix.ElementAt(2, 3) = static_cast<Scalarm>(scanHeader.pose.translation.z);
 
     meshModel->cm.Tr = translateMatrix * rotationMatrix;
 }
@@ -419,7 +419,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
         return;
     }
 
-    auto size = 0u;
+    size_t size = 0;
     auto dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
 
     // to enable colors, quality and normals inside the mesh
@@ -489,11 +489,11 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
         if (!data3DPoints.areColorsAvailable()) {
 
             const float percentile = 5.0f;
-            vcg::Histogram<float> histogram{};
+            vcg::Histogram<Scalarm> histogram{};
             vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, histogram);
 
-            const float minPercentile = histogram.Percentile(percentile / 100.0);
-            const float maxPercentile = histogram.Percentile(1.0 - (percentile / 100));
+            const Scalarm minPercentile = histogram.Percentile(percentile / 100.0);
+            const Scalarm maxPercentile = histogram.Percentile(1.0 - (percentile / 100));
 
             vcg::tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm, minPercentile, maxPercentile);
 
