@@ -364,7 +364,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     if (datacont == NULL)
         return -1;
 
-    int sz = int( md()->meshList.size())*5;
+    int sz = int( md()->meshNumber())*5;
     GLuint *selectBuf =new GLuint[sz];
     glSelectBuffer(sz, selectBuf);
     glRenderMode(GL_SELECT);
@@ -390,7 +390,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     /*if (shared->highPrecisionRendering())
         glTranslate(-shared->globalSceneCenter());*/
 
-    foreach(MeshModel * mp, this->md()->meshList)
+    for(MeshModel * mp : md()->meshIterator())
     {
         glLoadName(mp->id());
 
@@ -477,7 +477,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
                 MLDefaultMeshDecorators defdec(mw());
 
-                foreach(MeshModel * mp, this->md()->meshList)
+                for(MeshModel * mp : md()->meshIterator())
                 {
                     if ((mp != NULL) && (meshVisibilityMap[mp->id()]))
                     {
@@ -513,7 +513,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             if (datacont == NULL)
                 return;
 
-            foreach(MeshModel * mp, this->md()->meshList)
+            for(MeshModel * mp : md()->meshIterator())
             {
                 if (meshVisibilityMap[mp->id()])
                 {
@@ -534,7 +534,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     datacont->draw(mp->id(),context());
                 }
             }
-            foreach(MeshModel * mp, this->md()->meshList)
+            for(MeshModel * mp : md()->meshIterator())
             {
                 if (meshVisibilityMap[mp->id()])
                 {
@@ -794,9 +794,9 @@ void GLArea::displayInfo(QPainter *painter)
 
     QString col1Text,col0Text;
 
-    if(this->md()->size()>0)
+    if(this->md()->meshNumber()>0)
     {
-        if(this->md()->size()==1)
+        if(this->md()->meshNumber()==1)
         {
             QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             col1Text += QString("Mesh: %1\n").arg(mm()->label());
@@ -852,7 +852,7 @@ void GLArea::renderingFacilityString()
 	
 	renderfacility.clear();
 	makeCurrent();
-	if (md()->size() > 0)
+	if (md()->meshNumber() > 0)
 	{
 		enum RenderingType { FULL_BO, MIXED, FULL_IMMEDIATE_MODE };
 		RenderingType rendtype = FULL_IMMEDIATE_MODE;
@@ -863,12 +863,12 @@ void GLArea::renderingFacilityString()
 			if (shared != NULL)
 			{
 				int hh = 0;
-				foreach(MeshModel* meshmod, md()->meshList)
+				for(MeshModel * meshmod : md()->meshIterator())
 				{
 					if (shared->isBORenderingAvailable(meshmod->id()))
 					{
 						rendtype = MIXED;
-						if ((rendtype == MIXED) && (hh == md()->meshList.size() - 1))
+						if ((rendtype == MIXED) && (hh == md()->meshNumber() - 1))
 							rendtype = FULL_BO;
 					}
 					++hh;
@@ -956,45 +956,45 @@ void GLArea::displayHelp()
 void GLArea::saveSnapshot()
 {
 	makeCurrent();
-    // snap all layers
-    currSnapLayer=0;
+	// snap all layers
+	currSnapLayer=0;
 
-    // number of subparts
-    totalCols=totalRows=ss.resolution;
-    tileRow=tileCol=0;
+	// number of subparts
+	totalCols=totalRows=ss.resolution;
+	tileRow=tileCol=0;
 
-    if(ss.snapAllLayers)
-    {
-        while(currSnapLayer<this->md()->meshList.size())
-        {
-            tileRow=tileCol=0;
-            qDebug("Snapping layer %i",currSnapLayer);
+	if(ss.snapAllLayers)
+	{
+		while(currSnapLayer<md()->meshNumber())
+		{
+			tileRow=tileCol=0;
+			qDebug("Snapping layer %i",currSnapLayer);
 			int mmit = 0;
-            foreach(MeshModel *mp,this->md()->meshList) {
+			for(MeshModel * mp : md()->meshIterator()){
 				if (mmit == currSnapLayer)
 					meshSetVisibility(mp, true);
 				else
 					meshSetVisibility(mp, false);
 				mmit++;
-            }
+			}
 
-            takeSnapTile=true;
+			takeSnapTile=true;
 			for (int tilenum = 0; tilenum < (ss.resolution*ss.resolution); tilenum++)
 				repaint();
-            currSnapLayer++;
-        }
+			currSnapLayer++;
+		}
 
-        //cleanup
-        foreach(MeshModel *mp,this->md()->meshList) {
-            meshSetVisibility(mp,true);
-        }
-        ss.counter++;
-    }
-    else
-    {
-        takeSnapTile=true;
-        update();
-    }
+		//cleanup
+		for(MeshModel *mp : md()->meshIterator()) {
+			meshSetVisibility(mp,true);
+		}
+		ss.counter++;
+	}
+	else
+	{
+		takeSnapTile=true;
+		update();
+	}
 }
 
 // Slot called when the current mesh has changed.
@@ -1108,7 +1108,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	}
 	else
 	{
-		foreach(MeshModel* mm, md()->meshList)
+		for(MeshModel* mm : md()->meshIterator())
 		{
 			if (mm != NULL)
 			{
@@ -1333,7 +1333,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
 			MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
 			if (cont != NULL)
 			{
-				foreach(MeshModel * mp, this->md()->meshList)
+				for(MeshModel *mp : md()->meshIterator())
 				{
 					MLRenderingData dt;
 					cont->getRenderInfoPerMeshView(mp->id(), context(), dt);
@@ -1787,7 +1787,7 @@ void GLArea::updateCustomSettingValues( const RichParameterList& rps )
     this->update();
 }
 
-void GLArea::initGlobalParameterList( RichParameterList * defaultGlobalParamList)
+void GLArea::initGlobalParameterList( RichParameterList& defaultGlobalParamList)
 {
     GLAreaSetting::initGlobalParameterList(defaultGlobalParamList);
 }
@@ -1796,7 +1796,7 @@ void GLArea::initGlobalParameterList( RichParameterList * defaultGlobalParamList
 void GLArea::updateMeshSetVisibilities()
 {
     meshVisibilityMap.clear();
-    foreach(MeshModel * mp, this->md()->meshList)
+    for(MeshModel *mp : md()->meshIterator())
     {
         //Insert the new pair in the map; If the key is already in the map, its value will be overwritten
         meshVisibilityMap.insert(mp->id(),mp->visible);
@@ -1812,7 +1812,7 @@ void GLArea::updateRasterSetVisibilities()
     while (i.hasNext()) {
         i.next();
         bool found =false;
-        foreach(RasterModel * rp, this->md()->rasterList)
+        for(RasterModel * rp: md()->rasterIterator())
         {
             if(rp->id() == i.key())
             {
@@ -1824,7 +1824,7 @@ void GLArea::updateRasterSetVisibilities()
             rasterVisibilityMap.remove(i.key());
     }
 
-    foreach(RasterModel * rp, this->md()->rasterList)
+    for(RasterModel * rp: md()->rasterIterator())
     {
         //Insert the new pair in the map;If the key is already in the map, its value will be overwritten
         rasterVisibilityMap.insert(rp->id(),rp->visible);
@@ -1879,7 +1879,7 @@ void GLArea::showRaster(bool resetViewFlag)
 void GLArea::loadRaster(int id)
 {
 	lastloadedraster = id;
-    foreach(RasterModel *rm, this->md()->rasterList)
+	for(RasterModel *rm: md()->rasterIterator())
         if(rm->id()==id)
         {
             this->md()->setCurrentRaster(id);

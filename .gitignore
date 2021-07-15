@@ -20,6 +20,8 @@
 distrib*
 src/build/*
 src/install/*
+src/external/boost_1_75_0
+src/external/CGAL-5.2.1
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe

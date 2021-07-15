@@ -1,7 +1,7 @@
 # Known to build in Ubuntu 18.04, 20.04
 name: meshlab
 base: core18
-version: '2020.12'
+version: '2021.05'
 summary: MeshLab
 description: |
   The open source system for processing and editing 3D triangular meshes.
@@ -18,9 +18,14 @@ apps:
   meshlab:
     command: AppRun
     extensions: [kde-neon]
-    plugs: [home, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
-
+    environment:
+      DISABLE_WAYLAND: 1
+    plugs:
+      - home
+      - opengl
+      - removable-media
+      - mount-observe
 
 parts:
   meshlab:

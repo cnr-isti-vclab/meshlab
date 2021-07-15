@@ -66,9 +66,7 @@ static inline std::string filenameToString(const QString& fileName) noexcept;
  */
 static inline QString formatImageFilename(const std::string& fileName, const char* format) noexcept;
 
-void E57IOPlugin::initPreOpenParameter(const QString &format, RichParameterList & parlst) {}
-
-unsigned int E57IOPlugin::numberMeshesContainedInFile(const QString& format, const QString& fileName) const {
+unsigned int E57IOPlugin::numberMeshesContainedInFile(const QString& format, const QString& fileName, const RichParameterList&) const {
 
     unsigned int count;
 
@@ -146,6 +144,7 @@ void E57IOPlugin::open(const QString &formatName, const QString &fileName, const
         }
 
         try {
+
 
             if (numberPointSize != 0) {
 
@@ -434,7 +433,7 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
     }
 
     // set the mask
-    m.Enable(mask);
+    m.enable(mask);
 
     // read the data from the E57 file
     try {

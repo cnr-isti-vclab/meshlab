@@ -409,7 +409,7 @@ QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
 		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
 		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertices of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
-		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud.");
+		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud. The simplification is performed by subsampling the original point cloud using a Poisson Disk strategy.");
 		case FP_POISSONDISK_SAMPLING       :  return QString("Create a new layer populated with a point sampling of the current mesh;"
 													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
 													"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
@@ -462,8 +462,9 @@ int FilterDocSampling::getRequirements(const QAction *action)
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & md, RichParameterList & parlst)
+RichParameterList FilterDocSampling::initParameterList(const QAction *action, const MeshDocument & md)
 {
+  RichParameterList parlst;
   switch(ID(action))	 {
   case FP_MONTECARLO_SAMPLING :
     parlst.addParam(RichInt ("SampleNum", md.mm()->cm.vn,
@@ -541,7 +542,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
     parlst.addParam(RichBool("ApproximateGeodesicDistance", false, "Approximate Geodesic Distance", "If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."));
     parlst.addParam(RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
     parlst.addParam(RichBool("RefineFlag", false, "Refine Existing Samples", "If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "));
-    parlst.addParam(RichMesh("RefineMesh", md.mm(),&md, "Samples to be refined", "Used only if the above option is checked. "));
+	parlst.addParam(RichMesh("RefineMesh", md.mm()->id(),&md, "Samples to be refined", "Used only if the above option is checked. "));
     parlst.addParam(RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "));
     parlst.addParam(RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
     parlst.addParam(RichBool("ExactNumFlag", false, "Exact number of samples", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer."));
@@ -562,13 +563,17 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 
   case FP_HAUSDORFF_DISTANCE:
   {
-		MeshModel *vertexMesh = md.mm();
-		foreach(vertexMesh, md.meshList)
-		if (vertexMesh != md.mm())  break;
+		const MeshModel *vertexMesh = md.mm();
+		for(const MeshModel * vm: md.meshIterator()){
+			if (vm != md.mm()) {
+				vertexMesh = vm;
+				break;
+			}
+		}
 
-		parlst.addParam(RichMesh("SampledMesh", md.mm(), &md, "Sampled Mesh",
+		parlst.addParam(RichMesh("SampledMesh", md.mm()->id(), &md, "Sampled Mesh",
 			"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
-		parlst.addParam(RichMesh("TargetMesh", vertexMesh, &md, "Target Mesh",
+		parlst.addParam(RichMesh("TargetMesh", vertexMesh->id(), &md, "Target Mesh",
 			"The mesh that is sampled for the comparison."));
 		parlst.addParam(RichBool("SaveSample", false, "Save Samples",
 			"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));
@@ -584,17 +589,21 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
 		parlst.addParam(RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
 			tr("Max Distance"), tr("Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max.")));
-  } break;
+	} break;
 
-  case FP_DISTANCE_REFERENCE:
-  {
-		MeshModel *vertexMesh = md.mm();
-		foreach(vertexMesh, md.meshList)
-		if (vertexMesh != md.mm())  break;
+	case FP_DISTANCE_REFERENCE:
+	{
+		const MeshModel *vertexMesh = md.mm();
+		for(const MeshModel * vm: md.meshIterator()){
+			if (vm != md.mm()) {
+				vertexMesh = vm;
+				break;
+			}
+		}
 
-		parlst.addParam(RichMesh("MeasureMesh", md.mm(), &md, "Measured Mesh/PointCloud",
+		parlst.addParam(RichMesh("MeasureMesh", md.mm()->id(), &md, "Measured Mesh/PointCloud",
 			"The Mesh/Pointcloud that is measured, vertex by vertex, computing distance from the REFERENCE mesh/pointcloud."));
-		parlst.addParam(RichMesh("RefMesh", vertexMesh, &md, "Reference Mesh/PointCloud",
+		parlst.addParam(RichMesh("RefMesh", vertexMesh->id(), &md, "Reference Mesh/PointCloud",
 			"The Mesh/Pointcloud that is used as a reference, to measure distance from."));
 
 		parlst.addParam(RichBool("SignedDist", true, "Compute Signed Distance",
@@ -604,15 +613,18 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
 			tr("Max Distance [abs]"), tr("Search is interrupted when nothing is found within this distance range [+maxDistance -maxDistance].")));
   } break;
 
-  case FP_VERTEX_RESAMPLING:
-  {
-    MeshModel *vertexMesh= md.mm();
-    foreach (vertexMesh, md.meshList)
-      if (vertexMesh != md.mm())  break;
+	case FP_VERTEX_RESAMPLING:
+	{
+	const MeshModel *vertexMesh= md.mm();
+	for (const MeshModel* vm: md.meshIterator())
+		if (vm != md.mm()) {
+			vertexMesh = vm;
+			break;
+		}
 
-    parlst.addParam(RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+	parlst.addParam(RichMesh ("SourceMesh", md.mm()->id(),&md, "Source Mesh",
                                   "The mesh that contains the source data that we want to transfer."));
-    parlst.addParam(RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
+	parlst.addParam(RichMesh ("TargetMesh", vertexMesh->id(),&md, "Target Mesh",
                                   "The mesh whose vertices will receive the data from the source."));
     parlst.addParam(RichBool ("GeomTransfer", false, "Transfer Geometry",
                                   "if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));
@@ -656,20 +668,27 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
                                   "In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
                                   "Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t"));
   } break;
-  case FP_VORONOI_COLORING :
-  case FP_DISK_COLORING :
-  {
-    MeshModel *colorMesh= md.mm();
-    foreach (colorMesh, md.meshList) // Search a mesh with some faces..
-      if (colorMesh->cm.fn>0)  break;
 
-    MeshModel *vertexMesh;
-    foreach (vertexMesh, md.meshList) // Search another mesh
-      if (vertexMesh != colorMesh)  break;
+	case FP_VORONOI_COLORING :
+	case FP_DISK_COLORING :
+	{
+		const MeshModel *colorMesh= md.mm();
+		for (const MeshModel* colm: md.meshIterator()) // Search a mesh with some faces..
+			if (colm->cm.fn>0){
+				colorMesh = colm;
+				break;
+			}
 
-    parlst.addParam(RichMesh ("ColoredMesh", colorMesh,&md, "To be Colored Mesh",
+		const MeshModel *vertexMesh= md.mm();
+		for (const MeshModel* vm : md.meshIterator()) // Search another mesh
+			if (vm != colorMesh) {
+				vertexMesh = vm;
+				break;
+			}
+
+	parlst.addParam(RichMesh ("ColoredMesh", colorMesh->id(),&md, "To be Colored Mesh",
                                   "The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."));
-    parlst.addParam(RichMesh ("VertexMesh", vertexMesh,&md, "Vertex Mesh",
+	parlst.addParam(RichMesh ("VertexMesh", vertexMesh->id(),&md, "Vertex Mesh",
                                   "The mesh whose vertices are used as seed points for the color computation. These seeds point are projected onto the above mesh."));
     if(ID(action) ==	FP_DISK_COLORING) {
       float Diag = md.mm()->cm.bbox.Diag();
@@ -696,6 +715,7 @@ void FilterDocSampling::initParameterList(const QAction *action, MeshDocument & 
   } break;
   default: break; // do not add any parameter for the other filters
   }
+  return parlst;
 }
 
 std::map<std::string, QVariant> FilterDocSampling::applyFilter(
@@ -751,7 +771,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 		if(RecoverColor && curMM->cm.textures.size()>0)
 		{
-			mps.tex= new QImage(curMM->cm.textures[0].c_str());
+			mps.tex= new QImage(curMM->getTexture(curMM->cm.textures[0]));
 			if(mps.texSamplingWidth==0)  mps.texSamplingWidth  = mps.tex->width();
 			if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
 		}
@@ -995,7 +1015,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		if(par.getBool("RefineFlag"))
 		{
 			pp.preGenFlag=true;
-			pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
+			pp.preGenMesh=&(md.getMesh(par.getMeshId("RefineMesh"))->cm);
 		}
 		pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
 		pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
@@ -1014,8 +1034,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_HAUSDORFF_DISTANCE :
 	{
-		MeshModel* mm0 = par.getMesh("SampledMesh");  // surface where we choose the random samples
-		MeshModel* mm1 = par.getMesh("TargetMesh");   // surface that is sought for the closest point to each sample.
+		MeshModel* mm0 = md.getMesh(par.getMeshId("SampledMesh"));  // surface where we choose the random samples
+		MeshModel* mm1 = md.getMesh(par.getMeshId("TargetMesh"));   // surface that is sought for the closest point to each sample.
 		bool saveSampleFlag=par.getBool("SaveSample");
 		bool sampleVert=par.getBool("SampleVert");
 		bool sampleEdge=par.getBool("SampleEdge");
@@ -1107,8 +1127,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_DISTANCE_REFERENCE:
 	{
-		MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
-		MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
+		MeshModel* mm0 = md.getMesh(par.getMeshId("MeasureMesh"));  // this mesh gets measured.
+		MeshModel* mm1 = md.getMesh(par.getMeshId("RefMesh"));      // this is the reference mesh
 		bool useSigned = par.getBool("SignedDist");
 		Scalarm maxDistABS = par.getAbsPerc("MaxDist");
 		
@@ -1151,8 +1171,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_VERTEX_RESAMPLING :
 	{
-		MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
-		MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
+		MeshModel* srcMesh = md.getMesh(par.getMeshId("SourceMesh")); // mesh whose attribute are read
+		MeshModel* trgMesh = md.getMesh(par.getMeshId("TargetMesh")); // this whose surface is sought for the closest point to each sample.
 		Scalarm upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 		bool onlySelected = par.getBool("onSelected");
 		bool colorT = par.getBool("ColorTransfer");
@@ -1261,8 +1281,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_VORONOI_COLORING :
 	{
-		MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples
-		MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample.
+		MeshModel* mmM = md.getMesh(par.getMeshId("ColoredMesh"));  // surface where we choose the random samples
+		MeshModel* mmV = md.getMesh(par.getMeshId("VertexMesh"));   // surface that is sought for the closest point to each sample.
 		bool backwardFlag = par.getBool("backward");
 		
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
@@ -1286,8 +1306,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 	case FP_DISK_COLORING :
 	{
-		MeshModel* mmM = par.getMesh("ColoredMesh");
-		MeshModel* mmV = par.getMesh("VertexMesh");
+		MeshModel* mmM = md.getMesh(par.getMeshId("ColoredMesh"));
+		MeshModel* mmV = md.getMesh(par.getMeshId("VertexMesh"));
 		typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
 		SampleSHT sht;
 		tri::EmptyTMark<CMeshO> markerFunctor;

@@ -2,14 +2,15 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-# Prefer GLVND
+# Prefer OpenGL GLVND
 if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
 
 ### Build settings
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum OS X deployment version" FORCE)
 

@@ -61,7 +61,7 @@ void ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 				throw MLException("Error while loading [A]PTS mask.");
 			}
 		}
-		m.Enable(loadMask);
+		m.enable(loadMask);
 		int result;
 		if(useXYZ) {
 			result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
@@ -86,7 +86,7 @@ void ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 		if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)) {
 			throw MLException("Error while loading XYZ mask.");
 		}
-		m.Enable(loadMask);
+		m.enable(loadMask);
 		
 		
 		int result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);

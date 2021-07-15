@@ -169,8 +169,9 @@ QString FilterFractal::filterInfo(ActionIDType filterId) const
 	return description;
 }
 
-void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, RichParameterList &par)
+RichParameterList FilterFractal::initParameterList(const QAction* filter, const MeshDocument &md)
 {
+	RichParameterList par;
 	switch(ID(filter))
 	{
 	case CR_FRACTAL_TERRAIN:
@@ -181,9 +182,10 @@ void FilterFractal::initParameterList(const QAction* filter,MeshDocument &md, Ri
 		initParameterSetForCratersGeneration(md, par);
 		break;
 	}
+	return par;
 }
 
-void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter, const MeshDocument &md, RichParameterList &par)
 {
 	bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
 
@@ -213,18 +215,16 @@ void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter
 	par.addParam(RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
 }
 
-void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterList &par)
+void FilterFractal::initParameterSetForCratersGeneration(const MeshDocument &md, RichParameterList &par)
 {
-	int meshCount = md.meshList.size();
-
 	// tries to detect the target mesh
-	MeshModel* target = md.mm();
-	MeshModel* samples = md.mm();
-	MeshModel* tmpMesh;
+	const MeshModel* target = md.mm();
+	const MeshModel* samples = md.mm();
+	const MeshModel* tmpMesh;
 	if (samples->cm.fn != 0){ // this is probably not the samples layer
-		for(int i=0; i<meshCount; i++)
+		for(const MeshModel* mm : md.meshIterator())
 		{
-			tmpMesh = md.meshList.at(i);
+			tmpMesh = mm;
 			if (tmpMesh->cm.fn == 0)
 			{
 				samples = tmpMesh;
@@ -233,8 +233,8 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 		}
 	}
 
-	par.addParam(RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
-	par.addParam(RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
+	par.addParam(RichMesh("target_mesh", target->id(), &md, "Target mesh:", "The mesh on which craters will be generated."));
+	par.addParam(RichMesh("samples_mesh", samples->id(), &md, "Samples layer:", "The samples that represent the central points of craters."));
 	par.addParam(RichInt("seed", 0, "Seed:", "The seed with which the random number generator is initialized. The random generator generates radius and depth for each crater into the given range."));
 	par.addParam(RichInt("smoothingSteps", 5, "Normals smoothing steps:", "Vertex normals are smoothed this number of times before generating craters."));
 
@@ -304,15 +304,15 @@ std::map<std::string, QVariant> FilterFractal::applyFilter(
 		break;
 	case FP_CRATERS:
 	{
-		if (md.meshList.size() < 2) {
+		if (md.meshNumber() < 2) {
 			throw MLException("There must be at least two layers to apply the craters generation filter.");
 		}
 
-		CMeshO* samples = &(par.getMesh("samples_mesh")->cm);
+		CMeshO* samples = &(md.getMesh(par.getMeshId("samples_mesh"))->cm);
 		if (samples->face.size() > 0) {
 			throw MLException("The sample layer selected should be a points cloud.");
 		}
-		CMeshO* target = &(par.getMesh("target_mesh")->cm);
+		CMeshO* target = &(md.getMesh(par.getMeshId("target_mesh"))->cm);
 		if (samples == target) {
 			throw MLException("The sample layer and the target layer must be different.");
 		}
@@ -330,7 +330,7 @@ std::map<std::string, QVariant> FilterFractal::applyFilter(
 		}
 
 		// reads parameters
-		CratersUtils<CMeshO>::CratersArgs args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"), par.getEnum("rbf"),
+		CratersUtils<CMeshO>::CratersArgs args(md.getMesh(par.getMeshId("target_mesh")), md.getMesh(par.getMeshId("samples_mesh")), par.getEnum("rbf"),
 											   par.getInt("seed"), minRadius, maxRadius, minDepth, maxDepth,
 											   par.getInt("smoothingSteps"), par.getBool("save_as_quality"), par.getBool("invert"),
 											   par.getBool("ppNoise"), par.getBool("successiveImpacts"),

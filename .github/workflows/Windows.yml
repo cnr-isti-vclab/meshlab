@@ -28,6 +28,13 @@ jobs:
           echo  ::set-output name=artifact_suffix::""
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
+    - name: Expand PATH for wget
+      run: |
+        echo "C:\msys64\usr\bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Download external libraries
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_download_ext.sh
     - name: Configure and Build
       shell: bash
       run: |
@@ -47,7 +54,8 @@ jobs:
     - name: Move Installer
       shell: bash
       run: |
-        mv src/install/MeshLab*-windows.exe  src/
+        mkdir src/installer
+        mv src/install/MeshLab*-windows.exe  src/installer/
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
@@ -57,4 +65,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: src/MeshLab*-windows.exe
+        path: src/installer/MeshLab*-windows.exe

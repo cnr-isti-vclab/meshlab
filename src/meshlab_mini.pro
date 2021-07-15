@@ -19,7 +19,6 @@ message("DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
 SUBDIRS = \ #sub projects names
     common \
     meshlab \
-    meshlabserver \
     io_base \        # a few basic file formats (ply, obj, off), without this you cannot open anything
     decorate_base \
     filter_measure \
@@ -27,14 +26,12 @@ SUBDIRS = \ #sub projects names
     
 common.subdir = common
 meshlab.subdir = meshlab
-meshlabserver.subdir = meshlabserver
 io_base.subdir = meshlabplugins/io_base
 decorate_base.subdir = meshlabplugins/decorate_base
 filter_measure.subdir = meshlabplugins/filter_measure
 filter_meshing.subdir = meshlabplugins/filter_meshing
 
 meshlab.depends = common
-meshlabserver.depends = common
 io_base.depends = common
 decorate_base.depends = common
 filter_measure.depends = common

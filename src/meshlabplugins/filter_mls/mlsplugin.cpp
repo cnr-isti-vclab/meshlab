@@ -179,10 +179,11 @@ QString MlsPlugin::filterInfo(ActionIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichParameterList& parlst)
+RichParameterList MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md)
 {
+	RichParameterList parlst;
 	int id = ID(action);
-	MeshModel *target = md.mm();
+	const MeshModel *target = md.mm();
 
 	if (id == FP_SELECT_SMALL_COMPONENTS)
 	{
@@ -195,7 +196,7 @@ void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichP
 								  false,
 								  "Select only non closed components",
 								  ""));
-		return;
+		return parlst;
 	}
 	else if (id == FP_RADIUS_FROM_DENSITY)
 	{
@@ -203,14 +204,14 @@ void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichP
 								16,
 								"Number of neighbors",
 								"Number of neighbors used to estimate the local density. Larger values lead to smoother variations."));
-		return;
+		return parlst;
 	}
 
 	if ((id & _PROJECTION_))
 	{
-		parlst.addParam(RichMesh( "ControlMesh", target,&md, "Point set",
+		parlst.addParam(RichMesh( "ControlMesh", target->id(),&md, "Point set",
 								  "The point set (or mesh) which defines the MLS surface."));
-		parlst.addParam(RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
+		parlst.addParam(RichMesh( "ProxyMesh", target->id(), &md, "Proxy Mesh",
 								  "The mesh that will be projected/resampled onto the MLS surface."));
 	}
 	if ((id & _PROJECTION_) || (id & _COLORIZE_))
@@ -313,6 +314,7 @@ void MlsPlugin::initParameterList(const QAction* action, MeshDocument& md, RichP
 								  "The resolution of the grid on which we run the marching cubes."
                                         "This marching cube is memory friendly, so you can safely set large values up to 1000 or even more."));
 	}
+	return parlst;
 }
 
 int MlsPlugin::getRequirements(const QAction *)
@@ -410,10 +412,10 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_)
 		{
-			if (par.getMesh("ControlMesh") == par.getMesh("ProxyMesh"))
+			if (par.getMeshId("ControlMesh") == par.getMeshId("ProxyMesh"))
 			{
 				// clone the control mesh
-				MeshModel* ref = par.getMesh("ControlMesh");
+				MeshModel* ref = md.getMesh(par.getMeshId("ControlMesh"));
 				pPoints = md.addNewMesh("","TempMesh");
 				pPoints->updateDataMask(ref);
 				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm);  // the last true means "copy all vertices"
@@ -421,7 +423,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 				pPoints->cm.Tr = ref->cm.Tr;
 			}
 			else
-				pPoints = par.getMesh("ControlMesh");
+				pPoints = md.getMesh(par.getMeshId("ControlMesh"));
 		}
 		else // for curvature
 			pPoints = md.mm();
@@ -464,7 +466,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 
 		if (id & _PROJECTION_)
 		{
-			mesh = par.getMesh("ProxyMesh");
+			mesh = md.getMesh(par.getMeshId("ProxyMesh"));
 			bool selectionOnly = par.getBool("SelectionOnly");
 
 			if (selectionOnly)
@@ -614,13 +616,13 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		}
 
 		delete mls;
-		if ( (id & _PROJECTION_) && par.getMesh("ControlMesh")!=pPoints)
+		if ( (id & _PROJECTION_) && md.getMesh(par.getMeshId("ControlMesh"))!=pPoints)
 		{
 			md.delMesh(pPoints);
 		}
 
 		if (mesh)
-			mesh->UpdateBoxAndNormals();
+			mesh->updateBoxAndNormals();
 
 	} // end MLS based stuff
 

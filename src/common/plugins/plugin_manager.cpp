@@ -29,7 +29,6 @@
 
 #include <vcg/complex/algorithms/create/platonic.h>
 
-#include "meshlab_plugin_type.h"
 #include "../mlexception.h"
 #include "../globals.h"
 
@@ -68,7 +67,7 @@ PluginManager::~PluginManager()
  * 
  * Throws a MLException if the file is not a valid MeshLab plugin.
  */
-void PluginManager::checkPlugin(const QString& filename)
+MeshLabPluginType PluginManager::checkPlugin(const QString& filename)
 {
 	QFileInfo fin(filename);
 	if (!fin.exists()){
@@ -126,6 +125,7 @@ void PluginManager::checkPlugin(const QString& filename)
 	}
 
 	loader.unload();
+	return type;
 }
 
 /**
@@ -184,7 +184,7 @@ void PluginManager::loadPlugins(QDir pluginsDirectory)
  * 
  * Throws a MLException if the load of the plugin fails.
  */
-void PluginManager::loadPlugin(const QString& fileName)
+MeshLabPlugin* PluginManager::loadPlugin(const QString& fileName)
 {
 	QFileInfo fin(fileName);
 	if (pluginFiles.find(fin.absoluteFilePath()) != pluginFiles.end())
@@ -220,6 +220,7 @@ void PluginManager::loadPlugin(const QString& fileName)
 	allPlugins.push_back(ifp);
 	allPluginLoaders.push_back(loader);
 	pluginFiles.insert(fin.absoluteFilePath());
+	return ifp;
 }
 
 void PluginManager::unloadPlugin(MeshLabPlugin* ifp)
@@ -300,9 +301,24 @@ IOPlugin* PluginManager::outputMeshPlugin(const QString& outputFormat) const
 	return ioPlugins.outputMeshPlugin(outputFormat);
 }
 
-IOPlugin* PluginManager::inputRasterPlugin(const QString inputFormat) const
+IOPlugin* PluginManager::inputImagePlugin(const QString inputFormat) const
 {
-	return ioPlugins.inputRasterPlugin(inputFormat);
+	return ioPlugins.inputImagePlugin(inputFormat);
+}
+
+IOPlugin* PluginManager::outputImagePlugin(const QString& outputFormat) const
+{
+	return ioPlugins.outputImagePlugin(outputFormat);
+}
+
+IOPlugin* PluginManager::inputProjectPlugin(const QString& inputFormat) const
+{
+	return ioPlugins.inputProjectPlugin(inputFormat);
+}
+
+IOPlugin* PluginManager::outputProjectPlugin(const QString& outputFormat) const
+{
+	return ioPlugins.outputProjectPlugin(outputFormat);
 }
 
 bool PluginManager::isInputMeshFormatSupported(const QString inputFormat) const
@@ -315,9 +331,24 @@ bool PluginManager::isOutputMeshFormatSupported(const QString outputFormat) cons
 	return ioPlugins.isOutputMeshFormatSupported(outputFormat);
 }
 
-bool PluginManager::isInputRasterFormatSupported(const QString inputFormat) const
+bool PluginManager::isInputImageFormatSupported(const QString inputFormat) const
 {
-	return ioPlugins.isInputRasterFormatSupported(inputFormat);
+	return ioPlugins.isInputImageFormatSupported(inputFormat);
+}
+
+bool PluginManager::isOutputImageFormatSupported(const QString outputFormat) const
+{
+	return ioPlugins.isOutputImageFormatSupported(outputFormat);
+}
+
+bool PluginManager::isInputProjectFormatSupported(const QString inputFormat) const
+{
+	return ioPlugins.isInputProjectFormatSupported(inputFormat);
+}
+
+bool PluginManager::isOutputProjectFormatSupported(const QString outputFormat) const
+{
+	return ioPlugins.isOutputProjectFormatSupported(outputFormat);
 }
 
 QStringList PluginManager::inputMeshFormatList() const
@@ -330,9 +361,24 @@ QStringList PluginManager::outputMeshFormatList() const
 	return ioPlugins.outputMeshFormatList();
 }
 
-QStringList PluginManager::inputRasterFormatList() const
+QStringList PluginManager::inputImageFormatList() const
 {
-	return ioPlugins.inputRasterFormatList();
+	return ioPlugins.inputImageFormatList();
+}
+
+QStringList PluginManager::outputImageFormatList() const
+{
+	return ioPlugins.outputImageFormatList();
+}
+
+QStringList PluginManager::inputProjectFormatList() const
+{
+	return ioPlugins.inputProjectFormatList();
+}
+
+QStringList PluginManager::outputProjectFormatList() const
+{
+	return ioPlugins.outputProjectFormatList();
 }
 
 QStringList PluginManager::inputMeshFormatListDialog() const
@@ -345,9 +391,19 @@ QStringList PluginManager::outputMeshFormatListDialog() const
 	return outputFormatListDialog(ioPluginIterator());
 }
 
-QStringList PluginManager::inputRasterFormatListDialog() const
+QStringList PluginManager::inputImageFormatListDialog() const
 {
-	return inputRasterFormatListDialog(ioPluginIterator());
+	return inputImageFormatListDialog(ioPluginIterator());
+}
+
+QStringList PluginManager::inputProjectFormatListDialog() const
+{
+	return inputProjectFormatListDialog(ioPluginIterator());
+}
+
+QStringList PluginManager::outputProjectFormatListDialog() const
+{
+	return outputProjectFormatListDialog(ioPluginIterator());
 }
 
 MeshLabPlugin* PluginManager::operator[](unsigned int i) const
@@ -410,7 +466,7 @@ template<typename RangeIterator>
 QStringList PluginManager::inputFormatListDialog(RangeIterator iterator)
 {
 	QString allKnownFormats = QObject::tr("All known formats (");
-	QStringList inputRasterFormatsDialogStringList;
+	QStringList inputFormatsDialogStringList;
 	for (auto io : iterator){
 		QString allKnownFormatsFilter;
 		for (const FileFormat& currentFormat : io->importFormats()){
@@ -423,19 +479,19 @@ QStringList PluginManager::inputFormatListDialog(RangeIterator iterator)
 				currentFilterEntry.append(currentExtension);
 			}
 			currentFilterEntry.append(')');
-			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+			inputFormatsDialogStringList.append(currentFilterEntry);
 		}
 		allKnownFormats += allKnownFormatsFilter;
 	}
 	allKnownFormats.append(')');
-	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
-	return inputRasterFormatsDialogStringList;
+	inputFormatsDialogStringList.push_front(allKnownFormats);
+	return inputFormatsDialogStringList;
 }
 
 template<typename RangeIterator>
 QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 {
-	QStringList inputRasterFormatsDialogStringList;
+	QStringList outputFormatsDialogStringList;
 	for (auto io : iterator){
 		for (const FileFormat& currentFormat : io->exportFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
@@ -445,20 +501,20 @@ QStringList PluginManager::outputFormatListDialog(RangeIterator iterator)
 				currentFilterEntry.append(currentExtension);
 			}
 			currentFilterEntry.append(')');
-			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+			outputFormatsDialogStringList.append(currentFilterEntry);
 		}
 	}
-	return inputRasterFormatsDialogStringList;
+	return outputFormatsDialogStringList;
 }
 
 template<typename RangeIterator>
-QStringList PluginManager::inputRasterFormatListDialog(RangeIterator iterator)
+QStringList PluginManager::inputImageFormatListDialog(RangeIterator iterator)
 {
 	QString allKnownFormats = QObject::tr("All known formats (");
-	QStringList inputRasterFormatsDialogStringList;
+	QStringList inputImageFormatsDialogStringList;
 	for (auto io : iterator){
 		QString allKnownFormatsFilter;
-		for (const FileFormat& currentFormat : io->importRasterFormats()){
+		for (const FileFormat& currentFormat : io->importImageFormats()){
 			QString currentFilterEntry = currentFormat.description + " (";
 			for (QString currentExtension : currentFormat.extensions) {
 				currentExtension = currentExtension.toLower();
@@ -468,13 +524,58 @@ QStringList PluginManager::inputRasterFormatListDialog(RangeIterator iterator)
 				currentFilterEntry.append(currentExtension);
 			}
 			currentFilterEntry.append(')');
-			inputRasterFormatsDialogStringList.append(currentFilterEntry);
+			inputImageFormatsDialogStringList.append(currentFilterEntry);
 		}
 		allKnownFormats += allKnownFormatsFilter;
 	}
 	allKnownFormats.append(')');
-	inputRasterFormatsDialogStringList.push_front(allKnownFormats);
-	return inputRasterFormatsDialogStringList;
+	inputImageFormatsDialogStringList.push_front(allKnownFormats);
+	return inputImageFormatsDialogStringList;
+}
+
+template<typename RangeIterator>
+QStringList PluginManager::inputProjectFormatListDialog(RangeIterator iterator)
+{
+	QString allKnownFormats = QObject::tr("All known formats (");
+	QStringList inputProjectFormatsDialogStringList;
+	for (auto io : iterator){
+		QString allKnownFormatsFilter;
+		for (const FileFormat& currentFormat : io->importProjectFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				allKnownFormatsFilter.append(QObject::tr(" *."));
+				allKnownFormatsFilter.append(currentExtension);
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			inputProjectFormatsDialogStringList.append(currentFilterEntry);
+		}
+		allKnownFormats += allKnownFormatsFilter;
+	}
+	allKnownFormats.append(')');
+	inputProjectFormatsDialogStringList.push_front(allKnownFormats);
+	return inputProjectFormatsDialogStringList;
+}
+
+template<typename RangeIterator>
+QStringList PluginManager::outputProjectFormatListDialog(RangeIterator iterator)
+{
+	QStringList outputProjectFormatsDialogStringList;
+	for (auto io : iterator){
+		for (const FileFormat& currentFormat : io->exportProjectFormats()){
+			QString currentFilterEntry = currentFormat.description + " (";
+			for (QString currentExtension : currentFormat.extensions) {
+				currentExtension = currentExtension.toLower();
+				currentFilterEntry.append(QObject::tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			outputProjectFormatsDialogStringList.append(currentFilterEntry);
+		}
+	}
+	return outputProjectFormatsDialogStringList;
 }
 
 ConstPluginIterator<MeshLabPlugin> PluginManager::PluginRangeIterator::begin()

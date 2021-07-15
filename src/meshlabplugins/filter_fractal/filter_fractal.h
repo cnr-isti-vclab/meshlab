@@ -46,15 +46,15 @@ class FilterFractal : public QObject, public FilterPlugin
 	QString filterInfo(ActionIDType filter) const;
 
 	int getRequirements(const QAction*);
-	void initParameterList(const QAction*, MeshDocument &, RichParameterList &);
+	RichParameterList initParameterList(const QAction*, const MeshDocument &);
 
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	int postCondition(const QAction *action) const;
 	FilterClass getClass(const QAction*) const;
 	FilterArity filterArity(const QAction* act) const;
 private:
-	void initParameterSetForFractalDisplacement (const QAction*, MeshDocument &, RichParameterList &);
-	void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterList &par);
+	void initParameterSetForFractalDisplacement (const QAction*, const MeshDocument &, RichParameterList &);
+	void initParameterSetForCratersGeneration   (const MeshDocument &md, RichParameterList &par);
 
 	enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 };

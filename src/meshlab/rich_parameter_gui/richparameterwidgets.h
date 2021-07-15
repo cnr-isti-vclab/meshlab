@@ -372,7 +372,7 @@ public:
 class MeshWidget : public ComboWidget
 {
 private:
-	MeshDocument *md;
+	const MeshDocument *md;
 public:
 	MeshWidget(QWidget *p, const RichMesh& defaultMesh, const RichMesh& rdef);
 	~MeshWidget(){};
@@ -380,9 +380,6 @@ public:
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
-
-	MeshModel * getMesh();
-	void setMesh(MeshModel * newMesh);
 };
 
 class IOFileWidget : public RichParameterWidget

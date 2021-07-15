@@ -70,11 +70,11 @@ public:
 	SelectionFilterPlugin();
 	//~SelectionFilterPlugin();
 	QString pluginName() const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	QString filterName(ActionIDType filter) const;
 
-	virtual FilterClass getClass(const QAction*) const;
-	void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
+	FilterClass getClass(const QAction*) const;
+	RichParameterList initParameterList(const QAction* action, const MeshModel &m);
 	int getPreConditions(const QAction*) const;
 	int postCondition(const QAction* ) const;
 	int getRequirements(const QAction*);

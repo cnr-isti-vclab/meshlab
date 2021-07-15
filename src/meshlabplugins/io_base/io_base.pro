@@ -2,6 +2,8 @@ include (../../shared.pri)
 
 HEADERS += \
     baseio.h \
+    load_project.h \
+    save_project.h \
     $$VCGDIR/wrap/io_trimesh/import_ply.h \
     $$VCGDIR/wrap/io_trimesh/import_obj.h \
     $$VCGDIR/wrap/io_trimesh/import_off.h \
@@ -16,6 +18,8 @@ HEADERS += \
 
 SOURCES += \
     baseio.cpp \
+    load_project.cpp \
+    save_project.cpp \
     $$VCGDIR/wrap/ply/plylib.cpp \
     $$VCGDIR/wrap/openfbx/src/ofbx.cpp \
     $$VCGDIR/wrap/openfbx/src/miniz.c \

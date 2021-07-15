@@ -40,26 +40,25 @@ class FilterSSynth : public QObject, public IOPlugin, public FilterPlugin{
 	FilterSSynth();
 	~FilterSSynth(){}
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual int getRequirements(const QAction*);
-	virtual void initParameterList(const QAction* /*filter*/,MeshModel &,RichParameterList &){};
-	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	int getRequirements(const QAction*);
+	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	virtual FilterClass getClass(const QAction* filter) const;
+	FilterClass getClass(const QAction* filter) const;
 	void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
 	static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
-	virtual int postCondition(const QAction* filter) const;
+	int postCondition(const QAction* filter) const;
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
 
-	virtual void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
+	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
+	RichParameterList initPreOpenParameter(const QString&formatName) const;
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb);
 	FilterPlugin::FilterArity filterArity(const QAction *) const {return NONE;}

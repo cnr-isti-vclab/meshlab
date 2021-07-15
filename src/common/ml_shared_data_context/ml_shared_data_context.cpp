@@ -134,11 +134,15 @@ void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModalit
     }
 }
 
-void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
+void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(
+		const MLRenderingData::PRIMITIVE_MODALITY pm,
+		const MLRenderingData::RendAtts& updated, //from the result of the filter
+		const MLRenderingData::RendAtts& current, //from the current model
+		MLRenderingData::RendAtts& result) //returned final result
 {
-    MLRenderingData::RendAtts filteredupdated = updated;
-    MLRenderingData::RendAtts tmp = current;
-    tmp[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
+	MLRenderingData::RendAtts filteredupdated = updated;
+	MLRenderingData::RendAtts tmp = current; // tmp will be then saved in returned
+	tmp[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
 	if ((pm == MLRenderingData::PR_WIREFRAME_TRIANGLES) || (pm == MLRenderingData::PR_WIREFRAME_EDGES))
 	{
 		tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = false;
@@ -146,15 +150,17 @@ void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const M
 	}
 	else
 	{
+		//vert normal shading if in current or in updated
 		tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
-		tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
+		//face normal shading if in current or in updated
+		tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL];
 	}
- 
+
 	tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
 	tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
-    tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
-    tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
-    result = tmp;
+	tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
+	tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
+	result = tmp;
 }
 
 void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dtout, size_t minpolnumpersmoothshading)

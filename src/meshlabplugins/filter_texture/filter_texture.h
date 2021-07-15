@@ -58,7 +58,7 @@ public:
 	QString pluginName() const;
 	virtual QString filterName(ActionIDType filter) const;
 	virtual QString filterInfo(ActionIDType filter) const;
-	virtual void initParameterList(const QAction*, MeshDocument &/*m*/, RichParameterList & /*parent*/);
+	virtual RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,
@@ -70,6 +70,9 @@ public:
 	virtual int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction *a) const;
 	FilterArity filterArity(const QAction* filter) const;
+
+private:
+	void transferToTexture(MeshDocument &md, const RichParameterList & parameters, vcg::CallBackPos * cb);
 };
 
 #endif

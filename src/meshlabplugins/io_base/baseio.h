@@ -40,7 +40,10 @@ public:
 
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
-	std::list<FileFormat> importRasterFormats() const;
+	std::list<FileFormat> importImageFormats() const;
+	std::list<FileFormat> exportImageFormats() const;
+	std::list<FileFormat> importProjectFormats() const;
+	std::list<FileFormat> exportProjectFormats() const;
 
 	void exportMaskCapability(
 			const QString& format,
@@ -63,21 +66,39 @@ public:
 			const RichParameterList& par,
 			vcg::CallBackPos* cb);
 
-	void openRaster(
+	QImage openImage(
 			const QString& format,
-			const QString& filename,
-			RasterModel& rm,
-			vcg::CallBackPos*);
+			const QString& fileName,
+			vcg::CallBackPos* cb);
 
-	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
-	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
-	void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
+	void saveImage(
+			const QString& format,
+			const QString& fileName,
+			const QImage& image,
+			int quality,
+			vcg::CallBackPos* cb);
 
-private:
-	std::list<FileFormat> rasterFormatList;
+	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& format,
+			const QString& filename);
 
-	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
+	std::vector<MeshModel*> openProject(
+			const QString& format,
+			const QStringList& filenames,
+			MeshDocument& md,
+			std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* cb);
+
+	virtual void saveProject(
+			const QString& format,
+			const QString& fileName,
+			const MeshDocument& md,
+			bool onlyVisibleMeshes,
+			const std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* /*cb*/ = nullptr);
+
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
+	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
 };
 
 #endif

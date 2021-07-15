@@ -47,7 +47,7 @@ public:
 	std::list<FileFormat> exportFormats() const;
 
 	void exportMaskCapability(const QString &format, int &capability, int &defaultBits) const;
-	void initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/, RichParameterList & /*par*/);
+	RichParameterList initSaveParameter(const QString &/*format*/, const MeshModel &/*m*/) const;
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterList & par,  vcg::CallBackPos *cb);
 

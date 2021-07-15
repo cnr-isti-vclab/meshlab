@@ -95,7 +95,7 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 		// draw all visible mesh cameras
 		if(rm->getBool(ShowMeshCameras()))
 		{
-			foreach(MeshModel *meshm,  md.meshList)
+			for(MeshModel *meshm : md.meshIterator())
 			{
 				if (meshm != md.mm() || (!showCameraDetails))   // non-selected meshes, only draw 
 				{
@@ -108,14 +108,14 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 				}
 			}
 			
-			if (md.meshList.size() == 0)
+			if (md.meshNumber() == 0)
 				this->realTimeLog("Show Mesh Camera", md.mm()->label(), "There are no Mesh Layers");
 		}
 		
 		// draw all visible raster cameras
 		if(rm->getBool(ShowRasterCameras()))
 		{
-			foreach(RasterModel *raster, md.rasterList)
+			for(RasterModel *raster: md.rasterIterator())
 			{
 				if(raster != md.rm() || !showCameraDetails )   // non-selected raster, only draw
 				{
@@ -128,7 +128,7 @@ void DecorateBasePlugin::decorateDoc(const QAction* a, MeshDocument &md, const R
 				}
 			}
 			
-			if (md.rasterList.size() == 0)
+			if (md.rasterNumber() == 0)
 				this->realTimeLog("Show Raster Camera", md.mm()->label(), "There are no Rasters");
 		}
 	} break;

@@ -24,6 +24,7 @@
 #include "rich_parameter_list.h"
 
 #include "../mlexception.h"
+#include "../ml_document/mesh_document.h"
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
@@ -194,9 +195,9 @@ int RichParameterList::getEnum(const QString& name) const
  * @return the mesh of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MeshModel * RichParameterList::getMesh(const QString& name) const
+unsigned int RichParameterList::getMeshId(const QString& name) const
 {
-	return getParameterByName(name).value().getMesh();
+	return getParameterByName(name).value().getMeshId();
 }
 
 /**

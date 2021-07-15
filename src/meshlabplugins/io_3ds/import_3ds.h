@@ -143,215 +143,232 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 	int numVertices = 0;
 	int numFaces		= 0;
 
-        if (!node)
-        {
-  for (p=file->nodes; p!=0; p=p->next)
-      if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
-                    return E_ABORTED;
-        }
-        else
-			{
-            if (ReadNode(m, file, node, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+	if (node == nullptr) { //load all nodes in a single file
+		for (p=file->nodes; p!=0; p=p->next)
+			if (readNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
 				return E_ABORTED;
-			}
-	
+	}
+	else {
+		if (readNode(m, file, node, vi, fi, info, numVertices, numFaces, false) == E_ABORTED)
+			return E_ABORTED;
+	}
+
 	return result;
 } // end of Open
 
 
-	static int ReadNode(OpenMeshType &m, Lib3dsFile* file, Lib3dsNode *node, VertexIterator &vi, FaceIterator &fi, _3dsInfo &info, int &numVertices, int &numFaces)
+static int readNode(
+		OpenMeshType &m,
+		Lib3dsFile* file,
+		Lib3dsNode *node,
+		VertexIterator &vi,
+		FaceIterator &fi, _3dsInfo &info,
+		int &numVertices,
+		int &numFaces,
+		bool applyTransformMatrix = true)
+{
+	int result = E_NOERROR;
+	ASSERT(file);
+
 	{
-		int result = E_NOERROR;
-		ASSERT(file);
+		Lib3dsNode *p;
+		for (p=node->childs; p!=0; p=p->next)
+			if (readNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+				return E_ABORTED;
+	}
 
+	if (node->type==LIB3DS_OBJECT_NODE)
+	{
+		if (strcmp(node->name,"$$$DUMMY") == 0)
+			return E_NOERROR;
+
+		Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+		if( mesh == NULL )
+			mesh = lib3ds_file_mesh_by_name(file, node->name);
+
+		ASSERT(mesh);
+		if (!mesh)
+			return E_NOERROR;
+
+		if (!mesh->user.d)
 		{
-			Lib3dsNode *p;
-			for (p=node->childs; p!=0; p=p->next)
-				if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
-					return E_ABORTED;
-		}
+			int numVerticesPlusFaces = info.numVertices + info.numTriangles;
 
-		if (node->type==LIB3DS_OBJECT_NODE)
-		{
-			if (strcmp(node->name,"$$$DUMMY") == 0)
-				return E_NOERROR;
-		
-                        Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->data.object.morph);
-                        if( mesh == NULL )
-                          mesh = lib3ds_file_mesh_by_name(file, node->name);
+			Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
 
-				ASSERT(mesh);
-				if (!mesh)
-				  return E_NOERROR;
-      
-                        if (!mesh->user.d)
-			{
-				int numVerticesPlusFaces = info.numVertices + info.numTriangles;				
-				
-				Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
+			// Obtain current transformation matrix
+			// ------------------------------------
+			Lib3dsMatrix matrix;
+			//Lib3dsMatrix translatedMatrix;
+			Lib3dsMatrix inverseMatrix;
 
-				// Obtain current transformation matrix
-				// ------------------------------------
-				Lib3dsMatrix matrix;
-				//Lib3dsMatrix translatedMatrix;
-				Lib3dsMatrix inverseMatrix;
-				
-				Lib3dsObjectData *d;
-				d=&node->data.object;
+			Lib3dsObjectData *d;
+			d=&node->data.object;
 
-				// Version for lib3ds-1.2.0
-				//lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
-				//lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
-				//lib3ds_matrix_inv(inverseMatrix);
-				//lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
-				//lib3ds_matrix_mult(matrix, translatedMatrix, inverseMatrix);
-				
-				// Version for lib3ds-1.3.0
-				lib3ds_matrix_copy(matrix, mesh->matrix);
-				lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
-				lib3ds_matrix_inv(inverseMatrix);
-				lib3ds_matrix_translate_xyz(matrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
-				lib3ds_matrix_mult(matrix, inverseMatrix);
-				
+			// Version for lib3ds-1.2.0
+			//lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
+			//lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
+			//lib3ds_matrix_inv(inverseMatrix);
+			//lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+			//lib3ds_matrix_mult(matrix, translatedMatrix, inverseMatrix);
 
-				lib3ds_mesh_calculate_normals(mesh, normalL);
+			// Version for lib3ds-1.3.0
+			lib3ds_matrix_copy(matrix, mesh->matrix);
+			lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
+			lib3ds_matrix_inv(inverseMatrix);
+			lib3ds_matrix_translate_xyz(matrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+			lib3ds_matrix_mult(matrix, inverseMatrix);
+			//
+
+			lib3ds_mesh_calculate_normals(mesh, normalL);
 
 
-				// allocazione spazio per i vertici e le facce della mesh corrente
-				vi = Allocator<OpenMeshType>::AddVertices(m ,mesh->points);
-				fi = Allocator<OpenMeshType>::AddFaces(m ,mesh->faces);
-				
-				for (unsigned v=0; v<mesh->points; ++v) {
-					Lib3dsVector	*p		= &mesh->pointL[v].pos;
-					
-					Lib3dsVector	transformedP;
-					lib3ds_vector_transform( transformedP, matrix, *p);
-					
-					(*vi).P()[0] = transformedP[0];
-					(*vi).P()[1] = transformedP[1];
-					(*vi).P()[2] = transformedP[2];
+			// allocazione spazio per i vertici e le facce della mesh corrente
+			vi = Allocator<OpenMeshType>::AddVertices(m ,mesh->points);
+			fi = Allocator<OpenMeshType>::AddFaces(m ,mesh->faces);
 
-					++vi;
+			if (!applyTransformMatrix){
+				for (int i = 0; i < 4; i++)
+					for (int j = 0; j < 4; j++)
+						m.Tr.ElementAt(i,j) = matrix[i][j];
+			}
 
-					// callback invocation, abort loading process if the call returns false
-					if (	(info.cb !=NULL) && 
-								(((numFaces + numVertices + v)%100)==0) && 
-								!(*info.cb)(100.0f * (float)(numFaces + numVertices + v)/(float)numVerticesPlusFaces, "Vertex Loading")	)
-						return E_ABORTED;
-				}				
+			for (unsigned v=0; v<mesh->points; ++v) {
+				Lib3dsVector *p	= &mesh->pointL[v].pos;
 
-				for (unsigned p=0; p<mesh->faces; ++p) {
-					Lib3dsFace			*f		= &mesh->faceL[p];
-					Lib3dsMaterial	*mat	=	0;
-					if (f->material[0])
-						mat = lib3ds_file_material_by_name(file, f->material);
-						
-					if (mat)
-					{
-						// considering only diffuse color component
-						if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-						{
-							// assigning face color
-							// --------------------
-							(*fi).C()[0] = (unsigned char) (mat->diffuse[0] * 255.0f);
-							(*fi).C()[1] = (unsigned char) (mat->diffuse[1] * 255.0f);
-							(*fi).C()[2] = (unsigned char) (mat->diffuse[2] * 255.0f);
-							(*fi).C()[3] = (unsigned char) (mat->diffuse[3] * 255.0f);
-						}
-
-						// texture map 1
-						if (mat->texture1_map.name[0])
-						{
-							std::string textureName = mat->texture1_map.name;
-							int textureIdx = 0;
-							
-							// adding texture name into textures vector (if not already present)
-							// avoid adding the same name twice
-							bool found = false;
-							unsigned size = unsigned(m.textures.size());
-							unsigned j = 0;
-							while (!found && (j < size))
-							{
-								if (textureName.compare(m.textures[j])==0)
-								{
-									textureIdx = (int)j;
-									found = true;
-								}
-								++j;
-							}
-							if (!found)
-							{
-								m.textures.push_back(textureName);
-								textureIdx = (int)size;
-							}
-
-							if (tri::HasPerWedgeTexCoord(m) && (info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) )
-							{
-								// texture coordinates
-								for (int i=0; i<3; ++i)
-								{
-									(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
-									(*fi).WT(i).v() = mesh->texelL[f->points[i]][1];
-
-									(*fi).WT(i).n() = textureIdx;
-								}
-							}
-						}
-					}
-					else {
-						// we consider only diffuse color component, using default value
-						if(tri::HasPerFaceColor(m) && (info.mask & vcg::tri::io::Mask::IOM_FACECOLOR) )
-						{
-							// assigning default face color
-							// ----------------------------
-							(*fi).C()[0] = 204;
-							(*fi).C()[1] = 204;
-							(*fi).C()[2] = 204;
-							(*fi).C()[3] = 255;
-						}
-					}
-
-					if ( info.mask & vcg::tri::io::Mask::IOM_FACENORMAL )
-					{
-						// assigning face normal
-						// ---------------------
-						// we do not have to multiply normal for current matrix (as we did for vertices)
-						// since translation operations do not affect normals
-						(*fi).N() = Point3f(f->normal);
-					}
-					
-					for (int i=0; i<3; ++i)
-					{
-						if (tri::HasPerWedgeNormal(m) && ( info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL ) )
-						{
-							// assigning per wedge normal
-							// --------------------------
-							(*fi).WN(i) = Point3f(normalL[3*p+i]);
-						}
-
-						// assigning face vertices
-						// -----------------------
-						(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]);
-					}
-
-					++fi;
-					++numFaces;
-					// callback invocation, abort loading process if the call returns false
-					if (	(info.cb !=NULL) && 
-								(((numFaces + numVertices + mesh->points)%100)==0) && 
-								!(*info.cb)(100.0f * (float)(numFaces + numVertices + mesh->points)/(float)numVerticesPlusFaces, "Face Loading")	)
-						return E_ABORTED;
+				Lib3dsVector transformedP;
+				if (applyTransformMatrix){
+					lib3ds_vector_transform(transformedP, matrix, *p);
+				}
+				else {
+					lib3ds_vector_copy(transformedP, *p);
 				}
 
-        free(normalL);
+				(*vi).P()[0] = transformedP[0];
+				(*vi).P()[1] = transformedP[1];
+				(*vi).P()[2] = transformedP[2];
 
-				numVertices += mesh->points;
-      }
+				++vi;
 
+				// callback invocation, abort loading process if the call returns false
+				if ((info.cb !=NULL) &&
+						(((numFaces + numVertices + v)%100)==0) &&
+						!(*info.cb)(100.0f * (float)(numFaces + numVertices + v)/(float)numVerticesPlusFaces, "Vertex Loading")	)
+					return E_ABORTED;
+			}
+
+			for (unsigned p=0; p<mesh->faces; ++p) {
+				Lib3dsFace			*f		= &mesh->faceL[p];
+				Lib3dsMaterial	*mat	=	0;
+				if (f->material[0])
+					mat = lib3ds_file_material_by_name(file, f->material);
+
+				if (mat)
+				{
+					// considering only diffuse color component
+					if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+					{
+						// assigning face color
+						// --------------------
+						(*fi).C()[0] = (unsigned char) (mat->diffuse[0] * 255.0f);
+						(*fi).C()[1] = (unsigned char) (mat->diffuse[1] * 255.0f);
+						(*fi).C()[2] = (unsigned char) (mat->diffuse[2] * 255.0f);
+						(*fi).C()[3] = (unsigned char) (mat->diffuse[3] * 255.0f);
+					}
+
+					// texture map 1
+					if (mat->texture1_map.name[0])
+					{
+						std::string textureName = mat->texture1_map.name;
+						int textureIdx = 0;
+
+						// adding texture name into textures vector (if not already present)
+						// avoid adding the same name twice
+						bool found = false;
+						unsigned size = unsigned(m.textures.size());
+						unsigned j = 0;
+						while (!found && (j < size))
+						{
+							if (textureName.compare(m.textures[j])==0)
+							{
+								textureIdx = (int)j;
+								found = true;
+							}
+							++j;
+						}
+						if (!found)
+						{
+							m.textures.push_back(textureName);
+							textureIdx = (int)size;
+						}
+
+						if (tri::HasPerWedgeTexCoord(m) && (info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) )
+						{
+							// texture coordinates
+							for (int i=0; i<3; ++i)
+							{
+								(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
+								(*fi).WT(i).v() = mesh->texelL[f->points[i]][1];
+
+								(*fi).WT(i).n() = textureIdx;
+							}
+						}
+					}
+				}
+				else {
+					// we consider only diffuse color component, using default value
+					if(tri::HasPerFaceColor(m) && (info.mask & vcg::tri::io::Mask::IOM_FACECOLOR) )
+					{
+						// assigning default face color
+						// ----------------------------
+						(*fi).C()[0] = 204;
+						(*fi).C()[1] = 204;
+						(*fi).C()[2] = 204;
+						(*fi).C()[3] = 255;
+					}
+				}
+
+				if ( info.mask & vcg::tri::io::Mask::IOM_FACENORMAL )
+				{
+					// assigning face normal
+					// ---------------------
+					// we do not have to multiply normal for current matrix (as we did for vertices)
+					// since translation operations do not affect normals
+					(*fi).N() = Point3f(f->normal);
+				}
+
+				for (int i=0; i<3; ++i)
+				{
+					if (tri::HasPerWedgeNormal(m) && ( info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL ) )
+					{
+						// assigning per wedge normal
+						// --------------------------
+						(*fi).WN(i) = Point3f(normalL[3*p+i]);
+					}
+
+					// assigning face vertices
+					// -----------------------
+					(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]);
+				}
+
+				++fi;
+				++numFaces;
+				// callback invocation, abort loading process if the call returns false
+				if (	(info.cb !=NULL) &&
+						(((numFaces + numVertices + mesh->points)%100)==0) &&
+						!(*info.cb)(100.0f * (float)(numFaces + numVertices + mesh->points)/(float)numVerticesPlusFaces, "Face Loading")	)
+					return E_ABORTED;
+			}
+
+			free(normalL);
+
+			numVertices += mesh->points;
 		}
 
-		return result;
 	}
+
+	return result;
+}
 	
 	/*!
 	* Retrieves kind of data stored into the file and fills a mask appropriately

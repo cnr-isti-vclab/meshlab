@@ -101,8 +101,9 @@ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(const QAction *a) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
+RichParameterList PlyMCPlugin::initParameterList(const QAction *action,const MeshModel &m)
 {
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 	case FP_PLYMC :
@@ -120,6 +121,7 @@ void PlyMCPlugin::initParameterList(const QAction *action,MeshModel &m, RichPara
 		break;
 	default: break; // do not add any parameter for the other filters
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.
@@ -163,7 +165,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		p.FullyPreprocessedFlag=true;
 		p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
 		p.SimplificationFlag = par.getBool("simplification");
-		foreach(MeshModel*mm, md.meshList)
+		for(MeshModel*mm: md.meshIterator())
 		{
 			if(mm->visible)
 			{
@@ -212,7 +214,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 				tri::io::ImporterPLY<CMeshO>::Open(mp->cm,name.c_str(),loadMask);
 				if(p.MergeColor) mp->updateDataMask(MeshModel::MM_VERTCOLOR);
 				mp->updateDataMask(MeshModel::MM_VERTQUALITY);
-				mp->UpdateBoxAndNormals();
+				mp->updateBoxAndNormals();
 			}
 		}
 		

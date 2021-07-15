@@ -18,9 +18,14 @@ apps:
   meshlab:
     command: AppRun
     extensions: [kde-neon]
-    plugs: [home, opengl, removable-media]
     desktop: usr/share/applications/meshlab.desktop
-
+    environment:
+      DISABLE_WAYLAND: 1
+    plugs:
+      - home
+      - opengl
+      - removable-media
+      - mount-observe
 
 parts:
   meshlab:
@@ -43,6 +48,8 @@ parts:
       - patchelf
       - rsync
       - libqt5opengl5-dev
+      - libcgal-dev
+      - libboost-all-dev
     stage-packages:
       - lib3ds-1-3
       - libgomp1

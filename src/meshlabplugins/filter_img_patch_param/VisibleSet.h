@@ -81,7 +81,7 @@ private:
 public:
     VisibleSet( glw::Context &ctx,MLPluginGLContext* plugctx,int meshid,
                 CMeshO &mesh,
-                QList<RasterModel*> &rasterList,
+                std::list<RasterModel*> &rasterList,
                 int weightMask );
 
     float               getWeight( const RasterModel *rm, CFaceO &f );

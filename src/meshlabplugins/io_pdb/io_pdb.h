@@ -44,11 +44,7 @@ public:
 
 	void open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterList & par, vcg::CallBackPos *cb=0);
 	void save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb=0);
-	virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
-	virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterList &par);
-	void initPreOpenParameter(const QString &formatName, RichParameterList &parlst);
-
-	virtual void initSaveParameter(const QString &format, const MeshModel &/*m*/, RichParameterList & par);
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
 
 	//---------- PDB READER -----------//
 	bool parsePDB(const std::string &filename, CMeshO &m, const RichParameterList &parlst, vcg::CallBackPos *cb=0); 
