@@ -752,10 +752,8 @@ void MainWindow::endEdit()
 		return;
 	
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			addRenderingDataIfNewlyGeneratedMesh(mm->id());
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		addRenderingDataIfNewlyGeneratedMesh(mm.id());
 	}
 	meshDoc()->meshDocStateData().clear();
 	
@@ -801,7 +799,6 @@ void MainWindow::runFilterScript()
 			if (meshDoc()->mm() != NULL)
 				meshDoc()->mm()->updateDataMask(req);
 			iFilter->setLog(&meshDoc()->Log);
-			RichParameterList &parameterSet = pair.second;
 
 			bool created = false;
 			MLSceneGLSharedDataContext* shar = NULL;
@@ -820,24 +817,19 @@ void MainWindow::runFilterScript()
 				atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
 
-				if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
-				{
+				if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
 					MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-					if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-					{
+					if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != nullptr)) {
 						dt.set(pm,atts);
 						shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
 					}
 				}
-				else
-				{
-					for(MeshModel* mm : meshDoc()->meshIterator())
-					{
-						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-						if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-						{
+				else {
+					for(const MeshModel& mm : meshDoc()->meshIterator()) {
+						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
+						if ((pm != MLRenderingData::PR_ARITY)) {
 							dt.set(pm,atts);
-							shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
+							shar->setRenderingDataPerMeshView(mm.id(),iFilter->glContext,dt);
 						}
 					}
 				}
@@ -865,11 +857,6 @@ void MainWindow::runFilterScript()
 				}
 				if(classes & FilterPlugin::VertexColoring )
 				{
-
-
-
-
-
 					meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 				}
 				if(classes & MeshModel::MM_COLOR)
@@ -1180,24 +1167,19 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
 		atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 		
-		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH)
-		{
+		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
 			MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-			{
+			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL)) {
 				dt.set(pm,atts);
 				iFilter->glContext->initPerViewRenderingData(meshDoc()->mm()->id(),dt);
 			}
 		}
-		else
-		{
-			for(MeshModel* mm : meshDoc()->meshIterator())
-			{
-				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-				if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-				{
+		else {
+			for(const MeshModel& mm : meshDoc()->meshIterator()) {
+				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
+				if (pm != MLRenderingData::PR_ARITY) {
 					dt.set(pm,atts);
-					iFilter->glContext->initPerViewRenderingData(mm->id(),dt);
+					iFilter->glContext->initPerViewRenderingData(mm.id(),dt);
 				}
 			}
 		}
@@ -1230,8 +1212,7 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		if (meshDoc()->mm() != NULL)
 			meshDoc()->mm()->setMeshModified();
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-		if(GLA())
-		{
+		if(GLA()) {
 			GLA()->setLastAppliedFilter(action);
 		}
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -1252,9 +1233,9 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		{
 			for(const RichParameter& p : mergedenvironment)
 			{
-				if (p.value().isMesh())
+				if (p.isOfType<RichMesh>())
 				{
-					MeshModel* mm = meshDoc()->getMesh(p.value().getMeshId());
+					MeshModel* mm = meshDoc()->getMesh(p.value().getInt());
 					if (mm != NULL)
 						tmp.push_back(mm);
 				}
@@ -1277,11 +1258,9 @@ void MainWindow::executeFilter(const QAction* action, RichParameterList &params,
 		if(iFilter->getClass(action) & FilterPlugin::MeshCreation )
 			GLA()->resetTrackBall();
 		
-		for(int jj = 0;jj < tmp.size();++jj)
-		{
+		for(int jj = 0;jj < tmp.size();++jj) {
 			MeshModel* mm = tmp[jj];
-			if (mm != NULL)
-			{
+			if (mm != NULL) {
 				// at the end for filters that change the color, or selection set the appropriate rendering mode
 				if(iFilter->getClass(action) & FilterPlugin::FaceColoring )
 					mm->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -1596,17 +1575,17 @@ void MainWindow::saveProject()
 			bool firstNotSaved = true;
 			//if a mesh has been created by a create filter we must before to save it.
 			//Otherwise the project will refer to a mesh without file name path.
-			for(MeshModel * mp : meshDoc()->meshIterator()) {
-				if ((mp != nullptr) && (mp->fullName().isEmpty())) {
+			for(MeshModel& mp : meshDoc()->meshIterator()) {
+				if (mp.fullName().isEmpty()) {
 					if (firstNotSaved) {
 						QMessageBox::information(this, "Layer(s) not saved",
 								"Layers must be saved into files before saving the project.\n"
 								"Opening save dialog(s) to save the layer(s)...");
 						firstNotSaved = false;
 					}
-					bool saved = exportMesh(tr(""), mp, false);
+					bool saved = exportMesh(tr(""), &mp, false);
 					if (!saved) {
-						QString msg = "Mesh layer " + mp->label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
+						QString msg = "Mesh layer " + mp.label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
 						QMessageBox::warning(this,tr("Project Saving Aborted"),msg);
 						return;
 					}
@@ -1632,9 +1611,9 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 
 		std::vector<MLRenderingData> rendData;
-		for(MeshModel * mp : meshDoc()->meshIterator()) {
+		for(const MeshModel& mp : meshDoc()->meshIterator()) {
 			MLRenderingData ml;
-			getRenderingData(mp->id(), ml);
+			getRenderingData(mp.id(), ml);
 			rendData.push_back(ml);
 		}
 
@@ -1873,17 +1852,12 @@ void MainWindow::documentUpdateRequested()
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != nullptr)
-		{
-			addRenderingDataIfNewlyGeneratedMesh(mm->id());
-			updateLayerDialog();
-			if (currentViewContainer() != NULL)
-			{
-				currentViewContainer()->resetAllTrackBall();
-				currentViewContainer()->updateAllViewers();
-			}
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		addRenderingDataIfNewlyGeneratedMesh(mm.id());
+		updateLayerDialog();
+		if (currentViewContainer() != NULL) {
+			currentViewContainer()->resetAllTrackBall();
+			currentViewContainer()->updateAllViewers();
 		}
 	}
 }
@@ -1951,31 +1925,29 @@ void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati
 
 bool MainWindow::importRaster(const QString& fileImg)
 {
-	if (!GLA())
-	{
+	if (!GLA()) {
 		this->newProject();
 		if (!GLA())
 			return false;
 	}
-	
+
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputImageFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
-	
+
 	if (fileNameList.isEmpty())	return false;
-	else
-	{
+	else {
 		//save path away so we can use it again
 		QString path = fileNameList.first();
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-	
+
 	QElapsedTimer allFileTime;
 	allFileTime.start();
-	
+
 	for(const QString& fileName : fileNameList) {
 		RasterModel *rm = nullptr;
 		try {
@@ -1993,7 +1965,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 		}
 		catch(const MLException& e){
-			meshDoc()->delRaster(rm);
+			meshDoc()->delRaster(rm->id());
 			QMessageBox::warning(
 						this,
 						tr("Opening Failure"),
@@ -2004,142 +1976,11 @@ bool MainWindow::importRaster(const QString& fileImg)
 
 	if (_currviewcontainer != NULL)
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
-	
+
 	updateMenus();
 	updateLayerDialog();
 
 	qb->reset();
-	return true;
-}
-
-bool MainWindow::loadMesh(const QString& fileName, IOPlugin *pCurrentIOPlugin, const std::list<MeshModel*>& meshList, std::list<int>& maskList, const RichParameterList& prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
-{
-	if ((GLA() == NULL))
-		return false;
-
-	QFileInfo fi(fileName);
-	QString extension = fi.suffix();
-
-	// the original directory path before we switch it
-	QString origDir = QDir::current().path();
-
-	// this change of dir is needed for subsequent textures/materials loading
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
-
-	// Adjust the file name after changing the directory
-	QString fileNameSansDir = fi.fileName();
-
-	// retrieving corresponding IO plugin
-	if (pCurrentIOPlugin == 0)
-	{
-		QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
-		QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
-		QDir::setCurrent(origDir); // undo the change of directory before leaving
-		return false;
-	}
-	meshDoc()->setBusy(true);
-	pCurrentIOPlugin->setLog(&meshDoc()->Log);
-
-	unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileNameSansDir, prePar);
-	if (nMeshes != meshList.size()) {
-		QMessageBox::warning(
-					this,
-					tr("Opening Failure"),
-					"Expected one mesh but " + fileName + " contains " + nMeshes + " meshes.");
-		meshDoc()->setBusy(false);
-		QDir::setCurrent(origDir); // undo the change of directory before leaving
-		return false;
-	}
-
-	try {
-		meshlab::loadMesh(fileName, pCurrentIOPlugin, prePar, meshList, maskList, QCallBack);
-	}
-	catch(const MLException& e) {
-		QMessageBox::warning(
-					this,
-					tr("Opening Failure"),
-					"While opening: " + fileName + "\n\n" + e.what());
-		meshDoc()->setBusy(false);
-		QDir::setCurrent(origDir); // undo the change of directory before leaving
-		return false;
-	}
-
-	//std::cout << "Opened mesh: in " << tm.elapsed() << " secs\n";
-	// After opening the mesh lets ask to the io plugin if this format
-	// requires some optional, or userdriven post-opening processing.
-	// and in that case ask for the required parameters and then
-	// ask to the plugin to perform that processing
-	//RichParameterSet par;
-	//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-	//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
-
-	QString err = pCurrentIOPlugin->warningMessageString();
-	if (!err.isEmpty())
-	{
-		QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+ err);
-	}
-
-	saveRecentFileList(fileName);
-
-	auto itmesh = meshList.begin();
-	auto itmask = maskList.begin();
-	for (unsigned int i = 0; i < meshList.size(); ++i){
-		MeshModel* mm = *itmesh;
-		int mask = *itmask;
-
-		if (!(mm->cm.textures.empty()))
-			updateTexture(mm->id());
-
-		// In case of polygonal meshes the normal should be updated accordingly
-		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
-		{
-			mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
-			int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-			if(degNum)
-				GLA()->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
-			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
-			vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
-		} // standard case
-		else
-		{
-			vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm->cm);
-			if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
-				vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
-		}
-
-		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-		if(mm->cm.fn==0 && mm->cm.en==0)
-		{
-			if(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-		}
-
-		if(mm->cm.fn==0 && mm->cm.en>0)
-		{
-			if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-		}
-
-		updateMenus();
-		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
-		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-		tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-		if(delVertNum>0 || delFaceNum>0 )
-			QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-		mm->cm.Tr = mtr;
-
-		computeRenderingDataOnLoading(mm,isareload, rendOpt);
-		++itmesh;
-		++itmask;
-	}
-
-	updateLayerDialog();
-
-	meshDoc()->setBusy(false);
-
-	QDir::setCurrent(origDir); // undo the change of directory before leaving
-
 	return true;
 }
 
@@ -2151,8 +1992,26 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLR
 		MLSceneGLSharedDataContext* shared = mv->sharedDataContext();
 		if ((shared != NULL) && (mm != NULL))
 		{
+			//count the number of faces contained in the whole meshdocument before the newly inserted mm
+			unsigned int totalSumFaces = 0;
+			bool found = false;
+			for (const MeshModel& m : meshDoc()->meshIterator()){
+				if (!found){
+					if (&m != mm){
+						totalSumFaces += mm->cm.FN();
+					}
+					else { //found mm: stop counting
+						found = true;
+					}
+				}
+			}
+			unsigned int minNumberPolFlatShading = mwsettings.minpolygonpersmoothrendering;
+			//if the total number of faces is greater than 5*minpolynumber,
+			//the newly mesh will be set with flat shading
+			if (totalSumFaces > 5 * minNumberPolFlatShading)
+				minNumberPolFlatShading = 0;
 			MLRenderingData defdt;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt,mwsettings.minpolygonpersmoothrendering);
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt, minNumberPolFlatShading);
 			if (rendOpt != NULL)
 				defdt = *rendOpt;
 			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
@@ -2208,10 +2067,15 @@ bool MainWindow::importMesh(QString fileName)
 	}
 	
 	QStringList fileNameList;
-	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputMeshFormatListDialog().join(";;"));
-	else
+	if (fileName.isEmpty()) {
+		fileNameList = QFileDialog::getOpenFileNames(
+					this, tr("Import Mesh"),
+					lastUsedDirectory.path(),
+					PM.inputMeshFormatListDialog().join(";;"));
+	}
+	else {
 		fileNameList.push_back(fileName);
+	}
 	
 	if (fileNameList.isEmpty()) {
 		return false;
@@ -2250,27 +2114,69 @@ bool MainWindow::importMesh(QString fileName)
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 		RichParameterList prePar = pCurrentIOPlugin->initPreOpenParameter(extension);
 		if(!prePar.isEmpty()) {
-			// the user wants to see each time the pre parameters dialog:
-			if (currentGlobalParams.getBool(MainWindowSetting::showPreOpenParameterDialogParam())){
-				RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
-				preOpenDialog.setFocus();
-				preOpenDialog.exec();
+			// take the default values of the plugin and overwrite to the settings
+			// default values
+			for (RichParameter& p : prePar){
+				QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
+				if (currentGlobalParams.hasParameter(prefixName + p.name())){
+					const RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
+					p.setValue(cp.value());
+				}
 			}
-			// the user does not want to see the parameter dialog
-			// need to take the default values from the currentGlobalParams
-			else {
-				for (RichParameter& p : prePar){
-					QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
-					if (currentGlobalParams.hasParameter(prefixName + p.name())){
-						const RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
-						p.setValue(cp.value());
+
+			bool showPreOpenParameterDialog = true;
+			QString showDialogParamName = "MeshLab::IO::" + extension.toUpper() + "::showPreOpenParameterDialog";
+			if (currentGlobalParams.hasParameter(showDialogParamName)){
+				showPreOpenParameterDialog = currentGlobalParams.getBool(showDialogParamName);
+			}
+			// the user wants to see each time the pre parameters dialog:
+			if (showPreOpenParameterDialog){
+				RichParameterListDialog preOpenDialog(this, prePar, tr("Pre-Open Options"));
+				preOpenDialog.addVerticalSpacer();
+
+				QString cbDoNotShow = "Do not show this dialog next time";
+				preOpenDialog.addCheckBox(cbDoNotShow, false);
+				QString cbRememberOptions = "Remember these values for the next time";
+				preOpenDialog.addCheckBox(cbRememberOptions, true);
+				preOpenDialog.setFocus();
+				int res = preOpenDialog.exec();
+				if (res == QDialog::Accepted){
+					if (preOpenDialog.isCheckBoxChecked(cbDoNotShow)){
+						RichBool rp(showDialogParamName, false, "", "");
+						if (currentGlobalParams.hasParameter(showDialogParamName))
+							currentGlobalParams.setValue(rp.name(), BoolValue(false));
+						else
+							currentGlobalParams.addParam(rp);
+						QSettings settings;
+						QDomDocument doc("MeshLabSettings");
+						doc.appendChild(rp.fillToXMLDocument(doc));
+						QString docstring =  doc.toString();
+						settings.setValue(rp.name(), QVariant(docstring));
 					}
-					else {
-						qDebug() << "ERROR!!! " + prefixName + p.name() + " not found in global params.";
+					if (preOpenDialog.isCheckBoxChecked(cbRememberOptions)){
+						QSettings settings;
+						for (const RichParameter& p : prePar){
+
+							QString prefixName = "MeshLab::IO::" + extension.toUpper() + "::";
+							RichParameter& cp = currentGlobalParams.getParameterByName(prefixName + p.name());
+							cp.setValue(p.value());
+							RichParameter* pp = p.clone();
+							pp->setName(prefixName + p.name());
+							QDomDocument doc("MeshLabSettings");
+							doc.appendChild(pp->fillToXMLDocument(doc));
+							QString docstring =  doc.toString();
+							settings.setValue(pp->name(), QVariant(docstring));
+							delete pp;
+						}
 					}
+				}
+				else {
+					return false;
 				}
 			}
 		}
+
+		meshDoc()->setBusy(true);
 
 		//check how many meshes are going to be loaded from the file
 		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
@@ -2312,16 +2218,16 @@ bool MainWindow::importMesh(QString fileName)
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 		}
 		catch (const MLException& e){
-			for (MeshModel* mm : meshList)
-				meshDoc()->delMesh(mm);
+			for (const MeshModel* mm : meshList)
+				meshDoc()->delMesh(mm->id());
 			GLA()->Logf(0, "Error: File %s has not been loaded", qUtf8Printable(fileName));
 			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
+		meshDoc()->setBusy(false);
 	}// end foreach file of the input list
 	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 	
-	if (_currviewcontainer != NULL)
-	{
+	if (_currviewcontainer != NULL) {
 		_currviewcontainer->resetAllTrackBall();
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 	}
@@ -2343,50 +2249,6 @@ void MainWindow::openRecentProj()
 	if (action)	openProject(action->data().toString());
 }
 
-/**
- * **TODO**: this function assumes that the loaded file will contain just one
- * mesh.......
- */
-bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr, bool isreload, MLRenderingData* rendOpt)
-{
-	if ((meshDoc() == NULL) || (mm == NULL))
-		return false;
-	bool ret = false;
-	if (!mm->isVisible())
-	{
-		mm->clear();
-		mm->visible = false;
-	}
-	else
-		mm->clear();
-	QFileInfo fi(fullPath);
-	QString extension = fi.suffix();
-	IOPlugin *pCurrentIOPlugin = PM.inputMeshPlugin(extension);
-	
-	if(pCurrentIOPlugin != NULL)
-	{
-		RichParameterList prePar = pCurrentIOPlugin->initPreOpenParameter(extension);
-		prePar.join(currentGlobalParams);
-
-		QElapsedTimer t;t.start();
-
-		std::list<MeshModel*> ml;
-		std::list<int> masks;
-		ml.push_back(mm);
-		bool open = loadMesh(fullPath,pCurrentIOPlugin,ml,masks,prePar,mtr,isreload, rendOpt);
-		if(open)
-		{
-			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());
-			ret = true;
-		}
-		else
-			GLA()->Logf(0, "Warning: Mesh %s has not been opened", qUtf8Printable(fullPath));
-	}
-	else
-		GLA()->Logf(0, "Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format", qUtf8Printable(fullPath), qUtf8Printable(extension));
-	return ret;
-}
-
 void MainWindow::reloadAllMesh()
 {
 	// Discards changes and reloads current file
@@ -2395,9 +2257,10 @@ void MainWindow::reloadAllMesh()
 	QElapsedTimer t;
 	t.start();
 	MeshDocument* md = meshDoc();
-	for(MeshModel *mmm : md->meshIterator()) {
-		if (mmm->idInFile() <= 0){
-			QString fileName = mmm->fullName();
+	md->setBusy(true);
+	for(MeshModel& mmm : md->meshIterator()) {
+		if (mmm.idInFile() <= 0){
+			QString fileName = mmm.fullName();
 			if (!fileName.isEmpty()){
 				std::list<MeshModel* > meshList = meshDoc()->getMeshesLoadedFromSameFile(mmm);
 				std::vector<bool> isReload(meshList.size(), true);
@@ -2419,6 +2282,7 @@ void MainWindow::reloadAllMesh()
 			}
 		}
 	}
+	md->setBusy(false);
 	GLA()->Log(0, ("All meshes reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	qb->reset();
 	
@@ -2443,7 +2307,8 @@ void MainWindow::reload()
 		return;
 	}
 
-	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(meshDoc()->mm());
+	meshDoc()->setBusy(true);
+	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(*meshDoc()->mm());
 	std::vector<bool> isReload(meshList.size(), true);
 	unsigned int i = 0;
 	for (MeshModel* m : meshList){
@@ -2464,9 +2329,9 @@ void MainWindow::reload()
 	catch (const MLException& e) {
 		QMessageBox::critical(this, "Reload Error", e.what());
 	}
+	meshDoc()->setBusy(false);
 	qb->reset();
-	if (_currviewcontainer != NULL)
-	{
+	if (_currviewcontainer != NULL) {
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 		_currviewcontainer->updateAllViewers();
 	}
@@ -2475,36 +2340,31 @@ void MainWindow::reload()
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
 	const QStringList& suffixList = PM.outputMeshFormatListDialog();
-	
-	//QHash<QString, MeshIOInterface*> allKnownFormats;
-	QFileInfo fi(fileName);
-	//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
-	//QString defaultExt = "*." + mod->suffixName().toLower();
-	QString defaultExt = "*." + fi.suffix().toLower();
-	if(defaultExt == "*.")
-		defaultExt = "*.ply";
-	if (mod == NULL)
-		return false;
-	mod->setMeshModified(false);
-	QString laylabel = "Save \"" + mod->label() + "\" Layer";
-	QString ss = fi.absoluteFilePath();
-	QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());
-	saveDialog->setOption(QFileDialog::DontUseNativeDialog);
-	saveDialog->setNameFilters(suffixList);
-	saveDialog->setAcceptMode(QFileDialog::AcceptSave);
-	saveDialog->setFileMode(QFileDialog::AnyFile);
-	saveDialog->selectFile(fileName);
-	QStringList matchingExtensions=suffixList.filter(defaultExt);
-	if(!matchingExtensions.isEmpty())
-		saveDialog->selectNameFilter(matchingExtensions.last());
-	//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
-	
 	if (fileName.isEmpty()) {
+		//QHash<QString, MeshIOInterface*> allKnownFormats;
+		//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
+		//QString defaultExt = "*." + mod->suffixName().toLower();
+		QString defaultExt = "*.ply";
+		if (mod == NULL)
+			return false;
+		mod->setMeshModified(false);
+		QString laylabel = "Save \"" + mod->label() + "\" Layer";
+		QFileDialog* saveDialog = new QFileDialog(this,laylabel, lastUsedDirectory.path());
+		//saveDialog->setOption(QFileDialog::DontUseNativeDialog);
+		saveDialog->setNameFilters(suffixList);
+		saveDialog->setAcceptMode(QFileDialog::AcceptSave);
+		saveDialog->setFileMode(QFileDialog::AnyFile);
+		saveDialog->selectFile(fileName);
+		QStringList matchingExtensions=suffixList.filter(defaultExt);
+		if(!matchingExtensions.isEmpty())
+			saveDialog->selectNameFilter(matchingExtensions.last());
+		//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected)
 			return false;
-		fileName=saveDialog->selectedFiles ().first();
+		fileName=saveDialog->selectedFiles().at(0);
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty()) {
 			QString ext = saveDialog->selectedNameFilter();
@@ -2513,9 +2373,10 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			qDebug("File without extension adding it by hand '%s'", qUtf8Printable(fileName));
 		}
 	}
-	
+	QFileInfo fi(fileName);
+
 	QStringList fs = fileName.split(".");
-	
+
 	if(!fileName.isEmpty() && fs.size() < 2) {
 		QMessageBox::warning(this,"Save Error","You must specify file extension!!");
 		return false;
@@ -2527,29 +2388,31 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QString path = fileName;
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
-		
+
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
-		
+
 		QStringListIterator itFilter(suffixList);
-		
+
 		IOPlugin *pCurrentIOPlugin = PM.outputMeshPlugin(extension);
 		if (pCurrentIOPlugin == 0) {
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
 		pCurrentIOPlugin->setLog(&meshDoc()->Log);
-		
+
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->exportMaskCapability(extension,capability,defaultBits);
-		
+
 		// optional saving parameters (like ascii/binary encoding)
 		RichParameterList savePar = pCurrentIOPlugin->initSaveParameter(extension,*(mod));
-		
+
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
-		int quality = 66;
-		if (!saveAllPossibleAttributes)
+		int quality = -1;
+		bool saveTextures = true;
+		if (!saveAllPossibleAttributes) {
 			maskDialog.exec();
+		}
 		else {
 			//this is horrible: creating a dialog object but then not showing the
 			//dialog.. And using it just to select all the possible options..
@@ -2559,13 +2422,17 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		int mask = maskDialog.getNewMask();
 		savePar = maskDialog.getNewAdditionalSaveParameters();
 		quality = maskDialog.getTextureQuality();
-		std::vector<std::string> textureNames = maskDialog.getTextureNames();
+		saveTextures = maskDialog.saveTextures();
 
-		for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
-			if (textureNames[i].find('.') == std::string::npos){
-				textureNames[i] += ".png";
+		if (!saveTextures){
+			std::vector<std::string> textureNames = maskDialog.getTextureNames();
+
+			for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
+				if (textureNames[i].find('.') == std::string::npos){
+					textureNames[i] += ".png";
+				}
+				mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 			}
-			mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 		}
 		if (!saveAllPossibleAttributes) {
 			maskDialog.close();
@@ -2574,16 +2441,18 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		if(mask == -1)
 			return false;
-		
+
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		QElapsedTimer tt; tt.start();
-		qb->reset();
-
+		meshDoc()->setBusy(true);
 		try {
+			if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+				mod->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
 			QFileInfo finfo(fileName);
-			mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
+			if (saveTextures)
+				mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
 			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 			mod->setFileName(fileName);
 			QSettings settings;
@@ -2597,7 +2466,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 		qApp->restoreOverrideCursor();
 		updateLayerDialog();
-		
+		meshDoc()->setBusy(false);
+		qb->reset();
+
 		if (saved)
 			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
 	}
@@ -2691,10 +2562,32 @@ void MainWindow::showToolbarFile(){
 	mainToolBar->setVisible(!mainToolBar->isVisible());
 }
 
-void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
-void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
-void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
-void MainWindow::showRaster()    {if(GLA() != 0)	GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));}
+void MainWindow::showInfoPane()
+{
+	if(GLA() != 0) {
+		GLA()->infoAreaVisible = !(GLA()->infoAreaVisible);
+		GLA()->update();
+	}
+}
+
+void MainWindow::showTrackBall()
+{
+	if(GLA() != 0)
+		GLA()->showTrackBall(!GLA()->isTrackBallVisible());
+}
+
+void MainWindow::resetTrackBall()
+{
+	if(GLA() != 0)
+		GLA()->resetTrackBall();
+}
+
+void MainWindow::showRaster()
+{
+	if(GLA() != 0)
+		GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));
+}
+
 void MainWindow::showLayerDlg(bool visible)
 {
 	if ((GLA() != 0) && (layerDialog != NULL))
@@ -2800,8 +2693,8 @@ void MainWindow::updateTexture(int meshid)
 	int textmemMB = int(mwsettings.maxTextureMemory / ((float) 1024 * 1024));
 	
 	size_t totalTextureNum = 0;
-	for (MeshModel *mp : meshDoc()->meshIterator())
-		totalTextureNum+=mp->cm.textures.size();
+	for (const MeshModel& mp : meshDoc()->meshIterator())
+		totalTextureNum+=mp.cm.textures.size();
 	
 	int singleMaxTextureSizeMpx = int(textmemMB/((totalTextureNum != 0)? totalTextureNum : 1));
 
@@ -2832,92 +2725,6 @@ void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
 	this->QCallBack(pos,qUtf8Printable(text));
 }
-
-//WARNING!!!! Probably it's useless
-//void MainWindow::updateRenderMode( )
-//{
-//    if ((GLA() == NULL) || (meshDoc() == NULL))
-//        return;
-//    QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
-//
-//    RenderModeAction* act = qobject_cast<RenderModeAction*>(sender());
-//    RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(act);
-//
-//    //act->data contains the meshid to which the action is referred.
-//    //if the meshid is -1 the action is intended to be per-document and not per mesh
-//    bool isvalidid = true;
-//    int meshid = act->data().toInt(&isvalidid);
-//    if (!isvalidid)
-//        throw MeshLabException("A RenderModeAction contains a non-integer data id.");
-//
-//    if (meshid == -1)
-//    {
-//        for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
-//        {
-//            RenderMode& rm = it.value();
-//            RenderMode old = rm;
-//
-//            act->updateRenderMode(rm);
-//            //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-//            //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-//            //The enum-value depends from the enabled attributes of input mesh.
-//            if (textact != NULL)
-//                setBestTextureModePerMesh(textact,it.key(),rm);
-//
-//            MeshModel* mmod = meshDoc()->getMesh(it.key());
-//            if (mmod != NULL)
-//            {
-//                throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//                act->updateRenderMode(rm);
-//                if (textact != NULL)
-//                    setBestTextureModePerMesh(textact,it.key(),rm);
-//
-////                deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm;)
-//                
-//                GLA()->setupRequestedAttributesPerMesh(it.key());
-//            }
-//            else throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//
-//			GLA()->setupRequestedAttributesPerMesh(it.key());
-//        }
-//    }
-//    else
-//    {
-//        QMap<int,RenderMode>::iterator it = rmode.find(meshid);
-//        RenderMode& rm = it.value();
-//        RenderMode old = rm;
-//        if (it == rmode.end())
-//            throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
-//        MeshModel* mmod = meshDoc()->getMesh(it.key());
-//        if (mmod == NULL)
-//            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-//        act->updateRenderMode(rm);
-//        updateMenus();
-//        //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-//        //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-//        //The enum-value depends from the enabled attributes of input mesh.
-//        if (textact != NULL)
-///*setBestTextureModePerMesh(textact,meshid,rm)*/;
-//
-////        deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
-//        GLA()->setupRequestedAttributesPerMesh(it.key());
-//    }
-//    GLA()->update();
-//}
-
-//WARNING!!!!!! I suppose it should not be useful anymore, but....
-//void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm)
-//{
-//    MeshModel* mesh = NULL;
-//    if ((meshDoc() == NULL) || ((mesh  = meshDoc()->getMesh(meshid)) == NULL))
-//    {
-//        bool clicked = (textact != NULL) && (textact->isChecked());
-//        MLPoliciesStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mesh,rm.pmmask,rm.atts,rm.pmmask,rm.atts);
-//        rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] && clicked;
-//        rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] && clicked;
-//    }
-//}
-
 
 void MainWindow::showEvent(QShowEvent * event)
 {
@@ -3120,11 +2927,9 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 {
 	if (meshDoc() == NULL)
 		return;
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if ((mm != NULL) && (mm->isVisible()))
-		{
-			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		if (mm.isVisible()) {
+			updateRenderingDataAccordingToActionsCommonCode(mm.id(), acts);
 		}
 	}
 	//updateLayerDialog();
@@ -3149,10 +2954,8 @@ void MainWindow::updateRenderingDataAccordingToActions(int /*meshid*/, MLRenderi
 		}
 	}
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			updateRenderingDataAccordingToActionsCommonCode(mm->id(), tmpacts);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		updateRenderingDataAccordingToActionsCommonCode(mm.id(), tmpacts);
 	}
 	
 	for (int ii = 0; ii < tmpacts.size(); ++ii)
@@ -3204,11 +3007,9 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if ((mm != NULL) && (mm->isVisible()))
-		{
-			updateRenderingDataAccordingToActionCommonCode(mm->id(), act);
+	for (const MeshModel& mm : meshDoc()->meshIterator()) {
+		if (mm.isVisible()) {
+			updateRenderingDataAccordingToActionCommonCode(mm.id(), act);
 		}
 	}
 	updateLayerDialog();
@@ -3221,18 +3022,14 @@ void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalA
 	if (meshDoc() == NULL)
 		return;
 	
-	for (MeshModel* mm : meshDoc()->meshIterator())
+	for (const MeshModel& mm : meshDoc()->meshIterator())
 	{
-		if (mm != NULL)
-		{
-			foreach(MLRenderingGlobalAction* act, actlist)
-			{
-				foreach(MLRenderingAction* ract, act->mainActions())
-					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
-				
-				foreach(MLRenderingAction* ract, act->relatedActions())
-					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
-			}
+		foreach(MLRenderingGlobalAction* act, actlist) {
+			foreach(MLRenderingAction* ract, act->mainActions())
+				updateRenderingDataAccordingToActionCommonCode(mm.id(), ract);
+
+			foreach(MLRenderingAction* ract, act->relatedActions())
+				updateRenderingDataAccordingToActionCommonCode(mm.id(), ract);
 		}
 	}
 	updateLayerDialog();
@@ -3245,10 +3042,8 @@ void MainWindow::updateRenderingDataAccordingToAction(int /*meshid*/, MLRenderin
 	MLRenderingAction* sisteract = NULL;
 	act->createSisterAction(sisteract, NULL);
 	sisteract->setChecked(check);
-	for(MeshModel* mm : meshDoc()->meshIterator())
-	{
-		if (mm != NULL)
-			updateRenderingDataAccordingToActionCommonCode(mm->id(), sisteract);
+	for(const MeshModel& mm : meshDoc()->meshIterator()) {
+		updateRenderingDataAccordingToActionCommonCode(mm.id(), sisteract);
 	}
 	delete sisteract;
 	if (GLA() != NULL)

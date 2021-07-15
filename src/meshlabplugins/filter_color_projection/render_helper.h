@@ -63,7 +63,7 @@ class RenderHelper {
   int initializeMeshBuffers(MeshModel *mesh, vcg::CallBackPos *cb);
 
   // draw & readback
-  void renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode, MLPluginGLContext* plugcontext, float camNear = 0, float camFar = 0);
+  void renderScene(const Shotm& view, MeshModel *mesh, RenderingMode mode, MLPluginGLContext* plugcontext, float camNear = 0, float camFar = 0);
 
  private:
 

@@ -43,7 +43,7 @@ extern "C"
 #include "png.h"
 }
 
-typedef unsigned char byte;
+typedef unsigned char Byte;
 
 enum EIFXImageChannel
 {

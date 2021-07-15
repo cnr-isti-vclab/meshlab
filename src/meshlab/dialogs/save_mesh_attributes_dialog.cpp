@@ -67,6 +67,9 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	{
 		ui->check_iom_wedgtexcoord->setDisabled(true);
 		ui->check_iom_wedgtexcoord->setChecked(false);
+		ui->saveTextureCheckBox->setDisabled(true);
+		ui->textureQualitySpinBox->setDisabled(true);
+		ui->textureQualityLabel->setDisabled(true);
 	}
 
 	textureNames.reserve(m->cm.textures.size());
@@ -103,6 +106,11 @@ RichParameterList SaveMeshAttributesDialog::getNewAdditionalSaveParameters() con
 std::vector<std::string> SaveMeshAttributesDialog::getTextureNames() const
 {
 	return textureNames;
+}
+
+bool SaveMeshAttributesDialog::saveTextures() const
+{
+	return ui->saveTextureCheckBox->isChecked();
 }
 
 int SaveMeshAttributesDialog::getTextureQuality() const
@@ -301,4 +309,20 @@ void SaveMeshAttributesDialog::updateMask()
 	if( ui->check_iom_polygonal->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_BITPOLYGONAL;}
 
 	this->mask=newmask;
+}
+
+void SaveMeshAttributesDialog::on_saveTextureCheckBox_stateChanged(int arg1)
+{
+	ui->textureQualitySpinBox->setEnabled(arg1 == Qt::Checked);
+	ui->textureQualityLabel->setEnabled(arg1 == Qt::Checked);
+}
+
+void SaveMeshAttributesDialog::on_textureQualitySpinBox_valueChanged(int arg1)
+{
+	if (arg1 == -1){
+		ui->textureQualitySpinBox->setSuffix(" (default)");
+	}
+	else {
+		ui->textureQualitySpinBox->setSuffix("");
+	}
 }

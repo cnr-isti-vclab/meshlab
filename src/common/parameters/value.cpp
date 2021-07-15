@@ -73,15 +73,3 @@ void ColorValue::fillToXMLElement(QDomElement& element) const
 	element.setAttribute("a",QString::number(pval.alpha()));
 }
 
-void FileValue::fillToXMLElement(QDomElement& element) const
-{
-	element.setAttribute("value", pval);
-}
-
-void MeshValue::fillToXMLElement(QDomElement&) const
-{
-	//nothing to do on this side... Everything is done on RichMesh side
-	//maybe breaking retrocompatibility for mlx and do something here
-	//could be a good idea.
-}
-

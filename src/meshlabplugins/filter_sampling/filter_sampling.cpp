@@ -564,9 +564,9 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
   case FP_HAUSDORFF_DISTANCE:
   {
 		const MeshModel *vertexMesh = md.mm();
-		for(const MeshModel * vm: md.meshIterator()){
-			if (vm != md.mm()) {
-				vertexMesh = vm;
+		for(const MeshModel& vm: md.meshIterator()){
+			if (&vm != md.mm()) {
+				vertexMesh = &vm;
 				break;
 			}
 		}
@@ -594,9 +594,9 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 	case FP_DISTANCE_REFERENCE:
 	{
 		const MeshModel *vertexMesh = md.mm();
-		for(const MeshModel * vm: md.meshIterator()){
-			if (vm != md.mm()) {
-				vertexMesh = vm;
+		for(const MeshModel& vm: md.meshIterator()){
+			if (&vm != md.mm()) {
+				vertexMesh = &vm;
 				break;
 			}
 		}
@@ -616,9 +616,9 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 	case FP_VERTEX_RESAMPLING:
 	{
 	const MeshModel *vertexMesh= md.mm();
-	for (const MeshModel* vm: md.meshIterator())
-		if (vm != md.mm()) {
-			vertexMesh = vm;
+	for (const MeshModel& vm: md.meshIterator())
+		if (&vm != md.mm()) {
+			vertexMesh = &vm;
 			break;
 		}
 
@@ -673,16 +673,16 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 	case FP_DISK_COLORING :
 	{
 		const MeshModel *colorMesh= md.mm();
-		for (const MeshModel* colm: md.meshIterator()) // Search a mesh with some faces..
-			if (colm->cm.fn>0){
-				colorMesh = colm;
+		for (const MeshModel& colm: md.meshIterator()) // Search a mesh with some faces..
+			if (colm.cm.fn>0){
+				colorMesh = &colm;
 				break;
 			}
 
 		const MeshModel *vertexMesh= md.mm();
-		for (const MeshModel* vm : md.meshIterator()) // Search another mesh
-			if (vm != colorMesh) {
-				vertexMesh = vm;
+		for (const MeshModel& vm : md.meshIterator()) // Search another mesh
+			if (&vm != colorMesh) {
+				vertexMesh = &vm;
 				break;
 			}
 

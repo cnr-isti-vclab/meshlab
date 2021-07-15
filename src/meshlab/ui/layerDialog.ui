@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>298</width>
+    <width>426</width>
     <height>816</height>
    </rect>
   </property>
@@ -38,9 +38,27 @@
       <property name="indentation">
        <number>10</number>
       </property>
+      <attribute name="headerStretchLastSection">
+       <bool>false</bool>
+      </attribute>
       <column>
        <property name="text">
         <string notr="true">1</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>3</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>4</string>
        </property>
       </column>
      </widget>
@@ -219,9 +237,25 @@
         <property name="indentation">
          <number>10</number>
         </property>
+        <property name="columnCount">
+         <number>3</number>
+        </property>
+        <attribute name="headerStretchLastSection">
+         <bool>false</bool>
+        </attribute>
         <column>
          <property name="text">
           <string notr="true">1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">3</string>
          </property>
         </column>
        </widget>

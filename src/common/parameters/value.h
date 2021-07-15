@@ -51,11 +51,6 @@ public:
 	virtual Point3m getPoint3f() const { assert(0); return Point3m(); }
 	virtual Shotm getShotf() const { assert(0); return Shotm(); }
 	virtual QColor getColor() const { assert(0); return QColor(); }
-	virtual Scalarm getAbsPerc() const { assert(0); return Scalarm(); }
-	virtual int getEnum() const { assert(0); return int(); }
-	virtual unsigned int getMeshId() const { assert(0); return 0; }
-	virtual Scalarm getDynamicFloat() const { assert(0); return Scalarm(); }
-	virtual QString getFileName() const { assert(0); return QString(); }
 
 	virtual bool isBool() const { return false; }
 	virtual bool isInt() const { return false; }
@@ -65,11 +60,6 @@ public:
 	virtual bool isPoint3f() const { return false; }
 	virtual bool isShotf() const { return false; }
 	virtual bool isColor() const { return false; }
-	virtual bool isAbsPerc() const { return false; }
-	virtual bool isEnum() const { return false; }
-	virtual bool isMesh() const { return false; }
-	virtual bool isDynamicFloat() const { return false; }
-	virtual bool isFileName() const { return false; }
 
 	virtual QString typeName() const = 0;
 	virtual void set(const Value& p) = 0;
@@ -212,81 +202,6 @@ public:
 
 private:
 	QColor pval;
-};
-
-class AbsPercValue : public FloatValue
-{
-public:
-	AbsPercValue(const float val) :FloatValue(val) {}
-	~AbsPercValue() {}
-
-	inline Scalarm getAbsPerc() const { return getFloat(); }
-	inline QString typeName() const { return QString("AbsPerc"); }
-	inline bool isAbsPerc() const { return true; }
-	inline AbsPercValue* clone() const {return new AbsPercValue(*this);}
-	using FloatValue::fillToXMLElement;
-
-};
-
-class EnumValue : public IntValue
-{
-public:
-	EnumValue(const int val) :IntValue(val) {}
-	~EnumValue() {}
-
-	inline int getEnum() const { return getInt(); }
-	inline bool isEnum() const { return true; }
-	inline QString typeName() const { return QString("Enum"); }
-	inline EnumValue* clone() const {return new EnumValue(*this);}
-	using IntValue::fillToXMLElement;
-};
-
-class DynamicFloatValue : public FloatValue
-{
-public:
-	DynamicFloatValue(const float val) :FloatValue(val) {}
-	~DynamicFloatValue() {}
-
-	inline Scalarm getDynamicFloat() const { return getFloat(); }
-	inline bool isDynamicFloat() const { return true; }
-	inline QString typeName() const { return QString("DynamicFloat"); }
-	inline DynamicFloatValue* clone() const {return new DynamicFloatValue(*this);}
-	using FloatValue::fillToXMLElement;
-
-};
-
-class FileValue : public Value
-{
-public:
-	FileValue(const QString& filename) :pval(filename) {}
-	~FileValue() {}
-
-	inline QString getFileName() const { return pval; }
-	inline bool isFileName() const { return true; }
-	inline QString typeName() const { return QString("FileName"); }
-	inline void	set(const Value& p) { pval = p.getFileName(); }
-	inline FileValue* clone() const {return new FileValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
-
-private:
-	QString pval;
-};
-
-class MeshValue : public Value
-{
-public:
-	MeshValue(unsigned int meshind) : pval(meshind) {};
-	~MeshValue() {}
-
-	inline unsigned int getMeshId() const { return pval; }
-	inline bool isMesh() const { return true; }
-	inline QString typeName() const { return QString("Mesh"); }
-	inline void	set(const Value& p) { pval = p.getMeshId(); }
-	inline MeshValue* clone() const {return new MeshValue(*this);}
-	void fillToXMLElement(QDomElement& element) const;
-
-private:
-	unsigned int pval;
 };
 
 #endif //MESHLAB_VALUE_H

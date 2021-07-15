@@ -122,12 +122,10 @@ void RadianceScalingRendererPlugin::render(QAction *, MeshDocument &md, MLSceneG
 	vcg::glColor(vcg::Color4b(vcg::Color4b::LightGray));
 	_buffPass->enable();
 
-	for(MeshModel *mp: md.meshIterator())
-	{
-		if ((mp != NULL) && (gla->meshVisibilityMap[mp->id()]))
-		{
-			shared->setMeshTransformationMatrix(mp->id(), mp->cm.Tr);
-			shared->draw(mp->id(), gla->context());
+	for(const MeshModel& mp: md.meshIterator()) {
+		if (gla->meshVisibilityMap[mp.id()]) {
+			shared->setMeshTransformationMatrix(mp.id(), mp.cm.Tr);
+			shared->draw(mp.id(), gla->context());
 		}
 	}
 	_buffPass->disable();

@@ -25,6 +25,7 @@ else()
 		set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 	endif()
 endif()
+set(MESHLAB_VERSION ${MESHLAB_VERSION} PARENT_SCOPE)
 message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 
 if (BUILD_WITH_DOUBLE_SCALAR)
@@ -70,6 +71,7 @@ set(HEADERS
 	python/function_parameter.h
 	python/function_set.h
 	python/python_utils.h
+	utilities/eigen_mesh_conversions.h
 	utilities/file_format.h
 	utilities/load_save.h
 	globals.h
@@ -111,6 +113,7 @@ set(SOURCES
 	python/function_parameter.cpp
 	python/function_set.cpp
 	python/python_utils.cpp
+	utilities/eigen_mesh_conversions.cpp
 	utilities/load_save.cpp
 	globals.cpp
 	GLExtensionsManager.cpp
@@ -124,9 +127,6 @@ set(SOURCES
 set(RESOURCES meshlab-common.qrc)
 
 set(TARGET_TYPE SHARED)
-if(WIN32)
-	set(TARGET_TYPE STATIC)
-endif()
 add_library(meshlab-common ${TARGET_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_compile_definitions(meshlab-common
@@ -160,8 +160,12 @@ set_property(TARGET meshlab-common
 	PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 
 if (WIN32)
+	add_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
 	set_property(TARGET meshlab-common
 		PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 endif()
+
+set_target_properties(meshlab-common PROPERTIES
+	INSTALL_RPATH "${MESHLAB_LIB_INSTALL_DIR}:${INSTALL_RPATH}")
 
 install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})

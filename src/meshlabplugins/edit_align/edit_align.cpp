@@ -125,61 +125,56 @@ bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 	mode = ALIGN_IDLE;
 	int numOfMeshes = _md->meshNumber();
 	meshTree.clear();
-	for(MeshModel *mm: _md->meshIterator())
-	{
-
+	for(MeshModel& mm: _md->meshIterator()) {
 		// assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
 		// if above 50, truly unique color would generate too similar colors, so total number of unique color
 		// is capped to 50 and the color reused, id that are close will have different color anyway
-		if (mm != NULL)
-		{
-			if (numOfMeshes < 50)
-				mm->cm.C() = Color4b::Scatter(numOfMeshes + 1, mm->id(), .2f, .7f);
-			else
-				mm->cm.C() = Color4b::Scatter(51, mm->id() % 50, .2f, .7f);
-			mm->updateDataMask(MeshModel::MM_COLOR);
+		if (numOfMeshes < 50)
+			mm.cm.C() = Color4b::Scatter(numOfMeshes + 1, mm.id(), .2f, .7f);
+		else
+			mm.cm.C() = Color4b::Scatter(51, mm.id() % 50, .2f, .7f);
+		mm.updateDataMask(MeshModel::MM_COLOR);
 //			meshTree.nodeList.push_back(new MeshNode(mm));
-			meshTree.nodeMap[mm->id()]=new MeshNode(mm);
-		}
+		meshTree.nodeMap[mm.id()]=new MeshNode(&mm);
 	}
 
 //	for(QMap<int,RenderMode>::iterator it = _gla->rendermodemap.begin();it != _gla->rendermodemap.end();++it)
 //		it.value().colorMode=GLW::CMPerMesh;
 
-    _gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
-    if(alignDialog==0)
-    {
-        if (!GLExtensionsManager::initializeGLextensions_notThrowing())
+	_gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
+	if(alignDialog==0)
+	{
+		if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 			return false;
 
-        alignDialog=new AlignDialog(_gla->window(),this);
-        connect(alignDialog->ui.meshTreeParamButton,SIGNAL(clicked()),this,SLOT(meshTreeParam()));
-        connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
+		alignDialog=new AlignDialog(_gla->window(),this);
+		connect(alignDialog->ui.meshTreeParamButton,SIGNAL(clicked()),this,SLOT(meshTreeParam()));
+		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamDefMMButton, SIGNAL(clicked()), this, SLOT(setAlignParamMM()));
 		connect(alignDialog->ui.icpParamDefMButton, SIGNAL(clicked()), this, SLOT(setAlignParamM()));
-        connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
-        connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
-        connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
-        connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
-        connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
-        connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereVisible()));
-        connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
-        connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
-        connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), _gla,SLOT(updateMeshSetVisibilities()));
-        connect(alignDialog->ui.baseMeshButton, SIGNAL(clicked()) , this,  SLOT(setBaseMesh() ) );
-        connect(alignDialog->ui.badArcButton, SIGNAL(clicked()) , this,  SLOT(selectBadArc() ) );
-    }
+		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
+		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
+		connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
+		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
+		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
+		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereVisible()));
+		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
+		connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
+		connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), _gla,SLOT(updateMeshSetVisibilities()));
+		connect(alignDialog->ui.baseMeshButton, SIGNAL(clicked()) , this,  SLOT(setBaseMesh() ) );
+		connect(alignDialog->ui.badArcButton, SIGNAL(clicked()) , this,  SLOT(selectBadArc() ) );
+	}
 
-    //alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
-    alignDialog->setTree(& meshTree);
-    alignDialog->show();
-    //alignDialog->adjustSize();
+	//alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
+	alignDialog->setTree(& meshTree);
+	alignDialog->show();
+	//alignDialog->adjustSize();
 	
-    connect(this, SIGNAL(suspendEditToggle()),_gla,SLOT(suspendEditToggle()) );
-    connect(alignDialog, SIGNAL(closing()),_gla,SLOT(endEdit()) );
-    connect(_md,SIGNAL(currentMeshChanged(int)),alignDialog,SLOT(currentMeshChanged(int)));
-    suspendEditToggle();
-    return true;
+	connect(this, SIGNAL(suspendEditToggle()),_gla,SLOT(suspendEditToggle()) );
+	connect(alignDialog, SIGNAL(closing()),_gla,SLOT(endEdit()) );
+	connect(_md,SIGNAL(currentMeshChanged(int)),alignDialog,SLOT(currentMeshChanged(int)));
+	suspendEditToggle();
+	return true;
 }
 
 void EditAlignPlugin::decorate(MeshModel & mm, GLArea * gla)
@@ -233,7 +228,7 @@ void EditAlignPlugin::hideRevealGluedMesh()
   for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
   { 
     MeshNode *mn=ni->second;
-        if(!mn->glued) mn->m->visible=!(mn->m->visible);
+        if(!mn->glued) mn->m->setVisible(!(mn->m->isVisible()));
   }
     alignDialog->rebuildTree();
     _gla->update();
@@ -323,7 +318,7 @@ void EditAlignPlugin::glueManual()
 		{
 			emit suspendEditToggle();
 			mode = ALIGN_MOVE;
-			mm->visible = false;
+			mm->setVisible(false);
 			trackball.Reset();
 			trackball.center.Import(mm->cm.trBB().Center());
 			trackball.radius = mm->cm.trBB().Diag() / 2.0;
@@ -342,7 +337,7 @@ void EditAlignPlugin::glueManual()
 			mtran.SetTranslate(-trackball.center);
 			tmp.Import(mm->cm.Tr);
 			mm->cm.Tr.Import((tran)* trackball.track.Matrix()*(mtran)* tmp);
-			mm->visible = true;
+			mm->setVisible(true);
 			alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			currentNode()->glued = true;
 			alignDialog->rebuildTree();
@@ -437,7 +432,7 @@ void EditAlignPlugin::glueHereVisible()
 {
   for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
 //    foreach(MeshNode *mn, meshTree.nodeList)
-      if(ni->second->m->visible) ni->second->glued=true;
+      if(ni->second->m->isVisible()) ni->second->glued=true;
 
     alignDialog->rebuildTree();
 }

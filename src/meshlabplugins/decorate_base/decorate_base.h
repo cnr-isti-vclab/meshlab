@@ -102,8 +102,8 @@ public:
 	void DrawVertLabel(MeshModel &m, QPainter *gla);
 	void DrawEdgeLabel(MeshModel &m, QPainter *gla);
 	void DrawFaceLabel(MeshModel &m, QPainter *gla);
-	void DisplayCamera(QString who, Shotm &ls, int cameraSourceId);
-	void DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, const RichParameterList *rm, QPainter *painter, QFont qf);
+	void DisplayCamera(QString who, const Shotm& ls, int cameraSourceId);
+	void DrawCamera(const MeshModel* m, const Shotm& ls, vcg::Color4b camcolor, Matrix44m &currtr, const RichParameterList *rm, QPainter *painter, QFont qf);
 	void PlaceTexParam(int TexInd, int TexNum);
 	void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, const RichParameterList*, QFont qf);
 	void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, const RichParameterList*, QFont qf, bool perVertex);

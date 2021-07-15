@@ -36,7 +36,8 @@
 using namespace vcg;
 
 MeshModel::MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName) :
-	idInsideFile(-1)
+	idInsideFile(-1),
+	visible(true)
 {
 	/*glw.m = &(cm);*/
 	clear();
@@ -83,14 +84,14 @@ QString MeshModel::relativePathName(const QString& path) const
  * @brief Starting from the (still unloaded) textures contained in the contained
  * CMeshO, loads the textures in the map of QImages contained in the MeshModel.
  *
- * The contained CMeshO will have a list of texture names like ":filename.png",
+ * The contained CMeshO will have a list of texture names like "filename.png",
  * and these names will be mapped with the actual loaded image in the map
  * "textures".
  *
- * When a texture is not found, a dummy texture will be used (":dummy.png").
+ * When a texture is not found, a dummy texture will be used (":/img/dummy.png").
  *
  * Returns the list of non-loaded textures that have been modified with
- * ":dummy.png" in the contained mesh.
+ * ":/img/dummy.png" in the contained mesh.
  */
 std::list<std::string> MeshModel::loadTextures(
 		GLLogStream* log,
@@ -335,11 +336,16 @@ void MeshModel::enable(int openingFileMask)
 		updateDataMask(MM_VERTCOLOR);
 	if( openingFileMask & tri::io::Mask::IOM_FACECOLOR	)
 		updateDataMask(MM_FACECOLOR);
-	if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
-	if( openingFileMask & tri::io::Mask::IOM_CAMERA	   ) updateDataMask(MM_CAMERA);
-	if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
-	if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  ) updateDataMask(MM_FACEQUALITY);
-	if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
+	if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   )
+		updateDataMask(MM_VERTRADIUS);
+	if( openingFileMask & tri::io::Mask::IOM_CAMERA	   )
+		updateDataMask(MM_CAMERA);
+	if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  )
+		updateDataMask(MM_VERTQUALITY);
+	if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  )
+		updateDataMask(MM_FACEQUALITY);
+	if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL )
+		updateDataMask(MM_POLYGONAL);
 }
 
 bool MeshModel::meshModified() const

@@ -120,6 +120,7 @@ public:
 	const_iterator findParameter(const QString& name) const;
 	RichParameter& at(unsigned int i);
 	const RichParameter& at(unsigned int i) const;
+	unsigned int numberAdvancedParameters() const;
 
 	void setValue(const QString& name, const Value& val);
 	RichParameter& addParam(const RichParameter& pd);

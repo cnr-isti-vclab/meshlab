@@ -222,11 +222,9 @@ void FilterFractal::initParameterSetForCratersGeneration(const MeshDocument &md,
 	const MeshModel* samples = md.mm();
 	const MeshModel* tmpMesh;
 	if (samples->cm.fn != 0){ // this is probably not the samples layer
-		for(const MeshModel* mm : md.meshIterator())
-		{
-			tmpMesh = mm;
-			if (tmpMesh->cm.fn == 0)
-			{
+		for(const MeshModel& mm : md.meshIterator()) {
+			tmpMesh = &mm;
+			if (tmpMesh->cm.fn == 0) {
 				samples = tmpMesh;
 				break;
 			}

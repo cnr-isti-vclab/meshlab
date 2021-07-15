@@ -282,7 +282,7 @@ public:
 			const QString& format,
 			const QString& /*fileName*/,
 			const QImage& /*image*/,
-			int /*quality*/ = 66,
+			int /*quality*/ = -1,
 			vcg::CallBackPos* /*cb*/ = nullptr)
 	{
 		wrongSaveFormat(format);

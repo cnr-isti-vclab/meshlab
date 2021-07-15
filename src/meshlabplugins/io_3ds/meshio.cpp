@@ -171,23 +171,23 @@ void ExtraMeshIOPlugin::loadFromNode(MeshModel& mm, int& mask, vcg::tri::io::_3d
 		mask |= info.mask;
 
 		// verify if texture files are present
-		QString missingTextureFilesMsg = "The following texture files were not found:\n";
-		bool someTextureNotFound = false;
-		for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
-		{
-			FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
-			if (pFile == nullptr) {
-				missingTextureFilesMsg.append("\n");
-				missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
-				someTextureNotFound = true;
-			}
-			else {
-				fclose (pFile);
-			}
-		}
-		if (someTextureNotFound){
-			reportWarning("Missing texture files: " + missingTextureFilesMsg);
-		}
+//		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+//		bool someTextureNotFound = false;
+//		for ( unsigned textureIdx = 0; textureIdx < mm.cm.textures.size(); ++textureIdx)
+//		{
+//			FILE* pFile = fopen (mm.cm.textures[textureIdx].c_str(), "r");
+//			if (pFile == nullptr) {
+//				missingTextureFilesMsg.append("\n");
+//				missingTextureFilesMsg.append(mm.cm.textures[textureIdx].c_str());
+//				someTextureNotFound = true;
+//			}
+//			else {
+//				fclose (pFile);
+//			}
+//		}
+//		if (someTextureNotFound){
+//			reportWarning("Missing texture files: " + missingTextureFilesMsg);
+//		}
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm); // updates bounding box
 		if (!normalsUpdated)

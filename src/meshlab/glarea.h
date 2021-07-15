@@ -479,7 +479,7 @@ public:
     QMap<int, bool> rasterVisibilityMap;
 
     // Add an entry in the mesh visibility map
-    void meshSetVisibility(MeshModel *mp, bool visibility);
+    void meshSetVisibility(MeshModel& mp, bool visibility);
 
     // Add an entry in the raster visibility map
     void addRasterSetVisibility(int rasterId, bool visibility);
@@ -505,7 +505,6 @@ private:
     enum AnimMode { AnimNone, AnimSpin, AnimInterp};
     AnimMode animMode;
     int tileCol, tileRow, totalCols, totalRows;   // snapshot: total number of subparts and current subpart rendered
-    int  currSnapLayer;            // snapshot: total number of layers and current layer rendered
     void setCursorTrack(vcg::TrackMode *tm);
 
 	/*MLRenderingData _perdocglobaldt;*/

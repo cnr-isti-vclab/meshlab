@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005-2020                                           \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -64,22 +64,10 @@ std::list<std::string> loadMesh(
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
 
-	// the original directory path before we switch it
-	QString origDir = QDir::current().path();
-
-	// this change of dir is needed for subsequent textures/materials loading
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
-
-	// Adjust the file name after changing the directory
-	QString fileNameSansDir = fi.fileName();
-
-	try {
-		ioPlugin->open(extension, fileNameSansDir, meshList, maskList, prePar, cb);
-	}
-	catch(const MLException& e) {
-		QDir::setCurrent(origDir); // undo the change of directory before leaving
-		throw e;
-	}
+	QDir oldDir = QDir::current();
+	QDir::setCurrent(fi.absolutePath());
+	ioPlugin->open(extension, fileName, meshList, maskList, prePar, cb);
+	QDir::setCurrent(oldDir.absolutePath());
 
 	auto itmesh = meshList.begin();
 	auto itmask = maskList.begin();
@@ -112,11 +100,6 @@ std::list<std::string> loadMesh(
 				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 		}
 
-		if(mm->cm.fn==0 && mm->cm.en>0) {
-			if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-		}
-
 		//updateMenus();
 		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
@@ -128,7 +111,6 @@ std::list<std::string> loadMesh(
 		++itmesh;
 		++itmask;
 	}
-	QDir::setCurrent(origDir); // undo the change of directory before leaving
 	return unloadedTextures;
 }
 
@@ -193,11 +175,11 @@ std::list<MeshModel*> loadMeshWithStandardParameters(
 	std::list<int> masks;
 
 	try{
-		loadMesh(fi.fileName(), ioPlugin, prePar, meshList, masks, cb);
+		loadMesh(filename, ioPlugin, prePar, meshList, masks, cb);
 	}
 	catch(const MLException& e){
-		for (MeshModel* mm : meshList)
-			md.delMesh(mm);
+		for (const MeshModel* mm : meshList)
+			md.delMesh(mm->id());
 		throw e;
 	}
 
@@ -265,9 +247,11 @@ void saveMeshWithStandardParameters(
 	ioPlugin->exportMaskCapability(extension, capability, defaultBits);
 	RichParameterList saveParams = ioPlugin->initSaveParameter(extension, m);
 
-	ioPlugin->save(extension, fileName, m ,capability, saveParams, cb);
+	if (defaultBits & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	ioPlugin->save(extension, fileName, m, defaultBits, saveParams, cb);
 	m.setFileName(fileName);
-	m.saveTextures(fi.absolutePath(), 66, log, cb);
+	m.saveTextures(fi.absolutePath(), -1, log, cb);
 }
 
 void saveAllMeshes(
@@ -279,21 +263,21 @@ void saveAllMeshes(
 {
 	PluginManager& pm = meshlab::pluginManagerInstance();
 
-	for (MeshModel* m : md.meshIterator()){
-		if (m->isVisible() || !onlyVisible) {
+	for (MeshModel& m : md.meshIterator()){
+		if (m.isVisible() || !onlyVisible) {
 			QString filename, extension;
-			if (m->fullName().isEmpty()){
-				if (m->label().contains('.')){
-					extension = QFileInfo(m->label()).suffix();
-					filename = QFileInfo(m->label()).baseName();
+			if (m.fullName().isEmpty()){
+				if (m.label().contains('.')){
+					extension = QFileInfo(m.label()).suffix();
+					filename = QFileInfo(m.label()).baseName();
 				}
 				else {
 					extension = "ply";
-					filename = m->label();
+					filename = m.label();
 				}
 			}
 			else {
-				QFileInfo fi(m->fullName());
+				QFileInfo fi(m.fullName());
 				extension = fi.suffix();
 				filename = fi.baseName();
 			}
@@ -308,7 +292,7 @@ void saveAllMeshes(
 				filename += ("." + extension.toLower());
 			}
 			filename = basePath + "/" + filename;
-			saveMeshWithStandardParameters(filename, *m, log, cb);
+			saveMeshWithStandardParameters(filename, m, log, cb);
 		}
 	}
 }

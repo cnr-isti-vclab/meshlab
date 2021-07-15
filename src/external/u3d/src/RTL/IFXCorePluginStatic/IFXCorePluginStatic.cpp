@@ -137,9 +137,6 @@ void operator delete[]( void* pMemory ) throw()
 			plug-in DL uses the same memory functions as IFXCore uses.
 */
 void* operator new( size_t byteCount )
-#ifndef _MSC_VER
-	throw(std::bad_alloc)
-#endif
 {
 	void* p = NULL;
 
@@ -166,9 +163,6 @@ void* operator new( size_t byteCount )
 			plug-in DL uses the same memory functions as IFXCore uses.
 */
 void* operator new[]( size_t byteCount )
-#ifndef _MSC_VER
-	throw(std::bad_alloc)
-#endif
 {
 	return operator new( byteCount );
 }

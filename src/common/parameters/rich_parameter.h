@@ -49,13 +49,28 @@ class RichParameter
 public:
 	RichParameter(const RichParameter& rp);
 	RichParameter(RichParameter&& rp);
-	RichParameter(const QString& nm, const Value& v, const QString& desc = QString(), const QString& tltip = QString());
+	RichParameter(
+			const QString& nm,
+			const Value& v,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool isAdvanced = false,
+			const QString& category = QString());
 	virtual ~RichParameter();
 
 	const QString& name() const;
 	const Value& value() const;
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
+	bool isAdvanced() const;
+	const QString& category() const;
+
+	template <class RichParam>
+	bool isOfType() const
+	{
+		const RichParam* t = dynamic_cast<const RichParam*>(this);
+		return (t != nullptr);
+	}
 
 	virtual QString stringType() const = 0;
 
@@ -78,13 +93,21 @@ protected:
 	Value* val;
 	QString fieldDesc;
 	QString tooltip;
+	bool advanced;
+	QString pCategory;
 };
 
 
 class RichBool : public RichParameter
 {
 public:
-	RichBool(const QString& nm, const bool defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichBool(
+			const QString& nm,
+			const bool defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichBool();
 
 	QString stringType() const;
@@ -96,7 +119,13 @@ public:
 class RichInt : public RichParameter
 {
 public:
-	RichInt(const QString& nm, const int defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichInt(
+			const QString& nm,
+			const int defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichInt();
 
 	QString stringType() const;
@@ -108,7 +137,13 @@ public:
 class RichFloat : public RichParameter
 {
 public:
-	RichFloat(const QString& nm, const Scalarm defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichFloat(
+			const QString& nm,
+			const Scalarm defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichFloat();
 
 	QString stringType() const;
@@ -120,7 +155,13 @@ public:
 class RichString : public RichParameter
 {
 public:
-	RichString(const QString& nm, const QString& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichString(
+			const QString& nm,
+			const QString& defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichString();
 
 	QString stringType() const;
@@ -132,7 +173,13 @@ public:
 class RichMatrix44f : public RichParameter
 {
 public:
-	RichMatrix44f(const QString& nm, const Matrix44m& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichMatrix44f(
+			const QString& nm,
+			const Matrix44m& defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichMatrix44f();
 
 	QString stringType() const;
@@ -144,7 +191,13 @@ public:
 class RichPoint3f : public RichParameter
 {
 public:
-	RichPoint3f(const QString& nm, const Point3m& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichPoint3f(
+			const QString& nm,
+			const Point3m& defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichPoint3f();
 
 	QString stringType() const;
@@ -156,7 +209,13 @@ public:
 class RichShotf : public RichParameter
 {
 public:
-	RichShotf(const QString& nm, const Shotm& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichShotf(
+			const QString& nm,
+			const Shotm& defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichShotf();
 
 	QString stringType() const;
@@ -168,7 +227,13 @@ public:
 class RichColor : public RichParameter
 {
 public:
-	RichColor(const QString& nm, const QColor& defval, const QString& desc = QString(), const QString& tltip = QString());
+	RichColor(
+			const QString& nm,
+			const QColor& defval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichColor();
 
 	QString stringType() const;
@@ -180,7 +245,15 @@ public:
 class RichAbsPerc : public RichParameter
 {
 public:
-	RichAbsPerc(const QString& nm, const Scalarm defval, const Scalarm minval, const Scalarm maxval, const QString& desc = QString(), const QString& tltip = QString());
+	RichAbsPerc(
+			const QString& nm,
+			const Scalarm defval,
+			const Scalarm minval,
+			const Scalarm maxval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichAbsPerc();
 
 	QString stringType() const;
@@ -195,7 +268,14 @@ public:
 class RichEnum : public RichParameter
 {
 public:
-	RichEnum(const QString& nm, const int defval, const QStringList& values, const QString& desc = QString(), const QString& tltip = QString());
+	RichEnum(
+			const QString& nm,
+			const int defval,
+			const QStringList& values,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichEnum();
 
 	QString stringType() const;
@@ -209,7 +289,15 @@ public:
 class RichDynamicFloat : public RichParameter
 {
 public:
-	RichDynamicFloat(const QString& nm, const Scalarm defval, const Scalarm minval, const Scalarm maxval, const QString& desc = QString(), const QString& tltip = QString());
+	RichDynamicFloat(
+			const QString& nm,
+			const Scalarm defval,
+			const Scalarm minval,
+			const Scalarm maxval,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichDynamicFloat();
 
 	QString stringType() const;
@@ -224,7 +312,14 @@ public:
 class RichOpenFile : public RichParameter
 {
 public:
-	RichOpenFile(const QString& nm, const QString& directorydefval, const QStringList& exts, const QString& desc = QString(), const QString& tltip = QString());
+	RichOpenFile(
+			const QString& nm,
+			const QString& directorydefval,
+			const QStringList& exts,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichOpenFile();
 
 	QString stringType() const;
@@ -238,7 +333,14 @@ public:
 class RichSaveFile : public RichParameter
 {
 public:
-	RichSaveFile(const QString& nm, const QString& filedefval, const QString& ext, const QString& desc = QString(), const QString& tltip = QString());
+	RichSaveFile(
+			const QString& nm,
+			const QString& filedefval,
+			const QString& ext,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichSaveFile();
 
 	QString stringType() const;
@@ -252,13 +354,25 @@ public:
 class RichMesh : public RichParameter
 {
 public:
-	RichMesh(const QString& nm, unsigned int meshindex, const MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
+	RichMesh(
+			const QString& nm,
+			unsigned int meshindex,
+			const MeshDocument* doc,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString& nm, unsigned int meshind, const QString& desc = QString(), const QString& tltip = QString());
+	RichMesh(
+			const QString& nm,
+			unsigned int meshind,
+			const QString& desc = QString(),
+			const QString& tltip = QString(),
+			bool hidden = false,
+			const QString& category = QString());
 	~RichMesh();
 
 	QString stringType() const;
-	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
 	RichMesh* clone() const;
 	bool operator==(const RichParameter& rb);

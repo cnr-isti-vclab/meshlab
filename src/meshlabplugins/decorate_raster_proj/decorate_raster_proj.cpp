@@ -29,7 +29,7 @@
 
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
-    if ((m_Mesh == NULL) || ( !m_Mesh->visible ) || (ctx == NULL))
+    if ((m_Mesh == NULL) || ( !m_Mesh->isVisible() ) || (ctx == NULL))
         return;
 
     glPushAttrib( GL_TRANSFORM_BIT );
@@ -65,7 +65,7 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneG
 
 void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
-	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->visible))
+	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->isVisible()))
 		return;
 
     glPushAttrib( GL_TRANSFORM_BIT );
@@ -232,44 +232,41 @@ void DecorateRasterProjPlugin::initGlobalParameterList(const QAction* act, RichP
 }
 
 
-void DecorateRasterProjPlugin::updateCurrentMesh(MeshDocument &m,
-												  const RichParameterList& par )
+void DecorateRasterProjPlugin::updateCurrentMesh(
+		MeshDocument &m,
+		const RichParameterList& par )
 {
-    if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") )
-    {
-        QMap<int,MeshDrawer> tmpScene = m_Scene;
-        m_Scene.clear();
+	if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") ) {
+		QMap<int,MeshDrawer> tmpScene = m_Scene;
+		m_Scene.clear();
 
-        for( MeshModel *md : m.meshIterator() )
-        {
-            QMap<int,MeshDrawer>::iterator t = tmpScene.find( md->id() );
-            if( t != tmpScene.end() )
-                m_Scene[ t.key() ] = t.value();
-            else
-                m_Scene[ md->id() ] = MeshDrawer( md );
-        }
-    }
-    else
-    {
-        if( m_CurrentMesh && m.mm()==m_CurrentMesh->mm() )
-            return;
+		for(const MeshModel& md : m.meshIterator() ) {
+			QMap<int,MeshDrawer>::iterator t = tmpScene.find(md.id());
+			if(t != tmpScene.end())
+				m_Scene[t.key()] = t.value();
+			else
+				m_Scene[md.id()] = MeshDrawer(&md);
+		}
+	}
+	else {
+		if( m_CurrentMesh && m.mm()==m_CurrentMesh->mm() )
+			return;
 
-        m_Scene.clear();
-        m_CurrentMesh = &( m_Scene[m.mm()->id()] = MeshDrawer(m.mm()) );
-    }
+		m_Scene.clear();
+		m_CurrentMesh = &( m_Scene[m.mm()->id()] = MeshDrawer(m.mm()) );
+	}
 
-    /*if( !s_AreVBOSupported )
-    {
-        par.setValue( "MeshLab::Decoration::ProjRasterUseVBO", BoolValue(false) );
-    }*/
+	/*if( !s_AreVBOSupported )
+	{
+		par.setValue( "MeshLab::Decoration::ProjRasterUseVBO", BoolValue(false) );
+	}*/
 
-    m_SceneBox.SetNull();
+	m_SceneBox.SetNull();
 
-    for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-    {
-        m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
-        /*m->update( m_Context, areVBORequired );*/
-    }
+	for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m ) {
+		m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
+		/*m->update( m_Context, areVBORequired );*/
+	}
 }
 
 

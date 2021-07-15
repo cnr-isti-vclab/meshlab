@@ -319,7 +319,7 @@ struct MLPoliciesStandAloneFunctions
 
 	static bool isPrimitiveModalityWorthToBeActivated(MLRenderingData::PRIMITIVE_MODALITY pm, bool wasvisualized, bool wasmeanigful, bool ismeaningful);
 
-	static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(MeshModel* m);
+	static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(const MeshModel* m);
 
 	static void filterUselessUdpateAccordingToMeshMask(MeshModel* m, MLRenderingData::RendAtts& atts);
 

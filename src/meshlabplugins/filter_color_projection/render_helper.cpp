@@ -187,7 +187,7 @@ int RenderHelper::initializeMeshBuffers(MeshModel *mesh, vcg::CallBackPos *cb)
   return 0;
 }
 
-void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode, MLPluginGLContext* plugcontext, float camNear, float camFar)
+void RenderHelper::renderScene(const Shotm &view, MeshModel *mesh, RenderingMode mode, MLPluginGLContext* plugcontext, float camNear, float camFar)
 {
   int wt = view.Intrinsics.ViewportPx[0];
   int ht = view.Intrinsics.ViewportPx[1];

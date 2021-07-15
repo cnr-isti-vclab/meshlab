@@ -112,32 +112,32 @@ void ShadowMapping::renderingFromLightUnsetup(){
 }
 
 void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
-    GLfloat g_mModelView[16];
-    GLfloat g_mProjection[16];
+	GLfloat g_mModelView[16];
+	GLfloat g_mProjection[16];
 
-    MLSceneGLSharedDataContext* ctx = NULL;
-    if ((gla == NULL) || (gla->mvc() == NULL)) 
-        return;
-    ctx = gla->mvc()->sharedDataContext();
-    if (ctx == NULL)
-        return;
+	MLSceneGLSharedDataContext* ctx = NULL;
+	if ((gla == NULL) || (gla->mvc() == NULL))
+		return;
+	ctx = gla->mvc()->sharedDataContext();
+	if (ctx == NULL)
+		return;
 
-    this->renderingFromLightSetup(md, gla);
-    glMatrixMode(GL_PROJECTION);
-    glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-    glMatrixMode(GL_MODELVIEW);
-    glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
+	this->renderingFromLightSetup(md, gla);
+	glMatrixMode(GL_PROJECTION);
+	glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+	glMatrixMode(GL_MODELVIEW);
+	glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
-    /***********************************************************/
-    //SHADOW MAP Generation
-    /***********************************************************/
+	/***********************************************************/
+	//SHADOW MAP Generation
+	/***********************************************************/
 
-    //first rendering to get shadowMap from the light point of view
-    glEnable(GL_POLYGON_OFFSET_FILL);
-    glPolygonOffset(4.0, 4.0);
+	//first rendering to get shadowMap from the light point of view
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(4.0, 4.0);
 
-    //binding the FBO
-    this->bind();
+	//binding the FBO
+	this->bind();
 	MLRenderingData dt;
 	MLRenderingData::RendAtts atts;
 	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
@@ -145,53 +145,50 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 	dt.set(MLRenderingData::PR_SOLID, atts);
 
-	for(MeshModel *m: md.meshIterator())
+	for(const MeshModel& m: md.meshIterator())
 	{
-		if ((m != NULL) && (m->visible))
-		{
-			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+		if (m.isVisible()) {
+			ctx->drawAllocatedAttributesSubset(m.id(), gla->context(), dt);
 		}
 	}
 	glDisable(GL_POLYGON_OFFSET_FILL);
-    //unbinding the FBO
-    this->unbind();
+	//unbinding the FBO
+	this->unbind();
 
-    this->renderingFromLightUnsetup();
+	this->renderingFromLightUnsetup();
 
-    /***********************************************************/
-    //SHADOW MAP Generation finished
-    /***********************************************************/
+	/***********************************************************/
+	//SHADOW MAP Generation finished
+	/***********************************************************/
 
-    GLint depthFuncOld;
-    glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-    glDepthFunc(GL_LEQUAL);
+	GLint depthFuncOld;
+	glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
+	glDepthFunc(GL_LEQUAL);
 
-    vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
-    glUseProgram(this->_shadowMappingProgram);
+	vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
+	glUseProgram(this->_shadowMappingProgram);
 
-    GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
-    glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
+	GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
+	glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
-    GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
-    glUniform1f(shadowIntensityLoc, this->_intensity);
+	GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
+	glUniform1f(shadowIntensityLoc, this->_intensity);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
-    GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
-    glUniform1i(loc, 0);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for(MeshModel *m: md.meshIterator())
-	{
-		if ((m != NULL) && (m->visible))
-		{
-			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(),dt);
+	GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
+	glUniform1i(loc, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	for(const MeshModel& m: md.meshIterator()) {
+		if (m.isVisible()) {
+			ctx->drawAllocatedAttributesSubset(m.id(), gla->context(),dt);
 		}
 	}
-    glDisable(GL_BLEND);
-    glDepthFunc((GLenum)depthFuncOld);
-    glUseProgram(0);
+	glDisable(GL_BLEND);
+	glDepthFunc((GLenum)depthFuncOld);
+	glUseProgram(0);
 }
 
 bool ShadowMapping::setup()

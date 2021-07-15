@@ -483,13 +483,11 @@ void MeshShaderRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLShare
 	}
 	// * clear the errors, if any
 	glGetError();
-	if ((gla != NULL) && (gla->mvc() != NULL))
-	{
+	if ((gla != NULL) && (gla->mvc() != NULL)) {
 		MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
-		for(MeshModel * mp : md.meshIterator())
-		{
-			if ((mp != NULL) && (gla->meshVisibilityMap[mp->id()]))
-				shared->draw(mp->id(),gla->context());
+		for(const MeshModel& mp : md.meshIterator()) {
+			if (gla->meshVisibilityMap[mp.id()])
+				shared->draw(mp.id(),gla->context());
 		}
 	}
 	glUseProgramObjectARB(0);

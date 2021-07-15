@@ -25,10 +25,6 @@ src/external/CGAL-5.2.1
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe
-#install/snap20????/prime
-#install/snap20????/parts
-#install/snap20????/stage
-#install/snap20????/*.snap
 src/common/generated_version_header.h
 
 ##Standard cmake gitignore##
