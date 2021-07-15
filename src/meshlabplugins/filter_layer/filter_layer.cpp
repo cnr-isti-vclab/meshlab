@@ -143,7 +143,7 @@ RichParameterList FilterLayerPlugin::initParameterList(const QAction *action, co
 		parlst.addParam(RichBool ("MergeVertices", true,  "Merge duplicate vertices",
 								  "Merge the vertices that are duplicated among different layers. \n\n"
             "Very useful when the layers are spliced portions of a single big mesh."));
-		parlst.addParam(RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
+		parlst.addParam(RichBool ("AlsoUnreferenced", true, "Keep unreferenced vertices",
 								  "Do not discard unreferenced vertices from source layers\n\n"
             "Necessary for point-cloud layers"));
 		break;
