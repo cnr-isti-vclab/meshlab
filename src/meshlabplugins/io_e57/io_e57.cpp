@@ -284,6 +284,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
     scanHeader.pose.rotation = quaternion;
 
+    scanHeader.pointFields.cartesianInvalidStateField = true;
     scanHeader.pointFields.cartesianXField = true;
     scanHeader.pointFields.cartesianYField = true;
     scanHeader.pointFields.cartesianZField = true;
@@ -476,9 +477,6 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
                         // TODO: should we use the colors from the image 2D?
                     }
 
-                }
-                else {
-                    std::cerr << "Invalid Point!\n";
                 }
             }
         }
