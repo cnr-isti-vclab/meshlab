@@ -35,6 +35,7 @@ function(message)
 	if (NOT MESSAGE_QUIET)
 		_message(${ARGN})
 	endif()
+endfunction()
 
 function(add_file_format_info_plist)
 	cmake_parse_arguments(ARG "" "TARGET;FILE;FORMAT" "" ${ARGN})
@@ -74,5 +75,4 @@ function(set_additional_settings_info_plist)
 		TARGET ${ARG_TARGET}
 		FILE ${ARG_FILE}
 		FORMAT PLY)
->>>>>>> origin/master
 endfunction()
