@@ -43,7 +43,34 @@ namespace vcg {
             class E57Data3DPoints {
 
             private:
-                e57::Data3DPointsData data3DPointsData{};
+                e57::Data3DPointsData_t<Scalarm> data3DPointsData{};
+
+                // XYZ Coordinates
+                std::vector<Scalarm> cartesianX;
+                std::vector<Scalarm> cartesianY;
+                std::vector<Scalarm> cartesianZ;
+                std::vector<int8_t> cartesianInvalidState;
+
+                // RAE Coordinates
+                std::vector<Scalarm> sphericalRange;
+                std::vector<Scalarm> sphericalElevation;
+                std::vector<Scalarm> sphericalAzimuth;
+                std::vector<int8_t> sphericalInvalidState;
+
+                // Intensity
+                std::vector<float> intensity; /* Quality */
+                std::vector<int8_t> intensityInvalid;
+
+                // Colors
+                std::vector<uint8_t> colorRed;
+                std::vector<uint8_t> colorGreen;
+                std::vector<uint8_t> colorBlue;
+                std::vector<int8_t> colorInvalid;
+
+                // Normals
+                std::vector<float> normalX;
+                std::vector<float> normalY;
+                std::vector<float> normalZ;
 
             public:
 
@@ -51,78 +78,83 @@ namespace vcg {
 
                 explicit E57Data3DPoints(size_t buffSize, e57::Data3D& scanHeader) {
 
-                    data3DPointsData.rowIndex = new int32_t [buffSize];
-                    data3DPointsData.columnIndex = new int32_t [buffSize];
-
                     if (scanHeader.pointFields.cartesianXField && scanHeader.pointFields.cartesianYField &&
                         scanHeader.pointFields.cartesianZField) {
 
                         // XYZ coordinates
-                        data3DPointsData.cartesianX = new float [buffSize];
-                        data3DPointsData.cartesianY = new float [buffSize];
-                        data3DPointsData.cartesianZ = new float [buffSize];
+                        cartesianX.resize(buffSize); cartesianY.resize(buffSize); cartesianZ.resize(buffSize);
+
+                        data3DPointsData.cartesianX = cartesianX.data();
+                        data3DPointsData.cartesianY = cartesianY.data();
+                        data3DPointsData.cartesianZ = cartesianZ.data();
+
                         if (scanHeader.pointFields.cartesianInvalidStateField) {
-                            data3DPointsData.cartesianInvalidState = new int8_t [buffSize];
+                            cartesianInvalidState.resize(buffSize);
+                            data3DPointsData.cartesianInvalidState = cartesianInvalidState.data();
+                        }
+                    }
+
+                    if (scanHeader.pointFields.sphericalAzimuthField && scanHeader.pointFields.sphericalElevationField &&
+                        scanHeader.pointFields.sphericalRangeField) {
+
+                        //
+                        sphericalRange.resize(buffSize); sphericalElevation.resize(buffSize); sphericalAzimuth.resize(buffSize);
+
+                        data3DPointsData.sphericalRange = sphericalRange.data();
+                        data3DPointsData.sphericalAzimuth = sphericalAzimuth.data();
+                        data3DPointsData.sphericalElevation = sphericalElevation.data();
+
+                        if (scanHeader.pointFields.sphericalInvalidStateField) {
+                            sphericalInvalidState.resize(buffSize);
+                            data3DPointsData.sphericalInvalidState = sphericalInvalidState.data();
                         }
                     }
 
                     if (scanHeader.pointFields.intensityField) {
-                        data3DPointsData.intensity = new float [buffSize];
-                        data3DPointsData.isIntensityInvalid = new int8_t [buffSize];
+
+                        intensity.resize(buffSize);
+                        data3DPointsData.intensity = intensity.data();
+
+                        if (scanHeader.pointFields.isIntensityInvalidField) {
+                            intensityInvalid.resize(buffSize);
+                            data3DPointsData.isIntensityInvalid = intensityInvalid.data();
+                        }
                     }
 
                     if (scanHeader.pointFields.colorRedField && scanHeader.pointFields.colorGreenField &&
                         scanHeader.pointFields.colorBlueField) {
 
-                        data3DPointsData.colorRed = new uint8_t [buffSize];
-                        data3DPointsData.colorGreen = new uint8_t [buffSize];
-                        data3DPointsData.colorBlue = new uint8_t [buffSize];
-                        data3DPointsData.isColorInvalid = new int8_t [buffSize];
+                        colorRed.resize(buffSize); colorGreen.resize(buffSize); colorBlue.resize(buffSize);
+
+                        data3DPointsData.colorRed = colorRed.data();
+                        data3DPointsData.colorGreen = colorGreen.data();
+                        data3DPointsData.colorBlue = colorBlue.data();
+
+                        if (scanHeader.pointFields.isColorInvalidField) {
+                            colorInvalid.resize(buffSize);
+                            data3DPointsData.isColorInvalid = colorInvalid.data();
+                        }
                     }
 
                     if (scanHeader.pointFields.normalX && scanHeader.pointFields.normalY &&
                         scanHeader.pointFields.normalZ) {
 
-                        data3DPointsData.normalX = new float[buffSize];
-                        data3DPointsData.normalY = new float[buffSize];
-                        data3DPointsData.normalZ = new float[buffSize];
+                        normalX.resize(buffSize); normalY.resize(buffSize); normalZ.resize(buffSize);
+
+                        data3DPointsData.normalX = normalX.data();
+                        data3DPointsData.normalY = normalY.data();
+                        data3DPointsData.normalZ = normalZ.data();
                     }
                 }
 
-                ~E57Data3DPoints() {
-
-                    delete[] data3DPointsData.rowIndex;
-                    delete[] data3DPointsData.columnIndex;
-
-                    if (areCoordinatesAvailable()) {
-
-                        delete[] this->data3DPointsData.cartesianX;
-                        delete[] this->data3DPointsData.cartesianY;
-                        delete[] this->data3DPointsData.cartesianZ;
-                        delete[] this->data3DPointsData.cartesianInvalidState;
-                    }
-
-                    if (isQualityAvailable()) {
-                        delete[] this->data3DPointsData.intensity;
-                        delete[] this->data3DPointsData.isIntensityInvalid;
-                    }
-
-                    if (areNormalsAvailable()) {
-                        delete[] this->data3DPointsData.normalX;
-                        delete[] this->data3DPointsData.normalY;
-                        delete[] this->data3DPointsData.normalZ;
-                    }
-
-                    if (areColorsAvailable()) {
-                        delete[] this->data3DPointsData.colorRed;
-                        delete[] this->data3DPointsData.colorGreen;
-                        delete[] this->data3DPointsData.colorBlue;
-                        delete[] this->data3DPointsData.isColorInvalid;
-                    }
-                }
+                ~E57Data3DPoints() {}
 
                 inline bool areCoordinatesAvailable() const {
                     return this->data3DPointsData.cartesianX || this->data3DPointsData.cartesianY || this->data3DPointsData.cartesianZ;
+                }
+
+                inline bool areSphericalCoordinatesAvailable() const {
+                    return this->data3DPointsData.sphericalRange || this->data3DPointsData.sphericalAzimuth || this->data3DPointsData.sphericalElevation;
                 }
 
                 inline bool areColorsAvailable() const {

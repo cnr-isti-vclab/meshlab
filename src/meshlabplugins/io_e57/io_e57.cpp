@@ -208,7 +208,7 @@ std::pair<e57::Image2D, QImage> E57IOPlugin::extractMeshImage(const e57::Reader 
         return std::pair<e57::Image2D, QImage>{imageHeader, QImage{}};
     }
 
-    // Get sizes speces for the image
+    // Get sizes specs for the image
     fileReader.GetImage2DSizes(scanIndex, imageProjection, imageType, width, height, size,
                                            imageMaskType, imageVisualType);
 
@@ -311,7 +311,6 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
     scanIndex = fileWriter.NewData3D(scanHeader);
 
-
     vcg::tri::io::E57Data3DPoints data3DPoints{totalPoints, scanHeader};
     e57::Data3DPointsData& pointsData = data3DPoints.points();
 
@@ -413,9 +412,6 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
     // object holding data read from E57 file
     vcg::tri::io::E57Data3DPoints data3DPoints{buffSize, scanHeader};
-    if (!data3DPoints.areCoordinatesAvailable()) {
-        return;
-    }
 
     size_t size = 0;
     auto dataReader = fileReader.SetUpData3DPointsData(scanIndex, buffSize, data3DPoints.points());
@@ -444,38 +440,49 @@ void E57IOPlugin::loadMesh(MeshModel &m, int &mask, int scanIndex, size_t buffSi
 
                 Point3m coordinates;
 
-                if (pointsData.cartesianInvalidState == nullptr || pointsData.cartesianInvalidState[i] == 0) {
+                if (data3DPoints.areCoordinatesAvailable()) {
 
-                    coordinates[0] = pointsData.cartesianX[i];
-                    coordinates[1] = pointsData.cartesianY[i];
-                    coordinates[2] = pointsData.cartesianZ[i];
-
-                    auto vertex = vcg::tri::Allocator<CMeshO>::AddVertex(m.cm, coordinates);
-
-                    // Set the normals.
-                    if (data3DPoints.areNormalsAvailable()) {
-                        vertex->N()[0] = pointsData.normalX[i];
-                        vertex->N()[1] = pointsData.normalY[i];
-                        vertex->N()[2] = pointsData.normalZ[i];
+                    if (pointsData.cartesianInvalidState == nullptr || pointsData.cartesianInvalidState[i] == 0) {
+                        coordinates[0] = pointsData.cartesianX[i];
+                        coordinates[1] = pointsData.cartesianY[i];
+                        coordinates[2] = pointsData.cartesianZ[i];
                     }
-
-                    // Set the quality.
-                    if (data3DPoints.isQualityAvailable()) {
-                        vertex->Q() = pointsData.intensity[i];
-                    }
-
-                    // Set the point color.
-                    if (data3DPoints.areColorsAvailable()) {
-                        vertex->C()[0] = pointsData.colorRed[i];
-                        vertex->C()[1] = pointsData.colorGreen[i];
-                        vertex->C()[2] = pointsData.colorBlue[i];
-                        vertex->C()[3] = 0xFF;
-                    }
-                    else {
-                        // TODO: extract colors from the image?
-                    }
-
                 }
+                else if (data3DPoints.areSphericalCoordinatesAvailable()) {
+
+                    if (pointsData.sphericalInvalidState == nullptr || pointsData.sphericalInvalidState[i] == 0) {
+                        coordinates.FromPolarRad(pointsData.sphericalRange[i], pointsData.sphericalAzimuth[i], pointsData.sphericalElevation[i]);
+                    }
+                }
+                else {
+                    continue;
+                }
+
+                auto vertex = vcg::tri::Allocator<CMeshO>::AddVertex(m.cm, coordinates);
+
+                // Set the normals.
+                if (data3DPoints.areNormalsAvailable()) {
+                    vertex->N()[0] = pointsData.normalX[i];
+                    vertex->N()[1] = pointsData.normalY[i];
+                    vertex->N()[2] = pointsData.normalZ[i];
+                }
+
+                // Set the quality.
+                if (data3DPoints.isQualityAvailable()) {
+                    vertex->Q() = pointsData.intensity[i];
+                }
+
+                // Set the point color.
+                if (data3DPoints.areColorsAvailable()) {
+                    vertex->C()[0] = pointsData.colorRed[i];
+                    vertex->C()[1] = pointsData.colorGreen[i];
+                    vertex->C()[2] = pointsData.colorBlue[i];
+                    vertex->C()[3] = 0xFF;
+                }
+                else {
+                    // TODO: extract colors from the image?
+                }
+
             }
         }
 
