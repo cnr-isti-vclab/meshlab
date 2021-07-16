@@ -128,7 +128,7 @@ RichParameterList FilterIsoParametrization::initParameterList(const QAction *a, 
 								 "3: Regularity : stop at minimum number of irregular vertices<br>"
 								 "4: L2 : stop at minimum OneWay L2 Stretch Eff")));
 		
-		par.addParam(RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slightly better results"));
+		par.addParam(RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and, eventually, slightly better results"));
 		par.addParam(RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust."
 															  "<br> Consider to disable this bool in case the object has topologycal noise or small handles."));
 //		par.addParam(RichOpenFile("AbsLoadName", "", {"*.txt"}, "Load AM", "The filename of the abstract mesh that has to be loaded. If empty, the abstract mesh will be computed according to the above parameters (suggested extension '.abs')."));

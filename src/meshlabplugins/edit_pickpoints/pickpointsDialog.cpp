@@ -103,7 +103,7 @@ PickedPointTreeWidgetItem::PickedPointTreeWidgetItem(
 	setName(name);
 
 	active = _active;
-	//would set the checkbox but qt doesnt allow a way to do this in the constructor
+	//would set the checkbox but qt doesn't allow a way to do this in the constructor
 
 	//set point and normal
 	setPointAndNormal(intputPoint, faceNormal);

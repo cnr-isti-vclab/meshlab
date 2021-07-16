@@ -41,7 +41,7 @@ On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparamet
 
 On __Windows__, we suggest to build meshlab using QtCreator. Before trying to build, you should:
 
- * install VisualStudio >= 2017 with the C++ developement package;
+ * install VisualStudio >= 2017 with the C++ development package;
  * install Qt >= 5.12 and QtCreator.
 
 then, open the CMakeLists.txt file and try to build MeshLab.

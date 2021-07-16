@@ -13,9 +13,9 @@ Simulates the aging effects due to small collisions or various chipping events
 <TR><TD> \c Int  </TD> <TD> Fractal Octaves </TD> <TD><i> The number of octaves that are used in the generation of the <br>fractal noise using Perlin noise; reasonalble values are in the <br>1..8 range. Setting it to 1 means using a simple Perlin Noise. -- </i></TD> </TR>
 <TR><TD> \c AbsPerc  </TD> <TD> Noise frequency scale </TD> <TD><i> Changes the noise frequency scale: this affects chip dimensions and <br>the distance between chips. The value denotes the average values <br>between two dents. Smaller number means small and frequent chips. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Noise clamp threshold [0..1] </TD> <TD><i> All the noise values smaller than this parameter will be <br> considered as 0. -- </i></TD> </TR>
-<TR><TD> \c Float  </TD> <TD> Displacement steps </TD> <TD><i> The whole displacement process is performed as a sequence of small <br>offsets applyed on each vertex. This parameter represents the number <br>of steps into which the displacement process will be splitted. <br>Useful to avoid the introduction of self intersections. <br>Bigger number means better accuracy. -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> Displacement steps </TD> <TD><i> The whole displacement process is performed as a sequence of small <br>offsets applied on each vertex. This parameter represents the number <br>of steps into which the displacement process will be split. <br>Useful to avoid the introduction of self intersections. <br>Bigger number means better accuracy. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Affect only selected faces </TD> <TD><i> The aging procedure will be applied to the selected faces only. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Store erosion informations </TD> <TD><i> Select this option if you want to store the erosion informations <br>over the mesh. A new attribute will be added to each vertex <br>to contain the displacement offset applied to that vertex. -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Store erosion information </TD> <TD><i> Select this option if you want to store the erosion information <br>over the mesh. A new attribute will be added to each vertex <br>to contain the displacement offset applied to that vertex. -- </i></TD> </TR>
 </TABLE>
 
 \section f1 Ambient Occlusion - Per Vertex 
@@ -46,12 +46,12 @@ Generates environment occlusions values for the loaded mesh
 <TR><TD> \c Int  </TD> <TD> Depth texture size(should be 2^n) </TD> <TD><i> Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance -- </i></TD> </TR>
 </TABLE>
 
-\section f3 Automatic pair Alignement 
+\section f3 Automatic pair Alignment 
 
 Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Mesh  </TD> <TD> First Mesh </TD> <TD><i> The mesh were the coplanar bases are sampled (it will contain the trasformation) -- </i></TD> </TR>
+<TR><TD> \c Mesh  </TD> <TD> First Mesh </TD> <TD><i> The mesh were the coplanar bases are sampled (it will contain the transformation) -- </i></TD> </TR>
 <TR><TD> \c Mesh  </TD> <TD> Second Mesh </TD> <TD><i> The mesh were similar coplanar based are searched. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Estimated fraction of the
  first mesh overlapped by the second </TD> <TD><i>  -- </i></TD> </TR>
@@ -66,7 +66,7 @@ Reconstruct a surface using the <b>Ball Pivoting Algorithm</b> (Bernardini et al
 <TR><TD> \c AbsPerc  </TD> <TD> Pivoting Ball radius (0 autoguess) </TD> <TD><i> The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Clustering radius (% of ball radius) </TD> <TD><i> To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Angle Threshold (degrees) </TD> <TD><i> If we encounter a crease angle that is too large we should stop the ball rolling -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Delete intial set of faces </TD> <TD><i> if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius. -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Delete initial set of faces </TD> <TD><i> if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius. -- </i></TD> </TR>
 </TABLE>
 
 \section f5 Remove vertices wrt quality 
@@ -102,9 +102,9 @@ Align this mesh with another that has corresponding picked points.
 <TR><TD> \c Float  </TD> <TD> Minimal Starting Distance </TD> <TD><i> For all the chosen sample on one mesh we consider for ICP only the samples nearer than this value.If MSD is too large outliers could be included, if it is too small convergence will be very slow. A good guess is needed here, suggested values are in the range of 10-100 times of the device scanning error.This value is also dynamically changed by the 'Reduce Distance Factor' -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Target Distance </TD> <TD><i> When 50% of the chosen samples are below this distance we consider the two mesh aligned. Usually it should be a value lower than the error of the scanning device.  -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Max Iteration Num </TD> <TD><i> The maximum number of iteration that the ICP is allowed to perform. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Normal Equalized Sampling </TD> <TD><i> if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way. -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Normal Equalized Sampling </TD> <TD><i> if true (default) the sample points of icp are chosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> MSD Reduce Factor </TD> <TD><i> At each ICP iteration the Minimal Starting Distance is reduced to be 5 times the <Reduce Factor> percentile of the sample distances (e.g. if RF is 0.9 the new Minimal Starting Distance is 5 times the value <X> such that 90% of the sample lies at a distance lower than <X>. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Rigid matching </TD> <TD><i> If true the ICP is cosntrained to perform matching only throug roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear). -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Rigid matching </TD> <TD><i> If true the ICP is constrained to perform matching only through roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear). -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Use Markers for Alignment </TD> <TD><i> if true (default), then use the user picked markers to do an alignment (or pre alignment if you also use ICP). -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Scale the mesh </TD> <TD><i> if true (false by default), in addition to the alignment, scale the mesh based on the points picked -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Use ICP for Alignment </TD> <TD><i> if true (default), then use the ICP to align the two meshes. -- </i></TD> </TR>
@@ -143,7 +143,7 @@ Removes t-vertices from the mesh by collapsing the shortest of the incident edge
 
 \section f12 Remove Duplicate Faces 
 
-Remove all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.
+Remove all the duplicate faces. Two faces are considered equal if they are composed by the same set of vertices, regardless of the order of the vertices.
 <H2> Parameters </h2>
 No parameters.<br>
 \section f13 Remove Isolated folded face by edge flip 
@@ -153,10 +153,10 @@ Remove all the single folded faces. A face is considered folded if its normal is
 No parameters.<br>
 \section f14 Merge Close Vertices 
 
-Merge togheter all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.
+Merge together all the vertices that are nearer than the specified threshold. Like a unify duplicated vertices but with some tolerance.
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c AbsPerc  </TD> <TD> Merging distance </TD> <TD><i> All the vertices that closer than this threshold are merged toghether. Use very small values, default values is 1/10000 of bounding box diagonal.  -- </i></TD> </TR>
+<TR><TD> \c AbsPerc  </TD> <TD> Merging distance </TD> <TD><i> All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal.  -- </i></TD> </TR>
 </TABLE>
 
 \section f15 Clamp Vertex Quality 
@@ -167,7 +167,7 @@ Clamp vertex quality values to a given range according to specific values or to 
 <TR><TD> \c Float  </TD> <TD> Min </TD> <TD><i> The value that will be mapped with the lower end of the scale (blue) -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Max </TD> <TD><i> The value that will be mapped with the upper end of the scale (red) -- </i></TD> </TR>
 <TR><TD> \c DynamicFloat  </TD> <TD> Percentile Crop [0..100] </TD> <TD><i> If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Zero Simmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Zero Symmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
 </TABLE>
 
 \section f16 Saturate Vertex Quality 
@@ -176,7 +176,7 @@ Saturate vertex quality, so that for each vertex the gradient of the quality is 
 The saturation is done in a conservative way (quality is always decreased and never increased)
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Float  </TD> <TD> Gradient Threshold </TD> <TD><i> The maximum value admitted for the quality gradient (in absolute valu) -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> Gradient Threshold </TD> <TD><i> The maximum value admitted for the quality gradient (in absolute value) -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Update ColorMap </TD> <TD><i> if true the color ramp is computed again -- </i></TD> </TR>
 </TABLE>
 
@@ -188,7 +188,7 @@ Color vertices depending on their quality field (manually equalized).
 <TR><TD> \c Float  </TD> <TD> Min </TD> <TD><i> The value that will be mapped with the lower end of the scale (blue) -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Max </TD> <TD><i> The value that will be mapped with the upper end of the scale (red) -- </i></TD> </TR>
 <TR><TD> \c DynamicFloat  </TD> <TD> Percentile Crop [0..100] </TD> <TD><i> If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Zero Simmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Zero Symmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
 </TABLE>
 
 \section f18 Colorize by face Quality 
@@ -199,7 +199,7 @@ Color faces depending on their quality field (manually equalized).
 <TR><TD> \c Float  </TD> <TD> Min </TD> <TD><i> The value that will be mapped with the lower end of the scale (blue) -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Max </TD> <TD><i> The value that will be mapped with the upper end of the scale (red) -- </i></TD> </TR>
 <TR><TD> \c DynamicFloat  </TD> <TD> Percentile Crop [0..100] </TD> <TD><i> If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Zero Simmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Zero Symmetric </TD> <TD><i> If true the min max range will be enlarged to be symmertic (so that green is always Zero) -- </i></TD> </TR>
 </TABLE>
 
 \section f19 Discrete Curvatures 
@@ -256,7 +256,7 @@ Colorize Faces randomly. If internal edges are present they are used
 No parameters.<br>
 \section f27 Vertex Color Filling 
 
-Fills the color of the vertexes of the mesh  with a color choosed by the user.
+Fills the color of the vertexes of the mesh  with a color chosen by the user.
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c DynamicFloat  </TD> <TD> Red: </TD> <TD><i> Sets the red component of the color. -- </i></TD> </TR>
@@ -619,7 +619,7 @@ filter. You can select this layer by clicking on it in the layer dialog.
 
 \section f50 Conditional Vertex Selection 
 
-Boolean function using muparser lib to perform vertex selection over current mesh.<br>It's possibile to use parenthesis, per-vertex variables and boolean operator:<br><b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>It's possibile to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
+Boolean function using muparser lib to perform vertex selection over current mesh.<br>It's possible to use parenthesis, per-vertex variables and boolean operator:<br><b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>It's possible to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> boolean function </TD> <TD><i> type a boolean function that will be evaluated in order to select a subset of vertices<br>example: (y > 0) and (ny > 0) -- </i></TD> </TR>
@@ -628,7 +628,7 @@ Boolean function using muparser lib to perform vertex selection over current mes
 
 \section f51 Conditional Face Selection 
 
-Boolean function using muparser lib to perform faces selection over current mesh.<br>It's possibile to use parenthesis, per-vertex variables and boolean operator:<br><b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>It's possibile to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
+Boolean function using muparser lib to perform faces selection over current mesh.<br>It's possible to use parenthesis, per-vertex variables and boolean operator:<br><b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>It's possible to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> boolean function </TD> <TD><i> type a boolean function that will be evaluated in order to select a subset of faces<br> -- </i></TD> </TR>
@@ -636,7 +636,7 @@ Boolean function using muparser lib to perform faces selection over current mesh
 
 \section f52 Geometric Function 
 
-Geometric function using muparser lib to generate new Coord<br>You can change x,y,z for every vertex according to the function specified.<br>It's possibile to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
+Geometric function using muparser lib to generate new Coord<br>You can change x,y,z for every vertex according to the function specified.<br>It's possible to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> func x =  </TD> <TD><i> insert function to generate new coord for x -- </i></TD> </TR>
@@ -646,7 +646,7 @@ Geometric function using muparser lib to generate new Coord<br>You can change x,
 
 \section f53 Per Face Color Function 
 
-Color function using muparser lib to generate new RGB color for every face<br>Insert three function each one for red, green and blue channel respectively.<br>It's possibile to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
+Color function using muparser lib to generate new RGB color for every face<br>Insert three function each one for red, green and blue channel respectively.<br>It's possible to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> func r =  </TD> <TD><i> function to generate Red component. Expected Range 0-255 -- </i></TD> </TR>
@@ -656,7 +656,7 @@ Color function using muparser lib to generate new RGB color for every face<br>In
 
 \section f54 Per Vertex Color Function 
 
-Color function using muparser lib to generate new RGB color for every vertex<br>Insert three function each one for red, green and blue channel respectively.<br>It's possibile to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
+Color function using muparser lib to generate new RGB color for every vertex<br>Insert three function each one for red, green and blue channel respectively.<br>It's possible to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> func r =  </TD> <TD><i> function to generate Red component. Expected Range 0-255 -- </i></TD> </TR>
@@ -666,7 +666,7 @@ Color function using muparser lib to generate new RGB color for every vertex<br>
 
 \section f55 Per Vertex Quality Function 
 
-Quality function using muparser to generate new Quality for every vertex<br>It's possibile to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
+Quality function using muparser to generate new Quality for every vertex<br>It's possible to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> func q =  </TD> <TD><i> function to generate new Quality for every vertex -- </i></TD> </TR>
@@ -676,7 +676,7 @@ Quality function using muparser to generate new Quality for every vertex<br>It's
 
 \section f56 Per Face Quality Function 
 
-Quality function using muparser to generate new Quality for every face<br>Insert three function each one for quality of the three vertex of a face<br>It's possibile to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
+Quality function using muparser to generate new Quality for every face<br>Insert three function each one for quality of the three vertex of a face<br>It's possible to use per-face variables like attributes associated to the three vertex of every face.<br><b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,<b>q0,q1,q2</b> for <b>quality</b>.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> func q0 =  </TD> <TD><i> function to generate new Quality foreach face -- </i></TD> </TR>
@@ -686,7 +686,7 @@ Quality function using muparser to generate new Quality for every face<br>Insert
 
 \section f57 Define New Per Vertex Attribute 
 
-Add a new Per-Vertex scalar attribute to current mesh and fill it with the defined function.<br>The name specified below can be used in other filter functionIt's possibile to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
+Add a new Per-Vertex scalar attribute to current mesh and fill it with the defined function.<br>The name specified below can be used in other filter functionIt's possible to use the following per-vertex variables in the expression:<br>x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi, <br>and all custom <i>vertex attributes</i> already defined by user.<br>
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c String  </TD> <TD> Name </TD> <TD><i> the name of new attribute. you can access attribute in other filters through this name -- </i></TD> </TR>
@@ -748,7 +748,7 @@ The filter build the abstract Isoparameterization of a two-manifold triangular m
 <TR><TD> \c Int  </TD> <TD> Abstract Min Mesh Size </TD> <TD><i> This number and the following one indicate the range face number of the abstract mesh that is used for the parametrization process.<br>The algorithm will choose the best abstract mesh with the number of triangles within the specified interval.<br>If the mesh has a very simple structure this range can be very low and strict;for a roughly spherical object if you can specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>Large numbers (greater than 400) are usually not of practical use. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Abstract Max Mesh Size </TD> <TD><i> See above. -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Optimization Criteria </TD> <TD><i> Choose a metric to stop the parametrization within the interval<br>1: Best Heuristic : stop considering both isometry and number of faces of base domain<br>2: Area + Angle : stop at minimum area and angle distorsion<br>3: Regularity : stop at minimum number of irregular vertices<br>4: L2 : stop at minimum OneWay L2 Stretch Eff -- </i></TD> </TR>
-<TR><TD> \c Int  </TD> <TD> Convergence Precision </TD> <TD><i> This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> Convergence Precision </TD> <TD><i> This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and, eventually, slightly better results -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Double Step </TD> <TD><i> Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust, but it may increase the distorsion -- </i></TD> </TR>
 </TABLE>
 
@@ -765,7 +765,7 @@ Remeshing based on an Abstract Isoparameterization, each triangle of the domain 
 The filter build a new mesh with a standard atlased per wedge texture. The atlas is simply done by splitting each triangle of the abstract domain<br>For more details see: <br>Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>IEEE Transaction of Visualization and Computer Graphics 2010
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c DynamicFloat  </TD> <TD> BorderSize ratio </TD> <TD><i> This parameter controls the amount of space that must be left between each diamond when building the atlas.It directly affects how many triangle are splitted during this conversion. <br>In abstract parametrization mesh triangles can naturally cross the triangles of the abstract domain, so when converting to a standard parametrization we must cut all the triangles that protrudes outside each diamond more than the specified threshold.The unit of the threshold is in percentage of the size of the diamond,The bigger the threshold the less triangles are splitted, but the more UV space is used (wasted). -- </i></TD> </TR>
+<TR><TD> \c DynamicFloat  </TD> <TD> BorderSize ratio </TD> <TD><i> This parameter controls the amount of space that must be left between each diamond when building the atlas.It directly affects how many triangle are split during this conversion. <br>In abstract parametrization mesh triangles can naturally cross the triangles of the abstract domain, so when converting to a standard parametrization we must cut all the triangles that protrudes outside each diamond more than the specified threshold.The unit of the threshold is in percentage of the size of the diamond,The bigger the threshold the less triangles are split, but the more UV space is used (wasted). -- </i></TD> </TR>
 </TABLE>
 
 \section f65 Iso Parametrization Load Abstract Domain 
@@ -881,7 +881,7 @@ Removes null faces (the one with area equal to zero)
 No parameters.<br>
 \section f81 Select Faces with edges longer than... 
 
-Select all triangles having an edge with lenght greater or equal than a given threshold
+Select all triangles having an edge with length greater or equal than a given threshold
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c DynamicFloat  </TD> <TD> Edge Threshold </TD> <TD><i> All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps. -- </i></TD> </TR>
@@ -944,7 +944,7 @@ If disabled edges are collapsed onto one of the two original vertices and the fi
 
 \section f85 Subdivision Surfaces: Midpoint 
 
-Apply a plain subdivision scheme where every edge is splitted on its midpoint
+Apply a plain subdivision scheme where every edge is split on its midpoint
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c Int  </TD> <TD> Iterations </TD> <TD><i> Number of time the model is subdivided. -- </i></TD> </TR>
@@ -978,7 +978,7 @@ Generate a matrix transformation that rotates the mesh. The mesh can be rotated 
 <TABLE>
 <TR><TD> \c Enum  </TD> <TD> Rotation on: </TD> <TD><i> Choose a method -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Center of rotation: </TD> <TD><i> Choose a method -- </i></TD> </TR>
-<TR><TD> \c DynamicFloat  </TD> <TD> Rotation Angle </TD> <TD><i> Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value -- </i></TD> </TR>
+<TR><TD> \c DynamicFloat  </TD> <TD> Rotation Angle </TD> <TD><i> Angle of rotation (in <b>degree</b>). If snapping is enable this value is rounded according to the snap value -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Snap angle </TD> <TD><i> If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined) -- </i></TD> </TR>
 <TR><TD> \c Point3f  </TD> <TD> Custom axis </TD> <TD><i> This rotation axis is used only if the 'custom axis' option is chosen. -- </i></TD> </TR>
 <TR><TD> \c Point3f  </TD> <TD> Custom center </TD> <TD><i> This rotation center is used only if the 'custom point' option is chosen. -- </i></TD> </TR>
@@ -1010,7 +1010,7 @@ Generate a matrix transformation that scale the mesh. The mesh can be also autom
 <TR><TD> \c Bool  </TD> <TD> Uniform Scaling </TD> <TD><i> If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used) -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Center of rotation: </TD> <TD><i> Choose a method -- </i></TD> </TR>
 <TR><TD> \c Point3f  </TD> <TD> Custom center </TD> <TD><i> This rotation center is used only if the 'custom point' option is chosen. -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> Scale to Unit bbox </TD> <TD><i> If selected, the object is scaled to a box whose sides are at most 1 unit lenght -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> Scale to Unit bbox </TD> <TD><i> If selected, the object is scaled to a box whose sides are at most 1 unit length -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Freeze Matrix </TD> <TD><i> The transformation is explicitly applied and the vertex coords are actually changed -- </i></TD> </TR>
 </TABLE>
 
@@ -1022,7 +1022,7 @@ Generate a matrix transformation that translate the mesh. The mesh can be transl
 <TR><TD> \c DynamicFloat  </TD> <TD> X Axis </TD> <TD><i> Absolute translation amount along the X axis -- </i></TD> </TR>
 <TR><TD> \c DynamicFloat  </TD> <TD> Y Axis </TD> <TD><i> Absolute translation amount along the Y axis -- </i></TD> </TR>
 <TR><TD> \c DynamicFloat  </TD> <TD> Z Axis </TD> <TD><i> Absolute translation amount along the Z axis -- </i></TD> </TR>
-<TR><TD> \c Bool  </TD> <TD> translate center of bbox to the origin </TD> <TD><i> If selected, the object is scaled to a box whose sides are at most 1 unit lenght -- </i></TD> </TR>
+<TR><TD> \c Bool  </TD> <TD> translate center of bbox to the origin </TD> <TD><i> If selected, the object is scaled to a box whose sides are at most 1 unit length -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Freeze Matrix </TD> <TD><i> The transformation is explicitly applied and the vertex coords are actually changed -- </i></TD> </TR>
 </TABLE>
 
@@ -1036,7 +1036,7 @@ No parameters.<br>
 Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Int  </TD> <TD> Number of neigbors </TD> <TD><i> The number of neighbors used to estimate and propagate normals. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> Number of neighbors </TD> <TD><i> The number of neighbors used to estimate and propagate normals. -- </i></TD> </TR>
 </TABLE>
 
 \section f95 Compute curvature principal directions 
@@ -1158,7 +1158,7 @@ It is relative to the radius (local point spacing) of the vertices. -- </i></TD>
 <TR><TD> \c Float  </TD> <TD> Projection - Accuracy (adv) </TD> <TD><i> Threshold value used to stop the projections.
 This value is scaled by the mean point spacing to get the actual threshold. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Projection - Max iterations (adv) </TD> <TD><i> Max number of iterations for the projection. -- </i></TD> </TR>
-<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interresting results, but take care with extremesettings ! -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interesting results, but take care with extremesettings ! -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Accurate normals </TD> <TD><i> If checked, use the accurate MLS gradient instead of the local approximationto compute the normals. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Refinement - Max subdivisions </TD> <TD><i> Max number of subdivisions. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Refinement - Crease angle (degree) </TD> <TD><i> Threshold angle between two faces controlling the refinement. -- </i></TD> </TR>
@@ -1189,7 +1189,7 @@ It is relative to the radius (local point spacing) of the vertices. -- </i></TD>
 <TR><TD> \c Float  </TD> <TD> Projection - Accuracy (adv) </TD> <TD><i> Threshold value used to stop the projections.
 This value is scaled by the mean point spacing to get the actual threshold. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Projection - Max iterations (adv) </TD> <TD><i> Max number of iterations for the projection. -- </i></TD> </TR>
-<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interresting results, but take care with extremesettings ! -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interesting results, but take care with extremesettings ! -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Accurate normals </TD> <TD><i> If checked, use the accurate MLS gradient instead of the local approximationto compute the normals. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Grid Resolution </TD> <TD><i> The resolution of the grid on which we run the marching cubes.This marching cube is memory friendly, so you can safely set large values up to 1000 or even more. -- </i></TD> </TR>
 </TABLE>
@@ -1221,7 +1221,7 @@ It is relative to the radius (local point spacing) of the vertices. -- </i></TD>
 <TR><TD> \c Float  </TD> <TD> Projection - Accuracy (adv) </TD> <TD><i> Threshold value used to stop the projections.
 This value is scaled by the mean point spacing to get the actual threshold. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Projection - Max iterations (adv) </TD> <TD><i> Max number of iterations for the projection. -- </i></TD> </TR>
-<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interresting results, but take care with extremesettings ! -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> MLS - Spherical parameter </TD> <TD><i> Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,1 to a pure spherical fit, values between 0 and 1 gives intermediate results,while others real values might give interesting results, but take care with extremesettings ! -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Curvature type </TD> <TD><i> The type of the curvature to plot.<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature. -- </i></TD> </TR>
 </TABLE>
 
@@ -1259,7 +1259,7 @@ The surface reconstrction algorithm that have been used for a long time inside t
 
 \section f115 Simplfication: MC Edge Collapse 
 
-A simplification/cleaning algoritm tailored for meshes generated by Marching Cubes algorithm.
+A simplification/cleaning algorithm tailored for meshes generated by Marching Cubes algorithm.
 <H2> Parameters </h2>
 No parameters.<br>
 \section f116 Surface Reconstruction: Poisson 
@@ -1315,7 +1315,7 @@ Calculate the <b>Alpha Shape</b> of the mesh(Edelsbrunner and P.Mucke 1994) with
 
 \section f121 Select Visible Points 
 
-Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>It uses the Qhull library (http://www.qhull.org/ <br><br>The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.
+Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>It uses the Qhull library (http://www.qhull.org/ <br><br>The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.A point is considered visible if its transformed point lies on the convex hull of a transformed points cloud from the original mesh points.
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c DynamicFloat  </TD> <TD> radius threshold  </TD> <TD><i> Bounds the radius of the sphere used to select visible points.It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) according to the following equation: <br>radius = radius * pow(10,threshold); <br>As the radius increases more points are marked as visible.Use a big threshold for dense point clouds, a small one for sparse clouds. -- </i></TD> </TR>
@@ -1332,8 +1332,8 @@ Select the <b>visible points</b> in a point cloud, as viewed from a given viewpo
 The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertexes. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Float  </TD> <TD> Minimum mesh quality </TD> <TD><i> The specified quality value is mapped in the <b>lower</b> end of the choosen color scale. Default value: the minumum quality value found on the mesh. -- </i></TD> </TR>
-<TR><TD> \c Float  </TD> <TD> Maximum mesh quality </TD> <TD><i> The specified quality value is mapped in the <b>upper</b> end of the choosen color scale. Default value: the maximum quality value found on the mesh. -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> Minimum mesh quality </TD> <TD><i> The specified quality value is mapped in the <b>lower</b> end of the chosen color scale. Default value: the minimum quality value found on the mesh. -- </i></TD> </TR>
+<TR><TD> \c Float  </TD> <TD> Maximum mesh quality </TD> <TD><i> The specified quality value is mapped in the <b>upper</b> end of the chosen color scale. Default value: the maximum quality value found on the mesh. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Gamma biasing (0..100) </TD> <TD><i> Defines a gamma compression of the quality values, by setting the position of the middle of the color scale. Value is defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping. -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Mesh brightness </TD> <TD><i> must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with original colors, 2 represents a completely bright mesh -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Transfer Function type to apply to filter </TD> <TD><i> Choose the Transfer Function to apply to the filter -- </i></TD> </TR>
@@ -1342,7 +1342,7 @@ The filter maps quality levels into colors using a colorband built from a transf
 
 \section f123 Mesh Element Subsampling 
 
-Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen.
+Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c Enum  </TD> <TD> Element to sample: </TD> <TD><i> Choose what mesh element has to be used for the subsampling. At most one point sample will be added for each one of the chosen elements -- </i></TD> </TR>
@@ -1354,7 +1354,7 @@ Create a new layer populated with a point sampling of the current mesh, At most 
 Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Quality Weighted Sampling </TD> <TD><i> Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Exact Sample Num </TD> <TD><i> If the required total number of samples is not a strict exact requirement we can exploit a different algorithmbased on the choice of the number of samples inside each triangle by a random Poisson-distributed number with mean equal to the expected number of samples times the area of the triangle over the surface of the whole mesh. -- </i></TD> </TR>
 </TABLE>
@@ -1364,7 +1364,7 @@ Create a new layer populated with a point sampling of the current mesh; samples 
 Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i> stratified</i> strategies. Distribution is often biased by triangle shape.
 <H2> Parameters </h2>
 <TABLE>
-<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt. -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Element to sample: </TD> <TD><i> <b>Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered. This sampling leave space around edges and vertices for separate sampling of these entities.<br><b>Dual Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered.  <br><b>Long Edge Subdiv</b> each triangle is recursively subdivided along the longest edge. <br><b>Sample Edges</b> Only the edges of the mesh are uniformly sampled. <br><b>Sample NonFaux Edges</b> Only the non-faux edges of the mesh are uniformly sampled. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Random Sampling </TD> <TD><i> if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint. -- </i></TD> </TR>
 </TABLE>
@@ -1375,7 +1375,7 @@ Create a new layer populated with a  subsampling of the vertexes of the current 
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c AbsPerc  </TD> <TD> Cell Size </TD> <TD><i> The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values. -- </i></TD> </TR>
-<TR><TD> \c Enum  </TD> <TD> Representative Strataegy: </TD> <TD><i> <b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br><b>Closes to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones. -- </i></TD> </TR>
+<TR><TD> \c Enum  </TD> <TD> Representative Strataegy: </TD> <TD><i> <b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br><b>Closes to center</b>: for each cell we take the sample that is closest to the center of the cell. Chosen vertices are a subset of the original ones. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Selected </TD> <TD><i> If true only for the filter is applied only on the selected subset of the mesh. -- </i></TD> </TR>
 </TABLE>
 
@@ -1386,7 +1386,7 @@ Create a new layer populated with a point sampling of the current mesh; samples 
 <TABLE>
 <TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. The ray of the disk is calculated according to the sampling density. -- </i></TD> </TR>
 <TR><TD> \c AbsPerc  </TD> <TD> Explicit Radius </TD> <TD><i> If not zero this parameter override the previous parameter to allow exact radius specification -- </i></TD> </TR>
-<TR><TD> \c Int  </TD> <TD> MonterCarlo OverSampling </TD> <TD><i> The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> MonterCarlo OverSampling </TD> <TD><i> The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Base Mesh Subsampling </TD> <TD><i> If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Refine Existing Samples </TD> <TD><i> If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible.  -- </i></TD> </TR>
 <TR><TD> \c Mesh  </TD> <TD> Samples to be refined </TD> <TD><i> Used only if the above option is checked.  -- </i></TD> </TR>
@@ -1400,7 +1400,7 @@ Create a new layer populated with a point sampling of the current mesh; samples 
 <TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. The ray of the disk is calculated according to the sampling density. -- </i></TD> </TR>
 <TR><TD> \c AbsPerc  </TD> <TD> Explicit Radius </TD> <TD><i> If not zero this parameter override the previous parameter to allow exact radius specification -- </i></TD> </TR>
 <TR><TD> \c Float  </TD> <TD> Radius Variance </TD> <TD><i> The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling -- </i></TD> </TR>
-<TR><TD> \c Int  </TD> <TD> MonterCarlo OverSampling </TD> <TD><i> The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> MonterCarlo OverSampling </TD> <TD><i> The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is x means that x * <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Base Mesh Subsampling </TD> <TD><i> If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number. -- </i></TD> </TR>
 </TABLE>
 
@@ -1416,8 +1416,8 @@ Compute the Hausdorff Distance between two meshes, sampling one of the two and f
 <TR><TD> \c Bool  </TD> <TD> Sample Edges </TD> <TD><i> See the above comment. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Sample FauxEdge </TD> <TD><i> See the above comment. -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Sample Faces </TD> <TD><i> See the above comment. -- </i></TD> </TR>
-<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt. -- </i></TD> </TR>
-<TR><TD> \c AbsPerc  </TD> <TD> Max Distance </TD> <TD><i> Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max. -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> Number of samples </TD> <TD><i> The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt. -- </i></TD> </TR>
+<TR><TD> \c AbsPerc  </TD> <TD> Max Distance </TD> <TD><i> Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max. -- </i></TD> </TR>
 </TABLE>
 
 \section f130 Texel Sampling 
@@ -1426,7 +1426,7 @@ Create a new layer with a point sampling of the current mesh, a sample for each 
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c Int  </TD> <TD> Texture Width </TD> <TD><i> A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.
- Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>If this parameter is 0 the size of the current texture is choosen. -- </i></TD> </TR>
+ Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>If this parameter is 0 the size of the current texture is chosen. -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Texture Height </TD> <TD><i> A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.
  Setting this param to 256 means that you get at most 256x256 = 65536 samples) -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> UV Space Sampling </TD> <TD><i> The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience. -- </i></TD> </TR>
@@ -1435,7 +1435,7 @@ Create a new layer with a point sampling of the current mesh, a sample for each 
 
 \section f131 Vertex Attribute Transfer 
 
-Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>The algorithm assumes that the two meshes are reasonably similar and aligned.
+Transfer the chosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>The algorithm assumes that the two meshes are reasonably similar and aligned.
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c Mesh  </TD> <TD> Source Mesh </TD> <TD><i> The mesh that contains the source data that we want to transfer. -- </i></TD> </TR>
@@ -1445,7 +1445,7 @@ Transfer the choosen per-vertex attributes from one mesh to another. Useful to t
 <TR><TD> \c Bool  </TD> <TD> Transfer Color </TD> <TD><i> if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Transfer quality </TD> <TD><i> if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh -- </i></TD> </TR>
 <TR><TD> \c Bool  </TD> <TD> Store dist. as quality </TD> <TD><i> if enabled, we store the distance of the transferred value as in the vertex quality -- </i></TD> </TR>
-<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering attributes. -- </i></TD> </TR>
+<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything within this distance are rejected and not considered for recovering attributes. -- </i></TD> </TR>
 </TABLE>
 
 \section f132 Uniform Mesh Resampling 
@@ -1494,7 +1494,7 @@ Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of
 
 \section f136 Regular Recursive Sampling 
 
-The bbox is recrusively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples.
+The bbox is recursively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building offsetted samples.
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c AbsPerc  </TD> <TD> Precision </TD> <TD><i> Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger. -- </i></TD> </TR>
@@ -1672,7 +1672,7 @@ Structure Synth mesh creation based on Eisen Script.
 <TABLE>
 <TR><TD> \c String  </TD> <TD> Eisen Script grammar </TD> <TD><i> Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle  -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> seed for random construction </TD> <TD><i> Seed needed to build the mesh -- </i></TD> </TR>
-<TR><TD> \c Int  </TD> <TD> set maximum resolution of sphere primitves, it must be included between 1 and 4 </TD> <TD><i> increasing the resolution of the spheres will improve the quality of the mesh  -- </i></TD> </TR>
+<TR><TD> \c Int  </TD> <TD> set maximum resolution of sphere primitives, it must be included between 1 and 4 </TD> <TD><i> increasing the resolution of the spheres will improve the quality of the mesh  -- </i></TD> </TR>
 </TABLE>
 
 \section f160 UV to Color 
@@ -1729,7 +1729,7 @@ Transfer texture/vertex color from one mesh to another's texture.
 <TR><TD> \c Mesh  </TD> <TD> Source Mesh </TD> <TD><i> The mesh that contains the source data that we want to transfer -- </i></TD> </TR>
 <TR><TD> \c Mesh  </TD> <TD> Target Mesh </TD> <TD><i> The mesh whose texture will be filled according to source mesh texture or vertex color -- </i></TD> </TR>
 <TR><TD> \c Enum  </TD> <TD> Color Data Source </TD> <TD><i> Choose to transfer color information from source mesh texture or vertex color -- </i></TD> </TR>
-<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering data -- </i></TD> </TR>
+<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything within this distance are rejected and not considered for recovering data -- </i></TD> </TR>
 <TR><TD> \c String  </TD> <TD> Texture file </TD> <TD><i> The texture file to be created -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Texture width (px) </TD> <TD><i> The texture width -- </i></TD> </TR>
 <TR><TD> \c Int  </TD> <TD> Texture height (px) </TD> <TD><i> The texture height -- </i></TD> </TR>
@@ -1744,7 +1744,7 @@ Generates Vertex Color values picking color from another mesh texture.
 <TABLE>
 <TR><TD> \c Mesh  </TD> <TD> Source Mesh </TD> <TD><i> The mesh with associated texture that we want to sample from -- </i></TD> </TR>
 <TR><TD> \c Mesh  </TD> <TD> Target Mesh </TD> <TD><i> The mesh whose vertex color will be filled according to source mesh texture -- </i></TD> </TR>
-<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering color -- </i></TD> </TR>
+<TR><TD> \c AbsPerc  </TD> <TD> Max Dist Search </TD> <TD><i> Sample points for which we do not find anything within this distance are rejected and not considered for recovering color -- </i></TD> </TR>
 </TABLE>
 
 \section f167 Planar flipping optimization 
@@ -1813,7 +1813,7 @@ Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, ba
 
 \section f174 TwoStep Smooth 
 
-Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals
+Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged together and a step where the vertexes are fitted on the new normals
 <H2> Parameters </h2>
 <TABLE>
 <TR><TD> \c Int  </TD> <TD> Smoothing steps </TD> <TD><i> The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated. -- </i></TD> </TR>
@@ -1932,12 +1932,12 @@ Recompute face normals as the normal of the average of the normals of the triang
 No parameters.<br>
 \section f189 Normalize Face Normals 
 
-Normalize Face Normal Lenghts
+Normalize Face Normal Lengths
 <H2> Parameters </h2>
 No parameters.<br>
 \section f190 Normalize Vertex Normals 
 
-Normalize Vertex Normal Lenghts
+Normalize Vertex Normal Lengths
 <H2> Parameters </h2>
 No parameters.<br>
 \section f191 Vertex Linear Morphing 

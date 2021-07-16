@@ -68,7 +68,7 @@ public:
 	//get the normal
 	Point3m getNormal();
 	
-	//clear the ponint datas
+	//clear the point data
 	void clearPoint();
 		
 	//return if the point is set

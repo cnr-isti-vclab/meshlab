@@ -89,7 +89,7 @@ void EditPickPointsPlugin::decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 		currentModel = &mm;
 	}
 
-	//We have to calculate the position here because it doesnt work in the mouseEvent functions for some reason
+	//We have to calculate the position here because it doesn't work in the mouseEvent functions for some reason
 	Point3m pickedPoint;
 
 	if (moveSelectPoint)
@@ -99,7 +99,7 @@ void EditPickPointsPlugin::decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 				currentMousePosition.y(),
 				pickedPoint[0], pickedPoint[1], pickedPoint[2]); */
 
-				//let the dialog know that this was the pointed picked in case it wants the information
+				//let the dialog know that this was the point picked in case it wants the information
 		bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pickedPoint);
 		pickPointsDialog->selectOrMoveThisPoint(pickedPoint);
 

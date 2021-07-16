@@ -420,7 +420,7 @@ void DecorateRasterProjPlugin::updateDepthTexture(QGLContext* glctx, MLSceneGLSh
 void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
     // Update the stored raster with the one provided by the mesh document.
-    // If both are identical, the update is simply skiped.
+    // If both are identical, the update is simply skipped.
     if( m.rm() == m_CurrentRaster )
         return;
 
