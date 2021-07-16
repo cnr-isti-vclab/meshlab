@@ -2177,6 +2177,7 @@ bool MainWindow::importMesh(QString fileName)
 		}
 
 		meshDoc()->setBusy(true);
+		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 
 		//check how many meshes are going to be loaded from the file
 		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
@@ -2224,6 +2225,7 @@ bool MainWindow::importMesh(QString fileName)
 			QMessageBox::critical(this, "Meshlab Opening Error", e.what());
 		}
 		meshDoc()->setBusy(false);
+		qApp->restoreOverrideCursor();
 	}// end foreach file of the input list
 	GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 	
@@ -2258,6 +2260,7 @@ void MainWindow::reloadAllMesh()
 	t.start();
 	MeshDocument* md = meshDoc();
 	md->setBusy(true);
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	for(MeshModel& mmm : md->meshIterator()) {
 		if (mmm.idInFile() <= 0){
 			QString fileName = mmm.fullName();
@@ -2283,6 +2286,7 @@ void MainWindow::reloadAllMesh()
 		}
 	}
 	md->setBusy(false);
+	qApp->restoreOverrideCursor();
 	GLA()->Log(0, ("All meshes reloaded in " + std::to_string(t.elapsed()) + " msec.").c_str());
 	qb->reset();
 	
@@ -2308,6 +2312,7 @@ void MainWindow::reload()
 	}
 
 	meshDoc()->setBusy(true);
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	std::list<MeshModel*> meshList = meshDoc()->getMeshesLoadedFromSameFile(*meshDoc()->mm());
 	std::vector<bool> isReload(meshList.size(), true);
 	unsigned int i = 0;
@@ -2330,6 +2335,7 @@ void MainWindow::reload()
 		QMessageBox::critical(this, "Reload Error", e.what());
 	}
 	meshDoc()->setBusy(false);
+	qApp->restoreOverrideCursor();
 	qb->reset();
 	if (_currviewcontainer != NULL) {
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
