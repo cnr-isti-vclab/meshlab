@@ -666,7 +666,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
     parlst.addParam(RichBool ("absDist", false, "Absolute Distance",
                                   "If true a <b> not</b> signed distance field is computed. "
                                   "In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
-                                  "Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t"));
+                                  "Is useful to convert thin floating surfaces into <i> solid, thick meshes.</i>. t"));
   } break;
 
 	case FP_VORONOI_COLORING :

@@ -177,7 +177,7 @@ RichParameterList FilterTextureDefragPlugin::initParameterList(const QAction *ac
 		                    0.0,
 		                    100.0,
 		                    "UV Length Target (percentage)",
-		                    "Target UV length as percentage of the input length. The algorithm halts if the target UV length has be    en reached, or if no futher "
+							"Target UV length as percentage of the input length. The algorithm halts if the target UV length has be    en reached, or if no further "
 		                    "seams can be merged."));
 		parlst.addParam(RichFloat(
 		                    "offsetFactor",

@@ -368,7 +368,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
 		parlst.addParam(RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
 		parlst.addParam(RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
-		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove any unreference vertex (for which curvature values are not defined)"));
 		break;
 
 	case FP_QUADRIC_SIMPLIFICATION:

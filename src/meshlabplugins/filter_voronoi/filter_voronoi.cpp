@@ -180,7 +180,7 @@ RichParameterList FilterVoronoiPlugin::initParameterList(const QAction* action, 
 		par.addParam(RichBool("vertSphFlag", true, "Vertex -> Sph.", "If True all the vertices are converted into sphere."));
 		par.addParam(RichAbsPerc("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
 		par.addParam(RichBool("faceExtFlag", true, "Face -> Prism", "If True all the faces are converted into prism."));
-		par.addParam(RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substitued with each face."));
+		par.addParam(RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substituted with each face."));
 		par.addParam(RichAbsPerc("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
 		par.addParam(RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
 		par.addParam(RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));

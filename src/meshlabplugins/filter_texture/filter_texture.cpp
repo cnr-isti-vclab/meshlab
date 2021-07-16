@@ -244,7 +244,7 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		parlst.addParam(RichMesh ("targetMesh",trg->id(),&md, "Target Mesh",
 								  "The mesh whose texture will be filled according to source mesh data"));
 		parlst.addParam(RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
-								 "Choose what attribute has to be transferred onto the target texture. You can choose bettween Per vertex attributes (color,normal,quality) or to transfer color information from source mesh texture"));
+								 "Choose what attribute has to be transferred onto the target texture. You can choose between Per vertex attributes (color,normal,quality) or to transfer color information from source mesh texture"));
 		parlst.addParam(RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
 									tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering data")));
 		parlst.addParam(RichString("textName", trgFileName, "Texture file", "The texture file to be created"));
