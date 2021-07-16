@@ -87,7 +87,7 @@ FilterPlugin::FilterClass ExtraSampleDynPlugin::getClass(const QAction *) const 
 // 
 // In this sample a couple of parameter are declared as dynamic. That means that the meshlab framework will automatically 
 // manage the store and restore of the mesh state during the dynamic movement of the filter. 
-// The pluging writer is no more burdened with the task of saving the state but has only to declare what the filter changes 
+// The plugin writer is no more burdened with the task of saving the state but has only to declare what the filter changes 
 // (in this case just the vertex color). When a filter is dynamic (e.g. it has a dynamic float parameter) the meshlab 
 // framework will automatically store that part of the state at the opening of the dialog. When the user drag the slider,
 // the framework will restore the state and then simply call the apply callback of the filter. 
