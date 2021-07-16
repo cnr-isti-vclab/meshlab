@@ -61,6 +61,7 @@ function(set_additional_settings_info_plist)
 		POST_BUILD
 		COMMAND plutil -replace NSHighResolutionCapable -bool True ${ARG_FILE}
 		COMMAND plutil -replace CFBundleDocumentTypes -xml '<array/>' ${ARG_FILE}
+		COMMAND plutil -replace CFBundleIdentifier -string 'com.vcg.meshlab' ${ARG_FILE}
 	)
 
 	add_file_format_info_plist(
