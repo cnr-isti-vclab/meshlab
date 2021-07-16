@@ -42,6 +42,10 @@
 #include "StringNodeImpl.h"
 #include "VectorNodeImpl.h"
 
+#if __GNUC__ >= 11
+	#include <limits>
+#endif
+
 using namespace e57;
 using namespace XERCES_CPP_NAMESPACE;
 
