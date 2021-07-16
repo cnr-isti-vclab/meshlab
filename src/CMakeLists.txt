@@ -139,6 +139,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/io_bre
 			meshlabplugins/io_collada
 			meshlabplugins/io_ctm
+			meshlabplugins/io_e57
 			meshlabplugins/io_expe
 			meshlabplugins/io_gltf
 			meshlabplugins/io_json
@@ -148,7 +149,6 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/io_txt
 			meshlabplugins/io_u3d
 			meshlabplugins/io_x3d
-			meshlabplugins/io_e57
 
 			# Filter plugins
 			meshlabplugins/filter_sample

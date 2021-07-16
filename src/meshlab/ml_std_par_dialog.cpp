@@ -46,8 +46,7 @@ bool MeshlabStdDialog::showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocu
 
 	createFrame();
 	loadFrameContent();
-	if (isPreviewable())
-	{
+	if (isPreviewable()) {
 		meshState.create(curmask, curModel);
 		connect(stdParFrame, SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 	}

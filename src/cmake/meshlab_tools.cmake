@@ -60,7 +60,7 @@ function(set_additional_settings_info_plist)
 		TARGET ${ARG_TARGET}
 		POST_BUILD
 		COMMAND plutil -replace NSHighResolutionCapable -bool True ${ARG_FILE}
-		COMMAND plutil -insert CFBundleDocumentTypes -xml '<array/>' ${ARG_FILE}
+		COMMAND plutil -replace CFBundleDocumentTypes -xml '<array/>' ${ARG_FILE}
 	)
 
 	add_file_format_info_plist(

@@ -26,6 +26,8 @@
 
 #include "richparameterwidgets.h"
 
+#include <map>
+
 #include<QCheckBox>
 #include<QRadioButton>
 #include<QSpinBox>

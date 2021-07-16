@@ -115,11 +115,11 @@ void RichParameterListFrame::toggleAdvancedParameters()
 	if (hiddenFrame) {
 		if (hiddenFrame->isVisible()){
 			hiddenFrame->setVisible(false);
-			showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-ascending"));
+			showHiddenFramePushButton->setText("▼");
 		}
 		else {
 			hiddenFrame->setVisible(true);
-			showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-descending"));
+			showHiddenFramePushButton->setText("▲");
 		}
 		QFrame* p = dynamic_cast<QFrame*>(parent());
 		if (p){
@@ -195,7 +195,7 @@ void RichParameterListFrame::loadFrameContent(
 		hiddenFrame->setVisible(false);
 		showHiddenFramePushButton = new QPushButton("", this);
 		showHiddenFramePushButton->setFlat(true);
-		showHiddenFramePushButton->setIcon(QIcon::fromTheme("view-sort-ascending"));
+		showHiddenFramePushButton->setText("▼");
 		glay->addWidget(showHiddenFramePushButton, i++, 0, 1, 3);
 		connect(showHiddenFramePushButton, SIGNAL(clicked()), this, SLOT(toggleAdvancedParameters()));
 	}
