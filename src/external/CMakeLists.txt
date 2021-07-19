@@ -2,6 +2,8 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
+cmake_minimum_required(VERSION 3.10)
+
 option(
 	ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES
 	"Allow to use/build optional external libraries"
