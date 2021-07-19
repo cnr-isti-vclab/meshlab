@@ -21,6 +21,7 @@ if (TARGET external-xerces)
 		set(MESSAGE_QUIET ON)
 		add_subdirectory(e57 EXCLUDE_FROM_ALL)
 		unset(MESSAGE_QUIET)
+		install(TARGETS E57Format DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 
 		add_library(external-libE57Format INTERFACE)
 		target_link_libraries(external-libE57Format INTERFACE E57Format)
