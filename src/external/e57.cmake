@@ -18,13 +18,10 @@ if (TARGET external-xerces)
 
 		message(STATUS "- libE57Format - using bundled source")
 
+		set(E57_BUILD_SHARED OFF)
 		set(MESSAGE_QUIET ON)
 		add_subdirectory(e57 EXCLUDE_FROM_ALL)
 		unset(MESSAGE_QUIET)
-		get_target_property(target_type E57Format TYPE)
-		if (target_type STREQUAL "SHARED_LIBRARY")
-			install(TARGETS E57Format DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
-		endif ()
 
 		add_library(external-libE57Format INTERFACE)
 		target_link_libraries(external-libE57Format INTERFACE E57Format)
