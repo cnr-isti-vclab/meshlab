@@ -41,7 +41,7 @@ public:
 	void createFrame();
 	void loadFrameContent();
 
-	bool showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
+	bool showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * md, const QAction* q, MainWindow *mwi, QWidget *gla=0);
 	bool isPreviewable();
 
 public slots:
@@ -58,7 +58,7 @@ private slots:
 public:
 	QFrame *qf;
 	RichParameterListFrame *stdParFrame;
-	QAction *curAction;
+	const QAction *curAction;
 	MeshModelState meshState;
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;

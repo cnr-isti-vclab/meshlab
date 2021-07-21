@@ -29,7 +29,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p) :
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(FilterPlugin *mfi, MeshModel *mm, MeshDocument * mdp, const QAction *action, MainWindow *mwi, QWidget *gla)
 {
 	validcache = false;
 	curAction = action;
@@ -172,7 +172,7 @@ void MeshlabStdDialog::toggleHelp()
 
 void MeshlabStdDialog::applyClick()
 {
-	QAction *q = curAction;
+	const QAction *q = curAction;
 	stdParFrame->writeValuesOnParameterList(curParSet);
 
 	// Note that curModel CAN BE NULL (for creation filters on empty docs...)
@@ -208,7 +208,7 @@ void MeshlabStdDialog::applyDynamic()
 {
 	if (!previewCB->isChecked())
 		return;
-	QAction *q = curAction;
+	const QAction *q = curAction;
 	stdParFrame->writeValuesOnParameterList(curParSet);
 	//for cache mechanism
 	//needed to allocate the required memory space in prevParSet

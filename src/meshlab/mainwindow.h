@@ -176,7 +176,7 @@ private slots:
 	void applyEditMode();
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
-	void startFilter();
+	void startFilter(const QAction* action = nullptr);
 	void runFilterScript();
 	void showFilterScript();
 	void showTooltip(QAction*);

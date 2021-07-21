@@ -764,8 +764,7 @@ void MainWindow::endEdit()
 void MainWindow::applyLastFilter()
 {
 	if(GLA() != nullptr && GLA()->getLastAppliedFilter() != nullptr){
-		//TODO
-		//GLA()->getLastAppliedFilter()->trigger();
+		startFilter(GLA()->getLastAppliedFilter());
 	}
 }
 
@@ -911,7 +910,7 @@ void MainWindow::showTooltip(QAction* q)
 // - executeFilter callback invoked when the params have been set up.
 
 
-void MainWindow::startFilter()
+void MainWindow::startFilter(const QAction* action)
 {
 	if(currentViewContainer() == NULL) return;
 	if(GLA() == NULL) return;
@@ -923,8 +922,9 @@ void MainWindow::startFilter()
 	updateMenus();
 	
 	QStringList missingPreconditions;
-	QAction *action = qobject_cast<QAction *>(sender());
-	if (action == NULL)
+	if (action == nullptr)
+		action = qobject_cast<QAction *>(sender());
+	if (action == nullptr)
 		throw MLException("Invalid filter action value.");
 	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	if (meshDoc() == NULL)
