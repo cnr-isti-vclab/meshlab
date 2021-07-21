@@ -20,7 +20,7 @@ elseif(ALLOW_BUNDLED_XERCES AND EXISTS "${XERCES_DIR}/CMakeLists.txt")
 	message(STATUS "- XercesC - using bundled source")
 
 	set(MESSAGE_QUIET ON)
-	add_subdirectory(${XERCES_DIR})
+	add_subdirectory(${XERCES_DIR} EXCLUDE_FROM_ALL)
 	unset(MESSAGE_QUIET)
 
 	add_library(external-xerces INTERFACE)

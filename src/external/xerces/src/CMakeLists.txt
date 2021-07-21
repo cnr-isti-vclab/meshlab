@@ -1268,7 +1268,7 @@ include_directories(
 add_custom_target(xerces-c-headers SOURCES ${libxerces_c_HEADERS})
 set_target_properties(xerces-c-headers PROPERTIES FOLDER "Library")
 
-add_library(xerces-c
+add_library(xerces-c STATIC
   ${libxerces_c_SOURCES}
   ${libxerces_c_RESOURCES})
 target_link_libraries(xerces-c ${libxerces_c_DEPS})
