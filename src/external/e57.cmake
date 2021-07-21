@@ -18,7 +18,6 @@ if (TARGET external-xerces)
 
 		message(STATUS "- libE57Format - using bundled source")
 
-		set(E57_BUILD_SHARED OFF)
 		set(MESSAGE_QUIET ON)
 		add_subdirectory(e57 EXCLUDE_FROM_ALL)
 		unset(MESSAGE_QUIET)

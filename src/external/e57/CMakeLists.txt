@@ -72,9 +72,9 @@ option( E57_BUILD_SHARED
 	OFF
 )
 
-if( BUILD_SHARED_LIBS )
-	set( E57_BUILD_SHARED ON )
-endif()
+#if( BUILD_SHARED_LIBS )
+#	set( E57_BUILD_SHARED ON )
+#endif()
 
 set( revision_id "${PROJECT_NAME}-${PROJECT_VERSION}-${${PROJECT_NAME}_BUILD_TAG}" )
 message( STATUS "[E57] Revison ID: ${revision_id}" )
