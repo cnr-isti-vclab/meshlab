@@ -414,7 +414,7 @@ QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
 													"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
 													" Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
-		case FP_HAUSDORFF_DISTANCE         :  return QString("Compute the Hausdorff Distance between two layers, sampling one of the two and finding for each sample the closest point over the other mesh.");
+		case FP_HAUSDORFF_DISTANCE         :  return QString("Compute the Hausdorff Distance between two layers, sampling one of the two and finding for each sample the closest point over the other mesh. Distance is stored in vertex quality of the sampled mesh.");
 		case FP_DISTANCE_REFERENCE         :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
 		case FP_TEXEL_SAMPLING             :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
 		case FP_VERTEX_RESAMPLING          :  return QString("Transfer the chosen per-vertex attributes from one layer to another. Useful to transfer attributes to different representations of a same object.<br>"
