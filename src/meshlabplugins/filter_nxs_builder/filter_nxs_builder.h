@@ -28,13 +28,11 @@
 
 class NxsBuilderPlugin : public QObject, public FilterPlugin
 {
-	//keep these three lines unchanged
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
-	Q_INTERFACES(NxsBuilderPlugin)
+	Q_INTERFACES(FilterPlugin)
 
 public:
-	//enum used to give an ID to every filter implemented in the plugin
 	enum FileterIds {
 		FP_NXS_BUILDER,
 		FP_NXS_COMPRESS
@@ -58,13 +56,6 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-
-private:
-	void vertexDisplacement(
-			MeshDocument &md,
-			vcg::CallBackPos *cb,
-			bool updateNormals,
-			Scalarm max_displacement);
 };
 
 #endif //MESHLAB_FILTER_NXS_BUILDER_H

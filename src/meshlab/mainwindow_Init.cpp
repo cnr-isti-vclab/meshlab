@@ -744,6 +744,8 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuTexture);
 	filterMenuCamera = new MenuWithToolTip(tr("Camera"), this);
 	filterMenu->addMenu(filterMenuCamera);
+	filterMenuOther = new MenuWithToolTip(tr("Other"), this);
+	filterMenu->addMenu(filterMenuOther);
 
 
 	//this is used just to fill the menus with alhabetical order
@@ -761,89 +763,72 @@ void MainWindow::fillFilterMenu()
 		QAction *filterAction = iFilter->getFilterAction(p.first);
 		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
-		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if (filterClass & FilterPlugin::FaceColoring)
-		{
+		if (filterClass & FilterPlugin::FaceColoring) {
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::VertexColoring)
-		{
+		if (filterClass & FilterPlugin::VertexColoring) {
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::MeshColoring)
-		{
+		if (filterClass & FilterPlugin::MeshColoring) {
 			filterMenuColorize->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Selection)
-		{
+		if (filterClass & FilterPlugin::Selection) {
 			filterMenuSelect->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Cleaning)
-		{
+		if (filterClass & FilterPlugin::Cleaning) {
 			filterMenuClean->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Remeshing)
-		{
+		if (filterClass & FilterPlugin::Remeshing) {
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Smoothing)
-		{
+		if (filterClass & FilterPlugin::Smoothing) {
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Normal)
-		{
+		if (filterClass & FilterPlugin::Normal) {
 			filterMenuNormal->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Quality)
-		{
+		if (filterClass & FilterPlugin::Quality) {
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Measure)
-		{
+		if (filterClass & FilterPlugin::Measure) {
 			filterMenuQuality->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Layer)
-		{
+		if (filterClass & FilterPlugin::Layer) {
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::RasterLayer)
-		{
+		if (filterClass & FilterPlugin::RasterLayer) {
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::MeshCreation)
-		{
+		if (filterClass & FilterPlugin::MeshCreation) {
 			filterMenuCreate->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::RangeMap)
-		{
+		if (filterClass & FilterPlugin::RangeMap) {
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::PointSet)
-		{
+		if (filterClass & FilterPlugin::PointSet) {
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Sampling)
-		{
+		if (filterClass & FilterPlugin::Sampling) {
 			filterMenuSampling->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Texture)
-		{
+		if (filterClass & FilterPlugin::Texture) {
 			filterMenuTexture->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Polygonal)
-		{
+		if (filterClass & FilterPlugin::Polygonal) {
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if (filterClass & FilterPlugin::Camera)
-		{
+		if (filterClass & FilterPlugin::Camera) {
 			filterMenuCamera->addAction(filterAction);
 		}
+		if (filterClass & FilterPlugin::Other) {
+			filterMenuOther->addAction(filterAction);
+		}
+
 		//  MeshFilterInterface::Generic :
-		if (filterClass == 0)
-		{
+		if (filterClass == 0) {
 			filterMenu->addAction(filterAction);
 		}
 		//if(!filterAction->icon().isNull())

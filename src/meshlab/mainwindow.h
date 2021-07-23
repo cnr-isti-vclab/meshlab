@@ -358,159 +358,164 @@ public:
 private:
 	WordActionsMapAccessor wama;
 	//////// ToolBars ///////////////
-	QToolBar *mainToolBar;
-	QToolBar *decoratorToolBar;
-	QToolBar *editToolBar;
-	QToolBar *filterToolBar;
-	QToolBar *searchToolBar;
+	QToolBar* mainToolBar;
+	QToolBar* decoratorToolBar;
+	QToolBar* editToolBar;
+	QToolBar* filterToolBar;
+	QToolBar* searchToolBar;
 	MLRenderingGlobalToolbar* globrendtoolbar;
 	///////// Menus ///////////////
-	QMenu *fileMenu;
-	QMenu *filterMenu;
+	QMenu* fileMenu;
+	QMenu* filterMenu;
 	QMenu* recentProjMenu;
 	QMenu* recentFileMenu;
 
-	QMenu *filterMenuSelect;
-	QMenu *filterMenuClean;
-	QMenu *filterMenuCreate;
-	QMenu *filterMenuRemeshing;
-	QMenu *filterMenuPolygonal;
-	QMenu *filterMenuColorize;
-	QMenu *filterMenuSmoothing;
-	QMenu *filterMenuQuality;
-	QMenu *filterMenuMeshLayer;
-	QMenu *filterMenuRasterLayer;
-	QMenu *filterMenuNormal;
-	QMenu *filterMenuRangeMap;
-	QMenu *filterMenuPointSet;
-	QMenu *filterMenuSampling;
-	QMenu *filterMenuTexture;
-	QMenu *filterMenuCamera;
+	QMenu* filterMenuSelect;
+	QMenu* filterMenuClean;
+	QMenu* filterMenuCreate;
+	QMenu* filterMenuRemeshing;
+	QMenu* filterMenuPolygonal;
+	QMenu* filterMenuColorize;
+	QMenu* filterMenuSmoothing;
+	QMenu* filterMenuQuality;
+	QMenu* filterMenuMeshLayer;
+	QMenu* filterMenuRasterLayer;
+	QMenu* filterMenuNormal;
+	QMenu* filterMenuRangeMap;
+	QMenu* filterMenuPointSet;
+	QMenu* filterMenuSampling;
+	QMenu* filterMenuTexture;
+	QMenu* filterMenuCamera;
+	QMenu* filterMenuOther;
 
-	QMenu *editMenu;
+	QMenu* editMenu;
 
 	//Render Menu and SubMenu ////
-	QMenu *shadersMenu;
-	QMenu *renderMenu;
+	QMenu* shadersMenu;
+	QMenu* renderMenu;
 
 	//View Menu and SubMenu //////
-	QMenu *viewMenu;
-	QMenu *toolBarMenu;
+	QMenu* viewMenu;
+	QMenu* toolBarMenu;
 	//////////////////////////////
-	QMenu *windowsMenu;
-	QMenu *preferencesMenu;
-	QMenu *helpMenu;
-	QMenu *splitModeMenu;
-	QMenu *viewFromMenu;
-	QMenu *trackballStepMenu;
+	QMenu* windowsMenu;
+	QMenu* preferencesMenu;
+	QMenu* helpMenu;
+	QMenu* splitModeMenu;
+	QMenu* viewFromMenu;
+	QMenu* trackballStepMenu;
 	//////////// Split/Unsplit Menu from handle///////////
-	QMenu *handleMenu;
-	QMenu *splitMenu;
-	QMenu *unSplitMenu;
+	QMenu* handleMenu;
+	QMenu* splitMenu;
+	QMenu* unSplitMenu;
 	////////// Search Shortcut ////////////////
 	QShortcut* searchShortCut;
 	MyToolButton* searchButton;
 	SearchMenu* searchMenu;
 
 	//////////// Actions Menu File ///////////////////////
-	QAction *newProjectAct;
-	QAction *openProjectAct, *appendProjectAct, *saveProjectAct;
-	QAction *importMeshAct, *exportMeshAct, *exportMeshAsAct;
-	QAction *importRasterAct;
-	QAction *closeProjectAct;
-	QAction *reloadMeshAct;
-	QAction *reloadAllMeshAct;
-	QAction *saveSnapshotAct;
-	QAction *recentFileActs[MAXRECENTFILES];
-	QAction *recentProjActs[MAXRECENTFILES];
-	QAction *exitAct;
+	QAction* newProjectAct;
+	QAction* openProjectAct;
+	QAction* appendProjectAct;
+	QAction* saveProjectAct;
+	QAction* importMeshAct;
+	QAction* exportMeshAct;
+	QAction* exportMeshAsAct;
+	QAction* importRasterAct;
+	QAction* closeProjectAct;
+	QAction* reloadMeshAct;
+	QAction* reloadAllMeshAct;
+	QAction* saveSnapshotAct;
+	QAction* recentFileActs[MAXRECENTFILES];
+	QAction* recentProjActs[MAXRECENTFILES];
+	QAction* exitAct;
 	//////
-	QAction *lastFilterAct;
-	QAction *runFilterScriptAct;
-	QAction *showFilterScriptAct;
+	QAction* lastFilterAct;
+	QAction* runFilterScriptAct;
+	QAction* showFilterScriptAct;
 	//QAction* showFilterEditAct;
 	/////////// Actions Menu Edit  /////////////////////
-	QAction *suspendEditModeAct;
+	QAction* suspendEditModeAct;
 
 	///////////Actions Menu View ////////////////////////
-	QAction *fullScreenAct;
-	QAction *showToolbarStandardAct;
-	QAction *showInfoPaneAct;
-	QAction *showTrackBallAct;
-	QAction *resetTrackBallAct;
-	QAction *showLayerDlgAct;
-	QAction *showRasterAct;
+	QAction* fullScreenAct;
+	QAction* showToolbarStandardAct;
+	QAction* showInfoPaneAct;
+	QAction* showTrackBallAct;
+	QAction* resetTrackBallAct;
+	QAction* showLayerDlgAct;
+	QAction* showRasterAct;
 	///////////Actions Menu Windows /////////////////////
-	QAction *windowsTileAct;
-	QAction *windowsCascadeAct;
-	QAction *windowsNextAct;
-	QAction *closeAllAct;
-	QAction *setSplitHAct;
-	QAction *setSplitVAct;
-	QActionGroup *setSplitGroupAct;
-	QAction *setUnsplitAct;
+	QAction* windowsTileAct;
+	QAction* windowsCascadeAct;
+	QAction* windowsNextAct;
+	QAction* closeAllAct;
+	QAction* setSplitHAct;
+	QAction* setSplitVAct;
+	QActionGroup* setSplitGroupAct;
+	QAction* setUnsplitAct;
 	///////////Actions Menu Windows -> Split/UnSplit from Handle ////////////////////////
-	QActionGroup *splitGroupAct;
-	QActionGroup *unsplitGroupAct;
+	QActionGroup* splitGroupAct;
+	QActionGroup* unsplitGroupAct;
 
-	QAction *splitUpAct;
-	QAction *splitDownAct;
+	QAction* splitUpAct;
+	QAction* splitDownAct;
 
-	QAction *unsplitUpAct;
-	QAction *unsplitDownAct;
+	QAction* unsplitUpAct;
+	QAction* unsplitDownAct;
 
-	QAction *splitRightAct;
-	QAction *splitLeftAct;
+	QAction* splitRightAct;
+	QAction* splitLeftAct;
 
-	QAction *unsplitRightAct;
-	QAction *unsplitLeftAct;
+	QAction* unsplitRightAct;
+	QAction* unsplitLeftAct;
 
 	///////////Actions Menu Windows -> View From ////////////////////////
-	QActionGroup *viewFromGroupAct;
-	QAction *viewTopAct;
-	QAction *viewBottomAct;
-	QAction *viewLeftAct;
-	QAction *viewRightAct;
-	QAction *viewFrontAct;
-	QAction *viewBackAct;
-	QAction *viewTopYAct;
-	QAction *viewBottomYAct;
-	QAction *viewLeftYAct;
-	QAction *viewRightYAct;
-	QAction *viewFrontYAct;
-	QAction *viewBackYAct;
-	QAction *viewFromMeshAct;
-	QAction *viewFromRasterAct;
-	QAction *readViewFromFileAct;
-	QAction *saveViewToFileAct;
+	QActionGroup* viewFromGroupAct;
+	QAction* viewTopAct;
+	QAction* viewBottomAct;
+	QAction* viewLeftAct;
+	QAction* viewRightAct;
+	QAction* viewFrontAct;
+	QAction* viewBackAct;
+	QAction* viewTopYAct;
+	QAction* viewBottomYAct;
+	QAction* viewLeftYAct;
+	QAction* viewRightYAct;
+	QAction* viewFrontYAct;
+	QAction* viewBackYAct;
+	QAction* viewFromMeshAct;
+	QAction* viewFromRasterAct;
+	QAction* readViewFromFileAct;
+	QAction* saveViewToFileAct;
 
-	QAction *toggleOrthoAct;
+	QAction* toggleOrthoAct;
 
-	QActionGroup *trackballStepGroupAct;
-	QAction *trackballStepHP;
-	QAction *trackballStepHM;
-	QAction *trackballStepVP;
-	QAction *trackballStepVM;
-	QAction *trackballStepSP;
-	QAction *trackballStepSM;
+	QActionGroup* trackballStepGroupAct;
+	QAction* trackballStepHP;
+	QAction* trackballStepHM;
+	QAction* trackballStepVP;
+	QAction* trackballStepVM;
+	QAction* trackballStepSP;
+	QAction* trackballStepSM;
 
 
 	///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////
 public:
-	QAction *linkViewersAct;
+	QAction* linkViewersAct;
 private:
-	QAction *copyShotToClipboardAct;
-	QAction *pasteShotFromClipboardAct;
+	QAction* copyShotToClipboardAct;
+	QAction* pasteShotFromClipboardAct;
 
 	///////////Actions Menu Preferences /////////////////
-	QAction *setCustomizeAct;
+	QAction* setCustomizeAct;
 	///////////Actions Menu Help ////////////////////////
-	QAction *aboutAct;
-	QAction *aboutPluginsAct;
-	QAction *submitBugAct;
-	QAction *onlineHelpAct;
-	QAction *onscreenHelpAct;
-	QAction *checkUpdatesAct;
+	QAction* aboutAct;
+	QAction* aboutPluginsAct;
+	QAction* submitBugAct;
+	QAction* onlineHelpAct;
+	QAction* onscreenHelpAct;
+	QAction* checkUpdatesAct;
 	////////////////////////////////////////////////////
 	static QString getDecoratedFileName(const QString& name);
 

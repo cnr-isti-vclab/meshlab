@@ -23,6 +23,17 @@
 
 #include "filter_nxs_builder.h"
 
+#include <QTextStream>
+#include <QTemporaryDir>
+#include <nxsbuild/nexusbuilder.h>
+#include <nxsbuild/meshstream.h>
+#include <nxsbuild/vcgloader.h>
+#include <nxsbuild/kdtree.h>
+
+#include <nxsbuild/nexusbuilder.h>
+#include <common/traversal.h>
+#include <nxsedit/extractor.h>
+
 /**
  * @brief
  * Constructor usually performs only two simple tasks of filling the two lists
@@ -81,7 +92,7 @@ QString NxsBuilderPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_NXS_BUILDER :
-		return "Move the vertices of the mesh of a random quantity.";
+		return "Create a nxs file starting from a obj, ply or stl.";
 	default :
 		assert(0);
 		return "Unknown Filter";
@@ -99,7 +110,8 @@ NxsBuilderPlugin::FilterClass NxsBuilderPlugin::getClass(const QAction *a) const
 {
 	switch(ID(a)) {
 	case FP_NXS_BUILDER :
-		return FilterPlugin::Smoothing;
+	case FP_NXS_COMPRESS:
+		return FilterPlugin::Other;
 	default :
 		assert(0);
 		return FilterPlugin::Generic;
@@ -112,7 +124,7 @@ NxsBuilderPlugin::FilterClass NxsBuilderPlugin::getClass(const QAction *a) const
  */
 FilterPlugin::FilterArity NxsBuilderPlugin::filterArity(const QAction*) const
 {
-	return SINGLE_MESH;
+	return NONE;
 }
 
 /**
@@ -130,7 +142,7 @@ int NxsBuilderPlugin::getPreConditions(const QAction*) const
  */
 int NxsBuilderPlugin::postCondition(const QAction*) const
 {
-	return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;
+	return MeshModel::MM_NONE;
 }
 
 /**
@@ -143,18 +155,39 @@ int NxsBuilderPlugin::postCondition(const QAction*) const
  * @param action
  * @param m
  */
-RichParameterList NxsBuilderPlugin::initParameterList(const QAction *action, const MeshModel &m)
+RichParameterList NxsBuilderPlugin::initParameterList(const QAction *action, const MeshModel &)
 {
-	RichParameterList parlst;
+	RichParameterList params;
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		parlst.addParam(RichBool ("UpdateNormals", true, "Recompute normals", "Toggle the recomputation of the normals after the random displacement.\n\nIf disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-		parlst.addParam(RichAbsPerc("Displacement", m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(), "Max displacement", "The vertex are displaced of a vector whose norm is bounded by this value"));
+		params.addParam(RichOpenFile("input_file", "", {"*.ply", "*.obj", "*.stl", "*.tsp"}, "", ""));
+		params.addParam(RichSaveFile("out_file", "", "*.nxs", "", ""));
+		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
+		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
+		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
+		params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)", true));
+		params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
+		params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
+		params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center", true));
+		params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2", true));
+		params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file", true));
+		params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
 		break;
+	case FP_NXS_COMPRESS:
+		params.addParam(RichOpenFile("input_file", "", {"*.nxs"}, "", ""));
+		params.addParam(RichSaveFile("out_file", "", "*.nxz", "", ""));
+		params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)", false, "NXZ parameters"));
+		params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)", false, "NXZ parameters"));
+		params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error", false, "NXZ parameters"));
+		params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel", true, "NXZ parameters"));
+		params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel", true, "NXZ parameters"));
+		params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel", true, "NXZ parameters"));
+		params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals", true, "NXZ parameters"));
+		params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit", true, "NXZ parameters"));
 	default :
 		assert(0);
 	}
-	return parlst;
+	return params;
 }
 
 /**
@@ -166,15 +199,16 @@ RichParameterList NxsBuilderPlugin::initParameterList(const QAction *action, con
  * @return true if the filter has been applied correctly, false otherwise
  */
 std::map<std::string, QVariant> NxsBuilderPlugin::applyFilter(
-		const QAction * action,
-		const RichParameterList & par,
-		MeshDocument &md,
+		const QAction* action,
+		const RichParameterList& par,
+		MeshDocument&,
 		unsigned int& /*postConditionMask*/,
-		vcg::CallBackPos *cb)
+		vcg::CallBackPos* cb)
 {
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		vertexDisplacement(md, cb, par.getBool("UpdateNormals"), par.getAbsPerc("Displacement"));
+		break;
+	case FP_NXS_COMPRESS:
 		break;
 	default :
 		wrongActionCalled(action);
@@ -182,35 +216,4 @@ std::map<std::string, QVariant> NxsBuilderPlugin::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 
-void NxsBuilderPlugin::vertexDisplacement(
-		MeshDocument &md,
-		vcg::CallBackPos *cb,
-		bool updateNormals,
-		Scalarm max_displacement)
-{
-	CMeshO &m = md.mm()->cm;
-	srand(time(NULL));
-
-	for(unsigned int i = 0; i< m.vert.size(); i++){
-		// Typical usage of the callback for showing a nice progress bar in the bottom.
-		// First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-		cb(100*i/m.vert.size(), "Randomly Displacing...");
-
-		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
-	}
-
-	// Log function dump textual info in the lower part of the MeshLab screen.
-	log("Successfully displaced %i vertices",m.vn);
-
-	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-	if(updateNormals){
-		vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
-	}
-
-	vcg::tri::UpdateBounding<CMeshO>::Box(m);
-}
-
-MESHLAB_PLUGIN_NAME_EXPORTER(FilterSamplePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(NxsBuilderPlugin)

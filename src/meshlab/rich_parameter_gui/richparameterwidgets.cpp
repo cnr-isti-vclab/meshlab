@@ -1223,7 +1223,7 @@ void OpenFileWidget::selectFile()
 	//OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(rp);
 	QString ext;
-	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getString(), dec->exts.join(" "));
+	QString fl = QFileDialog::getOpenFileName(this,tr("Open"),rp->value().getString(), dec->exts.join(";;"));
 	collectWidgetValue();
 	updateFileName(fl);
 	StringValue fileName(fl);
