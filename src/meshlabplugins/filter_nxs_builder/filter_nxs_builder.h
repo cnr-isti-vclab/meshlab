@@ -56,6 +56,9 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
+
+private:
+	void nxsBuild(const RichParameterList& par);
 };
 
 #endif //MESHLAB_FILTER_NXS_BUILDER_H

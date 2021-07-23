@@ -23,11 +23,12 @@
 
 #include "filter_nxs_builder.h"
 
+#include <thread>
 #include <QTextStream>
 #include <QTemporaryDir>
 #include <nxsbuild/nexusbuilder.h>
 #include <nxsbuild/meshstream.h>
-#include <nxsbuild/vcgloader.h>
+#include <nxsbuild/plyloader.h>
 #include <nxsbuild/kdtree.h>
 
 #include <nxsbuild/nexusbuilder.h>
@@ -161,7 +162,7 @@ RichParameterList NxsBuilderPlugin::initParameterList(const QAction *action, con
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
 		params.addParam(RichOpenFile("input_file", "", {"*.ply", "*.obj", "*.stl", "*.tsp"}, "", ""));
-		params.addParam(RichSaveFile("out_file", "", "*.nxs", "", ""));
+		params.addParam(RichSaveFile("output_file", "", "*.nxs", "", ""));
 		params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
 		params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
 		params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
@@ -203,10 +204,11 @@ std::map<std::string, QVariant> NxsBuilderPlugin::applyFilter(
 		const RichParameterList& par,
 		MeshDocument&,
 		unsigned int& /*postConditionMask*/,
-		vcg::CallBackPos* cb)
+		vcg::CallBackPos*)
 {
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
+		nxsBuild(par);
 		break;
 	case FP_NXS_COMPRESS:
 		break;
@@ -214,6 +216,160 @@ std::map<std::string, QVariant> NxsBuilderPlugin::applyFilter(
 		wrongActionCalled(action);
 	}
 	return std::map<std::string, QVariant>();
+}
+
+void NxsBuilderPlugin::nxsBuild(const RichParameterList& params)
+{
+	QString inputFile = params.getOpenFileName("input_file");
+	QString outputFile = params.getSaveFileName("output_file");
+
+	//parameters:
+	int node_size = params.getInt("node_faces");
+	int top_node_size = params.getInt("top_node_faces");
+	float vertex_quantization = 0;
+	int tex_quality = params.getInt("tex_quality");
+	float scaling = 0.5;
+	int skiplevels = params.getInt("skiplevels");
+	int ram_buffer = params.getInt("ram");
+	int n_threads = std::thread::hardware_concurrency() / 2;
+	if (n_threads == 0)
+		n_threads = 1;
+
+	vcg::Point3d origin = vcg::Point3d::Construct(params.getPoint3m("origin"));
+	bool center = params.getBool("center");
+
+	bool useOrigTex = false;
+	bool create_pow_two_tex = params.getBool("pow_2_textures");
+	bool deepzoom = params.getBool("deepzoom");
+	QVariant adaptive = params.getDynamicFloat("adaptive");
+
+	Stream* stream = nullptr;
+	KDTree* tree = nullptr;
+
+	bool point_cloud = false;
+	bool normals = false;
+	bool no_normals = false;
+	bool colors = false;
+	bool no_colors = false;
+	bool no_texcoords = false;
+
+	try {
+		quint64 max_memory = (1<<20)*(uint64_t)ram_buffer/4; //hack 4 is actually an estimate...
+
+		//autodetect point cloud ply
+		if(inputFile.endsWith(".ply")) {
+			PlyLoader autodetect(inputFile);
+			if(autodetect.nTriangles() == 0)
+				point_cloud = true;
+		}
+
+		std::string input = "mesh";
+
+		if (point_cloud) {
+			input = "pointcloud";
+			stream = new StreamCloud("cache_stream");
+		}
+		else
+			stream = new StreamSoup("cache_stream");
+
+		stream->setVertexQuantization(vertex_quantization);
+		stream->setMaxMemory(max_memory);
+		if(center) {
+			vcg::Box3d box = stream->getBox(QStringList(inputFile));
+			stream->origin = box.Center();
+		}
+		else {
+			stream->origin = origin;
+		}
+
+		vcg::Point3d &o = stream->origin;
+		if(o[0] != 0.0 || o[1] != 0.0 || o[2] != 0.0) {
+			int lastPoint = outputFile.lastIndexOf(".");
+			QString ref = outputFile.left(lastPoint) + ".js";
+			QFile file(ref);
+			if(!file.open(QFile::ReadWrite)) {
+				throw MLException("Could not save reference file: " + ref);
+			}
+			QTextStream stream(&file);
+			stream.setRealNumberPrecision(12);
+			stream << "{ \"origin\": [" << o[0] << ", " << o[1] << ", " << o[2] << "] }\n";
+		}
+		//TODO: actually the stream will store textures or normals or colors even if not needed
+		stream->load(QStringList(inputFile), ""); //second parameter should be the mtl file....
+
+		bool has_colors = stream->hasColors();
+		bool has_normals = stream->hasNormals();
+		bool has_textures = stream->hasTextures();
+
+		quint32 components = 0;
+		if(!point_cloud) components |= NexusBuilder::FACES;
+
+		if((!no_normals && (!point_cloud || has_normals)) || normals) {
+			components |= NexusBuilder::NORMALS;
+		}
+		if((has_colors  && !no_colors ) || colors ) {
+			components |= NexusBuilder::COLORS;
+		}
+		if(has_textures && !no_texcoords) {
+			components |= NexusBuilder::TEXTURES;
+		}
+
+		//WORKAROUND to save loading textures not needed
+		if(!(components & NexusBuilder::TEXTURES)) {
+			stream->textures.clear();
+		}
+
+		NexusBuilder builder(components);
+		builder.skipSimplifyLevels = skiplevels;
+		builder.setMaxMemory(max_memory);
+		builder.n_threads = n_threads;
+		builder.setScaling(scaling);
+		builder.useNodeTex = !useOrigTex;
+		builder.createPowTwoTex = create_pow_two_tex;
+		if(deepzoom)
+			builder.header.signature.flags |= nx::Signature::Flags::DEEPZOOM;
+		builder.tex_quality = tex_quality;
+		bool success = builder.initAtlas(stream->textures);
+		if(!success) {
+			throw MLException("Fail when initializing atlas");
+		}
+
+		if(point_cloud)
+			tree = new KDTreeCloud("cache_tree", adaptive.toFloat());
+		else
+			tree = new KDTreeSoup("cache_tree", adaptive.toFloat());
+
+		tree->setMaxMemory((1<<20)*(uint64_t)ram_buffer/2);
+		KDTreeSoup *treesoup = dynamic_cast<KDTreeSoup *>(tree);
+		if(treesoup)
+			treesoup->setTrianglesPerBlock(node_size);
+
+		KDTreeCloud *treecloud = dynamic_cast<KDTreeCloud *>(tree);
+		if(treecloud)
+			treecloud->setTrianglesPerBlock(node_size);
+
+		builder.create(tree, stream, top_node_size);
+		builder.save(outputFile);
+	}
+	catch(const MLException& error) {
+		if(tree)   delete tree;
+		if(stream) delete stream;
+		throw error;
+	}
+	catch(QString error) {
+		if(tree)   delete tree;
+		if(stream) delete stream;
+		throw MLException("Fatal error: " + error);
+
+	}
+	catch(const char *error) {
+		if(tree)   delete tree;
+		if(stream) delete stream;
+		throw MLException("Fatal error: " + QString(error));
+	}
+
+	if(tree)   delete tree;
+	if(stream) delete stream;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(NxsBuilderPlugin)
