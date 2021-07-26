@@ -70,7 +70,8 @@ public:
 	//FilterPlugin interface
 	enum FileterIds {
 		FP_NXS_BUILDER,
-		FP_NXS_COMPRESS
+		FP_NXS_COMPRESS,
+		FP_NXS_BUILD_AND_COMPRESS
 	};
 
 	QString filterName(ActionIDType filter) const;
@@ -89,7 +90,7 @@ public:
 
 private:
 	RichParameterList nxsParameters() const;
-	RichParameterList nxzParameters() const;
+	RichParameterList nxzParameters(bool categorize) const;
 
 	void buildNxs(
 			const QString& outputFile,
@@ -97,10 +98,9 @@ private:
 			const MeshModel* m,
 			int mask);
 
-	void saveNxz(
-			const QString &fileName,
-			const MeshModel& m,
-			const int mask,
+	void compressNxs(
+			const QString& inputFile,
+			const QString& outputFile,
 			const RichParameterList& params);
 };
 

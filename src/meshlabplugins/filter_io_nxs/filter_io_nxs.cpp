@@ -41,7 +41,8 @@ FilterIONXSPlugin::FilterIONXSPlugin()
 {
 	typeList = {
 		FP_NXS_BUILDER,
-		FP_NXS_COMPRESS
+		FP_NXS_COMPRESS,
+		FP_NXS_BUILD_AND_COMPRESS
 	};
 
 	for(ActionIDType tt: types())
@@ -97,7 +98,7 @@ RichParameterList FilterIONXSPlugin::initSaveParameter(
 		params = nxsParameters();
 	}
 	if (format.toUpper() == "NXZ") { //additional parameters for nxz
-		params = nxzParameters();
+		params.join(nxzParameters(true));
 	}
 	return params;
 }
@@ -108,14 +109,24 @@ void FilterIONXSPlugin::save(
 		MeshModel& m,
 		const int mask,
 		const RichParameterList& params,
-		vcg::CallBackPos*)
+		vcg::CallBackPos* cb)
 {
 	if (fileFormat.toUpper() == "NXS"){
-		//saveNxs(fileName, m, mask, params);
+		cb(1, "Saving NXS File...");
 		buildNxs(fileName, params, &m, mask);
+		cb(100, "NXS File saved");
 	}
 	else if (fileFormat.toUpper() == "NXZ") {
-		saveNxz(fileName, m, mask, params);
+		QFileInfo finfo(fileName);
+		QTemporaryDir tmpdir;
+		QString nxsFileName = tmpdir.path() + "/"+ finfo.baseName() + ".nxs";
+		cb(1, "Building NXS...");
+		buildNxs(nxsFileName, params, &m, mask);
+		cb(50, "Compressing NXS...");
+		compressNxs(nxsFileName, fileName, params);
+		cb(99, "Clearing tmp file...");
+		QFile::remove(nxsFileName);
+		cb(100, "NXZ File saved");
 	}
 	else {
 		wrongSaveFormat(fileFormat);
@@ -129,6 +140,8 @@ QString FilterIONXSPlugin::filterName(ActionIDType filter) const
 		return "NXS Build";
 	case FP_NXS_COMPRESS :
 		return "NXS Compress";
+	case FP_NXS_BUILD_AND_COMPRESS:
+		return "NXS Build and Compress";
 	default :
 		assert(0);
 		return "";
@@ -142,6 +155,8 @@ QString FilterIONXSPlugin::filterInfo(ActionIDType filter) const
 		return "Create a nxs file starting from a obj, ply or stl.";
 	case FP_NXS_COMPRESS:
 		return "Create a nxz file starting from a nxs";
+	case FP_NXS_BUILD_AND_COMPRESS:
+		return "Create a nxz file starting from a obj, ply or stl.";
 	default :
 		assert(0);
 		return "Unknown Filter";
@@ -153,6 +168,7 @@ FilterPlugin::FilterClass FilterIONXSPlugin::getClass(const QAction* a) const
 	switch(ID(a)) {
 	case FP_NXS_BUILDER :
 	case FP_NXS_COMPRESS:
+	case FP_NXS_BUILD_AND_COMPRESS:
 		return FilterPlugin::Other;
 	default :
 		assert(0);
@@ -178,18 +194,25 @@ int FilterIONXSPlugin::postCondition(const QAction*) const
 RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, const MeshModel&)
 {
 	RichParameterList params;
+	QString defDir = QDir::home().path();
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		params.addParam(RichOpenFile("input_file", "", {"*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", ""));
-		params.addParam(RichOpenFile("input_mtl_file", "", {"*.mtl"}, "Input mtl File", ""));
-		params.addParam(RichSaveFile("output_file", "", "*.nxs", "Output File", ""));
+		params.addParam(RichOpenFile("input_file", defDir, {"*.ply;;*.obj;;*.stl;;*.tsp", "*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxs file."));
+		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
+		params.addParam(RichSaveFile("output_file", defDir, "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
 		break;
 	case FP_NXS_COMPRESS:
-		params.addParam(RichOpenFile("input_file", "", {"*.nxs"}, "Input File", ""));
-		params.addParam(RichSaveFile("out_file", "", "*.nxz", "Output File", ""));
-		params.join(nxzParameters());
+		params.addParam(RichOpenFile("input_file", defDir, {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
+		params.addParam(RichSaveFile("output_file", defDir, "*.nxz", "Output File", "The name of the output nxz file."));
+		params.join(nxzParameters(false));
 		break;
+	case FP_NXS_BUILD_AND_COMPRESS:
+		params.addParam(RichOpenFile("input_file", defDir, {"*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxz file."));
+		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
+		params.addParam(RichSaveFile("output_file", defDir, "*.nxz", "Output File", "The name of the output nxz file."));
+		params.join(nxsParameters());
+		params.join(nxzParameters(true));
 	default :
 		assert(0);
 	}
@@ -199,16 +222,43 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 std::map<string, QVariant> FilterIONXSPlugin::applyFilter(
 		const QAction* action,
 		const RichParameterList& params,
-		MeshDocument&, unsigned int&,
-		vcg::CallBackPos*)
+		MeshDocument&,
+		unsigned int&,
+		vcg::CallBackPos* cb)
 {
+	QString inFile;
 	QString outFile;
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
 		outFile = params.getString("output_file");
+		cb(1, "Saving NXS File...");
 		buildNxs(outFile, params, nullptr, 0);
+		cb(100, "NXS File saved");
 		break;
 	case FP_NXS_COMPRESS:
+		inFile = params.getString("input_file");
+		outFile = params.getString("output_file");
+		cb(1, "Compressing NXS File...");
+		compressNxs(inFile, outFile, params);
+		cb(100, "NXZ File saved");
+		break;
+	case FP_NXS_BUILD_AND_COMPRESS: {
+		inFile = params.getString("input_file");
+		outFile = params.getString("output_file");
+		if (inFile.isEmpty())
+			throw MLException("Input file name is empty");
+
+		QFileInfo finfo(inFile);
+		QTemporaryDir tmpdir;
+		QString nxsFileName = tmpdir.path() + "/"+ finfo.baseName() + ".nxs";
+		cb(1, "Building NXS...");
+		buildNxs(nxsFileName, params, nullptr, 0);
+		cb(50, "Compressing NXS...");
+		compressNxs(nxsFileName, outFile, params);
+		cb(99, "Clearing tmp file...");
+		QFile::remove(nxsFileName);
+		cb(100, "NXZ File saved");
+	}
 		break;
 	default :
 		wrongActionCalled(action);
@@ -232,17 +282,20 @@ RichParameterList FilterIONXSPlugin::nxsParameters() const
 	return params;
 }
 
-RichParameterList FilterIONXSPlugin::nxzParameters() const
+RichParameterList FilterIONXSPlugin::nxzParameters(bool categorize) const
 {
+	QString category;
+	if (categorize)
+		category = "NXZ parameters";
 	RichParameterList params;
-	params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)", false, "NXZ parameters"));
-	params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)", false, "NXZ parameters"));
-	params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error", false, "NXZ parameters"));
-	params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel", true, "NXZ parameters"));
-	params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel", true, "NXZ parameters"));
-	params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel", true, "NXZ parameters"));
-	params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals", true, "NXZ parameters"));
-	params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit", true, "NXZ parameters"));
+	params.addParam(RichFloat("nxz_vertex_quantization", 0.0, "NXZ Vertex quantization", "absolute side of quantization grid (uses quantization factor, instead)", false, category));
+	params.addParam(RichInt("vertex_bits", 0, "Vertex bits", "number of bits in vertex coordinates when compressing (uses quantization factor, instead)", false, category));
+	params.addParam(RichFloat("quantization_factor", 0.1, "Quantization factor", "Quantization as a factor of error", false, category));
+	params.addParam(RichInt("luma_bits", 6, "Luma bits", "Quantization of luma channel", true, category));
+	params.addParam(RichInt("chroma_bits", 6, "Chroma bits", "Quantization of chroma channel", true, category));
+	params.addParam(RichInt("alpha_bits", 5, "Alpha bits", "Quantization of alpha channel", true, category));
+	params.addParam(RichInt("normal_bits", 10, "Normal bits", "Quantization of normals", true, category));
+	params.addParam(RichFloat("textures_precision", 0.25, "Textures precision", "Quantization of textures, precision in pixels per unit", true, category));
 	return params;
 }
 
@@ -252,6 +305,11 @@ void FilterIONXSPlugin::buildNxs(
 		const MeshModel* m,
 		int mask)
 {
+	//if m is nullptr, we load the mesh directly from file (same of nxsbuild).
+	//the name of the file is into the parameter list "input_file"
+	//if m is not nullptr, it means that we are saving a nxs from the given
+	//MeshModel.
+
 	QString inputFile;
 	if (m == nullptr)
 		inputFile = params.getOpenFileName("input_file");
@@ -442,19 +500,11 @@ void FilterIONXSPlugin::buildNxs(
 	if (loader) delete loader;
 }
 
-
-
-void FilterIONXSPlugin::saveNxz(
-		const QString& fileName,
-		const MeshModel& m,
-		const int mask,
+void FilterIONXSPlugin::compressNxs(
+		const QString& inputFile,
+		const QString& outputFile,
 		const RichParameterList& params)
 {
-	QFileInfo finfo(fileName);
-	QTemporaryDir tmpdir;
-	QString nxsFileName = tmpdir.path() + "/"+ finfo.baseName() + ".nxs";
-	buildNxs(nxsFileName, params, &m, mask);
-
 	float coord_step = params.getFloat("nxz_vertex_quantization");
 	int position_bits = params.getInt("vertex_bits");
 	float error_q = params.getFloat("quantization_factor");
@@ -468,7 +518,7 @@ void FilterIONXSPlugin::saveNxz(
 
 	nx::NexusData nexus;
 	try {
-		nexus.open(nxsFileName.toStdString().c_str());
+		nexus.open(inputFile.toStdString().c_str());
 		Extractor extractor(&nexus);
 
 		nx::Signature signature = nexus.header.signature;
@@ -510,15 +560,7 @@ void FilterIONXSPlugin::saveNxz(
 			extractor.tex_step = tex_step; //was (int)log2(tex_step * pow(2, -12));, moved to per node value
 			//cout << "Texture step: " << extractor.tex_step << endl;
 		}
-
-		//cout << "Saving with flag: " << signature.flags;
-		//if (signature.flags & nx::Signature::MECO) cout << " (compressed with MECO)";
-		//else if (signature.flags & nx::Signature::CORTO) cout << " (compressed with CORTO)";
-		//else cout << " (not compressed)";
-		//cout << endl;
-
-		extractor.save(fileName, signature);
-		QFile::remove(nxsFileName);
+		extractor.save(outputFile, signature);
 	}
 	catch (QString error) {
 		throw MLException("Fatal error: " + error);
