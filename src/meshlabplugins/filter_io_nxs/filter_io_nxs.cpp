@@ -197,7 +197,7 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 	QString defDir = QDir::home().path();
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		params.addParam(RichOpenFile("input_file", defDir, {"*.ply;;*.obj;;*.stl;;*.tsp", "*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxs file."));
+		params.addParam(RichOpenFile("input_file", defDir, {"*.ply *.obj *.stl *.tsp", "*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxs file."));
 		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
 		params.addParam(RichSaveFile("output_file", defDir, "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
@@ -208,7 +208,7 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 		params.join(nxzParameters(false));
 		break;
 	case FP_NXS_BUILD_AND_COMPRESS:
-		params.addParam(RichOpenFile("input_file", defDir, {"*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxz file."));
+		params.addParam(RichOpenFile("input_file", defDir, {"*.ply *.obj *.stl *.tsp", "*.ply", "*.obj", "*.stl", "*.tsp"}, "Input File", "The input file from which create the .nxz file."));
 		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
 		params.addParam(RichSaveFile("output_file", defDir, "*.nxz", "Output File", "The name of the output nxz file."));
 		params.join(nxsParameters());
