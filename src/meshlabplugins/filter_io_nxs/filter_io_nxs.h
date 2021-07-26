@@ -25,17 +25,20 @@
 #define IO_NXS_PLUGIN_H
 
 #include <common/plugins/interfaces/io_plugin.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class IONXSPlugin : public QObject, public IOPlugin
+class FilterIONXSPlugin : public QObject, public IOPlugin, public FilterPlugin
 { 
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
-	Q_INTERFACES(IOPlugin)
+	Q_INTERFACES(FilterPlugin IOPlugin)
 
 public:
-
+	FilterIONXSPlugin();
+	~FilterIONXSPlugin() {}
 	QString pluginName() const;
 
+	//IOPlugin interface
 	std::list<FileFormat> importFormats() const;
 	std::list<FileFormat> exportFormats() const;
 
@@ -64,12 +67,35 @@ public:
 			const RichParameterList & par,
 			vcg::CallBackPos *cb = 0);
 
+	//FilterPlugin interface
+	enum FileterIds {
+		FP_NXS_BUILDER,
+		FP_NXS_COMPRESS
+	};
+
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction* a) const;
+	FilterArity filterArity(const QAction*) const;
+	int getPreConditions(const QAction *) const;
+	int postCondition(const QAction* ) const;
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & params,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
+
 private:
-	void saveNxs(
-			const QString &fileName,
-			const MeshModel& m,
-			const int mask,
-			const RichParameterList& params);
+	RichParameterList nxsParameters() const;
+	RichParameterList nxzParameters() const;
+
+	void buildNxs(
+			const QString& outputFile,
+			const RichParameterList& params,
+			const MeshModel* m,
+			int mask);
 
 	void saveNxz(
 			const QString &fileName,
