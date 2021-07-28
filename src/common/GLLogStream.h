@@ -79,9 +79,9 @@ public:
 		}
 	}
 
-	void log(int Level, const char * buf);
-	void log(int Level, const std::string& logMessage);
-	void log(int Level, const QString& logMessage);
+	void log(int level, const char * buf);
+	void log(int level, const std::string& logMessage);
+	void log(int level, const QString& logMessage);
 	void setBookmark();
 	void clearBookmark();
 	void backToBookmark();

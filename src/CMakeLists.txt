@@ -9,6 +9,7 @@ project(MeshLab)
 option(BUILD_MINI "Build only a minimal set of plugins" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
 option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
+option(ENABLE_MESHLAB_DEBUG_LOG_FILE "" OFF)
 
 option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
 option(USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)

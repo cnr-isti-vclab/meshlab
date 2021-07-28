@@ -24,6 +24,7 @@
 #include "globals.h"
 
 #include <QDir>
+#include <QDateTime>
 #include <qapplication.h>
 
 #include "parameters/rich_parameter_list.h"
@@ -102,6 +103,14 @@ QString meshlab::defaultPluginPath()
 QString meshlab::defaultShadersPath()
 {
 	return basePath() + "/shaders";
+}
+
+QString meshlab::logDebugFileName()
+{
+	static QString filename = QDir::homePath() + "/MeshLab" +
+			QString::fromStdString(meshlab::meshlabVersion()) +
+			" " + QDateTime::currentDateTime().toString() + ".log";
+	return filename;
 }
 
 RichParameterList& meshlab::defaultGlobalParameterList()

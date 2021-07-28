@@ -160,9 +160,13 @@ set_property(TARGET meshlab-common
 	PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 
 if (WIN32)
-	add_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
+	target_compile_definitions(meshlab-common PRIVATE ML_EXPORT_SYMBOLS)
 	set_property(TARGET meshlab-common
 		PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+endif()
+
+if(ENABLE_MESHLAB_DEBUG_LOG_FILE)
+	target_compile_definitions(meshlab-common PUBLIC MESHLAB_LOG_FILE_ENABLED)
 endif()
 
 set_target_properties(meshlab-common PROPERTIES

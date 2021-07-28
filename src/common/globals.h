@@ -28,7 +28,6 @@
 #define mlstringify(a) #a
 
 #include <QString>
-
 #ifndef MESHLAB_VERSION
 #error "MESHLAB_VERSION needs to be defined!"
 #endif
@@ -43,6 +42,7 @@ namespace meshlab {
 
 QString defaultPluginPath();
 QString defaultShadersPath();
+QString logDebugFileName();
 
 RichParameterList& defaultGlobalParameterList();
 PluginManager& pluginManagerInstance();

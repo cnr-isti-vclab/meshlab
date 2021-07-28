@@ -25,6 +25,13 @@
 #include <stdarg.h>
 #include <QStringList>
 
+#ifdef MESHLAB_LOG_FILE_ENABLED
+#include <QThread>
+#include <QTextStream>
+#include <QFile>
+#include "globals.h"
+#endif
+
 #include "GLLogStream.h"
 
 using namespace std;
@@ -91,25 +98,30 @@ void GLLogStream::clear()
 	logTextList.clear();
 }
 
-void GLLogStream::log(int Level, const char * buf )
+void GLLogStream::log(int level, const char * buf )
 {
 	QString tmp(buf);
-	logTextList.push_back(std::make_pair(Level,tmp));
-	qDebug("LOG: %i %s",Level,buf);
+	logTextList.push_back(std::make_pair(level,tmp));
+	qDebug("LOG: %i %s",level,buf);
+#ifdef MESHLAB_LOG_FILE_ENABLED
+	QThread::msleep(100);
+	QFile f(meshlab::logDebugFileName());
+	f.open(QIODevice::Append);
+	QTextStream stream(&f);
+	stream << "LOG: [" + QString::number(level) + "] " + QString(buf) + "\n";
+	stream.flush();
+	f.close();
+#endif
 	emit logUpdated();
 }
 
-void GLLogStream::log(int Level, const string& logMessage)
+void GLLogStream::log(int level, const string& logMessage)
 {
-	logTextList.push_back(std::make_pair(Level, QString::fromStdString(logMessage)));
-	qDebug("LOG: %i %s",Level, logMessage.c_str());
-	emit logUpdated();
+	log(level, logMessage.c_str());
 }
 
-void GLLogStream::log(int Level, const QString& logMessage)
+void GLLogStream::log(int level, const QString& logMessage)
 {
-	logTextList.push_back(std::make_pair(Level, logMessage));
-	qDebug("LOG: %i %s",Level, logMessage.toStdString().c_str());
-	emit logUpdated();
+	log(level, logMessage.toStdString().c_str());
 }
 

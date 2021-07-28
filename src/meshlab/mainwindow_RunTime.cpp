@@ -27,6 +27,9 @@
 #include <exception>
 #include "ml_default_decorators.h"
 
+#ifdef MESHLAB_LOG_FILE_ENABLED
+#include <QThread>
+#endif
 #include <QToolBar>
 #include <QToolTip>
 #include <QStatusBar>
@@ -2669,6 +2672,15 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 		return true;
 	currTime.start();
 	MainWindow::globalStatusBar()->showMessage(str, 5000);
+#ifdef MESHLAB_LOG_FILE_ENABLED
+	QThread::msleep(100);
+	QFile f(meshlab::logDebugFileName());
+	f.open(QIODevice::Append);
+	QTextStream stream(&f);
+	stream << "[" + QString::number(pos) + "] " + QString(str) + "\n";
+	stream.flush();
+	f.close();
+#endif
 	qb->show();
 	qb->setEnabled(true);
 	qb->setValue(pos);
