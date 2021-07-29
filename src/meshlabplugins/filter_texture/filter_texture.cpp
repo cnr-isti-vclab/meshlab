@@ -930,6 +930,16 @@ void FilterTexturePlugin::transferToTexture(
 	int numTrgTex = 1;
 	if (trgMesh->cm.textures.size()> 0)
 		numTrgTex = trgMesh->cm.textures.size();
+	else { //I am creating the texture, need to set N() to WT
+		for (auto& f : trgMesh->cm.face) {
+			if (!f.IsD()) {
+				f.WT(0).N() = 0;
+				f.WT(1).N() = 0;
+				f.WT(2).N() = 0;
+			}
+		}
+	}
+
 	QString baseName(textName);
 	if (baseName.lastIndexOf(".") != -1){
 		if (baseName.endsWith("bmp", Qt::CaseInsensitive) || baseName.endsWith("jpg", Qt::CaseInsensitive) || baseName.endsWith("png", Qt::CaseInsensitive)
