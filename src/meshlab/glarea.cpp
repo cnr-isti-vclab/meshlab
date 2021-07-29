@@ -1285,7 +1285,6 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	}
 	else
 	{
-
 		const int WHEEL_STEP = 120;
 		float notchX = e->angleDelta().x()/ float(WHEEL_STEP);
 		float notchY = e->angleDelta().y()/ float(WHEEL_STEP);
@@ -1307,8 +1306,16 @@ void GLArea::wheelEvent(QWheelEvent*e)
 			clipRatioFar = math::Clamp(clipRatioFar*powf(1.1f, notchY),0.01f, 500.0f);
 			break;
 		case Qt::ShiftModifier:
-			fov = math::Clamp(fov+1.2f*notchY,5.0f,90.0f);
+		{
+			float notch = notchY;
+			//needed on mac: for some reason, when using a mouse (not touchpad) and with shift
+			//modifier, notchX and notchY are inverted...
+			//fixes https://github.com/cnr-isti-vclab/meshlab/issues/1049
+			if (notchY == 0)
+				notch = notchX;
+			fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f);
 			break;
+		}
 		case Qt::AltModifier:
 		{
 			glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notchX), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
