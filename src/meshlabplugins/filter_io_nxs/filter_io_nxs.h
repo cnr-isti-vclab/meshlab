@@ -70,8 +70,7 @@ public:
 	//FilterPlugin interface
 	enum FileterIds {
 		FP_NXS_BUILDER,
-		FP_NXS_COMPRESS,
-		FP_NXS_BUILD_AND_COMPRESS
+		FP_NXS_COMPRESS
 	};
 
 	QString filterName(ActionIDType filter) const;

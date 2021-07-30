@@ -140,8 +140,6 @@ QString FilterIONXSPlugin::filterName(ActionIDType filter) const
 		return "NXS Build";
 	case FP_NXS_COMPRESS :
 		return "NXS Compress";
-	case FP_NXS_BUILD_AND_COMPRESS:
-		return "NXS Build and Compress";
 	default :
 		assert(0);
 		return "";
@@ -163,12 +161,6 @@ QString FilterIONXSPlugin::filterInfo(ActionIDType filter) const
 		return commonDescription +
 				"This filter is the equivalent of calling nxscompress, which"
 				"creates a nxz (compressed nexus) file starting from a nxs.";
-	case FP_NXS_BUILD_AND_COMPRESS:
-		return commonDescription +
-				"This filter is the equivalent of calling "
-				"<a href=\"http://vcg.isti.cnr.it/nexus/#nxsbuild\">nxsbuild</a> "
-				"and then nxscompress: it creates a nxz (compressed nexus) file "
-				"starting from obj, ply or stl.";
 	default :
 		assert(0);
 		return "Unknown Filter";
@@ -180,7 +172,6 @@ FilterPlugin::FilterClass FilterIONXSPlugin::getClass(const QAction* a) const
 	switch(ID(a)) {
 	case FP_NXS_BUILDER :
 	case FP_NXS_COMPRESS:
-	case FP_NXS_BUILD_AND_COMPRESS:
 		return FilterPlugin::Other;
 	default :
 		assert(0);
@@ -219,12 +210,6 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 		params.addParam(RichSaveFile("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
 		params.join(nxzParameters(false));
 		break;
-	case FP_NXS_BUILD_AND_COMPRESS:
-		params.addParam(RichOpenFile("input_file", defDir, {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxz file."));
-		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
-		params.addParam(RichSaveFile("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
-		params.join(nxsParameters());
-		params.join(nxzParameters(true));
 	default :
 		assert(0);
 	}
@@ -254,24 +239,6 @@ std::map<string, QVariant> FilterIONXSPlugin::applyFilter(
 		compressNxs(inFile, outFile, params);
 		cb(100, "NXZ File saved");
 		break;
-	case FP_NXS_BUILD_AND_COMPRESS: {
-		inFile = params.getString("input_file");
-		outFile = params.getString("output_file");
-		if (inFile.isEmpty())
-			throw MLException("Input file name is empty");
-
-		QFileInfo finfo(inFile);
-		QTemporaryDir tmpdir;
-		QString nxsFileName = tmpdir.path() + "/"+ finfo.baseName() + ".nxs";
-		cb(1, "Building NXS...");
-		buildNxs(nxsFileName, params, nullptr, 0);
-		cb(50, "Compressing NXS...");
-		compressNxs(nxsFileName, outFile, params);
-		cb(99, "Clearing tmp file...");
-		QFile::remove(nxsFileName);
-		cb(100, "NXZ File saved");
-	}
-		break;
 	default :
 		wrongActionCalled(action);
 	}
@@ -281,16 +248,29 @@ std::map<string, QVariant> FilterIONXSPlugin::applyFilter(
 RichParameterList FilterIONXSPlugin::nxsParameters() const
 {
 	RichParameterList params;
-	params.addParam(RichInt("node_faces", 1<<15, "Node faces", "Number of faces per patch"));
-	params.addParam(RichInt("top_node_faces", 4096, "Top node faces", "Number of triangles in the top node"));
-	params.addParam(RichInt("tex_quality", 100, "Texture quality [0-100]", "jpg texture quality"));
-	params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used (in MegaBytes)", true));
-	params.addParam(RichInt("skiplevels", 0, "Skip levels", "Decimation skipped for n levels"));
+	params.addParam(RichInt("node_faces", 1<<15, "Node faces",
+					"Number of faces per patch, (min ~1000, max 32768)\n"
+					"This parameter controls the granularity of the multiresolution: "
+					"smaller values result in smaller changes (less 'pop')."
+					"Small nodes are less efficient in rendering and compression.\n"
+					"Meshes with very large textures and few vertices benefit from small nodes."));
+	params.addParam(RichInt("top_node_faces", 4096, "Top node faces",
+					"Number of triangles in the top node. Controls the size of the smallest "
+					"LOD. Higher values will delay the first rendering but with higher quality."));
+	params.addParam(RichInt("tex_quality", 95, "JPEG texture quality [0-100]", "jpg texture quality"));
+	params.addParam(RichInt("ram", 2000, "Ram buffer", "Max ram used in MegaBytes (WARNING: just an approximation)", true));
+	params.addParam(RichInt("skiplevels", 0, "Skip levels",
+					"Decimation skipped for n levels. Use for meshes with large textures "
+					"and very few vertices."));
 	params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
 	params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center", true));
 	params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2", true));
-	params.addParam(RichBool("deepzoom", false, "Deepzoom", "Save each node and texture to a separated file", true));
-	params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive", "Split nodes adaptively"));
+	params.addParam(RichBool("deepzoom", false, "Deepzoom",
+					"Save each node and texture to a separated file. Used for server "
+					"which do not support http range requests (206). Will generate MANY files.", true));
+	params.addParam(RichDynamicFloat("adaptive", 0.333, 0, 1, "Adaptive",
+					"Split nodes adaptively. Different settings might help with "
+					"very uneven distribution of geometry."));
 	return params;
 }
 
