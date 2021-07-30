@@ -41,8 +41,7 @@ FilterIONXSPlugin::FilterIONXSPlugin()
 {
 	typeList = {
 		FP_NXS_BUILDER,
-		FP_NXS_COMPRESS,
-		FP_NXS_BUILD_AND_COMPRESS
+		FP_NXS_COMPRESS
 	};
 
 	for(ActionIDType tt: types())
