@@ -177,7 +177,7 @@ RichParameterList FilterLayerPlugin::initParameterList(const QAction *action, co
 								   "Name of the output file, it will be saved in the same folder as the project file"));
 		break;
 	case FP_IMPORT_CAMERAS:
-		parlst.addParam(RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
+		parlst.addParam(RichOpenFile("ImportFile", "", QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
 		break;
 	default: break; // do not add any parameter for the other filters
 	}

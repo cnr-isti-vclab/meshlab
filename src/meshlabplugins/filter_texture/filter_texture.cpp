@@ -207,7 +207,6 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 			break;
 		}
 	}
-	QString fileName = extractFilenameTexture(md.mm());
 	QString trgFileName = extractFilenameTexture(trg);
 	switch(ID(action)) {
 	case FP_VORONOI_ATLAS :
@@ -228,10 +227,10 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		parlst.addParam(RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
 		break;
 	case FP_SET_TEXTURE :
-		parlst.addParam(RichOpenFile("textName", fileName, QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
+		parlst.addParam(RichOpenFile("textName", "", QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "Sets the given input image as unique texture of the mesh."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
-		parlst.addParam(RichString("textName", fileName, "Texture file", "The texture file to be created"));
+		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
 		parlst.addParam(RichInt("textW", 1024, "Texture width (px)", "The texture width"));
 		parlst.addParam(RichInt("textH", 1024, "Texture height (px)", "The texture height"));
 		parlst.addParam(RichBool("overwrite", false, "Overwrite texture", "if current mesh has a texture will be overwritten (with provided texture dimension)"));

@@ -199,13 +199,13 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 	QString defDir = QDir::home().path();
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		params.addParam(RichOpenFile("input_file", defDir, {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
-		params.addParam(RichOpenFile("input_mtl_file", defDir, {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
+		params.addParam(RichOpenFile("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
+		params.addParam(RichOpenFile("input_mtl_file", "", {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
 		params.addParam(RichSaveFile("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
 		break;
 	case FP_NXS_COMPRESS:
-		params.addParam(RichOpenFile("input_file", defDir, {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
+		params.addParam(RichOpenFile("input_file", "", {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
 		params.addParam(RichSaveFile("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
 		params.join(nxzParameters(false));
 		break;
