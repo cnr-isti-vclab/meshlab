@@ -35,6 +35,11 @@
 
 using namespace vcg;
 
+RichParameterListFrame::RichParameterListFrame(QWidget* parent) :
+	QFrame(parent), gla(nullptr), hiddenFrame(nullptr)
+{
+}
+
 RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		const RichParameterList& defParSet,
@@ -49,7 +54,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla)
+	QFrame(p), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet);
 }
@@ -59,13 +64,23 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameter& defPar,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla)
+	QFrame(p), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curPar, defPar);
 }
 
 RichParameterListFrame::~RichParameterListFrame()
 {
+}
+
+void RichParameterListFrame::initParams(
+		const RichParameterList& curParSet,
+		const RichParameterList& defParSet,
+		QWidget* gla)
+{
+	if (gla != nullptr)
+		this->gla = gla;
+	loadFrameContent(curParSet, defParSet);
 }
 
 /**
