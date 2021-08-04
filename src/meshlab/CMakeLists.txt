@@ -16,6 +16,7 @@ set(SOURCES
 	multiViewer_Container.cpp
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
+	dialogs/filter_dock_dialog.cpp
 	dialogs/filter_script_dialog.cpp
 	dialogs/options_dialog.cpp
 	dialogs/plugin_info_dialog.cpp
@@ -43,6 +44,7 @@ set(HEADERS
 	snapshotsetting.h
 	dialogs/about_dialog.h
 	dialogs/congrats_dialog.h
+	dialogs/filter_dock_dialog.h
 	dialogs/filter_script_dialog.h
 	dialogs/options_dialog.h
 	dialogs/plugin_info_dialog.h
@@ -61,6 +63,7 @@ set(RESOURCES meshlab.qrc)
 set(UI
 	dialogs/about_dialog.ui
 	dialogs/congrats_dialog.ui
+	dialogs/filter_dock_dialog.ui
 	dialogs/filter_script_dialog.ui
 	dialogs/plugin_info_dialog.ui
 	dialogs/save_mesh_attributes_dialog.ui
