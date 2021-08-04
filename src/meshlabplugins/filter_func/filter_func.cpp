@@ -1281,7 +1281,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 		qDebug("Adding custom per vertex float variable %s",v_attrNames.back().c_str());
 	}
 	AllVertexAttribName.clear();
-	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m,AllVertexAttribName);
+	tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(m,AllVertexAttribName);
 	for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
 	{
 		CMeshO::PerVertexAttributeHandle<Point3m> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m, AllVertexAttribName[i]);
@@ -1391,7 +1391,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
 	std::vector<std::string> AllFaceAttribName;
-	tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m,AllFaceAttribName);
+	tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(m,AllFaceAttribName);
 	f_handlers.clear();
 	f_attrNames.clear();
 	f_attrValue.clear();
