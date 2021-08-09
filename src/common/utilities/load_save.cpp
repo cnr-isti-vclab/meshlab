@@ -40,7 +40,7 @@ namespace meshlab {
  * - the list of MeshModel(s) that will contain the loaded mesh(es)
  * - the open parameters that will be used to load the mesh(es)
  *
- * The function will take care to loat the mesh, load textures if needed
+ * The function will take care to load the mesh, load textures if needed
  * and make all the clean operations after loading the meshes.
  * If load fails, throws a MLException.
  *
@@ -66,7 +66,7 @@ std::list<std::string> loadMesh(
 
 	QDir oldDir = QDir::current();
 	QDir::setCurrent(fi.absolutePath());
-	ioPlugin->open(extension, fileName, meshList, maskList, prePar, cb);
+	ioPlugin->open(extension, fi.fileName(), meshList, maskList, prePar, cb);
 	QDir::setCurrent(oldDir.absolutePath());
 
 	auto itmesh = meshList.begin();
