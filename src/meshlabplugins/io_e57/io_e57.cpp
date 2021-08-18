@@ -332,7 +332,8 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
                 pointsData.colorRed[i] = static_cast<uint8_t>(vertices[i].C().X());
                 pointsData.colorGreen[i] = static_cast<uint8_t>(vertices[i].C().Y());
                 pointsData.colorBlue[i] = static_cast<uint8_t>(vertices[i].C().Z());
-                pointsData.isColorInvalid[i] = 0;
+                if (scanHeader.pointFields.isColorInvalidField)
+                    pointsData.isColorInvalid[i] = 0;
             }
 
             if (data3DPoints.areNormalsAvailable()) {
