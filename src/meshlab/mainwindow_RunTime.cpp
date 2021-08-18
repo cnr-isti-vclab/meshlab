@@ -100,41 +100,6 @@ void MainWindow::updateRecentProjActions()
 		recentProjActs[j]->setVisible(false);
 }
 
-// creates the standard plugin window
-void MainWindow::createStdPluginWnd()
-{
-	//checks if a MeshlabStdDialog is already open and closes it
-	if (stddialog!=0)
-	{
-		stddialog->close();
-		delete stddialog;
-	}
-	stddialog = new MeshlabStdDialog(this);
-	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea);
-	//addDockWidget(Qt::RightDockWidgetArea,stddialog);
-	
-	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
-	stddialog->setFloating(true);
-	stddialog->hide();
-	connect(GLA(),SIGNAL(glareaClosed()),this,SLOT(updateStdDialog()));
-	connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(closeClick()));
-}
-
-// When we switch the current model (and we change the active window)
-// we have to close the stddialog.
-// this one is called when user switch current window.
-void MainWindow::updateStdDialog()
-{
-	if(stddialog!=0){
-		if(GLA()!=0){
-			if(stddialog->curModel != meshDoc()->mm()){
-				stddialog->curgla=0; // invalidate the curgla member that is no more valid.
-				stddialog->close();
-			}
-		}
-	}
-}
-
 void MainWindow::updateCustomSettings()
 {
 	mwsettings.updateGlobalParameterList(currentGlobalParams);
@@ -245,8 +210,6 @@ void MainWindow::enableDocumentSensibleActionsContainer(const bool allowed)
 	if (editToolBar)
 		editToolBar->setEnabled(allowed);
 }
-
-
 
 //menu create is not enabled only in case of not valid/existing meshdocument
 void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool validmeshdoc )
@@ -741,8 +704,6 @@ void MainWindow::dropEvent ( QDropEvent * event )
 						this, "File format not supported",
 						extension + " file format is not supported by MeshLab.");
 			}
-			
-
 		}
 		showLayerDlg(layervis || meshDoc()->meshNumber() > 0);
 	}
@@ -911,8 +872,6 @@ void MainWindow::showTooltip(QAction* q)
 // It is split in two part
 // - startFilter that setup the dialogs and asks for parameters
 // - executeFilter callback invoked when the params have been set up.
-
-
 void MainWindow::startFilter(const QAction* action)
 {
 	if(currentViewContainer() == NULL) return;
@@ -920,7 +879,7 @@ void MainWindow::startFilter(const QAction* action)
 	
 	// In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
-	if (GLA()->getCurrentEditAction() != NULL)
+	if (GLA()->getCurrentEditAction() != nullptr)
 		endEdit();
 	updateMenus();
 	
@@ -930,49 +889,73 @@ void MainWindow::startFilter(const QAction* action)
 	if (action == nullptr)
 		throw MLException("Invalid filter action value.");
 	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
-	if (meshDoc() == NULL)
+	if (meshDoc() == nullptr)
 		return;
-	//OLD FILTER PHILOSOPHY
-	if (iFilter != NULL)
-	{
-		//if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
-		//{
-		//	qDebug("MeshCreation");
-		//	GLA()->meshDoc->addNewMesh("",iFilter->filterName(action) );
-		//}
-		//else
-		if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
-		{
+	if (iFilter != nullptr) {
+		if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions)) {
 			QString enstr = missingPreconditions.join(",");
 			QMessageBox::warning(this, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
 																																					"Current mesh does not have <i>" + enstr + "</i>."));
 			return;
 		}
 		
-		if(currentViewContainer())
-		{
+		if(currentViewContainer()) {
 			iFilter->setLog(currentViewContainer()->LogPtr());
 			currentViewContainer()->LogPtr()->setBookmark();
 		}
-		// just to be sure...
-		createStdPluginWnd();
+
+		//checks if a filterDockDialog is already open and closes it
+		if (filterDockDialog != nullptr) {
+			filterDockDialog->close();
+			delete filterDockDialog;
+		}
 		
 		// (2) Ask for filter parameters and eventually directly invoke the filter
 		// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 		// if no dialog is created the filter must be executed immediately
-		if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
-		{
-			RichParameterList dummyParSet;
-			executeFilter(action, dummyParSet, false);
+
+		RichParameterList rpl = iFilter->initParameterList(action, *meshDoc());
+		if (rpl.isEmpty()) {
+			executeFilter(action, rpl, false);
 			
 			//Insert the filter to filterHistory
 			FilterNameParameterValuesPair tmp;
-			tmp.first = action->text(); tmp.second = dummyParSet;
+			tmp.first = action->text();
+			tmp.second = rpl;
 			meshDoc()->filterHistory.append(tmp);
 		}
+		else {
+			filterDockDialog = new FilterDockDialog(
+						rpl,
+						iFilter, action,
+						this, GLA()
+						);
+			filterDockDialog->setAllowedAreas (Qt::NoDockWidgetArea);
+			addDockWidget(Qt::RightDockWidgetArea, filterDockDialog);
+
+			//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
+			filterDockDialog->setFloating(true);
+			connect(
+					GLA(), SIGNAL(glareaClosed()),
+					this, SLOT(closeFilterDockDialog()));
+			connect(
+					filterDockDialog, SIGNAL(applyButtonClicked(const QAction*, RichParameterList)),
+					this, SLOT(executeFilter(const QAction*, RichParameterList)));
+			filterDockDialog->show();
+		}
 	}
-	
-}//void MainWindow::startFilter()
+}
+
+// When we switch the current model (and we change the active window)
+// we have to close the stddialog.
+// this one is called when user switch current window.
+void MainWindow::closeFilterDockDialog()
+{
+	if(filterDockDialog != nullptr) {
+		filterDockDialog->close();
+		filterDockDialog = nullptr;
+	}
+}
 
 
 void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated)
@@ -1127,7 +1110,7 @@ from the user defined dialog
 */
 
 
-void MainWindow::executeFilter(const QAction* action, RichParameterList &params, bool isPreview)
+void MainWindow::executeFilter(const QAction* action, const RichParameterList &params, bool isPreview)
 {
 	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	qb->show();
@@ -3140,7 +3123,7 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 	{
 		updateLayerDialog();
 		updateMenus();
-		updateStdDialog();
+		closeFilterDockDialog();
 	}
 }
 

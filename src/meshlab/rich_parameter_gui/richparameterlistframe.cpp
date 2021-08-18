@@ -36,7 +36,7 @@
 using namespace vcg;
 
 RichParameterListFrame::RichParameterListFrame(QWidget* parent) :
-	QFrame(parent), gla(nullptr), hiddenFrame(nullptr)
+	QFrame(parent), isHelpVisible(false), gla(nullptr), hiddenFrame(nullptr)
 {
 }
 
@@ -45,7 +45,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& defParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla), hiddenFrame(nullptr)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet, defParSet);
 }
@@ -54,7 +54,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla), hiddenFrame(nullptr)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet);
 }
@@ -64,7 +64,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameter& defPar,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla), hiddenFrame(nullptr)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curPar, defPar);
 }
@@ -105,9 +105,9 @@ void RichParameterListFrame::resetValues()
 
 void RichParameterListFrame::toggleHelp()
 {
+	isHelpVisible = !isHelpVisible;
 	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
-	updateGeometry();
+		helpList.at(i)->setVisible(isHelpVisible);
 }
 
 unsigned int RichParameterListFrame::size() const
@@ -136,11 +136,8 @@ void RichParameterListFrame::toggleAdvancedParameters()
 			hiddenFrame->setVisible(true);
 			showHiddenFramePushButton->setText("▲");
 		}
-		QFrame* p = dynamic_cast<QFrame*>(parent());
-		if (p){
-			p->setMinimumSize(p->sizeHint());
-		}
 	}
+	setMinimumSize(sizeHint());
 }
 
 void RichParameterListFrame::loadFrameContent(
