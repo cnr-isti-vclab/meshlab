@@ -3,6 +3,10 @@
 
 #include <QDockWidget>
 
+#include <common/plugins/interfaces/filter_plugin.h>
+
+class GLArea;
+
 namespace Ui {
 class FilterDockDialog;
 }
@@ -12,11 +16,32 @@ class FilterDockDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	explicit FilterDockDialog(QWidget *parent = nullptr);
+	explicit FilterDockDialog(
+			const RichParameterList& rpl,
+			FilterPlugin* plugin,
+			const QAction* filter,
+			QWidget *parent = nullptr,
+			GLArea* glArea = nullptr);
 	~FilterDockDialog();
+
+signals:
+	void applyButtonClicked(const QAction*, RichParameterList);
+
+private slots:
+	void on_applyPushButton_clicked();
+
+	void on_helpPushButton_clicked();
+
+	void on_closePushButton_clicked();
+
+	void on_defaultPushButton_clicked();
 
 private:
 	Ui::FilterDockDialog *ui;
+
+	const QAction* filter;
+	RichParameterList parameters;
+	GLArea* currentGLArea;
 };
 
 #endif // FILTER_DOCK_DIALOG_H
