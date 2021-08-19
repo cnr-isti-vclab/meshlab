@@ -278,7 +278,7 @@ void FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichPa
     alignerResult.FixName = static_cast<int>(par.getMeshId(PAR_FIXED_MESH));
     alignerResult.MovName = static_cast<int>(par.getMeshId(PAR_MOVING_MESH));
 
-    movingMesh->cm.Tr = alignerResult.Tr;
+    movingMesh->cm.Tr.FromMatrix(alignerResult.Tr);
 
 }
 
