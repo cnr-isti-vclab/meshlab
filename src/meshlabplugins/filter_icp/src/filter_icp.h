@@ -60,7 +60,6 @@ public:
     FilterIcpPlugin();
 
 	QString pluginName() const;
-	QString vendor() const;
 
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
@@ -84,6 +83,7 @@ private:
 
     vcg::AlignPair::Param alignParameters;
 
+    void saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) const;
 };
 
 #endif //MESHLAB_FILTER_EXAMPLE_PLUGIN_H
