@@ -21,10 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QDir>
-
 #include "filter_icp.h"
-#include "stats_builder/stats_builder.h"
 
 #define PAR_SOURCE_MESH         "SourceMesh"
 #define PAR_REFERENCE_MESH      "ReferenceMesh"
@@ -184,7 +181,7 @@ RichParameterList FilterIcpPlugin::initParameterList(const QAction *action, cons
 
     /* Add a checkbox to toggle 'Save Last Iteration' */
     parameterList.addParam(RichBool(PAR_SAVE_LAST_ITERATION, false, "Save Last Iteration",
-                                    "Toggle this checkbox in order to save the last iteration points in a file."));
+                                    "Toggle this checkbox in order to save the last iteration points in two layers."));
 
     return parameterList;
 }
@@ -290,8 +287,22 @@ void FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichPa
     }
 
     // Prints out the log
-    QString statsLog = ResultAlignerPlainTextFormatter(alignerResult.as.I).format();
-    log(qUtf8Printable(statsLog));
+    std::vector<vcg::AlignPair::Stat::IterInfo> &I = alignerResult.as.I;
+    // Print the header
+    log(" Iter | MinD | Error | Sample | Used | DistR | BordR | AnglR");
+    // Print the IterInfos
+    for (size_t qi = 0; qi < I.size(); ++qi) {
+        log("%04zu | %6.2f | %7.4f | %05i | %05i | %5i | %5i | %5i",
+                    qi,
+                    I[qi].MinDistAbs,
+                    I[qi].pcl50,
+                    I[qi].SampleTested,
+                    I[qi].SampleUsed,
+                    I[qi].DistanceDiscarded,
+                    I[qi].BorderDiscarded,
+                    I[qi].AngleDiscarded);
+    }
+
 
     // Apply the obtained transformation matrix to the moving mesh
     movingMesh->cm.Tr.FromMatrix(alignerResult.Tr);
@@ -325,6 +336,9 @@ void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::A
         (*viFixed).N() = fixedPoints[i];
         (*viFixed).C() = vcg::Color4b::Red;
     }
+
+    // Apply the result transformation matrix to the chosen points
+    chosenMovingPointsMesh->cm.Tr = alignerResult.Tr;
 
     // Update the data masks for the new meshes
     chosenMovingPointsMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
