@@ -71,19 +71,19 @@ class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>
 
 const static std::list<FileFormat> importImageFormatList = {
 	FileFormat("Windows Bitmap", "BMP"),
-	FileFormat("Joint Photographic Experts Group", "JPG"),
-	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Joint Photographic Experts Group", {"JPG", "JPEG"}),
 	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("Truevision Graphics Adapter", "TGA"),
+	FileFormat("Tagged Image File Format", {"TIF", "TIFF"}),
 	FileFormat("X11 Bitmap", "XBM"),
-	FileFormat("X11 Bitmap", "XPM"),
-	FileFormat("Truevision Graphics Adapter", "TGA")
+	FileFormat("X11 Bitmap", "XPM")
 };
 
 const static std::list<FileFormat> exportImageFormatList = {
 	FileFormat("Windows Bitmap", "BMP"),
-	FileFormat("Joint Photographic Experts Group", "JPG"),
-	FileFormat("Joint Photographic Experts Group", "JPEG"),
+	FileFormat("Joint Photographic Experts Group", {"JPG", "JPEG"}),
 	FileFormat("Portable Network Graphics", "PNG"),
+	FileFormat("Tagged Image File Format", {"TIF", "TIFF"}),
 	FileFormat("X11 Bitmap", "XBM"),
 	FileFormat("X11 Bitmap", "XPM")
 };
@@ -519,8 +519,10 @@ QImage BaseMeshIOPlugin::openImage(
 	else { //check if it is a format supported natively by QImage
 		bool supportedFormat = false;
 		for (const FileFormat& f : importImageFormatList){
-			if (f.extensions.first().toUpper() == format.toUpper())
-				supportedFormat = true;
+			for (const QString& ext : f.extensions){
+				if (ext.toUpper() == format.toUpper())
+					supportedFormat = true;
+			}
 		}
 
 		if (supportedFormat) {
@@ -556,8 +558,10 @@ void BaseMeshIOPlugin::saveImage(
 {
 	bool supportedFormat = false;
 	for (const FileFormat& f : exportImageFormatList){
-		if (f.extensions.first().toUpper() == format.toUpper())
-			supportedFormat = true;
+		for (const QString& ext : f.extensions){
+			if (ext.toUpper() == format.toUpper())
+				supportedFormat = true;
+		}
 	}
 	if (supportedFormat){
 		bool ok = image.save(fileName, nullptr, quality);
