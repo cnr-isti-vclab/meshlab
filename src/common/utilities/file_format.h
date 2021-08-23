@@ -30,6 +30,7 @@ class FileFormat
 {
 public:
 	FileFormat(QString description, QString ex) : description(description), extensions(ex){}
+	FileFormat(QString description, QStringList ex) : description(description), extensions(ex){}
 	QString description;
 	QStringList extensions;
 };

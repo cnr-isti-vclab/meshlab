@@ -1936,7 +1936,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 
 	QStringList fileNameList;
 	if (fileImg.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inputImageFormatListDialog().join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Raster"), lastUsedDirectory.path(), PM.inputImageFormatListDialog().join(";;"));
 	else
 		fileNameList.push_back(fileImg);
 
