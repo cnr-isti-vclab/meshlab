@@ -303,11 +303,11 @@ void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::A
     MeshModel *chosenMovingPointsMesh = meshDocument.addNewMesh("", "Chosen Source Points", false);
     MeshModel *correspondingFixedPointsMesh = meshDocument.addNewMesh("", "Corresponding Reference Points", false);
 
-    std::vector<Point3m> &movingPoints = alignerResult.Pmov;
-    std::vector<Point3m> &movingNormals = alignerResult.Nmov;
+    std::vector<vcg::Point3d> &movingPoints = alignerResult.Pmov;
+    std::vector<vcg::Point3d> &movingNormals = alignerResult.Nmov;
 
-    std::vector<Point3m> &fixedPoints = alignerResult.Pfix;
-    std::vector<Point3m> &fixedNormals = alignerResult.Nmov;
+    std::vector<vcg::Point3d> &fixedPoints = alignerResult.Pfix;
+    std::vector<vcg::Point3d> &fixedNormals = alignerResult.Nmov;
 
     auto viMoving = vcg::tri::Allocator<CMeshO>::AddVertices(chosenMovingPointsMesh->cm, movingPoints.size());
     auto viFixed = vcg::tri::Allocator<CMeshO>::AddVertices(correspondingFixedPointsMesh->cm, fixedPoints.size());
