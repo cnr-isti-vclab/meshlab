@@ -1223,8 +1223,9 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		rs.selectionFlag = selectionT;
 		rs.storeDistanceAsQualityFlag = distquality;
 		
-		if(rs.colorFlag)   trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
-		if(rs.qualityFlag) trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
+		if(rs.colorFlag) trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+		if(rs.qualityFlag || rs.storeDistanceAsQualityFlag)
+			trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
 		
 		qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
 		qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
