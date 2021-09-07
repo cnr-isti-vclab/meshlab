@@ -124,14 +124,13 @@ QString SelectionFilterPlugin::pluginName() const
     return "FilterSelect";
 }
 
- QString SelectionFilterPlugin::filterName(ActionIDType filter) const
+QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 {
- switch(filter)
- {
+	switch(filter) {
 	case FP_SELECT_ALL :                  return tr("Select All");
 	case FP_SELECT_NONE :                 return tr("Select None");
 	case FP_SELECT_INVERT :               return tr("Invert Selection");
-    case FP_SELECT_CONNECTED :            return tr("Select Connected Faces");
+	case FP_SELECT_CONNECTED :            return tr("Select Connected Faces");
 	case FP_SELECT_DELETE_VERT :          return tr("Delete Selected Vertices");
 	case FP_SELECT_DELETE_ALL_FACE :      return tr("Delete ALL Faces");
 	case FP_SELECT_DELETE_FACE :          return tr("Delete Selected Faces");
@@ -148,14 +147,14 @@ QString SelectionFilterPlugin::pluginName() const
 	case FP_SELECT_BY_COLOR :             return tr("Select Faces by Color");
 	case CP_SELFINTERSECT_SELECT :        return tr("Select Self Intersecting Faces");
 	case CP_SELECT_TEXBORDER :            return tr("Select Vertex Texture Seams");
-	case CP_SELECT_NON_MANIFOLD_FACE :    return tr("Select non Manifold Edges ");
+	case CP_SELECT_NON_MANIFOLD_FACE :    return tr("Select non Manifold Edges");
 	case CP_SELECT_NON_MANIFOLD_VERTEX :  return tr("Select non Manifold Vertices");
 	case FP_SELECT_FACES_BY_EDGE:         return tr("Select Faces with edges longer than...");
 	case FP_SELECT_FOLD_FACE :            return tr("Select Folded Faces");
 	case  FP_SELECT_OUTLIER:              return tr("Select Outliers");
- }
- assert(0);
- return QString("Unknown filter");
+	}
+	assert(0);
+	return QString("Unknown filter");
 }
 
 QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
