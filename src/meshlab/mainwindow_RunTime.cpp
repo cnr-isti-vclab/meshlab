@@ -916,13 +916,7 @@ void MainWindow::startFilter(const QAction* action)
 
 		RichParameterList rpl = iFilter->initParameterList(action, *meshDoc());
 		if (rpl.isEmpty()) {
-			executeFilter(action, rpl, false);
-			
-			//Insert the filter to filterHistory
-			FilterNameParameterValuesPair tmp;
-			tmp.first = action->text();
-			tmp.second = rpl;
-			meshDoc()->filterHistory.append(tmp);
+			executeFilter(action, rpl, false, true);
 		}
 		else {
 			filterDockDialog = new FilterDockDialog(rpl, iFilter, action, this, GLA());
@@ -933,9 +927,9 @@ void MainWindow::startFilter(const QAction* action)
 			connect(GLA(), SIGNAL(glareaClosed()), this, SLOT(closeFilterDockDialog()));
 			connect(
 				filterDockDialog,
-				SIGNAL(applyButtonClicked(const QAction*, RichParameterList)),
+				SIGNAL(applyButtonClicked(const QAction*, RichParameterList, bool, bool)),
 				this,
-				SLOT(executeFilter(const QAction*, RichParameterList)));
+				SLOT(executeFilter(const QAction*, RichParameterList, bool, bool)));
 			filterDockDialog->show();
 		}
 	}
@@ -1104,8 +1098,8 @@ from the automatic dialog
 from the user defined dialog
 */
 
-
-void MainWindow::executeFilter(const QAction* action, const RichParameterList &params, bool isPreview)
+void MainWindow::executeFilter(
+	const QAction* action, const RichParameterList& params, bool isPreview, bool saveOnHistory)
 {
 	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	qb->show();
@@ -1265,6 +1259,14 @@ void MainWindow::executeFilter(const QAction* action, const RichParameterList &p
 		
 		updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
 		meshDoc()->meshDocStateData().clear();
+
+		if (saveOnHistory){
+			//Insert the filter to filterHistory
+			FilterNameParameterValuesPair tmp;
+			tmp.first = action->text();
+			tmp.second = params;
+			meshDoc()->filterHistory.append(tmp);
+		}
 	}
 	catch (const std::bad_alloc& bdall) {
 		meshDoc()->setBusy(false);

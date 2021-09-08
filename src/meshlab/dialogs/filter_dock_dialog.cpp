@@ -1,6 +1,8 @@
 #include "filter_dock_dialog.h"
 #include "ui_filter_dock_dialog.h"
 
+#include "../mainwindow.h"
+
 FilterDockDialog::FilterDockDialog(
 	const RichParameterList& rpl,
 	FilterPlugin*            plugin,
@@ -13,7 +15,12 @@ FilterDockDialog::FilterDockDialog(
 	filter(filter),
 	parameters(rpl),
 	mask(plugin->postCondition(filter)),
-	currentGLArea(glArea)
+	currentGLArea(glArea),
+	isPreviewMeshStateValid(false),
+	prevParams(rpl),
+	mw(nullptr),
+	md(nullptr),
+	mesh(nullptr)
 {
 	ui->setupUi(this);
 
@@ -23,8 +30,31 @@ FilterDockDialog::FilterDockDialog(
 	ui->parameterFrame->initParams(rpl, rpl, (QWidget*) glArea);
 	ui->parameterFrame->setMinimumSize(ui->parameterFrame->sizeHint());
 
-	if (!isPreviewable())
+	if (!isFilterPreviewable(plugin, filter)) {
 		ui->previewCheckBox->setVisible(false);
+	}
+	else {
+		// parent should be always the mainwindow
+		mw = static_cast<MainWindow*>(parent);
+		if (mw) {
+			md   = mw->meshDoc();
+			mesh = mw->meshDoc()->mm();
+			if (md == nullptr || mesh == nullptr) {
+				ui->previewCheckBox->setVisible(false);
+				mw   = nullptr;
+				md   = nullptr;
+				mesh = nullptr;
+			}
+			else {
+				noPreviewMeshState.create(mask, mesh);
+				connect(ui->parameterFrame, SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
+				connect(md, SIGNAL(currentMeshChanged(int)), this, SLOT(changeCurrentMesh(int)));
+			}
+		}
+		else {
+			ui->previewCheckBox->setVisible(false);
+		}
+	}
 	setMinimumWidth(sizeHint().width());
 }
 
@@ -33,10 +63,59 @@ FilterDockDialog::~FilterDockDialog()
 	delete ui;
 }
 
+void FilterDockDialog::on_previewCheckBox_stateChanged(int state)
+{
+	if (state == Qt::Checked) {
+		ui->parameterFrame->writeValuesOnParameterList(parameters);
+
+		// if the preview mesh state is valid and parameters are not changed, we do not need to
+		// apply again the filter
+		if (isPreviewMeshStateValid && parameters == prevParams) {
+			previewMeshState.apply(mesh);
+			updateRenderingData(mw, mesh);
+			if (currentGLArea != nullptr)
+				currentGLArea->updateAllDecorators();
+		}
+		else { // we need to apply the filter
+			applyDynamic();
+			if (currentGLArea != nullptr)
+				currentGLArea->updateAllDecorators();
+		}
+	}
+	else { // not checked - exit from preview
+		noPreviewMeshState.apply(mesh);
+		updateRenderingData(mw, mesh);
+		if (currentGLArea != nullptr)
+			currentGLArea->updateAllDecorators();
+	}
+}
+
 void FilterDockDialog::on_applyPushButton_clicked()
 {
 	ui->parameterFrame->writeValuesOnParameterList(parameters);
-	emit applyButtonClicked(filter, parameters);
+
+	if (isPreviewable()) {
+		if (mesh) {
+			// first, restore the mesh to the no-preview state
+			noPreviewMeshState.apply(mesh);
+			updateRenderingData(mw, mesh);
+		}
+	}
+
+	if (isPreviewable() && isPreviewMeshStateValid && parameters == prevParams) {
+		previewMeshState.apply(mesh);
+		updateRenderingData(mw, mesh);
+	}
+	else
+		emit applyButtonClicked(filter, parameters, false, true);
+
+	if (isPreviewable()) {
+		// save the no-preview state, after the filter was applied
+		noPreviewMeshState.create(mask, mesh);
+	}
+
+	if (currentGLArea)
+		currentGLArea->update();
 }
 
 void FilterDockDialog::on_helpPushButton_clicked()
@@ -56,8 +135,44 @@ void FilterDockDialog::on_defaultPushButton_clicked()
 	ui->parameterFrame->resetValues();
 }
 
+void FilterDockDialog::applyDynamic()
+{
+	if (ui->previewCheckBox->isChecked()) {
+		prevParams = parameters;
+		ui->parameterFrame->writeValuesOnParameterList(parameters);
+		ui->parameterFrame->writeValuesOnParameterList(prevParams);
+
+		// first, restore the mesh to the no-preview state
+		noPreviewMeshState.apply(mesh);
+		// then, apply dynamically with the new parameters
+		mw->executeFilter(filter, parameters, true);
+		// save the preview state
+		previewMeshState.create(mask, mesh);
+		isPreviewMeshStateValid = true;
+
+		if (currentGLArea)
+			currentGLArea->update();
+	}
+}
+
+void FilterDockDialog::changeCurrentMesh(int meshId)
+{
+	if (isPreviewable()) {
+		noPreviewMeshState.apply(mesh);
+		mesh = md->getMesh(meshId);
+		noPreviewMeshState.create(mask, mesh);
+		applyDynamic();
+	}
+}
+
 bool FilterDockDialog::isPreviewable() const
 {
+	return ui->previewCheckBox->isVisible();
+}
+
+bool FilterDockDialog::isFilterPreviewable(FilterPlugin* plugin, const QAction* filter)
+{
+	unsigned int mask = plugin->postCondition(filter);
 	if ((filter == nullptr) || (plugin == nullptr) ||
 		(plugin->filterArity(filter) != FilterPlugin::SINGLE_MESH))
 		return false;
@@ -69,4 +184,18 @@ bool FilterDockDialog::isPreviewable() const
 		return false;
 
 	return true;
+}
+
+void FilterDockDialog::updateRenderingData(MainWindow* mw, MeshModel* mesh)
+{
+	if (mw != nullptr && mesh != nullptr) {
+		MultiViewer_Container* mvcont = mw->currentViewContainer();
+		if (mvcont != nullptr) {
+			MLSceneGLSharedDataContext* shar = mvcont->sharedDataContext();
+			if (shar != nullptr) {
+				shar->meshAttributesUpdated(mesh->id(), true, MLRenderingData::RendAtts(true));
+				shar->manageBuffers(mesh->id());
+			}
+		}
+	}
 }
