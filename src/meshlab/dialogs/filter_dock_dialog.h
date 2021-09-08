@@ -17,11 +17,11 @@ class FilterDockDialog : public QDockWidget
 
 public:
 	explicit FilterDockDialog(
-			const RichParameterList& rpl,
-			FilterPlugin* plugin,
-			const QAction* filter,
-			QWidget *parent = nullptr,
-			GLArea* glArea = nullptr);
+		const RichParameterList& rpl,
+		FilterPlugin*            plugin,
+		const QAction*           filter,
+		QWidget*                 parent = nullptr,
+		GLArea*                  glArea = nullptr);
 	~FilterDockDialog();
 
 signals:
@@ -37,11 +37,15 @@ private slots:
 	void on_defaultPushButton_clicked();
 
 private:
-	Ui::FilterDockDialog *ui;
+	bool isPreviewable() const;
 
-	const QAction* filter;
+	Ui::FilterDockDialog* ui;
+
+	FilterPlugin*     plugin;
+	const QAction*    filter;
 	RichParameterList parameters;
-	GLArea* currentGLArea;
+	unsigned int      mask;
+	GLArea*           currentGLArea;
 };
 
 #endif // FILTER_DOCK_DIALOG_H

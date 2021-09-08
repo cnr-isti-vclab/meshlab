@@ -127,7 +127,7 @@ MainWindow::MainWindow():
 	createToolBars();
 	createMenus();
 	gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
-	filterDockDialog = 0;
+	filterDockDialog = nullptr;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(MeshLabApplication::shortName());
