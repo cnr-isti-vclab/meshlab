@@ -925,22 +925,17 @@ void MainWindow::startFilter(const QAction* action)
 			meshDoc()->filterHistory.append(tmp);
 		}
 		else {
-			filterDockDialog = new FilterDockDialog(
-						rpl,
-						iFilter, action,
-						this, GLA()
-						);
-			filterDockDialog->setAllowedAreas (Qt::NoDockWidgetArea);
+			filterDockDialog = new FilterDockDialog(rpl, iFilter, action, this, GLA());
+			filterDockDialog->setAllowedAreas(Qt::NoDockWidgetArea);
 			addDockWidget(Qt::RightDockWidgetArea, filterDockDialog);
 
-			//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
 			filterDockDialog->setFloating(true);
+			connect(GLA(), SIGNAL(glareaClosed()), this, SLOT(closeFilterDockDialog()));
 			connect(
-					GLA(), SIGNAL(glareaClosed()),
-					this, SLOT(closeFilterDockDialog()));
-			connect(
-					filterDockDialog, SIGNAL(applyButtonClicked(const QAction*, RichParameterList)),
-					this, SLOT(executeFilter(const QAction*, RichParameterList)));
+				filterDockDialog,
+				SIGNAL(applyButtonClicked(const QAction*, RichParameterList)),
+				this,
+				SLOT(executeFilter(const QAction*, RichParameterList)));
 			filterDockDialog->show();
 		}
 	}
