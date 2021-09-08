@@ -102,7 +102,7 @@ public:
 	MainWindowSetting mwsettings;
 public slots:
 	// callback function to execute a filter
-	void executeFilter(const QAction *action, const RichParameterList& srcpar, bool isPreview = false);
+	void executeFilter(const QAction *action, const RichParameterList& srcpar, bool isPreview = false, bool saveOnHistory = false);
 signals:
 	void dispatchCustomSettings(const RichParameterList& rps);
 	void filterExecuted();
