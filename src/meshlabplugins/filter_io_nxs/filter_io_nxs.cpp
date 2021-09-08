@@ -300,10 +300,17 @@ void FilterIONXSPlugin::buildNxs(
 	//the name of the file is into the parameter list "input_file"
 	//if m is not nullptr, it means that we are saving a nxs from the given
 	//MeshModel.
+	
+	if (outputFile.isEmpty())
+		throw MLException("Cannot save file. Output filename not valid.");
 
 	QString inputFile;
-	if (m == nullptr)
+	if (m == nullptr) {
 		inputFile = params.getOpenFileName("input_file");
+		QFileInfo finfo(inputFile);
+		if (inputFile.isEmpty() || !finfo.exists())
+			throw MLException("Cannot save file. Input filename not valid.");
+	}
 
 	//parameters:
 	int node_size = params.getInt("node_faces");
@@ -469,7 +476,7 @@ void FilterIONXSPlugin::buildNxs(
 	catch(const MLException& error) {
 		if(tree)   delete tree;
 		if(stream) delete stream;
-		if (loader) delete loader;
+		if(loader) delete loader;
 		throw error;
 	}
 	catch(QString error) {
@@ -482,13 +489,13 @@ void FilterIONXSPlugin::buildNxs(
 	catch(const char *error) {
 		if(tree)   delete tree;
 		if(stream) delete stream;
-		if (loader) delete loader;
+		if(loader) delete loader;
 		throw MLException("Fatal error: " + QString(error));
 	}
 
 	if(tree)   delete tree;
 	if(stream) delete stream;
-	if (loader) delete loader;
+	if(loader) delete loader;
 }
 
 void FilterIONXSPlugin::compressNxs(
@@ -496,6 +503,12 @@ void FilterIONXSPlugin::compressNxs(
 		const QString& outputFile,
 		const RichParameterList& params)
 {
+	if (outputFile.isEmpty())
+		throw MLException("Cannot save file. Output filename not valid.");
+	QFileInfo finfo(inputFile);
+	if (inputFile.isEmpty() || !finfo.exists())
+		throw MLException("Cannot save file. Input filename not valid.");
+	
 	float coord_step = params.getFloat("nxz_vertex_quantization");
 	int position_bits = params.getInt("vertex_bits");
 	float error_q = params.getFloat("quantization_factor");
