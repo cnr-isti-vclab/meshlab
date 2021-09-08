@@ -196,11 +196,9 @@ int FilterIONXSPlugin::postCondition(const QAction*) const
 RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, const MeshModel&)
 {
 	RichParameterList params;
-	QString defDir = QDir::home().path();
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
 		params.addParam(RichOpenFile("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
-		params.addParam(RichOpenFile("input_mtl_file", "", {"*.mtl"}, "Input mtl File", "The input material file; required if loading an obj."));
 		params.addParam(RichSaveFile("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
 		break;
@@ -394,8 +392,7 @@ void FilterIONXSPlugin::buildNxs(
 		std::vector<QImage> textures;
 		//TODO: actually the stream will store textures or normals or colors even if not needed
 		if (m == nullptr) {
-			QString mtlFile = params.getString("input_mtl_file");
-			stream->load(QStringList(inputFile), mtlFile);
+			stream->load(QStringList(inputFile), "");
 			has_colors = stream->hasColors();
 			has_normals = stream->hasNormals();
 			has_v_textures = stream->hasTextures();
@@ -448,8 +445,13 @@ void FilterIONXSPlugin::buildNxs(
 		builder.tex_quality = tex_quality;
 
 		bool success = true;
-		if (m == 0)
+		if (m == 0){
+			QFileInfo finfo(inputFile);
+			QString currDir = QDir::currentPath();
+			QDir::setCurrent(finfo.absolutePath());
 			success = builder.initAtlas(stream->textures);
+			QDir::setCurrent(currDir);
+		}
 		else
 			builder.initAtlas(textures);
 		if(!success) {
