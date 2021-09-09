@@ -324,9 +324,9 @@ bool RichMatrix44f::operator==( const RichParameter& rb )
 	return (rb.value().isMatrix44f() &&(pName == rb.name()) && (value().getMatrix44f() == rb.value().getMatrix44f()));
 }
 
-/**** RichPoint3f Class ****/
+/**** RichPosition Class ****/
 
-RichPoint3f::RichPoint3f(
+RichPosition::RichPosition(
 		const QString& nm,
 		const Point3m& defval,
 		const QString& desc,
@@ -337,21 +337,53 @@ RichPoint3f::RichPoint3f(
 {
 }
 
-RichPoint3f::~RichPoint3f()
+RichPosition::~RichPosition()
 {
 }
 
-QString RichPoint3f::stringType() const
+QString RichPosition::stringType() const
 {
-	return "RichPoint3f";
+	return "RichPosition";
 }
 
-RichPoint3f* RichPoint3f::clone() const
+RichPosition* RichPosition::clone() const
 {
-	return new RichPoint3f(*this);
+	return new RichPosition(*this);
 }
 
-bool RichPoint3f::operator==( const RichParameter& rb )
+bool RichPosition::operator==( const RichParameter& rb )
+{
+	return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
+}
+
+/**** RichDirection Class ****/
+
+RichDirection::RichDirection(
+	const QString& nm,
+	const Point3m& defval,
+	const QString& desc,
+	const QString& tltip,
+	bool           hidden,
+	const QString& category) :
+	RichParameter(nm, Point3fValue(defval), desc, tltip, hidden, category)
+{
+}
+
+RichDirection::~RichDirection()
+{
+}
+
+QString RichDirection::stringType() const
+{
+	return "RichDirection";
+}
+
+RichDirection* RichDirection::clone() const
+{
+	return new RichDirection(*this);
+}
+
+bool RichDirection::operator==(const RichParameter& rb)
 {
 	return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
 }
@@ -835,7 +867,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if (!corrconv)
 			return false;
 
-		*par = new RichPoint3f(name, val,desc,tooltip);
+		*par = new RichPosition(name, val,desc,tooltip);
 		return true;
 	}
 	if(type=="RichShotf") {

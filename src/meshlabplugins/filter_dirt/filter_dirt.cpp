@@ -105,7 +105,7 @@ RichParameterList FilterDirt::initParameterList(const QAction* filter, const Mes
 	switch(ID(filter)){
 
 	case FP_DIRT:{
-		par.addParam(RichPoint3f("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
+		par.addParam(RichDirection("dust_dir", Point3m(0, 1, 0), "Direction", "Direction of the dust source"));
 		par.addParam(RichInt("nparticles", 3, "max particles x face", "Max Number of Dust Particles to Generate Per Face"));
 		par.addParam(RichFloat("slippiness", 1.0f, "s", "The surface slippines(large s means less sticky)"));
 		par.addParam(RichFloat("adhesion", 0.2f, "k", "Factor to model the general adhesion"));
@@ -114,8 +114,8 @@ RichParameterList FilterDirt::initParameterList(const QAction* filter, const Mes
 		break;
 	}
 	case FP_CLOUD_MOVEMENT:{
-		par.addParam(RichPoint3f("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
-		par.addParam(RichPoint3f("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
+		par.addParam(RichDirection("gravity_dir", Point3m(0, -1, 0), "g", "Direction of gravity"));
+		par.addParam(RichDirection("force_dir", Point3m(0, 0, 0), "force", "Direction of the force acting on the points cloud"));
 		par.addParam(RichInt("steps", 1, "s", "Simulation Steps"));
 		par.addParam(RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f, "adhesion", "Factor to model the general adhesion."));
 		par.addParam(RichFloat("velocity", 0, "v", "Initial velocity of the particle"));

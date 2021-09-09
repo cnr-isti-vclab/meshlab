@@ -135,7 +135,7 @@ RichParameterList AmbientOcclusionPlugin::initParameterList(const QAction *actio
 				" - 1 means that all the light cames from the specified cone of directions <br>"
 				" - other values mix the two set of lighting directions "));
 			parlst.addParam(RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-			parlst.addParam(RichPoint3f("coneDir",Point3m(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
+			parlst.addParam(RichDirection("coneDir",Point3m(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","Only works for per-vertex AO. In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
 			//parlst.addParam(RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
