@@ -855,7 +855,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		return true;
 	}
 
-	if(type=="RichPoint3f") {
+	if(type=="RichPoint3f") { // for backward compatibility
 		vcg::Point3f val;
 		val[0]=np.attribute("x").toFloat(&corrconv);
 		if (!corrconv)
@@ -868,6 +868,36 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 			return false;
 
 		*par = new RichPosition(name, val,desc,tooltip);
+		return true;
+	}
+	if(type=="RichPosition") { // for backward compatibility
+		vcg::Point3f val;
+		val[0]=np.attribute("x").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[1]=np.attribute("y").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[2]=np.attribute("z").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+
+		*par = new RichPosition(name, val,desc,tooltip);
+		return true;
+	}
+	if(type=="RichDirection") { // for backward compatibility
+		vcg::Point3f val;
+		val[0]=np.attribute("x").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[1]=np.attribute("y").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+		val[2]=np.attribute("z").toFloat(&corrconv);
+		if (!corrconv)
+			return false;
+
+		*par = new RichDirection(name, val,desc,tooltip);
 		return true;
 	}
 	if(type=="RichShotf") {
