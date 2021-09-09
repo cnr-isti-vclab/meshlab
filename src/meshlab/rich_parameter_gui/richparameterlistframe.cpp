@@ -134,10 +134,12 @@ void RichParameterListFrame::toggleAdvancedParameters()
 		if (hiddenFrame->isVisible()){
 			hiddenFrame->setVisible(false);
 			showHiddenFramePushButton->setText("▼");
+			showHiddenFramePushButton->setToolTip("Show advanced parameters");
 		}
 		else {
 			hiddenFrame->setVisible(true);
 			showHiddenFramePushButton->setText("▲");
+			showHiddenFramePushButton->setToolTip("Hide advanced parameters");
 		}
 	}
 	setMinimumSize(sizeHint());
@@ -205,15 +207,18 @@ void RichParameterListFrame::loadFrameContent(
 				wd->addWidgetToGridLayout(flay,j++);
 			}
 		}
-		//hiddenFrame->setMinimumSize(hiddenFrame->sizeHint());
 		glay->addWidget(hiddenFrame, i++, 0, 1, 3);
 		hiddenFrame->setVisible(false);
 		showHiddenFramePushButton = new QPushButton("", this);
 		showHiddenFramePushButton->setFlat(true);
 		showHiddenFramePushButton->setText("▼");
+		showHiddenFramePushButton->setToolTip("Show advanced parameters");
 		glay->addWidget(showHiddenFramePushButton, i++, 0, 1, 3);
 		connect(showHiddenFramePushButton, SIGNAL(clicked()), this, SLOT(toggleAdvancedParameters()));
 	}
+
+	QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+	glay->addItem(spacer, i++, 0);
 	setLayout(glay);
 }
 
