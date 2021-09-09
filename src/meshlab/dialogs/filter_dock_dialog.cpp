@@ -28,13 +28,17 @@ FilterDockDialog::FilterDockDialog(
 	ui->filterInfoLabel->setText(plugin->filterInfo(filter));
 
 	ui->parameterFrame->initParams(rpl, rpl, (QWidget*) glArea);
-	ui->parameterFrame->setMinimumSize(ui->parameterFrame->sizeHint());
 
+	// by default, the previewCheckBox is visible when the dialog is constructed.
+	// now, we check if the filter is previewable:
+	// - if it is previewable, we set all data structures necessary to make the preview available
+	// - if it is not previewable, we set the previewCheckBox non visible
 	if (!isFilterPreviewable(plugin, filter)) {
 		ui->previewCheckBox->setVisible(false);
 	}
 	else {
-		// parent should be always the mainwindow
+		// parent should always be the mainwindow
+		// if not, the filter won't be previewable
 		mw = static_cast<MainWindow*>(parent);
 		if (mw) {
 			md   = mw->meshDoc();
@@ -55,7 +59,9 @@ FilterDockDialog::FilterDockDialog(
 			ui->previewCheckBox->setVisible(false);
 		}
 	}
-	setMinimumWidth(sizeHint().width());
+	ui->parameterFrame->showNormal();
+	ui->parameterFrame->adjustSize();
+	showNormal();
 }
 
 FilterDockDialog::~FilterDockDialog()
@@ -65,13 +71,13 @@ FilterDockDialog::~FilterDockDialog()
 
 void FilterDockDialog::on_previewCheckBox_stateChanged(int state)
 {
-	if (state == Qt::Checked) {
+	if (state == Qt::Checked) { //enable preview
 		ui->parameterFrame->writeValuesOnParameterList(parameters);
 
 		// if the preview mesh state is valid and parameters are not changed, we do not need to
 		// apply again the filter
 		if (isPreviewMeshStateValid && parameters == prevParams) {
-			previewMeshState.apply(mesh);
+			previewMeshState.apply(mesh); // apply the preview state to the mesh
 			updateRenderingData(mw, mesh);
 			if (currentGLArea != nullptr)
 				currentGLArea->updateAllDecorators();
@@ -82,8 +88,8 @@ void FilterDockDialog::on_previewCheckBox_stateChanged(int state)
 				currentGLArea->updateAllDecorators();
 		}
 	}
-	else { // not checked - exit from preview
-		noPreviewMeshState.apply(mesh);
+	else { // not checked - disable preview
+		noPreviewMeshState.apply(mesh); // re-apply old state of the mesh
 		updateRenderingData(mw, mesh);
 		if (currentGLArea != nullptr)
 			currentGLArea->updateAllDecorators();
@@ -121,8 +127,9 @@ void FilterDockDialog::on_applyPushButton_clicked()
 void FilterDockDialog::on_helpPushButton_clicked()
 {
 	ui->parameterFrame->toggleHelp();
-	ui->parameterFrame->setMinimumWidth(ui->parameterFrame->sizeHint().width());
-	setMinimumWidth(sizeHint().width());
+	ui->parameterFrame->updateGeometry();
+	ui->parameterFrame->adjustSize();
+	updateGeometry();
 }
 
 void FilterDockDialog::on_closePushButton_clicked()
@@ -167,6 +174,9 @@ void FilterDockDialog::changeCurrentMesh(int meshId)
 
 bool FilterDockDialog::isPreviewable() const
 {
+	// the actual check whether the filter is previewable or not is made in the consturctor, calling
+	// the function isFilterPreviewable().
+	// when a filter is previewable, the previewCheckBox is visible.
 	return ui->previewCheckBox->isVisible();
 }
 
