@@ -1,3 +1,25 @@
+/****************************************************************************
+ * VCGLib                                                            o o     *
+ * Visual and Computer Graphics Library                            o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2004-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 #include "filter_dock_dialog.h"
 #include "ui_filter_dock_dialog.h"
 
@@ -68,7 +90,7 @@ FilterDockDialog::~FilterDockDialog()
 
 void FilterDockDialog::on_previewCheckBox_stateChanged(int state)
 {
-	if (state == Qt::Checked) { //enable preview
+	if (state == Qt::Checked) { // enable preview
 		ui->parameterFrame->writeValuesOnParameterList(parameters);
 
 		// if the preview mesh state is valid and parameters are not changed, we do not need to
@@ -85,7 +107,8 @@ void FilterDockDialog::on_previewCheckBox_stateChanged(int state)
 				currentGLArea->updateAllDecorators();
 		}
 	}
-	else { // not checked - disable preview
+	// not checked - disable preview
+	else {
 		noPreviewMeshState.apply(mesh); // re-apply old state of the mesh
 		updateRenderingData(mw, mesh);
 		if (currentGLArea != nullptr)
