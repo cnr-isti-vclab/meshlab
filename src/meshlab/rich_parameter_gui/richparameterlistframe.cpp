@@ -108,6 +108,9 @@ void RichParameterListFrame::toggleHelp()
 	isHelpVisible = !isHelpVisible;
 	for(int i = 0; i < helpList.count(); i++)
 		helpList.at(i)->setVisible(isHelpVisible);
+	setMinimumSize(sizeHint());
+	adjustSize();
+	updateGeometry();
 }
 
 unsigned int RichParameterListFrame::size() const

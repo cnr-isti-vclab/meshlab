@@ -59,9 +59,6 @@ FilterDockDialog::FilterDockDialog(
 			ui->previewCheckBox->setVisible(false);
 		}
 	}
-	ui->parameterFrame->showNormal();
-	ui->parameterFrame->adjustSize();
-	showNormal();
 }
 
 FilterDockDialog::~FilterDockDialog()
