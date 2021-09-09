@@ -23,6 +23,7 @@ set(SOURCES
 	dialogs/save_mesh_attributes_dialog.cpp
 	dialogs/save_snapshot_dialog.cpp
 	dialogs/setting_dialog.cpp
+	gui_utils/vertical_scroll_area.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
 	rich_parameter_gui/richparameterlistframe.cpp
 	rich_parameter_gui/richparameterwidgets.cpp
@@ -51,6 +52,7 @@ set(HEADERS
 	dialogs/save_mesh_attributes_dialog.h
 	dialogs/save_snapshot_dialog.h
 	dialogs/setting_dialog.h
+	gui_utils/vertical_scroll_area.h
 	rich_parameter_gui/richparameterlistdialog.h
 	rich_parameter_gui/richparameterlistframe.h
 	rich_parameter_gui/richparameterwidgets.h
