@@ -188,21 +188,39 @@ public:
 	bool operator==(const RichParameter& rb);
 };
 
-class RichPoint3f : public RichParameter
+class RichPosition : public RichParameter
 {
 public:
-	RichPoint3f(
+	RichPosition(
 			const QString& nm,
 			const Point3m& defval,
 			const QString& desc = QString(),
 			const QString& tltip = QString(),
 			bool hidden = false,
 			const QString& category = QString());
-	~RichPoint3f();
+	~RichPosition();
 
 	QString stringType() const;
 
-	RichPoint3f* clone() const;
+	RichPosition* clone() const;
+	bool operator==(const RichParameter& rb);
+};
+
+class RichDirection : public RichParameter
+{
+public:
+	RichDirection(
+		const QString& nm,
+		const Point3m& defval,
+		const QString& desc = QString(),
+		const QString& tltip = QString(),
+		bool hidden = false,
+		const QString& category = QString());
+	~RichDirection();
+
+	QString stringType() const;
+
+	RichDirection* clone() const;
 	bool operator==(const RichParameter& rb);
 };
 

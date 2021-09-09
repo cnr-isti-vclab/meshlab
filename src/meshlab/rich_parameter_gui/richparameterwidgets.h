@@ -196,12 +196,12 @@ protected:
 	QGridLayout* vlay;
 };
 
-class Point3fWidget : public RichParameterWidget
+class PositionWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint3f& rdef, QWidget *gla);
-	~Point3fWidget();
+	PositionWidget(QWidget *p, const RichPosition& rpf, const RichPosition& rdef, QWidget *gla);
+	~PositionWidget();
 	QString paramName;
 	vcg::Point3f getValue();
 
@@ -215,11 +215,40 @@ public:
 	void  setValue(QString name, Point3m val);
 	void  setShotValue(QString name, Shotm val);
 	signals:
-	void askViewDir(QString);
 	void askViewPos(QString);
 	void askSurfacePos(QString);
 	void askCameraPos(QString);
 	void askTrackballPos(QString);
+
+protected:
+	QLineEdit * coordSB[3];
+	QComboBox *getPoint3Combo;
+	QPushButton *getPoint3Button;
+	QLabel* descLab;
+	QHBoxLayout* vlay;
+};
+
+class DirectionWidget : public RichParameterWidget
+{
+	Q_OBJECT
+public:
+	DirectionWidget(QWidget *p, const RichDirection& rpf, const RichDirection& rdef, QWidget *gla);
+	~DirectionWidget();
+	QString paramName;
+	vcg::Point3f getValue();
+
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void collectWidgetValue();
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
+
+public slots:
+	void  getPoint();
+	void  setValue(QString name, Point3m val);
+	void  setShotValue(QString name, Shotm val);
+signals:
+	void askViewDir(QString);
+	void askCameraDir(QString);
 
 protected:
 	QLineEdit * coordSB[3];

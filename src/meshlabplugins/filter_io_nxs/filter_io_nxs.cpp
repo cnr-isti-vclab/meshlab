@@ -259,7 +259,7 @@ RichParameterList FilterIONXSPlugin::nxsParameters() const
 	params.addParam(RichInt("skiplevels", 0, "Skip levels",
 					"Decimation skipped for n levels. Use for meshes with large textures "
 					"and very few vertices."));
-	params.addParam(RichPoint3f("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
+	params.addParam(RichPosition("origin", Point3m(0,0,0), "Origin", "new origin for the model"));
 	params.addParam(RichBool("center", false, "Center", "Set origin in the bounding box center", true));
 	params.addParam(RichBool("pow_2_textures", false, "Pow 2 textures", "Create textures to be power of 2", true));
 	params.addParam(RichBool("deepzoom", false, "Deepzoom",

@@ -458,10 +458,10 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 /******************************************/
-// Point3fWidget Implementation
+// PositionWidget Implementation
 /******************************************/
 
-Point3fWidget::Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint3f& rdef, QWidget *gla_curr):
+PositionWidget::PositionWidget(QWidget *p, const RichPosition& rpf, const RichPosition& rdef, QWidget *gla_curr):
 	RichParameterWidget(p,rpf, rdef)
 {
 	//qDebug("Creating a Point3fWidget");
@@ -490,16 +490,7 @@ Point3fWidget::Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint
 	this->setValue(paramName,rp->value().getPoint3f());
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 	{
-		getPoint3Button = new QPushButton("Get",this);
-		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
-
-		getPoint3Button->setFlat(true);
-		getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
-		//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
-		//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
-		vlay->addWidget(getPoint3Button);
 		QStringList names;
-		names << "View Dir.";
 		names << "View Pos.";
 		names << "Surf. Pos.";
 		names << "Raster Camera Pos.";
@@ -511,46 +502,57 @@ Point3fWidget::Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint
 		//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
 		vlay->addWidget(getPoint3Combo);
 
-		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
-		connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
-		connect(gla_curr,SIGNAL(transmitViewDir(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
-		connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
+		//connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 		connect(gla_curr,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
 		connect(gla_curr,SIGNAL(transmitCameraPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
+		connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
 		connect(gla_curr,SIGNAL(transmitTrackballPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
-		connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
 		connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendViewerShot(QString)));
 		connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
 		connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendRasterShot(QString)));
 		connect(this,SIGNAL(askTrackballPos(QString)),gla_curr,SLOT(sendTrackballPos(QString)));
+
+		getPoint3Button = new QPushButton("Get",this);
+		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+
+		getPoint3Button->setFlat(true);
+		getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
+
+		vlay->addWidget(getPoint3Button);
 	}
 	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
 
-Point3fWidget::~Point3fWidget()
+PositionWidget::~PositionWidget()
 {
 	//qDebug("Deallocating a point3fwidget");
 	this->disconnect();
 }
 
-void Point3fWidget::getPoint()
+void PositionWidget::getPoint()
 {
 	int index = getPoint3Combo->currentIndex();
-	//qDebug("Got signal %i",index);
 	switch(index)
 	{
-		case 0: emit askViewDir(paramName);       break;
-		case 1: emit askViewPos(paramName);       break;
-		case 2: emit askSurfacePos(paramName);    break;
-		case 3: emit askCameraPos(paramName);     break;
-		case 4: emit askTrackballPos(paramName);  break;
+		case 0:
+			emit askViewPos(paramName);
+			break;
+		case 1:
+			emit askSurfacePos(paramName);
+			break;
+		case 2:
+			emit askCameraPos(paramName);
+			break;
+		case 3:
+			emit askTrackballPos(paramName);
+			break;
 		default : assert(0);
 	}
 }
 
-void Point3fWidget::setValue(QString name,Point3m newVal)
+void PositionWidget::setValue(QString name,Point3m newVal)
 {
-	//qDebug("setValue parametername: %s ", qUtf8Printable(name));
 	if(name==paramName)
 	{
 		for(int i =0;i<3;++i)
@@ -558,35 +560,159 @@ void Point3fWidget::setValue(QString name,Point3m newVal)
 	}
 }
 
-void Point3fWidget::setShotValue(QString name, Shotm newValShot)
+void PositionWidget::setShotValue(QString name, Shotm newValShot)
 {
 	vcg::Point3f p = newValShot.GetViewPoint();
 	setValue(name,p);
 }
 
-vcg::Point3f Point3fWidget::getValue()
+vcg::Point3f PositionWidget::getValue()
 {
 	return vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat());
 }
 
-void Point3fWidget::collectWidgetValue()
+void PositionWidget::collectWidgetValue()
 {
 	rp->setValue(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
 }
 
-void Point3fWidget::resetWidgetValue()
+void PositionWidget::resetWidgetValue()
 {
 	for(unsigned int ii = 0; ii < 3;++ii)
 		coordSB[ii]->setText(QString::number(rp->value().getPoint3f()[ii],'g',3));
 }
 
-void Point3fWidget::setWidgetValue( const Value& nv )
+void PositionWidget::setWidgetValue( const Value& nv )
 {
 	for(unsigned int ii = 0; ii < 3;++ii)
 		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
 
-void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+void PositionWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLab,r,0);
+		lay->addLayout(vlay,r,1);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay,r);
+}
+
+/******************************************/
+// DirectionWidget Implementation
+/******************************************/
+
+DirectionWidget::DirectionWidget(QWidget *p, const RichDirection& rpf, const RichDirection& rdef, QWidget *gla_curr):
+	RichParameterWidget(p,rpf, rdef)
+{
+	paramName = rpf.name();
+	descLab = new QLabel(rpf.fieldDescription(),this);
+	descLab->setToolTip(rpf.fieldDescription());
+
+	vlay = new QHBoxLayout();
+	vlay->setSpacing(0);
+	for(int i =0;i<3;++i)
+	{
+		coordSB[i]= new QLineEdit(this);
+		QFont baseFont=coordSB[i]->font();
+		if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+		else baseFont.setPointSize(baseFont.pointSize()*3/4);
+		coordSB[i]->setFont(baseFont);
+		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
+		coordSB[i]->setValidator(new QDoubleValidator());
+		coordSB[i]->setAlignment(Qt::AlignRight);
+		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
+		vlay->addWidget(coordSB[i]);
+		connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
+	}
+	this->setValue(paramName,rp->value().getPoint3f());
+	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+	{
+		QStringList names;
+		names << "View Dir.";
+		names << "Raster Camera Dir.";
+
+		getPoint3Combo = new QComboBox(this);
+		getPoint3Combo->addItems(names);
+		vlay->addWidget(getPoint3Combo);
+
+		//connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
+		connect(gla_curr,SIGNAL(transmitViewDir(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
+		connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
+		connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
+		connect(this,SIGNAL(askCameraDir(QString)),gla_curr,SLOT(sendRasterShot(QString)));
+
+		getPoint3Button = new QPushButton("Get",this);
+		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+
+		getPoint3Button->setFlat(true);
+		getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
+
+		vlay->addWidget(getPoint3Button);
+	}
+}
+
+DirectionWidget::~DirectionWidget()
+{
+	//qDebug("Deallocating a point3fwidget");
+	this->disconnect();
+}
+
+void DirectionWidget::getPoint()
+{
+	int index = getPoint3Combo->currentIndex();
+	switch(index)
+	{
+	case 0:
+		emit askViewDir(paramName);
+		break;
+	case 1:
+		emit askCameraDir(paramName);
+		break;
+
+	default : assert(0);
+	}
+}
+
+void DirectionWidget::setValue(QString name,Point3m newVal)
+{
+	if(name==paramName)
+	{
+		for(int i =0;i<3;++i)
+			coordSB[i]->setText(QString::number(newVal[i],'g',4));
+	}
+}
+
+void DirectionWidget::setShotValue(QString name, Shotm newValShot)
+{
+	vcg::Point3f p = newValShot.GetViewDir();
+	setValue(name,p);
+}
+
+vcg::Point3f DirectionWidget::getValue()
+{
+	return vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat());
+}
+
+void DirectionWidget::collectWidgetValue()
+{
+	rp->setValue(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
+}
+
+void DirectionWidget::resetWidgetValue()
+{
+	for(unsigned int ii = 0; ii < 3;++ii)
+		coordSB[ii]->setText(QString::number(rp->value().getPoint3f()[ii],'g',3));
+}
+
+void DirectionWidget::setWidgetValue( const Value& nv )
+{
+	for(unsigned int ii = 0; ii < 3;++ii)
+		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
+}
+
+void DirectionWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
 	if (lay != NULL)
 	{

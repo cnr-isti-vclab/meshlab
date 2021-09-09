@@ -210,7 +210,7 @@ RichParameterList SelectionFilterPlugin::initParameterList(const QAction *action
 	{
 		parlst.addParam(RichDynamicFloat("anglelimit", 75.0f, 0.0f, 180.0f, "angle threshold (deg)", "faces with normal at higher angle w.r.t. the view direction are selected"));
 		parlst.addParam(RichBool ("usecamera", false, "Use ViewPoint from Mesh Camera", "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
-		parlst.addParam(RichPoint3f("viewpoint", Point3f(0.0f, 0.0f, 0.0f), "ViewPoint", "if UseCamera is true, this value is ignored"));
+		parlst.addParam(RichDirection("viewpoint", Point3f(0.0f, 0.0f, 0.0f), "ViewPoint", "if UseCamera is true, this value is ignored"));
 	} break;
 
 	case FP_SELECT_UGLY :

@@ -112,8 +112,8 @@ RichParameterList FilterCameraPlugin::initParameterList(const QAction *action, c
 		rotCenter.push_back("custom point");
 		parlst.addParam(RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
 		parlst.addParam(RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
-		parlst.addParam(RichPoint3f("customAxis",Point3m(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-		parlst.addParam(RichPoint3f("customCenter",Point3m(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+		parlst.addParam(RichDirection("customAxis",Point3m(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+		parlst.addParam(RichPosition("customCenter",Point3m(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
 		parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
 	}
@@ -129,7 +129,7 @@ RichParameterList FilterCameraPlugin::initParameterList(const QAction *action, c
 		scaleCenter.push_back("camera viewpoint");
 		scaleCenter.push_back("custom point");
 		parlst.addParam(RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
-		parlst.addParam(RichPoint3f("customCenter",Point3m(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
+		parlst.addParam(RichPosition("customCenter",Point3m(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
 		parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
 		parlst.addParam(RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));

@@ -281,7 +281,7 @@ RichParameterList FilterColorProc::initParameterList(const QAction *a, const Mes
 		par.addParam(RichColor("color1", color1, "Color 1:", "Sets the first color to mix with Perlin Noise function."));
 		par.addParam(RichColor("color2", color2, "Color 2:", "Sets the second color to mix with Perlin Noise function."));
 		par.addParam(RichDynamicFloat("freq", 10.0f, 0.1f, 100.0f,"Frequency:","Frequency of the Perlin Noise function, expressed as multiples of mesh bbox (frequency 10 means a noise period of bbox diagonal / 10). High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
-		par.addParam(RichPoint3f("offset", Point3f(0.0f, 0.0f, 0.0f), "Offset",	"This values is the XYZ frequency offset of the Noise function (offset 1 means 1 period shift)."));
+		par.addParam(RichPosition("offset", Point3f(0.0f, 0.0f, 0.0f), "Offset",	"This values is the XYZ frequency offset of the Noise function (offset 1 means 1 period shift)."));
 		par.addParam(RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 		break;
 	}
