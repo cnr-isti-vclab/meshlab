@@ -35,7 +35,6 @@
 
 #include "glarea.h"
 #include "layerDialog.h"
-#include "ml_std_par_dialog.h"
 #include "dialogs/filter_dock_dialog.h"
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"

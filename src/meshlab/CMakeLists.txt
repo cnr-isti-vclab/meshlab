@@ -12,7 +12,6 @@ set(SOURCES
 	ml_default_decorators.cpp
 	ml_render_gui.cpp
 	ml_rendering_actions.cpp
-	ml_std_par_dialog.cpp
 	multiViewer_Container.cpp
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
@@ -40,7 +39,6 @@ set(HEADERS
 	ml_default_decorators.h
 	ml_render_gui.h
 	ml_rendering_actions.h
-	ml_std_par_dialog.h
 	multiViewer_Container.h
 	snapshotsetting.h
 	dialogs/about_dialog.h
