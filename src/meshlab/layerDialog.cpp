@@ -37,11 +37,12 @@ $Log: stdpardialog.cpp,v $
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
+#include "rich_parameter_gui/richparameterlistframe.h"
 #include "../common/mlexception.h"
 
 using namespace std;
 
-LayerDialog::LayerDialog(QWidget *parent )    
+LayerDialog::LayerDialog(QWidget *parent )
 	: QDockWidget(parent)
 {
 	ui = new Ui::layerDialog();
