@@ -207,8 +207,7 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
     switch (ID(action)) {
 
         case FP_TWO_MESH_ICP: {
-            applyIcpTwoMeshes(md, par);
-            break;
+            return applyIcpTwoMeshes(md, par);
         }
         case FP_GLOBAL_MESH_ICP: {
             // TODO: Globally align meshes
@@ -218,11 +217,12 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
             wrongActionCalled(action);
         }
     }
+
     return std::map<std::string, QVariant>();
 }
 
 
-void FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par) {
+std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par) {
 
     vcg::AlignPair aligner;
 
@@ -288,10 +288,29 @@ void FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichPa
 
     // Prints out the log
     std::vector<vcg::AlignPair::Stat::IterInfo> &I = alignerResult.as.I;
+
+    std::list<double> minDistAbs(I.size());
+    std::list<double> pcl50(I.size());
+    std::list<double> sampleTested(I.size());
+    std::list<double> sampleUsed(I.size());
+    std::list<double> distancedDiscarded(I.size());
+    std::list<double> borderDiscarded(I.size());
+    std::list<double> angleDiscarded(I.size());
+
     // Print the header
-    log(" Iter | MinD | Error | Sample | Used | DistR | BordR | AnglR");
+    log("Iter | MinD | Error | Sample | Used | DistR | BordR | AnglR");
     // Print the IterInfos
     for (size_t qi = 0; qi < I.size(); ++qi) {
+
+        // Add values inside the vector
+        minDistAbs.push_back(I[qi].MinDistAbs);
+        pcl50.push_back(I[qi].pcl50);
+        sampleTested.push_back(I[qi].SampleTested);
+        sampleUsed.push_back(I[qi].SampleUsed);
+        distancedDiscarded.push_back(I[qi].DistanceDiscarded);
+        borderDiscarded.push_back(I[qi].BorderDiscarded);
+        angleDiscarded.push_back(I[qi].AngleDiscarded);
+
         log("%04zu | %6.2f | %7.4f | %05i | %05i | %5i | %5i | %5i",
                     qi,
                     I[qi].MinDistAbs,
@@ -306,6 +325,16 @@ void FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichPa
 
     // Apply the obtained transformation matrix to the moving mesh
     movingMesh->cm.Tr.FromMatrix(alignerResult.Tr);
+
+    return std::map<std::string, QVariant> {
+            {"min_dist_abs",        QVariant::fromValue(minDistAbs)},
+            {"pcl_50",              QVariant::fromValue(pcl50)},
+            {"sample_tested",       QVariant::fromValue(sampleTested)},
+            {"sample_used",         QVariant::fromValue(sampleUsed)},
+            {"distance_discarded",  QVariant::fromValue(distancedDiscarded)},
+            {"border_discarded",    QVariant::fromValue(borderDiscarded)},
+            {"angle_discarded",     QVariant::fromValue(angleDiscarded)},
+    };
 }
 
 void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) const {
@@ -338,7 +367,7 @@ void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::A
     }
 
     // Apply the result transformation matrix to the chosen points
-    chosenMovingPointsMesh->cm.Tr = alignerResult.Tr;
+    chosenMovingPointsMesh->cm.Tr.FromMatrix(alignerResult.Tr);
 
     // Update the data masks for the new meshes
     chosenMovingPointsMesh->updateDataMask(MeshModel::MM_VERTCOLOR);

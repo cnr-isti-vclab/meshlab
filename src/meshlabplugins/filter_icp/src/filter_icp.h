@@ -79,7 +79,7 @@ public:
 
 private:
 
-    void applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par);
+    std::map<std::string, QVariant> applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par);
 
     vcg::AlignPair::Param alignParameters;
 
