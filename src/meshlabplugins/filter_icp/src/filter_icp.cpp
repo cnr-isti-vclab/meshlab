@@ -322,7 +322,6 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument 
                     I[qi].AngleDiscarded);
     }
 
-
     // Apply the obtained transformation matrix to the moving mesh
     movingMesh->cm.Tr.FromMatrix(alignerResult.Tr);
 
