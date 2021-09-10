@@ -307,13 +307,19 @@ QImage loadImage(
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	IOPlugin *ioPlugin = pm.inputImagePlugin(extension);
 
-	if (ioPlugin == nullptr)
-		throw MLException(
+	if (ioPlugin != nullptr){
+		ioPlugin->setLog(log);
+		return ioPlugin->openImage(extension, filename, cb);
+	}
+	else { // fallback: try to load the file using QImage::load
+		QImage img(filename);
+		if (img.isNull()){ // also QImage::load failed
+			throw MLException(
 				"Image " + filename + " cannot be opened. Your MeshLab version "
 				"has not plugin to read " + extension + " file format.");
-
-	ioPlugin->setLog(log);
-	return ioPlugin->openImage(extension, filename, cb);
+		}
+		return img;
+	}
 }
 
 void saveImage(
