@@ -97,7 +97,9 @@ void RichParameterWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 BoolWidget::BoolWidget(QWidget* p, const RichBool& rb , const RichBool& rdef) :
 	RichParameterWidget(p,rb, rdef)
 {
-	cb = new QCheckBox(rp->fieldDescription(),this);
+	descriptionLabel = new QLabel(rp->fieldDescription(),this);
+	cb = new QCheckBox("",this);
+	descriptionLabel->setToolTip(rp->toolTip());
 	cb->setToolTip(rp->toolTip());
 	cb->setChecked(rp->value().getBool());
 
@@ -125,8 +127,10 @@ void BoolWidget::setWidgetValue( const Value& nv )
 
 void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 {
-	if (lay !=NULL)
-		lay->addWidget(cb,r,0,1,2);
+	if (lay !=NULL){
+		lay->addWidget(descriptionLabel, r, 0);
+		lay->addWidget(cb,r,1);
+	}
 	RichParameterWidget::addWidgetToGridLayout(lay,r);
 }
 
@@ -464,12 +468,9 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 PositionWidget::PositionWidget(QWidget *p, const RichPosition& rpf, const RichPosition& rdef, QWidget *gla_curr):
 	RichParameterWidget(p,rpf, rdef)
 {
-	//qDebug("Creating a Point3fWidget");
 	paramName = rpf.name();
-	//int row = gridLay->rowCount() - 1;
 	descLab = new QLabel(rpf.fieldDescription(),this);
 	descLab->setToolTip(rpf.fieldDescription());
-	//gridLay->addWidget(descLab,row,0);
 
 	vlay = new QHBoxLayout();
 	vlay->setSpacing(0);
@@ -483,7 +484,7 @@ PositionWidget::PositionWidget(QWidget *p, const RichPosition& rpf, const RichPo
 		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
 		coordSB[i]->setValidator(new QDoubleValidator());
 		coordSB[i]->setAlignment(Qt::AlignRight);
-		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
+		coordSB[i]->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 		vlay->addWidget(coordSB[i]);
 		connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
 	}
@@ -498,8 +499,7 @@ PositionWidget::PositionWidget(QWidget *p, const RichPosition& rpf, const RichPo
 
 		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->addItems(names);
-		//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
-		//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
+		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
 		vlay->addWidget(getPoint3Combo);
 
 		//connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
@@ -513,10 +513,10 @@ PositionWidget::PositionWidget(QWidget *p, const RichPosition& rpf, const RichPo
 		connect(this,SIGNAL(askTrackballPos(QString)),gla_curr,SLOT(sendTrackballPos(QString)));
 
 		getPoint3Button = new QPushButton("Get",this);
-		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+		//getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
-		getPoint3Button->setFlat(true);
-		getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+		//getPoint3Button->setFlat(true);
+		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 
 		vlay->addWidget(getPoint3Button);
@@ -621,7 +621,7 @@ DirectionWidget::DirectionWidget(QWidget *p, const RichDirection& rpf, const Ric
 		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
 		coordSB[i]->setValidator(new QDoubleValidator());
 		coordSB[i]->setAlignment(Qt::AlignRight);
-		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
+		coordSB[i]->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 		vlay->addWidget(coordSB[i]);
 		connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
 	}
@@ -634,6 +634,7 @@ DirectionWidget::DirectionWidget(QWidget *p, const RichDirection& rpf, const Ric
 
 		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->addItems(names);
+		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
 		vlay->addWidget(getPoint3Combo);
 
 		//connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
@@ -643,9 +644,9 @@ DirectionWidget::DirectionWidget(QWidget *p, const RichDirection& rpf, const Ric
 		connect(this,SIGNAL(askCameraDir(QString)),gla_curr,SLOT(sendRasterShot(QString)));
 
 		getPoint3Button = new QPushButton("Get",this);
-		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+		//getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
-		getPoint3Button->setFlat(true);
+		//getPoint3Button->setFlat(true);
 		getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
 		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 
