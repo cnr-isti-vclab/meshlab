@@ -81,6 +81,8 @@ public:
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
+private:
+	QLabel* descriptionLabel;
 	QCheckBox* cb;
 };
 
