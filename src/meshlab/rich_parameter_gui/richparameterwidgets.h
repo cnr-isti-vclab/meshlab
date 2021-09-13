@@ -373,7 +373,7 @@ protected:
 public:
 	ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~ComboWidget();
-	void         Init(QWidget* p, int newEnum, QStringList values);
+	void         init(QWidget* p, int newEnum, QStringList values);
 	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
 	virtual void collectWidgetValue()            = 0;
 	virtual void resetWidgetValue()              = 0;

@@ -41,14 +41,14 @@ RichParameterWidget::RichParameterWidget(
 	if (parameter != nullptr) {
 		descriptionLabel = new QLabel(parameter->fieldDescription(), this);
 		descriptionLabel->setToolTip(parameter->toolTip());
+		descriptionLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 		helpLabel = new QLabel("<small>" + rpar.toolTip() + "</small>", this);
 		helpLabel->setTextFormat(Qt::RichText);
 		helpLabel->setWordWrap(true);
 		helpLabel->setVisible(false);
-		helpLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		helpLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 		helpLabel->setMinimumWidth(250);
-		// helpLabel->setMaximumWidth(QWIDGETSIZE_MAX);
 	}
 }
 
@@ -95,7 +95,7 @@ void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
 	if (lay != NULL) {
 		lay->addWidget(descriptionLabel, r, 0);
-		lay->addWidget(helpLabel, r, 2, 1, 1, Qt::AlignLeft);
+		lay->addWidget(helpLabel, r, 2);
 	}
 }
 
@@ -261,12 +261,8 @@ ColorWidget::ColorWidget(QWidget* p, const RichColor& newColor, const RichColor&
 	colorButton = new QPushButton(this);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
-	colorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	// const QColor cl = rp->pd->defvalue().getColor();
-	// resetWidgetValue();
+	colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 	initWidgetValue();
-	// int row = gridLay->rowCount() - 1;
-	// gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
 	vlay = new QHBoxLayout();
 	QFontMetrics met(colorLabel->font());
@@ -278,7 +274,6 @@ ColorWidget::ColorWidget(QWidget* p, const RichColor& newColor, const RichColor&
 	vlay->addWidget(colorLabel, 0, Qt::AlignRight);
 	vlay->addWidget(colorButton);
 
-	// gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	pickcol = parameter->value().getColor();
 	connect(colorButton, SIGNAL(clicked()), this, SLOT(pickColor()));
 	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
@@ -367,12 +362,11 @@ AbsPercWidget::AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsP
 	absSB->setAlignment(Qt::AlignRight);
 
 	int decimals = 7 - ceil(log10(fabs(m_max - m_min)));
-	// qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
-	// qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	absSB->setDecimals(decimals);
 	absSB->setSingleStep((m_max - m_min) / 100.0);
 	float initVal = parameter->value().getFloat();
 	absSB->setValue(initVal);
+	absSB->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
 	percSB->setMinimum(-200);
 	percSB->setMaximum(200);
@@ -380,11 +374,10 @@ AbsPercWidget::AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsP
 	percSB->setSingleStep(0.5);
 	percSB->setValue((100 * (initVal - m_min)) / (m_max - m_min));
 	percSB->setDecimals(3);
+	percSB->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 	QLabel* absLab  = new QLabel("<i> <small> world unit</small></i>");
 	QLabel* percLab = new QLabel(
 		"<i> <small> perc on" + QString("(%1 .. %2)").arg(m_min).arg(m_max) + "</small></i>");
-
-	//  gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
 	vlay = new QGridLayout();
 	vlay->addWidget(absLab, 0, 0, Qt::AlignHCenter);
@@ -392,8 +385,6 @@ AbsPercWidget::AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsP
 
 	vlay->addWidget(absSB, 1, 0, Qt::AlignTop);
 	vlay->addWidget(percSB, 1, 1, Qt::AlignTop);
-
-	// gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
 	connect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
 	connect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
@@ -424,7 +415,6 @@ void AbsPercWidget::on_percSB_valueChanged(double newv)
 
 void AbsPercWidget::setValue(float val, float minV, float maxV)
 {
-	assert(absSB);
 	absSB->setValue(val);
 	m_min = minV;
 	m_max = maxV;
@@ -437,14 +427,12 @@ void AbsPercWidget::collectWidgetValue()
 
 void AbsPercWidget::resetWidgetValue()
 {
-	// const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(parameter);
 	setValue(parameter->value().getFloat(), ap->min, ap->max);
 }
 
 void AbsPercWidget::setWidgetValue(const Value& nv)
 {
-	// const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(parameter);
 	setValue(nv.getFloat(), ap->min, ap->max);
 }
@@ -480,10 +468,9 @@ PositionWidget::PositionWidget(
 		else
 			baseFont.setPointSize(baseFont.pointSize() * 3 / 4);
 		coordSB[i]->setFont(baseFont);
-		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width() / 2);
+		coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width() / 4);
 		coordSB[i]->setValidator(new QDoubleValidator());
-		coordSB[i]->setAlignment(Qt::AlignRight);
-		coordSB[i]->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		vlay->addWidget(coordSB[i]);
 		connect(coordSB[i], SIGNAL(textChanged(QString)), p, SIGNAL(parameterChanged()));
 	}
@@ -499,10 +486,9 @@ PositionWidget::PositionWidget(
 
 		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->addItems(names);
-		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		vlay->addWidget(getPoint3Combo);
 
-		// connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 		connect(
 			gla_curr,
 			SIGNAL(transmitSurfacePos(QString, Point3m)),
@@ -529,20 +515,15 @@ PositionWidget::PositionWidget(
 		connect(this, SIGNAL(askTrackballPos(QString)), gla_curr, SLOT(sendTrackballPos(QString)));
 
 		getPoint3Button = new QPushButton("Get", this);
-		// getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
-
-		// getPoint3Button->setFlat(true);
-		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		connect(getPoint3Button, SIGNAL(clicked()), this, SLOT(getPoint()));
 
 		vlay->addWidget(getPoint3Button);
 	}
-	// gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
 
 PositionWidget::~PositionWidget()
 {
-	// qDebug("Deallocating a point3fwidget");
 	this->disconnect();
 }
 
@@ -627,10 +608,10 @@ DirectionWidget::DirectionWidget(
 		else
 			baseFont.setPointSize(baseFont.pointSize() * 3 / 4);
 		coordSB[i]->setFont(baseFont);
-		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width() / 2);
+		coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width() / 4);
 		coordSB[i]->setValidator(new QDoubleValidator());
 		coordSB[i]->setAlignment(Qt::AlignRight);
-		coordSB[i]->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		vlay->addWidget(coordSB[i]);
 		connect(coordSB[i], SIGNAL(textChanged(QString)), p, SIGNAL(parameterChanged()));
 	}
@@ -644,10 +625,9 @@ DirectionWidget::DirectionWidget(
 
 		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->addItems(names);
-		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		vlay->addWidget(getPoint3Combo);
 
-		// connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 		connect(
 			gla_curr,
 			SIGNAL(transmitViewDir(QString, Point3m)),
@@ -662,10 +642,7 @@ DirectionWidget::DirectionWidget(
 		connect(this, SIGNAL(askCameraDir(QString)), gla_curr, SLOT(sendRasterShot(QString)));
 
 		getPoint3Button = new QPushButton("Get", this);
-		// getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
-
-		// getPoint3Button->setFlat(true);
-		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		connect(getPoint3Button, SIGNAL(clicked()), this, SLOT(getPoint()));
 
 		vlay->addWidget(getPoint3Button);
@@ -674,7 +651,6 @@ DirectionWidget::DirectionWidget(
 
 DirectionWidget::~DirectionWidget()
 {
-	// qDebug("Deallocating a point3fwidget");
 	this->disconnect();
 }
 
@@ -749,9 +725,7 @@ Matrix44fWidget::Matrix44fWidget(
 	valid = false;
 	m.SetIdentity();
 	paramName = rpf.name();
-	// int row = gridLay->rowCount() - 1;
 
-	// gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 	vlay  = new QVBoxLayout();
 	lay44 = new QGridLayout();
 
@@ -763,13 +737,9 @@ Matrix44fWidget::Matrix44fWidget(
 		else
 			baseFont.setPointSize(baseFont.pointSize() * 3 / 4);
 		coordSB[i]->setFont(baseFont);
-		// coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
-		coordSB[i]->setMinimumWidth(0);
-		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width() / 2);
-		// coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
+		coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
 		coordSB[i]->setValidator(new QDoubleValidator(p));
-		coordSB[i]->setAlignment(Qt::AlignRight);
-		// this->addWidget(coordSB[i],1,Qt::AlignHCenter);
 		lay44->addWidget(coordSB[i], i / 4, i % 4);
 		connect(
 			coordSB[i],
@@ -849,8 +819,9 @@ void Matrix44fWidget::pasteMatrix()
 				return;
 		}
 		id = 0;
-		for (QStringList::iterator i = list1.begin(); i != list1.end(); ++i, ++id)
+		for (QStringList::iterator i = list1.begin(); i != list1.end(); ++i, ++id) {
 			coordSB[id]->setText(*i);
+		}
 	}
 	else {
 		QByteArray value = QByteArray::fromBase64(shotString.toLocal8Bit());
@@ -869,8 +840,9 @@ void Matrix44fWidget::collectWidgetValue()
 			tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
 		parameter->setValue(Matrix44fValue(tempM));
 	}
-	else
+	else {
 		parameter->setValue(Matrix44fValue(m));
+	}
 }
 
 void Matrix44fWidget::resetWidgetValue()
@@ -878,9 +850,10 @@ void Matrix44fWidget::resetWidgetValue()
 	valid = false;
 	vcg::Matrix44f m;
 	m.SetIdentity();
-	for (unsigned int ii = 0; ii < 16; ++ii)
+	for (unsigned int ii = 0; ii < 16; ++ii) {
 		coordSB[ii]->setText(
 			QString::number(parameter->value().getMatrix44f()[ii / 4][ii % 4], 'g', 3));
+	}
 }
 
 void Matrix44fWidget::setWidgetValue(const Value& nv)
@@ -920,11 +893,11 @@ ShotfWidget::ShotfWidget(
 	hlay = new QHBoxLayout();
 
 	this->setShotValue(paramName, parameter->value().getShotf());
-	if (gla_curr) // if we have a connection to the current glarea we can setup the additional
-				  // button for getting the current view direction.
-	{
+	// if we have a connection to the current glarea we can setup the additional
+	// button for getting the current view direction.
+	if (gla_curr) {
 		getShotButton = new QPushButton("Get shot", this);
-		getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+		getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		hlay->addWidget(getShotButton);
 
 		QStringList names;
@@ -947,7 +920,6 @@ ShotfWidget::ShotfWidget(
 		connect(this, SIGNAL(askMeshShot(QString)), gla_curr, SLOT(sendMeshShot(QString)));
 		connect(this, SIGNAL(askRasterShot(QString)), gla_curr, SLOT(sendRasterShot(QString)));
 	}
-	// gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 }
 
 void ShotfWidget::getShot()
@@ -1034,21 +1006,16 @@ DynamicFloatWidget::DynamicFloatWidget(
 	valueLE->setAlignment(Qt::AlignRight);
 
 	valueSlider = new QSlider(Qt::Horizontal, this);
-	valueSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	valueSlider->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
 	valueSlider->setValue(floatToInt(parameter->value().getFloat()));
 	RichDynamicFloat* dfd = reinterpret_cast<RichDynamicFloat*>(parameter);
-	// const DynamicFloatDecoration* dfd = reinterpret_cast<const
-	// DynamicFloatDecoration*>(&(rp->pd));
 	QFontMetrics fm(valueLE->font());
 	QSize        sz = fm.size(Qt::TextSingleLine, QString::number(0));
 	valueLE->setValidator(new QDoubleValidator(dfd->min, dfd->max, numbdecimaldigit, valueLE));
 	valueLE->setText(QString::number(parameter->value().getFloat()));
 	valueLE->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-
-	// int row = gridLay->rowCount() - 1;
-	// lay->addWidget(fieldDesc,row,0);
 
 	hlay = new QHBoxLayout();
 	hlay->addWidget(valueLE);
@@ -1056,8 +1023,6 @@ DynamicFloatWidget::DynamicFloatWidget(
 	int maxlenghtplusdot = 8; // numbmaxvaluedigit + numbdecimaldigit + 1;
 	valueLE->setMaxLength(maxlenghtplusdot);
 	valueLE->setMaximumWidth(sz.width() * maxlenghtplusdot);
-
-	// gridLay->addLayout(hlay,row,1);
 
 	connect(valueLE, SIGNAL(textChanged(const QString&)), this, SLOT(setValue()));
 	connect(valueSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
@@ -1134,14 +1099,11 @@ ComboWidget::ComboWidget(QWidget* p, const RichParameter& rpar, const RichParame
 {
 }
 
-void ComboWidget::Init(QWidget* p, int defaultEnum, QStringList values)
+void ComboWidget::init(QWidget* p, int defaultEnum, QStringList values)
 {
 	enumCombo = new QComboBox(this);
 	enumCombo->addItems(values);
 	setIndex(defaultEnum);
-	// int row = gridLay->rowCount() - 1;
-	// gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
-	// gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
 	connect(enumCombo, SIGNAL(activated(int)), this, SIGNAL(dialogParamChanged()));
 	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
 }
@@ -1176,9 +1138,7 @@ void ComboWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 EnumWidget::EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef) :
 		ComboWidget(p, rpar, rdef)
 {
-	// you MUST call it!!!!
-	Init(p, rpar.value().getInt(), rpar.enumvalues);
-	// assert(enumCombo != NULL);
+	init(p, rpar.value().getInt(), rpar.enumvalues);
 }
 
 int EnumWidget::getSize()
@@ -1214,7 +1174,6 @@ MeshWidget::MeshWidget(QWidget* p, const RichMesh& rpar, const RichMesh& rdef) :
 
 	// make the default mesh Index be 0
 	// defaultMeshIndex = -1;
-
 	int          currentmeshindex = -1;
 	unsigned int i                = 0;
 	for (const MeshModel& mm : md->meshIterator()) {
@@ -1226,7 +1185,7 @@ MeshWidget::MeshWidget(QWidget* p, const RichMesh& rpar, const RichMesh& rdef) :
 		++i;
 	}
 
-	Init(p, currentmeshindex, meshNames);
+	init(p, currentmeshindex, meshNames);
 }
 
 void MeshWidget::collectWidgetValue()
@@ -1273,10 +1232,6 @@ IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar, const RichPara
 	filename->setText(tr(""));
 	browse  = new QPushButton(this);
 	browse->setText("...");
-	// const QColor cl = rp->pd->defvalue().getColor();
-	// resetWidgetValue();
-	// int row = gridLay->rowCount() - 1;
-	// gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 	hlay = new QHBoxLayout();
 	hlay->addWidget(filename, 2);
 	hlay->addWidget(browse);
@@ -1338,7 +1293,6 @@ SaveFileWidget::~SaveFileWidget()
 
 void SaveFileWidget::selectFile()
 {
-	// SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(parameter);
 	QString       ext;
 	QString       fl =
@@ -1361,7 +1315,6 @@ OpenFileWidget::OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOp
 
 void OpenFileWidget::selectFile()
 {
-	// OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(parameter);
 	QString       ext;
 	QString       path = QDir::homePath();
