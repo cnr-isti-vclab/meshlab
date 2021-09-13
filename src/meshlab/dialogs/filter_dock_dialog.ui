@@ -43,6 +43,9 @@
       <property name="frameShadow">
        <enum>QFrame::Plain</enum>
       </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
