@@ -161,8 +161,12 @@ void MeshModel::clearTextures()
 
 void MeshModel::addTexture(std::string name, const QImage& txt)
 {
-	cm.textures.push_back(name);
-	textures[name]=txt;
+	if (textures.find(name) == textures.end()){
+		// just to be sure to not make duplicates in the contained mesh list of textures
+		if (std::find(cm.textures.begin(), cm.textures.end(), name) == cm.textures.end())
+			cm.textures.push_back(name);
+		textures[name]=txt;
+	}
 }
 
 void MeshModel::setTexture(std::string name, const QImage& txt)
