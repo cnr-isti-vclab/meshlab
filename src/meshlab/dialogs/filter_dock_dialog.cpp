@@ -81,6 +81,14 @@ FilterDockDialog::FilterDockDialog(
 			ui->previewCheckBox->setVisible(false);
 		}
 	}
+
+	//horrible hack to make the window of almost the right size...
+	ui->filterInfoLabel->adjustSize();
+	ui->parameterFrame->adjustSize();
+	resize(
+		width(),
+		ui->filterInfoLabel->height() + ui->parameterFrame->height() +
+			ui->previewCheckBox->height() + ui->applyPushButton->height() * 2 + 10);
 }
 
 FilterDockDialog::~FilterDockDialog()
