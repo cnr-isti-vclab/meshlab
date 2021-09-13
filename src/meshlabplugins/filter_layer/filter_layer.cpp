@@ -272,6 +272,9 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		numVertSel = (int)tri::UpdateSelection<CMeshO>::VertexCount(currentModel->cm);
 
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm, true);
+		for (const std::string& tex: destModel->cm.textures) {
+			destModel->addTexture(tex, currentModel->getTexture(tex));
+		}
 
 		if(par.getBool("DeleteOriginal"))	// delete original vert/faces
 		{
@@ -315,6 +318,9 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		numVertSel = (int)tri::UpdateSelection<CMeshO>::VertexCount(currentModel->cm);
 
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm, true);
+		for (const std::string& tex: destModel->cm.textures) {
+			destModel->addTexture(tex, currentModel->getTexture(tex));
+		}
 
 		if(par.getBool("DeleteOriginal"))	// delete original faces
 		{
@@ -378,7 +384,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 
 		std::list<unsigned int> toBeDeletedList;
 
-		int cnt=0;
+		unsigned int cnt=0;
 		for(MeshModel& mmp: md.meshIterator()) {
 			++cnt;
 			if(mmp.isVisible() || !mergeVisible) {
@@ -391,6 +397,11 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 					}
 					destModel->updateDataMask(&mmp);
 					tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, mmp.cm);
+
+					for (const std::string& txt : mmp.cm.textures){
+						destModel->addTexture(txt, mmp.getTexture(txt));
+					}
+
 					tri::UpdatePosition<CMeshO>::Matrix(mmp.cm,Inverse(mmp.cm.Tr),true);
 				}
 			}
@@ -418,7 +429,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 		CMeshO &cm = md.mm()->cm;
 		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		std::vector< std::pair<int,CMeshO::FacePointer> > connectedCompVec;
-		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm,  connectedCompVec);
+		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm, connectedCompVec);
 		log("Found %i Connected Components",numCC);
 		
 		for(size_t i=0; i<connectedCompVec.size();++i)
@@ -432,6 +443,10 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			MeshModel *destModel= md.addNewMesh("",QString("CC %1").arg(i), true);
 			destModel->updateDataMask(currentModel);
 			tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, cm, true);
+
+			for (const std::string& txt : cm.textures){
+				destModel->addTexture(txt, md.mm()->getTexture(txt));
+			}
 
 			// init new layer
 			destModel->updateBoxAndNormals();
@@ -605,6 +620,7 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			xmlWriter.writeEndDocument();
 
 			file.close();
+			QDir::setCurrent(tmpDir.path());
 		}
 	} break;
 
