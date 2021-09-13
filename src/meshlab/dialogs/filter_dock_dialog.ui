@@ -131,6 +131,9 @@
       <property name="text">
        <string>Help</string>
       </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
    </layout>

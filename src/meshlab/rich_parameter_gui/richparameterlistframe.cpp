@@ -106,8 +106,9 @@ void RichParameterListFrame::resetValues()
 void RichParameterListFrame::toggleHelp()
 {
 	isHelpVisible = !isHelpVisible;
-	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(isHelpVisible);
+	for(auto& p : stdfieldwidgets) {
+		p.second->setHelpVisible(isHelpVisible);
+	}
 	setMinimumSize(sizeHint());
 	adjustSize();
 	updateGeometry();
@@ -182,7 +183,6 @@ void RichParameterListFrame::loadFrameContent(
 			const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 			RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
 			stdfieldwidgets[fpi->name()] = wd;
-			helpList.push_back(wd->helpLab);
 			wd->addWidgetToGridLayout(glay,i++);
 		}
 	}
@@ -203,7 +203,6 @@ void RichParameterListFrame::loadFrameContent(
 				const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 				RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
 				stdfieldwidgets[fpi->name()] = wd;
-				helpList.push_back(wd->helpLab);
 				wd->addWidgetToGridLayout(flay,j++);
 			}
 		}
