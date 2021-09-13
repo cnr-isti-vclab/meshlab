@@ -94,7 +94,7 @@ QString RichParameterWidget::parameterName() const
 void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
 	if (lay != NULL) {
-		lay->addWidget(descriptionLabel, r, 0);
+		lay->addWidget(descriptionLabel, r, 0, 1, 1, Qt::AlignRight);
 		lay->addWidget(helpLabel, r, 2);
 	}
 }
