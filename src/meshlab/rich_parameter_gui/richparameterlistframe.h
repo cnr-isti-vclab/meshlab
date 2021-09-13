@@ -88,7 +88,6 @@ private:
 			const RichParameter& def);
 
 	std::map<QString, RichParameterWidget *> stdfieldwidgets;
-	QVector<QLabel *> helpList;
 	bool isHelpVisible;
 
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
