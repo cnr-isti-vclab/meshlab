@@ -34,7 +34,7 @@
 #include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 #include <vcg/complex/algorithms/meshtree.h>
 
-typedef vcg::MeshTree<MeshModel> MeshTreem;
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
 
 class GLArea;
 

@@ -24,7 +24,7 @@
 #include <common/parameters/rich_parameter_list.h>
 #include <vcg/complex/algorithms/meshtree.h>
 
-typedef vcg::MeshTree<MeshModel> MeshTreem;
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
 
 class AlignParameter {
 

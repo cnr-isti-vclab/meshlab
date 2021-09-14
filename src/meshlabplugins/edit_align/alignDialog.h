@@ -31,7 +31,7 @@ $Log: stdpardialog.cpp,v $
 #include <QDockWidget>
 #include <vcg/complex/algorithms/meshtree.h>
 
-typedef vcg::MeshTree<MeshModel> MeshTreem;
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
 
 class GLArea;
 
