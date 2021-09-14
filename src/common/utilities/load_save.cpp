@@ -334,6 +334,14 @@ void saveImage(
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	IOPlugin *ioPlugin = pm.outputImagePlugin(extension);
 
+	std::cerr << "Path: " << fi.path().toStdString() << "\n";
+
+	if (!fi.path().isEmpty()){
+		if (!QDir(fi.path()).exists()){
+			QDir().mkdir(fi.path());
+		}
+	}
+
 	if (ioPlugin == nullptr)
 		throw MLException(
 				"Image " + filename + " cannot be saved. Your MeshLab version "
