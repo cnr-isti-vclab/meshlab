@@ -52,7 +52,7 @@ class PFace :
 			PUsedTypes,
 			face::PolyInfo, // this is necessary  if you use component in
 							// vcg/simplex/face/component_polygon.h
-			face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
+			face::PFVAdj, // Pointer to the vertices (just like FVAdj )
 			face::Qualityf,
 			face::Color4b,
 			face::BitFlags, // bit flags
@@ -84,6 +84,8 @@ class PolyMesh :
  * @param faceNormals: #F*3 matrix of scalars (face normals)
  * @param vertexQuality: #V vector of scalars (vertex quality)
  * @param faceQuality: #F vector of scalars (face quality)
+ * @param vertexColor: #V*4 vector of scalars (RGBA vertex colors in interval [0-1])
+ * @param faceColor: #F*4 vector of scalars (RGBA face colors in interval [0-1])
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::meshFromMatrices(
@@ -92,7 +94,9 @@ CMeshO meshlab::meshFromMatrices(
 	const EigenMatrixX3m&   vertexNormals,
 	const EigenMatrixX3m&   faceNormals,
 	const EigenVectorXm&    vertexQuality,
-	const EigenVectorXm&    faceQuality)
+	const EigenVectorXm&    faceQuality,
+	const EigenMatrixX4m&   vertexColor,
+	const EigenMatrixX4m&   faceColor)
 {
 	CMeshO m;
 	if (vertices.rows() > 0) {
@@ -101,6 +105,7 @@ CMeshO meshlab::meshFromMatrices(
 
 		bool hasVNormals = vertexNormals.rows() > 0;
 		bool hasVQuality = vertexQuality.rows() > 0;
+		bool hasVColors  = vertexColor.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of vertex normals "
@@ -110,6 +115,11 @@ CMeshO meshlab::meshFromMatrices(
 			throw MLException(
 				"Error while creating mesh: the number of vertex quality "
 				"values is different from the number of vertices.");
+		}
+		if (hasVColors && (vertices.rows() != vertexColor.rows())) {
+			throw MLException(
+				"Error while creating mesh: the number of vertex colors "
+				"is different from the number of vertices.");
 		}
 		CMeshO::VertexIterator vi = vcg::tri::Allocator<CMeshO>::AddVertices(m, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
@@ -122,12 +132,20 @@ CMeshO meshlab::meshFromMatrices(
 			if (hasVQuality) {
 				vi->Q() = vertexQuality(i);
 			}
+			if (hasVColors) {
+				vi->C() = CMeshO::VertexType::ColorType(
+					vertexColor(i, 0) * 255,
+					vertexColor(i, 1) * 255,
+					vertexColor(i, 2) * 255,
+					vertexColor(i, 3) * 255);
+			}
 		}
 
 		// add faces and their associated normals and quality if any
 
 		bool hasFNormals = faceNormals.rows() > 0;
 		bool hasFQuality = faceQuality.rows() > 0;
+		bool hasFColors  = faceColor.rows() > 0;
 		if (hasFNormals && (faces.rows() != faceNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of face normals "
@@ -140,6 +158,14 @@ CMeshO meshlab::meshFromMatrices(
 					"values is different from the number of faces.");
 			}
 			m.face.EnableQuality();
+		}
+		if (hasFColors) {
+			if (faces.rows() != faceColor.rows()) {
+				throw MLException(
+					"Error while creating mesh: the number of face colors "
+					"is different from the number of faces.");
+			}
+			m.face.EnableColor();
 		}
 		CMeshO::FaceIterator fi = vcg::tri::Allocator<CMeshO>::AddFaces(m, faces.rows());
 		for (unsigned int i = 0; i < faces.rows(); ++i, ++fi) {
@@ -161,6 +187,13 @@ CMeshO meshlab::meshFromMatrices(
 			}
 			if (hasFQuality) {
 				fi->Q() = faceQuality(i);
+			}
+			if (hasFColors) {
+				fi->C() = CMeshO::FaceType::ColorType(
+					faceColor(i, 0) * 255,
+					faceColor(i, 1) * 255,
+					faceColor(i, 2) * 255,
+					faceColor(i, 3) * 255);
 			}
 		}
 		if (!hasFNormals) {
@@ -196,6 +229,8 @@ CMeshO meshlab::meshFromMatrices(
  * @param faceNormals: #F*3 matrix of scalars (face normals)
  * @param vertexQuality: #V vector of scalars (vertex quality)
  * @param faceQuality: #F vector of scalars (face quality)
+ * @param vertexColor: #V*4 vector of scalars (RGBA vertex colors in interval [0-1])
+ * @param faceColor: #F*4 vector of scalars (RGBA face colors in interval [0-1])
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::polyMeshFromMatrices(
@@ -204,7 +239,9 @@ CMeshO meshlab::polyMeshFromMatrices(
 	const EigenMatrixX3m&            vertexNormals,
 	const EigenMatrixX3m&            faceNormals,
 	const EigenVectorXm&             vertexQuality,
-	const EigenVectorXm&             faceQuality)
+	const EigenVectorXm&             faceQuality,
+	const EigenMatrixX4m&            vertexColor,
+	const EigenMatrixX4m&            faceColor)
 {
 	PolyMesh pm;
 	CMeshO   m;
@@ -214,6 +251,7 @@ CMeshO meshlab::polyMeshFromMatrices(
 
 		bool hasVNormals = vertexNormals.rows() > 0;
 		bool hasVQuality = vertexQuality.rows() > 0;
+		bool hasVColors  = vertexColor.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of vertex normals "
@@ -223,6 +261,11 @@ CMeshO meshlab::polyMeshFromMatrices(
 			throw MLException(
 				"Error while creating mesh: the number of vertex quality "
 				"values is different from the number of vertices.");
+		}
+		if (hasVColors && (vertices.rows() != vertexColor.rows())) {
+			throw MLException(
+				"Error while creating mesh: the number of vertex colors "
+				"is different from the number of vertices.");
 		}
 		PolyMesh::VertexIterator vi =
 			vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
@@ -236,12 +279,20 @@ CMeshO meshlab::polyMeshFromMatrices(
 			if (hasVQuality) {
 				vi->Q() = vertexQuality(i);
 			}
+			if (hasVColors) {
+				vi->C() = CMeshO::VertexType::ColorType(
+					vertexColor(i, 0) * 255,
+					vertexColor(i, 1) * 255,
+					vertexColor(i, 2) * 255,
+					vertexColor(i, 3) * 255);
+			}
 		}
 
 		// add faces and their associated normals and quality if any
 
 		bool hasFNormals = faceNormals.rows() > 0;
 		bool hasFQuality = faceQuality.rows() > 0;
+		bool hasFColors  = faceColor.rows() > 0;
 		if (hasFNormals && (faces.size() != (size_t) faceNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of face normals "
@@ -253,6 +304,15 @@ CMeshO meshlab::polyMeshFromMatrices(
 					"Error while creating mesh: the number of face quality "
 					"values is different from the number of faces.");
 			}
+			m.face.EnableQuality();
+		}
+		if (hasFColors) {
+			if (faces.size() != (size_t) faceColor.rows()) {
+				throw MLException(
+					"Error while creating mesh: the number of face colors "
+					"is different from the number of faces.");
+			}
+			m.face.EnableColor();
 		}
 		PolyMesh::FaceIterator fi = vcg::tri::Allocator<PolyMesh>::AddFaces(pm, faces.size());
 		auto                   it = faces.begin();
@@ -273,6 +333,13 @@ CMeshO meshlab::polyMeshFromMatrices(
 			}
 			if (hasFQuality) {
 				fi->Q() = faceQuality(i);
+			}
+			if (hasFColors) {
+				fi->C() = CMeshO::FaceType::ColorType(
+					faceColor(i, 0) * 255,
+					faceColor(i, 1) * 255,
+					faceColor(i, 2) * 255,
+					faceColor(i, 3) * 255);
 			}
 		}
 
