@@ -1,25 +1,25 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005-2021                                           \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #include "eigen_mesh_conversions.h"
 #include "../mlexception.h"
@@ -29,37 +29,45 @@ namespace vcg {
 class PEdge;
 class PFace;
 class PVertex;
-struct PUsedTypes : public UsedTypes<
-		Use<PVertex>   ::AsVertexType,
-		Use<PEdge>     ::AsEdgeType,
-		Use<PFace>     ::AsFaceType> {};
+struct PUsedTypes :
+		public UsedTypes<Use<PVertex>::AsVertexType, Use<PEdge>::AsEdgeType, Use<PFace>::AsFaceType>
+{
+};
 
-class PVertex : public Vertex<
-		PUsedTypes,
-		vertex::Coord3f,
-		vertex::Normal3f,
-		vertex::Qualityf,
-		vertex::Color4b,
-		vertex::BitFlags
-> {};
-class PEdge : public Edge<
-		PUsedTypes,
-		edge::VertexRef,
-		edge::BitFlags
-> {};
-class PFace :public vcg::Face<
-		PUsedTypes,
-		face::PolyInfo, // this is necessary  if you use component in vcg/simplex/face/component_polygon.h
-		face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
-		face::Qualityf,
-		face::Color4b,
-		face::BitFlags, // bit flags
-		face::Normal3f, // normal
-		face::WedgeTexCoord2f
-> {};
+class PVertex :
+		public Vertex<
+			PUsedTypes,
+			vertex::Coord3f,
+			vertex::Normal3f,
+			vertex::Qualityf,
+			vertex::Color4b,
+			vertex::BitFlags>
+{
+};
+class PEdge : public Edge<PUsedTypes, edge::VertexRef, edge::BitFlags>
+{
+};
+class PFace :
+		public vcg::Face<
+			PUsedTypes,
+			face::PolyInfo, // this is necessary  if you use component in
+							// vcg/simplex/face/component_polygon.h
+			face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
+			face::Qualityf,
+			face::Color4b,
+			face::BitFlags, // bit flags
+			face::Normal3f, // normal
+			face::WedgeTexCoord2f>
+{
+};
 
-} //namespace vcg
-class PolyMesh : public vcg::tri::TriMesh< std::vector<vcg::PVertex>, std::vector<vcg::PEdge>, std::vector<vcg::PFace>   > {};
+} // namespace vcg
+
+class PolyMesh :
+		public vcg::tri::
+			TriMesh<std::vector<vcg::PVertex>, std::vector<vcg::PEdge>, std::vector<vcg::PFace>>
+{
+};
 
 /**
  * @brief Creates a CMeshO mesh from the data contained in the given matrices.
@@ -79,92 +87,86 @@ class PolyMesh : public vcg::tri::TriMesh< std::vector<vcg::PVertex>, std::vecto
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::meshFromMatrices(
-		const EigenMatrixX3m& vertices,
-		const Eigen::MatrixX3i& faces,
-		const EigenMatrixX3m& vertexNormals,
-		const EigenMatrixX3m& faceNormals,
-		const EigenVectorXm& vertexQuality,
-		const EigenVectorXm& faceQuality)
+	const EigenMatrixX3m&   vertices,
+	const Eigen::MatrixX3i& faces,
+	const EigenMatrixX3m&   vertexNormals,
+	const EigenMatrixX3m&   faceNormals,
+	const EigenVectorXm&    vertexQuality,
+	const EigenVectorXm&    faceQuality)
 {
 	CMeshO m;
 	if (vertices.rows() > 0) {
-		//add vertices and their associated normals and quality if any
+		// add vertices and their associated normals and quality if any
 		std::vector<CMeshO::VertexPointer> ivp(vertices.rows());
 
 		bool hasVNormals = vertexNormals.rows() > 0;
 		bool hasVQuality = vertexQuality.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
-					"Error while creating mesh: the number of vertex normals "
-					"is different from the number of vertices.");
+				"Error while creating mesh: the number of vertex normals "
+				"is different from the number of vertices.");
 		}
 		if (hasVQuality && (vertices.rows() != vertexQuality.size())) {
 			throw MLException(
-					"Error while creating mesh: the number of vertex quality "
-					"values is different from the number of vertices.");
+				"Error while creating mesh: the number of vertex quality "
+				"values is different from the number of vertices.");
 		}
-		CMeshO::VertexIterator vi =
-				vcg::tri::Allocator<CMeshO>::AddVertices(m, vertices.rows());
+		CMeshO::VertexIterator vi = vcg::tri::Allocator<CMeshO>::AddVertices(m, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
-			ivp[i] = &*vi;
-			vi->P() = CMeshO::CoordType(vertices(i,0), vertices(i,1), vertices(i,2));
+			ivp[i]  = &*vi;
+			vi->P() = CMeshO::CoordType(vertices(i, 0), vertices(i, 1), vertices(i, 2));
 			if (hasVNormals) {
 				vi->N() = CMeshO::CoordType(
-							vertexNormals(i,0),
-							vertexNormals(i,1),
-							vertexNormals(i,2));
+					vertexNormals(i, 0), vertexNormals(i, 1), vertexNormals(i, 2));
 			}
 			if (hasVQuality) {
 				vi->Q() = vertexQuality(i);
 			}
 		}
 
-		//add faces and their associated normals and quality if any
+		// add faces and their associated normals and quality if any
 
 		bool hasFNormals = faceNormals.rows() > 0;
 		bool hasFQuality = faceQuality.rows() > 0;
 		if (hasFNormals && (faces.rows() != faceNormals.rows())) {
 			throw MLException(
-					"Error while creating mesh: the number of face normals "
-					"is different from the number of faces.");
+				"Error while creating mesh: the number of face normals "
+				"is different from the number of faces.");
 		}
 		if (hasFQuality) {
 			if (faces.rows() != faceQuality.size()) {
 				throw MLException(
-						"Error while creating mesh: the number of face quality "
-						"values is different from the number of faces.");
+					"Error while creating mesh: the number of face quality "
+					"values is different from the number of faces.");
 			}
 			m.face.EnableQuality();
 		}
-		CMeshO::FaceIterator fi =
-				vcg::tri::Allocator<CMeshO>::AddFaces(m, faces.rows());
+		CMeshO::FaceIterator fi = vcg::tri::Allocator<CMeshO>::AddFaces(m, faces.rows());
 		for (unsigned int i = 0; i < faces.rows(); ++i, ++fi) {
-			for (unsigned int j = 0; j < 3; j++){
-				if ((unsigned int)faces(i,j) >= ivp.size()) {
+			for (unsigned int j = 0; j < 3; j++) {
+				if ((unsigned int) faces(i, j) >= ivp.size()) {
 					throw MLException(
-							"Error while creating mesh: bad vertex index " +
-							QString::number(faces(i,j)) + " in face " +
-							QString::number(i) + "; vertex " + QString::number(j) + ".");
+						"Error while creating mesh: bad vertex index " +
+						QString::number(faces(i, j)) + " in face " + QString::number(i) +
+						"; vertex " + QString::number(j) + ".");
 				}
 			}
-			fi->V(0)=ivp[faces(i,0)];
-			fi->V(1)=ivp[faces(i,1)];
-			fi->V(2)=ivp[faces(i,2)];
+			fi->V(0) = ivp[faces(i, 0)];
+			fi->V(1) = ivp[faces(i, 1)];
+			fi->V(2) = ivp[faces(i, 2)];
 
-			if (hasFNormals){
-				fi->N() = CMeshO::CoordType(
-							faceNormals(i,0),
-							faceNormals(i,1),
-							faceNormals(i,2));
+			if (hasFNormals) {
+				fi->N() =
+					CMeshO::CoordType(faceNormals(i, 0), faceNormals(i, 1), faceNormals(i, 2));
 			}
 			if (hasFQuality) {
 				fi->Q() = faceQuality(i);
 			}
 		}
-		if (!hasFNormals){
+		if (!hasFNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
 		}
-		if (!hasVNormals){
+		if (!hasVNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
 		}
 	}
@@ -197,83 +199,77 @@ CMeshO meshlab::meshFromMatrices(
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::polyMeshFromMatrices(
-		const EigenMatrixX3m& vertices,
-		const std::list<EigenVectorXui>& faces,
-		const EigenMatrixX3m& vertexNormals,
-		const EigenMatrixX3m& faceNormals,
-		const EigenVectorXm& vertexQuality,
-		const EigenVectorXm& faceQuality)
+	const EigenMatrixX3m&            vertices,
+	const std::list<EigenVectorXui>& faces,
+	const EigenMatrixX3m&            vertexNormals,
+	const EigenMatrixX3m&            faceNormals,
+	const EigenVectorXm&             vertexQuality,
+	const EigenVectorXm&             faceQuality)
 {
 	PolyMesh pm;
-	CMeshO m;
+	CMeshO   m;
 	if (vertices.rows() > 0) {
-		//add vertices and their associated normals and quality if any
+		// add vertices and their associated normals and quality if any
 		std::vector<PolyMesh::VertexPointer> ivp(vertices.rows());
 
 		bool hasVNormals = vertexNormals.rows() > 0;
 		bool hasVQuality = vertexQuality.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
-					"Error while creating mesh: the number of vertex normals "
-					"is different from the number of vertices.");
+				"Error while creating mesh: the number of vertex normals "
+				"is different from the number of vertices.");
 		}
 		if (hasVQuality && (vertices.rows() != vertexQuality.size())) {
 			throw MLException(
-					"Error while creating mesh: the number of vertex quality "
-					"values is different from the number of vertices.");
+				"Error while creating mesh: the number of vertex quality "
+				"values is different from the number of vertices.");
 		}
 		PolyMesh::VertexIterator vi =
-				vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
+			vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
-			ivp[i] = &*vi;
-			vi->P() = PolyMesh::CoordType(vertices(i,0), vertices(i,1), vertices(i,2));
+			ivp[i]  = &*vi;
+			vi->P() = PolyMesh::CoordType(vertices(i, 0), vertices(i, 1), vertices(i, 2));
 			if (hasVNormals) {
 				vi->N() = PolyMesh::CoordType(
-							vertexNormals(i,0),
-							vertexNormals(i,1),
-							vertexNormals(i,2));
+					vertexNormals(i, 0), vertexNormals(i, 1), vertexNormals(i, 2));
 			}
 			if (hasVQuality) {
 				vi->Q() = vertexQuality(i);
 			}
 		}
 
-		//add faces and their associated normals and quality if any
+		// add faces and their associated normals and quality if any
 
 		bool hasFNormals = faceNormals.rows() > 0;
 		bool hasFQuality = faceQuality.rows() > 0;
-		if (hasFNormals && (faces.size() != (size_t)faceNormals.rows())) {
+		if (hasFNormals && (faces.size() != (size_t) faceNormals.rows())) {
 			throw MLException(
-					"Error while creating mesh: the number of face normals "
-					"is different from the number of faces.");
+				"Error while creating mesh: the number of face normals "
+				"is different from the number of faces.");
 		}
 		if (hasFQuality) {
-			if (faces.size() != (size_t)faceQuality.size()) {
+			if (faces.size() != (size_t) faceQuality.size()) {
 				throw MLException(
-						"Error while creating mesh: the number of face quality "
-						"values is different from the number of faces.");
+					"Error while creating mesh: the number of face quality "
+					"values is different from the number of faces.");
 			}
 		}
-		PolyMesh::FaceIterator fi =
-				vcg::tri::Allocator<PolyMesh>::AddFaces(pm, faces.size());
-		auto it = faces.begin();
+		PolyMesh::FaceIterator fi = vcg::tri::Allocator<PolyMesh>::AddFaces(pm, faces.size());
+		auto                   it = faces.begin();
 		for (unsigned int i = 0; i < faces.size(); ++i, ++fi, ++it) {
 			fi->Alloc(it->size());
 			const EigenVectorXui& iface = *it;
-			for (unsigned int j = 0; j < iface.size(); ++j){
-				if ((unsigned int)iface(j) >= ivp.size()) {
+			for (unsigned int j = 0; j < iface.size(); ++j) {
+				if ((unsigned int) iface(j) >= ivp.size()) {
 					throw MLException(
-							"Error while creating mesh: bad vertex index " +
-							QString::number(iface(j)) + " in face " +
-							QString::number(i) + "; vertex " + QString::number(j) + ".");
+						"Error while creating mesh: bad vertex index " + QString::number(iface(j)) +
+						" in face " + QString::number(i) + "; vertex " + QString::number(j) + ".");
 				}
 				fi->V(j) = ivp[iface(j)];
 			}
-			if (hasFNormals){
-				fi->N() = PolyMesh::CoordType(
-							faceNormals(i,0),
-							faceNormals(i,1),
-							faceNormals(i,2));
+			if (hasFNormals) {
+				fi->N() =
+					PolyMesh::CoordType(faceNormals(i, 0), faceNormals(i, 1), faceNormals(i, 2));
 			}
 			if (hasFQuality) {
 				fi->Q() = faceQuality(i);
@@ -287,10 +283,10 @@ CMeshO meshlab::polyMeshFromMatrices(
 		for (unsigned int i = 0; i < m.face.size(); ++i)
 			h[i] = birthFaces[i];
 
-		if (!hasFNormals){
+		if (!hasFNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
 		}
-		if (!hasVNormals){
+		if (!hasVNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
 		}
 	}
@@ -315,18 +311,22 @@ CMeshO meshlab::polyMeshFromMatrices(
  * @param attributeName: the name of the new attribute
  */
 void meshlab::addVertexScalarAttribute(
-		CMeshO& mesh,
-		const EigenVectorXm& attributeValues,
-		const std::string& attributeName)
+	CMeshO&              mesh,
+	const EigenVectorXm& attributeValues,
+	const std::string&   attributeName)
 {
 	if (mesh.VN() != attributeValues.size())
-		throw MLException("The given vector has different number of elements than the number of vertices of the mesh.");
+		throw MLException(
+			"The given vector has different number of elements than the number of vertices of the "
+			"mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Scalarm>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)) {
+		throw MLException(
+			"The mesh already has a custom attribute with the name " +
+			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Scalarm>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
 		h[i] = attributeValues(i);
 	}
 }
@@ -345,18 +345,22 @@ void meshlab::addVertexScalarAttribute(
  * @param attributeName: the name of the new attribute
  */
 void meshlab::addFaceScalarAttribute(
-		CMeshO& mesh,
-		const EigenVectorXm& attributeValues,
-		const std::string& attributeName)
+	CMeshO&              mesh,
+	const EigenVectorXm& attributeValues,
+	const std::string&   attributeName)
 {
 	if (mesh.FN() != attributeValues.size())
-		throw MLException("The given vector has different number of elements than the number of faces of the mesh.");
+		throw MLException(
+			"The given vector has different number of elements than the number of faces of the "
+			"mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Scalarm>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)) {
+		throw MLException(
+			"The mesh already has a custom attribute with the name " +
+			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i){
+	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
 		h[i] = attributeValues(i);
 	}
 }
@@ -375,21 +379,25 @@ void meshlab::addFaceScalarAttribute(
  * @param attributeName: the name of the new attribute
  */
 void meshlab::addVertexVectorAttribute(
-		CMeshO& mesh,
-		const EigenMatrixX3m& attributeValues,
-		const std::string& attributeName)
+	CMeshO&               mesh,
+	const EigenMatrixX3m& attributeValues,
+	const std::string&    attributeName)
 {
 	if (mesh.VN() != attributeValues.rows())
-		throw MLException("The given vector has different number of rows than the number of vertices of the mesh.");
+		throw MLException(
+			"The given vector has different number of rows than the number of vertices of the "
+			"mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<Point3m>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)) {
+		throw MLException(
+			"The mesh already has a custom attribute with the name " +
+			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i){
-		h[i][0] = attributeValues(i,0);
-		h[i][1] = attributeValues(i,1);
-		h[i][2] = attributeValues(i,2);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
+		h[i][0] = attributeValues(i, 0);
+		h[i][1] = attributeValues(i, 1);
+		h[i][2] = attributeValues(i, 2);
 	}
 }
 
@@ -407,21 +415,24 @@ void meshlab::addVertexVectorAttribute(
  * @param attributeName: the name of the new attribute
  */
 void meshlab::addFaceVectorAttribute(
-		CMeshO& mesh,
-		const EigenMatrixX3m& attributeValues,
-		const std::string& attributeName)
+	CMeshO&               mesh,
+	const EigenMatrixX3m& attributeValues,
+	const std::string&    attributeName)
 {
 	if (mesh.FN() != attributeValues.rows())
-		throw MLException("The given vector has different number of rows than the number of faces of the mesh.");
+		throw MLException(
+			"The given vector has different number of rows than the number of faces of the mesh.");
 	auto h = vcg::tri::Allocator<CMeshO>::FindPerFaceAttribute<Point3m>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)){
-		throw MLException("The mesh already has a custom attribute with the name " + QString::fromStdString(attributeName));
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, h)) {
+		throw MLException(
+			"The mesh already has a custom attribute with the name " +
+			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i){
-		h[i][0] = attributeValues(i,0);
-		h[i][1] = attributeValues(i,1);
-		h[i][2] = attributeValues(i,2);
+	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
+		h[i][0] = attributeValues(i, 0);
+		h[i][1] = attributeValues(i, 1);
+		h[i][2] = attributeValues(i, 2);
 	}
 }
 
@@ -442,9 +453,9 @@ EigenMatrixX3m meshlab::vertexMatrix(const CMeshO& mesh)
 	EigenMatrixX3m vert(mesh.VN(), 3);
 
 	// copy vertices
-	for (int i = 0; i < mesh.VN(); i++){
-		for (int j = 0; j < 3; j++){
-			vert(i,j) = mesh.vert[i].P()[j];
+	for (int i = 0; i < mesh.VN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			vert(i, j) = mesh.vert[i].P()[j];
 		}
 	}
 
@@ -468,9 +479,9 @@ Eigen::MatrixX3i meshlab::faceMatrix(const CMeshO& mesh)
 	Eigen::MatrixXi faces(mesh.FN(), 3);
 
 	// copy faces
-	for (int i = 0; i < mesh.FN(); i++){
-		for (int j = 0; j < 3; j++){
-			faces(i,j) = (int)vcg::tri::Index(mesh,mesh.face[i].V(j));
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			faces(i, j) = (int) vcg::tri::Index(mesh, mesh.face[i].V(j));
 		}
 	}
 
@@ -494,9 +505,9 @@ EigenMatrixX3m meshlab::vertexNormalMatrix(const CMeshO& mesh)
 	EigenMatrixX3m vertexNormals(mesh.VN(), 3);
 
 	// per vertices normals
-	for (int i = 0; i < mesh.VN(); i++){
-		for (int j = 0; j < 3; j++){
-			vertexNormals(i,j) = mesh.vert[i].N()[j];
+	for (int i = 0; i < mesh.VN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			vertexNormals(i, j) = mesh.vert[i].N()[j];
 		}
 	}
 
@@ -520,9 +531,9 @@ EigenMatrixX3m meshlab::faceNormalMatrix(const CMeshO& mesh)
 	EigenMatrixX3m faceNormals(mesh.FN(), 3);
 
 	// per face normals
-	for (int i = 0; i < mesh.FN(); i++){
-		for (int j = 0; j < 3; j++){
-			faceNormals(i,j) = mesh.face[i].N()[j];
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			faceNormals(i, j) = mesh.face[i].N()[j];
 		}
 	}
 
@@ -543,9 +554,9 @@ EigenMatrixX4m meshlab::vertexColorMatrix(const CMeshO& mesh)
 	vcg::tri::RequireVertexCompactness(mesh);
 	EigenMatrixX4m vertexColors(mesh.VN(), 4);
 
-	for (int i = 0; i < mesh.VN(); i++){
-		for (int j = 0; j < 4; j++){
-			vertexColors(i,j) = mesh.vert[i].C()[j] / 255.0;
+	for (int i = 0; i < mesh.VN(); i++) {
+		for (int j = 0; j < 4; j++) {
+			vertexColors(i, j) = mesh.vert[i].C()[j] / 255.0;
 		}
 	}
 
@@ -568,9 +579,9 @@ EigenMatrixX4m meshlab::faceColorMatrix(const CMeshO& mesh)
 
 	EigenMatrixX4m faceColors(mesh.FN(), 4);
 
-	for (int i = 0; i < mesh.FN(); i++){
-		for (int j = 0; j < 4; j++){
-			faceColors(i,j) = mesh.face[i].C()[j] / 255.0;
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 4; j++) {
+			faceColors(i, j) = mesh.face[i].C()[j] / 255.0;
 		}
 	}
 
@@ -587,15 +598,13 @@ EigenMatrixX4m meshlab::faceColorMatrix(const CMeshO& mesh)
  * @param mesh: input mesh
  * @return #V vector of unsigned integers (vertex colors)
  */
-EigenVectorXui meshlab::vertexColorArray(
-		const CMeshO& mesh)
+EigenVectorXui meshlab::vertexColorArray(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
 	EigenVectorXui vertexColors(mesh.VN());
 
-	for (int i = 0; i < mesh.VN(); i++){
-		vertexColors(i) =
-			vcg::Color4<unsigned char>::ToUnsignedA8R8G8B8(mesh.vert[i].C());
+	for (int i = 0; i < mesh.VN(); i++) {
+		vertexColors(i) = vcg::Color4<unsigned char>::ToUnsignedA8R8G8B8(mesh.vert[i].C());
 	}
 
 	return vertexColors;
@@ -611,17 +620,15 @@ EigenVectorXui meshlab::vertexColorArray(
  * @param mesh: input mesh
  * @return #F vector of unsigned integers (face colors)
  */
-EigenVectorXui meshlab::faceColorArray(
-		const CMeshO& mesh)
+EigenVectorXui meshlab::faceColorArray(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	vcg::tri::RequirePerFaceColor(mesh);
 
 	EigenVectorXui faceColors(mesh.FN());
 
-	for (int i = 0; i < mesh.FN(); i++){
-		faceColors(i) =
-			vcg::Color4<unsigned char>::ToUnsignedA8R8G8B8(mesh.face[i].C());
+	for (int i = 0; i < mesh.FN(); i++) {
+		faceColors(i) = vcg::Color4<unsigned char>::ToUnsignedA8R8G8B8(mesh.face[i].C());
 	}
 
 	return faceColors;
@@ -642,7 +649,7 @@ EigenVectorXm meshlab::vertexQualityArray(const CMeshO& mesh)
 	vcg::tri::RequirePerVertexQuality(mesh);
 
 	EigenVectorXm qv(mesh.VN());
-	for (int i = 0; i < mesh.VN(); i++){
+	for (int i = 0; i < mesh.VN(); i++) {
 		qv(i) = mesh.vert[i].Q();
 	}
 	return qv;
@@ -663,7 +670,7 @@ EigenVectorXm meshlab::faceQualityArray(const CMeshO& mesh)
 	vcg::tri::RequirePerFaceQuality(mesh);
 
 	EigenVectorXm qf(mesh.FN());
-	for (int i = 0; i < mesh.FN(); i++){
+	for (int i = 0; i < mesh.FN(); i++) {
 		qf(i) = mesh.face[i].Q();
 	}
 	return qf;
@@ -676,19 +683,19 @@ EigenVectorXm meshlab::faceQualityArray(const CMeshO& mesh)
  * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
  *
  * @param mesh: input mesh
- * @return #V*2 matrix of scalars (vertex exture coordinates)
+ * @return #V*2 matrix of scalars (vertex texture coordinates)
  */
 EigenMatrixX2m meshlab::vertexTexCoordMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
 	vcg::tri::RequirePerVertexTexCoord(mesh);
 
-	EigenMatrixX2m uv (mesh.VN(), 2);
+	EigenMatrixX2m uv(mesh.VN(), 2);
 
 	// per vertices uv
 	for (int i = 0; i < mesh.VN(); i++) {
-		uv(i,0) = mesh.vert[i].T().U();
-		uv(i,1) = mesh.vert[i].T().V();
+		uv(i, 0) = mesh.vert[i].T().U();
+		uv(i, 1) = mesh.vert[i].T().V();
 	}
 
 	return uv;
@@ -708,16 +715,62 @@ EigenMatrixX2m meshlab::wedgeTexCoordMatrix(const CMeshO& mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	vcg::tri::RequirePerFaceWedgeTexCoord(mesh);
-	EigenMatrixX2m m(mesh.FN()*3, 2);
+	EigenMatrixX2m m(mesh.FN() * 3, 2);
 
 	for (int i = 0; i < mesh.FN(); i++) {
 		int base = i * 3;
-		for (int j = 0; j < 3; j++){
-			m(base+j, 0) = mesh.face[i].WT(j).u();
-			m(base+j, 1) = mesh.face[i].WT(j).v();
+		for (int j = 0; j < 3; j++) {
+			m(base + j, 0) = mesh.face[i].WT(j).u();
+			m(base + j, 1) = mesh.face[i].WT(j).v();
 		}
 	}
 	return m;
+}
+
+/**
+ * @brief Get a #V Eigen vector of booleans which are true if the corresponding
+ * vertex is selected, false otherwise
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V vector of booleans
+ */
+EigenVectorXb meshlab::vertexSelectionArray(const CMeshO& mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+
+	EigenVectorXb sel(mesh.VN());
+
+	// per vertex selection
+	for (int i = 0; i < mesh.VN(); i++) {
+		sel(i) = mesh.vert[i].IsS();
+	}
+
+	return sel;
+}
+
+/**
+ * @brief Get a #F Eigen vector of booleans which are true if the corresponding
+ * face is selected, false otherwise
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F vector of booleans
+ */
+EigenVectorXb meshlab::faceSelectionArray(const CMeshO& mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+
+	EigenVectorXb sel(mesh.FN());
+
+	// per face selection
+	for (int i = 0; i < mesh.FN(); i++) {
+		sel(i) = mesh.face[i].IsS();
+	}
+
+	return sel;
 }
 
 /**
@@ -734,16 +787,16 @@ Eigen::MatrixX3i meshlab::faceFaceAdjacencyMatrix(const CMeshO& mesh)
 	vcg::tri::RequireFaceCompactness(mesh);
 	vcg::tri::RequireFFAdjacency(mesh);
 
-	Eigen::MatrixX3i faceFaceMatrix(mesh.FN(),3);
+	Eigen::MatrixX3i faceFaceMatrix(mesh.FN(), 3);
 
 	for (int i = 0; i < mesh.FN(); i++) {
 		for (int j = 0; j < 3; j++) {
-			auto AdjF= mesh.face[i].FFp(j);
-			if (AdjF==&mesh.face[i]) {
-				faceFaceMatrix(i,j)=-1;
+			auto AdjF = mesh.face[i].FFp(j);
+			if (AdjF == &mesh.face[i]) {
+				faceFaceMatrix(i, j) = -1;
 			}
-			else{
-				faceFaceMatrix(i,j)=mesh.face[i].FFi(j);
+			else {
+				faceFaceMatrix(i, j) = mesh.face[i].FFi(j);
 			}
 		}
 	}
@@ -760,23 +813,23 @@ Eigen::MatrixX3i meshlab::faceFaceAdjacencyMatrix(const CMeshO& mesh)
  * @param mesh: input mesh
  * @return #V vector of scalars (custom scalar vertex attribute)
  */
-EigenVectorXm meshlab::vertexScalarAttributeArray(
-		const CMeshO& mesh,
-		const std::string& attributeName)
+EigenVectorXm
+meshlab::vertexScalarAttributeArray(const CMeshO& mesh, const std::string& attributeName)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
 	CMeshO::ConstPerVertexAttributeHandle<Scalarm> attributeHandle =
-			vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)) {
 		EigenVectorXm attrVector(mesh.VN());
-		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i){
+		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i) {
 			attrVector[i] = attributeHandle[i];
 		}
 		return attrVector;
 	}
 	else {
-		throw MLException("No valid per vertex scalar attribute named " +
-						  QString::fromStdString(attributeName) + " was found.");
+		throw MLException(
+			"No valid per vertex scalar attribute named " + QString::fromStdString(attributeName) +
+			" was found.");
 	}
 }
 
@@ -789,25 +842,25 @@ EigenVectorXm meshlab::vertexScalarAttributeArray(
  * @param mesh: input mesh
  * @return #V*3 matrix of scalars (custom Point3 vertex attribute)
  */
-EigenMatrixX3m meshlab::vertexVectorAttributeMatrix(
-		const CMeshO& mesh,
-		const std::string& attributeName)
+EigenMatrixX3m
+meshlab::vertexVectorAttributeMatrix(const CMeshO& mesh, const std::string& attributeName)
 {
 	vcg::tri::RequireVertexCompactness(mesh);
 	CMeshO::ConstPerVertexAttributeHandle<Point3m> attributeHandle =
-			vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)) {
 		EigenMatrixX3m attrMatrix(mesh.VN(), 3);
-		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i){
-			attrMatrix(i,0) = attributeHandle[i][0];
-			attrMatrix(i,1) = attributeHandle[i][1];
-			attrMatrix(i,2) = attributeHandle[i][2];
+		for (unsigned int i = 0; i < (unsigned int) mesh.VN(); ++i) {
+			attrMatrix(i, 0) = attributeHandle[i][0];
+			attrMatrix(i, 1) = attributeHandle[i][1];
+			attrMatrix(i, 2) = attributeHandle[i][2];
 		}
 		return attrMatrix;
 	}
 	else {
-		throw MLException("No valid per vertex vector attribute named " +
-						  QString::fromStdString(attributeName) + " was found.");
+		throw MLException(
+			"No valid per vertex vector attribute named " + QString::fromStdString(attributeName) +
+			" was found.");
 	}
 }
 
@@ -820,23 +873,23 @@ EigenMatrixX3m meshlab::vertexVectorAttributeMatrix(
  * @param mesh: input mesh
  * @return #F vector of scalars (custom scalar face attribute)
  */
-EigenVectorXm meshlab::faceScalarAttributeArray(
-		const CMeshO& mesh,
-		const std::string& attributeName)
+EigenVectorXm
+meshlab::faceScalarAttributeArray(const CMeshO& mesh, const std::string& attributeName)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	CMeshO::ConstPerFaceAttributeHandle<Scalarm> attributeHandle =
-			vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)) {
 		EigenVectorXm attrMatrix(mesh.FN());
-		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i){
+		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i) {
 			attrMatrix[i] = attributeHandle[i];
 		}
 		return attrMatrix;
 	}
 	else {
-		throw MLException("No valid per face scalar attribute named " +
-						  QString::fromStdString(attributeName) + " was found.");
+		throw MLException(
+			"No valid per face scalar attribute named " + QString::fromStdString(attributeName) +
+			" was found.");
 	}
 }
 
@@ -849,24 +902,24 @@ EigenVectorXm meshlab::faceScalarAttributeArray(
  * @param mesh: input mesh
  * @return #F*3 matrix of scalars (custom Point3 face attribute)
  */
-EigenMatrixX3m meshlab::faceVectorAttributeMatrix(
-		const CMeshO& mesh,
-		const std::string& attributeName)
+EigenMatrixX3m
+meshlab::faceVectorAttributeMatrix(const CMeshO& mesh, const std::string& attributeName)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 	CMeshO::ConstPerFaceAttributeHandle<Point3m> attributeHandle =
-			vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(mesh, attributeName);
-	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)){
+		vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(mesh, attributeName);
+	if (vcg::tri::Allocator<CMeshO>::IsValidHandle(mesh, attributeHandle)) {
 		EigenMatrixX3m attrMatrix(mesh.FN(), 3);
-		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i){
-			attrMatrix(i,0) = attributeHandle[i][0];
-			attrMatrix(i,1) = attributeHandle[i][1];
-			attrMatrix(i,2) = attributeHandle[i][2];
+		for (unsigned int i = 0; i < (unsigned int) mesh.FN(); ++i) {
+			attrMatrix(i, 0) = attributeHandle[i][0];
+			attrMatrix(i, 1) = attributeHandle[i][1];
+			attrMatrix(i, 2) = attributeHandle[i][2];
 		}
 		return attrMatrix;
 	}
 	else {
-		throw MLException("No valid per face vector attribute named " +
-						  QString::fromStdString(attributeName) + " was found.");
+		throw MLException(
+			"No valid per face vector attribute named " + QString::fromStdString(attributeName) +
+			" was found.");
 	}
 }
