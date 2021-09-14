@@ -57,14 +57,14 @@ void AlignParameter::AlignPairParamToRichParameterSet(const AlignPair::Param &ap
   rps.addParam(RichBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is constrained to perform matching only through roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear)."));
 }
 
-void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterList &fps , MeshTree::Param &mtp)
+void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterList &fps , MeshTreem::Param &mtp)
 {
   mtp.arcThreshold=fps.getFloat("arcThreshold");
   mtp.OGSize = fps.getInt("OGSize");
   mtp.recalcThreshold = fps.getFloat("recalcThreshold");
 }
 
-void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterList &rps)
+void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTreem::Param &mtp, RichParameterList &rps)
 {
   rps.clear();
   rps.addParam(RichInt("OGSize",mtp.OGSize,"Occupancy Grid Size","To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can "));

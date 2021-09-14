@@ -22,7 +22,9 @@
 ****************************************************************************/
 
 #include <common/parameters/rich_parameter_list.h>
-#include <meshlabplugins/edit_align/meshtree.h>
+#include <vcg/complex/algorithms/meshtree.h>
+
+typedef vcg::MeshTree<MeshModel> MeshTreem;
 
 class AlignParameter {
 
@@ -30,8 +32,8 @@ public:
 	static void RichParameterSetToAlignPairParam(const RichParameterList &rps, vcg::AlignPair::Param &app);
 	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterList &rps);
 
-	static void RichParameterSetToMeshTreeParam(const RichParameterList &rps, MeshTree::Param &mtp);
-	static void MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterList &rps);
+	static void RichParameterSetToMeshTreeParam(const RichParameterList &rps, MeshTreem::Param &mtp);
+	static void MeshTreeParamToRichParameterSet(const MeshTreem::Param &mtp, RichParameterList &rps);
 
 private:
 	//no need to have an instance of this class

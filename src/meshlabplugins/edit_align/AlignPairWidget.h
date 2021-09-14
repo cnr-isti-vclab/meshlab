@@ -32,9 +32,9 @@
 #include <wrap/gui/trackball.h>
 
 #include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
+#include <vcg/complex/algorithms/meshtree.h>
 
-class MeshTree;
-class MeshNode;
+typedef vcg::MeshTree<MeshModel> MeshTreem;
 
 class GLArea;
 
@@ -67,8 +67,8 @@ protected:
 
 private:
     /// the active mesh instance
-    MeshNode* freeMesh;
-    MeshTree* gluedTree;
+    MeshTreem::MeshNode* freeMesh;
+    MeshTreem* gluedTree;
 
     /// the active manipulator
     vcg::Trackball trackLeft,trackRight;
@@ -96,7 +96,7 @@ public:
     // force point rendering
     bool usePointRendering;
 public:
-    void initMesh(MeshNode *left, MeshTree *right);
+    void initMesh(MeshTreem::MeshNode *left, MeshTreem *right);
 };
 
 #endif

@@ -135,7 +135,7 @@ bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 			mm.cm.C() = Color4b::Scatter(51, mm.id() % 50, .2f, .7f);
 		mm.updateDataMask(MeshModel::MM_COLOR);
 //			meshTree.nodeList.push_back(new MeshNode(mm));
-		meshTree.nodeMap[mm.id()]=new MeshNode(&mm);
+		meshTree.nodeMap[mm.id()] = new MeshTreem::MeshNode(&mm);
 	}
 
 //	for(QMap<int,RenderMode>::iterator it = _gla->rendermodemap.begin();it != _gla->rendermodemap.end();++it)
@@ -227,7 +227,7 @@ void EditAlignPlugin::hideRevealGluedMesh()
   //    foreach(MeshNode *mn, meshTree.nodeList)
   for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
   { 
-    MeshNode *mn=ni->second;
+    MeshTreem::MeshNode *mn=ni->second;
         if(!mn->glued) mn->m->setVisible(!(mn->m->isVisible()));
   }
     alignDialog->rebuildTree();
@@ -243,8 +243,8 @@ void EditAlignPlugin::setBaseMesh()
 
     //foreach(MeshNode *mn, meshTree.nodeList)
     for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
-    { 
-      MeshNode *mn=ni->second;
+    {
+        MeshTreem::MeshNode *mn=ni->second;
       if(mn->glued && (mn->m != _md->mm()) )
             mn->m->cm.Tr.Import(inv*Matrix44d::Construct(mn->m->cm.Tr));
     }
@@ -420,7 +420,7 @@ void EditAlignPlugin::setAlignParamM()
 
 void EditAlignPlugin::glueHere()
 {
-    MeshNode *mn=currentNode();
+    MeshTreem::MeshNode *mn=currentNode();
     if(mn->glued)
       meshTree.deleteResult(mn);
 
@@ -441,7 +441,7 @@ void EditAlignPlugin::selectBadArc()
 {
   float maxErr=0;
   AlignPair::Result *worseArc=0;
-  for(QList<vcg::AlignPair::Result>::iterator li=meshTree.resultList.begin();li!=meshTree.resultList.end();++li)
+  for(auto li=meshTree.resultList.begin();li!=meshTree.resultList.end();++li)
   {
     if(li->err > maxErr)
     {
@@ -561,8 +561,8 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 {
     unsigned int i;
     AlignPair::Result &r=*A;
-    MeshNode *fix=meshTree.find(r.FixName);
-    MeshNode *mov=meshTree.find(r.MovName);
+    MeshTreem::MeshNode *fix=meshTree.find(r.FixName);
+    MeshTreem::MeshNode *mov=meshTree.find(r.MovName);
     //int mov=FindMesh(r.MovName);
     double nl=2.0*(*fix).bbox().Diag()/100.0;
     glPushAttrib(GL_ENABLE_BIT );

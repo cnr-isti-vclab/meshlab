@@ -29,7 +29,10 @@ $Log: stdpardialog.cpp,v $
 #define ALIGN_DIALOG_H
 #include <QMenu>
 #include <QDockWidget>
-#include "meshtree.h"
+#include <vcg/complex/algorithms/meshtree.h>
+
+typedef vcg::MeshTree<MeshModel> MeshTreem;
+
 class GLArea;
 
 #include "ui_alignDialog.h"
@@ -40,10 +43,10 @@ class MeshModel;
 class MeshTreeWidgetItem : public QTreeWidgetItem
 {
 public:
-	MeshTreeWidgetItem(MeshNode *n);
-	MeshTreeWidgetItem(MeshTree* meshTree,vcg::AlignPair::Result *A,MeshTreeWidgetItem *parent);
+	MeshTreeWidgetItem(MeshTreem::MeshNode *n);
+	MeshTreeWidgetItem(MeshTreem* meshTree,vcg::AlignPair::Result *A,MeshTreeWidgetItem *parent);
 
-	MeshNode *n;
+    MeshTreem::MeshNode *n;
 	vcg::AlignPair::Result *a;
 };
 
@@ -57,7 +60,7 @@ public:
 	void updateButtons();
 	void updateDialog();
 	void updateMeshVisibilities() {emit updateMeshSetVisibilities();}
-	void setTree(MeshTree *);
+	void setTree(MeshTreem *);
 	void updateCurrentNodeBackground();
 	void setCurrentArc(vcg::AlignPair::Result *currentArc);
 
@@ -67,11 +70,11 @@ private:
 	EditAlignPlugin *edit;
 public:
 
-	MeshTree *meshTree;
-	MeshNode *currentNode();
+    MeshTreem *meshTree;
+    MeshTreem::MeshNode *currentNode();
 	vcg::AlignPair::Result *currentArc;
 
-	QMap<MeshNode *,           MeshTreeWidgetItem *> M2T; // MeshNode to treeitem hash
+	QMap<MeshTreem::MeshNode *,           MeshTreeWidgetItem *> M2T; // MeshNode to treeitem hash
 	QMap<vcg::AlignPair::Result  *, MeshTreeWidgetItem *> A2Tf; // Arc to treeitem hash  (forward)
 	QMap<vcg::AlignPair::Result  *, MeshTreeWidgetItem *> A2Tb; // Arc to treeitem hash  (backward)
 

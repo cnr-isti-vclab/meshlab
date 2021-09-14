@@ -36,7 +36,7 @@ $Log: stdpardialog.cpp,v $
 
 static QTextEdit *globalLogTextEdit = 0;
 
-MeshNode *AlignDialog::currentNode() { return edit->currentNode(); }
+MeshTreem::MeshNode *AlignDialog::currentNode() { return edit->currentNode(); }
 
 // Global function to write on the log in the lower part of the window.
 bool AlignCallBackPos(const int, const char * message)
@@ -113,7 +113,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 
 void AlignDialog::updateCurrentNodeBackground()
 {
-	static MeshNode *lastCurrentNode = 0;
+	static MeshTreem::MeshNode *lastCurrentNode = 0;
 	assert(meshTree);
 
 	if (lastCurrentNode && M2T[lastCurrentNode])
@@ -127,7 +127,7 @@ void AlignDialog::updateCurrentNodeBackground()
 	}
 }
 
-void AlignDialog::setTree(MeshTree *_meshTree)
+void AlignDialog::setTree(MeshTreem *_meshTree)
 {
 	assert(meshTree == 0);
 	meshTree = _meshTree;
@@ -157,7 +157,7 @@ void AlignDialog::updateButtons()
 	ui.baseMeshButton->setDisabled(!currentNode()->glued);
 }
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTreem::MeshNode *meshNode)
 {
 	QString meshName = meshNode->m->label();
 
@@ -175,7 +175,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 }
 
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* /*meshTree*/, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTreem* /*meshTree*/, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
 {
 	n = 0;
 	a = A;
@@ -216,11 +216,11 @@ void AlignDialog::rebuildTree()
 	M2T.clear();
 	A2Tf.clear();
 	A2Tb.clear();
-    //  QList<MeshNode*> &meshList = meshTree->nodeList;
+    //  QList<MeshTreem::MeshNode*> &meshList = meshTree->nodeList;
     //	for (int i = 0; i < meshList.size(); ++i)
     for(auto ni=meshTree->nodeMap.begin();ni!=meshTree->nodeMap.end();++ni)
       { 
-        MeshNode *mn=ni->second;
+        MeshTreem::MeshNode *mn=ni->second;
 //		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(meshList.value(i));
         MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mn);
 //		 if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
@@ -268,7 +268,7 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column)
 	if (!mItem) 
 		return; // user clicked on a iteration info (neither a node nor an arc)
 
-	MeshNode * nn = mItem->n;
+	MeshTreem::MeshNode * nn = mItem->n;
 	if (nn) {
 		if (column == 1)
 		{
