@@ -44,7 +44,9 @@ CMeshO meshFromMatrices(
 	const EigenMatrixX3m&   vertexNormals = EigenMatrixX3m(),
 	const EigenMatrixX3m&   faceNormals   = EigenMatrixX3m(),
 	const EigenVectorXm&    vertexQuality = EigenVectorXm(),
-	const EigenVectorXm&    faceQuality   = EigenVectorXm());
+	const EigenVectorXm&    faceQuality   = EigenVectorXm(),
+	const EigenMatrixX4m&   vertexColor   = EigenMatrixX4m(),
+	const EigenMatrixX4m&   faceColor     = EigenMatrixX4m());
 
 // From eigen to polygonal CMeshO
 CMeshO polyMeshFromMatrices(
@@ -53,7 +55,9 @@ CMeshO polyMeshFromMatrices(
 	const EigenMatrixX3m&            vertexNormals = EigenMatrixX3m(),
 	const EigenMatrixX3m&            faceNormals   = EigenMatrixX3m(),
 	const EigenVectorXm&             vertexQuality = EigenVectorXm(),
-	const EigenVectorXm&             faceQuality   = EigenVectorXm());
+	const EigenVectorXm&             faceQuality   = EigenVectorXm(),
+	const EigenMatrixX4m&            vertexColor   = EigenMatrixX4m(),
+	const EigenMatrixX4m&            faceColor     = EigenMatrixX4m());
 
 void addVertexScalarAttribute(
 	CMeshO&              mesh,
