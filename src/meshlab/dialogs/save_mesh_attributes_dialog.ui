@@ -231,13 +231,6 @@
          <widget class="QListWidget" name="listTextureName"/>
         </item>
         <item>
-         <widget class="QPushButton" name="renametextureButton">
-          <property name="text">
-           <string>Rename Texture</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QCheckBox" name="saveTextureCheckBox">
           <property name="text">
            <string>Save Texture File(s)</string>

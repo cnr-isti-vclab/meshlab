@@ -2419,8 +2419,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		SaveMeshAttributesDialog maskDialog(this, mod, capability, defaultBits, savePar, this->GLA());
 		int quality = -1;
 		bool saveTextures = true;
+		bool save = true;
 		if (!saveAllPossibleAttributes) {
-			maskDialog.exec();
+			save = maskDialog.exec() == QDialog::Accepted;
 		}
 		else {
 			//this is horrible: creating a dialog object but then not showing the
@@ -2428,58 +2429,63 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			//to be removed soon
 			maskDialog.selectAllPossibleBits();
 		}
-		int mask = maskDialog.getNewMask();
-		savePar = maskDialog.getNewAdditionalSaveParameters();
-		quality = maskDialog.getTextureQuality();
-		saveTextures = maskDialog.saveTextures();
+		if (save) {
+			int mask = maskDialog.getNewMask();
+			savePar = maskDialog.getNewAdditionalSaveParameters();
+			quality = maskDialog.getTextureQuality();
+			saveTextures = maskDialog.saveTextures();
 
-		if (!saveTextures){
-			std::vector<std::string> textureNames = maskDialog.getTextureNames();
+			if (saveTextures){
+				std::vector<std::string> textureNames = maskDialog.getTextureNames();
 
-			for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
-				if (textureNames[i].find('.') == std::string::npos){
-					textureNames[i] += ".png";
+				for (unsigned int i = 0; i < mod->cm.textures.size(); ++i){
+					if (textureNames[i].find('.') == std::string::npos){
+						textureNames[i] += ".png";
+					}
+					mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 				}
-				mod->changeTextureName(mod->cm.textures[i], textureNames[i]);
 			}
-		}
-		if (!saveAllPossibleAttributes) {
-			maskDialog.close();
-			if(maskDialog.result() == QDialog::Rejected)
+			if (!saveAllPossibleAttributes) {
+				maskDialog.close();
+				if(maskDialog.result() == QDialog::Rejected)
+					return false;
+			}
+			if(mask == -1)
 				return false;
-		}
-		if(mask == -1)
-			return false;
 
-		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-		qb->show();
-		QElapsedTimer tt; tt.start();
-		meshDoc()->setBusy(true);
-		try {
-			if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
-				mod->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
-			QFileInfo finfo(fileName);
-			if (saveTextures)
-				mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
-			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
-			mod->setFileName(fileName);
-			QSettings settings;
-			int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
-			settings.setValue("savedMeshCounter", savedMeshCounter + 1);
+			qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+			qb->show();
+			QElapsedTimer tt; tt.start();
+			meshDoc()->setBusy(true);
+			try {
+				if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+					mod->updateDataMask(MeshModel::MM_FACEFACETOPO);
+				pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack);
+				QFileInfo finfo(fileName);
+				if (saveTextures)
+					mod->saveTextures(finfo.absolutePath(), quality, &meshDoc()->Log, QCallBack);
+				GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
+				mod->setFileName(fileName);
+				QSettings settings;
+				int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
+				settings.setValue("savedMeshCounter", savedMeshCounter + 1);
+			}
+			catch(const MLException& e) {
+				GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
+				QMessageBox::critical(this, tr("Meshlab Saving Error"),  e.what());
+				saved = false;
+			}
+			qApp->restoreOverrideCursor();
+			updateLayerDialog();
+			meshDoc()->setBusy(false);
+			qb->reset();
+
+			if (saved)
+				QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
 		}
-		catch(const MLException& e) {
-			GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
-			QMessageBox::critical(this, tr("Meshlab Saving Error"),  e.what());
+		else {
 			saved = false;
 		}
-		qApp->restoreOverrideCursor();
-		updateLayerDialog();
-		meshDoc()->setBusy(false);
-		qb->reset();
-
-		if (saved)
-			QDir::setCurrent(fi.absoluteDir().absolutePath()); //set current dir
 	}
 	return saved;
 }

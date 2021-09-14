@@ -25,6 +25,7 @@
 #define __VCGLIB_SAVEMASK_EXPORT
 
 #include <QDialog>
+#include <QListWidgetItem>
 
 #include <wrap/io_trimesh/io_mask.h>
 
@@ -71,8 +72,7 @@ private slots:
 	void on_okButton_clicked();
 	void on_cancelButton_clicked();
 	void on_check_help_stateChanged(int);
-	void on_renametextureButton_clicked();
-	void on_listTextureName_itemSelectionChanged();
+	void on_listTextureName_itemDoubleClicked(QListWidgetItem *item);
 	void on_AllButton_clicked();
 	void on_NoneButton_clicked();
 

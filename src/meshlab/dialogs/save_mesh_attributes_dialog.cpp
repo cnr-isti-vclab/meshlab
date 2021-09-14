@@ -46,8 +46,6 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 {
 	ui->setupUi(this);
 
-	ui->renametextureButton->setDisabled(true);
-
 	additionalParametersFrame = new RichParameterListFrame(additionalSaveParametrs, this,glar);
 	QVBoxLayout *vbox = new QVBoxLayout(this);
 	vbox->addWidget(additionalParametersFrame);
@@ -135,26 +133,18 @@ void SaveMeshAttributesDialog::on_check_help_stateChanged(int)
 	additionalParametersFrame->toggleHelp();
 }
 
-void SaveMeshAttributesDialog::on_renametextureButton_clicked()
+void SaveMeshAttributesDialog::on_listTextureName_itemDoubleClicked(QListWidgetItem *item)
 {
-	int row = ui->listTextureName->currentRow();
-	//ChangeTextureNameDialog dialog(this, textureNames[row].c_str());
-	//dialog.exec();
 	bool ok;
 	QString newtexture =
-			QInputDialog::getText(this, "New Texture Name",
-						"Enter the new texture name:", QLineEdit::Normal,
-						QString::fromStdString(textureNames[row]), &ok);
+		QInputDialog::getText(this, "New Texture Name",
+							  "Enter the new texture name:", QLineEdit::Normal,
+							  item->text(), &ok);
 	//dialog.close();
 	if(ok && newtexture.size()>0 ) {
-		textureNames[row] = newtexture.toStdString();
+		textureNames[ui->listTextureName->row(item)] = newtexture.toStdString();
 		ui->listTextureName->currentItem()->setText(newtexture);
 	}
-}
-
-void SaveMeshAttributesDialog::on_listTextureName_itemSelectionChanged()
-{
-	ui->renametextureButton->setDisabled(false);
 }
 
 void SaveMeshAttributesDialog::on_AllButton_clicked()
@@ -326,3 +316,4 @@ void SaveMeshAttributesDialog::on_textureQualitySpinBox_valueChanged(int arg1)
 		ui->textureQualitySpinBox->setSuffix("");
 	}
 }
+
