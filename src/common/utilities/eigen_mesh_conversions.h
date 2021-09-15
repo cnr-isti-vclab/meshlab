@@ -94,10 +94,10 @@ EigenMatrixX2m   vertexTexCoordMatrix(const CMeshO& mesh);
 EigenMatrixX2m   wedgeTexCoordMatrix(const CMeshO& mesh);
 EigenVectorXb    vertexSelectionArray(const CMeshO& mesh);
 EigenVectorXb    faceSelectionArray(const CMeshO& mesh);
-EigenMatrixX3m   vertexCurvatureMinMatrix(const CMeshO& mesh);
-EigenMatrixX3m   vertexCurvatureMaxMatrix(const CMeshO& mesh);
-EigenMatrixX3m   faceCurvatureMinMatrix(const CMeshO& mesh);
-EigenMatrixX3m   faceCurvatureMaxMatrix(const CMeshO& mesh);
+EigenMatrixX3m   vertexCurvaturePD1Matrix(const CMeshO& mesh);
+EigenMatrixX3m   vertexCurvaturePD2Matrix(const CMeshO& mesh);
+EigenMatrixX3m   faceCurvaturePD1Matrix(const CMeshO& mesh);
+EigenMatrixX3m   faceCurvaturePD2Matrix(const CMeshO& mesh);
 
 Eigen::MatrixX3i faceFaceAdjacencyMatrix(const CMeshO& mesh);
 
