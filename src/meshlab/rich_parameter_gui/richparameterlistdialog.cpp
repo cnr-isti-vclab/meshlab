@@ -84,11 +84,15 @@ void RichParameterListDialog::addVerticalSpacer()
 
 void RichParameterListDialog::addCheckBox(const QString& name, bool checked)
 {
+	QLabel* l = new QLabel(stdParFrame);
+	l->setText(name);
+	l->setAlignment(Qt::AlignRight);
 	QCheckBox* cb = new QCheckBox(stdParFrame);
-	cb->setText(name);
+	cb->setText("");
 	cb->setChecked(checked);
 	QGridLayout* lay = (QGridLayout*)stdParFrame->layout();
-	lay->addWidget(cb,lay->rowCount(), 0);
+	lay->addWidget(l,lay->rowCount(), 0);
+	lay->addWidget(cb,lay->rowCount()-1, 1);
 	additionalCheckBoxes[name] = cb;
 }
 
