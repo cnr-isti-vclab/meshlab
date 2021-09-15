@@ -411,22 +411,26 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		// custom attributes
 		for (const RichParameter& pr : par) {
 			QString pname = pr.name();
-			if (pname.startsWith("PVAF")) { // if pname starts with PVAF, it is a PLY per-vertex float custom attribute
-				if (par.getBool(pname)) { // if it is true, add to save list
+			// if pname starts with __CA_VS__, it is a PLY per-vertex scalar custom attribute
+			if (pname.startsWith("__CA_VS__")) {
+				if (par.getBool(pname)) {        // if it is true, add to save list
 					pi.addPerVertexScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
 				}
 			}
-			else if (pname.startsWith("PVA3F")) { // if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
-				if (par.getBool(pname)) { // if it is true, add to save list
+			// if pname starts with __CA_VP__, it is a PLY per-vertex point3m custom attribute
+			else if (pname.startsWith("__CA_VP__")) {
+				if (par.getBool(pname)) {             // if it is true, add to save list
 					pi.addPerVertexPoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
 				}
 			}
-			else if (pname.startsWith("PFAF")) { // if pname starts with PFAF, it is a PLY per-face float custom attribute
-				if (par.getBool(pname)) { // if it is true, add to save list
+			// if pname starts with __CA_FS__, it is a PLY per-face scalar custom attribute
+			else if (pname.startsWith("__CA_FS__")) {
+				if (par.getBool(pname)) {             // if it is true, add to save list
 					pi.addPerFaceScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
 				}
 			}
-			else if (pname.startsWith("PFA3F")){ // if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
+			// if pname starts with __CA_FP__, it is a PLY per-face point3m custom attribute
+			else if (pname.startsWith("__CA_FP__")) {
 				if (par.getBool(pname)) {
 					pi.addPerFacePoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
 				}
@@ -684,38 +688,66 @@ RichParameterList BaseMeshIOPlugin::initSaveParameter(const QString &format, con
 {
 	RichParameterList par;
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addParam(RichBool("Binary", true, "Binary encoding",
-		"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
+		par.addParam(RichBool(
+			"Binary",
+			true,
+			"Binary encoding",
+			"Save the mesh using a binary encoding. If false the mesh is saved in a plain, "
+			"readable ascii format."));
 
 	if (format.toUpper() == tr("STL"))
-		par.addParam(RichBool("ColorMode", true, "Materialise Color Encoding",
-		"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
+		par.addParam(RichBool(
+			"ColorMode",
+			true,
+			"Materialise Color Encoding",
+			"Save the color using a binary encoding according to the Materialise's Magic style "
+			"(e.g. RGB coding instead of BGR coding)."));
 
-	if (format.toUpper() == tr("PLY")){
-		std::vector<std::string> AttribNameVector;
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(m.cm, AttribNameVector);
-		for (int i = 0; i < (int)AttribNameVector.size(); i++)
-		{
-			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
+	if (format.toUpper() == tr("PLY")) {
+		std::vector<std::string> attribNameVector;
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(m.cm, attribNameVector);
+		for (int i = 0; i < (int) attribNameVector.size(); i++) {
+			QString ca_name = attribNameVector[i].c_str();
+			par.addParam(RichBool(
+				"__CA_VS__" + ca_name,
+				false,
+				"V(f): " + ca_name,
+				"Save this custom scalar (f) per-vertex attribute.",
+				false,
+				"Custom attributes"));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(m.cm, AttribNameVector);
-		for (int i = 0; i < (int)AttribNameVector.size(); i++)
-		{
-			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Point3m>(m.cm, attribNameVector);
+		for (int i = 0; i < (int) attribNameVector.size(); i++) {
+			QString ca_name = attribNameVector[i].c_str();
+			par.addParam(RichBool(
+				"__CA_VP__" + ca_name,
+				false,
+				"V(3f): " + ca_name,
+				"Save this custom vector (3f) per-vertex attribute.",
+				false,
+				"Custom attributes"));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(m.cm, AttribNameVector);
-		for (int i = 0; i < (int)AttribNameVector.size(); i++)
-		{
-			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Scalarm>(m.cm, attribNameVector);
+		for (int i = 0; i < (int) attribNameVector.size(); i++) {
+			QString ca_name = attribNameVector[i].c_str();
+			par.addParam(RichBool(
+				"__CA_FS__" + ca_name,
+				false,
+				"F(f): " + ca_name,
+				"Save this custom scalar (f) per-face attribute.",
+				false,
+				"Custom attributes"));
 		}
-		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(m.cm, AttribNameVector);
-		for (int i = 0; i < (int)AttribNameVector.size(); i++)
-		{
-			QString va_name = AttribNameVector[i].c_str();
-			par.addParam(RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Point3m>(m.cm, attribNameVector);
+		for (int i = 0; i < (int) attribNameVector.size(); i++) {
+			QString ca_name = attribNameVector[i].c_str();
+			par.addParam(RichBool(
+				"__CA_FP__" + ca_name,
+				false,
+				"F(3f): " + ca_name,
+				"Save this custom vector (3f) per-face attribute.",
+				false,
+				"Custom attributes"));
 		}
 	}
 	return par;
