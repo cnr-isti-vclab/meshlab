@@ -5,6 +5,8 @@
 ![MacOS](https://github.com/cnr-isti-vclab/meshlab/workflows/MacOS/badge.svg)
 ![Windows](https://github.com/cnr-isti-vclab/meshlab/workflows/Windows/badge.svg)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5114037.svg)](https://doi.org/10.5281/zenodo.5114037)
+
 This is the official repository for the source and the binaries of [MeshLab](https://www.MeshLab.net).
 
 MeshLab is an open source, portable, and extensible system for the processing and editing of unstructured large 3D triangular meshes. It is aimed to help the processing of the typical not-so-small unstructured models arising in 3D scanning, providing a set of tools for editing, cleaning, healing, inspecting, rendering and converting this kind of meshes.
