@@ -178,7 +178,6 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 	case FP_MIDPOINT                         :
 	case FP_REFINE_CATMULL                   :
 	case FP_QUADRIC_SIMPLIFICATION           :
-	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
 	case FP_EXPLICIT_ISOTROPIC_REMESHING     :
 	case FP_REORIENT                         :
 	case FP_INVERT_FACES                     :
@@ -195,6 +194,7 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 	case FP_PERIMETER_POLYLINE               :
 	case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
 	case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return MeshModel::MM_WEDGTEXCOORD;
 	case FP_CLUSTERING                       :
 	case FP_SCALE                            :
 	case FP_CENTER                           :
@@ -813,7 +813,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		if(flipped)
 			tri::Clean<CMeshO>::FlipMesh(m.cm,onlySelected);
 		else
-			flipped =  tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
+			tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
 		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;
@@ -911,19 +911,17 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 	{
-		m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK);
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK);
 		tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
 
-		if(!tri::HasPerWedgeTexCoord(m.cm))
-		{
-			throw MLException("Warning: nothing have been done. Mesh has no Texture.");
-		}
-		if ( ! tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) ) {
-			throw MLException("Mesh has some inconsistent tex coordinates (some faces without texture)");
+		if (!tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm)) {
+			throw MLException(
+				"Mesh has some inconsistent tex coordinates (some faces without texture)");
 		}
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
-		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
+		if (par.getFloat("TargetPerc") != 0)
+			TargetFaceNum = m.cm.fn * par.getFloat("TargetPerc");
 
 		tri::TriEdgeCollapseQuadricTexParameter pp;
 
@@ -931,18 +929,19 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		lastqtex_extratw = pp.ExtraTCoordWeight = par.getFloat("Extratcoordw");
 		lastq_OptimalPlacement = pp.OptimalPlacement = par.getBool("OptimalPlacement");
 		lastq_PreserveBoundary = pp.PreserveBoundary = par.getBool("PreserveBoundary");
-		pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
-		lastq_PlanarQuadric  = pp.QualityQuadric = par.getBool("PlanarQuadric");
+		pp.BoundaryWeight   = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
+		lastq_PlanarQuadric = pp.QualityQuadric = par.getBool("PlanarQuadric");
 		lastq_PreserveNormal = pp.NormalCheck = par.getBool("PreserveNormal");
 
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
+		QuadricTexSimplification(m.cm, TargetFaceNum, lastq_Selected, pp, cb);
 		m.updateBoxAndNormals();
 		tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 		tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-	} break;
+	}
+	break;
 	case FP_EXPLICIT_ISOTROPIC_REMESHING:
 	{
 		m.updateDataMask( MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTFACETOPO |

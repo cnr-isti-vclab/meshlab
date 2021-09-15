@@ -386,6 +386,7 @@ RichParameterList FilterColorProc::initParameterList(const QAction *a, const Mes
 
 std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filter, const RichParameterList &par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
+	std::map<std::string, QVariant> values;
 	MeshModel *m = md.mm();  //get current mesh from document
 
 	switch(ID(filter))
@@ -697,6 +698,10 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
 			log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
+			values["curv_range_min"] = H.MinV();
+			values["curv_range_max"] = H.MaxV();
+			values["10_percentile"] = H.Percentile(0.1f);
+			values["90_percentile"] = H.Percentile(0.9f);
 			break;
 		}
 
@@ -943,7 +948,7 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 		default:
 			wrongActionCalled(filter);
 	}
-	return std::map<std::string, QVariant>();
+	return values;
 }
 
  FilterPlugin::FilterClass FilterColorProc::getClass(const QAction *a) const
