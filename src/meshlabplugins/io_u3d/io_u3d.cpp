@@ -189,9 +189,9 @@ RichParameterList U3DIOPlugin::initSaveParameter(const QString &, const MeshMode
 				m.cm.bbox.Center(),m.cm.bbox.Diag());
 	Point3m pos = _param._campar->_obj_pos;
 	Point3m dir(0.0f,0.0f,-1.0f * _param._campar->_obj_bbox_diag);
-	par.addParam(RichPoint3f("position_val",dir, "Camera Position",
+	par.addParam(RichPosition("position_val",dir, "Camera Position",
 		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box."));
-	par.addParam(RichPoint3f("target_val",pos, "Camera target point",
+	par.addParam(RichDirection("target_val",pos, "Camera target point",
 		"The point towards the camera is seeing. The default value is derived by the 3d mesh's bounding box."));
 	par.addParam(RichFloat("fov_val",60.0f,
 		"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));

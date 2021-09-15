@@ -141,7 +141,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			<< "[" << v[12] << ", " << v[13] << ", " << v[14] << ", " << v[15] << "]]";
 		return;
 	}
-	if (parameter->isOfType<RichPoint3f>()) {
+	if (parameter->isOfType<RichPosition>() || parameter->isOfType<RichDirection>()) {
 		o << "[" << parameter->value().getPoint3f().X() << ", "
 			<< parameter->value().getPoint3f().Y() << ", "
 			<< parameter->value().getPoint3f().Z() << "]";

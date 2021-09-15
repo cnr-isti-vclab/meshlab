@@ -359,7 +359,7 @@ RichParameterList FilterUnsharp::initParameterList(const QAction *action, const 
             break;
         case FP_DEPTH_SMOOTH:
             parlst.addParam(RichInt     ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-            parlst.addParam(RichPoint3f ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
+            parlst.addParam(RichDirection ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
             parlst.addParam(RichAbsPerc ("delta", 1.0, 0, 1.0, "Strength", "How much smoothing is applied: 0 (no smooth) e 1 (full smooth)"));
             parlst.addParam(RichBool    ("Selected",md.mm()->cm.sfn>0,"Affect only selection","If checked the filter is performed only on the selected area"));
             break;
@@ -369,7 +369,7 @@ RichParameterList FilterUnsharp::initParameterList(const QAction *action, const 
                                     tr("Step:"),
                                     tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
                                        "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>.")));
-            parlst.addParam(RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
+            parlst.addParam(RichDirection  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
             parlst.addParam(RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
             break;
         case FP_TAUBIN_SMOOTH:
@@ -397,8 +397,8 @@ RichParameterList FilterUnsharp::initParameterList(const QAction *action, const 
         }
         break;
     case FP_SCALAR_HARMONIC_FIELD:
-        parlst.addParam(RichPoint3f("point1",  md.mm()->cm.bbox.min, "Point 1", "A vertex on the mesh that represent one harmonic field boundary condition."));
-        parlst.addParam(RichPoint3f("point2",  md.mm()->cm.bbox.max, "Point 2", "A vertex on the mesh that represent one harmonic field boundary condition."));
+        parlst.addParam(RichPosition("point1",  md.mm()->cm.bbox.min, "Point 1", "A vertex on the mesh that represent one harmonic field boundary condition."));
+        parlst.addParam(RichPosition("point2",  md.mm()->cm.bbox.max, "Point 2", "A vertex on the mesh that represent one harmonic field boundary condition."));
         parlst.addParam(RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f, "value for the 1st point", "Harmonic field value for the vertex."));
         parlst.addParam(RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f, "value for the 2nd point", "Harmonic field value for the vertex."));
         parlst.addParam(RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));

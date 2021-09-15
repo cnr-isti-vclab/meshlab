@@ -35,12 +35,17 @@
 
 using namespace vcg;
 
+RichParameterListFrame::RichParameterListFrame(QWidget* parent) :
+	QFrame(parent), isHelpVisible(false), gla(nullptr), hiddenFrame(nullptr)
+{
+}
+
 RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		const RichParameterList& defParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla), hiddenFrame(nullptr)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet, defParSet);
 }
@@ -49,7 +54,7 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameterList& curParSet,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curParSet);
 }
@@ -59,13 +64,23 @@ RichParameterListFrame::RichParameterListFrame(
 		const RichParameter& defPar,
 		QWidget* p,
 		QWidget* gla) :
-	QFrame(p), gla(gla)
+	QFrame(p), isHelpVisible(false), gla(gla), hiddenFrame(nullptr)
 {
 	loadFrameContent(curPar, defPar);
 }
 
 RichParameterListFrame::~RichParameterListFrame()
 {
+}
+
+void RichParameterListFrame::initParams(
+		const RichParameterList& curParSet,
+		const RichParameterList& defParSet,
+		QWidget* gla)
+{
+	if (gla != nullptr)
+		this->gla = gla;
+	loadFrameContent(curParSet, defParSet);
 }
 
 /**
@@ -90,8 +105,12 @@ void RichParameterListFrame::resetValues()
 
 void RichParameterListFrame::toggleHelp()
 {
-	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	isHelpVisible = !isHelpVisible;
+	for(auto& p : stdfieldwidgets) {
+		p.second->setHelpVisible(isHelpVisible);
+	}
+	setMinimumSize(sizeHint());
+	adjustSize();
 	updateGeometry();
 }
 
@@ -116,16 +135,15 @@ void RichParameterListFrame::toggleAdvancedParameters()
 		if (hiddenFrame->isVisible()){
 			hiddenFrame->setVisible(false);
 			showHiddenFramePushButton->setText("▼");
+			showHiddenFramePushButton->setToolTip("Show advanced parameters");
 		}
 		else {
 			hiddenFrame->setVisible(true);
 			showHiddenFramePushButton->setText("▲");
-		}
-		QFrame* p = dynamic_cast<QFrame*>(parent());
-		if (p){
-			p->setMinimumSize(p->sizeHint());
+			showHiddenFramePushButton->setToolTip("Hide advanced parameters");
 		}
 	}
+	setMinimumSize(sizeHint());
 }
 
 void RichParameterListFrame::loadFrameContent(
@@ -165,7 +183,6 @@ void RichParameterListFrame::loadFrameContent(
 			const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 			RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
 			stdfieldwidgets[fpi->name()] = wd;
-			helpList.push_back(wd->helpLab);
 			wd->addWidgetToGridLayout(glay,i++);
 		}
 	}
@@ -186,19 +203,21 @@ void RichParameterListFrame::loadFrameContent(
 				const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
 				RichParameterWidget* wd = createWidgetFromRichParameter(this, *fpi, defrp);
 				stdfieldwidgets[fpi->name()] = wd;
-				helpList.push_back(wd->helpLab);
 				wd->addWidgetToGridLayout(flay,j++);
 			}
 		}
-		//hiddenFrame->setMinimumSize(hiddenFrame->sizeHint());
 		glay->addWidget(hiddenFrame, i++, 0, 1, 3);
 		hiddenFrame->setVisible(false);
 		showHiddenFramePushButton = new QPushButton("", this);
 		showHiddenFramePushButton->setFlat(true);
 		showHiddenFramePushButton->setText("▼");
+		showHiddenFramePushButton->setToolTip("Show advanced parameters");
 		glay->addWidget(showHiddenFramePushButton, i++, 0, 1, 3);
 		connect(showHiddenFramePushButton, SIGNAL(clicked()), this, SLOT(toggleAdvancedParameters()));
 	}
+
+	QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+	glay->addItem(spacer, i++, 0);
 	setLayout(glay);
 }
 
@@ -246,8 +265,11 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	else if (pd.isOfType<RichMatrix44f>()){
 		return new Matrix44fWidget(parent, (const RichMatrix44f&)pd, (const RichMatrix44f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichPoint3f>()){
-		return new Point3fWidget(parent, (const RichPoint3f&)pd, (const RichPoint3f&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
+	else if (pd.isOfType<RichPosition>()){
+		return new PositionWidget(parent, (const RichPosition&)pd, (const RichPosition&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
+	}
+	else if (pd.isOfType<RichDirection>()){
+		return new DirectionWidget(parent, (const RichDirection&)pd, (const RichDirection&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichShotf>()){
 		return new ShotfWidget(parent, (const RichShotf&)pd, (const RichShotf&)def, reinterpret_cast<RichParameterListFrame*>(parent)->gla);

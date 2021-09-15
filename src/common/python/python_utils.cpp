@@ -44,7 +44,9 @@ QString pymeshlab::computePythonTypeString(const RichParameter& par)
 		return PYTHON_TYPE_STRING;
 	if (par.isOfType<RichMatrix44f>())
 		return PYTHON_TYPE_MATRIX44F;
-	if (par.isOfType<RichPoint3f>())
+	if (par.isOfType<RichPosition>())
+		return PYTHON_TYPE_POINT3F;
+	if (par.isOfType<RichDirection>())
 		return PYTHON_TYPE_POINT3F;
 	if (par.isOfType<RichShotf>())
 		return PYTHON_TYPE_SHOTF;

@@ -20,50 +20,70 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
+#ifndef FILTER_DOCK_DIALOG_H
+#define FILTER_DOCK_DIALOG_H
 
-#ifndef RICHPARAMETERLISTDIALOG_H
-#define RICHPARAMETERLISTDIALOG_H
+#include <QDockWidget>
 
-#include <QDialog>
+#include <common/ml_document/mesh_model_state.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-#include "../../common/parameters/rich_parameter_list.h"
-#include "richparameterlistframe.h"
+class GLArea;
+class MainWindow;
 
-/**
- * @brief This class provide a modal dialog box for asking a generic parameter list
- * It can be used by anyone needing for some values in a structured form and having some integrated help
- *
- * When the user clicks ok, the dialog will apply the modified values in the RichParameterList given
- * as input in the Dialog constructor.
- * Used by some I/O and Edit plugins
- *
- */
-class RichParameterListDialog: public QDialog
+namespace Ui {
+class FilterDockDialog;
+}
+
+class FilterDockDialog : public QDockWidget
 {
 	Q_OBJECT
+
 public:
-	RichParameterListDialog(QWidget *p, RichParameterList& curParList, const QString& title=QString());
-	~RichParameterListDialog();
+	explicit FilterDockDialog(
+		const RichParameterList& rpl,
+		FilterPlugin*            plugin,
+		const QAction*           filter,
+		QWidget*                 parent = nullptr,
+		GLArea*                  glArea = nullptr);
+	~FilterDockDialog();
 
-	void createFrame();
+signals:
+	void applyButtonClicked(const QAction*, RichParameterList, bool, bool);
 
-	void addVerticalSpacer();
-	void addCheckBox(const QString& name, bool checked);
-	bool isCheckBoxChecked(const QString& name);
+private slots:
+	void on_previewCheckBox_stateChanged(int state);
+	void on_applyPushButton_clicked();
+	void on_helpPushButton_clicked();
+	void on_closePushButton_clicked();
+	void on_defaultPushButton_clicked();
 
-public slots:
-	void getAccept();
-	void toggleHelp();
-
-	//reset the values on the gui back to the ones originally given to the dialog
-	void resetValues();
+	// preview slots
+	void applyDynamic();
+	void changeCurrentMesh(int meshId);
 
 private:
-	RichParameterList& curParList;
-	RichParameterListFrame *stdParFrame;
+	bool isPreviewable() const;
 
-	std::map<QString, QCheckBox*> additionalCheckBoxes;
+	static bool isFilterPreviewable(FilterPlugin* plugin, const QAction* filter);
+	static void updateRenderingData(MainWindow* mw, MeshModel* mesh);
 
+	Ui::FilterDockDialog* ui;
+
+	FilterPlugin*     plugin;
+	const QAction*    filter;
+	RichParameterList parameters;
+	unsigned int      mask;
+	GLArea*           currentGLArea;
+
+	// preview
+	bool              isPreviewMeshStateValid;
+	MeshModelState    noPreviewMeshState;
+	MeshModelState    previewMeshState;
+	RichParameterList prevParams;
+	MainWindow*       mw;
+	MeshDocument*     md;
+	MeshModel*        mesh;
 };
 
-#endif // RICHPARAMETERLISTDIALOG_H
+#endif // FILTER_DOCK_DIALOG_H

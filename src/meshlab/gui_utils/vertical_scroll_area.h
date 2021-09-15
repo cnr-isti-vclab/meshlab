@@ -20,50 +20,29 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
+#ifndef VERTICAL_SCROLL_AREA_H
+#define VERTICAL_SCROLL_AREA_H
 
-#ifndef RICHPARAMETERLISTDIALOG_H
-#define RICHPARAMETERLISTDIALOG_H
-
-#include <QDialog>
-
-#include "../../common/parameters/rich_parameter_list.h"
-#include "richparameterlistframe.h"
+#include <QScrollArea>
 
 /**
- * @brief This class provide a modal dialog box for asking a generic parameter list
- * It can be used by anyone needing for some values in a structured form and having some integrated help
+ * @brief The VerticalScrollArea class
  *
- * When the user clicks ok, the dialog will apply the modified values in the RichParameterList given
- * as input in the Dialog constructor.
- * Used by some I/O and Edit plugins
+ * This class is necessary because Qt does not provide a pure Vertical Scroll Area,
+ * that behaves as a normal qwidget horizontally.
  *
+ * @see https://forum.qt.io/topic/13374/solved-qscrollarea-vertical-scroll-only
  */
-class RichParameterListDialog: public QDialog
+class VerticalScrollArea : public QScrollArea
 {
 	Q_OBJECT
 public:
-	RichParameterListDialog(QWidget *p, RichParameterList& curParList, const QString& title=QString());
-	~RichParameterListDialog();
+	explicit VerticalScrollArea(QWidget* parent = 0);
 
-	void createFrame();
-
-	void addVerticalSpacer();
-	void addCheckBox(const QString& name, bool checked);
-	bool isCheckBoxChecked(const QString& name);
-
-public slots:
-	void getAccept();
-	void toggleHelp();
-
-	//reset the values on the gui back to the ones originally given to the dialog
-	void resetValues();
+	virtual bool eventFilter(QObject* o, QEvent* e);
 
 private:
-	RichParameterList& curParList;
-	RichParameterListFrame *stdParFrame;
-
-	std::map<QString, QCheckBox*> additionalCheckBoxes;
-
+	QWidget* m_scrollAreaWidgetContents;
 };
 
-#endif // RICHPARAMETERLISTDIALOG_H
+#endif // VERTICAL_SCROLL_AREA_H

@@ -50,10 +50,13 @@ class RichParameterListFrame : public QFrame
 public:
 	typedef std::map<QString, RichParameterWidget *>::iterator iterator;
 
+	RichParameterListFrame(QWidget *parent);
 	RichParameterListFrame(const RichParameterList& curParSet, const RichParameterList& defParSet, QWidget *p, QWidget *gla=0);
 	RichParameterListFrame(const RichParameterList& curParSet, QWidget *p, QWidget *gla=0);
 	RichParameterListFrame(const RichParameter& curPar, const RichParameter& defPar, QWidget *p, QWidget *gla=0);
 	~RichParameterListFrame();
+
+	void initParams(const RichParameterList& curParSet, const RichParameterList& defParSet, QWidget *gla=nullptr);
 
 	// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
 	// This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
@@ -85,7 +88,7 @@ private:
 			const RichParameter& def);
 
 	std::map<QString, RichParameterWidget *> stdfieldwidgets;
-	QVector<QLabel *> helpList;
+	bool isHelpVisible;
 
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
 	QFrame* hiddenFrame;

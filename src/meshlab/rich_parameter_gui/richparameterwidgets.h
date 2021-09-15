@@ -1,41 +1,41 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* Visual and Computer Graphics Library                            o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * Visual and Computer Graphics Library                            o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2004-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #ifndef RICHPARAMETERLISTWIDGETS_H
 #define RICHPARAMETERLISTWIDGETS_H
 
-#include <QWidget>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QDoubleSpinBox>
-#include <QComboBox>
 #include <QSlider>
+#include <QWidget>
 
-#include <common/parameters/rich_parameter_list.h>
 #include <common/ml_document/cmesh.h>
+#include <common/parameters/rich_parameter_list.h>
 
 class RichParameterWidget : public QWidget
 {
@@ -45,91 +45,97 @@ public:
 
 	// this one is called by resetValue to reset the values inside the widgets.
 	virtual void resetWidgetValue() = 0;
-	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	virtual void collectWidgetValue() = 0;
+	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the
+	// parameter).
+	virtual void collectWidgetValue()            = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 	virtual ~RichParameterWidget();
 
-	virtual void addWidgetToGridLayout(QGridLayout* lay,const int r) = 0;
+	virtual void addWidgetToGridLayout(QGridLayout* lay, const int r) = 0;
 	// called when the user press the 'default' button to reset the parameter values to its default.
-	// It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
+	// It just set the parameter value and then it calls the specialized resetWidgetValue() to
+	// update also the widget.
 	void resetValue();
 	void setValue(const Value& v);
+	void setHelpVisible(bool b);
 	// update the parameter with the current widget values and return it.
-	const Value& widgetValue();
+	const Value&         widgetValue();
 	const RichParameter& richParameter() const;
 
 	QString parameterName() const;
 
-	QLabel* helpLab;
-
 signals:
 	void parameterChanged();
+
 protected:
-	RichParameter* rp;
-	RichParameter* defp;
+	QLabel* descriptionLabel;
+	QLabel* helpLabel;
+
+	RichParameter* parameter;
+	RichParameter* defaultParameter;
 };
 
 class BoolWidget : public RichParameterWidget
 {
 public:
-	BoolWidget(QWidget* p, const RichBool& rb, const RichBool&rdef);
+	BoolWidget(QWidget* p, const RichBool& rb, const RichBool& rdef);
 	~BoolWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
+private:
 	QCheckBox* cb;
 };
 
 class LineEditWidget : public RichParameterWidget
 {
-  Q_OBJECT
+	Q_OBJECT
 protected:
-	QLabel* lab;
 	QLineEdit* lned;
-	QString lastVal;
+	QString    lastVal;
 
-	private slots:
-		void changeChecker();
-	signals:
-		void lineEditChanged();
+private slots:
+	void changeChecker();
+signals:
+	void lineEditChanged();
+
 public:
-	LineEditWidget(QWidget* p, const RichParameter& rpar, const RichParameter&rdef);
+	LineEditWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~LineEditWidget();
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
-	virtual void collectWidgetValue() = 0;
-	virtual void resetWidgetValue() = 0;
+	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
+	virtual void collectWidgetValue()            = 0;
+	virtual void resetWidgetValue()              = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 };
 
 class IntWidget : public LineEditWidget
 {
 public:
-	IntWidget(QWidget* p, const RichInt& rpar, const RichInt&rdef);
-	~IntWidget(){}
+	IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef);
+	~IntWidget() {}
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 };
 
-class FloatWidget : public  LineEditWidget
+class FloatWidget : public LineEditWidget
 {
 public:
 	FloatWidget(QWidget* p, const RichFloat& rpar, const RichFloat& rdef);
-	~FloatWidget(){}
+	~FloatWidget() {}
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 };
 
-class StringWidget  : public  LineEditWidget
+class StringWidget : public LineEditWidget
 {
 public:
 	StringWidget(QWidget* p, const RichString& rpar, const RichString& rdef);
-	~StringWidget(){}
+	~StringWidget() {}
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
@@ -139,17 +145,17 @@ class ColorWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	ColorWidget(QWidget *p, const RichColor& newColor, const RichColor& rdef);
+	ColorWidget(QWidget* p, const RichColor& newColor, const RichColor& rdef);
 	~ColorWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 	void initWidgetValue();
 
 private:
-	void  updateColorInfo(const ColorValue& newColor);
+	void updateColorInfo(const ColorValue& newColor);
 private slots:
 	void pickColor();
 signals:
@@ -160,16 +166,15 @@ protected:
 
 private:
 	QPushButton* colorButton;
-	QLabel* colorLabel;
-	QLabel* descLabel;
-	QColor pickcol;
+	QLabel*      colorLabel;
+	QColor       pickcol;
 };
 
 class AbsPercWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	AbsPercWidget(QWidget *p, const RichAbsPerc& rabs, const RichAbsPerc& rdef);
+	AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsPerc& rdef);
 	~AbsPercWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
@@ -178,7 +183,7 @@ public:
 	void setWidgetValue(const Value& nv);
 
 private:
-	void  setValue(float val, float minV, float maxV);
+	void setValue(float val, float minV, float maxV);
 
 public slots:
 
@@ -188,44 +193,70 @@ signals:
 	void dialogParamChanged();
 
 protected:
-	QDoubleSpinBox *absSB;
-	QDoubleSpinBox *percSB;
-	QLabel* fieldDesc;
-	float m_min;
-	float m_max;
-	QGridLayout* vlay;
+	QDoubleSpinBox* absSB;
+	QDoubleSpinBox* percSB;
+	float           m_min;
+	float           m_max;
+	QGridLayout*    vlay;
 };
 
-class Point3fWidget : public RichParameterWidget
+class PositionWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	Point3fWidget(QWidget *p, const RichPoint3f& rpf, const RichPoint3f& rdef, QWidget *gla);
-	~Point3fWidget();
-	QString paramName;
+	PositionWidget(QWidget* p, const RichPosition& rpf, const RichPosition& rdef, QWidget* gla);
+	~PositionWidget();
+	QString      paramName;
 	vcg::Point3f getValue();
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
-	public slots:
-	void  getPoint();
-	void  setValue(QString name, Point3m val);
-	void  setShotValue(QString name, Shotm val);
-	signals:
-	void askViewDir(QString);
+public slots:
+	void getPoint();
+	void setValue(QString name, Point3m val);
+	void setShotValue(QString name, Shotm val);
+signals:
 	void askViewPos(QString);
 	void askSurfacePos(QString);
 	void askCameraPos(QString);
 	void askTrackballPos(QString);
 
 protected:
-	QLineEdit * coordSB[3];
-	QComboBox *getPoint3Combo;
-	QPushButton *getPoint3Button;
-	QLabel* descLab;
+	QLineEdit*   coordSB[3];
+	QComboBox*   getPoint3Combo;
+	QPushButton* getPoint3Button;
+	QHBoxLayout* vlay;
+};
+
+class DirectionWidget : public RichParameterWidget
+{
+	Q_OBJECT
+public:
+	DirectionWidget(QWidget* p, const RichDirection& rpf, const RichDirection& rdef, QWidget* gla);
+	~DirectionWidget();
+	QString      paramName;
+	vcg::Point3f getValue();
+
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void collectWidgetValue();
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
+
+public slots:
+	void getPoint();
+	void setValue(QString name, Point3m val);
+	void setShotValue(QString name, Shotm val);
+signals:
+	void askViewDir(QString);
+	void askCameraDir(QString);
+
+protected:
+	QLineEdit*   coordSB[3];
+	QComboBox*   getPoint3Combo;
+	QPushButton* getPoint3Button;
 	QHBoxLayout* vlay;
 };
 
@@ -234,12 +265,16 @@ class Matrix44fWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	Matrix44fWidget(QWidget *p, const RichMatrix44f& rpf, const RichMatrix44f& rdef, QWidget *gla_curr);
+	Matrix44fWidget(
+		QWidget*             p,
+		const RichMatrix44f& rpf,
+		const RichMatrix44f& rdef,
+		QWidget*             gla_curr);
 	~Matrix44fWidget();
-	QString paramName;
+	QString   paramName;
 	Matrix44m getValue();
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
@@ -253,13 +288,12 @@ signals:
 	void askMeshMatrix(QString);
 
 protected:
-	QLineEdit * coordSB[16];
-	QPushButton *getPoint3Button;
-	QLabel* descLab;
+	QLineEdit*   coordSB[16];
+	QPushButton* getPoint3Button;
 	QGridLayout* lay44;
 	QVBoxLayout* vlay;
-	Matrix44m m;
-	bool valid;
+	Matrix44m    m;
+	bool         valid;
 };
 
 class ShotfWidget : public RichParameterWidget
@@ -267,30 +301,29 @@ class ShotfWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	ShotfWidget(QWidget *p, const RichShotf& rpf, const RichShotf& rdef,  QWidget *gla);
+	ShotfWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, QWidget* gla);
 	~ShotfWidget();
 	QString paramName;
-	Shotm getValue();
+	Shotm   getValue();
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
 public slots:
-	void  getShot();
-	void  setShotValue(QString name, Shotm val);
+	void getShot();
+	void setShotValue(QString name, Shotm val);
 signals:
 	void askRasterShot(QString);
 	void askMeshShot(QString);
 	void askViewerShot(QString);
 
 protected:
-	Shotm curShot;
-	QLineEdit * shotLE;
-	QPushButton *getShotButton;
-	QComboBox *getShotCombo;
-	QLabel* descLab;
+	Shotm        curShot;
+	QLineEdit*   shotLE;
+	QPushButton* getShotButton;
+	QComboBox*   getShotCombo;
 	QHBoxLayout* hlay;
 };
 
@@ -299,13 +332,13 @@ class DynamicFloatWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	DynamicFloatWidget(QWidget *p, const RichDynamicFloat& rdf, const RichDynamicFloat& rdef);
+	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& rdf, const RichDynamicFloat& rdef);
 	~DynamicFloatWidget();
 
 	float getValue();
 	void  setValue(float val, float minV, float maxV);
 
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
@@ -316,38 +349,38 @@ public slots:
 	void setValue(float newValue);
 
 signals:
-	//void valueChanged(int mask);
+	// void valueChanged(int mask);
 	void dialogParamChanged();
 
 protected:
-	QLineEdit *valueLE;
-	QSlider   *valueSlider;
-	QLabel* fieldDesc;
-	float minVal;
-	float maxVal;
+	QLineEdit*   valueLE;
+	QSlider*     valueSlider;
+	float        minVal;
+	float        maxVal;
 	QHBoxLayout* hlay;
-private :
+
+private:
 	float intToFloat(int val);
-	int floatToInt(float val);
+	int   floatToInt(float val);
 };
 
 class ComboWidget : public RichParameterWidget
 {
 	Q_OBJECT
 protected:
-	QComboBox *enumCombo;
-	QLabel *enumLabel;
+	QComboBox* enumCombo;
+
 public:
-	ComboWidget(QWidget *p, const RichParameter& rpar, const RichParameter& rdef);
+	ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~ComboWidget();
-	void Init(QWidget *p,int newEnum, QStringList values);
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
-	virtual void collectWidgetValue() = 0;
-	virtual void resetWidgetValue() = 0;
+	void         init(QWidget* p, int newEnum, QStringList values);
+	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
+	virtual void collectWidgetValue()            = 0;
+	virtual void resetWidgetValue()              = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 
-	int getIndex();
-	void  setIndex(int newEnum);
+	int  getIndex();
+	void setIndex(int newEnum);
 
 signals:
 	void dialogParamChanged();
@@ -358,24 +391,25 @@ class EnumWidget : public ComboWidget
 	Q_OBJECT
 
 public:
-	EnumWidget(QWidget *p, const RichEnum& rpar, const RichEnum& rdef);
-	~EnumWidget(){};
+	EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef);
+	~EnumWidget() {};
 
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
-	//returns the number of items in the list
+	// returns the number of items in the list
 	int getSize();
 };
 
 class MeshWidget : public ComboWidget
 {
 private:
-	const MeshDocument *md;
+	const MeshDocument* md;
+
 public:
-	MeshWidget(QWidget *p, const RichMesh& defaultMesh, const RichMesh& rdef);
-	~MeshWidget(){};
+	MeshWidget(QWidget* p, const RichMesh& defaultMesh, const RichMesh& rdef);
+	~MeshWidget() {};
 
 	void collectWidgetValue();
 	void resetWidgetValue();
@@ -390,10 +424,10 @@ protected:
 	IOFileWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~IOFileWidget();
 
-	void  updateFileName(const StringValue& file);
+	void updateFileName(const StringValue& file);
 
 public:
-	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
@@ -404,11 +438,9 @@ protected slots:
 signals:
 	void dialogParamChanged();
 
-
 protected:
-	QLineEdit* filename;
+	QLineEdit*   filename;
 	QPushButton* browse;
-	QLabel* descLab;
 	QHBoxLayout* hlay;
 };
 
@@ -421,14 +453,13 @@ public:
 
 protected slots:
 	void selectFile();
-
 };
 
 class OpenFileWidget : public IOFileWidget
 {
 	Q_OBJECT
 public:
-	OpenFileWidget(QWidget *p, const RichOpenFile& rdf, const RichOpenFile& rdef);
+	OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOpenFile& rdef);
 	~OpenFileWidget();
 
 	/*void collectWidgetValue();

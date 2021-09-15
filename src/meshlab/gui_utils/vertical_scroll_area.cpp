@@ -20,50 +20,26 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
+#include "vertical_scroll_area.h"
 
-#ifndef RICHPARAMETERLISTDIALOG_H
-#define RICHPARAMETERLISTDIALOG_H
+#include <QEvent>
+#include <QScrollBar>
+#include <QVBoxLayout>
 
-#include <QDialog>
+#include "vertical_scroll_area.h"
 
-#include "../../common/parameters/rich_parameter_list.h"
-#include "richparameterlistframe.h"
-
-/**
- * @brief This class provide a modal dialog box for asking a generic parameter list
- * It can be used by anyone needing for some values in a structured form and having some integrated help
- *
- * When the user clicks ok, the dialog will apply the modified values in the RichParameterList given
- * as input in the Dialog constructor.
- * Used by some I/O and Edit plugins
- *
- */
-class RichParameterListDialog: public QDialog
+VerticalScrollArea::VerticalScrollArea(QWidget* parent) : QScrollArea(parent)
 {
-	Q_OBJECT
-public:
-	RichParameterListDialog(QWidget *p, RichParameterList& curParList, const QString& title=QString());
-	~RichParameterListDialog();
+	setWidgetResizable(true);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+}
 
-	void createFrame();
+bool VerticalScrollArea::eventFilter(QObject* o, QEvent* e)
+{
+	// This works because QScrollArea::setWidget installs an eventFilter on the widget
+	if (o && o == widget() && e->type() == QEvent::Resize)
+		setMinimumWidth(widget()->minimumSizeHint().width() + verticalScrollBar()->width());
 
-	void addVerticalSpacer();
-	void addCheckBox(const QString& name, bool checked);
-	bool isCheckBoxChecked(const QString& name);
-
-public slots:
-	void getAccept();
-	void toggleHelp();
-
-	//reset the values on the gui back to the ones originally given to the dialog
-	void resetValues();
-
-private:
-	RichParameterList& curParList;
-	RichParameterListFrame *stdParFrame;
-
-	std::map<QString, QCheckBox*> additionalCheckBoxes;
-
-};
-
-#endif // RICHPARAMETERLISTDIALOG_H
+	return QScrollArea::eventFilter(o, e);
+}

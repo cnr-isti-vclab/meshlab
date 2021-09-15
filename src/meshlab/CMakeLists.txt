@@ -12,16 +12,17 @@ set(SOURCES
 	ml_default_decorators.cpp
 	ml_render_gui.cpp
 	ml_rendering_actions.cpp
-	ml_std_par_dialog.cpp
 	multiViewer_Container.cpp
 	dialogs/about_dialog.cpp
 	dialogs/congrats_dialog.cpp
+	dialogs/filter_dock_dialog.cpp
 	dialogs/filter_script_dialog.cpp
 	dialogs/options_dialog.cpp
 	dialogs/plugin_info_dialog.cpp
 	dialogs/save_mesh_attributes_dialog.cpp
 	dialogs/save_snapshot_dialog.cpp
 	dialogs/setting_dialog.cpp
+	gui_utils/vertical_scroll_area.cpp
 	rich_parameter_gui/richparameterlistdialog.cpp
 	rich_parameter_gui/richparameterlistframe.cpp
 	rich_parameter_gui/richparameterwidgets.cpp
@@ -38,17 +39,18 @@ set(HEADERS
 	ml_default_decorators.h
 	ml_render_gui.h
 	ml_rendering_actions.h
-	ml_std_par_dialog.h
 	multiViewer_Container.h
 	snapshotsetting.h
 	dialogs/about_dialog.h
 	dialogs/congrats_dialog.h
+	dialogs/filter_dock_dialog.h
 	dialogs/filter_script_dialog.h
 	dialogs/options_dialog.h
 	dialogs/plugin_info_dialog.h
 	dialogs/save_mesh_attributes_dialog.h
 	dialogs/save_snapshot_dialog.h
 	dialogs/setting_dialog.h
+	gui_utils/vertical_scroll_area.h
 	rich_parameter_gui/richparameterlistdialog.h
 	rich_parameter_gui/richparameterlistframe.h
 	rich_parameter_gui/richparameterwidgets.h
@@ -61,6 +63,7 @@ set(RESOURCES meshlab.qrc)
 set(UI
 	dialogs/about_dialog.ui
 	dialogs/congrats_dialog.ui
+	dialogs/filter_dock_dialog.ui
 	dialogs/filter_script_dialog.ui
 	dialogs/plugin_info_dialog.ui
 	dialogs/save_mesh_attributes_dialog.ui

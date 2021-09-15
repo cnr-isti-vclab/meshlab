@@ -53,16 +53,20 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	QFileInfo fi(m->fullName());
 	this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
 	// Show the additional parameters only for formats that have some.
-	if(additionalSaveParametrs.isEmpty())
+	if(additionalSaveParametrs.isEmpty()) {
 		ui->saveParBox->hide();
-	else
+	}
+	else {
 		ui->saveParBox->show();
+		ui->scrollArea->setMinimumSize(ui->scrollArea->width(), ui->saveParBox->sizeHint().height());
+		ui->scrollArea->adjustSize();
+		updateGeometry();
+	}
 	//all - none
 	ui->AllButton->setChecked(true);
 	//ui->NoneButton->setChecked(true);
 
-	if( m->cm.textures.size() == 0 )
-	{
+	if( m->cm.textures.size() == 0 ) {
 		ui->check_iom_wedgtexcoord->setDisabled(true);
 		ui->check_iom_wedgtexcoord->setChecked(false);
 		ui->saveTextureCheckBox->setDisabled(true);
@@ -71,8 +75,7 @@ SaveMeshAttributesDialog::SaveMeshAttributesDialog(
 	}
 
 	textureNames.reserve(m->cm.textures.size());
-	for(const std::string& tname : m->cm.textures)
-	{
+	for(const std::string& tname : m->cm.textures) {
 		textureNames.push_back(tname);
 		QString item(tname.c_str());
 		ui->listTextureName->addItem(item);

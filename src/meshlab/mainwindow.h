@@ -35,7 +35,7 @@
 
 #include "glarea.h"
 #include "layerDialog.h"
-#include "ml_std_par_dialog.h"
+#include "dialogs/filter_dock_dialog.h"
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"
 
@@ -93,15 +93,15 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	// callback function to execute a filter
-	void executeFilter(const QAction *action, RichParameterList &srcpar, bool isPreview = false);
-
 	MainWindow();
 	~MainWindow();
 	static bool QCallBack(const int pos, const char * str);
 	//const QString appName() const {return tr("MeshLab v")+appVer(); }
 	//const QString appVer() const {return tr("1.3.2"); }
 	MainWindowSetting mwsettings;
+public slots:
+	// callback function to execute a filter
+	void executeFilter(const QAction *action, const RichParameterList& srcpar, bool isPreview = false, bool saveOnHistory = false);
 signals:
 	void dispatchCustomSettings(const RichParameterList& rps);
 	void filterExecuted();
@@ -201,7 +201,7 @@ private slots:
 	void updateMenus();
 	void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
 	void updateMenuItems(QMenu* menu,const bool enabled);
-	void updateStdDialog();
+	void closeFilterDockDialog();
 	void enableDocumentSensibleActionsContainer(const bool enable);
 	void setSplit(QAction *qa);
 	void setUnsplit();
@@ -246,7 +246,6 @@ private:
 	int longestActionWidthInMenu(QMenu* m,const int longestwidth);
 	int longestActionWidthInMenu( QMenu* m);
 	int longestActionWidthInAllMenus();
-	void createStdPluginWnd(); // this one is
 	void initGlobalParameters();
 	void createActions();
 	void createMenus();
@@ -277,7 +276,7 @@ private:
 	int idGet;
 	bool verboseCheckingFlag;
 
-	MeshlabStdDialog *stddialog;
+	FilterDockDialog* filterDockDialog;
 	static QProgressBar *qb;
 
 	QMdiArea *mdiarea;
