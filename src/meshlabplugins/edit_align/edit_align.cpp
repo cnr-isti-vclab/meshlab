@@ -28,7 +28,6 @@ $Log: meshedit.cpp,v $
 #include "edit_align.h"
 #include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
-#include <meshlab/rich_parameter_gui/richparameterlistframe.h>
 #include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
@@ -49,7 +48,7 @@ vcg::Box3d vcg::PointMatchingScale::b;
 
 EditAlignPlugin::EditAlignPlugin()
 {
-    alignDialog=0;
+    alignDialog = nullptr;
     qFont.setFamily("Helvetica");
     qFont.setPixelSize(10);
 
@@ -57,7 +56,7 @@ EditAlignPlugin::EditAlignPlugin()
     trackball.radius= 1;
 }
 
-const QString EditAlignPlugin::info()
+QString EditAlignPlugin::info()
 {
     return tr("Allows one to align different layers together.");
 }
@@ -66,7 +65,7 @@ void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData&
 {
 	MLPerViewGLOptions opts;
 	dt.get(opts);
-	for (MLRenderingData::PRIMITIVE_MODALITY pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
+	for (auto pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
 	{
 		MLRenderingData::RendAtts atts;
 		dt.get(pr, atts);
@@ -142,8 +141,7 @@ bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 //		it.value().colorMode=GLW::CMPerMesh;
 
 	_gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
-	if(alignDialog==0)
-	{
+	if (alignDialog == nullptr) {
 		if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 			return false;
 
@@ -190,7 +188,7 @@ void EditAlignPlugin::decorate(MeshModel & mm, GLArea * gla)
 		opts._perbbox_enabled = true;
 		tmp.set(opts);
 		_shared->drawAllocatedAttributesSubset(mm.id(), _gla->context(), tmp);
-		if ((alignDialog != NULL) && (alignDialog->currentArc != 0))
+		if ((alignDialog != nullptr) && (alignDialog->currentArc != nullptr))
 			DrawArc(alignDialog->currentArc);
 	}
 
@@ -214,12 +212,9 @@ void EditAlignPlugin::decorate(MeshModel & mm, GLArea * gla)
 
 void EditAlignPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
-
     // some cleaning at the end.
     qDebug("EndEdit: cleaning everything");
     meshTree.clear();
-    delete alignDialog;
-    alignDialog=0;
 }
 
 void EditAlignPlugin::hideRevealGluedMesh()
@@ -263,12 +258,11 @@ void EditAlignPlugin::glueByPicking()
     }
 
     //Matrix44f oldTr = md->mm()->cm.Tr;
-    AlignPairDialog *dd=new AlignPairDialog(_gla,this->alignDialog);
+    AlignPairDialog *dd = new AlignPairDialog(_gla,this->alignDialog);
     dd->aa->initMesh(currentNode(), &meshTree);
     dd->exec();
 
-    if(dd->result()==QDialog::Rejected) 
-		return;
+    if (dd->result()==QDialog::Rejected) return;
 
     // i picked points sono in due sistemi di riferimento.
 
@@ -281,7 +275,7 @@ void EditAlignPlugin::glueByPicking()
     }
 
     Matrix44m res;
-    if ((dd != NULL) && (dd->aa != NULL) && (dd->aa->allowscaling))
+    if ((dd != nullptr) && (dd->aa != nullptr) && (dd->aa->allowscaling))
         ComputeSimilarityMatchMatrix(gluedPnt,freePnt,res);
     else
         ComputeRigidMatchMatrix(gluedPnt,freePnt,res);
@@ -304,7 +298,7 @@ void EditAlignPlugin::glueManual()
 {
     assert(currentNode()->glued==false);
     
-	if ((_md == NULL) || (_md->mm() == NULL) || (_gla == NULL) || (_gla->mvc() == NULL))
+	if ((_md == nullptr) || (_md->mm() == nullptr) || (_gla == nullptr) || (_gla->mvc() == nullptr))
 		return;
 
 	MeshModel *mm=_md->mm();
@@ -343,7 +337,7 @@ void EditAlignPlugin::glueManual()
 			alignDialog->rebuildTree();
 			break;
 		}
-		default : assert("entered in the GlueManual slot in the wrong state"==0);
+		default : assert("entered in the GlueManual slot in the wrong state"==nullptr);
 	}
 
     _gla->update();
@@ -415,7 +409,7 @@ void EditAlignPlugin::setAlignParamM()
 	defaultAP.ReduceFactorPerc = 0.8;
 	defaultAP.PassHiFilter = 0.75;
 	defaultAP.MatchMode = AlignPair::Param::MMRigid;
-	QMessageBox::warning(0, "Align tool", "ICP Default Parameters set for METERS");
+	QMessageBox::warning(nullptr, "Align tool", "ICP Default Parameters set for METERS");
 }
 
 void EditAlignPlugin::glueHere()
@@ -458,7 +452,7 @@ void EditAlignPlugin::process()
 {
     if(meshTree.gluedNum()<2)
     {
-        QMessageBox::warning(0,"Align tool", "ICP Process can only work when at least two layers have been glued");
+        QMessageBox::warning(nullptr,"Align tool", "ICP Process can only work when at least two layers have been glued");
         return;
     }
     alignDialog->setEnabled(false);

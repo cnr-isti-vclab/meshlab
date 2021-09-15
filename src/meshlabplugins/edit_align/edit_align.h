@@ -49,10 +49,10 @@ class EditAlignPlugin : public QObject, public EditTool
 
 public:
 	EditAlignPlugin();
-	virtual ~EditAlignPlugin() {
-	}
+    virtual ~EditAlignPlugin() {
+    }
 
-	static const QString info();
+	static QString info();
 
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);
@@ -74,8 +74,9 @@ public:
 	GLArea* _gla;
 	MeshDocument* _md;
     MeshTreem::MeshNode *currentNode() { return meshTree.find(_md->mm()); }
-	vcg::AlignPair::Result *currentArc() { return  alignDialog->currentArc; }
+	vcg::AlignPair::Result *currentArc() const { return alignDialog->currentArc; }
 	MeshTreem meshTree;
+
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
 	MeshTreem::Param defaultMTP;  // default MeshTree parameters

@@ -71,8 +71,8 @@ AlignDialog::AlignDialog(QWidget *parent, EditAlignPlugin *_edit) : QDockWidget(
 	// The following connection is used to associate the click with the change of the current mesh.
 	connect(ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(onClickItem(QTreeWidgetItem *, int)));
 	globalLogTextEdit = ui.logTextEdit;
-	currentArc = 0;
-	meshTree = 0;
+	currentArc = nullptr;
+	meshTree = nullptr;
 }
 
 
@@ -92,7 +92,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 
 	// if we clicked twice on the same arc deselect it
 	if (_currentArc == currentArc) {
-		currentArc = 0;
+		currentArc = nullptr;
 		return;
 	}
 
@@ -113,7 +113,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 
 void AlignDialog::updateCurrentNodeBackground()
 {
-	static MeshTreem::MeshNode *lastCurrentNode = 0;
+	static MeshTreem::MeshNode *lastCurrentNode = nullptr;
 	assert(meshTree);
 
 	if (lastCurrentNode && M2T[lastCurrentNode])
@@ -129,7 +129,7 @@ void AlignDialog::updateCurrentNodeBackground()
 
 void AlignDialog::setTree(MeshTreem *_meshTree)
 {
-	assert(meshTree == 0);
+	assert(meshTree == nullptr);
 	meshTree = _meshTree;
 	meshTree->cb = AlignCallBackPos;
 	rebuildTree();
@@ -137,14 +137,14 @@ void AlignDialog::setTree(MeshTreem *_meshTree)
 
 void AlignDialog::updateDialog()
 {
-	assert(meshTree != 0);
+	assert(meshTree != nullptr);
 	assert(currentNode() == meshTree->find(currentNode()->m));
 	updateButtons();
 }
 
 void AlignDialog::updateButtons()
 {
-	if (currentNode() == NULL)
+	if (currentNode() == nullptr)
 		return;
 	if (currentNode()->glued)
 		ui.glueHereButton->setText("Unglue Mesh   ");
@@ -152,8 +152,8 @@ void AlignDialog::updateButtons()
 
 	ui.pointBasedAlignButton->setDisabled(currentNode()->glued);
 	ui.manualAlignButton->setDisabled(currentNode()->glued);
-	ui.recalcButton->setDisabled(currentArc == 0);
-	ui.icpParamCurrentButton->setDisabled(currentArc == 0);
+	ui.recalcButton->setDisabled(currentArc == nullptr);
+	ui.icpParamCurrentButton->setDisabled(currentArc == nullptr);
 	ui.baseMeshButton->setDisabled(!currentNode()->glued);
 }
 
@@ -171,13 +171,13 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTreem::MeshNode *meshNode)
 	setText(3, labelText);
 
 	n = meshNode;
-	a = 0;
+	a = nullptr;
 }
 
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTreem* /*meshTree*/, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
 {
-	n = 0;
+	n = nullptr;
 	a = A;
 	parent->addChild(this);
 	QString buf = QString("Arc: %1 -> %2 Area: %3 Err: %4 Sample# %5 (%6)")
@@ -210,7 +210,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTreem* /*meshTree*/, vcg::AlignPair::
 
 void AlignDialog::rebuildTree()
 {
-	currentArc = 0;
+	currentArc = nullptr;
 	gla = edit->_gla;
 	ui.alignTreeWidget->clear();
 	M2T.clear();
