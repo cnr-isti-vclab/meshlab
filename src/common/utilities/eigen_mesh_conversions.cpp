@@ -841,6 +841,114 @@ EigenVectorXb meshlab::faceSelectionArray(const CMeshO& mesh)
 }
 
 /**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
+ * vertex min curvature of a CMeshO.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (vertex min curvature)
+ */
+EigenMatrixX3m meshlab::vertexCurvatureMinMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+	vcg::tri::RequirePerVertexCurvatureDir(mesh);
+
+	// create eigen matrix
+	EigenMatrixX3m vertexCurv(mesh.VN(), 3);
+
+	// per vertices min curvature dir
+	for (int i = 0; i < mesh.VN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			vertexCurv(i, j) = mesh.vert[i].PD1()[j];
+		}
+	}
+
+	return vertexCurv;
+}
+
+/**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
+ * vertex max curvature of a CMeshO.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (vertex max curvature)
+ */
+EigenMatrixX3m meshlab::vertexCurvatureMaxMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+	vcg::tri::RequirePerVertexCurvatureDir(mesh);
+
+	// create eigen matrix
+	EigenMatrixX3m vertexCurv(mesh.VN(), 3);
+
+	// per vertices min curvature dir
+	for (int i = 0; i < mesh.VN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			vertexCurv(i, j) = mesh.vert[i].PD2()[j];
+		}
+	}
+
+	return vertexCurv;
+}
+
+/**
+ * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
+ * face min curvature of a CMeshO.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of scalars (face min curvature)
+ */
+EigenMatrixX3m meshlab::faceCurvatureMinMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+	vcg::tri::RequirePerFaceCurvatureDir(mesh);
+
+	// create eigen matrix
+	EigenMatrixX3m faceCurv(mesh.FN(), 3);
+
+	// per face min curvature dir
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			faceCurv(i, j) = mesh.face[i].PD1()[j];
+		}
+	}
+
+	return faceCurv;
+}
+
+/**
+ * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
+ * face max curvature of a CMeshO.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of scalars (face max curvature)
+ */
+EigenMatrixX3m meshlab::faceCurvatureMaxMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+	vcg::tri::RequirePerFaceCurvatureDir(mesh);
+
+	// create eigen matrix
+	EigenMatrixX3m faceCurv(mesh.FN(), 3);
+
+	// per face min curvature dir
+	for (int i = 0; i < mesh.FN(); i++) {
+		for (int j = 0; j < 3; j++) {
+			faceCurv(i, j) = mesh.face[i].PD2()[j];
+		}
+	}
+
+	return faceCurv;
+}
+
+/**
  * @brief Get a #F*3 Eigen matrix of integers containing the indices of the
  * adjacent faces for each face in a CMeshO.
  * The faces in the mesh must be compact (no deleted faces).
