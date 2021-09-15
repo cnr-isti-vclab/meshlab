@@ -56,23 +56,28 @@ The MeshLab repository is organized as follows:
 
 # References
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5114037.svg)](https://doi.org/10.5281/zenodo.5114037)
+
+
 Please, when using this tool, cite the references listed in the official web page https://www.meshlab.net/#references according to you needs, or if you are lazy just cite:
 
-Meshlab: an open-source mesh processing tool. P. Cignoni, M. Callieri, M. Corsini, M. Dellepiane, F. Ganovelli, G. Ranzuglia
-Proceedings of the 2008 Eurographics Italian Chapter Conference, ISBN: 978-3-905673-68-5, pp. 129-136, DOI: 10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136
-
-BibTeX format:
-
 ```
+@software{meshlab,
+  author       = {Paolo Cignoni, Alessandro Muntoni, Guido Ranzuglia, Marco Callieri},
+  title        = {{MeshLab}},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.5114037}
+}
+
 @inproceedings {LocalChapterEvents:ItalChap:ItalianChapConf2008:129-136,
-booktitle = {Eurographics Italian Chapter Conference},
-editor = {Vittorio Scarano and Rosario De Chiara and Ugo Erra},
-title = {{MeshLab: an Open-Source Mesh Processing Tool}},
-author = {Cignoni, Paolo and Callieri, Marco and Corsini, Massimiliano and Dellepiane, Matteo and Ganovelli, Fabio and Ranzuglia, Guido},
-year = {2008},
-publisher = {The Eurographics Association},
-ISBN = {978-3-905673-68-5},
-DOI = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
+  booktitle = {Eurographics Italian Chapter Conference},
+  editor    = {Vittorio Scarano and Rosario De Chiara and Ugo Erra},
+  title     = {{MeshLab: an Open-Source Mesh Processing Tool}},
+  author    = {Cignoni, Paolo and Callieri, Marco and Corsini, Massimiliano and Dellepiane, Matteo and Ganovelli, Fabio and Ranzuglia, Guido},
+  year      = {2008},
+  publisher = {The Eurographics Association},
+  ISBN      = {978-3-905673-68-5},
+  DOI       = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
 }
 ```
 
