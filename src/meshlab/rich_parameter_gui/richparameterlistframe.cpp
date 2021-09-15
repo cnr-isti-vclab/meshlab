@@ -176,7 +176,8 @@ void RichParameterListFrame::loadFrameContent(
 		if (!p.first.isEmpty()) {
 			QString labltext = "<P><b>" + p.first + ":</b></P>";
 			QLabel* l = new QLabel(labltext, this);
-			glay->addWidget(l,i++,0,Qt::AlignLeft);
+			l->setAlignment(Qt::AlignRight);
+			glay->addWidget(l,i++,0);
 		}
 		//put the parameter widgets into the grid layout
 		for (const RichParameter* fpi : p.second){
@@ -197,7 +198,8 @@ void RichParameterListFrame::loadFrameContent(
 			if (!p.first.isEmpty()) {
 				QString labltext = "<P><b>" + p.first + ":</b></P>";
 				QLabel* l = new QLabel(labltext, this);
-				flay->addWidget(l,j++,0,Qt::AlignLeft);
+				l->setAlignment(Qt::AlignRight);
+				flay->addWidget(l,j++,0);
 			}
 			for (const RichParameter* fpi : p.second){
 				const RichParameter& defrp = defParSet.getParameterByName(fpi->name());
