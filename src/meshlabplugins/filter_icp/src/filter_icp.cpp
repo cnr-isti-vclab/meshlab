@@ -64,7 +64,7 @@ QString FilterIcpPlugin::filterName(ActionIDType filterId) const {
             return "ICP Between Meshes";
         }
         case FP_GLOBAL_MESH_ICP: {
-            return "Globally Align Meshes";
+            return "Global Align Meshes";
         }
         default: {
             assert(0);
