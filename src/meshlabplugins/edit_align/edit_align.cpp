@@ -145,7 +145,7 @@ bool EditAlignPlugin::startEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 		if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 			return false;
 
-		alignDialog=new AlignDialog(_gla->window(),this);
+		alignDialog = new AlignDialog(_gla->window(),this);
 		connect(alignDialog->ui.meshTreeParamButton,SIGNAL(clicked()),this,SLOT(meshTreeParam()));
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamDefMMButton, SIGNAL(clicked()), this, SLOT(setAlignParamMM()));
@@ -212,9 +212,12 @@ void EditAlignPlugin::decorate(MeshModel & mm, GLArea * gla)
 
 void EditAlignPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
+
     // some cleaning at the end.
     qDebug("EndEdit: cleaning everything");
     meshTree.clear();
+
+    delete alignDialog;
 }
 
 void EditAlignPlugin::hideRevealGluedMesh()

@@ -83,7 +83,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 	// First clear the background of previously selected arc
 	MeshTreeWidgetItem *oldArcF = A2Tf[currentArc];
 	MeshTreeWidgetItem *oldArcB = A2Tb[currentArc];
-	if (oldArcF != NULL)
+	if (oldArcF != nullptr)
 	{
 		assert(oldArcF->a == currentArc);
 		oldArcF->setBackground(3, QBrush());
@@ -98,7 +98,7 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 
 	MeshTreeWidgetItem *newArcB = A2Tb[_currentArc];
 	MeshTreeWidgetItem *newArcF = A2Tf[_currentArc];
-	if (newArcB != NULL)
+	if (newArcB != nullptr)
 	{
 		assert(newArcB->a == _currentArc);
 		newArcB->setBackground(3, QBrush(QColor("#d0ffff")));
@@ -120,7 +120,7 @@ void AlignDialog::updateCurrentNodeBackground()
 		M2T[lastCurrentNode]->setBackground(3, QBrush());
 
 	MeshTreeWidgetItem *newNodeItem = M2T[currentNode()];
-	if (newNodeItem != NULL)
+	if (newNodeItem != nullptr)
 	{
 		newNodeItem->setBackground(3, QBrush(QColor(Qt::lightGray)));
 		lastCurrentNode = currentNode();

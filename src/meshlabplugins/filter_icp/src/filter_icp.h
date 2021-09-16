@@ -25,13 +25,17 @@
 #define MESHLAB_FILTER_EXAMPLE_PLUGIN_H
 
 // from meshlab common, include the abstract class file of filter plugins
+
 #include <common/plugins/interfaces/filter_plugin.h>
-#include <vcglib/vcg/complex/algorithms/align_pair.h>
+#include <vcg/complex/algorithms/align_pair.h>
+#include <vcg/complex/algorithms/meshtree.h>
 
 #include "./align/icp_align_parameter.h"
 
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
+
 /**
- * @brief The FilterExamplePlugin class
+ * @brief TODO: update the desc! The FilterExamplePlugin class
  * This is a simple and useless example of a MeshLab filter plugin.
  *
  * You can use this class as a base to start and coding your plugin!
@@ -79,10 +83,11 @@ public:
 
 private:
 
-    std::map<std::string, QVariant> applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par);
-
     vcg::AlignPair::Param alignParameters;
+    MeshTreem::Param meshTreeParameters;
 
+    std::map<std::string, QVariant> globalAlignment(MeshDocument &meshDocument, const RichParameterList &par);
+    std::map<std::string, QVariant> applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par);
     void saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) const;
 };
 

@@ -24,6 +24,7 @@
 #include "filter_icp.h"
 
 #define PAR_SOURCE_MESH         "SourceMesh"
+#define PAR_BASE_MESH           "BaseMesh"
 #define PAR_REFERENCE_MESH      "ReferenceMesh"
 #define PAR_SAVE_LAST_ITERATION "SaveLastIteration"
 
@@ -85,7 +86,9 @@ QString FilterIcpPlugin::filterInfo(ActionIDType filterId) const {
             return tr("Perform the ICP algorithm to minimize the difference between two cloud of points.");
         }
         case FP_GLOBAL_MESH_ICP: {
-            return tr("TODO");
+            return tr("Perform the global alignment process to align a set of visible meshes together. "
+                      "The alignment algorithm is implemented over the idea written by Kari Pulli in his paper: "
+                      "\"Multiview Registration for Large Data Sets\"");
         }
         default: {
             assert(0);
@@ -163,11 +166,30 @@ RichParameterList FilterIcpPlugin::initParameterList(const QAction *action, cons
                                             "The Reference Mesh is the point cloud kept fixed during the ICP process."));
             parameterList.addParam(RichMesh(PAR_SOURCE_MESH, 1, &md, "Source Mesh",
                                             "The Source Mesh is the point cloud which will be roto-translated to match the Reference Mesh."));
+
+            /* Add default ICP parameters to the parameters List */
+            FilterIcpAlignParameter::AlignPairParamToRichParameterSet(this->alignParameters, parameterList);
+
+
+            /* Add a checkbox to toggle 'Save Last Iteration' */
+            parameterList.addParam(RichBool(PAR_SAVE_LAST_ITERATION, false, "Save Last Iteration",
+                                            "Toggle this checkbox in order to save the last iteration points in two layers."));
+
             break;
         }
 
         case FP_GLOBAL_MESH_ICP: {
-            // TODO
+            
+            /* Add the bash mesh */
+            parameterList.addParam(RichMesh(PAR_BASE_MESH, 0, &md, "Base Mesh", "The base mesh is the one who will stay fixed during the alignment process."));
+
+            /* Add the Arc Creation Parameters */
+            FilterIcpAlignParameter::MeshTreeParamToRichParameterSet(this->meshTreeParameters, parameterList);
+
+            /* Add default ICP parameters to the parameters List */
+            FilterIcpAlignParameter::AlignPairParamToRichParameterSet(this->alignParameters, parameterList);
+
+
             break;
         }
 
@@ -175,13 +197,6 @@ RichParameterList FilterIcpPlugin::initParameterList(const QAction *action, cons
             assert(0);
         }
     }
-
-    /* Add default ICP parameters to the parameters List */
-    FilterIcpAlignParameter::AlignPairParamToRichParameterSet(this->alignParameters, parameterList);
-
-    /* Add a checkbox to toggle 'Save Last Iteration' */
-    parameterList.addParam(RichBool(PAR_SAVE_LAST_ITERATION, false, "Save Last Iteration",
-                                    "Toggle this checkbox in order to save the last iteration points in two layers."));
 
     return parameterList;
 }
@@ -201,7 +216,8 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
         unsigned int & /*postConditionMask*/,
         vcg::CallBackPos *cb) {
 
-    // Set the align parameters from the RichParameterList
+    // Set the align parameters from the RichParameterList, they are in common
+    // with the two filters.
     FilterIcpAlignParameter::RichParameterSetToAlignPairParam(par, this->alignParameters);
 
     switch (ID(action)) {
@@ -209,9 +225,11 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
         case FP_TWO_MESH_ICP: {
             return applyIcpTwoMeshes(md, par);
         }
+
         case FP_GLOBAL_MESH_ICP: {
-            // TODO: Globally align meshes
-            break;
+            // Read the parameters for the New Arc Creation
+            FilterIcpAlignParameter::RichParameterSetToMeshTreeParam(par, this->meshTreeParameters);
+            return globalAlignment(md, par);
         }
         default: {
             wrongActionCalled(action);
@@ -221,6 +239,50 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
     return std::map<std::string, QVariant>();
 }
 
+std::map<std::string, QVariant> FilterIcpPlugin::globalAlignment(MeshDocument &meshDocument, const RichParameterList &par) {
+
+    MeshTreem meshTree {};
+
+    auto baseMeshId = par.getMeshId(PAR_BASE_MESH);
+    auto baseMesh = meshDocument.getMesh(baseMeshId);
+
+    /* Load the Meshes inside the MeshTree's nodeMap */
+    for (auto& mesh : meshDocument.meshIterator()) {
+        meshTree.nodeMap[mesh.id()] = new MeshTreem::MeshNode(&mesh);
+    }
+
+    // Start Gluing Process
+    for (auto& ni : meshTree.nodeMap) {
+        if (ni.second->m->isVisible()) {
+            ni.second->glued=true;
+        }
+    }
+    // End Gluing Process
+
+    // Start BaseMesh Process
+    auto oldTr = vcg::Matrix44d::Construct(baseMesh->cm.Tr);
+    auto inv = vcg::Inverse(oldTr);
+
+    baseMesh->cm.Tr.SetIdentity();
+
+    for (auto& ni : meshTree.nodeMap) {
+
+        MeshTreem::MeshNode *mn = ni.second;
+
+        if (mn->glued && (mn->m != meshDocument.mm()) ) {
+            mn->m->cm.Tr.Import(inv * vcg::Matrix44d::Construct(baseMesh->cm.Tr));
+        }
+    }
+    // End BaseMesh Process
+
+    // Start the global alignment
+    log("Starting the global alignment filter...");
+    meshTree.Process(this->alignParameters, this->meshTreeParameters);
+    log("Global alignment completed!");
+    meshTree.clear();
+
+    return std::map<std::string, QVariant> {};
+}
 
 std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par) {
 

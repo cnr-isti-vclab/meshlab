@@ -22,14 +22,29 @@
 ****************************************************************************/
 
 #include <common/parameters/rich_parameter_list.h>
-#include <vcglib/vcg/complex/algorithms/align_pair.h>
+
+#include <vcg/complex/algorithms/align_pair.h>
+#include <vcg/complex/algorithms/meshtree.h>
+
+#ifndef ICP_ALIGN_PARAMETER_H
+
+#define ICP_ALIGN_PARAMETER_H
+
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
 
 class FilterIcpAlignParameter {
 
 public:
-	static void RichParameterSetToAlignPairParam(const RichParameterList &rps, vcg::AlignPair::Param &app);
+
+    static void RichParameterSetToAlignPairParam(const RichParameterList &rps, vcg::AlignPair::Param &app);
 	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterList &rps);
+
+	static void RichParameterSetToMeshTreeParam(const RichParameterList &fps , MeshTreem::Param &mtp);
+	static void MeshTreeParamToRichParameterSet(const MeshTreem::Param &mtp, RichParameterList &rps);
+
 private:
 	/* No need to have an instance of this class */
 	FilterIcpAlignParameter();
 };
+
+#endif
