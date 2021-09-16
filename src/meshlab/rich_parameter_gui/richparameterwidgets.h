@@ -58,6 +58,7 @@ public:
 	void resetValue();
 	void setValue(const Value& v);
 	void setHelpVisible(bool b);
+	void setVisible(bool b);
 	// update the parameter with the current widget values and return it.
 	const Value&         widgetValue();
 	const RichParameter& richParameter() const;
@@ -70,9 +71,13 @@ signals:
 protected:
 	QLabel* descriptionLabel;
 	QLabel* helpLabel;
+	std::vector<QWidget*> widgets; //will contain all the other widgets of this widget
 
 	RichParameter* parameter;
 	RichParameter* defaultParameter;
+
+	bool visible;
+	bool helpVisible;
 };
 
 class BoolWidget : public RichParameterWidget
