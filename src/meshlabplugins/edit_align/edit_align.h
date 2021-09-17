@@ -26,8 +26,11 @@
 
 #include <common/plugins/interfaces/edit_plugin.h>
 #include <vcg/complex/algorithms/align_pair.h>
-#include "align/OccupancyGrid.h"
-#include "meshtree.h"
+#include <vcg/complex/algorithms/occupancy_grid.h>
+
+//#include "align/OccupancyGrid.h"
+
+#include <vcg/complex/algorithms/meshtree.h>
 #include <wrap/gui/trackball.h>
 #include "alignDialog.h"
 
@@ -46,10 +49,10 @@ class EditAlignPlugin : public QObject, public EditTool
 
 public:
 	EditAlignPlugin();
-	virtual ~EditAlignPlugin() {
-	}
+    virtual ~EditAlignPlugin() {
+    }
 
-	static const QString info();
+	static QString info();
 
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);
@@ -70,12 +73,13 @@ public:
 	vcg::Trackball trackball;
 	GLArea* _gla;
 	MeshDocument* _md;
-	MeshNode *currentNode() { return meshTree.find(_md->mm()); }
-	vcg::AlignPair::Result *currentArc() { return  alignDialog->currentArc; }
-	MeshTree meshTree;
+    MeshTreem::MeshNode *currentNode() { return meshTree.find(_md->mm()); }
+	vcg::AlignPair::Result *currentArc() const { return alignDialog->currentArc; }
+	MeshTreem meshTree;
+
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
-	MeshTree::Param defaultMTP;  // default MeshTree parameters
+	MeshTreem::Param defaultMTP;  // default MeshTree parameters
 
 	// this callback MUST be redefined because we are able to manage internally the layer change.
 	void layerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* )

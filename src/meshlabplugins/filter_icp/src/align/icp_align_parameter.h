@@ -1,8 +1,8 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005, 2009                                          \/)\/    *
+* Copyright(C) 2004                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,28 +20,31 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef __VCG_ALIGNPAIRDIALOG
-#define __VCG_ALIGNPAIRDIALOG
 
-class QCheckBox;
+#include <common/parameters/rich_parameter_list.h>
 
-#include "AlignPairWidget.h"
+#include <vcg/complex/algorithms/align_pair.h>
+#include <vcg/complex/algorithms/meshtree.h>
 
-#include <QCheckBox>
+#ifndef ICP_ALIGN_PARAMETER_H
 
-class AlignPairDialog: public QDialog
-{
-    Q_OBJECT
+#define ICP_ALIGN_PARAMETER_H
+
+typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
+
+class FilterIcpAlignParameter {
+
 public:
-    AlignPairWidget *aa;
 
-    AlignPairDialog (GLArea* gla, QWidget * parent = nullptr);
+    static void RichParameterSetToAlignPairParam(const RichParameterList &rps, vcg::AlignPair::Param &app);
+	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterList &rps);
 
+	static void RichParameterSetToMeshTreeParam(const RichParameterList &fps , MeshTreem::Param &mtp);
+	static void MeshTreeParamToRichParameterSet(const MeshTreem::Param &mtp, RichParameterList &rps);
 
-private slots:
-	void setScalingFlag(bool);
-	void setPointRenderingFlag(bool);
-	void setFakeColorFlag(bool);
-	
+private:
+	/* No need to have an instance of this class */
+	FilterIcpAlignParameter();
 };
+
 #endif

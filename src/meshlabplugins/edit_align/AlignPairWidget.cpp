@@ -62,7 +62,7 @@ AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget * parent)
 	setAutoFillBackground(false);
 }
 
-void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
+void AlignPairWidget::initMesh(MeshTreem::MeshNode *_freeMesh, MeshTreem *_gluedTree)
 {
 	freeMesh = _freeMesh;
 	gluedTree = _gluedTree;
@@ -118,7 +118,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
       {
         for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
         {
-          MeshNode *mn=ni->second;
+          MeshTreem::MeshNode *mn=ni->second;
           if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->isVisible())
           {
             MLRenderingData dt;
@@ -162,7 +162,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 //			foreach(MeshNode *mn, gluedTree->nodeList)
           for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
           {
-            MeshNode *mn=ni->second;
+              MeshTreem::MeshNode *mn=ni->second;
             if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->isVisible())
 			{
               shared->draw(mn->m->id(), context());

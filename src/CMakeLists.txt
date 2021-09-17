@@ -166,6 +166,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 			meshlabplugins/filter_fractal
 			meshlabplugins/filter_func
 			meshlabplugins/filter_img_patch_param
+			meshlabplugins/filter_icp
 			meshlabplugins/filter_io_nxs
 			meshlabplugins/filter_isoparametrization
 			meshlabplugins/filter_layer

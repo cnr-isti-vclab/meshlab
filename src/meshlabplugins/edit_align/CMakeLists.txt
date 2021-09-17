@@ -7,14 +7,12 @@ if(TARGET external-newuoa)
 
 	set(SOURCES
 		align/align_parameter.cpp
-		align/AlignGlobal.cpp
-		align/OccupancyGrid.cpp
+
 		alignDialog.cpp
 		AlignPairDialog.cpp
 		AlignPairWidget.cpp
 		edit_align_factory.cpp
 		edit_align.cpp
-		meshtree.cpp
 		../../meshlab/rich_parameter_gui/richparameterwidgets.cpp
 		../../meshlab/rich_parameter_gui/richparameterlistframe.cpp
 		../../meshlab/rich_parameter_gui/richparameterlistdialog.cpp
@@ -24,14 +22,12 @@ if(TARGET external-newuoa)
 
 	set(HEADERS
 		align/align_parameter.h
-		align/AlignGlobal.h
-		align/OccupancyGrid.h
+
 		alignDialog.h
 		AlignPairDialog.h
 		AlignPairWidget.h
 		edit_align_factory.h
 		edit_align.h
-		meshtree.h
 		../../meshlab/rich_parameter_gui/richparameterwidgets.h
 		../../meshlab/rich_parameter_gui/richparameterlistframe.h
 		../../meshlab/rich_parameter_gui/richparameterlistdialog.h
