@@ -26,6 +26,7 @@
 #define PAR_SOURCE_MESH         "SourceMesh"
 #define PAR_BASE_MESH           "BaseMesh"
 #define PAR_REFERENCE_MESH      "ReferenceMesh"
+#define PAR_ONLY_VISIBLE_MESHES "OnlyVisibleMeshes"
 #define PAR_SAVE_LAST_ITERATION "SaveLastIteration"
 
 /* Static variables needed by the vcg::AlignPair::align() method */
@@ -182,6 +183,8 @@ RichParameterList FilterIcpPlugin::initParameterList(const QAction *action, cons
             
             /* Add the bash mesh */
             parameterList.addParam(RichMesh(PAR_BASE_MESH, 0, &md, "Base Mesh", "The base mesh is the one who will stay fixed during the alignment process."));
+            /**/
+            parameterList.addParam(RichBool(PAR_ONLY_VISIBLE_MESHES, false, "Only visible meshes", "Apply the global alignment only to the visible meshes"));
 
             /* Add the Arc Creation Parameters */
             FilterIcpAlignParameter::MeshTreeParamToRichParameterSet(this->meshTreeParameters, parameterList);
@@ -246,16 +249,28 @@ std::map<std::string, QVariant> FilterIcpPlugin::globalAlignment(MeshDocument &m
     auto baseMeshId = par.getMeshId(PAR_BASE_MESH);
     auto baseMesh = meshDocument.getMesh(baseMeshId);
 
+    bool applyToOnlyVisibleMeshes = par.getBool(PAR_ONLY_VISIBLE_MESHES);
+
     /* Load the Meshes inside the MeshTree's nodeMap */
     for (auto& mesh : meshDocument.meshIterator()) {
-        meshTree.nodeMap[mesh.id()] = new MeshTreem::MeshNode(&mesh);
+
+        /* If the filter apply only on to the visible meshes ... */
+        if (applyToOnlyVisibleMeshes) {
+
+            /* ... and the mesh is visible, then put it inside the nodeMap*/
+            if (mesh.isVisible()) {
+                meshTree.nodeMap[mesh.id()] = new MeshTreem::MeshNode(&mesh);
+            }
+        }
+        else {
+            /* Otherwise add the mesh to the nodeMap regardless the visibility */
+            meshTree.nodeMap[mesh.id()] = new MeshTreem::MeshNode(&mesh);
+        }
     }
 
     // Start Gluing Process
     for (auto& ni : meshTree.nodeMap) {
-        if (ni.second->m->isVisible()) {
-            ni.second->glued=true;
-        }
+        ni.second->glued = true;
     }
     // End Gluing Process
 
