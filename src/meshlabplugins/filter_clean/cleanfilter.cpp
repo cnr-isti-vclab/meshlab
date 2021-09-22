@@ -46,8 +46,7 @@ CleanFilter::CleanFilter()
 		FP_SNAP_MISMATCHED_BORDER,
 		FP_REMOVE_DUPLICATE_FACE,
 		FP_REMOVE_FOLD_FACE,
-		FP_REMOVE_NON_MANIF_EDGE,
-		FP_REMOVE_NON_MANIF_EDGE_SPLIT,
+		FP_REPAIR_NON_MANIF_EDGE,
 		FP_REMOVE_NON_MANIF_VERT,
 		FP_REMOVE_UNREFERENCED_VERTEX,
 		FP_REMOVE_DUPLICATED_VERTEX,
@@ -85,9 +84,7 @@ QString CleanFilter::filterName(ActionIDType filter) const
 	case FP_MERGE_WEDGE_TEX: return QString("Merge Wedge Texture Coord");
 	case FP_REMOVE_DUPLICATE_FACE: return QString("Remove Duplicate Faces");
 	case FP_REMOVE_FOLD_FACE: return QString("Remove Isolated Folded Faces by Edge Flip");
-	case FP_REMOVE_NON_MANIF_EDGE: return QString("Repair non Manifold Edges by removing faces");
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT:
-		return QString("Repair non Manifold Edges by splitting vertices");
+	case FP_REPAIR_NON_MANIF_EDGE: return QString("Repair non Manifold Edges");
 	case FP_REMOVE_NON_MANIF_VERT: return QString("Repair non Manifold Vertices by splitting");
 	case FP_REMOVE_UNREFERENCED_VERTEX: return QString("Remove Unreferenced Vertices");
 	case FP_REMOVE_DUPLICATED_VERTEX: return QString("Remove Duplicate Vertices");
@@ -153,14 +150,11 @@ QString CleanFilter::filterInfo(ActionIDType filterId) const
 			"Delete all the single folded faces. A face is considered folded if its normal is "
 			"opposite to all the adjacent faces. It is removed by flipping it against the face f "
 			"adjacent along the edge e such that the vertex opposite to e fall inside f");
-	case FP_REMOVE_NON_MANIF_EDGE:
+	case FP_REPAIR_NON_MANIF_EDGE:
 		return QString(
-			"For each non Manifold edge it iteratively deletes the smallest area face until it "
-			"becomes 2-Manifold.");
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT:
-		return QString(
-			"Remove all non manifold edges splitting vertices. Each non manifold edges chain will "
-			"become a border");
+			"Remove non-manifold edges by removing faces (for each non Manifold edge it "
+			"iteratively deletes the smallest area face until it becomes 2-Manifold) or by "
+			"splitting vertices (each non manifold edges chain will become a border).");
 	case FP_REMOVE_NON_MANIF_VERT:
 		return QString("Split non Manifold vertices until it becomes 2-Manifold.");
 	case FP_REMOVE_UNREFERENCED_VERTEX:
@@ -188,8 +182,7 @@ CleanFilter::FilterClass CleanFilter::getClass(const QAction* a) const
 	case FP_MERGE_CLOSE_VERTEX:
 	case FP_REMOVE_DUPLICATE_FACE:
 	case FP_SNAP_MISMATCHED_BORDER:
-	case FP_REMOVE_NON_MANIF_EDGE:
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT:
+	case FP_REPAIR_NON_MANIF_EDGE:
 	case FP_REMOVE_NON_MANIF_VERT:
 	case FP_REMOVE_FACE_ZERO_AREA:
 	case FP_REMOVE_UNREFERENCED_VERTEX:
@@ -210,8 +203,7 @@ int CleanFilter::getRequirements(const QAction* action)
 	case FP_REMOVE_ISOLATED_COMPLEXITY:
 	case FP_REMOVE_ISOLATED_DIAMETER: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK;
 	case FP_REMOVE_TVERTEX: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-	case FP_REMOVE_NON_MANIF_EDGE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+	case FP_REPAIR_NON_MANIF_EDGE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 	case FP_REMOVE_NON_MANIF_VERT: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 	case FP_SNAP_MISMATCHED_BORDER:
 		return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK | MeshModel::MM_FACEMARK;
@@ -240,12 +232,11 @@ int CleanFilter::postCondition(const QAction* action) const
 	case FP_MERGE_WEDGE_TEX:
 	case FP_REMOVE_DUPLICATE_FACE:
 	case FP_REMOVE_FOLD_FACE:
-	case FP_REMOVE_NON_MANIF_EDGE:
+	case FP_REPAIR_NON_MANIF_EDGE:
 	case FP_REMOVE_NON_MANIF_VERT:
 	case FP_REMOVE_UNREFERENCED_VERTEX:
 	case FP_REMOVE_DUPLICATED_VERTEX:
-	case FP_REMOVE_FACE_ZERO_AREA:
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT: return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
+	case FP_REMOVE_FACE_ZERO_AREA: return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
 	}
 	return MeshModel::MM_ALL;
 }
@@ -386,6 +377,14 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 			"is 0.5 the new vertex is half away toward the barycenter of the face. Reasonable "
 			"values are in the [0 .. 0.1] range."));
 		break;
+	case FP_REPAIR_NON_MANIF_EDGE:
+		parlst.addParam(RichEnum(
+			"method",
+			0,
+			{"Remove Faces", "Split Vertices"},
+			"Method",
+			"Selects wether to remove non manifold edges by removing faces or by splitting "
+			"vertices."));
 	default: break; // do not add any parameter for the other filters
 	}
 	return parlst;
@@ -526,19 +525,21 @@ std::map<std::string, QVariant> CleanFilter::applyFilter(
 		m.updateBoxAndNormals();
 	} break;
 
-	case FP_REMOVE_NON_MANIF_EDGE: {
-		int total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
-		log("Successfully removed %d non-manifold faces", total);
-		m.updateBoxAndNormals();
-	} break;
-
-	case FP_REMOVE_NON_MANIF_EDGE_SPLIT: {
-		int total = tri::Clean<CMeshO>::SplitManifoldComponents(m.cm);
-		log("Successfully split the mesh into %d edge manifold components", total);
-		m.updateBoxAndNormals();
-		if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-			postConditionMask =
-				MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_WEDGTEXCOORD;
+	case FP_REPAIR_NON_MANIF_EDGE: {
+		int total = 0;
+		if (par.getEnum("method") == 0) { // removing faces
+			total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
+			log("Successfully removed %d non-manifold faces", total);
+			m.updateBoxAndNormals();
+		}
+		else { // splitting vertices
+			total = tri::Clean<CMeshO>::SplitManifoldComponents(m.cm);
+			log("Successfully split the mesh into %d edge manifold components", total);
+			m.updateBoxAndNormals();
+			if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+				postConditionMask =
+					MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_WEDGTEXCOORD;
+		}
 	} break;
 
 	case FP_REMOVE_NON_MANIF_VERT: {
