@@ -20,26 +20,32 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include "vertical_scroll_area.h"
+#ifndef CLICKABLELABEL_H
+#define CLICKABLELABEL_H
 
-#include <QEvent>
-#include <QScrollBar>
-#include <QVBoxLayout>
+#include <QLabel>
+#include <QWidget>
+#include <Qt>
 
-#include "vertical_scroll_area.h"
-
-VerticalScrollArea::VerticalScrollArea(QWidget* parent) : QScrollArea(parent)
+/**
+ * @brief A QLabel class with clicked signal
+ *
+ * https://wiki.qt.io/Clickable_QLabel
+ */
+class ClickableLabel : public QLabel
 {
-	setWidgetResizable(true);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-}
+	Q_OBJECT
 
-bool VerticalScrollArea::eventFilter(QObject* o, QEvent* e)
-{
-	// This works because QScrollArea::setWidget installs an eventFilter on the widget
-	if (o && o == widget() && e->type() == QEvent::Resize)
-		setMinimumWidth(widget()->minimumSizeHint().width() + verticalScrollBar()->width());
+public:
+	explicit ClickableLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+	explicit ClickableLabel(const QString& description, QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+	~ClickableLabel();
 
-	return QScrollArea::eventFilter(o, e);
-}
+signals:
+	void clicked();
+
+protected:
+	void mousePressEvent(QMouseEvent* event);
+};
+
+#endif // CLICKABLELABEL_H

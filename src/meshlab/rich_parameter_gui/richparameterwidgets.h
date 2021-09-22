@@ -37,6 +37,8 @@
 #include <common/ml_document/cmesh.h>
 #include <common/parameters/rich_parameter_list.h>
 
+#include "../gui_utils/clickable_label.h"
+
 class RichParameterWidget : public QWidget
 {
 	Q_OBJECT
@@ -69,7 +71,7 @@ signals:
 	void parameterChanged();
 
 protected:
-	QLabel* descriptionLabel;
+	ClickableLabel* descriptionLabel;
 	QLabel* helpLabel;
 	std::vector<QWidget*> widgets; //will contain all the other widgets of this widget
 

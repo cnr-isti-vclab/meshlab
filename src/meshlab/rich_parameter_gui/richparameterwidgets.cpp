@@ -43,7 +43,7 @@ RichParameterWidget::RichParameterWidget(
 		helpVisible(false)
 {
 	if (parameter != nullptr) {
-		descriptionLabel = new QLabel(parameter->fieldDescription(), this);
+		descriptionLabel = new ClickableLabel(parameter->fieldDescription(), this);
 		descriptionLabel->setToolTip(parameter->toolTip());
 		descriptionLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
@@ -130,6 +130,7 @@ BoolWidget::BoolWidget(QWidget* p, const RichBool& rb, const RichBool& rdef) :
 	widgets.push_back(cb);
 
 	connect(cb, SIGNAL(stateChanged(int)), p, SIGNAL(parameterChanged()));
+	connect(descriptionLabel, SIGNAL(clicked()), cb, SLOT(toggle()));
 }
 
 BoolWidget::~BoolWidget()

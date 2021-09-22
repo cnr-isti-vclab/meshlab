@@ -20,26 +20,22 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include "vertical_scroll_area.h"
+#include "clickable_label.h"
 
-#include <QEvent>
-#include <QScrollBar>
-#include <QVBoxLayout>
-
-#include "vertical_scroll_area.h"
-
-VerticalScrollArea::VerticalScrollArea(QWidget* parent) : QScrollArea(parent)
+ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f) : QLabel(parent, f)
 {
-	setWidgetResizable(true);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
 
-bool VerticalScrollArea::eventFilter(QObject* o, QEvent* e)
+ClickableLabel::ClickableLabel(const QString& description, QWidget* parent, Qt::WindowFlags f) :
+	QLabel(description, parent, f)
 {
-	// This works because QScrollArea::setWidget installs an eventFilter on the widget
-	if (o && o == widget() && e->type() == QEvent::Resize)
-		setMinimumWidth(widget()->minimumSizeHint().width() + verticalScrollBar()->width());
+}
 
-	return QScrollArea::eventFilter(o, e);
+ClickableLabel::~ClickableLabel()
+{
+}
+
+void ClickableLabel::mousePressEvent(QMouseEvent*)
+{
+	emit clicked();
 }

@@ -8,6 +8,7 @@ set(SOURCES
 	pickPointsTemplate.cpp
 	pickedPoints.cpp
 	pickpointsDialog.cpp
+	../../meshlab/gui_utils/clickable_label.cpp
 	../../meshlab/rich_parameter_gui/richparameterwidgets.cpp
 	../../meshlab/rich_parameter_gui/richparameterlistframe.cpp
 	../../meshlab/rich_parameter_gui/richparameterlistdialog.cpp)
