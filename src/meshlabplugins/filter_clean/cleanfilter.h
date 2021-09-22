@@ -55,9 +55,7 @@ class CleanFilter : public QObject, public FilterPlugin
 			FP_REMOVE_DUPLICATED_VERTEX,
 			FP_REMOVE_FACE_ZERO_AREA,
 			FP_MERGE_CLOSE_VERTEX,
-			FP_MERGE_WEDGE_TEX,
-			FP_COMPACT_VERT,
-			FP_COMPACT_FACE
+			FP_MERGE_WEDGE_TEX
 	} ;
 
 	CleanFilter();

@@ -476,9 +476,8 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 		float alpha = 1;
 
 		switch (stepNum) {
-		case 0: // ***** Storing Vertex Data *****
-		{
-			if(tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
+		case 0: { // ***** Storing Vertex Data *****
+			if(tri::HasPerVertexAttribute(m.cm,AttribName)) {
 				vcg::tri::Allocator<CMeshO>::DeletePerVertexAttribute(m.cm,AttribName);
 			}
 			CMeshO::PerVertexAttributeHandle<Point3m> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m> (m.cm,AttribName);
@@ -490,27 +489,26 @@ std::map<std::string, QVariant> FilterUnsharp::applyFilter(
 			log( "Stored Position %d vertices", m.cm.vn);
 			break;
 		}
-		case 1: // ***** Recovering and Projection Vertex Data *****
-		{
-			if(!tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
+		case 1: { // ***** Recovering and Projection Vertex Data *****
+			if(!tri::HasPerVertexAttribute(m.cm,AttribName)) {
 				throw MLException("Failed to retrieve the stored vertex position. First Store than recover.");
 			}
 			CMeshO::PerVertexAttributeHandle<Point3m> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m> (m.cm,AttribName);
 
 			CMeshO::VertexIterator vi;
-			for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
-			{
-				Point3m d = h[vi] - viewpoint; d.Normalize();
-				float s = d * ( (*vi).cP() - h[vi] );
+			for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi) {
+				Point3m d = h[vi] - viewpoint;
+				d.Normalize();
+				Scalarm s = d * ( (*vi).cP() - h[vi] );
 				(*vi).P() = h[vi] + d * (s*alpha);
 			}
 			m.updateBoxAndNormals();
-			log(  "Projected smoothed Position %d vertices", m.cm.vn);
-		}
+			log("Projected smoothed Position %d vertices", m.cm.vn);
 			break;
 		}
-	}
+		}
 		break;
+	}
 	case FP_SD_LAPLACIAN_SMOOTH:
 	{
 		tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
