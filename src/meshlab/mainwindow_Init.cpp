@@ -759,9 +759,11 @@ void MainWindow::fillFilterMenu()
 	}
 
 	for (const auto& p : mapFilterPlugins) {
-		FilterPlugin * iFilter = p.second;
-		QAction *filterAction = iFilter->getFilterAction(p.first);
-		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+		FilterPlugin* iFilter      = p.second;
+		QAction*      filterAction = iFilter->getFilterAction(p.first);
+		QString       tooltip = "<b>" + iFilter->filterName(filterAction) + "</b><br>" +
+						  iFilter->filterInfo(filterAction) + "<br>" +
+						  getDecoratedFileName(filterAction->data().toString());
 		filterAction->setToolTip(tooltip);
 		connect(filterAction, SIGNAL(triggered()), this, SLOT(startFilter()));
 
@@ -831,10 +833,8 @@ void MainWindow::fillFilterMenu()
 		if (filterClass == 0) {
 			filterMenu->addAction(filterAction);
 		}
-		//if(!filterAction->icon().isNull())
+		// if(!filterAction->icon().isNull())
 		//    filterToolBar->addAction(filterAction);
-
-
 	}
 }
 

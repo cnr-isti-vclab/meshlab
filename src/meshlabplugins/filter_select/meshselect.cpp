@@ -121,7 +121,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 
 QString SelectionFilterPlugin::pluginName() const
 {
-    return "FilterSelect";
+	return "FilterSelect";
 }
 
 QString SelectionFilterPlugin::filterName(ActionIDType filter) const
