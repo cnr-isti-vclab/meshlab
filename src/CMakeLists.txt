@@ -152,7 +152,6 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 
 			# Filter plugins
 			meshlabplugins/filter_sample
-			meshlabplugins/filter_sample_dyn
 			meshlabplugins/filter_createiso
 			meshlabplugins/filter_geodesic
 			meshlabplugins/filter_sample_gpu
