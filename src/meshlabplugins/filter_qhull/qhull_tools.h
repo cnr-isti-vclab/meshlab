@@ -46,21 +46,22 @@
 ****************************************************************************/
 
 #include <common/ml_document/mesh_model.h>
+
+#ifdef SYSTEM_QHULL
+#include "libqhull_r.h"
+#include "geom_r.h"
+#include "io_r.h"
+#include "merge_r.h"
+#else
+
 #include <math.h>
-
-
 extern "C"
 {
 #include <stdio.h>
 #include <stdlib.h>
 
-// qhull includes - qhull/ omitted to support both system and bundled libs.
-#ifdef SYSTEM_QHULL
-#include "libqhull.h"
-#else
 #include "qhull.h"
 #include "qset.h"
-#endif
 #include "mem.h"
 #include "geom.h"
 #include "merge.h"
@@ -68,9 +69,10 @@ extern "C"
 #include "io.h"
 #include "stat.h"
 }
+#endif
 
-facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m);
-facetT *compute_delaunay(int dim, int numpoints, MeshModel &m);
-bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, Scalarm threshold);
-bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm,double alpha, bool alphashape);
-int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, Point3m viewpointP,float threshold,bool convex_hullFP,bool triangVP);
+facetT *compute_convex_hull(qhT* qh, int dim, int numpoints, MeshModel &m);
+bool compute_delaunay(qhT* qh, int dim, int numpoints, MeshModel &m);
+bool compute_voronoi(qhT* qh, int dim, int numpoints, MeshModel &m, MeshModel &pm, Scalarm threshold);
+bool compute_alpha_shapes(qhT* qh, int dim, int numpoints, MeshModel &m, MeshModel &pm,double alpha, bool alphashape);
+int visible_points(qhT* qh, int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, Point3m viewpointP,float threshold,bool convex_hullFP,bool triangVP);

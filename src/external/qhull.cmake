@@ -5,15 +5,15 @@
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
 
-find_package(Qhull COMPONENTS libqhull)
+find_package(Qhull COMPONENTS qhull_r)
 set(QHULL_DIR ${CMAKE_CURRENT_LIST_DIR}/qhull-2003.1)
 
-if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::libqhull)
+if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::qhull_r)
 	message(STATUS "- qhull - using system-provided library")
 	add_library(external-qhull INTERFACE)
-	target_link_libraries(external-qhull INTERFACE Qhull::libqhull)
+	target_link_libraries(external-qhull INTERFACE Qhull::qhull_r)
 	target_compile_definitions(external-qhull INTERFACE SYSTEM_QHULL)
-	target_include_directories(external-qhull INTERFACE ${QHULL_libqhull_INCLUDE_DIR}/libqhull)
+	target_include_directories(external-qhull INTERFACE ${QHULL_qhull_r_INCLUDE_DIR}/libqhull_r)
 elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/src/qhull.h")
 	message(STATUS "- qhull - using bundled source")
 	add_library(

@@ -207,6 +207,9 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos */* cb*/)
 {
+	qhT qh_qh = {};
+	qhT* qh = &qh_qh;
+
 	switch(ID(filter))
 	{
 	case FP_QHULL_CONVEX_HULL :
@@ -231,17 +234,18 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		int dim= 3;				/* dimension of points */
 		int numpoints= m.cm.vn;	/* number of mesh vertices */
 
-		//facet_list contains the Delaunauy triangulation as a list of tetrahedral facets */
-		facetT *facet_list = compute_delaunay(dim,numpoints,m);
+		// facet_list contains the Delaunauy triangulation as a list of tetrahedral facets
+		bool result = compute_delaunay(qh, dim,numpoints,m);
 
-		if(facet_list!=NULL){
+		if (result) {
 
-			int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-			assert( qh num_vertices == convexNumVert);
+			setT* vertices = qh_facetvertices (qh, qh->facet_list, NULL, false);
+			int convexNumVert = qh_setsize(qh, vertices);
+			assert( qh->num_vertices == convexNumVert);
 
 			tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
 
-			vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
+			vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh->num_vertices);
 			vertexT *vertex;
 			int i=0;
 			FORALLvertices{
@@ -249,7 +253,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 					pm.cm.vert[i].P()[0] = (*vertex).point[0];
 					pm.cm.vert[i].P()[1] = (*vertex).point[1];
 					pm.cm.vert[i].P()[2] = (*vertex).point[2];
-					ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
+					ivp[qh_pointid(qh, vertex->point)] = &pm.cm.vert[i];
 					i++;
 				}
 			}
@@ -258,23 +262,23 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 			//each ridge (d-1 vertices between two neighboring facets) is a triangle.
 
 			facetT *facet, *neighbor;
-			qh visit_id++;
+			qh->visit_id++;
 			int ridgeCount=0;
 
 			//Compute each ridge (triangle) once
-			FORALLfacet_(facet_list)
+			FORALLfacets
 					if (!facet->upperdelaunay) {
-				facet->visitid= qh visit_id;
-				qh_makeridges(facet);
+				facet->visitid = qh->visit_id;
+				qh_makeridges(qh, facet);
 				ridgeT *ridge, **ridgep;
 				FOREACHridge_(facet->ridges) {
 					neighbor= otherfacet_(ridge, facet);
-					if (neighbor->visitid != qh visit_id) {
+					if (neighbor->visitid != qh->visit_id) {
 						tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 						ridgeCount++;
 						int vertex_n, vertex_i;
-						FOREACHvertex_i_(ridge->vertices)
-								(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+						FOREACHvertex_i_(qh, ridge->vertices)
+								(*fi).V(vertex_i)= ivp[qh_pointid(qh, vertex->point)];
 					}
 				}
 			}
@@ -288,8 +292,8 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 			pm.updateBoxAndNormals();
 
 			int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-			qh_freeqhull(!qh_ALL);
-			qh_memfreeshort (&curlong, &totlong);
+			qh_freeqhull(qh, !qh_ALL);
+			qh_memfreeshort (qh, &curlong, &totlong);
 			if (curlong || totlong)
 				fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
 						 totlong, curlong);
@@ -310,7 +314,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 
 		Scalarm threshold = par.getDynamicFloat("threshold");
 
-		bool result = compute_voronoi(dim,numpoints,m,pm,threshold);
+		bool result = compute_voronoi(qh, dim,numpoints,m,pm,threshold);
 
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -360,7 +364,7 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 			pm.updateDataMask(MeshModel::MM_FACEQUALITY);
 		}
 
-		bool result =compute_alpha_shapes(dim,numpoints,m,pm,alpha,alphashape);
+		bool result =compute_alpha_shapes(qh, dim,numpoints,m,pm,alpha,alphashape);
 
 		if(result){
 			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
