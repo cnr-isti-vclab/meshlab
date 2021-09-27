@@ -82,7 +82,7 @@ void FilterIcpAlignParameter::RichParameterSetToMeshTreeParam(const RichParamete
 
 void FilterIcpAlignParameter::MeshTreeParamToRichParameterSet(const MeshTreem::Param &mtp, RichParameterList &rps) {
     rps.addParam(RichInt("OGSize", mtp.OGSize, "Occupancy Grid Size",
-                         "To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can ", false, CATEGORY_ARC_CREATION_PARAMETERS));
+                         "To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can...", false, CATEGORY_ARC_CREATION_PARAMETERS));
     rps.addParam(RichFloat("arcThreshold", mtp.arcThreshold, "Arc Area Thr.",
                            "We run ICP on every pair of mesh with a relative overlap greater than this threshold. The relative overlap is computed as overlapArea / min(area1,area2)", false, CATEGORY_ARC_CREATION_PARAMETERS));
     rps.addParam(RichFloat("recalcThreshold", mtp.recalcThreshold, "Recalc Fraction",
