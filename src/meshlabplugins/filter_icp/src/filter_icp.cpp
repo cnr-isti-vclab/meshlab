@@ -26,8 +26,11 @@
 #define PAR_SOURCE_MESH         "SourceMesh"
 #define PAR_BASE_MESH           "BaseMesh"
 #define PAR_REFERENCE_MESH      "ReferenceMesh"
+#define PAR_OG_SIZE             "OGSize"
 #define PAR_ONLY_VISIBLE_MESHES "OnlyVisibleMeshes"
 #define PAR_SAVE_LAST_ITERATION "SaveLastIteration"
+
+#define DEFAULT_OG_SIZE 50000
 
 /* Static variables needed by the vcg::AlignPair::align() method */
 std::vector<vcg::Point3d> *vcg::PointMatchingScale::fix;
@@ -42,7 +45,7 @@ vcg::Box3d vcg::PointMatchingScale::b;
  * If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
  */
 FilterIcpPlugin::FilterIcpPlugin() {
-    this->typeList = {FP_TWO_MESH_ICP, FP_GLOBAL_MESH_ICP};
+    this->typeList = {FP_TWO_MESH_ICP, FP_GLOBAL_MESH_ICP, FP_OVERLAPPING_MESHES};
 
     for (const ActionIDType &tt : typeList) {
         actionList.push_back(new QAction(this->filterName(tt), this));
@@ -67,6 +70,9 @@ QString FilterIcpPlugin::filterName(ActionIDType filterId) const {
         case FP_GLOBAL_MESH_ICP: {
             return "Global Align Meshes";
         }
+        case  FP_OVERLAPPING_MESHES: {
+            return "Overlapping Meshes";
+        }
         default: {
             assert(0);
             return "";
@@ -88,8 +94,11 @@ QString FilterIcpPlugin::filterInfo(ActionIDType filterId) const {
         }
         case FP_GLOBAL_MESH_ICP: {
             return tr("Perform the global alignment process to align a set of visible meshes together. "
-                      "The alignment algorithm is implemented over the idea written by Kari Pulli in his paper: "
+                      "The alignment algorithm is implemented over the idea written by <i>Kari Pulli</i> in his paper: "
                       "\"Multiview Registration for Large Data Sets\"");
+        }
+        case FP_OVERLAPPING_MESHES: {
+            return tr("Use an occupancy grid to see which meshes overlap between themselves.");
         }
         default: {
             assert(0);
@@ -110,6 +119,8 @@ FilterIcpPlugin::FilterClass FilterIcpPlugin::getClass(const QAction *action) co
         case FP_TWO_MESH_ICP:
         case FP_GLOBAL_MESH_ICP:
             return FilterPlugin::Remeshing;
+        case FP_OVERLAPPING_MESHES:
+            return FilterPlugin::Measure;
         default:
             assert(0);
             return FilterPlugin::Generic;
@@ -192,6 +203,13 @@ RichParameterList FilterIcpPlugin::initParameterList(const QAction *action, cons
             /* Add default ICP parameters to the parameters List */
             FilterIcpAlignParameter::AlignPairParamToRichParameterSet(this->alignParameters, parameterList);
 
+            break;
+        }
+
+        case FP_OVERLAPPING_MESHES: {
+
+            parameterList.addParam(RichInt(PAR_OG_SIZE, DEFAULT_OG_SIZE, "Occupancy Grid Size",
+                                 "To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can..."));
 
             break;
         }
@@ -219,21 +237,24 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
         unsigned int & /*postConditionMask*/,
         vcg::CallBackPos *cb) {
 
-    // Set the align parameters from the RichParameterList, they are in common
-    // with the two filters.
-    FilterIcpAlignParameter::RichParameterSetToAlignPairParam(par, this->alignParameters);
-
     switch (ID(action)) {
 
         case FP_TWO_MESH_ICP: {
+            FilterIcpAlignParameter::RichParameterSetToAlignPairParam(par, this->alignParameters);
             return applyIcpTwoMeshes(md, par);
         }
 
         case FP_GLOBAL_MESH_ICP: {
+            FilterIcpAlignParameter::RichParameterSetToAlignPairParam(par, this->alignParameters);
             // Read the parameters for the New Arc Creation
             FilterIcpAlignParameter::RichParameterSetToMeshTreeParam(par, this->meshTreeParameters);
             return globalAlignment(md, par);
         }
+
+        case FP_OVERLAPPING_MESHES: {
+            return checkOverlappingMeshes(md, par);
+        }
+
         default: {
             wrongActionCalled(action);
         }
@@ -242,7 +263,7 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyFilter(
     return std::map<std::string, QVariant>();
 }
 
-std::map<std::string, QVariant> FilterIcpPlugin::globalAlignment(MeshDocument &meshDocument, const RichParameterList &par) {
+std::map<std::string, QVariant> FilterIcpPlugin::globalAlignment(MeshDocument& meshDocument, const RichParameterList &par) {
 
     MeshTreem meshTree {};
 
@@ -299,7 +320,7 @@ std::map<std::string, QVariant> FilterIcpPlugin::globalAlignment(MeshDocument &m
     return std::map<std::string, QVariant> {};
 }
 
-std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par) {
+std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument& meshDocument, const RichParameterList &par) {
 
     vcg::AlignPair aligner;
 
@@ -413,7 +434,44 @@ std::map<std::string, QVariant> FilterIcpPlugin::applyIcpTwoMeshes(MeshDocument 
     };
 }
 
-void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) const {
+std::map<std::string, QVariant> FilterIcpPlugin::checkOverlappingMeshes(MeshDocument& meshDocument, const RichParameterList& par) {
+
+    using SourceTargetPair = std::pair<unsigned int, unsigned int>;
+
+    const int occupancyGridSize = par.getInt(PAR_OG_SIZE);
+    const unsigned int meshNumber = meshDocument.meshNumber();
+
+    auto overlapPairs = std::vector<SourceTargetPair>{};
+    auto occupancyGrid = vcg::OccupancyGrid<CMeshO, Scalarm>{};
+
+    /* Init occupancy grid using information we have */
+    occupancyGrid.Init(meshNumber, meshDocument.bbox(), occupancyGridSize);
+
+    /* Add each meshes contained in the document inside the Occupancy Grid */
+    for (auto& mesh : meshDocument.meshIterator()) {
+        occupancyGrid.AddMesh(mesh.cm, mesh.cm.Tr, mesh.id());
+    }
+
+    /* Compute the Occupancy Grid to see the overlapping meshes */
+    occupancyGrid.Compute();
+
+    for (auto& arc: occupancyGrid.SVA) {
+
+        auto sourceName = meshDocument.getMesh(arc.s)->shortName().toStdString();
+        auto targetName = meshDocument.getMesh(arc.t)->shortName().toStdString();
+
+        log("[%d -> %d]: Mesh \"%s\" overlaps with \"%s\".\n", arc.s, arc.t, sourceName.c_str(), targetName.c_str());
+
+        /* Add a pair inside the overlapPairs vector */
+        overlapPairs.push_back(SourceTargetPair{arc.s, arc.t});
+    }
+
+    return std::map<std::string, QVariant>{
+            {"overlappingMeshesPairs", QVariant::fromValue(overlapPairs)}
+    };
+}
+
+void FilterIcpPlugin::saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) {
 
     /* Save the last points iteration */
     MeshModel *chosenMovingPointsMesh = meshDocument.addNewMesh("", "Chosen Source Points", false);

@@ -58,7 +58,8 @@ public:
 	//enum used to give an ID to every filter implemented in the plugin
 	enum FileterIds {
 	    FP_TWO_MESH_ICP,
-	    FP_GLOBAL_MESH_ICP
+	    FP_GLOBAL_MESH_ICP,
+        FP_OVERLAPPING_MESHES
 	};
 
     FilterIcpPlugin();
@@ -88,7 +89,8 @@ private:
 
     std::map<std::string, QVariant> globalAlignment(MeshDocument &meshDocument, const RichParameterList &par);
     std::map<std::string, QVariant> applyIcpTwoMeshes(MeshDocument &meshDocument, const RichParameterList &par);
-    void saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) const;
+    std::map<std::string, QVariant> checkOverlappingMeshes(MeshDocument& meshDocument, const RichParameterList& par);
+    static void saveLastIterationPoints(MeshDocument &meshDocument, vcg::AlignPair::Result &alignerResult) ;
 };
 
 #endif //MESHLAB_FILTER_EXAMPLE_PLUGIN_H
