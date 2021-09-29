@@ -47,29 +47,10 @@
 
 #include <common/ml_document/mesh_model.h>
 
-#ifdef SYSTEM_QHULL
 #include "libqhull_r.h"
 #include "geom_r.h"
 #include "io_r.h"
 #include "merge_r.h"
-#else
-
-#include <math.h>
-extern "C"
-{
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "qhull.h"
-#include "qset.h"
-#include "mem.h"
-#include "geom.h"
-#include "merge.h"
-#include "poly.h"
-#include "io.h"
-#include "stat.h"
-}
-#endif
 
 facetT *compute_convex_hull(qhT* qh, int dim, int numpoints, MeshModel &m);
 bool compute_delaunay(qhT* qh, int dim, int numpoints, MeshModel &m);

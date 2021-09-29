@@ -1,0 +1,81 @@
+#!/bin/sh
+#   writes examples to eg/
+#   see html/qh_eg.htm
+if ! which qconvex >/dev/null 2>&1; then
+    if [ ! -d bin ]; then
+	echo 'eg/q_eg: Run eg/q_eg from the Qhull directory with bin/qconvex, or add qconvex/etc. to $PATH'
+	exit 1
+    fi
+    if [ ! -e bin/qconvex -a ! -e bin/qconvex.exe ]; then
+	echo 'eg/q_eg: Build qhull first.  qconvex is missing from bin/ directory and $PATH'
+	exit 1
+    fi
+    echo 'eg/q_eg: Temporarily add "$PWD/bin" to $PATH for access to qconvex,etc.'
+    PATH=$PWD/bin:$PATH
+    if ! which qconvex >/dev/null 2>&1; then
+	echo 'eg/q_eg: PATH=... failed.  Please execute "export PATH=$PWD/bin:$PATH" and repeat'
+	exit 1
+    fi
+fi
+mkdir -p eg
+echo ==============================
+echo ========= eg/q_eg ============
+echo == Create geomview examples ==
+echo ==============================
+echo
+set -v
+rbox c D3 | qconvex s G >eg/eg.01.cube
+rbox c d G2.0 | qconvex s G >eg/eg.02.diamond.cube
+rbox s 100 D3 | qconvex s G >eg/eg.03.sphere
+rbox s 100 D2 | qconvex s G >eg/eg.04.circle
+rbox 10 l | qconvex s G >eg/eg.05.spiral 
+rbox 1000 D2 | qconvex s C-0.03 Qc Gapcv >eg/eg.06.merge.square
+rbox 1000 D3 | qconvex s G >eg/eg.07.box 
+rbox c G0.4 s 500 | qconvex s G >eg/eg.08a.cube.sphere
+rbox d G0.6 s 500 | qconvex s G >eg/eg.08b.diamond.sphere
+rbox 100 L3 G0.5 s | qconvex s G >eg/eg.09.lens
+rbox 100 s P0.5,0.5,0.5 | qconvex s Ga QG0 >eg/eg.10a.sphere.visible
+rbox 100 s P0.5,0.5,0.5 | qconvex s Ga QG-0 >eg/eg.10b.sphere.beyond
+rbox 100 s P0.5,0.5,0.5 | qconvex s Ga QG0 PG >eg/eg.10c.sphere.horizon
+rbox 100 s P0.5,0.5,0.5 | qconvex s Ga QV0 PgG >eg/eg.10d.sphere.cone
+rbox 100 s P0.5,0.5,0.5 | qconvex s Ga >eg/eg.10e.sphere.new
+rbox 100 s P0.5,0.5,0.5 | qhull s Ga QV0g Q0 >eg/eg.14.sphere.corner
+rbox 500 W0 | qconvex s QR0 Qc Gvp >eg/eg.15a.surface
+rbox 500 W0 | qconvex s QR0 Qt Qc Gvp >eg/eg.15b.triangle
+rbox 500 W0 | qconvex s QR0 QJ5e-2 Qc Gvp >eg/eg.15c.joggle
+echo 2 = rbox 6 r s D2, rbox 15 B0.3 W0.25, c G0.5 >eg/eg.data.17
+echo 25 >>eg/eg.data.17
+rbox 15 D2 B0.3 W0.25 c G0.5 | tail -n +3 >>eg/eg.data.17
+rbox 6 r s D2 B0.2 | tail -n +3 >>eg/eg.data.17
+qdelaunay s Qt <eg/eg.data.17 GnraD2 >eg/eg.17a.delaunay.2
+qdelaunay s <eg/eg.data.17 GnraD2 >eg/eg.17b.delaunay.2i
+qdelaunay s <eg/eg.data.17 C-0 Ga >eg/eg.17c.delaunay.2-3
+qvoronoi s QJ <eg/eg.data.17 Gna >eg/eg.17d.voronoi.2
+qvoronoi s <eg/eg.data.17 Gna >eg/eg.17e.voronoi.2i
+rbox c G0.1 d | qdelaunay Gt Qz >eg/eg.17f.delaunay.3
+rbox 10 D2 d | qdelaunay s Qu G >eg/eg.18a.furthest.2-3
+rbox 10 D2 d | qdelaunay s Qu Pd2 G >eg/eg.18b.furthest-up.2-3
+rbox 10 D2 d | qvoronoi s Qu Gv >eg/eg.18c.furthest.2 
+rbox 10 D3 | qvoronoi s FQ QV5 p | qconvex s G >eg/eg.19.voronoi.region.3
+rbox r s 20 Z1 G0.2 | qconvex s QR1 G >eg/eg.20.cone
+rbox 200 s | qconvex s Qc R0.014 Gpav >eg/eg.21b.roundoff.fixed
+rbox 1000 s| qconvex s C0.01 Qc Gcrp >eg/eg.22a.merge.sphere.01
+rbox 1000 s| qconvex s C-0.01 Qc Gcrp >eg/eg.22b.merge.sphere.-01
+rbox 1000 s| qconvex s C0.05 Qc Gcrpv >eg/eg.22c.merge.sphere.05
+rbox 1000 s| qconvex s C-0.05 Qc Gcrpv >eg/eg.22d.merge.sphere.-05
+rbox 1000 | qconvex s Gcprvah C0.1 Qc >eg/eg.23.merge.cube
+rbox 5000 D4 | qconvex s GD0v Pd0:0.5 C-0.02 C0.1 >eg/eg.24.merge.cube.4d-in-3d
+rbox 5000 D4 | qconvex s s C-0.02 C0.1 Gh >eg/eg.30.4d.merge.cube
+rbox 20 D3 | qdelaunay s G >eg/eg.31.4d.delaunay
+rbox 30 s D4 | qconvex s G Pd0d1d2D3 >eg/eg.32.4d.octant
+rbox 10 r s Z1 G0.3 | qconvex G >eg/eg.33a.cone
+rbox 10 r s Z1 G0.3 | qconvex FQ FV n | qhalf G >eg/eg.33b.cone.dual
+rbox 10 r s Z1 G0.3 | qconvex FQ FV n | qhalf FQ s Fp | qconvex G >eg/eg.33c.cone.halfspace
+
+echo ==the following should generate flipped and concave facets== >/dev/null
+rbox 200 s | qhull Q0 s R0.014 Gav Po >eg/eg.21a.roundoff.errors
+echo ==the preceding should report flipped and concave facets== >/dev/null
+echo END eg/q_eg >/dev/null
+
+
+
