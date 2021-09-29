@@ -19,7 +19,6 @@ elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/libqhull_r.h")
 	add_library(
 		external-qhull STATIC
 		"${QHULL_DIR}/geom2_r.c"
-		"${QHULL_DIR}/global.c"
 		"${QHULL_DIR}/io_r.c"
 		"${QHULL_DIR}/io_r.h"
 		"${QHULL_DIR}/mem_r.c"
