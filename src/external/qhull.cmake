@@ -5,7 +5,7 @@
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
 
-find_package(Qhull COMPONENTS qhull_r)
+find_package(Qhull 8 COMPONENTS qhull_r)
 set(QHULL_DIR ${CMAKE_CURRENT_LIST_DIR}/qhull-2020.2/src)
 
 if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::qhull_r)
