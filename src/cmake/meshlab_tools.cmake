@@ -4,9 +4,14 @@
 
 #function used to add plugins
 function(add_meshlab_plugin target_name)
+	set(EXCLUDE_ALL_ARG "")
+	if (BUILD_MESHLAB_MINI)
+		set(EXCLUDE_ALL_ARG "EXCLUDE_FROM_ALL")
+	endif()
+
 	cmake_parse_arguments(ARG "" "" "" ${ARGN})
 
-	add_library(${target_name} MODULE ${ARG_UNPARSED_ARGUMENTS})
+	add_library(${target_name} MODULE ${EXCLUDE_ALL_ARG} ${ARG_UNPARSED_ARGUMENTS})
 
 	target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 	target_link_libraries(${target_name} PUBLIC meshlab-common)
