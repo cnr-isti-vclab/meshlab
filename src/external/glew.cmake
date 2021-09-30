@@ -36,9 +36,6 @@ elseif(ALLOW_BUNDLED_GLEW AND EXISTS "${GLEW_DIR}/src/glew.c")
 	else()
 		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
 	endif()
-	if(TARGET OpenGL::GLX)
-		target_link_libraries(external-glew PUBLIC OpenGL::GLX)
-	endif()
 	set_property(TARGET external-glew PROPERTY FOLDER External)
 
 	set_property(TARGET external-glew
