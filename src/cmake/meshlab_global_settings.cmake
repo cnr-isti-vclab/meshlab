@@ -2,12 +2,15 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-# Prefer OpenGL GLVND
 if(POLICY CMP0072)
-	cmake_policy(SET CMP0072 NEW)
+	if (USE_OPENGL_GLVND)
+		cmake_policy(SET CMP0072 NEW) # OpenGL GLVND
+	else()
+		cmake_policy(SET CMP0072 OLD) # OpenGL legacy
+	endif()
 endif()
 
-#enable setting options with SET cmake command
+# Enable setting options with SET cmake command
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 ### Build settings
