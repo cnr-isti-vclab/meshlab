@@ -5,42 +5,48 @@
 option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
 
-find_package(Qhull COMPONENTS libqhull)
-set(QHULL_DIR ${CMAKE_CURRENT_LIST_DIR}/qhull-2003.1)
+find_package(Qhull 8 COMPONENTS qhull_r CONFIG)
+set(QHULL_DIR ${CMAKE_CURRENT_LIST_DIR}/qhull-2020.2/src)
 
-if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::libqhull)
+if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::qhull_r)
 	message(STATUS "- qhull - using system-provided library")
 	add_library(external-qhull INTERFACE)
-	target_link_libraries(external-qhull INTERFACE Qhull::libqhull)
+	target_link_libraries(external-qhull INTERFACE Qhull::qhull_r)
 	target_compile_definitions(external-qhull INTERFACE SYSTEM_QHULL)
-	target_include_directories(external-qhull INTERFACE ${QHULL_libqhull_INCLUDE_DIR}/libqhull)
-elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/src/qhull.h")
+elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/libqhull_r/libqhull_r.h")
 	message(STATUS "- qhull - using bundled source")
 	add_library(
 		external-qhull STATIC
-		"${QHULL_DIR}/src/geom2.c"
-		"${QHULL_DIR}/src/global.c"
-		"${QHULL_DIR}/src/io.c"
-		"${QHULL_DIR}/src/io.h"
-		"${QHULL_DIR}/src/mem.c"
-		"${QHULL_DIR}/src/mem.h"
-		"${QHULL_DIR}/src/merge.c"
-		"${QHULL_DIR}/src/merge.h"
-		"${QHULL_DIR}/src/poly.c"
-		"${QHULL_DIR}/src/poly.h"
-		"${QHULL_DIR}/src/poly2.c"
-		"${QHULL_DIR}/src/qconvex.c"
-		"${QHULL_DIR}/src/qhull.c"
-		"${QHULL_DIR}/src/qhull.h"
-		"${QHULL_DIR}/src/qset.c"
-		"${QHULL_DIR}/src/qset.h"
-		"${QHULL_DIR}/src/stat.c"
-		"${QHULL_DIR}/src/stat.h"
-		"${QHULL_DIR}/src/geom.c"
-		"${QHULL_DIR}/src/geom.h"
-		"${QHULL_DIR}/src/user.c"
-		"${QHULL_DIR}/src/user.h")
-	target_include_directories(external-qhull INTERFACE "${QHULL_DIR}/src")
+		"${QHULL_DIR}/libqhull_r/geom2_r.c"
+		"${QHULL_DIR}/libqhull_r/io_r.c"
+		"${QHULL_DIR}/libqhull_r/io_r.h"
+		"${QHULL_DIR}/libqhull_r/mem_r.c"
+		"${QHULL_DIR}/libqhull_r/mem_r.h"
+		"${QHULL_DIR}/libqhull_r/merge_r.c"
+		"${QHULL_DIR}/libqhull_r/merge_r.h"
+		"${QHULL_DIR}/libqhull_r/poly_r.c"
+		"${QHULL_DIR}/libqhull_r/poly_r.h"
+		"${QHULL_DIR}/libqhull_r/poly2_r.c"
+		"${QHULL_DIR}/libqhull_r/libqhull_r.c"
+		"${QHULL_DIR}/libqhull_r/libqhull_r.h"
+		"${QHULL_DIR}/libqhull_r/qset_r.c"
+		"${QHULL_DIR}/libqhull_r/qset_r.h"
+		"${QHULL_DIR}/libqhull_r/stat_r.c"
+		"${QHULL_DIR}/libqhull_r/stat_r.h"
+		"${QHULL_DIR}/libqhull_r/geom_r.c"
+		"${QHULL_DIR}/libqhull_r/geom_r.h"
+		"${QHULL_DIR}/libqhull_r/user_r.c"
+		"${QHULL_DIR}/libqhull_r/user_r.h"
+		"${QHULL_DIR}/libqhull_r/qhull_ra.h"
+		"${QHULL_DIR}/libqhull_r/global_r.c"
+		"${QHULL_DIR}/libqhull_r/random_r.h"
+		"${QHULL_DIR}/libqhull_r/random_r.c"
+		"${QHULL_DIR}/libqhull_r/usermem_r.c"
+		"${QHULL_DIR}/libqhull_r/userprintf_r.c"
+		"${QHULL_DIR}/libqhull_r/rboxlib_r.c"
+		"${QHULL_DIR}/libqhull_r/userprintf_rbox_r.c"
+		)
+	target_include_directories(external-qhull INTERFACE "${QHULL_DIR}")
 	set_property(TARGET external-qhull PROPERTY FOLDER External)
 	target_link_libraries(external-qhull PRIVATE external-disable-warnings)
 endif()

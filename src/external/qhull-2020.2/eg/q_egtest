@@ -1,0 +1,55 @@
+#!/bin/sh
+#   writes examples to eg/
+if ! which qconvex >/dev/null 2>&1; then
+    if [ ! -d bin ]; then
+	echo 'eg/q_egtest: Run eg/q_egtest from the Qhull directory with bin/qconvex, or add qconvex/etc. to $PATH'
+	exit
+    fi
+    if [ ! -e bin/qconvex -a ! -e bin/qconvex.exe ]; then
+	echo 'eg/q_egtest: Build qhull first.  qconvex is missing from bin/ directory and $PATH'
+	exit
+    fi
+    echo 'eg/q_egtest: Temporarily add "$PWD/bin" to $PATH for access to qconvex,etc.'
+    PATH=$PWD/bin:$PATH
+    if ! which qconvex >/dev/null 2>&1; then
+	echo 'eg/q_egtest: PATH=... failed.  Please execute "export PATH=$PWD/bin:$PATH" and repeat'
+	exit 1
+    fi
+fi
+mkdir -p eg
+echo ==============================
+echo ========= eg/q_egtest ========
+echo == Create geomview tests =====
+echo ==============================
+echo
+set -v
+rbox d D3 | qconvex s Gnrv Tc Tv >eg/eg.t01.spheres.3
+rbox d D2 | qconvex s Gnv  Tc Tv >eg/eg.t02.spheres.2
+rbox d D3 | qconvex s Gnrp Tc Tv >eg/eg.t03.points.3
+rbox d D2 | qconvex s Gnp Tc Tv >eg/eg.t04.points.2
+rbox c D4 | qconvex s C0.05 GnpcD3 Pd3:0.5 Tc Tv >eg/eg.t05.centrum.points.4-3
+rbox d D3 | qconvex s Gnrc Tc Tv >eg/eg.t06.centrums.3.precise
+rbox d D3 | qconvex s C0.05 Gnrc Tc Tv >eg/eg.t07.centrums.3
+rbox d D2 | qconvex s C0.05 Gc Tc Tv >eg/eg.t08.centrums.2
+rbox d D3 | qconvex s Gnha Tc Tv >eg/eg.t09.intersect.3
+rbox d D3 | qconvex s GaD0 Pd0 Tc Tv >eg/eg.t10.faces.3-2
+rbox d D3 | qconvex s GnrpD0 Pd0 Tc Tv >eg/eg.t11.points.3-2
+rbox d D3 | qconvex s C0.05 GnrcD0 Pd0 Tc Tv >eg/eg.t12.centrums.3-2
+rbox d D3 | qconvex s GnhaD0 Pd0 Tc Tv >eg/eg.t13.intersect.3-2
+rbox d D3 | qconvex s GnrvD0 Pd0 Tc Tv >eg/eg.t14.spheres.3-2
+rbox c D4 | qconvex s GvD0 Pd0:0.5 Tc Tv >eg/eg.t15.spheres.4-3
+rbox c D4 | qhull s Q0 C0 GpD0 Pd0:0.5 Tc Tv >eg/eg.t16.points.4-3
+rbox c D4 | qconvex s GahD0 Pd0:0.5 Tc Tv >eg/eg.t17.intersect.4-3
+rbox 100 s | qconvex s C-0.05 Qc Gicvprh Tc Tv >eg/eg.t18.imprecise.3
+rbox 30 s D4 | qconvex s GhD0 Pd0d1d2D3 Tc >eg/eg.t19.intersect.precise.4-3
+rbox 100 s P1,1,1 | qconvex s QG-0 Pgp Tc G >eg/eg.t20.notvisible
+rbox 100 s | qconvex s QV-10 Pgp Tc G  >eg/eg.t21.notvertex
+rbox 100 r D2 P1,1 | qhull s Pd0:0.7 PD0:0.8 QgG0 G Tv >eg/eg.t22.split
+rbox 100 D2 c G1.0 | qvoronoi s A-0.95 Gna Tv >eg/eg.t23.voronoi.imprecise
+rbox 30 s D4 | qconvex s Gh Pd0d1d2D3 Tc >eg/eg.t24.intersect.precise.4d
+
+echo ==the following generates an error== >/dev/null
+rbox 1000 D4 | qhull Q0 s Po R0.005 Ga Tc Tv >eg/eg.t25.neighbors.4d
+echo ==the previous should generate an error== >/dev/null
+echo END eg/q_egtest >/dev/null
+

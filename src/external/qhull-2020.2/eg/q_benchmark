@@ -1,0 +1,705 @@
+#!/bin/sh
+#
+# eg/q_benchmark [test] [precision-count] [other-count] [pinched-count] [time-count]"  
+#  Time and precision benchmark for qhull using eg/qtest.sh
+#
+# With negative counts, compare output with Beyond Compare.  Aligns on '^Test.?.?.? -- '
+#  Session > Session Settings.. > Alignment > Skew Tolerance > 5000
+#
+# To compare various choices for facet merging (e.g., merge_r.c/qh_next_facetmerge)
+#  T=A_LT_T_LT_6; ../eg/q_benchmark 0 -6 -6 | tee $T.log | grep -E '^== |Maximum|error' | tee $T.err; echo $T $(grep error $T.err | wc -l)
+#
+# Use 'gcc -O3' via libqhull/Makefile
+#
+# $Id: //main/2019/qhull/eg/q_benchmark#5 $$DateTime: 2020/06/05 16:33:18 $
+# $Change: 2967 $$Author: bbarber $
+
+function log { #message
+        echo "$1" | tee -a $QH_APPEND_DEST | tee -a $QH_APPEND_SHOW
+}
+
+# set -v # echo commands to stdout
+
+if [[ "$1" == "test" ]]; then
+  TEST_QTEST=1
+  shift
+fi
+
+N_PRECISION=${1:-0}
+FUZZY_CUBE=1
+NARROW_LENSE=1
+CONE=1
+
+N_OTHER=${2:-0}
+DELAUNAY_CIRCLE=1
+LENSE_SIZE=0   # not repeatable
+LENSE_GAP=0    # not repeatable
+
+N_PINCHED=${3:-0}	# Q14 -- merge pinched vertices
+CUBE_PAIRS=1
+DELAUNAY_PAIRS=1
+CIRCLE_PAIRS=1
+VORONOI_WIDE_MESH=1     # wide pairs, 1e-8 instead of 1e-13
+DELAUNAY_DRUM_PAIRS=1   # nearly cospherical with Qbb
+TIME_DELAUNAY_PAIRS_CUBE=1
+TIME_DELAUNAY_PAIRS=1
+
+N_TIMING=${4:-0}
+TIME_INTERIOR=1 	# Random points
+TIME_SPHERE=1		# Cospherical points
+TIME_POST_MERGE=1	# Post-merge of cospherical points
+TIME_CUBICAL=1		# Rotated cubical points
+TIME_JOGGLE=1		# Joggled cubical points
+TIME_MERGE=1		# Merging cubical points
+TIME_DELAUNAY=1		# Delaunay of random points
+TIME_REGULAR_MESH=1
+
+QHULL=${QHULL:-qhull}
+if [[ -d eg ]]; then
+    export QH_APPEND_DEST="eg/qhull-benchmark.log"
+    export QH_APPEND_SHOW="eg/qhull-benchmark-show.log"
+else
+    export QH_APPEND_DEST="qhull-benchmark.log"
+    export QH_APPEND_SHOW="qhull-benchmark-show.log"
+fi
+rm -f $QH_APPEND_DEST
+rm -f $QH_APPEND_SHOW
+
+if qtest.sh >/dev/null 2>&1; then
+    QTEST=qtest.sh
+elif [ -e qtest.sh ]; then
+    QTEST=qtest.sh
+elif [ -e eg/qtest.sh ]; then
+    QTEST=eg/qtest.sh
+elif [ -e ../eg/qtest.sh ]; then
+    QTEST=../eg/qtest.sh
+elif [ -e ../../eg/qtest.sh ]; then
+    QTEST=../../eg/qtest.sh
+else
+    echo 'eg/q_benchmark: Not able to locate qtest.sh.  Tried $PATH, ./, eg/, ../eg/, and ../../eg/'
+    exit 1
+fi
+
+if ! which rbox >/dev/null 2>&1; then
+    if [ ! -d bin ]; then
+        echo 'eg/q_benchmark: Run eg/q_benchmark from the Qhull directory with bin/rbox, or add rbox to $PATH'
+        exit 1
+    fi
+    if [ ! -e bin/rbox -a ! -e bin/rbox.exe ]; then
+        echo 'eg/q_benchmark: Build qhull first.  rbox is missing from bin/ directory and $PATH'
+        exit 1
+    fi
+    echo 'eg/q_benchmark: Temporarily add "$PWD/bin" to $PATH for access to rbox'
+    PATH=$PWD/bin:$PATH
+    if ! which rbox >/dev/null 2>&1; then
+	echo 'eg/q_benchmark: PATH=... failed.  Please execute "export PATH=$PWD/bin:$PATH" and repeat'
+	exit 1
+    fi
+fi
+if ! which $QTEST >/dev/null 2>&1; then
+    log "q_benchmark error: expecting Qhull test program '$QTEST', not able to execute"
+    log "$(ls -ld $QTEST)"
+    log "$($QTEST)"
+    exit 1
+fi
+if ! (rbox c | $QHULL >/dev/null 2>&1); then
+    log "q_benchmark error: expecting a Qhull program \$QHULL '$QHULL', not able to execute"
+    log "$(ls -ld $QHULL)"
+    log "$($QHULL)"
+    exit 1
+fi
+
+export QH_TEST='' # additional regexp for qtest.sh, see N_TIMING
+
+log
+log "============================================"
+log "== eg/q_benchmark [test] [precision-count] [other-count] [pinched-count] [time-count]"
+log "== Time and precision benchmarks for qhull"
+log "============================================"
+log
+log "[jun'20] Many timing figures 5-10% faster than jun'19 results.  No change to code"
+log
+if [[ "$TEST_QTEST" == 1 ]]; then
+    log "'q_benchmark test $N_PRECISION $N_OTHER $N_PINCHED $N_TIMING' $(date)"
+else
+    log "'q_benchmark $N_PRECISION $N_OTHER $N_PINCHED $N_TIMING' $(date)"
+fi
+log
+log "$(grep Id: $0 | head -1)"
+log "$($QTEST help | grep Id:)"
+log "qhull => $(QHULL -V)"
+log "$(ls -l $(which $QHULL))"
+log "rbox => $(rbox | grep Version | sed 's/^.*Version/Version/')"
+log "$(ls -l $(which rbox))"
+log "$(uname -a)"
+log
+log "Logging to $PWD/$QH_APPEND_DEST and $QH_APPEND_SHOW"
+
+if [[ "$TEST_QTEST" == 1 ]]; then
+    log
+    log  ========================
+    log "=== test eg/qtest.sh ==="
+    log  ========================
+    log
+    log "== qtest.sh help"
+    $QTEST | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh 1 '10' ''"
+    $QTEST 1 '10' ''
+    log "== qtest.sh 2 'rbox 10 | qhull'"
+    $QTEST 2 'rbox 10 | qhull'
+    log "== qtest.sh -3 '10' ''"
+    $QTEST -3 '10' ''
+    log "== qtest.sh -3 'rbox 10 | qhull'"
+    $QTEST -3 'rbox 10 | qhull'
+    log "== qtest.sh run t123456 '10' 'Tz'"
+    $QTEST run t123456 '10' 'Tz' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh run QR123456 'rbox 10 | qhull Tz'"
+    $QTEST run QR123456 'rbox 10 | qhull Tz' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh log 'rbox 10 | qhull'"
+    ($QTEST log 'rbox 10 | qhull' && echo && echo qhull.log && head qhull.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh t123456 '10' ''"
+    ($QTEST t123456 '10' '' && echo && echo qhull.log && head qhull.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh QR123456 'rbox 10 | qhull'"
+    ($QTEST QR123456 'rbox 10 | qhull' && echo && echo qhull-step.log && head qhull-step.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep 'qh_addpoint|QH1' >qhull-grep.log"
+    ($QTEST grep 'qh_addpoint|QH1' >qhull-grep.log && head qhull-grep.log && echo qhull-grep.log && tail qhull-grep.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep 'qh_addpoint' 'added| qh_addpoint' >qhull-grep.log"
+    ($QTEST grep 'qh_addpoint' 'added| qh_addpoint' >qhull-grep.log && head qhull-grep.log && echo qhull-grep.log && tail qhull-grep.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-merge 'qhull.log' >qhull-grep.log"
+    ($QTEST grep-merge qhull.log >qhull-grep.log && head qhull-grep.log && echo qhull-grep.log && tail qhull-grep.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-step 'qhull.log' >qhull-step.log"
+    ($QTEST grep-step qhull.log >qhull-step.log && head qhull-step.log && echo qhull-step.log && tail qhull-step.log) | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh -v -3 'rbox 10 | qhull'"
+    $QTEST -v -3 'rbox 10 | qhull'
+
+    log
+    log  ============================
+    log "=== test qtest.sh errors ==="
+    log  ============================
+    log "== qtest.sh run -3 'rbox 10 | qhull'"
+    $QTEST run -3 'rbox 10 | qhull' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh run 3 '10' ''"
+    $QTEST run 3 '10' '' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh run '10' ''"
+    $QTEST run '10' '' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh run"
+    $QTEST run  | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh 3 '10' d T4"
+    $QTEST 3 '10' d T4 | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh 3 '10' 'd H'"
+    $QTEST 3 '10' 'd H' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh 3"
+    $QTEST 3 | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep"
+    $QTEST grep | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-merge '10' 'v'"
+    $QTEST grep-merge '10' 'v' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-merge"
+    $QTEST grep-merge | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-merge not-a-file"
+    $QTEST grep-merge not-a-file | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-step '10' 'v'"
+    $QTEST grep-step '10' 'v' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-step"
+    $QTEST grep-step | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh grep-step not-a-file"
+    $QTEST grep-step not-a-file | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh log '10' 'd'"
+    $QTEST log '10' 'd' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh t34"
+    $QTEST t34 | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh t34 'rbox 10 | qhull'"
+    $QTEST t34 'rbox 10 | qhull' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh QR34"
+    $QTEST QR34 | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh QR34 '10' 'v'"
+    $QTEST QR34 '10' 'v' | tee -a "$QH_APPEND_DEST"
+    log "== qtest.sh t34 '10  ZERROR' 'v'"
+    $QTEST t34 '10 ZERROR' 'v' | tee -a "$QH_APPEND_DEST"
+    log "== Delete temporary log files ghull.log, qhull-grep.log, and qhull-step.log"
+    rm -f qhull.log qhull-grep.log qhull-step.log
+fi
+
+log
+log "=============================="
+log "=== N_PRECISION test cases ==="
+log "=============================="
+if [[ $N_PRECISION -gt 0 || $N_PRECISION -lt 0 ]]; then
+
+log "== difficult cases for qhull ${d:-`date`}"
+
+if [[ $FUZZY_CUBE == 1 ]]; then
+    log
+    log ====================
+    log "== Convex hull of fuzzy cube (large flat facets)"
+    log ====================
+    set -v
+    # [2015-2019] 1 D5 error vs. 2 D5 + 1 D6 error, similar CPU
+    # rbox is slow if compiled for Debug
+    $QTEST $N_PRECISION '1000000 W1e-13 D2' 'Tv'
+    $QTEST $N_PRECISION '500000 W1e-13 D3' 'Tv'
+    $QTEST $N_PRECISION '10000 W1e-13 D4' 'Tv'
+    $QTEST $N_PRECISION '2000 W1e-13 D5' 'Tv'
+    $QTEST $N_PRECISION '1000 W1e-13 D6' 'Tv'
+    set +v
+fi
+if [[ $NARROW_LENSE == 1 ]]; then
+    log
+    log ====================
+    log "== narrow lense"
+    log ====================
+    set -v
+    # [2015-2019] no errors, similar CPU, new sometimes slower
+    $QTEST $N_PRECISION '1000000 L100000 s G1e-6 D2' 'Tv'
+    $QTEST $N_PRECISION '10000 L100000 s G1e-6 D3' 'Q12 Tv'
+    $QTEST $N_PRECISION '5000 L100000 s G1e-6 D4' 'Tv'
+    $QTEST $N_PRECISION '1000 L100000 s G1e-6 D5' 'Tv'
+    $QTEST $N_PRECISION '400 L100000 s G1e-6 D6' 'Tv'
+    set +v
+fi
+
+if [[ $CONE == 1 ]]; then
+    log
+    log ====================
+    log "== cone"
+    log ====================
+    set -v
+    # [2015-2019] D2, no errors, similar CPU
+    # [2015-2019] D3, 2+20x and outside points vs. 3+20x, new is faster except for one 3x slower
+    # [2015-2019] D4, 3+20x vs. no errors, wide variation in CPU, new is slower
+    # [2015-2019] D5, 0 vs. 2 errors, new is 2x slower
+    # [2015-2019] D6, 0 vs. 1 error and 3 OK errors, new is 2x slower
+    $QTEST $N_PRECISION '100000 s Z1 G1e-13 D2' 'Tv'
+    $QTEST $N_PRECISION '10000 s Z1 G1e-13 D3' 'Q12 Tv'
+    $QTEST $N_PRECISION '2000 s Z1 G1e-13 D4' 'Q12 Tv'
+    $QTEST $N_PRECISION '1000 s Z1 G1e-13 D5' 'Q12 Tv'
+    $QTEST $N_PRECISION '400 s Z1 G1e-13 D6' 'Q12 Tv'
+    set +v
+fi
+export QH_TEST=''
+fi # end of N_PRECISION test cases
+
+log
+log "=========================="
+log "=== N_OTHER test cases ==="
+log "=========================="
+if [[ $N_OTHER -gt 0 || $N_OTHER -lt 0 ]]; then
+
+if [[ $DELAUNAY_CIRCLE == 1 ]]; then
+    log
+    log ====================
+    log "== Delaunay triangulation of fuzzy circle (large, narrow disk)"
+    log "== No Qbb, highly degenerate due to narrow disk of two cospherical sets of points"
+    log ====================
+    set -v
+    # [2015-2019] D2, ten 20+x  vs. 3 errors and seven 20+x
+    # [2015-2019] D3, 1 error 2 outside nine 20+x vs. 8 errors and two 20+x
+    # [2015-2019] D4, 5 errors and three 20+x vs. 3 errors and three 20+x
+    # [2015-2019] D5, 7 errors vs. 1 error and one 20+x
+    # [2015-2019] D6, 8 errors vs. 9 errors
+    #    Only 8 facets remain due to many dupridges with flipped facets
+    $QTEST $N_OTHER '10000 s W1e-13 D2' 'd Tv'  # no Qbb
+    $QTEST $N_OTHER '2000 s W1e-13 D3' 'd Tv'
+    $QTEST $N_OTHER '1000 s W1e-13 D4' 'd Tv'
+    $QTEST $N_OTHER '200 s W1e-13  D5' 'd Tv'
+    $QTEST $N_OTHER '100 s W1e-13  D6' 'd Tv'
+    set +v
+fi
+
+export QH_TEST='merge|rename|created:|facets:| hull:'
+if [[ $LENSE_SIZE == 1 ]]; then   # For testing, normally skipped
+    log
+    log ====================
+    log "== test narrow lense by size "
+    log ====================
+    set -v
+    # [2015.2-2018.0] D3 similar behavior, 10x increase in merges/facet per run
+    # [2015.2-2018.0] D3 L1000000 QH6154, initial simplex is flat
+    $QTEST 1 '1000 L1000 s G1e-6 D3' ''
+    $QTEST 1 '1000 L10000 s G1e-6 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-6 D3' ''
+    $QTEST 1 '1000 L1000000 s G1e-6 D3' ''
+    set +v
+fi
+if [[ $LENSE_GAP == 1 ]]; then   # For testing, normally skipped
+    log
+    log ====================
+    log "== test narrow lense by gap "
+    log ====================
+    set -v
+    # [2015.2-2018.0] D3 similar behavior, L100000 max'd 511 merges for a facet
+    $QTEST 1 '1000 L100000 s G1e-3 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-4 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-5 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-6 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-7 D3' ''
+    $QTEST 1 '1000 L100000 s G1e-8 D3' ''
+    set +v
+fi
+export QH_TEST=''
+
+fi # end of N_OTHER test cases
+
+log
+log "==========================================================="
+log "=== N_PINCHED test cases for Q14-merge-pinched-vertices ==="
+log "==========================================================="
+if [[ $N_PINCHED -gt 0 || $N_PINCHED -lt 0 ]]; then
+
+if [[ $CUBE_PAIRS == 1 ]]; then
+    log
+    log ====================
+    log "== Convex hull of fuzzy cube with point pairs (large flat facets)"
+    log ====================
+    set -v
+    # [2015-2019] D2, no errors, similar CPU
+    # [2015-2019] D3, no errors, new is faster
+    # [2015-2019] D4, 3 vs. 1 error, similar speed
+    # [2015-2019] D5, 10 vs. 1 errors
+    # [2015-2019] D6, 10 vs. 2 errors
+    $QTEST $N_PINCHED '1000000 W1e-13 C1,2e-13 D2' 'Q14 Tv'
+    $QTEST $N_PINCHED '500000 W1e-13 C1,2e-13 D3' 'Q14 Tv'  # Tv doubles the time
+    $QTEST $N_PINCHED '20000 W1e-13 C1,2e-13 D4' 'Q14 Tv'
+    $QTEST $N_PINCHED '2000 W1e-13 C1,2e-13 D5' 'Q14 Tv'
+    $QTEST $N_PINCHED '500 W1e-13 C1,2e-13 D6' 'Q14 Tv'
+    set +v
+    log
+    log ====================
+    log "== Convex hull of cube with point pairs (large flat facets)"
+    log ====================
+    set -v
+    # [2015-2019] D2, no errors, new is somewhat slower
+    # [2015-2019] D3, no errors, similar CPU
+    # [2015-2019] D4, 5 vs. no errors, similar speed
+    # [2015-2019] D5, 9 vs. 1 error
+    # [2015-2019] D6, 10 vs. 6 errors
+    $QTEST $N_PINCHED '1000000 W0 C1,2e-13 D2' 'Q14 Tv'
+    $QTEST $N_PINCHED '100000 W0 C1,2e-13 D3' 'Q14 Tv'
+    $QTEST $N_PINCHED '5000  W0 C1,2e-13 D4' 'Q14 Tv'
+    $QTEST $N_PINCHED '1000 W0 C1,2e-13 D5' 'Q14 Tv'
+    $QTEST $N_PINCHED '500 W0 C1,2e-13 D6' 'Q14 Tv'
+    set +v
+fi
+
+if [[ $DELAUNAY_PAIRS == 1 ]]; then
+
+    log
+    log ====================
+    log "== Delaunay triangulation of point pairs (large upper facet)"
+    log "== Difficult case due to large upper facet with nearly adjacent vertices"
+    log "== A bounding box helps avoid this case, see TIME_DELAUNAY_PAIRS"
+    log ====================
+    set -v
+    # [2015-2019] D2 no errors, similar CPU
+    # [2015-2019] D3 10 vs. 0 errors
+    # [2015-2019] D4 10 vs. 4 errors
+    # [2015-2019] D5 10 vs. 7 errors
+    # [2015-2019] D6 10 vs. 0 errors
+    $QTEST $N_PINCHED '100000 C1,2e-13 D2' 'Q14 d Qbb'  # Tv is too expensive
+    $QTEST $N_PINCHED '10000 C1,2e-13 D3' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '500 C1,2e-13 D4' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '200 C1,2e-13 D5' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '100 C1,2e-13 D6' 'Q14 d Qbb Tv'
+    set +v
+
+    log
+    log ====================
+    log "== Delaunay triangulation of point quads (2e-13, large upper facet)"
+    log "== Difficult case due to large upper facet with many nearly adjacent vertices"
+    log ====================
+    set -v
+    # [2015-2019] D2 no errors, new somewhat faster
+    # [2015-2019] D3 10 vs. 7 errors
+    # [2015-2019] D4 10 vs. 9 errors
+    # [2015-2019] D5 10 vs. 9 errors
+    # [2015-2019] D6 10 vs. 2 errors
+    $QTEST $N_PINCHED '50000 C3,2e-13 D2' 'Q14 d Qbb'  # 'Tv' is too expensive
+    $QTEST $N_PINCHED '10000 C3,2e-13 D3' 'Q14 d Qbb'  # 'Tv' is too expensive
+    $QTEST $N_PINCHED '200 C3,2e-13 D4' 'Q14 d Qbb Tv' # lots of errors for 300
+    $QTEST $N_PINCHED '100 C3,2e-13 D5' 'Q14 d Qbb Tv' # lots of error for 100 and 200
+    $QTEST $N_PINCHED '100 C3,2e-13 D6' 'Q14 d Qbb Tv' # OK
+    set +v
+fi
+if [[ $CIRCLE_PAIRS == 1 ]]; then
+    log
+    log ====================
+    log "== Delaunay triangulation of fuzzy circle with pairs (large, narrow disk)"
+    log "== Highly degenerate due to narrow disk of two cospherical sets of point pairs"
+    log "== Worse with Qbb since it stretches out the paraboloid, doubling _one-merge"
+    log ====================
+    set -v
+    # [2015-2019] D2 0 vs. 2 errors, new 10x faster
+    # [2015-2019] D3 10 vs. 9 errors
+    # [2015-2019] D4 10 vs. 7 errors
+    # [2015-2019] D5 10 vs. 10 errors
+    # [2015-2019] D6 10 vs. 10 errors
+    $QTEST $N_PINCHED '10000 s W1e-13 C1,1e-13 D2' 'Q14 d Tv'
+    $QTEST $N_PINCHED '5000 s W1e-13 C1,1e-13 D3' 'Q14 d Tv'
+    $QTEST $N_PINCHED '500 s W1e-13  C1,1e-13 D4' 'Q14 d Tv'
+    $QTEST $N_PINCHED '200 s W1e-13  C1,1e-13 D5' 'Q14 d Tv'
+    $QTEST $N_PINCHED '100 s W1e-13  C1,1e-13 D6' 'Q14 d Tv'
+    set +v
+fi
+
+if [[ $VORONOI_WIDE_MESH == 1 ]]; then
+    log
+    log ====================
+    log "== Voronoi diagram of rotated mesh with wide, 1e-8 pairs"
+    log "== All fail at C1,1e-12"
+    log ====================
+    set -v
+    # [2015-2019] D2 1 vs. 0 errors, similar speed
+    # [2015-2019] D3 6 vs. 4 errors, similar speed
+    # [2015-2019] D4 0 vs. 0 errors, new is 5% slower
+    # [2015-2019] D5 0 vs. 2 errors, new is 10% slower
+    # [2015-2019] D6 skipped, too slow
+    $QTEST $N_PINCHED "10000 M3,4 C1,1e-8 D2" "QR3 Q14 v Qbb Tv" # co-circular if 40000
+    $QTEST $N_PINCHED "2000 M3,4,5 C1,1e-8 D3" "QR3 Q14 v Qbb Tv"
+    $QTEST $N_PINCHED "600 M3,4,5 C1,1e-8 D4" "QR3 Q14 v Qbb Tv"
+    $QTEST $N_PINCHED "300 M3,4,5 C1,1e-8 D5" "QR3 Q14 v Qbb Tv" # 250 is narrow
+    log "skip D6, millions of vertices" # $QTEST $N_PINCHED "250 M3,4,5 D6 C1,1e-8" "QR3 Q14 v Qbb Tv"
+    set +v
+fi
+
+if [[ $DELAUNAY_DRUM_PAIRS == 1 ]]; then
+    log
+    log  ============================
+    log "== Delaunay triangulation of nearly cospherical point pairs with Qbb drum"
+    log "== Qbb makes this the most difficult distribution for Qhull, only 100 points"
+    log  ============================
+    # [2015-2019] D3 0 vs. 0 errors, new is 2x faster
+    # [2015-2019] D4 9 vs. 8 errors
+    # [2015-2019] D5 10 vs. 10 errors
+    # [2015-2019] D6 10 vs. 10 errors
+    $QTEST $N_PINCHED '1000 s C1,1e-13 D3' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '100 s C1,1e-13 D4' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '50 s C1,1e-13 D5' 'Q14 d Qbb Tv'
+    $QTEST $N_PINCHED '50 s C1,1e-13 D6' 'Q14 d Qbb Tv'
+fi
+
+
+if [[ $TIME_DELAUNAY_PAIRS_CUBE == 1 ]]; then
+    log
+    log  ============================
+    log "== Time for pinched Delaunay triangulation of random point pairs (Q14) with bounding box"
+    log  ============================
+    # [2015-2019] D2 no errors, similar speed
+    # [2015-2019] D3 3 vs. no errors, similar speed
+    # [2015-2019] D4 10 vs. 1 error
+    # [2015-2019] D5 10 vs. 1 error
+    # [2015-2019] D6 10 vs. 1 error
+    $QTEST $N_PINCHED '50000 C1,2e-13 c G2.0 D2' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '10000 C1,2e-13 c G2.0 D3' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '3000 C1,2e-13 c G2.0 D4' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '500 C1,2e-13 c G2.0 D5' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '100 C1,2e-13 c G2.0 D6' 'Q14 d Qbb'
+fi
+
+if [[ $TIME_DELAUNAY_PAIRS == 1 ]]; then
+    log
+    log  ============================
+    log "== Time for pinched Delaunay triangulation of random point pairs (Q14, Q12)"
+    log "== qh_next_facetmerge, qh_findbesthorizon (qh_distplane)"
+    log  ============================
+    # [2015-2019] D2 no errors, 20% slower CPU
+    # [2015-2019] D3 10 vs. no errors
+    # [2015-2019] D4 10 vs. no errors
+    # [2015-2019] D5 10 vs. 2 errors
+    # [2015-2019] D6 10 vs. no errors
+    $QTEST $N_PINCHED '50000 C1,2e-13 D2' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '5000 C1,2e-13 D3' 'Q14 d Qbb'
+    $QTEST $N_PINCHED '500 C1,2e-13 D4' 'Q12 Q14 d Qbb'
+    $QTEST $N_PINCHED '300 C1,2e-13 D5' 'Q12 Q14 d Qbb'
+    $QTEST $N_PINCHED '100 C1,2e-13 D6' 'Q14 d Qbb'
+fi
+
+export QH_TEST=''
+fi # end of N_PINCHED test cases
+
+log
+log  ===========================
+log "=== N_TIMING test cases ==="
+log  ===========================
+if [[ $N_TIMING -gt 0 || $N_TIMING -lt 0 ]]; then
+
+# export QH_TEST='vertices:|facets:|sites:|regions:|merged facets:|hyperplanes created:'
+
+log
+log  ============================
+log "== Time for random points in a cube"
+log  ============================
+if [[ $TIME_INTERIOR == 1 ]]; then
+    # [2015-2019] D2 no errors, 10% slower CPU
+    # [2015-2019] D3 no errors, 5% slower CPU
+    # [2015-2019] D4 no errors, similar CPU
+    # [2015-2019] D5 no errors, similar CPU
+    # [2015-2019] D6 no errors, similar CPU
+    $QTEST $N_TIMING '1000000 D2' ''
+    $QTEST $N_TIMING '500000 D3' ''
+    $QTEST $N_TIMING '200000 D4' ''
+    $QTEST $N_TIMING '100000 D5' 'Q12'
+    $QTEST $N_TIMING '3000 D6' ''
+fi
+
+log
+log  ============================
+log "== Time for random cospherical points"
+log  ============================
+if [[ $TIME_SPHERE == 1 ]]; then
+    # [2015-2019] D2 no errors, similar CPU
+    # [2015-2019] D3 no errors, 10% slower CPU
+    # [2015-2019] D4 no errors, 5% slower CPU
+    # [2019, gcc] D4 qconvex, no errors, 4% faster than qhull
+    # [2015-2019] D5 no errors, similar CPU
+    # [2015-2019] D6 no errors, similar CPU
+    $QTEST $N_TIMING '100000 s D2' ''
+    $QTEST $N_TIMING '100000 s D3' ''
+    $QTEST $N_TIMING '50000 s D4' ''
+    if [[ -e ../bin/qconvex || -e bin/qconvex ]]; then
+      echo
+      echo == Repeat with 'qconvex', bin/qconvex is built with libqhull instead of libqhull_r
+      QHULL=qconvex $QTEST $N_TIMING '50000 s D4' ''
+    fi
+    $QTEST $N_TIMING '10000 s D5' ''
+    $QTEST $N_TIMING '1000 s D6' ''
+fi
+
+log
+log  ============================
+log "== Time for extreme post-merge of random cospherical points"
+log  ============================
+if [[ $TIME_POST_MERGE == 1 ]]; then
+    # [2015-2019] D2 no errors, 10% slower CPU
+    # [2015-2019] D3 no errors, 20% slower CPU
+    # [2015-2019] D4 no errors, 15% slower CPU
+    # [2019, gcc] D4 qconvex, no errors, slightly faster than qhull
+    # [2015-2019] D5 no errors, 10% slower CPU
+    # [2015-2019] D6 no errors, 10% slower CPU
+    $QTEST $N_TIMING '100000 s D2' 'C0.01'
+    $QTEST $N_TIMING '10000 s D3' 'C0.01'
+    $QTEST $N_TIMING '5000 s D4' 'C0.01'
+    if [[ -e ../bin/qconvex || -e bin/qconvex ]]; then
+      echo
+      echo == Repeat with 'qconvex', bin/qconvex is built with libqhull instead of libqhull_r
+      QHULL=qconvex $QTEST $N_TIMING '5000 s D4' 'C0.01'
+    fi
+    $QTEST $N_TIMING '2000 s D5' 'C0.01'
+    $QTEST $N_TIMING '500 s D6' 'C0.01'
+fi
+
+log
+log  ============================
+log "== Time for rotated cubical points with large merged facets"
+log  ============================
+if [[ $TIME_CUBICAL == 1 ]]; then
+    # [2015-2019] D2 no errors, 5% slower CPU
+    # [2015-2019] D3 no errors, somewhat slower CPU
+    # [2015-2019] D4 no errors, similar CPU
+    # [2015-2019] D5 no errors, 10% slower CPU
+    # [2015-2019] D6 no errors, 10% slower CPU
+    $QTEST $N_TIMING '5000000 W0 D2' 'QR3'
+    $QTEST $N_TIMING '1000000 W0 D3' 'QR3'
+    $QTEST $N_TIMING '100000 W0 D4' 'QR3'
+    $QTEST $N_TIMING '10000 W0 D5' 'QR3'
+    $QTEST $N_TIMING '1000 W0 D6' 'QR3'
+fi
+
+log
+log  ============================
+log "== Time for joggled, rotated cubical points with multiple retries"
+log  ============================
+if [[ $TIME_JOGGLE == 1 ]]; then
+    # [2015-2019] D2 no errors, somewhat slower CPU, 0.67-0.78 was 0.8
+    # [2015-2019] D3 no errors, similar CPU, 0.4-1.7 was 0.5-0.6
+    # [2015-2019] D4 no errors, somewhat slower CPU, 0.24-0.37 was 0.35
+    # [2015-2019] D5 no errors, similar CPU, 0.4-0.9 was 0.6
+    # [2015-2019] D6 no errors, similar CPU, 0.5-1.0 was 0.9
+    $QTEST $N_TIMING '5000000 W0 D2' 'QR3 QJ'
+    $QTEST $N_TIMING '1000000 W0 D3' 'QR3 QJ'
+    $QTEST $N_TIMING '100000 W0 D4' 'QR3 QJ'
+    $QTEST $N_TIMING '10000 W0 D5' 'QR3 QJ'
+    $QTEST $N_TIMING '1000 W0 D6' 'QR3 QJ'
+
+    log
+    log  ============================
+    log "== Time for joggled, nearly cubical points"
+    log  ============================
+    $QTEST $N_TIMING '1000000 W1e-13 D2' 'QJ'
+    $QTEST $N_TIMING '500000 W1e-13 D3' 'QJ'
+    $QTEST $N_TIMING '100000 W1e-13 D4' 'QJ'
+    $QTEST $N_TIMING '10000 W1e-13 D5' 'QJ'
+    $QTEST $N_TIMING '1000 W1e-13 D6' 'QJ'
+fi
+
+log
+log  ============================
+log "== Time for merging nearly cubical points"
+log  ============================
+if [[ $TIME_MERGE == 1 ]]; then
+    # [2015-2019] D2 no errors, somewhat slower CPU
+    # [2015-2019] D3 no errors, similar CPU
+    # [2015-2019] D4 no vs. 1+20x, varied CPU
+    # [2015-2019] D5 1 vs. 1 errors, similar CPU
+    # [2015-2019] D6 no errors, similar CPU
+    $QTEST $N_TIMING '1000000 W1e-13 D2' ''
+    $QTEST $N_TIMING '1000000 W1e-13 D3' ''
+    $QTEST $N_TIMING '100000 W1e-13 D4' 'Q12'
+    $QTEST $N_TIMING '2000 W1e-13 D5' 'Q12'
+    $QTEST $N_TIMING '500 W1e-13 D6' ''
+fi
+
+log
+log  ============================
+log "== Time for Delaunay triangulation of random points"
+log "== qh_findbesthorizon, qh_distplane, qh_update_vertexneighbors_cone, qh_makenew_simplicial"
+log  ============================
+if [[ $TIME_DELAUNAY == 1 ]]; then
+    # [2015-2019] D2 no errors, similar CPU
+    # [2015-2019] D3 no errors, similar CPU
+    # [2015-2019] D4 no errors, 5% slower CPU
+    # [2015-2019] D5 no errors, 5% slower CPU
+    # [2015-2019] D6 no errors, 10% slower CPU
+    $QTEST $N_TIMING '100000 D2' 'd Qbb Qz'
+    $QTEST $N_TIMING '50000 D3' 'd Qbb Qz'
+    $QTEST $N_TIMING '10000 D4' 'd Qbb Qz'
+    $QTEST $N_TIMING '1000 D5' 'd Qbb Qz'
+    $QTEST $N_TIMING '200 D6' 'd Qbb Qz'
+fi
+
+if [[ $TIME_REGULAR_MESH == 1 ]]; then
+    log
+    log ====================
+    log "== Time for Delaunay triangulation of regular mesh, integer coordinates"
+    log ====================
+    set -v
+    # [2015-2019] D2 no errors, similar CPU
+    # [2015-2019] D3 no errors, 5% slower CPU
+    # [2015-2019] D4 no errors, 5% slower CPU
+    # [2015-2019] D5 no errors, 5% slower CPU
+    # [2015-2019] D6 no errors, somewhat slower CPU
+    $QTEST $N_TIMING "100000 M3,4 z D2" "QR3 d Qt Qbb"
+    $QTEST $N_TIMING "20000 M3,4,5 z D3" "QR3 d Qt Qbb"
+    $QTEST $N_TIMING "5000 M3,4,5 z D4" "QR3 d Qt Qbb"
+    $QTEST $N_TIMING "1500 M3,4,5 z D5" "QR3 d Qt Qbb"
+    $QTEST $N_TIMING "500 M3,4,5 z D6" "QR3 d Qt Qbb"
+    log
+    log ====================
+    log "== Time for Voronoi diagram of regular mesh"
+    log ====================
+    # [2015-2019] D2 no errors, somewhat faster CPU
+    # [2015-2019] D3 no errors, 5% slower CPU
+    # [2015-2019] D4 no errors, 5% slower CPU
+    # [2015-2019] D5 no errors, 5% slower CPU
+    # [2015-2019] D6 no errors, 10% slower CPU
+    $QTEST $N_TIMING "rbox 100000 M3,4 z D2 | $QHULL v Qbb"
+    $QTEST $N_TIMING "rbox 20000 M3,4,5 z | $QHULL v Qbb"
+    $QTEST $N_TIMING "rbox 5000 M3,4,5 z D4 | $QHULL v Qbb"
+    $QTEST $N_TIMING "rbox 1500 M3,4,5 z D5 | $QHULL v Qbb"
+    $QTEST $N_TIMING "rbox 500 M3,4,5 z D6 | $QHULL v Qbb"
+    set +v
+fi
+
+export QH_TEST=''
+fi # end of N_TIMING test cases
+
+# end of q_benchmark
