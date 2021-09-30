@@ -2,6 +2,12 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
+# OpenGL legacy is preferred because GLVND links libOpenGL.so
+# which cannot be bundled into AppImages and is not provided by
+# default into distros:
+# https://github.com/AppImage/pkg2appimage/issues/477
+# https://github.com/probonopd/linuxdeployqt/issues/486
+
 set(OpenGL_GL_PREFERENCE LEGACY) # OpenGL legacy
 
 # Enable setting options with SET cmake command
