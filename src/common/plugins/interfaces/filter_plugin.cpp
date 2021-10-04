@@ -50,10 +50,10 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 MeshLabPlugin::ActionIDType FilterPlugin::ID(const QAction* a) const
 {
 	QString aa=a->text();
-	for(ActionIDType tt : qAsConst(typeList))
+	for(ActionIDType tt : typeList)
 		if (a->text() == this->filterName(tt)) return tt;
 	aa.replace("&","");
-	for(ActionIDType tt : qAsConst(typeList))
+	for(ActionIDType tt : typeList)
 		if (aa == this->filterName(tt)) return tt;
 
 	qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
@@ -70,10 +70,10 @@ QAction* FilterPlugin::getFilterAction(ActionIDType filterID)
 QAction* FilterPlugin::getFilterAction(const QString& idName)
 {
 	QString i=idName;
-	for(QAction *tt : qAsConst(actionList))
+	for(QAction *tt : actionList)
 		if (idName == tt->text()) return tt;
 	i.replace("&","");
-	for(QAction *tt : qAsConst(actionList))
+	for(QAction *tt : actionList)
 		if (i == tt->text()) return tt;
 
 	qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));

@@ -373,61 +373,114 @@ FilterDocSampling::FilterDocSampling()
 
 QString FilterDocSampling::pluginName() const
 {
-    return "FilterSampling";
+	return "FilterSampling";
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
 QString FilterDocSampling::filterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-  case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Sampling");
-  case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling");
-  case FP_STRATIFIED_SAMPLING :  return QString("Stratified Triangle Sampling");
-  case FP_CLUSTERED_SAMPLING :  return QString("Clustered Vertex Sampling");
-  case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
-  case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance");
-  case FP_DISTANCE_REFERENCE:  return QString("Distance from Reference Mesh");
-  case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling");
-  case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer");
-  case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling");
-  case FP_VORONOI_COLORING  :  return QString("Voronoi Vertex Coloring");
-  case FP_DISK_COLORING  :  return QString("Disk Vertex Coloring");
-  case FP_REGULAR_RECURSIVE_SAMPLING  :  return QString("Regular Recursive Sampling");
-  case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Point Cloud Simplification");
+	switch (filterId) {
+	case FP_ELEMENT_SUBSAMPLING: return QString("Mesh Element Sampling");
+	case FP_MONTECARLO_SAMPLING: return QString("Montecarlo Sampling");
+	case FP_STRATIFIED_SAMPLING: return QString("Stratified Triangle Sampling");
+	case FP_CLUSTERED_SAMPLING: return QString("Clustered Vertex Sampling");
+	case FP_POISSONDISK_SAMPLING: return QString("Poisson-disk Sampling");
+	case FP_HAUSDORFF_DISTANCE: return QString("Hausdorff Distance");
+	case FP_DISTANCE_REFERENCE: return QString("Distance from Reference Mesh");
+	case FP_TEXEL_SAMPLING: return QString("Texel Sampling");
+	case FP_VERTEX_RESAMPLING: return QString("Vertex Attribute Transfer");
+	case FP_UNIFORM_MESH_RESAMPLING: return QString("Uniform Mesh Resampling");
+	case FP_VORONOI_COLORING: return QString("Voronoi Vertex Coloring");
+	case FP_DISK_COLORING: return QString("Disk Vertex Coloring");
+	case FP_REGULAR_RECURSIVE_SAMPLING: return QString("Regular Recursive Sampling");
+	case FP_POINTCLOUD_SIMPLIFICATION: return QString("Point Cloud Simplification");
 
-  default : assert(0); return QString("unknown filter!!!!");
-  }
+	default: assert(0); return QString("unknown filter!!!!");
+	}
 }
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
 QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 {
-	switch(filterId) {
-		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.");
-		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
-		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
-		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertices of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
-		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud. The simplification is performed by subsampling the original point cloud using a Poisson Disk strategy.");
-		case FP_POISSONDISK_SAMPLING       :  return QString("Create a new layer populated with a point sampling of the current mesh;"
-													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
-													"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
-													" Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
-		case FP_HAUSDORFF_DISTANCE         :  return QString("Compute the Hausdorff Distance between two layers, sampling one of the two and finding for each sample the closest point over the other mesh. Distance is stored in vertex quality of the sampled mesh.");
-		case FP_DISTANCE_REFERENCE         :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
-		case FP_TEXEL_SAMPLING             :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
-		case FP_VERTEX_RESAMPLING          :  return QString("Transfer the chosen per-vertex attributes from one layer to another. Useful to transfer attributes to different representations of a same object.<br>"
-													"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
-													"The algorithm assumes that the two meshes are reasonably similar and aligned.");
-		case FP_UNIFORM_MESH_RESAMPLING    :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
-															"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
-															"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume.");
-		case FP_VORONOI_COLORING           :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis.");
-		case FP_DISK_COLORING              :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
-		case FP_REGULAR_RECURSIVE_SAMPLING :  return QString("The bbox is recursively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building offsetted samples.");
-		default : assert(0); return QString("unknown filter!!!!");
-  }
+	switch (filterId) {
+	case FP_ELEMENT_SUBSAMPLING:
+		return QString(
+			"Create a new layer populated with a point sampling of the current mesh; at most one "
+			"sample for each element of the mesh is created. Samples are taking in a uniform way, "
+			"one for each element (vertex/edge/face); all the elements have the same probability "
+			"of being chosen.");
+	case FP_MONTECARLO_SAMPLING:
+		return QString(
+			"Create a new layer populated with a point sampling of the current mesh; samples are "
+			"generated in a randomly uniform way, or with a distribution biased by the per-vertex "
+			"quality values of the mesh.");
+	case FP_STRATIFIED_SAMPLING:
+		return QString(
+			"Create a new layer populated with a point sampling of the current mesh; to generate "
+			"multiple samples inside a triangle each triangle is subdivided according to various "
+			"<i>stratified</i> strategies. Distribution is often biased by triangle shape.");
+	case FP_CLUSTERED_SAMPLING:
+		return QString(
+			"Create a new layer populated with a subsampling of the vertices of the current mesh; "
+			"the subsampling is driven by a simple one-per-gridded cell strategy.");
+	case FP_POINTCLOUD_SIMPLIFICATION:
+		return QString(
+			"Create a new layer populated with a simplified version of the current point cloud. "
+			"The simplification is performed by subsampling the original point cloud using a "
+			"Poisson Disk strategy.");
+	case FP_POISSONDISK_SAMPLING:
+		return QString(
+			"Create a new layer populated with a point sampling of the current mesh;"
+			"samples are generated according to a Poisson-disk distribution, using the algorithm "
+			"described in:<br>"
+			"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular "
+			"Meshes'</b><br>"
+			" Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
+	case FP_HAUSDORFF_DISTANCE:
+		return QString(
+			"Compute the Hausdorff Distance between two layers, sampling one of the two and "
+			"finding for each sample the closest point over the other mesh. Distance is stored in "
+			"vertex quality of the sampled mesh.");
+	case FP_DISTANCE_REFERENCE:
+		return QString(
+			"Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a "
+			"reference mesh/pointcloud. Distance is stored in vertex quality.");
+	case FP_TEXEL_SAMPLING:
+		return QString(
+			"Create a new layer with a point sampling of the current mesh, a sample for each texel "
+			"of the mesh is generated");
+	case FP_VERTEX_RESAMPLING:
+		return QString(
+			"Transfer the chosen per-vertex attributes from one layer to another. Useful to "
+			"transfer attributes to different representations of a same object.<br>"
+			"For each vertex of the target mesh the closest point (not vertex!) on the source mesh "
+			"is computed, and the requested interpolated attributes from that source point are "
+			"copied into the target vertex.<br>"
+			"The algorithm assumes that the two meshes are reasonably similar and aligned.");
+	case FP_UNIFORM_MESH_RESAMPLING:
+		return QString(
+			"Create a new mesh that is a resampled version of the current one.<br>"
+			"The resampling is done by building a uniform volumetric representation where each "
+			"voxel contains the signed distance from the original surface. "
+			"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over "
+			"this volume.");
+	case FP_VORONOI_COLORING:
+		return QString(
+			"Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P "
+			"over M and color M according to the geodesic distance from these projected points. "
+			"Projection and coloring are done on a per vertex basis.");
+	case FP_DISK_COLORING:
+		return QString(
+			"Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P "
+			"over M and color M according to the Euclidean distance from these projected points. "
+			"Projection and coloring are done on a per vertex basis.");
+	case FP_REGULAR_RECURSIVE_SAMPLING:
+		return QString(
+			"The bounding box is recursively partitioned in a octree style, center of bbox are "
+			"considered, when the center is nearer to the surface than a given threshold it is "
+			"projected on it. It works also for building offsetted samples.");
+	default: assert(0); return QString("unknown filter!!!!");
+	}
 }
 int FilterDocSampling::getRequirements(const QAction *action)
 {
