@@ -556,6 +556,34 @@ Eigen::MatrixX3i meshlab::faceMatrix(const CMeshO& mesh)
 }
 
 /**
+ * @brief Get a #F list of Eigen vectors of integers containing the vertex indices of
+ * the polygonal mesh contained in the CMeshO mesh.
+ *
+ * @todo This method first makes a COPY of the mesh, because ImportFromTriMesh cannot
+ * take const meshes as input -> manage visited flags for const meshes!!
+ *
+ * @param mesh: input mesh
+ * @return Get a #F list of vectors of integers (vertex indices composing the faces)
+ */
+std::list<EigenVectorXui> meshlab::polygonalFaceList(const CMeshO& mesh)
+{
+	std::list<EigenVectorXui> listIndices;
+	PolyMesh                  pm;
+	CMeshO                    tm = mesh;
+	tm.face.EnableFFAdjacency();
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(tm);
+	vcg::tri::PolygonSupport<CMeshO, PolyMesh>::ImportFromTriMesh(pm, tm);
+	for (unsigned int i = 0; i < pm.face.size(); ++i) {
+		unsigned int   nv = pm.face[i].VN();
+		EigenVectorXui vi(nv);
+		for (unsigned int j = 0; j < nv; j++)
+			vi(j) = vcg::tri::Index(pm, pm.face[i].V(j));
+		listIndices.push_back(vi);
+	}
+	return listIndices;
+}
+
+/**
  * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
  * vertex normals of a CMeshO.
  * The vertices in the mesh must be compact (no deleted vertices).

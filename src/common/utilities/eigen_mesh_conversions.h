@@ -80,24 +80,25 @@ void addFaceVectorAttribute(
 	const std::string&    attributeName);
 
 // From CMeshO to Eigen
-EigenMatrixX3m   vertexMatrix(const CMeshO& mesh);
-Eigen::MatrixX3i faceMatrix(const CMeshO& mesh);
-EigenMatrixX3m   vertexNormalMatrix(const CMeshO& mesh);
-EigenMatrixX3m   faceNormalMatrix(const CMeshO& mesh);
-EigenMatrixX4m   vertexColorMatrix(const CMeshO& mesh);
-EigenMatrixX4m   faceColorMatrix(const CMeshO& mesh);
-EigenVectorXui   vertexColorArray(const CMeshO& mesh);
-EigenVectorXui   faceColorArray(const CMeshO& mesh);
-EigenVectorXm    vertexQualityArray(const CMeshO& mesh);
-EigenVectorXm    faceQualityArray(const CMeshO& mesh);
-EigenMatrixX2m   vertexTexCoordMatrix(const CMeshO& mesh);
-EigenMatrixX2m   wedgeTexCoordMatrix(const CMeshO& mesh);
-EigenVectorXb    vertexSelectionArray(const CMeshO& mesh);
-EigenVectorXb    faceSelectionArray(const CMeshO& mesh);
-EigenMatrixX3m   vertexCurvaturePD1Matrix(const CMeshO& mesh);
-EigenMatrixX3m   vertexCurvaturePD2Matrix(const CMeshO& mesh);
-EigenMatrixX3m   faceCurvaturePD1Matrix(const CMeshO& mesh);
-EigenMatrixX3m   faceCurvaturePD2Matrix(const CMeshO& mesh);
+EigenMatrixX3m            vertexMatrix(const CMeshO& mesh);
+Eigen::MatrixX3i          faceMatrix(const CMeshO& mesh);
+std::list<EigenVectorXui> polygonalFaceList(const CMeshO& mesh);
+EigenMatrixX3m            vertexNormalMatrix(const CMeshO& mesh);
+EigenMatrixX3m            faceNormalMatrix(const CMeshO& mesh);
+EigenMatrixX4m            vertexColorMatrix(const CMeshO& mesh);
+EigenMatrixX4m            faceColorMatrix(const CMeshO& mesh);
+EigenVectorXui            vertexColorArray(const CMeshO& mesh);
+EigenVectorXui            faceColorArray(const CMeshO& mesh);
+EigenVectorXm             vertexQualityArray(const CMeshO& mesh);
+EigenVectorXm             faceQualityArray(const CMeshO& mesh);
+EigenMatrixX2m            vertexTexCoordMatrix(const CMeshO& mesh);
+EigenMatrixX2m            wedgeTexCoordMatrix(const CMeshO& mesh);
+EigenVectorXb             vertexSelectionArray(const CMeshO& mesh);
+EigenVectorXb             faceSelectionArray(const CMeshO& mesh);
+EigenMatrixX3m            vertexCurvaturePD1Matrix(const CMeshO& mesh);
+EigenMatrixX3m            vertexCurvaturePD2Matrix(const CMeshO& mesh);
+EigenMatrixX3m            faceCurvaturePD1Matrix(const CMeshO& mesh);
+EigenMatrixX3m            faceCurvaturePD2Matrix(const CMeshO& mesh);
 
 Eigen::MatrixX3i faceFaceAdjacencyMatrix(const CMeshO& mesh);
 
