@@ -106,7 +106,7 @@ QString meshlab::defaultShadersPath()
 {
 	QDir dir(basePath());
 #ifdef Q_OS_MAC // TODO: check that this works as expected
-	return shadersDir.path() + "/shaders";
+	return dir.path() + "/shaders";
 #endif
 #ifdef Q_OS_LINUX
 	dir.cdUp();
