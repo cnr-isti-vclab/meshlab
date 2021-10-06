@@ -218,6 +218,7 @@ void EditAlignPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSh
     meshTree.clear();
 
     delete alignDialog;
+    alignDialog = nullptr;
 }
 
 void EditAlignPlugin::hideRevealGluedMesh()
