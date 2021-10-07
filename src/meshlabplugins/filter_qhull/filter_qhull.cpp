@@ -44,7 +44,6 @@ QhullPlugin::QhullPlugin()
 {
 	typeList = {
 		FP_QHULL_CONVEX_HULL,
-		FP_QHULL_DELAUNAY_TRIANGULATION,
 		FP_QHULL_VORONOI_FILTERING,
 		FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
 		FP_QHULL_VISIBLE_POINTS
@@ -69,7 +68,6 @@ QString QhullPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull");
-	case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Delaunay Triangulation");
 	case FP_QHULL_VORONOI_FILTERING :  return QString("Voronoi Filtering");
 	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE : return QString("Alpha Complex/Shape");
 	case FP_QHULL_VISIBLE_POINTS: return QString("Select Visible Points");
@@ -85,9 +83,6 @@ QString QhullPlugin::filterInfo(ActionIDType filterId) const
 	switch(filterId) {
 	case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "
                                          "The convex hull of a set of points is the boundary of the minimal convex set containing the given non-empty finite set of points.");
-	case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate the <b>Delaunay triangulation</b> with Qhull library (http://www.qhull.org/html/qdelaun.htm).<br><br>"
-                                                    "The Delaunay triangulation DT(P) of a set of points P in d-dimensional spaces is a triangulation of the convex hull "
-                                                    "such that no point in P is inside the circum-sphere of any simplex in DT(P).<br> ");
 	case FP_QHULL_VORONOI_FILTERING :  return QString("Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). <br><br>"
                                                "The algorithm calculates a triangulation of the input point cloud without requiring vertex normals."
                                                "It uses a subset of the Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
@@ -117,7 +112,6 @@ QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
 	switch(ID(a))
 	{
 	case FP_QHULL_CONVEX_HULL :
-	case FP_QHULL_DELAUNAY_TRIANGULATION :
 	case FP_QHULL_VORONOI_FILTERING :
 	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
 		return FilterClass (FilterPlugin::Remeshing) ;
@@ -142,10 +136,6 @@ RichParameterList QhullPlugin::initParameterList(const QAction *action,const Mes
 	case FP_QHULL_CONVEX_HULL :
 	{
 		//parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
-		break;
-	}
-	case FP_QHULL_DELAUNAY_TRIANGULATION :
-	{
 		break;
 	}
 	case FP_QHULL_VORONOI_FILTERING :
@@ -222,84 +212,6 @@ std::map<std::string, QVariant> QhullPlugin::applyFilter(
 		pm.updateBoxAndNormals();
 		if (!result)
 			throw MLException("Failed computing convex hull.");
-	} break;
-	case FP_QHULL_DELAUNAY_TRIANGULATION:
-	{
-		MeshModel &m=*md.mm();
-		MeshModel &pm =*md.addNewMesh("","Delaunay Triangulation");
-
-		m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-
-		int dim= 3;				/* dimension of points */
-		int numpoints= m.cm.vn;	/* number of mesh vertices */
-
-		// facet_list contains the Delaunauy triangulation as a list of tetrahedral facets
-		bool result = compute_delaunay(qh, dim,numpoints,m);
-
-		if (result) {
-
-			setT* vertices = qh_facetvertices (qh, qh->facet_list, NULL, false);
-			int convexNumVert = qh_setsize(qh, vertices);
-			assert( qh->num_vertices == convexNumVert);
-
-			tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
-
-			vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh->num_vertices);
-			vertexT *vertex;
-			int i=0;
-			FORALLvertices{
-				if ((*vertex).point){
-					pm.cm.vert[i].P()[0] = (*vertex).point[0];
-					pm.cm.vert[i].P()[1] = (*vertex).point[1];
-					pm.cm.vert[i].P()[2] = (*vertex).point[2];
-					ivp[qh_pointid(qh, vertex->point)] = &pm.cm.vert[i];
-					i++;
-				}
-			}
-
-			// In 3-d Delaunay triangulation each facet is a tetrahedron. If triangulated,
-			//each ridge (d-1 vertices between two neighboring facets) is a triangle.
-
-			facetT *facet, *neighbor;
-			qh->visit_id++;
-			int ridgeCount=0;
-
-			//Compute each ridge (triangle) once
-			FORALLfacets
-					if (!facet->upperdelaunay) {
-				facet->visitid = qh->visit_id;
-				qh_makeridges(qh, facet);
-				ridgeT *ridge, **ridgep;
-				FOREACHridge_(facet->ridges) {
-					neighbor= otherfacet_(ridge, facet);
-					if (neighbor->visitid != qh->visit_id) {
-						tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
-						ridgeCount++;
-						int vertex_n, vertex_i;
-						FOREACHvertex_i_(qh, ridge->vertices)
-								(*fi).V(vertex_i)= ivp[qh_pointid(qh, vertex->point)];
-					}
-				}
-			}
-
-			assert(pm.cm.fn == ridgeCount);
-			log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-			//m.cm.Clear();
-
-			//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-			//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-			pm.updateBoxAndNormals();
-
-			int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-			qh_freeqhull(qh, !qh_ALL);
-			qh_memfreeshort (qh, &curlong, &totlong);
-			if (curlong || totlong)
-				fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
-						 totlong, curlong);
-		}
-		else
-			throw MLException("Failed computing delaunay triangulation.");
 	} break;
 	case FP_QHULL_VORONOI_FILTERING:
 	{
