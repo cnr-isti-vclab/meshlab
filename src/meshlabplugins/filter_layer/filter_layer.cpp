@@ -40,7 +40,6 @@ FilterLayerPlugin::FilterLayerPlugin()
 {
 	typeList = {
 		FP_FLATTEN,
-		FP_MESH_VISIBILITY,
 		FP_DELETE_MESH,
 		FP_DELETE_NON_VISIBLE_MESH,
 		FP_DELETE_RASTER,
@@ -80,7 +79,6 @@ QString FilterLayerPlugin::filterName(ActionIDType filterId) const
 	case FP_FLATTEN: return QString("Flatten Visible Layers");
 	case FP_RENAME_MESH: return QString("Rename Current Mesh");
 	case FP_RENAME_RASTER: return QString("Rename Current Raster");
-	case FP_MESH_VISIBILITY: return QString("Change Visibility of layer(s)");
 	case FP_EXPORT_CAMERAS: return QString("Export active rasters cameras to file");
 	case FP_IMPORT_CAMERAS: return QString("Import cameras for active rasters from file");
 	default: assert(0);
@@ -115,8 +113,6 @@ QString FilterLayerPlugin::filterInfo(ActionIDType filterId) const
 			"are preserved. Existing layers can be optionally deleted");
 	case FP_RENAME_MESH: return QString("Explicitly change the label shown for a given mesh");
 	case FP_RENAME_RASTER: return QString("Explicitly change the label shown for a given raster");
-	case FP_MESH_VISIBILITY:
-		return QString("Make layer(s) visible/invisible. Useful for scripting.");
 	case FP_EXPORT_CAMERAS:
 		return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
 	case FP_IMPORT_CAMERAS:
@@ -175,27 +171,6 @@ FilterLayerPlugin::initParameterList(const QAction* action, const MeshDocument& 
 		parlst.addParam(
 			RichString("newName", rm ? rm->label() : "", "New Label", "New Label for the raster."));
 		break;
-	case FP_MESH_VISIBILITY:
-		parlst.addParam(RichMesh(
-			"layer",
-			md.mm()->id(),
-			&md,
-			"Layer Name",
-			"The name of the layer that has to change visibility. If second parameter is not "
-			"empty, this parameter is ignored."));
-		parlst.addParam(RichString(
-			"lName",
-			"",
-			"Substring match",
-			"Apply visibility to all layers with name substring matching the entered string. If "
-			"not empty, the first parameter is ignored."));
-		parlst.addParam(RichBool(
-			"isMeshVisible",
-			true,
-			"Visible",
-			"It makes the selected layer(s) visible or invisible."));
-		break;
-
 	case FP_EXPORT_CAMERAS:
 		parlst.addParam(RichEnum(
 			"ExportFile",
@@ -247,21 +222,6 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			throw MLException("Error: Call to Rename Current Raster with no valid raster.");
 		}
 
-	} break;
-
-	case FP_MESH_VISIBILITY: {
-		QString match = par.getString("lName");
-		if (match == "") {
-			MeshModel* mm = md.getMesh(par.getMeshId("layer"));
-			if (mm)
-				md.setVisible(mm->id(), par.getBool("isMeshVisible"));
-		}
-		else {
-			for (const MeshModel& mmp : md.meshIterator()) {
-				if (mmp.label().contains(match))
-					md.setVisible(mmp.id(), par.getBool("isMeshVisible"));
-			}
-		}
 	} break;
 
 	case FP_DELETE_MESH: {
@@ -930,7 +890,6 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(const QAction* a) con
 	case FP_SPLITSELECTEDVERTICES:
 	case FP_DUPLICATE:
 	case FP_FLATTEN:
-	case FP_MESH_VISIBILITY:
 	case FP_SPLITCONNECTED:
 	case FP_DELETE_MESH:
 	case FP_DELETE_NON_VISIBLE_MESH: return FilterPlugin::Layer;
@@ -948,7 +907,6 @@ FilterPlugin::FilterArity FilterLayerPlugin::filterArity(const QAction* filter) 
 {
 	switch (ID(filter)) {
 	case FP_RENAME_MESH:
-	case FP_MESH_VISIBILITY:
 	case FP_SPLITSELECTEDFACES:
 	case FP_SPLITSELECTEDVERTICES:
 	case FP_DUPLICATE:
@@ -978,8 +936,7 @@ int FilterLayerPlugin::postCondition(const QAction* filter) const
 	case FP_DELETE_NON_SELECTED_RASTER:
 	case FP_EXPORT_CAMERAS:
 	case FP_IMPORT_CAMERAS:
-	case FP_SPLITCONNECTED:
-	case FP_MESH_VISIBILITY: return MeshModel::MM_NONE;
+	case FP_SPLITCONNECTED: return MeshModel::MM_NONE;
 
 	case FP_SPLITSELECTEDFACES:
 	case FP_SPLITSELECTEDVERTICES: return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
