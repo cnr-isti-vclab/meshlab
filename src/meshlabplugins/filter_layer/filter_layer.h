@@ -37,7 +37,6 @@ class FilterLayerPlugin : public QObject, public FilterPlugin
 public:
 	enum {
 		FP_FLATTEN,
-		FP_MESH_VISIBILITY,
 		FP_SPLITSELECTEDFACES,
 		FP_SPLITSELECTEDVERTICES,
 		FP_SPLITCONNECTED,
