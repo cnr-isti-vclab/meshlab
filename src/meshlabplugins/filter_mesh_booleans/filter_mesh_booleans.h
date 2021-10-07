@@ -1,25 +1,25 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005-2021                                           \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #ifndef MESHLAB_FILTER_MESH_BOOLEANS_H
 #define MESHLAB_FILTER_MESH_BOOLEANS_H
@@ -47,59 +47,55 @@ class FilterMeshBooleans : public QObject, public FilterPlugin
 	Q_INTERFACES(FilterPlugin)
 
 public:
-	//enum used to give an ID to every filter implemented in the plugin
-	enum FileterIds {
-			MESH_INTERSECTION,
-			MESH_UNION,
-			MESH_DIFFERENCE,
-			MESH_XOR};
+	// enum used to give an ID to every filter implemented in the plugin
+	enum FileterIds { MESH_INTERSECTION, MESH_UNION, MESH_DIFFERENCE, MESH_XOR };
 
 	FilterMeshBooleans();
 
 	QString pluginName() const;
 	QString vendor() const;
 
-	QString filterName(ActionIDType filter) const;
-	QString filterInfo(ActionIDType filter) const;
+	QString     filterName(ActionIDType filter) const;
+	QString     filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;
-	//int getPreConditions(const QAction *) const;
-	//int postCondition(const QAction* ) const;
-	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
+	// int getPreConditions(const QAction *) const;
+	// int postCondition(const QAction* ) const;
+	RichParameterList               initParameterList(const QAction*, const MeshDocument& /*m*/);
 	std::map<std::string, QVariant> applyFilter(
-			const QAction* action,
-			const RichParameterList & params,
-			MeshDocument &md,
-			unsigned int& postConditionMask,
-			vcg::CallBackPos * cb);
+		const QAction*           action,
+		const RichParameterList& params,
+		MeshDocument&            md,
+		unsigned int&            postConditionMask,
+		vcg::CallBackPos*        cb);
 
 private:
-	//generic boolean operation function
+	// generic boolean operation function
 	static void booleanOperation(
-			MeshDocument& md,
-			const MeshModel& m1,
-			const MeshModel& m2,
-			int op,
-			bool transfFaceQuality,
-			bool transfFaceColor,
-			bool transfVertQuality,
-			bool transfVertColor);
+		MeshDocument&    md,
+		const MeshModel& m1,
+		const MeshModel& m2,
+		int              op,
+		bool             transfFaceQuality,
+		bool             transfFaceColor,
+		bool             transfVertQuality,
+		bool             transfVertColor);
 
-	//transfer functions
+	// transfer functions
 	static void transferFaceAttributes(
-			MeshModel& res,
-			const Eigen::VectorXi& faceIndices,
-			const MeshModel& m1,
-			const MeshModel& m2,
-			bool quality,
-			bool color);
+		MeshModel&             res,
+		const Eigen::VectorXi& faceIndices,
+		const MeshModel&       m1,
+		const MeshModel&       m2,
+		bool                   quality,
+		bool                   color);
 	static void transferVertexAttributes(
-			MeshModel& res,
-			const Eigen::VectorXi& faceIndices,
-			const MeshModel& m1,
-			const MeshModel& m2,
-			bool quality,
-			bool color);
+		MeshModel&             res,
+		const Eigen::VectorXi& faceIndices,
+		const MeshModel&       m1,
+		const MeshModel&       m2,
+		bool                   quality,
+		bool                   color);
 };
 
-#endif //MESHLAB_FILTER_MESH_BOOLEANS_H
+#endif // MESHLAB_FILTER_MESH_BOOLEANS_H
