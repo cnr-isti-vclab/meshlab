@@ -740,47 +740,47 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 //Add default annotations for each mesh about faces and vertices number
 void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel)
 {
-	QTreeWidgetItem *fileItem = new QTreeWidgetItem();
+	QTreeWidgetItem* fileItem = new QTreeWidgetItem();
 	fileItem->setText(1, QString("File"));
-	if(!meshModel->fullName().isEmpty())
+	if (!meshModel->fullName().isEmpty())
 		fileItem->setText(2, meshModel->shortName());
 	parent->addChild(fileItem);
 	updateColumnNumber(fileItem);
 
-	QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	QTreeWidgetItem* vertItem = new QTreeWidgetItem();
 	vertItem->setText(1, QString("Vertices"));
 	vertItem->setText(2, QString::number(meshModel->cm.vn));
 	parent->addChild(vertItem);
 	updateColumnNumber(vertItem);
 
-	if(meshModel->cm.en>0){
-		QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
+	if (meshModel->cm.en > 0) {
+		QTreeWidgetItem* edgeItem = new QTreeWidgetItem();
 		edgeItem->setText(1, QString("Edges"));
 		edgeItem->setText(2, QString::number(meshModel->cm.en));
 		parent->addChild(edgeItem);
 		updateColumnNumber(edgeItem);
 	}
 
-	QTreeWidgetItem *faceItem = new QTreeWidgetItem();
+	QTreeWidgetItem* faceItem = new QTreeWidgetItem();
 	faceItem->setText(1, QString("Faces"));
 	faceItem->setText(2, QString::number(meshModel->cm.fn));
 	parent->addChild(faceItem);
 	updateColumnNumber(faceItem);
 
 	std::vector<std::string> vertScalarNames;
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Scalarm >(meshModel->cm,vertScalarNames);
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(meshModel->cm, vertScalarNames);
 	std::vector<std::string> vertPointNames;
-	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3m >(meshModel->cm,vertPointNames);
+	vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Point3m>(meshModel->cm, vertPointNames);
 	std::vector<std::string> faceScalarNames;
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Scalarm >(meshModel->cm,faceScalarNames);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Scalarm>(meshModel->cm, faceScalarNames);
 	std::vector<std::string> facePointNames;
-	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< Point3m >(meshModel->cm,facePointNames);
+	vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Point3m>(meshModel->cm, facePointNames);
 
 	unsigned int totAttributes = vertScalarNames.size() + vertPointNames.size() +
-			faceScalarNames.size() + facePointNames.size();
-	if (totAttributes > 0){
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		QFont f;
+								 faceScalarNames.size() + facePointNames.size();
+	if (totAttributes > 0) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
+		QFont            f;
 		f.setBold(true);
 		vertItem->setFont(1, f);
 		vertItem->setText(1, QString("Custom Attrs:"));
@@ -788,41 +788,41 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		updateColumnNumber(vertItem);
 	}
 
-	for(const std::string& name: vertScalarNames) {
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	for (const std::string& name : vertScalarNames) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
 		vertItem->setText(2, QString("Vert (scalar):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
-	for(const std::string& name: vertPointNames) {
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Vert (vec3):"));
+	for (const std::string& name : vertPointNames) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
+		vertItem->setText(2, QString("Vert (point):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
-	for(const std::string& name: faceScalarNames) {
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	for (const std::string& name : faceScalarNames) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
 		vertItem->setText(2, QString("Face (scalar):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
-	for(const std::string& name: facePointNames) {
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		vertItem->setText(2, QString("Face (vec3):"));
+	for (const std::string& name : facePointNames) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
+		vertItem->setText(2, QString("Face (point):"));
 		vertItem->setText(3, QString(name.c_str()));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
 
-	if (meshModel->cm.textures.size() > 0){
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-		QFont f;
+	if (meshModel->cm.textures.size() > 0) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
+		QFont            f;
 		f.setBold(true);
 		vertItem->setFont(1, f);
 		vertItem->setText(1, QString("Textures:"));
@@ -830,16 +830,15 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		updateColumnNumber(vertItem);
 	}
 
-	for(const std::string& name: meshModel->cm.textures) {
-		QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	for (const std::string& name : meshModel->cm.textures) {
+		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
 		vertItem->setText(2, QString(name.c_str()));
-		const QImage& img = meshModel->getTexture(name);
-		QString size = QString::number(img.width()) + "x" + QString::number(img.height());
+		const QImage& img  = meshModel->getTexture(name);
+		QString       size = QString::number(img.width()) + "x" + QString::number(img.height());
 		vertItem->setText(3, QString(size));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
 	}
-
 }
 
 //Add, if necessary, columns to the treeWidget.
