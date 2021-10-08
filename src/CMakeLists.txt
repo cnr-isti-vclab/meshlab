@@ -259,7 +259,15 @@ if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 
 	# Custom target - to trigger the execution of the custom commands above.
 	add_custom_target(copy-distrib-files ALL DEPENDS ${COPIED_FILES})
+
 	set_property(TARGET copy-distrib-files PROPERTY FOLDER Core)
+
+	# be sure to remove all plugins (also old one that are not target anymore) when clean
+	set_property(
+		TARGET copy-distrib-files
+		APPEND
+		PROPERTY ADDITIONAL_CLEAN_FILES ${MESHLAB_PLUGIN_OUTPUT_DIR}
+	)
 
 	if(NOT WIN32 AND NOT APPLE)
 		install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/Linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
