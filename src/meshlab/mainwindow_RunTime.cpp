@@ -923,7 +923,6 @@ void MainWindow::startFilter(const QAction* action)
 			filterDockDialog->setAllowedAreas(Qt::NoDockWidgetArea);
 			addDockWidget(Qt::RightDockWidgetArea, filterDockDialog);
 
-			filterDockDialog->setFloating(true);
 			connect(GLA(), SIGNAL(glareaClosed()), this, SLOT(closeFilterDockDialog()));
 			connect(
 				filterDockDialog,
@@ -931,6 +930,7 @@ void MainWindow::startFilter(const QAction* action)
 				this,
 				SLOT(executeFilter(const QAction*, RichParameterList, bool, bool)));
 			filterDockDialog->show();
+			filterDockDialog->activateWindow();
 		}
 	}
 }

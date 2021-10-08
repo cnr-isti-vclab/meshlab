@@ -81,6 +81,12 @@ FilterDockDialog::FilterDockDialog(
 			ui->previewCheckBox->setVisible(false);
 		}
 	}
+	ui->applyPushButton->setFocus();
+	ui->applyPushButton->setDefault(true);
+
+	setTabOrder(ui->defaultPushButton, ui->helpPushButton);
+	setTabOrder(ui->helpPushButton, ui->closePushButton);
+	setTabOrder(ui->closePushButton, ui->applyPushButton);
 
 	//horrible hack to make the window of almost the right size...
 	adjustSize();
