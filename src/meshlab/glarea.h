@@ -462,30 +462,34 @@ private:
     MeshModel *lastModelEdited;
 
 public:
-    inline MLSceneGLSharedDataContext* getSceneGLSharedContext() {return ((mvc() != NULL)? mvc()->sharedDataContext() : NULL);}
+	inline MLSceneGLSharedDataContext* getSceneGLSharedContext()
+	{
+		return ((mvc() != NULL) ? mvc()->sharedDataContext() : NULL);
+	}
 
-    // view setting variables
-    float fov;
-    float clipRatioFar;
-    float clipRatioNear;
-    float nearPlane;
-    float farPlane;
-    SnapshotSetting ss;
+	// view setting variables
+	float           fov;
+	float           clipRatioFar;
+	float           clipRatioNear;
+	float           nearPlane;
+	float           farPlane;
+	SnapshotSetting ss;
+	unsigned int    snapshotCounter;
 
-    // Store for each mesh if it is visible for the current viewer.
-    QMap<int, bool> meshVisibilityMap;
+	// Store for each mesh if it is visible for the current viewer.
+	QMap<int, bool> meshVisibilityMap;
 
-    // Store for each raster if it is visible for the current viewer.
-    QMap<int, bool> rasterVisibilityMap;
+	// Store for each raster if it is visible for the current viewer.
+	QMap<int, bool> rasterVisibilityMap;
 
-    // Add an entry in the mesh visibility map
-    void meshSetVisibility(MeshModel& mp, bool visibility);
+	// Add an entry in the mesh visibility map
+	void meshSetVisibility(MeshModel& mp, bool visibility);
 
-    // Add an entry in the raster visibility map
-    void addRasterSetVisibility(int rasterId, bool visibility);
+	// Add an entry in the raster visibility map
+	void addRasterSetVisibility(int rasterId, bool visibility);
 
-	//void getPerDocGlobalRenderingData(MLRenderingData& dt) const;
-	//void setPerDocGlobalRenderingData(const MLRenderingData& dt);
+	// void getPerDocGlobalRenderingData(MLRenderingData& dt) const;
+	// void setPerDocGlobalRenderingData(const MLRenderingData& dt);
 
 public slots:
     void updateMeshSetVisibilities();

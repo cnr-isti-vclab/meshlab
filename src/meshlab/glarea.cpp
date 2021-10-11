@@ -181,95 +181,100 @@ void GLArea::initializeGL()
 
 void GLArea::pasteTile()
 {
-    QString outfile;
+	QString outfile;
 	makeCurrent();
-    glPushAttrib(GL_ENABLE_BIT);
-	bool useAlfa = ss.background==1;
+	glPushAttrib(GL_ENABLE_BIT);
+	bool   useAlfa    = ss.background == 1;
 	QImage tileBuffer = grabFrameBuffer(useAlfa).mirrored(false, true);
-    if(ss.tiledSave)
-    {
-        outfile=QString("%1/%2_%3-%4.png")
-                .arg(ss.outdir)
-                .arg(ss.basename)
-                .arg(tileCol,2,10,QChar('0'))
-                .arg(tileRow,2,10,QChar('0'));
-        tileBuffer.mirrored(false,true).save(outfile,"PNG");
-    }
-    else
-    {
-        if (snapBuffer.isNull())
-            snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
+	if (ss.tiledSave) {
+		outfile = QString("%1/%2_%3-%4.png")
+					  .arg(ss.outdir)
+					  .arg(ss.basename)
+					  .arg(tileCol, 2, 10, QChar('0'))
+					  .arg(tileRow, 2, 10, QChar('0'));
+		tileBuffer.mirrored(false, true).save(outfile, "PNG");
+	}
+	else {
+		if (snapBuffer.isNull())
+			snapBuffer = QImage(
+				tileBuffer.width() * ss.resolution,
+				tileBuffer.height() * ss.resolution,
+				tileBuffer.format());
 
-		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
-        uchar *tilePtr = tileBuffer.bits();
+		uchar* snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) +
+						 ((totalCols * tileRow) * tileBuffer.byteCount());
+		uchar* tilePtr = tileBuffer.bits();
 
-        for (int y=0; y < tileBuffer.height(); y++)
-        {
-            memcpy((void*) snapPtr, (void*) tilePtr, tileBuffer.bytesPerLine());
-            snapPtr+=tileBuffer.bytesPerLine() * totalCols;
-            tilePtr+=tileBuffer.bytesPerLine();
-        }
-    }
-    tileCol++;
+		for (int y = 0; y < tileBuffer.height(); y++) {
+			memcpy((void*) snapPtr, (void*) tilePtr, tileBuffer.bytesPerLine());
+			snapPtr += tileBuffer.bytesPerLine() * totalCols;
+			tilePtr += tileBuffer.bytesPerLine();
+		}
+	}
+	tileCol++;
 
-    if (tileCol >= totalCols)
-    {
-        tileCol=0;
-        tileRow++;
+	if (tileCol >= totalCols) {
+		tileCol = 0;
+		tileRow++;
 
-        if (tileRow >= totalRows)
-        {
-            if(ss.snapAllLayers)
-            {
-                outfile=QString("%1/%2%3_L%4.png")
-                        .arg(ss.outdir).arg(ss.basename)
-                        .arg(ss.counter,2,10,QChar('0'))
-                        .arg(md()->meshNumber(),2,10,QChar('0'));
-            } else {
-                outfile=QString("%1/%2%3.png")
-                        .arg(ss.outdir).arg(ss.basename)
-                        .arg(ss.counter++,2,10,QChar('0'));
-            }
+		if (tileRow >= totalRows) {
+			if (ss.snapAllLayers) {
+				outfile = QString("%1/%2%3_L%4.png")
+							  .arg(ss.outdir)
+							  .arg(ss.basename)
+							  .arg(ss.counter, 2, 10, QChar('0'))
+							  .arg(snapshotCounter, 2, 10, QChar('0'));
+			}
+			else {
+				outfile = QString("%1/%2%3.png")
+							  .arg(ss.outdir)
+							  .arg(ss.basename)
+							  .arg(ss.counter++, 2, 10, QChar('0'));
+			}
 
-            if(!ss.tiledSave)
-            {
-                bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
-                if (ret)
-                {
-                    this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-                    if(ss.addToRasters)
-                    {
+			if (!ss.tiledSave) {
+				bool ret = (snapBuffer.mirrored(false, true)).save(outfile, "PNG");
+				if (ret) {
+					this->Logf(
+						GLLogStream::SYSTEM,
+						"Snapshot saved to %s",
+						outfile.toLocal8Bit().constData());
+					if (ss.addToRasters) {
 						// get current transform, before is reset by the following importRaster
 						Shotm shot_tmp = shotFromTrackball().first;
-						float tmp_sca = trackball.track.sca;
-                        mw()->importRaster(outfile);
+						float tmp_sca  = trackball.track.sca;
+						mw()->importRaster(outfile);
 
-                        RasterModel *rastm = md()->rm();
-						rastm->shot = shot_tmp;
-                        float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
-                        rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
-                        rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
-                        rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-                        rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-                        rastm->shot.Intrinsics.CenterPx[0]= rastm->shot.Intrinsics.ViewportPx[0]/2.0;
-                        rastm->shot.Intrinsics.CenterPx[1]= rastm->shot.Intrinsics.ViewportPx[1]/2.0;
+						RasterModel* rastm = md()->rm();
+						rastm->shot        = shot_tmp;
+						float ratio        = (float) rastm->currentPlane->image.height() /
+									  (float) rastm->shot.Intrinsics.ViewportPx[1];
+						rastm->shot.Intrinsics.ViewportPx[0] = rastm->currentPlane->image.width();
+						rastm->shot.Intrinsics.ViewportPx[1] = rastm->currentPlane->image.height();
+						rastm->shot.Intrinsics.PixelSizeMm[1] /= ratio;
+						rastm->shot.Intrinsics.PixelSizeMm[0] /= ratio;
+						rastm->shot.Intrinsics.CenterPx[0] =
+							rastm->shot.Intrinsics.ViewportPx[0] / 2.0;
+						rastm->shot.Intrinsics.CenterPx[1] =
+							rastm->shot.Intrinsics.ViewportPx[1] / 2.0;
 
-						//importRaster has destroyed the original trackball state, now we restore it
+						// importRaster has destroyed the original trackball state, now we restore
+						// it
 						trackball.track.sca = tmp_sca;
 						loadShot(QPair<Shotm, float>(shot_tmp, trackball.track.sca));
-                    }
-                }
-                else
-                {
-                    Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
-                }
-            }
-            takeSnapTile=false;
-            snapBuffer=QImage();
-        }
-    }
-    update();
-    glPopAttrib();
+					}
+				}
+				else {
+					Logf(
+						GLLogStream::WARNING, "Error saving %s", outfile.toLocal8Bit().constData());
+				}
+			}
+			takeSnapTile = false;
+			snapBuffer   = QImage();
+		}
+	}
+	update();
+	glPopAttrib();
 }
 
 
@@ -951,39 +956,39 @@ void GLArea::saveSnapshot()
 {
 	makeCurrent();
 	// snap all layers
-	unsigned int currSnapLayer=0;
+	snapshotCounter = 0;
 
 	// number of subparts
-	totalCols=totalRows=ss.resolution;
-	tileRow=tileCol=0;
+	totalCols = totalRows = ss.resolution;
+	tileRow = tileCol = 0;
 
-	if(ss.snapAllLayers) {
-		while(currSnapLayer<md()->meshNumber()) {
-			tileRow=tileCol=0;
-			qDebug("Snapping layer %i",currSnapLayer);
+	if (ss.snapAllLayers) {
+		while (snapshotCounter < md()->meshNumber()) {
+			tileRow = tileCol = 0;
+			qDebug("Snapping layer %i", snapshotCounter);
 			unsigned int mmit = 0;
-			for(MeshModel& mp : md()->meshIterator()){
-				if (mmit == currSnapLayer)
+			for (MeshModel& mp : md()->meshIterator()) {
+				if (mmit == snapshotCounter)
 					meshSetVisibility(mp, true);
 				else
 					meshSetVisibility(mp, false);
 				mmit++;
 			}
 
-			takeSnapTile=true;
-			for (int tilenum = 0; tilenum < (ss.resolution*ss.resolution); tilenum++)
+			takeSnapTile = true;
+			for (int tilenum = 0; tilenum < (ss.resolution * ss.resolution); tilenum++)
 				repaint();
-			currSnapLayer++;
+			snapshotCounter++;
 		}
 
-		//cleanup
-		for(MeshModel& mp : md()->meshIterator()) {
+		// cleanup
+		for (MeshModel& mp : md()->meshIterator()) {
 			meshSetVisibility(mp, true);
 		}
 		ss.counter++;
 	}
 	else {
-		takeSnapTile=true;
+		takeSnapTile = true;
 		update();
 	}
 }
