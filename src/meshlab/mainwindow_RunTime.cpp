@@ -2126,10 +2126,12 @@ bool MainWindow::importMesh(QString fileName)
 				if (res == QDialog::Accepted){
 					if (preOpenDialog.isCheckBoxChecked(cbDoNotShow)){
 						RichBool rp(showDialogParamName, false, "", "");
-						if (currentGlobalParams.hasParameter(showDialogParamName))
+						if (currentGlobalParams.hasParameter(showDialogParamName)) {
 							currentGlobalParams.setValue(rp.name(), BoolValue(false));
-						else
+						}
+						else {
 							currentGlobalParams.addParam(rp);
+						}
 						QSettings settings;
 						QDomDocument doc("MeshLabSettings");
 						doc.appendChild(rp.fillToXMLDocument(doc));
@@ -2196,8 +2198,36 @@ bool MainWindow::importMesh(QString fileName)
 				for (const std::string& txt : unloadedTextures)
 					warningString += QString::fromStdString(txt) + "\n";
 			}
-			if (!warningString.isEmpty()){
-				QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
+
+			bool showWariningDialog = true;
+			QString showWarningDialogParamName = "MeshLab::IO::" + extension.toUpper() + "::showWarningDialog";
+			if (currentGlobalParams.hasParameter(showWarningDialogParamName)){
+				showWariningDialog = currentGlobalParams.getBool(showWarningDialogParamName);
+			}
+
+			if (!warningString.isEmpty() && showWariningDialog){
+				QMessageBox box(this);
+				box.setWindowTitle("Meshlab Opening Warning");
+				box.setText(warningString);
+				QCheckBox* cb = new QCheckBox("Do not show this message again for " + extension.toLower() + " format.");
+				box.setCheckBox(cb);
+				box.setIcon(QMessageBox::Warning);
+				box.exec();
+				if (cb->isChecked()){
+					RichBool rb(showWarningDialogParamName, false, "", "");
+					if (currentGlobalParams.hasParameter(showWarningDialogParamName)){
+						currentGlobalParams.setValue(showWarningDialogParamName, BoolValue(false));
+					}
+					else {
+						currentGlobalParams.addParam(rb);
+					}
+					QSettings settings;
+					QDomDocument doc("MeshLabSettings");
+					doc.appendChild(rb.fillToXMLDocument(doc));
+					QString docstring =  doc.toString();
+					settings.setValue(rb.name(), QVariant(docstring));
+				}
+				//QMessageBox::warning(this, "Meshlab Opening Warning", warningString);
 			}
 			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 		}

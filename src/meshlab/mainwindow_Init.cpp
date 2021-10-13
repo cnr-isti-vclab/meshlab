@@ -960,15 +960,17 @@ void MainWindow::loadDefaultSettingsFromPlugins()
 		for (const FileFormat& ff : iop->importFormats()) {
 			for (const QString& format : ff.extensions) {
 				RichParameterList tmplist = iop->initPreOpenParameter(format);
+				QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 				if (!tmplist.isEmpty()){
-					QString prefixName = "MeshLab::IO::" + format.toUpper() + "::";
 					for (RichParameter& rp : tmplist){
 						rp.setName(prefixName + rp.name());
 					}
 					RichBool rp(prefixName + "showPreOpenParameterDialog", true, "", "");
 					tmplist.addParam(rp);
-					defaultGlobalParams.join(tmplist);
 				}
+				RichBool rb(prefixName + "showWarningDialog", true, "", "");
+				tmplist.addParam(rb);
+				defaultGlobalParams.join(tmplist);
 			}
 		}
 	}
