@@ -373,15 +373,13 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 	std::map<std::string, QVariant> outValues;
 	int id = ID(filter);
 
-	if (id == FP_RADIUS_FROM_DENSITY)
-	{
+	if (id == FP_RADIUS_FROM_DENSITY) {
 		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
 		APSS<CMeshO> mls(md.mm()->cm);
 		mls.computeVertexRaddi(par.getInt("NbNeighbors"));
 		return outValues;
 	}
-	if (id == FP_SELECT_SMALL_COMPONENTS)
-	{
+	if (id == FP_SELECT_SMALL_COMPONENTS) {
 		MeshModel* mesh = md.mm();
 		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		bool nonClosedOnly = par.getBool("NonClosedOnly");
@@ -392,22 +390,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 
 	// we are doing some MLS based stuff
 	{
-		if(md.mm()->cm.fn > 0)
-		{ // if we start from a mesh, and it has unreferenced vertices
-			// normals are undefined on that vertices.
-			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-			if(delvert) log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
-		}
-		tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-
-		// We require a per vertex radius so as a first thing check it
-		if(!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS))
-		{
-			md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
-			APSS<CMeshO> mls(md.mm()->cm);
-			mls.computeVertexRaddi();
-			log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
-		}
+		initMLS(md);
 
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_)
@@ -562,9 +545,6 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 			}
 			// pass 2: convert the curvature to color
 			cb(99, "Curvature to color...");
-			Scalarm d = maxc-minc;
-			minc += 0.05*d;
-			maxc -= 0.05*d;
 
 			Histogramm H;
 			vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
@@ -627,6 +607,24 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 	} // end MLS based stuff
 
 	return outValues;
+}
+
+void MlsPlugin::initMLS(MeshDocument& md)
+{
+	if(md.mm()->cm.fn > 0) { // if we start from a mesh, and it has unreferenced vertices
+		// normals are undefined on that vertices.
+		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
+		if(delvert) log( "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+	}
+	tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+
+	// We require a per vertex radius so as a first thing check it
+	if(!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS)) {
+		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
+		APSS<CMeshO> mls(md.mm()->cm);
+		mls.computeVertexRaddi();
+		log( "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(MlsPlugin)

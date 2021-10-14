@@ -75,6 +75,9 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
+
+private:
+	void initMLS(MeshDocument& md);
 };
 
 #endif
