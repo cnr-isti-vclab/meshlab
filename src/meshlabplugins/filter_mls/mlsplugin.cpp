@@ -313,14 +313,14 @@ RichParameterList MlsPlugin::initParameterList(const QAction* action, const Mesh
 			"Curvature type",
 			QString("The type of the curvature to plot.") +
 				((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an "
-                                 "approximation of the mean curvature." :
+								 "approximation of the mean curvature." :
                                  "")));
 		// 		if ((id & _APSS_))
 		// 			parlst.addParam(RichBool( "ApproxCurvature",
 		// 										false,
 		// 										"Approx mean curvature",
-		// 										"If checked, use the radius of the fitted sphere as an approximation of the
-		// mean curvature.");
+		// 										"If checked, use the radius of the fitted sphere as an approximation of
+		// the mean curvature.");
 	}
 
 	if (id & _MCUBE_) {
@@ -411,18 +411,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_) {
-			if (par.getMeshId("ControlMesh") == par.getMeshId("ProxyMesh")) {
-				// clone the control mesh
-				MeshModel* ref = md.getMesh(par.getMeshId("ControlMesh"));
-				pPoints        = md.addNewMesh("", "TempMesh", false);
-				pPoints->updateDataMask(ref);
-				vcg::tri::Append<CMeshO, CMeshO>::Mesh(
-					pPoints->cm, ref->cm); // the last true means "copy all vertices"
-				vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
-				pPoints->cm.Tr = ref->cm.Tr;
-			}
-			else
-				pPoints = md.getMesh(par.getMeshId("ControlMesh"));
+			pPoints = getProjectionPointsMesh(md, par);
 		}
 		else // for curvature
 			pPoints = md.mm();
@@ -431,198 +420,25 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		cb(1, "Create the MLS data structures...");
 		MlsSurface<CMeshO>* mls = 0;
 
-		RIMLS<CMeshO>* rimls = 0;
-		APSS<CMeshO>*  apss  = 0;
-
 		if (id & _RIMLS_)
-			mls = rimls = new RIMLS<CMeshO>(pPoints->cm);
+			mls = createMlsRimls(pPoints, par);
 		else if (id & _APSS_)
-			mls = apss = new APSS<CMeshO>(pPoints->cm);
+			mls = createMlsApss(pPoints, par, id & _COLORIZE_);
 		else {
 			assert(0);
 		}
 
-		mls->setFilterScale(par.getFloat("FilterScale"));
-		mls->setMaxProjectionIters(par.getInt("MaxProjectionIters"));
-		mls->setProjectionAccuracy(par.getFloat("ProjectionAccuracy"));
-
-		if (rimls) {
-			rimls->setMaxRefittingIters(par.getInt("MaxRefittingIters"));
-			// mls.setMinRefittingIters(par.getFloat("MinRefittingIters"));
-			rimls->setSigmaN(par.getFloat("SigmaN"));
-		}
-
-		if (apss) {
-			apss->setSphericalParameter(par.getFloat("SphericalParameter"));
-			if (!(id & _COLORIZE_))
-				apss->setGradientHint(
-					par.getBool("AccurateNormal") ? GaelMls::MLS_DERIVATIVE_ACCURATE :
-                                                    GaelMls::MLS_DERIVATIVE_APPROX);
-		}
-
-		MeshModel* mesh = 0;
-
 		if (id & _PROJECTION_) {
-			mesh               = md.getMesh(par.getMeshId("ProxyMesh"));
-			bool selectionOnly = par.getBool("SelectionOnly");
-
-			if (selectionOnly)
-				vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(mesh->cm);
-			EdgeAnglePredicate<CMeshO, float> edgePred;
-			edgePred.thCosAngle = cos(M_PI * par.getFloat("ThAngleInDegree") / 180.);
-
-			int nbRefinements = par.getInt("MaxSubdivisions");
-			for (int k = 0; k < nbRefinements + 1; ++k) {
-				// UpdateFaceNormalFromVertex(m.cm);
-				if (k != 0) {
-					mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-
-					vcg::tri::UpdateNormal<CMeshO>::PerFace(mesh->cm);
-					vcg::tri::UpdateNormal<CMeshO>::NormalizePerFace(mesh->cm);
-					// vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(),
-					// edgePred, false, cb);
-					vcg::tri::RefineOddEvenE<
-						CMeshO,
-						tri::OddPointLoop<CMeshO>,
-						tri::EvenPointLoop<CMeshO>>(
-						mesh->cm,
-						tri::OddPointLoop<CMeshO>(mesh->cm),
-						tri::EvenPointLoop<CMeshO>(),
-						edgePred,
-						selectionOnly,
-						cb);
-				}
-				// project all vertices onto the MLS surface
-				for (unsigned int i = 0; i < mesh->cm.vert.size(); i++) {
-					cb(1 + 98 * i / mesh->cm.vert.size(), "MLS projection...");
-
-					if ((!selectionOnly) || (mesh->cm.vert[i].IsS()))
-						mesh->cm.vert[i].P() =
-							mls->project(mesh->cm.vert[i].P(), &mesh->cm.vert[i].N());
-				}
-			}
-
-			log("Successfully projected %i vertices", mesh->cm.vn);
+			computeProjection(md, par, mls, pPoints, cb);
 		}
 		else if (id & _COLORIZE_) {
-			mesh = md.mm();
-			mesh->updateDataMask(MeshModel::MM_VERTCOLOR);
-			mesh->updateDataMask(MeshModel::MM_VERTQUALITY);
-			mesh->updateDataMask(MeshModel::MM_VERTCURVDIR);
-
-			bool selectionOnly = par.getBool("SelectionOnly");
-			// bool approx = apss && par.getBool("ApproxCurvature");
-			int ct = par.getEnum("CurvatureType");
-
-			uint size = mesh->cm.vert.size();
-			// std::vector<float> curvatures(size);
-			Scalarm   minc = 1e9, maxc = -1e9, minabsc = 1e9;
-			Point3m   grad;
-			Matrix33m hess;
-
-			// pass 1: computes curvatures and statistics
-			for (unsigned int i = 0; i < size; i++) {
-				cb(1 + 98 * i / pPoints->cm.vert.size(), "MLS colorization...");
-
-				if ((!selectionOnly) || (pPoints->cm.vert[i].IsS())) {
-					Point3m p = mls->project(mesh->cm.vert[i].P());
-					Scalarm c = 0;
-
-					if (ct == CT_APSS)
-						c = apss->approxMeanCurvature(p);
-					else {
-						int errorMask;
-						grad = mls->gradient(p, &errorMask);
-						if (errorMask == MLS_OK && grad.Norm() > 1e-8) {
-							hess = mls->hessian(p);
-							implicits::WeingartenMap<CMeshO::ScalarType> W(grad, hess);
-
-							mesh->cm.vert[i].PD1() = W.K1Dir();
-							mesh->cm.vert[i].PD2() = W.K2Dir();
-							mesh->cm.vert[i].K1()  = W.K1();
-							mesh->cm.vert[i].K2()  = W.K2();
-
-							switch (ct) {
-							case CT_MEAN: c = W.MeanCurvature(); break;
-							case CT_GAUSS: c = W.GaussCurvature(); break;
-							case CT_K1: c = W.K1(); break;
-							case CT_K2: c = W.K2(); break;
-							default: assert(0 && "invalid curvature type");
-							}
-						}
-						assert(
-							!math::IsNAN(c) &&
-							"You should never try to compute Histogram with Invalid Floating "
-							"points numbers (NaN)");
-					}
-					mesh->cm.vert[i].Q() = c;
-					minc                 = std::min(c, minc);
-					maxc                 = std::max(c, maxc);
-					minabsc              = std::min(std::abs(c), minabsc);
-				}
-			}
-			// pass 2: convert the curvature to color
-			cb(99, "Curvature to color...");
-
-			Histogramm H;
-			vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm, H);
-			vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
-				mesh->cm, H.Percentile(0.01f), H.Percentile(0.99f));
+			computeColorize(md, par, mls, pPoints, cb);
 		}
-		// 	else if (id & _AFRONT_)
-		// 	{
-		// 		// create a new mesh
-		// 		mesh = md.addNewMesh("afront mesh");
-		// 		vcg::tri::AdvancingMLS<CMeshO> afront(mesh->cm, *mls);
-		// 		//afront.BuildMesh(cb);
-		// 		afront._SeedFace();
-		// 		for (int i=0; i<20120; ++i)
-		// 			afront.AddFace();
-		// 		Log(0, "Advancing front MLS meshing done.");
-		// 	}
 		else if (id & _MCUBE_) {
-			// create a new mesh
-			mesh = md.addNewMesh("", "mc_mesh");
-
-			typedef vcg::tri::MlsWalker<CMeshO, MlsSurface<CMeshO>> MlsWalker;
-			typedef vcg::tri::MarchingCubes<CMeshO, MlsWalker>      MlsMarchingCubes;
-			MlsWalker                                               walker;
-			walker.resolution = par.getInt("Resolution");
-
-			// iso extraction
-			MlsMarchingCubes mc(mesh->cm, walker);
-			walker.BuildMesh<MlsMarchingCubes>(mesh->cm, *mls, mc, cb);
-
-			// accurate projection
-			for (unsigned int i = 0; i < mesh->cm.vert.size(); i++) {
-				cb(1 + 98 * i / mesh->cm.vert.size(), "MLS projection...");
-				mesh->cm.vert[i].P() = mls->project(mesh->cm.vert[i].P(), &mesh->cm.vert[i].N());
-			}
-
-			// extra zero detection and removal
-			{
-				mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-				// selection...
-				vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1f);
-				// deletion...
-				vcg::tri::SmallComponent<CMeshO>::DeleteFaceVert(mesh->cm);
-				mesh->clearDataMask(MeshModel::MM_FACEFACETOPO);
-			}
-
-			log("Marching cubes MLS meshing done.");
+			computeMarchingCubes(md, par, mls, cb);
 		}
 
 		delete mls;
-		if ((id & _PROJECTION_) && pPoints != nullptr &&
-			md.getMesh(par.getMeshId("ControlMesh")) != pPoints) {
-			MeshModel* mm = md.mm();
-			md.delMesh(pPoints->id());
-			if (mm != pPoints) // just to be sure
-				md.setCurrentMesh(mm->id());
-		}
-
-		if (mesh)
-			mesh->updateBoxAndNormals();
 
 	} // end MLS based stuff
 
@@ -646,6 +462,216 @@ void MlsPlugin::initMLS(MeshDocument& md)
 		mls.computeVertexRaddi();
 		log("Mesh has no per vertex radius. Computed and added using default neighbourhood");
 	}
+}
+
+MeshModel* MlsPlugin::getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params)
+{
+	MeshModel* pPoints = 0;
+	if (params.getMeshId("ControlMesh") == params.getMeshId("ProxyMesh")) {
+		// clone the control mesh
+		MeshModel* ref = md.getMesh(params.getMeshId("ControlMesh"));
+		pPoints        = md.addNewMesh("", "TempMesh", false);
+		pPoints->updateDataMask(ref);
+		vcg::tri::Append<CMeshO, CMeshO>::Mesh(
+			pPoints->cm, ref->cm); // the last true means "copy all vertices"
+		vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
+		pPoints->cm.Tr = ref->cm.Tr;
+	}
+	else
+		pPoints = md.getMesh(params.getMeshId("ControlMesh"));
+	return pPoints;
+}
+
+MlsSurface<CMeshO>* MlsPlugin::createMlsRimls(MeshModel* pPoints, const RichParameterList& par)
+{
+	RIMLS<CMeshO>* rimls = new RIMLS<CMeshO>(pPoints->cm);
+	rimls->setFilterScale(par.getFloat("FilterScale"));
+	rimls->setMaxProjectionIters(par.getInt("MaxProjectionIters"));
+	rimls->setProjectionAccuracy(par.getFloat("ProjectionAccuracy"));
+	rimls->setMaxRefittingIters(par.getInt("MaxRefittingIters"));
+	rimls->setSigmaN(par.getFloat("SigmaN"));
+	return rimls;
+}
+
+MlsSurface<CMeshO>*
+MlsPlugin::createMlsApss(MeshModel* pPoints, const RichParameterList& par, bool colorize)
+{
+	APSS<CMeshO>* apss = new APSS<CMeshO>(pPoints->cm);
+	apss->setFilterScale(par.getFloat("FilterScale"));
+	apss->setMaxProjectionIters(par.getInt("MaxProjectionIters"));
+	apss->setProjectionAccuracy(par.getFloat("ProjectionAccuracy"));
+	apss->setSphericalParameter(par.getFloat("SphericalParameter"));
+	if (!colorize)
+		apss->setGradientHint(
+			par.getBool("AccurateNormal") ? GaelMls::MLS_DERIVATIVE_ACCURATE :
+                                            GaelMls::MLS_DERIVATIVE_APPROX);
+	return apss;
+}
+
+void MlsPlugin::computeProjection(
+	MeshDocument&                md,
+	const RichParameterList&     par,
+	GaelMls::MlsSurface<CMeshO>* mls,
+	MeshModel*                   pPoints,
+	vcg::CallBackPos*            cb)
+{
+	MeshModel* mesh          = md.getMesh(par.getMeshId("ProxyMesh"));
+	bool       selectionOnly = par.getBool("SelectionOnly");
+
+	if (selectionOnly)
+		vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(mesh->cm);
+	EdgeAnglePredicate<CMeshO, float> edgePred;
+	edgePred.thCosAngle = cos(M_PI * par.getFloat("ThAngleInDegree") / 180.);
+
+	int nbRefinements = par.getInt("MaxSubdivisions");
+	for (int k = 0; k < nbRefinements + 1; ++k) {
+		// UpdateFaceNormalFromVertex(m.cm);
+		if (k != 0) {
+			mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+
+			vcg::tri::UpdateNormal<CMeshO>::PerFace(mesh->cm);
+			vcg::tri::UpdateNormal<CMeshO>::NormalizePerFace(mesh->cm);
+			// vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(),
+			// edgePred, false, cb);
+			vcg::tri::RefineOddEvenE<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO>>(
+				mesh->cm,
+				tri::OddPointLoop<CMeshO>(mesh->cm),
+				tri::EvenPointLoop<CMeshO>(),
+				edgePred,
+				selectionOnly,
+				cb);
+		}
+		// project all vertices onto the MLS surface
+		for (unsigned int i = 0; i < mesh->cm.vert.size(); i++) {
+			cb(1 + 98 * i / mesh->cm.vert.size(), "MLS projection...");
+
+			if ((!selectionOnly) || (mesh->cm.vert[i].IsS()))
+				mesh->cm.vert[i].P() = mls->project(mesh->cm.vert[i].P(), &mesh->cm.vert[i].N());
+		}
+	}
+
+	log("Successfully projected %i vertices", mesh->cm.vn);
+
+	if (pPoints != nullptr && md.getMesh(par.getMeshId("ControlMesh")) != pPoints) {
+		MeshModel* mm = md.mm();
+		md.delMesh(pPoints->id());
+		if (mm != pPoints) // just to be sure
+			md.setCurrentMesh(mm->id());
+	}
+	mesh->updateBoxAndNormals();
+}
+
+void MlsPlugin::computeColorize(
+	MeshDocument&                md,
+	const RichParameterList&     par,
+	GaelMls::MlsSurface<CMeshO>* mls,
+	MeshModel*                   pPoints,
+	vcg::CallBackPos*            cb)
+{
+	MeshModel* mesh = md.mm();
+	mesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+	mesh->updateDataMask(MeshModel::MM_VERTQUALITY);
+	mesh->updateDataMask(MeshModel::MM_VERTCURVDIR);
+
+	bool selectionOnly = par.getBool("SelectionOnly");
+	// bool approx = apss && par.getBool("ApproxCurvature");
+	int ct = par.getEnum("CurvatureType");
+
+	uint size = mesh->cm.vert.size();
+	// std::vector<float> curvatures(size);
+	Scalarm   minc = 1e9, maxc = -1e9, minabsc = 1e9;
+	Point3m   grad;
+	Matrix33m hess;
+
+	// pass 1: computes curvatures and statistics
+	for (unsigned int i = 0; i < size; i++) {
+		cb(1 + 98 * i / pPoints->cm.vert.size(), "MLS colorization...");
+
+		if ((!selectionOnly) || (pPoints->cm.vert[i].IsS())) {
+			Point3m p = mls->project(mesh->cm.vert[i].P());
+			Scalarm c = 0;
+
+			if (ct == CT_APSS) {
+				APSS<CMeshO>* apss = dynamic_cast<APSS<CMeshO>*>(mls);
+				c                  = apss->approxMeanCurvature(p);
+			}
+			else {
+				int errorMask;
+				grad = mls->gradient(p, &errorMask);
+				if (errorMask == MLS_OK && grad.Norm() > 1e-8) {
+					hess = mls->hessian(p);
+					implicits::WeingartenMap<CMeshO::ScalarType> W(grad, hess);
+
+					mesh->cm.vert[i].PD1() = W.K1Dir();
+					mesh->cm.vert[i].PD2() = W.K2Dir();
+					mesh->cm.vert[i].K1()  = W.K1();
+					mesh->cm.vert[i].K2()  = W.K2();
+
+					switch (ct) {
+					case CT_MEAN: c = W.MeanCurvature(); break;
+					case CT_GAUSS: c = W.GaussCurvature(); break;
+					case CT_K1: c = W.K1(); break;
+					case CT_K2: c = W.K2(); break;
+					default: assert(0 && "invalid curvature type");
+					}
+				}
+				assert(
+					!math::IsNAN(c) &&
+					"You should never try to compute Histogram with Invalid Floating "
+					"points numbers (NaN)");
+			}
+			mesh->cm.vert[i].Q() = c;
+			minc                 = std::min(c, minc);
+			maxc                 = std::max(c, maxc);
+			minabsc              = std::min(std::abs(c), minabsc);
+		}
+	}
+	// pass 2: convert the curvature to color
+	cb(99, "Curvature to color...");
+
+	Histogramm H;
+	vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm, H);
+	vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
+		mesh->cm, H.Percentile(0.01f), H.Percentile(0.99f));
+	mesh->updateBoxAndNormals();
+}
+
+void MlsPlugin::computeMarchingCubes(
+	MeshDocument&                md,
+	const RichParameterList&     par,
+	GaelMls::MlsSurface<CMeshO>* mls,
+	vcg::CallBackPos*            cb)
+{
+	// create a new mesh
+	MeshModel* mesh = md.addNewMesh("", "mc_mesh");
+
+	typedef vcg::tri::MlsWalker<CMeshO, MlsSurface<CMeshO>> MlsWalker;
+	typedef vcg::tri::MarchingCubes<CMeshO, MlsWalker>      MlsMarchingCubes;
+	MlsWalker                                               walker;
+	walker.resolution = par.getInt("Resolution");
+
+	// iso extraction
+	MlsMarchingCubes mc(mesh->cm, walker);
+	walker.BuildMesh<MlsMarchingCubes>(mesh->cm, *mls, mc, cb);
+
+	// accurate projection
+	for (unsigned int i = 0; i < mesh->cm.vert.size(); i++) {
+		cb(1 + 98 * i / mesh->cm.vert.size(), "MLS projection...");
+		mesh->cm.vert[i].P() = mls->project(mesh->cm.vert[i].P(), &mesh->cm.vert[i].N());
+	}
+
+	// extra zero detection and removal
+	{
+		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		// selection...
+		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1f);
+		// deletion...
+		vcg::tri::SmallComponent<CMeshO>::DeleteFaceVert(mesh->cm);
+		mesh->clearDataMask(MeshModel::MM_FACEFACETOPO);
+	}
+
+	log("Marching cubes MLS meshing done.");
+	mesh->updateBoxAndNormals();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(MlsPlugin)

@@ -26,6 +26,7 @@
 
 #include <QObject>
 
+#include "mlssurface.h"
 #include <common/plugins/interfaces/filter_plugin.h>
 
 class MlsPlugin : public QObject, public FilterPlugin
@@ -76,7 +77,28 @@ public:
 	FilterArity filterArity(const QAction*) const { return SINGLE_MESH; }
 
 private:
-	void initMLS(MeshDocument& md);
+	void       initMLS(MeshDocument& md);
+	MeshModel* getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params);
+	GaelMls::MlsSurface<CMeshO>* createMlsRimls(MeshModel* pPoints, const RichParameterList& par);
+	GaelMls::MlsSurface<CMeshO>*
+		 createMlsApss(MeshModel* pPoints, const RichParameterList& par, bool colorize);
+	void computeProjection(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		MeshModel*                   pPoints,
+		vcg::CallBackPos*            cb);
+	void computeColorize(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		MeshModel*                   pPoints,
+		vcg::CallBackPos*            cb);
+	void computeMarchingCubes(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		vcg::CallBackPos*            cb);
 };
 
 #endif
