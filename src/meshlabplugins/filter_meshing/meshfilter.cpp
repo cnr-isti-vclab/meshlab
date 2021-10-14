@@ -323,7 +323,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 	case FP_SET_TRANSFORM_MATRIX               : return tr("Set the current transformation matrix by filling it, or copying from another layer.");
 	case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 	case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
-	case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
+	case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with different algorithms");
 	case FP_CLOSE_HOLES                        : return tr("Close holes smaller than a given threshold");
 	case FP_CYLINDER_UNWRAP                    : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
 	case FP_QUAD_PAIRING                       : return tr("Convert a tri-mesh into a quad mesh by pairing triangles.");
@@ -361,13 +361,17 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	switch(ID(action))
 	{
 	case FP_COMPUTE_PRINC_CURV_DIR:
+      maxVal = m.cm.bbox.Diag();
 		curvCalcMethods.push_back("Taubin approximation");
 		curvCalcMethods.push_back("Principal Component Analysis");
 		curvCalcMethods.push_back("Normal Cycles");
-		curvCalcMethods.push_back("Pseudoinverse Quadric Fitting");
+		curvCalcMethods.push_back("Quadric Fitting");
+        curvCalcMethods.push_back("Scale Dependent Quadric Fitting");
 		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
 		parlst.addParam(RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
 		parlst.addParam(RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
+        parlst.addParam(RichAbsPerc("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
+									" It specifies the scale at which the curvature is computed. e.g. for SDQF it specify how large is the patch where we fit the quadric used to compute curvature dirs."));
 		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove any unreference vertex (for which curvature values are not defined)"));
 		break;
 
@@ -1309,6 +1313,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 	case FP_COMPUTE_PRINC_CURV_DIR:
 	{
+		float CurvatureScale = par.getAbsPerc("Scale");
 		m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
 		m.updateDataMask(MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR);
 		m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
@@ -1324,9 +1329,10 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		switch(par.getEnum("Method"))
 		{
 		case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
-		case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,true,cb); break;
+		case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,CurvatureScale,true,cb); break;
 		case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
-		case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
+        case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
+        case 4: tri::UpdateCurvatureFitting<CMeshO>::updateCurvatureLocal(m.cm,CurvatureScale,cb); break;
 		default:assert(0);break;
 		}
 		switch(par.getEnum("CurvColorMethod"))
