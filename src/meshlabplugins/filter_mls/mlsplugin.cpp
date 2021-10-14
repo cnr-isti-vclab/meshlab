@@ -399,7 +399,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 			{
 				// clone the control mesh
 				MeshModel* ref = md.getMesh(par.getMeshId("ControlMesh"));
-				pPoints = md.addNewMesh("","TempMesh");
+				pPoints = md.addNewMesh("","TempMesh", false);
 				pPoints->updateDataMask(ref);
 				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm);  // the last true means "copy all vertices"
 				vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
@@ -598,7 +598,10 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		delete mls;
 		if ( (id & _PROJECTION_) && pPoints != nullptr && md.getMesh(par.getMeshId("ControlMesh"))!=pPoints)
 		{
+			MeshModel* mm = md.mm();
 			md.delMesh(pPoints->id());
+			if (mm != pPoints) //just to be sure
+				md.setCurrentMesh(mm->id());
 		}
 
 		if (mesh)
