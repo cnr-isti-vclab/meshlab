@@ -71,8 +71,6 @@ private:
 	void addColorizeParameters(RichParameterList& parlst, bool apss);
 	void addMarchingCubesParameters(RichParameterList& parlst);
 
-
-
 	void       initMLS(MeshDocument& md);
 	MeshModel* getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params);
 	GaelMls::MlsSurface<CMeshO>* createMlsRimls(MeshModel* pPoints, const RichParameterList& par);

@@ -29,8 +29,12 @@
 #include <iostream>
 #include <vcg/math/matrix33.h>
 #include <vcg/space/box3.h>
+#include <vcg/complex/allocate.h>
 
 namespace GaelMls {
+
+template<typename MeshType>
+void computeVertexRadius(MeshType& m, int nNeighbors = 16);
 
 enum {
 	MLS_OK,
@@ -58,11 +62,9 @@ public:
 
 		mAABB = mesh.bbox;
 
-		// compute radii using a basic meshless density estimator
-		if (!mMesh.vert.RadiusEnabled) {
-			const_cast<PointsType&>(mMesh.vert).EnableRadius();
-			computeVertexRaddi();
-		}
+		typename MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
+		h = vcg::tri::Allocator<MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
+		assert(vcg::tri::Allocator<MeshType>::IsValidHandle<Scalar>(mMesh, h));
 
 		mFilterScale                = 4.0;
 		mMaxNofProjectionIterations = 20;
@@ -149,16 +151,20 @@ public:
 	}
 	inline vcg::ConstDataWrapper<Scalar> radii() const
 	{
+		typename MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
+		h = vcg::tri::Allocator<MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
+		assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mMesh, h));
+
 		return vcg::ConstDataWrapper<Scalar>(
-			&mMesh.vert[0].R(),
+			&h[0],
 			mMesh.vert.size(),
-			size_t(&mMesh.vert[1].R()) - size_t(&mMesh.vert[0].R()));
+			size_t(&h[1]) - size_t(&h[0]));
 	}
 	const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
 
 	static const Scalar InvalidValue() { return Scalar(12345679810.11121314151617); }
 
-	void computeVertexRaddi(const int nbNeighbors = 16);
+	//void computeVertexRaddi(const int nbNeighbors = 16);
 
 protected:
 	void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;

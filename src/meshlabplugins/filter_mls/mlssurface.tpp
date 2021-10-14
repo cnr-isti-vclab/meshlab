@@ -26,8 +26,35 @@
 #include <limits>
 #include <vcg/space/index/kdtree/kdtree.h>
 #include <vcg/space/index/octree.h>
+#include <vcg/complex/base.h>
+#include <vcg/complex/allocate.h>
 
 namespace GaelMls {
+
+template<typename _MeshType>
+void computeVertexRadius(_MeshType& mesh, int nNeighbors)
+{
+	typedef typename _MeshType::ScalarType    Scalar;
+	if (!vcg::tri::HasPerVertexAttribute(mesh, "radius")) {
+		vcg::tri::Allocator<_MeshType>::template AddPerVertexAttribute<Scalar>(mesh, "radius");
+	}
+
+	typename _MeshType::template PerVertexAttributeHandle<Scalar> h;
+	h = vcg::tri::Allocator<_MeshType>::template FindPerVertexAttribute<Scalar>(mesh, "radius");
+	assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mesh, h));
+
+	auto positions = vcg::ConstDataWrapper<vcg::Point3<Scalar>>(
+		&mesh.vert[0].P(),
+		mesh.vert.size(),
+		size_t(mesh.vert[1].P().V()) - size_t(mesh.vert[0].P().V()));
+
+	vcg::KdTree<Scalar> knn(positions);
+	typename vcg::KdTree<Scalar>::PriorityQueue pq;
+	for (size_t i = 0; i < mesh.vert.size(); i++) {
+		knn.doQueryK(mesh.vert[i].cP(), nNeighbors, pq);
+		h[i] = 2. * sqrt(pq.getTopWeight() / Scalarm(pq.getNofElements()));
+	}
+}
 
 template<typename _MeshType>
 void MlsSurface<_MeshType>::setFilterScale(Scalar v)
@@ -67,23 +94,6 @@ void MlsSurface<_MeshType>::setHessianHint(int h)
 }
 
 template<typename _MeshType>
-void MlsSurface<_MeshType>::computeVertexRaddi(const int nbNeighbors)
-{
-	assert(mMesh.vert.size() >= 2);
-	vcg::KdTree<Scalar>                         knn(positions());
-	typename vcg::KdTree<Scalar>::PriorityQueue pq;
-	//    knn.setMaxNofNeighbors(nbNeighbors);
-	mAveragePointSpacing = 0;
-	for (size_t i = 0; i < mMesh.vert.size(); i++) {
-		knn.doQueryK(mMesh.vert[i].cP(), nbNeighbors, pq);
-		const_cast<PointsType&>(mMesh.vert)[i].R() =
-			2. * sqrt(pq.getTopWeight() / Scalar(pq.getNofElements()));
-		mAveragePointSpacing += mMesh.vert[i].cR();
-	}
-	mAveragePointSpacing /= Scalar(mMesh.vert.size());
-}
-
-template<typename _MeshType>
 void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool computeDerivatives) const
 {
 	if (!mBallTree) {
@@ -102,9 +112,13 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 	else
 		mCachedWeightGradients.clear();
 
+	typename _MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
+	h = vcg::tri::Allocator<_MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
+	assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mMesh, h));
+
 	for (size_t i = 0; i < nofSamples; i++) {
 		int    id = mNeighborhood.index(i);
-		Scalar s  = 1. / (mMesh.vert[id].cR() * mFilterScale);
+		Scalar s  = 1. / (h[id] * mFilterScale);
 		s         = s * s;
 		Scalar w  = Scalar(1) - mNeighborhood.squaredDistance(i) * s;
 		if (w < 0)
@@ -124,6 +138,10 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 template<typename _MeshType>
 void MlsSurface<_MeshType>::requestSecondDerivatives() const
 {
+	typename _MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
+	h = vcg::tri::Allocator<_MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
+	assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mMesh, h));
+
 	// if (!mSecondDerivativeUptodate)
 	{
 		size_t nofSamples = mNeighborhood.size();
@@ -133,7 +151,7 @@ void MlsSurface<_MeshType>::requestSecondDerivatives() const
 		{
 			for (size_t i = 0; i < nofSamples; ++i) {
 				int    id = mNeighborhood.index(i);
-				Scalar s  = 1. / (mMesh.vert[id].cR() * mFilterScale);
+				Scalar s  = 1. / (h[id] * mFilterScale);
 				s         = s * s;
 				Scalar x2 = s * mNeighborhood.squaredDistance(i);
 				x2        = 1.0 - x2;
@@ -160,6 +178,11 @@ MlsSurface<_MeshType>::meanCurvature(const VectorType& gradient, const MatrixTyp
 template<typename _MeshType>
 bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
 {
+	typename _MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
+	h = vcg::tri::Allocator<_MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
+	assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mMesh, h));
+
+
 	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint != x) {
 		computeNeighborhood(x, false);
 	}
@@ -173,7 +196,7 @@ bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
 	if ((mDomainNormalScale == 1.f) || (!hasNormal)) {
 		while (out && i < nb) {
 			int    id  = mNeighborhood.index(i);
-			Scalar rs2 = mMesh.vert[id].cR() * mDomainRadiusScale;
+			Scalar rs2 = h[id] * mDomainRadiusScale;
 			rs2        = rs2 * rs2;
 			out        = mNeighborhood.squaredDistance(i) > rs2;
 			++i;
@@ -183,7 +206,7 @@ bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
 		Scalar s = 1. / (mDomainNormalScale * mDomainNormalScale) - 1.f;
 		while (out && i < nb) {
 			int    id  = mNeighborhood.index(i);
-			Scalar rs2 = mMesh.vert[id].cR() * mDomainRadiusScale;
+			Scalar rs2 = h[id] * mDomainRadiusScale;
 			rs2        = rs2 * rs2;
 			Scalar dn  = mMesh.vert[id].cN().dot(x - mMesh.vert[id].cP());
 			out        = (mNeighborhood.squaredDistance(i) + s * dn * dn) > rs2;

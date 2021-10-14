@@ -316,9 +316,7 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 		computeColorize(md, par, mls, pPoints, cb);
 		break;
 	case FP_RADIUS_FROM_DENSITY: {
-		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
-		APSS<CMeshO> mls(md.mm()->cm);
-		mls.computeVertexRaddi(par.getInt("NbNeighbors"));
+		GaelMls::computeVertexRadius(md.mm()->cm, par.getInt("NbNeighbors"));
 		break;
 	}
 	case FP_SELECT_SMALL_COMPONENTS:
@@ -466,13 +464,7 @@ void MlsPlugin::initMLS(MeshDocument& md)
 	}
 	tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 
-	// We require a per vertex radius so as a first thing check it
-	if (!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS)) {
-		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
-		APSS<CMeshO> mls(md.mm()->cm);
-		mls.computeVertexRaddi();
-		log("Mesh has no per vertex radius. Computed and added using default neighbourhood");
-	}
+	GaelMls::computeVertexRadius(md.mm()->cm);
 }
 
 MeshModel* MlsPlugin::getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params)
