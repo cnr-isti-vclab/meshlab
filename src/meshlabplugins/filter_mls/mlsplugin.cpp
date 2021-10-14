@@ -58,7 +58,6 @@ MlsPlugin::MlsPlugin()
 	typeList = {
 		FP_RIMLS_PROJECTION,
 		FP_APSS_PROJECTION,
-		// FP_RIMLS_AFRONT, FP_APSS_AFRONT,
 		FP_RIMLS_MCUBE,
 		FP_APSS_MCUBE,
 		FP_RIMLS_COLORIZE,
@@ -83,8 +82,6 @@ QString MlsPlugin::filterName(ActionIDType filterId) const
 	switch (filterId) {
 	case FP_APSS_PROJECTION: return QString("MLS projection (APSS)");
 	case FP_RIMLS_PROJECTION: return QString("MLS projection (RIMLS)");
-	case FP_APSS_AFRONT: return QString("MLS meshing/APSS Advancing Front");
-	case FP_RIMLS_AFRONT: return QString("MLS meshing/RIMLS Advancing Front");
 	case FP_APSS_MCUBE: return QString("Marching Cubes (APSS)");
 	case FP_RIMLS_MCUBE: return QString("Marching Cubes (RIMLS)");
 	case FP_APSS_COLORIZE: return QString("Colorize curvature (APSS)");
@@ -103,8 +100,6 @@ FilterPlugin::FilterClass MlsPlugin::getClass(const QAction* a) const
 	switch (filterId) {
 	case FP_APSS_PROJECTION:
 	case FP_RIMLS_PROJECTION: return FilterClass(FilterPlugin::PointSet + FilterPlugin::Smoothing);
-	case FP_APSS_AFRONT:
-	case FP_RIMLS_AFRONT:
 	case FP_APSS_MCUBE:
 	case FP_RIMLS_MCUBE: return FilterClass(FilterPlugin::PointSet | FilterPlugin::Remeshing);
 	case FP_APSS_COLORIZE:
@@ -122,71 +117,86 @@ FilterPlugin::FilterClass MlsPlugin::getClass(const QAction* a) const
 QString MlsPlugin::filterInfo(ActionIDType filterId) const
 {
 	QString str = "";
-	if (filterId & _PROJECTION_) {
-		str +=
-			"Project a mesh (or a point set) onto the MLS surface defined by itself or another "
-			"point set.<br>";
+	const QString proj = "Project a mesh (or a point set) onto the MLS surface defined by itself or another "
+		"point set.<br>";
+	const QString mcube = "Extract the iso-surface (as a mesh) of a MLS surface defined by the current point set "
+		"(or mesh)"
+		"using the marching cubes algorithm. The coarse extraction is followed by an accurate "
+		"projection"
+		"step onto the MLS, and an extra zero removal procedure.<br>";
+	const QString colorize = "Colorize the vertices of a mesh or point set using the curvature of the underlying "
+		"surface.<br>";
+	const QString apss = "<br>This is the <i>algebraic point set surfaces</i> (APSS) variant which is based on "
+		"the local fitting of algebraic spheres. It requires points equipped with oriented "
+		"normals. <br>"
+		"For all the details about APSS see: <br> Guennebaud and Gross, 'Algebraic Point Set "
+		"Surfaces', Siggraph 2007, and<br>"
+		"Guennebaud et al., 'Dynamic Sampling and Rendering of APSS', Eurographics 2008";
+	const QString rimls = "<br>This is the Robust Implicit MLS (RIMLS) variant which is an extension of "
+		"Implicit MLS preserving sharp features using non linear regression. For more details "
+		"see: <br>"
+		"Oztireli, Guennebaud and Gross, 'Feature Preserving Point Set Surfaces based on "
+		"Non-Linear Kernel Regression' Eurographics 2009.";
+
+	switch (filterId) {
+	case FP_APSS_PROJECTION:
+		return proj + apss;
+	case FP_RIMLS_PROJECTION:
+		return proj + rimls;
+	case FP_APSS_MCUBE:
+		return mcube + apss;
+	case FP_RIMLS_MCUBE:
+		return mcube + rimls;
+	case FP_APSS_COLORIZE:
+		return colorize + apss;
+	case FP_RIMLS_COLORIZE:
+		return colorize + rimls;
+	case FP_RADIUS_FROM_DENSITY:
+		return "Estimate the local point spacing (aka radius) around each vertex using a basic "
+			   "estimate of the local density.";
+	case FP_SELECT_SMALL_COMPONENTS:
+		return "Select the small disconnected components of a mesh.";
+	default:
+		return "";
 	}
-
-	if (filterId & _MCUBE_) {
-		str +=
-			"Extract the iso-surface (as a mesh) of a MLS surface defined by the current point set "
-			"(or mesh)"
-			"using the marching cubes algorithm. The coarse extraction is followed by an accurate "
-			"projection"
-			"step onto the MLS, and an extra zero removal procedure.<br>";
-	}
-
-	if (filterId & _COLORIZE_) {
-		str +=
-			"Colorize the vertices of a mesh or point set using the curvature of the underlying "
-			"surface.<br>";
-	}
-
-	if (filterId & _APSS_) {
-		str +=
-			"<br>This is the <i>algebraic point set surfaces</i> (APSS) variant which is based on "
-			"the local fitting of algebraic spheres. It requires points equipped with oriented "
-			"normals. <br>"
-			"For all the details about APSS see: <br> Guennebaud and Gross, 'Algebraic Point Set "
-			"Surfaces', Siggraph 2007, and<br>"
-			"Guennebaud et al., 'Dynamic Sampling and Rendering of APSS', Eurographics 2008";
-	}
-
-	if (filterId & _RIMLS_) {
-		str +=
-			"<br>This is the Robust Implicit MLS (RIMLS) variant which is an extension of "
-			"Implicit MLS preserving sharp features using non linear regression. For more details "
-			"see: <br>"
-			"Oztireli, Guennebaud and Gross, 'Feature Preserving Point Set Surfaces based on "
-			"Non-Linear Kernel Regression' Eurographics 2009.";
-	}
-
-	if (filterId == FP_RADIUS_FROM_DENSITY)
-		str =
-			"Estimate the local point spacing (aka radius) around each vertex using a basic "
-			"estimate of the local density.";
-	else if (filterId == FP_SELECT_SMALL_COMPONENTS)
-		str = "Select the small disconnected components of a mesh.";
-
-	return str;
 }
 
-// This function define the needed parameters for each filter. Return true if the filter has some
-// parameters it is called every time, so you can set the default value of parameters according to
-// the mesh For each parameter you need to define,
-// - the name of the parameter,
-// - the string shown in the dialog
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the
-// dialog)
 RichParameterList MlsPlugin::initParameterList(const QAction* action, const MeshDocument& md)
 {
 	RichParameterList parlst;
-	int               id     = ID(action);
-	const MeshModel*  target = md.mm();
 
-	if (id == FP_SELECT_SMALL_COMPONENTS) {
+	switch (ID(action)) {
+	case FP_APSS_PROJECTION:
+		addProjectionParameters(parlst, md);
+		addMlsParameters(parlst);
+		addApssParameters(parlst, false);
+		break;
+	case FP_RIMLS_PROJECTION:
+		addProjectionParameters(parlst, md);
+		addMlsParameters(parlst);
+		addRimlsParameters(parlst);
+		break;
+	case FP_APSS_MCUBE:
+		addMlsParameters(parlst);
+		addApssParameters(parlst, false);
+		addMarchingCubesParameters(parlst);
+		break;
+	case FP_RIMLS_MCUBE:
+		addMlsParameters(parlst);
+		addRimlsParameters(parlst);
+		addMarchingCubesParameters(parlst);
+		break;
+	case FP_APSS_COLORIZE:
+		addMlsParameters(parlst);
+		addApssParameters(parlst, true);
+		addColorizeParameters(parlst, true);
+		break;
+	case FP_RIMLS_COLORIZE:
+		addMlsParameters(parlst);
+		addRimlsParameters(parlst);
+		addColorizeParameters(parlst, false);
+		break;
+	case FP_SELECT_SMALL_COMPONENTS:
 		parlst.addParam(RichFloat(
 			"NbFaceRatio",
 			0.1f,
@@ -196,142 +206,17 @@ RichParameterList MlsPlugin::initParameterList(const QAction* action, const Mesh
 			"of the largest component and the other ones. A larger value will select more "
 			"components."));
 		parlst.addParam(RichBool("NonClosedOnly", false, "Select only non closed components", ""));
-		return parlst;
-	}
-	else if (id == FP_RADIUS_FROM_DENSITY) {
+
+	case FP_RADIUS_FROM_DENSITY:
 		parlst.addParam(RichInt(
 			"NbNeighbors",
 			16,
 			"Number of neighbors",
 			"Number of neighbors used to estimate the local density. Larger values lead to "
 			"smoother variations."));
-		return parlst;
+		break;
 	}
 
-	if ((id & _PROJECTION_)) {
-		parlst.addParam(RichMesh(
-			"ControlMesh",
-			target->id(),
-			&md,
-			"Point set",
-			"The point set (or mesh) which defines the MLS surface."));
-		parlst.addParam(RichMesh(
-			"ProxyMesh",
-			target->id(),
-			&md,
-			"Proxy Mesh",
-			"The mesh that will be projected/resampled onto the MLS surface."));
-	}
-	if ((id & _PROJECTION_) || (id & _COLORIZE_)) {
-		parlst.addParam(RichBool(
-			"SelectionOnly",
-			target->cm.sfn > 0,
-			"Selection only",
-			"If checked, only selected vertices will be projected."));
-	}
-
-	if ((id & _APSS_) || (id & _RIMLS_)) {
-		parlst.addParam(RichFloat(
-			"FilterScale",
-			2.0,
-			"MLS - Filter scale",
-			"Scale of the spatial low pass filter.\n"
-			"It is relative to the radius (local point spacing) of the vertices."));
-		parlst.addParam(RichFloat(
-			"ProjectionAccuracy",
-			1e-4f,
-			"Projection - Accuracy (adv)",
-			"Threshold value used to stop the projections.\n"
-			"This value is scaled by the mean point spacing to get the actual threshold."));
-		parlst.addParam(RichInt(
-			"MaxProjectionIters",
-			15,
-			"Projection - Max iterations (adv)",
-			"Max number of iterations for the projection."));
-	}
-
-	if (id & _APSS_) {
-		parlst.addParam(RichFloat(
-			"SphericalParameter",
-			1,
-			"MLS - Spherical parameter",
-			"Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
-			"1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
-			"while other real values might give interesting results, but take care with extreme"
-			"settings !"));
-		if (!(id & _COLORIZE_))
-			parlst.addParam(RichBool(
-				"AccurateNormal",
-				true,
-				"Accurate normals",
-				"If checked, use the accurate MLS gradient instead of the local approximation"
-				"to compute the normals."));
-	}
-
-	if (id & _RIMLS_) {
-		parlst.addParam(RichFloat(
-			"SigmaN",
-			0.75,
-			"MLS - Sharpness",
-			"Width of the filter used by the normal refitting weight."
-			"This weight function is a Gaussian on the distance between two unit vectors:"
-			"the current gradient and the input normal. Therefore, typical value range between 0.5 "
-			"(sharp) to 2 (smooth)."));
-		parlst.addParam(RichInt(
-			"MaxRefittingIters",
-			3,
-			"MLS - Max fitting iterations",
-			"Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)"));
-	}
-
-	if (id & _PROJECTION_) {
-		parlst.addParam(RichInt(
-			"MaxSubdivisions", 0, "Refinement - Max subdivisions", "Max number of subdivisions."));
-		parlst.addParam(RichFloat(
-			"ThAngleInDegree",
-			2,
-			"Refinement - Crease angle (degree)",
-			"Threshold angle between two faces controlling the refinement."));
-	}
-
-	if (id & _AFRONT_) {
-	}
-
-	if ((id & _COLORIZE_)) {
-		QStringList lst;
-		lst << "Mean"
-			<< "Gauss"
-			<< "K1"
-			<< "K2";
-		if (id & _APSS_)
-			lst << "ApproxMean";
-
-		parlst.addParam(RichEnum(
-			"CurvatureType",
-			CT_MEAN,
-			lst,
-			"Curvature type",
-			QString("The type of the curvature to plot.") +
-				((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an "
-								 "approximation of the mean curvature." :
-                                 "")));
-		// 		if ((id & _APSS_))
-		// 			parlst.addParam(RichBool( "ApproxCurvature",
-		// 										false,
-		// 										"Approx mean curvature",
-		// 										"If checked, use the radius of the fitted sphere as an approximation of
-		// the mean curvature.");
-	}
-
-	if (id & _MCUBE_) {
-		parlst.addParam(RichInt(
-			"Resolution",
-			200,
-			"Grid Resolution",
-			"The resolution of the grid on which we run the marching cubes."
-			"This marching cube is memory friendly, so you can safely set large values up to 1000 "
-			"or even more."));
-	}
 	return parlst;
 }
 
@@ -388,61 +273,187 @@ std::map<std::string, QVariant> MlsPlugin::applyFilter(
 	vcg::CallBackPos* cb)
 {
 	std::map<std::string, QVariant> outValues;
-	int                             id = ID(filter);
+	MeshModel* pPoints = nullptr;
+	MlsSurface<CMeshO>* mls = nullptr;
 
-	if (id == FP_RADIUS_FROM_DENSITY) {
+	switch (ID(filter)) {
+	case FP_APSS_PROJECTION:
+		initMLS(md);
+		pPoints = getProjectionPointsMesh(md, par);
+		cb(1, "Create the MLS data structures...");
+		mls = createMlsApss(pPoints, par, false);
+		computeProjection(md, par, mls, pPoints, cb);
+		break;
+	case FP_RIMLS_PROJECTION:
+		initMLS(md);
+		pPoints = getProjectionPointsMesh(md, par);
+		cb(1, "Create the MLS data structures...");
+		mls = createMlsRimls(pPoints, par);
+		computeProjection(md, par, mls, pPoints, cb);
+		break;
+	case FP_APSS_MCUBE:
+		initMLS(md);
+		pPoints = md.mm();
+		mls = createMlsApss(pPoints, par, false);
+		computeMarchingCubes(md, par, mls, cb);
+		break;
+	case FP_RIMLS_MCUBE:
+		initMLS(md);
+		pPoints = md.mm();
+		mls = createMlsRimls(pPoints, par);
+		computeMarchingCubes(md, par, mls, cb);
+		break;
+	case FP_APSS_COLORIZE:
+		initMLS(md);
+		pPoints = md.mm();
+		mls = createMlsApss(pPoints, par, true);
+		computeColorize(md, par, mls, pPoints, cb);
+		break;
+	case FP_RIMLS_COLORIZE:
+		initMLS(md);
+		pPoints = md.mm();
+		mls = createMlsRimls(pPoints, par);
+		computeColorize(md, par, mls, pPoints, cb);
+		break;
+	case FP_RADIUS_FROM_DENSITY: {
 		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
 		APSS<CMeshO> mls(md.mm()->cm);
 		mls.computeVertexRaddi(par.getInt("NbNeighbors"));
-		return outValues;
+		break;
 	}
-	if (id == FP_SELECT_SMALL_COMPONENTS) {
-		MeshModel* mesh = md.mm();
-		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		bool    nonClosedOnly = par.getBool("NonClosedOnly");
-		Scalarm ratio         = par.getFloat("NbFaceRatio");
-		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
-		return outValues;
+	case FP_SELECT_SMALL_COMPONENTS:
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		vcg::tri::SmallComponent<CMeshO>::Select(md.mm()->cm, par.getFloat("NbFaceRatio"), par.getBool("NonClosedOnly"));
+		break;
+	default:
+		wrongActionCalled(filter);
 	}
-
-	// we are doing some MLS based stuff
-	{
-		initMLS(md);
-
-		MeshModel* pPoints = 0;
-		if (id & _PROJECTION_) {
-			pPoints = getProjectionPointsMesh(md, par);
-		}
-		else // for curvature
-			pPoints = md.mm();
-
-		// create the MLS surface
-		cb(1, "Create the MLS data structures...");
-		MlsSurface<CMeshO>* mls = 0;
-
-		if (id & _RIMLS_)
-			mls = createMlsRimls(pPoints, par);
-		else if (id & _APSS_)
-			mls = createMlsApss(pPoints, par, id & _COLORIZE_);
-		else {
-			assert(0);
-		}
-
-		if (id & _PROJECTION_) {
-			computeProjection(md, par, mls, pPoints, cb);
-		}
-		else if (id & _COLORIZE_) {
-			computeColorize(md, par, mls, pPoints, cb);
-		}
-		else if (id & _MCUBE_) {
-			computeMarchingCubes(md, par, mls, cb);
-		}
-
-		delete mls;
-
-	} // end MLS based stuff
+	delete mls;
 
 	return outValues;
+}
+
+void MlsPlugin::addProjectionParameters(RichParameterList& parlst, const MeshDocument& md)
+{
+	parlst.addParam(RichMesh(
+		"ControlMesh",
+		md.mm()->id(),
+		&md,
+		"Point set",
+		"The point set (or mesh) which defines the MLS surface."));
+	parlst.addParam(RichMesh(
+		"ProxyMesh",
+		md.mm()->id(),
+		&md,
+		"Proxy Mesh",
+		"The mesh that will be projected/resampled onto the MLS surface."));
+	parlst.addParam(RichBool(
+		"SelectionOnly",
+		false,
+		"Selection only",
+		"If checked, only selected vertices will be projected."));
+	parlst.addParam(RichInt(
+		"MaxSubdivisions", 0, "Refinement - Max subdivisions", "Max number of subdivisions."));
+	parlst.addParam(RichFloat(
+		"ThAngleInDegree",
+		2,
+		"Refinement - Crease angle (degree)",
+		"Threshold angle between two faces controlling the refinement."));
+
+}
+
+void MlsPlugin::addMlsParameters(RichParameterList& parlst)
+{
+	parlst.addParam(RichFloat(
+		"FilterScale",
+		2.0,
+		"MLS - Filter scale",
+		"Scale of the spatial low pass filter.\n"
+		"It is relative to the radius (local point spacing) of the vertices."));
+	parlst.addParam(RichFloat(
+		"ProjectionAccuracy",
+		1e-4f,
+		"Projection - Accuracy (adv)",
+		"Threshold value used to stop the projections.\n"
+		"This value is scaled by the mean point spacing to get the actual threshold."));
+	parlst.addParam(RichInt(
+		"MaxProjectionIters",
+		15,
+		"Projection - Max iterations (adv)",
+		"Max number of iterations for the projection."));
+}
+
+void MlsPlugin::addApssParameters(RichParameterList& parlst, bool colorize)
+{
+	parlst.addParam(RichFloat(
+		"SphericalParameter",
+		1,
+		"MLS - Spherical parameter",
+		"Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
+		"1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
+		"while other real values might give interesting results, but take care with extreme"
+		"settings !"));
+	if (!colorize)
+		parlst.addParam(RichBool(
+			"AccurateNormal",
+			true,
+			"Accurate normals",
+			"If checked, use the accurate MLS gradient instead of the local approximation"
+			"to compute the normals."));
+}
+
+void MlsPlugin::addRimlsParameters(RichParameterList& parlst)
+{
+	parlst.addParam(RichFloat(
+		"SigmaN",
+		0.75,
+		"MLS - Sharpness",
+		"Width of the filter used by the normal refitting weight."
+		"This weight function is a Gaussian on the distance between two unit vectors:"
+		"the current gradient and the input normal. Therefore, typical value range between 0.5 "
+		"(sharp) to 2 (smooth)."));
+	parlst.addParam(RichInt(
+		"MaxRefittingIters",
+		3,
+		"MLS - Max fitting iterations",
+		"Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)"));
+
+}
+
+void MlsPlugin::addColorizeParameters(RichParameterList& parlst, bool apss)
+{
+	parlst.addParam(RichBool(
+		"SelectionOnly",
+		false,
+		"Selection only",
+		"If checked, only selected vertices will be projected."));
+	QStringList lst;
+	lst << "Mean"
+		<< "Gauss"
+		<< "K1"
+		<< "K2";
+	if (apss)
+		lst << "ApproxMean";
+
+	parlst.addParam(RichEnum(
+		"CurvatureType",
+		CT_MEAN,
+		lst,
+		"Curvature type",
+		QString("The type of the curvature to plot.") +
+			(apss ? "<br>ApproxMean uses the radius of the fitted sphere as an "
+							 "approximation of the mean curvature." : "")));
+}
+
+void MlsPlugin::addMarchingCubesParameters(RichParameterList& parlst)
+{
+	parlst.addParam(RichInt(
+		"Resolution",
+		200,
+		"Grid Resolution",
+		"The resolution of the grid on which we run the marching cubes."
+		"This marching cube is memory friendly, so you can safely set large values up to 1000 "
+		"or even more."));
 }
 
 void MlsPlugin::initMLS(MeshDocument& md)

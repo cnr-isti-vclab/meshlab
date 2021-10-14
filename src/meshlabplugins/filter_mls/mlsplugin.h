@@ -37,27 +37,14 @@ class MlsPlugin : public QObject, public FilterPlugin
 
 public:
 	enum {
-		_RIMLS_      = 0x1,
-		_APSS_       = 0x2,
-		_PROJECTION_ = 0x1000,
-		_AFRONT_     = 0x2000,
-		_MCUBE_      = 0x4000,
-		_COLORIZE_   = 0x8000,
-
-		FP_RIMLS_PROJECTION = _RIMLS_ | _PROJECTION_,
-		FP_APSS_PROJECTION  = _APSS_ | _PROJECTION_,
-
-		FP_RIMLS_AFRONT = _RIMLS_ | _AFRONT_,
-		FP_APSS_AFRONT  = _APSS_ | _AFRONT_,
-
-		FP_RIMLS_MCUBE = _RIMLS_ | _MCUBE_,
-		FP_APSS_MCUBE  = _APSS_ | _MCUBE_,
-
-		FP_RIMLS_COLORIZE = _RIMLS_ | _COLORIZE_,
-		FP_APSS_COLORIZE  = _APSS_ | _COLORIZE_,
-
-		FP_RADIUS_FROM_DENSITY     = 0x10000,
-		FP_SELECT_SMALL_COMPONENTS = 0x20000
+		FP_RIMLS_PROJECTION,
+		FP_APSS_PROJECTION,
+		FP_RIMLS_MCUBE,
+		FP_APSS_MCUBE,
+		FP_RIMLS_COLORIZE,
+		FP_APSS_COLORIZE,
+		FP_RADIUS_FROM_DENSITY,
+		FP_SELECT_SMALL_COMPONENTS
 	};
 
 	MlsPlugin();
@@ -77,6 +64,15 @@ public:
 	FilterArity filterArity(const QAction*) const { return SINGLE_MESH; }
 
 private:
+	void addProjectionParameters(RichParameterList& parlst, const MeshDocument& md);
+	void addMlsParameters(RichParameterList& parlst);
+	void addApssParameters(RichParameterList& parlst, bool colorize);
+	void addRimlsParameters(RichParameterList& parlst);
+	void addColorizeParameters(RichParameterList& parlst, bool apss);
+	void addMarchingCubesParameters(RichParameterList& parlst);
+
+
+
 	void       initMLS(MeshDocument& md);
 	MeshModel* getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params);
 	GaelMls::MlsSurface<CMeshO>* createMlsRimls(MeshModel* pPoints, const RichParameterList& par);
