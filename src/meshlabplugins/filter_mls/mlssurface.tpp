@@ -122,18 +122,18 @@ void MlsSurface<_MeshType>::computeVertexRaddi(const int nbNeighbors)
 
 //	int nbNeighbors = 16;
 
-    assert(mPoints.size()>=2);
+    assert(mMesh.vert.size()>=2);
     vcg::KdTree<Scalar> knn(positions());
     typename vcg::KdTree<Scalar>::PriorityQueue pq;
 //    knn.setMaxNofNeighbors(nbNeighbors);
     mAveragePointSpacing = 0;
-    for (size_t i = 0; i< mPoints.size(); i++)
+    for (size_t i = 0; i< mMesh.vert.size(); i++)
     {
-        knn.doQueryK(mPoints[i].cP(),nbNeighbors,pq);
-        const_cast<PointsType&>(mPoints)[i].R() = 2. * sqrt(pq.getTopWeight()/Scalar(pq.getNofElements()));
-        mAveragePointSpacing += mPoints[i].cR();
+        knn.doQueryK(mMesh.vert[i].cP(),nbNeighbors,pq);
+        const_cast<PointsType&>(mMesh.vert)[i].R() = 2. * sqrt(pq.getTopWeight()/Scalar(pq.getNofElements()));
+        mAveragePointSpacing += mMesh.vert[i].cR();
     }
-    mAveragePointSpacing /= Scalar(mPoints.size());
+    mAveragePointSpacing /= Scalar(mMesh.vert.size());
 
     #endif
 }
@@ -162,7 +162,7 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
     for (size_t i=0; i<nofSamples; i++)
     {
         int id = mNeighborhood.index(i);
-        Scalar s = 1./(mPoints[id].cR()*mFilterScale);
+        Scalar s = 1./(mMesh.vert[id].cR()*mFilterScale);
         s = s*s;
         Scalar w = Scalar(1) - mNeighborhood.squaredDistance(i) * s;
         if (w<0)
@@ -175,7 +175,7 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
         if (computeDerivatives)
         {
             mCachedWeightDerivatives[i] = (-2. * s) * (4. * aux * aux * aux);
-            mCachedWeightGradients[i]  = (x - mPoints[id].cP()) * mCachedWeightDerivatives[i];
+            mCachedWeightGradients[i]  = (x - mMesh.vert[id].cP()) * mCachedWeightDerivatives[i];
         }
     }
 }
@@ -193,7 +193,7 @@ void MlsSurface<_MeshType>::requestSecondDerivatives() const
             for (size_t i=0 ; i<nofSamples ; ++i)
             {
                 int id = mNeighborhood.index(i);
-                Scalar s = 1./(mPoints[id].cR()*mFilterScale);
+                Scalar s = 1./(mMesh.vert[id].cR()*mFilterScale);
                 s = s*s;
                 Scalar x2 = s * mNeighborhood.squaredDistance(i);
                 x2 = 1.0 - x2;
@@ -234,7 +234,7 @@ bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
         while (out && i<nb)
         {
             int id = mNeighborhood.index(i);
-            Scalar rs2 = mPoints[id].cR() * mDomainRadiusScale;
+            Scalar rs2 = mMesh.vert[id].cR() * mDomainRadiusScale;
             rs2 = rs2*rs2;
             out = mNeighborhood.squaredDistance(i) > rs2;
             ++i;
@@ -246,9 +246,9 @@ bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
         while (out && i<nb)
         {
             int id = mNeighborhood.index(i);
-            Scalar rs2 = mPoints[id].cR() * mDomainRadiusScale;
+            Scalar rs2 = mMesh.vert[id].cR() * mDomainRadiusScale;
             rs2 = rs2*rs2;
-            Scalar dn = mPoints[id].cN().dot(x-mPoints[id].cP());
+            Scalar dn = mMesh.vert[id].cN().dot(x-mMesh.vert[id].cP());
             out = (mNeighborhood.squaredDistance(i) + s*dn*dn) > rs2;
             ++i;
         }

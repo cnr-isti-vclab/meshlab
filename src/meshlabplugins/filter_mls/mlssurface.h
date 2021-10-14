@@ -53,16 +53,16 @@ class MlsSurface
         typedef typename MeshType::VertContainer PointsType;
 
         MlsSurface(const MeshType& mesh)
-            : mMesh(mesh), mPoints(mesh.vert)
+            : mMesh(mesh)
         {
             mCachedQueryPointIsOK = false;
 
             mAABB = mesh.bbox;
 
             // compute radii using a basic meshless density estimator
-            if (!mPoints.RadiusEnabled)
+            if (!mMesh.vert.RadiusEnabled)
             {
-                const_cast<PointsType&>(mPoints).EnableRadius();
+                const_cast<PointsType&>(mMesh.vert).EnableRadius();
                 computeVertexRaddi();
             }
 
@@ -127,22 +127,22 @@ class MlsSurface
 
         inline const MeshType& mesh() const { return mMesh; }
         /** a shortcut for mesh().vert */
-        inline const PointsType& points() const { return mPoints; }
+        inline const PointsType& points() const { return mMesh.vert; }
 
         inline vcg::ConstDataWrapper<VectorType> positions() const
         {
-            return vcg::ConstDataWrapper<VectorType>(&mPoints[0].P(), mPoints.size(),
-                                                                                    size_t(mPoints[1].P().V()) - size_t(mPoints[0].P().V()));
+            return vcg::ConstDataWrapper<VectorType>(&mMesh.vert[0].P(), mMesh.vert.size(),
+                                                                                    size_t(mMesh.vert[1].P().V()) - size_t(mMesh.vert[0].P().V()));
         }
         inline vcg::ConstDataWrapper<VectorType> normals() const
         {
-            return vcg::ConstDataWrapper<VectorType>(&mPoints[0].N(), mPoints.size(),
-                                                                                    size_t(mPoints[1].N().V()) - size_t(mPoints[0].N().V()));
+            return vcg::ConstDataWrapper<VectorType>(&mMesh.vert[0].N(), mMesh.vert.size(),
+                                                                                    size_t(mMesh.vert[1].N().V()) - size_t(mMesh.vert[0].N().V()));
         }
         inline vcg::ConstDataWrapper<Scalar> radii() const
         {
-            return vcg::ConstDataWrapper<Scalar>(&mPoints[0].R(), mPoints.size(),
-                                                                            size_t(&mPoints[1].R()) - size_t(&mPoints[0].R()));
+            return vcg::ConstDataWrapper<Scalar>(&mMesh.vert[0].R(), mMesh.vert.size(),
+                                                                            size_t(&mMesh.vert[1].R()) - size_t(&mMesh.vert[0].R()));
         }
         const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
 
@@ -173,7 +173,6 @@ class MlsSurface
 
     protected:
         const MeshType& mMesh;
-        const PointsType& mPoints;
         vcg::Box3<Scalar> mAABB;
         int mGradientHint;
         int mHessianHint;
