@@ -908,6 +908,7 @@ void MainWindow::startFilter(const QAction* action)
 		if (filterDockDialog != nullptr) {
 			filterDockDialog->close();
 			delete filterDockDialog;
+			filterDockDialog = nullptr;
 		}
 		
 		// (2) Ask for filter parameters and eventually directly invoke the filter
@@ -1160,19 +1161,17 @@ void MainWindow::executeFilter(
 		}
 	}
 	bool newmeshcreated = false;
-	try
-	{
+	try {
 		meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
 		iFilter->applyFilter(action, mergedenvironment, *(meshDoc()), postCondMask, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)
 			postCondMask = iFilter->postCondition(action);
-		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
-			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+		for (MeshModel& mm : meshDoc()->meshIterator())
+			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm.cm);
 		
-		if (shar != NULL)
-		{
+		if (shar != NULL) {
 			shar->removeView(iFilter->glContext);
 			delete filterWidget;
 		}
