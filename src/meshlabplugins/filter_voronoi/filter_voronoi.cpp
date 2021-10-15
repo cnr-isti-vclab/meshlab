@@ -40,7 +40,7 @@ FilterVoronoiPlugin::FilterVoronoiPlugin()
 		VOLUME_SAMPLING,
 		VORONOI_SCAFFOLDING,
 		BUILD_SHELL,
-		CROSS_FIELD_CREATION,
+//		CROSS_FIELD_CREATION,
 //		CROSS_FIELD_SMOOTHING,
 	};
 
@@ -64,8 +64,8 @@ QString FilterVoronoiPlugin::filterName(ActionIDType filterId) const
 		return "Voronoi Scaffolding";
 	case BUILD_SHELL:
 		return "Create Solid Wireframe";
-	case CROSS_FIELD_CREATION:
-		return "Cross Field Creation";
+//	case CROSS_FIELD_CREATION:
+//		return "Cross Field Creation";
 //	case CROSS_FIELD_SMOOTHING:
 //		return "Cross Field Smoothing";
 	default :
@@ -86,8 +86,8 @@ QString FilterVoronoiPlugin::filterInfo(ActionIDType filterId) const
 		return "Compute a volumetric sampling over a watertight mesh.";
 	case BUILD_SHELL:
 		return "";
-	case CROSS_FIELD_CREATION:
-		return "";
+//	case CROSS_FIELD_CREATION:
+//		return "";
 //	case CROSS_FIELD_SMOOTHING:
 //		return "";
 	default :
@@ -105,8 +105,8 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(const QAction* a)
 		return FilterPlugin::Sampling;
 	case BUILD_SHELL:
 		return FilterPlugin::Remeshing;
-	case CROSS_FIELD_CREATION:
-		return FilterPlugin::Normal;
+//	case CROSS_FIELD_CREATION:
+//		return FilterPlugin::Normal;
 //	case CROSS_FIELD_SMOOTHING:
 //		return MeshFilterInterface::Smoothing;
 	default :
@@ -120,7 +120,7 @@ FilterPlugin::FilterArity FilterVoronoiPlugin::filterArity(const QAction* a) con
 	switch(ID(a)) {
 	case VORONOI_SAMPLING :
 	case VORONOI_SCAFFOLDING :
-	case CROSS_FIELD_CREATION :
+//	case CROSS_FIELD_CREATION :
 //	case CROSS_FIELD_SMOOTHING :
 		return SINGLE_MESH;
 	case VOLUME_SAMPLING :
@@ -185,9 +185,9 @@ RichParameterList FilterVoronoiPlugin::initParameterList(const QAction* action, 
 		par.addParam(RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
 		par.addParam(RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
 		break;
-	case CROSS_FIELD_CREATION:
-		par.addParam(RichEnum("crossType", 0, {"Linear Y", "Radial", "Curvature"}, "Cross Type", ""));
-		break;
+//	case CROSS_FIELD_CREATION:
+//		par.addParam(RichEnum("crossType", 0, {"Linear Y", "Radial", "Curvature"}, "Cross Type", ""));
+//		break;
 //	case CROSS_FIELD_SMOOTHING:
 //		par.addParam(RichBool("preprocessFlag", true, "Preprocessing"));
 //		break;
@@ -204,7 +204,7 @@ int FilterVoronoiPlugin::getPreConditions(const QAction* action) const
 	case VOLUME_SAMPLING:
 	case VORONOI_SCAFFOLDING:
 	case BUILD_SHELL:
-	case CROSS_FIELD_CREATION:
+//	case CROSS_FIELD_CREATION:
 		return MeshModel::MM_NONE;
 //	case CROSS_FIELD_SMOOTHING:
 //		return MeshModel::MM_VERTCURVDIR;
@@ -255,9 +255,9 @@ std::map<std::string, QVariant> FilterVoronoiPlugin::applyFilter(
 					par.getFloat("faceExtInset"), par.getBool("edgeFauxFlag"),
 					par.getInt("cylinderSideNum"));
 		break;
-	case CROSS_FIELD_CREATION:
-		crossFieldCreation(md, par.getEnum("crossType"));
-		break;
+//	case CROSS_FIELD_CREATION:
+//		crossFieldCreation(md, par.getEnum("crossType"));
+//		break;
 //	case CROSS_FIELD_SMOOTHING:
 //		return crossFieldSmoothing(md, par.getBool("preprocessFlag"));
 	default :
@@ -276,8 +276,8 @@ int FilterVoronoiPlugin::postCondition(const QAction* action) const
 		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case BUILD_SHELL:
 		return MeshModel::MM_NONE;
-	case CROSS_FIELD_CREATION:
-		return MeshModel::MM_VERTCURVDIR;
+//	case CROSS_FIELD_CREATION:
+//		return MeshModel::MM_VERTCURVDIR;
 //	case CROSS_FIELD_SMOOTHING:
 //		return MeshModel::MM_VERTCOLOR;
 	default :
