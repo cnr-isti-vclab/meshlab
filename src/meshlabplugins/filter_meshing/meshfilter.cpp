@@ -361,16 +361,16 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	switch(ID(action))
 	{
 	case FP_COMPUTE_PRINC_CURV_DIR:
-      maxVal = m.cm.bbox.Diag();
+		maxVal = m.cm.bbox.Diag();
 		curvCalcMethods.push_back("Taubin approximation");
 		curvCalcMethods.push_back("Principal Component Analysis");
 		curvCalcMethods.push_back("Normal Cycles");
 		curvCalcMethods.push_back("Quadric Fitting");
-        curvCalcMethods.push_back("Scale Dependent Quadric Fitting");
+		curvCalcMethods.push_back("Scale Dependent Quadric Fitting");
 		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
 		parlst.addParam(RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
 		parlst.addParam(RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
-        parlst.addParam(RichAbsPerc("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
+		parlst.addParam(RichAbsPerc("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
 									" It specifies the scale at which the curvature is computed. e.g. for SDQF it specify how large is the patch where we fit the quadric used to compute curvature dirs."));
 		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove any unreference vertex (for which curvature values are not defined)"));
 		break;
@@ -1331,8 +1331,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
 		case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,CurvatureScale,true,cb); break;
 		case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
-        case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
-        case 4: tri::UpdateCurvatureFitting<CMeshO>::updateCurvatureLocal(m.cm,CurvatureScale,cb); break;
+		case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
+		case 4: tri::UpdateCurvatureFitting<CMeshO>::updateCurvatureLocal(m.cm,CurvatureScale,cb); break;
 		default:assert(0);break;
 		}
 		switch(par.getEnum("CurvColorMethod"))
