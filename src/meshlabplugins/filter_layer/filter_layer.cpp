@@ -131,14 +131,21 @@ FilterLayerPlugin::initParameterList(const QAction* action, const MeshDocument& 
 	const RasterModel* rm = md.rm();
 	switch (ID(action)) {
 	case FP_SPLITSELECTEDVERTICES:
-	case FP_SPLITSELECTEDFACES: {
+	case FP_SPLITSELECTEDFACES:
 		parlst.addParam(RichBool(
 			"DeleteOriginal",
 			true,
 			"Delete original selection",
 			"Deletes the original selected faces/vertices, thus splitting the mesh among layers."
 			"\n\nif false, the selected faces/vertices are duplicated in the new layer."));
-	} break;
+		break;
+	case FP_SPLITCONNECTED:
+		parlst.addParam(RichBool(
+			"delete_source_mesh",
+			false,
+			"Delete source mesh",
+			"Deletes the source mesh after all the connected component meshes are generated."));
+		break;
 	case FP_FLATTEN:
 		parlst.addParam(RichBool(
 			"MergeVisible",
@@ -429,22 +436,32 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	case FP_SPLITCONNECTED: {
 		MeshModel* currentModel = md.mm();
 		CMeshO&    cm           = md.mm()->cm;
+		bool removeSourceMesh = par.getBool("delete_source_mesh");
 		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		std::vector<std::pair<int, CMeshO::FacePointer>> connectedCompVec;
 		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm, connectedCompVec);
 		log("Found %i Connected Components", numCC);
+		tri::UpdateSelection<CMeshO>::FaceClear(cm);
+		tri::UpdateSelection<CMeshO>::VertexClear(cm);
 
 		for (size_t i = 0; i < connectedCompVec.size(); ++i) {
-			tri::UpdateSelection<CMeshO>::FaceClear(cm);
+			// select verts and faces of ith connected component
 			connectedCompVec[i].second->SetS();
 			tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm /*,true*/);
-			tri::UpdateSelection<CMeshO>::VertexClear(cm);
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
 
+			// create a new mesh from the selection
 			MeshModel* destModel = md.addNewMesh("", QString("CC %1").arg(i), true);
 			destModel->updateDataMask(currentModel);
 			tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, cm, true);
 
+			// clear selection from source mesh and from newly created mesh
+			tri::UpdateSelection<CMeshO>::FaceClear(cm);
+			tri::UpdateSelection<CMeshO>::VertexClear(cm);
+			tri::UpdateSelection<CMeshO>::FaceClear(destModel->cm);
+			tri::UpdateSelection<CMeshO>::VertexClear(destModel->cm);
+
+			// append any textures... (todo: append only the ACTUALLY USED ones)
 			for (const std::string& txt : cm.textures) {
 				destModel->addTexture(txt, md.mm()->getTexture(txt));
 			}
@@ -452,7 +469,10 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			// init new layer
 			destModel->updateBoxAndNormals();
 			destModel->cm.Tr = currentModel->cm.Tr;
+
 		}
+		if (removeSourceMesh)
+			md.delMesh(currentModel->id());
 	} break;
 
 	case FP_EXPORT_CAMERAS: {

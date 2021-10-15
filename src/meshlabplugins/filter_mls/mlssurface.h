@@ -64,7 +64,7 @@ public:
 
 		typename MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
 		h = vcg::tri::Allocator<MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
-		assert(vcg::tri::Allocator<MeshType>::IsValidHandle<Scalar>(mMesh, h));
+		assert(vcg::tri::Allocator<MeshType>::template IsValidHandle<Scalar>(mMesh, h));
 
 		mFilterScale                = 4.0;
 		mMaxNofProjectionIterations = 20;
@@ -153,7 +153,7 @@ public:
 	{
 		typename MeshType::template ConstPerVertexAttributeHandle<Scalar> h;
 		h = vcg::tri::Allocator<MeshType>::template FindPerVertexAttribute<Scalar>(mMesh, "radius");
-		assert(vcg::tri::Allocator<_MeshType>::template IsValidHandle<Scalar>(mMesh, h));
+		assert(vcg::tri::Allocator<MeshType>::template IsValidHandle<Scalar>(mMesh, h));
 
 		return vcg::ConstDataWrapper<Scalar>(
 			&h[0],
