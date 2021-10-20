@@ -198,7 +198,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		
 		if(pmc.Process(cb)==false)
 		{
-			throw MLException(pmc.errorMessage);
+			throw MLException(pmc.errorMessage.c_str());
 		}
 		
 		
