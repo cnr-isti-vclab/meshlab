@@ -438,6 +438,14 @@ void MainWindow::setSplit(QAction *qa)
 	if(mvc)
 	{
 		GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
+
+		// Start the new view with the same orientation as the existing one
+		GLArea* glArea = mvc->currentView();
+		if(glArea) {
+			QPair<Shotm,float> shotAndScale = glArea->shotFromTrackball();
+			glwClone->loadShot(shotAndScale);
+		}
+		
 		//connect(glwClone, SIGNAL(insertRenderingDataForNewlyGeneratedMesh(int)), this, SLOT(addRenderingDataIfNewlyGeneratedMesh(int)));
 		if(qa->text() == tr("&Horizontally"))
 			mvc->addView(glwClone,Qt::Vertical);
@@ -454,7 +462,6 @@ void MainWindow::setSplit(QAction *qa)
 		
 		updateMenus();
 		
-		glwClone->resetTrackBall();
 		glwClone->update();
 	}
 	
