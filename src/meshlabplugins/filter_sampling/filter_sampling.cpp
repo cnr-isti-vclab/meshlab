@@ -991,7 +991,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, curMM->cm, sampleNum, radius,pp,0.005);
 		else
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, curMM->cm, radius,pp);
-		
+		mm->cm.Tr = curMM->cm.Tr;
+
 		log("Point Cloud Simplification created a new mesh of %i points", mm->cm.vn);
 		UpdateBounding<CMeshO>::Box(mm->cm);
 	} break;
