@@ -284,7 +284,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
     scanHeader.pose.rotation = quaternion;
 
-    scanHeader.pointFields.cartesianInvalidStateField = true;
+    scanHeader.pointFields.cartesianInvalidStateField = false;
     scanHeader.pointFields.cartesianXField = true;
     scanHeader.pointFields.cartesianYField = true;
     scanHeader.pointFields.cartesianZField = true;
@@ -295,6 +295,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
         scanHeader.pointFields.normalZ = true;
     }
     if ((mask & Mask::IOM_VERTCOLOR) != 0) {
+        scanHeader.pointFields.isColorInvalidField = false;
         scanHeader.pointFields.colorRedField = true;
         scanHeader.pointFields.colorGreenField = true;
         scanHeader.pointFields.colorBlueField = true;
@@ -306,6 +307,16 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
         scanHeader.colorLimits.colorBlueMaximum = e57::E57_UINT8_MAX;
     }
     if ((mask & Mask::IOM_VERTQUALITY) != 0) {
+        float min = std::numeric_limits<float>::max();
+        float max = std::numeric_limits<float>::min();
+        for (size_t i = 0; i < m.cm.vert.size(); ++i) {
+            if (m.cm.vert[i].Q() < min)
+                min = m.cm.vert[i].Q();
+            if (m.cm.vert[i].Q() > max)
+                max = m.cm.vert[i].Q();
+        }
+        scanHeader.intensityLimits.intensityMinimum = min;
+        scanHeader.intensityLimits.intensityMaximum = max;
         scanHeader.pointFields.intensityField = true;
     }
 
@@ -326,14 +337,10 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
             pointsData.cartesianY[i] = vertices[i].P().Y();
             pointsData.cartesianZ[i] = vertices[i].P().Z();
 
-            pointsData.cartesianInvalidState[i] = 0;
-
             if (data3DPoints.areColorsAvailable()) {
                 pointsData.colorRed[i] = static_cast<uint8_t>(vertices[i].C().X());
                 pointsData.colorGreen[i] = static_cast<uint8_t>(vertices[i].C().Y());
                 pointsData.colorBlue[i] = static_cast<uint8_t>(vertices[i].C().Z());
-                if (scanHeader.pointFields.isColorInvalidField)
-                    pointsData.isColorInvalid[i] = 0;
             }
 
             if (data3DPoints.areNormalsAvailable()) {
@@ -344,7 +351,6 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
 
             if (data3DPoints.isQualityAvailable()) {
                 pointsData.intensity[i] = vertices[i].Q();
-                pointsData.isIntensityInvalid[i] = 0;
             }
         }
 
