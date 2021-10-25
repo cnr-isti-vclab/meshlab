@@ -414,25 +414,25 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 			// if pname starts with __CA_VS__, it is a PLY per-vertex scalar custom attribute
 			if (pname.startsWith("__CA_VS__")) {
 				if (par.getBool(pname)) {        // if it is true, add to save list
-					pi.addPerVertexScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
+					pi.addPerVertexScalarAttribute(qUtf8Printable(pname.mid(9)), scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_VP__, it is a PLY per-vertex point3m custom attribute
 			else if (pname.startsWith("__CA_VP__")) {
 				if (par.getBool(pname)) {             // if it is true, add to save list
-					pi.addPerVertexPoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+					pi.addPerVertexPoint3mAttribute(qUtf8Printable(pname.mid(9)), scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_FS__, it is a PLY per-face scalar custom attribute
 			else if (pname.startsWith("__CA_FS__")) {
 				if (par.getBool(pname)) {             // if it is true, add to save list
-					pi.addPerFaceScalarAttribute(qUtf8Printable(pname.mid(4)), scalarPlyType);
+					pi.addPerFaceScalarAttribute(qUtf8Printable(pname.mid(9)), scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_FP__, it is a PLY per-face point3m custom attribute
 			else if (pname.startsWith("__CA_FP__")) {
 				if (par.getBool(pname)) {
-					pi.addPerFacePoint3mAttribute(qUtf8Printable(pname.mid(5)), scalarPlyType);
+					pi.addPerFacePoint3mAttribute(qUtf8Printable(pname.mid(9)), scalarPlyType);
 				}
 			}
 		}

@@ -45,6 +45,7 @@ public:
 	QString pythonFunctionName() const;
 	QString meshlabFunctionName() const;
 	QString description() const;
+	void setDescription(const QString& newDescription);
 	unsigned int parametersNumber() const;
 	QStringList pythonFunctionParameters() const;
 	bool contains(const QString& pythonParameter) const;

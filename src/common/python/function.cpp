@@ -57,6 +57,11 @@ QString pymeshlab::Function::description() const
 	return funDescription;
 }
 
+void pymeshlab::Function::setDescription(const QString& newDescription)
+{
+	funDescription = newDescription;
+}
+
 unsigned int pymeshlab::Function::parametersNumber() const
 {
 	return parameters.size();

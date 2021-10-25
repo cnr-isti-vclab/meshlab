@@ -95,7 +95,24 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			QString pythonFilterName = outputFormat.toLower();
 			Function f(pythonFilterName, originalFilterName, "Save " + outputFormat + " format.");
 			RichParameterList rps = iop->initSaveParameter(outputFormat, *dummyMeshDocument.mm());
-
+			if (outputFormat.toUpper() == "PLY"){
+				f.setDescription(
+					"Ply files also support saving custom attributes. You'll need to add an "
+					"additional boolean parameter for each one of that you want to save, and use "
+					"only non-capital letters for parameter names. These parameters have a prefix "
+					"for each type of custom attribute:</br>"
+					"- ``__ca_vs__``: Custom Attribute Vertex Scalar;</br>"
+					"- ``__ca_vp__``: Custom Attribute Vertex Point;</br>"
+					"- ``__ca_fs__``: Custom Attribute Face Scalar;</br>"
+					"- ``__ca_fp__``: Custom Attribute Face Point;</br>"
+					"For example, if your mesh has a custom per vertex scalar attribute called "
+					"'MyAttribute', you can save it in a ply file by calling:</br>"
+					"``ms.save_current_mesh(file_name='myfile.ply', __ca_vs__myattribute=True)`` "
+					"</br>"
+					"You can check the parameters available on a mesh by calling the MeshSet "
+					"method :py:meth:`pmeshlab.MeshSet.filter_parameter_values`, with first "
+					"parameter ``ply``.");
+			}
 			//filename parameter
 			QString sv = "file_name." + outputFormat;
 			RichSaveFile of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
