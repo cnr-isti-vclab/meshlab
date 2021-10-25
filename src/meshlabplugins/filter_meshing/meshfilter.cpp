@@ -296,9 +296,25 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 			                                               "<br> <i>Luiz Velho, Denis Zorin </i>"
 			                                               "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
 	case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
-	case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
-	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
-	case FP_EXPLICIT_ISOTROPIC_REMESHING       : return tr("Perform a explicit remeshing of a triangular mesh, by repeatedly applying edge flip, collapse, relax and refine to improve aspect ratio (triangle quality) and topological regularity.");
+	case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse strategy. Inspired in the QSLIM surface simplification algorithm "
+							       "by Michael Garland, which turned into the industry standar method for mesh simplification."
+							       "<br> See: <br>"
+							       "<i>M. Garland and P. Heckbert.</i> <br>"
+			                                        "<b>Surface Simplification Using Quadric Error Metrics</b> (<a href='http://mgarland.org/papers/quadrics.pdf'>pdf</a>)<br>"
+			                                        "In Proceedings of SIGGRAPH 97.<br/><br/>");
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization. "
+							       "Inspired in the QSLIM surface simplification algorithm "
+							       "by Michael Garland, which turned into the industry standar method for mesh simplification."
+							       "<br> See: <br>"
+							       "<i>M. Garland and P. Heckbert.</i> <br>"
+			                                       "<b>Simplifying Surfaces with Color and Texture using Quadric Error Metrics</b> (<a href='http://mgarland.org/papers/quadric2.pdf'>pdf</a>)<br>"
+			                                       " In Proceedings of IEEE Visualization 98.<br/><br/>");
+	case FP_EXPLICIT_ISOTROPIC_REMESHING       : return tr("Perform a explicit remeshing of a triangular mesh, by repeatedly applying edge flip, collapse, relax and refine "
+							       "to improve aspect ratio (triangle quality) and topological regularity."
+							       "<br> See: <br>"
+							       "<i>Mario Botsch & Leif Kobbelt</i> <br>"
+			                                       "<b>A Remeshing Approach to Multiresolution Modeling</b> (<a href='https://doi.org/10.1145/1057432.1057457'>doi</a>)<br>"
+			                                       " Proceedings of the 2004 Eurographics/ACM SIGGRAPH symposium on Geometry processing.<br/><br/>");
 	case FP_REORIENT                           : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
 			                                               "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
 			                                               "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
