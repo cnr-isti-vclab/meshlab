@@ -86,6 +86,12 @@ public:
 
 	std::ptrdiff_t maxTextureMemory;
 	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
+	  
+	int startupWindowWidth;
+	inline static QString startupWindowWidthParam() {return "MeshLab::System::startupWindowWidth";}
+  
+	int startupWindowHeight;
+	inline static QString startupWindowHeightParam() {return "MeshLab::System::startupWindowHeight";}
 };
 
 class MainWindow : public QMainWindow

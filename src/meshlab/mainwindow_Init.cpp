@@ -1330,6 +1330,9 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		gbllist.addParam(RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
 	gbllist.addParam(RichInt(maxTextureMemoryParam(), 256, "Max Texture Memory (in MB)", "The maximum quantity of texture memory allowed to load mesh textures"));
+
+	gbllist.addParam(RichInt(startupWindowWidthParam(), 0, "Startup Window Width (in pixels)", "Window width on startup"));
+	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1341,6 +1344,8 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rpl.getBool(highPrecisionRendering());
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
+	startupWindowWidth = rpl.getInt(startupWindowWidthParam());
+	startupWindowHeight = rpl.getInt(startupWindowHeightParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
