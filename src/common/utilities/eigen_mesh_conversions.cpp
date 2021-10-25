@@ -556,6 +556,32 @@ Eigen::MatrixX3i meshlab::faceMatrix(const CMeshO& mesh)
 }
 
 /**
+ * @brief Get a #E*2 Eigen matrix of integers containing the vertex indices of
+ * the edges of a CMeshO.
+ * The edges in the mesh must be compact (no deleted edges).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #E*2 matrix of integers (vertex indices composing the edges)
+ */
+Eigen::MatrixX2i meshlab::edgeMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireEdgeCompactness(mesh);
+
+	// create eigen matrix of edges
+	Eigen::MatrixXi edges(mesh.EN(), 2);
+
+	// copy faces
+	for (int i = 0; i < mesh.EN(); i++) {
+		for (int j = 0; j < 2; j++) {
+			edges(i, j) = (int) vcg::tri::Index(mesh, mesh.edge[i].V(j));
+		}
+	}
+
+	return edges;
+}
+
+/**
  * @brief Get a #F list of Eigen vectors of integers containing the vertex indices of
  * the polygonal mesh contained in the CMeshO mesh.
  *

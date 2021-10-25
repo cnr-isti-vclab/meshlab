@@ -82,6 +82,7 @@ void addFaceVectorAttribute(
 // From CMeshO to Eigen
 EigenMatrixX3m            vertexMatrix(const CMeshO& mesh);
 Eigen::MatrixX3i          faceMatrix(const CMeshO& mesh);
+Eigen::MatrixX2i          edgeMatrix(const CMeshO& mesh);
 std::list<EigenVectorXui> polygonalFaceList(const CMeshO& mesh);
 EigenMatrixX3m            vertexNormalMatrix(const CMeshO& mesh);
 EigenMatrixX3m            faceNormalMatrix(const CMeshO& mesh);
