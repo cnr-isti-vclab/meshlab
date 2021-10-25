@@ -97,21 +97,23 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			RichParameterList rps = iop->initSaveParameter(outputFormat, *dummyMeshDocument.mm());
 			if (outputFormat.toUpper() == "PLY"){
 				f.setDescription(
-					"Ply files also support saving custom attributes. You'll need to add an "
+					"Save PLY format.</p></br> Ply exporter also support saving custom attributes. "
+					"You'll need to add an "
 					"additional boolean parameter for each one of that you want to save, and use "
 					"only non-capital letters for parameter names. These parameters have a prefix "
 					"for each type of custom attribute:</br>"
-					"- ``__ca_vs__``: Custom Attribute Vertex Scalar;</br>"
-					"- ``__ca_vp__``: Custom Attribute Vertex Point;</br>"
-					"- ``__ca_fs__``: Custom Attribute Face Scalar;</br>"
-					"- ``__ca_fp__``: Custom Attribute Face Point;</br>"
-					"For example, if your mesh has a custom per vertex scalar attribute called "
-					"'MyAttribute', you can save it in a ply file by calling:</br>"
-					"``ms.save_current_mesh(file_name='myfile.ply', __ca_vs__myattribute=True)`` "
-					"</br>"
-					"You can check the parameters available on a mesh by calling the MeshSet "
-					"method :py:meth:`pmeshlab.MeshSet.filter_parameter_values`, with first "
-					"parameter ``ply``.");
+					"<ul>"
+					"   <li><code>__ca_vs__</code>: Custom Attribute Vertex Scalar;</li>"
+					"   <li><code>__ca_vp__</code>: Custom Attribute Vertex Point;</li>"
+					"   <li><code>__ca_fs__</code>: Custom Attribute Face Scalar;</li>"
+					"   <li><code>__ca_fp__</code>: Custom Attribute Face Point;</li>"
+					"</ul>For example, if your mesh has a custom per vertex scalar attribute "
+					"called <code>MyAttribute</code>, you can save it in a ply file by "
+					"calling:</br>"
+					"<code>ms.save_current_mesh(file_name='myfile.ply', __ca_vs__myattribute=True)"
+					"</code></br> You can check the parameters available on a mesh by calling the "
+					"MeshSet method <code>MeshSet.filter_parameter_values</code>, with first "
+					"parameter <code>'ply'</code>.");
 			}
 			//filename parameter
 			QString sv = "file_name." + outputFormat;
