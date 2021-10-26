@@ -669,6 +669,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     glFlush();
     glFinish();
     painter.endNativePainting();
+
+    emit currentViewerRefreshed();
 }
 
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
