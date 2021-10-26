@@ -412,27 +412,31 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		for (const RichParameter& pr : par) {
 			QString pname = pr.name();
 			// if pname starts with __CA_VS__, it is a PLY per-vertex scalar custom attribute
-			if (pname.startsWith("__CA_VS__")) {
+			if (pname.size() > 9 && pname.startsWith("__CA_VS__")) {
+				std::string attributeName = pname.toStdString().substr(9);
 				if (par.getBool(pname)) {        // if it is true, add to save list
-					pi.addPerVertexScalarAttribute(pname.toStdString().substr(9), scalarPlyType);
+					pi.addPerVertexScalarAttribute(attributeName, scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_VP__, it is a PLY per-vertex point3m custom attribute
-			else if (pname.startsWith("__CA_VP__")) {
+			else if (pname.size() > 9 && pname.startsWith("__CA_VP__")) {
+				std::string attributeName = pname.toStdString().substr(9);
 				if (par.getBool(pname)) {             // if it is true, add to save list
-					pi.addPerVertexPoint3mAttribute(pname.toStdString().substr(9), scalarPlyType);
+					pi.addPerVertexPoint3mAttribute(attributeName, scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_FS__, it is a PLY per-face scalar custom attribute
-			else if (pname.startsWith("__CA_FS__")) {
+			else if (pname.size() > 9 && pname.startsWith("__CA_FS__")) {
+				std::string attributeName = pname.toStdString().substr(9);
 				if (par.getBool(pname)) {             // if it is true, add to save list
-					pi.addPerFaceScalarAttribute(pname.toStdString().substr(9), scalarPlyType);
+					pi.addPerFaceScalarAttribute(attributeName, scalarPlyType);
 				}
 			}
 			// if pname starts with __CA_FP__, it is a PLY per-face point3m custom attribute
-			else if (pname.startsWith("__CA_FP__")) {
+			else if (pname.size() > 9 && pname.startsWith("__CA_FP__")) {
+				std::string attributeName = pname.toStdString().substr(9);
 				if (par.getBool(pname)) {
-					pi.addPerFacePoint3mAttribute(pname.toStdString().substr(9), scalarPlyType);
+					pi.addPerFacePoint3mAttribute(attributeName, scalarPlyType);
 				}
 			}
 		}
