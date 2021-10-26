@@ -475,8 +475,13 @@ void MainWindow::setUnsplit()
 		assert(mvc->viewerCounter() >1);
 		
 		mvc->removeView(mvc->currentView()->getId());
-		
-		updateMenus();
+
+		// After the view is removed and the remaining viewers
+		// are refreshed to fill the freed area, the geometry
+		// of these viewers becomes known, and then the menus
+		// can be updated correctly.
+		QObject::connect(mvc->currentView(), SIGNAL(currentViewerRefreshed()),
+				this, SLOT(updateMenus()));
 	}
 }
 

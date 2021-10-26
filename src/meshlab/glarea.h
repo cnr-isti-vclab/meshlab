@@ -279,6 +279,7 @@ signals:
     void glareaClosed();					//someone has closed the glarea
 	void insertRenderingDataForNewlyGeneratedMesh(int);
     void currentViewerChanged(int currentId);
+    void currentViewerRefreshed();
 
 public slots:
 
