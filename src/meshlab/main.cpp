@@ -45,11 +45,9 @@ int main(int argc, char *argv[])
 		const QString versOpt1 = "-v";
 		const QString versOpt2 = "--version";
 		if(helpOpt1==argv[1] || helpOpt2==argv[1]) {
-			std::cout <<
-						"Usage:\n"
-						"meshlab <meshfile>\n"
-						"Look at http://www.meshlab.net\n"
-						"for a longer documentation\n";
+			std::cout << "Usage:\n"
+				  << "  meshlab [<camera_view>] [<meshes>] [<projects>]\n"
+				  << "See https://www.meshlab.net for a longer documentation.\n";
 			return 0;
 		}
 		if (versOpt1==argv[1] || versOpt2==argv[1]){

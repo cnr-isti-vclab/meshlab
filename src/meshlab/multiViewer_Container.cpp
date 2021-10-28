@@ -78,8 +78,8 @@ MultiViewer_Container::~MultiViewer_Container()
     /*for(int ii = 0;ii < viewerList.size();++ii)
         delete viewerList[ii];*/
 	
-    //WARNING!!!! here it's just destroyed the pointer to the MLSceneGLSharedDataContext
-    //the data contained in the GPU are deallocated in the closeEvent function
+    //WARNING!!!! Here just the pointer to the MLSceneGLSharedDataContext is destroyed.
+    // The data contained in the GPU gets deallocated in the closeEvent function.
     delete scenecontext;
 }
 
@@ -138,7 +138,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	{
 		viewerList.append(viewer);
 		this->setOrientation(orient);
-        addWidget(viewer);
+		addWidget(viewer);
 		QList<int> sizes;
 		if(this->orientation()== Qt::Horizontal){
 			sizes.append(this->width()/2);
@@ -201,9 +201,9 @@ void MultiViewer_Container::removeView(int viewerId)
 			viewer = viewerList.at(i);
 	}
 	assert(viewer);
-    if (viewer != NULL)
-        scenecontext->removeView(viewer->context());
-    Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
+	if (viewer != NULL)
+		scenecontext->removeView(viewer->context());
+	Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
 	int currentIndex = parentSplitter->indexOf(viewer);
 
     viewer->deleteLater();
@@ -231,20 +231,20 @@ void MultiViewer_Container::removeView(int viewerId)
 
 		Splitter *siblingSplitter = qobject_cast<Splitter *>(this->widget(insertIndex));
 		assert(siblingSplitter);
-        siblingSplitter->hide();
-        siblingSplitter->deleteLater();
+		siblingSplitter->hide();
+		siblingSplitter->deleteLater();
 
 		QWidget *sonLeft = siblingSplitter->widget(0);
 		QWidget *sonRight = siblingSplitter->widget(1);
 		this->setOrientation(siblingSplitter->orientation());
-        this->insertWidget(0,sonLeft);
+		this->insertWidget(0,sonLeft);
 		this->insertWidget(1,sonRight);
 
-        patchForCorrectResize(this);
+		patchForCorrectResize(this);
 		viewerList.removeAll(viewer);
 		//currentId = viewerList.first()->getId();
 		updateCurrent(viewerList.first()->getId());
-        return;
+		return;
 	}
 
 	// Final case. Very generic, not son of the root.
@@ -259,11 +259,11 @@ void MultiViewer_Container::removeView(int viewerId)
 
 	QWidget  *siblingWidget = parentSplitter->widget(siblingIndex);
 
-    parentSplitter->hide();
-    parentSplitter->deleteLater();
-    parentParentSplitter->insertWidget(parentIndex,siblingWidget);
+	parentSplitter->hide();
+	parentSplitter->deleteLater();
+	parentParentSplitter->insertWidget(parentIndex,siblingWidget);
     
-    patchForCorrectResize(parentParentSplitter);
+	patchForCorrectResize(parentParentSplitter);
 	viewerList.removeAll(viewer);
 	updateCurrent(viewerList.first()->getId());
 }
