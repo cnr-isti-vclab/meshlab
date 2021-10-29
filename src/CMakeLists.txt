@@ -103,6 +103,8 @@ set(VCGDIR "${VCGDIR}")
 
 if(NOT VCGDIR)
 	message(FATAL_ERROR "VCGLib not found. Please clone recursively the MeshLab repo.")
+else ()
+	message(STATUS "- VCGLib directory: " ${VCGDIR})
 endif()
 
 # External
