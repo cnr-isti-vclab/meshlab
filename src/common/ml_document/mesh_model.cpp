@@ -108,9 +108,9 @@ std::list<std::string> MeshModel::loadTextures(
 			} catch (const MLException& e) {
 				try { //could be relative to the meshmodel
 					QFileInfo mfi(fullName());
-					QString fn2 = mfi.absolutePath() + "/" + finfo.fileName();
+					QString fn2 = mfi.absolutePath() + "/" + finfo.filePath();
 					img = meshlab::loadImage(fn2, log, cb);
-					textName = finfo.fileName().toStdString();
+					textName = finfo.filePath().toStdString();
 				} catch (const MLException& e) {
 					if (log){
 						log->log(
