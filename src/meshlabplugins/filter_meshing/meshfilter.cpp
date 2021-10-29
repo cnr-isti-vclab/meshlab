@@ -1350,12 +1350,12 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		}
 		switch(par.getEnum("CurvColorMethod"))
 		{
-		case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureDir    (m.cm); break;
-		case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
-		case 2: tri::UpdateQuality<CMeshO>::VertexFromMinCurvatureDir(m.cm); break;
-		case 3: tri::UpdateQuality<CMeshO>::VertexFromMaxCurvatureDir(m.cm); break;
-		case 4: tri::UpdateQuality<CMeshO>::VertexFromShapeIndexCurvatureDir(m.cm); break;
-		case 5: tri::UpdateQuality<CMeshO>::VertexFromCurvednessCurvatureDir(m.cm); break;
+		case 0: tri::UpdateQuality<CMeshO>::VertexMeanFromCurvatureDir    (m.cm); break;
+		case 1: tri::UpdateQuality<CMeshO>::VertexGaussianFromCurvatureDir(m.cm); break;
+		case 2: tri::UpdateQuality<CMeshO>::VertexMinCurvFromCurvatureDir(m.cm); break;
+		case 3: tri::UpdateQuality<CMeshO>::VertexMaxCurvFromCurvatureDir(m.cm); break;
+		case 4: tri::UpdateQuality<CMeshO>::VertexShapeIndexFromCurvatureDir(m.cm); break;
+		case 5: tri::UpdateQuality<CMeshO>::VertexCurvednessFromCurvatureDir(m.cm); break;
 		case 6: tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0); break;
 		}
 

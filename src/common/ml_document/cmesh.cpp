@@ -78,8 +78,6 @@ void CMeshO::enableComponentsFromOtherMesh(const CMeshO& oth)
 		this->vert.EnableMark();
 	if (oth.vert.IsTexCoordEnabled())
 		this->vert.EnableTexCoord();
-	if (oth.vert.IsCurvatureEnabled())
-		this->vert.EnableCurvature();
 	if (oth.vert.IsCurvatureDirEnabled())
 		this->vert.EnableCurvatureDir();
 	if (oth.vert.IsRadiusEnabled())

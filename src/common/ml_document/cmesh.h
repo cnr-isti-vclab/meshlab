@@ -42,10 +42,6 @@ template <class T> class Qualitym: public Quality<Scalarm, T> {
 public: static void Name(std::vector<std::string> & name){name.push_back(std::string("Qualitym"));T::Name(name);}
 };
 
-template <class T> class CurvaturemOcf: public CurvatureOcf<Scalarm, T> {
-public: static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvaturemOcf"));T::Name(name);}
-};
-
 template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<Scalarm>, T> {
 public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
 };
@@ -98,7 +94,6 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 		vcg::vertex::VFAdjOcf,          /*  0b */
 		vcg::vertex::MarkOcf,           /*  0b */
 		vcg::vertex::TexCoordfOcf,      /*  0b */
-		vcg::vertex::CurvaturemOcf,     /*  0b */
 		vcg::vertex::CurvatureDirmOcf,  /*  0b */
 		vcg::vertex::RadiusmOcf         /*  0b */
 		>{

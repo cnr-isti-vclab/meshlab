@@ -246,8 +246,6 @@ void MeshModel::updateDataMask()
 		currentDataMask |= MM_VERTMARK;
 	if (cm.vert.IsTexCoordEnabled())
 		currentDataMask |= MM_VERTTEXCOORD;
-	if (cm.vert.IsCurvatureEnabled())
-		currentDataMask |= MM_VERTCURV;
 	if (cm.vert.IsCurvatureDirEnabled())
 		currentDataMask |= MM_VERTCURVDIR;
 	if (cm.vert.IsRadiusEnabled())
@@ -299,8 +297,6 @@ void MeshModel::updateDataMask(int neededDataMask)
 		cm.face.EnableMark();
 	if((neededDataMask & MM_VERTMARK)!=0)
 		cm.vert.EnableMark();
-	if((neededDataMask & MM_VERTCURV)!=0)
-		cm.vert.EnableCurvature();
 	if((neededDataMask & MM_VERTCURVDIR)!=0)
 		cm.vert.EnableCurvatureDir();
 	if((neededDataMask & MM_VERTRADIUS)!=0)

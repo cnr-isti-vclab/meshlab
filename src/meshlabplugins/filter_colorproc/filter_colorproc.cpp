@@ -687,10 +687,10 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 
 			switch (curvType)
 			{
-				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        log("Computed Mean Curvature");      break;
-				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    log("Computed Gaussian Curvature"); break;
-				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         log("Computed RMS Curvature"); break;
-				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    log("Computed ABS Curvature"); break;
+				case 0: tri::UpdateQuality<CMeshO>::VertexFromAttributeName(m->cm,"KH");        log("Computed Mean Curvature");      break;
+				case 1: tri::UpdateQuality<CMeshO>::VertexFromAttributeName(m->cm,"KG");    log("Computed Gaussian Curvature"); break;
+				case 2: tri::UpdateQuality<CMeshO>::VertexRMSCurvatureFromHGAttribute(m->cm);         log("Computed RMS Curvature"); break;
+				case 3: tri::UpdateQuality<CMeshO>::VertexAbsoluteCurvatureFromHGAttribute(m->cm);    log("Computed ABS Curvature"); break;
 				default: assert(0);
 			}
 
