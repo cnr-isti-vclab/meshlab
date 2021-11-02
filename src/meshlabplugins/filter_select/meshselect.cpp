@@ -68,7 +68,9 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 		CP_SELECT_NON_MANIFOLD_VERTEX,
 		FP_SELECT_FACES_BY_EDGE,
 		FP_SELECT_BY_COLOR,
-		FP_SELECT_OUTLIER};
+		FP_SELECT_FOLD_FACE,
+		FP_SELECT_OUTLIER
+	};
 
 	QCoreApplication* app = QCoreApplication::instance();
 
@@ -152,6 +154,7 @@ QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 	case CP_SELECT_NON_MANIFOLD_FACE: return tr("Select non Manifold Edges");
 	case CP_SELECT_NON_MANIFOLD_VERTEX: return tr("Select non Manifold Vertices");
 	case FP_SELECT_FACES_BY_EDGE: return tr("Select Faces with edges longer than...");
+	case FP_SELECT_FOLD_FACE : return tr("Select Folded Faces");
 	case FP_SELECT_OUTLIER: return tr("Select Outliers");
 	}
 	assert(0);
@@ -220,6 +223,8 @@ QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
 			"Select the non manifold vertices that do not belong to non manifold edges. For "
 			"example two cones connected by their apex. Vertices incident on non manifold edges "
 			"are ignored.");
+	case FP_SELECT_FOLD_FACE:
+		return tr("Select the folded faces created by the Quadric Edge Collapse decimation. The face is selected if the angle between the face normal and the normal of the best fitting plane of the neighbor vertices is above the selected threshold.");
 	case FP_SELECT_OUTLIER:
 		return tr(
 			"Select the vertex classified as outlier using Local Outlier Propabilty measure "
@@ -468,6 +473,11 @@ SelectionFilterPlugin::initParameterList(const QAction* action, const MeshModel&
 			"If true the filter will invert the set of selected vertices."));
 	} break;
 
+	case FP_SELECT_FOLD_FACE:
+	{
+		parlst.addParam(RichDynamicFloat("AngleThreshold", 160.0f, 90.0f, 180.0f, tr("Angle Threshold"), tr("Angle between the face and the best fitting plane of the neighbours vertices. If it is above the threshold the face is selected.")));
+	} break;
+	
 	case FP_SELECT_OUTLIER: {
 		parlst.addParam(RichDynamicFloat(
 			"PropThreshold",
@@ -807,6 +817,13 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 		log("Selected %d faces with and edge longer than %f", selFaceNum, threshold);
 	} break;
 
+	case FP_SELECT_FOLD_FACE:
+	{
+		Scalarm angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		tri::Clean<CMeshO>::SelectFoldedFaceFromOneRingFaces(m.cm, cos(angle));
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+	} break;
 	case FP_SELECT_OUTLIER: {
 		Scalarm                             threshold = par.getDynamicFloat("PropThreshold");
 		int                                 kNearest  = par.getInt("KNearest");
@@ -852,6 +869,7 @@ FilterPlugin::FilterClass SelectionFilterPlugin::getClass(const QAction* action)
 	case FP_SELECT_BORDER:
 	case FP_SELECT_INVERT:
 	case FP_SELECT_FACES_BY_EDGE:
+	case FP_SELECT_FOLD_FACE:
 	case FP_SELECT_OUTLIER:
 	case FP_SELECT_BY_COLOR:
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
@@ -869,6 +887,8 @@ int SelectionFilterPlugin::getRequirements(const QAction* action)
 
 	case CP_SELECT_TEXBORDER: return MeshModel::MM_FACEFACETOPO;
 	case CP_SELFINTERSECT_SELECT: return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO;
+
+	case FP_SELECT_FOLD_FACE: return MeshModel::MM_VERTFACETOPO;
 
 	default: return MeshModel::MM_NONE;
 	}
@@ -895,6 +915,7 @@ int SelectionFilterPlugin::postCondition(const QAction* action) const
 	case CP_SELECT_NON_MANIFOLD_VERTEX:
 	case FP_SELECT_FACES_BY_EDGE:
 	case FP_SELECT_UGLY:
+	case FP_SELECT_FOLD_FACE:
 	case FP_SELECT_OUTLIER: return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
 	case FP_SELECT_DELETE_VERT:
 	case FP_SELECT_DELETE_ALL_FACE:
@@ -915,6 +936,7 @@ int SelectionFilterPlugin::getPreConditions(const QAction* action) const
 	case FP_SELECT_BORDER:
 	case FP_SELECT_ERODE:
 	case FP_SELECT_DILATE:
+	case FP_SELECT_FOLD_FACE:
 	case FP_SELECT_CONNECTED: return MeshModel::MM_FACENUMBER;
 	case FP_SELECT_BY_COLOR: return MeshModel::MM_VERTCOLOR;
 	case FP_SELECT_BY_VERT_QUALITY: return MeshModel::MM_VERTQUALITY;
