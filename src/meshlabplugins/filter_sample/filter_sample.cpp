@@ -59,7 +59,24 @@ QString FilterSamplePlugin::filterName(ActionIDType filterId) const
 		return "Random Vertex Displacement";
 	default :
 		assert(0);
-		return "";
+		return QString();
+	}
+}
+
+/**
+ * @brief FilterSamplePlugin::pythonFilterName if you want that your filter should have a different
+ * name on pymeshlab, use this function to return its python name.
+ * @param f
+ * @return
+ */
+QString FilterSamplePlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f) {
+	case FP_MOVE_VERTEX :
+		return "apply_coord_random_displacement";
+	default :
+		assert(0);
+		return QString();
 	}
 }
 
