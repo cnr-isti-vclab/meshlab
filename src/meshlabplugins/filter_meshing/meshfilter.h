@@ -84,6 +84,7 @@ public:
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin(){}
 	QString pluginName() const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 
@@ -99,7 +100,6 @@ public:
 	int getPreConditions(const QAction *filter) const;
 	int getRequirements(const QAction* filter);
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
-
 protected:
 
 	float lastq_QualityThr;

@@ -222,51 +222,94 @@ int ExtraMeshFilterPlugin::getRequirements(const QAction* filter)
 	}
 }
 
+QString ExtraMeshFilterPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_LOOP_SS: return tr("meshing_surface_subdivision_loop");
+	case FP_BUTTERFLY_SS: return tr("meshing_surface_subdivision_butterfly");
+	case FP_MIDPOINT: return tr("meshing_surface_subdivision_midpoint");
+	case FP_REFINE_CATMULL: return tr("meshing_surface_subdivision_catmull_clark");
+	case FP_QUADRIC_SIMPLIFICATION: return tr("meshing_decimation_quadric_edge_collapse");
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		return tr("meshing_decimation_quadric_edge_collapse_with_texture");
+	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("meshing_isotropic_explicit_remeshing");
+	case FP_CLUSTERING: return tr("meshing_decimation_clustering");
+	case FP_REORIENT: return tr("meshing_re_orient_faces_coherentely");
+	case FP_INVERT_FACES: return tr("meshing_invert_face_orientation");
+	case FP_SCALE: return tr("compute_matrix_from_scaling_or_normalization");
+	case FP_CENTER: return tr("compute_matrix_from_translation");
+	case FP_ROTATE: return tr("compute_matrix_from_rotation");
+	case FP_ROTATE_FIT: return tr("compute_matrix_by_fitting_to_plane");
+	case FP_PRINCIPAL_AXIS: return tr("compute_matrix_by_principal_axis");
+	case FP_FLIP_AND_SWAP: return tr("apply_matrix_flip_or_swap_axis");
+	case FP_FREEZE_TRANSFORM: return tr("apply_matrix_freeze");
+	case FP_RESET_TRANSFORM: return tr("set_matrix_identity");
+	case FP_INVERT_TRANSFORM: return tr("apply_matrix_inverse");
+	case FP_SET_TRANSFORM_PARAMS: return tr("compute_matrix_from_translation_rotation_scale");
+	case FP_SET_TRANSFORM_MATRIX: return tr("set_matrix");
+	case FP_NORMAL_EXTRAPOLATION: return tr("compute_normal_for_point_clouds");
+	case FP_NORMAL_SMOOTH_POINTCLOUD: return tr("apply_normal_point_cloud_smoothing");
+	case FP_COMPUTE_PRINC_CURV_DIR: return tr("compute_curvature_principal_directions_per_vertex");
+	case FP_CLOSE_HOLES: return tr("meshing_close_holes");
+	case FP_CYLINDER_UNWRAP: return tr("generate_cylindrical_unwrapping");
+	case FP_REFINE_HALF_CATMULL: return tr("meshing_tri_to_quad_by_4_8_subdivision");
+	case FP_QUAD_DOMINANT: return tr("meshing_tri_to_quad_dominant");
+	case FP_MAKE_PURE_TRI: return tr("meshing_poly_to_tri");
+	case FP_QUAD_PAIRING: return tr("meshing_tri_to_quad_by_smart_triangle_pairing");
+	case FP_FAUX_CREASE: return tr("compute_selection_crease_per_edge");
+	case FP_FAUX_EXTRACT: return tr("generate_polyline_from_selected_edges");
+	case FP_VATTR_SEAM: return tr("meshing_vertex_attribute_seam");
+	case FP_REFINE_LS3_LOOP: return tr("meshing_surface_subdivision_ls3_loop");
+	case FP_SLICE_WITH_A_PLANE: return tr("generate_polyline_from_planar_section");
+	case FP_PERIMETER_POLYLINE: return tr("generate_polyline_from_selection_perimeter");
+
+	default: assert(0); return QString();
+	}
+}
+
 QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 {
-	switch (filter)
-	{
-	case FP_LOOP_SS                          : return tr("Subdivision Surfaces: Loop");
-	case FP_BUTTERFLY_SS                     : return tr("Subdivision Surfaces: Butterfly Subdivision");
-	case FP_MIDPOINT                         : return tr("Subdivision Surfaces: Midpoint");
-	case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
-	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
-	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
-	case FP_EXPLICIT_ISOTROPIC_REMESHING     : return tr("Remeshing: Isotropic Explicit Remeshing");
-	case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
-	case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
-	case FP_INVERT_FACES                     : return tr("Invert Faces Orientation");
-	case FP_SCALE                            : return tr("Transform: Scale, Normalize");
-	case FP_CENTER                           : return tr("Transform: Translate, Center, set Origin");
-	case FP_ROTATE                           : return tr("Transform: Rotate");
-	case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
-	case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
-	case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
-	case FP_FREEZE_TRANSFORM                 : return tr("Matrix: Freeze Current Matrix");
-	case FP_RESET_TRANSFORM                  : return tr("Matrix: Reset Current Matrix");
-	case FP_INVERT_TRANSFORM                 : return tr("Matrix: Invert Current Matrix");
-	case FP_SET_TRANSFORM_PARAMS             : return tr("Matrix: Set from translation/rotation/scale");
-	case FP_SET_TRANSFORM_MATRIX             : return tr("Matrix: Set/Copy Transformation");
-	case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
-	case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
-	case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
-	case FP_CLOSE_HOLES                      : return tr("Close Holes");
-	case FP_CYLINDER_UNWRAP                  : return tr("Geometric Cylindrical Unwrapping");
-	case FP_REFINE_HALF_CATMULL              : return tr("Tri to Quad by 4-8 Subdivision");
-	case FP_QUAD_DOMINANT                    : return tr("Turn into Quad-Dominant mesh");
-	case FP_MAKE_PURE_TRI                    : return tr("Turn into a Pure-Triangular mesh");
-	case FP_QUAD_PAIRING                     : return tr("Tri to Quad by smart triangle pairing");
-	case FP_FAUX_CREASE                      : return tr("Select Crease Edges");
-	case FP_FAUX_EXTRACT                     : return tr("Build a Polyline from Selected Edges");
-	case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
-	case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
-	case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
-	case FP_PERIMETER_POLYLINE               : return tr("Create Selection Perimeter Polyline");
+	switch (filter) {
+	case FP_LOOP_SS: return tr("Subdivision Surfaces: Loop");
+	case FP_BUTTERFLY_SS: return tr("Subdivision Surfaces: Butterfly Subdivision");
+	case FP_MIDPOINT: return tr("Subdivision Surfaces: Midpoint");
+	case FP_REFINE_CATMULL: return tr("Subdivision Surfaces: Catmull-Clark");
+	case FP_QUADRIC_SIMPLIFICATION: return tr("Simplification: Quadric Edge Collapse Decimation");
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
+	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("Remeshing: Isotropic Explicit Remeshing");
+	case FP_CLUSTERING: return tr("Simplification: Clustering Decimation");
+	case FP_REORIENT: return tr("Re-Orient all faces coherentely");
+	case FP_INVERT_FACES: return tr("Invert Faces Orientation");
+	case FP_SCALE: return tr("Transform: Scale, Normalize");
+	case FP_CENTER: return tr("Transform: Translate, Center, set Origin");
+	case FP_ROTATE: return tr("Transform: Rotate");
+	case FP_ROTATE_FIT: return tr("Transform: Rotate to Fit to a plane");
+	case FP_PRINCIPAL_AXIS: return tr("Transform: Align to Principal Axis");
+	case FP_FLIP_AND_SWAP: return tr("Transform: Flip and/or swap axis");
+	case FP_FREEZE_TRANSFORM: return tr("Matrix: Freeze Current Matrix");
+	case FP_RESET_TRANSFORM: return tr("Matrix: Reset Current Matrix");
+	case FP_INVERT_TRANSFORM: return tr("Matrix: Invert Current Matrix");
+	case FP_SET_TRANSFORM_PARAMS: return tr("Matrix: Set from translation/rotation/scale");
+	case FP_SET_TRANSFORM_MATRIX: return tr("Matrix: Set/Copy Transformation");
+	case FP_NORMAL_EXTRAPOLATION: return tr("Compute normals for point sets");
+	case FP_NORMAL_SMOOTH_POINTCLOUD: return tr("Smooth normals on point sets");
+	case FP_COMPUTE_PRINC_CURV_DIR: return tr("Compute curvature principal directions");
+	case FP_CLOSE_HOLES: return tr("Close Holes");
+	case FP_CYLINDER_UNWRAP: return tr("Geometric Cylindrical Unwrapping");
+	case FP_REFINE_HALF_CATMULL: return tr("Tri to Quad by 4-8 Subdivision");
+	case FP_QUAD_DOMINANT: return tr("Turn into Quad-Dominant mesh");
+	case FP_MAKE_PURE_TRI: return tr("Turn into a Pure-Triangular mesh");
+	case FP_QUAD_PAIRING: return tr("Tri to Quad by smart triangle pairing");
+	case FP_FAUX_CREASE: return tr("Select Crease Edges");
+	case FP_FAUX_EXTRACT: return tr("Build a Polyline from Selected Edges");
+	case FP_VATTR_SEAM: return tr("Vertex Attribute Seam");
+	case FP_REFINE_LS3_LOOP: return tr("Subdivision Surfaces: LS3 Loop");
+	case FP_SLICE_WITH_A_PLANE: return tr("Compute Planar Section");
+	case FP_PERIMETER_POLYLINE: return tr("Create Selection Perimeter Polyline");
 
-	default                                  : assert(0);
+	default: assert(0); return QString();
 	}
-
-	return tr("error!");
 }
 
 QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
