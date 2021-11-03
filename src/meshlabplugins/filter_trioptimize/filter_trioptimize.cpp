@@ -125,21 +125,27 @@ QString TriOptimizePlugin::pluginName() const
 	return "FilterTriOptimize";
 }
 
-
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
- QString TriOptimizePlugin::filterName(ActionIDType filterId) const
+QString TriOptimizePlugin::pythonFilterName(ActionIDType f) const
 {
-	switch (filterId) {
-		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
-		case FP_CURVATURE_EDGE_FLIP:		return tr("Curvature flipping optimization");
-		case FP_NEAR_LAPLACIAN_SMOOTH: 	return tr("Laplacian Smooth (surface preserving)");
-		default:		assert(0);
+	switch (f) {
+	case FP_PLANAR_EDGE_FLIP: return tr("meshing_edge_flip_by_planar_optimization");
+	case FP_CURVATURE_EDGE_FLIP: return tr("meshing_edge_flip_by_curvature_optimization");
+	case FP_NEAR_LAPLACIAN_SMOOTH: return tr("apply_coord_laplacian_smoothing_surface_preserving");
+	default: assert(0); return QString();
 	}
-	return {};
 }
 
- int TriOptimizePlugin::getRequirements(const QAction *action)
+QString TriOptimizePlugin::filterName(ActionIDType filterId) const
+{
+	switch (filterId) {
+	case FP_PLANAR_EDGE_FLIP: return tr("Planar flipping optimization");
+	case FP_CURVATURE_EDGE_FLIP: return tr("Curvature flipping optimization");
+	case FP_NEAR_LAPLACIAN_SMOOTH: return tr("Laplacian Smooth (surface preserving)");
+	default: assert(0); return QString();
+	}
+}
+
+int TriOptimizePlugin::getRequirements(const QAction *action)
 {
 	switch (ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:
@@ -152,9 +158,7 @@ QString TriOptimizePlugin::pluginName() const
 	return 0;
 }
 
-// Info() must return the longer string describing each filtering action
-// (this string is used in the About plugin dialog)
- QString TriOptimizePlugin::filterInfo(ActionIDType filterId) const
+QString TriOptimizePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_PLANAR_EDGE_FLIP:
