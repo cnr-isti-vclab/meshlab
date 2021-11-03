@@ -42,6 +42,7 @@ class FilterFractal : public QObject, public FilterPlugin
 	~FilterFractal(){}
 
 	QString pluginName() const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 
