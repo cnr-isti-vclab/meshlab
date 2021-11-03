@@ -71,6 +71,36 @@ QString FilterUnsharp::pluginName() const
 	return "FilterUnsharp";
 }
 
+QString FilterUnsharp::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_LAPLACIAN_SMOOTH: return QString("apply_coord_laplacian_smoothing");
+	case FP_HC_LAPLACIAN_SMOOTH: return QString("apply_coord_hc_laplacian_smoothing");
+	case FP_SD_LAPLACIAN_SMOOTH: return QString("apply_coord_laplacian_smoothing_scale_dependent");
+	case FP_TWO_STEP_SMOOTH: return QString("apply_coord_two_steps_smoothing");
+	case FP_TAUBIN_SMOOTH: return QString("apply_coord_taubin_smoothing");
+	case FP_DEPTH_SMOOTH: return QString("apply_coord_depth_smoothing");
+	//case FP_DIRECTIONAL_PRESERVATION_STORE: return QString("Directional Geom. Preserv.");
+	case FP_DIRECTIONAL_PRESERVATION_BLEND: return QString("apply_coord_directional_preservation");
+	case FP_CREASE_CUT: return QString("meshing_cut_along_crease_edges");
+	case FP_FACE_NORMAL_NORMALIZE: return QString("apply_normal_normalization_per_face");
+	case FP_VERTEX_NORMAL_NORMALIZE: return QString("apply_normal_normalization_per_vertex");
+	case FP_FACE_NORMAL_SMOOTHING: return QString("apply_normal_smoothing_per_face");
+	case FP_VERTEX_QUALITY_SMOOTHING: return QString("apply_scalar_smoothing_per_vertex");
+	case FP_UNSHARP_NORMAL: return QString("apply_normal_unsharp_mask_per_vertex");
+	case FP_UNSHARP_GEOMETRY: return QString("apply_coord_unsharp_mask");
+	case FP_UNSHARP_QUALITY: return QString("apply_scalar_unsharp_mask_per_vertex");
+	case FP_UNSHARP_VERTEX_COLOR: return QString("apply_color_unsharp_mask_per_vertex");
+	case FP_RECOMPUTE_VERTEX_NORMAL: return QString("compute_normal_per_vertex");
+	case FP_RECOMPUTE_FACE_NORMAL: return QString("compute_normal_per_face");
+	case FP_RECOMPUTE_QUADFACE_NORMAL: return QString("compute_normal_polygon_mesh_per_face");
+	case FP_LINEAR_MORPH: return QString("compute_coord_linear_morphing");
+	case FP_SCALAR_HARMONIC_FIELD: return QString("compute_scalar_by_scalar_harmonic_field_per_vertex");
+
+	default: assert(0); return QString();
+	}
+}
+
 QString FilterUnsharp::filterName(ActionIDType filter) const
 {
 	switch (filter) {
