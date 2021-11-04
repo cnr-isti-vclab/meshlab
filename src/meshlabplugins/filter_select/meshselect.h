@@ -65,7 +65,9 @@ public:
 	SelectionFilterPlugin();
 	QString pluginName() const;
 	QString filterInfo(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterName(ActionIDType filter) const;
+
 
 	FilterClass                     getClass(const QAction*) const;
 	RichParameterList               initParameterList(const QAction* action, const MeshModel& m);
