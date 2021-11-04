@@ -80,13 +80,15 @@ public:
 	FilterFunctionPlugin();
 	~FilterFunctionPlugin();
 
-	QString                         pluginName() const;
-	QString                         filterName(ActionIDType filter) const;
-	QString                         filterInfo(ActionIDType filter) const;
-	FilterClass                     getClass(const QAction*) const;
-	int                             postCondition(const QAction* action) const;
-	RichParameterList               initParameterList(const QAction*, const MeshModel& /*m*/);
-	virtual int                     getRequirements(const QAction*);
+	QString           pluginName() const;
+	QString           pythonFilterName(ActionIDType f) const;
+	QString           filterName(ActionIDType filter) const;
+	QString           filterInfo(ActionIDType filter) const;
+	FilterClass       getClass(const QAction*) const;
+	int               postCondition(const QAction* action) const;
+	RichParameterList initParameterList(const QAction*, const MeshModel& /*m*/);
+	virtual int       getRequirements(const QAction*);
+
 	std::map<std::string, QVariant> applyFilter(
 		const QAction*           action,
 		const RichParameterList& parameters,
