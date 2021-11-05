@@ -67,6 +67,7 @@ public:
 	QString pluginName() const;
 
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;
@@ -81,7 +82,6 @@ public:
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-
 private:
 
     vcg::AlignPair::Param alignParameters;
