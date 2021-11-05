@@ -52,6 +52,7 @@ public:
 	FilterDocSampling();
 
 	QString pluginName() const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
