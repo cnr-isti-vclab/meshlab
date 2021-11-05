@@ -71,6 +71,7 @@ public:
 
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 	int getPreConditions(const QAction *) const;
 	int postCondition(const QAction* ) const;

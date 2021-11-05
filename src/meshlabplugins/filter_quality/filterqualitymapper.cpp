@@ -30,10 +30,6 @@ FIRST RELEASE
 #include <stdlib.h>
 #include "filterqualitymapper.h"
 
-// Constructor usually performs only two simple tasks of filling the two lists 
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-
 QualityMapperFilter::QualityMapperFilter() 
 { 
 	typeList = {FP_QUALITY_MAPPER};
@@ -47,19 +43,24 @@ QString QualityMapperFilter::pluginName() const
 	return "FilterQuality";
 }
 
-// ST() must return the very short string describing each filtering action 
-// (this string is used also to define the menu entry)
 QString QualityMapperFilter::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_QUALITY_MAPPER :  return QString("Quality Mapper applier");
-	default : assert(0);
+	default : assert(0); return QString();
 	}
-	return QString("");
 }
 
-// Info() must return the longer string describing each filtering action 
-// (this string is used in the About plugin dialog)
+QString QualityMapperFilter::pythonFilterName(ActionIDType f) const
+{
+	switch(f) {
+	case FP_QUALITY_MAPPER :
+		return QString("compute_color_from_scalar_using_transfer_function_per_vertex");
+	default : assert(0); return QString();
+	}
+}
+
+
 QString QualityMapperFilter::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
@@ -84,14 +85,6 @@ FilterPlugin::FilterClass QualityMapperFilter::getClass(const QAction *a) const
 	}
 }
 
-
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 RichParameterList QualityMapperFilter::initParameterList(const QAction *action,const MeshModel &m)
 {
 	RichParameterList parlst;
@@ -131,8 +124,6 @@ RichParameterList QualityMapperFilter::initParameterList(const QAction *action,c
 	return parlst;
 }
 
-// The Real Core Function doing the actual mesh processing.
-// Apply color to mesh vertices
 std::map<std::string, QVariant> QualityMapperFilter::applyFilter(
 		const QAction *filter,
 		const RichParameterList & par,

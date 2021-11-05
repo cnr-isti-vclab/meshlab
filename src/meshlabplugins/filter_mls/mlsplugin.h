@@ -49,12 +49,15 @@ public:
 
 	MlsPlugin();
 
-	QString                         pluginName() const;
-	QString                         filterName(ActionIDType filter) const;
-	QString                         filterInfo(ActionIDType filter) const;
-	FilterClass                     getClass(const QAction* a) const;
-	RichParameterList               initParameterList(const QAction*, const MeshDocument& md);
-	int                             getRequirements(const QAction* action);
+	QString     pluginName() const;
+	QString     filterName(ActionIDType filter) const;
+	QString     pythonFilterName(ActionIDType f) const;
+	QString     filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction* a) const;
+	int         getRequirements(const QAction* action);
+
+	RichParameterList initParameterList(const QAction*, const MeshDocument& md);
+
 	std::map<std::string, QVariant> applyFilter(
 		const QAction*           action,
 		const RichParameterList& parameters,
