@@ -61,14 +61,26 @@ QString FilterGeodesic::pluginName() const
 
 QString FilterGeodesic::filterName(ActionIDType filter) const
 {
-	switch(filter)
-	{
-	case FP_QUALITY_BORDER_GEODESIC     : return QString("Colorize by border distance");
-	case FP_QUALITY_POINT_GEODESIC      : return QString("Colorize by geodesic distance from a given point");
-	case FP_QUALITY_SELECTED_GEODESIC   : return QString("Colorize by geodesic distance from the selected points");
-	default                             : assert(0);
+	switch (filter) {
+	case FP_QUALITY_BORDER_GEODESIC: return QString("Colorize by border distance");
+	case FP_QUALITY_POINT_GEODESIC:
+		return QString("Colorize by geodesic distance from a given point");
+	case FP_QUALITY_SELECTED_GEODESIC:
+		return QString("Colorize by geodesic distance from the selected points");
+	default: assert(0); return QString();
 	}
-	return QString("error!");
+}
+
+QString FilterGeodesic::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_QUALITY_BORDER_GEODESIC: return QString("compute_scalar_by_border_distance_per_vertex");
+	case FP_QUALITY_POINT_GEODESIC:
+		return QString("compute_scalar_by_geodesic_distance_from_given_point_per_vertex");
+	case FP_QUALITY_SELECTED_GEODESIC:
+		return QString("compute_scalar_by_geodesic_distance_from_selection_per_vertex");
+	default: assert(0); return QString();
+	}
 }
 
 QString FilterGeodesic::filterInfo(ActionIDType filterId) const

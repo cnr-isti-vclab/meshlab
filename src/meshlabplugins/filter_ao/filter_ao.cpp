@@ -74,13 +74,18 @@ QString AmbientOcclusionPlugin::pluginName() const
 
 QString AmbientOcclusionPlugin::filterName(ActionIDType filterId) const
 {
-    switch(filterId)
-    {
-    case FP_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion");
-    default : assert(0);
-    }
+	switch (filterId) {
+	case FP_AMBIENT_OCCLUSION: return QString("Ambient Occlusion");
+	default: assert(0); return QString();
+	}
+}
 
-    return QString("");
+QString AmbientOcclusionPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_AMBIENT_OCCLUSION: return QString("compute_scalar_ambient_occlusion");
+	default: assert(0); return QString();
+	}
 }
 
 QString AmbientOcclusionPlugin::filterInfo(ActionIDType filterId) const
