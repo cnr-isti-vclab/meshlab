@@ -61,16 +61,26 @@ QString FilterIsoParametrization::pluginName() const
 
 QString FilterIsoParametrization::filterName(ActionIDType filter) const
 {
-	switch(filter)
-	{
-	case ISOP_PARAM :			return "Iso Parametrization: Main";
-	case ISOP_REMESHING :     return "Iso Parametrization Remeshing";
-	case ISOP_DIAMPARAM :     return "Iso Parametrization Build Atlased Mesh";
-	case ISOP_TRANSFER:		return "Iso Parametrization transfer between meshes";
-	default: assert(0);
+	switch (filter) {
+	case ISOP_PARAM: return "Iso Parametrization: Main";
+	case ISOP_REMESHING: return "Iso Parametrization Remeshing";
+	case ISOP_DIAMPARAM: return "Iso Parametrization Build Atlased Mesh";
+	case ISOP_TRANSFER: return "Iso Parametrization transfer between meshes";
+	default: assert(0); return QString();
 	}
-	return QString("error!");
 }
+
+QString FilterIsoParametrization::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case ISOP_PARAM: return "compute_iso_parametrization";
+	case ISOP_REMESHING: return "generate_iso_parametrization_remeshing";
+	case ISOP_DIAMPARAM: return "generate_iso_parametrization_atlased_mesh";
+	case ISOP_TRANSFER: return "transfer_iso_parametrization_between_meshes";
+	default: assert(0); return QString();
+	}
+}
+
 static const QString bibRef("For more details see: <br>"
 							"<b>N. Pietroni, M. Tarini and P. Cignoni</b>, <br><a href=\"http://vcg.isti.cnr.it/Publications/2010/PTC10/\">'Almost isometric mesh parameterization through abstract domains'</a> <br>"
 							"IEEE Transaction of Visualization and Computer Graphics, 2010");
