@@ -98,16 +98,24 @@ RichParameterList SdfGpuPlugin::initParameterList(const QAction *action, const M
 
 QString SdfGpuPlugin::filterName(ActionIDType filterId) const
 {
-	switch(filterId)
-	{
-	case SDF_SDF                   :  return QString("Shape Diameter Function");
-	case SDF_DEPTH_COMPLEXITY      :  return QString("Depth complexity");
-	case SDF_OBSCURANCE            :  return QString("Volumetric obscurance");
+	switch (filterId) {
+	case SDF_SDF: return QString("Shape Diameter Function");
+	case SDF_DEPTH_COMPLEXITY: return QString("Depth complexity");
+	case SDF_OBSCURANCE: return QString("Volumetric obscurance");
 
-	default : assert(0);
+	default: assert(0); return QString();
 	}
+}
 
-	return QString("");
+QString SdfGpuPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case SDF_SDF: return QString("compute_scalar_by_shape_diameter_function_per_vertex");
+	case SDF_DEPTH_COMPLEXITY: return QString("get_depth_complexity");
+	case SDF_OBSCURANCE: return QString("compute_scalar_by_volumetric_obscurance");
+
+	default: assert(0); return QString();
+	}
 }
 
 QString SdfGpuPlugin::filterInfo(ActionIDType filterId) const

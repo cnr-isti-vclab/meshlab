@@ -44,10 +44,14 @@ public:
 	QhullPlugin();
 	~QhullPlugin();
 
-	QString                         pluginName() const;
-	QString                         filterName(ActionIDType filter) const;
-	QString                         filterInfo(ActionIDType filter) const;
-	RichParameterList               initParameterList(const QAction*, const MeshModel& /*m*/);
+	QString pluginName() const;
+	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+
+	QString filterInfo(ActionIDType filter) const;
+
+	RichParameterList initParameterList(const QAction*, const MeshModel& /*m*/);
+
 	std::map<std::string, QVariant> applyFilter(
 		const QAction*           action,
 		const RichParameterList& parameters,
