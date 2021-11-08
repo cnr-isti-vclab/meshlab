@@ -56,21 +56,21 @@ public:
 	FilterTexturePlugin();
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
+	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+	QString filterInfo(ActionIDType filter) const;
+	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
-	virtual int getRequirements(const QAction*);
-	virtual int getPreConditions(const QAction*) const;
-	virtual int postCondition(const QAction* ) const;
+	int getRequirements(const QAction*);
+	int getPreConditions(const QAction*) const;
+	int postCondition(const QAction* ) const;
 	FilterClass getClass(const QAction *a) const;
 	FilterArity filterArity(const QAction* filter) const;
-
 private:
 	void transferToTexture(MeshDocument &md, const RichParameterList & parameters, vcg::CallBackPos * cb);
 };

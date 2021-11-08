@@ -77,9 +77,25 @@ QString FilterTexturePlugin::filterName(ActionIDType filterId) const
 	case FP_COLOR_TO_TEXTURE : return QString("Transfer: Vertex Color to Texture");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer: Vertex Attributes to Texture (1 or 2 meshes)");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Transfer: Texture to Vertex Color (1 or 2 meshes)");
-	default : assert(0);
+	default : assert(0); return QString();
 	}
-	return {};
+}
+
+QString FilterTexturePlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f)
+	{
+	case FP_VORONOI_ATLAS : return QString("generate_voronoi_atlas_parametrization");
+	case FP_UV_WEDGE_TO_VERTEX : return QString("compute_texcoord_transfer_wedge_to_vertex");
+	case FP_UV_VERTEX_TO_WEDGE : return QString("compute_texcoord_transfer_vertex_to_wedge");
+	case FP_BASIC_TRIANGLE_MAPPING : return QString("compute_texcoord_triangle_trivial_parametrization_per_wedge");
+	case FP_PLANAR_MAPPING : return QString("compute_texcoord_flat_plane_parametrization_per_wedge");
+	case FP_SET_TEXTURE : return QString("set_texture_per_mesh");
+	case FP_COLOR_TO_TEXTURE : return QString("compute_texmap_from_color");
+	case FP_TRANSFER_TO_TEXTURE : return QString("transfer_attributes_to_texture_per_vertex");
+	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("transfer_texture_to_color_per_vertex");
+	default : assert(0); return QString();
+	}
 }
 
 // Info() must return the longer string describing each filtering action
