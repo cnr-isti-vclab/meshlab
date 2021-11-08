@@ -99,8 +99,8 @@ QString FilterLayerPlugin::pythonFilterName(ActionIDType f) const
 	case FP_FLATTEN: return QString("generate_by_merging_visible_meshes");
 	case FP_RENAME_MESH: return QString("set_mesh_name");
 	case FP_RENAME_RASTER: return QString("set_raster_name");
-	case FP_EXPORT_CAMERAS: return QString("export_active_raster_cameras_to_file");
-	case FP_IMPORT_CAMERAS: return QString("import_active_raster_cameras_from_file");
+	case FP_EXPORT_CAMERAS: return QString("save_active_raster_cameras");
+	case FP_IMPORT_CAMERAS: return QString("load_active_raster_cameras");
 	default: assert(0); return QString();
 	}
 }
