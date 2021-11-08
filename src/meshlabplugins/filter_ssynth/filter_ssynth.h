@@ -41,6 +41,7 @@ class FilterSSynth : public QObject, public IOPlugin, public FilterPlugin{
 	~FilterSSynth(){}
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 	int getRequirements(const QAction*);
 	RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);

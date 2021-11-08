@@ -34,15 +34,18 @@ QString FilterSSynth::pluginName() const
 
 QString FilterSSynth::filterName(ActionIDType filter) const
 {
-    switch(filter)
-    {
-        case CR_SSYNTH:
-            return QString("Structure Synth Mesh Creation");
-            break;
-        default:
-            assert(0); return QString("error");
-            break;
-    }
+	switch (filter) {
+	case CR_SSYNTH: return QString("Structure Synth Mesh Creation"); break;
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterSSynth::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case CR_SSYNTH: return QString("create_mesh_by_grammar"); break;
+	default: assert(0); return QString();
+	}
 }
 
 QString FilterSSynth::filterInfo(ActionIDType filterId) const
