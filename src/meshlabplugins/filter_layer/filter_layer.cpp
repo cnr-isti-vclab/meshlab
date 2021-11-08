@@ -81,9 +81,28 @@ QString FilterLayerPlugin::filterName(ActionIDType filterId) const
 	case FP_RENAME_RASTER: return QString("Rename Current Raster");
 	case FP_EXPORT_CAMERAS: return QString("Export active rasters cameras to file");
 	case FP_IMPORT_CAMERAS: return QString("Import cameras for active rasters from file");
-	default: assert(0);
+	default: assert(0); return QString();
 	}
-	return NULL;
+}
+
+QString FilterLayerPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_SPLITSELECTEDFACES: return QString("generate_from_selected_faces");
+	case FP_SPLITSELECTEDVERTICES: return QString("generate_from_selected_vertices");
+	case FP_SPLITCONNECTED: return QString("generate_splitting_by_connected_components");
+	case FP_DUPLICATE: return QString("generate_copy_of_current_mesh");
+	case FP_DELETE_MESH: return QString("delete_current_mesh");
+	case FP_DELETE_NON_VISIBLE_MESH: return QString("delete_non_visible_meshes");
+	case FP_DELETE_RASTER: return QString("delete_current_raster");
+	case FP_DELETE_NON_SELECTED_RASTER: return QString("delete_non_active_rasters");
+	case FP_FLATTEN: return QString("generate_by_merging_visible_meshes");
+	case FP_RENAME_MESH: return QString("set_mesh_name");
+	case FP_RENAME_RASTER: return QString("set_raster_name");
+	case FP_EXPORT_CAMERAS: return QString("export_active_raster_cameras_to_file");
+	case FP_IMPORT_CAMERAS: return QString("import_active_raster_cameras_from_file");
+	default: assert(0); return QString();
+	}
 }
 
 // Info() return the longer string describing each filtering action
