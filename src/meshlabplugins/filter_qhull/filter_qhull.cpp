@@ -51,24 +51,24 @@ QString QhullPlugin::pluginName() const
 	return "FilterQHull";
 }
 
-QString QhullPlugin::filterName(ActionIDType filterId) const
-{
-	switch (filterId) {
-	case FP_QHULL_CONVEX_HULL: return QString("generate_convex_hull");
-	case FP_QHULL_VORONOI_FILTERING: return QString("generate_voronoi_filtering");
-	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("generate_alpha_shape");
-	case FP_QHULL_VISIBLE_POINTS: return QString("compute_selection_of_visible_convex_hull_per_vertex");
-	default: assert(0); return QString();
-	}
-}
-
-QString QhullPlugin::pythonFilterName(ActionIDType f) const
+QString QhullPlugin::filterName(ActionIDType f) const
 {
 	switch (f) {
 	case FP_QHULL_CONVEX_HULL: return QString("Convex Hull");
 	case FP_QHULL_VORONOI_FILTERING: return QString("Voronoi Filtering");
 	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Alpha Complex/Shape");
 	case FP_QHULL_VISIBLE_POINTS: return QString("Select Convex Hull Visible Points");
+	default: assert(0); return QString();
+	}
+}
+
+QString QhullPlugin::pythonFilterName(ActionIDType filterId) const
+{
+	switch (filterId) {
+	case FP_QHULL_CONVEX_HULL: return QString("generate_convex_hull");
+	case FP_QHULL_VORONOI_FILTERING: return QString("generate_voronoi_filtering");
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("generate_alpha_shape");
+	case FP_QHULL_VISIBLE_POINTS: return QString("compute_selection_of_visible_convex_hull_per_vertex");
 	default: assert(0); return QString();
 	}
 }
