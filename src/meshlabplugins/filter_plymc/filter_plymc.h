@@ -41,9 +41,10 @@ public:
 	PlyMCPlugin();
 
 	QString pluginName() const;
-	virtual QString filterName(ActionIDType filter) const;
-	virtual QString filterInfo(ActionIDType filter) const;
-	virtual RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
+	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+	QString filterInfo(ActionIDType filter) const;
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
 			const RichParameterList & parameters,
@@ -53,6 +54,7 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	FilterPlugin::FilterArity filterArity(const QAction* filter) const;
 	int postCondition(const QAction *filter) const;
+
 };
 
 #endif

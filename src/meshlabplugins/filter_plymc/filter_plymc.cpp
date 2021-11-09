@@ -50,17 +50,22 @@ QString PlyMCPlugin::pluginName() const
 	return "FilterPlyMC";
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
 QString PlyMCPlugin::filterName(ActionIDType filterId) const
 {
-	switch(filterId)
-	{
-	case FP_PLYMC :        return QString("Surface Reconstruction: VCG");
-	case FP_MC_SIMPLIFY :  return QString("Simplification: Edge Collapse for Marching Cube meshes");
-	default : assert(0);
+	switch (filterId) {
+	case FP_PLYMC: return QString("Surface Reconstruction: VCG");
+	case FP_MC_SIMPLIFY: return QString("Simplification: Edge Collapse for Marching Cube meshes");
+	default: assert(0); return QString();
 	}
-	return {};
+}
+
+QString PlyMCPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_PLYMC: return QString("generate_surface_reconstruction_vcg");
+	case FP_MC_SIMPLIFY: return QString("meshing_decimation_edge_collapse_for_marching_cube_meshes");
+	default: assert(0); return QString();
+	}
 }
 
 // Info() must return the longer string describing each filtering action

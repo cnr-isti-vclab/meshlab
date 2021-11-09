@@ -42,6 +42,7 @@ public:
 
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction* a) const;
@@ -57,6 +58,7 @@ public:
 	RichParameterList initParameterList(const QAction* a, const MeshModel&);
 	int postCondition(const QAction* filter) const;
 	FilterArity filterArity(const QAction*) const;
+
 };
 
 
