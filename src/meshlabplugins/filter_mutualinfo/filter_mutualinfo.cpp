@@ -49,12 +49,17 @@ QString FilterMutualInfoPlugin::pluginName() const
 
 QString FilterMutualInfoPlugin::filterName(ActionIDType filterId) const
 {
-	switch(filterId) {
-	case FP_IMAGE_MUTUALINFO:
-		return "Image alignment: Mutual Information";
-	default :
-		assert(0);
-		return "";
+	switch (filterId) {
+	case FP_IMAGE_MUTUALINFO: return "Image alignment: Mutual Information";
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterMutualInfoPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_IMAGE_MUTUALINFO: return "raster_alignment_mutual_information";
+	default: assert(0); return QString();
 	}
 }
 

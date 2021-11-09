@@ -61,15 +61,22 @@ QString FilterMutualGlobal::pluginName() const
 	return "FilterMutualGlobal";
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
 QString FilterMutualGlobal::filterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-        case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information");
-        default : assert(0);
-    }
-  return QString();
+	switch (filterId) {
+	case FP_IMAGE_GLOBALIGN:
+		return QString("Image Registration: Global refinement using Mutual Information");
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterMutualGlobal::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_IMAGE_GLOBALIGN:
+		return QString("raster_global_refinement_mutual_information");
+	default: assert(0); return QString();
+	}
 }
 
 // Info() must return the longer string describing each filtering action
