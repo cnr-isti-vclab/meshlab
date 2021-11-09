@@ -66,33 +66,34 @@ QString FilterMeasurePlugin::pluginName() const
 QString FilterMeasurePlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
-	case COMPUTE_TOPOLOGICAL_MEASURES:
-		return "Compute Topological Measures";
-		break;
+	case COMPUTE_TOPOLOGICAL_MEASURES: return "Compute Topological Measures"; break;
 	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
 		return "Compute Topological Measures for Quad Meshes";
 		break;
-	case COMPUTE_GEOMETRIC_MEASURES:
-		return "Compute Geometric Measures";
+	case COMPUTE_GEOMETRIC_MEASURES: return "Compute Geometric Measures"; break;
+	case COMPUTE_AREA_PERIMETER_SELECTION: return "Compute Area/Perimeter of selection"; break;
+	case PER_VERTEX_QUALITY_STAT: return "Per Vertex Quality Stat"; break;
+	case PER_FACE_QUALITY_STAT: return "Per Face Quality Stat"; break;
+	case PER_VERTEX_QUALITY_HISTOGRAM: return "Per Vertex Quality Histogram"; break;
+	case PER_FACE_QUALITY_HISTOGRAM: return "Per Face Quality Histogram"; break;
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterMeasurePlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case COMPUTE_TOPOLOGICAL_MEASURES: return "get_topological_measures"; break;
+	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
+		return "get_topological_measures_from_quad_mesh";
 		break;
-	case COMPUTE_AREA_PERIMETER_SELECTION:
-		return "Compute Area/Perimeter of selection";
-		break;
-	case PER_VERTEX_QUALITY_STAT:
-		return "Per Vertex Quality Stat";
-		break;
-	case PER_FACE_QUALITY_STAT:
-		return "Per Face Quality Stat";
-		break;
-	case PER_VERTEX_QUALITY_HISTOGRAM:
-		return "Per Vertex Quality Histogram";
-		break;
-	case PER_FACE_QUALITY_HISTOGRAM:
-		return "Per Face Quality Histogram";
-		break;
-	default:
-		assert(0);
-		return "";
+	case COMPUTE_GEOMETRIC_MEASURES: return "get_geometric_measures"; break;
+	case COMPUTE_AREA_PERIMETER_SELECTION: return "get_area_and_perimeter_of_selection"; break;
+	case PER_VERTEX_QUALITY_STAT: return "get_scalar_statistics_per_vertex"; break;
+	case PER_FACE_QUALITY_STAT: return "get_scalar_statistics_per_face"; break;
+	case PER_VERTEX_QUALITY_HISTOGRAM: return "get_scalar_histogram_per_vertex"; break;
+	case PER_FACE_QUALITY_HISTOGRAM: return "get_scalar_histogram_per_face"; break;
+	default: assert(0); return QString();
 	}
 }
 
