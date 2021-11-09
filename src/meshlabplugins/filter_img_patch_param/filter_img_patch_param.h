@@ -110,6 +110,7 @@ public:
 
 	QString pluginName() const;
 	QString filterName( ActionIDType id ) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo( ActionIDType id ) const;
 
 	FilterClass getClass(const QAction* act ) const;

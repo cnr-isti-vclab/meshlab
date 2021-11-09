@@ -74,18 +74,23 @@ public:
 	};
 
 	QString filterName(ActionIDType filter) const;
-	QString filterInfo(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+
+	QString     filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;
-	int getPreConditions(const QAction *) const;
-	int postCondition(const QAction* ) const;
-	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
+
+	int getPreConditions(const QAction*) const;
+	int postCondition(const QAction*) const;
+
+	RichParameterList initParameterList(const QAction*, const MeshModel& /*m*/);
+
 	std::map<std::string, QVariant> applyFilter(
-			const QAction* action,
-			const RichParameterList & params,
-			MeshDocument &md,
-			unsigned int& postConditionMask,
-			vcg::CallBackPos * cb);
+		const QAction*           action,
+		const RichParameterList& params,
+		MeshDocument&            md,
+		unsigned int&            postConditionMask,
+		vcg::CallBackPos*        cb);
 
 private:
 	RichParameterList nxsParameters() const;
