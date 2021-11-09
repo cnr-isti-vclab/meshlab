@@ -47,12 +47,17 @@ QString FilterSketchFabPlugin::pluginName() const
 
 QString FilterSketchFabPlugin::filterName(ActionIDType filterId) const
 {
-	switch(filterId) {
-	case FP_SKETCHFAB :
-		return "Export to Sketchfab";
-	default :
-		assert(0);
-		return "";
+	switch (filterId) {
+	case FP_SKETCHFAB: return "Export to Sketchfab";
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterSketchFabPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_SKETCHFAB: return "export_mesh_to_sketchfab";
+	default: assert(0); return QString();
 	}
 }
 
