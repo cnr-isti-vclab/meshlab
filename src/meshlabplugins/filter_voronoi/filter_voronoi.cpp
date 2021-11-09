@@ -74,6 +74,27 @@ QString FilterVoronoiPlugin::filterName(ActionIDType filterId) const
 	}
 }
 
+QString FilterVoronoiPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f) {
+	case VORONOI_SAMPLING :
+		return "generate_sampling_voronoi";
+	case VOLUME_SAMPLING:
+		return "generate_sampling_volumetric";
+	case VORONOI_SCAFFOLDING:
+		return "generate_voronoi_scaffolding";
+	case BUILD_SHELL:
+		return "generate_solid_wireframe";
+		//	case CROSS_FIELD_CREATION:
+		//		return "Cross Field Creation";
+		//	case CROSS_FIELD_SMOOTHING:
+		//		return "Cross Field Smoothing";
+	default :
+		assert(0);
+		return "";
+	}
+}
+
 
 QString FilterVoronoiPlugin::filterInfo(ActionIDType filterId) const
 {
