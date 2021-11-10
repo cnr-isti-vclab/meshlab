@@ -45,11 +45,15 @@ public:
 	QString pythonFunctionName() const;
 	QString meshlabFunctionName() const;
 	QString description() const;
+	void setPythonFunctionName(const QString& newName);
 	void setDescription(const QString& newDescription);
 	unsigned int parametersNumber() const;
 	QStringList pythonFunctionParameters() const;
 	bool contains(const QString& pythonParameter) const;
 	const FunctionParameter& getFilterFunctionParameter(const QString& pythonParameter) const;
+	bool isDeprecated() const;
+	std::string deprecatedString() const;
+	void setDeprecated(const std::string& message);
 
 	bool operator< (const Function& oth) const;
 
@@ -63,6 +67,7 @@ private:
 	QString meshlabFunName;
 	QString funDescription;
 	std::list<FunctionParameter> parameters;
+	std::string deprecatedMessage;
 };
 
 }
