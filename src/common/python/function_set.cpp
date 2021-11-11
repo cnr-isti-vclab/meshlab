@@ -64,10 +64,10 @@ void pymeshlab::FunctionSet::loadFilterPlugin(FilterPlugin* fp)
 		filterSet.insert(f);
 
 		// Just for actual PyMeshLab version; this portion of code will be removed soon
-		QString oldPythonFilterName = computePythonName(fp->pythonFilterName(act));
+		QString oldPythonFilterName = computePythonName(fp->filterName(act));
 		f.setPythonFunctionName(oldPythonFilterName);
-		f.setDeprecated("You should use " + pythonFilterName.toStdString() +
-						" instead of " + oldPythonFilterName.toStdString() + ".");
+		f.setDeprecated("You should use '" + pythonFilterName.toStdString() +
+						"' instead of '" + oldPythonFilterName.toStdString() + "'.");
 		filterSet.insert(f);
 	}
 }
