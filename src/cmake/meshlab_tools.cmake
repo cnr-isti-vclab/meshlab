@@ -67,6 +67,7 @@ function(set_additional_settings_info_plist)
 		COMMAND plutil -replace NSHighResolutionCapable -bool True ${ARG_FILE}
 		COMMAND plutil -replace CFBundleDocumentTypes -xml '<array/>' ${ARG_FILE}
 		COMMAND plutil -replace CFBundleIdentifier -string 'com.vcg.meshlab' ${ARG_FILE}
+		COMMAND plutil -insert NSRequiresAquaSystemAppearance -bool True ${ARG_FILE}
 	)
 
 	add_file_format_info_plist(
