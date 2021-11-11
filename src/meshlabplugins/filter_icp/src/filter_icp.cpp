@@ -80,6 +80,24 @@ QString FilterIcpPlugin::filterName(ActionIDType filterId) const {
     }
 }
 
+QString FilterIcpPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_TWO_MESH_ICP: {
+		return "compute_matrix_by_icp_between_meshes";
+	}
+	case FP_GLOBAL_MESH_ICP: {
+		return "compute_matrix_by_mesh_global_alignment";
+	}
+	case  FP_OVERLAPPING_MESHES: {
+		return "get_overlapping_meshes_graph";
+	}
+	default: {
+		assert(0);
+		return "";
+	}
+	}
+}
 
 /**
  * @brief // Info() must return the longer string describing each filtering action

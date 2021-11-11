@@ -76,6 +76,17 @@ QString FilterTextureDefragPlugin::filterName(ActionIDType filterId) const
 	return {};
 }
 
+QString FilterTextureDefragPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f) {
+	case FP_TEXTURE_DEFRAG:
+		return QString("apply_texmap_defragmentation");
+	default:
+		assert(0); return QString();
+	}
+	return {};
+}
+
 QString FilterTextureDefragPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {

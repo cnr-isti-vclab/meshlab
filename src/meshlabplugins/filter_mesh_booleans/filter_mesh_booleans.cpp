@@ -66,7 +66,18 @@ QString FilterMeshBooleans::filterName(ActionIDType filterId) const
 	case MESH_UNION: return "Mesh Boolean: Union";
 	case MESH_DIFFERENCE: return "Mesh Boolean: Difference";
 	case MESH_XOR: return "Mesh Boolean: Symmetric Difference (XOR)";
-	default: assert(0); return "";
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterMeshBooleans::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case MESH_INTERSECTION: return "generate_boolean_intersection";
+	case MESH_UNION: return "generate_boolean_union";
+	case MESH_DIFFERENCE: return "generate_boolean_difference";
+	case MESH_XOR: return "generate_boolean_xor";
+	default: assert(0); return QString();
 	}
 }
 

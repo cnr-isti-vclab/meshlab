@@ -58,7 +58,7 @@ QString ExtraSampleGPUPlugin::filterName(ActionIDType filterId) const
 QString ExtraSampleGPUPlugin::pythonFilterName(ActionIDType filterId) const
 {
 	if (filterId == FP_GPU_EXAMPLE)
-		return "snapshot";
+		return "save_snapshot";
 	else
 		return "";
 }

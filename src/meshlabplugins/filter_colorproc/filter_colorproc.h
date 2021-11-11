@@ -72,6 +72,7 @@ public:
 
 	QString pluginName() const;
 	virtual FilterClass getClass(const QAction*) const;
+	QString pythonFilterName(ActionIDType f) const;
 	virtual QString filterName(ActionIDType filter) const;
 	virtual QString filterInfo(ActionIDType filter) const;
 

@@ -58,12 +58,18 @@ QString FilterCreateIso::pluginName() const
 
 QString FilterCreateIso::filterName(ActionIDType filter) const
 {
-	switch(filter)
-	{
-	case FP_CREATEISO :								return QString("Noisy Isosurface");
-	default: assert(0);
+	switch (filter) {
+	case FP_CREATEISO: return QString("Noisy Isosurface");
+	default: assert(0); return QString();
 	}
-	return QString("error!");
+}
+
+QString FilterCreateIso::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_CREATEISO: return QString("create_noisy_isosurface");
+	default: assert(0); return QString();
+	}
 }
 
 QString FilterCreateIso::filterInfo(ActionIDType filterId) const

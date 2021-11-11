@@ -54,6 +54,8 @@ public:
 
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+
 	RichParameterList initParameterList(const QAction*, const MeshDocument & md);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
@@ -83,7 +85,6 @@ public:
 
 
 	void initGL();
-
 };
 
 

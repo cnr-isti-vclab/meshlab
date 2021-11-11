@@ -53,17 +53,22 @@ public:
 
 	FilterLayerPlugin();
 
-	QString                         pluginName() const;
-	QString                         filterName(ActionIDType filter) const;
-	QString                         filterInfo(ActionIDType filter) const;
-	FilterClass                     getClass(const QAction*) const;
-	RichParameterList               initParameterList(const QAction*, const MeshDocument& /*m*/);
+	QString pluginName() const;
+	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+
+	QString     filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction*) const;
+
+	RichParameterList initParameterList(const QAction*, const MeshDocument& /*m*/);
+
 	std::map<std::string, QVariant> applyFilter(
 		const QAction*           action,
 		const RichParameterList& parameters,
 		MeshDocument&            md,
 		unsigned int&            postConditionMask,
 		vcg::CallBackPos*        cb);
+
 	int         postCondition(const QAction* filter) const;
 	FilterArity filterArity(const QAction*) const;
 };

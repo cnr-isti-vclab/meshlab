@@ -57,6 +57,11 @@ QString pymeshlab::Function::description() const
 	return funDescription;
 }
 
+void pymeshlab::Function::setPythonFunctionName(const QString& newName)
+{
+	pythonFunName = newName;
+}
+
 void pymeshlab::Function::setDescription(const QString& newDescription)
 {
 	funDescription = newDescription;
@@ -94,6 +99,21 @@ const pymeshlab::FunctionParameter& pymeshlab::Function::getFilterFunctionParame
 				return x.pythonName() == pythonParameter;
 			});
 	return *it;
+}
+
+bool pymeshlab::Function::isDeprecated() const
+{
+	return !deprecatedMessage.empty();
+}
+
+std::string pymeshlab::Function::deprecatedString() const
+{
+	return deprecatedMessage;
+}
+
+void pymeshlab::Function::setDeprecated(const std::string& message)
+{
+	deprecatedMessage = message;
 }
 
 bool pymeshlab::Function::operator<(const pymeshlab::Function& oth) const

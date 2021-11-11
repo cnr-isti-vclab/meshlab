@@ -26,6 +26,8 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 	QString pluginName() const;
 	
 	QString filterName(ActionIDType filterId) const;
+
+	QString pythonFilterName(ActionIDType f) const;
 	
 	QString filterInfo(ActionIDType filterId) const;
 	
@@ -97,7 +99,6 @@ class SdfGpuPlugin : public QObject, public FilterPlugin
 	void preRender(unsigned int peelingIteration);
 	
 	bool postRender(unsigned int peelingIteration);
-	
 protected:
 	
 	ONPRIMITIVE        mOnPrimitive;

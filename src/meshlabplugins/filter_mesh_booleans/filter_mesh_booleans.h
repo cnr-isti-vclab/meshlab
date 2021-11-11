@@ -55,7 +55,9 @@ public:
 	QString pluginName() const;
 	QString vendor() const;
 
-	QString     filterName(ActionIDType filter) const;
+	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+
 	QString     filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;

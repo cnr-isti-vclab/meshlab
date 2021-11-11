@@ -53,10 +53,23 @@ QString FilterScreenedPoissonPlugin::pluginName() const
 
 QString FilterScreenedPoissonPlugin::filterName(ActionIDType filter) const
 {
-	if (filter == FP_SCREENED_POISSON)
+	if (filter == FP_SCREENED_POISSON) {
 		return "Surface Reconstruction: Screened Poisson";
+	}
 	else {
-		return "Error!";
+		assert(0);
+		return QString();
+	}
+}
+
+QString FilterScreenedPoissonPlugin::pythonFilterName(ActionIDType f) const
+{
+	if (f == FP_SCREENED_POISSON) {
+		return "generate_surface_reconstruction_screened_poisson";
+	}
+	else {
+		assert(0);
+		return QString();
 	}
 }
 

@@ -46,11 +46,6 @@ using namespace vcg;
 
 typedef Histogram<Scalarm> Histogramm;
 
-// Constructor usually performs only two simple tasks of filling the two lists
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions
-//  you can do here by construction the QActions accordingly
-
 enum { CT_MEAN = 0, CT_GAUSS = 1, CT_K1 = 2, CT_K2 = 3, CT_APSS = 4 };
 
 MlsPlugin::MlsPlugin()
@@ -75,8 +70,6 @@ QString MlsPlugin::pluginName() const
 	return "FilterMLS";
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
 QString MlsPlugin::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
@@ -88,9 +81,23 @@ QString MlsPlugin::filterName(ActionIDType filterId) const
 	case FP_RIMLS_COLORIZE: return QString("Colorize curvature (RIMLS)");
 	case FP_RADIUS_FROM_DENSITY: return QString("Estimate radius from density");
 	case FP_SELECT_SMALL_COMPONENTS: return QString("Select small disconnected component");
-	default: assert(0);
+	default: assert(0); return QString();
 	}
-	return QString("Filter Unknown");
+}
+
+QString MlsPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_APSS_PROJECTION: return QString("compute_mls_projection_apss");
+	case FP_RIMLS_PROJECTION: return QString("compute_mls_projection_rimls");
+	case FP_APSS_MCUBE: return QString("generate_marching_cubes_apss");
+	case FP_RIMLS_MCUBE: return QString("generate_marching_cubes_rimls");
+	case FP_APSS_COLORIZE: return QString("compute_curvature_and_color_apss_per_vertex");
+	case FP_RIMLS_COLORIZE: return QString("compute_curvature_and_color_rimls_per_vertex");
+	case FP_RADIUS_FROM_DENSITY: return QString("compute_custom_radius_scalar_attribute_per_vertex");
+	case FP_SELECT_SMALL_COMPONENTS: return QString("compute_selection_by_small_disconnected_components_per_face");
+	default: assert(0); return QString();
+	}
 }
 
 FilterPlugin::FilterClass MlsPlugin::getClass(const QAction* a) const
@@ -112,8 +119,6 @@ FilterPlugin::FilterClass MlsPlugin::getClass(const QAction* a) const
 	return FilterPlugin::Generic;
 }
 
-// Info() must return the longer string describing each filtering action
-// (this string is used in the About plugin dialog)
 QString MlsPlugin::filterInfo(ActionIDType filterId) const
 {
 	QString str = "";

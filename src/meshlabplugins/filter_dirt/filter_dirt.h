@@ -45,6 +45,7 @@ public:
 	FilterDirt();
 	~FilterDirt() {};
 
+	QString pythonFilterName(ActionIDType f) const;
 	QString         pluginName() const;
 	virtual QString filterName(ActionIDType filter) const;
 	virtual QString filterInfo(ActionIDType filter) const;

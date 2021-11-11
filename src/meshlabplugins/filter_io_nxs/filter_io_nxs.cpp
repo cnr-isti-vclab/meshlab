@@ -134,14 +134,19 @@ void FilterIONXSPlugin::save(
 
 QString FilterIONXSPlugin::filterName(ActionIDType filter) const
 {
-	switch(filter) {
-	case FP_NXS_BUILDER :
-		return "NXS Build";
-	case FP_NXS_COMPRESS :
-		return "NXS Compress";
-	default :
-		assert(0);
-		return "";
+	switch (filter) {
+	case FP_NXS_BUILDER: return "NXS Build";
+	case FP_NXS_COMPRESS: return "NXS Compress";
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterIONXSPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_NXS_BUILDER: return "nxs_build";
+	case FP_NXS_COMPRESS: return "nxs_compress";
+	default: assert(0); return QString();
 	}
 }
 

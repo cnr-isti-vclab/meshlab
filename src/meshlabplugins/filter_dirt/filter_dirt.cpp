@@ -59,22 +59,21 @@ QString FilterDirt::pluginName() const
 	return "FilterDirt";
 }
 
+QString FilterDirt::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_DIRT: return QString("generate_dust_accumulation_point_cloud");
+	case FP_CLOUD_MOVEMENT: return QString("apply_coord_point_cloud_movement_over_mesh");
+	default: assert(0); return QString();
+	}
+}
+
 QString FilterDirt::filterName(ActionIDType filterId) const
 {
 	switch (filterId) {
-	case FP_DIRT: {
-		return QString("Dust Accumulation");
-		break;
-	}
-	case FP_CLOUD_MOVEMENT: {
-		return QString("Points Cloud Movement");
-		break;
-	}
-	default: {
-		assert(0);
-		return QString("error");
-		break;
-	}
+	case FP_DIRT: return QString("Dust Accumulation");
+	case FP_CLOUD_MOVEMENT: return QString("Points Cloud Movement");
+	default: assert(0); return QString();
 	}
 }
 

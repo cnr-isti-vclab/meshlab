@@ -46,6 +46,7 @@ public:
 
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction* a) const;
@@ -58,7 +59,6 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	int postCondition(const QAction* ) const;
-
 private:
 	void voronoiSampling(
 			MeshDocument &md,

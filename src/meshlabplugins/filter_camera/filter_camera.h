@@ -54,6 +54,7 @@ public:
 	virtual RichParameterList initParameterList(const QAction*, const MeshDocument &/*m*/);
 	std::map<std::string, QVariant> applyFilter(const QAction* action, const RichParameterList & /*parent*/, MeshDocument &md, unsigned int& postConditionMask, vcg::CallBackPos * cb);
 	FilterArity filterArity(const QAction* act) const;
+	QString pythonFilterName(ActionIDType f) const;
 };
 
 #endif

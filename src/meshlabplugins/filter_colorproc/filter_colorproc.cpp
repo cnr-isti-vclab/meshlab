@@ -90,6 +90,44 @@ QString FilterColorProc::pluginName() const
     return "FilterColorProc";
 }
 
+QString FilterColorProc::pythonFilterName(ActionIDType f) const
+{
+	switch(f)
+	{
+	case CP_FILLING:                   return QString("set_color_per_vertex");
+	case CP_THRESHOLDING:              return QString("apply_color_thresholding_per_vertex");
+	case CP_CONTR_BRIGHT:              return QString("apply_color_brightness_contrast_gamma_per_vertex");
+	case CP_INVERT:                    return QString("apply_color_inverse_per_vertex");
+	case CP_LEVELS:                    return QString("apply_color_level_adjustment_per_vertex");
+	case CP_COLOURISATION:             return QString("apply_color_intensity_colourisation_per_vertex");
+	case CP_DESATURATION:              return QString("apply_color_desaturation_per_vertex");
+	case CP_EQUALIZE:                  return QString("apply_color_equalization_per_vertex");
+	case CP_WHITE_BAL:                 return QString("apply_color_white_balance_per_vertex");
+	case CP_PERLIN_COLOR:              return QString("compute_color_perlin_noise_per_vertex");
+	case CP_COLOR_NOISE:               return QString("apply_color_noising_per_vertex");
+	case CP_SCATTER_PER_MESH:          return QString("compute_color_scattering_per_mesh");
+	case CP_CLAMP_QUALITY:             return QString("apply_scalar_clamping_per_vertex");
+	case CP_SATURATE_QUALITY:          return QString("apply_scalar_saturation_per_vertex");
+	case CP_MAP_VQUALITY_INTO_COLOR:   return QString("compute_color_from_scalar_per_vertex");
+	case CP_MAP_FQUALITY_INTO_COLOR:   return QString("compute_color_from_scalar_per_face");
+	case CP_DISCRETE_CURVATURE:        return QString("compute_scalar_by_discrete_curvature_per_vertex");
+	case CP_TRIANGLE_QUALITY:          return QString("compute_scalar_by_aspect_ratio_per_face");
+	case CP_VERTEX_SMOOTH:             return QString("apply_color_laplacian_smoothing_per_vertex");
+	case CP_FACE_SMOOTH:               return QString("apply_color_laplacian_smoothing_per_face");
+	case CP_VERTEX_TO_FACE:            return QString("compute_color_transfer_vertex_to_face");
+	case CP_MESH_TO_FACE:              return QString("compute_color_transfer_mesh_to_face");
+	case CP_FACE_TO_VERTEX:            return QString("compute_color_transfer_face_to_vertex");
+	case CP_TEXTURE_TO_VERTEX:         return QString("compute_color_from_texture_per_vertex");
+	case CP_RANDOM_FACE:               return QString("compute_color_random_per_face");
+	case CP_RANDOM_CONNECTED_COMPONENT:return QString("compute_color_by_conntected_component_per_face");
+	case CP_VERTEX_TO_FACE_QUALITY:    return QString("compute_scalar_transfer_vertex_to_face");
+	case CP_FACE_TO_VERTEX_QUALITY:    return QString("compute_scalar_transfer_face_to_vertex");
+
+	default: assert(0);
+	}
+	return QString();
+}
+
 QString FilterColorProc::filterName(ActionIDType filter) const
 {
 	switch(filter)

@@ -44,6 +44,25 @@ QString FilterFractal::pluginName() const
 	return "FilterFractal";
 }
 
+QString FilterFractal::pythonFilterName(ActionIDType f) const
+{
+	switch (f)
+	{
+	case CR_FRACTAL_TERRAIN:
+		return QString("create_fractal_terrain");
+		break;
+	case FP_FRACTAL_MESH:
+		return QString("apply_coord_fractal_displacement");
+		break;
+	case FP_CRATERS:
+		return QString("apply_coord_craters_from_point_cloud");
+		break;
+	default:
+		assert(0); return QString();
+		break;
+	}
+}
+
 QString FilterFractal::filterName(ActionIDType filterId) const
 {
 	switch (filterId)
@@ -58,7 +77,7 @@ QString FilterFractal::filterName(ActionIDType filterId) const
 		return QString("Craters Generation");
 		break;
 	default:
-		assert(0); return QString("error");
+		assert(0); return QString();
 		break;
 	}
 }

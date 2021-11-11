@@ -74,9 +74,27 @@ QString FilterCreate::filterName(ActionIDType filterId) const
 	case CR_CONE: return QString("Cone");
 	case CR_TORUS: return QString("Torus");
 	case CR_FITPLANE: return QString("Fit a plane to selection");
-	default : assert(0);
+	default : assert(0); return QString();
 	}
-	return "";
+}
+
+QString FilterCreate::pythonFilterName(ActionIDType f) const
+{
+	switch(f) {
+	case CR_BOX : return QString("create_cube");
+	case CR_ANNULUS : return QString("create_annulus");
+	case CR_SPHERE: return QString("create_sphere");
+	case CR_SPHERE_CAP: return QString("create_sphere_cap");
+	case CR_RANDOM_SPHERE: return QString("create_sphere_points");
+	case CR_ICOSAHEDRON: return QString("create_icosahedron");
+	case CR_DODECAHEDRON: return QString("create_dodecahedron");
+	case CR_OCTAHEDRON: return QString("create_octahedron");
+	case CR_TETRAHEDRON: return QString("create_tetrahedron");
+	case CR_CONE: return QString("create_cone");
+	case CR_TORUS: return QString("create_torus");
+	case CR_FITPLANE: return QString("generate_plane_fitting_to_selection");
+	default : assert(0); return QString();
+	}
 }
 
 // Info() must return the longer string describing each filtering action

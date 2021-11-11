@@ -44,6 +44,7 @@ public:
 
 	TriOptimizePlugin();
 	
+	QString pythonFilterName(ActionIDType f) const;
 	QString pluginName() const;
 	QString filterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
@@ -58,7 +59,6 @@ public:
 	FilterClass getClass(const QAction *) const;
 	int postCondition(const QAction* ) const;
 	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
-
 };
 
 #endif

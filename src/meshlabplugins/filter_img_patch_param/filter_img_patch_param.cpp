@@ -61,12 +61,26 @@ QString FilterImgPatchParamPlugin::pluginName() const
 
 QString FilterImgPatchParamPlugin::filterName( ActionIDType id ) const
 {
-	switch( id )
+	switch (id) {
+	case FP_PATCH_PARAM_ONLY: return QString("Parameterization from registered rasters");
+	case FP_PATCH_PARAM_AND_TEXTURING:
+		return QString("Parameterization + texturing from registered rasters");
+	case FP_RASTER_VERT_COVERAGE: return QString("Quality from raster coverage (Vertex)");
+	case FP_RASTER_FACE_COVERAGE: return QString("Quality from raster coverage (Face)");
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterImgPatchParamPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f)
 	{
-	case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
-	case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
-	case FP_RASTER_VERT_COVERAGE:  return QString( "Quality from raster coverage (Vertex)" );
-	case FP_RASTER_FACE_COVERAGE:  return QString( "Quality from raster coverage (Face)" );
+	case FP_PATCH_PARAM_ONLY:
+		return QString("compute_texcoord_parametrization_from_registered_rasters");
+	case FP_PATCH_PARAM_AND_TEXTURING:
+		return QString("compute_texcoord_parametrization_and_texture_from_registered_rasters");
+	case FP_RASTER_VERT_COVERAGE: return QString("compute_scalar_from_raster_coverage_per_vertex");
+	case FP_RASTER_FACE_COVERAGE: return QString("compute_scalar_from_raster_coverage_per_face");
 	default: assert(0); return QString();
 	}
 }
@@ -76,8 +90,8 @@ QString FilterImgPatchParamPlugin::filterInfo( ActionIDType id ) const
 {
 	switch( id )
 	{
-	case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
-	case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+	case FP_PATCH_PARAM_ONLY: return QString("The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+	case FP_PATCH_PARAM_AND_TEXTURING: return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
 	case FP_RASTER_VERT_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each vertex of the active mesh is visible." );
 	case FP_RASTER_FACE_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each face of the active mesh is visible." );
 	default: assert(0); return QString();

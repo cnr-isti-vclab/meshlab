@@ -89,9 +89,30 @@ QString CleanFilter::filterName(ActionIDType filter) const
 	case FP_REMOVE_UNREFERENCED_VERTEX: return QString("Remove Unreferenced Vertices");
 	case FP_REMOVE_DUPLICATED_VERTEX: return QString("Remove Duplicate Vertices");
 	case FP_REMOVE_FACE_ZERO_AREA: return QString("Remove Zero Area Faces");
-	default: assert(0);
+	default: assert(0); return QString();
 	}
-	return QString("error!");
+}
+
+QString CleanFilter::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_BALL_PIVOTING: return QString("generate_surface_reconstruction_ball_pivoting");
+	case FP_REMOVE_WRT_Q: return QString("meshing_remove_vertices_by_scalar");
+	case FP_REMOVE_ISOLATED_DIAMETER: return QString("meshing_remove_connected_component_by_diameter");
+	case FP_REMOVE_ISOLATED_COMPLEXITY: return QString("meshing_remove_connected_component_by_face_number");
+	case FP_REMOVE_TVERTEX: return QString("meshing_remove_t_vertices");
+	case FP_SNAP_MISMATCHED_BORDER: return QString("meshing_snap_mismatched_borders");
+	case FP_MERGE_CLOSE_VERTEX: return QString("meshing_merge_close_vertices");
+	case FP_MERGE_WEDGE_TEX: return QString("apply_texcoord_merge_per_wedge");
+	case FP_REMOVE_DUPLICATE_FACE: return QString("meshing_remove_duplicate_faces");
+	case FP_REMOVE_FOLD_FACE: return QString("meshing_remove_folded_faces");
+	case FP_REPAIR_NON_MANIF_EDGE: return QString("meshing_repair_non_manifold_edges");
+	case FP_REMOVE_NON_MANIF_VERT: return QString("meshing_repair_non_manifold_vertices");
+	case FP_REMOVE_UNREFERENCED_VERTEX: return QString("meshing_remove_unreferenced_vertices");
+	case FP_REMOVE_DUPLICATED_VERTEX: return QString("meshing_remove_duplicate_vertices");
+	case FP_REMOVE_FACE_ZERO_AREA: return QString("meshing_remove_null_faces");
+	default: assert(0); return QString();
+	}
 }
 
 QString CleanFilter::filterInfo(ActionIDType filterId) const

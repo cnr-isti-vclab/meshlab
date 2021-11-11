@@ -53,7 +53,21 @@ QString FilterCameraPlugin::pluginName() const
 	return "FilterCamera";
 }
 
-// ST() return the very short string describing each filtering action
+QString FilterCameraPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_SET_MESH_CAMERA :           return QString("set_camera_per_mesh");
+	case FP_SET_RASTER_CAMERA :         return QString("set_camera_per_raster");
+	case FP_QUALITY_FROM_CAMERA :       return QString("compute_scalar_from_camera_per_vertex");
+	case FP_CAMERA_ROTATE :             return QString("apply_cameras_rotation");
+	case FP_CAMERA_SCALE :              return QString("apply_cameras_scaling");
+	case FP_CAMERA_TRANSLATE :          return QString("apply_cameras_translation");
+	case FP_CAMERA_TRANSFORM :          return QString("apply_cameras_extrinsics_transformation");
+	case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("compute_normal_from_cameras_per_vertex");
+	default : assert(0); return QString();
+	}
+}
+
 QString FilterCameraPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
@@ -63,11 +77,10 @@ QString FilterCameraPlugin::filterName(ActionIDType filterId) const
 	case FP_CAMERA_ROTATE :             return QString("Transform: Rotate Camera or set of cameras");
 	case FP_CAMERA_SCALE :              return QString("Transform: Scale Camera or set of cameras");
 	case FP_CAMERA_TRANSLATE :          return QString("Transform: Translate Camera or set of cameras");
-	case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project.");
+	case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project");
 	case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Re-Orient vertex normals using cameras");
-	default : assert(0);
+	default : assert(0); return QString();
 	}
-	return NULL;
 }
 
 // Info() return the longer string describing each filtering action

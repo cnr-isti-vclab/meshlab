@@ -77,9 +77,25 @@ QString FilterTexturePlugin::filterName(ActionIDType filterId) const
 	case FP_COLOR_TO_TEXTURE : return QString("Transfer: Vertex Color to Texture");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer: Vertex Attributes to Texture (1 or 2 meshes)");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Transfer: Texture to Vertex Color (1 or 2 meshes)");
-	default : assert(0);
+	default : assert(0); return QString();
 	}
-	return {};
+}
+
+QString FilterTexturePlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f)
+	{
+	case FP_VORONOI_ATLAS : return QString("generate_voronoi_atlas_parametrization");
+	case FP_UV_WEDGE_TO_VERTEX : return QString("compute_texcoord_transfer_wedge_to_vertex");
+	case FP_UV_VERTEX_TO_WEDGE : return QString("compute_texcoord_transfer_vertex_to_wedge");
+	case FP_BASIC_TRIANGLE_MAPPING : return QString("compute_texcoord_parametrization_triangle_trivial_per_wedge");
+	case FP_PLANAR_MAPPING : return QString("compute_texcoord_parametrization_flat_plane_per_wedge");
+	case FP_SET_TEXTURE : return QString("set_texture_per_mesh");
+	case FP_COLOR_TO_TEXTURE : return QString("compute_texmap_from_color");
+	case FP_TRANSFER_TO_TEXTURE : return QString("transfer_attributes_to_texture_per_vertex");
+	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("transfer_texture_to_color_per_vertex");
+	default : assert(0); return QString();
+	}
 }
 
 // Info() must return the longer string describing each filtering action
@@ -88,9 +104,9 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId)
 	{
-	case FP_VORONOI_ATLAS :  return QString("Build an atlased parametrization based on a geodesic voronoi partitioning of the surface and parametrizing each region using Harmonic Mapping. For the  parametrization of the disk like voronoi regions the used method is: <br><b>Ulrich Pinkall, Konrad Polthier</b><br>\
-											<i>Computing Discrete Minimal Surfaces and Their Conjugates</i> <br>\
-											Experimental Mathematics, Vol 2 (1), 1993<br> .");
+	case FP_VORONOI_ATLAS :  return QString("Build an atlased parametrization based on a geodesic voronoi partitioning of the surface and parametrizing each region using Harmonic Mapping. For the  parametrization of the disk like voronoi regions the used method is: <br><b>Ulrich Pinkall, Konrad Polthier</b><br>"
+											"<i>Computing Discrete Minimal Surfaces and Their Conjugates</i> <br>"
+											"Experimental Mathematics, Vol 2 (1), 1993.");
 	case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 	case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");

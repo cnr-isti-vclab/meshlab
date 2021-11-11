@@ -50,6 +50,7 @@ public:
 	QString pluginName() const;
 	virtual FilterClass getClass(const QAction*) const;
 	virtual QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	virtual QString filterInfo(ActionIDType filter) const;
 
 	virtual int getRequirements(const QAction*);
@@ -64,6 +65,5 @@ public:
 	int postCondition(const QAction* filter) const;
 	void PrintStats(CMeshO *mesh);
 	FilterArity filterArity(const QAction*) const;
-
 };
 #endif

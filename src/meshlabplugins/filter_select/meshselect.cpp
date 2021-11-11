@@ -127,6 +127,37 @@ QString SelectionFilterPlugin::pluginName() const
 	return "FilterSelect";
 }
 
+QString SelectionFilterPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_SELECT_ALL: return tr("set_selection_all");
+	case FP_SELECT_NONE: return tr("set_selection_none");
+	case FP_SELECT_INVERT: return tr("apply_selection_inverse");
+	case FP_SELECT_CONNECTED: return tr("apply_selection_by_same_connected_component");
+	case FP_SELECT_DELETE_VERT: return tr("meshing_remove_selected_vertices");
+	case FP_SELECT_DELETE_ALL_FACE: return tr("meshing_remove_all_faces");
+	case FP_SELECT_DELETE_FACE: return tr("meshing_remove_selected_faces");
+	case FP_SELECT_DELETE_FACEVERT: return tr("meshing_remove_selected_vertices_and_faces");
+	case FP_SELECTBYANGLE: return tr("compute_selection_by_angle_with_direction_per_face");
+	case FP_SELECT_UGLY: return tr("compute_selection_bad_faces");
+	case FP_SELECT_FACE_FROM_VERT: return tr("compute_selection_transfer_vertex_to_face");
+	case FP_SELECT_VERT_FROM_FACE: return tr("compute_selection_transfer_face_to_vertex");
+	case FP_SELECT_ERODE: return tr("apply_selection_erosion");
+	case FP_SELECT_DILATE: return tr("apply_selection_dilatation");
+	case FP_SELECT_BORDER: return tr("compute_selection_from_mesh_border");
+	case FP_SELECT_BY_VERT_QUALITY: return tr("compute_selection_by_scalar_per_vertex");
+	case FP_SELECT_BY_FACE_QUALITY: return tr("compute_selection_by_scalar_per_face");
+	case FP_SELECT_BY_COLOR: return tr("compute_selection_by_color_per_face");
+	case CP_SELFINTERSECT_SELECT: return tr("compute_selection_by_self_intersections_per_face");
+	case CP_SELECT_TEXBORDER: return tr("compute_selection_by_texture_seams_per_vertex");
+	case CP_SELECT_NON_MANIFOLD_FACE: return tr("compute_selection_by_non_manifold_edges_per_face");
+	case CP_SELECT_NON_MANIFOLD_VERTEX: return tr("compute_selection_by_non_manifold_per_vertex");
+	case FP_SELECT_FACES_BY_EDGE: return tr("compute_selection_by_edge_length");
+	case FP_SELECT_OUTLIER: return tr("compute_selection_point_cloud_outliers");
+	default: assert(0); return QString();
+	}
+}
+
 QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 {
 	switch (filter) {
@@ -154,9 +185,8 @@ QString SelectionFilterPlugin::filterName(ActionIDType filter) const
 	case CP_SELECT_NON_MANIFOLD_VERTEX: return tr("Select non Manifold Vertices");
 	case FP_SELECT_FACES_BY_EDGE: return tr("Select Faces with edges longer than...");
 	case FP_SELECT_OUTLIER: return tr("Select Outliers");
+	default: assert(0); return QString();
 	}
-	assert(0);
-	return QString("Unknown filter");
 }
 
 QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const

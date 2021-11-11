@@ -49,6 +49,7 @@ public:
 	QString pluginName() const;
 
 	QString filterName(ActionIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction*) const;
 	FilterArity filterArity(const QAction*) const;
@@ -61,7 +62,6 @@ public:
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 	int postCondition(const QAction* ) const;
-
 private:
 	std::map<std::string, QVariant> computeTopologicalMeasures(MeshDocument& md);
 	std::map<std::string, QVariant> computeTopologicalMeasuresForQuadMeshes(MeshDocument& md);

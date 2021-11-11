@@ -90,9 +90,33 @@ QString FilterFunctionPlugin::filterName(ActionIDType filterId) const
 	case FF_REFINE: return QString("Refine User-Defined");
 	case FF_ISOSURFACE: return QString("Implicit Surface");
 
-	default: assert(0);
+	default: assert(0); return QString();
 	}
-	return QString("error!");
+}
+
+QString FilterFunctionPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FF_VERT_SELECTION: return QString("compute_selection_by_condition_per_vertex");
+	case FF_FACE_SELECTION: return QString("compute_selection_by_condition_per_face");
+	case FF_GEOM_FUNC: return QString("compute_coord_by_function");
+	case FF_FACE_COLOR: return QString("compute_color_by_function_per_face");
+	case FF_FACE_QUALITY: return QString("compute_scalar_by_function_per_face");
+	case FF_VERT_COLOR: return QString("compute_color_by_function_per_vertex");
+	case FF_VERT_QUALITY: return QString("compute_scalar_by_function_per_vertex");
+	case FF_VERT_TEXTURE_FUNC: return QString("compute_texcoord_by_function_per_vertex");
+	case FF_WEDGE_TEXTURE_FUNC: return QString("compute_texcoord_by_function_per_wedge");
+	case FF_VERT_NORMAL: return QString("compute_normal_by_function_per_vertex");
+	case FF_DEF_VERT_SCALAR_ATTRIB: return QString("compute_new_custom_scalar_attribute_per_vertex");
+	case FF_DEF_FACE_SCALAR_ATTRIB: return QString("compute_new_custom_scalar_attribute_per_face");
+	case FF_DEF_VERT_POINT_ATTRIB: return QString("compute_new_custom_point_attribute_per_vertex");
+	case FF_DEF_FACE_POINT_ATTRIB: return QString("compute_new_custom_point_attribute_per_face");
+	case FF_GRID: return QString("create_grid");
+	case FF_REFINE: return QString("meshing_refine_by_function");
+	case FF_ISOSURFACE: return QString("create_implicit_surface");
+
+	default: assert(0); return QString();
+	}
 }
 
 const QString PossibleOperators(

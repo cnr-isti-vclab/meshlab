@@ -394,7 +394,29 @@ QString FilterDocSampling::filterName(ActionIDType filterId) const
 	case FP_REGULAR_RECURSIVE_SAMPLING: return QString("Regular Recursive Sampling");
 	case FP_POINTCLOUD_SIMPLIFICATION: return QString("Point Cloud Simplification");
 
-	default: assert(0); return QString("unknown filter!!!!");
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterDocSampling::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_ELEMENT_SUBSAMPLING: return QString("generate_sampling_element");
+	case FP_MONTECARLO_SAMPLING: return QString("generate_sampling_montecarlo");
+	case FP_STRATIFIED_SAMPLING: return QString("generate_sampling_stratified_triangle");
+	case FP_CLUSTERED_SAMPLING: return QString("generate_sampling_clustered_vertex");
+	case FP_POISSONDISK_SAMPLING: return QString("generate_sampling_poisson_disk");
+	case FP_HAUSDORFF_DISTANCE: return QString("get_hausdorff_distance");
+	case FP_DISTANCE_REFERENCE: return QString("compute_scalar_by_distance_from_another_mesh_per_vertex");
+	case FP_TEXEL_SAMPLING: return QString("generate_sampling_texel");
+	case FP_VERTEX_RESAMPLING: return QString("transfer_attributes_per_vertex");
+	case FP_UNIFORM_MESH_RESAMPLING: return QString("generate_resampled_uniform_mesh");
+	case FP_VORONOI_COLORING: return QString("compute_color_by_point_cloud_voronoi_projection");
+	case FP_DISK_COLORING: return QString("compute_scalar_by_distance_from_point_cloud_per_vertex");
+	case FP_REGULAR_RECURSIVE_SAMPLING: return QString("generate_sampling_regular_recursive");
+	case FP_POINTCLOUD_SIMPLIFICATION: return QString("generate_simplified_point_cloud");
+
+	default: assert(0); return QString();
 	}
 }
 
