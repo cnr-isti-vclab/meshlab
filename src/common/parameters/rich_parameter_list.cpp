@@ -364,7 +364,7 @@ void RichParameterList::join( const RichParameterList& rps )
 void RichParameterList::pushFromQDomElement(QDomElement np)
 {
 	RichParameter* rp = nullptr;
-	bool b = RichParameterAdapter::create(np, &rp);
+	bool b = RichParameterAdapter::create(np, rp);
 	if (b)
 		paramList.push_back(rp);
 }

@@ -675,17 +675,6 @@ RichMesh::RichMesh(
 {
 }
 
-RichMesh::RichMesh(
-		const QString& nm,
-		unsigned int meshind,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category):
-	RichParameter(nm, IntValue(meshind), desc, tltip, hidden, category), meshdoc(nullptr)
-{
-}
-
 RichMesh::~RichMesh()
 {
 }
@@ -707,7 +696,7 @@ bool RichMesh::operator==( const RichParameter& rb )
 
 /**** RichParameterAdapter Class ****/
 
-bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
+bool RichParameterAdapter::create( const QDomElement& np,RichParameter*& par )
 {
 	QString name=np.attribute("name");
 	QString type=np.attribute("type");
@@ -721,7 +710,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		QString val = np.attribute("value").toLower();
 		if ((val != QString("true")) && (val != QString("false")))
 			return false;
-		*par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip);
+		par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip);
 		return true;
 	}
 
@@ -729,7 +718,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		int val = np.attribute("value").toInt(&corrconv);
 		if (!corrconv)
 			return false;
-		*par = new RichInt(name,val,desc,tooltip);
+		par = new RichInt(name,val,desc,tooltip);
 		return true;
 	}
 
@@ -737,12 +726,12 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		float val = np.attribute("value").toFloat(&corrconv);
 		if (!corrconv)
 			return false;
-		*par = new RichFloat(name,val,desc,tooltip);
+		par = new RichFloat(name,val,desc,tooltip);
 		return true;
 	}
 
 	if(type=="RichString") {
-		*par = new RichString(name,np.attribute("value"),desc,tooltip);
+		par = new RichString(name,np.attribute("value"),desc,tooltip);
 		return true;
 	}
 
@@ -756,7 +745,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		float max = np.attribute("max").toFloat(&corrconv);
 		if (!corrconv)
 			return false;
-		*par = new RichAbsPerc(name,val,min,max,desc,tooltip);
+		par = new RichAbsPerc(name,val,min,max,desc,tooltip);
 		return true;
 	}
 
@@ -774,7 +763,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if ((!corrconv) && (a <= 255))
 			return false;
 		QColor col(r,g,b,a);
-		*par= new RichColor(name,col,desc,tooltip);
+		par= new RichColor(name,col,desc,tooltip);
 		return true;
 	}
 
@@ -787,7 +776,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 				return false;
 			mm.V()[i]=val;
 		}
-		*par = new RichMatrix44f(name,mm,desc,tooltip);
+		par = new RichMatrix44f(name,mm,desc,tooltip);
 		return true;
 	}
 
@@ -803,7 +792,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		int val = np.attribute("value").toInt(&corrconv);
 		if ((!corrconv) && (val >=0) && (val < enum_card))
 			return false;
-		*par = new RichEnum(name,val,list,desc,tooltip);
+		par = new RichEnum(name,val,list,desc,tooltip);
 		return true;
 	}
 
@@ -813,7 +802,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if (!corrconv)
 			return false;
 
-		*par = new RichMesh(name, val,desc,tooltip);
+		par = new RichMesh(name, val, nullptr, desc,tooltip);
 		return true;
 	}
 
@@ -829,7 +818,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if ((!corrconv) && (val >= min) && (val <= max))
 			return false;
 
-		*par = new RichDynamicFloat(name, val, min, max, desc, tooltip);
+		par = new RichDynamicFloat(name, val, min, max, desc, tooltip);
 		return true;
 	}
 
@@ -844,14 +833,14 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 
 		QString defdir = np.attribute("value");
 
-		*par = new RichOpenFile(name,defdir,list,desc,tooltip);
+		par = new RichOpenFile(name,defdir,list,desc,tooltip);
 		return true;
 	}
 
 	if(type == "RichSaveFile") {
 		QString deffile = np.attribute("value");
 		QString ext = np.attribute("ext");
-		*par = new RichSaveFile(name,deffile,ext,desc,tooltip);
+		par = new RichSaveFile(name,deffile,ext,desc,tooltip);
 		return true;
 	}
 
@@ -867,7 +856,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if (!corrconv)
 			return false;
 
-		*par = new RichPosition(name, val,desc,tooltip);
+		par = new RichPosition(name, val,desc,tooltip);
 		return true;
 	}
 	if(type=="RichPosition") { // for backward compatibility
@@ -882,7 +871,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if (!corrconv)
 			return false;
 
-		*par = new RichPosition(name, val,desc,tooltip);
+		par = new RichPosition(name, val,desc,tooltip);
 		return true;
 	}
 	if(type=="RichDirection") { // for backward compatibility
@@ -897,13 +886,13 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 		if (!corrconv)
 			return false;
 
-		*par = new RichDirection(name, val,desc,tooltip);
+		par = new RichDirection(name, val,desc,tooltip);
 		return true;
 	}
 	if(type=="RichShotf") {
 		Shotm val;
 		assert(0); //TODO!!!!
-		*par = new RichShotf(name, val,desc,tooltip);
+		par = new RichShotf(name, val,desc,tooltip);
 		return true;
 	}
 

@@ -380,14 +380,6 @@ public:
 			const QString& tltip = QString(),
 			bool hidden = false,
 			const QString& category = QString());
-	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(
-			const QString& nm,
-			unsigned int meshind,
-			const QString& desc = QString(),
-			const QString& tltip = QString(),
-			bool hidden = false,
-			const QString& category = QString());
 	~RichMesh();
 
 	QString stringType() const;
@@ -400,7 +392,7 @@ public:
 class RichParameterAdapter
 {
 public:
-	static bool create(const QDomElement& np, RichParameter** par);
+	static bool create(const QDomElement& np, RichParameter*& par);
 };
 
 #endif // MESHLAB_RICH_PARAMETER_H

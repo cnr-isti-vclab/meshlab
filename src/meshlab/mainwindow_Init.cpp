@@ -1000,7 +1000,7 @@ void MainWindow::loadMeshLabSettings()
 		if (!docElem.isNull())
 		{
 			RichParameter* rp = nullptr;
-			bool b = RichParameterAdapter::create(docElem, &rp);
+			bool b = RichParameterAdapter::create(docElem, rp);
 			if (b && defaultGlobalParams.hasParameter(rp->name()))
 				currentGlobalParams.pushFromQDomElement(docElem);
 			if (b)
