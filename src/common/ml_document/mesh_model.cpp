@@ -36,7 +36,6 @@
 using namespace vcg;
 
 MeshModel::MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName) :
-	idInsideFile(-1),
 	visible(true)
 {
 	/*glw.m = &(cm);*/

@@ -205,7 +205,7 @@ private:
 	//this is an id used for meshes that are loaded from files
 	//that can store more than one mesh. For meshes loaded from
 	//files containing just this mesh, this id will be -1.
-	int idInsideFile;
+	int idInsideFile = -1;
 
 	//textures associated to mesh
 	std::map<std::string, QImage> textures;
