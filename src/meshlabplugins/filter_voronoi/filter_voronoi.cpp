@@ -32,6 +32,7 @@
 #include<vcg/complex/algorithms/polygon_support.h>
 
 using namespace vcg;
+using namespace vcg::tri;
 
 FilterVoronoiPlugin::FilterVoronoiPlugin()
 { 
@@ -337,11 +338,11 @@ void FilterVoronoiPlugin::voronoiSampling(
 	tri::UpdateCurvature<CMeshO>::PerVertexBasicRadialCrossField(m.cm);
 
 	//tri::EuclideanDistance<CMeshO> dd;
-	vector<CVertexO *> seedVec;
+	std::vector<CVertexO *> seedVec;
 	//tri::ClusteringSampler<CMeshO> cs(seedVec);
 	//tri::SurfaceSampling<CMeshO, vcg::tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
-	vector<Point3m> pointVec;
-	vector<bool> fixedVec;
+	std::vector<Point3m> pointVec;
+	std::vector<bool> fixedVec;
 	CMeshO::ScalarType radius=0;
 
 	tri::PoissonSampling<CMeshO>(m.cm,pointVec,sampleNum,radius,radiusVariance,0,randomSeed);

@@ -1016,7 +1016,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		mm->cm.Tr = curMM->cm.Tr;
 
 		log("Point Cloud Simplification created a new mesh of %i points", mm->cm.vn);
-		UpdateBounding<CMeshO>::Box(mm->cm);
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 	} break;
 		
 	case FP_POISSONDISK_SAMPLING :
@@ -1146,7 +1146,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		
 		MeshModel *samplePtMesh =0;
 		MeshModel *closestPtMesh =0;
-		HausdorffSampler<CMeshO> hs(&(mm1->cm));
+		vcg::tri::HausdorffSampler<CMeshO> hs(&(mm1->cm));
 		if(saveSampleFlag)
 		{
 			closestPtMesh=md.addNewMesh("","Hausdorff Closest Points", false); // the new mesh is NOT the current one (byproduct of measurement)
@@ -1163,11 +1163,11 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		qDebug("Max sampling distance %f on a bbox diag of %f",distUpperBound,mm1->cm.bbox.Diag());
 		
 		if(sampleVert)
-			tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
+			tri::SurfaceSampling<CMeshO,vcg::tri::HausdorffSampler<CMeshO> >::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
 		if(sampleEdge)
-			tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
+			tri::SurfaceSampling<CMeshO,vcg::tri::HausdorffSampler<CMeshO> >::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
 		if(sampleFace)
-			tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+			tri::SurfaceSampling<CMeshO,vcg::tri::HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 		
 		// the meshes have to return to their original position
 		if (mm0->cm.Tr != Matrix44m::Identity())

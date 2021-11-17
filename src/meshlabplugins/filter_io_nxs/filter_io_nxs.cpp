@@ -218,7 +218,7 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 	return params;
 }
 
-std::map<string, QVariant> FilterIONXSPlugin::applyFilter(
+std::map<std::string, QVariant> FilterIONXSPlugin::applyFilter(
 		const QAction* action,
 		const RichParameterList& params,
 		MeshDocument&,

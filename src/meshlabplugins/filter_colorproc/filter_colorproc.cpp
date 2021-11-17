@@ -791,11 +791,11 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 						if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 						{
 							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-								(*fi).Q() = Distortion<CMeshO, true>::AngleDistortion(&*fi);
+								(*fi).Q() = vcg::tri::Distortion<CMeshO, true>::AngleDistortion(&*fi);
 						}
 						else {
 							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-								(*fi).Q() = Distortion<CMeshO, false>::AngleDistortion(&*fi);
+								(*fi).Q() = vcg::tri::Distortion<CMeshO, false>::AngleDistortion(&*fi);
 						}
 						tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
 						minV = distrib.Percentile(CMeshO::ScalarType(0.05));
@@ -806,14 +806,14 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 						CMeshO::ScalarType areaScaleVal, edgeScaleVal;
 						if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 						{
-							Distortion<CMeshO, true>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+							vcg::tri::Distortion<CMeshO, true>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
 							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-								(*fi).Q() = Distortion<CMeshO, true>::AreaDistortion(&*fi, areaScaleVal);
+								(*fi).Q() = vcg::tri::Distortion<CMeshO, true>::AreaDistortion(&*fi, areaScaleVal);
 						}
 						else {
-							Distortion<CMeshO, false>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+							vcg::tri::Distortion<CMeshO, false>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
 							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-								(*fi).Q() = Distortion<CMeshO, false>::AreaDistortion(&*fi, areaScaleVal);
+								(*fi).Q() = vcg::tri::Distortion<CMeshO, false>::AreaDistortion(&*fi, areaScaleVal);
 
 						}
 						tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);

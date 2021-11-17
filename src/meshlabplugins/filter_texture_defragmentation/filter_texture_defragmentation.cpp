@@ -267,7 +267,7 @@ std::map<std::string, QVariant> FilterTextureDefragPlugin::applyFilter(
 		// build textureobjecthandle object
 		TextureObjectHandle textureObject = std::make_shared<TextureObject>();
 
-		for (const string& textureName : currentModel.cm.textures) {
+		for (const std::string& textureName : currentModel.cm.textures) {
 			textureObject->AddImage(currentModel.getTexture(textureName));
 		}
 

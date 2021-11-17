@@ -73,7 +73,7 @@ bool LoadMesh(const char *fileName, Mesh& m, TextureObjectHandle& textureObject,
 
     LOG_INFO << "Loaded mesh " << fileName << " (VN " <<  m.VN() << ", FN " << m.FN() << ")";
 
-    for (const string& textureName : m.textures) {
+    for (const std::string& textureName : m.textures) {
         QFileInfo textureFile(textureName.c_str());
         textureFile.makeAbsolute();
         if (!textureFile.exists() || !textureFile.isReadable()) {

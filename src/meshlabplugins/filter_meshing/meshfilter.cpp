@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace vcg;
+using namespace vcg::tri;
 
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
@@ -788,15 +789,15 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 					tri::RefineOddEven<CMeshO/*,
 								tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >,
 								tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >*/ >
-							(m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(m.cm),
-							 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
+							(m.cm, tri::OddPointLoopGeneric<CMeshO, vcg::tri::Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(m.cm),
+							 tri::EvenPointLoopGeneric<CMeshO, vcg::tri::Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
 					break;
 				case 2:
 					tri::RefineOddEven<CMeshO/*,
 								tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >,
 								tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >*/ >
-							(m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(m.cm),
-							 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
+						(m.cm, tri::OddPointLoopGeneric<CMeshO, vcg::tri::Centroid<CMeshO>, vcg::tri::ContinuityLoopWeight<CMeshO::ScalarType> >(m.cm),
+							 tri::EvenPointLoopGeneric<CMeshO, vcg::tri::Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
 					break;
 				}
 				break;

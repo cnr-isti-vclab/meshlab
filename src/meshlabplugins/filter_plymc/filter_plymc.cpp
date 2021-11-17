@@ -210,7 +210,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		if(par.getBool("openResult"))
 		{
 			for(size_t i=0;i<p.OutNameVec.size();++i)
-			{string name;
+			{std::string name;
 				if(!p.SimplificationFlag) name = p.OutNameVec[i].c_str();
 				else name = p.OutNameSimpVec[i].c_str();
 				

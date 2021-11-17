@@ -727,9 +727,9 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 				baseName.truncate(baseName.lastIndexOf("."));
 
 		unsigned int texNum = m.cm.textures.size();
-		vector <QString> texFileNames;
+		std::vector <QString> texFileNames;
 		texFileNames.resize(texNum);
-		vector <QImage> trgImgs;
+		std::vector <QImage> trgImgs;
 		trgImgs.reserve(texNum);
 
 		// Image texture creation
@@ -817,7 +817,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
 		CheckError(srcMesh->cm.textures.empty(), "Source mesh doesn't have any associated texture");
 		
-		vector <QImage> srcImgs;
+		std::vector <QImage> srcImgs;
 		srcImgs.resize(srcMesh->cm.textures.size());
 		
 		for (size_t textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
@@ -936,8 +936,8 @@ void FilterTexturePlugin::transferToTexture(
 
 	// Source images (for texture to texture transfer)
 	int numSrcTex = srcMesh->cm.textures.size();
-	vector <QImage> srcImgs;
-	vector <QString> srcTextureFileNames;
+	std::vector <QImage> srcImgs;
+	std::vector <QString> srcTextureFileNames;
 	srcImgs.resize(numSrcTex);
 	srcTextureFileNames.resize(numSrcTex);
 	int srcTexInd = 0;
@@ -961,8 +961,8 @@ void FilterTexturePlugin::transferToTexture(
 				|| baseName.endsWith("jpeg", Qt::CaseInsensitive) || baseName.endsWith("tif", Qt::CaseInsensitive) || baseName.endsWith("tiff", Qt::CaseInsensitive))
 			baseName.truncate(baseName.lastIndexOf("."));
 	}
-	vector <QImage> trgImgs;
-	vector <QString> trgTextureFileNames;
+	std::vector <QImage> trgImgs;
+	std::vector <QString> trgTextureFileNames;
 	trgImgs.reserve(numTrgTex);
 	trgTextureFileNames.resize(numTrgTex);
 	int trgTexInd = 0;

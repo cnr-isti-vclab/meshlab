@@ -316,7 +316,7 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		else if (orientation == 1)
 		{
 			Matrix33m cov;
-			vector<Point3m> PtVec;
+			std::vector<Point3m> PtVec;
 			for (size_t i = 0; i < selected_pts.size(); ++i)
 				PtVec.push_back(plane.Projection(selected_pts[i]));
 

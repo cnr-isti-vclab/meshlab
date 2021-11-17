@@ -33,7 +33,7 @@ class VertexSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
 
-    vector <QImage> &srcImgs;
+    std::vector <QImage> &srcImgs;
     float dist_upper_bound;
 
     MetroMeshGrid unifGridFace;
@@ -45,7 +45,7 @@ class VertexSampler
     int vertexNo, vertexCnt, start, offset;
 
 public:
-	VertexSampler(CMeshO &_srcMesh, vector <QImage> &_srcImg, float upperBound) :
+	VertexSampler(CMeshO &_srcMesh, std::vector <QImage> &_srcImg, float upperBound) :
 	srcImgs(_srcImg), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
@@ -103,7 +103,7 @@ public:
 
 class RasterSampler
 {
-    vector<QImage> &trgImgs;
+    std::vector<QImage> &trgImgs;
 
     // Callback stuff
     vcg::CallBackPos *cb;
@@ -111,7 +111,7 @@ class RasterSampler
     int faceNo, faceCnt, start, offset;
 
 public:
-	RasterSampler(vector<QImage> &_imgs) : trgImgs(_imgs) {}
+	RasterSampler(std::vector<QImage> &_imgs) : trgImgs(_imgs) {}
 
     void InitCallback(vcg::CallBackPos *_cb, int _faceNo, int _start=0, int _offset=100)
     {
@@ -157,8 +157,8 @@ class TransferColorSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
-    vector <QImage> &trgImgs;
-	vector <QImage> *srcImgs;
+    std::vector <QImage> &trgImgs;
+    std::vector <QImage> *srcImgs;
     float dist_upper_bound;
     bool fromTexture;
     MetroMeshGrid unifGridFace;
@@ -206,7 +206,7 @@ class TransferColorSampler
     }*/
 
 public:
-    TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, float upperBound, int _vertexMode)
+    TransferColorSampler(CMeshO &_srcMesh, std::vector <QImage> &_trgImgs, float upperBound, int _vertexMode)
     : trgImgs(_trgImgs), dist_upper_bound(upperBound)
     {
         srcMesh=&_srcMesh;
@@ -224,7 +224,7 @@ public:
         }
     }
 
-	TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, vector <QImage> *_srcImgs, float upperBound)
+	TransferColorSampler(CMeshO &_srcMesh, std::vector <QImage> &_trgImgs, std::vector <QImage> *_srcImgs, float upperBound)
 		: trgImgs(_trgImgs), srcImgs(_srcImgs), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
