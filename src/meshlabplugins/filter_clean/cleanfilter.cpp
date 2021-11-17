@@ -207,7 +207,7 @@ CleanFilter::FilterClass CleanFilter::getClass(const QAction* a) const
 	case FP_REMOVE_NON_MANIF_VERT:
 	case FP_REMOVE_FACE_ZERO_AREA:
 	case FP_REMOVE_UNREFERENCED_VERTEX:
-	case FP_REMOVE_DUPLICATED_VERTEX:
+	case FP_REMOVE_DUPLICATED_VERTEX: return FilterPlugin::Cleaning;
 	case FP_BALL_PIVOTING: return FilterPlugin::Remeshing;
 	case FP_MERGE_WEDGE_TEX:
 		return FilterPlugin::FilterClass(FilterPlugin::Cleaning + FilterPlugin::Texture);
