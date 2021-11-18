@@ -164,7 +164,7 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
         {
             // reading and tokenizing
             freshLine = QString(impFile.readLine()).simplified();
-            tokenizedLine = freshLine.split(separator, QString::SkipEmptyParts);
+            tokenizedLine = freshLine.split(separator, Qt::SkipEmptyParts);
 
             switch(dataFormat)
             {
