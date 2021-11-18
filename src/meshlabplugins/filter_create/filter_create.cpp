@@ -419,9 +419,8 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		numV = numH = vertNum;
 
 		// UV vector, just in case
-		float *UUs, *VVs;
-		UUs = new float[numH*numV];
-		VVs = new float[numH*numV];
+		std::vector<CMeshO::FaceType::TexCoordType::PointType> uvs;
+		uvs.resize(numH*numV);
 
 		int vind = 0;
 		for (int ir = 0; ir < numV; ir++)
@@ -430,8 +429,8 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 				Point3m newP = (centerP + (dirV * -dimV) + (dirH * -dimH));
 				newP = newP + (dirH * ic * (2.0 * dimH / (numH-1))) + (dirV * ir * (2.0 * dimV / (numV-1)));
 				tri::Allocator<CMeshO>::AddVertex(m->cm, newP, plane.Direction());
-				UUs[vind] = ic * (1.0 / (numH - 1));
-				VVs[vind] = ir * (1.0 / (numV - 1));
+				uvs[vind][0] = ic * (1.0 / (numH - 1));
+				uvs[vind][1] = ir * (1.0 / (numV - 1));
 				vind++;
 			}
 		
@@ -448,13 +447,10 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 				for (int i = 0; i<3; ++i)
 				{
 					int vind = (*fi).V(i)->Index();
-					(*fi).WT(i).U() = UUs[vind];
-					(*fi).WT(i).V() = VVs[vind];
+					(*fi).WT(i).P() = uvs[vind];
 				}
 			}
 		}
-		delete[] UUs;	// delete temporary UV storage
-		delete[] VVs;
 
 	} break;
 
