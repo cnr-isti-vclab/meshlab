@@ -180,7 +180,7 @@ RichParameterList FilterCreate::initParameterList(const QAction *action, const M
 		break;
 
 	case CR_FITPLANE:
-		parlst.addParam(RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
+		parlst.addParam(RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger then the selection"));
 		parlst.addParam(RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
 		parlst.addParam(RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
 		parlst.addParam(RichEnum("orientation", 0,
@@ -275,7 +275,8 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		plane.Normalize();
 		// check if normal of the interpolated plane is coherent with average normal of the used points, otherwise, flip
 		// i do this because plane fitter does not take in account source noramls, and a fliped fit is terrible to see
-		Naccum = (Naccum / (CMeshO::ScalarType)selected_pts.size()).Normalize();
+		// (Note: valid only when normals are meaningful)
+		Naccum.normalize();
 		if ((plane.Direction() * Naccum) < 0.0)
 			plane.Set(-plane.Direction(), -plane.Offset());
 
@@ -287,7 +288,7 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		log("Fitting Plane offset is %f", plane.Offset());
 
 		// find center of selection on plane
-		Point3m centerP;
+		Point3m centerP = Point3m::Zero();
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 		{
 			centerP += plane.Projection(selected_pts[i]);
