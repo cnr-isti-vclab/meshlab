@@ -14,7 +14,7 @@ The source code of MeshLab is structured in the following directories:
 
 ## Build MeshLab
 
-MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.12.
+MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.15.
 
 After setting up the Qt environment:
 

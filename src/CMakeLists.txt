@@ -28,8 +28,8 @@ find_package(
 	Qt5
 	COMPONENTS OpenGL Xml Network
 	REQUIRED)
-if (Qt5_VERSION VERSION_LESS 5.12.0)
-	message(FATAL_ERROR "Minimum supported Qt5 version is 5.12!")
+if (Qt5_VERSION VERSION_LESS 5.15.0)
+	message(FATAL_ERROR "Minimum supported Qt5 version is 5.15!")
 endif()
 find_package(OpenMP)
 
