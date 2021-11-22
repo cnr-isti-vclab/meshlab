@@ -152,6 +152,11 @@ QImage MeshModel::getTexture(const std::string& tn) const
 		return QImage();
 }
 
+const std::map<std::string, QImage>& MeshModel::getTextures() const
+{
+	return textures;
+}
+
 void MeshModel::clearTextures()
 {
 	textures.clear();

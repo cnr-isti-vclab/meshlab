@@ -171,6 +171,7 @@ public:
 	void saveTextures(const QString& basePath, int quality = -1, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
 
 	QImage getTexture(const std::string& tn) const;
+	const std::map<std::string, QImage>& getTextures() const;
 	void clearTextures();
 	void addTexture(std::string name, const QImage& txt);
 	void setTexture(std::string name, const QImage& txt);
