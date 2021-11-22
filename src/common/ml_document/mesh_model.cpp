@@ -35,7 +35,7 @@
 
 using namespace vcg;
 
-MeshModel::MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName) :
+MeshModel::MeshModel(int id, const QString& fullFileName, const QString& labelName) :
 	visible(true)
 {
 	/*glw.m = &(cm);*/

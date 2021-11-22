@@ -121,14 +121,14 @@ public:
 		MM_ALL            = 0xffffffff
 	};
 
-	MeshModel(unsigned int id, const QString& fullFileName, const QString& labelName);
+	MeshModel(int id, const QString& fullFileName, const QString& labelName);
 	~MeshModel()
 	{
 	}
 
 	void clear();
 	void updateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
-	inline unsigned int id() const {return _id;}
+	inline int id() const {return _id;}
 
 	int idInFile() const {return idInsideFile;}
 	void setIdInFile(int id) {idInsideFile = id;}
@@ -199,7 +199,7 @@ private:
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	QString fullPathFileName;
 	QString _label;
-	unsigned int _id;
+	int _id;
 	bool modified;
 
 	//this is an id used for meshes that are loaded from files
