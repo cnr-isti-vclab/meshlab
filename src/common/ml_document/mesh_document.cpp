@@ -99,7 +99,7 @@ void MeshDocument::clear()
 const MeshModel* MeshDocument::getMesh(unsigned int id) const
 {
 	for (const MeshModel& m : meshList)
-		if (m.id() == id)
+		if ((unsigned int)m.id() == id)
 			return &m;
 	return nullptr;
 }
@@ -107,7 +107,7 @@ const MeshModel* MeshDocument::getMesh(unsigned int id) const
 MeshModel* MeshDocument::getMesh(unsigned int id)
 {
 	for (MeshModel& m : meshList) {
-		if (m.id() == id) {
+		if ((unsigned int)m.id() == id) {
 			return &m;
 		}
 	}
@@ -132,7 +132,7 @@ void MeshDocument::setVisible(int meshId, bool val)
 }
 
 //returns the raster at a given position in the list
-RasterModel *MeshDocument::getRaster(int i)
+RasterModel *MeshDocument::getRaster(unsigned int i)
 {
 	for(RasterModel& rmp : rasterList) {
 		if(rmp.id() == i) {
@@ -358,7 +358,7 @@ bool MeshDocument::delMesh(unsigned int id)
 {
 	auto pos = meshList.end();
 	for (auto it = meshList.begin(); it != meshList.end(); ++it)
-		if (it->id() == id)
+		if ((unsigned int)it->id() == id)
 			pos = it;
 	if (pos == meshList.end())
 		return false;

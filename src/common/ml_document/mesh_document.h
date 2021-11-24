@@ -102,7 +102,7 @@ public:
 	void setVisible(int meshId, bool val);
 
 	/// returns the raster with the given unique id
-	RasterModel *getRaster(int i);
+	RasterModel *getRaster(unsigned int i);
 
 	//set the current raster to be the one with the given ID
 	void setCurrentRaster( int new_curr_id );
