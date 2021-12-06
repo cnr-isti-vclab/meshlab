@@ -244,6 +244,7 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		break;
 	case FP_SET_TEXTURE :
 		parlst.addParam(RichOpenFile("textName", "", QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "Sets the given input image as unique texture of the mesh."));
+		parlst.addParam(RichBool("use_dummy_texture", false, "Use dummy texture", "If checked, the filter will set a dummy texture instead of loading an image. The 'Texture File' parameter will be ignored."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
@@ -672,15 +673,23 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		
 	case FP_SET_TEXTURE : {
 		// Get parameters
-		QString textName = par.getOpenFileName("textName");
-		
-		CheckError(textName.length() == 0, "Texture file not specified");
-		
-		QImage textFile = meshlab::loadImage(textName, &md.Log, cb);
-		QFileInfo finfo(textName);
-		//Assign texture
-		m.clearTextures();
-		m.addTexture(finfo.fileName().toStdString(), textFile);
+		bool setDummy = par.getBool("use_dummy_texture");
+		if (!setDummy) {
+			QString textName = par.getOpenFileName("textName");
+
+			CheckError(textName.length() == 0, "Texture file not specified");
+
+			QImage textFile = meshlab::loadImage(textName, &md.Log, cb);
+			QFileInfo finfo(textName);
+			//Assign texture
+			m.clearTextures();
+			m.addTexture(finfo.fileName().toStdString(), textFile);
+		}
+		else {
+			QImage dummy = meshlab::getDummyTexture();
+			m.clearTextures();
+			m.addTexture("dummy_texture", dummy);
+		}
 	}
 		break;
 		

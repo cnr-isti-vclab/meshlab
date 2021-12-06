@@ -70,6 +70,8 @@ void saveAllMeshes(
 QImage
 loadImage(const QString& filename, GLLogStream* log = nullptr, vcg::CallBackPos* cb = nullptr);
 
+QImage getDummyTexture();
+
 void saveImage(
 	const QString&    filename,
 	const QImage&     image,
