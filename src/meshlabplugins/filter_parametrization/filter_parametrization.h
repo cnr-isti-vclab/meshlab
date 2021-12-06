@@ -47,6 +47,7 @@ public:
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;
 	int getPreConditions(const QAction *) const;
+	int getRequirements(const QAction *);
 	int postCondition(const QAction* ) const;
 	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(

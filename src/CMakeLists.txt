@@ -32,6 +32,7 @@ if (Qt5_VERSION VERSION_LESS 5.15.0)
 	message(FATAL_ERROR "Minimum supported Qt5 version is 5.15!")
 endif()
 find_package(OpenMP)
+find_package(Threads)
 
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)

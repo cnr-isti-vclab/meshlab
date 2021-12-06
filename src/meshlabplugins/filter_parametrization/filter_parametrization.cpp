@@ -23,6 +23,12 @@
 
 #include "filter_parametrization.h"
 
+#include <common/utilities/eigen_mesh_conversions.h>
+
+#include <igl/boundary_loop.h>
+#include <igl/harmonic.h>
+#include <igl/map_vertices_to_circle.h>
+
 FilterParametrizationPlugin::FilterParametrizationPlugin()
 { 
 	typeList = { FP_HARMONIC_PARAM};
@@ -45,7 +51,7 @@ QString FilterParametrizationPlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_HARMONIC_PARAM :
-		return "Armonic Parametrization";
+		return "Harmonic Parametrization";
 	default :
 		assert(0);
 		return "";
@@ -81,7 +87,12 @@ FilterPlugin::FilterArity FilterParametrizationPlugin::filterArity(const QAction
 
 int FilterParametrizationPlugin::getPreConditions(const QAction*) const
 {
-	return MeshModel::MM_NONE;
+	return MeshModel::MM_VERTCOORD | MeshModel::MM_FACEVERT;
+}
+
+int FilterParametrizationPlugin::getRequirements(const QAction*)
+{
+	return MeshModel::MM_VERTTEXCOORD;
 }
 
 int FilterParametrizationPlugin::postCondition(const QAction*) const
@@ -94,6 +105,7 @@ RichParameterList FilterParametrizationPlugin::initParameterList(const QAction *
 	RichParameterList parlst;
 	switch(ID(action)) {
 	case FP_HARMONIC_PARAM :
+		parlst.addParam(RichInt("harm_function", 1,"N-Harmonic Function", "1 denotes harmonic function, 2 biharmonic, 3 triharmonic, etc."));
 		break;
 	default :
 		assert(0);
@@ -106,12 +118,34 @@ std::map<std::string, QVariant> FilterParametrizationPlugin::applyFilter(
 		const RichParameterList & par,
 		MeshDocument &md,
 		unsigned int& /*postConditionMask*/,
-		vcg::CallBackPos *cb)
+		vcg::CallBackPos *)
 {
 	switch(ID(action)) {
-	case FP_HARMONIC_PARAM :
+	case FP_HARMONIC_PARAM : {
+		int f = par.getInt("harm_function");
+		if (f < 1)
+			throw MLException("Invalid N-Harmonic Function value. Must be >= 1.");
+
+		EigenMatrixX3m v = meshlab::vertexMatrix(md.mm()->cm);
+		Eigen::MatrixX3d verts = v.cast<double>();
+		Eigen::MatrixX3i faces = meshlab::faceMatrix(md.mm()->cm);
+
+		Eigen::MatrixXd V_uv, bnd_uv;
+		Eigen::VectorXi bnd;
+
+		igl::boundary_loop(faces,bnd);
+		igl::map_vertices_to_circle(verts,bnd,bnd_uv);
+		igl::harmonic(verts,faces,bnd,bnd_uv,1,V_uv);
+
+		unsigned int i = 0;
+		for (auto& v : md.mm()->cm.vert){
+			v.T().u() =V_uv(i, 0);
+			v.T().v() =V_uv(i, 1);
+			i++;
+		}
 
 		break;
+	}
 	default :
 		wrongActionCalled(action);
 	}
