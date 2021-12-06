@@ -236,6 +236,36 @@ bool MeshModel::hasDataMask(const int maskToBeTested) const
 	return ((currentDataMask & maskToBeTested)!= 0);
 }
 
+bool MeshModel::hasPerVertexColor() const
+{
+	return currentDataMask & MM_VERTCOLOR;
+}
+
+bool MeshModel::hasPerVertexQuality() const
+{
+	return currentDataMask & MM_VERTQUALITY;
+}
+
+bool MeshModel::hasPerVertexTexCoord() const
+{
+	return currentDataMask & MM_VERTTEXCOORD;
+}
+
+bool MeshModel::hasPerFaceColor() const
+{
+	return currentDataMask & MM_FACECOLOR;
+}
+
+bool MeshModel::hasPerFaceQuality() const
+{
+	return currentDataMask & MM_FACEQUALITY;
+}
+
+bool MeshModel::hasPerFaceWedgeTexCoords() const
+{
+	return currentDataMask & MM_WEDGTEXCOORD;
+}
+
 void MeshModel::updateDataMask()
 {
 	currentDataMask = MM_NONE;

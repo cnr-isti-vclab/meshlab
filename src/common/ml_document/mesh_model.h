@@ -81,7 +81,7 @@ public:
 		MM_VERTQUALITY    = 0x00000010,
 		MM_VERTMARK       = 0x00000020,
 		MM_VERTFACETOPO   = 0x00000040,
-		MM_VERTCURV	      = 0x00000080,
+		MM_VERTCURV       = 0x00000080,
 		MM_VERTCURVDIR    = 0x00000100,
 		MM_VERTRADIUS     = 0x00000200,
 		MM_VERTTEXCOORD   = 0x00000400,
@@ -182,6 +182,14 @@ public:
 	void enable(int openingFileMask);
 
 	bool hasDataMask(const int maskToBeTested) const;
+
+	bool hasPerVertexColor() const;
+	bool hasPerVertexQuality() const;
+	bool hasPerVertexTexCoord() const;
+	bool hasPerFaceColor() const;
+	bool hasPerFaceQuality() const;
+	bool hasPerFaceWedgeTexCoords() const;
+
 	void updateDataMask();
 	void updateDataMask(const MeshModel* m);
 	void updateDataMask(int neededDataMask);
