@@ -35,7 +35,9 @@ class FilterParametrizationPlugin : public QObject, public FilterPlugin
 
 public:
 	//enum used to give an ID to every filter implemented in the plugin
-	enum FileterIds {FP_HARMONIC_PARAM};
+	enum FileterIds {
+		FP_HARMONIC_PARAM,
+		FP_LEAST_SQUARES_PARAM};
 
 	FilterParametrizationPlugin();
 

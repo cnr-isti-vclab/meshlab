@@ -27,11 +27,12 @@
 
 #include <igl/boundary_loop.h>
 #include <igl/harmonic.h>
+#include <igl/lscm.h>
 #include <igl/map_vertices_to_circle.h>
 
 FilterParametrizationPlugin::FilterParametrizationPlugin()
-{ 
-	typeList = { FP_HARMONIC_PARAM};
+{
+	typeList = { FP_HARMONIC_PARAM, FP_LEAST_SQUARES_PARAM};
 
 	for(const ActionIDType& tt : typeList)
 		actionList.push_back(new QAction(filterName(tt), this));
@@ -52,6 +53,8 @@ QString FilterParametrizationPlugin::filterName(ActionIDType filterId) const
 	switch(filterId) {
 	case FP_HARMONIC_PARAM :
 		return "Harmonic Parametrization";
+	case FP_LEAST_SQUARES_PARAM:
+		return "Least Squares Conformal Maps Parametrization";
 	default :
 		assert(0);
 		return "";
@@ -63,6 +66,8 @@ QString FilterParametrizationPlugin::filterInfo(ActionIDType filterId) const
 	switch(filterId) {
 	case FP_HARMONIC_PARAM :
 		return "";
+	case FP_LEAST_SQUARES_PARAM:
+		return "";
 	default :
 		assert(0);
 		return "Unknown Filter";
@@ -73,6 +78,7 @@ FilterParametrizationPlugin::FilterClass FilterParametrizationPlugin::getClass(c
 {
 	switch(ID(a)) {
 	case FP_HARMONIC_PARAM :
+	case FP_LEAST_SQUARES_PARAM:
 		return FilterPlugin::Texture;
 	default :
 		assert(0);
@@ -100,12 +106,15 @@ int FilterParametrizationPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_VERTTEXCOORD;
 }
 
-RichParameterList FilterParametrizationPlugin::initParameterList(const QAction *action, const MeshModel &m)
+RichParameterList FilterParametrizationPlugin::initParameterList(const QAction *action, const MeshModel &)
 {
 	RichParameterList parlst;
 	switch(ID(action)) {
 	case FP_HARMONIC_PARAM :
 		parlst.addParam(RichInt("harm_function", 1,"N-Harmonic Function", "1 denotes harmonic function, 2 biharmonic, 3 triharmonic, etc."));
+		break;
+	case FP_LEAST_SQUARES_PARAM:
+
 		break;
 	default :
 		assert(0);
@@ -134,8 +143,43 @@ std::map<std::string, QVariant> FilterParametrizationPlugin::applyFilter(
 		Eigen::VectorXi bnd;
 
 		igl::boundary_loop(faces,bnd);
-		igl::map_vertices_to_circle(verts,bnd,bnd_uv);
+		if (bnd.size() == 0)
+			throw MLException(
+				"Harmonic Parametrization can be applied only on meshes that have a boundary.");
+		igl::map_vertices_to_circle(verts, bnd, bnd_uv);
 		igl::harmonic(verts,faces,bnd,bnd_uv,1,V_uv);
+
+		unsigned int i = 0;
+		for (auto& v : md.mm()->cm.vert){
+			v.T().u() =V_uv(i, 0);
+			v.T().v() =V_uv(i, 1);
+			i++;
+		}
+
+		break;
+	}
+	case FP_LEAST_SQUARES_PARAM: {
+		EigenMatrixX3m v = meshlab::vertexMatrix(md.mm()->cm);
+		Eigen::MatrixX3d verts = v.cast<double>();
+		Eigen::MatrixX3i faces = meshlab::faceMatrix(md.mm()->cm);
+		Eigen::VectorXi bnd, boundaryPoints(2, 1);
+
+		Eigen::MatrixXd V_uv;
+
+		igl::boundary_loop(faces,bnd);
+		if (bnd.size() == 0)
+			throw MLException(
+				"Least Squares Conformal Maps Parametrization can be applied only on meshes that "
+				"have a boundary.");
+
+		boundaryPoints(0) = bnd(0);
+		boundaryPoints(1) = bnd(bnd.size()/2);
+
+		Eigen::MatrixXd bc(2,2);
+		bc<<0,0,1,0;
+
+		// LSCM parametrization
+		igl::lscm(verts,faces,boundaryPoints,bc,V_uv);
 
 		unsigned int i = 0;
 		for (auto& v : md.mm()->cm.vert){
