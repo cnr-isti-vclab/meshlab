@@ -374,22 +374,22 @@ SelectionFilterPlugin::initParameterList(const QAction* action, const MeshModel&
 
 		parlst.addParam(RichDynamicFloat(
 			"minQ",
-			minq * 0.75 + maxq * .25,
+			minq,
 			minq,
 			maxq,
 			tr("Min Quality"),
 			tr("Minimum acceptable quality value")));
 		parlst.addParam(RichDynamicFloat(
 			"maxQ",
-			minq * 0.25 + maxq * .75,
+			maxq,
 			minq,
 			maxq,
 			tr("Max Quality"),
 			tr("Maximum acceptable quality value")));
 		parlst.addParam(RichBool(
-			"Inclusive",
+			"faceSelInclusive",
 			true,
-			"Inclusive Sel.",
+			"Inclusive Face Sel.",
 			"If true only the faces with <b>all</b> the vertices within the specified range are "
 			"selected. Otherwise any face with at least one vertex within the range is selected."));
 	} break;
@@ -401,14 +401,14 @@ SelectionFilterPlugin::initParameterList(const QAction* action, const MeshModel&
 
 		parlst.addParam(RichDynamicFloat(
 			"minQ",
-			minq * 0.75 + maxq * .25,
+			minq,
 			minq,
 			maxq,
 			tr("Min Quality"),
 			tr("Minimum acceptable quality value")));
 		parlst.addParam(RichDynamicFloat(
 			"maxQ",
-			minq * 0.25 + maxq * .75,
+			maxq,
 			minq,
 			maxq,
 			tr("Max Quality"),
