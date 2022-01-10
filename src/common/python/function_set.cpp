@@ -67,7 +67,8 @@ void pymeshlab::FunctionSet::loadFilterPlugin(FilterPlugin* fp)
 		QString oldPythonFilterName = computePythonName(fp->filterName(act));
 		f.setPythonFunctionName(oldPythonFilterName);
 		f.setDeprecated("You should use '" + pythonFilterName.toStdString() +
-						"' instead of '" + oldPythonFilterName.toStdString() + "'.");
+						"' instead of '" + oldPythonFilterName.toStdString() + "'. See "
+						"https://pymeshlab.readthedocs.io/en/latest/index.html#filters-renaming");
 		filterSet.insert(f);
 	}
 }
