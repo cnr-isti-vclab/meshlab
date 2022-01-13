@@ -63,11 +63,18 @@ QString FilterParametrizationPlugin::filterName(ActionIDType filterId) const
 
 QString FilterParametrizationPlugin::filterInfo(ActionIDType filterId) const
 {
+	QString commonDescription =
+		"The resulting parametrization is saved in the per vertex texture coordinates.<br>"
+		"The filter uses the original code provided in the "
+		"<a href=\"https://libigl.github.io/\">libigl library</a>.<br>";
 	switch(filterId) {
 	case FP_HARMONIC_PARAM :
-		return "";
+		return "Computes a single patch, fixed boundary harmonic parametrization of a mesh. The "
+			   "filter requires that the input mesh has a single fixed boundary." +
+			   commonDescription;
 	case FP_LEAST_SQUARES_PARAM:
-		return "";
+		return "Compuites a least squares conformal maps parametrization of a mesh. " +
+			   commonDescription;
 	default :
 		assert(0);
 		return "Unknown Filter";
