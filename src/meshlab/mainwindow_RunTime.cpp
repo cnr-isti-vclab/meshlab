@@ -2175,23 +2175,26 @@ bool MainWindow::importMesh(QString fileName)
 		meshDoc()->setBusy(true);
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 
-		//check how many meshes are going to be loaded from the file
-		unsigned int nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
-
-		QFileInfo info(fileName);
+		unsigned int nMeshes = 0;
 		std::list<MeshModel*> meshList;
-		for (unsigned int i = 0; i < nMeshes; i++) {
-			MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
-			if (nMeshes != 1) {
-				// if the file contains more than one mesh, this id will be
-				// != -1
-				mm->setIdInFile(i);
-			}
-			meshList.push_back(mm);
-		}
-		qb->show();
-		std::list<int> masks;
 		try {
+			//check how many meshes are going to be loaded from the file
+			 nMeshes = pCurrentIOPlugin->numberMeshesContainedInFile(extension, fileName, prePar);
+
+			QFileInfo info(fileName);
+
+			for (unsigned int i = 0; i < nMeshes; i++) {
+				MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
+				if (nMeshes != 1) {
+					// if the file contains more than one mesh, this id will be
+					// != -1
+					mm->setIdInFile(i);
+				}
+				meshList.push_back(mm);
+			}
+			qb->show();
+			std::list<int> masks;
+
 			QElapsedTimer t;
 			t.start();
 			std::list<std::string> unloadedTextures =
