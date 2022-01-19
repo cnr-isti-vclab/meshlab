@@ -331,6 +331,10 @@ void loadMeshPrimitive(
 				QImage qimg(img.image.data(), img.width, img.height, QImage::Format_RGBA8888);
 				if (!qimg.isNull()){
 					QImage copy = qimg.copy();
+					if (uri.empty())
+					{
+						uri = "texture_" + std::to_string(textureImg);
+					}
 					m.addTexture(uri, copy);
 				}
 				else {
