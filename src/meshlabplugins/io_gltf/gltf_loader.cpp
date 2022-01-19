@@ -405,7 +405,10 @@ void loadMeshPrimitive(
 		cb(progress.progress(), "Loading vertex texcoords");
 	res = loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
 	if (res)
+	{
 		mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+	}
 	progress.increment();
 
 
@@ -569,6 +572,7 @@ void populateAttr(
 		break;
 	case TEXCOORD_0:
 		m.enable(vcg::tri::io::Mask::IOM_VERTTEXCOORD);
+		m.enable(vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
 		populateVTextCoords(ivp, array, number, textID); break;
 		break;
 	case INDICES:
@@ -647,18 +651,26 @@ void populateTriangles(
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, triNumber);
 		for (unsigned int i = 0; i < triNumber*3; i+=3, ++fi) {
-			fi->V(0) = ivp[triArray[i]];
-			fi->V(1) = ivp[triArray[i+1]];
-			fi->V(2) = ivp[triArray[i+2]];
+			for (int j = 0; j < 3; ++j) {
+				fi->V(j) = ivp[triArray[i+j]];
+
+				fi->WT(j).u() = fi->V(j)->T().u();
+				fi->WT(j).v() = fi->V(j)->T().v();
+				fi->WT(j).n() = fi->V(j)->T().N();
+			}
 		}
 	}
 	else {
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, ivp.size()/3);
 		for (unsigned int i = 0; i < ivp.size(); i+=3, ++fi) {
-			fi->V(0) = ivp[i];
-			fi->V(1) = ivp[i+1];
-			fi->V(2) = ivp[i+2];
+			for (int j = 0; j < 3; ++j) {
+				fi->V(j) = ivp[i+j];
+
+				fi->WT(j).u() = fi->V(j)->T().u();
+				fi->WT(j).v() = fi->V(j)->T().v();
+				fi->WT(j).n() = fi->V(j)->T().N();
+			}
 		}
 	}
 }
