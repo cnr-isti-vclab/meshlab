@@ -363,21 +363,41 @@ bool MeshDocument::delMesh(unsigned int id)
 	if (pos == meshList.end())
 		return false;
 
-	if((currentMesh == &(*pos)) && (!meshList.empty()))
-		setCurrentMesh(this->meshList.front().id());
-	else if (meshList.empty())
-		setCurrentMesh(-1);
-
-	meshList.erase(pos);
-
-	emit meshSetChanged();
-	emit meshRemoved(id);
+	eraseMesh(pos);
 	return true;
 }
 
 MeshDocument::MeshIterator MeshDocument::eraseMesh(MeshIterator it)
 {
-	return meshList.erase(it);
+	if (it != meshList.end()) {
+		int id = it->id();
+		// no other meshes, therefore no current mesh after deleting this one
+		if (meshList.size() == 1) {
+			setCurrentMesh(-1);
+		}
+		else {
+			// trying to delete che current mesh, need to change current mesh first
+			if(currentMesh == &(*it)) {
+				// we are removing the first mesh, the current mesh becomes the second
+				if (it != meshList.begin()) {
+					auto next = it;
+					next++;
+					setCurrentMesh(next->id());
+				}
+				// we can set as current mesh the first mesh
+				else {
+					setCurrentMesh(this->meshList.front().id());
+				}
+			}
+		}
+
+		it = meshList.erase(it);
+
+		emit meshSetChanged();
+		emit meshRemoved(id);
+	}
+
+	return it;
 }
 
 RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
