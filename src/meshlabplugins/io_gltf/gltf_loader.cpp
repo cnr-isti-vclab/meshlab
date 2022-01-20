@@ -326,16 +326,28 @@ void loadMeshPrimitive(
 		std::string uri = img.uri;
 		uri = std::regex_replace(uri, std::regex("\\%20"), " ");
 
+		bool textureAlreadyExists = false;
 		if (img.image.size() > 0) {
 			if (img.bits == 8 || img.component == 4) {
 				QImage qimg(img.image.data(), img.width, img.height, QImage::Format_RGBA8888);
 				if (!qimg.isNull()){
 					QImage copy = qimg.copy();
-					if (uri.empty())
-					{
+					if (uri.empty()) {
 						uri = "texture_" + std::to_string(textureImg);
 					}
-					m.addTexture(uri, copy);
+
+					QImage existingTexture = m.getTexture(uri);
+					if (existingTexture.isNull()) {
+						m.addTexture(uri, copy);
+					}
+					else {
+						//use the existing texture index
+						auto it = std::find(m.cm.textures.begin(), m.cm.textures.end(), uri);
+						textureAlreadyExists = it != m.cm.textures.end();
+						if (textureAlreadyExists) {
+							textureImg = it - m.cm.textures.begin();
+						}
+					}
 				}
 				else {
 					m.cm.textures.push_back(uri);
@@ -349,8 +361,12 @@ void loadMeshPrimitive(
 			//set to load later (could be format non-supported by tinygltf)
 			m.cm.textures.push_back(uri);
 		}
-		//set the id of the texture: we need it when set uv coords
-		textureImg = m.cm.textures.size()-1;
+
+		if (!textureAlreadyExists)
+		{
+			//set the id of the texture: we need it when set uv coords
+			textureImg = m.cm.textures.size() - 1;
+		}
 	}
 	//vector of vertex pointers added to the mesh
 	//this vector is modified only when adding vertex position attributes
