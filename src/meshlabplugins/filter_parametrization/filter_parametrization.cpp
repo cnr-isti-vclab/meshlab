@@ -61,6 +61,19 @@ QString FilterParametrizationPlugin::filterName(ActionIDType filterId) const
 	}
 }
 
+QString FilterParametrizationPlugin::pythonFilterName(ActionIDType filter) const
+{
+	switch(filter) {
+	case FP_HARMONIC_PARAM :
+		return "compute_texcoord_parametrization_harmonic";
+	case FP_LEAST_SQUARES_PARAM:
+		return "compute_texcoord_parametrization_least_squares_conformal_maps";
+	default :
+		assert(0);
+		return "";
+	}
+}
+
 QString FilterParametrizationPlugin::filterInfo(ActionIDType filterId) const
 {
 	QString commonDescription =
