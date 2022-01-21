@@ -300,7 +300,8 @@ void loadMeshPrimitive(
 	progress.setStep(oldStep/GLTF_ATTR_STR.size()+1);
 
 	int textureImg = -1; //id of the texture associated to the material
-	bool vCol = false; //used if a material has a base color for all the primitive
+	bool vCol = false; // used if a material has a base color for all the primitive
+	bool vTex = false; // used if a material has a texture
 	vcg::Color4b col; //the base color, to be set to all the vertices
 
 	if (p.material >= 0) { //if the primitive has a material
@@ -321,6 +322,7 @@ void loadMeshPrimitive(
 		}
 	}
 	if (textureImg != -1) { //if we found a texture
+		vTex = true;
 		const tinygltf::Image& img = model.images[model.textures[textureImg].source];
 		//add the path of the texture to the mesh
 		std::string uri = img.uri;
@@ -389,9 +391,15 @@ void loadMeshPrimitive(
 	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 		for (auto v : ivp)
 			v->C() = col;
+	}
+
+	// if the mesh has a texture, enable texcoords to the mesh
+	if (vTex) {
+		m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
+		m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	}
 
 	if (cb)
@@ -414,15 +422,14 @@ void loadMeshPrimitive(
 	if (cb)
 		cb(progress.progress(), "Loading vertex colors");
 	res = loadAttribute(m, ivp, model, p, COLOR_0);
-	if (res)
+	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+	}
 	progress.increment();
 	if (cb)
 		cb(progress.progress(), "Loading vertex texcoords");
 	res = loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
-	if (res)
-	{
-		mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 	}
 	progress.increment();
@@ -433,6 +440,15 @@ void loadMeshPrimitive(
 		cb(progress.progress(), "Loading triangle indices");
 	loadAttribute(m, ivp, model, p, INDICES);
 	progress.increment();
+
+	// if vTex was true, it means that we loaded texcoords, that have been transfered from vertex to
+	// wedges when loading triangle indices. Therefore, we can remove vertex texcoords and leave
+	// only wedges, which are the only that can be rendered with multiple textures in meshlab
+	// TODO: remove this mechanism whenever vertex texcoords allow to render multiple textures in
+	// vcg.
+	if (vTex) {
+		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+	}
 
 	if (cb)
 		cb(progress.progress(), "Loaded all attributes of current mesh");
@@ -585,12 +601,8 @@ void populateAttr(
 		populateVNormals(ivp, array, number); break;
 	case COLOR_0:
 		populateVColors(ivp, array, number, textID); break;
-		break;
 	case TEXCOORD_0:
-		m.enable(vcg::tri::io::Mask::IOM_VERTTEXCOORD);
-		m.enable(vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
 		populateVTextCoords(ivp, array, number, textID); break;
-		break;
 	case INDICES:
 		populateTriangles(m, ivp, array, number/3); break;
 	}
