@@ -361,7 +361,7 @@ public:
 	QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 
 private:
-	WordActionsMapAccessor wama;
+	ActionSearcher wama;
 	//////// ToolBars ///////////////
 	QToolBar* mainToolBar;
 	QToolBar* decoratorToolBar;

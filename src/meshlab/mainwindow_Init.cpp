@@ -36,7 +36,6 @@
 #include <QWidgetAction>
 #include <QMessageBox>
 #include "mainwindow.h"
-#include <common/searcher.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
 #include <common/globals.h>
@@ -692,8 +691,7 @@ void MainWindow::initMenuForSearching(QMenu* menu)
 
 void MainWindow::initItemForSearching(QAction* act)
 {
-	QString tx = act->text() + " " + act->toolTip();
-	wama.addWordsPerAction(*act, tx);
+	wama.addAction(act);
 }
 
 QString MainWindow::getDecoratedFileName(const QString& name)
