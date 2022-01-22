@@ -230,20 +230,10 @@ std::vector<MeshModel*> loadMLP(
 					vcg::Matrix44f trm;
 					if (tr.childNodes().size() == 1) {
 						if (!binary) {
-							QStringList rows = tr.firstChild().nodeValue().split("\n", QString::SkipEmptyParts);
-							int i = 0;
-							for (const QString& row : qAsConst(rows)){
-								if (rows.size() > 0) {
-									QStringList values = row.split(" ", QString::SkipEmptyParts);
-									int j = 0;
-									for (const QString& value : qAsConst(values)) {
-										if (i < 4 && j < 4) {
-											md.mm()->cm.Tr[i][j] = value.toFloat();
-											j++;
-										}
-									}
-									i++;
-								}
+							auto const & values = tr.childNodes();
+							auto * v = md.mm()->cm.V();
+							for (auto index = 0u; index < values.length(); ++index) {
+								v[index] = values.item(index).nodeName().toFloat();
 							}
 						}
 						else {
