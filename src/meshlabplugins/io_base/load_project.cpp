@@ -231,7 +231,7 @@ std::vector<MeshModel*> loadMLP(
 					if (tr.childNodes().size() == 1) {
 						if (!binary) {
 							auto const & values = tr.childNodes();
-							auto * v = md.mm()->cm.V();
+							auto * v = md.mm()->cm.Tr.V();
 							for (auto index = 0u; index < values.length(); ++index) {
 								v[index] = values.item(index).nodeName().toFloat();
 							}
