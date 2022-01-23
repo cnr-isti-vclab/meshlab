@@ -74,6 +74,7 @@ private:
 	bool vertexDisplacement(
 			MeshDocument &md,
 			vcg::CallBackPos *cb,
+			int randomSeed,
 			bool updateNormals,
 			Scalarm max_displacement);
 };

@@ -162,6 +162,7 @@ RichParameterList FilterSamplePlugin::initParameterList(const QAction *action,co
 	case FP_MOVE_VERTEX :
 		parlst.addParam(RichBool ("UpdateNormals", true, "Recompute normals", "Toggle the recomputation of the normals after the random displacement.\n\nIf disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
 		parlst.addParam(RichAbsPerc("Displacement", m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(), "Max displacement", "The vertex are displaced of a vector whose norm is bounded by this value"));
+		parlst.addParam(RichInt("RandomSeed", 0, "Random Seed", "The seed used to generate random values. If seed is zero no random seed is used"));
 		break;
 	default :
 		assert(0);
@@ -181,7 +182,7 @@ std::map<std::string, QVariant> FilterSamplePlugin::applyFilter(const QAction * 
 {
 	switch(ID(action)) {
 	case FP_MOVE_VERTEX :
-		vertexDisplacement(md, cb, parameters.getBool("UpdateNormals"), parameters.getAbsPerc("Displacement"));
+		vertexDisplacement(md, cb, parameters.getInt("RandomSeed"), parameters.getBool("UpdateNormals"), parameters.getAbsPerc("Displacement"));
 		break;
 	default :
 		wrongActionCalled(action);
@@ -190,23 +191,25 @@ std::map<std::string, QVariant> FilterSamplePlugin::applyFilter(const QAction * 
 }
 
 bool FilterSamplePlugin::vertexDisplacement(
-		MeshDocument &md,
-		vcg::CallBackPos *cb,
-		bool updateNormals,
-		Scalarm max_displacement)
+	MeshDocument &md,
+	vcg::CallBackPos *cb,
+	int randomSeed,
+	bool updateNormals,
+	Scalarm max_displacement)
 {
 	CMeshO &m = md.mm()->cm;
-	srand(time(NULL));
+	if(randomSeed==0) srand(time(NULL));
+	else srand(randomSeed);
 
 	for(unsigned int i = 0; i< m.vert.size(); i++){
 		// Typical usage of the callback for showing a nice progress bar in the bottom.
 		// First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
 		cb(100*i/m.vert.size(), "Randomly Displacing...");
-
-		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
+		
+		Scalarm rndax = (Scalarm(2.0*rand())/float(RAND_MAX) - 1.0 ) *max_displacement;
+		Scalarm rnday = (Scalarm(2.0*rand())/float(RAND_MAX) - 1.0 ) *max_displacement;
+		Scalarm rndaz = (Scalarm(2.0*rand())/float(RAND_MAX) - 1.0 ) *max_displacement;
+		m.vert[i].P() += Point3m(rndax,rnday,rndaz); 
 	}
 
 	// Log function dump textual info in the lower part of the MeshLab screen.
