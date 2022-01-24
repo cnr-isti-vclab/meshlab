@@ -44,19 +44,18 @@ void ActionSearcher::clear()
 void ActionSearcher::addAction(QAction *action, bool usePythonFilterNames)
 {
 	if (action != nullptr) {
-		if (!usePythonFilterNames) {
-			// add title to the action map
-			QString title = action->text();
-			title = title.toLower();
-			title.remove(ignexp);
-			QStringList res = title.split(sepexp, Qt::SkipEmptyParts);
-			res.removeDuplicates();
-			addSubStrings(res);
-			for (const QString& str : qAsConst(res)) {
-				titleActionsMap[str].push_back(action);
-			}
+
+		// add title to the action map
+		QString title = action->text();
+		title = title.toLower();
+		title.remove(ignexp);
+		QStringList res = title.split(sepexp, Qt::SkipEmptyParts);
+		res.removeDuplicates();
+		addSubStrings(res);
+		for (const QString& str : qAsConst(res)) {
+			titleActionsMap[str].push_back(action);
 		}
-		else {
+		if (usePythonFilterNames) {
 			// if the action is a filter, we should add also the python name to the search
 			QObject* parent = action->parent();
 			FilterPlugin* fp = qobject_cast<FilterPlugin*>(parent);
@@ -77,7 +76,7 @@ void ActionSearcher::addAction(QAction *action, bool usePythonFilterNames)
 		QString info = action->toolTip();
 		info = info.toLower();
 		info.remove(ignexp);
-		QStringList res = info.split(sepexp, Qt::SkipEmptyParts);
+		res = info.split(sepexp, Qt::SkipEmptyParts);
 		res.removeDuplicates();
 		addSubStrings(res);
 		for (const QString& str : qAsConst(res)) {
