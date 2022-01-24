@@ -2576,6 +2576,7 @@ void MainWindow::aboutPlugins()
 	PluginInfoDialog dialog(this);
 	dialog.exec();
 	updateAllPluginsActions();
+	initSearchEngine();
 	QSettings settings;
 	QStringList disabledPlugins;
 	for (MeshLabPlugin* pf : PM.pluginIterator(true)){

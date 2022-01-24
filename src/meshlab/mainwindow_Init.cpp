@@ -658,40 +658,23 @@ void MainWindow::createMenus()
 
 void MainWindow::initSearchEngine()
 {
+	wama.clear();
 	for (const auto& p : PM.filterPluginIterator()){
 		for (QAction* act : p->actions())
-			initItemForSearching(act);
+			wama.addAction(act);
 	}
-	/*for (const auto& p : PM.editPluginFactoryIterator()){
+	for (const auto& p : PM.editPluginFactoryIterator()){
 		for (QAction* act : p->actions())
-			initItemForSearching(act);
+			wama.addAction(act);
 	}
 	for (const auto& p : PM.renderPluginIterator()){
 		for (QAction* act : p->actions())
-			initItemForSearching(act);
-	}*/
-
-	initMenuForSearching(editMenu);
-	initMenuForSearching(renderMenu);
-}
-
-void MainWindow::initMenuForSearching(QMenu* menu)
-{
-	if (menu == NULL)
-		return;
-	const QList<QAction*>& acts = menu->actions();
-	for(QAction* act: acts) {
-		QMenu* submenu = act->menu();
-		if (!act->isSeparator() && (submenu == NULL))
-			initItemForSearching(act);
-		else if (!act->isSeparator())
-			initMenuForSearching(submenu);
+			wama.addAction(act);
 	}
-}
-
-void MainWindow::initItemForSearching(QAction* act)
-{
-	wama.addAction(act);
+	for (const auto& p : PM.decoratePluginIterator()){
+		for (QAction* act : p->actions())
+			wama.addAction(act);
+	}
 }
 
 QString MainWindow::getDecoratedFileName(const QString& name)
@@ -928,20 +911,6 @@ void MainWindow::updateAllPluginsActions()
 	
 	filterToolBar->clear();
 	updateFilterToolBar();
-	
-	//TODO update the searcher: this seems to be an impossible task due to unreadable code.
-	//for now, just close and reopen meshlab....
-	/*
-	disconnect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
-	wama.clear();
-	delete searchMenu;
-	
-	initSearchEngine();
-	int longest = longestActionWidthInAllMenus();
-	searchMenu = new SearchMenu(wama, 15, searchButton, longest);
-	searchButton->setMenu(searchMenu);
-	connect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
-	*/
 }
 
 void MainWindow::loadDefaultSettingsFromPlugins()
