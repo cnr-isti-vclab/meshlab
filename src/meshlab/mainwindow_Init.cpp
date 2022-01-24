@@ -46,13 +46,14 @@
 
 QProgressBar *MainWindow::qb;
 
-MainWindow::MainWindow(): 
-	httpReq(this), 
-	gpumeminfo(NULL),
-	defaultGlobalParams(meshlab::defaultGlobalParameterList()),
-	lastUsedDirectory(QDir::home()),
-	PM(meshlab::pluginManagerInstance()),
-	_currviewcontainer(NULL)
+MainWindow::MainWindow() :
+		searcher(meshlab::actionSearcherInstance()),
+		httpReq(this),
+		gpumeminfo(NULL),
+		defaultGlobalParams(meshlab::defaultGlobalParameterList()),
+		lastUsedDirectory(QDir::home()),
+		PM(meshlab::pluginManagerInstance()),
+		_currviewcontainer(NULL)
 {
 	QSettings settings;
 	//toDelete plugins, flagged in the last session
@@ -650,7 +651,7 @@ void MainWindow::createMenus()
 	{
 		initSearchEngine();
 		int longest = longestActionWidthInAllMenus();
-		searchMenu = new SearchMenu(wama, 15, searchButton, longest);
+		searchMenu = new SearchMenu(searcher, 15, searchButton, longest);
 		searchButton->setMenu(searchMenu);
 		connect(searchShortCut, SIGNAL(activated()), searchButton, SLOT(openMenu()));
 	}
@@ -658,22 +659,22 @@ void MainWindow::createMenus()
 
 void MainWindow::initSearchEngine()
 {
-	wama.clear();
+	searcher.clear();
 	for (const auto& p : PM.filterPluginIterator()){
 		for (QAction* act : p->actions())
-			wama.addAction(act);
+			searcher.addAction(act);
 	}
 	for (const auto& p : PM.editPluginFactoryIterator()){
 		for (QAction* act : p->actions())
-			wama.addAction(act);
+			searcher.addAction(act);
 	}
 	for (const auto& p : PM.renderPluginIterator()){
 		for (QAction* act : p->actions())
-			wama.addAction(act);
+			searcher.addAction(act);
 	}
 	for (const auto& p : PM.decoratePluginIterator()){
 		for (QAction* act : p->actions())
-			wama.addAction(act);
+			searcher.addAction(act);
 	}
 }
 

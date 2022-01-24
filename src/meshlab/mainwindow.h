@@ -359,7 +359,7 @@ public:
 	QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 
 private:
-	ActionSearcher wama;
+	ActionSearcher& searcher;
 	//////// ToolBars ///////////////
 	QToolBar* mainToolBar;
 	QToolBar* decoratorToolBar;
