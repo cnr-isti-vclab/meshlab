@@ -65,6 +65,7 @@ set(HEADERS
 	plugins/interfaces/filter_plugin.h
 	plugins/interfaces/io_plugin.h
 	plugins/interfaces/render_plugin.h
+	plugins/action_searcher.h
 	plugins/meshlab_plugin_type.h
 	plugins/plugin_manager.h
 	python/function.h
@@ -81,8 +82,7 @@ set(HEADERS
 	ml_selection_buffers.h
 	ml_thread_safe_memory_info.h
 	mlapplication.h
-	mlexception.h
-	searcher.h)
+	mlexception.h)
 
 set(SOURCES
 	ml_document/helpers/mesh_document_state_data.cpp
@@ -107,6 +107,7 @@ set(SOURCES
 	plugins/interfaces/decorate_plugin.cpp
 	plugins/interfaces/filter_plugin.cpp
 	plugins/interfaces/io_plugin.cpp
+	plugins/action_searcher.cpp
 	plugins/meshlab_plugin_type.cpp
 	plugins/plugin_manager.cpp
 	python/function.cpp
@@ -121,8 +122,7 @@ set(SOURCES
 	filterscript.cpp
 	ml_selection_buffers.cpp
 	ml_thread_safe_memory_info.cpp
-	mlapplication.cpp
-	searcher.cpp)
+	mlapplication.cpp)
 
 set(RESOURCES meshlab-common.qrc)
 

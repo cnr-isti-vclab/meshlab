@@ -62,6 +62,7 @@ public:
 	DecoratePlugin* getDecoratePlugin(const QString& name);
 
 	QAction* filterAction(const QString& name);
+	FilterPlugin* getFilterPluginFromAction(const QAction* action) const;
 
 	IOPlugin* inputMeshPlugin(const QString& inputFormat) const;
 	IOPlugin* outputMeshPlugin(const QString& outputFormat) const;

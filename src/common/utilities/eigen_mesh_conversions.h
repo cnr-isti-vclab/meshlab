@@ -31,9 +31,12 @@
 typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 1>      EigenVectorXm;
 typedef Eigen::Matrix<bool, Eigen::Dynamic, 1>         EigenVectorXb;
 typedef Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> EigenVectorXui;
-typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 2>      EigenMatrixX2m;
-typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 3>      EigenMatrixX3m;
-typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 4>      EigenMatrixX4m;
+
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 2> EigenMatrixX2m;
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 3> EigenMatrixX3m;
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, 4> EigenMatrixX4m;
+
+typedef Eigen::Matrix<Scalarm, Eigen::Dynamic, Eigen::Dynamic> EigenMatrixXm;
 
 namespace meshlab {
 

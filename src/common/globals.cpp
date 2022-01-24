@@ -29,6 +29,7 @@
 
 #include "parameters/rich_parameter_list.h"
 #include "plugins/plugin_manager.h"
+#include "plugins/action_searcher.h"
 #include "python/function_set.h"
 
 QString basePath()
@@ -139,6 +140,12 @@ PluginManager& meshlab::pluginManagerInstance()
 {
 	static PluginManager pm;
 	return pm;
+}
+
+ActionSearcher& meshlab::actionSearcherInstance()
+{
+	static ActionSearcher as;
+	return as;
 }
 
 pymeshlab::FunctionSet& pymeshlab::functionSetInstance()

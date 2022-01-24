@@ -45,6 +45,7 @@ public:
 	void eraseFilterPlugin(FilterPlugin* iFilter);
 
 	QAction* filterAction(const QString& name);
+	FilterPlugin* pluginOfFilter(const QAction* action) const;
 
 	FilterPluginRangeIterator filterPluginIterator(bool iterateAlsoDisabledPlugins = false) const;
 

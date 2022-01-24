@@ -291,6 +291,11 @@ QAction* PluginManager::filterAction(const QString& name)
 	return filterPlugins.filterAction(name);
 }
 
+FilterPlugin* PluginManager::getFilterPluginFromAction(const QAction *action) const
+{
+	return filterPlugins.pluginOfFilter(action);
+}
+
 IOPlugin* PluginManager::inputMeshPlugin(const QString& inputFormat) const
 {
 	return ioPlugins.inputMeshPlugin(inputFormat);

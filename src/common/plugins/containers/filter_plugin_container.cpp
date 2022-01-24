@@ -61,6 +61,17 @@ QAction* FilterPluginContainer::filterAction(const QString& name)
 		return nullptr;
 }
 
+FilterPlugin *FilterPluginContainer::pluginOfFilter(const QAction *action) const
+{
+	for (FilterPlugin* fp : filterPlugins) {
+		std::list<QAction*> al = fp->actions();
+		auto it = std::find(al.begin(), al.end(), action);
+		if (it != al.end())
+			return fp;
+	}
+	return nullptr;
+}
+
 FilterPluginContainer::FilterPluginRangeIterator FilterPluginContainer::filterPluginIterator(bool iterateAlsoDisabledPlugins) const
 {
 	return FilterPluginRangeIterator(this, iterateAlsoDisabledPlugins);
