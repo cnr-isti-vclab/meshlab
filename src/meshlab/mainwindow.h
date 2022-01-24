@@ -256,8 +256,6 @@ private:
 	void createActions();
 	void createMenus();
 	void initSearchEngine();
-	void initItemForSearching(QAction* act);
-	void initMenuForSearching(QMenu* menu);
 	void fillFilterMenu();
 	void fillRenderMenu();
 	void fillShadersMenu();
@@ -361,7 +359,7 @@ public:
 	QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 
 private:
-	WordActionsMapAccessor wama;
+	ActionSearcher& searcher;
 	//////// ToolBars ///////////////
 	QToolBar* mainToolBar;
 	QToolBar* decoratorToolBar;

@@ -8,7 +8,7 @@
 #include <QStyle>
 #include <QDebug>
 
-SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth)
+SearchMenu::SearchMenu(const ActionSearcher& wm,const int max,QWidget* parent,const int fixedwidth)
 :MenuWithToolTip(QString(),parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
 {
     searchline = new MenuLineEdit(this);
@@ -24,29 +24,14 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 
 void SearchMenu::getResults(const QString& text,QList<QAction*>& result)
 {
-    try
-    {
-        RankedMatches rm;
-        int ii = wama.rankedMatchesPerInputString(text,rm);
-        int inserted = 0;
-        while(ii > 0)
-        {
-            QList<QAction*> myacts;
-            rm.getActionsWithNMatches(ii,myacts);
-            if (inserted + myacts.size() > maxres)
-                myacts = myacts.mid(0,myacts.size() - (inserted + myacts.size() - maxres));
-            result.append(myacts);
-            QAction* sep = new QAction(this);
-            sep->setSeparator(true);
-            result.append(sep);
-            inserted += myacts.size();
-            --ii;
-        }
-    }
-    catch(InvalidInvariantException& e)
-    {
-        qDebug() << "WARNING!!!!!!!!!!!!!!!!!!!" << e.what() << "\n";
-    }
+	std::vector<QAction*> rm = wama.bestMatchingActions(text, 15);
+
+	for (QAction* act : rm) {
+		result.append(act);
+	}
+	QAction* sep = new QAction(this);
+	sep->setSeparator(true);
+	result.append(sep);
 }
 
 void SearchMenu::updateGUI( const QList<QAction*>& results )

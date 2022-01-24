@@ -119,7 +119,7 @@ void PluginInfoDialog::on_loadPluginsPushButton_clicked()
 	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Plugins", "", pluginFileFormat);
 	PluginManager& pm = meshlab::pluginManagerInstance();
 	bool loadOk = false;
-	for (const QString& fileName : fileList){
+	for (const QString& fileName : qAsConst(fileList)){
 		QFileInfo finfo(fileName);
 		
 		try {

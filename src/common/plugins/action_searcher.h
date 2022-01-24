@@ -2,7 +2,7 @@
  * MeshLab                                                           o o     *
  * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2005-2021                                           \/)\/    *
+ * Copyright(C) 2005-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,53 +21,42 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_GLOBALS_H
-#define MESHLAB_GLOBALS_H
+#ifndef ACTION_SEARCHER_H
+#define ACTION_SEARCHER_H
 
-#define meshlab_xstr(a) mlstringify(a)
-#define mlstringify(a) #a
-
+#include <map>
+#include <vector>
 #include <QString>
-#ifndef MESHLAB_VERSION
-#error "MESHLAB_VERSION needs to be defined!"
-#endif
-#ifndef MESHLAB_SCALAR
-#error "MESHLAB_SCALAR needs to be defined!"
-#endif
+#include <QAction>
 
-class RichParameterList;
-class PluginManager;
-class ActionSearcher;
-
-namespace meshlab {
-
-QString defaultPluginPath();
-QString defaultShadersPath();
-QString logDebugFileName();
-
-RichParameterList& defaultGlobalParameterList();
-PluginManager&     pluginManagerInstance();
-ActionSearcher&    actionSearcherInstance();
-
-// keep these functions inlined please
-// each plugin that uses them need to have their own definition
-// plugins cannot link them!!
-inline std::string meshlabVersion()
+class ActionSearcher
 {
-	return std::string(meshlab_xstr(MESHLAB_VERSION));
-}
+public:
+	ActionSearcher();
 
-inline bool builtWithDoublePrecision()
-{
-	return std::string(meshlab_xstr(MESHLAB_SCALAR)) == std::string("double");
-}
+	void clear();
+	void addAction(QAction* action, bool usePythonFilterNames = false);
 
-} // namespace meshlab
+	std::vector<QAction*> bestMatchingActions(QString inputString, int maxNumberActions) const;
 
-namespace pymeshlab {
-class FunctionSet;
+private:
+	const QRegExp sepexp = QRegExp("\\W+");
+	const QRegExp ignexp = QRegExp(
+		"\\b(an|the|of|it|as|in|by|and|or|for)\\b|\\b[a-z]\\b|'s\\b|\\.|<[^>]*>");
 
-FunctionSet& functionSetInstance();
-} // namespace pymeshlab
+	// map that stores, for each string, all the actions that store that string in their titles
+	std::map<QString, std::vector<QAction*>> titleActionsMap;
 
-#endif // MESHLAB_GLOBALS_H
+	// map that stores, for each stirng, all the actions that store that stirng in their info
+	std::map<QString, std::vector<QAction*>> infoActionsMap;
+
+	struct ActionComparator {
+		bool operator()(QAction* a1, QAction* a2) {
+			return a1->text() < a2->text();
+		}
+	};
+
+	static void addSubStrings(QStringList& res);
+};
+
+#endif // ACTION_SEARCHER_H

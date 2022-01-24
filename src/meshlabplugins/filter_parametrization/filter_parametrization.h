@@ -2,13 +2,13 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,62 +21,46 @@
 *                                                                           *
 ****************************************************************************/
 
-/****************************************************************************
-History
-$Log: sampleplugins.h,v $
-
-Revision 1,3 2020/05/20
-Reorganization of the filter, comments in doxygen format
-
-Revision 1.2  2006/11/29 00:59:21  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add sampleplugins
-
-****************************************************************************/
-
-#ifndef FILTERSAMPLE_PLUGIN_H
-#define FILTERSAMPLE_PLUGIN_H
+#ifndef MESHLAB_FILTER_PARAMETRIZATION_PLUGIN_H
+#define MESHLAB_FILTER_PARAMETRIZATION_PLUGIN_H
 
 #include <common/plugins/interfaces/filter_plugin.h>
 
-class FilterSamplePlugin : public QObject, public FilterPlugin
+class FilterParametrizationPlugin : public QObject, public FilterPlugin
 {
+	//keep these three lines unchanged
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
 	Q_INTERFACES(FilterPlugin)
 
 public:
-	enum { FP_MOVE_VERTEX  } ;
+	//enum used to give an ID to every filter implemented in the plugin
+	enum FileterIds {
+		FP_HARMONIC_PARAM,
+		FP_LEAST_SQUARES_PARAM};
 
-	FilterSamplePlugin();
-	virtual ~FilterSamplePlugin();
+	FilterParametrizationPlugin();
 
 	QString pluginName() const;
+	QString vendor() const;
 
 	QString filterName(ActionIDType filter) const;
-	QString pythonFilterName(ActionIDType f) const;
+	QString pythonFilterName(ActionIDType filter) const;
 	QString filterInfo(ActionIDType filter) const;
 	FilterClass getClass(const QAction* a) const;
 	FilterArity filterArity(const QAction*) const;
 	int getPreConditions(const QAction *) const;
+	int getRequirements(const QAction *);
 	int postCondition(const QAction* ) const;
 	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
 	std::map<std::string, QVariant> applyFilter(
 			const QAction* action,
-			const RichParameterList & parameters,
+			const RichParameterList & params,
 			MeshDocument &md,
 			unsigned int& postConditionMask,
 			vcg::CallBackPos * cb);
 
 private:
-	bool vertexDisplacement(
-			MeshDocument &md,
-			vcg::CallBackPos *cb,
-			int randomSeed,
-			bool updateNormals,
-			Scalarm max_displacement);
 };
 
-#endif
+#endif //MESHLAB_FILTER_PARAMETRIZATION_PLUGIN_H
