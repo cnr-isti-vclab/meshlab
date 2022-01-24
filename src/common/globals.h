@@ -37,6 +37,7 @@
 
 class RichParameterList;
 class PluginManager;
+class ActionSearcher;
 
 namespace meshlab {
 
@@ -46,6 +47,7 @@ QString logDebugFileName();
 
 RichParameterList& defaultGlobalParameterList();
 PluginManager&     pluginManagerInstance();
+ActionSearcher&    actionSearcherInstance();
 
 // keep these functions inlined please
 // each plugin that uses them need to have their own definition
