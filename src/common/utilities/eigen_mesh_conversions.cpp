@@ -530,6 +530,33 @@ EigenMatrixX3m meshlab::vertexMatrix(const CMeshO& mesh)
 }
 
 /**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the coordinates of the
+ * vertices of a CMeshO, to which has been applied the transform matrix of the mesh.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (transformed vertex coordinates)
+ */
+EigenMatrixX3m meshlab::transformedVertexMatrix(const CMeshO &mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+
+	   // create eigen matrix of vertices
+	EigenMatrixX3m vert(mesh.VN(), 3);
+
+	   // copy vertices
+	for (int i = 0; i < mesh.VN(); i++) {
+		CMeshO::CoordType p = mesh.Tr * mesh.vert[i].P();
+		for (int j = 0; j < 3; j++) {
+			vert(i, j) = p[j];
+		}
+	}
+
+	return vert;
+}
+
+/**
  * @brief Get a #F*3 Eigen matrix of integers containing the vertex indices of
  * a CMeshO.
  * The faces in the mesh must be compact (no deleted faces).
@@ -636,6 +663,42 @@ EigenMatrixX3m meshlab::vertexNormalMatrix(const CMeshO& mesh)
 }
 
 /**
+ * @brief Get a #V*3 Eigen matrix of scalars containing the values of the
+ * vertex normals of a CMeshO, to which has been applied the transform matrix of the mesh.
+ * The vertices in the mesh must be compact (no deleted vertices).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #V*3 matrix of scalars (transformed vertex normals)
+ */
+EigenMatrixX3m meshlab::transformedVertexNormalMatrix(const CMeshO &mesh)
+{
+	vcg::tri::RequireVertexCompactness(mesh);
+
+	CMeshO::ScalarType scale;
+
+	vcg::Matrix33<CMeshO::ScalarType> mat33(mesh.Tr,3);
+	scale = pow(mat33.Determinant(),(CMeshO::ScalarType)(1.0/3.0));
+	CMeshO::CoordType scaleV(scale,scale,scale);
+	vcg::Matrix33<CMeshO::ScalarType> S;
+	S.SetDiagonal(scaleV.V());
+	mat33*=S;
+
+	// create eigen matrix of vertex normals
+	EigenMatrixX3m vertexNormals(mesh.VN(), 3);
+
+	// per vertices normals
+	for (int i = 0; i < mesh.VN(); i++) {
+		CMeshO::CoordType n = mat33 * mesh.vert[i].N();
+		for (int j = 0; j < 3; j++) {
+			vertexNormals(i, j) = n[j];
+		}
+	}
+
+	return vertexNormals;
+}
+
+/**
  * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
  * face normals of a CMeshO.
  * The faces in the mesh must be compact (no deleted faces).
@@ -645,6 +708,42 @@ EigenMatrixX3m meshlab::vertexNormalMatrix(const CMeshO& mesh)
  * @return #F*3 matrix of scalars (face normals)
  */
 EigenMatrixX3m meshlab::faceNormalMatrix(const CMeshO& mesh)
+{
+	vcg::tri::RequireFaceCompactness(mesh);
+
+	CMeshO::ScalarType scale;
+
+	vcg::Matrix33<CMeshO::ScalarType> mat33(mesh.Tr,3);
+	scale = pow(mat33.Determinant(),(CMeshO::ScalarType)(1.0/3.0));
+	CMeshO::CoordType scaleV(scale,scale,scale);
+	vcg::Matrix33<CMeshO::ScalarType> S;
+	S.SetDiagonal(scaleV.V());
+	mat33*=S;
+
+	// create eigen matrix of face normals
+	EigenMatrixX3m faceNormals(mesh.FN(), 3);
+
+	// per face normals
+	for (int i = 0; i < mesh.FN(); i++) {
+		CMeshO::CoordType n = mat33 * mesh.face[i].N();
+		for (int j = 0; j < 3; j++) {
+			faceNormals(i, j) = n[j];
+		}
+	}
+
+	return faceNormals;
+}
+
+/**
+ * @brief Get a #F*3 Eigen matrix of scalars containing the values of the
+ * face normals of a CMeshO, to which has been applied the transform matrix of the mesh.
+ * The faces in the mesh must be compact (no deleted faces).
+ * If the mesh is not compact, a vcg::MissingCompactnessException will be thrown.
+ *
+ * @param mesh: input mesh
+ * @return #F*3 matrix of scalars (transformed face normals)
+ */
+EigenMatrixX3m meshlab::transformedFaceNormalMatrix(const CMeshO &mesh)
 {
 	vcg::tri::RequireFaceCompactness(mesh);
 
@@ -660,6 +759,7 @@ EigenMatrixX3m meshlab::faceNormalMatrix(const CMeshO& mesh)
 
 	return faceNormals;
 }
+
 
 /**
  * @brief Get a #V*4 Eigen matrix of scalars containing the values of the

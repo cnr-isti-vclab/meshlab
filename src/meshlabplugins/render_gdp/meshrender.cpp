@@ -67,7 +67,10 @@ void MeshShaderRenderPlugin::initActionList()
 {
 	QDir shadersDir = QDir(meshlab::defaultShadersPath());
 
-	qDebug("Shader directory found '%s', and it contains %i gdp files", qUtf8Printable(shadersDir.path()), shadersDir.entryList(QStringList("*.gdp")).size());
+	// qDebug(
+	// 	"Shader directory found '%s', and it contains %i gdp files",
+	// 	qUtf8Printable(shadersDir.path()),
+	// 	shadersDir.entryList(QStringList("*.gdp")).size());
 	loadShaders(shadersDir);
 	
 	loadShaders(MeshLabApplication::extraShadersLocation());
