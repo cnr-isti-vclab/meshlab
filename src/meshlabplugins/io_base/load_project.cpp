@@ -233,8 +233,8 @@ std::vector<MeshModel*> loadMLP(
 							auto * const v = md.mm()->cm.Tr.V();
 							auto const rows = tr.firstChild().nodeValue().split("\n", QString::SkipEmptyParts);
 							auto i = 0u;
-							{
-								if (rows.size() > 0u) {
+							for (auto const & row: rows) {
+								{
 									auto const values = row.split(" ", QString::SkipEmptyParts);
 									for (auto const & value: values) {
 										if (i >= 16u) break;
