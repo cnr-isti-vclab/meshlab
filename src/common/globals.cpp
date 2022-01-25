@@ -51,7 +51,6 @@ QString basePath()
 			break;
 		baseDir.cdUp();
 	}
-	qDebug("The base dir is %s", qUtf8Printable(baseDir.absolutePath()));
 #endif
 	return baseDir.absolutePath();
 }
