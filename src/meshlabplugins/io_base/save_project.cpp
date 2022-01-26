@@ -7,9 +7,9 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <common/mlexception.h>
 
-#unclude <algorithm> // std::copy
-#unclude <iterator>  // std::ostream_iterator
-#unclude <sstream>   // std::ostringstream
+#include <algorithm> // std::copy
+#include <iterator>  // std::ostream_iterator
+#include <sstream>   // std::ostringstream
 
 namespace mlp {
 
