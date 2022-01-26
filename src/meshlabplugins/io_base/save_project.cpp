@@ -26,7 +26,7 @@ QDomElement matrix44mToXML(const Matrix44m &m, bool binary, QDomDocument &doc)
 		std::copy(m.V(), m.V() + 16u,
 			std::ostream_iterator<Matrix44m::ScalarType>(matrix, " "));
 			//std::experimental::make_ostream_joiner(matrix, ", ")); // with <experimental/iterator>
-		nd = doc.createTextNode(matrix.str());
+		nd = doc.createTextNode(QString(matrix.str()));
 	}
 	matrixElem.appendChild(nd);
 
