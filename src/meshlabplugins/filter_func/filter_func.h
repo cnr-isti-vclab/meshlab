@@ -102,6 +102,7 @@ public:
 	void setAttributes(CMeshO::FaceIterator& fi, CMeshO& m);
 	void setPerVertexVariables(mu::Parser& p, CMeshO& m);
 	void setPerFaceVariables(mu::Parser& p, CMeshO& m);
+	void checkAttributeName(const std::string& name) const;
 };
 
 #endif

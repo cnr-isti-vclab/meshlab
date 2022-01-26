@@ -203,33 +203,32 @@ QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
 			   PerFaceAttributeString;
 
 	case FF_DEF_VERT_SCALAR_ATTRIB:
-		return tr("Add a new Per-Vertex custom scalar attribute to current mesh and fill it with the "
-				  "defined function.<br>"
-				  "The name specified below can be used in other filter function") +
+		return tr("Add a new Per-Vertex custom scalar attribute to current mesh and fill it with "
+				  "the defined function.<br>"
+				  "Attribute names must contain only letters, numbers and underscores.<br>"
+				  "The name specified for the attribute can be used in other filter functions.<br>") +
 			   PerVertexAttributeString;
 
 	case FF_DEF_FACE_SCALAR_ATTRIB:
-		return tr("Add a new Per-Face custom scalar attribute to current mesh.<br>"
-				  "You can specify custom name and a function to generate attribute's values<br>"
-				  "It's possible to use per-face variables in the expression:<br>") +
-			   PerFaceAttributeString +
-			   tr("<font color=\"#FF0000\">The attribute name specified below can be used in other "
-				  "filter function</font>");
+		return tr("Add a new Per-Face custom scalar attribute to current mesh and fill it with "
+				  "the defined function.<br>"
+				  "Attribute names must contain only letters, numbers and underscores.<br>"
+			      "The name specified for the attribute can be used in other filter functions.<br>") +
+			   PerFaceAttributeString;
 
 	case FF_DEF_VERT_POINT_ATTRIB:
 		return tr("Add a new Per-Vertex custom point attribute to current mesh and fill it with the "
-				  "defined function.<br>"
-				  "The name specified below can be used in other filter function") +
+				  "defined functions.<br>"
+				  "Attribute names must contain only letters, numbers and underscores.<br>"
+				  "The name specified for the attribute can be used in other filter functions.<br>") +
 			   PerVertexAttributeString;
 
 	case FF_DEF_FACE_POINT_ATTRIB:
-		return tr("Add a new Per-Face custom point attribute to current mesh.<br>"
-				  "You can specify custom name and a function to generate attribute's values<br>"
-				  "It's possible to use per-face variables in the expression:<br>") +
-			   PerFaceAttributeString +
-			   tr("<font color=\"#FF0000\">The attribute name specified below can be used in other "
-				  "filter function</font>");
-
+		return tr("Add a new Per-Face custom point attribute to current mesh and fill it with the "
+				  "defined functions.<br>"
+				  "Attribute names must contain only letters, numbers and underscores.<br>"
+				  "The name specified for the attribute can be used in other filter functions.<br>") +
+			   PerFaceAttributeString;
 	case FF_GRID:
 		return tr(
 			"Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user "
@@ -518,7 +517,7 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 	case FF_DEF_VERT_SCALAR_ATTRIB:
 		parlst.addParam(RichString(
 			"name",
-			"Custom Attr Name",
+			"CustomAttrName",
 			"Name",
 			"the name of new attribute. you can access attribute in other filters through this "
 			"name"));
@@ -532,7 +531,7 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 	case FF_DEF_FACE_SCALAR_ATTRIB:
 		parlst.addParam(RichString(
 			"name",
-			"Custom Attr Name",
+			"CustomAttrName",
 			"Name",
 			"the name of new attribute. you can access attribute in other filters through this "
 			"name"));
@@ -546,7 +545,7 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 	case FF_DEF_VERT_POINT_ATTRIB:
 		parlst.addParam(RichString(
 			"name",
-			"Custom Attr Name",
+			"CustomAttrName",
 			"Name",
 			"the name of new attribute. you can access attribute in other filters through this "
 			"name"));
@@ -570,7 +569,7 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 	case FF_DEF_FACE_POINT_ATTRIB:
 		parlst.addParam(RichString(
 			"name",
-			"Custom Attr Name",
+			"CustomAttrName",
 			"Name",
 			"the name of new attribute. you can access attribute in other filters through this "
 			"name"));
@@ -1181,6 +1180,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 	case FF_DEF_VERT_SCALAR_ATTRIB: {
 		std::string name = par.getString("name").toStdString();
 		std::string expr = par.getString("expr").toStdString();
+		checkAttributeName(name);
 
 		// add per-vertex attribute with type float and name specified by user
 		CMeshO::PerVertexAttributeHandle<Scalarm> h;
@@ -1195,6 +1195,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		Parser p;
 		setPerVertexVariables(p, m.cm);
+
 		p.SetExpr(conversion::fromStringToWString(expr));
 
 		time_t start = clock();
@@ -1231,6 +1232,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 	case FF_DEF_FACE_SCALAR_ATTRIB: {
 		std::string name = par.getString("name").toStdString();
 		std::string expr = par.getString("expr").toStdString();
+		checkAttributeName(name);
 
 		// add per-face attribute with type float and name specified by user
 		// add per-vertex attribute with type float and name specified by user
@@ -1274,6 +1276,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		std::string x_expr = par.getString("x_expr").toStdString();
 		std::string y_expr = par.getString("y_expr").toStdString();
 		std::string z_expr = par.getString("z_expr").toStdString();
+		checkAttributeName(name);
 
 		// add per-vertex attribute with type float and name specified by user
 		CMeshO::PerVertexAttributeHandle<Point3m> h;
@@ -1332,6 +1335,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		std::string x_expr = par.getString("x_expr").toStdString();
 		std::string y_expr = par.getString("y_expr").toStdString();
 		std::string z_expr = par.getString("z_expr").toStdString();
+		checkAttributeName(name);
 
 		// add per-face attribute with type float and name specified by user
 		// add per-vertex attribute with type float and name specified by user
@@ -1826,6 +1830,20 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser& p, CMeshO& m)
 		f_attrNames.push_back(AllFaceAttribName[i]);
 		f_attrValue.push_back(0);
 		p.DefineVar(conversion::fromStringToWString(f_attrNames.back()), &f_attrValue.back());
+	}
+}
+
+void FilterFunctionPlugin::checkAttributeName(const std::string &name) const
+{
+	static const std::string validChars =
+		"0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	if ( !name.length() ||
+		(name.find_first_not_of(validChars)!=string_type::npos) ||
+		(name[0]>='0' && name[0]<='9'))
+	{
+		throw MLException(
+			"Invalid Attribute name: only letters, numbers and underscores are allowed in custom "
+			"attribute names.");
 	}
 }
 
