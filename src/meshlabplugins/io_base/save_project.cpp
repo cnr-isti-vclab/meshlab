@@ -7,10 +7,6 @@
 #include <wrap/io_trimesh/alnParser.h>
 #include <common/mlexception.h>
 
-#include <algorithm> // std::copy
-#include <iterator>  // std::ostream_iterator
-#include <sstream>   // std::ostringstream
-
 namespace mlp {
 
 QDomElement matrix44mToXML(const Matrix44m &m, bool binary, QDomDocument &doc)
@@ -22,11 +18,11 @@ QDomElement matrix44mToXML(const Matrix44m &m, bool binary, QDomDocument &doc)
 		QDomText nd = doc.createTextNode(QString(value));
 	}
 	else {
-		std::ostringstream matrix;
-		std::copy(m.V(), m.V() + 16u,
-			std::ostream_iterator<Matrix44m::ScalarType>(matrix, " "));
-			//std::experimental::make_ostream_joiner(matrix, ", ")); // with <experimental/iterator>
-		nd = doc.createTextNode(QString(matrix.str().c_str()));
+		QString row[4];
+		for (int i = 0; i < 4; ++i)
+			row[i] = QString("%1 %2 %3 %4 ").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
+
+		nd = doc.createTextNode("\n" + row[0] + row[1] + row[2] + row[3] + "\n");
 	}
 	matrixElem.appendChild(nd);
 
