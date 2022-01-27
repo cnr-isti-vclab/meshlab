@@ -18,11 +18,11 @@ QDomElement matrix44mToXML(const Matrix44m &m, bool binary, QDomDocument &doc)
 		QDomText nd = doc.createTextNode(QString(value));
 	}
 	else {
-		QString Row[4];
+		QString row[4];
 		for (int i = 0; i < 4; ++i)
-			Row[i] = QString("%1 %2 %3 %4 \n").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
+			row[i] = QString("%1 %2 %3 %4 ").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
 
-		nd = doc.createTextNode("\n" + Row[0] + Row[1] + Row[2] + Row[3]);
+		nd = doc.createTextNode("\n" + row[0] + row[1] + row[2] + row[3] + "\n");
 	}
 	matrixElem.appendChild(nd);
 

@@ -227,22 +227,16 @@ std::vector<MeshModel*> loadMLP(
 				QDomNode tr = mesh.firstChildElement("MLMatrix44");
 
 				if (!tr.isNull()) {
-					vcg::Matrix44f trm;
 					if (tr.childNodes().size() == 1) {
 						if (!binary) {
-							QStringList rows = tr.firstChild().nodeValue().split("\n", QString::SkipEmptyParts);
-							int i = 0;
-							for (const QString& row : qAsConst(rows)){
-								if (rows.size() > 0) {
-									QStringList values = row.split(" ", QString::SkipEmptyParts);
-									int j = 0;
-									for (const QString& value : qAsConst(values)) {
-										if (i < 4 && j < 4) {
-											md.mm()->cm.Tr[i][j] = value.toFloat();
-											j++;
-										}
-									}
-									i++;
+							Scalarm* v = md.mm()->cm.Tr.V();
+							const QStringList rows = tr.firstChild().nodeValue().split("\n", Qt::SkipEmptyParts);
+							unsigned int i = 0;
+							for (const QString& row: rows) {
+								const QStringList values = row.split(" ", Qt::SkipEmptyParts);
+								for (const QString& value: values) {
+									if (i >= 16u) break;
+									v[i++] = value.toFloat();
 								}
 							}
 						}
