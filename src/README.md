@@ -14,34 +14,35 @@ The source code of MeshLab is structured in the following directories:
 
 ## Build MeshLab
 
-MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) >= 5.15.
+MeshLab builds with the three major compilers: `gcc`, `clang`, and `msvc`. It requires [Qt](https://www.qt.io/) 5.15.
 
 After setting up the Qt environment:
 
-	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	mkdir meshlab/src/build
-	cd meshlab/src/build
-    cmake ..
-    make
-
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+mkdir meshlab/src/build
+cd meshlab/src/build
+cmake ..
+make
+```
 
 You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
 
-1. Install QtCreator and Qt >= 5.12;
+1. Install QtCreator and Qt 5.15;
 2. Open `CMakeLists.txt` inside `src`;
 3. Select your favourite shadow build directory;
 4. Build meshlab.
 
-MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Don't worry: if a plugin fails to compile, just remove it and you lose just that functionality.
-
 ### Platform specific notes
 On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparametrization) so you need a compiler supporting it and the clang provided by xcode does not support openmp. You can install all the required libraries by running the following command in a terminal:
 
-	brew install llvm libomp
+```
+brew install llvm libomp
+```
 
 On __Windows__, we suggest to build meshlab using QtCreator. Before trying to build, you should:
 
  * install VisualStudio >= 2017 with the C++ development package;
- * install Qt >= 5.12 and QtCreator.
+ * install Qt 5.15 and QtCreator.
 
-then, open the CMakeLists.txt file and try to build MeshLab.
+then, open the CMakeLists.txt file and build MeshLab.
