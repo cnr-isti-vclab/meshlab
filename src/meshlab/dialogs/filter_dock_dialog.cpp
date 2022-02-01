@@ -95,6 +95,18 @@ FilterDockDialog::FilterDockDialog(
 	resize(
 		width(),
 		height() + ui->parameterFrame->height() - 60);
+
+	// set the position of the dock widget starting from the position of the parent.
+	if (parent) {
+		auto parentCenter = parent->geometry().center();
+		auto sizes = geometry().size();
+
+		setGeometry(
+			parentCenter.x() - sizes.width() / 2,
+			parentCenter.y() - sizes.height() / 2,
+			sizes.width(),
+			sizes.height());
+	}
 }
 
 FilterDockDialog::~FilterDockDialog()
