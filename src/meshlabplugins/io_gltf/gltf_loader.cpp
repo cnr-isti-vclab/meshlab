@@ -300,7 +300,8 @@ void loadMeshPrimitive(
 	progress.setStep(oldStep/GLTF_ATTR_STR.size()+1);
 
 	int textureImg = -1; //id of the texture associated to the material
-	bool vCol = false; //used if a material has a base color for all the primitive
+	bool vCol = false; // used if a material has a base color for all the primitive
+	bool vTex = false; // used if a material has a texture
 	vcg::Color4b col; //the base color, to be set to all the vertices
 
 	if (p.material >= 0) { //if the primitive has a material
@@ -321,17 +322,34 @@ void loadMeshPrimitive(
 		}
 	}
 	if (textureImg != -1) { //if we found a texture
+		vTex = true;
 		const tinygltf::Image& img = model.images[model.textures[textureImg].source];
 		//add the path of the texture to the mesh
 		std::string uri = img.uri;
 		uri = std::regex_replace(uri, std::regex("\\%20"), " ");
 
+		bool textureAlreadyExists = false;
 		if (img.image.size() > 0) {
 			if (img.bits == 8 || img.component == 4) {
 				QImage qimg(img.image.data(), img.width, img.height, QImage::Format_RGBA8888);
 				if (!qimg.isNull()){
 					QImage copy = qimg.copy();
-					m.addTexture(uri, copy);
+					if (uri.empty()) {
+						uri = "texture_" + std::to_string(textureImg);
+					}
+
+					QImage existingTexture = m.getTexture(uri);
+					if (existingTexture.isNull()) {
+						m.addTexture(uri, copy);
+					}
+					else {
+						//use the existing texture index
+						auto it = std::find(m.cm.textures.begin(), m.cm.textures.end(), uri);
+						textureAlreadyExists = it != m.cm.textures.end();
+						if (textureAlreadyExists) {
+							textureImg = it - m.cm.textures.begin();
+						}
+					}
 				}
 				else {
 					m.cm.textures.push_back(uri);
@@ -345,8 +363,12 @@ void loadMeshPrimitive(
 			//set to load later (could be format non-supported by tinygltf)
 			m.cm.textures.push_back(uri);
 		}
-		//set the id of the texture: we need it when set uv coords
-		textureImg = m.cm.textures.size()-1;
+
+		if (!textureAlreadyExists)
+		{
+			//set the id of the texture: we need it when set uv coords
+			textureImg = m.cm.textures.size() - 1;
+		}
 	}
 	//vector of vertex pointers added to the mesh
 	//this vector is modified only when adding vertex position attributes
@@ -369,9 +391,15 @@ void loadMeshPrimitive(
 	//if the mesh has a base color, set it to vertex colors
 	if (vCol) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		m.enable(vcg::tri::io::Mask::IOM_VERTCOLOR);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 		for (auto v : ivp)
 			v->C() = col;
+	}
+
+	// if the mesh has a texture, enable texcoords to the mesh
+	if (vTex) {
+		m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
+		m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	}
 
 	if (cb)
@@ -394,14 +422,16 @@ void loadMeshPrimitive(
 	if (cb)
 		cb(progress.progress(), "Loading vertex colors");
 	res = loadAttribute(m, ivp, model, p, COLOR_0);
-	if (res)
+	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+	}
 	progress.increment();
 	if (cb)
 		cb(progress.progress(), "Loading vertex texcoords");
 	res = loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
-	if (res)
-		mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+	if (res) {
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+	}
 	progress.increment();
 
 
@@ -410,6 +440,15 @@ void loadMeshPrimitive(
 		cb(progress.progress(), "Loading triangle indices");
 	loadAttribute(m, ivp, model, p, INDICES);
 	progress.increment();
+
+	// if vTex was true, it means that we loaded texcoords, that have been transfered from vertex to
+	// wedges when loading triangle indices. Therefore, we can remove vertex texcoords and leave
+	// only wedges, which are the only that can be rendered with multiple textures in meshlab
+	// TODO: remove this mechanism whenever vertex texcoords allow to render multiple textures in
+	// vcg.
+	if (vTex) {
+		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+	}
 
 	if (cb)
 		cb(progress.progress(), "Loaded all attributes of current mesh");
@@ -562,11 +601,8 @@ void populateAttr(
 		populateVNormals(ivp, array, number); break;
 	case COLOR_0:
 		populateVColors(ivp, array, number, textID); break;
-		break;
 	case TEXCOORD_0:
-		m.enable(vcg::tri::io::Mask::IOM_VERTTEXCOORD);
 		populateVTextCoords(ivp, array, number, textID); break;
-		break;
 	case INDICES:
 		populateTriangles(m, ivp, array, number/3); break;
 	}
@@ -643,18 +679,26 @@ void populateTriangles(
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, triNumber);
 		for (unsigned int i = 0; i < triNumber*3; i+=3, ++fi) {
-			fi->V(0) = ivp[triArray[i]];
-			fi->V(1) = ivp[triArray[i+1]];
-			fi->V(2) = ivp[triArray[i+2]];
+			for (int j = 0; j < 3; ++j) {
+				fi->V(j) = ivp[triArray[i+j]];
+
+				fi->WT(j).u() = fi->V(j)->T().u();
+				fi->WT(j).v() = fi->V(j)->T().v();
+				fi->WT(j).n() = fi->V(j)->T().N();
+			}
 		}
 	}
 	else {
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, ivp.size()/3);
 		for (unsigned int i = 0; i < ivp.size(); i+=3, ++fi) {
-			fi->V(0) = ivp[i];
-			fi->V(1) = ivp[i+1];
-			fi->V(2) = ivp[i+2];
+			for (int j = 0; j < 3; ++j) {
+				fi->V(j) = ivp[i+j];
+
+				fi->WT(j).u() = fi->V(j)->T().u();
+				fi->WT(j).v() = fi->V(j)->T().v();
+				fi->WT(j).n() = fi->V(j)->T().N();
+			}
 		}
 	}
 }
