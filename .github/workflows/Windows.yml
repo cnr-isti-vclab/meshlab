@@ -28,11 +28,12 @@ jobs:
           echo  ::set-output name=artifact_suffix::""
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC" >> $GITHUB_ENV
-    - name: Expand PATH for wget
+    - name: Install wget
       run: |
-        echo "C:\msys64\usr\bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        $env:PATH = "C:\msys64\mingw64\bin;C:\msys64\usr\bin"
+        pacman.exe -S --noconfirm --noprogressbar wget
     - name: Download external libraries
-      shell: bash
+      shell: C:\shells\msys2bash.cmd {0}
       run: |
         bash scripts/${{ runner.os }}/0_download_ext.sh
     - name: Configure and Build
