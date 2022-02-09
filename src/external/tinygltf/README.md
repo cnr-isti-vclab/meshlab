@@ -7,6 +7,8 @@ If you are looking for old, C++03 version, please use `devel-picojson` branch(bu
 
 ## Status
 
+Currently TinyGLTF is stable and maintainance mode. No drastic changes and feature addition planned.
+
  - v2.4.0 Experimental RapidJSON support. Experimental C++14 support(C++14 may give better performance)
  - v2.3.0 Modified Material representation according to glTF 2.0 schema(and introduced TextureInfo class)
  - v2.2.0 release(Support loading 16bit PNG. Sparse accessor support)
@@ -173,8 +175,22 @@ if (!ret) {
 * `TINYGLTF_NO_INCLUDE_RAPIDJSON `: Disable including RapidJson's header files from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
 * `TINYGLTF_NO_INCLUDE_STB_IMAGE `: Disable including `stb_image.h` from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
 * `TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE `: Disable including `stb_image_write.h` from within `tiny_gltf.h` because it has been already included before or you want to include it using custom path before including `tiny_gltf.h`.
-* `TINYGLTF_USE_RAPIDJSON` : Use RapidJSON as a JSON parser/serializer. RapidJSON files are not included in TinyGLTF repo. Please set an include path to RapidJSON if you enable this featrure.
+* `TINYGLTF_USE_RAPIDJSON` : Use RapidJSON as a JSON parser/serializer. RapidJSON files are not included in TinyGLTF repo. Please set an include path to RapidJSON if you enable this feature.
 * `TINYGLTF_USE_CPP14` : Use C++14 feature(requires C++14 compiler). This may give better performance than C++11.
+
+## CMake options
+
+You can add tinygltf using `add_subdirectory` feature.
+If you add tinygltf to your project using `add_subdirectory`, it would be better to set `TINYGLTF_HEADER_ONLY` on(just add an include path to tinygltf) and `TINYGLTF_INSTALL` off(Which does not install tinygltf files).
+
+```
+// Your project's CMakeLists.txt
+...
+
+set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE)
+add_subdirectory(/path/to/tinygltf)
+```
 
 
 ### Saving gltTF 2.0 model
