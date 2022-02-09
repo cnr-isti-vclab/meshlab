@@ -276,7 +276,7 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		// check if normal of the interpolated plane is coherent with average normal of the used points, otherwise, flip
 		// i do this because plane fitter does not take in account source noramls, and a fliped fit is terrible to see
 		// (Note: valid only when normals are meaningful)
-		Naccum.normalize();
+		Naccum.Normalize();
 		if ((plane.Direction() * Naccum) < 0.0)
 			plane.Set(-plane.Direction(), -plane.Offset());
 
