@@ -44,6 +44,7 @@ namespace meshlab {
 CMeshO meshFromMatrices(
 	const EigenMatrixX3m&   vertices,
 	const Eigen::MatrixX3i& faces         = Eigen::MatrixX3i(),
+	const Eigen::MatrixX2i& edges         = Eigen::MatrixX2i(),
 	const EigenMatrixX3m&   vertexNormals = EigenMatrixX3m(),
 	const EigenMatrixX3m&   faceNormals   = EigenMatrixX3m(),
 	const EigenVectorXm&    vertexQuality = EigenVectorXm(),

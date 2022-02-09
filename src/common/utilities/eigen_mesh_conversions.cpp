@@ -91,6 +91,7 @@ class PolyMesh :
 CMeshO meshlab::meshFromMatrices(
 	const EigenMatrixX3m&   vertices,
 	const Eigen::MatrixX3i& faces,
+	const Eigen::MatrixX2i& edges,
 	const EigenMatrixX3m&   vertexNormals,
 	const EigenMatrixX3m&   faceNormals,
 	const EigenVectorXm&    vertexQuality,
@@ -196,6 +197,23 @@ CMeshO meshlab::meshFromMatrices(
 					faceColor(i, 3) * 255);
 			}
 		}
+
+		// add edges
+
+		CMeshO::EdgeIterator ei = vcg::tri::Allocator<CMeshO>::AddEdges(m, edges.rows());
+		for (unsigned int i = 0; i < edges.rows(); ++i, ++ei) {
+			for (unsigned int j = 0; j < 2; j++) {
+				if ((unsigned int) edges(i, j) >= ivp.size()) {
+					throw MLException(
+						"Error while creating mesh: bad vertex index " +
+						QString::number(edges(i, j)) + " in edge " + QString::number(i) +
+						"; vertex " + QString::number(j) + ".");
+				}
+			}
+			ei->V(0) = ivp[edges(i, 0)];
+			ei->V(1) = ivp[edges(i, 1)];
+		}
+
 		if (!hasFNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerFace(m);
 		}
