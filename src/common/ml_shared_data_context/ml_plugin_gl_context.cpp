@@ -25,9 +25,22 @@
 
 #include <QThread>
 
-MLPluginGLContext::MLPluginGLContext(const QGLFormat& frmt,QPaintDevice* dvc,MLSceneGLSharedDataContext& cont )
-	:QGLContext(frmt,dvc),_shared(cont)
+//MLPluginGLContext::MLPluginGLContext(const QGLFormat& frmt,QPaintDevice* dvc,MLSceneGLSharedDataContext& cont )
+MLPluginGLContext::MLPluginGLContext(MLSceneGLSharedDataContext& shared)
+    : QOpenGLContext(nullptr)
+    , _shared(shared)
 {
+	this->setShareContext(&_shared);
+	this->setFormat(_shared.format());
+	const bool ok = this->create();
+	assert(ok);
+	(void)ok;
+
+	// initialize dummy surface
+//	_surface.setFormat(this->format());
+//	_surface.create();
+
+//	this->makeCurrent(&_surface);
 }
 
 MLPluginGLContext::~MLPluginGLContext()

@@ -26,13 +26,10 @@
 
 #include "ml_scene_gl_shared_data_context.h"
 
-class MLPluginGLContext : public QGLContext
+class MLPluginGLContext : public QOpenGLContext
 {
 public:
-	MLPluginGLContext(
-			const QGLFormat& frmt,
-			QPaintDevice* dvc,
-			MLSceneGLSharedDataContext& shared);
+	MLPluginGLContext(MLSceneGLSharedDataContext& shared);
 	~MLPluginGLContext();
 
 	void initPerViewRenderingData(int meshid, MLRenderingData& dt);

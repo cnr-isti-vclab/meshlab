@@ -781,10 +781,12 @@ void MainWindow::runFilterScript()
 			{
 				shar = currentViewContainer()->sharedDataContext();
 				//GLA() is only the parent
-				QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
-				QGLFormat defForm = QGLFormat::defaultFormat();
-				iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-				created = iFilter->glContext->create(filterWidget->context());
+//				QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+//				QGLFormat defForm = QGLFormat::defaultFormat();
+//				iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+				iFilter->glContext = new MLPluginGLContext(*shar);
+				// FIXME GL!!! Is this supposed to make it current? for now creation is embedded inside the constructor
+//				created = iFilter->glContext->create(filterWidget->context());
 				shar->addView(iFilter->glContext);
 				MLRenderingData dt;
 				MLRenderingData::RendAtts atts;
@@ -1140,15 +1142,17 @@ void MainWindow::executeFilter(
 	mergedenvironment.join(currentGlobalParams);
 	
 	MLSceneGLSharedDataContext* shar = NULL;
-	QGLWidget* filterWidget = NULL;
+//	QGLWidget* filterWidget = NULL;
 	if (currentViewContainer() != NULL)
 	{
 		shar = currentViewContainer()->sharedDataContext();
 		//GLA() is only the parent
-		filterWidget = new QGLWidget(NULL,shar);
-		QGLFormat defForm = QGLFormat::defaultFormat();
-		iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-		iFilter->glContext->create(filterWidget->context());
+//		filterWidget = new QGLWidget(NULL,shar);
+//		QGLFormat defForm = QGLFormat::defaultFormat();
+//		iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+		iFilter->glContext = new MLPluginGLContext(*shar);
+		// FIXME GL!!! Is this supposed to make it current? for now creation is embedded inside the constructor
+//		iFilter->glContext->create(filterWidget->context());
 		
 		MLRenderingData dt;
 		MLRenderingData::RendAtts atts;
@@ -1185,7 +1189,10 @@ void MainWindow::executeFilter(
 		
 		if (shar != NULL) {
 			shar->removeView(iFilter->glContext);
-			delete filterWidget;
+			// FIXME GL clean commented code
+//			delete filterWidget;
+			delete iFilter->glContext;
+			iFilter->glContext = nullptr;
 		}
 		
 		meshDoc()->setBusy(false);

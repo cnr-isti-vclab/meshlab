@@ -168,7 +168,7 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
 	{
-		makeCurrent();
+		makeCurrent(&_surface);
 		std::vector<GLuint> texids;
 		for(size_t ii = 0;ii < man->textureIDContainer().size();++ii)
 		{
@@ -215,7 +215,7 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
 		QImage imgscaled;
 		QImage imggl;
 
-		makeCurrent();
+		makeCurrent(&_surface);
 		GLint maxtexturesize;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxtexturesize);
 
@@ -270,7 +270,7 @@ void MLSceneGLSharedDataContext::meshRemoved(int mmid)
 	PerMeshMultiViewManager* man = it->second;
 	if (man != NULL)
 	{
-		makeCurrent();
+		makeCurrent(&_surface);
 		man->removeAllViewsAndDeallocateBO();
 		doneCurrent();
 		delete man;
@@ -313,7 +313,7 @@ void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QOpenGL
 
 void MLSceneGLSharedDataContext::removeView(QOpenGLContext * viewerid )
 {
-	makeCurrent();
+	makeCurrent(&_surface);
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
@@ -356,7 +356,7 @@ void MLSceneGLSharedDataContext::addView(QOpenGLContext * viewerid)
 
 void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
 {
-	makeCurrent();
+	makeCurrent(&_surface);
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
@@ -414,7 +414,7 @@ bool MLSceneGLSharedDataContext::manageBuffers( int mmid )
 
 	if (man != NULL)
 	{
-		makeCurrent();
+		makeCurrent(&_surface);
 		man->manageBuffers();
 		doneCurrent();
 	}
@@ -464,9 +464,10 @@ bool MLSceneGLSharedDataContext::isBORenderingAvailable( int mmid )
 
 void MLSceneGLSharedDataContext::updateGPUMemInfo()
 {
+	// FIXME GL: another call to initializeGL?!?!??
 	initializeGL();
 
-	makeCurrent();
+	makeCurrent(&_surface);
 	GLint allmem = 0;
 	glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
 	GLint currentallocated = 0;
