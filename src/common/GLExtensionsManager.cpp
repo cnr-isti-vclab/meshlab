@@ -23,6 +23,8 @@
 
 #include "GLExtensionsManager.h"
 
+#include <GL/glew.h>
+
 bool GLExtensionsManager::glewInitialized;
 
 void GLExtensionsManager::init()

@@ -23,8 +23,6 @@
 
 #include "mlexception.h"
 
-#include <GL/glew.h>
-
 class GLExtensionsManager {
 public:
 

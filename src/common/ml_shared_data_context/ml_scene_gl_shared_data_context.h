@@ -28,7 +28,9 @@
 
 #include <QGLWidget>
 
+//
 // This is supposed to be the shared GL context used everywhere
+//
 class MLSceneGLSharedDataContext : public QGLWidget
 {
 	Q_OBJECT
