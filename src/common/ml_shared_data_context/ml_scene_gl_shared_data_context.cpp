@@ -32,7 +32,8 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 	//if (md.size() != 0)
 	//    throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
 
-	connect(&_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
+	// FIXME GL: restore gpu memory info
+//	connect(&_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
 
 	/*connection intended for the plugins living in another thread*/
 	connect(this,SIGNAL(initPerMeshViewRequestMT(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
@@ -48,7 +49,9 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 	///****************************************************************/
 
 	_timer.start(1000);
-	updateGPUMemInfo();
+
+	// FIXME GL: restore gpu memory info
+//	updateGPUMemInfo();
 
 	// Print OpenGL version
 	const auto format = this->format();
