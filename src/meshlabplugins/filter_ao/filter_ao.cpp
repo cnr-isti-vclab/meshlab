@@ -30,8 +30,8 @@
 
 #include <wrap/qt/checkGLError.h>
 
-
 #include <iostream>
+#include <random>
 
 #define AMBOCC_MAX_TEXTURE_SIZE 2048
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 512
@@ -185,8 +185,11 @@ std::map<std::string, QVariant> AmbientOcclusionPlugin::applyFilter(const QActio
 			std::vector<Point3m> coneDirVec;
 			GenNormal<Scalarm>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
 
-			std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
-			std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
+			{
+				std::random_device rd;
+				std::shuffle(unifDirVec.begin(),unifDirVec.end(),std::mt19937(rd()));
+				std::shuffle(coneDirVec.begin(),coneDirVec.end(), std::mt19937(rd()));
+			}
 
 			int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
 			int coneNum = floor(coneDirVec.size() * (dirBias ));
