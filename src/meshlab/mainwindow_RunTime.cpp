@@ -2809,8 +2809,9 @@ void MainWindow::meshAdded(int mid)
 		if (shared != NULL)
 		{
 			shared->meshInserted(mid);
-			QList<QGLContext*> contlist;
-			for(int glarid = 0;glarid < mvc->viewerCounter();++glarid)
+			// FIXME GL: what's the point of this cont list??? REMOVE?
+			QList<QOpenGLContext*> contlist;
+			for(int glarid = 0; glarid < mvc->viewerCounter(); ++glarid)
 			{
 				GLArea* ar = mvc->getViewer(glarid);
 				if (ar != NULL)

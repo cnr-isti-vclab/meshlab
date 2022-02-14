@@ -27,6 +27,7 @@
 #include "ml_shared_data_context.h"
 
 #include <QOpenGLContext>
+#include <QOffscreenSurface>
 
 //
 // This is supposed to be the shared GL context used everywhere
@@ -63,6 +64,7 @@ public:
 
 	MeshDocument& meshDoc() { return _md; }
 
+	// FIXME GL: this function is called just once after the contructor to initialize the GLEW
 	void initializeGL();
 	void deAllocateGPUSharedData();
 
@@ -126,6 +128,8 @@ private:
 	size_t _minfacessmoothrendering;
 	bool _highprecision;
 	QTimer _timer;
+
+	QOffscreenSurface _surface; // dummy offscreen surface to use makeCurrent() for this context
 
 signals:
 
