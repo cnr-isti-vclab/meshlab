@@ -190,25 +190,25 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_voronoi
 
 		# Rendering and Decoration Plugins
-		meshlabplugins/render_gdp
-		meshlabplugins/render_radiance_scaling
-		meshlabplugins/decorate_base
-		meshlabplugins/decorate_background
-		meshlabplugins/decorate_raster_proj
-		meshlabplugins/decorate_shadow
+#		meshlabplugins/render_gdp
+#		meshlabplugins/render_radiance_scaling
+#		meshlabplugins/decorate_base
+#		meshlabplugins/decorate_background
+#		meshlabplugins/decorate_raster_proj
+#		meshlabplugins/decorate_shadow
 
 		# Edit Plugins
-		meshlabplugins/edit_sample
-		meshlabplugins/edit_align
-		meshlabplugins/edit_manipulators
-		meshlabplugins/edit_measure
-		meshlabplugins/edit_mutualcorrs
-		meshlabplugins/edit_paint
-		meshlabplugins/edit_pickpoints
-		meshlabplugins/edit_point
-		meshlabplugins/edit_referencing
-		meshlabplugins/edit_quality
-		meshlabplugins/edit_select
+#		meshlabplugins/edit_sample
+#		meshlabplugins/edit_align
+#		meshlabplugins/edit_manipulators
+#		meshlabplugins/edit_measure
+#		meshlabplugins/edit_mutualcorrs
+#		meshlabplugins/edit_paint
+#		meshlabplugins/edit_pickpoints
+#		meshlabplugins/edit_point
+#		meshlabplugins/edit_referencing
+#		meshlabplugins/edit_quality
+#		meshlabplugins/edit_select
 	)
 endif()
 
