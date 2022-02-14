@@ -26,17 +26,21 @@
 
 #include "ml_shared_data_context.h"
 
-#include <QGLWidget>
+#include <QOpenGLContext>
 
 //
 // This is supposed to be the shared GL context used everywhere
 //
-class MLSceneGLSharedDataContext : public QGLWidget
+// QOpenGLContext* is currently used as view id (it's the context of each GL view)
+//
+class MLSceneGLSharedDataContext : public QOpenGLContext
 {
 	Q_OBJECT
 public:
+	// FIXME GL: the following must be checked
 	//parent is set to NULL in order to avoid QT bug on MAC (business as usual...).
 	//The QGLWidget are destroyed by hand in the MainWindow destructor...
+
 	MLSceneGLSharedDataContext(MeshDocument& md, vcg::QtThreadSafeMemoryInfo& gpumeminfo, bool highprecision, size_t perbatchtriangles, size_t minfacespersmoothrendering = 0);
 
 	~MLSceneGLSharedDataContext();
@@ -53,7 +57,7 @@ public:
 		return _highprecision;
 	}
 
-	//Given a QGLContext the PerMeshRenderingDataMap contains the rendering data per each mesh contained in the MeshDocument (eg. flat/smooth shading? pervertex/perface/permesh color?)
+	//Given a view id (QOpenGlContext*) the PerMeshRenderingDataMap contains the rendering data per each mesh contained in the MeshDocument (eg. flat/smooth shading? pervertex/perface/permesh color?)
 	//and the 'meaningful' gl parameters used by the rendering system
 	typedef QMap<int, MLRenderingData> PerMeshRenderingDataMap;
 
@@ -62,8 +66,8 @@ public:
 	void initializeGL();
 	void deAllocateGPUSharedData();
 
-	void draw(int mmid, QGLContext* viewid) const;
-	void drawAllocatedAttributesSubset(int mmid, QGLContext* viewid, const MLRenderingData& dt);
+	void draw(int mmid, QOpenGLContext* viewid) const;
+	void drawAllocatedAttributesSubset(int mmid, QOpenGLContext* viewid, const MLRenderingData& dt);
 	void setSceneTransformationMatrix(const Matrix44m& m);
 	void setMeshTransformationMatrix(int mmid, const Matrix44m& m);
 
@@ -72,8 +76,8 @@ public:
 	GLuint getTextureId(int meshid, size_t position) const;
 
 
-	void getRenderInfoPerMeshView(QGLContext* ctx, PerMeshRenderingDataMap& map);
-	void getRenderInfoPerMeshView(int mmid, QGLContext* ctx, MLRenderingData& dt);
+	void getRenderInfoPerMeshView(QOpenGLContext* ctx, PerMeshRenderingDataMap& map);
+	void getRenderInfoPerMeshView(int mmid, QOpenGLContext* ctx, MLRenderingData& dt);
 	void meshInserted(int mmid);
 	void meshRemoved(int mmid);
 	bool manageBuffers(int mmid);
@@ -83,35 +87,35 @@ public:
 
 
 	/*functions intended for the plugins (they emit different signals according if the calling thread is different from the one where the MLSceneGLSharedDataContext object lives)*/
-	void requestInitPerMeshView(QThread* callingthread, int meshid, QGLContext* cont, const MLRenderingData& dt);
-	void requestRemovePerMeshView(QThread* callingthread, QGLContext* cont);
-	void requestSetPerMeshViewRenderingData(QThread* callingthread, int meshid, QGLContext* cont, const MLRenderingData& dt);
+	void requestInitPerMeshView(QThread* callingthread, int meshid, QOpenGLContext* cont, const MLRenderingData& dt);
+	void requestRemovePerMeshView(QThread* callingthread, QOpenGLContext* cont);
+	void requestSetPerMeshViewRenderingData(QThread* callingthread, int meshid, QOpenGLContext* cont, const MLRenderingData& dt);
 	void requestMeshAttributesUpdated(QThread* callingthread, int meshid, bool connectivitychanged, const MLRenderingData::RendAtts& dt);
 	/***************************************/
 	public slots:
 	void meshDeallocated(int mmid);
-	void setRenderingDataPerMeshView(int mmid, QGLContext* viewerid, const MLRenderingData& perviewdata);
+	void setRenderingDataPerMeshView(int mmid, QOpenGLContext* viewerid, const MLRenderingData& perviewdata);
 	void setRenderingDataPerAllMeshViews(int mmid, const MLRenderingData& perviewdata);
-	void setGLOptions(int mmid, QGLContext* viewid, const MLPerViewGLOptions& opts);
+	void setGLOptions(int mmid, QOpenGLContext* viewid, const MLPerViewGLOptions& opts);
 
-	void addView(QGLContext* viewerid);
-	void addView(QGLContext* viewerid, MLRenderingData& dt);
+	void addView(QOpenGLContext* viewerid);
+	void addView(QOpenGLContext* viewerid, MLRenderingData& dt);
 
 
-	void removeView(QGLContext* viewerid);
+	void removeView(QOpenGLContext* viewerid);
 	void meshAttributesUpdated(int mmid, bool conntectivitychanged, const MLRenderingData::RendAtts& dt);
 	void updateGPUMemInfo();
 	//void updateRequested(int meshid,MLRenderingData::ATT_NAMES name);
 
 	private slots:
 	/*slots intended for the plugins living in another thread*/
-	void initPerMeshViewRequested(int meshid, QGLContext* cont, const MLRenderingData& dt);
-	void removePerMeshViewRequested(QGLContext* cont);
-	void setPerMeshViewRenderingDataRequested(int meshid, QGLContext* cont, const MLRenderingData& dt);
+	void initPerMeshViewRequested(int meshid, QOpenGLContext* cont, const MLRenderingData& dt);
+	void removePerMeshViewRequested(QOpenGLContext* cont);
+	void setPerMeshViewRenderingDataRequested(int meshid, QOpenGLContext* cont, const MLRenderingData& dt);
 	void meshAttributesUpdatedRequested(int meshid, bool connectivitychanged, const MLRenderingData::RendAtts& dt);
 	/***************************************/
 private:
-	typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO, QGLContext*, MLPerViewGLOptions> PerMeshMultiViewManager;
+	typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO, QOpenGLContext *, MLPerViewGLOptions> PerMeshMultiViewManager;
 	PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid) const;
 
 	MeshDocument& _md;
@@ -134,9 +138,9 @@ signals:
 	///***************************************/
 
 	/*signals intended for the plugins living in another thread*/
-	void initPerMeshViewRequestMT(int, QGLContext*, const MLRenderingData&);
-	void removePerMeshViewRequestMT(QGLContext*);
-	void setPerMeshViewRenderingDataRequestMT(int, QGLContext*, const MLRenderingData&);
+	void initPerMeshViewRequestMT(int, QOpenGLContext*, const MLRenderingData&);
+	void removePerMeshViewRequestMT(QOpenGLContext*);
+	void setPerMeshViewRenderingDataRequestMT(int, QOpenGLContext*, const MLRenderingData&);
 	void meshAttributesUpdatedRequestMT(int, bool, const MLRenderingData::RendAtts&);
 	/***************************************/
 };

@@ -28,11 +28,33 @@
 #include <GL/glew.h>
 
 
-MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
-	:QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision),_timer(this)
+MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,
+                                                       vcg::QtThreadSafeMemoryInfo& gpumeminfo,
+                                                       bool highprecision,
+                                                       size_t perbatchtriangles,
+                                                       size_t minfacespersmoothrendering)
+    : QOpenGLContext(nullptr)
+    , _md(md)
+    , _gpumeminfo(gpumeminfo)
+    , _perbatchtriangles(perbatchtriangles)
+    , _minfacessmoothrendering(minfacespersmoothrendering)
+    , _highprecision(highprecision),_timer(this)
 {
-	//if (md.size() != 0)
-	//    throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
+
+	// initialize this as shared QOpenGLContext
+	{
+		// FIXME GL: use QSurfaceFormat::setDefaultFormat() globally (elsewhere)
+		QSurfaceFormat format;
+		format.setRenderableType(QSurfaceFormat::OpenGL);
+		format.setProfile(QSurfaceFormat::CompatibilityProfile);
+		format.setMajorVersion(2);
+		format.setMajorVersion(1);
+
+		this->setFormat(format);
+		const bool done = this->create();
+		assert(done);
+		(void)done;
+	}
 
 	// FIXME GL: restore gpu memory info
 //	connect(&_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
@@ -95,7 +117,7 @@ void MLSceneGLSharedDataContext::initializeGL()
 	// FIXME GL --- check if resetting the gl context is harmful
 }
 
-void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata )
+void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid, QOpenGLContext* viewerid,const MLRenderingData& perviewdata )
 {
 	MeshModel* mm = _md.getMesh(mmid);
 	if (mm == NULL)
@@ -249,7 +271,7 @@ void MLSceneGLSharedDataContext::meshRemoved(int mmid)
 	_meshboman.erase(it);
 }
 
-void MLSceneGLSharedDataContext::setMeshTransformationMatrix( int mmid,const Matrix44m& m )
+void MLSceneGLSharedDataContext::setMeshTransformationMatrix(int mmid,const Matrix44m& m )
 {
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
@@ -261,21 +283,21 @@ void MLSceneGLSharedDataContext::setSceneTransformationMatrix( const Matrix44m& 
 
 }
 
-void MLSceneGLSharedDataContext::setGLOptions( int mmid,QGLContext* viewid,const MLPerViewGLOptions& opts )
+void MLSceneGLSharedDataContext::setGLOptions(int mmid, QOpenGLContext* viewid,const MLPerViewGLOptions& opts )
 {
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
 		man->setGLOptions(viewid,opts);
 }
 
-void MLSceneGLSharedDataContext::draw( int mmid,QGLContext* viewid ) const
+void MLSceneGLSharedDataContext::draw(int mmid, QOpenGLContext* viewid ) const
 {
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
 		man->draw(viewid);
 }
 
-void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QGLContext * viewid, const MLRenderingData & dt)
+void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QOpenGLContext * viewid, const MLRenderingData & dt)
 {
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
