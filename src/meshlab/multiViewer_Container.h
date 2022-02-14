@@ -98,9 +98,9 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event);
+	MLSceneGLSharedDataContext* scenecontext;
 public:
     MeshDocument meshDoc;
-    MLSceneGLSharedDataContext* scenecontext;
 
     int currentId;
 

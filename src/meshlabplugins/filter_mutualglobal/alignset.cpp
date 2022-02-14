@@ -291,7 +291,7 @@ void AlignSet::initializeGL() {
 
 bool AlignSet::ProjectedImageChanged(const QImage & img)
 {
-	QImage tmp = QGLWidget::convertToGLFormat(img);
+	QImage tmp = img.convertToFormat(QImage::Format_RGBA8888);
 	tmp=tmp.scaled(wt,ht);
 	//tmp.save("pippo.png");
 
@@ -347,7 +347,7 @@ bool AlignSet::ProjectedMultiImageChanged()
 /////// Image 1
 	//arcImages[0]->save("im0.jpg");
 
-	QImage tmp = QGLWidget::convertToGLFormat(*arcImages[0]);
+	QImage tmp = arcImages[0]->convertToFormat(QImage::Format_RGBA8888);
 	tmp=tmp.scaled(wt,ht);
 
 	//tmp.save("temp.jpg");
@@ -379,7 +379,7 @@ bool AlignSet::ProjectedMultiImageChanged()
 
 /////// Image 2
 
-	tmp = QGLWidget::convertToGLFormat(*arcImages[1]);
+	tmp = arcImages[1]->convertToFormat(QImage::Format_RGBA8888);
 	tmp=tmp.scaled(wt,ht);
 		
 	//tmp.save("temp2.jpg");
@@ -411,7 +411,7 @@ bool AlignSet::ProjectedMultiImageChanged()
 
 /////// Image 3
 
-	tmp = QGLWidget::convertToGLFormat(*arcImages[2]);
+	tmp = arcImages[2]->convertToFormat(QImage::Format_RGBA8888);
 	tmp=tmp.scaled(wt,ht);
 		
 	//tmp.save("temp3.jpg");

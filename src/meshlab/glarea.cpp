@@ -1971,7 +1971,7 @@ void GLArea::setTarget(QImage &image) {
     }
     // create texture
     glGenTextures(1, &targetTex);
-    QImage tximg = QGLWidget::convertToGLFormat(image);
+    QImage tximg = image.convertToFormat(QImage::Format_RGBA8888);
     glBindTexture(GL_TEXTURE_2D, targetTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

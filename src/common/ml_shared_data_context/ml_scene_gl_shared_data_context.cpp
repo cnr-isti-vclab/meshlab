@@ -221,7 +221,7 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
 		while(bestH>maxtexturesize) bestH /=2;
 		//Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
 		imgscaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-		imggl=convertToGLFormat(imgscaled);
+		imggl = imgscaled.convertToFormat(QImage::Format_RGBA8888);
 
 		vcg::QtThreadSafeTextureNamesContainer& txtcont = meshfeed->textureIDContainer();
 
