@@ -66,7 +66,8 @@ MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminf
     : Splitter(parent),meshDoc()
 {
 	setChildrenCollapsible(false);
-    scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives,minfacespersmoothrendering);
+	// Here a shared GL content is initialized for each 'window'
+	scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives,minfacespersmoothrendering);
 	scenecontext->setHidden(true);
 	scenecontext->initializeGL();
 	currentId=-1;

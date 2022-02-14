@@ -23,10 +23,7 @@
 #ifndef __MULTIVIEWER_CONTAINER_H__
 #define __MULTIVIEWER_CONTAINER_H__
 
-#include <GL/glew.h>
-
 #include <QWidget>
-#include <QGLWidget>
 #include <QVector>
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -42,7 +39,7 @@ class MainWindow;
 
 class Splitter : public QSplitter
 {
-	Q_OBJECT	
+	Q_OBJECT
 
 public:
 	Splitter ( QWidget * parent);
