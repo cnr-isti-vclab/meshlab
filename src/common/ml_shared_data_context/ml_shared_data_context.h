@@ -31,9 +31,7 @@
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
 
 
-#include <QGLWidget>
-#include <QOffscreenSurface>
-#include <QMap>
+// THIS FILE AND HIS CLASSES DO NOT REPRESENT ANY CONTEXT!!
 
 class MeshModel;
 class MeshDocument;
