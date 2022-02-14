@@ -27,8 +27,6 @@
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
 
-#include <GL/glew.h>
-
 #include "common/plugins/plugin_manager.h"
 
 #include <wrap/qt/qt_thread_safe_memory_info.h>

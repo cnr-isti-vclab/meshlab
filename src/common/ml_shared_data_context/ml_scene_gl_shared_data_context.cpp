@@ -25,6 +25,8 @@
 #include "../ml_document/mesh_document.h"
 #include "../GLExtensionsManager.h"
 
+#include <GL/glew.h>
+
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
 	:QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision),_timer(this)
@@ -87,9 +89,10 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 
 void MLSceneGLSharedDataContext::initializeGL()
 {
-	QGLContext *ctx = makeCurrentGLContext();
+	makeCurrent(); // FIXME GL --- this should not be necessary if properly used
 	GLExtensionsManager::initializeGLextensions();
-	doneCurrentGLContext(ctx);
+	doneCurrent();
+	// FIXME GL --- check if resetting the gl context is harmful
 }
 
 void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata )
@@ -136,7 +139,7 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
 	{
-		QGLContext* ctx = makeCurrentGLContext();
+		makeCurrent();
 		std::vector<GLuint> texids;
 		for(size_t ii = 0;ii < man->textureIDContainer().size();++ii)
 		{
@@ -147,7 +150,7 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
 			man->textureIDContainer().remove(tex);
 
 		glDeleteTextures(texids.size(), texids.data());
-		doneCurrentGLContext(ctx);
+		doneCurrent();
 	}
 }
 
@@ -183,7 +186,7 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
 		QImage imgscaled;
 		QImage imggl;
 
-		QGLContext* ctx = makeCurrentGLContext();
+		makeCurrent();
 		GLint maxtexturesize;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxtexturesize);
 
@@ -213,7 +216,7 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
 		// ensure mipmaps are computed
 		glFinish();
 
-		doneCurrentGLContext(ctx);
+		doneCurrent();
 	}
 	return res;
 }
@@ -238,9 +241,9 @@ void MLSceneGLSharedDataContext::meshRemoved(int mmid)
 	PerMeshMultiViewManager* man = it->second;
 	if (man != NULL)
 	{
-		QGLContext* ctx = makeCurrentGLContext();
+		makeCurrent();
 		man->removeAllViewsAndDeallocateBO();
-		doneCurrentGLContext(ctx);
+		doneCurrent();
 		delete man;
 	}
 	_meshboman.erase(it);
@@ -281,7 +284,7 @@ void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QGLCont
 
 void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 {
-	QGLContext* ctx = makeCurrentGLContext();
+	makeCurrent();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
@@ -291,7 +294,7 @@ void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 			man->manageBuffers();
 		}
 	}
-	doneCurrentGLContext(ctx);
+	doneCurrent();
 }
 
 void MLSceneGLSharedDataContext::addView( QGLContext* viewerid,MLRenderingData& dt)
@@ -324,14 +327,14 @@ void MLSceneGLSharedDataContext::addView(QGLContext* viewerid)
 
 void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
 {
-	QGLContext* ctx = makeCurrentGLContext();
+	makeCurrent();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
 		deAllocateTexturesPerMesh(it->first);
 		man->removeAllViewsAndDeallocateBO();
 	}
-	doneCurrentGLContext(ctx);
+	doneCurrent();
 }
 
 void MLSceneGLSharedDataContext::meshAttributesUpdated(int mmid,bool conntectivitychanged,const MLRenderingData::RendAtts& atts)
@@ -382,9 +385,9 @@ bool MLSceneGLSharedDataContext::manageBuffers( int mmid )
 
 	if (man != NULL)
 	{
-		QGLContext* ctx = makeCurrentGLContext();
+		makeCurrent();
 		man->manageBuffers();
-		doneCurrentGLContext(ctx);
+		doneCurrent();
 	}
 	return didsomething;
 }
@@ -433,7 +436,8 @@ bool MLSceneGLSharedDataContext::isBORenderingAvailable( int mmid )
 void MLSceneGLSharedDataContext::updateGPUMemInfo()
 {
 	initializeGL();
-	QGLContext* ctx = makeCurrentGLContext();
+
+	makeCurrent();
 	GLint allmem = 0;
 	glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
 	GLint currentallocated = 0;
@@ -446,7 +450,7 @@ void MLSceneGLSharedDataContext::updateGPUMemInfo()
 	glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, ATI_tex);
 	/*GLenum errorATI =*/ glGetError(); // purge errors
 
-	doneCurrentGLContext(ctx);
+	doneCurrent();
 	emit currentAllocatedGPUMem((int)allmem, (int)currentallocated, (int)ATI_tex[0], (int)ATI_vbo[0]);
 }
 
@@ -520,22 +524,5 @@ void MLSceneGLSharedDataContext::requestMeshAttributesUpdated(QThread* callingth
 	else
 		//emit setPerMeshViewRenderingDataRequestST(meshid,cont,dt);
 		meshAttributesUpdated(meshid,connectivitychanged,dt);
-}
-
-
-
-
-QGLContext* MLSceneGLSharedDataContext::makeCurrentGLContext()
-{
-	QGLContext* ctx = const_cast<QGLContext*>(QGLContext::currentContext());
-	makeCurrent();
-	return ctx;
-}
-
-void MLSceneGLSharedDataContext::doneCurrentGLContext( QGLContext* oldone /*= NULL*/ )
-{
-	doneCurrent();
-	if (oldone != NULL)
-		oldone->makeCurrent();
 }
 

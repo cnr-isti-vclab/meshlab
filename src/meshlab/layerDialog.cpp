@@ -27,7 +27,6 @@ $Log: stdpardialog.cpp,v $
 
 ****************************************************************************/
 
-#include <GL/glew.h>
 #include <QToolBar>
 #include <QActionGroup>
 #include <QDebug>

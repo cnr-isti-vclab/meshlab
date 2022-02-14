@@ -29,6 +29,8 @@
 #include <QImageReader>
 #include <QImage>
 
+#include <GL/glew.h>
+
 
 TextureObject::TextureObject()
 {

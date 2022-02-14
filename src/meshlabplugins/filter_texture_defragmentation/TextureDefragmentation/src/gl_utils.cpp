@@ -29,6 +29,8 @@
 #include <QImage>
 #include <QFileInfo>
 
+#include <GL/glew.h>
+
 void CheckGLError()
 {
     GLenum error = glGetError();

@@ -113,8 +113,6 @@ public:
 private:
 	typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO, QGLContext*, MLPerViewGLOptions> PerMeshMultiViewManager;
 	PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid) const;
-	QGLContext* makeCurrentGLContext();
-	void doneCurrentGLContext(QGLContext* oldone = NULL);
 
 	MeshDocument& _md;
 	typedef std::map<int, PerMeshMultiViewManager*> MeshIDManMap;

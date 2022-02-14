@@ -24,10 +24,14 @@
 #ifndef __ML_SHARED_DATA_CONTEXT_H
 #define __ML_SHARED_DATA_CONTEXT_H
 
-#include <GL/glew.h>
 #include <QTimer>
 
 #include "../ml_document/cmesh.h"
+
+
+// FIXME GL: this include should not be here
+#include <GL/glew.h>
+
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
 
 

@@ -27,9 +27,6 @@
 #include <cstdint>
 #include <string>
 
-#include <GL/glew.h>
-
-
 /* Prints the last OpenGL error code */
 void CheckGLError();
 

@@ -37,6 +37,7 @@
 
 #include <QImage>
 
+#include <GL/glew.h>
 
 
 static const char *vs_text[] = {
