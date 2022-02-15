@@ -267,7 +267,7 @@ SelectionFilterPlugin::initParameterList(const QAction* action, const MeshModel&
 			"Use ViewPoint from Mesh Camera",
 			"Uses the ViewPoint from the camera associated to the current mesh\n if there is no "
 			"camera, an error occurs"));
-		parlst.addParam(RichDirection(
+		parlst.addParam(RichPosition(
 			"viewpoint",
 			Point3f(0.0f, 0.0f, 0.0f),
 			"ViewPoint",
