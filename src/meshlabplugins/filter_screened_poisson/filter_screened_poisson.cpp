@@ -148,6 +148,7 @@ std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 		pp.ConfidenceFlag = params.getBool("confidence");
 		pp.DensityFlag = true;
 		pp.CleanFlag = params.getBool("preClean");
+		pp.ThreadsVal = params.getInt("threads");
 
 		bool goodNormal=true, goodColor=true;
 		if(params.getBool("visibleLayer") == false) {
@@ -224,6 +225,7 @@ RichParameterList FilterScreenedPoissonPlugin::initParameterList(
 		parlist.addParam(RichInt("iters", 8, "Gauss-Seidel Relaxations", "This integer value specifies the number of Gauss-Seidel relaxations to be performed at each level of the hierarchy. The default value for this parameter is 8.", true));
 		parlist.addParam(RichBool("confidence", false, "Confidence Flag", "Enabling this flag tells the reconstructor to use the quality as confidence information; this is done by scaling the unit normals with the quality values. When the flag is not enabled, all normals are normalized to have unit-length prior to reconstruction."));
 		parlist.addParam(RichBool("preClean", false, "Pre-Clean", "Enabling this flag force a cleaning pre-pass on the data removing all unreferenced vertices or vertices with null normals."));
+		parlist.addParam(RichInt("threads", 8, "Number Threads", "Maximum number of threads that the reconstruction algorithm can use."));
 	}
 	return parlist;
 }
