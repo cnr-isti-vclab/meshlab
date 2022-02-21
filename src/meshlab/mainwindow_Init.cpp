@@ -47,6 +47,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow() :
+		filterDockDialog(nullptr),
 		searcher(meshlab::actionSearcherInstance()),
 		httpReq(this),
 		gpumeminfo(NULL),
@@ -127,7 +128,6 @@ MainWindow::MainWindow() :
 	createToolBars();
 	createMenus();
 	gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
-	filterDockDialog = nullptr;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(MeshLabApplication::shortName());
