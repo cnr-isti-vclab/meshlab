@@ -1150,7 +1150,11 @@ void MainWindow::executeFilter(
 //		filterWidget = new QGLWidget(NULL,shar);
 //		QGLFormat defForm = QGLFormat::defaultFormat();
 //		iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-		iFilter->glContext = new MLPluginGLContext(*shar);
+
+
+//		iFilter->glContext = new MLPluginGLContext(*shar);
+
+
 		// FIXME GL!!! Is this supposed to make it current? for now creation is embedded inside the constructor
 //		iFilter->glContext->create(filterWidget->context());
 		
@@ -1191,8 +1195,8 @@ void MainWindow::executeFilter(
 			shar->removeView(iFilter->glContext);
 			// FIXME GL clean commented code
 //			delete filterWidget;
-			delete iFilter->glContext;
-			iFilter->glContext = nullptr;
+//			delete iFilter->glContext;
+//			iFilter->glContext = nullptr;
 		}
 		
 		meshDoc()->setBusy(false);
