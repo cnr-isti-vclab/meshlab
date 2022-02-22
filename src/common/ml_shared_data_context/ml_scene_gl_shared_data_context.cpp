@@ -33,7 +33,7 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,
                                                        bool highprecision,
                                                        size_t perbatchtriangles,
                                                        size_t minfacespersmoothrendering)
-    : QOpenGLContext(nullptr)
+    : QOpenGLWidget(nullptr)
     , _md(md)
     , _gpumeminfo(gpumeminfo)
     , _perbatchtriangles(perbatchtriangles)
@@ -45,22 +45,23 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,
 	// initialize this as shared QOpenGLContext
 	{
 		// FIXME GL: use QSurfaceFormat::setDefaultFormat() globally (elsewhere)
-		QSurfaceFormat format;
-		format.setRenderableType(QSurfaceFormat::OpenGL);
-		format.setProfile(QSurfaceFormat::CompatibilityProfile);
-		format.setMajorVersion(2);
-		format.setMajorVersion(1);
+//		QSurfaceFormat format;
+//		format.setRenderableType(QSurfaceFormat::OpenGL);
+//		format.setProfile(QSurfaceFormat::CompatibilityProfile);
+//		format.setMajorVersion(2);
+//		format.setMajorVersion(1);
 
-		this->setFormat(format);
-		const bool done = this->create();
-		assert(done);
-		(void)done;
+//		this->setFormat(format);
+//		const bool done = this->create();
+//		assert(done);
+//		(void)done;
 
 		// initialize dummy surface
-		_surface.setFormat(this->format());
-		_surface.create();
+//		_surface.setFormat(this->format());
+//		_surface.create();
 
-		this->makeCurrent(&_surface);
+		//this->makeCurrent(&_surface);
+		this->makeCurrent();
 	}
 
 	// FIXME GL: restore gpu memory info
@@ -118,7 +119,8 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 
 void MLSceneGLSharedDataContext::initializeGL()
 {
-	makeCurrent(&_surface); // FIXME GL --- this should not be necessary if properly used
+	//makeCurrent(&_surface); // FIXME GL --- this should not be necessary if properly used
+	makeCurrent();
 	GLExtensionsManager::initializeGLextensions();
 	doneCurrent();
 	// FIXME GL --- check if resetting the gl context is harmful
@@ -168,7 +170,8 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
 	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 	if (man != NULL)
 	{
-		makeCurrent(&_surface);
+//		makeCurrent(&_surface);
+		makeCurrent();
 		std::vector<GLuint> texids;
 		for(size_t ii = 0;ii < man->textureIDContainer().size();++ii)
 		{
@@ -215,7 +218,8 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
 		QImage imgscaled;
 		QImage imggl;
 
-		makeCurrent(&_surface);
+//		makeCurrent(&_surface);
+		makeCurrent();
 		GLint maxtexturesize;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxtexturesize);
 
@@ -270,7 +274,8 @@ void MLSceneGLSharedDataContext::meshRemoved(int mmid)
 	PerMeshMultiViewManager* man = it->second;
 	if (man != NULL)
 	{
-		makeCurrent(&_surface);
+//		makeCurrent(&_surface);
+		makeCurrent();
 		man->removeAllViewsAndDeallocateBO();
 		doneCurrent();
 		delete man;
@@ -313,7 +318,8 @@ void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QOpenGL
 
 void MLSceneGLSharedDataContext::removeView(QOpenGLContext * viewerid )
 {
-	makeCurrent(&_surface);
+//	makeCurrent(&_surface);
+	makeCurrent();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
@@ -356,7 +362,8 @@ void MLSceneGLSharedDataContext::addView(QOpenGLContext * viewerid)
 
 void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
 {
-	makeCurrent(&_surface);
+//	makeCurrent(&_surface);
+	makeCurrent();
 	for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
 	{
 		PerMeshMultiViewManager* man = it->second;
@@ -414,7 +421,8 @@ bool MLSceneGLSharedDataContext::manageBuffers( int mmid )
 
 	if (man != NULL)
 	{
-		makeCurrent(&_surface);
+//		makeCurrent(&_surface);
+		makeCurrent();
 		man->manageBuffers();
 		doneCurrent();
 	}
@@ -467,7 +475,8 @@ void MLSceneGLSharedDataContext::updateGPUMemInfo()
 	// FIXME GL: another call to initializeGL?!?!??
 	initializeGL();
 
-	makeCurrent(&_surface);
+//	makeCurrent(&_surface);
+	makeCurrent();
 	GLint allmem = 0;
 	glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
 	GLint currentallocated = 0;

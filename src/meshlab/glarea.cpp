@@ -51,7 +51,9 @@ using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList *current)
-    : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
+//    : QOpenGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
+// FIXME GL: This is weird...
+    : QOpenGLWidget(parent),interrbutshow(false)
 {
 	makeCurrent();
     parentmultiview = mvcont;
@@ -184,8 +186,8 @@ void GLArea::pasteTile()
 	QString outfile;
 	makeCurrent();
 	glPushAttrib(GL_ENABLE_BIT);
-	bool   useAlfa    = ss.background == 1;
-	QImage tileBuffer = grabFrameBuffer(useAlfa).mirrored(false, true);
+//	bool   useAlfa    = ss.background == 1;
+	QImage tileBuffer = grabFramebuffer().mirrored(false, true);
 	if (ss.tiledSave) {
 		outfile = QString("%1/%2_%3-%4.png")
 					  .arg(ss.outdir)

@@ -26,15 +26,15 @@
 
 #include "ml_shared_data_context.h"
 
-#include <QOpenGLContext>
-#include <QOffscreenSurface>
+#include <QOpenGLWidget>
+//#include <QOffscreenSurface>
 
 //
 // This is supposed to be the shared GL context used everywhere
 //
 // QOpenGLContext* is currently used as view id (it's the context of each GL view)
 //
-class MLSceneGLSharedDataContext : public QOpenGLContext
+class MLSceneGLSharedDataContext : public QOpenGLWidget
 {
 	Q_OBJECT
 public:
@@ -129,7 +129,7 @@ private:
 	bool _highprecision;
 	QTimer _timer;
 
-	QOffscreenSurface _surface; // dummy offscreen surface to use makeCurrent() for this context
+//	QOffscreenSurface _surface; // dummy offscreen surface to use makeCurrent() for this context
 
 signals:
 

@@ -27,6 +27,8 @@
 #include "mainwindow.h"
 #include <common/mlapplication.h>
 
+#include <QOpenGLWidget>
+
 using namespace vcg;
 
 Splitter::Splitter ( QWidget * parent):QSplitter(parent){}
@@ -69,7 +71,8 @@ MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminf
 	// Here a shared GL content is initialized for each 'window'
 	scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives,minfacespersmoothrendering);
 	scenecontext->setHidden(true);
-	scenecontext->initializeGL();
+	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be ready
+//	scenecontext->initializeGL();
 	currentId=-1;
 	currentgla = NULL;
 }

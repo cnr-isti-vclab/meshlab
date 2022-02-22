@@ -56,6 +56,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// FIXME GL: is this the right place?
+	{
+		QSurfaceFormat format;
+		format.setRenderableType(QSurfaceFormat::OpenGL);
+		format.setProfile(QSurfaceFormat::CompatibilityProfile);
+		format.setMajorVersion(2);
+		format.setMinorVersion(1);
+
+		QSurfaceFormat::setDefaultFormat(format);
+	}
+
 	MeshLabApplication app(argc, argv);
 	std::setlocale(LC_ALL, "C");
 	QLocale::setDefault(QLocale::C);
@@ -68,9 +79,9 @@ int main(int argc, char *argv[])
 	QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
 	QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
 
-	QGLFormat fmt = QGLFormat::defaultFormat();
-	fmt.setAlphaBufferSize(8);
-	QGLFormat::setDefaultFormat(fmt);
+//	QGLFormat fmt = QGLFormat::defaultFormat();
+//	fmt.setAlphaBufferSize(8);
+//	QGLFormat::setDefaultFormat(fmt);
 
 	GLExtensionsManager::init();
 	std::unique_ptr<MainWindow> window;

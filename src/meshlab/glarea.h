@@ -47,6 +47,8 @@
 #include <common/ml_selection_buffers.h>
 #include "ml_default_decorators.h"
 
+#include <QOpenGLWidget>
+
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
@@ -54,7 +56,7 @@ enum LightingModel{LDOUBLE,LFANCY};
 class MeshModel;
 class MainWindow;
 
-class GLArea : public QGLWidget
+class GLArea : public QOpenGLWidget
 {
     Q_OBJECT
 
