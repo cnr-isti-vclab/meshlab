@@ -919,11 +919,7 @@ void MainWindow::startFilter(const QAction* action)
 		}
 
 		//checks if a filterDockDialog is already open and closes it
-		if (filterDockDialog != nullptr) {
-			filterDockDialog->close();
-			delete filterDockDialog;
-			filterDockDialog = nullptr;
-		}
+		closeFilterDockDialog();
 		
 		// (2) Ask for filter parameters and eventually directly invoke the filter
 		// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
@@ -945,7 +941,6 @@ void MainWindow::startFilter(const QAction* action)
 				this,
 				SLOT(executeFilter(const QAction*, RichParameterList, bool, bool)));
 			filterDockDialog->show();
-			filterDockDialog->activateWindow();
 		}
 	}
 }
@@ -3183,7 +3178,6 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 	{
 		updateLayerDialog();
 		updateMenus();
-		closeFilterDockDialog();
 	}
 }
 
