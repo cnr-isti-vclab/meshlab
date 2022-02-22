@@ -26,6 +26,9 @@
 
 #include "ml_scene_gl_shared_data_context.h"
 
+#include <QOpenGLContext>
+#include <QOffscreenSurface>
+
 class MLPluginGLContext : public QOpenGLContext
 {
 public:
@@ -41,10 +44,13 @@ public:
 			bool conntectivitychanged,
 			const MLRenderingData::RendAtts& dt);
 
+	void makeCurrent();
+
 	static void smoothModalitySuggestedRenderingData(MLRenderingData& dt);
 	static void pointModalitySuggestedRenderingData(MLRenderingData& dt);
 private:
 	MLSceneGLSharedDataContext& _shared;
+	QOffscreenSurface _surface;
 };
 
 #endif // ML_PLUGIN_GL_CONTEXT_H

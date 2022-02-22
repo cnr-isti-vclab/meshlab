@@ -30,17 +30,17 @@ MLPluginGLContext::MLPluginGLContext(MLSceneGLSharedDataContext& shared)
     : QOpenGLContext(nullptr)
     , _shared(shared)
 {
-	this->setShareContext(&_shared);
+	this->setShareContext(_shared.context());
 	this->setFormat(_shared.format());
 	const bool ok = this->create();
 	assert(ok);
 	(void)ok;
 
 	// initialize dummy surface
-//	_surface.setFormat(this->format());
-//	_surface.create();
+	_surface.setFormat(this->format());
+	_surface.create();
 
-//	this->makeCurrent(&_surface);
+	QOpenGLContext::makeCurrent(&_surface);
 }
 
 MLPluginGLContext::~MLPluginGLContext()
@@ -51,6 +51,11 @@ void MLPluginGLContext::drawMeshModel( int meshid) const
 {
 	MLPluginGLContext* id = const_cast<MLPluginGLContext*>(this);
 	_shared.draw(meshid,id);
+}
+
+void MLPluginGLContext::makeCurrent()
+{
+	QOpenGLContext::makeCurrent(&_surface);
 }
 
 void MLPluginGLContext::setRenderingData( int meshid,MLRenderingData& dt )
