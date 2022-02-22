@@ -404,8 +404,6 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 				}
 				mw->GLA()->meshSetVisibility(*md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 			}
-			if (mItem != NULL)
-				mw->meshDoc()->setCurrentMesh(clickedId);
 			updatePerMeshItemVisibility();
 		} break;
 		case 1 :
