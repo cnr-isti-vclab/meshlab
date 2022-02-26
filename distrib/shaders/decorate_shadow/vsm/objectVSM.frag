@@ -6,7 +6,7 @@ uniform float shadowIntensity; // 1.0 black, 0, transparent
 
 vec4 shadowCoordPostW;
 float chebyshevUpperBound( float distance) {
-  // We retrive the two moments previously stored (depth and depth*depth) 
+  // We retrieve the two moments previously stored (depth and depth*depth) 
   vec2 moments = texture2D(shadowMap,shadowCoordPostW.xy).rb; 
   // Surface is fully lit. as the current fragment is before the light occluder 
   if (distance <= moments.x) 

@@ -134,7 +134,7 @@ public:
 	/**
 	 * @brief This function should require true if the glContext is used by the
 	 * filter. Without this, the glContext will remain set to nullptr on non-GUI
-	 * softwares that will use the filter (E.G. PyMeshLab).
+	 * software that will use the filter (E.G. PyMeshLab).
 	 * Note: every filter that uses the glContext should first check if
 	 * glContext != nullptr. 
 	 */

@@ -23,7 +23,7 @@ void main(void)
 
     radius_depth_w.x = 0.0;
     
-    // for some reason seting the vector to vec4(0.0) drops
+    // for some reason setting the vector to vec4(0.0) drops
     // the performance significantly, at least on the GeForce8800 -- RM 2007-10-19
     gl_Position = vec4(1.0);
   }

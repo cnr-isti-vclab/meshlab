@@ -47,7 +47,7 @@ private:
 	// map that stores, for each string, all the actions that store that string in their titles
 	std::map<QString, std::vector<QAction*>> titleActionsMap;
 
-	// map that stores, for each stirng, all the actions that store that stirng in their info
+	// map that stores, for each string, all the actions that store that string in their info
 	std::map<QString, std::vector<QAction*>> infoActionsMap;
 
 	struct ActionComparator {

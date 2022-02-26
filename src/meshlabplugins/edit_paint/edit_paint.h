@@ -412,7 +412,7 @@ inline bool isIn(const QPointF &p0, const QPointF &p1, float x, float y, float r
 		}
 	}
 
-	// there could be some problem when point is nearer p0 or p1 and viceversa
+	// there could be some problem when point is nearer p0 or p1 and vice-versa
 	// so i have to check both. is only needed with smooth_borders
 	bool found = false;
 	float dx = (x - p1.x());

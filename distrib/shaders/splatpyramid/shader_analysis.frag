@@ -143,7 +143,7 @@ void main (void) {
     }
 
   // average values if there are any valid ellipses
-  // otherwise the pixel will be writen as unspecified
+  // otherwise the pixel will be written as unspecified
   
   if (valid_pixels > 0.0)
     {

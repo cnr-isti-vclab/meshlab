@@ -428,7 +428,7 @@ public:
 	/**
 	 * @brief The warningMessageString is invoked by the framework after the
 	 * execution of load/save functions. It returns the warning string containing
-	 * all the warinings produced by the function, and it clears the string.
+	 * all the warnings produced by the function, and it clears the string.
 	 */
 	QString warningMessageString() const;
 

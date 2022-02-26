@@ -34,7 +34,7 @@
 namespace meshlab {
 
 /**
- * @brief This function assumes that you already have the followind data:
+ * @brief This function assumes that you already have the following data:
  * - the plugin that is needed to load the mesh
  * - the number of meshes that will be loaded from the file
  * - the list of MeshModel(s) that will contain the loaded mesh(es)

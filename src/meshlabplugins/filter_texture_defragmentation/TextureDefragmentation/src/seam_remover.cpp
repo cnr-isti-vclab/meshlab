@@ -1034,7 +1034,7 @@ static CheckStatus CheckAfterLocalOptimizationInner(SeamData& sd, AlgoStateHandl
     }
 
     // also ensure the optimization border does not intersect the border of the fixed area
-    // note that this check is not suficient, we should make sure that the optimization AREA
+    // note that this check is not sufficient, we should make sure that the optimization AREA
     // does not intersect with the non-optimized area. This check should be done either with
     // rasterization or triangle intersections
     std::vector<HalfEdge> nopVecBorder;

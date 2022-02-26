@@ -220,7 +220,7 @@ void FilterDockDialog::changeCurrentMesh(int meshId)
 
 bool FilterDockDialog::isPreviewable() const
 {
-	// the actual check whether the filter is previewable or not is made in the consturctor, calling
+	// the actual check whether the filter is previewable or not is made in the constructor, calling
 	// the function isFilterPreviewable().
 	// when a filter is previewable, the previewCheckBox is visible.
 	return ui->previewCheckBox->isVisible();

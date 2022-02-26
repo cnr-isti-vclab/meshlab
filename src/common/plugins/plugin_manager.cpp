@@ -61,7 +61,7 @@ PluginManager::~PluginManager()
 
 /**
  * @brief Checks if the given file is a valid MeshLab plugin.
- * It does not add the plugin to the plugin manger.
+ * It does not add the plugin to the plugin manager.
  * 
  * Note: this function is called automatically before loading a plugin.
  * 
