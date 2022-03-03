@@ -256,13 +256,9 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	} break;
 
 	case FP_DELETE_NON_VISIBLE_MESH: {
-		for (auto it = md.meshBegin(); it != md.meshEnd();) {
-			if (!it->isVisible()) {
-				it = md.eraseMesh(it);
-			}
-			else {
-				++it;
-			}
+		for (auto& m : md.meshIterator()){
+			if (!m.isVisible())
+				md.delMesh(m.id());
 		}
 	} break;
 

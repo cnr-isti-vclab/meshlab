@@ -127,8 +127,7 @@ const QString PossibleOperators(
 const QString PerVertexAttributeString(
 	"It's possible to use the following per-vertex variables in the expression:<br>"
 	"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> "
-	"(quality), "
-	"<b>rad</b> (radius), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
+	"(quality), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
 	"index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
 	"and all custom <i>vertex attributes</i> already defined by user.<br>");
 
@@ -1531,11 +1530,6 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator& vi, CMeshO& m)
 
 	vsel = ((*vi).IsS()) ? 1.0 : 0.0; // selection
 
-	if (tri::HasPerVertexRadius(m))
-		rad = (*vi).R();
-	else
-		rad = 0;
-
 	v = vi - m.vert.begin(); // zero based index of current vertex
 
 	if (tri::HasPerVertexTexCoord(m)) {
@@ -1684,7 +1678,6 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser& p, CMeshO& m)
 	p.DefineVar(conversion::fromStringToWString("a"), &a);
 	p.DefineVar(conversion::fromStringToWString("q"), &q);
 	p.DefineVar(conversion::fromStringToWString("vi"), &v);
-	p.DefineVar(conversion::fromStringToWString("rad"), &rad);
 	p.DefineVar(conversion::fromStringToWString("vtu"), &vtu);
 	p.DefineVar(conversion::fromStringToWString("vtv"), &vtv);
 	p.DefineVar(conversion::fromStringToWString("ti"), &ti);

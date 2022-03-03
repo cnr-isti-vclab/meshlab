@@ -375,20 +375,13 @@ MeshDocument::MeshIterator MeshDocument::eraseMesh(MeshIterator it)
 		if (meshList.size() == 1) {
 			setCurrentMesh(-1);
 		}
-		else {
-			// trying to delete che current mesh, need to change current mesh first
-			if(currentMesh == &(*it)) {
-				// we are removing the first mesh, the current mesh becomes the second
-				if (it != meshList.begin()) {
-					auto next = it;
-					next++;
-					setCurrentMesh(next->id());
-				}
-				// we can set as current mesh the first mesh
-				else {
-					setCurrentMesh(this->meshList.front().id());
-				}
-			}
+		else { // other meshes, I need to choose which one will become the current mesh
+			auto next = it;
+			next++;
+			if (next != meshList.end()) // if there is a next, will be the next one
+				setCurrentMesh(next->id());
+			else // no next, I set the first mesh as current
+				setCurrentMesh(this->meshList.front().id());
 		}
 
 		it = meshList.erase(it);

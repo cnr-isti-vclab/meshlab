@@ -350,7 +350,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: Meshlab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
+        tag_name: MeshLab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
         release_name: MeshLab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
         draft: false
         prerelease: ${{ github.event.inputs.release_candidate }}
@@ -466,7 +466,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_windows_installer/MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.exe
         asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.exe
-        asset_content_type: MeshLab Portable for Windows
+        asset_content_type: MeshLab Installer for Windows
     - name: Upload ReleaseWindowsInstaller-d
       id: upload-release-windows-installer-d
       uses: actions/upload-release-asset@v1.0.1
@@ -476,4 +476,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_windows_installer_double/MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.exe
         asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.exe
-        asset_content_type: MeshLab Portable for Windows
+        asset_content_type: MeshLab Installer for Windows
