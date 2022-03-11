@@ -90,13 +90,7 @@ public:
 	MeshDocument *md();
 
 	template <typename... Ts>
-	void Logf(int Level, const char * f, Ts&&... ts)
-	{
-		makeCurrent();
-		if( this->md() != nullptr){
-			this->md()->Log.logf(Level, f, std::forward<Ts>(ts)...);
-		}
-	}
+	void Logf(int Level, const char * f, Ts&&... ts);
 
 	void Log(int Level, const char * f);
 
@@ -152,7 +146,8 @@ public:
 	float lastRenderingTime() { return lastTime;}
 	void drawGradient();
 	void drawLight();
-	float getFov() { return fov; }
+	float& getFov();
+	float  getFov() const;
 	bool showInterruptButton() const;
 	void showInterruptButton(const bool& show);
 
@@ -205,8 +200,6 @@ public:
 
 	// Store for each raster if it is visible for the current viewer.
 	QMap<int, bool> rasterVisibilityMap;
-
-	float           fov;
 public slots:
 	// Edit Mode management
 	// In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state
@@ -383,10 +376,11 @@ private:
 
 	bool _isRaster; // true if the viewer is a RasterViewer, false if is a MeshViewer; default false
 
-	int   zoomx, zoomy;
-	bool  zoom;
-	float opacity;
-	GLuint targetTex; // store the reference image. The raster image is rendered as a texture
+	float   fov;
+	int     zoomx, zoomy;
+	bool    zoom;
+	float   opacity;
+	GLuint  targetTex; // store the reference image. The raster image is rendered as a texture
 	QString lastViewBeforeRasterMode; // keep the view immediately before switching to raster mode
 
 	int lastloadedraster;
@@ -417,118 +411,135 @@ private:
 	inline float fovDefault() const { return 60.f; }
 	void         initializeShot(Shotm& shot);
 
-	/*
-	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
-	to apply "refCamera" o "track" (via GPU).
-	*/
 	template <class T>
-	vcg::Shot<T> track2ShotGPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
-		vcg::Shot<T> view;
+	vcg::Shot<T> track2ShotGPU(vcg::Shot<T> &refCamera, vcg::Trackball *track);
 
-		double _near, _far;
-		_near = 0.1;
-		_far = 100;
-
-		   //get OpenGL modelview matrix after applying the trackball
-		GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far);
-		glPushMatrix();
-		track->GetView();
-		track->Apply();
-		vcg::Matrix44d model;
-		glGetv(GL_MODELVIEW_MATRIX, model);
-		glPopMatrix();
-		GlShot<vcg::Shot<T> >::UnsetView();
-
-		   //get translation out of modelview
-		vcg::Point3d tra;
-		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
-		model[0][3] = model[1][3] = model[2][3] = 0;
-
-		   //get pure rotation out of modelview
-		double det = model.Determinant();
-		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
-		model *= idet;
-		model[3][3] = 1;
-		view.Extrinsics.SetRot(model);
-
-		   //get pure translation out of modelview
-		vcg::Matrix44d imodel = model;
-		vcg::Transpose(imodel);
-		tra = -(imodel*tra);
-		tra *= idet;
-		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
-
-		   //use same current intrinsics
-		view.Intrinsics = refCamera.Intrinsics;
-
-		return view;
-	}
-
-	/*
-	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
-	to apply "refCamera" o "track" (via CPU).
-	*/
 	template <class T>
-	vcg::Shot<T> track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
-		vcg::Shot<T> view;
+	vcg::Shot<T> track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track);
 
-		//double _near, _far;
-		//_near = 0.1;
-		//_far = 100;
-
-		//get shot extrinsics matrix
-		vcg::Matrix44<T> shotExtr;
-		refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
-
-		vcg::Matrix44<T> model2;
-		model2 = (shotExtr)* vcg::Matrix44<T>::Construct(track->Matrix());
-		vcg::Matrix44<T> model;
-		model2.ToMatrix(model);
-
-		//get translation out of modelview
-		vcg::Point3<T> tra;
-		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
-		model[0][3] = model[1][3] = model[2][3] = 0;
-
-		//get pure rotation out of modelview
-		double det = model.Determinant();
-		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
-		model *= idet;
-		model[3][3] = 1;
-		view.Extrinsics.SetRot(model);
-
-		//get pure translation out of modelview
-		vcg::Matrix44<T> imodel = model;
-		vcg::Transpose(imodel);
-		tra = -(imodel*tra);
-		tra *= idet;
-		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
-
-		//use same current intrinsics
-		view.Intrinsics = refCamera.Intrinsics;
-
-		return view;
-	}
-
-	/*
-	Given a shot "from" and a trackball "track", updates "track" with "from" extrinsics.
-	A translation involving cameraDistance is included. This is necessary to compensate
-	a transformation that OpenGL performs at the end of the graphic pipeline.
-	*/
 	template <class T>
-	void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
-
-		vcg::Quaternion<T> qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
-
-		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
-		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
-		tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
-	}
+	void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb);
 
 private slots:
 	void meshAdded(int index);
 	void meshRemoved(int index);
 };
 
+template <typename... Ts>
+void GLArea::Logf(int Level, const char * f, Ts&&... ts)
+{
+	makeCurrent();
+	if( this->md() != nullptr){
+		this->md()->Log.logf(Level, f, std::forward<Ts>(ts)...);
+	}
+}
+
+/*
+Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+to apply "refCamera" o "track" (via GPU).
+*/
+template <class T>
+vcg::Shot<T> GLArea::track2ShotGPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+	vcg::Shot<T> view;
+
+	double _near, _far;
+	_near = 0.1;
+	_far = 100;
+
+	   //get OpenGL modelview matrix after applying the trackball
+	GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far);
+	glPushMatrix();
+	track->GetView();
+	track->Apply();
+	vcg::Matrix44d model;
+	glGetv(GL_MODELVIEW_MATRIX, model);
+	glPopMatrix();
+	GlShot<vcg::Shot<T> >::UnsetView();
+
+	   //get translation out of modelview
+	vcg::Point3d tra;
+	tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+	model[0][3] = model[1][3] = model[2][3] = 0;
+
+	   //get pure rotation out of modelview
+	double det = model.Determinant();
+	double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+	model *= idet;
+	model[3][3] = 1;
+	view.Extrinsics.SetRot(model);
+
+	   //get pure translation out of modelview
+	vcg::Matrix44d imodel = model;
+	vcg::Transpose(imodel);
+	tra = -(imodel*tra);
+	tra *= idet;
+	view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+	   //use same current intrinsics
+	view.Intrinsics = refCamera.Intrinsics;
+
+	return view;
+}
+
+/*
+Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+to apply "refCamera" o "track" (via CPU).
+*/
+template <class T>
+vcg::Shot<T> GLArea::track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+	vcg::Shot<T> view;
+
+	   //double _near, _far;
+	   //_near = 0.1;
+	   //_far = 100;
+
+	   //get shot extrinsics matrix
+	vcg::Matrix44<T> shotExtr;
+	refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
+
+	vcg::Matrix44<T> model2;
+	model2 = (shotExtr)* vcg::Matrix44<T>::Construct(track->Matrix());
+	vcg::Matrix44<T> model;
+	model2.ToMatrix(model);
+
+	   //get translation out of modelview
+	vcg::Point3<T> tra;
+	tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+	model[0][3] = model[1][3] = model[2][3] = 0;
+
+	   //get pure rotation out of modelview
+	double det = model.Determinant();
+	double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+	model *= idet;
+	model[3][3] = 1;
+	view.Extrinsics.SetRot(model);
+
+	   //get pure translation out of modelview
+	vcg::Matrix44<T> imodel = model;
+	vcg::Transpose(imodel);
+	tra = -(imodel*tra);
+	tra *= idet;
+	view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+	   //use same current intrinsics
+	view.Intrinsics = refCamera.Intrinsics;
+
+	return view;
+}
+
+/*
+Given a shot "from" and a trackball "track", updates "track" with "from" extrinsics.
+A translation involving cameraDistance is included. This is necessary to compensate
+a transformation that OpenGL performs at the end of the graphic pipeline.
+*/
+template <class T>
+void GLArea::shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
+
+	vcg::Quaternion<T> qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+
+	tb.track.rot = vcg::Quaternionf::Construct(qfrom);
+	tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
+	tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
+}
 
 #endif

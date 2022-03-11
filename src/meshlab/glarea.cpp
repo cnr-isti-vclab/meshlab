@@ -406,6 +406,17 @@ void GLArea::drawLight()
 	if (!isDefaultTrackBall())
 		trackball_light.DrawPostApply();
 }
+
+float &GLArea::getFov()
+{
+	return fov;
+}
+
+float GLArea::getFov() const
+{
+	return fov;
+}
+
 int GLArea::RenderForSelection(int pickX, int pickY)
 {
 	makeCurrent();

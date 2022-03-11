@@ -1953,7 +1953,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			meshlab::loadRaster(fileName, *rm, &meshDoc()->Log, QCallBack);
 			GLA()->Logf(0, "Opened raster %s in %i msec", qUtf8Printable(fileName), t.elapsed());
 			GLA()->resetTrackBall();
-			GLA()->fov = meshDoc()->rm()->shot.GetFovFromFocal();
+			GLA()->getFov() = meshDoc()->rm()->shot.GetFovFromFocal();
 			meshDoc()->rm()->shot = GLA()->shotFromTrackball().first;
 			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 			if (!layerDialog->isVisible())
