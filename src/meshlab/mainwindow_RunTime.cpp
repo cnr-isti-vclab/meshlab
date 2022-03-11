@@ -366,12 +366,12 @@ void MainWindow::updateMenus()
 				a->setEnabled(GLA()->getCurrentEditAction() == nullptr);
 		}
 		
-		suspendEditModeAct->setChecked(GLA()->suspendedEditor);
+		suspendEditModeAct->setChecked(GLA()->isEditorSuspended());
 		suspendEditModeAct->setDisabled(GLA()->getCurrentEditAction() == NULL);
 		
 		if(GLA()->getCurrentEditAction())
 		{
-			GLA()->getCurrentEditAction()->setChecked(! GLA()->suspendedEditor);
+			GLA()->getCurrentEditAction()->setChecked(! GLA()->isEditorSuspended());
 			GLA()->getCurrentEditAction()->setEnabled(true);
 		}
 		
@@ -1347,12 +1347,9 @@ void MainWindow::applyEditMode()
 	
 	QAction *action = qobject_cast<QAction *>(sender());
 	
-	if(GLA()->getCurrentEditAction()) //prevents multiple buttons pushed
-	{
-		if(action==GLA()->getCurrentEditAction()) // We have double pressed the same action and that means disable that actioon
-		{
-			if(GLA()->suspendedEditor)
-			{
+	if(GLA()->getCurrentEditAction()) { // prevents multiple buttons pushed
+		if(action==GLA()->getCurrentEditAction()) { // We have double pressed the same action and that means disable that actioon
+			if(GLA()->isEditorSuspended()) {
 				suspendEditMode();
 				return;
 			}
@@ -1365,8 +1362,7 @@ void MainWindow::applyEditMode()
 	}
 	
 	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
-	if(!GLA()->editorExistsForAction(action))
-	{
+	if(!GLA()->editorExistsForAction(action)) {
 		EditPlugin *iEditFactory = qobject_cast<EditPlugin *>(action->parent());
 		EditTool *iEdit = iEditFactory->getEditTool(action);
 		GLA()->addMeshEditor(action, iEdit);

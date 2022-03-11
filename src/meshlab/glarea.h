@@ -73,62 +73,21 @@ public:
 	// Layer Management stuff.
 
 	//MultiViewer_Container *mvc()
-	MultiViewer_Container * mvc()
-	{
-		return parentmultiview;
-	}
+	MultiViewer_Container * mvc();
 
-	void updateSelection(int meshid, bool vertsel, bool facesel)
-	{
-		makeCurrent();
-		if (md() != NULL)
-		{
-			MeshModel* mm = md()->getMesh(meshid);
-			if (mm != NULL)
-			{
-				CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(mm->cm, MLDefaultMeshDecorators::selectionAttName());
-				if ((selbufhand() != NULL) && (facesel))
-					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
-
-				if ((selbufhand() != NULL) && (vertsel))
-					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
-			}
-		}
-	}
+	void updateSelection(int meshid, bool vertsel, bool facesel);
 
 	/*WARNING!!!!! HORRIBLE THING!!!!! Added just to avoid to include the multiViewer_container.cpp file in a MeshLab plugins project in case it needs to update all the GLArea and not just the one passed as parameter*/
 
-	void updateAllSiblingsGLAreas()
-	{
-		if (mvc() == NULL)
-			return;
-		foreach(GLArea* viewer, mvc()->viewerList)
-		{
-			if (viewer != NULL)
-				viewer->update();
-		}
-	}
+	void updateAllSiblingsGLAreas();
 
-	void requestForRenderingAttsUpdate( int meshid,MLRenderingData::ATT_NAMES attname )
-	{
-		if (parentmultiview != NULL)
-		{
-			MLSceneGLSharedDataContext* cont = parentmultiview->sharedDataContext();
-			if (cont != NULL)
-			{
-				MLRenderingData::RendAtts atts;
-				atts[attname] = true;
-				cont->meshAttributesUpdated(meshid,false,atts);
-				cont->manageBuffers(meshid);
-			}
-		}
-	}
+	void requestForRenderingAttsUpdate( int meshid,MLRenderingData::ATT_NAMES attname );
 
 
 	MainWindow * mw();
 
-	MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
-	inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
+	MeshModel *mm();
+	MeshDocument *md();
 
 	template <typename... Ts>
 	void Logf(int Level, const char * f, Ts&&... ts)
@@ -139,42 +98,25 @@ public:
 		}
 	}
 
-	void Log(int Level, const char * f)
-	{
-		makeCurrent();
-		if( this->md() != nullptr){
-			this->md()->Log.log(Level, f);
-		}
-	}
+	void Log(int Level, const char * f);
 
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 
-	const QAction *getLastAppliedFilter() {return lastFilterRef;}
-	void setLastAppliedFilter(const QAction *qa) {lastFilterRef = qa;}
-
-	////RenderMode*  getCurrentRenderMode();
-	//RenderMode* getCurrentRenderMode()
-	//{
-	//    if ((md() != NULL) && (md()->mm() != NULL))
-	//    {
-	//        QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-	//        if (it != rendermodemap.end())
-	//            return &it.value();
-	//    }
-	//    return NULL;
-	//}
+	const QAction *getLastAppliedFilter();
+	void setLastAppliedFilter(const QAction *qa);
 
 	void updateFps(float deltaTime);
 
-	bool isCurrent() { if (mvc() == NULL) return false;return mvc()->currentId == this->id;}
+	bool isCurrent();
 
-	void showTrackBall(bool b)		{trackBallVisible = b; update();}
-	bool isHelpVisible()      {return helpVisible;}
-	bool isTrackBallVisible()		{return trackBallVisible;}
-	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
+	void showTrackBall(bool b);
+	bool isHelpVisible();
+	bool isTrackBallVisible();
+	bool isEditorSuspended();
+	bool isDefaultTrackBall();
 	void saveSnapshot();
-	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}
+	void toggleHelpVisible();
 	/*  void setBackFaceCulling(bool enabled);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);*/
@@ -255,7 +197,6 @@ public:
 	// TODO: make private these member attributes
 	QList<QAction *> iPerDocDecoratorlist;
 	bool	infoAreaVisible;		// Draws the lower info area ?
-	bool  suspendedEditor;
 
 	SnapshotSetting ss;
 
@@ -293,63 +234,14 @@ public slots:
 	 void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
 	void updateCustomSettingValues(const RichParameterList& rps);
 
-	void endEdit()
-	{
-		if(iEdit && currentEditor)
-		{
-			if (md() != NULL)
-				iEdit->endEdit(*md(), this, parentmultiview->sharedDataContext());
+	void endEdit();
 
-			if (mm() != NULL)
-				iEdit->endEdit(*mm(), this, parentmultiview->sharedDataContext());
-		}
-
-		//MLSceneGLSharedDataContext* shared;
-		//if ((parentmultiview != NULL) && (parentmultiview->sharedDataContext() != NULL))
-		//	shared = parentmultiview->sharedDataContext();
-
-		//if (shared != NULL)
-		//{
-		//	for (MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = _oldvalues.begin(); it != _oldvalues.end(); ++it)
-		//	{
-		//		shared->setRenderingDataPerMeshView(it.key(), context(), it.value());
-		//		shared->manageBuffers(it.key());
-		//	}
-		//}
-		//_oldvalues.clear();
-
-		iEdit= 0;
-		currentEditor=0;
-		setCursorTrack(0);
-		update();
-		emit updateMainWindowMenus();
-	}
-
-	void suspendEditToggle()
-	{
-		if(currentEditor==0)
-			return;
-		static QCursor qc;
-		if(suspendedEditor) {
-			suspendedEditor=false;
-			setCursor(qc);
-		}	else {
-			suspendedEditor=true;
-			qc=cursor();
-			setCursorTrack(0);
-		}
-	}
+	void suspendEditToggle();
 
 	//// Other slots
 
-	void copyToClip()
-	{
-		viewToClipboard();
-	}
-	void pasteFromClip()
-	{
-		viewFromClipboard();
-	}
+	void copyToClip();
+	void pasteFromClip();
 
 	// Called when we change layer, notifies the edit tool if one is open
 	void manageCurrentMeshChange();
@@ -357,50 +249,9 @@ public slots:
 	/// Execute a end/start pair for all the PerMesh decorator that are active in this glarea.
 	/// It is used when the document is changed or when some parameter changes
 	/// Note that it is rather inefficient. Such work should be done only once for each decorator.
-	void updateAllPerMeshDecorators()
-	{
-		MeshDocument* mdoc = md();
-		if (mdoc == NULL)
-			return;
-		makeCurrent();
+	void updateAllPerMeshDecorators();
 
-		for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i)
-		{
-
-			MeshModel *m = md()->getMesh(i.key());
-			if (m != nullptr) {
-				foreach(QAction *p, i.value())
-				{
-					DecoratePlugin * decorInterface = qobject_cast<DecoratePlugin *>(p->parent());
-					decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
-					decorInterface->setLog(&md()->Log);
-					decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);
-				}
-			}
-		}
-
-		MultiViewer_Container* viewcont = mvc();
-		if (viewcont == NULL)
-			return;
-
-		MLSceneGLSharedDataContext* shared = viewcont->sharedDataContext();
-		if (shared == NULL)
-			return;
-
-		MLDefaultMeshDecorators defdec(mw());
-		for (MeshModel* mm = mdoc->nextMesh(); mm != NULL; mm = mdoc->nextMesh(mm))
-		{
-			MLRenderingData dt;
-			shared->getRenderInfoPerMeshView(mm->id(), context(), dt);
-			defdec.cleanMeshDecorationData(*mm, dt);
-			defdec.initMeshDecorationData(*mm, dt);
-		}
-	}
-
-	void updatePerMeshDecorators(int)
-	{
-		update();
-	}
+	void updatePerMeshDecorators(int);
 
 	void updateAllDecorators();
 
@@ -496,14 +347,15 @@ private:
 	vcg::Point2i pointToPick;
 
 	// shader support
-	RenderPlugin*  iRenderer;
+	RenderPlugin*  iRenderer = nullptr;
 	QAction*       currentShader;
 	const QAction* lastFilterRef; // reference to last filter applied
 	QFont          qFont;         // font settings
 
 	// Editing support
-	EditTool*                 iEdit;
-	QAction*                  currentEditor;
+	EditTool*                 iEdit = nullptr;
+	QAction*                  currentEditor = nullptr;
+	bool                      suspendedEditor = false;
 	QAction*                  suspendedEditRef; // reference to last Editing Mode Used
 	QMap<QAction*, EditTool*> actionToMeshEditMap;
 
@@ -525,7 +377,7 @@ private:
 	bool   takeSnapTile;
 
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp };
-	AnimMode animMode;
+	AnimMode animMode = AnimNone;
 	int      tileCol, tileRow, totalCols,
 		totalRows; // snapshot: total number of subparts and current subpart rendered
 
