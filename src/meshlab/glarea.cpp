@@ -51,27 +51,10 @@ GLArea::GLArea(QWidget* parent, MultiViewer_Container* mvcont, RichParameterList
 		//    QOpenGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
 		// FIXME GL: This is weird...
 		QOpenGLWidget(parent),
-		interrbutshow(false),
 		parentmultiview(mvcont)
 {
 	makeCurrent();
 	this->updateCustomSettingValues(*current);
-	suspendedEditor = false;
-	lastModelEdited = 0;
-	cfps            = 0;
-	lastTime        = 0;
-	hasToPick       = false;
-	hasToSelectMesh = false;
-	hasToGetPickPos = false;
-	// hasToUpdateTexture=false;
-	helpVisible            = false;
-	takeSnapTile           = false;
-	activeDefaultTrackball = true;
-	infoAreaVisible        = true;
-	trackBallVisible       = true;
-	currentShader          = NULL;
-	lastFilterRef          = NULL;
-	// lastEditRef = NULL;
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	fov           = fovDefault();
 	clipRatioFar  = clipRatioFarDefault();
@@ -2799,6 +2782,16 @@ bool GLArea::showInterruptButton() const
 void GLArea::showInterruptButton(const bool& show)
 {
 	interrbutshow = show;
+}
+
+bool GLArea::isInfoAreaVisible() const
+{
+	return infoAreaVisible;
+}
+
+bool GLArea::setInfoAreaVisibility(bool vis)
+{
+	infoAreaVisible = vis;
 }
 
 void GLArea::completeUpdateRequested()

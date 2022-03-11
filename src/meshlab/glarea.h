@@ -150,6 +150,8 @@ public:
 	float  getFov() const;
 	bool showInterruptButton() const;
 	void showInterruptButton(const bool& show);
+	bool isInfoAreaVisible() const;
+	bool setInfoAreaVisibility(bool vis);
 
 	vcg::Point3f getViewDir();
 
@@ -191,7 +193,6 @@ public:
 
 	// TODO: make private these member attributes
 	QList<QAction *> iPerDocDecoratorlist;
-	bool	infoAreaVisible;		// Draws the lower info area ?
 
 	SnapshotSetting ss;
 
@@ -321,28 +322,29 @@ private:
 
 	QMap<QString, QCursor> curMap;
 
-	bool helpVisible;            // Help on screen
-	bool trackBallVisible;       // Draws the trackball ?
-	bool activeDefaultTrackball; // keep track on active trackball
+	bool infoAreaVisible = true; // Draws the lower info area
+	bool helpVisible = false;            // Help on screen
+	bool trackBallVisible = true; // Draws the trackball
+	bool activeDefaultTrackball = true; // keep track on active trackball
 	// bool hasToUpdateTexture;			// has to reload textures at the next redraw
-	bool hasToPick;          // has to pick during the next redraw.
-	bool hasToGetPickPos;    // if we are waiting for a double click for getting a surface position
+	bool hasToPick = false;          // has to pick during the next redraw.
+	bool hasToGetPickPos = false;    // if we are waiting for a double click for getting a surface position
 							 // that has to be sent back using signal/slots (for parameters)
 	bool hasToGetPickCoords; // if we are waiting for a double click for getting a position on the
 							 // GLArea that has to be sent back using signal/slots (for parameters)
-	bool hasToSelectMesh;    // if we are waiting for a double click for getting a surface position
+	bool hasToSelectMesh = false;    // if we are waiting for a double click for getting a surface position
 							 // that has to be sent back using signal/slots (for parameters)
 	QString
 		nameToGetPickPos; // the name of the parameter that has asked for the point on the surface
 	QString
 		nameToGetPickCoords; // the name of the parameter that has asked for the point on the GLArea
-	bool         interrbutshow;
+	bool         interrbutshow = false;
 	vcg::Point2i pointToPick;
 
 	// shader support
 	RenderPlugin*  iRenderer = nullptr;
-	QAction*       currentShader;
-	const QAction* lastFilterRef; // reference to last filter applied
+	QAction*       currentShader = nullptr;
+	const QAction* lastFilterRef = nullptr; // reference to last filter applied
 	QFont          qFont;         // font settings
 
 	// Editing support
@@ -353,7 +355,7 @@ private:
 	QMap<QAction*, EditTool*> actionToMeshEditMap;
 
 	// the last model that start edit was called with
-	MeshModel* lastModelEdited;
+	MeshModel* lastModelEdited = nullptr;
 
 	// view setting variables
 	float clipRatioFar;
@@ -363,11 +365,11 @@ private:
 
 	unsigned int snapshotCounter;
 
-	float cfps;
-	float lastTime;
+	float cfps = 0;
+	float lastTime = 0;
 
 	QImage snapBuffer;
-	bool   takeSnapTile;
+	bool   takeSnapTile = false;
 
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp };
 	AnimMode animMode = AnimNone;

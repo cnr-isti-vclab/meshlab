@@ -375,7 +375,7 @@ void MainWindow::updateMenus()
 			GLA()->getCurrentEditAction()->setEnabled(true);
 		}
 		
-		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
+		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		
 		// Decorator Menu Checking and unChecking
@@ -2607,7 +2607,7 @@ void MainWindow::showToolbarFile(){
 void MainWindow::showInfoPane()
 {
 	if(GLA() != 0) {
-		GLA()->infoAreaVisible = !(GLA()->infoAreaVisible);
+		GLA()->setInfoAreaVisibility(!GLA()->isInfoAreaVisible());
 		GLA()->update();
 	}
 }
