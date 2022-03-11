@@ -2789,7 +2789,7 @@ bool GLArea::isInfoAreaVisible() const
 	return infoAreaVisible;
 }
 
-bool GLArea::setInfoAreaVisibility(bool vis)
+void GLArea::setInfoAreaVisibility(bool vis)
 {
 	infoAreaVisible = vis;
 }

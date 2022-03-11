@@ -151,7 +151,7 @@ public:
 	bool showInterruptButton() const;
 	void showInterruptButton(const bool& show);
 	bool isInfoAreaVisible() const;
-	bool setInfoAreaVisibility(bool vis);
+	void setInfoAreaVisibility(bool vis);
 
 	vcg::Point3f getViewDir();
 
