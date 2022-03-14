@@ -375,7 +375,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 			0,
 			{"Edge Collapse", "Edge Flip"},
 			"Method",
-			"Selects wether to remove t-vertices by edge collapse or edge flip."));
+			"Selects whether to remove t-vertices by edge collapse or edge flip."));
 		parlst.addParam(RichFloat(
 			"Threshold",
 			40,
@@ -404,7 +404,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 			0,
 			{"Remove Faces", "Split Vertices"},
 			"Method",
-			"Selects wether to remove non manifold edges by removing faces or by splitting "
+			"Selects whether to remove non manifold edges by removing faces or by splitting "
 			"vertices."));
 	default: break; // do not add any parameter for the other filters
 	}

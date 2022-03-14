@@ -441,7 +441,7 @@ void loadMeshPrimitive(
 	loadAttribute(m, ivp, model, p, INDICES);
 	progress.increment();
 
-	// if vTex was true, it means that we loaded texcoords, that have been transfered from vertex to
+	// if vTex was true, it means that we loaded texcoords, that have been transferred from vertex to
 	// wedges when loading triangle indices. Therefore, we can remove vertex texcoords and leave
 	// only wedges, which are the only that can be rendered with multiple textures in meshlab
 	// TODO: remove this mechanism whenever vertex texcoords allow to render multiple textures in
@@ -462,7 +462,7 @@ void loadMeshPrimitive(
  * vector ivp. For all the other parameters, ivp is a const input.
  *
  * If the primitive does not contain the primitive p, nothing is done.
- * Howerver, id the attribute is POSITION, then a MLException will be thrown.
+ * However, id the attribute is POSITION, then a MLException will be thrown.
  *
  *
  * @param m

@@ -43,7 +43,7 @@ protected:
   SimpleTempData<typename MESH_TYPE::VertContainer, int > isFixed;
 public:
 
-  /* Tpyes */
+  /* Types */
   typedef MESH_TYPE MeshType;
   typedef typename MESH_TYPE::VertexIterator VertexIterator;
   typedef typename MESH_TYPE::FaceIterator FaceIterator;

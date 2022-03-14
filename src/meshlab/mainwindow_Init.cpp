@@ -730,7 +730,7 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addMenu(filterMenuOther);
 
 
-	//this is used just to fill the menus with alhabetical order
+	//this is used just to fill the menus with alphabetical order
 	std::map<QString, FilterPlugin*> mapFilterPlugins;
 	
 	//populate the map
