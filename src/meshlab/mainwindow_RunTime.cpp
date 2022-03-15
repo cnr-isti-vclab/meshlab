@@ -1136,41 +1136,34 @@ void MainWindow::executeFilter(
 	RichParameterList mergedenvironment(params);
 	mergedenvironment.join(currentGlobalParams);
 	
-	MLSceneGLSharedDataContext* shar = NULL;
-//	QGLWidget* filterWidget = NULL;
-	if (currentViewContainer() != NULL)
-	{
-		shar = currentViewContainer()->sharedDataContext();
-		//GLA() is only the parent
-//		filterWidget = new QGLWidget(NULL,shar);
-//		QGLFormat defForm = QGLFormat::defaultFormat();
-//		iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+	MLSceneGLSharedDataContext* shar = nullptr;
+	if (currentViewContainer() != nullptr) {
+		if (iFilter->requiresGLContext(action)) { // settings needed just when filter uses glcontext
+			// create the glcontext for the filter
+			shar = currentViewContainer()->sharedDataContext();
+			iFilter->glContext = new MLPluginGLContext(*shar);
 
+			// set the render options
+			// FIXME GL: not sure that this actually works
+			MLRenderingData dt;
+			MLRenderingData::RendAtts atts;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-//		iFilter->glContext = new MLPluginGLContext(*shar);
-
-
-		// FIXME GL!!! Is this supposed to make it current? for now creation is embedded inside the constructor
-//		iFilter->glContext->create(filterWidget->context());
-		
-		MLRenderingData dt;
-		MLRenderingData::RendAtts atts;
-		atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-		atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-		
-		if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
-			MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-			if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL)) {
-				dt.set(pm,atts);
-				iFilter->glContext->initPerViewRenderingData(meshDoc()->mm()->id(),dt);
-			}
-		}
-		else {
-			for(const MeshModel& mm : meshDoc()->meshIterator()) {
-				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
-				if (pm != MLRenderingData::PR_ARITY) {
+			if (iFilter->filterArity(action) == FilterPlugin::SINGLE_MESH) {
+				MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+				if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL)) {
 					dt.set(pm,atts);
-					iFilter->glContext->initPerViewRenderingData(mm.id(),dt);
+					iFilter->glContext->initPerViewRenderingData(meshDoc()->mm()->id(),dt);
+				}
+			}
+			else {
+				for(const MeshModel& mm : meshDoc()->meshIterator()) {
+					MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(&mm);
+					if (pm != MLRenderingData::PR_ARITY) {
+						dt.set(pm,atts);
+						iFilter->glContext->initPerViewRenderingData(mm.id(),dt);
+					}
 				}
 			}
 		}
@@ -1185,14 +1178,6 @@ void MainWindow::executeFilter(
 			postCondMask = iFilter->postCondition(action);
 		for (MeshModel& mm : meshDoc()->meshIterator())
 			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm.cm);
-		
-		if (shar != NULL) {
-			shar->removeView(iFilter->glContext);
-			// FIXME GL clean commented code
-//			delete filterWidget;
-//			delete iFilter->glContext;
-//			iFilter->glContext = nullptr;
-		}
 		
 		meshDoc()->setBusy(false);
 		
@@ -1210,39 +1195,38 @@ void MainWindow::executeFilter(
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 
-		
+		// TODO: completely refactor this to support RAII - no new and delete - just stack objects
+		// that own resources (and avoid code duplication)
+		// note: this portion of code is pasted also in the catch branches (it cannot be moved after
+		// the try-catch block) -- support of RAII will allow to avoid code duplication
+		if (iFilter->requiresGLContext(action)) {
+			shar->removeView(iFilter->glContext);
+			delete iFilter->glContext;
+			iFilter->glContext = nullptr;
+			GLA()->makeCurrent();
+		}
 		
 		FilterPlugin::FilterArity arity = iFilter->filterArity(action);
 		QList<MeshModel*> tmp;
-		switch(arity)
-		{
+		switch(arity) {
 		case (FilterPlugin::SINGLE_MESH):
-		{
 			tmp.push_back(meshDoc()->mm());
 			break;
-		}
 		case (FilterPlugin::FIXED):
-		{
-			for(const RichParameter& p : mergedenvironment)
-			{
-				if (p.isOfType<RichMesh>())
-				{
+			for(const RichParameter& p : mergedenvironment) {
+				if (p.isOfType<RichMesh>()) {
 					MeshModel* mm = meshDoc()->getMesh(p.value().getInt());
 					if (mm != NULL)
 						tmp.push_back(mm);
 				}
 			}
 			break;
-		}
 		case (FilterPlugin::VARIABLE):
-		{
-			for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
-			{
+			for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm)) {
 				if (mm->isVisible())
 					tmp.push_back(mm);
 			}
 			break;
-		}
 		default:
 			break;
 		}
@@ -1277,7 +1261,7 @@ void MainWindow::executeFilter(
 		updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
 		meshDoc()->meshDocStateData().clear();
 
-		if (saveOnHistory){
+		if (saveOnHistory) {
 			//Insert the filter to filterHistory
 			FilterNameParameterValuesPair tmp;
 			tmp.first = action->text();
@@ -1293,8 +1277,16 @@ void MainWindow::executeFilter(
 					QString("Operating system was not able to allocate the requested memory.<br><b>"
 					"Failure of filter <font color=red>: '%1'</font><br>").arg(action->text())+bdall.what()); // text
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+		// TODO: completely refactor this to support RAII - no new and delete - just stack objects
+		// that own resources (and avoid code duplication)
+		if (iFilter->requiresGLContext(action)) {
+			shar->removeView(iFilter->glContext);
+			delete iFilter->glContext;
+			iFilter->glContext = nullptr;
+			GLA()->makeCurrent();
+		}
 	}
-	catch(const MLException& exc){
+	catch(const MLException& exc) {
 		meshDoc()->setBusy(false);
 		qApp->restoreOverrideCursor();
 		QMessageBox::warning(
@@ -1303,6 +1295,14 @@ void MainWindow::executeFilter(
 				"Failure of filter <font color=red>: '" + iFilter->filterName(action) + "'</font><br><br>" + exc.what());
 		meshDoc()->Log.log(GLLogStream::SYSTEM, iFilter->filterName(action) + " failed: " + exc.what());
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+		// TODO: completely refactor this to support RAII - no new and delete - just stack objects
+		// that own resources (and avoid code duplication)
+		if (iFilter->requiresGLContext(action)) {
+			shar->removeView(iFilter->glContext);
+			delete iFilter->glContext;
+			iFilter->glContext = nullptr;
+			GLA()->makeCurrent();
+		}
 	}
 
 	qb->reset();
@@ -1310,8 +1310,7 @@ void MainWindow::executeFilter(
 	updateLayerDialog();
 	updateMenus();
 	MultiViewer_Container* mvc = currentViewContainer();
-	if (mvc)
-	{
+	if (mvc) {
 		mvc->updateAllDecoratorsForAllViewers();
 		mvc->updateAllViewers();
 	}

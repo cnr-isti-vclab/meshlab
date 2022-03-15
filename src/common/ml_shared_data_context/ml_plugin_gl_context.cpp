@@ -39,8 +39,6 @@ MLPluginGLContext::MLPluginGLContext(MLSceneGLSharedDataContext& shared)
 	// initialize dummy surface
 	_surface.setFormat(this->format());
 	_surface.create();
-
-	QOpenGLContext::makeCurrent(&_surface);
 }
 
 MLPluginGLContext::~MLPluginGLContext()
