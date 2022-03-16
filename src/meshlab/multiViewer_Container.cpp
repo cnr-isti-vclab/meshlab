@@ -93,13 +93,14 @@ MultiViewer_Container::MultiViewer_Container(
 	size_t                       perbatchprimitives,
 	size_t                       minfacespersmoothrendering,
 	QWidget*                     parent) :
-		Splitter(parent), meshDoc()
+		Splitter(parent),
+		meshDoc(),
+		scenecontext(meshDoc, meminfo, highprec, perbatchprimitives, minfacespersmoothrendering)
+
 {
 	setChildrenCollapsible(false);
 	// Here a shared GL content is initialized for each 'window'
-	scenecontext = new MLSceneGLSharedDataContext(
-		meshDoc, meminfo, highprec, perbatchprimitives, minfacespersmoothrendering);
-	scenecontext->setHidden(true);
+	scenecontext.setHidden(true);
 	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be
 	// ready
 	//	scenecontext->initializeGL();
@@ -108,12 +109,6 @@ MultiViewer_Container::MultiViewer_Container(
 
 MultiViewer_Container::~MultiViewer_Container()
 {
-	/*for(int ii = 0;ii < viewerList.size();++ii)
-		delete viewerList[ii];*/
-
-	// WARNING!!!! Here just the pointer to the MLSceneGLSharedDataContext is destroyed.
-	//  The data contained in the GPU gets deallocated in the closeEvent function.
-	delete scenecontext;
 }
 
 bool MultiViewer_Container::isMultiViewerContainer() const
@@ -121,7 +116,7 @@ bool MultiViewer_Container::isMultiViewerContainer() const
 	return true;
 }
 
-int MultiViewer_Container::getNextViewerId()
+int MultiViewer_Container::getNextViewerId() const
 {
 	int newId = -1;
 
@@ -144,9 +139,9 @@ void MultiViewer_Container::addView(GLArea* viewer, Qt::Orientation orient)
 {
 	MLRenderingData dt;
 	MainWindow*     window = qobject_cast<MainWindow*>(QApplication::activeWindow());
-	if ((window != NULL) && (scenecontext != NULL)) {
+	if (window != nullptr) {
 		// window->defaultPerViewRenderingData(dt);
-		scenecontext->addView(viewer->context(), dt);
+		scenecontext.addView(viewer->context(), dt);
 	}
 	/* The Viewers are organized like a BSP tree.
 	Every new viewer is added within an Horizontal splitter. Its orientation could change according
@@ -236,7 +231,7 @@ void MultiViewer_Container::removeView(int viewerId)
 	}
 	assert(viewer);
 	if (viewer != NULL)
-		scenecontext->removeView(viewer->context());
+		scenecontext.removeView(viewer->context());
 	Splitter* parentSplitter = qobject_cast<Splitter*>(viewer->parent());
 	int       currentIndex   = parentSplitter->indexOf(viewer);
 
@@ -339,7 +334,7 @@ GLArea* MultiViewer_Container::currentView()
 	return getViewer(currId);
 }
 
-int MultiViewer_Container::viewerCounter()
+int MultiViewer_Container::viewerCounter() const
 {
 	return viewerList.count();
 }
@@ -392,10 +387,10 @@ void MultiViewer_Container::updateTrackballInViewers()
 
 MLSceneGLSharedDataContext* MultiViewer_Container::sharedDataContext()
 {
-	return scenecontext;
+	return &scenecontext;
 }
 
-GLLogStream* MultiViewer_Container::LogPtr()
+GLLogStream* MultiViewer_Container::logger()
 {
 	return &meshDoc.Log;
 }
@@ -418,7 +413,7 @@ void MultiViewer_Container::closeEvent(QCloseEvent* event)
 	}
 	bool close = true;
 	int  ii    = 0;
-	scenecontext->deAllocateGPUSharedData();
+	scenecontext.deAllocateGPUSharedData();
 	while (close && (ii < viewerList.size())) {
 		close = viewerList.at(ii)->readyToClose();
 		++ii;

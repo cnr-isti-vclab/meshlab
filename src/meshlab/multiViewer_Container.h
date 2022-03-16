@@ -86,8 +86,8 @@ public:
 	void removeView(int);
 
 	GLArea* currentView();
-	int     getNextViewerId();
-	int     viewerCounter();
+	int     getNextViewerId() const;
+	int     viewerCounter() const;
 	int     currentViewerId() const;
 
 	void updateAllViewers();
@@ -103,7 +103,12 @@ public:
 
 	MLSceneGLSharedDataContext* sharedDataContext();
 
-	GLLogStream* LogPtr();
+	GLLogStream* logger();
+
+	// TODO: make these private. Cannot have this kind of data public.
+	MeshDocument meshDoc;
+
+	QList<GLArea*> viewerList; /// widgets for the OpenGL contexts and images
 
 public slots:
 
@@ -117,17 +122,11 @@ signals:
 
 private:
 	void                        closeEvent(QCloseEvent* event);
-	MLSceneGLSharedDataContext* scenecontext;
+	MLSceneGLSharedDataContext scenecontext;
 
 	int currId;
 
 	void patchForCorrectResize(QSplitter* split);
-
-public:
-	// TODO: make these private. Cannot have this kind of data public.
-	MeshDocument meshDoc;
-
-	QList<GLArea*> viewerList; /// widgets for the OpenGL contexts and images
 };
 
 #endif // __MULTIVIEWER_CONTAINER_H__

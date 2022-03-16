@@ -914,8 +914,8 @@ void MainWindow::startFilter(const QAction* action)
 		}
 		
 		if(currentViewContainer()) {
-			iFilter->setLog(currentViewContainer()->LogPtr());
-			currentViewContainer()->LogPtr()->setBookmark();
+			iFilter->setLog(currentViewContainer()->logger());
+			currentViewContainer()->logger()->setBookmark();
 		}
 
 		//checks if a filterDockDialog is already open and closes it
