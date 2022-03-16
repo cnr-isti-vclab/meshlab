@@ -31,126 +31,157 @@
 
 using namespace vcg;
 
-Splitter::Splitter ( QWidget * parent):QSplitter(parent){}
-Splitter::Splitter(Qt::Orientation orientation, QWidget *parent):QSplitter(orientation,parent){}
+/*
+ * Splitter Class
+ */
 
-QSplitterHandle *Splitter::createHandle()
+Splitter::Splitter(QWidget* parent) : QSplitter(parent)
+{
+}
+Splitter::Splitter(Qt::Orientation orientation, QWidget* parent) : QSplitter(orientation, parent)
+{
+}
+
+bool Splitter::isMultiViewerContainer() const
+{
+	return false;
+}
+
+QSplitterHandle* Splitter::createHandle()
 {
 	return new SplitterHandle(orientation(), this);
 }
 
-MultiViewer_Container *Splitter::getRootContainer()
+MultiViewer_Container* Splitter::getRootContainer()
 {
-	Splitter * parentSplitter = this;
-	MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
-	while(!mvc)
-	{
-		parentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
-		mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
+	Splitter*              parentSplitter = this;
+	MultiViewer_Container* mvc            = qobject_cast<MultiViewer_Container*>(parentSplitter);
+	while (!mvc) {
+		parentSplitter = qobject_cast<Splitter*>(parentSplitter->parent());
+		mvc            = qobject_cast<MultiViewer_Container*>(parentSplitter);
 	}
 	return mvc;
 }
 
-SplitterHandle::SplitterHandle(Qt::Orientation orientation, QSplitter *parent):QSplitterHandle(orientation, parent){}
+/*
+ * SplitterHandle Class
+ */
 
-void SplitterHandle::mousePressEvent ( QMouseEvent * e )
+SplitterHandle::SplitterHandle(Qt::Orientation orientation, QSplitter* parent) :
+		QSplitterHandle(orientation, parent)
+{
+}
+
+void SplitterHandle::mousePressEvent(QMouseEvent* e)
 {
 	QSplitterHandle::mousePressEvent(e);
 
-	if(e->button()== Qt::RightButton)
-	{
-		MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-		if (window) window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
+	if (e->button() == Qt::RightButton) {
+		MainWindow* window = qobject_cast<MainWindow*>(QApplication::activeWindow());
+		if (window)
+			window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
 	}
 }
 
-MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo, bool highprec,size_t perbatchprimitives, size_t minfacespersmoothrendering,QWidget *parent)
-    : Splitter(parent),meshDoc()
+/*
+ * MultiViewer_Container Class
+ */
+
+MultiViewer_Container::MultiViewer_Container(
+	vcg::QtThreadSafeMemoryInfo& meminfo,
+	bool                         highprec,
+	size_t                       perbatchprimitives,
+	size_t                       minfacespersmoothrendering,
+	QWidget*                     parent) :
+		Splitter(parent), meshDoc()
 {
 	setChildrenCollapsible(false);
 	// Here a shared GL content is initialized for each 'window'
-	scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives,minfacespersmoothrendering);
+	scenecontext = new MLSceneGLSharedDataContext(
+		meshDoc, meminfo, highprec, perbatchprimitives, minfacespersmoothrendering);
 	scenecontext->setHidden(true);
-	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be ready
-//	scenecontext->initializeGL();
-	currentId=-1;
-	currentgla = NULL;
+	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be
+	// ready
+	//	scenecontext->initializeGL();
+	currId  = -1;
 }
 
 MultiViewer_Container::~MultiViewer_Container()
 {
-    /*for(int ii = 0;ii < viewerList.size();++ii)
-        delete viewerList[ii];*/
-	
-    //WARNING!!!! Here just the pointer to the MLSceneGLSharedDataContext is destroyed.
-    // The data contained in the GPU gets deallocated in the closeEvent function.
-    delete scenecontext;
+	/*for(int ii = 0;ii < viewerList.size();++ii)
+		delete viewerList[ii];*/
+
+	// WARNING!!!! Here just the pointer to the MLSceneGLSharedDataContext is destroyed.
+	//  The data contained in the GPU gets deallocated in the closeEvent function.
+	delete scenecontext;
 }
 
-int MultiViewer_Container::getNextViewerId(){
-    int newId=-1;
+bool MultiViewer_Container::isMultiViewerContainer() const
+{
+	return true;
+}
 
-	foreach(GLArea* view, viewerList)
-	{
-		if(newId < view->getId()) newId = view->getId();
+int MultiViewer_Container::getNextViewerId()
+{
+	int newId = -1;
+
+	foreach (GLArea* view, viewerList) {
+		if (newId < view->getId())
+			newId = view->getId();
 	}
 
 	return ++newId;
 }
 
+/*********************************************************************************************************/
+/*********************************************************************************************************/
+/*WARNING!!!!!!!!!!!! Horizontal and Vertical in QT are the opposite on how we consider them in
+ * Meshlab*/
+/*********************************************************************************************************/
+/*********************************************************************************************************/
 
-/*********************************************************************************************************/
-/*********************************************************************************************************/
-/*WARNING!!!!!!!!!!!! Horizontal and Vertical in QT are the opposite on how we consider them in Meshlab*/
-/*********************************************************************************************************/
-/*********************************************************************************************************/
-
-
-void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
+void MultiViewer_Container::addView(GLArea* viewer, Qt::Orientation orient)
 {
-	
-    MLRenderingData dt;
-    MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-    if ((window != NULL) && (scenecontext != NULL))
-    {
-        //window->defaultPerViewRenderingData(dt);
-        scenecontext->addView(viewer->context(),dt);
-    }
-    /* The Viewers are organized like a BSP tree.
-	Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
-	  HSplit
+	MLRenderingData dt;
+	MainWindow*     window = qobject_cast<MainWindow*>(QApplication::activeWindow());
+	if ((window != NULL) && (scenecontext != NULL)) {
+		// window->defaultPerViewRenderingData(dt);
+		scenecontext->addView(viewer->context(), dt);
+	}
+	/* The Viewers are organized like a BSP tree.
+	Every new viewer is added within an Horizontal splitter. Its orientation could change according
+	to next insertions. HSplit
 	/       \
 	View1   VSplit
-	        /   \
-	      View2  View3
+			/   \
+		  View2  View3
 
-	In the GUI, when a viewer is split, the new one appears on its right (the space is split in two equal portions).
+	In the GUI, when a viewer is split, the new one appears on its right (the space is split in two
+	equal portions).
 	*/
-	//CASE 0: only when the first viewer is opened, just add it and return;
-	if (viewerCounter()==0)
-	{
+	// CASE 0: only when the first viewer is opened, just add it and return;
+	if (viewerCounter() == 0) {
 		viewerList.append(viewer);
 		addWidget(viewer);
 		updateCurrent(viewer->getId());
-		//action for new viewer
+		// action for new viewer
 		connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 		return;
 	}
 
-	//CASE 1: happens only at the FIRST split;
-	if (viewerCounter()==1)
-	{
+	// CASE 1: happens only at the FIRST split;
+	if (viewerCounter() == 1) {
 		viewerList.append(viewer);
 		this->setOrientation(orient);
 		addWidget(viewer);
 		QList<int> sizes;
-		if(this->orientation()== Qt::Horizontal){
-			sizes.append(this->width()/2);
-			sizes.append(this->width()/2);
+		if (this->orientation() == Qt::Horizontal) {
+			sizes.append(this->width() / 2);
+			sizes.append(this->width() / 2);
 		}
-		else{
-			sizes.append(this->height()/2);
-			sizes.append(this->height()/2);
+		else {
+			sizes.append(this->height() / 2);
+			sizes.append(this->height() / 2);
 		}
 
 		this->setSizes(sizes);
@@ -158,32 +189,32 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 		this->setChildrenCollapsible(false);
 
 		updateCurrent(viewer->getId());
-		//action for new viewer
+		// action for new viewer
 		connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 		return;
 	}
 
 	// Generic Case: Each splitter Has ALWAYS two children.
 	viewerList.append(viewer);
-	GLArea* currentGLA = this->currentView();
-	Splitter* currentSplitter = qobject_cast<Splitter *>(currentGLA->parent());
-	QList<int> parentSizes = currentSplitter->sizes();
+	GLArea*    currentGLA      = this->currentView();
+	Splitter*  currentSplitter = qobject_cast<Splitter*>(currentGLA->parent());
+	QList<int> parentSizes     = currentSplitter->sizes();
 
-	int splittedIndex = currentSplitter->indexOf(currentGLA);
-	Splitter* newSplitter = new Splitter(orient);
-	currentSplitter->insertWidget(splittedIndex,newSplitter);
+	int       splittedIndex = currentSplitter->indexOf(currentGLA);
+	Splitter* newSplitter   = new Splitter(orient);
+	currentSplitter->insertWidget(splittedIndex, newSplitter);
 
 	newSplitter->addWidget(viewer);
 	newSplitter->addWidget(currentGLA);
 
 	QList<int> sizes;
-	if(orient== Qt::Horizontal){
-		sizes.append(currentSplitter->width()/2);
-		sizes.append(currentSplitter->width()/2);
+	if (orient == Qt::Horizontal) {
+		sizes.append(currentSplitter->width() / 2);
+		sizes.append(currentSplitter->width() / 2);
 	}
-	else{
-		sizes.append(currentSplitter->height()/2);
-		sizes.append(currentSplitter->height()/2);
+	else {
+		sizes.append(currentSplitter->height() / 2);
+		sizes.append(currentSplitter->height() / 2);
 	}
 	currentSplitter->setSizes(parentSizes);
 	newSplitter->setSizes(sizes);
@@ -191,7 +222,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	newSplitter->setChildrenCollapsible(false);
 
 	updateCurrent(viewer->getId());
-	//action for new viewer
+	// action for new viewer
 	connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 	return;
 }
@@ -199,23 +230,21 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 void MultiViewer_Container::removeView(int viewerId)
 {
 	GLArea* viewer = NULL;
-	for (int i=0; i< viewerList.count(); i++)
-	{
-		if(viewerList.at(i)->getId() == viewerId)
+	for (int i = 0; i < viewerList.count(); i++) {
+		if (viewerList.at(i)->getId() == viewerId)
 			viewer = viewerList.at(i);
 	}
 	assert(viewer);
 	if (viewer != NULL)
 		scenecontext->removeView(viewer->context());
-	Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
-	int currentIndex = parentSplitter->indexOf(viewer);
+	Splitter* parentSplitter = qobject_cast<Splitter*>(viewer->parent());
+	int       currentIndex   = parentSplitter->indexOf(viewer);
 
-    viewer->deleteLater();
+	viewer->deleteLater();
 	// Very basic case of just two son of the MultiviewContainer.
-	if(viewerList.count()==2)
-	{
+	if (viewerList.count() == 2) {
 		viewerList.removeAll(viewer);
-        updateCurrent(viewerList.first()->getId());
+		updateCurrent(viewerList.first()->getId());
 		return;
 	}
 
@@ -224,49 +253,51 @@ void MultiViewer_Container::removeView(int viewerId)
 	// 1) the deleted object is a direct child of the root
 	// 2) otherwise; e.g. parent->parent exists.
 
-
 	// First Case: deleting the direct son of the root (the mvc)
 	// the sibling content (that is a splitter) surely will be moved up
-	if(parentSplitter == this)
-	{
+	if (parentSplitter == this) {
 		int insertIndex;
-		if(currentIndex == 0) insertIndex = 1;
-		else insertIndex = 0;
+		if (currentIndex == 0)
+			insertIndex = 1;
+		else
+			insertIndex = 0;
 
-		Splitter *siblingSplitter = qobject_cast<Splitter *>(this->widget(insertIndex));
+		Splitter* siblingSplitter = qobject_cast<Splitter*>(this->widget(insertIndex));
 		assert(siblingSplitter);
 		siblingSplitter->hide();
 		siblingSplitter->deleteLater();
 
-		QWidget *sonLeft = siblingSplitter->widget(0);
-		QWidget *sonRight = siblingSplitter->widget(1);
+		QWidget* sonLeft  = siblingSplitter->widget(0);
+		QWidget* sonRight = siblingSplitter->widget(1);
 		this->setOrientation(siblingSplitter->orientation());
-		this->insertWidget(0,sonLeft);
-		this->insertWidget(1,sonRight);
+		this->insertWidget(0, sonLeft);
+		this->insertWidget(1, sonRight);
 
 		patchForCorrectResize(this);
 		viewerList.removeAll(viewer);
-		//currentId = viewerList.first()->getId();
+		// currentId = viewerList.first()->getId();
 		updateCurrent(viewerList.first()->getId());
 		return;
 	}
 
 	// Final case. Very generic, not son of the root.
 
-	Splitter* parentParentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
+	Splitter* parentParentSplitter = qobject_cast<Splitter*>(parentSplitter->parent());
 	assert(parentParentSplitter);
-	int parentIndex= parentParentSplitter->indexOf(parentSplitter);
+	int parentIndex = parentParentSplitter->indexOf(parentSplitter);
 
 	int siblingIndex;
-	if(currentIndex == 0) siblingIndex = 1;
-	else siblingIndex = 0;
+	if (currentIndex == 0)
+		siblingIndex = 1;
+	else
+		siblingIndex = 0;
 
-	QWidget  *siblingWidget = parentSplitter->widget(siblingIndex);
+	QWidget* siblingWidget = parentSplitter->widget(siblingIndex);
 
 	parentSplitter->hide();
 	parentSplitter->deleteLater();
-	parentParentSplitter->insertWidget(parentIndex,siblingWidget);
-    
+	parentParentSplitter->insertWidget(parentIndex, siblingWidget);
+
 	patchForCorrectResize(parentParentSplitter);
 	viewerList.removeAll(viewer);
 	updateCurrent(viewerList.first()->getId());
@@ -274,29 +305,27 @@ void MultiViewer_Container::removeView(int viewerId)
 
 void MultiViewer_Container::updateCurrent(int current)
 {
-	int previousCurrentId = currentId;
-	currentId=current;
-	currentgla = getViewer(currentId);
-	if(getViewer(previousCurrentId))
+	int previousCurrentId = currId;
+	currId             = current;
+	if (getViewer(previousCurrentId))
 		update(previousCurrentId);
-    emit updateMainWindowMenus();
-    if (current != previousCurrentId)
-        emit updateDocumentViewer();     
+	emit updateMainWindowMenus();
+	if (current != previousCurrentId)
+		emit updateDocumentViewer();
 }
 
-GLArea * MultiViewer_Container::getViewer(int id)
+GLArea* MultiViewer_Container::getViewer(int id)
 {
-	foreach ( GLArea* viewer, viewerList)
+	foreach (GLArea* viewer, viewerList)
 		if ((viewer != NULL) && (viewer->getId() == id))
 			return viewer;
 	return 0;
 }
 
-int MultiViewer_Container::getViewerByPicking(QPoint p){
-	foreach ( GLArea* viewer, viewerList)
-	{
-		if (viewer != NULL)
-		{
+int MultiViewer_Container::getViewerByPicking(QPoint p)
+{
+	foreach (GLArea* viewer, viewerList) {
+		if (viewer != NULL) {
 			QPoint pViewer = viewer->mapFromGlobal(p);
 			if (viewer->visibleRegion().contains(pViewer))
 				return viewer->getId();
@@ -305,17 +334,24 @@ int MultiViewer_Container::getViewerByPicking(QPoint p){
 	return -1;
 }
 
-GLArea* MultiViewer_Container::currentView(){
-	return getViewer(currentId);
+GLArea* MultiViewer_Container::currentView()
+{
+	return getViewer(currId);
 }
 
-int MultiViewer_Container::viewerCounter(){
+int MultiViewer_Container::viewerCounter()
+{
 	return viewerList.count();
 }
 
-void MultiViewer_Container::updateAllViewers(){
-	foreach(GLArea* viewer, viewerList)
-	{
+int MultiViewer_Container::currentViewerId() const
+{
+	return currId;
+}
+
+void MultiViewer_Container::updateAllViewers()
+{
+	foreach (GLArea* viewer, viewerList) {
 		if (viewer != NULL)
 			viewer->update();
 	}
@@ -323,67 +359,72 @@ void MultiViewer_Container::updateAllViewers(){
 
 void MultiViewer_Container::updateAllDecoratorsForAllViewers()
 {
-	foreach(GLArea* viewer, viewerList)
-	{
+	foreach (GLArea* viewer, viewerList) {
 		if (viewer != NULL)
 			viewer->updateAllPerMeshDecorators();
 	}
 }
 
-
-
 void MultiViewer_Container::resetAllTrackBall()
 {
-	foreach(GLArea* viewer, viewerList)
-	{
+	foreach (GLArea* viewer, viewerList) {
 		if (viewer != NULL)
 			viewer->resetTrackBall();
 	}
 }
 
-void MultiViewer_Container::update(int id){
+void MultiViewer_Container::update(int id)
+{
 	getViewer(id)->update();
 }
 
 void MultiViewer_Container::updateTrackballInViewers()
 {
 	GLArea* glArea = currentView();
-	if(glArea)
-	{
-		QPair<Shotm,float> shotAndScale = glArea->shotFromTrackball();
-		foreach(GLArea* viewer, viewerList)
-			if(viewer->getId() != currentId){
+	if (glArea) {
+		QPair<Shotm, float> shotAndScale = glArea->shotFromTrackball();
+		foreach (GLArea* viewer, viewerList)
+			if (viewer->getId() != currId) {
 				((GLArea*) viewer)->loadShot(shotAndScale);
 			}
 	}
 }
 
-void MultiViewer_Container::closeEvent( QCloseEvent *event )
+MLSceneGLSharedDataContext* MultiViewer_Container::sharedDataContext()
 {
-	if (meshDoc.hasBeenModified())
-	{
-		QMessageBox::StandardButton ret=QMessageBox::question(
-			this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(meshDoc.docLabel()),
-			QMessageBox::Yes|QMessageBox::No,
+	return scenecontext;
+}
+
+GLLogStream* MultiViewer_Container::LogPtr()
+{
+	return &meshDoc.Log;
+}
+
+void MultiViewer_Container::closeEvent(QCloseEvent* event)
+{
+	if (meshDoc.hasBeenModified()) {
+		QMessageBox::StandardButton ret = QMessageBox::question(
+			this,
+			tr("MeshLab"),
+			tr("Project '%1' modified.\n\nClose without saving?").arg(meshDoc.docLabel()),
+			QMessageBox::Yes | QMessageBox::No,
 			QMessageBox::No);
 
-		if(ret==QMessageBox::No)	// don't close please!
+		if (ret == QMessageBox::No) // don't close please!
 		{
 			event->ignore();
 			return;
 		}
 	}
 	bool close = true;
-	int ii = 0;
-    scenecontext->deAllocateGPUSharedData();
-	while(close && (ii < viewerList.size()))
-	{
+	int  ii    = 0;
+	scenecontext->deAllocateGPUSharedData();
+	while (close && (ii < viewerList.size())) {
 		close = viewerList.at(ii)->readyToClose();
 		++ii;
 	}
 
-	if (close)
-	{
+	if (close) {
 		emit closingMultiViewerContainer();
 		event->accept();
 	}
@@ -391,32 +432,32 @@ void MultiViewer_Container::closeEvent( QCloseEvent *event )
 		event->ignore();
 }
 
-void MultiViewer_Container::patchForCorrectResize( QSplitter* split )
+void MultiViewer_Container::patchForCorrectResize(QSplitter* split)
 {
-    /***************************patch to avoid a qt problem**********************/
-    /*in qt it's not possible to remove a widget from a splitter (no comment....).
-    it's not sufficient to hide it.
-    it looks like that anyway the framework allocates space on the screen also for the hidden splitter. 
-    So we have to resize all the visible glareas to half of the size of the new splitter in which they are going to be inserted and set, 
-    by hand, to zero the size of the splitter that is going to be deleted */
-    /***************************************************************************/
+	/***************************patch to avoid a qt problem**********************/
+	/*in qt it's not possible to remove a widget from a splitter (no comment....).
+	it's not sufficient to hide it.
+	it looks like that anyway the framework allocates space on the screen also for the hidden
+	splitter. So we have to resize all the visible glareas to half of the size of the new splitter
+	in which they are going to be inserted and set, by hand, to zero the size of the splitter that
+	is going to be deleted */
+	/***************************************************************************/
 
-    QSize sz = split->size();
-    int newsz = 0;
-    if(split->orientation() == Qt::Horizontal)
-        newsz = sz.width()/2;
-    else
-        newsz = sz.height()/2;
-    
-    QList<int> newwigsizes;
-    for(int ii = 0;ii < split->count();++ii)
-    {
-        QWidget* tmpwid = split->widget(ii);
-        if (tmpwid->isVisible())
-            newwigsizes.push_back(newsz);
-        else
-            newwigsizes.push_back(0);
-    }
+	QSize sz    = split->size();
+	int   newsz = 0;
+	if (split->orientation() == Qt::Horizontal)
+		newsz = sz.width() / 2;
+	else
+		newsz = sz.height() / 2;
 
-    split->setSizes(newwigsizes);
+	QList<int> newwigsizes;
+	for (int ii = 0; ii < split->count(); ++ii) {
+		QWidget* tmpwid = split->widget(ii);
+		if (tmpwid->isVisible())
+			newwigsizes.push_back(newsz);
+		else
+			newwigsizes.push_back(0);
+	}
+
+	split->setSizes(newwigsizes);
 }

@@ -682,7 +682,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 		displayHelp();
 
 	// Draw highlight if it is the current viewer
-	if (mvc()->currentId == id)
+	if (mvc()->currentViewerId() == id)
 		displayViewerHighlight();
 
 	QString error = checkGLError::makeString("There are gl errors: ");
@@ -691,7 +691,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 	}
 	// check if viewers are linked
 	MainWindow* window = qobject_cast<MainWindow*>(QApplication::activeWindow());
-	if (window && window->linkViewersAct->isChecked() && mvc()->currentId == id)
+	if (window && window->linkViewersAct->isChecked() && mvc()->currentViewerId() == id)
 		mvc()->updateTrackballInViewers();
 
 	// Draw the log area background
@@ -756,7 +756,7 @@ void GLArea::displayRealTimeLog(QPainter* painter)
 	painter->setPen(Qt::white);
 	Color4b logAreaColor = glas.logAreaColor;
 	glas.logAreaColor[3] = 128;
-	if (mvc()->currentId != id)
+	if (mvc()->currentViewerId() != id)
 		logAreaColor /= 2.0;
 
 	qFont.setStyleStrategy(QFont::PreferAntialias);
@@ -843,7 +843,7 @@ void GLArea::displayInfo(QPainter* painter)
 
 	Color4b logAreaColor = glas.logAreaColor;
 	glas.logAreaColor[3] = 128;
-	if (mvc()->currentId != id)
+	if (mvc()->currentViewerId() != id)
 		logAreaColor /= 2.0;
 
 	painter->fillRect(
@@ -1860,7 +1860,7 @@ bool GLArea::isCurrent()
 {
 	if (mvc() == nullptr)
 		return false;
-	return mvc()->currentId == this->id;
+	return mvc()->currentViewerId() == this->id;
 }
 
 void GLArea::showTrackBall(bool b)

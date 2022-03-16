@@ -42,15 +42,16 @@ class Splitter : public QSplitter
 	Q_OBJECT
 
 public:
-	Splitter ( QWidget * parent);
-	Splitter(Qt::Orientation orientation, QWidget *parent = 0);
-    ~Splitter() {}
+	Splitter(QWidget* parent);
+	Splitter(Qt::Orientation orientation, QWidget* parent = 0);
+	~Splitter() {}
 
-	virtual bool isMultiViewerContainer() const { return false; }
-	MultiViewer_Container *getRootContainer();
+	virtual bool isMultiViewerContainer() const;
+
+	MultiViewer_Container* getRootContainer();
 
 protected:
-	QSplitterHandle *createHandle();
+	QSplitterHandle* createHandle();
 };
 
 class SplitterHandle : public QSplitterHandle
@@ -58,68 +59,75 @@ class SplitterHandle : public QSplitterHandle
 	Q_OBJECT
 
 public:
-	SplitterHandle(Qt::Orientation orientation, QSplitter *parent);
-    ~SplitterHandle() {}
+	SplitterHandle(Qt::Orientation orientation, QSplitter* parent);
+	~SplitterHandle() {}
 
 protected:
-	void mousePressEvent ( QMouseEvent * e ); 
+	void mousePressEvent(QMouseEvent* e);
 };
 
 class MultiViewer_Container : public Splitter
 {
-    Q_OBJECT
+	Q_OBJECT
 
-        typedef vcg::Shot<double> Shot;
+	typedef vcg::Shot<double> Shot;
 
 public:
-    MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo,bool highprec,size_t perbatchprimitives,size_t minfacesforsmoothrendering,QWidget *parent);
-    ~MultiViewer_Container();
+	MultiViewer_Container(
+		vcg::QtThreadSafeMemoryInfo& meminfo,
+		bool                         highprec,
+		size_t                       perbatchprimitives,
+		size_t                       minfacesforsmoothrendering,
+		QWidget*                     parent);
+	~MultiViewer_Container();
 
-	bool isMultiViewerContainer() const { return true; }
-    void addView(GLArea *viewer, Qt::Orientation);
-    void removeView(int);
+	bool isMultiViewerContainer() const;
+	void addView(GLArea* viewer, Qt::Orientation);
+	void removeView(int);
 
-    GLArea* currentView();
-    int getNextViewerId();
-    int viewerCounter();
+	GLArea* currentView();
+	int     getNextViewerId();
+	int     viewerCounter();
+	int     currentViewerId() const;
 
 	void updateAllViewers();
 
 	void updateAllDecoratorsForAllViewers();
 	void resetAllTrackBall();
-    void update(int id);
+	void update(int id);
 
-    GLArea* getViewer(int id);
-    int getViewerByPicking(QPoint);
+	GLArea* getViewer(int id);
+	int     getViewerByPicking(QPoint);
 
-    void updateTrackballInViewers();
+	void updateTrackballInViewers();
 
-    inline MLSceneGLSharedDataContext* sharedDataContext() {return scenecontext;}
+	MLSceneGLSharedDataContext* sharedDataContext();
 
-protected:
-    void closeEvent(QCloseEvent *event);
-	MLSceneGLSharedDataContext* scenecontext;
-public:
-    MeshDocument meshDoc;
-
-    int currentId;
-
-    GLLogStream *LogPtr() {return &meshDoc.Log;}
-	GLArea* currentgla;
-signals:
-    void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
-    void updateDocumentViewer();
-	void closingMultiViewerContainer();
+	GLLogStream* LogPtr();
 
 public slots:
 
-        // Called when we change viewer, set the current viewer
+	// Called when we change viewer, set the current viewer
 	void updateCurrent(int current);
 
+signals:
+	void updateMainWindowMenus(); // updates the menus of the meshlab MainWindow
+	void updateDocumentViewer();
+	void closingMultiViewerContainer();
+
 private:
-    void patchForCorrectResize(QSplitter* split); 
+	void                        closeEvent(QCloseEvent* event);
+	MLSceneGLSharedDataContext* scenecontext;
+
+	int currId;
+
+	void patchForCorrectResize(QSplitter* split);
+
 public:
-    QList<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
+	// TODO: make these private. Cannot have this kind of data public.
+	MeshDocument meshDoc;
+
+	QList<GLArea*> viewerList; /// widgets for the OpenGL contexts and images
 };
 
 #endif // __MULTIVIEWER_CONTAINER_H__

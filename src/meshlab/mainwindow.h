@@ -316,11 +316,12 @@ public:
 	RichParameterList& currentGlobalPars() { return currentGlobalParams; }
 	const RichParameterList& defaultGlobalPars() const { return defaultGlobalParams; }
 
-	GLArea *GLA() const {
-		//if(mdiarea->currentSubWindow()==0) return 0;
+	GLArea *GLA() const
+	{
 		MultiViewer_Container *mvc = currentViewContainer();
-		if(!mvc) return 0;
-		return  mvc->currentgla;
+		if (!mvc)
+			return nullptr;
+		return mvc->currentView();
 	}
 
 	MultiViewer_Container* currentViewContainer() const {
