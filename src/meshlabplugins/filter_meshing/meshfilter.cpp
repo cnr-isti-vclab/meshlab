@@ -660,7 +660,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
 		parlst.addParam(RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
 		parlst.addParam(RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
-		parlst.addParam(RichDirection("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+		parlst.addParam(RichPosition("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
 		break;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD:
