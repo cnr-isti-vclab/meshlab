@@ -387,7 +387,7 @@ SelectionFilterPlugin::initParameterList(const QAction* action, const MeshModel&
 			tr("Max Quality"),
 			tr("Maximum acceptable quality value")));
 		parlst.addParam(RichBool(
-			"faceSelInclusive",
+			"Inclusive",
 			true,
 			"Inclusive Face Sel.",
 			"If true only the faces with <b>all</b> the vertices within the specified range are "
