@@ -128,7 +128,7 @@ QString SdfGpuPlugin::filterInfo(ActionIDType filterId) const
                                           "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lengths. "
                                           "For further details, see the reference paper:<br>"
                                           "<b>Shapira Shamir Cohen-Or,<br>"
-                                          "Consistent Mesh Partitioning and Skeletonisation using the shaper diamter function, Visual Comput. J. (2008)</b> ");
+                                          "Consistent Mesh Partitioning and Skeletonisation using the shaper diameter function, Visual Comput. J. (2008)</b> ");
 	case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration parameter. "
                                           "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration parameter. After having calculated the correct value,"
                                           "you can ignore further warnings that you may get using that value.</b>. ");

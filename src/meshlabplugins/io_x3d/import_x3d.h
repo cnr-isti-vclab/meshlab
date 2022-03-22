@@ -2717,7 +2717,7 @@ public:
 
 		
 
-		//Merge all meshes in the x3d's file in the templeted mesh m
+		//Merge all meshes in the x3d's file in the templated mesh m
 		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb = 0)
 		{
 			vcg::Matrix44<ScalarType> tMatrix;

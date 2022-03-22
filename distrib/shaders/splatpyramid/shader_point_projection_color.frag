@@ -31,7 +31,7 @@ void main(void)
 	gl_FragData[1] = vec4 (radius_depth_w.y, 2.0*depth_interval, screen_pos);
 	gl_FragData[2] = gl_Color;
 
-	// avoids point with low quality overwritting point with high quality
+	// avoids point with low quality overwriting point with high quality
 	// during depth test
 	//gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
 }

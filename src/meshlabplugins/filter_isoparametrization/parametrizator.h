@@ -668,7 +668,7 @@ public:
     int lower_limit;
     int interval;
     int accuracy;
-    //edn parameters
+    //end parameters
 
     MyTriEdgeCollapse *next_oper;
     MyTriEdgeFlip *next_flip;

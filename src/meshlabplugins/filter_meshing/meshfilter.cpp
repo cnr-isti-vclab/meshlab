@@ -340,14 +340,14 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 			                                               "<br> <i>Luiz Velho, Denis Zorin </i>"
 			                                               "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
 	case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
-	case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a quadric based edge-collapse strategy. A variant of the well known Garland and Heckbert simplification algorithm with different weighting schemes to better cope with aspect ration andd planar/degenerate quadrics areas."
+	case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a quadric based edge-collapse strategy. A variant of the well known Garland and Heckbert simplification algorithm with different weighting schemes to better cope with aspect ration and planar/degenerate quadrics areas."
 							       "<br> See: <br>"
 							       "<i>M. Garland and P. Heckbert.</i> <br>"
 			                                        "<b>Surface Simplification Using Quadric Error Metrics</b> (<a href='http://mgarland.org/papers/quadrics.pdf'>pdf</a>)<br>"
 			                                        "In Proceedings of SIGGRAPH 97.<br/><br/>");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization. "
 							       "Inspired in the QSLIM surface simplification algorithm "
-							       "by Michael Garland, which turned into the industry standar method for mesh simplification."
+							       "by Michael Garland, which turned into the industry standard method for mesh simplification."
 							       "<br> See: <br>"
 							       "<i>M. Garland and P. Heckbert.</i> <br>"
 			                                       "<b>Simplifying Surfaces with Color and Texture using Quadric Error Metrics</b> (<a href='http://mgarland.org/papers/quadric2.pdf'>pdf</a>)<br>"
@@ -660,7 +660,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
 		parlst.addParam(RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
 		parlst.addParam(RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
-		parlst.addParam(RichDirection("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+		parlst.addParam(RichPosition("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
 		break;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD:
