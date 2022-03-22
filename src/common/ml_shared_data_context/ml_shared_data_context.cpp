@@ -442,7 +442,6 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions( MLPerViewG
 MLRenderingData::MLRenderingData()
     :PerViewData<MLPerViewGLOptions>()
 {
-    _glopts = new MLPerViewGLOptions();
 }
 
 //MLRenderingData::MLRenderingData( const MLRenderingData& dt )
