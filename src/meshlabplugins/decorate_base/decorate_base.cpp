@@ -295,9 +295,9 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 		//      glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
 		QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
 		
-		CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
+		std::pair<Scalarm,Scalarm> mmqH = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 		this->realTimeLog("Quality Contour", m.label(),
-						  "min Q %f -- max Q %f",mmqH().first,mmqH().second);
+						  "min Q %f -- max Q %f",mmqH.first,mmqH.second);
 		
 		float stripe_num = rm->getFloat(this->ShowContourFreq());
 		float stripe_width = rm->getFloat(this->ShowContourWidth());
@@ -305,8 +305,8 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 		bool stripe_ramp = rm->getBool(this->ShowContourRamp());
 		float colormap = rm->getEnum(this->ShowContourColorMap());
 		glp->bind();
-		glp->setUniformValue("quality_min",mmqH().first);
-		glp->setUniformValue("quality_max",mmqH().second);
+		glp->setUniformValue("quality_min",mmqH.first);
+		glp->setUniformValue("quality_max",mmqH.second);
 		glp->setUniformValue("stripe_num",stripe_num);
 		glp->setUniformValue("stripe_width",stripe_width);
 		glp->setUniformValue("stripe_alpha",stripe_alpha);
@@ -725,9 +725,6 @@ bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, con
 	
 	case DP_SHOW_QUALITY_CONTOUR :
 	{
-		tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
-		CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH;
-		mmqH = vcg::tri::Allocator<CMeshO>::FindPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
 		if(this->contourShaderProgramMap[&m] == 0)
 		{
 			bool ret=true;
