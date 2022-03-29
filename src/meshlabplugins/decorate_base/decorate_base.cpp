@@ -295,7 +295,7 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 		//      glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
 		QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
 		
-		std::pair<Scalarm,Scalarm> mmqH = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+		std::pair<float,float> mmqH = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 		this->realTimeLog("Quality Contour", m.label(),
 						  "min Q %f -- max Q %f",mmqH.first,mmqH.second);
 		
