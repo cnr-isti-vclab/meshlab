@@ -19,6 +19,7 @@ INSTALL_PATH=$SOURCE_PATH/install/usr/
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
+QT_DIR=""
 
 #check parameters
 for i in "$@"
@@ -44,6 +45,10 @@ case $i in
         NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
         shift # past argument=value
         ;;
+    -qt=*|--qt_dir=*)
+        QT_DIR=${i#*=}
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
@@ -66,6 +71,10 @@ BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
 
 cd $BUILD_PATH
+if [ ! -z "$QT_DIR" ]
+then
+    export Qt5_DIR=$QT_DIR
+fi
 cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 make $CORES
 make install
