@@ -35,14 +35,10 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
-    - name: Deploy
+    - name: Deploy and AppImage
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Build MeshLab AppImage
-      shell: bash
-      run : |
-        bash scripts/${{ runner.os }}/3_appimage.sh
+        bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh
     #todo: try deb when ubuntu16.04 won't be required anymore by linuxdeployqt...
     #- name: Build deb package
     #  uses: jiro4989/build-deb-action@v2
@@ -62,7 +58,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
-        path: src/MeshLab*.AppImage
+        path: MeshLab*.AppImage
     #- name: Upload MeshLab deb
     #  uses: actions/upload-artifact@v2
     #  with:

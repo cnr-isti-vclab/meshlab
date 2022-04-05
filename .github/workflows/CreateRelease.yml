@@ -65,11 +65,7 @@ jobs:
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Build MeshLab AppImage
-      shell: bash
-      run : |
-        bash scripts/${{ runner.os }}/3_appimage.sh
+        bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v2
       with:
@@ -79,7 +75,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
-        path: src/MeshLab*-linux.AppImage
+        path: MeshLab*-linux.AppImage
 
   macos_build:
     needs: [update_ml_version]
