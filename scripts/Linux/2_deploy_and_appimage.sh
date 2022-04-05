@@ -44,7 +44,9 @@ chmod +x $INSTALL_PATH/usr/bin/meshlab
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
 $SCRIPTS_PATH/resources/linuxdeploy --appdir=$INSTALL_PATH \
-  --plugin qt --output appimage
+  --plugin qt --output appimage \
+  --library=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_e57.so \
+  --library=$INSTALL_PATH/usr/lib/meshlab/plugins/libfilter_mesh_booleans.so
 
 #get version
 IFS=' ' #space delimiter
