@@ -26,10 +26,15 @@ elseif(ALLOW_BUNDLED_CGAL AND EXISTS "${CGAL_DIR}/include/CGAL/version.h")
 		add_library(gmp SHARED IMPORTED GLOBAL)
 		set_property(TARGET gmp PROPERTY IMPORTED_IMPLIB "${CGAL_DIR}/auxiliary/gmp/lib/libgmp-10.lib")
 		set_property(TARGET gmp PROPERTY IMPORTED_LOCATION "${CGAL_DIR}/auxiliary/gmp/lib/libgmp-10.dll")
+		target_link_libraries(external-cgal INTERFACE mpfr gmp Threads::Threads)
+	else()
+		find_package(GMP)
+		find_package(MPFR)
+		target_include_directories(external-cgal SYSTEM INTERFACE ${GMP_INCLUDE_DIRS})
+		target_link_libraries(external-cgal INTERFACE ${GMP_LIBRARIES} ${MPFR_LIBRARIES} Threads::Threads)
 	endif()
 	
-	target_link_libraries(external-cgal INTERFACE mpfr gmp Threads::Threads)
-	
+
 	if (WIN32)
 		if (DEFINED MESHLAB_LIB_OUTPUT_DIR)
 			file(

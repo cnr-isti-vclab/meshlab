@@ -36,8 +36,8 @@ else
     echo "=== jumping installation of qt packages..."
 fi
 
-echo "=== installing gmp, patchelf and cmake..."
-sudo apt-get install -y libgmp-dev patchelf cmake
+echo "=== installing gmp, mpfr, patchelf and cmake..."
+sudo apt-get install -y libgmp-dev libmpfr-dev patchelf cmake
 
 if [ "$DOWNLOAD_CGAL_BOOST_SRC" = false ] ; then
     echo "=== installing cgal and boost..."
