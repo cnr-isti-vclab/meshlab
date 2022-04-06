@@ -30,7 +30,7 @@ elseif(ALLOW_BUNDLED_CGAL AND EXISTS "${CGAL_DIR}/include/CGAL/version.h")
 	else()
 		find_package(GMP)
 		find_package(MPFR)
-		target_include_directories(external-cgal SYSTEM INTERFACE ${GMP_INCLUDE_DIRS})
+		target_include_directories(external-cgal SYSTEM INTERFACE ${GMP_INCLUDE_DIRS} ${MPFR_INCLUDE_DIRS})
 		target_link_libraries(external-cgal INTERFACE ${GMP_LIBRARIES} ${MPFR_LIBRARIES} Threads::Threads)
 	endif()
 	
