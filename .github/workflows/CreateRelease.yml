@@ -63,7 +63,7 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
-    - name: Deploy
+    - name: Deploy and AppImage
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh

@@ -59,7 +59,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
-        path: MeshLab*.AppImage
+        path: MeshLab*-linux.AppImage
     #- name: Upload MeshLab deb
     #  uses: actions/upload-artifact@v2
     #  with:
