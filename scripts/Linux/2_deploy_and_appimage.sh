@@ -2,9 +2,6 @@
 # This is a script shell for deploying a meshlab-portable folder.
 # Requires a properly built MeshLab (see 1_build.sh).
 #
-# This script can be run only in the oldest supported linux distro
-# due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
-#
 # Without given arguments, the folder that will be deployed is meshlab/src/install, which
 # should be the path where MeshLab has been installed (default output of 1_build.sh).
 #
@@ -44,8 +41,7 @@ chmod +x $INSTALL_PATH/usr/bin/meshlab
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
 $SCRIPTS_PATH/resources/linuxdeploy --appdir=$INSTALL_PATH \
-  --plugin qt --output appimage \
-  --library=$INSTALL_PATH/usr/lib/meshlab/plugins/libio_e57.so
+  --plugin qt --output appimage
 
 #get version
 IFS=' ' #space delimiter

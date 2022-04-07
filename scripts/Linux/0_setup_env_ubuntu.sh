@@ -36,9 +36,10 @@ else
     echo "=== jumping installation of qt packages..."
 fi
 
-echo "=== installing gmp, mpfr, patchelf and cmake..."
+echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
 sudo apt-get install -y cmake patchelf libgmp-dev libmpfr-dev libxerces-c-dev
 
+# possibility to use always system libraries starting from ubuntu 20.04, since cgal is header only
 if [ "$DOWNLOAD_CGAL_BOOST_SRC" = false ] ; then
     echo "=== installing cgal and boost..."
     sudo apt-get install -y libcgal-dev libboost-all-dev
