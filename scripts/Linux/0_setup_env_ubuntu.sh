@@ -37,7 +37,7 @@ else
 fi
 
 echo "=== installing gmp, mpfr, patchelf and cmake..."
-sudo apt-get install -y libgmp-dev libmpfr-dev patchelf cmake
+sudo apt-get install -y cmake patchelf libgmp-dev libmpfr-dev libxerces-c-dev
 
 if [ "$DOWNLOAD_CGAL_BOOST_SRC" = false ] ; then
     echo "=== installing cgal and boost..."
