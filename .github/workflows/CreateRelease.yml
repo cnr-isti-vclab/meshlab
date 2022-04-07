@@ -46,9 +46,10 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libgmp-dev libcgal-dev libboost-all-dev
-       #needed by qt 5.15 on linux
-       sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
+        sudo apt-get update && sudo apt-get dist-upgrade
+        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
+        #needed by qt 5.15 on linux
+        sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
       id: envs
       shell: bash
@@ -62,14 +63,10 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
-    - name: Deploy
+    - name: Deploy and AppImage
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Build MeshLab AppImage
-      shell: bash
-      run : |
-        bash scripts/${{ runner.os }}/3_appimage.sh
+        bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v2
       with:
@@ -79,7 +76,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
-        path: src/MeshLab*-linux.AppImage
+        path: MeshLab*-linux.AppImage
 
   macos_build:
     needs: [update_ml_version]
