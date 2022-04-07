@@ -1,0 +1,21 @@
+name: AutoMergeMainOnDevel
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  auto_merge:
+    name: Automatic Merge Main On Devel
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Merge main -> devel
+      uses: devmasx/merge-branch@master
+      with:
+        type: now
+        target_branch: devel
+        message: "Automatic merge branch 'main' into 'devel'"
+        github_token: ${{ github.token }}
