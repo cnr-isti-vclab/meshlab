@@ -25,33 +25,37 @@ BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
+QT_DIR_OPTION=""
 
 #check parameters
 for i in "$@"
 do
 case $i in
     -b=*|--build_path=*)
-    BUILD_PATH="${i#*=}"
-    shift # past argument=value
-    ;;
+        BUILD_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"/usr/
-    shift # past argument=value
-    ;;
+        INSTALL_PATH="${i#*=}"/usr/
+        shift # past argument=value
+        ;;
     -j*)
-    CORES=$i
-    shift # past argument=value
-    ;;
+        CORES=$i
+        shift # past argument=value
+        ;;
     --double_precision)
-    DOUBLE_PRECISION_OPTION="--double_precision"
-    shift # past argument=value
-    ;;
+        DOUBLE_PRECISION_OPTION="--double_precision"
+        shift # past argument=value
+        ;;
+    -qt=*|--qt_dir=*)
+        QT_DIR_OPTION=-qt=${i#*=}
+        shift # past argument=value
+        ;;
     *)
-          # unknown option
-    ;;
+        # unknown option
+        ;;
 esac
 done
 
-sh $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $CORES
-sh $SCRIPTS_PATH/2_deploy.sh -i=$INSTALL_PATH
-sh $SCRIPTS_PATH/3_appimage.sh -i=$INSTALL_PATH $DOUBLE_PRECISION_OPTION
+sh $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $QT_DIR_OPTION $DOUBLE_PRECISION_OPTION $CORES
+sh $SCRIPTS_PATH/2_deploy_and_appimage.sh -i=$INSTALL_PATH $QT_DIR_OPTION
