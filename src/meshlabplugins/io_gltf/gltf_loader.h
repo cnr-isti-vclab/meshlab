@@ -98,6 +98,7 @@ void populateAttr(
 		MeshModel&m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* array,
+		unsigned int stride,
 		unsigned int number,
 		int textID = -1);
 
@@ -106,18 +107,21 @@ void populateVertices(
 		MeshModel& m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* posArray,
+		unsigned int stride,
 		unsigned int vertNumber);
 
 template <typename Scalar>
 void populateVNormals(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* normArray,
+		unsigned int stride,
 		unsigned int vertNumber);
 
 template <typename Scalar>
 void populateVColors(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* colorArray,
+		unsigned int stride,
 		unsigned int vertNumber,
 		int nElemns);
 
@@ -125,6 +129,7 @@ template <typename Scalar>
 void populateVTextCoords(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* textCoordArray,
+		unsigned int stride,
 		unsigned int vertNumber,
 		int textID);
 
