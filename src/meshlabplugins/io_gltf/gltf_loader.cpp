@@ -675,6 +675,8 @@ void populateTriangles(
 		const Scalar* triArray,
 		unsigned int triNumber)
 {
+	const bool hasTexcoord = m.hasPerVertexTexCoord();
+
 	if (triArray != nullptr) {
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, triNumber);
@@ -682,9 +684,11 @@ void populateTriangles(
 			for (int j = 0; j < 3; ++j) {
 				fi->V(j) = ivp[triArray[i+j]];
 
-				fi->WT(j).u() = fi->V(j)->T().u();
-				fi->WT(j).v() = fi->V(j)->T().v();
-				fi->WT(j).n() = fi->V(j)->T().N();
+				if (hasTexcoord) {
+					fi->WT(j).u() = fi->V(j)->T().u();
+					fi->WT(j).v() = fi->V(j)->T().v();
+					fi->WT(j).n() = fi->V(j)->T().N();
+				}
 			}
 		}
 	}
@@ -695,9 +699,11 @@ void populateTriangles(
 			for (int j = 0; j < 3; ++j) {
 				fi->V(j) = ivp[i+j];
 
-				fi->WT(j).u() = fi->V(j)->T().u();
-				fi->WT(j).v() = fi->V(j)->T().v();
-				fi->WT(j).n() = fi->V(j)->T().N();
+				if (hasTexcoord) {
+					fi->WT(j).u() = fi->V(j)->T().u();
+					fi->WT(j).v() = fi->V(j)->T().v();
+					fi->WT(j).n() = fi->V(j)->T().N();
+				}
 			}
 		}
 	}
