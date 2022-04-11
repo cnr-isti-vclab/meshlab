@@ -396,8 +396,8 @@ void loadMeshPrimitive(
 			v->C() = col;
 	}
 
-	// if the mesh has a texture, enable texcoords to the mesh
-	if (vTex) {
+	// if the mesh has a texture or texcoords, enable texcoords to the mesh
+	if (vTex || p.attributes.find(GLTF_ATTR_STR[TEXCOORD_0]) != p.attributes.end()) {
 		m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 		m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	}
