@@ -47,11 +47,11 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(QWidget* parent, MultiViewer_Container* mvcont, RichParameterList* current) :
+GLArea::GLArea(MultiViewer_Container* parent, RichParameterList* current) :
 		//    QOpenGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
 		// FIXME GL: This is weird...
 		QOpenGLWidget(parent),
-		parentmultiview(mvcont)
+		parentmultiview(parent)
 {
 	makeCurrent();
 	this->updateCustomSettingValues(*current);
@@ -65,7 +65,7 @@ GLArea::GLArea(QWidget* parent, MultiViewer_Container* mvcont, RichParameterList
 	// if (mvcont != NULL)
 	//     shared = mvcont->sharedDataContext();
 
-	id = mvcont->getNextViewerId();
+	id = parent->getNextViewerId();
 
 	updateMeshSetVisibilities();
 	updateRasterSetVisibilities();
