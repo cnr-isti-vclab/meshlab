@@ -107,24 +107,6 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 		_fancy_b_light_diffuse_color = vcg::Color4b(204, 204, 255, 255);
 	}
 
-	~MLPerViewGLOptions()
-	{
-	}
-
-	MLPerViewGLOptions(const  MLPerViewGLOptions& opts)
-		:vcg::RenderingModalityGLOptions(opts)
-	{
-		copyData(opts);
-	}
-
-	MLPerViewGLOptions& operator=(const MLPerViewGLOptions& opts)
-	{
-		vcg::RenderingModalityGLOptions::operator=(opts);
-		copyData(opts);
-		return (*this);
-	}
-
-
   size_t serialize(std::string& str) const
   {
     str.append(((_visible) ? "1" : "0"));
@@ -216,36 +198,6 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 	static Scalarm maxLineWidth()
 	{
 		return 5.0;
-	}
-
-private:
-	void copyData(const  MLPerViewGLOptions& opts)
-	{
-		_visible = opts._visible;
-		_perbbox_quoted_info_enabled = opts._perbbox_quoted_info_enabled;
-		_peredge_extra_enabled = opts._peredge_extra_enabled;
-		_peredge_edgeboundary_enabled = opts._peredge_edgeboundary_enabled;
-		_peredge_faceboundary_enabled = opts._peredge_faceboundary_enabled;
-		_peredge_edgemanifold_enabled = opts._peredge_edgemanifold_enabled;
-		_peredge_vertmanifold_enabled = opts._peredge_vertmanifold_enabled;
-		_peredge_text_boundary_enabled = opts._peredge_text_boundary_enabled;
-		_peredge_fauxwire_enabled = opts._peredge_fauxwire_enabled;
-		_peredge_wire_enabled = opts._peredge_wire_enabled;
-		_back_face_cull = opts._back_face_cull;
-		_single_side_lighting = opts._single_side_lighting;
-		_double_side_lighting = opts._double_side_lighting;
-		_fancy_lighting = opts._fancy_lighting;
-		_sel_enabled = opts._sel_enabled;
-		_face_sel = opts._face_sel;
-		_vertex_sel = opts._vertex_sel;
-
-		_base_light_ambient_color = opts._base_light_ambient_color;
-		_base_light_diffuse_color = opts._base_light_diffuse_color;
-		_base_light_specular_color = opts._base_light_specular_color;
-
-		_fancy_lighting_enabled = opts._fancy_lighting_enabled;
-		_fancy_f_light_diffuse_color = opts._fancy_f_light_diffuse_color;
-		_fancy_b_light_diffuse_color = opts._fancy_b_light_diffuse_color;
 	}
 };
 
