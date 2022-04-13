@@ -38,13 +38,15 @@ public:
 	void initPerViewRenderingData(int meshid, MLRenderingData& dt);
 	void removePerViewRenderindData();
 	void setRenderingData(int meshid, MLRenderingData& dt);
-	void drawMeshModel(int meshid) const;
+	void drawMeshModel(int meshid);
 	void meshAttributesUpdated(
 			int meshid,
 			bool conntectivitychanged,
 			const MLRenderingData::RendAtts& dt);
 
 	void makeCurrent();
+
+	void printSharedContext(void);
 
 	static void smoothModalitySuggestedRenderingData(MLRenderingData& dt);
 	static void pointModalitySuggestedRenderingData(MLRenderingData& dt);

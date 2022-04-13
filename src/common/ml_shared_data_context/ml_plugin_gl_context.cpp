@@ -30,7 +30,8 @@ MLPluginGLContext::MLPluginGLContext(MLSceneGLSharedDataContext& shared)
     : QOpenGLContext(nullptr)
     , _shared(shared)
 {
-	this->setShareContext(_shared.context());
+	auto * sharedGlContext = _shared.context();
+	this->setShareContext(sharedGlContext);
 	this->setFormat(_shared.format());
 	const bool ok = this->create();
 	assert(ok);
@@ -43,10 +44,14 @@ MLPluginGLContext::MLPluginGLContext(MLSceneGLSharedDataContext& shared)
 
 MLPluginGLContext::~MLPluginGLContext()
 {
+	if (_surface.isValid())
+		_surface.destroy();
 }
 
-void MLPluginGLContext::drawMeshModel( int meshid) const
+void MLPluginGLContext::drawMeshModel(int meshid)
 {
+	// This function must be called using the plugin context (make current is enforced)
+	this->makeCurrent();
 	MLPluginGLContext* id = const_cast<MLPluginGLContext*>(this);
 	_shared.draw(meshid,id);
 }
@@ -54,6 +59,13 @@ void MLPluginGLContext::drawMeshModel( int meshid) const
 void MLPluginGLContext::makeCurrent()
 {
 	QOpenGLContext::makeCurrent(&_surface);
+}
+
+void MLPluginGLContext::printSharedContext(void)
+{
+	std::cout << "PLUGIN CONTEXT GROUP " << this->shareGroup() << std::endl;
+	std::cout << "SHARED CONTEXT " << _shared.context() << std::endl;
+	std::cout << "SHARED CONTEXT GROUP " << _shared.context()->shareGroup() << std::endl;
 }
 
 void MLPluginGLContext::setRenderingData( int meshid,MLRenderingData& dt )
