@@ -32,8 +32,9 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,
                                                        vcg::QtThreadSafeMemoryInfo& gpumeminfo,
                                                        bool highprecision,
                                                        size_t perbatchtriangles,
-                                                       size_t minfacespersmoothrendering)
-    : QOpenGLWidget(nullptr)
+                                                       size_t minfacespersmoothrendering,
+                                                       QWidget * parent)
+    : QOpenGLWidget(parent)
     , _md(md)
     , _gpumeminfo(gpumeminfo)
     , _perbatchtriangles(perbatchtriangles)
@@ -119,11 +120,13 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 
 void MLSceneGLSharedDataContext::initializeGL()
 {
-	//makeCurrent(&_surface); // FIXME GL --- this should not be necessary if properly used
-	makeCurrent();
+//	makeCurrent(&_surface); // FIXME GL --- this is not needed if properly used
+//	makeCurrent();
 	GLExtensionsManager::initializeGLextensions();
-	doneCurrent();
-	// FIXME GL --- check if resetting the gl context is harmful
+//	doneCurrent(); // NO
+
+	// hide immediately this widget (used only to obtain a shared opengl context)
+	this->setHidden(true);
 }
 
 void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid, QOpenGLContext* viewerid,const MLRenderingData& perviewdata )
