@@ -95,15 +95,14 @@ MultiViewer_Container::MultiViewer_Container(
 	QWidget*                     parent) :
 		Splitter(parent),
 		meshDoc(),
-		scenecontext(meshDoc, meminfo, highprec, perbatchprimitives, minfacespersmoothrendering)
+		scenecontext(meshDoc, meminfo, highprec, perbatchprimitives, minfacespersmoothrendering, this)
 
 {
-	setChildrenCollapsible(false);
 	// Here a shared GL content is initialized for each 'window'
-	scenecontext.setHidden(true);
-	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be
-	// ready
-	//	scenecontext->initializeGL();
+	setChildrenCollapsible(false);
+
+	// FIXME GL: this function is implicitly called, it cannot be forced as the context won't be ready REMOVE
+//		scenecontext.initializeGL();
 	currId  = -1;
 }
 
