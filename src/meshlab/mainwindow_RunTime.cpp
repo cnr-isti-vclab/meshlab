@@ -2689,10 +2689,6 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
  */
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
-	int static lastPos = -1;
-	if (pos == lastPos) return true;
-	lastPos = pos;
-	
 	static QElapsedTimer currTime;
 	if (currTime.isValid() && currTime.elapsed() < 100)
 		return true;
