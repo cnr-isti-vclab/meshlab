@@ -1600,10 +1600,12 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 
 		std::vector<MLRenderingData> rendData;
-		for(const MeshModel& mp : meshDoc()->meshIterator()) {
-			MLRenderingData ml;
-			getRenderingData(mp.id(), ml);
-			rendData.push_back(ml);
+		if (saveViewStateCheckBox->isChecked()) {
+			for(const MeshModel& mp : meshDoc()->meshIterator()) {
+				MLRenderingData ml;
+				getRenderingData(mp.id(), ml);
+				rendData.push_back(ml);
+			}
 		}
 
 		try {
