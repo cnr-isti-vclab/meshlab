@@ -21,7 +21,7 @@ endif()
 
 # if double precision version, "d" is inserted after 7 chars (YYYY.mmd*)
 if (BUILD_WITH_DOUBLE_SCALAR)
-	string(LENGTH MESHLAB_VERSION MLV_LEN)
+	string(LENGTH ${MESHLAB_VERSION} MLV_LEN)
 	MATH(EXPR MLV_POSTFIX_LEN "${MLV_LEN}-7") # how many chars there are adter YYYY.mm
 	string(SUBSTRING ${MESHLAB_VERSION} 0 7 MLV_PREFIX)
 	string(SUBSTRING ${MESHLAB_VERSION} 7 ${MLV_POSTFIX_LEN} MLV_POSTFIX)
