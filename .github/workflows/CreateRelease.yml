@@ -24,7 +24,7 @@ jobs:
     - name: commit ML_VERSION change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: New version: ${{ github.event.inputs.version }}
+        commit_message: Set MeshLab version to ${{ github.event.inputs.version }}
 
   linux_build:
     needs: [update_ml_version]
