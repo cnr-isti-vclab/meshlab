@@ -352,12 +352,12 @@ jobs:
           MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz
           MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
           meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
-          meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
+          meshlab_linux_appimage_double/MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
           MeshLab${{steps.envs.outputs.ml_version}}-macos.tar.gz
           MeshLab${{steps.envs.outputs.ml_version_d}}-macos.tar.gz
           meshlab_macos_dmg/MeshLab${{steps.envs.outputs.ml_version}}-macos.dmg
-          meshlab_macos_dmg/MeshLab${{steps.envs.outputs.ml_version_d}}-macos.dmg
+          meshlab_macos_dmg_double/MeshLab${{steps.envs.outputs.ml_version_d}}-macos.dmg
           MeshLab${{steps.envs.outputs.ml_version}}-windows.zip
           MeshLab${{steps.envs.outputs.ml_version_d}}-windows.zip
           meshlab_windows_installer/MeshLab${{steps.envs.outputs.ml_version}}-windows.exe
-          meshlab_windows_installer/MeshLab${{steps.envs.outputs.ml_version_d}}-windows.exe
+          meshlab_windows_installer_double/MeshLab${{steps.envs.outputs.ml_version_d}}-windows.exe
