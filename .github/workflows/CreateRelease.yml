@@ -24,7 +24,7 @@ jobs:
     - name: commit ML_VERSION change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: Apply automatic ML_VERSION change to ${{ github.event.inputs.version }}
+        commit_message: New version: ${{ github.event.inputs.version }}
 
   linux_build:
     needs: [update_ml_version]
@@ -192,7 +192,7 @@ jobs:
       run: |
         .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\install\'
     - name: Deploy
-      shell: bash
+      shell: C:\shells\msys2bash.cmd {0}
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
     - name: NSIS script
