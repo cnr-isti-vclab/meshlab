@@ -232,16 +232,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Setup env variables
-      id: envs
-      shell: bash
-      run: |
-        if [ "${{ github.event.inputs.release_candidate }}" == "true" ]; then
-          echo  ::set-output name=rc_suffix::"_rc"
-        else
-          echo ::set-output name=rc_suffix::""
-        fi
-
     #Download Linux Packages
     - name: Download Linux ZIP
       uses: actions/download-artifact@v2
@@ -272,9 +262,9 @@ jobs:
     - name: Create MeshLab Portable Linux Archive
       run: |
         cd meshlab_linux_portable
-        tar -cvzf ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}-linux.tar.gz *
         cd ../meshlab_linux_portable_double
-        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d-linux.tar.gz *
         cd ..
 
     #Download MacOS Package
@@ -305,9 +295,9 @@ jobs:
     - name: Create MeshLab Portable MacOS
       run: |
         cd meshlab_macos_portable
-        tar -cvzf ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}-macos.tar.gz *
         cd ../meshlab_macos_portable_double
-        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz *
+        tar -cvzf ../MeshLab${{ github.event.inputs.version }}d-macos.tar.gz *
         cd ..
 
     #Download Windows Packages
@@ -334,11 +324,26 @@ jobs:
     - name: Create MeshLab Portable Windows Archive
       run: |
         cd meshlab_windows_portable
-        zip -r ../MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip *
+        zip -r ../MeshLab${{ github.event.inputs.version }}-windows.zip *
         cd ../meshlab_windows_portable_double
-        zip -r ../MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip *
+        zip -r ../MeshLab${{ github.event.inputs.version }}d-windows.zip *
         cd ..
 
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        #get version of meshlab
+        IFS=' ' #space delimiter
+        STR_VERSION=$(meshlab_linux_portable/usr/bin/meshlab --version)
+        read -a strarr <<< "$STR_VERSION"
+        ML_VERSION=${strarr[1]} #get the meshlab version from the string
+        echo  ::set-output name=ml_version::"$ML_VERSION"
+        STR_VERSION=$(meshlab_linux_portable_double/usr/bin/meshlab --version)
+        read -a strarrd <<< "$STR_VERSION"
+        ML_VERSION_D=${strarrd[1]} #get the meshlab version from the string
+        echo  ::set-output name=ml_version_d::"$ML_VERSION_D"
+        #access to this variable using ${{steps.envs.outputs.ml_version}} or ${{steps.envs.outputs.ml_version_d}}
 
     #Create release and upload
     - name: Publish Release
@@ -347,8 +352,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: MeshLab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
-        release_name: MeshLab-${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}
+        tag_name: MeshLab-${{ github.event.inputs.version }}
+        release_name: MeshLab-${{ github.event.inputs.version }}
         draft: false
         prerelease: ${{ github.event.inputs.release_candidate }}
     #Linux
@@ -359,8 +364,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.tar.gz
+        asset_path: MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz
         asset_content_type: MeshLab Portable for Linux
     - name: Upload ReleaseLinuxPortable-d
       id: upload-release-linux-portable-d
@@ -369,8 +374,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.tar.gz
+        asset_path: MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
         asset_content_type: MeshLab Portable for Linux
     - name: Upload ReleaseLinuxAppImage
       id: upload-release-linux-appimage
@@ -379,8 +384,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_linux_appimage/MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.AppImage
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-linux.AppImage
+        asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
     - name: Upload ReleaseLinuxAppImage-d
       id: upload-release-linux-appimage-d
@@ -389,8 +394,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_linux_appimage_double/MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.AppImage
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-linux.AppImage
+        asset_path: meshlab_linux_appimage_double/MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
     #MacOS
     - name: Upload ReleaseMacOSDMG
@@ -400,8 +405,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_macos_dmg/MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.dmg
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.dmg
+        asset_path: meshlab_macos_dmg/MeshLab${{steps.envs.outputs.ml_version}}-macos.dmg
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-macos.dmg
         asset_content_type: MeshLab DMG for MacOS
     - name: Upload ReleaseMacOSDMG-d
       id: upload-release-macos-d
@@ -410,8 +415,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_macos_dmg_double/MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.dmg
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.dmg
+        asset_path: meshlab_macos_dmg_double/MeshLab${{steps.envs.outputs.ml_version_d}}-macos.dmg
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}$-macos.dmg
         asset_content_type: MeshLab DMG for MacOS
     - name: Upload ReleaseMacOSPortable
       id: upload-release-macos-portable
@@ -420,8 +425,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_path: MeshLab${{steps.envs.outputs.ml_version}}-macos.tar.gz
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     - name: Upload ReleaseMacOSPortable-d
       id: upload-release-macos-portable-d
@@ -430,8 +435,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-macos.tar.gz
+        asset_path: MeshLab${{steps.envs.outputs.ml_version_d}}-macos.tar.gz
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}-macos.tar.gz
         asset_content_type: MeshLab Portable for MacOS
     #Windows
     - name: Upload ReleaseWindowsPortable
@@ -441,8 +446,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.zip
+        asset_path: MeshLab${{steps.envs.outputs.ml_version}}-windows.zip
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-windows.zip
         asset_content_type: MeshLab Portable for Windows
     - name: Upload ReleaseWindowsPortable-d
       id: upload-release-windows-portable-d
@@ -451,8 +456,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.zip
+        asset_path: MeshLab${{steps.envs.outputs.ml_version_d}}-windows.zip
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}-windows.zip
         asset_content_type: MeshLab Portable for Windows
     - name: Upload ReleaseWindowsInstaller
       id: upload-release-windows-installer
@@ -461,8 +466,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_windows_installer/MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.exe
-        asset_name: MeshLab${{ github.event.inputs.version }}${{steps.envs.outputs.rc_suffix}}-windows.exe
+        asset_path: meshlab_windows_installer/MeshLab${{steps.envs.outputs.ml_version}}-windows.exe
+        asset_name: MeshLab${{steps.envs.outputs.ml_version}}-windows.exe
         asset_content_type: MeshLab Installer for Windows
     - name: Upload ReleaseWindowsInstaller-d
       id: upload-release-windows-installer-d
@@ -471,6 +476,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: meshlab_windows_installer_double/MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.exe
-        asset_name: MeshLab${{ github.event.inputs.version }}d${{steps.envs.outputs.rc_suffix}}-windows.exe
+        asset_path: meshlab_windows_installer_double/MeshLab${{steps.envs.outputs.ml_version_d}}-windows.exe
+        asset_name: MeshLab${{steps.envs.outputs.ml_version_d}}-windows.exe
         asset_content_type: MeshLab Installer for Windows
