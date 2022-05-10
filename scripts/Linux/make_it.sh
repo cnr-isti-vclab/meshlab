@@ -1,9 +1,6 @@
 #!/bin/bash
 # This is a script shell for compiling and deploying MeshLab in a Linux environment.
 #
-# This script can be run only in the oldest supported linux distro
-# due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
-#
 # Requires a Qt environment which is set-up properly, and an accessible
 # cmake binary.
 #
@@ -57,5 +54,5 @@ case $i in
 esac
 done
 
-sh $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $QT_DIR_OPTION $DOUBLE_PRECISION_OPTION $CORES
-sh $SCRIPTS_PATH/2_deploy_and_appimage.sh -i=$INSTALL_PATH $QT_DIR_OPTION
+bash $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $QT_DIR_OPTION $DOUBLE_PRECISION_OPTION $CORES
+bash $SCRIPTS_PATH/2_deploy_and_appimage.sh -i=$INSTALL_PATH $QT_DIR_OPTION

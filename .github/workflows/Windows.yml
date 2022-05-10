@@ -41,7 +41,7 @@ jobs:
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
     - name: Deploy
-      shell: bash
+      shell: C:\shells\msys2bash.cmd {0}
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
     - name: NSIS script
