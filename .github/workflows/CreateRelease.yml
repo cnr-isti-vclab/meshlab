@@ -115,7 +115,7 @@ jobs:
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-        p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Sign
       run: |
         codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} src/install/meshlab.app
@@ -190,7 +190,7 @@ jobs:
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Sign Portable content
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\install\'
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\install\'
     - name: Deploy
       shell: C:\shells\msys2bash.cmd {0}
       run: |
@@ -210,7 +210,7 @@ jobs:
         mv src/install/MeshLab*-windows.exe  src/installer
     - name: Sign Installer
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PWD }}' -path 'src\installer\'
+        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\installer\'
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
