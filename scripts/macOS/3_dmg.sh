@@ -11,8 +11,7 @@
 
 SCRIPTS_PATH=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-ML_VERSION=$(cat $SCRIPTS_PATH/../../ML_VERSION)
+INSTALL_PATH=$SCRIPTS_PATH/../../install
 
 #checking for parameters
 for i in "$@"

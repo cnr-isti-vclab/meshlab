@@ -3,8 +3,8 @@
 # Requires a Qt environment which is set-up properly, and an accessible
 # cmake binary.
 #
-# Without given arguments, MeshLab will be built in the meshlab/src/build
-# directory, and installed in $BUILD_PATH/../install.
+# Without given arguments, MeshLab will be built in the meshlab/build
+# directory, and installed in meshlab/install.
 #
 # You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
@@ -15,8 +15,8 @@
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 SOURCE_PATH=$SCRIPTS_PATH/../../src
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-BUILD_PATH=$SOURCE_PATH/build
-INSTALL_PATH=$SOURCE_PATH/install
+BUILD_PATH=$SOURCE_PATH/../build
+INSTALL_PATH=$SOURCE_PATH/../install
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""

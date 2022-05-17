@@ -117,17 +117,17 @@ jobs:
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Sign
       run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} src/install/meshlab.app
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} install/meshlab.app
     - name: Notarize
       uses: devbotsxyz/xcode-notarize@v1
       with:
-        product-path: "src/install/meshlab.app"
+        product-path: "install/meshlab.app"
         appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
         appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
     - name: "Staple Release"
       uses: devbotsxyz/xcode-staple@v1
       with:
-        product-path: "src/install/meshlab.app"
+        product-path: "install/meshlab.app"
     - name: Create MeshLab DMG
       shell: bash
       run: |
@@ -136,12 +136,12 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/MeshLab*.app
+        path: install/MeshLab*.app
     - name: Upload DMG
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/MeshLab*-macos.dmg
+        path: install/MeshLab*-macos.dmg
 
   windows_build:
     needs: [update_ml_version]
