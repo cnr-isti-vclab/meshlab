@@ -44,7 +44,7 @@ jobs:
     #  uses: jiro4989/build-deb-action@v2
     #  with:
     #    package: MeshLab
-    #    package_root: src/install
+    #    package_root: install
     #    maintainer: cnr-isti-vclab
     #    version: ${{steps.envs.outputs.version}} # refs/tags/v*.*.*
     #    arch: 'amd64'
@@ -53,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/
+        path: install/
     - name: Upload MeshLab AppImage
       uses: actions/upload-artifact@v2
       with:

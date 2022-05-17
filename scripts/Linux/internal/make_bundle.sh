@@ -2,7 +2,7 @@
 # this is a script shell for setting up the application bundle for linux
 # Requires a properly built meshlab.
 #
-# Without given arguments, the application boundle will be placed in the meshlab/src/install
+# Without given arguments, the application boundle will be placed in the meshlab/install
 # directory.
 #
 # You can give as argument the path were meshlab has been installed.
@@ -10,14 +10,21 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/../
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 SOURCE_PATH=$SCRIPTS_PATH/../../src
+INSTALL_PATH=$SOURCE_PATH/../install
 
-#checking for parameters
-if [ "$#" -eq 0 ]
-then
-    INSTALL_PATH=$SOURCE_PATH/install
-else
-    INSTALL_PATH=$(realpath $1)
-fi
+#check parameters
+for i in "$@"
+do
+case $i in
+    -i=*|--install_path=*)
+        INSTALL_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
+    *)
+        # unknown option
+        ;;
+esac
+done
 
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH
 

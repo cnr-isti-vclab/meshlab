@@ -2,14 +2,15 @@
 # This is a script shell for deploying a meshlab-portable folder and create an AppImage.
 # Requires a properly built MeshLab (see 1_build.sh).
 #
-# Without given arguments, the folder that will be deployed is meshlab/src/install, which
+# Without given arguments, the folder that will be deployed is meshlab/install, which
 # should be the path where MeshLab has been installed (default output of 1_build.sh).
+# The AppImage will be placed in the directory where the script is run.
 #
 # You can give as argument the path where you installed MeshLab.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+INSTALL_PATH=$SCRIPTS_PATH/../../install
 QT_DIR=""
 
 #checking for parameters
@@ -30,7 +31,7 @@ case $i in
 esac
 done
 
-bash $SCRIPTS_PATH/internal/make_bundle.sh $INSTALL_PATH
+bash $SCRIPTS_PATH/internal/make_bundle.sh -i=$INSTALL_PATH
 
 if [ ! -z "$QT_DIR" ]
 then
