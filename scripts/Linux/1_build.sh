@@ -8,7 +8,7 @@
 #
 # You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
-# sh linux_build.sh --build_path=/path/to/build --install_path=/path/to/install
+# bash 1_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
 
 #default paths wrt the script folder

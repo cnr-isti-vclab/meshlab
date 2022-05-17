@@ -8,17 +8,13 @@
 #
 # You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
-# sh macos_build.sh --build_path=/path/to/build --install_path=/path/to/install
+# bash 1_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
-
-#realpath function
-#realpath() {
-#    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-#}
 
 #default paths wrt the script folder
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 SOURCE_PATH=$SCRIPTS_PATH/../../src
+RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
 CORES="-j4"

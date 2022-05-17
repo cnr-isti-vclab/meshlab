@@ -190,7 +190,7 @@ jobs:
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Sign Portable content
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\install\'
+        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\install\'
     - name: Deploy
       shell: C:\shells\msys2bash.cmd {0}
       run: |
@@ -198,7 +198,7 @@ jobs:
     - name: NSIS script
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/resources/nsis_script.sh
+        bash scripts/${{ runner.os }}/internal/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
@@ -208,9 +208,12 @@ jobs:
       run: |
         mkdir src/installer
         mv src/install/MeshLab*-windows.exe  src/installer
+        rm src/install/meshlab_final.nsi
+        rm src/install/ExecWaitJob.nsh
+        rm src/install/FileAssociation.nsh
     - name: Sign Installer
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\installer\'
+        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\installer\'
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:

@@ -8,7 +8,7 @@
 #
 # You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
-# sh linux_build.sh --build_path=/path/to/build --install_path=/path/to/install
+# bash 1_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
 
 #default paths wrt the script folder
@@ -59,10 +59,6 @@ fi
 
 BUILD_PATH=$(realpath $BUILD_PATH)
 INSTALL_PATH=$(realpath $INSTALL_PATH)
-
-echo "BUILD PATH: "$BUILD_PATH
-echo "INSTALL PATH: "$INSTALL_PATH
-echo "SCRIPTS PATH: "$SCRIPTS_PATH
 
 cd $BUILD_PATH
 cmake -GNinja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH

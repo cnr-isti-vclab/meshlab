@@ -47,7 +47,7 @@ jobs:
     - name: NSIS script
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/resources/nsis_script.sh
+        bash scripts/${{ runner.os }}/internal/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
@@ -57,6 +57,9 @@ jobs:
       run: |
         mkdir src/installer
         mv src/install/MeshLab*-windows.exe  src/installer/
+        rm src/install/meshlab_final.nsi
+        rm src/install/ExecWaitJob.nsh
+        rm src/install/FileAssociation.nsh
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:

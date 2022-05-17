@@ -38,6 +38,8 @@ message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
 find_package(Eigen3)
 
+set(MESHLAB_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../resources)
+
 ### Build directories
 if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these dirs are defined in parent dir
 	set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
@@ -231,7 +233,7 @@ set(COPIED_FILES)
 
 if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	# shaders
-	set(SHADER_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders")
+	set(SHADER_BASE_DIR "${MESHLAB_RESOURCES_DIR}/shaders")
 	file(
 		GLOB_RECURSE SHADERS
 		LIST_DIRECTORIES false
@@ -276,8 +278,8 @@ if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	)
 
 	if(NOT WIN32 AND NOT APPLE)
-		install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/Linux/resources/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-		install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/512x512/apps)
+		install(FILES "${MESHLAB_RESOURCES_DIR}/linux/meshlab.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+		install(FILES "${MESHLAB_RESOURCES_DIR}/icons/meshlab.png" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/512x512/apps)
 	endif()
 
 endif()

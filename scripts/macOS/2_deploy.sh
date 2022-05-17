@@ -8,11 +8,6 @@
 #
 # After running this script, $DISTRIB_PATH/meshlab.app will be a portable meshlab application.
 
-#realpath function
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 INSTALL_PATH=$SCRIPTS_PATH/../../src/install
 APPNAME="meshlab.app"
@@ -22,12 +17,12 @@ for i in "$@"
 do
 case $i in
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"
-    shift # past argument=value
-    ;;
+        INSTALL_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
-          # unknown option
-    ;;
+        # unknown option
+        ;;
 esac
 done
 
