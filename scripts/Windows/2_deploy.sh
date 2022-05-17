@@ -2,13 +2,13 @@
 # This is a script shell for deploying a meshlab-portable folder.
 # Requires a properly built meshlab (see 1_build.sh).
 #
-# Without given arguments, the folder that will be deployed is meshlab/src/install.
+# Without given arguments, the folder that will be deployed is meshlab/install.
 #
 # You can give as argument the path where meshlab is installed.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+INSTALL_PATH=$SCRIPTS_PATH/../../install
 
 #checking for parameters
 for i in "$@"

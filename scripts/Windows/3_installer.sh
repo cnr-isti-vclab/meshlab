@@ -7,11 +7,11 @@
 #
 # You can give as argument the INSTALL_PATH.
 #
-# After running this script, the installer can be found inside the resources folder.
+# After running this script, the installer can be found inside the install folder.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
+INSTALL_PATH=$SCRIPTS_PATH/../../install
 
 
 #checking for parameters
