@@ -3,10 +3,11 @@ name: AutoMergeMainOnDevel
 on:
   push:
     branches:
-      - 'cnr-isti-vclab/main'
+      - 'main'
 
 jobs:
   auto_merge:
+    if: github.repository == 'cnr-isti-vclab/meshlab'
     name: Automatic Merge Main On Devel
     runs-on: ubuntu-latest
 
