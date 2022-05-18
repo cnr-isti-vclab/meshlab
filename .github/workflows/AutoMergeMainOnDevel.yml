@@ -7,6 +7,7 @@ on:
 
 jobs:
   auto_merge:
+    if: github.repository == 'cnr-isti-vclab/meshlab'
     name: Automatic Merge Main On Devel
     runs-on: ubuntu-latest
 

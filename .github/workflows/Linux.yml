@@ -19,7 +19,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-        sudo apt-get update && sudo apt-get upgrade
         bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
         #needed by qt 5.15 on linux
         sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
@@ -45,7 +44,7 @@ jobs:
     #  uses: jiro4989/build-deb-action@v2
     #  with:
     #    package: MeshLab
-    #    package_root: src/install
+    #    package_root: install
     #    maintainer: cnr-isti-vclab
     #    version: ${{steps.envs.outputs.version}} # refs/tags/v*.*.*
     #    arch: 'amd64'
@@ -54,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/
+        path: install/
     - name: Upload MeshLab AppImage
       uses: actions/upload-artifact@v2
       with:

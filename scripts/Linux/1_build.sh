@@ -3,19 +3,19 @@
 # Requires a Qt environment which is set-up properly, and an accessible
 # cmake binary.
 #
-# Without given arguments, MeshLab will be built in the meshlab/src/build
+# Without given arguments, MeshLab will be built in the meshlab/build
 # directory, and installed in $BUILD_PATH/../install.
 #
 # You can give as argument the BUILD_PATH and the INSTALL_PATH in the
 # following way:
-# sh linux_build.sh --build_path=/path/to/build --install_path=/path/to/install
+# bash 1_build.sh --build_path=/path/to/build --install_path=/path/to/install
 # -b and -i arguments are also supported.
 
 #default paths wrt the script folder
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 SOURCE_PATH=$SCRIPTS_PATH/../../src
-BUILD_PATH=$SOURCE_PATH/build
-INSTALL_PATH=$SOURCE_PATH/install/usr/
+BUILD_PATH=$SOURCE_PATH/../build
+INSTALL_PATH=$SOURCE_PATH/../install/usr/
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
@@ -75,6 +75,6 @@ if [ ! -z "$QT_DIR" ]
 then
     export Qt5_DIR=$QT_DIR
 fi
-cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 make $CORES
 make install

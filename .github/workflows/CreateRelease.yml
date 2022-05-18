@@ -43,7 +43,6 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Install dependencies
       run: |
-        sudo apt-get update && sudo apt-get upgrade
         bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
         #needed by qt 5.15 on linux
         sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
@@ -68,7 +67,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_linux_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/
+        path: install/
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v2
       with:
@@ -118,17 +117,17 @@ jobs:
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Sign
       run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} src/install/meshlab.app
+        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} install/meshlab.app
     - name: Notarize
       uses: devbotsxyz/xcode-notarize@v1
       with:
-        product-path: "src/install/meshlab.app"
+        product-path: "install/meshlab.app"
         appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
         appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
     - name: "Staple Release"
       uses: devbotsxyz/xcode-staple@v1
       with:
-        product-path: "src/install/meshlab.app"
+        product-path: "install/meshlab.app"
     - name: Create MeshLab DMG
       shell: bash
       run: |
@@ -137,12 +136,12 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/MeshLab*.app
+        path: install/MeshLab*.app
     - name: Upload DMG
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
-        path: src/install/MeshLab*-macos.dmg
+        path: install/MeshLab*-macos.dmg
 
   windows_build:
     needs: [update_ml_version]
@@ -190,7 +189,7 @@ jobs:
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
     - name: Sign Portable content
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\install\'
+        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'install\'
     - name: Deploy
       shell: C:\shells\msys2bash.cmd {0}
       run: |
@@ -198,29 +197,32 @@ jobs:
     - name: NSIS script
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/resources/nsis_script.sh
+        bash scripts/${{ runner.os }}/internal/nsis_script.sh
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
-        script-file: "src/install/meshlab_final.nsi"
+        script-file: "install/meshlab_final.nsi"
     - name: Move Installer
       shell: bash
       run: |
-        mkdir src/installer
-        mv src/install/MeshLab*-windows.exe  src/installer
+        mkdir installer
+        mv install/MeshLab*-windows.exe  installer
+        rm install/meshlab_final.nsi
+        rm install/ExecWaitJob.nsh
+        rm install/FileAssociation.nsh
     - name: Sign Installer
       run: |
-        .\scripts\Windows\resources\windows_sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'src\installer\'
+        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'installer\'
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_windows_portable${{steps.envs.outputs.artifact_suffix}}
-        path: src/install
+        path: install
     - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v2
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: src/installer/MeshLab*-windows.exe
+        path: installer/MeshLab*-windows.exe
 
   #after building MeshLab for the three platforms, we create a release in github
   create_release:
