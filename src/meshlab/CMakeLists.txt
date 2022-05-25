@@ -92,7 +92,7 @@ target_link_libraries(
 set_property(TARGET meshlab PROPERTY FOLDER Core)
 if (APPLE)
 	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/images/meshlab.icns DESTINATION "${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/Resources/")
+	file(COPY ${MESHLAB_RESOURCES_DIR}/icons/meshlab.icns DESTINATION "${MESHLAB_BUILD_DISTRIB_DIR}/meshlab.app/Contents/Resources/")
 	set_target_properties(meshlab PROPERTIES 
 		MACOSX_BUNDLE_ICON_FILE meshlab.icns
 		MACOSX_BUNDLE_BUNDLE_VERSION "${MESHLAB_VERSION}"

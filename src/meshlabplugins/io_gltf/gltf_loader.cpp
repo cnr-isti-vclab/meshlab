@@ -396,8 +396,8 @@ void loadMeshPrimitive(
 			v->C() = col;
 	}
 
-	// if the mesh has a texture, enable texcoords to the mesh
-	if (vTex) {
+	// if the mesh has a texture or texcoords, enable texcoords to the mesh
+	if (vTex || p.attributes.find(GLTF_ATTR_STR[TEXCOORD_0]) != p.attributes.end()) {
 		m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 		m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	}
@@ -461,8 +461,8 @@ void loadMeshPrimitive(
  * gltf model. If the attribute is vertex position, sets also vertex pointers
  * vector ivp. For all the other parameters, ivp is a const input.
  *
- * If the primitive does not contain the primitive p, nothing is done.
- * However, id the attribute is POSITION, then a MLException will be thrown.
+ * If the primitive does not contain the attribute attr, nothing is done.
+ * However, if the attribute is POSITION, then a MLException will be thrown.
  *
  *
  * @param m
@@ -525,39 +525,45 @@ bool loadAttribute(
 				textID = 4;
 		}
 
+		const unsigned int elementSize =
+				tinygltf::GetNumComponentsInType(accessor->type) *
+				tinygltf::GetComponentSizeInBytes(accessor->componentType);
+		const unsigned int stride =
+				(posbw.byteStride > elementSize) ? posbw.byteStride : elementSize;
+
 		//if data is float
 		if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
 			//get the starting point of the data as float pointer
 			const float* posArray = (const float*) (posdata.data() + posOffset);
-			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
+			populateAttr(attr, m, ivp, posArray, stride, accessor->count, textID);
 			attrLoaded = true;
 		}
 		//if data is double
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE) {
 			//get the starting point of the data as double pointer
 			const double* posArray = (const double*) (posdata.data() + posOffset);
-			populateAttr(attr, m, ivp, posArray, accessor->count, textID);
+			populateAttr(attr, m, ivp, posArray, stride, accessor->count, textID);
 			attrLoaded = true;
 		}
 		//if data is ubyte
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
 			//get the starting point of the data as uchar pointer
 			const unsigned char* triArray = (const unsigned char*) (posdata.data() + posOffset);
-			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			populateAttr(attr, m, ivp, triArray, stride, accessor->count, textID);
 			attrLoaded = true;
 		}
 		//if data is ushort
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
 			//get the starting point of the data as ushort pointer
 			const unsigned short* triArray = (const unsigned short*) (posdata.data() + posOffset);
-			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			populateAttr(attr, m, ivp, triArray, stride, accessor->count, textID);
 			attrLoaded = true;
 		}
 		//if data is uint
 		else if (accessor->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
 			//get the starting point of the data as uint pointer
 			const unsigned int* triArray = (const unsigned int*) (posdata.data() + posOffset);
-			populateAttr(attr, m, ivp, triArray, accessor->count, textID);
+			populateAttr(attr, m, ivp, triArray, stride, accessor->count, textID);
 			attrLoaded = true;
 		}
 	}
@@ -566,7 +572,7 @@ bool loadAttribute(
 	//generate triangles
 	else if (attr == INDICES) {
 		//this case is managed when passing nullptr as data
-		populateAttr<unsigned char>(attr, m, ivp, nullptr, 0);
+		populateAttr<unsigned char>(attr, m, ivp, nullptr, 0, 0);
 		attrLoaded = true;
 	}
 	return attrLoaded;
@@ -579,7 +585,10 @@ bool loadAttribute(
  * @param attr
  * @param m
  * @param ivp: modified only if attr
- * @param array: plain vector containing the data
+ * @param array: vector containing the data
+ * @param stride:
+ *     number of bytes between consecutive elements in the vector
+ *     (only applies to vertex attributes; indices are always tightly packed)
  * @param number: number of elements contained in the data
  * @param textID:
  *     if attr is texcoord, it is the texture id
@@ -591,18 +600,19 @@ void populateAttr(
 		MeshModel&m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* array,
+		unsigned int stride,
 		unsigned int number,
 		int textID)
 {
 	switch (attr) {
 	case POSITION:
-		populateVertices(m, ivp, array, number); break;
+		populateVertices(m, ivp, array, stride, number); break;
 	case NORMAL:
-		populateVNormals(ivp, array, number); break;
+		populateVNormals(ivp, array, stride, number); break;
 	case COLOR_0:
-		populateVColors(ivp, array, number, textID); break;
+		populateVColors(ivp, array, stride, number, textID); break;
 	case TEXCOORD_0:
-		populateVTextCoords(ivp, array, number, textID); break;
+		populateVTextCoords(ivp, array, stride, number, textID); break;
 	case INDICES:
 		populateTriangles(m, ivp, array, number/3); break;
 	}
@@ -613,6 +623,7 @@ void populateVertices(
 		MeshModel&m,
 		std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* posArray,
+		unsigned int stride,
 		unsigned int vertNumber)
 {
 	ivp.clear();
@@ -621,7 +632,9 @@ void populateVertices(
 			vcg::tri::Allocator<CMeshO>::AddVertices(m.cm, vertNumber);
 	for (unsigned int i = 0; i < vertNumber*3; i+= 3, ++vi){
 		ivp[i/3] = &*vi;
-		vi->P() = CMeshO::CoordType(posArray[i], posArray[i+1], posArray[i+2]);
+		const Scalar* posBase =
+				reinterpret_cast<const Scalar*>(reinterpret_cast<const char*>(posArray) + (i/3) * stride);
+		vi->P() = CMeshO::CoordType(posBase[0], posBase[1], posBase[2]);
 	}
 }
 
@@ -629,10 +642,13 @@ template <typename Scalar>
 void populateVNormals(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* normArray,
+		unsigned int stride,
 		unsigned int vertNumber)
 {
-	for (unsigned int i = 0; i < vertNumber*3; i+= 3){
-		ivp[i/3]->N() = CMeshO::CoordType(normArray[i], normArray[i+1], normArray[i+2]);
+	for (unsigned int i = 0; i < vertNumber*3; i+= 3) {
+		const Scalar* normBase =
+				reinterpret_cast<const Scalar*>(reinterpret_cast<const char*>(normArray) + (i/3) * stride);
+		ivp[i/3]->N() = CMeshO::CoordType(normBase[0], normBase[1], normBase[2]);
 	}
 }
 
@@ -640,17 +656,20 @@ template <typename Scalar>
 void populateVColors(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* colorArray,
+		unsigned int stride,
 		unsigned int vertNumber,
 		int nElemns)
 {
-	for (unsigned int i = 0; i < vertNumber*nElemns; i+= nElemns){
+	for (unsigned int i = 0; i < vertNumber*nElemns; i+= nElemns) {
+		const Scalar* colorBase =
+				reinterpret_cast<const Scalar*>(reinterpret_cast<const char*>(colorArray) + (i/nElemns) * stride);
 		if (!std::is_floating_point<Scalar>::value) {
-			int alpha = nElemns == 4 ? colorArray[i+3] : 255;
-			ivp[i/nElemns]->C() = vcg::Color4b(colorArray[i], colorArray[i+1], colorArray[i+2], alpha);
+			int alpha = nElemns == 4 ? colorBase[3] : 255;
+			ivp[i/nElemns]->C() = vcg::Color4b(colorBase[0], colorBase[1], colorBase[2], alpha);
 		}
 		else {
-			int alpha = nElemns == 4 ? colorArray[i+3] * 255 : 255;
-			ivp[i/nElemns]->C() = vcg::Color4b(colorArray[i] * 255, colorArray[i+1]*255, colorArray[i+2]*255, alpha);
+			int alpha = nElemns == 4 ? colorBase[3] * 255 : 255;
+			ivp[i/nElemns]->C() = vcg::Color4b(colorBase[0] * 255, colorBase[1]*255, colorBase[2]*255, alpha);
 		}
 	}
 }
@@ -659,11 +678,14 @@ template <typename Scalar>
 void populateVTextCoords(
 		const std::vector<CMeshO::VertexPointer>& ivp,
 		const Scalar* textCoordArray,
+		unsigned int stride,
 		unsigned int vertNumber,
 		int textID)
 {
 	for (unsigned int i = 0; i < vertNumber*2; i+= 2) {
-		ivp[i/2]->T() = CMeshO::VertexType::TexCoordType(textCoordArray[i], 1-textCoordArray[i+1]);
+		const Scalar* textCoordBase =
+				reinterpret_cast<const Scalar*>(reinterpret_cast<const char*>(textCoordArray) + (i/2) * stride);
+		ivp[i/2]->T() = CMeshO::VertexType::TexCoordType(textCoordBase[0], 1-textCoordBase[1]);
 		ivp[i/2]->T().N() = textID;
 	}
 }
@@ -675,6 +697,8 @@ void populateTriangles(
 		const Scalar* triArray,
 		unsigned int triNumber)
 {
+	const bool hasTexcoord = m.hasPerVertexTexCoord();
+
 	if (triArray != nullptr) {
 		CMeshO::FaceIterator fi =
 				vcg::tri::Allocator<CMeshO>::AddFaces(m.cm, triNumber);
@@ -682,9 +706,11 @@ void populateTriangles(
 			for (int j = 0; j < 3; ++j) {
 				fi->V(j) = ivp[triArray[i+j]];
 
-				fi->WT(j).u() = fi->V(j)->T().u();
-				fi->WT(j).v() = fi->V(j)->T().v();
-				fi->WT(j).n() = fi->V(j)->T().N();
+				if (hasTexcoord) {
+					fi->WT(j).u() = fi->V(j)->T().u();
+					fi->WT(j).v() = fi->V(j)->T().v();
+					fi->WT(j).n() = fi->V(j)->T().N();
+				}
 			}
 		}
 	}
@@ -695,9 +721,11 @@ void populateTriangles(
 			for (int j = 0; j < 3; ++j) {
 				fi->V(j) = ivp[i+j];
 
-				fi->WT(j).u() = fi->V(j)->T().u();
-				fi->WT(j).v() = fi->V(j)->T().v();
-				fi->WT(j).n() = fi->V(j)->T().N();
+				if (hasTexcoord) {
+					fi->WT(j).u() = fi->V(j)->T().u();
+					fi->WT(j).v() = fi->V(j)->T().v();
+					fi->WT(j).n() = fi->V(j)->T().N();
+				}
 			}
 		}
 	}

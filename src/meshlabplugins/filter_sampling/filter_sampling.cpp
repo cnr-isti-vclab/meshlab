@@ -606,7 +606,8 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
     parlst.addParam(RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
     parlst.addParam(RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "));
     parlst.addParam(RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
-    parlst.addParam(RichBool("ExactNumFlag", false, "Exact number of samples", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer."));
+	parlst.addParam(RichBool("ExactNumFlag", false, "Precise sample number", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with the below specified tolerance. Obviously it will takes much longer."));
+	parlst.addParam(RichFloat("ExactNumTolerance", 0.005, "Precise sample number tolerance", "If a precise number of sample is requested, the sample number will be matched with the precision specified here. Precision is specified as a fraction of the sample number. so for example a precision of 0.005 over 1000 samples means that you can get 995 or 1005 samples."));
     break;
 
   case FP_POISSONDISK_SAMPLING :
@@ -620,7 +621,8 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 	parlst.addParam(RichMesh("RefineMesh", md.mm()->id(),&md, "Samples to be refined", "Used only if the above option is checked. "));
     parlst.addParam(RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "));
     parlst.addParam(RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
-    parlst.addParam(RichBool("ExactNumFlag", false, "Exact number of samples", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer."));
+    parlst.addParam(RichBool("ExactNumFlag", false, "Precise sample number", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with the below specified tolerance. Obviously it will takes much longer."));
+	parlst.addParam(RichFloat("ExactNumTolerance", 0.005, "Precise sample number tolerance", "If a precise number of sample is requested, the sample number will be matched with the precision specified here. Precision is specified as a fraction of the sample number. so for example a precision of 0.005 over 1000 samples means that you can get 995 or 1005 samples."));
     parlst.addParam(RichFloat("RadiusVariance", 1, "Radius Variance", "The radius of the disk is allowed to vary between r and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"));
     break;
 
@@ -1010,7 +1012,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 			sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
 		
 		if(par.getBool("ExactNumFlag") && radius==0)
-			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, curMM->cm, sampleNum, radius,pp,0.005);
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, curMM->cm, sampleNum, radius,pp,par.getFloat("ExactNumTolerance"),20);
 		else
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, curMM->cm, radius,pp);
 		mm->cm.Tr = curMM->cm.Tr;
@@ -1097,7 +1099,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
 		pp.bestSamplePoolSize =par.getInt("BestSamplePool");
 		if(par.getBool("ExactNumFlag"))
-			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, *presampledMesh, sampleNum, radius,pp,0.005);
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, *presampledMesh, sampleNum, radius,pp,par.getFloat("ExactNumTolerance"),20);
 		else
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, *presampledMesh, radius,pp);
 		

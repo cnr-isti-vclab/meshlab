@@ -101,7 +101,9 @@ QString FilterVoronoiPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case VORONOI_SAMPLING :
-		return "Compute a sampling over a mesh and perform a Lloyd relaxation.";
+		return "Compute a point sampling over a mesh and perform a Lloyd relaxation. The filter selects the vertices of the starting mesh that corresponds to the sampled points. <br>"
+			   "Two additional layers containing a voronoi tassellation are created, one as a mesh and one as a polyline. "
+			   "To save the sampled vertices in a different layer just use the 'move selected vertices to a new layer' filter";
 	case VOLUME_SAMPLING:
 		return "Compute a volumetric sampling over a watertight mesh.";
 	case VORONOI_SCAFFOLDING:
@@ -325,7 +327,7 @@ void FilterVoronoiPlugin::voronoiSampling(
 {
 	MeshModel *om=md.addOrGetMesh("voro", "voro", false);
 	MeshModel *poly=md.addOrGetMesh("poly", "poly", false);
-
+	
 	om->updateDataMask(MeshModel::MM_VERTCOLOR);
 
 	MeshModel &m=*md.mm();
@@ -363,7 +365,7 @@ void FilterVoronoiPlugin::voronoiSampling(
 	QList<int> meshlist; meshlist << m.id();
 
 	// Uniform Euclidean Distance
-	if(distanceType==0)  {
+	if(distanceType==0)  { 
 		EuclideanDistance<CMeshO> dd;
 		for(int i=0;i<iterNum;++i) {
 			cb(100*i/iterNum, "Relaxing...");
@@ -382,7 +384,7 @@ void FilterVoronoiPlugin::voronoiSampling(
 		om->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
 	}
-
+    //  Quality Weighted Distance
 	if(distanceType==1) {
 		IsotropicDistance<CMeshO> id(m.cm,radiusVariance);
 		for(int i=0;i<iterNum;++i) {
@@ -392,9 +394,11 @@ void FilterVoronoiPlugin::voronoiSampling(
 			//if (intteruptreq)
 			//	return true;
 		}
-		// tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
+		om->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
 	}
-	if(distanceType==2) {
+	// Anisotropic distance 
+	if(distanceType==2) { 
 		for(int i=0;i<iterNum;++i) {
 			cb(100*i/iterNum, "Relaxing...");
 			BasicCrossFunctor<CMeshO> bcf(m.cm);

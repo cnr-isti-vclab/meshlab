@@ -136,6 +136,7 @@ public:
 	inline QString ShowPerVertexCurvature() const     { return  "MeshLab::Decoration::ShowPerVertexCurvature" ; }
 	inline QString ShowPerFaceCurvature() const     { return  "MeshLab::Decoration::ShowPerFaceCurvature" ; }
 	inline QString CurvatureLength() const { return  "MeshLab::Decoration::CurvatureLength" ; }
+	inline QString CurvatureScaling() const { return  "MeshLab::Decoration::CurvatureScaling" ; }
 	
 	inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
 	inline QString TextureFaceColorParam() const   { return  "MeshLab::Decoration::TextureFaceColor" ; }

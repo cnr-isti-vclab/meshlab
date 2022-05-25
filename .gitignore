@@ -17,9 +17,8 @@
 *.db-wal
 *.AppImage
 .DS_Store
-distrib*
-src/build/*
-src/install/*
+build/*
+install/*
 src/external/boost_1_75_0
 src/external/CGAL-5.2.1
 install/macos/resources/meshlab_dmg_final.json

@@ -1606,10 +1606,12 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 
 		std::vector<MLRenderingData> rendData;
-		for(const MeshModel& mp : meshDoc()->meshIterator()) {
-			MLRenderingData ml;
-			getRenderingData(mp.id(), ml);
-			rendData.push_back(ml);
+		if (saveViewStateCheckBox->isChecked()) {
+			for(const MeshModel& mp : meshDoc()->meshIterator()) {
+				MLRenderingData ml;
+				getRenderingData(mp.id(), ml);
+				rendData.push_back(ml);
+			}
 		}
 
 		try {
@@ -2695,10 +2697,6 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
  */
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
-	int static lastPos = -1;
-	if (pos == lastPos) return true;
-	lastPos = pos;
-	
 	static QElapsedTimer currTime;
 	if (currTime.isValid() && currTime.elapsed() < 100)
 		return true;
