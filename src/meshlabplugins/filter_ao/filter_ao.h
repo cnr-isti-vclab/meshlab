@@ -45,7 +45,7 @@ protected:
 
 	unsigned int numViews, depthTexArea, numTexPages;
 
-	bool useGPU, errInit;
+	bool errInit;
 	bool perFace;
 
 public:

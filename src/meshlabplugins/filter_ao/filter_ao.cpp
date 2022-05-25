@@ -36,7 +36,6 @@
 #define AMBOCC_MAX_TEXTURE_SIZE 2048
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 512
 #define AMBOCC_DEFAULT_NUM_VIEWS 128
-#define AMBOCC_USEGPU_BY_DEFAULT false
 #define AMBOCC_USEVBO_BY_DEFAULT true
 
 using namespace std;
@@ -53,7 +52,6 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 		actionList.push_back(new QAction(filterName(tt), this));
 
     init = false;
-    useGPU = AMBOCC_USEGPU_BY_DEFAULT;
     numViews = AMBOCC_DEFAULT_NUM_VIEWS;
     depthTexSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
     depthTexArea = depthTexSize*depthTexSize;
@@ -142,8 +140,6 @@ RichParameterList AmbientOcclusionPlugin::initParameterList(const QAction *actio
 			parlst.addParam(RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichDirection("coneDir",Point3m(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
 			parlst.addParam(RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-			parlst.addParam(RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","Only works for per-vertex AO. In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
-			//parlst.addParam(RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
 			parlst.addParam(RichInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance"));
 		break;
 		default: break; // do not add any parameter for the other filters
@@ -163,9 +159,6 @@ std::map<std::string, QVariant> AmbientOcclusionPlugin::applyFilter(const QActio
 			else
 				perFace = false;
 
-			useGPU = par.getBool("useGPU");
-			if (perFace) //GPU only works per-vertex
-				useGPU = false;
 			depthTexSize = par.getInt("depthTexSize");
 			depthTexArea = depthTexSize*depthTexSize;
 			numViews = par.getInt("reqViews");
@@ -277,13 +270,6 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 	else
 		tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
 
-    if(useGPU)
-    {
-        vertexCoordsToTexture( m );
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
-    }
-
     tInitElapsed = tInit.elapsed();
 	vector<Point3f> faceCenterVec;
 	
@@ -301,66 +287,29 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.0f, 1.0f);
 
-        if (useGPU)
-        {
-            glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        // FIRST PASS - fill depth buffer
+        glColorMask(0, 0, 0, 0);
 
-            // FIRST PASS - fill depth buffer
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
-            glViewport(0,0,depthTexSize,depthTexSize);
-            glClear(GL_DEPTH_BUFFER_BIT);
+        MLRenderingData dt;
+        MLRenderingData::RendAtts atts;
+        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+        dt.set(MLRenderingData::PR_SOLID,atts);
+        glContext->setRenderingData(m.id(),dt);
+        glContext->drawMeshModel(m.id());
 
-            glColorMask(0, 0, 0, 0);
+        glColorMask(1, 1, 1, 1);
 
-            MLRenderingData dt;
-            MLRenderingData::RendAtts atts;
-            atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-            dt.set(MLRenderingData::PR_SOLID,atts);
-            glContext->setRenderingData(m.id(),dt);
-            glContext->drawMeshModel(m.id());
+        glDisable(GL_POLYGON_OFFSET_FILL);
 
-            glColorMask(1, 1, 1, 1);
-
-            glDisable(GL_POLYGON_OFFSET_FILL);
-
-            // SECOND PASS - use depth buffer to check occlusion
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
-            glViewport(0,0,maxTexSize,maxTexSize);
-            generateOcclusionHW();
-        }
+        // SECOND PASS - use depth buffer to check occlusion
+        if(perFace)
+            generateFaceOcclusionSW(m,faceCenterVec);
         else
-        {
-            glDisable(GL_BLEND);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            // FIRST PASS - fill depth buffer
-            glColorMask(0, 0, 0, 0);
-
-            MLRenderingData dt;
-            MLRenderingData::RendAtts atts;
-            atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-            dt.set(MLRenderingData::PR_SOLID,atts);
-            glContext->setRenderingData(m.id(),dt);
-            glContext->drawMeshModel(m.id());
-
-            glColorMask(1, 1, 1, 1);
-
-            glDisable(GL_POLYGON_OFFSET_FILL);
-
-            // SECOND PASS - use depth buffer to check occlusion
-            if(perFace) 
-				generateFaceOcclusionSW(m,faceCenterVec);
-            else 
-				generateOcclusionSW(m);
-        }
-        checkGLError::debugInfo("Debug AO: ");
+            generateOcclusionSW(m);
     }
-
-    if (useGPU)
-    {
-        applyOcclusionHW(m);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
-    }
+    checkGLError::debugInfo("Debug AO: ");
 
     if(perFace)
     {
@@ -384,30 +333,6 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     }
 
     log(GLLogStream::SYSTEM,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
-
-
-    /********** Clean up the mess ************/
-    if (useGPU)
-    {
-        glDisable(GL_BLEND);
-
-        glUseProgram(0);
-
-        glDeleteTextures(1, &vertexCoordTex);
-        glDeleteTextures(1, &vertexNormalsTex);
-        glDeleteTextures(numTexPages, resultBufferTex);
-
-        glDeleteFramebuffersEXT(1, &fboDepth);
-        glDeleteFramebuffersEXT(1, &fboResult);
-
-        glDetachShader(shdrID, vs);
-        glDetachShader(shdrID, fs);
-        glDeleteShader(shdrID);   //executes but gives INVALID_OPERATION ( ?!?!? )
-        glGetError();            //patch for clean the gl error state from previous error
-        delete [] resultBufferTex;
-        delete [] resultBufferMRT;
-
-    }
 
     glDeleteTextures(1, &depthBufferTex);
 
@@ -450,128 +375,6 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_TEXTURE_3D_EXT );
-
-    //******* CHECK THAT EVERYTHING IS SUPPORTED **********/
-    if (useGPU)
-    {
-        if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
-        {
-            if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
-            {
-                log(GLLogStream::SYSTEM, "Your hardware doesn't support Shaders, which are required for hw occlusion");
-                errInit = true;
-                return;
-            }
-        }
-        if ( !glewIsSupported("GL_EXT_framebuffer_object") )
-        {
-            log(GLLogStream::SYSTEM, "Your hardware doesn't support FBOs, which are required for hw occlusion");
-            errInit = true;
-            return;
-        }
-
-        if ( glewIsSupported("GL_ARB_texture_float") )
-        {
-            if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
-            {
-                //colorFormat = GL_RGB16F_ARB;
-                //dataTypeFP = GL_HALF_FLOAT_ARB;
-
-                log(GLLogStream::SYSTEM,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
-                errInit = true;
-                return;
-            }
-
-            colorFormat = GL_RGB32F_ARB;
-            dataTypeFP = GL_FLOAT;
-        }
-        else
-        {
-            log(GLLogStream::SYSTEM,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
-            errInit = true;
-            return;
-        }
-
-        unsigned int maxTexPages=1;
-        glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, reinterpret_cast<GLint*>(&maxTexPages) );
-
-        //******* CHECK MODEL SIZE ***********/
-        if ((maxTexSize*maxTexSize*maxTexPages) < numVertices && useGPU)
-        {
-            log(GLLogStream::SYSTEM, "That's a really huge model, I can't handle it in hardware, sorry..");
-            errInit = true;
-            return;
-        }
-
-        //******* FIND BEST COMPROMISE BETWEEN TEX SIZE AND MRTs ********/
-        unsigned int smartTexSize;
-        for (smartTexSize=64; (smartTexSize*smartTexSize) < (numVertices/maxTexPages); smartTexSize*=2 );
-
-        if (smartTexSize > maxTexSize)
-        {
-            //should ever enter this point, just exit with error
-            log(GLLogStream::SYSTEM,"There was an error while determining best texture size, unable to continue");
-            errInit = true;
-            return;
-        }
-
-        //******* LOAD SHADERS *******/
-        cb(30, "Initializing: Shaders and Textures");
-		QString shad1(":/AmbientOcclusion/shaders/ambient_occlusion4");
-		QString shad2(":/AmbientOcclusion/shaders/ambient_occlusion8");
-        if (maxTexPages == 4)
-            set_shaders(shad1.toLatin1().data(),vs,fs,shdrID);
-        else
-            set_shaders(shad2.toLatin1().data(),vs,fs,shdrID);  //geforce 8+
-
-
-        maxTexSize = smartTexSize;
-        numTexPages = std::min( (numVertices / (smartTexSize*smartTexSize))+1, maxTexPages);
-        resultBufferTex = new GLuint[numTexPages];
-        resultBufferMRT = new GLenum[numTexPages];
-
-        //******* INIT TEXTURES **********/
-        initTextures();
-
-        //*******INIT FBO*********/
-        cb(60, "Initializing: Framebuffer Objects");
-
-        fboDepth = 0;
-        glGenFramebuffersEXT(1, &fboDepth);   // FBO for first pass (1 depth attachment)
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferTex, 0);
-
-        // only in this way it is possible to read back the depth texture correctly(!!)
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        if (!checkFramebuffer())
-        {
-            errInit = true;
-            return;
-        }
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-        fboResult = 0;
-        glGenFramebuffersEXT(1, &fboResult);   // FBO for second pass (1 color attachment)
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
-        for (unsigned int i=0; i<numTexPages; ++i)
-        {
-            resultBufferMRT[i] = GL_COLOR_ATTACHMENT0_EXT+i;
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT+i, GL_TEXTURE_2D, resultBufferTex[i], 0);
-        }
-
-        glDrawBuffers(numTexPages, resultBufferMRT);
-
-        if (!checkFramebuffer())
-        {
-            errInit = true;
-            return;
-        }
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    }
 
     glViewport(0.0, 0.0, depthTexSize, depthTexSize);
 
