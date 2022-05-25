@@ -437,7 +437,7 @@ void MainWindow::setSplit(QAction *qa)
 	MultiViewer_Container *mvc = currentViewContainer();
 	if(mvc)
 	{
-		GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
+		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);
 
 		// Start the new view with the same orientation as the existing one
 		GLArea* glArea = mvc->currentView();
@@ -1824,7 +1824,7 @@ void MainWindow::newProject(const QString& projName)
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
 		updateSubFiltersMenu(true,false);
-	GLArea *gla=new GLArea(this, mvcont, &currentGlobalParams);
+	GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 	//connect(gla, SIGNAL(insertRenderingDataForNewlyGeneratedMesh(int)), this, SLOT(addRenderingDataIfNewlyGeneratedMesh(int)));
 	mvcont->addView(gla, Qt::Horizontal);
 	

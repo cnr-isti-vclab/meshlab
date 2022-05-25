@@ -63,7 +63,7 @@ class GLArea : public QOpenGLWidget
 	//typedef vcg::Shot<double> Shot;
 
 public:
-	GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterList *current);
+	GLArea(MultiViewer_Container *mvcont, RichParameterList *current);
 	~GLArea();
 
 	static void initGlobalParameterList(RichParameterList& /*globalparam*/);
