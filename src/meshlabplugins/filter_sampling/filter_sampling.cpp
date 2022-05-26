@@ -127,46 +127,41 @@ public:
 
 /* This sampler is used to transfer the detail of a mesh onto another one.
  * It keep internally the spatial indexing structure used to find the closest point
+ * According to the kin of sampling is (vertexsampling or not) it uses a
  */
 class LocalRedetailSampler
 {
-  typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+  typedef GridStaticPtr<CMeshO::FaceType,   CMeshO::ScalarType >   FaceMeshGrid;
   typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
 public:
-
-  LocalRedetailSampler():m(0) {}
-
-  CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
-  CallBackPos *cb;
-  int sampleNum;  // the expected number of samples. Used only for the callback
-  int sampleCnt;
-  MetroMeshGrid   unifGridFace;
+  CMeshO *m=0;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
+  CallBackPos *cb=0;
+  int sampleNum=0;  // the expected number of samples. Used only for the callback
+  int sampleCnt=0;
+  FaceMeshGrid     unifGridFace;
   VertexMeshGrid   unifGridVert;
-  bool useVertexSampling;
+  
+  bool useVertexSampling=false;
 
   // Parameters
   typedef tri::FaceTmark<CMeshO> MarkerFace;
   MarkerFace markerFunctor;
 
-  bool coordFlag;
-  bool colorFlag;
-  bool normalFlag;
-  bool qualityFlag;
-  bool selectionFlag;
+  // what data has to be resampled
+  bool coordFlag=false;
+  bool colorFlag=false;
+  bool normalFlag=false;
+  bool qualityFlag=false;
+  bool selectionFlag=false;
+  
   bool storeDistanceAsQualityFlag;
   float dist_upper_bound;
   void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
   {
-    coordFlag=false;
-    colorFlag=false;
-    qualityFlag=false;
-    selectionFlag=false;
-    storeDistanceAsQualityFlag=false;
     m=_m;
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
     if(m->fn==0) useVertexSampling = true;
-    else useVertexSampling = false;
 
     if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
     else  unifGridFace.Set(m->face.begin(),m->face.end());
@@ -703,6 +698,9 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
                                   "The mesh that contains the source data that we want to transfer."));
 	parlst.addParam(RichMesh ("TargetMesh", vertexMesh->id(),&md, "Target Mesh",
                                   "The mesh whose vertices will receive the data from the source."));
+	parlst.addParam(RichBool ("VertexSampling", false, "Vertex Sampling",
+							 "if enabled for each vertex of the target mesh we search the closest vertex in the source mesh and directly copy the found attributes, otherwise we search for the closest point on the source surface that usually falls inside a face and attribute are therefore interpolated"));
+	
     parlst.addParam(RichBool ("GeomTransfer", false, "Transfer Geometry",
                                   "if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));
     parlst.addParam(RichBool ("NormalTransfer", false, "Transfer Normal",
@@ -1259,6 +1257,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		bool qualityT = par.getBool("QualityTransfer");
 		bool selectionT = par.getBool("SelectionTransfer");
 		bool distquality = par.getBool("QualityDistance");
+		bool vertSampling = par.getBool("VertexSampling");
 		
 		if (srcMesh == trgMesh){
 			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
@@ -1291,8 +1290,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 		
 		LocalRedetailSampler rs;
-		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
-		
+		rs.useVertexSampling = vertSampling;
 		rs.dist_upper_bound = upperbound;
 		rs.colorFlag = colorT;
 		rs.coordFlag = geomT;
@@ -1300,7 +1298,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		rs.qualityFlag = qualityT;
 		rs.selectionFlag = selectionT;
 		rs.storeDistanceAsQualityFlag = distquality;
-		
+		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
+		qDebug("apply: using vertex samping %s\n",rs.useVertexSampling?"True":"False");
 		if(rs.colorFlag) trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 		if(rs.qualityFlag || rs.storeDistanceAsQualityFlag)
 			trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
@@ -1390,7 +1389,6 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
 		SampleSHT sht;
 		tri::EmptyTMark<CMeshO> markerFunctor;
-		typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
 		tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
 		tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
 		bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
