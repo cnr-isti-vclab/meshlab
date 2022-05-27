@@ -838,8 +838,8 @@ void DecorateBasePlugin::DisplayCamera(QString who, const Shotm &ls, int cameraS
 	}
 	
 	const char *typeBuf;
-	if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) typeBuf="Persp";
-	if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       typeBuf="Ortho";
+	if(ls.Intrinsics.cameraType == Camera<Scalarm>::PERSPECTIVE) typeBuf="Persp";
+	if(ls.Intrinsics.cameraType == Camera<Scalarm>::ORTHO)       typeBuf="Ortho";
 	
 	Point3m vp = ls.GetViewPoint();
 	Point3m ax0 = ls.Axis(0);
@@ -888,7 +888,7 @@ void DecorateBasePlugin::DrawCamera(const MeshModel* m, const Shotm &ls, vcg::Co
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	
-	if (ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
+	if (ls.Intrinsics.cameraType == Camera<Scalarm>::PERSPECTIVE)
 	{
 		// draw scale
 		float drawscale = 1.0;
