@@ -35,7 +35,7 @@ LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& rpar, const Rich
 	lned = new QLineEdit(this);
 
 	connect(lned, SIGNAL(editingFinished()), this, SLOT(changeChecker()));
-	connect(this, SIGNAL(lineEditChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(lineEditChanged()), this, SLOT(setParameterChanged()));
 	lned->setAlignment(Qt::AlignLeft);
 	widgets.push_back(lned);
 }

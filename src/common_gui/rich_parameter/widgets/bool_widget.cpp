@@ -37,7 +37,7 @@ BoolWidget::BoolWidget(QWidget* p, const RichBool& rb, const RichBool& rdef) :
 	cb->setChecked(parameter->value().getBool());
 	widgets.push_back(cb);
 
-	connect(cb, SIGNAL(stateChanged(int)), p, SIGNAL(parameterChanged()));
+	connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setParameterChanged()));
 	connect(descriptionLabel, SIGNAL(clicked()), cb, SLOT(toggle()));
 }
 

@@ -41,7 +41,7 @@ void ComboWidget::init(QWidget* p, int defaultEnum, QStringList values)
 	widgets.push_back(enumCombo);
 	setIndex(defaultEnum);
 	connect(enumCombo, SIGNAL(activated(int)), this, SIGNAL(dialogParamChanged()));
-	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
 void ComboWidget::setIndex(int newEnum)

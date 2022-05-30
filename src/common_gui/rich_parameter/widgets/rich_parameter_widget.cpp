@@ -29,6 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
+#include "../richparameterlistframe.h"
+
 RichParameterWidget::RichParameterWidget(
 	QWidget*             p,
 	const RichParameter& rpar,
@@ -101,9 +103,14 @@ const RichParameter& RichParameterWidget::richParameter() const
 	return *parameter;
 }
 
-QString RichParameterWidget::parameterName() const
+void RichParameterWidget::setParameterChanged()
 {
-	return parameter->name();
+	parameterValueChanged = true;
+	QObject* p = parent();
+	RichParameterListFrame* f = dynamic_cast<RichParameterListFrame*>(p);
+	if (f) {
+		emit f->parameterChanged();
+	}
 }
 
 void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)

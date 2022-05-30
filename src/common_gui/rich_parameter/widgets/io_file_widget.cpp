@@ -43,7 +43,7 @@ IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar, const RichPara
 	widgets.push_back(browse);
 
 	connect(browse, SIGNAL(clicked()), this, SLOT(selectFile()));
-	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
 IOFileWidget::~IOFileWidget()

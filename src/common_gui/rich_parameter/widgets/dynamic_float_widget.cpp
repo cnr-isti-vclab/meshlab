@@ -64,7 +64,7 @@ DynamicFloatWidget::DynamicFloatWidget(
 
 	connect(valueLE, SIGNAL(textChanged(const QString&)), this, SLOT(setValue()));
 	connect(valueSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
-	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
 DynamicFloatWidget::~DynamicFloatWidget()

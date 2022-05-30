@@ -77,7 +77,7 @@ AbsPercWidget::AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsP
 
 	connect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
 	connect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
-	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
 AbsPercWidget::~AbsPercWidget()

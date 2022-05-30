@@ -53,7 +53,7 @@ ColorWidget::ColorWidget(QWidget* p, const RichColor& newColor, const RichColor&
 
 	pickcol = parameter->value().getColor();
 	connect(colorButton, SIGNAL(clicked()), this, SLOT(pickColor()));
-	connect(this, SIGNAL(dialogParamChanged()), p, SIGNAL(parameterChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
 ColorWidget::~ColorWidget()

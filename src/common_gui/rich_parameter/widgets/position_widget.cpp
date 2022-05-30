@@ -53,7 +53,7 @@ PositionWidget::PositionWidget(
 		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		vlay->addWidget(coordSB[i]);
 		widgets.push_back(coordSB[i]);
-		connect(coordSB[i], SIGNAL(textChanged(QString)), p, SIGNAL(parameterChanged()));
+		connect(coordSB[i], SIGNAL(textChanged(QString)), this, SLOT(setParameterChanged()));
 	}
 	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional

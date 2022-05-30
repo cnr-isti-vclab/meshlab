@@ -68,10 +68,8 @@ public:
 	const Value&         widgetValue();
 	const RichParameter& richParameter() const;
 
-	QString parameterName() const;
-
-signals:
-	void parameterChanged();
+protected slots:
+	void setParameterChanged();
 
 protected:
 	ClickableLabel* descriptionLabel;
@@ -80,6 +78,8 @@ protected:
 
 	RichParameter* parameter;
 	RichParameter* defaultParameter;
+
+	bool parameterValueChanged = false;
 
 	bool visible;
 	bool helpVisible;
