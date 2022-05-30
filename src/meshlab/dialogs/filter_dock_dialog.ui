@@ -194,13 +194,13 @@
   <customwidget>
    <class>RichParameterListFrame</class>
    <extends>QFrame</extends>
-   <header>rich_parameter_gui/richparameterlistframe.h</header>
+   <header>common_gui/rich_parameter_gui/richparameterlistframe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>VerticalScrollArea</class>
    <extends>QScrollArea</extends>
-   <header>gui_utils/vertical_scroll_area.h</header>
+   <header>common_gui/gui_utils/vertical_scroll_area.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

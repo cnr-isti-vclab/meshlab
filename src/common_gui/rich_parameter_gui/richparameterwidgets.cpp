@@ -160,6 +160,11 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> BoolWidget::getWidgetValue() const
+{
+	return std::make_shared<BoolValue>(cb->isChecked());
+}
+
 /******************************************/
 // LineEditWidget Implementation
 /******************************************/

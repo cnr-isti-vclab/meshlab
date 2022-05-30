@@ -34,6 +34,8 @@
 #include <QSlider>
 #include <QWidget>
 
+#include <memory>
+
 #include <common/ml_document/cmesh.h>
 #include <common/parameters/rich_parameter_list.h>
 
@@ -49,6 +51,7 @@ public:
 	virtual void resetWidgetValue() = 0;
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the
 	// parameter).
+	virtual std::shared_ptr<Value> getWidgetValue() const;
 	virtual void collectWidgetValue()            = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 	virtual ~RichParameterWidget();
@@ -89,6 +92,7 @@ public:
 	~BoolWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

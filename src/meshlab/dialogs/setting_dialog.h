@@ -26,7 +26,7 @@
 
 #include <QDialog>
 #include <common/parameters/rich_parameter.h>
-#include "../rich_parameter_gui/richparameterlistframe.h"
+#include <common_gui/rich_parameter_gui/richparameterlistframe.h>
 
 /**
  * @brief This class describes a dialog to load, save, modify and reset a
