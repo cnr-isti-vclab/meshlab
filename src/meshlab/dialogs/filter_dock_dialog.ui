@@ -68,7 +68,7 @@
          <x>0</x>
          <y>0</y>
          <width>382</width>
-         <height>388</height>
+         <height>387</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -194,7 +194,7 @@
   <customwidget>
    <class>RichParameterListFrame</class>
    <extends>QFrame</extends>
-   <header>common_gui/rich_parameter_gui/richparameterlistframe.h</header>
+   <header>common_gui/rich_parameter/richparameterlistframe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

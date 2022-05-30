@@ -48,7 +48,7 @@
 #include <common/globals.h>
 #include <common/utilities/load_save.h>
 
-#include <common_gui/rich_parameter_gui/richparameterlistdialog.h>
+#include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 #include <wrap/io_trimesh/alnParser.h>
 #include "dialogs/about_dialog.h"

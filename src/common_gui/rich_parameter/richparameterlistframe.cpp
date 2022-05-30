@@ -242,7 +242,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new StringWidget(parent, (const RichString&) pd, (const RichString&) def);
 	}
 	else if (pd.isOfType<RichMatrix44f>()) {
-		return new Matrix44fWidget(
+		return new Matrix44Widget(
 			parent,
 			(const RichMatrix44f&) pd,
 			(const RichMatrix44f&) def,
@@ -263,7 +263,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichShotf>()) {
-		return new ShotfWidget(
+		return new ShotWidget(
 			parent,
 			(const RichShotf&) pd,
 			(const RichShotf&) def,

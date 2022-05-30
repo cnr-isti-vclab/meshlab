@@ -24,7 +24,7 @@
 #ifndef RICHPARAMETERLISTFRAME_H
 #define RICHPARAMETERLISTFRAME_H
 
-#include "richparameterwidgets.h"
+#include "widgets/rich_parameter_widgets.h"
 
 #include <map>
 
