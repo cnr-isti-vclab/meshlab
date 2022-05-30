@@ -152,7 +152,7 @@ QString RichParameterList::getString(const QString& name) const
  */
 Matrix44m RichParameterList::getMatrix44(const QString& name) const
 {
-	return getParameterByName(name).value().getMatrix44f();
+	return getParameterByName(name).value().getMatrix44();
 }
 
 /**
@@ -161,7 +161,7 @@ Matrix44m RichParameterList::getMatrix44(const QString& name) const
  */
 Point3m RichParameterList::getPoint3m(const QString& name) const
 {
-	return getParameterByName(name).value().getPoint3f();
+	return getParameterByName(name).value().getPoint3();
 }
 
 /**
@@ -170,7 +170,7 @@ Point3m RichParameterList::getPoint3m(const QString& name) const
  */
 Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
 {
-	return Shot<Scalarm>::Construct(getParameterByName(name).value().getShotf());
+	return Shot<Scalarm>::Construct(getParameterByName(name).value().getShot());
 }
 
 /**

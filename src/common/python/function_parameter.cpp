@@ -134,7 +134,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		return;
 	}
 	if (parameter->isOfType<RichMatrix44f>()){
-		const MESHLAB_SCALAR* v = parameter->value().getMatrix44f().V();
+		const MESHLAB_SCALAR* v = parameter->value().getMatrix44().V();
 		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
 			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
 			<< "[" << v[8] << ", " << v[9] << ", " << v[10] << ", " << v[11] << "],"
@@ -142,9 +142,9 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		return;
 	}
 	if (parameter->isOfType<RichPosition>() || parameter->isOfType<RichDirection>()) {
-		o << "[" << parameter->value().getPoint3f().X() << ", "
-			<< parameter->value().getPoint3f().Y() << ", "
-			<< parameter->value().getPoint3f().Z() << "]";
+		o << "[" << parameter->value().getPoint3().X() << ", "
+			<< parameter->value().getPoint3().Y() << ", "
+			<< parameter->value().getPoint3().Z() << "]";
 		return;
 	}
 	if (parameter->isOfType<RichShotf>()) {

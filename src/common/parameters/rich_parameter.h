@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RICH_PARAMETER_H
 #define MESHLAB_RICH_PARAMETER_H
 
-#include "value.h"
+#include "value/values.h"
 #include <QDomElement>
 
 class MeshDocument;

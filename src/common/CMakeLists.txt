@@ -55,7 +55,16 @@ set(HEADERS
 	ml_shared_data_context/ml_shared_data_context.h
 	parameters/rich_parameter.h
 	parameters/rich_parameter_list.h
-	parameters/value.h
+	parameters/value/bool_value.h
+	parameters/value/color_value.h
+	parameters/value/float_value.h
+	parameters/value/int_value.h
+	parameters/value/matrix44_value.h
+	parameters/value/point3_value.h
+	parameters/value/shot_value.h
+	parameters/value/string_value.h
+	parameters/value/value.h
+	parameters/value/values.h
 	plugins/containers/generic_container_iterator.h
 	plugins/containers/decorate_plugin_container.h
 	plugins/containers/edit_plugin_container.h
@@ -101,7 +110,14 @@ set(SOURCES
 	ml_shared_data_context/ml_shared_data_context.cpp
 	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp
-	parameters/value.cpp
+	parameters/value/bool_value.cpp
+	parameters/value/color_value.cpp
+	parameters/value/float_value.cpp
+	parameters/value/int_value.cpp
+	parameters/value/matrix44_value.cpp
+	parameters/value/point3_value.cpp
+	parameters/value/shot_value.cpp
+	parameters/value/string_value.cpp
 	plugins/containers/decorate_plugin_container.cpp
 	plugins/containers/edit_plugin_container.cpp
 	plugins/containers/filter_plugin_container.cpp

@@ -503,7 +503,7 @@ PositionWidget::PositionWidget(
 		widgets.push_back(coordSB[i]);
 		connect(coordSB[i], SIGNAL(textChanged(QString)), p, SIGNAL(parameterChanged()));
 	}
-	this->setValue(paramName, parameter->value().getPoint3f());
+	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla_curr) {
@@ -592,20 +592,20 @@ vcg::Point3f PositionWidget::getValue()
 
 void PositionWidget::collectWidgetValue()
 {
-	parameter->setValue(Point3fValue(vcg::Point3f(
+	parameter->setValue(Point3Value(vcg::Point3f(
 		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
 }
 
 void PositionWidget::resetWidgetValue()
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(parameter->value().getPoint3f()[ii], 'g', 3));
+		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
 }
 
 void PositionWidget::setWidgetValue(const Value& nv)
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii], 'g', 3));
+		coordSB[ii]->setText(QString::number(nv.getPoint3()[ii], 'g', 3));
 }
 
 void PositionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
@@ -647,7 +647,7 @@ DirectionWidget::DirectionWidget(
 		widgets.push_back(coordSB[i]);
 		connect(coordSB[i], SIGNAL(textChanged(QString)), p, SIGNAL(parameterChanged()));
 	}
-	this->setValue(paramName, parameter->value().getPoint3f());
+	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla_curr) {
@@ -721,20 +721,20 @@ vcg::Point3f DirectionWidget::getValue()
 
 void DirectionWidget::collectWidgetValue()
 {
-	parameter->setValue(Point3fValue(vcg::Point3f(
+	parameter->setValue(Point3Value(vcg::Point3f(
 		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
 }
 
 void DirectionWidget::resetWidgetValue()
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(parameter->value().getPoint3f()[ii], 'g', 3));
+		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
 }
 
 void DirectionWidget::setWidgetValue(const Value& nv)
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii], 'g', 3));
+		coordSB[ii]->setText(QString::number(nv.getPoint3()[ii], 'g', 3));
 }
 
 void DirectionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
@@ -782,7 +782,7 @@ Matrix44fWidget::Matrix44fWidget(
 			this,
 			SLOT(invalidateMatrix(const QString&)));
 	}
-	this->setValue(paramName, parameter->value().getMatrix44f());
+	this->setValue(paramName, parameter->value().getMatrix44());
 
 	QLabel* headerL = new QLabel("Matrix:", this);
 	vlay->addWidget(headerL, 0, Qt::AlignTop);
@@ -876,10 +876,10 @@ void Matrix44fWidget::collectWidgetValue()
 		Matrix44m tempM;
 		for (unsigned int i = 0; i < 16; ++i)
 			tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
-		parameter->setValue(Matrix44fValue(tempM));
+		parameter->setValue(Matrix44Value(tempM));
 	}
 	else {
-		parameter->setValue(Matrix44fValue(m));
+		parameter->setValue(Matrix44Value(m));
 	}
 }
 
@@ -890,16 +890,16 @@ void Matrix44fWidget::resetWidgetValue()
 	m.SetIdentity();
 	for (unsigned int ii = 0; ii < 16; ++ii) {
 		coordSB[ii]->setText(
-			QString::number(parameter->value().getMatrix44f()[ii / 4][ii % 4], 'g', 3));
+			QString::number(parameter->value().getMatrix44()[ii / 4][ii % 4], 'g', 3));
 	}
 }
 
 void Matrix44fWidget::setWidgetValue(const Value& nv)
 {
 	valid = true;
-	m     = nv.getMatrix44f();
+	m     = nv.getMatrix44();
 	for (unsigned int ii = 0; ii < 16; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii / 4][ii % 4], 'g', 3));
+		coordSB[ii]->setText(QString::number(nv.getMatrix44()[ii / 4][ii % 4], 'g', 3));
 }
 
 void Matrix44fWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
@@ -930,7 +930,7 @@ ShotfWidget::ShotfWidget(
 
 	hlay = new QHBoxLayout();
 
-	this->setShotValue(paramName, parameter->value().getShotf());
+	this->setShotValue(paramName, parameter->value().getShot());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla_curr) {
@@ -1008,17 +1008,17 @@ Shotm ShotfWidget::getValue()
 
 void ShotfWidget::collectWidgetValue()
 {
-	parameter->setValue(ShotfValue(curShot));
+	parameter->setValue(ShotValue(curShot));
 }
 
 void ShotfWidget::resetWidgetValue()
 {
-	curShot = parameter->value().getShotf();
+	curShot = parameter->value().getShot();
 }
 
 void ShotfWidget::setWidgetValue(const Value& nv)
 {
-	curShot = nv.getShotf();
+	curShot = nv.getShot();
 }
 
 void ShotfWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)

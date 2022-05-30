@@ -140,7 +140,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 		return nullptr;
 	}
 	else if (pd.isOfType<RichPosition>() || pd.isOfType<RichDirection>()){
-		vcg::Point3f pp = pd.value().getPoint3f();
+		vcg::Point3f pp = pd.value().getPoint3();
 		QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
 		return new QTableWidgetItem(pst);
 	}

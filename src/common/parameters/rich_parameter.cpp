@@ -301,7 +301,7 @@ RichMatrix44f::RichMatrix44f(
 		const QString& tltip,
 		bool hidden,
 		const QString& category) :
-	RichParameter(nm, Matrix44fValue(defval),desc, tltip, hidden, category)
+	RichParameter(nm, Matrix44Value(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -321,7 +321,7 @@ RichMatrix44f* RichMatrix44f::clone() const
 
 bool RichMatrix44f::operator==( const RichParameter& rb )
 {
-	return (rb.value().isMatrix44f() &&(pName == rb.name()) && (value().getMatrix44f() == rb.value().getMatrix44f()));
+	return (rb.value().isMatrix44() &&(pName == rb.name()) && (value().getMatrix44() == rb.value().getMatrix44()));
 }
 
 /**** RichPosition Class ****/
@@ -333,7 +333,7 @@ RichPosition::RichPosition(
 		const QString& tltip,
 		bool hidden,
 		const QString& category) :
-	RichParameter(nm, Point3fValue(defval),desc, tltip, hidden, category)
+	RichParameter(nm, Point3Value(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -353,7 +353,7 @@ RichPosition* RichPosition::clone() const
 
 bool RichPosition::operator==( const RichParameter& rb )
 {
-	return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
+	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
 }
 
 /**** RichDirection Class ****/
@@ -365,7 +365,7 @@ RichDirection::RichDirection(
 	const QString& tltip,
 	bool           hidden,
 	const QString& category) :
-	RichParameter(nm, Point3fValue(defval), desc, tltip, hidden, category)
+	RichParameter(nm, Point3Value(defval), desc, tltip, hidden, category)
 {
 }
 
@@ -385,7 +385,7 @@ RichDirection* RichDirection::clone() const
 
 bool RichDirection::operator==(const RichParameter& rb)
 {
-	return (rb.value().isPoint3f() &&(pName == rb.name()) && (value().getPoint3f() == rb.value().getPoint3f()));
+	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
 }
 
 /**** RichShotf Class ****/
@@ -397,7 +397,7 @@ RichShotf::RichShotf(
 		const QString& tltip,
 		bool hidden,
 		const QString& category) :
-	RichParameter(nm, ShotfValue(defval),desc, tltip, hidden, category)
+	RichParameter(nm, ShotValue(defval),desc, tltip, hidden, category)
 {
 }
 
@@ -417,7 +417,7 @@ RichShotf* RichShotf::clone() const
 
 bool RichShotf::operator==( const RichParameter& rb )
 {
-	return (rb.value().isShotf() &&(pName == rb.name()) );
+	return (rb.value().isShot() &&(pName == rb.name()) );
 	// TODO REAL TEST OF EQUALITY // && (value().getShotf() == rb.value().getShotf()));
 }
 
