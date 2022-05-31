@@ -32,13 +32,13 @@ class PositionWidget : public RichParameterWidget
 public:
 	PositionWidget(QWidget* p, const RichPosition& rpf, const RichPosition& rdef, QWidget* gla);
 	~PositionWidget();
-	QString      paramName;
-	vcg::Point3f getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+	vcg::Point3f getValue();
 
 public slots:
 	void getPoint();
@@ -51,6 +51,7 @@ signals:
 	void askTrackballPos(QString);
 
 protected:
+	QString      paramName;
 	QLineEdit*   coordSB[3];
 	QComboBox*   getPoint3Combo;
 	QPushButton* getPoint3Button;

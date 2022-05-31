@@ -46,24 +46,23 @@ class RichParameterWidget : public QWidget
 	Q_OBJECT
 public:
 	RichParameterWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
+	virtual ~RichParameterWidget();
 
 	// this one is called by resetValue to reset the values inside the widgets.
 	virtual void resetWidgetValue() = 0;
-	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the
-	// parameter).
-	//virtual std::shared_ptr<Value> getWidgetValue() const;
+
+	// virtual std::shared_ptr<Value> getWidgetValue() const;
 	virtual void collectWidgetValue()            = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
-	virtual ~RichParameterWidget();
 
 	virtual void addWidgetToGridLayout(QGridLayout* lay, const int r) = 0;
-	// called when the user press the 'default' button to reset the parameter values to its default.
-	// It just set the parameter value and then it calls the specialized resetWidgetValue() to
-	// update also the widget.
+
+	void setVisible(bool b);
+
 	void resetValue();
 	void setValue(const Value& v);
 	void setHelpVisible(bool b);
-	void setVisible(bool b);
+
 	// update the parameter with the current widget values and return it.
 	const Value&         widgetValue();
 	const RichParameter& richParameter() const;
@@ -72,9 +71,9 @@ protected slots:
 	void setParameterChanged();
 
 protected:
-	ClickableLabel* descriptionLabel;
-	QLabel* helpLabel;
-	std::vector<QWidget*> widgets; //will contain all the other widgets of this widget
+	ClickableLabel*       descriptionLabel;
+	QLabel*               helpLabel;
+	std::vector<QWidget*> widgets; // will contain all the other widgets of this widget
 
 	RichParameter* parameter;
 	RichParameter* defaultParameter;

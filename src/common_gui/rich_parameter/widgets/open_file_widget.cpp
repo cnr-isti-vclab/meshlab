@@ -34,6 +34,10 @@ OpenFileWidget::OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOp
 {
 }
 
+OpenFileWidget::~OpenFileWidget()
+{
+}
+
 void OpenFileWidget::selectFile()
 {
 	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(parameter);
@@ -47,8 +51,4 @@ void OpenFileWidget::selectFile()
 	StringValue fileName(fl);
 	parameter->setValue(fileName);
 	emit dialogParamChanged();
-}
-
-OpenFileWidget::~OpenFileWidget()
-{
 }

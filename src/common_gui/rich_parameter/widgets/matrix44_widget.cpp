@@ -94,14 +94,44 @@ Matrix44Widget::~Matrix44Widget()
 {
 }
 
-void Matrix44Widget::setValue(QString name, Matrix44m newVal)
+void Matrix44Widget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
-	if (name == paramName) {
-		for (int i = 0; i < 16; ++i)
-			coordSB[i]->setText(QString::number(newVal[i / 4][i % 4], 'g', 4));
-		valid = true;
-		m     = newVal;
+	if (lay != nullptr) {
+		lay->addLayout(vlay, r, 1, Qt::AlignTop);
 	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
+void Matrix44Widget::collectWidgetValue()
+{
+	if (!valid) {
+		Matrix44m tempM;
+		for (unsigned int i = 0; i < 16; ++i)
+			tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
+		parameter->setValue(Matrix44Value(tempM));
+	}
+	else {
+		parameter->setValue(Matrix44Value(m));
+	}
+}
+
+void Matrix44Widget::resetWidgetValue()
+{
+	valid = false;
+	vcg::Matrix44f m;
+	m.SetIdentity();
+	for (unsigned int ii = 0; ii < 16; ++ii) {
+		coordSB[ii]->setText(
+			QString::number(parameter->value().getMatrix44()[ii / 4][ii % 4], 'g', 3));
+	}
+}
+
+void Matrix44Widget::setWidgetValue(const Value& nv)
+{
+	valid = true;
+	m     = nv.getMatrix44();
+	for (unsigned int ii = 0; ii < 16; ++ii)
+		coordSB[ii]->setText(QString::number(nv.getMatrix44()[ii / 4][ii % 4], 'g', 3));
 }
 
 Matrix44m Matrix44Widget::getValue()
@@ -113,6 +143,16 @@ Matrix44m Matrix44Widget::getValue()
 		return Matrix44m(val);
 	}
 	return m;
+}
+
+void Matrix44Widget::setValue(QString name, Matrix44m newVal)
+{
+	if (name == paramName) {
+		for (int i = 0; i < 16; ++i)
+			coordSB[i]->setText(QString::number(newVal[i / 4][i % 4], 'g', 4));
+		valid = true;
+		m     = newVal;
+	}
 }
 
 void Matrix44Widget::getMatrix()
@@ -148,46 +188,6 @@ void Matrix44Widget::pasteMatrix()
 		for (int i = 0; i < 16; ++i, ++id)
 			coordSB[id]->setText(QString::number(m.V()[i]));
 	}
-}
-
-void Matrix44Widget::collectWidgetValue()
-{
-	if (!valid) {
-		Matrix44m tempM;
-		for (unsigned int i = 0; i < 16; ++i)
-			tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
-		parameter->setValue(Matrix44Value(tempM));
-	}
-	else {
-		parameter->setValue(Matrix44Value(m));
-	}
-}
-
-void Matrix44Widget::resetWidgetValue()
-{
-	valid = false;
-	vcg::Matrix44f m;
-	m.SetIdentity();
-	for (unsigned int ii = 0; ii < 16; ++ii) {
-		coordSB[ii]->setText(
-			QString::number(parameter->value().getMatrix44()[ii / 4][ii % 4], 'g', 3));
-	}
-}
-
-void Matrix44Widget::setWidgetValue(const Value& nv)
-{
-	valid = true;
-	m     = nv.getMatrix44();
-	for (unsigned int ii = 0; ii < 16; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getMatrix44()[ii / 4][ii % 4], 'g', 3));
-}
-
-void Matrix44Widget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addLayout(vlay, r, 1, Qt::AlignTop);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
 void Matrix44Widget::invalidateMatrix(const QString& /*s*/)

@@ -29,11 +29,7 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ShotWidget::ShotWidget(
-	QWidget*         p,
-	const RichShotf& rpf,
-	const RichShotf& rdef,
-	QWidget*         gla_curr) :
+ShotWidget::ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, QWidget* gla_curr) :
 		RichParameterWidget(p, rpf, rdef)
 {
 	paramName = rpf.name();
@@ -72,48 +68,8 @@ ShotWidget::ShotWidget(
 	}
 }
 
-void ShotWidget::getShot()
-{
-	int index = getShotCombo->currentIndex();
-	switch (index) {
-	case 0: emit askViewerShot(paramName); break;
-	case 1: emit askMeshShot(paramName); break;
-	case 2: emit askRasterShot(paramName); break;
-	case 3: {
-		QString filename = QFileDialog::getOpenFileName(
-            this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
-		QFile     qf(filename);
-		QFileInfo qfInfo(filename);
-
-		if (!qf.open(QIODevice::ReadOnly))
-			return;
-
-		QDomDocument doc("XmlDocument"); // It represents the XML document
-		if (!doc.setContent(&qf))
-			return;
-		qf.close();
-
-		QString type = doc.doctype().name();
-
-	} break;
-	default: assert(0);
-	}
-}
-
 ShotWidget::~ShotWidget()
 {
-}
-
-void ShotWidget::setShotValue(QString name, Shotm newVal)
-{
-	if (name == paramName) {
-		curShot = newVal;
-	}
-}
-
-Shotm ShotWidget::getValue()
-{
-	return curShot;
 }
 
 void ShotWidget::collectWidgetValue()
@@ -137,4 +93,44 @@ void ShotWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 		lay->addLayout(hlay, r, 1);
 	}
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
+Shotm ShotWidget::getValue()
+{
+	return curShot;
+}
+
+void ShotWidget::getShot()
+{
+	int index = getShotCombo->currentIndex();
+	switch (index) {
+	case 0: emit askViewerShot(paramName); break;
+	case 1: emit askMeshShot(paramName); break;
+	case 2: emit askRasterShot(paramName); break;
+	case 3: {
+		QString filename = QFileDialog::getOpenFileName(
+			this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
+		QFile     qf(filename);
+		QFileInfo qfInfo(filename);
+
+		if (!qf.open(QIODevice::ReadOnly))
+			return;
+
+		QDomDocument doc("XmlDocument"); // It represents the XML document
+		if (!doc.setContent(&qf))
+			return;
+		qf.close();
+
+		QString type = doc.doctype().name();
+
+	} break;
+	default: assert(0);
+	}
+}
+
+void ShotWidget::setShotValue(QString name, Shotm newVal)
+{
+	if (name == paramName) {
+		curShot = newVal;
+	}
 }

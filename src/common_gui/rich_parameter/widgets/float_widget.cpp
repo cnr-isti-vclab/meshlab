@@ -35,6 +35,10 @@ FloatWidget::FloatWidget(QWidget* p, const RichFloat& rpar, const RichFloat& rde
 	lned->setText(QString::number(parameter->value().getFloat(), 'g', 3));
 }
 
+FloatWidget::~FloatWidget()
+{
+}
+
 void FloatWidget::collectWidgetValue()
 {
 	parameter->setValue(FloatValue(lned->text().toFloat()));

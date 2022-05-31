@@ -34,8 +34,6 @@ protected:
 	IOFileWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~IOFileWidget();
 
-	void updateFileName(const StringValue& file);
-
 public:
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
@@ -49,6 +47,8 @@ signals:
 	void dialogParamChanged();
 
 protected:
+	void updateFileName(const StringValue& file);
+
 	QLineEdit*   filename;
 	QPushButton* browse;
 	QHBoxLayout* hlay;

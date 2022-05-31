@@ -37,13 +37,13 @@ public:
 		const RichMatrix44f& rdef,
 		QWidget*             gla_curr);
 	~Matrix44Widget();
-	QString   paramName;
-	Matrix44m getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+	Matrix44m getValue();
 
 public slots:
 	void setValue(QString name, Matrix44m val);
@@ -53,7 +53,8 @@ public slots:
 signals:
 	void askMeshMatrix(QString);
 
-protected:
+private:
+	QString      paramName;
 	QLineEdit*   coordSB[16];
 	QPushButton* getPoint3Button;
 	QGridLayout* lay44;

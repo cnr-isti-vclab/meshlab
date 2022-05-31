@@ -33,7 +33,6 @@ SaveFileWidget::SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const RichS
 		IOFileWidget(p, rpar, rdef)
 {
 	filename->setText(parameter->value().getString());
-	QString tmp = parameter->value().getString();
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -43,7 +42,6 @@ SaveFileWidget::~SaveFileWidget()
 void SaveFileWidget::selectFile()
 {
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(parameter);
-	QString       ext;
 	QString       fl =
 		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
 	collectWidgetValue();

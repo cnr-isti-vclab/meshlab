@@ -30,7 +30,8 @@ class StringWidget : public LineEditWidget
 {
 public:
 	StringWidget(QWidget* p, const RichString& rpar, const RichString& rdef);
-	~StringWidget() {}
+	~StringWidget();
+
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

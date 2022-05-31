@@ -44,6 +44,14 @@ LineEditWidget::~LineEditWidget()
 {
 }
 
+void LineEditWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != nullptr) {
+		lay->addWidget(lned, r, 1);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
 void LineEditWidget::changeChecker()
 {
 	if (lned->text() != this->lastVal) {
@@ -51,12 +59,4 @@ void LineEditWidget::changeChecker()
 		if (!this->lastVal.isEmpty())
 			emit lineEditChanged();
 	}
-}
-
-void LineEditWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addWidget(lned, r, 1);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }

@@ -28,8 +28,6 @@
 
 class EnumWidget : public ComboWidget
 {
-	Q_OBJECT
-
 public:
 	EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef);
 	~EnumWidget();;

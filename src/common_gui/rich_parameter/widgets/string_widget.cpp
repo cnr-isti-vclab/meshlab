@@ -35,6 +35,10 @@ StringWidget::StringWidget(QWidget* p, const RichString& rpar, const RichString&
 	lned->setText(parameter->value().getString());
 }
 
+StringWidget::~StringWidget()
+{
+}
+
 void StringWidget::collectWidgetValue()
 {
 	parameter->setValue(StringValue(lned->text()));

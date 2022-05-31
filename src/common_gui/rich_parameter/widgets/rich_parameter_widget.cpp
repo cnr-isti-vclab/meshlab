@@ -61,6 +61,33 @@ RichParameterWidget::~RichParameterWidget()
 	delete defaultParameter;
 }
 
+void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != NULL) {
+		lay->addWidget(descriptionLabel, r, 0, 1, 1, Qt::AlignRight);
+		lay->addWidget(helpLabel, r, 2);
+	}
+}
+
+void RichParameterWidget::setVisible(bool b)
+{
+	visible = b;
+	descriptionLabel->setVisible(b);
+	for (QWidget* w : widgets)
+		w->setVisible(b);
+	if (b && helpVisible)
+		helpLabel->setVisible(true);
+	else if (!b)
+		helpLabel->setVisible(false);
+	QWidget::setVisible(b);
+}
+
+/**
+ * @brief RichParameterWidget::resetValue
+ * called when the user press the 'default' button to reset the parameter values to its default.
+ * It just set the parameter value and then it calls the specialized resetWidgetValue() to
+ * update also the widget.
+ */
 void RichParameterWidget::resetValue()
 {
 	parameter->setValue(defaultParameter->value());
@@ -77,19 +104,6 @@ void RichParameterWidget::setHelpVisible(bool b)
 {
 	helpVisible = b;
 	helpLabel->setVisible(visible && helpVisible);
-}
-
-void RichParameterWidget::setVisible(bool b)
-{
-	visible = b;
-	descriptionLabel->setVisible(b);
-	for (QWidget* w : widgets)
-		w->setVisible(b);
-	if (b && helpVisible)
-		helpLabel->setVisible(true);
-	else if (!b)
-		helpLabel->setVisible(false);
-	QWidget::setVisible(b);
 }
 
 const Value& RichParameterWidget::widgetValue()
@@ -110,13 +124,5 @@ void RichParameterWidget::setParameterChanged()
 	RichParameterListFrame* f = dynamic_cast<RichParameterListFrame*>(p);
 	if (f) {
 		emit f->parameterChanged();
-	}
-}
-
-void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != NULL) {
-		lay->addWidget(descriptionLabel, r, 0, 1, 1, Qt::AlignRight);
-		lay->addWidget(helpLabel, r, 2);
 	}
 }

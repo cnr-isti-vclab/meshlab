@@ -30,7 +30,7 @@ class IntWidget : public LineEditWidget
 {
 public:
 	IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef);
-	~IntWidget() {}
+	~IntWidget();
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

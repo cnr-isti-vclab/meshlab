@@ -30,7 +30,7 @@ class FloatWidget : public LineEditWidget
 {
 public:
 	FloatWidget(QWidget* p, const RichFloat& rpar, const RichFloat& rdef);
-	~FloatWidget() {}
+	~FloatWidget();
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

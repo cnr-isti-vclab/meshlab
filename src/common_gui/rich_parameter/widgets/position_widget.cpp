@@ -110,6 +110,38 @@ PositionWidget::~PositionWidget()
 	this->disconnect();
 }
 
+void PositionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != nullptr) {
+		lay->addLayout(vlay, r, 1);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
+void PositionWidget::collectWidgetValue()
+{
+	parameter->setValue(Point3Value(vcg::Point3f(
+		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
+}
+
+void PositionWidget::resetWidgetValue()
+{
+	for (unsigned int ii = 0; ii < 3; ++ii)
+		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
+}
+
+void PositionWidget::setWidgetValue(const Value& nv)
+{
+	for (unsigned int ii = 0; ii < 3; ++ii)
+		coordSB[ii]->setText(QString::number(nv.getPoint3()[ii], 'g', 3));
+}
+
+vcg::Point3f PositionWidget::getValue()
+{
+	return vcg::Point3f(
+		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat());
+}
+
 void PositionWidget::getPoint()
 {
 	int index = getPoint3Combo->currentIndex();
@@ -134,36 +166,4 @@ void PositionWidget::setShotValue(QString name, Shotm newValShot)
 {
 	vcg::Point3f p = newValShot.GetViewPoint();
 	setValue(name, p);
-}
-
-vcg::Point3f PositionWidget::getValue()
-{
-	return vcg::Point3f(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat());
-}
-
-void PositionWidget::collectWidgetValue()
-{
-	parameter->setValue(Point3Value(vcg::Point3f(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
-}
-
-void PositionWidget::resetWidgetValue()
-{
-	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
-}
-
-void PositionWidget::setWidgetValue(const Value& nv)
-{
-	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getPoint3()[ii], 'g', 3));
-}
-
-void PositionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addLayout(vlay, r, 1);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }

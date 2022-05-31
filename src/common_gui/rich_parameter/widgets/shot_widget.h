@@ -33,13 +33,13 @@ class ShotWidget : public RichParameterWidget
 public:
 	ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, QWidget* gla);
 	~ShotWidget();
-	QString paramName;
-	Shotm   getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+	Shotm   getValue();
 
 public slots:
 	void getShot();
@@ -49,7 +49,8 @@ signals:
 	void askMeshShot(QString);
 	void askViewerShot(QString);
 
-protected:
+private:
+	QString paramName;
 	Shotm        curShot;
 	QLineEdit*   shotLE;
 	QPushButton* getShotButton;

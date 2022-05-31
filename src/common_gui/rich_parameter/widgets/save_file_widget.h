@@ -29,8 +29,8 @@
 class SaveFileWidget : public IOFileWidget
 {
 	Q_OBJECT
-		public:
-				 SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const RichSaveFile& rdef);
+public:
+	SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const RichSaveFile& rdef);
 	~SaveFileWidget();
 
 protected slots:

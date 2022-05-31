@@ -29,13 +29,9 @@
 class OpenFileWidget : public IOFileWidget
 {
 	Q_OBJECT
-		public:
-				 OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOpenFile& rdef);
+public:
+	OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOpenFile& rdef);
 	~OpenFileWidget();
-
-	/*void collectWidgetValue();
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);*/
 
 protected slots:
 	void selectFile();

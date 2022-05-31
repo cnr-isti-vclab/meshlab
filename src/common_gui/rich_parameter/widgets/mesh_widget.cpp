@@ -36,8 +36,8 @@ MeshWidget::MeshWidget(QWidget* p, const RichMesh& rpar, const RichMesh& rdef) :
 
 	QStringList meshNames;
 
-		 // make the default mesh Index be 0
-		 // defaultMeshIndex = -1;
+	// make the default mesh Index be 0
+	// defaultMeshIndex = -1;
 	int          currentmeshindex = -1;
 	unsigned int i                = 0;
 	for (const MeshModel& mm : md->meshIterator()) {
@@ -50,6 +50,10 @@ MeshWidget::MeshWidget(QWidget* p, const RichMesh& rpar, const RichMesh& rdef) :
 	}
 
 	init(p, currentmeshindex, meshNames);
+}
+
+MeshWidget::~MeshWidget()
+{
 }
 
 void MeshWidget::collectWidgetValue()

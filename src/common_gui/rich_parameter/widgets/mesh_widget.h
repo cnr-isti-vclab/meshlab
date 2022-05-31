@@ -28,16 +28,16 @@
 
 class MeshWidget : public ComboWidget
 {
-private:
-	const MeshDocument* md;
-
 public:
 	MeshWidget(QWidget* p, const RichMesh& defaultMesh, const RichMesh& rdef);
-	~MeshWidget() {};
+	~MeshWidget();;
 
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+private:
+	const MeshDocument* md;
 };
 
 #endif // MESHLAB_MESH_WIDGET_H

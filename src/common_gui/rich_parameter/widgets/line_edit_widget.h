@@ -30,15 +30,6 @@ class LineEditWidget : public RichParameterWidget
 {
 	Q_OBJECT
 
-protected:
-	QLineEdit* lned;
-	QString    lastVal;
-
-private slots:
-	void changeChecker();
-signals:
-	void lineEditChanged();
-
 public:
 	LineEditWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~LineEditWidget();
@@ -46,6 +37,15 @@ public:
 	virtual void collectWidgetValue()            = 0;
 	virtual void resetWidgetValue()              = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
+
+private slots:
+	void changeChecker();
+signals:
+	void lineEditChanged();
+
+protected:
+	QLineEdit* lned;
+	QString    lastVal;
 };
 
 #endif // MESHLAB_LINE_EDIT_WIDGET_H

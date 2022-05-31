@@ -35,6 +35,10 @@ IntWidget::IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef) :
 	lned->setText(QString::number(parameter->value().getInt()));
 }
 
+IntWidget::~IntWidget()
+{
+}
+
 void IntWidget::collectWidgetValue()
 {
 	parameter->setValue(IntValue(lned->text().toInt()));

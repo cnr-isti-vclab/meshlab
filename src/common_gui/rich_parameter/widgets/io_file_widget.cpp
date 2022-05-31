@@ -52,6 +52,14 @@ IOFileWidget::~IOFileWidget()
 	delete browse;
 }
 
+void IOFileWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != nullptr) {
+		lay->addLayout(hlay, r, 1, Qt::AlignTop);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
 void IOFileWidget::collectWidgetValue()
 {
 	parameter->setValue(StringValue(filename->text()));
@@ -72,12 +80,4 @@ void IOFileWidget::setWidgetValue(const Value& nv)
 void IOFileWidget::updateFileName(const StringValue& file)
 {
 	filename->setText(file.getString());
-}
-
-void IOFileWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addLayout(hlay, r, 1, Qt::AlignTop);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
