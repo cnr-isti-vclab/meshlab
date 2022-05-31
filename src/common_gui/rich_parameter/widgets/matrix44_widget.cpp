@@ -115,19 +115,6 @@ std::shared_ptr<Value> Matrix44Widget::getWidgetValue() const
 	}
 }
 
-void Matrix44Widget::collectWidgetValue()
-{
-	if (!valid) {
-		Matrix44m tempM;
-		for (unsigned int i = 0; i < 16; ++i)
-			tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
-		parameter->setValue(Matrix44Value(tempM));
-	}
-	else {
-		parameter->setValue(Matrix44Value(m));
-	}
-}
-
 void Matrix44Widget::resetWidgetValue()
 {
 	valid = false;

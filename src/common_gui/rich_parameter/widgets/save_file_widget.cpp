@@ -44,7 +44,6 @@ void SaveFileWidget::selectFile()
 	RichSaveFile* dec = reinterpret_cast<RichSaveFile*>(parameter);
 	QString       fl =
 		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	collectWidgetValue();
 	updateFileName(fl);
 	StringValue fileName(fl);
 	parameter->setValue(fileName);

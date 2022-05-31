@@ -75,11 +75,6 @@ std::shared_ptr<Value> ColorWidget::getWidgetValue() const
 	return std::make_shared<ColorValue>(pickcol);
 }
 
-void ColorWidget::collectWidgetValue()
-{
-	parameter->setValue(ColorValue(pickcol));
-}
-
 void ColorWidget::resetWidgetValue()
 {
 	QColor cl = parameter->value().getColor();
@@ -117,7 +112,7 @@ void ColorWidget::pickColor()
 		"Pick a Color",
 		QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
 	if (pickcol.isValid()) {
-		collectWidgetValue();
+		parameter->setValue(ColorValue(pickcol));
 		updateColorInfo(ColorValue(pickcol));
 	}
 	emit dialogParamChanged();

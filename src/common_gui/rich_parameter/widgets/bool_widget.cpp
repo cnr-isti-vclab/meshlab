@@ -58,11 +58,6 @@ std::shared_ptr<Value> BoolWidget::getWidgetValue() const
 	return std::make_shared<BoolValue>(cb->isChecked());
 }
 
-void BoolWidget::collectWidgetValue()
-{
-	parameter->setValue(BoolValue(cb->isChecked()));
-}
-
 void BoolWidget::resetWidgetValue()
 {
 	cb->setChecked(parameter->value().getBool());

@@ -45,6 +45,7 @@ class RichParameterWidget : public QWidget
 {
 	Q_OBJECT
 public:
+	RichParameterWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
 	RichParameterWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
 	virtual ~RichParameterWidget();
 
@@ -52,7 +53,6 @@ public:
 	virtual void resetWidgetValue() = 0;
 
 	virtual std::shared_ptr<Value> getWidgetValue() const = 0;
-	virtual void collectWidgetValue()            = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 
 	virtual void addWidgetToGridLayout(QGridLayout* lay, const int r) = 0;
@@ -72,7 +72,7 @@ protected:
 	std::vector<QWidget*> widgets; // will contain all the other widgets of this widget
 
 	RichParameter* parameter;
-	RichParameter* defaultParameter;
+	Value* defaultValue;
 
 	bool parameterValueChanged = false;
 

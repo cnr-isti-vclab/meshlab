@@ -111,12 +111,6 @@ std::shared_ptr<Value> DirectionWidget::getWidgetValue() const
 		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
 }
 
-void DirectionWidget::collectWidgetValue()
-{
-	parameter->setValue(Point3Value(vcg::Point3f(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
-}
-
 void DirectionWidget::resetWidgetValue()
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)

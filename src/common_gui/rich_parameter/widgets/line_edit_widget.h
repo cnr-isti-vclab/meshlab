@@ -35,7 +35,6 @@ public:
 	~LineEditWidget();
 	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const = 0;
-	virtual void collectWidgetValue()            = 0;
 	virtual void resetWidgetValue()              = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 

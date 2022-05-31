@@ -99,11 +99,6 @@ std::shared_ptr<Value> AbsPercWidget::getWidgetValue() const
 	return std::make_shared<FloatValue>(absSB->value());
 }
 
-void AbsPercWidget::collectWidgetValue()
-{
-	parameter->setValue(FloatValue(absSB->value()));
-}
-
 void AbsPercWidget::resetWidgetValue()
 {
 	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(parameter);

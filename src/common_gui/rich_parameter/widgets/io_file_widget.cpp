@@ -65,11 +65,6 @@ std::shared_ptr<Value> IOFileWidget::getWidgetValue() const
 	return std::make_shared<StringValue>(filename->text());
 }
 
-void IOFileWidget::collectWidgetValue()
-{
-	parameter->setValue(StringValue(filename->text()));
-}
-
 void IOFileWidget::resetWidgetValue()
 {
 	QString fle = parameter->value().getString();

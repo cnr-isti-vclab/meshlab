@@ -44,11 +44,6 @@ std::shared_ptr<Value> IntWidget::getWidgetValue() const
 	return std::make_shared<IntValue>(lned->text().toInt());
 }
 
-void IntWidget::collectWidgetValue()
-{
-	parameter->setValue(IntValue(lned->text().toInt()));
-}
-
 void IntWidget::resetWidgetValue()
 {
 	lned->setText(QString::number(parameter->value().getInt()));

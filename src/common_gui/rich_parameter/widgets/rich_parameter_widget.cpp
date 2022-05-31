@@ -34,10 +34,10 @@
 RichParameterWidget::RichParameterWidget(
 	QWidget*             p,
 	const RichParameter& rpar,
-	const RichParameter& defaultParam) :
+	const Value&         defaultValue) :
 		QWidget(p),
 		parameter(rpar.clone()),
-		defaultParameter(defaultParam.clone()),
+		defaultValue(defaultValue.clone()),
 		visible(true),
 		helpVisible(false)
 {
@@ -55,10 +55,18 @@ RichParameterWidget::RichParameterWidget(
 	}
 }
 
+RichParameterWidget::RichParameterWidget(
+	QWidget*             p,
+	const RichParameter& rpar,
+	const RichParameter& defaultParam) :
+		RichParameterWidget(p, rpar, defaultParam.value())
+{
+}
+
 RichParameterWidget::~RichParameterWidget()
 {
 	delete parameter;
-	delete defaultParameter;
+	delete defaultValue;
 }
 
 void RichParameterWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
@@ -83,14 +91,13 @@ void RichParameterWidget::setVisible(bool b)
 }
 
 /**
- * @brief RichParameterWidget::resetValue
- * called when the user press the 'default' button to reset the parameter values to its default.
+ * @brief called when the user press the 'default' button to reset the parameter values to its default.
  * It just set the parameter value and then it calls the specialized resetWidgetValue() to
  * update also the widget.
  */
 void RichParameterWidget::resetValue()
 {
-	parameter->setValue(defaultParameter->value());
+	parameter->setValue(*defaultValue);
 	resetWidgetValue();
 }
 

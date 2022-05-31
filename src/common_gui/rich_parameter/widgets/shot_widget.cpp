@@ -85,11 +85,6 @@ std::shared_ptr<Value> ShotWidget::getWidgetValue() const
 	return std::make_shared<ShotValue>(curShot);
 }
 
-void ShotWidget::collectWidgetValue()
-{
-	parameter->setValue(ShotValue(curShot));
-}
-
 void ShotWidget::resetWidgetValue()
 {
 	curShot = parameter->value().getShot();

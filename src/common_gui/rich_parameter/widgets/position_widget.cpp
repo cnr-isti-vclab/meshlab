@@ -124,12 +124,6 @@ std::shared_ptr<Value> PositionWidget::getWidgetValue() const
 		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
 }
 
-void PositionWidget::collectWidgetValue()
-{
-	parameter->setValue(Point3Value(vcg::Point3f(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat())));
-}
-
 void PositionWidget::resetWidgetValue()
 {
 	for (unsigned int ii = 0; ii < 3; ++ii)

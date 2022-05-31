@@ -46,7 +46,6 @@ void OpenFileWidget::selectFile()
 	if (!parameter->value().getString().isEmpty())
 		path = parameter->value().getString();
 	QString fl = QFileDialog::getOpenFileName(this, tr("Open"), path, dec->exts.join(";;"));
-	collectWidgetValue();
 	updateFileName(fl);
 	StringValue fileName(fl);
 	parameter->setValue(fileName);

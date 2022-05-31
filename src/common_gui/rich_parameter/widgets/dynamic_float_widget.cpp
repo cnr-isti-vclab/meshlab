@@ -84,11 +84,6 @@ std::shared_ptr<Value> DynamicFloatWidget::getWidgetValue() const
 	return std::make_shared<FloatValue>(valueLE->text().toFloat());
 }
 
-void DynamicFloatWidget::collectWidgetValue()
-{
-	parameter->setValue(FloatValue(valueLE->text().toFloat()));
-}
-
 void DynamicFloatWidget::resetWidgetValue()
 {
 	valueLE->setText(QString::number(parameter->value().getFloat()));
