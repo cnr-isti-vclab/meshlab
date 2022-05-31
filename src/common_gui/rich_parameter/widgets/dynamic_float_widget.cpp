@@ -79,6 +79,11 @@ void DynamicFloatWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> DynamicFloatWidget::getWidgetValue() const
+{
+	return std::make_shared<FloatValue>(valueLE->text().toFloat());
+}
+
 void DynamicFloatWidget::collectWidgetValue()
 {
 	parameter->setValue(FloatValue(valueLE->text().toFloat()));

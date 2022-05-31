@@ -70,6 +70,11 @@ void ColorWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> ColorWidget::getWidgetValue() const
+{
+	return std::make_shared<ColorValue>(pickcol);
+}
+
 void ColorWidget::collectWidgetValue()
 {
 	parameter->setValue(ColorValue(pickcol));

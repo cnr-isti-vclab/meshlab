@@ -1299,7 +1299,7 @@ void DecoratorParamsTreeWidget::apply()
 	for(auto& p : *frame) {
 		current.setValue(
 					p.first,
-					p.second->widgetValue());
+					*p.second->getWidgetValue());
 	}
 	mainWin->updateCustomSettings();
 	if (mainWin->GLA())

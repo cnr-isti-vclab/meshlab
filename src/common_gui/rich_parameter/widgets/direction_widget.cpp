@@ -105,6 +105,12 @@ void DirectionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> DirectionWidget::getWidgetValue() const
+{
+	return std::make_shared<Point3Value>(Point3m(
+		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
+}
+
 void DirectionWidget::collectWidgetValue()
 {
 	parameter->setValue(Point3Value(vcg::Point3f(

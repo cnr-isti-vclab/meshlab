@@ -91,7 +91,7 @@ void RichParameterListFrame::writeValuesOnParameterList(RichParameterList& curPa
 {
 	assert(curParSet.size() == (unsigned int) stdfieldwidgets.size());
 	for (auto& p : stdfieldwidgets) {
-		curParSet.setValue(p.first, (p.second)->widgetValue());
+		curParSet.setValue(p.first, *(p.second)->getWidgetValue());
 	}
 }
 

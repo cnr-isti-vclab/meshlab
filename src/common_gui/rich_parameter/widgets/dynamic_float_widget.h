@@ -35,6 +35,7 @@ public:
 	~DynamicFloatWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

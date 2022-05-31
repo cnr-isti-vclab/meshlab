@@ -31,6 +31,8 @@ class IntWidget : public LineEditWidget
 public:
 	IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef);
 	~IntWidget();
+
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

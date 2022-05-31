@@ -39,6 +39,11 @@ StringWidget::~StringWidget()
 {
 }
 
+std::shared_ptr<Value> StringWidget::getWidgetValue() const
+{
+	return std::make_shared<StringValue>(lned->text());
+}
+
 void StringWidget::collectWidgetValue()
 {
 	parameter->setValue(StringValue(lned->text()));

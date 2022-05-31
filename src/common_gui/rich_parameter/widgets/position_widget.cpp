@@ -118,6 +118,12 @@ void PositionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> PositionWidget::getWidgetValue() const
+{
+	return std::make_shared<Point3Value>(Point3m(
+		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
+}
+
 void PositionWidget::collectWidgetValue()
 {
 	parameter->setValue(Point3Value(vcg::Point3f(

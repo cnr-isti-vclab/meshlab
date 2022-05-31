@@ -39,6 +39,11 @@ FloatWidget::~FloatWidget()
 {
 }
 
+std::shared_ptr<Value> FloatWidget::getWidgetValue() const
+{
+	return std::make_shared<FloatValue>(lned->text().toFloat());
+}
+
 void FloatWidget::collectWidgetValue()
 {
 	parameter->setValue(FloatValue(lned->text().toFloat()));

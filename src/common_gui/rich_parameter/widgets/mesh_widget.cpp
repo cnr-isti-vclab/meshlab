@@ -56,6 +56,13 @@ MeshWidget::~MeshWidget()
 {
 }
 
+std::shared_ptr<Value> MeshWidget::getWidgetValue() const
+{
+	auto it = md->meshBegin();
+	std::advance(it, enumCombo->currentIndex());
+	return std::make_shared<IntValue>((*it).id());
+}
+
 void MeshWidget::collectWidgetValue()
 {
 	auto it = md->meshBegin();

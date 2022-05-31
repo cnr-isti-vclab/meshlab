@@ -36,10 +36,11 @@ public:
 	ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~ComboWidget();
 
-	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
-	virtual void collectWidgetValue()            = 0;
-	virtual void resetWidgetValue()              = 0;
-	virtual void setWidgetValue(const Value& nv) = 0;
+	void                           addWidgetToGridLayout(QGridLayout* lay, const int r);
+	virtual std::shared_ptr<Value> getWidgetValue() const          = 0;
+	virtual void                   collectWidgetValue()            = 0;
+	virtual void                   resetWidgetValue()              = 0;
+	virtual void                   setWidgetValue(const Value& nv) = 0;
 
 	void init(QWidget* p, int newEnum, QStringList values);
 

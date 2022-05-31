@@ -32,6 +32,7 @@ public:
 	StringWidget(QWidget* p, const RichString& rpar, const RichString& rdef);
 	~StringWidget();
 
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

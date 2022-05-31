@@ -51,7 +51,7 @@ public:
 	// this one is called by resetValue to reset the values inside the widgets.
 	virtual void resetWidgetValue() = 0;
 
-	// virtual std::shared_ptr<Value> getWidgetValue() const;
+	virtual std::shared_ptr<Value> getWidgetValue() const = 0;
 	virtual void collectWidgetValue()            = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 
@@ -62,10 +62,6 @@ public:
 	void resetValue();
 	void setValue(const Value& v);
 	void setHelpVisible(bool b);
-
-	// update the parameter with the current widget values and return it.
-	const Value&         widgetValue();
-	const RichParameter& richParameter() const;
 
 protected slots:
 	void setParameterChanged();

@@ -32,6 +32,7 @@ public:
 	EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef);
 	~EnumWidget();;
 
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

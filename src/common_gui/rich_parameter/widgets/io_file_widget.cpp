@@ -60,6 +60,11 @@ void IOFileWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
+std::shared_ptr<Value> IOFileWidget::getWidgetValue() const
+{
+	return std::make_shared<StringValue>(filename->text());
+}
+
 void IOFileWidget::collectWidgetValue()
 {
 	parameter->setValue(StringValue(filename->text()));

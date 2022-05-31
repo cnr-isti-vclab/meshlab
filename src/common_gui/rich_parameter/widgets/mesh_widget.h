@@ -32,6 +32,7 @@ public:
 	MeshWidget(QWidget* p, const RichMesh& defaultMesh, const RichMesh& rdef);
 	~MeshWidget();;
 
+	std::shared_ptr<Value> getWidgetValue() const;
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);

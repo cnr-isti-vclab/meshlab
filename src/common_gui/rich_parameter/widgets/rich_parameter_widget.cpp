@@ -106,17 +106,6 @@ void RichParameterWidget::setHelpVisible(bool b)
 	helpLabel->setVisible(visible && helpVisible);
 }
 
-const Value& RichParameterWidget::widgetValue()
-{
-	collectWidgetValue();
-	return parameter->value();
-}
-
-const RichParameter& RichParameterWidget::richParameter() const
-{
-	return *parameter;
-}
-
 void RichParameterWidget::setParameterChanged()
 {
 	parameterValueChanged = true;
