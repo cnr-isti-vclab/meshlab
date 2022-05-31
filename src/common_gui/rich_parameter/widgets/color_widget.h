@@ -29,8 +29,8 @@
 class ColorWidget : public RichParameterWidget
 {
 	Q_OBJECT
-		public:
-				 ColorWidget(QWidget* p, const RichColor& newColor, const RichColor& rdef);
+public:
+	ColorWidget(QWidget* p, const RichColor& newColor, const RichColor& rdef);
 	~ColorWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);

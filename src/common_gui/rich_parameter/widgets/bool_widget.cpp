@@ -45,6 +45,19 @@ BoolWidget::~BoolWidget()
 {
 }
 
+void BoolWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != nullptr) {
+		lay->addWidget(cb, r, 1);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
+std::shared_ptr<Value> BoolWidget::getWidgetValue() const
+{
+	return std::make_shared<BoolValue>(cb->isChecked());
+}
+
 void BoolWidget::collectWidgetValue()
 {
 	parameter->setValue(BoolValue(cb->isChecked()));
@@ -60,15 +73,3 @@ void BoolWidget::setWidgetValue(const Value& nv)
 	cb->setChecked(nv.getBool());
 }
 
-void BoolWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addWidget(cb, r, 1);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
-}
-
-std::shared_ptr<Value> BoolWidget::getWidgetValue() const
-{
-	return std::make_shared<BoolValue>(cb->isChecked());
-}

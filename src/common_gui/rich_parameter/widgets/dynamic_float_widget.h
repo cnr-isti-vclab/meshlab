@@ -34,13 +34,12 @@ public:
 	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& rdf, const RichDynamicFloat& rdef);
 	~DynamicFloatWidget();
 
-	float getValue();
-	void  setValue(float val, float minV, float maxV);
-
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+	float getValue();
 
 public slots:
 	void setValue(int newv);
@@ -51,14 +50,13 @@ signals:
 	// void valueChanged(int mask);
 	void dialogParamChanged();
 
-protected:
+private:
 	QLineEdit*   valueLE;
 	QSlider*     valueSlider;
 	float        minVal;
 	float        maxVal;
 	QHBoxLayout* hlay;
 
-private:
 	float intToFloat(int val);
 	int   floatToInt(float val);
 };

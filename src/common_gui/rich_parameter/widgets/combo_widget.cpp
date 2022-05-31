@@ -34,6 +34,19 @@ ComboWidget::ComboWidget(QWidget* p, const RichParameter& rpar, const RichParame
 {
 }
 
+ComboWidget::~ComboWidget()
+{
+	delete enumCombo;
+}
+
+void ComboWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+{
+	if (lay != nullptr) {
+		lay->addWidget(enumCombo, r, 1);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
 void ComboWidget::init(QWidget* p, int defaultEnum, QStringList values)
 {
 	enumCombo = new QComboBox(this);
@@ -52,17 +65,4 @@ void ComboWidget::setIndex(int newEnum)
 int ComboWidget::getIndex()
 {
 	return enumCombo->currentIndex();
-}
-
-ComboWidget::~ComboWidget()
-{
-	delete enumCombo;
-}
-
-void ComboWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addWidget(enumCombo, r, 1);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }

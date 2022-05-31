@@ -29,14 +29,15 @@
 class AbsPercWidget : public RichParameterWidget
 {
 	Q_OBJECT
-		public:
-				 AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsPerc& rdef);
+public:
+	AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsPerc& rdef);
 	~AbsPercWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	void collectWidgetValue();
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
+	std::shared_ptr<Value> getWidgetValue() const;
+	void                   collectWidgetValue();
+	void                   resetWidgetValue();
+	void                   setWidgetValue(const Value& nv);
 
 private:
 	void setValue(float val, float minV, float maxV);

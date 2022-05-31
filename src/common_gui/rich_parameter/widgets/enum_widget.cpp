@@ -35,9 +35,8 @@ EnumWidget::EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef) :
 	init(p, rpar.value().getInt(), rpar.enumvalues);
 }
 
-int EnumWidget::getSize()
+EnumWidget::~EnumWidget()
 {
-	return enumCombo->count();
 }
 
 void EnumWidget::collectWidgetValue()

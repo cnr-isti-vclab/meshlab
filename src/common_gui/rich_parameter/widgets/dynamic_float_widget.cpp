@@ -71,38 +71,12 @@ DynamicFloatWidget::~DynamicFloatWidget()
 {
 }
 
-float DynamicFloatWidget::getValue()
+void DynamicFloatWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
-	return float(valueLE->text().toDouble());
-}
-
-void DynamicFloatWidget::setValue(float newVal)
-{
-	if (QString::number(intToFloat(newVal)) != valueLE->text())
-		valueLE->setText(QString::number(intToFloat(newVal)));
-}
-
-void DynamicFloatWidget::setValue(int newVal)
-{
-	if (floatToInt(float(valueLE->text().toDouble())) != newVal) {
-		valueLE->setText(QString::number(intToFloat(newVal)));
+	if (lay != nullptr) {
+		lay->addLayout(hlay, r, 1);
 	}
-}
-
-void DynamicFloatWidget::setValue()
-{
-	float newValLE = float(valueLE->text().toDouble());
-	valueSlider->setValue(floatToInt(newValLE));
-	emit dialogParamChanged();
-}
-
-float DynamicFloatWidget::intToFloat(int val)
-{
-	return minVal + float(val) / 100.0f * (maxVal - minVal);
-}
-int DynamicFloatWidget::floatToInt(float val)
-{
-	return int(100.0f * (val - minVal) / (maxVal - minVal));
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
 void DynamicFloatWidget::collectWidgetValue()
@@ -120,10 +94,36 @@ void DynamicFloatWidget::setWidgetValue(const Value& nv)
 	valueLE->setText(QString::number(nv.getFloat()));
 }
 
-void DynamicFloatWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+float DynamicFloatWidget::getValue()
 {
-	if (lay != nullptr) {
-		lay->addLayout(hlay, r, 1);
+	return float(valueLE->text().toDouble());
+}
+
+void DynamicFloatWidget::setValue(int newVal)
+{
+	if (floatToInt(float(valueLE->text().toDouble())) != newVal) {
+		valueLE->setText(QString::number(intToFloat(newVal)));
 	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
+}
+
+void DynamicFloatWidget::setValue()
+{
+	float newValLE = float(valueLE->text().toDouble());
+	valueSlider->setValue(floatToInt(newValLE));
+	emit dialogParamChanged();
+}
+
+void DynamicFloatWidget::setValue(float newVal)
+{
+	if (QString::number(intToFloat(newVal)) != valueLE->text())
+		valueLE->setText(QString::number(intToFloat(newVal)));
+}
+
+float DynamicFloatWidget::intToFloat(int val)
+{
+	return minVal + float(val) / 100.0f * (maxVal - minVal);
+}
+int DynamicFloatWidget::floatToInt(float val)
+{
+	return int(100.0f * (val - minVal) / (maxVal - minVal));
 }

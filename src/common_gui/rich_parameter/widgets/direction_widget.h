@@ -29,31 +29,32 @@
 class DirectionWidget : public RichParameterWidget
 {
 	Q_OBJECT
-		public:
-				 DirectionWidget(QWidget* p, const RichDirection& rpf, const RichDirection& rdef, QWidget* gla);
+public:
+	DirectionWidget(QWidget* p, const RichDirection& rpf, const RichDirection& rdef, QWidget* gla);
 	~DirectionWidget();
-	QString      paramName;
-	vcg::Point3f getValue();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 
+	vcg::Point3f getValue();
+
 public slots:
 	void getPoint();
 	void setValue(QString name, Point3m val);
 	void setShotValue(QString name, Shotm val);
+
 signals:
 	void askViewDir(QString);
 	void askCameraDir(QString);
 
-protected:
+private:
+	QString      paramName;
 	QLineEdit*   coordSB[3];
 	QComboBox*   getPoint3Combo;
 	QPushButton* getPoint3Button;
 	QHBoxLayout* vlay;
 };
-
 
 #endif // MESHLAB_DIRECTION_WIDGET_H

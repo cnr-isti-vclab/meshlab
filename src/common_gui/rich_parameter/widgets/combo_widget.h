@@ -35,11 +35,13 @@ protected:
 public:
 	ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
 	~ComboWidget();
-	void         init(QWidget* p, int newEnum, QStringList values);
+
 	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
 	virtual void collectWidgetValue()            = 0;
 	virtual void resetWidgetValue()              = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
+
+	void init(QWidget* p, int newEnum, QStringList values);
 
 	int  getIndex();
 	void setIndex(int newEnum);

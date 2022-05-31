@@ -86,27 +86,17 @@ AbsPercWidget::~AbsPercWidget()
 	delete percSB;
 }
 
-void AbsPercWidget::on_absSB_valueChanged(double newv)
+void AbsPercWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
-	disconnect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
-	percSB->setValue((100 * (newv - m_min)) / (m_max - m_min));
-	connect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
-	emit dialogParamChanged();
+	if (lay != nullptr) {
+		lay->addLayout(vlay, r, 1, Qt::AlignTop);
+	}
+	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
-void AbsPercWidget::on_percSB_valueChanged(double newv)
+std::shared_ptr<Value> AbsPercWidget::getWidgetValue() const
 {
-	disconnect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
-	absSB->setValue((m_max - m_min) * 0.01 * newv + m_min);
-	connect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
-	emit dialogParamChanged();
-}
-
-void AbsPercWidget::setValue(float val, float minV, float maxV)
-{
-	absSB->setValue(val);
-	m_min = minV;
-	m_max = maxV;
+	return std::make_shared<FloatValue>(absSB->value());
 }
 
 void AbsPercWidget::collectWidgetValue()
@@ -126,10 +116,25 @@ void AbsPercWidget::setWidgetValue(const Value& nv)
 	setValue(nv.getFloat(), ap->min, ap->max);
 }
 
-void AbsPercWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+void AbsPercWidget::setValue(float val, float minV, float maxV)
 {
-	if (lay != nullptr) {
-		lay->addLayout(vlay, r, 1, Qt::AlignTop);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
+	absSB->setValue(val);
+	m_min = minV;
+	m_max = maxV;
+}
+
+void AbsPercWidget::on_absSB_valueChanged(double newv)
+{
+	disconnect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
+	percSB->setValue((100 * (newv - m_min)) / (m_max - m_min));
+	connect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
+	emit dialogParamChanged();
+}
+
+void AbsPercWidget::on_percSB_valueChanged(double newv)
+{
+	disconnect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
+	absSB->setValue((m_max - m_min) * 0.01 * newv + m_min);
+	connect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
+	emit dialogParamChanged();
 }

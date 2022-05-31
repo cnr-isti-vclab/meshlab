@@ -32,14 +32,11 @@ class EnumWidget : public ComboWidget
 
 public:
 	EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef);
-	~EnumWidget() {};
+	~EnumWidget();;
 
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
-
-	// returns the number of items in the list
-	int getSize();
 };
 
 #endif // MESHLAB_ENUM_WIDGET_H
