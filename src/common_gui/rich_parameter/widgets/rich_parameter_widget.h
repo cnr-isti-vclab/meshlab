@@ -49,8 +49,7 @@ public:
 	RichParameterWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
 	virtual ~RichParameterWidget();
 
-	// this one is called by resetValue to reset the values inside the widgets.
-	virtual void resetWidgetValue() = 0;
+
 
 	virtual std::shared_ptr<Value> getWidgetValue() const = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
@@ -59,8 +58,7 @@ public:
 
 	void setVisible(bool b);
 
-	void resetValue();
-	void setValue(const Value& v);
+	void resetWidgetToDefaultValue();
 	void setHelpVisible(bool b);
 
 protected slots:

@@ -98,7 +98,7 @@ void RichParameterListFrame::writeValuesOnParameterList(RichParameterList& curPa
 void RichParameterListFrame::resetValues()
 {
 	for (auto& p : stdfieldwidgets) {
-		p.second->resetValue();
+		p.second->resetWidgetToDefaultValue();
 	}
 }
 

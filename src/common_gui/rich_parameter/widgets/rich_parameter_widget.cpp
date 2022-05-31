@@ -90,21 +90,9 @@ void RichParameterWidget::setVisible(bool b)
 	QWidget::setVisible(b);
 }
 
-/**
- * @brief called when the user press the 'default' button to reset the parameter values to its default.
- * It just set the parameter value and then it calls the specialized resetWidgetValue() to
- * update also the widget.
- */
-void RichParameterWidget::resetValue()
+void RichParameterWidget::resetWidgetToDefaultValue()
 {
-	parameter->setValue(*defaultValue);
-	resetWidgetValue();
-}
-
-void RichParameterWidget::setValue(const Value& v)
-{
-	parameter->setValue(v);
-	resetWidgetValue();
+	setWidgetValue(*defaultValue);
 }
 
 void RichParameterWidget::setHelpVisible(bool b)

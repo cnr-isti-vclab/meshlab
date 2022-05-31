@@ -95,7 +95,7 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(currentParameter->name()));
 
 	assert(frame.size() == 1);
-	frame.begin()->second->setValue(defaultParameter.value());
+	frame.begin()->second->resetWidgetToDefaultValue();
 	apply();
 }
 

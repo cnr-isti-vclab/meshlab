@@ -1289,7 +1289,7 @@ void DecoratorParamsTreeWidget::save()
 void DecoratorParamsTreeWidget::reset()
 {
 	for(auto& p : *frame)
-		p.second->resetValue();
+		p.second->resetWidgetToDefaultValue();
 	apply();
 }
 
