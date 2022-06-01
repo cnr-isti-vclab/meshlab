@@ -125,7 +125,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastqtex_QualityThr       = 0.3f;
 	lastqtex_extratw          = 1.0;
 
-	lastisor_Iterations          = 3;
+	lastisor_Iterations          = 10;
 	lastisor_RemeshingAdaptivity = false;
 	lastisor_SelectedOnly        = false;
 	lastisor_RefineFlag          = true;
