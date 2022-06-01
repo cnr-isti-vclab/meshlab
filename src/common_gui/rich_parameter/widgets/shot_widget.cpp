@@ -29,8 +29,12 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ShotWidget::ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, QWidget* gla_curr) :
-		RichParameterWidget(p, rpf, rdef)
+ShotWidget::ShotWidget(
+	QWidget*         p,
+	const RichShotf& rpf,
+	const ShotValue& defaultValue,
+	QWidget*         gla) :
+		RichParameterWidget(p, rpf, defaultValue)
 {
 	paramName = rpf.name();
 
@@ -39,7 +43,7 @@ ShotWidget::ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, 
 	this->setShotValue(paramName, parameter->value().getShot());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
-	if (gla_curr) {
+	if (gla) {
 		getShotButton = new QPushButton("Get shot", this);
 		getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		hlay->addWidget(getShotButton);
@@ -58,13 +62,10 @@ ShotWidget::ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, 
 		connect(getShotCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(getShot()));
 		connect(getShotButton, SIGNAL(clicked()), this, SLOT(getShot()));
 		connect(
-			gla_curr,
-			SIGNAL(transmitShot(QString, Shotm)),
-			this,
-			SLOT(setShotValue(QString, Shotm)));
-		connect(this, SIGNAL(askViewerShot(QString)), gla_curr, SLOT(sendViewerShot(QString)));
-		connect(this, SIGNAL(askMeshShot(QString)), gla_curr, SLOT(sendMeshShot(QString)));
-		connect(this, SIGNAL(askRasterShot(QString)), gla_curr, SLOT(sendRasterShot(QString)));
+			gla, SIGNAL(transmitShot(QString, Shotm)), this, SLOT(setShotValue(QString, Shotm)));
+		connect(this, SIGNAL(askViewerShot(QString)), gla, SLOT(sendViewerShot(QString)));
+		connect(this, SIGNAL(askMeshShot(QString)), gla, SLOT(sendMeshShot(QString)));
+		connect(this, SIGNAL(askRasterShot(QString)), gla, SLOT(sendRasterShot(QString)));
 	}
 }
 

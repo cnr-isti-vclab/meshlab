@@ -55,14 +55,6 @@ RichParameterWidget::RichParameterWidget(
 	}
 }
 
-RichParameterWidget::RichParameterWidget(
-	QWidget*             p,
-	const RichParameter& rpar,
-	const RichParameter& defaultParam) :
-		RichParameterWidget(p, rpar, defaultParam.value())
-{
-}
-
 RichParameterWidget::~RichParameterWidget()
 {
 	delete parameter;

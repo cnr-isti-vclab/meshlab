@@ -245,7 +245,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new Matrix44Widget(
 			parent,
 			(const RichMatrix44f&) pd,
-			(const RichMatrix44f&) def,
+			(const Matrix44Value&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichPosition>() && def.isOfType<RichPosition>()) {
@@ -266,7 +266,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new ShotWidget(
 			parent,
 			(const RichShotf&) pd,
-			(const RichShotf&) def,
+			(const ShotValue&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichColor>() && def.isOfType<RichColor>()) {

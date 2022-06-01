@@ -46,7 +46,6 @@ class RichParameterWidget : public QWidget
 	Q_OBJECT
 public:
 	RichParameterWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
-	RichParameterWidget(QWidget* p, const RichParameter& rpar, const RichParameter& defaultValue);
 	virtual ~RichParameterWidget();
 
 

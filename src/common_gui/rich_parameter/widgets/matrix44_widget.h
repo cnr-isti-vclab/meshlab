@@ -34,8 +34,8 @@ public:
 	Matrix44Widget(
 		QWidget*             p,
 		const RichMatrix44f& rpf,
-		const RichMatrix44f& rdef,
-		QWidget*             gla_curr);
+		const Matrix44Value& defaultValue,
+		QWidget*             gla);
 	~Matrix44Widget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);

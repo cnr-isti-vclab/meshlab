@@ -31,15 +31,15 @@ class ShotWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	ShotWidget(QWidget* p, const RichShotf& rpf, const RichShotf& rdef, QWidget* gla);
+	ShotWidget(QWidget* p, const RichShotf& rpf, const ShotValue& defaultValue, QWidget* gla);
 	~ShotWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   resetWidgetValue();
+	void                   setWidgetValue(const Value& nv);
 
-	Shotm   getValue();
+	Shotm getValue();
 
 public slots:
 	void getShot();
@@ -50,7 +50,7 @@ signals:
 	void askViewerShot(QString);
 
 private:
-	QString paramName;
+	QString      paramName;
 	Shotm        curShot;
 	QLineEdit*   shotLE;
 	QPushButton* getShotButton;

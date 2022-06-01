@@ -32,9 +32,9 @@
 Matrix44Widget::Matrix44Widget(
 	QWidget*             p,
 	const RichMatrix44f& rpf,
-	const RichMatrix44f& rdef,
-	QWidget*             gla_curr) :
-		RichParameterWidget(p, rpf, rdef)
+	const Matrix44Value& defaultValue,
+	QWidget*             gla) :
+		RichParameterWidget(p, rpf, defaultValue)
 {
 	valid = false;
 	m.SetIdentity();
@@ -81,13 +81,13 @@ Matrix44Widget::Matrix44Widget(
 		 // gridLay->addLayout(vlay,row,1,Qt::AlignTop);
 
 	connect(
-		gla_curr,
+		gla,
 		SIGNAL(transmitMatrix(QString, Matrix44m)),
 		this,
 		SLOT(setValue(QString, Matrix44m)));
 	connect(getMatrixButton, SIGNAL(clicked()), this, SLOT(getMatrix()));
 	connect(pasteMatrixButton, SIGNAL(clicked()), this, SLOT(pasteMatrix()));
-	connect(this, SIGNAL(askMeshMatrix(QString)), gla_curr, SLOT(sendMeshMatrix(QString)));
+	connect(this, SIGNAL(askMeshMatrix(QString)), gla, SLOT(sendMeshMatrix(QString)));
 }
 
 Matrix44Widget::~Matrix44Widget()
