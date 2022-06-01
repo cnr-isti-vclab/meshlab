@@ -29,8 +29,11 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-SaveFileWidget::SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const RichSaveFile& rdef) :
-		IOFileWidget(p, rpar, rdef)
+SaveFileWidget::SaveFileWidget(
+	QWidget*            p,
+	const RichSaveFile& rpar,
+	const StringValue&  defaultValue) :
+		IOFileWidget(p, rpar, defaultValue)
 {
 	filename->setText(parameter->value().getString());
 }

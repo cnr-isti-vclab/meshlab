@@ -31,7 +31,7 @@ class IOFileWidget : public RichParameterWidget
 	Q_OBJECT
 
 protected:
-	IOFileWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
+	IOFileWidget(QWidget* p, const RichParameter& rpar, const StringValue& defaultValue);
 	~IOFileWidget();
 
 public:

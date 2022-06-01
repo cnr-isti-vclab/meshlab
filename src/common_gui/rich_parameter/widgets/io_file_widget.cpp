@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef) :
-		RichParameterWidget(p, rpar, rdef)
+IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar, const StringValue& defaultValue) :
+		RichParameterWidget(p, rpar, defaultValue)
 {
 	filename = new QLineEdit(this);
 	filename->setText(tr(""));

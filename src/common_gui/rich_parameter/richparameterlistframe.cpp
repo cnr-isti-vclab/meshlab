@@ -273,10 +273,12 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new ColorWidget(parent, (const RichColor&) pd, (const ColorValue&) def.value());
 	}
 	else if (pd.isOfType<RichOpenFile>() && def.isOfType<RichOpenFile>()) {
-		return new OpenFileWidget(parent, (const RichOpenFile&) pd, (const RichOpenFile&) def);
+		return new OpenFileWidget(
+			parent, (const RichOpenFile&) pd, (const StringValue&) def.value());
 	}
 	else if (pd.isOfType<RichSaveFile>() && def.isOfType<RichSaveFile>()) {
-		return new SaveFileWidget(parent, (const RichSaveFile&) pd, (const RichSaveFile&) def);
+		return new SaveFileWidget(
+			parent, (const RichSaveFile&) pd, (const StringValue&) def.value());
 	}
 	else if (pd.isOfType<RichMesh>() && def.isOfType<RichMesh>()) {
 		return new MeshWidget(parent, (const RichMesh&) pd, (const IntValue&) def.value());

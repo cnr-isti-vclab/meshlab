@@ -30,7 +30,7 @@ class SaveFileWidget : public IOFileWidget
 {
 	Q_OBJECT
 public:
-	SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const RichSaveFile& rdef);
+	SaveFileWidget(QWidget* p, const RichSaveFile& rpar, const StringValue& defaultValue);
 	~SaveFileWidget();
 
 protected slots:

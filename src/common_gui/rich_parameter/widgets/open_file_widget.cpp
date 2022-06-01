@@ -29,8 +29,11 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-OpenFileWidget::OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const RichOpenFile& rdef) :
-		IOFileWidget(p, rdf, rdef)
+OpenFileWidget::OpenFileWidget(
+	QWidget*            p,
+	const RichOpenFile& rdf,
+	const StringValue&  defaultValue) :
+		IOFileWidget(p, rdf, defaultValue)
 {
 }
 
@@ -40,8 +43,7 @@ OpenFileWidget::~OpenFileWidget()
 
 void OpenFileWidget::selectFile()
 {
-	RichOpenFile* dec = reinterpret_cast<RichOpenFile*>(parameter);
-	QString       ext;
+	RichOpenFile* dec  = reinterpret_cast<RichOpenFile*>(parameter);
 	QString       path = QDir::homePath();
 	if (!parameter->value().getString().isEmpty())
 		path = parameter->value().getString();
