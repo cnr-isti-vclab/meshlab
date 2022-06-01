@@ -29,13 +29,9 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-AbsPercWidget::AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsPerc& rdef) :
-		RichParameterWidget(p, rabs, rdef)
-
+AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc &rabs, const FloatValue &defaultValue) :
+		RichParameterWidget(p, rabs, defaultValue), m_min(rabs.min), m_max(rabs.max)
 {
-	m_min = rabs.min;
-	m_max = rabs.max;
-
 	descriptionLabel->setText(descriptionLabel->text() + " (abs and %)");
 
 	absSB  = new QDoubleSpinBox(this);

@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ColorWidget::ColorWidget(QWidget* p, const RichColor& newColor, const RichColor& rdef) :
-		RichParameterWidget(p, newColor, rdef), pickcol()
+ColorWidget::ColorWidget(QWidget *p, const RichColor &newColor, const ColorValue &defaultValue) :
+		RichParameterWidget(p, newColor, defaultValue), pickcol(defaultValue.getColor())
 {
 	colorLabel  = new QLabel(this);
 	colorButton = new QPushButton(this);
@@ -51,7 +51,6 @@ ColorWidget::ColorWidget(QWidget* p, const RichColor& newColor, const RichColor&
 	widgets.push_back(colorLabel);
 	widgets.push_back(colorButton);
 
-	pickcol = parameter->value().getColor();
 	connect(colorButton, SIGNAL(clicked()), this, SLOT(pickColor()));
 	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }

@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-BoolWidget::BoolWidget(QWidget* p, const RichBool& rb, const RichBool& rdef) :
-		RichParameterWidget(p, rb, rdef)
+BoolWidget::BoolWidget(QWidget *p, const RichBool &param, const BoolValue &defaultValue) :
+		RichParameterWidget(p, param, defaultValue)
 {
 	cb = new QCheckBox("", this);
 	cb->setToolTip(parameter->toolTip());

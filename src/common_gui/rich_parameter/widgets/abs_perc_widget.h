@@ -30,7 +30,7 @@ class AbsPercWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	AbsPercWidget(QWidget* p, const RichAbsPerc& rabs, const RichAbsPerc& rdef);
+	AbsPercWidget(QWidget* p, const RichAbsPerc &rabs, const FloatValue &defaultValue);
 	~AbsPercWidget();
 
 	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);

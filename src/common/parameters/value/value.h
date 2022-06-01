@@ -98,6 +98,13 @@ public:
 	virtual Value*  clone() const                                = 0;
 	virtual bool    operator==(const Value& p) const             = 0;
 	virtual void    fillToXMLElement(QDomElement& element) const = 0;
+
+	template <class Val>
+	bool isOfType() const
+	{
+		const Val* t = dynamic_cast<const Val*>(this);
+		return (t != nullptr);
+	}
 };
 
 #endif //MESHLAB_VALUE_H

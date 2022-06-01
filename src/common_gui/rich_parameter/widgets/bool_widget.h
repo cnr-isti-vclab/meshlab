@@ -29,7 +29,7 @@
 class BoolWidget : public RichParameterWidget
 {
 public:
-	BoolWidget(QWidget* p, const RichBool& rb, const RichBool& rdef);
+	BoolWidget(QWidget* p, const RichBool& param, const BoolValue& defaultValue);
 	~BoolWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);

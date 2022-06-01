@@ -219,66 +219,66 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	const RichParameter& pd,
 	const RichParameter& def)
 {
-	if (pd.isOfType<RichAbsPerc>()) {
-		return new AbsPercWidget(parent, (const RichAbsPerc&) pd, (const RichAbsPerc&) def);
+	if (pd.isOfType<RichAbsPerc>() && def.isOfType<RichAbsPerc>()) {
+		return new AbsPercWidget(parent, (const RichAbsPerc&) pd, (const FloatValue&) def.value());
 	}
-	else if (pd.isOfType<RichDynamicFloat>()) {
+	else if (pd.isOfType<RichDynamicFloat>() && def.isOfType<RichDynamicFloat>()) {
 		return new DynamicFloatWidget(
 			parent, (const RichDynamicFloat&) pd, (const RichDynamicFloat&) def);
 	}
-	else if (pd.isOfType<RichEnum>()) {
+	else if (pd.isOfType<RichEnum>() && def.isOfType<RichEnum>()) {
 		return new EnumWidget(parent, (const RichEnum&) pd, (const RichEnum&) def);
 	}
-	else if (pd.isOfType<RichBool>()) {
-		return new BoolWidget(parent, (const RichBool&) pd, (const RichBool&) def);
+	else if (pd.isOfType<RichBool>() && def.isOfType<RichBool>()) {
+		return new BoolWidget(parent, (const RichBool&) pd, (const BoolValue&) def.value());
 	}
-	else if (pd.isOfType<RichInt>()) {
+	else if (pd.isOfType<RichInt>() && def.isOfType<RichInt>()) {
 		return new IntWidget(parent, (const RichInt&) pd, (const RichInt&) def);
 	}
-	else if (pd.isOfType<RichFloat>()) {
+	else if (pd.isOfType<RichFloat>() && def.isOfType<RichFloat>()) {
 		return new FloatWidget(parent, (const RichFloat&) pd, (const RichFloat&) def);
 	}
-	else if (pd.isOfType<RichString>()) {
+	else if (pd.isOfType<RichString>() && def.isOfType<RichString>()) {
 		return new StringWidget(parent, (const RichString&) pd, (const RichString&) def);
 	}
-	else if (pd.isOfType<RichMatrix44f>()) {
+	else if (pd.isOfType<RichMatrix44f>() && def.isOfType<RichMatrix44f>()) {
 		return new Matrix44Widget(
 			parent,
 			(const RichMatrix44f&) pd,
 			(const RichMatrix44f&) def,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichPosition>()) {
+	else if (pd.isOfType<RichPosition>() && def.isOfType<RichPosition>()) {
 		return new PositionWidget(
 			parent,
 			(const RichPosition&) pd,
 			(const RichPosition&) def,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichDirection>()) {
+	else if (pd.isOfType<RichDirection>() && def.isOfType<RichDirection>()) {
 		return new DirectionWidget(
 			parent,
 			(const RichDirection&) pd,
 			(const RichDirection&) def,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichShotf>()) {
+	else if (pd.isOfType<RichShotf>() && def.isOfType<RichShotf>()) {
 		return new ShotWidget(
 			parent,
 			(const RichShotf&) pd,
 			(const RichShotf&) def,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichColor>()) {
-		return new ColorWidget(parent, (const RichColor&) pd, (const RichColor&) def);
+	else if (pd.isOfType<RichColor>() && def.isOfType<RichColor>()) {
+		return new ColorWidget(parent, (const RichColor&) pd, (const ColorValue&) def.value());
 	}
-	else if (pd.isOfType<RichOpenFile>()) {
+	else if (pd.isOfType<RichOpenFile>() && def.isOfType<RichOpenFile>()) {
 		return new OpenFileWidget(parent, (const RichOpenFile&) pd, (const RichOpenFile&) def);
 	}
-	else if (pd.isOfType<RichSaveFile>()) {
+	else if (pd.isOfType<RichSaveFile>() && def.isOfType<RichSaveFile>()) {
 		return new SaveFileWidget(parent, (const RichSaveFile&) pd, (const RichSaveFile&) def);
 	}
-	else if (pd.isOfType<RichMesh>()) {
+	else if (pd.isOfType<RichMesh>() && def.isOfType<RichMesh>()) {
 		return new MeshWidget(parent, (const RichMesh&) pd, (const RichMesh&) def);
 	}
 	else {
