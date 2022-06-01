@@ -34,28 +34,8 @@ PositionWidget::PositionWidget(
 	const RichPosition& rpf,
 	const RichPosition& rdef,
 	QWidget*            gla_curr) :
-		RichParameterWidget(p, rpf, rdef)
+		Point3Widget(p, rpf, rdef, gla_curr)
 {
-	paramName = rpf.name();
-
-	vlay = new QHBoxLayout();
-	vlay->setSpacing(0);
-	for (int i = 0; i < 3; ++i) {
-		coordSB[i]     = new QLineEdit(this);
-		QFont baseFont = coordSB[i]->font();
-		if (baseFont.pixelSize() != -1)
-			baseFont.setPixelSize(baseFont.pixelSize() * 3 / 4);
-		else
-			baseFont.setPointSize(baseFont.pointSize() * 3 / 4);
-		coordSB[i]->setFont(baseFont);
-		coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width() / 4);
-		coordSB[i]->setValidator(new QDoubleValidator());
-		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-		vlay->addWidget(coordSB[i]);
-		widgets.push_back(coordSB[i]);
-		connect(coordSB[i], SIGNAL(textChanged(QString)), this, SLOT(setParameterChanged()));
-	}
-	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla_curr) {
@@ -65,11 +45,7 @@ PositionWidget::PositionWidget(
 		names << "Raster Camera Pos.";
 		names << "Trackball Center";
 
-		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->addItems(names);
-		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		vlay->addWidget(getPoint3Combo);
-		widgets.push_back(getPoint3Combo);
 
 		connect(
 			gla_curr,
@@ -96,50 +72,13 @@ PositionWidget::PositionWidget(
 		connect(this, SIGNAL(askCameraPos(QString)), gla_curr, SLOT(sendRasterShot(QString)));
 		connect(this, SIGNAL(askTrackballPos(QString)), gla_curr, SLOT(sendTrackballPos(QString)));
 
-		getPoint3Button = new QPushButton("Get", this);
-		getPoint3Button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		connect(getPoint3Button, SIGNAL(clicked()), this, SLOT(getPoint()));
-
-		vlay->addWidget(getPoint3Button);
-		widgets.push_back(getPoint3Button);
 	}
 }
 
 PositionWidget::~PositionWidget()
 {
 	this->disconnect();
-}
-
-void PositionWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
-{
-	if (lay != nullptr) {
-		lay->addLayout(vlay, r, 1);
-	}
-	RichParameterWidget::addWidgetToGridLayout(lay, r);
-}
-
-std::shared_ptr<Value> PositionWidget::getWidgetValue() const
-{
-	return std::make_shared<Point3Value>(Point3m(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
-}
-
-void PositionWidget::resetWidgetValue()
-{
-	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
-}
-
-void PositionWidget::setWidgetValue(const Value& nv)
-{
-	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(nv.getPoint3()[ii], 'g', 3));
-}
-
-vcg::Point3f PositionWidget::getValue()
-{
-	return vcg::Point3f(
-		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat());
 }
 
 void PositionWidget::getPoint()
@@ -152,18 +91,4 @@ void PositionWidget::getPoint()
 	case 3: emit askTrackballPos(paramName); break;
 	default: assert(0);
 	}
-}
-
-void PositionWidget::setValue(QString name, Point3m newVal)
-{
-	if (name == paramName) {
-		for (int i = 0; i < 3; ++i)
-			coordSB[i]->setText(QString::number(newVal[i], 'g', 4));
-	}
-}
-
-void PositionWidget::setShotValue(QString name, Shotm newValShot)
-{
-	vcg::Point3f p = newValShot.GetViewPoint();
-	setValue(name, p);
 }

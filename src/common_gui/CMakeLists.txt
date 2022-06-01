@@ -16,6 +16,7 @@ set(HEADERS
 	rich_parameter/widgets/matrix44_widget.h
 	rich_parameter/widgets/mesh_widget.h
 	rich_parameter/widgets/open_file_widget.h
+	rich_parameter/widgets/point3_widget.h
 	rich_parameter/widgets/position_widget.h
 	rich_parameter/widgets/rich_parameter_widget.h
 	rich_parameter/widgets/rich_parameter_widgets.h
@@ -45,6 +46,7 @@ set(SOURCES
 	rich_parameter/widgets/matrix44_widget.cpp
 	rich_parameter/widgets/mesh_widget.cpp
 	rich_parameter/widgets/open_file_widget.cpp
+	rich_parameter/widgets/point3_widget.cpp
 	rich_parameter/widgets/position_widget.cpp
 	rich_parameter/widgets/rich_parameter_widget.cpp
 	rich_parameter/widgets/save_file_widget.cpp

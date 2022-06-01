@@ -21,24 +21,35 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_DIRECTION_WIDGET_H
-#define MESHLAB_DIRECTION_WIDGET_H
+#ifndef MESHLAB_POINT3_WIDGET_H
+#define MESHLAB_POINT3_WIDGET_H
 
-#include "point3_widget.h"
+#include "rich_parameter_widget.h"
 
-class DirectionWidget : public Point3Widget
+class Point3Widget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	DirectionWidget(QWidget* p, const RichDirection& rpf, const RichDirection& rdef, QWidget* gla);
-	~DirectionWidget();
+	Point3Widget(QWidget* p, const RichParameter &rpf, const RichParameter &rdef, QWidget* gla);
+	~Point3Widget();
+
+	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	std::shared_ptr<Value> getWidgetValue() const;
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
+
+	vcg::Point3f getValue();
 
 public slots:
-	void getPoint();
+	void setValue(QString name, Point3m val);
+	void setShotValue(QString name, Shotm val);
 
-signals:
-	void askViewDir(QString);
-	void askCameraDir(QString);
+protected:
+	QString      paramName;
+	QLineEdit*   coordSB[3];
+	QComboBox*   getPoint3Combo;
+	QPushButton* getPoint3Button;
+	QHBoxLayout* vlay;
 };
 
-#endif // MESHLAB_DIRECTION_WIDGET_H
+#endif // MESHLAB_POINT3_WIDGET_H
