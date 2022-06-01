@@ -1,29 +1,30 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2004-2021                                           \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2004-2022                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #include "rich_parameter.h"
-#include "../ml_document/mesh_document.h"
-#include "../python/python_utils.h"
+
+#include <common/ml_document/mesh_document.h>
+#include <common/python/python_utils.h>
 
 /**** RichParameter Class ****/
 
@@ -162,337 +163,6 @@ RichParameter& RichParameter::operator=(RichParameter&& rp)
 	fieldDesc = std::move(rp.fieldDesc);
 	tooltip = std::move(rp.tooltip);
 	return *this;
-}
-
-/**** RichBool Class ****/
-
-RichBool::RichBool(
-		const QString& nm,
-		const bool defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, BoolValue(defval), desc, tltip, hidden, category)
-{
-}
-
-RichBool::~RichBool()
-{
-}
-
-QString RichBool::stringType() const
-{
-	return "RichBool";
-}
-
-RichBool* RichBool::clone() const
-{
-	return new RichBool(*this);
-}
-
-bool RichBool::operator==( const RichParameter& rb )
-{
-	return (rb.value().isBool() && (pName == rb.name()) && (value().getBool() == rb.value().getBool()));
-}
-
-/**** RichInt Class ****/
-
-RichInt::RichInt(
-		const QString& nm,
-		const int defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, IntValue(defval),desc, tltip, hidden, category)
-{
-}
-
-RichInt::~RichInt()
-{
-}
-
-QString RichInt::stringType() const
-{
-	return "RichInt";
-}
-
-RichInt* RichInt::clone() const
-{
-	return new RichInt(*this);
-}
-
-bool RichInt::operator==( const RichParameter& rb )
-{
-	return (rb.value().isInt() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
-}
-
-/**** RichFloat Class ****/
-
-RichFloat::RichFloat(
-		const QString& nm,
-		const Scalarm defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, FloatValue(defval),desc, tltip, hidden, category)
-{
-}
-
-RichFloat::~RichFloat()
-{
-}
-
-QString RichFloat::stringType() const
-{
-	return "RichFloat";
-}
-
-RichFloat* RichFloat::clone() const
-{
-	return new RichFloat(*this);
-}
-
-bool RichFloat::operator==( const RichParameter& rb )
-{
-	return (rb.value().isFloat() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
-}
-
-/**** RichString Class ****/
-
-RichString::RichString(
-		const QString& nm,
-		const QString& defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, StringValue(defval),desc,tltip, hidden, category)
-{
-}
-
-RichString::~RichString()
-{
-}
-
-QString RichString::stringType() const
-{
-	return "RichString";
-}
-
-RichString* RichString::clone() const
-{
-	return new RichString(*this);
-}
-
-bool RichString::operator==( const RichParameter& rb )
-{
-	return (rb.value().isString() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
-}
-
-/**** RichMatrix44f Class ****/
-
-RichMatrix44f::RichMatrix44f(
-		const QString& nm,
-		const Matrix44m& defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, Matrix44Value(defval),desc, tltip, hidden, category)
-{
-}
-
-RichMatrix44f::~RichMatrix44f()
-{
-}
-
-QString RichMatrix44f::stringType() const
-{
-	return "RichMatrix44f";
-}
-
-RichMatrix44f* RichMatrix44f::clone() const
-{
-	return new RichMatrix44f(*this);
-}
-
-bool RichMatrix44f::operator==( const RichParameter& rb )
-{
-	return (rb.value().isMatrix44() &&(pName == rb.name()) && (value().getMatrix44() == rb.value().getMatrix44()));
-}
-
-/**** RichPosition Class ****/
-
-RichPosition::RichPosition(
-		const QString& nm,
-		const Point3m& defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, Point3Value(defval),desc, tltip, hidden, category)
-{
-}
-
-RichPosition::~RichPosition()
-{
-}
-
-QString RichPosition::stringType() const
-{
-	return "RichPosition";
-}
-
-RichPosition* RichPosition::clone() const
-{
-	return new RichPosition(*this);
-}
-
-bool RichPosition::operator==( const RichParameter& rb )
-{
-	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
-}
-
-/**** RichDirection Class ****/
-
-RichDirection::RichDirection(
-	const QString& nm,
-	const Point3m& defval,
-	const QString& desc,
-	const QString& tltip,
-	bool           hidden,
-	const QString& category) :
-	RichParameter(nm, Point3Value(defval), desc, tltip, hidden, category)
-{
-}
-
-RichDirection::~RichDirection()
-{
-}
-
-QString RichDirection::stringType() const
-{
-	return "RichDirection";
-}
-
-RichDirection* RichDirection::clone() const
-{
-	return new RichDirection(*this);
-}
-
-bool RichDirection::operator==(const RichParameter& rb)
-{
-	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
-}
-
-/**** RichShotf Class ****/
-
-RichShotf::RichShotf(
-		const QString& nm,
-		const Shotm& defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, ShotValue(defval),desc, tltip, hidden, category)
-{
-}
-
-RichShotf::~RichShotf()
-{
-}
-
-QString RichShotf::stringType() const
-{
-	return "RichShotf";
-}
-
-RichShotf* RichShotf::clone() const
-{
-	return new RichShotf(*this);
-}
-
-bool RichShotf::operator==( const RichParameter& rb )
-{
-	return (rb.value().isShot() &&(pName == rb.name()) );
-	// TODO REAL TEST OF EQUALITY // && (value().getShotf() == rb.value().getShotf()));
-}
-
-/**** RichColor Class ****/
-
-RichColor::RichColor(
-		const QString& nm,
-		const QColor& defval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, ColorValue(defval),desc, tltip, hidden, category)
-{
-}
-
-RichColor::~RichColor()
-{
-}
-
-QString RichColor::stringType() const
-{
-	return "RichColor";
-}
-
-RichColor* RichColor::clone() const
-{
-	return new RichColor(*this);
-}
-
-bool RichColor::operator==( const RichParameter& rb )
-{
-	return (rb.value().isColor() &&(pName == rb.name()) && (value().getColor() == rb.value().getColor()));
-}
-
-/**** RichAbsPerc Class ****/
-
-RichAbsPerc::RichAbsPerc(
-		const QString& nm,
-		const Scalarm defval,
-		const Scalarm minval,
-		const Scalarm maxval,
-		const QString& desc,
-		const QString& tltip,
-		bool hidden,
-		const QString& category) :
-	RichParameter(nm, FloatValue(defval), desc, tltip, hidden, category), min(minval), max(maxval)
-{
-}
-
-RichAbsPerc::~RichAbsPerc()
-{
-}
-
-QString RichAbsPerc::stringType() const
-{
-	return "RichAbsPerc";
-}
-
-QDomElement RichAbsPerc::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
-{
-	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
-	parElem.setAttribute("min",QString::number(min));
-	parElem.setAttribute("max",QString::number(max));
-	return parElem;
-}
-
-RichAbsPerc* RichAbsPerc::clone() const
-{
-	return new RichAbsPerc(*this);
-}
-
-bool RichAbsPerc::operator==( const RichParameter& rb )
-{
-	return (rb.isOfType<RichAbsPerc>() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }
 
 /**** RichEnum Class ****/
@@ -745,7 +415,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter*& par )
 		float max = np.attribute("max").toFloat(&corrconv);
 		if (!corrconv)
 			return false;
-		par = new RichAbsPerc(name,val,min,max,desc,tooltip);
+		par = new RichPercentage(name,val,min,max,desc,tooltip);
 		return true;
 	}
 
@@ -776,7 +446,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter*& par )
 				return false;
 			mm.V()[i]=val;
 		}
-		par = new RichMatrix44f(name,mm,desc,tooltip);
+		par = new RichMatrix44(name,mm,desc,tooltip);
 		return true;
 	}
 
@@ -892,7 +562,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter*& par )
 	if(type=="RichShotf") {
 		Shotm val;
 		assert(0); //TODO!!!!
-		par = new RichShotf(name, val,desc,tooltip);
+		par = new RichShot(name, val,desc,tooltip);
 		return true;
 	}
 

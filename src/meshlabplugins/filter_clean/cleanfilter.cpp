@@ -268,7 +268,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 	pair<float, float> qualityRange;
 	switch (ID(action)) {
 	case FP_BALL_PIVOTING:
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"BallRadius",
 			0.0f,
 			0.0f,
@@ -297,7 +297,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 			"Useful if you run the algorithm multiple times with an increasing ball radius."));
 		break;
 	case FP_REMOVE_ISOLATED_DIAMETER:
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"MinComponentDiag",
 			md.mm()->cm.bbox.Diag() / 10.0f,
 			0.0f,
@@ -326,7 +326,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 		break;
 	case FP_REMOVE_WRT_Q:
 		qualityRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"MaxQualityThr",
 			(float) 1.0,
 			qualityRange.first,
@@ -334,7 +334,7 @@ RichParameterList CleanFilter::initParameterList(const QAction* action, const Me
 			"Delete all vertices with quality under:"));
 		break;
 	case FP_MERGE_CLOSE_VERTEX:
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"Threshold",
 			md.mm()->cm.bbox.Diag() / 10000.0f,
 			0.0f,

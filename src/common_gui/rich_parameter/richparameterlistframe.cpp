@@ -219,8 +219,8 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	const RichParameter& pd,
 	const RichParameter& def)
 {
-	if (pd.isOfType<RichAbsPerc>() && def.isOfType<RichAbsPerc>()) {
-		return new AbsPercWidget(parent, (const RichAbsPerc&) pd, (const FloatValue&) def.value());
+	if (pd.isOfType<RichPercentage>() && def.isOfType<RichPercentage>()) {
+		return new PercentageWidget(parent, (const RichPercentage&) pd, (const FloatValue&) def.value());
 	}
 	else if (pd.isOfType<RichDynamicFloat>() && def.isOfType<RichDynamicFloat>()) {
 		return new DynamicFloatWidget(
@@ -241,10 +241,10 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	else if (pd.isOfType<RichString>() && def.isOfType<RichString>()) {
 		return new StringWidget(parent, (const RichString&) pd, (const StringValue&) def.value());
 	}
-	else if (pd.isOfType<RichMatrix44f>() && def.isOfType<RichMatrix44f>()) {
+	else if (pd.isOfType<RichMatrix44>() && def.isOfType<RichMatrix44>()) {
 		return new Matrix44Widget(
 			parent,
-			(const RichMatrix44f&) pd,
+			(const RichMatrix44&) pd,
 			(const Matrix44Value&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
@@ -262,10 +262,10 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 			(const Point3Value&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichShotf>() && def.isOfType<RichShotf>()) {
+	else if (pd.isOfType<RichShot>() && def.isOfType<RichShot>()) {
 		return new ShotWidget(
 			parent,
-			(const RichShotf&) pd,
+			(const RichShot&) pd,
 			(const ShotValue&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}

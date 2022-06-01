@@ -31,7 +31,7 @@
 
 ShotWidget::ShotWidget(
 	QWidget*         p,
-	const RichShotf& rpf,
+	const RichShot& rpf,
 	const ShotValue& defaultValue,
 	QWidget*         gla) :
 		RichParameterWidget(p, rpf, defaultValue)

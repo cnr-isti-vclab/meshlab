@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,39 +21,34 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_ABS_PERC_WIDGET_H
-#define MESHLAB_ABS_PERC_WIDGET_H
+#include "rich_direction.h"
 
-#include "rich_parameter_widget.h"
-
-class AbsPercWidget : public RichParameterWidget
+RichDirection::RichDirection(
+	const QString& nm,
+	const Point3m& defval,
+	const QString& desc,
+	const QString& tltip,
+	bool           hidden,
+	const QString& category) :
+		RichParameter(nm, Point3Value(defval), desc, tltip, hidden, category)
 {
-	Q_OBJECT
-public:
-	AbsPercWidget(QWidget* p, const RichAbsPerc &rabs, const FloatValue &defaultValue);
-	~AbsPercWidget();
+}
 
-	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void                   resetWidgetValue();
-	void                   setWidgetValue(const Value& nv);
+RichDirection::~RichDirection()
+{
+}
 
-private:
-	void setValue(float val, float minV, float maxV);
+QString RichDirection::stringType() const
+{
+	return "RichDirection";
+}
 
-public slots:
+RichDirection* RichDirection::clone() const
+{
+	return new RichDirection(*this);
+}
 
-	void on_absSB_valueChanged(double newv);
-	void on_percSB_valueChanged(double newv);
-signals:
-	void dialogParamChanged();
-
-protected:
-	QDoubleSpinBox* absSB;
-	QDoubleSpinBox* percSB;
-	float           m_min;
-	float           m_max;
-	QGridLayout*    vlay;
-};
-
-#endif // MESHLAB_ABS_PERC_WIDGET_H
+bool RichDirection::operator==(const RichParameter& rb)
+{
+	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
+}

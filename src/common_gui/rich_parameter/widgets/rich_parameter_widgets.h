@@ -24,7 +24,6 @@
 #ifndef MESHLAB_RICH_PARAMETER_WIDGETS_H
 #define MESHLAB_RICH_PARAMETER_WIDGETS_H
 
-#include "abs_perc_widget.h"
 #include "bool_widget.h"
 #include "color_widget.h"
 #include "direction_widget.h"
@@ -35,6 +34,7 @@
 #include "matrix44_widget.h"
 #include "mesh_widget.h"
 #include "open_file_widget.h"
+#include "percentage_widget.h"
 #include "position_widget.h"
 #include "save_file_widget.h"
 #include "shot_widget.h"

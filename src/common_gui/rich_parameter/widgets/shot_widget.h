@@ -31,7 +31,7 @@ class ShotWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	ShotWidget(QWidget* p, const RichShotf& rpf, const ShotValue& defaultValue, QWidget* gla);
+	ShotWidget(QWidget* p, const RichShot& rpf, const ShotValue& defaultValue, QWidget* gla);
 	~ShotWidget();
 
 	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);

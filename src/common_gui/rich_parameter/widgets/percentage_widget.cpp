@@ -21,7 +21,7 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "abs_perc_widget.h"
+#include "percentage_widget.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc &rabs, const FloatValue &defaultValue) :
+PercentageWidget::PercentageWidget(QWidget *p, const RichPercentage &rabs, const FloatValue &defaultValue) :
 		RichParameterWidget(p, rabs, defaultValue), m_min(rabs.min), m_max(rabs.max)
 {
 	descriptionLabel->setText(descriptionLabel->text() + " (abs and %)");
@@ -76,13 +76,13 @@ AbsPercWidget::AbsPercWidget(QWidget *p, const RichAbsPerc &rabs, const FloatVal
 	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
 
-AbsPercWidget::~AbsPercWidget()
+PercentageWidget::~PercentageWidget()
 {
 	delete absSB;
 	delete percSB;
 }
 
-void AbsPercWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
+void PercentageWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
 	if (lay != nullptr) {
 		lay->addLayout(vlay, r, 1, Qt::AlignTop);
@@ -90,31 +90,31 @@ void AbsPercWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
-std::shared_ptr<Value> AbsPercWidget::getWidgetValue() const
+std::shared_ptr<Value> PercentageWidget::getWidgetValue() const
 {
 	return std::make_shared<FloatValue>(absSB->value());
 }
 
-void AbsPercWidget::resetWidgetValue()
+void PercentageWidget::resetWidgetValue()
 {
-	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(parameter);
+	RichPercentage* ap = reinterpret_cast<RichPercentage*>(parameter);
 	setValue(parameter->value().getFloat(), ap->min, ap->max);
 }
 
-void AbsPercWidget::setWidgetValue(const Value& nv)
+void PercentageWidget::setWidgetValue(const Value& nv)
 {
-	RichAbsPerc* ap = reinterpret_cast<RichAbsPerc*>(parameter);
+	RichPercentage* ap = reinterpret_cast<RichPercentage*>(parameter);
 	setValue(nv.getFloat(), ap->min, ap->max);
 }
 
-void AbsPercWidget::setValue(float val, float minV, float maxV)
+void PercentageWidget::setValue(float val, float minV, float maxV)
 {
 	absSB->setValue(val);
 	m_min = minV;
 	m_max = maxV;
 }
 
-void AbsPercWidget::on_absSB_valueChanged(double newv)
+void PercentageWidget::on_absSB_valueChanged(double newv)
 {
 	disconnect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
 	percSB->setValue((100 * (newv - m_min)) / (m_max - m_min));
@@ -122,7 +122,7 @@ void AbsPercWidget::on_absSB_valueChanged(double newv)
 	emit dialogParamChanged();
 }
 
-void AbsPercWidget::on_percSB_valueChanged(double newv)
+void PercentageWidget::on_percSB_valueChanged(double newv)
 {
 	disconnect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
 	absSB->setValue((m_max - m_min) * 0.01 * newv + m_min);

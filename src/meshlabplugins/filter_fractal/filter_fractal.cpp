@@ -213,7 +213,7 @@ void FilterFractal::initParameterSetForFractalDisplacement(const QAction *filter
 		par.addParam(RichDynamicFloat("maxHeight", 0.2f, 0.0f, 1.0f, "Max height:", "Defines the maximum perturbation height as a fraction of the terrain's side."));
 	} else {
 		float diag = md.mm()->cm.bbox.Diag();
-		par.addParam(RichAbsPerc("maxHeight", 0.02 * diag, 0, 0.5*diag, "Max height:", "Defines the maximum height for the perturbation."));
+		par.addParam(RichPercentage("maxHeight", 0.02 * diag, 0, 0.5*diag, "Max height:", "Defines the maximum height for the perturbation."));
 	}
 
 	par.addParam(RichDynamicFloat("scale", 1.0f, 0.0f, 10.0f, "Scale factor:", "Scales the fractal perturbation in and out. Values larger than 1 mean zoom out; values smaller than one mean zoom in."));

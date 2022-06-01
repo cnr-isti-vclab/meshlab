@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,46 +21,32 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#ifndef MESHLAB_RICH_PERCENTAGE_H
+#define MESHLAB_RICH_PERCENTAGE_H
 
-#include "rich_parameter_widget.h"
+#include "rich_parameter.h"
 
-class Matrix44Widget : public RichParameterWidget
+class RichPercentage : public RichParameter
 {
-	Q_OBJECT
-
 public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+	RichPercentage(
+		const QString& nm,
+		const Scalarm defval,
+		const Scalarm minval,
+		const Scalarm maxval,
+		const QString& desc = QString(),
+		const QString& tltip = QString(),
+		bool hidden = false,
+		const QString& category = QString());
+	~RichPercentage();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
-	Matrix44m getValue();
-
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
-
-private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
+	RichPercentage* clone() const;
+	bool operator==(const RichParameter& rb);
+	Scalarm min;
+	Scalarm max;
 };
 
-#endif // MESHLAB_MATRIX44_WIDGET_H
+#endif // MESHLAB_RICH_PERCENTAGE_H

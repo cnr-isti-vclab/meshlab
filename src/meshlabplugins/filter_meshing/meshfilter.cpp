@@ -456,7 +456,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
 		parlst.addParam(RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
 		parlst.addParam(RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
-		parlst.addParam(RichAbsPerc("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
+		parlst.addParam(RichPercentage("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
 									" It specifies the scale at which the curvature is computed. e.g. for SDQF it specify how large is the patch where we fit the quadric used to compute curvature dirs."));
 		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove any unreference vertex (for which curvature values are not defined)"));
 		break;
@@ -496,10 +496,10 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
 		parlst.addParam(RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applied only to the selected faces."));
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
+		parlst.addParam(RichPercentage("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
 		parlst.addParam(RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Crease Angle", "Minimum angle between faces of the original to consider the shared edge as a feature to be preserved."));
 		parlst.addParam(RichBool ("CheckSurfDist", lastisor_CheckSurfDist, "Check Surface Distance", "If toggled each local operation must deviate from original mesh by [Max. surface distance]"));
-		parlst.addParam(RichAbsPerc ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
+		parlst.addParam(RichPercentage ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
 		parlst.addParam(RichBool ("SplitFlag", lastisor_RefineFlag, "Refine Step", "If checked the remeshing operations will include a refine step."));
 		parlst.addParam(RichBool ("CollapseFlag", lastisor_CollapseFlag, "Collapse Step", "If checked the remeshing operations will include a collapse step."));
 		parlst.addParam(RichBool ("SwapFlag", lastisor_SwapFlag, "Edge-Swap Step", "If checked the remeshing operations will include a edge-swap step, aimed at improving the vertex valence of the resulting mesh."));
@@ -523,7 +523,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	case FP_MIDPOINT:
 		parlst.addParam(RichInt("Iterations", 3, "Iterations", "Number of time the model is subdivided."));
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
+		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
 		parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 		break;
 		
@@ -534,7 +534,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 
 	case FP_CLUSTERING:
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
+		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
 		parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 		break;
 
@@ -571,7 +571,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	case FP_SET_TRANSFORM_MATRIX:
 	{
 		Matrix44m mat; mat.SetIdentity();
-		parlst.addParam(RichMatrix44f("TransformMatrix", mat, ""));
+		parlst.addParam(RichMatrix44("TransformMatrix", mat, ""));
 		parlst.addParam(RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
 		parlst.addParam(RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(RichBool ("allLayers",false,"Apply to all visible Layers","If selected, the filter will be applied to all visible mesh layers"));

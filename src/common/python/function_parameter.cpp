@@ -120,8 +120,8 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
 		return;
 	}
-	if (parameter->isOfType<RichAbsPerc>()) {
-		RichAbsPerc* rabs = dynamic_cast<RichAbsPerc*>(parameter);
+	if (parameter->isOfType<RichPercentage>()) {
+		RichPercentage* rabs = dynamic_cast<RichPercentage*>(parameter);
 		float abs = parameter->value().getFloat();
 		float perc = (abs - rabs->min) / (rabs->max - rabs->min) * 100;
 		o << perc << "%";
@@ -133,7 +133,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
 		return;
 	}
-	if (parameter->isOfType<RichMatrix44f>()){
+	if (parameter->isOfType<RichMatrix44>()){
 		const MESHLAB_SCALAR* v = parameter->value().getMatrix44().V();
 		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
 			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
@@ -147,7 +147,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			<< parameter->value().getPoint3().Z() << "]";
 		return;
 	}
-	if (parameter->isOfType<RichShotf>()) {
+	if (parameter->isOfType<RichShot>()) {
 		o << "None";
 		return;
 	}

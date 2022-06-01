@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RICH_PARAMETER_LIST_H
 #define MESHLAB_RICH_PARAMETER_LIST_H
 
-#include "rich_parameter.h"
+#include "rich_parameters.h"
 
 /**
  * @brief The RichParameterList class

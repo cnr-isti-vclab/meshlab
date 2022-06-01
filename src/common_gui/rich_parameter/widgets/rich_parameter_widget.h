@@ -48,8 +48,6 @@ public:
 	RichParameterWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
 	virtual ~RichParameterWidget();
 
-
-
 	virtual std::shared_ptr<Value> getWidgetValue() const = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 

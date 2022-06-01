@@ -25,7 +25,7 @@
 #define MESHLAB_SETTING_DIALOG_H
 
 #include <QDialog>
-#include <common/parameters/rich_parameter.h>
+#include <common/parameters/rich_parameters.h>
 #include <common_gui/rich_parameter/richparameterlistframe.h>
 
 /**

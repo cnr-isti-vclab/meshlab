@@ -23,7 +23,7 @@
 #include "function.h"
 
 #include <QStringList>
-#include "../parameters/rich_parameter.h"
+#include <common/parameters/rich_parameters.h>
 
 pymeshlab::Function::Function()
 {

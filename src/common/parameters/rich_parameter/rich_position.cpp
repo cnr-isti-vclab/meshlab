@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,46 +21,35 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#include "rich_position.h"
 
-#include "rich_parameter_widget.h"
-
-class Matrix44Widget : public RichParameterWidget
+RichPosition::RichPosition(
+	const QString& nm,
+	const Point3m& defval,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, Point3Value(defval),desc, tltip, hidden, category)
 {
-	Q_OBJECT
+}
 
-public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+RichPosition::~RichPosition()
+{
+}
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+QString RichPosition::stringType() const
+{
+	return "RichPosition";
+}
 
-	Matrix44m getValue();
+RichPosition* RichPosition::clone() const
+{
+	return new RichPosition(*this);
+}
 
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
+bool RichPosition::operator==( const RichParameter& rb )
+{
+	return (rb.value().isPoint3() &&(pName == rb.name()) && (value().getPoint3() == rb.value().getPoint3()));
+}
 
-private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
-};
-
-#endif // MESHLAB_MATRIX44_WIDGET_H

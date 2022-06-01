@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,46 +21,44 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#include "rich_percentage.h"
 
-#include "rich_parameter_widget.h"
-
-class Matrix44Widget : public RichParameterWidget
+RichPercentage::RichPercentage(
+	const QString& nm,
+	const Scalarm defval,
+	const Scalarm minval,
+	const Scalarm maxval,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, FloatValue(defval), desc, tltip, hidden, category), min(minval), max(maxval)
 {
-	Q_OBJECT
+}
 
-public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+RichPercentage::~RichPercentage()
+{
+}
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+QString RichPercentage::stringType() const
+{
+	return "RichAbsPerc";
+}
 
-	Matrix44m getValue();
+QDomElement RichPercentage::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
+	parElem.setAttribute("min",QString::number(min));
+	parElem.setAttribute("max",QString::number(max));
+	return parElem;
+}
 
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
+RichPercentage* RichPercentage::clone() const
+{
+	return new RichPercentage(*this);
+}
 
-private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
-};
-
-#endif // MESHLAB_MATRIX44_WIDGET_H
+bool RichPercentage::operator==( const RichParameter& rb )
+{
+	return (rb.isOfType<RichPercentage>() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
+}

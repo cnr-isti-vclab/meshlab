@@ -114,7 +114,7 @@ RichParameterList FilterMutualInfoPlugin::initParameterList(const QAction *actio
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO:
 		parlst.addParam(RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
-		parlst.addParam(RichShotf("Shot", Shotm(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
+		parlst.addParam(RichShot("Shot", Shotm(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
 		parlst.addParam(RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
 		parlst.addParam(RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
 		parlst.addParam(RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));

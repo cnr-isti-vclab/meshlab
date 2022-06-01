@@ -53,8 +53,20 @@ set(HEADERS
 	ml_shared_data_context/ml_plugin_gl_context.h
 	ml_shared_data_context/ml_scene_gl_shared_data_context.h
 	ml_shared_data_context/ml_shared_data_context.h
-	parameters/rich_parameter.h
+	parameters/rich_parameters.h
+	parameters/values.h
 	parameters/rich_parameter_list.h
+	parameters/rich_parameter/rich_bool.h
+	parameters/rich_parameter/rich_color.h
+	parameters/rich_parameter/rich_direction.h
+	parameters/rich_parameter/rich_float.h
+	parameters/rich_parameter/rich_int.h
+	parameters/rich_parameter/rich_matrix44.h
+	parameters/rich_parameter/rich_parameter.h
+	parameters/rich_parameter/rich_percentage.h
+	parameters/rich_parameter/rich_position.h
+	parameters/rich_parameter/rich_shot.h
+	parameters/rich_parameter/rich_string.h
 	parameters/value/bool_value.h
 	parameters/value/color_value.h
 	parameters/value/float_value.h
@@ -64,7 +76,6 @@ set(HEADERS
 	parameters/value/shot_value.h
 	parameters/value/string_value.h
 	parameters/value/value.h
-	parameters/value/values.h
 	plugins/containers/generic_container_iterator.h
 	plugins/containers/decorate_plugin_container.h
 	plugins/containers/edit_plugin_container.h
@@ -108,8 +119,18 @@ set(SOURCES
 	ml_shared_data_context/ml_plugin_gl_context.cpp
 	ml_shared_data_context/ml_scene_gl_shared_data_context.cpp
 	ml_shared_data_context/ml_shared_data_context.cpp
-	parameters/rich_parameter.cpp
 	parameters/rich_parameter_list.cpp
+	parameters/rich_parameter/rich_bool.cpp
+	parameters/rich_parameter/rich_color.cpp
+	parameters/rich_parameter/rich_direction.cpp
+	parameters/rich_parameter/rich_float.cpp
+	parameters/rich_parameter/rich_int.cpp
+	parameters/rich_parameter/rich_matrix44.cpp
+	parameters/rich_parameter/rich_parameter.cpp
+	parameters/rich_parameter/rich_percentage.cpp
+	parameters/rich_parameter/rich_position.cpp
+	parameters/rich_parameter/rich_shot.cpp
+	parameters/rich_parameter/rich_string.cpp
 	parameters/value/bool_value.cpp
 	parameters/value/color_value.cpp
 	parameters/value/float_value.cpp

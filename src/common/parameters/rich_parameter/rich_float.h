@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
  * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
@@ -21,16 +21,27 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_VALUES_H
-#define MESHLAB_VALUES_H
+#ifndef MESHLAB_RICH_FLOAT_H
+#define MESHLAB_RICH_FLOAT_H
 
-#include "bool_value.h"
-#include "color_value.h"
-#include "float_value.h"
-#include "int_value.h"
-#include "matrix44_value.h"
-#include "point3_value.h"
-#include "shot_value.h"
-#include "string_value.h"
+#include "rich_parameter.h"
 
-#endif // MESHLAB_VALUES_H
+class RichFloat : public RichParameter
+{
+public:
+	RichFloat(
+		const QString& nm,
+		const Scalarm defval,
+		const QString& desc = QString(),
+		const QString& tltip = QString(),
+		bool hidden = false,
+		const QString& category = QString());
+	~RichFloat();
+
+	QString stringType() const;
+
+	RichFloat* clone() const;
+	bool operator==(const RichParameter& rb);
+};
+
+#endif // MESHLAB_RICH_FLOAT_H

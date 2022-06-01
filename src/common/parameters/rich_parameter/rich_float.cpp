@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,46 +21,35 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#include "rich_float.h"
 
-#include "rich_parameter_widget.h"
-
-class Matrix44Widget : public RichParameterWidget
+RichFloat::RichFloat(
+	const QString& nm,
+	const Scalarm defval,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, FloatValue(defval),desc, tltip, hidden, category)
 {
-	Q_OBJECT
+}
 
-public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+RichFloat::~RichFloat()
+{
+}
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+QString RichFloat::stringType() const
+{
+	return "RichFloat";
+}
 
-	Matrix44m getValue();
+RichFloat* RichFloat::clone() const
+{
+	return new RichFloat(*this);
+}
 
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
+bool RichFloat::operator==( const RichParameter& rb )
+{
+	return (rb.value().isFloat() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
+}
 
-private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
-};
-
-#endif // MESHLAB_MATRIX44_WIDGET_H

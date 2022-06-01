@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,46 +21,35 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#include "rich_string.h"
 
-#include "rich_parameter_widget.h"
-
-class Matrix44Widget : public RichParameterWidget
+RichString::RichString(
+	const QString& nm,
+	const QString& defval,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, StringValue(defval),desc,tltip, hidden, category)
 {
-	Q_OBJECT
+}
 
-public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+RichString::~RichString()
+{
+}
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+QString RichString::stringType() const
+{
+	return "RichString";
+}
 
-	Matrix44m getValue();
+RichString* RichString::clone() const
+{
+	return new RichString(*this);
+}
 
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
+bool RichString::operator==( const RichParameter& rb )
+{
+	return (rb.value().isString() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
+}
 
-private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
-};
-
-#endif // MESHLAB_MATRIX44_WIDGET_H

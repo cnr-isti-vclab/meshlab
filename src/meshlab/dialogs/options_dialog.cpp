@@ -126,7 +126,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.isOfType<RichString>()){
 		return new QTableWidgetItem(pd.value().getString());
 	}
-	else if (pd.isOfType<RichAbsPerc>()){
+	else if (pd.isOfType<RichPercentage>()){
 		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
 	else if (pd.isOfType<RichDynamicFloat>()){
@@ -135,7 +135,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.isOfType<RichEnum>()){
 		return new QTableWidgetItem(QString::number(pd.value().getInt()));
 	}
-	else if (pd.isOfType<RichMatrix44f>()){
+	else if (pd.isOfType<RichMatrix44>()){
 		assert(0);
 		return nullptr;
 	}
@@ -144,7 +144,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 		QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
 		return new QTableWidgetItem(pst);
 	}
-	else if (pd.isOfType<RichShotf>()){
+	else if (pd.isOfType<RichShot>()){
 		assert(0); ///
 		return new QTableWidgetItem(QString("TODO"));
 	}

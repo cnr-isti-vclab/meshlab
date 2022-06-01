@@ -31,7 +31,7 @@
 
 Matrix44Widget::Matrix44Widget(
 	QWidget*             p,
-	const RichMatrix44f& rpf,
+	const RichMatrix44& rpf,
 	const Matrix44Value& defaultValue,
 	QWidget*             gla) :
 		RichParameterWidget(p, rpf, defaultValue)

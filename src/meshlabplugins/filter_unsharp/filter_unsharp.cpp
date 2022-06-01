@@ -606,7 +606,7 @@ RichParameterList FilterUnsharp::initParameterList(const QAction* action, const 
 			Point3f(0, 0, 0),
 			"Viewpoint",
 			"The position of the view point that is used to get the constraint direction."));
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"delta",
 			1.0,
 			0,
@@ -680,7 +680,7 @@ RichParameterList FilterUnsharp::initParameterList(const QAction* action, const 
 			"The number of times that the whole algorithm (normal smoothing + vertex fitting) is "
 			"iterated."));
 		float maxVal = md.mm()->cm.bbox.Diag() / 10;
-		parlst.addParam(RichAbsPerc("delta", maxVal * 0.01, 0, maxVal, "delta", ""));
+		parlst.addParam(RichPercentage("delta", maxVal * 0.01, 0, maxVal, "delta", ""));
 		parlst.addParam(RichBool(
 			"Selected",
 			md.mm()->cm.sfn > 0,

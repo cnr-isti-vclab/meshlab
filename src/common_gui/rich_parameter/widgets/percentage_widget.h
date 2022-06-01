@@ -21,46 +21,39 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_MATRIX44_WIDGET_H
-#define MESHLAB_MATRIX44_WIDGET_H
+#ifndef MESHLAB_PERCENTAGE_WIDGET_H
+#define MESHLAB_PERCENTAGE_WIDGET_H
 
 #include "rich_parameter_widget.h"
 
-class Matrix44Widget : public RichParameterWidget
+class PercentageWidget : public RichParameterWidget
 {
 	Q_OBJECT
-
 public:
-	Matrix44Widget(
-		QWidget*             p,
-		const RichMatrix44& rpf,
-		const Matrix44Value& defaultValue,
-		QWidget*             gla);
-	~Matrix44Widget();
+	PercentageWidget(QWidget* p, const RichPercentage &rabs, const FloatValue &defaultValue);
+	~PercentageWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
-
-	Matrix44m getValue();
-
-public slots:
-	void setValue(QString name, Matrix44m val);
-	void getMatrix();
-	void pasteMatrix();
-	void invalidateMatrix(const QString& s);
-signals:
-	void askMeshMatrix(QString);
+	void                   resetWidgetValue();
+	void                   setWidgetValue(const Value& nv);
 
 private:
-	QString      paramName;
-	QLineEdit*   coordSB[16];
-	QPushButton* getPoint3Button;
-	QGridLayout* lay44;
-	QVBoxLayout* vlay;
-	Matrix44m    m;
-	bool         valid;
+	void setValue(float val, float minV, float maxV);
+
+public slots:
+
+	void on_absSB_valueChanged(double newv);
+	void on_percSB_valueChanged(double newv);
+signals:
+	void dialogParamChanged();
+
+protected:
+	QDoubleSpinBox* absSB;
+	QDoubleSpinBox* percSB;
+	float           m_min;
+	float           m_max;
+	QGridLayout*    vlay;
 };
 
-#endif // MESHLAB_MATRIX44_WIDGET_H
+#endif // MESHLAB_PERCENTAGE_WIDGET_H
