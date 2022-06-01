@@ -30,7 +30,11 @@ class Point3Widget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	Point3Widget(QWidget* p, const RichParameter &rpf, const RichParameter &rdef, QWidget* gla);
+	Point3Widget(
+		QWidget*             p,
+		const RichParameter& rpf,
+		const Point3Value&   defaultValue,
+		QWidget*             gla);
 	~Point3Widget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);

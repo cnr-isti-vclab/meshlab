@@ -30,7 +30,11 @@ class DirectionWidget : public Point3Widget
 {
 	Q_OBJECT
 public:
-	DirectionWidget(QWidget* p, const RichDirection& rpf, const RichDirection& rdef, QWidget* gla);
+	DirectionWidget(
+		QWidget*             p,
+		const RichDirection& rpf,
+		const Point3Value&   defaultValue,
+		QWidget*             gla);
 	~DirectionWidget();
 
 public slots:

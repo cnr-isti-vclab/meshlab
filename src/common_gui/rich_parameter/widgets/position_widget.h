@@ -30,7 +30,11 @@ class PositionWidget : public Point3Widget
 {
 	Q_OBJECT
 public:
-	PositionWidget(QWidget* p, const RichPosition& rpf, const RichPosition& rdef, QWidget* gla);
+	PositionWidget(
+		QWidget*            p,
+		const RichPosition& rpf,
+		const Point3Value&  defaultValue,
+		QWidget*            gla);
 	~PositionWidget();
 
 public slots:

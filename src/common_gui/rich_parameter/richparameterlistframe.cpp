@@ -252,14 +252,14 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new PositionWidget(
 			parent,
 			(const RichPosition&) pd,
-			(const RichPosition&) def,
+			(const Point3Value&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichDirection>() && def.isOfType<RichDirection>()) {
 		return new DirectionWidget(
 			parent,
 			(const RichDirection&) pd,
-			(const RichDirection&) def,
+			(const Point3Value&) def.value(),
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
 	else if (pd.isOfType<RichShotf>() && def.isOfType<RichShotf>()) {

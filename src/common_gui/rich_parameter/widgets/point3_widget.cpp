@@ -30,11 +30,11 @@
 #include <common/ml_document/mesh_document.h>
 
 Point3Widget::Point3Widget(
-	QWidget*            p,
+	QWidget*             p,
 	const RichParameter& rpf,
-	const RichParameter& rdef,
-	QWidget*            gla_curr) :
-		RichParameterWidget(p, rpf, rdef)
+	const Point3Value&   defaultValue,
+	QWidget*             gla) :
+		RichParameterWidget(p, rpf, defaultValue)
 {
 	assert(rpf.value().isPoint3());
 
@@ -63,7 +63,7 @@ Point3Widget::Point3Widget(
 	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
-	if (gla_curr) {
+	if (gla) {
 		getPoint3Combo = new QComboBox(this);
 		getPoint3Combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		vlay->addWidget(getPoint3Combo);

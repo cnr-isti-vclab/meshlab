@@ -32,13 +32,13 @@
 PositionWidget::PositionWidget(
 	QWidget*            p,
 	const RichPosition& rpf,
-	const RichPosition& rdef,
-	QWidget*            gla_curr) :
-		Point3Widget(p, rpf, rdef, gla_curr)
+	const Point3Value&  defaultValue,
+	QWidget*            gla) :
+		Point3Widget(p, rpf, defaultValue, gla)
 {
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
-	if (gla_curr) {
+	if (gla) {
 		QStringList names;
 		names << "View Pos.";
 		names << "Surf. Pos.";
@@ -48,29 +48,29 @@ PositionWidget::PositionWidget(
 		getPoint3Combo->addItems(names);
 
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitSurfacePos(QString, Point3m)),
 			this,
 			SLOT(setValue(QString, Point3m)));
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitCameraPos(QString, Point3m)),
 			this,
 			SLOT(setValue(QString, Point3m)));
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitShot(QString, Shotm)),
 			this,
 			SLOT(setShotValue(QString, Shotm)));
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitTrackballPos(QString, Point3m)),
 			this,
 			SLOT(setValue(QString, Point3m)));
-		connect(this, SIGNAL(askViewPos(QString)), gla_curr, SLOT(sendViewerShot(QString)));
-		connect(this, SIGNAL(askSurfacePos(QString)), gla_curr, SLOT(sendSurfacePos(QString)));
-		connect(this, SIGNAL(askCameraPos(QString)), gla_curr, SLOT(sendRasterShot(QString)));
-		connect(this, SIGNAL(askTrackballPos(QString)), gla_curr, SLOT(sendTrackballPos(QString)));
+		connect(this, SIGNAL(askViewPos(QString)), gla, SLOT(sendViewerShot(QString)));
+		connect(this, SIGNAL(askSurfacePos(QString)), gla, SLOT(sendSurfacePos(QString)));
+		connect(this, SIGNAL(askCameraPos(QString)), gla, SLOT(sendRasterShot(QString)));
+		connect(this, SIGNAL(askTrackballPos(QString)), gla, SLOT(sendTrackballPos(QString)));
 
 		connect(getPoint3Button, SIGNAL(clicked()), this, SLOT(getPoint()));
 	}

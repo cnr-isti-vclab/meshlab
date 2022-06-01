@@ -32,13 +32,13 @@
 DirectionWidget::DirectionWidget(
 	QWidget*             p,
 	const RichDirection& rpf,
-	const RichDirection& rdef,
-	QWidget*             gla_curr) :
-		Point3Widget(p, rpf, rdef, gla_curr)
+	const Point3Value&   defaultValue,
+	QWidget*             gla) :
+		Point3Widget(p, rpf, defaultValue, gla)
 {
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
-	if (gla_curr) {
+	if (gla) {
 		QStringList names;
 		names << "View Dir.";
 		names << "Raster Camera Dir.";
@@ -46,17 +46,17 @@ DirectionWidget::DirectionWidget(
 		getPoint3Combo->addItems(names);
 
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitViewDir(QString, Point3m)),
 			this,
 			SLOT(setValue(QString, Point3m)));
 		connect(
-			gla_curr,
+			gla,
 			SIGNAL(transmitShot(QString, Shotm)),
 			this,
 			SLOT(setShotValue(QString, Shotm)));
-		connect(this, SIGNAL(askViewDir(QString)), gla_curr, SLOT(sendViewDir(QString)));
-		connect(this, SIGNAL(askCameraDir(QString)), gla_curr, SLOT(sendRasterShot(QString)));
+		connect(this, SIGNAL(askViewDir(QString)), gla, SLOT(sendViewDir(QString)));
+		connect(this, SIGNAL(askCameraDir(QString)), gla, SLOT(sendRasterShot(QString)));
 
 		connect(getPoint3Button, SIGNAL(clicked()), this, SLOT(getPoint()));
 	}
