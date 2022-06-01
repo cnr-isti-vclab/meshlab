@@ -29,7 +29,7 @@
 class IntWidget : public LineEditWidget
 {
 public:
-	IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef);
+	IntWidget(QWidget* p, const RichInt& rpar, const IntValue& defaultValue);
 	~IntWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;

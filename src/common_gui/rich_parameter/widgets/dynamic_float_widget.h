@@ -31,7 +31,7 @@ class DynamicFloatWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& rdf, const RichDynamicFloat& rdef);
+	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& rdf, const FloatValue& defaultValue);
 	~DynamicFloatWidget();
 
 	void addWidgetToGridLayout(QGridLayout* lay, const int r);

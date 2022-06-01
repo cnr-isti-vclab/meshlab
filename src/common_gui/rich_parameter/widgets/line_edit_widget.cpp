@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef) :
-		RichParameterWidget(p, rpar, rdef)
+LineEditWidget::LineEditWidget(QWidget *p, const RichParameter &rpar, const Value &defaultValue) :
+		RichParameterWidget(p, rpar, defaultValue)
 {
 	lned = new QLineEdit(this);
 

@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-IntWidget::IntWidget(QWidget* p, const RichInt& rpar, const RichInt& rdef) :
-		LineEditWidget(p, rpar, rdef)
+IntWidget::IntWidget(QWidget *p, const RichInt &rpar, const IntValue &defaultValue) :
+	LineEditWidget(p, rpar, defaultValue)
 {
 	lned->setText(QString::number(parameter->value().getInt()));
 }

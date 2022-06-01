@@ -31,12 +31,13 @@ class LineEditWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	LineEditWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
+	LineEditWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
 	~LineEditWidget();
-	void         addWidgetToGridLayout(QGridLayout* lay, const int r);
-	std::shared_ptr<Value> getWidgetValue() const = 0;
-	virtual void resetWidgetValue()              = 0;
-	virtual void setWidgetValue(const Value& nv) = 0;
+
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
+	std::shared_ptr<Value> getWidgetValue() const          = 0;
+	virtual void           resetWidgetValue()              = 0;
+	virtual void           setWidgetValue(const Value& nv) = 0;
 
 private slots:
 	void changeChecker();

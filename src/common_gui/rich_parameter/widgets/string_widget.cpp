@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-StringWidget::StringWidget(QWidget* p, const RichString& rpar, const RichString& rdef) :
-		LineEditWidget(p, rpar, rdef)
+StringWidget::StringWidget(QWidget *p, const RichString &rpar, const StringValue &defaultValue) :
+		LineEditWidget(p, rpar, defaultValue)
 {
 	lned->setText(parameter->value().getString());
 }

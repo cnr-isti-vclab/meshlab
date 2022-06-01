@@ -224,7 +224,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 	}
 	else if (pd.isOfType<RichDynamicFloat>() && def.isOfType<RichDynamicFloat>()) {
 		return new DynamicFloatWidget(
-			parent, (const RichDynamicFloat&) pd, (const RichDynamicFloat&) def);
+			parent, (const RichDynamicFloat&) pd, (const FloatValue&) def.value());
 	}
 	else if (pd.isOfType<RichEnum>() && def.isOfType<RichEnum>()) {
 		return new EnumWidget(parent, (const RichEnum&) pd, (const IntValue&) def.value());
@@ -233,13 +233,13 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new BoolWidget(parent, (const RichBool&) pd, (const BoolValue&) def.value());
 	}
 	else if (pd.isOfType<RichInt>() && def.isOfType<RichInt>()) {
-		return new IntWidget(parent, (const RichInt&) pd, (const RichInt&) def);
+		return new IntWidget(parent, (const RichInt&) pd, (const IntValue&) def.value());
 	}
 	else if (pd.isOfType<RichFloat>() && def.isOfType<RichFloat>()) {
-		return new FloatWidget(parent, (const RichFloat&) pd, (const RichFloat&) def);
+		return new FloatWidget(parent, (const RichFloat&) pd, (const FloatValue&) def.value());
 	}
 	else if (pd.isOfType<RichString>() && def.isOfType<RichString>()) {
-		return new StringWidget(parent, (const RichString&) pd, (const RichString&) def);
+		return new StringWidget(parent, (const RichString&) pd, (const StringValue&) def.value());
 	}
 	else if (pd.isOfType<RichMatrix44f>() && def.isOfType<RichMatrix44f>()) {
 		return new Matrix44Widget(

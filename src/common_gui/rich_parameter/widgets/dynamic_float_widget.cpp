@@ -29,11 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-DynamicFloatWidget::DynamicFloatWidget(
-	QWidget*                p,
-	const RichDynamicFloat& rdf,
-	const RichDynamicFloat& rdef) :
-		RichParameterWidget(p, rdf, rdef)
+DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &rdf, const FloatValue &defaultValue) :
+		RichParameterWidget(p, rdf, defaultValue)
 {
 	int numbdecimaldigit = 4;
 	minVal               = rdf.min;

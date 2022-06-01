@@ -29,7 +29,7 @@
 class FloatWidget : public LineEditWidget
 {
 public:
-	FloatWidget(QWidget* p, const RichFloat& rpar, const RichFloat& rdef);
+	FloatWidget(QWidget* p, const RichFloat& rpar, const FloatValue& defaultValue);
 	~FloatWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;

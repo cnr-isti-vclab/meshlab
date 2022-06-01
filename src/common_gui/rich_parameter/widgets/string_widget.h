@@ -29,7 +29,7 @@
 class StringWidget : public LineEditWidget
 {
 public:
-	StringWidget(QWidget* p, const RichString& rpar, const RichString& rdef);
+	StringWidget(QWidget* p, const RichString& rpar, const StringValue& defaultValue);
 	~StringWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;
