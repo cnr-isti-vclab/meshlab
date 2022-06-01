@@ -29,14 +29,24 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ComboWidget::ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef) :
-		RichParameterWidget(p, rpar, rdef)
+ComboWidget::ComboWidget(QWidget *p, const RichParameter &rpar, const Value &defaultValue) :
+	RichParameterWidget(p, rpar, defaultValue), enumCombo(new QComboBox(this))
 {
+}
+
+ComboWidget::ComboWidget(
+	QWidget *p,
+	const RichParameter &rpar,
+	const Value &defaultValue,
+	const QStringList& values,
+	int defaultEnum) :
+		RichParameterWidget(p, rpar, defaultValue), enumCombo(new QComboBox(this))
+{
+	init(defaultEnum, values);
 }
 
 ComboWidget::~ComboWidget()
 {
-	delete enumCombo;
 }
 
 void ComboWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
@@ -47,16 +57,6 @@ void ComboWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 	RichParameterWidget::addWidgetToGridLayout(lay, r);
 }
 
-void ComboWidget::init(QWidget* p, int defaultEnum, QStringList values)
-{
-	enumCombo = new QComboBox(this);
-	enumCombo->addItems(values);
-	widgets.push_back(enumCombo);
-	setIndex(defaultEnum);
-	connect(enumCombo, SIGNAL(activated(int)), this, SIGNAL(dialogParamChanged()));
-	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
-}
-
 void ComboWidget::setIndex(int newEnum)
 {
 	enumCombo->setCurrentIndex(newEnum);
@@ -65,4 +65,13 @@ void ComboWidget::setIndex(int newEnum)
 int ComboWidget::getIndex()
 {
 	return enumCombo->currentIndex();
+}
+
+void ComboWidget::init(int defaultEnum, QStringList values)
+{
+	enumCombo->addItems(values);
+	widgets.push_back(enumCombo);
+	setIndex(defaultEnum);
+	connect(enumCombo, SIGNAL(activated(int)), this, SIGNAL(dialogParamChanged()));
+	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }

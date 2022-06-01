@@ -227,7 +227,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 			parent, (const RichDynamicFloat&) pd, (const RichDynamicFloat&) def);
 	}
 	else if (pd.isOfType<RichEnum>() && def.isOfType<RichEnum>()) {
-		return new EnumWidget(parent, (const RichEnum&) pd, (const RichEnum&) def);
+		return new EnumWidget(parent, (const RichEnum&) pd, (const IntValue&) def.value());
 	}
 	else if (pd.isOfType<RichBool>() && def.isOfType<RichBool>()) {
 		return new BoolWidget(parent, (const RichBool&) pd, (const BoolValue&) def.value());
@@ -279,7 +279,7 @@ RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
 		return new SaveFileWidget(parent, (const RichSaveFile&) pd, (const RichSaveFile&) def);
 	}
 	else if (pd.isOfType<RichMesh>() && def.isOfType<RichMesh>()) {
-		return new MeshWidget(parent, (const RichMesh&) pd, (const RichMesh&) def);
+		return new MeshWidget(parent, (const RichMesh&) pd, (const IntValue&) def.value());
 	}
 	else {
 		std::cerr << "RichParameter type not supported for widget creation.\n";

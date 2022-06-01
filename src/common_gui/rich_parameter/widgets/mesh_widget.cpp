@@ -29,27 +29,27 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-MeshWidget::MeshWidget(QWidget* p, const RichMesh& rpar, const RichMesh& rdef) :
-		ComboWidget(p, rpar, rdef)
+MeshWidget::MeshWidget(QWidget *p, const RichMesh &rpar, const IntValue &defaultValue) :
+	ComboWidget(p, rpar, defaultValue)
 {
-	md = ((RichMesh*) parameter)->meshdoc;
+	md = rpar.meshdoc;
 
 	QStringList meshNames;
 
-	// make the default mesh Index be 0
-	// defaultMeshIndex = -1;
-	int          currentmeshindex = -1;
-	unsigned int i                = 0;
-	for (const MeshModel& mm : md->meshIterator()) {
-		QString shortName = mm.label();
-		meshNames.push_back(shortName);
-		if (mm.id() == (unsigned int) parameter->value().getInt()) {
-			currentmeshindex = i;
+	if (md) {
+		int          currentmeshindex = -1;
+		unsigned int i                = 0;
+		for (const MeshModel& mm : md->meshIterator()) {
+			QString shortName = mm.label();
+			meshNames.push_back(shortName);
+			if (mm.id() == (unsigned int) parameter->value().getInt()) {
+				currentmeshindex = i;
+			}
+			++i;
 		}
-		++i;
-	}
 
-	init(p, currentmeshindex, meshNames);
+		init(currentmeshindex, meshNames);
+	}
 }
 
 MeshWidget::~MeshWidget()

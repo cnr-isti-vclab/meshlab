@@ -29,7 +29,7 @@
 class EnumWidget : public ComboWidget
 {
 public:
-	EnumWidget(QWidget* p, const RichEnum& rpar, const RichEnum& rdef);
+	EnumWidget(QWidget* p, const RichEnum& rpar, const IntValue& defaultValue);
 	~EnumWidget();;
 
 	std::shared_ptr<Value> getWidgetValue() const;

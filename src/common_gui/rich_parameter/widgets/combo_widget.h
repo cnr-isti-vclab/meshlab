@@ -33,7 +33,13 @@ protected:
 	QComboBox* enumCombo;
 
 public:
-	ComboWidget(QWidget* p, const RichParameter& rpar, const RichParameter& rdef);
+	ComboWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
+	ComboWidget(
+		QWidget*             p,
+		const RichParameter& rpar,
+		const Value&         defaultValue,
+		const QStringList&   values,
+		int                  defaultEnum);
 	~ComboWidget();
 
 	void                           addWidgetToGridLayout(QGridLayout* lay, const int r);
@@ -41,13 +47,14 @@ public:
 	virtual void                   resetWidgetValue()              = 0;
 	virtual void                   setWidgetValue(const Value& nv) = 0;
 
-	void init(QWidget* p, int newEnum, QStringList values);
-
 	int  getIndex();
 	void setIndex(int newEnum);
 
 signals:
 	void dialogParamChanged();
+
+protected:
+	void init(int newEnum, QStringList values);
 };
 
 #endif // MESHLAB_COMBO_WIDGET_H
