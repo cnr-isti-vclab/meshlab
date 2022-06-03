@@ -27,13 +27,24 @@
 #include "rich_parameter/rich_bool.h"
 #include "rich_parameter/rich_color.h"
 #include "rich_parameter/rich_direction.h"
+#include "rich_parameter/rich_dynamic_float.h"
+#include "rich_parameter/rich_enum.h"
 #include "rich_parameter/rich_float.h"
+#include "rich_parameter/rich_file_open.h"
+#include "rich_parameter/rich_file_save.h"
 #include "rich_parameter/rich_int.h"
 #include "rich_parameter/rich_matrix44.h"
+#include "rich_parameter/rich_mesh.h"
 #include "rich_parameter/rich_percentage.h"
 #include "rich_parameter/rich_position.h"
 #include "rich_parameter/rich_shot.h"
 #include "rich_parameter/rich_string.h"
 #include "rich_parameter/rich_parameter.h"
+
+class RichParameterAdapter
+{
+public:
+	static bool create(const QDomElement& np, RichParameter*& par);
+};
 
 #endif // MESHLAB_RICH_PARAMETERS_H

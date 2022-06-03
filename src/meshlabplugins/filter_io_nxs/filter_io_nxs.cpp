@@ -203,13 +203,13 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 	RichParameterList params;
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		params.addParam(RichOpenFile("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
-		params.addParam(RichSaveFile("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
+		params.addParam(RichFileOpen("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
+		params.addParam(RichFileSave("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
 		break;
 	case FP_NXS_COMPRESS:
-		params.addParam(RichOpenFile("input_file", "", {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
-		params.addParam(RichSaveFile("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
+		params.addParam(RichFileOpen("input_file", "", {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
+		params.addParam(RichFileSave("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
 		params.join(nxzParameters(false));
 		break;
 	default :

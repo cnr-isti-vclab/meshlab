@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,44 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#include "rich_dynamic_float.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
-{
-	filename->setText(parameter->value().getString());
-}
-
-SaveFileWidget::~SaveFileWidget()
+RichDynamicFloat::RichDynamicFloat(
+	const QString& nm,
+	const Scalarm defval,
+	const Scalarm minval,
+	const Scalarm maxval,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, FloatValue(defval),desc, tltip, hidden, category), min(minval), max(maxval)
 {
 }
 
-void SaveFileWidget::selectFile()
+RichDynamicFloat::~RichDynamicFloat()
 {
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
+}
+
+QString RichDynamicFloat::stringType() const
+{
+	return "RichDynamicFloat";
+}
+
+QDomElement RichDynamicFloat::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
+	parElem.setAttribute("min",QString::number(min));
+	parElem.setAttribute("max",QString::number(max));
+	return parElem;
+}
+
+RichDynamicFloat* RichDynamicFloat::clone() const
+{
+	return new RichDynamicFloat(*this);
+}
+
+bool RichDynamicFloat::operator==( const RichParameter& rb )
+{
+	return (rb.isOfType<RichDynamicFloat>() &&(pName == rb.name()) && (value().getFloat() == rb.value().getFloat()));
 }

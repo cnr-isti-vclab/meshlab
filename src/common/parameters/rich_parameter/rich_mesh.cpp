@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,36 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#include "rich_mesh.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
-{
-	filename->setText(parameter->value().getString());
-}
-
-SaveFileWidget::~SaveFileWidget()
+RichMesh::RichMesh(
+	const QString& nm,
+	unsigned int meshind,
+	const MeshDocument* doc,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category):
+		RichParameter(nm,IntValue(meshind), desc, tltip, hidden, category), meshdoc(doc)
 {
 }
 
-void SaveFileWidget::selectFile()
+RichMesh::~RichMesh()
 {
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
 }
+
+QString RichMesh::stringType() const
+{
+	return "RichMesh";
+}
+
+RichMesh* RichMesh::clone() const
+{
+	return new RichMesh(*this);
+}
+
+bool RichMesh::operator==( const RichParameter& rb )
+{
+	return (rb.isOfType<RichMesh>() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
+}
+

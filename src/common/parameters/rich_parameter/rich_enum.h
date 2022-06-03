@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,30 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#ifndef MESHLAB_RICH_ENUM_H
+#define MESHLAB_RICH_ENUM_H
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
+#include "rich_parameter.h"
 
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
+class RichEnum : public RichParameter
 {
-	filename->setText(parameter->value().getString());
-}
+public:
+	RichEnum(
+		const QString& nm,
+		const int defval,
+		const QStringList& values,
+		const QString& desc = QString(),
+		const QString& tltip = QString(),
+		bool hidden = false,
+		const QString& category = QString());
+	~RichEnum();
 
-SaveFileWidget::~SaveFileWidget()
-{
-}
+	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
-void SaveFileWidget::selectFile()
-{
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
-}
+	RichEnum* clone() const;
+	bool operator==(const RichParameter& rb);
+	QStringList enumvalues;
+};
+
+#endif // MESHLAB_RICH_ENUM_H

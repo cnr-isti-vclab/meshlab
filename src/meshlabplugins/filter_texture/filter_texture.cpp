@@ -243,7 +243,7 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		parlst.addParam(RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
 		break;
 	case FP_SET_TEXTURE :
-		parlst.addParam(RichOpenFile("textName", "", QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "Sets the given input image as unique texture of the mesh."));
+		parlst.addParam(RichFileOpen("textName", "", QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "Sets the given input image as unique texture of the mesh."));
 		parlst.addParam(RichBool("use_dummy_texture", false, "Use dummy texture", "If checked, the filter will set a dummy texture instead of loading an image. The 'Texture File' parameter will be ignored."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {

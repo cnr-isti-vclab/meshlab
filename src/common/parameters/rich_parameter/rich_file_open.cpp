@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,44 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#include "rich_file_open.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
-{
-	filename->setText(parameter->value().getString());
-}
-
-SaveFileWidget::~SaveFileWidget()
+RichFileOpen::RichFileOpen(
+	const QString& nm,
+	const QString& directorydefval,
+	const QStringList& exts,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, StringValue(directorydefval), desc, tltip, hidden, category), exts(exts)
 {
 }
 
-void SaveFileWidget::selectFile()
+RichFileOpen::~RichFileOpen()
 {
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
+}
+
+QString RichFileOpen::stringType() const
+{
+	return "RichOpenFile";
+}
+
+QDomElement RichFileOpen::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
+	parElem.setAttribute("exts_cardinality", exts.size());
+	for(int ii = 0; ii < exts.size(); ++ii)
+		parElem.setAttribute(QString("ext_val")+QString::number(ii), exts[ii]);
+	return parElem;
+}
+
+RichFileOpen* RichFileOpen::clone() const
+{
+	return new RichFileOpen(*this);
+}
+
+bool RichFileOpen::operator==( const RichParameter& rb )
+{
+	return (rb.isOfType<RichFileOpen>() &&(pName == rb.name()) && (value().getString() == rb.value().getString()));
 }

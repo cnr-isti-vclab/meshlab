@@ -59,9 +59,14 @@ set(HEADERS
 	parameters/rich_parameter/rich_bool.h
 	parameters/rich_parameter/rich_color.h
 	parameters/rich_parameter/rich_direction.h
+	parameters/rich_parameter/rich_dynamic_float.h
+	parameters/rich_parameter/rich_enum.h
+	parameters/rich_parameter/rich_file_open.h
+	parameters/rich_parameter/rich_file_save.h
 	parameters/rich_parameter/rich_float.h
 	parameters/rich_parameter/rich_int.h
 	parameters/rich_parameter/rich_matrix44.h
+	parameters/rich_parameter/rich_mesh.h
 	parameters/rich_parameter/rich_parameter.h
 	parameters/rich_parameter/rich_percentage.h
 	parameters/rich_parameter/rich_position.h
@@ -119,13 +124,19 @@ set(SOURCES
 	ml_shared_data_context/ml_plugin_gl_context.cpp
 	ml_shared_data_context/ml_scene_gl_shared_data_context.cpp
 	ml_shared_data_context/ml_shared_data_context.cpp
+	parameters/rich_parameters.cpp
 	parameters/rich_parameter_list.cpp
 	parameters/rich_parameter/rich_bool.cpp
 	parameters/rich_parameter/rich_color.cpp
 	parameters/rich_parameter/rich_direction.cpp
+	parameters/rich_parameter/rich_dynamic_float.cpp
+	parameters/rich_parameter/rich_enum.cpp
+	parameters/rich_parameter/rich_file_open.cpp
+	parameters/rich_parameter/rich_file_save.cpp
 	parameters/rich_parameter/rich_float.cpp
 	parameters/rich_parameter/rich_int.cpp
 	parameters/rich_parameter/rich_matrix44.cpp
+	parameters/rich_parameter/rich_mesh.cpp
 	parameters/rich_parameter/rich_parameter.cpp
 	parameters/rich_parameter/rich_percentage.cpp
 	parameters/rich_parameter/rich_position.cpp

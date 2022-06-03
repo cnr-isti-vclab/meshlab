@@ -31,7 +31,7 @@
 
 OpenFileWidget::OpenFileWidget(
 	QWidget*            p,
-	const RichOpenFile& rdf,
+	const RichFileOpen& rdf,
 	const StringValue&  defaultValue) :
 		IOFileWidget(p, rdf, defaultValue)
 {
@@ -43,7 +43,7 @@ OpenFileWidget::~OpenFileWidget()
 
 void OpenFileWidget::selectFile()
 {
-	RichOpenFile* dec  = reinterpret_cast<RichOpenFile*>(parameter);
+	RichFileOpen* dec  = reinterpret_cast<RichFileOpen*>(parameter);
 	QString       path = QDir::homePath();
 	if (!parameter->value().getString().isEmpty())
 		path = parameter->value().getString();

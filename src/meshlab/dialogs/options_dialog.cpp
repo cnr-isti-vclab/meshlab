@@ -154,10 +154,10 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 		QIcon ic(pix);
 		return new QTableWidgetItem(ic,"");
 	}
-	else if (pd.isOfType<RichOpenFile>()){
+	else if (pd.isOfType<RichFileOpen>()){
 		new QTableWidgetItem(pd.value().getString());
 	}
-	else if (pd.isOfType<RichSaveFile>()){
+	else if (pd.isOfType<RichFileSave>()){
 		assert(0);
 		return nullptr;
 	}

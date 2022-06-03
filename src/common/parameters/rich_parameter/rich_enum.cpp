@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,45 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#include "rich_enum.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
-{
-	filename->setText(parameter->value().getString());
-}
-
-SaveFileWidget::~SaveFileWidget()
+RichEnum::RichEnum(
+	const QString& nm,
+	const int defval,
+	const QStringList& values,
+	const QString& desc,
+	const QString& tltip,
+	bool hidden,
+	const QString& category) :
+		RichParameter(nm, IntValue(defval),desc, tltip, hidden, category), enumvalues(values)
 {
 }
 
-void SaveFileWidget::selectFile()
+RichEnum::~RichEnum()
 {
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
 }
+
+QString RichEnum::stringType() const
+{
+	return "RichEnum";
+}
+
+QDomElement RichEnum::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
+{
+	QDomElement parElem = RichParameter::fillToXMLDocument(doc, saveDescriptionAndTooltip);
+	parElem.setAttribute("enum_cardinality", enumvalues.size());
+	for(int ii = 0; ii < enumvalues.size(); ++ii)
+		parElem.setAttribute(QString("enum_val")+QString::number(ii), enumvalues.at(ii));
+	return parElem;
+}
+
+RichEnum* RichEnum::clone() const
+{
+	return new RichEnum(*this);
+}
+
+bool RichEnum::operator==( const RichParameter& rb )
+{
+	return (rb.isOfType<RichEnum>() &&(pName == rb.name()) && (value().getInt() == rb.value().getInt()));
+}
+

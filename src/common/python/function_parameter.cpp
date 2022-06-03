@@ -165,7 +165,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << rm->value().getInt();
 		return;
 	}
-	if (parameter->isOfType<RichSaveFile>() || parameter->isOfType<RichOpenFile>()){
+	if (parameter->isOfType<RichFileSave>() || parameter->isOfType<RichFileOpen>()){
 		o << "'" << parameter->value().getString().toStdString() << "'";
 		return;
 	}

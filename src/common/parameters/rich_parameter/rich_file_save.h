@@ -1,6 +1,6 @@
-/*****************************************************************************
+/****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * A versatile mesh processing toolbox                             o     o   *
  *                                                                _   O  _   *
  * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
@@ -21,34 +21,30 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "save_file_widget.h"
+#ifndef MESHLAB_RICH_FILE_SAVE_H
+#define MESHLAB_RICH_FILE_SAVE_H
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
+#include "rich_parameter.h"
 
-SaveFileWidget::SaveFileWidget(
-	QWidget*            p,
-	const RichFileSave& rpar,
-	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
+class RichFileSave : public RichParameter
 {
-	filename->setText(parameter->value().getString());
-}
+public:
+	RichFileSave(
+		const QString& nm,
+		const QString& filedefval,
+		const QString& ext,
+		const QString& desc = QString(),
+		const QString& tltip = QString(),
+		bool hidden = false,
+		const QString& category = QString());
+	~RichFileSave();
 
-SaveFileWidget::~SaveFileWidget()
-{
-}
+	QString stringType() const;
+	QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
-void SaveFileWidget::selectFile()
-{
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
-}
+	RichFileSave* clone() const;
+	bool operator==(const RichParameter& rb);
+	QString ext;
+};
+
+#endif // MESHLAB_RICH_FILE_SAVE_H

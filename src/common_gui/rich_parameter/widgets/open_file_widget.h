@@ -30,7 +30,7 @@ class OpenFileWidget : public IOFileWidget
 {
 	Q_OBJECT
 public:
-	OpenFileWidget(QWidget* p, const RichOpenFile& rdf, const StringValue& defaultValue);
+	OpenFileWidget(QWidget* p, const RichFileOpen& rdf, const StringValue& defaultValue);
 	~OpenFileWidget();
 
 protected slots:

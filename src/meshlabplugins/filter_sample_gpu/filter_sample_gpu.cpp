@@ -118,7 +118,7 @@ RichParameterList ExtraSampleGPUPlugin::initParameterList(const QAction * action
 			parlst.addParam(RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
 			parlst.addParam(RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
 			//QString curr = QDir::currentPath();
-			parlst.addParam(RichSaveFile ("ImageFileName",        /*curr + "/" */+"gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
+			parlst.addParam(RichFileSave ("ImageFileName",        /*curr + "/" */+"gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0);

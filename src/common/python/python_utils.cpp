@@ -55,7 +55,7 @@ QString pymeshlab::computePythonTypeString(const RichParameter& par)
 		return PYTHON_TYPE_COLOR;
 	if (par.isOfType<RichMesh>())
 		return PYTHON_TYPE_MESH;
-	if (par.isOfType<RichSaveFile>() || par.isOfType<RichOpenFile>())
+	if (par.isOfType<RichFileSave>() || par.isOfType<RichFileOpen>())
 		return PYTHON_TYPE_FILENAME;
 	return "still_unsupported";
 }
