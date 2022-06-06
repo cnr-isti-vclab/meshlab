@@ -9,6 +9,8 @@ on:
         required: true
         default: 'YYYY.MM'
 
+env:
+  QT_VERSION: 5.15.2
 
 jobs:
   update_ml_version:
@@ -39,8 +41,17 @@ jobs:
       with:
         ref: main
         submodules: recursive
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install dependencies
       run: |
         bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
@@ -91,8 +102,17 @@ jobs:
       run: |
         brew install libomp cgal xerces-c
         npm install -g appdmg
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Setup env variables
       id: envs
       shell: bash
@@ -158,8 +178,17 @@ jobs:
         submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Setup env variables
       shell: bash
       id: envs
@@ -172,7 +201,7 @@ jobs:
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC" >> $GITHUB_ENV
     - name: Install wget
       run: |
-        $env:PATH = "C:\msys64\mingw64\bin;C:\msys64\usr\bin"
+        $env:PATH = "${{ env.PATH }};C:\msys64\mingw64\bin;C:\msys64\usr\bin"
         pacman.exe -S --noconfirm --noprogressbar wget unzip
     - name: Set Certificate
       run: |
@@ -193,7 +222,7 @@ jobs:
     - name: Deploy
       shell: C:\shells\msys2bash.cmd {0}
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
+        bash scripts/${{ runner.os }}/2_deploy.sh -qt=${{ env.Qt5_DIR }}
     - name: NSIS script
       shell: bash
       run: |
