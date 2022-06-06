@@ -20,6 +20,7 @@ INSTALL_PATH=$SOURCE_PATH/../install
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
+QT_DIR=""
 
 #check parameters
 for i in "$@"
@@ -43,6 +44,10 @@ case $i in
         ;;
     -n|--nightly)
         NIGHTLY_OPTION="-DMESHLAB_IS_NIGHTLY_VERSION=ON"
+        shift # past argument=value
+        ;;
+    -qt=*|--qt_dir=*)
+        QT_DIR=${i#*=}
         shift # past argument=value
         ;;
     *)
