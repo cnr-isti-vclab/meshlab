@@ -29,12 +29,12 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &rdf, const FloatValue &defaultValue) :
-		RichParameterWidget(p, rdf, defaultValue)
+DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &param, const FloatValue &defaultValue) :
+		RichParameterWidget(p, param, defaultValue)
 {
 	int numbdecimaldigit = 4;
-	minVal               = rdf.min;
-	maxVal               = rdf.max;
+	minVal               = param.min;
+	maxVal               = param.max;
 	valueLE              = new QLineEdit(this);
 	valueLE->setAlignment(Qt::AlignRight);
 
@@ -42,12 +42,11 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &rdf, 
 	valueSlider->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
-	valueSlider->setValue(floatToInt(parameter->value().getFloat()));
-	RichDynamicFloat* dfd = reinterpret_cast<RichDynamicFloat*>(parameter);
+	valueSlider->setValue(floatToInt(param.value().getFloat()));
 	QFontMetrics      fm(valueLE->font());
 	QSize             sz = fm.size(Qt::TextSingleLine, QString::number(0));
-	valueLE->setValidator(new QDoubleValidator(dfd->min, dfd->max, numbdecimaldigit, valueLE));
-	valueLE->setText(QString::number(parameter->value().getFloat()));
+	valueLE->setValidator(new QDoubleValidator(param.min, param.max, numbdecimaldigit, valueLE));
+	valueLE->setText(QString::number(param.value().getFloat()));
 	valueLE->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
 	hlay = new QHBoxLayout();
@@ -59,7 +58,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &rdf, 
 	valueLE->setMaxLength(maxlenghtplusdot);
 	valueLE->setMaximumWidth(sz.width() * maxlenghtplusdot);
 
-	connect(valueLE, SIGNAL(textChanged(const QString&)), this, SLOT(setValue()));
+	connect(valueLE, SIGNAL(textChanged(const QString&)), this, SLOT(setValueFromTextBox()));
 	connect(valueSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 	connect(this, SIGNAL(dialogParamChanged()), this, SLOT(setParameterChanged()));
 }
@@ -81,11 +80,6 @@ std::shared_ptr<Value> DynamicFloatWidget::getWidgetValue() const
 	return std::make_shared<FloatValue>(valueLE->text().toFloat());
 }
 
-void DynamicFloatWidget::resetWidgetValue()
-{
-	valueLE->setText(QString::number(parameter->value().getFloat()));
-}
-
 void DynamicFloatWidget::setWidgetValue(const Value& nv)
 {
 	valueLE->setText(QString::number(nv.getFloat()));
@@ -103,7 +97,7 @@ void DynamicFloatWidget::setValue(int newVal)
 	}
 }
 
-void DynamicFloatWidget::setValue()
+void DynamicFloatWidget::setValueFromTextBox()
 {
 	float newValLE = float(valueLE->text().toDouble());
 	valueSlider->setValue(floatToInt(newValLE));

@@ -33,8 +33,8 @@ BoolWidget::BoolWidget(QWidget *p, const RichBool &param, const BoolValue &defau
 		RichParameterWidget(p, param, defaultValue)
 {
 	cb = new QCheckBox("", this);
-	cb->setToolTip(parameter->toolTip());
-	cb->setChecked(parameter->value().getBool());
+	cb->setToolTip(param.toolTip());
+	cb->setChecked(param.value().getBool());
 	widgets.push_back(cb);
 
 	connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setParameterChanged()));
@@ -56,11 +56,6 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 std::shared_ptr<Value> BoolWidget::getWidgetValue() const
 {
 	return std::make_shared<BoolValue>(cb->isChecked());
-}
-
-void BoolWidget::resetWidgetValue()
-{
-	cb->setChecked(parameter->value().getBool());
 }
 
 void BoolWidget::setWidgetValue(const Value& nv)

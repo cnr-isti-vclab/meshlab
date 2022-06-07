@@ -29,15 +29,17 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ColorWidget::ColorWidget(QWidget *p, const RichColor &newColor, const ColorValue &defaultValue) :
-		RichParameterWidget(p, newColor, defaultValue), pickcol(defaultValue.getColor())
+ColorWidget::ColorWidget(QWidget *p, const RichColor &param, const ColorValue &defaultValue) :
+		RichParameterWidget(p, param, defaultValue), pickcol(defaultValue.getColor())
 {
 	colorLabel  = new QLabel(this);
 	colorButton = new QPushButton(this);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
 	colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-	initWidgetValue();
+	QColor cl = param.value().getColor();
+	pickcol   = cl;
+	updateColorInfo(cl);
 
 	vlay = new QHBoxLayout();
 	QFontMetrics met(colorLabel->font());
@@ -74,23 +76,9 @@ std::shared_ptr<Value> ColorWidget::getWidgetValue() const
 	return std::make_shared<ColorValue>(pickcol);
 }
 
-void ColorWidget::resetWidgetValue()
-{
-	QColor cl = parameter->value().getColor();
-	pickcol   = cl;
-	updateColorInfo(cl);
-}
-
 void ColorWidget::setWidgetValue(const Value& nv)
 {
 	QColor cl = nv.getColor();
-	pickcol   = cl;
-	updateColorInfo(cl);
-}
-
-void ColorWidget::initWidgetValue()
-{
-	QColor cl = parameter->value().getColor();
 	pickcol   = cl;
 	updateColorInfo(cl);
 }
@@ -105,14 +93,17 @@ void ColorWidget::updateColorInfo(const ColorValue& newColor)
 
 void ColorWidget::pickColor()
 {
+	QColor tmp = pickcol;
 	pickcol = QColorDialog::getColor(
 		pickcol,
 		this->parentWidget(),
 		"Pick a Color",
 		QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
 	if (pickcol.isValid()) {
-		parameter->setValue(ColorValue(pickcol));
 		updateColorInfo(ColorValue(pickcol));
+		emit dialogParamChanged();
 	}
-	emit dialogParamChanged();
+	else {
+		pickcol = tmp;
+	}
 }
