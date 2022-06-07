@@ -23,11 +23,7 @@
 
 #include "shot_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
 #include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 ShotWidget::ShotWidget(
 	QWidget*         p,

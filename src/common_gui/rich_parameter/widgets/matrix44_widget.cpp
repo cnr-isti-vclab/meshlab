@@ -25,9 +25,6 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 Matrix44Widget::Matrix44Widget(
 	QWidget*             p,

@@ -23,10 +23,6 @@
 
 #include "mesh_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
 MeshWidget::MeshWidget(QWidget* p, const RichMesh& param, const IntValue& defaultValue) :

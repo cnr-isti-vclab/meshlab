@@ -23,12 +23,6 @@
 
 #include "string_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 StringWidget::StringWidget(QWidget* p, const RichString& param, const StringValue& defaultValue) :
 		LineEditWidget(p, param, defaultValue)
 {

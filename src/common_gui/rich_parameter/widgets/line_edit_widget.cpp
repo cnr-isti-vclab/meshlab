@@ -23,12 +23,6 @@
 
 #include "line_edit_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 LineEditWidget::LineEditWidget(QWidget* p, const RichParameter& param, const Value& defaultValue) :
 		RichParameterWidget(p, param, defaultValue)
 {

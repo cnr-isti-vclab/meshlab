@@ -23,12 +23,6 @@
 
 #include "bool_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 BoolWidget::BoolWidget(QWidget* p, const RichBool& param, const BoolValue& defaultValue) :
 		RichParameterWidget(p, param, defaultValue)
 {

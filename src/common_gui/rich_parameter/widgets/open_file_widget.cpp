@@ -23,11 +23,7 @@
 
 #include "open_file_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
 #include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 OpenFileWidget::OpenFileWidget(
 	QWidget*            p,

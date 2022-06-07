@@ -23,12 +23,6 @@
 
 #include "combo_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 ComboWidget::ComboWidget(QWidget* p, const RichParameter& param, const Value& defaultValue) :
 		RichParameterWidget(p, param, defaultValue), enumCombo(new QComboBox(this))
 {

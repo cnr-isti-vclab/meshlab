@@ -23,12 +23,6 @@
 
 #include "float_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 FloatWidget::FloatWidget(QWidget* p, const RichFloat& param, const FloatValue& defaultValue) :
 		LineEditWidget(p, param, defaultValue)
 {

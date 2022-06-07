@@ -23,11 +23,7 @@
 
 #include "color_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
 #include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 ColorWidget::ColorWidget(QWidget* p, const RichColor& param, const ColorValue& defaultValue) :
 		RichParameterWidget(p, param, defaultValue), pickcol(defaultValue.getColor())

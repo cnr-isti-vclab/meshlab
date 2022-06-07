@@ -23,12 +23,6 @@
 
 #include "enum_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 EnumWidget::EnumWidget(QWidget* p, const RichEnum& param, const IntValue& defaultValue) :
 		ComboWidget(p, param, defaultValue, param.enumvalues, param.value().getInt())
 {

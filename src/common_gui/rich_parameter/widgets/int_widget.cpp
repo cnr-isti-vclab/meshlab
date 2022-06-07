@@ -23,12 +23,6 @@
 
 #include "int_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 IntWidget::IntWidget(QWidget* p, const RichInt& param, const IntValue& defaultValue) :
 		LineEditWidget(p, param, defaultValue)
 {

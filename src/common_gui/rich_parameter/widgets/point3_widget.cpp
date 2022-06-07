@@ -23,12 +23,6 @@
 
 #include "point3_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 Point3Widget::Point3Widget(
 	QWidget*             p,
 	const RichParameter& param,
