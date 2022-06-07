@@ -29,11 +29,11 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& rpar, const StringValue& defaultValue) :
-		RichParameterWidget(p, rpar, defaultValue)
+IOFileWidget::IOFileWidget(QWidget* p, const RichParameter& param, const StringValue& defaultValue) :
+		RichParameterWidget(p, param, defaultValue)
 {
 	filename = new QLineEdit(this);
-	filename->setText(tr(""));
+	filename->setText(param.value().getString());
 	browse = new QPushButton(this);
 	browse->setText("...");
 	hlay = new QHBoxLayout();
@@ -63,12 +63,6 @@ void IOFileWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 std::shared_ptr<Value> IOFileWidget::getWidgetValue() const
 {
 	return std::make_shared<StringValue>(filename->text());
-}
-
-void IOFileWidget::resetWidgetValue()
-{
-	QString fle = parameter->value().getString();
-	updateFileName(fle);
 }
 
 void IOFileWidget::setWidgetValue(const Value& nv)

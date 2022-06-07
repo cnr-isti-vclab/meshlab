@@ -29,10 +29,10 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-IntWidget::IntWidget(QWidget *p, const RichInt &rpar, const IntValue &defaultValue) :
-	LineEditWidget(p, rpar, defaultValue)
+IntWidget::IntWidget(QWidget *p, const RichInt &param, const IntValue &defaultValue) :
+	LineEditWidget(p, param, defaultValue)
 {
-	lned->setText(QString::number(parameter->value().getInt()));
+	lned->setText(QString::number(param.value().getInt()));
 }
 
 IntWidget::~IntWidget()
@@ -42,11 +42,6 @@ IntWidget::~IntWidget()
 std::shared_ptr<Value> IntWidget::getWidgetValue() const
 {
 	return std::make_shared<IntValue>(lned->text().toInt());
-}
-
-void IntWidget::resetWidgetValue()
-{
-	lned->setText(QString::number(parameter->value().getInt()));
 }
 
 void IntWidget::setWidgetValue(const Value& nv)

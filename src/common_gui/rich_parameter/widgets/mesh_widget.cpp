@@ -29,10 +29,10 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-MeshWidget::MeshWidget(QWidget *p, const RichMesh &rpar, const IntValue &defaultValue) :
-	ComboWidget(p, rpar, defaultValue)
+MeshWidget::MeshWidget(QWidget *p, const RichMesh &param, const IntValue &defaultValue) :
+	ComboWidget(p, param, defaultValue)
 {
-	md = rpar.meshdoc;
+	md = param.meshdoc;
 
 	QStringList meshNames;
 
@@ -42,7 +42,7 @@ MeshWidget::MeshWidget(QWidget *p, const RichMesh &rpar, const IntValue &default
 		for (const MeshModel& mm : md->meshIterator()) {
 			QString shortName = mm.label();
 			meshNames.push_back(shortName);
-			if (mm.id() == (unsigned int) parameter->value().getInt()) {
+			if (mm.id() == (unsigned int) param.value().getInt()) {
 				currentmeshindex = i;
 			}
 			++i;
@@ -61,19 +61,6 @@ std::shared_ptr<Value> MeshWidget::getWidgetValue() const
 	auto it = md->meshBegin();
 	std::advance(it, enumCombo->currentIndex());
 	return std::make_shared<IntValue>((*it).id());
-}
-
-void MeshWidget::resetWidgetValue()
-{
-	int          meshindex = -1;
-	unsigned int i         = 0;
-	for (const MeshModel& mm : md->meshIterator()) {
-		if (mm.id() == (unsigned int) parameter->value().getInt()) {
-			meshindex = i;
-		}
-		++i;
-	}
-	enumCombo->setCurrentIndex(meshindex);
 }
 
 void MeshWidget::setWidgetValue(const Value& nv)

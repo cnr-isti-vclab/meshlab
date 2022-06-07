@@ -30,11 +30,14 @@ class SaveFileWidget : public IOFileWidget
 {
 	Q_OBJECT
 public:
-	SaveFileWidget(QWidget* p, const RichFileSave& rpar, const StringValue& defaultValue);
+	SaveFileWidget(QWidget* p, const RichFileSave& param, const StringValue& defaultValue);
 	~SaveFileWidget();
 
 protected slots:
 	void selectFile();
+
+private:
+	QString extension;
 };
 
 #endif // MESHLAB_SAVE_FILE_WIDGET_H

@@ -31,9 +31,10 @@
 
 OpenFileWidget::OpenFileWidget(
 	QWidget*            p,
-	const RichFileOpen& rdf,
+	const RichFileOpen& param,
 	const StringValue&  defaultValue) :
-		IOFileWidget(p, rdf, defaultValue)
+		IOFileWidget(p, param, defaultValue),
+		extensions(param.exts.join(";;"))
 {
 }
 
@@ -43,13 +44,12 @@ OpenFileWidget::~OpenFileWidget()
 
 void OpenFileWidget::selectFile()
 {
-	RichFileOpen* dec  = reinterpret_cast<RichFileOpen*>(parameter);
-	QString       path = QDir::homePath();
-	if (!parameter->value().getString().isEmpty())
-		path = parameter->value().getString();
-	QString fl = QFileDialog::getOpenFileName(this, tr("Open"), path, dec->exts.join(";;"));
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
+	QString path = QDir::homePath();
+	if (!filename->text().isEmpty())
+		path = filename->text();
+	QString fl = QFileDialog::getOpenFileName(this, tr("Open"), path, extensions);
+	if (!fl.isEmpty()) {
+		updateFileName(fl);
+		emit dialogParamChanged();
+	}
 }

@@ -30,11 +30,14 @@ class OpenFileWidget : public IOFileWidget
 {
 	Q_OBJECT
 public:
-	OpenFileWidget(QWidget* p, const RichFileOpen& rdf, const StringValue& defaultValue);
+	OpenFileWidget(QWidget* p, const RichFileOpen& param, const StringValue& defaultValue);
 	~OpenFileWidget();
 
 protected slots:
 	void selectFile();
+
+private:
+	QString extensions;
 };
 
 #endif // MESHLAB_OPEN_FILE_WIDGET_H

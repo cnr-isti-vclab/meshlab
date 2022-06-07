@@ -43,11 +43,6 @@ std::shared_ptr<Value> EnumWidget::getWidgetValue() const
 	return std::make_shared<IntValue>(enumCombo->currentIndex());
 }
 
-void EnumWidget::resetWidgetValue()
-{
-	enumCombo->setCurrentIndex(parameter->value().getInt());
-}
-
 void EnumWidget::setWidgetValue(const Value& nv)
 {
 	enumCombo->setCurrentIndex(nv.getInt());

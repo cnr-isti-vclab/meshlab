@@ -31,11 +31,11 @@
 
 SaveFileWidget::SaveFileWidget(
 	QWidget*            p,
-	const RichFileSave& rpar,
+	const RichFileSave& param,
 	const StringValue&  defaultValue) :
-		IOFileWidget(p, rpar, defaultValue)
+		IOFileWidget(p, param, defaultValue),
+		extension(param.ext)
 {
-	filename->setText(parameter->value().getString());
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -44,11 +44,9 @@ SaveFileWidget::~SaveFileWidget()
 
 void SaveFileWidget::selectFile()
 {
-	RichFileSave* dec = reinterpret_cast<RichFileSave*>(parameter);
-	QString       fl =
-		QFileDialog::getSaveFileName(this, tr("Save"), parameter->value().getString(), dec->ext);
-	updateFileName(fl);
-	StringValue fileName(fl);
-	parameter->setValue(fileName);
-	emit dialogParamChanged();
+	QString fl = QFileDialog::getSaveFileName(this, tr("Save"), filename->text(), extension);
+	if (!fl.isEmpty()) {
+		updateFileName(fl);
+		emit dialogParamChanged();
+	}
 }

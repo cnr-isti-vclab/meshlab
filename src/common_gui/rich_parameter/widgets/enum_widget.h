@@ -33,7 +33,6 @@ public:
 	~EnumWidget();;
 
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
 };
 
