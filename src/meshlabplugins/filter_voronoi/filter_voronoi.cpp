@@ -181,13 +181,13 @@ RichParameterList FilterVoronoiPlugin::initParameterList(const QAction* action, 
 									"</ul>"));
 		break;
 	case VOLUME_SAMPLING:
-		par.addParam(RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 500.0, 0, m.cm.bbox.Diag(),"Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		par.addParam(RichPercentage("sampleSurfRadius", m.cm.bbox.Diag() / 500.0, 0, m.cm.bbox.Diag(),"Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
 		par.addParam(RichInt("sampleVolNum", 200000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
 		par.addParam(RichBool("poissonFiltering", true, "Poisson Filtering", "If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution."));
-		par.addParam(RichAbsPerc("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
+		par.addParam(RichPercentage("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
 		break;
 	case VORONOI_SCAFFOLDING:
-		par.addParam(RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		par.addParam(RichPercentage("sampleSurfRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
 		par.addParam(RichInt("sampleVolNum", 100000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
 		par.addParam(RichInt("voxelRes", 50, "Volume Side Resolution", "Number of voxel per side in the volumetric representation."));
 		par.addParam(RichFloat("isoThr", 1, "Width of the entity (in voxel)", "Number of voxel per side in the volumetric representation."));
@@ -198,14 +198,14 @@ RichParameterList FilterVoronoiPlugin::initParameterList(const QAction* action, 
 		break;
 	case BUILD_SHELL:
 		par.addParam(RichBool("edgeCylFlag", true, "Edge -> Cyl.", "If True all the edges are converted into cylinders."));
-		par.addParam(RichAbsPerc("edgeCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Edge Cylinder Rad.", "The radius of the cylinder replacing each edge."));
+		par.addParam(RichPercentage("edgeCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Edge Cylinder Rad.", "The radius of the cylinder replacing each edge."));
 		par.addParam(RichBool("vertCylFlag", false, "Vertex -> Cyl.", "If True all the vertices are converted into cylinders."));
-		par.addParam(RichAbsPerc("vertCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Cylinder Rad.", "The radius of the cylinder replacing each vertex."));
+		par.addParam(RichPercentage("vertCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Cylinder Rad.", "The radius of the cylinder replacing each vertex."));
 		par.addParam(RichBool("vertSphFlag", true, "Vertex -> Sph.", "If True all the vertices are converted into sphere."));
-		par.addParam(RichAbsPerc("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
+		par.addParam(RichPercentage("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
 		par.addParam(RichBool("faceExtFlag", true, "Face -> Prism", "If True all the faces are converted into prism."));
-		par.addParam(RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substituted with each face."));
-		par.addParam(RichAbsPerc("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
+		par.addParam(RichPercentage("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substituted with each face."));
+		par.addParam(RichPercentage("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
 		par.addParam(RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
 		par.addParam(RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
 		break;

@@ -24,13 +24,14 @@
 #include "python_utils.h"
 
 #include <QRegularExpression>
-#include "../parameters/rich_parameter.h"
+
+#include <common/parameters/rich_parameters.h>
 
 QString pymeshlab::computePythonTypeString(const RichParameter& par)
 {
 	if (par.isOfType<RichEnum>())
 		return PYTHON_TYPE_ENUM;
-	if (par.isOfType<RichAbsPerc>())
+	if (par.isOfType<RichPercentage>())
 		return PYTHON_TYPE_ABSPERC;
 	if (par.isOfType<RichDynamicFloat>())
 		return PYTHON_TYPE_DYNAMIC_FLOAT;
@@ -42,30 +43,31 @@ QString pymeshlab::computePythonTypeString(const RichParameter& par)
 		return PYTHON_TYPE_FLOAT;
 	if (par.isOfType<RichString>())
 		return PYTHON_TYPE_STRING;
-	if (par.isOfType<RichMatrix44f>())
+	if (par.isOfType<RichMatrix44>())
 		return PYTHON_TYPE_MATRIX44F;
 	if (par.isOfType<RichPosition>())
 		return PYTHON_TYPE_POINT3F;
 	if (par.isOfType<RichDirection>())
 		return PYTHON_TYPE_POINT3F;
-	if (par.isOfType<RichShotf>())
+	if (par.isOfType<RichShot>())
 		return PYTHON_TYPE_SHOTF;
 	if (par.isOfType<RichColor>())
 		return PYTHON_TYPE_COLOR;
 	if (par.isOfType<RichMesh>())
 		return PYTHON_TYPE_MESH;
-	if (par.isOfType<RichSaveFile>() || par.isOfType<RichOpenFile>())
+	if (par.isOfType<RichFileSave>() || par.isOfType<RichFileOpen>())
 		return PYTHON_TYPE_FILENAME;
 	return "still_unsupported";
 }
 
 QString pymeshlab::computePythonName(const QString& name)
 {
+	static const QRegularExpression rgexp("[().,'\":+]+");
 	QString pythonName = name.toLower();
 	pythonName.replace(' ', '_');
 	pythonName.replace('/', '_');
 	pythonName.replace('-', '_');
-	pythonName.remove(QRegularExpression("[().,'\":+]+"));
+	pythonName.remove(rgexp);
 
 	if (pythonKeywords.contains(pythonName))
 		pythonName += "_";

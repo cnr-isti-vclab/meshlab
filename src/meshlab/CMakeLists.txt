@@ -22,11 +22,6 @@ set(SOURCES
 	dialogs/save_mesh_attributes_dialog.cpp
 	dialogs/save_snapshot_dialog.cpp
 	dialogs/setting_dialog.cpp
-	gui_utils/clickable_label.cpp
-	gui_utils/vertical_scroll_area.cpp
-	rich_parameter_gui/richparameterlistdialog.cpp
-	rich_parameter_gui/richparameterlistframe.cpp
-	rich_parameter_gui/richparameterwidgets.cpp
 	${VCGDIR}/wrap/gui/trackball.cpp
 	${VCGDIR}/wrap/gui/trackmode.cpp
 	${VCGDIR}/wrap/gui/coordinateframe.cpp)
@@ -51,11 +46,6 @@ set(HEADERS
 	dialogs/save_mesh_attributes_dialog.h
 	dialogs/save_snapshot_dialog.h
 	dialogs/setting_dialog.h
-	gui_utils/clickable_label.h
-	gui_utils/vertical_scroll_area.h
-	rich_parameter_gui/richparameterlistdialog.h
-	rich_parameter_gui/richparameterlistframe.h
-	rich_parameter_gui/richparameterwidgets.h
 	${VCGDIR}/wrap/gui/trackball.h
 	${VCGDIR}/wrap/gui/trackmode.h
 	${VCGDIR}/wrap/gl/trimesh.h)
@@ -86,7 +76,7 @@ target_compile_definitions(meshlab PUBLIC QT_DISABLE_DEPRECATED_BEFORE=0x000000)
 target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
 	meshlab
-	PUBLIC meshlab-common OpenGL::GLU Qt5::Network
+	PUBLIC meshlab-common meshlab-common-gui OpenGL::GLU Qt5::Network
 	)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)

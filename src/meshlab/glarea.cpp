@@ -2207,7 +2207,7 @@ void GLArea::loadRaster(int id)
 			// load his shot or a default shot
 
 			if (rm.shot.IsValid()) {
-				fov = (rm.shot.Intrinsics.cameraType == 0) ? rm.shot.GetFovFromFocal() : 5.0;
+				fov = (rm.shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? rm.shot.GetFovFromFocal() : 5.0;
 
 				// this code seems useless, and if the camera translation is[0 0 0] (or even just
 				// with a small z), there is a division by zero
@@ -2473,7 +2473,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument& doc)
 	// The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
 	// The scale factor is computed as the ratio between cameraDistance and the z coordinate of the
 	// translation introduced by the shot.
-	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+	fov = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
 
 	// float cameraDist = getCameraDistance();
 
@@ -2510,7 +2510,7 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument& doc)
 				attr.namedItem("TrackScale").nodeValue().section(' ', 0, 0).toFloat();
 			nearPlane     = attr.namedItem("NearPlane").nodeValue().section(' ', 0, 0).toFloat();
 			farPlane      = attr.namedItem("FarPlane").nodeValue().section(' ', 0, 0).toFloat();
-			fov           = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+			fov           = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
 			clipRatioNear = nearPlane / getCameraDistance();
 			clipRatioFar  = farPlane / getCameraDistance();
 		}
@@ -2589,9 +2589,9 @@ QPair<Shotm, float> GLArea::shotFromTrackball()
 
 	// in MeshLab, fov < 5.0 means orthographic camera
 	if (fov > 5.0)
-		shot.Intrinsics.cameraType = 0; // perspective
+		shot.Intrinsics.cameraType = vcg::Camera<Scalarm>::PERSPECTIVE; //perspective
 	else
-		shot.Intrinsics.cameraType = 1; // orthographic
+		shot.Intrinsics.cameraType = vcg::Camera<Scalarm>::ORTHO; //orthographic
 
 	float cameraDist = getCameraDistance();
 
@@ -2626,7 +2626,7 @@ void GLArea::loadShot(const QPair<Shotm, float>& shotAndScale)
 {
 	Shotm shot = shotAndScale.first;
 
-	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+	fov = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
 
 	float cameraDist = getCameraDistance();
 

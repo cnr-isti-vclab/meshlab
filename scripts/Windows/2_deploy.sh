@@ -9,6 +9,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
+QT_DIR=""
 
 #checking for parameters
 for i in "$@"
@@ -18,15 +19,19 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
+    -qt=*|--qt_dir=*)
+        QT_DIR=${i#*=}/bin/
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
 esac
 done
 
-windeployqt $INSTALL_PATH/meshlab.exe
+${QT_DIR}windeployqt $INSTALL_PATH/meshlab.exe
 
-windeployqt $INSTALL_PATH/plugins/filter_sketchfab.dll --libdir $INSTALL_PATH/
+${QT_DIR}windeployqt $INSTALL_PATH/plugins/filter_sketchfab.dll --libdir $INSTALL_PATH/
 
 mv $INSTALL_PATH/lib/meshlab/IFX* $INSTALL_PATH
 cp $INSTALL_PATH/IFXCoreStatic.lib $INSTALL_PATH/lib/meshlab/
@@ -38,6 +43,3 @@ then
     echo "Downloading vc_redist because it was missing..."
     wget https://aka.ms/vs/17/release/vc_redist.x64.exe --output-document=$INSTALL_PATH/vc_redist.x64.exe
 fi
-
-#at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$INSTALL_PATH is now a self contained meshlab application"

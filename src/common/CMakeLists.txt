@@ -53,9 +53,34 @@ set(HEADERS
 	ml_shared_data_context/ml_plugin_gl_context.h
 	ml_shared_data_context/ml_scene_gl_shared_data_context.h
 	ml_shared_data_context/ml_shared_data_context.h
-	parameters/rich_parameter.h
+	parameters/rich_parameters.h
+	parameters/values.h
 	parameters/rich_parameter_list.h
-	parameters/value.h
+	parameters/rich_parameter/rich_bool.h
+	parameters/rich_parameter/rich_color.h
+	parameters/rich_parameter/rich_direction.h
+	parameters/rich_parameter/rich_dynamic_float.h
+	parameters/rich_parameter/rich_enum.h
+	parameters/rich_parameter/rich_file_open.h
+	parameters/rich_parameter/rich_file_save.h
+	parameters/rich_parameter/rich_float.h
+	parameters/rich_parameter/rich_int.h
+	parameters/rich_parameter/rich_matrix44.h
+	parameters/rich_parameter/rich_mesh.h
+	parameters/rich_parameter/rich_parameter.h
+	parameters/rich_parameter/rich_percentage.h
+	parameters/rich_parameter/rich_position.h
+	parameters/rich_parameter/rich_shot.h
+	parameters/rich_parameter/rich_string.h
+	parameters/value/bool_value.h
+	parameters/value/color_value.h
+	parameters/value/float_value.h
+	parameters/value/int_value.h
+	parameters/value/matrix44_value.h
+	parameters/value/point3_value.h
+	parameters/value/shot_value.h
+	parameters/value/string_value.h
+	parameters/value/value.h
 	plugins/containers/generic_container_iterator.h
 	plugins/containers/decorate_plugin_container.h
 	plugins/containers/edit_plugin_container.h
@@ -99,9 +124,32 @@ set(SOURCES
 	ml_shared_data_context/ml_plugin_gl_context.cpp
 	ml_shared_data_context/ml_scene_gl_shared_data_context.cpp
 	ml_shared_data_context/ml_shared_data_context.cpp
-	parameters/rich_parameter.cpp
+	parameters/rich_parameters.cpp
 	parameters/rich_parameter_list.cpp
-	parameters/value.cpp
+	parameters/rich_parameter/rich_bool.cpp
+	parameters/rich_parameter/rich_color.cpp
+	parameters/rich_parameter/rich_direction.cpp
+	parameters/rich_parameter/rich_dynamic_float.cpp
+	parameters/rich_parameter/rich_enum.cpp
+	parameters/rich_parameter/rich_file_open.cpp
+	parameters/rich_parameter/rich_file_save.cpp
+	parameters/rich_parameter/rich_float.cpp
+	parameters/rich_parameter/rich_int.cpp
+	parameters/rich_parameter/rich_matrix44.cpp
+	parameters/rich_parameter/rich_mesh.cpp
+	parameters/rich_parameter/rich_parameter.cpp
+	parameters/rich_parameter/rich_percentage.cpp
+	parameters/rich_parameter/rich_position.cpp
+	parameters/rich_parameter/rich_shot.cpp
+	parameters/rich_parameter/rich_string.cpp
+	parameters/value/bool_value.cpp
+	parameters/value/color_value.cpp
+	parameters/value/float_value.cpp
+	parameters/value/int_value.cpp
+	parameters/value/matrix44_value.cpp
+	parameters/value/point3_value.cpp
+	parameters/value/shot_value.cpp
+	parameters/value/string_value.cpp
 	plugins/containers/decorate_plugin_container.cpp
 	plugins/containers/edit_plugin_container.cpp
 	plugins/containers/filter_plugin_container.cpp

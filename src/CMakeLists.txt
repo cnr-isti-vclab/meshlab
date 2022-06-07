@@ -118,6 +118,7 @@ set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 add_subdirectory(${EXTERNAL_DIR})
 
 add_subdirectory(common)
+add_subdirectory(common_gui)
 
 if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
 	add_subdirectory(meshlab)

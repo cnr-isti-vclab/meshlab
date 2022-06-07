@@ -126,7 +126,7 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.isOfType<RichString>()){
 		return new QTableWidgetItem(pd.value().getString());
 	}
-	else if (pd.isOfType<RichAbsPerc>()){
+	else if (pd.isOfType<RichPercentage>()){
 		return new QTableWidgetItem(QString::number(pd.value().getFloat()));
 	}
 	else if (pd.isOfType<RichDynamicFloat>()){
@@ -135,16 +135,16 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 	else if (pd.isOfType<RichEnum>()){
 		return new QTableWidgetItem(QString::number(pd.value().getInt()));
 	}
-	else if (pd.isOfType<RichMatrix44f>()){
+	else if (pd.isOfType<RichMatrix44>()){
 		assert(0);
 		return nullptr;
 	}
 	else if (pd.isOfType<RichPosition>() || pd.isOfType<RichDirection>()){
-		vcg::Point3f pp = pd.value().getPoint3f();
+		vcg::Point3f pp = pd.value().getPoint3();
 		QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
 		return new QTableWidgetItem(pst);
 	}
-	else if (pd.isOfType<RichShotf>()){
+	else if (pd.isOfType<RichShot>()){
 		assert(0); ///
 		return new QTableWidgetItem(QString("TODO"));
 	}
@@ -154,10 +154,10 @@ QTableWidgetItem* MeshLabOptionsDialog::createQTableWidgetItemFromRichParameter(
 		QIcon ic(pix);
 		return new QTableWidgetItem(ic,"");
 	}
-	else if (pd.isOfType<RichOpenFile>()){
+	else if (pd.isOfType<RichFileOpen>()){
 		new QTableWidgetItem(pd.value().getString());
 	}
-	else if (pd.isOfType<RichSaveFile>()){
+	else if (pd.isOfType<RichFileSave>()){
 		assert(0);
 		return nullptr;
 	}

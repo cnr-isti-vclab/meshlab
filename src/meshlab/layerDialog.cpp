@@ -33,10 +33,11 @@ $Log: stdpardialog.cpp,v $
 #include <QFontMetrics>
 #include <QSettings>
 
+#include <common_gui/rich_parameter/richparameterlistframe.h>
+
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
-#include "rich_parameter_gui/richparameterlistframe.h"
 #include "../common/mlexception.h"
 
 using namespace std;
@@ -1287,7 +1288,7 @@ void DecoratorParamsTreeWidget::save()
 void DecoratorParamsTreeWidget::reset()
 {
 	for(auto& p : *frame)
-		p.second->resetValue();
+		p.second->resetWidgetToDefaultValue();
 	apply();
 }
 
@@ -1297,7 +1298,7 @@ void DecoratorParamsTreeWidget::apply()
 	for(auto& p : *frame) {
 		current.setValue(
 					p.first,
-					p.second->widgetValue());
+					*p.second->getWidgetValue());
 	}
 	mainWin->updateCustomSettings();
 	if (mainWin->GLA())

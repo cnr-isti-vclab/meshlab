@@ -127,46 +127,41 @@ public:
 
 /* This sampler is used to transfer the detail of a mesh onto another one.
  * It keep internally the spatial indexing structure used to find the closest point
+ * According to the kin of sampling is (vertexsampling or not) it uses a
  */
 class LocalRedetailSampler
 {
-  typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+  typedef GridStaticPtr<CMeshO::FaceType,   CMeshO::ScalarType >   FaceMeshGrid;
   typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
 public:
-
-  LocalRedetailSampler():m(0) {}
-
-  CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
-  CallBackPos *cb;
-  int sampleNum;  // the expected number of samples. Used only for the callback
-  int sampleCnt;
-  MetroMeshGrid   unifGridFace;
+  CMeshO *m=0;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
+  CallBackPos *cb=0;
+  int sampleNum=0;  // the expected number of samples. Used only for the callback
+  int sampleCnt=0;
+  FaceMeshGrid     unifGridFace;
   VertexMeshGrid   unifGridVert;
-  bool useVertexSampling;
+  
+  bool useVertexSampling=false;
 
   // Parameters
   typedef tri::FaceTmark<CMeshO> MarkerFace;
   MarkerFace markerFunctor;
 
-  bool coordFlag;
-  bool colorFlag;
-  bool normalFlag;
-  bool qualityFlag;
-  bool selectionFlag;
+  // what data has to be resampled
+  bool coordFlag=false;
+  bool colorFlag=false;
+  bool normalFlag=false;
+  bool qualityFlag=false;
+  bool selectionFlag=false;
+  
   bool storeDistanceAsQualityFlag;
   float dist_upper_bound;
   void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
   {
-    coordFlag=false;
-    colorFlag=false;
-    qualityFlag=false;
-    selectionFlag=false;
-    storeDistanceAsQualityFlag=false;
     m=_m;
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
     if(m->fn==0) useVertexSampling = true;
-    else useVertexSampling = false;
 
     if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
     else  unifGridFace.Set(m->face.begin(),m->face.end());
@@ -580,7 +575,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
     break;
   case FP_CLUSTERED_SAMPLING :{
     float maxVal = md.mm()->cm.bbox.Diag();
-    parlst.addParam(RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
+    parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
 
     parlst.addParam(RichEnum("Sampling", 1,
                                  QStringList() << "Average" << "Closest to center",
@@ -603,7 +598,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 
   case FP_POINTCLOUD_SIMPLIFICATION :
     parlst.addParam(RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
-    parlst.addParam(RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
+    parlst.addParam(RichPercentage("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
     parlst.addParam(RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "));
     parlst.addParam(RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
 	parlst.addParam(RichBool("ExactNumFlag", false, "Precise sample number", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with the below specified tolerance. Obviously it will takes much longer."));
@@ -612,7 +607,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 
   case FP_POISSONDISK_SAMPLING :
     parlst.addParam(RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
-    parlst.addParam(RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
+    parlst.addParam(RichPercentage("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
     parlst.addParam(RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
     parlst.addParam(RichBool("SaveMontecarlo", false, "Save Montecarlo", "If true, it will generate an additional Layer with the montecarlo sampling that was pruned to build the poisson distribution."));
     parlst.addParam(RichBool("ApproximateGeodesicDistance", false, "Approximate Geodesic Distance", "If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."));
@@ -664,7 +659,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 		parlst.addParam(RichBool("SampleFace", false, "Sample Faces", "See the above comment."));
 		parlst.addParam(RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the chosen sampling strategy it will try to adapt."));
-		parlst.addParam(RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
+		parlst.addParam(RichPercentage("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
 			tr("Max Distance"), tr("Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max.")));
 	} break;
 
@@ -686,7 +681,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
 		parlst.addParam(RichBool("SignedDist", true, "Compute Signed Distance",
 			"If TRUE, the distance is signed; if FALSE, it will compute the distance absolute value."));
 
-		parlst.addParam(RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag(), 0.0f, md.bbox().Diag(),
+		parlst.addParam(RichPercentage("MaxDist", md.mm()->cm.bbox.Diag(), 0.0f, md.bbox().Diag(),
 			tr("Max Distance [abs]"), tr("Search is interrupted when nothing is found within this distance range [+maxDistance -maxDistance].")));
   } break;
 
@@ -703,6 +698,9 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
                                   "The mesh that contains the source data that we want to transfer."));
 	parlst.addParam(RichMesh ("TargetMesh", vertexMesh->id(),&md, "Target Mesh",
                                   "The mesh whose vertices will receive the data from the source."));
+	parlst.addParam(RichBool ("VertexSampling", false, "Vertex Sampling",
+							 "if enabled for each vertex of the target mesh we search the closest vertex in the source mesh and directly copy the found attributes, otherwise we search for the closest point on the source surface that usually falls inside a face and attribute are therefore interpolated"));
+	
     parlst.addParam(RichBool ("GeomTransfer", false, "Transfer Geometry",
                                   "if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));
     parlst.addParam(RichBool ("NormalTransfer", false, "Transfer Normal",
@@ -715,7 +713,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
                                   "if enabled,  each vertex of the target mesh will be selected if the corresponding closest point on the source mesh falls in a selected face"));
     parlst.addParam(RichBool ("QualityDistance", false, "Store dist. as quality",
                                   "if enabled, we store the distance of the transferred value as in the vertex quality"));
-    parlst.addParam(RichAbsPerc("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+    parlst.addParam(RichPercentage("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering attributes.")));
     parlst.addParam(RichBool ("onSelected", false, "Only on selection",	"If checked, only transfer to selected vertices on TARGET mesh"));
 
@@ -723,10 +721,10 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
   case FP_UNIFORM_MESH_RESAMPLING :
   {
 
-    parlst.addParam(RichAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+    parlst.addParam(RichPercentage("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger.")));
 
-    parlst.addParam(RichAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+    parlst.addParam(RichPercentage("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
                                     tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
                                                      "If offset is zero, the created surface passes on the original mesh itself. "
                                                      "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
@@ -781,10 +779,10 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
   } break;
   case FP_REGULAR_RECURSIVE_SAMPLING :
   {
-    parlst.addParam(RichAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+    parlst.addParam(RichPercentage("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger.")));
 
-    parlst.addParam(RichAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+    parlst.addParam(RichPercentage("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
                                     tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
                                                      "If offset is zero, the created surface passes on the original mesh itself. "
                                                      "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
@@ -1259,6 +1257,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		bool qualityT = par.getBool("QualityTransfer");
 		bool selectionT = par.getBool("SelectionTransfer");
 		bool distquality = par.getBool("QualityDistance");
+		bool vertSampling = par.getBool("VertexSampling");
 		
 		if (srcMesh == trgMesh){
 			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
@@ -1291,8 +1290,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 		
 		LocalRedetailSampler rs;
-		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
-		
+		rs.useVertexSampling = vertSampling;
 		rs.dist_upper_bound = upperbound;
 		rs.colorFlag = colorT;
 		rs.coordFlag = geomT;
@@ -1300,7 +1298,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		rs.qualityFlag = qualityT;
 		rs.selectionFlag = selectionT;
 		rs.storeDistanceAsQualityFlag = distquality;
-		
+		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
+		qDebug("apply: using vertex samping %s\n",rs.useVertexSampling?"True":"False");
 		if(rs.colorFlag) trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 		if(rs.qualityFlag || rs.storeDistanceAsQualityFlag)
 			trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
@@ -1390,7 +1389,6 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
 		SampleSHT sht;
 		tri::EmptyTMark<CMeshO> markerFunctor;
-		typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
 		tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
 		tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
 		bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
