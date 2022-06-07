@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-FloatWidget::FloatWidget(QWidget *p, const RichFloat &param, const FloatValue &defaultValue) :
-	LineEditWidget(p, param, defaultValue)
+FloatWidget::FloatWidget(QWidget* p, const RichFloat& param, const FloatValue& defaultValue) :
+		LineEditWidget(p, param, defaultValue)
 {
 	lned->setText(QString::number(param.value().getFloat(), 'g', 3));
 }

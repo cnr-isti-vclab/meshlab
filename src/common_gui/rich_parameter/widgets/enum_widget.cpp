@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-EnumWidget::EnumWidget(QWidget *p, const RichEnum &rpar, const IntValue &defaultValue) :
-		ComboWidget(p, rpar, defaultValue, rpar.enumvalues, rpar.value().getInt())
+EnumWidget::EnumWidget(QWidget* p, const RichEnum& param, const IntValue& defaultValue) :
+		ComboWidget(p, param, defaultValue, param.enumvalues, param.value().getInt())
 {
 }
 

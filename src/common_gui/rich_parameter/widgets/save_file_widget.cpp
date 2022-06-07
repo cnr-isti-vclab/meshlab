@@ -33,8 +33,7 @@ SaveFileWidget::SaveFileWidget(
 	QWidget*            p,
 	const RichFileSave& param,
 	const StringValue&  defaultValue) :
-		IOFileWidget(p, param, defaultValue),
-		extension(param.ext)
+		IOFileWidget(p, param, defaultValue), extension(param.ext)
 {
 }
 

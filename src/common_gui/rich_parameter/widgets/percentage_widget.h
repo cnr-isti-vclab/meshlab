@@ -30,12 +30,11 @@ class PercentageWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	PercentageWidget(QWidget* p, const RichPercentage &rabs, const FloatValue &defaultValue);
+	PercentageWidget(QWidget* p, const RichPercentage& param, const FloatValue& defaultValue);
 	~PercentageWidget();
 
 	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void                   resetWidgetValue();
 	void                   setWidgetValue(const Value& nv);
 
 private:

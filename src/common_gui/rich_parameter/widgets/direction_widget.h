@@ -32,7 +32,7 @@ class DirectionWidget : public Point3Widget
 public:
 	DirectionWidget(
 		QWidget*             p,
-		const RichDirection& rpf,
+		const RichDirection& param,
 		const Point3Value&   defaultValue,
 		QWidget*             gla);
 	~DirectionWidget();

@@ -37,10 +37,9 @@ public:
 		QWidget*             gla);
 	~Point3Widget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 	vcg::Point3f getValue();
 

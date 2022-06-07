@@ -35,9 +35,9 @@ protected:
 	~IOFileWidget();
 
 public:
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 protected slots:
 	virtual void selectFile() = 0;

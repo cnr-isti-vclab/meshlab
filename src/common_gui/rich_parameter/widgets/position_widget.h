@@ -32,7 +32,7 @@ class PositionWidget : public Point3Widget
 public:
 	PositionWidget(
 		QWidget*            p,
-		const RichPosition& rpf,
+		const RichPosition& param,
 		const Point3Value&  defaultValue,
 		QWidget*            gla);
 	~PositionWidget();

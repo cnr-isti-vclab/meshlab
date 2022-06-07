@@ -29,8 +29,11 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-PercentageWidget::PercentageWidget(QWidget *p, const RichPercentage &rabs, const FloatValue &defaultValue) :
-		RichParameterWidget(p, rabs, defaultValue), m_min(rabs.min), m_max(rabs.max)
+PercentageWidget::PercentageWidget(
+	QWidget*              p,
+	const RichPercentage& param,
+	const FloatValue&     defaultValue) :
+		RichParameterWidget(p, param, defaultValue), m_min(param.min), m_max(param.max)
 {
 	descriptionLabel->setText(descriptionLabel->text() + " (abs and %)");
 
@@ -44,7 +47,7 @@ PercentageWidget::PercentageWidget(QWidget *p, const RichPercentage &rabs, const
 	int decimals = 7 - ceil(log10(fabs(m_max - m_min)));
 	absSB->setDecimals(decimals);
 	absSB->setSingleStep((m_max - m_min) / 100.0);
-	float initVal = parameter->value().getFloat();
+	float initVal = param.value().getFloat();
 	absSB->setValue(initVal);
 	absSB->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
@@ -95,16 +98,9 @@ std::shared_ptr<Value> PercentageWidget::getWidgetValue() const
 	return std::make_shared<FloatValue>(absSB->value());
 }
 
-void PercentageWidget::resetWidgetValue()
-{
-	RichPercentage* ap = reinterpret_cast<RichPercentage*>(parameter);
-	setValue(parameter->value().getFloat(), ap->min, ap->max);
-}
-
 void PercentageWidget::setWidgetValue(const Value& nv)
 {
-	RichPercentage* ap = reinterpret_cast<RichPercentage*>(parameter);
-	setValue(nv.getFloat(), ap->min, ap->max);
+	setValue(nv.getFloat(), m_min, m_max);
 }
 
 void PercentageWidget::setValue(float val, float minV, float maxV)

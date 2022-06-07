@@ -33,8 +33,7 @@ OpenFileWidget::OpenFileWidget(
 	QWidget*            p,
 	const RichFileOpen& param,
 	const StringValue&  defaultValue) :
-		IOFileWidget(p, param, defaultValue),
-		extensions(param.exts.join(";;"))
+		IOFileWidget(p, param, defaultValue), extensions(param.exts.join(";;"))
 {
 }
 

@@ -29,7 +29,10 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &param, const FloatValue &defaultValue) :
+DynamicFloatWidget::DynamicFloatWidget(
+	QWidget*                p,
+	const RichDynamicFloat& param,
+	const FloatValue&       defaultValue) :
 		RichParameterWidget(p, param, defaultValue)
 {
 	int numbdecimaldigit = 4;
@@ -43,8 +46,8 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, const RichDynamicFloat &param
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
 	valueSlider->setValue(floatToInt(param.value().getFloat()));
-	QFontMetrics      fm(valueLE->font());
-	QSize             sz = fm.size(Qt::TextSingleLine, QString::number(0));
+	QFontMetrics fm(valueLE->font());
+	QSize        sz = fm.size(Qt::TextSingleLine, QString::number(0));
 	valueLE->setValidator(new QDoubleValidator(param.min, param.max, numbdecimaldigit, valueLE));
 	valueLE->setText(QString::number(param.value().getFloat()));
 	valueLE->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);

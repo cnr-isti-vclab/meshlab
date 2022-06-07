@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-MeshWidget::MeshWidget(QWidget *p, const RichMesh &param, const IntValue &defaultValue) :
-	ComboWidget(p, param, defaultValue)
+MeshWidget::MeshWidget(QWidget* p, const RichMesh& param, const IntValue& defaultValue) :
+		ComboWidget(p, param, defaultValue)
 {
 	md = param.meshdoc;
 

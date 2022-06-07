@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-BoolWidget::BoolWidget(QWidget *p, const RichBool &param, const BoolValue &defaultValue) :
+BoolWidget::BoolWidget(QWidget* p, const RichBool& param, const BoolValue& defaultValue) :
 		RichParameterWidget(p, param, defaultValue)
 {
 	cb = new QCheckBox("", this);
@@ -62,4 +62,3 @@ void BoolWidget::setWidgetValue(const Value& nv)
 {
 	cb->setChecked(nv.getBool());
 }
-

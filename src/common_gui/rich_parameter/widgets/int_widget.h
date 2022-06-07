@@ -33,7 +33,7 @@ public:
 	~IntWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 };
 
 #endif // MESHLAB_INT_WIDGET_H

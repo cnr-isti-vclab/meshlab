@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ColorWidget::ColorWidget(QWidget *p, const RichColor &param, const ColorValue &defaultValue) :
+ColorWidget::ColorWidget(QWidget* p, const RichColor& param, const ColorValue& defaultValue) :
 		RichParameterWidget(p, param, defaultValue), pickcol(defaultValue.getColor())
 {
 	colorLabel  = new QLabel(this);
@@ -94,11 +94,8 @@ void ColorWidget::updateColorInfo(const ColorValue& newColor)
 void ColorWidget::pickColor()
 {
 	QColor tmp = pickcol;
-	pickcol = QColorDialog::getColor(
-		pickcol,
-		this->parentWidget(),
-		"Pick a Color",
-		QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
+	auto dialogParam = QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel;
+	pickcol = QColorDialog::getColor(pickcol, this->parentWidget(), "Pick a Color", dialogParam);
 	if (pickcol.isValid()) {
 		updateColorInfo(ColorValue(pickcol));
 		emit dialogParamChanged();

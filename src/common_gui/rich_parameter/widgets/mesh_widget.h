@@ -30,10 +30,11 @@ class MeshWidget : public ComboWidget
 {
 public:
 	MeshWidget(QWidget* p, const RichMesh& param, const IntValue& defaultValue);
-	~MeshWidget();;
+	~MeshWidget();
+	;
 
 	std::shared_ptr<Value> getWidgetValue() const;
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 private:
 	const MeshDocument* md;

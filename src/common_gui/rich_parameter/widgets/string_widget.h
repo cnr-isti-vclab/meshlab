@@ -29,12 +29,11 @@
 class StringWidget : public LineEditWidget
 {
 public:
-	StringWidget(QWidget* p, const RichString& rpar, const StringValue& defaultValue);
+	StringWidget(QWidget* p, const RichString& param, const StringValue& defaultValue);
 	~StringWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 };
 
 #endif // MESHLAB_STRING_WIDGET_H

@@ -33,7 +33,7 @@ protected:
 	QComboBox* enumCombo;
 
 public:
-	ComboWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
+	ComboWidget(QWidget* p, const RichParameter& param, const Value& defaultValue);
 	ComboWidget(
 		QWidget*             p,
 		const RichParameter& rpar,

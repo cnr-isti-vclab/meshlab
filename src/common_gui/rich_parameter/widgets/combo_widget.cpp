@@ -29,17 +29,17 @@
 #include <QFileDialog>
 #include <common/ml_document/mesh_document.h>
 
-ComboWidget::ComboWidget(QWidget *p, const RichParameter &rpar, const Value &defaultValue) :
-	RichParameterWidget(p, rpar, defaultValue), enumCombo(new QComboBox(this))
+ComboWidget::ComboWidget(QWidget* p, const RichParameter& param, const Value& defaultValue) :
+		RichParameterWidget(p, param, defaultValue), enumCombo(new QComboBox(this))
 {
 }
 
 ComboWidget::ComboWidget(
-	QWidget *p,
-	const RichParameter &rpar,
-	const Value &defaultValue,
-	const QStringList& values,
-	int defaultEnum) :
+	QWidget*             p,
+	const RichParameter& rpar,
+	const Value&         defaultValue,
+	const QStringList&   values,
+	int                  defaultEnum) :
 		RichParameterWidget(p, rpar, defaultValue), enumCombo(new QComboBox(this))
 {
 	init(defaultEnum, values);

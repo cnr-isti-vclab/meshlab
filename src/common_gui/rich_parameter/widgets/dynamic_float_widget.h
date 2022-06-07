@@ -34,9 +34,9 @@ public:
 	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& param, const FloatValue& defaultValue);
 	~DynamicFloatWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 	float getValue();
 

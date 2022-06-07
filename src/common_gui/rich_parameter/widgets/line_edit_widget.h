@@ -31,7 +31,7 @@ class LineEditWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	LineEditWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
+	LineEditWidget(QWidget* p, const RichParameter& param, const Value& defaultValue);
 	~LineEditWidget();
 
 	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
