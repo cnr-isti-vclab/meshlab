@@ -47,14 +47,15 @@ FilterDockDialog::FilterDockDialog(
 	ui->setupUi(this);
 
 	this->setWindowTitle(plugin->filterName(filter));
+	ui->pymeshlabFilterLabel->setText(plugin->pythonFilterName(filter));
 	ui->filterInfoLabel->setText(plugin->filterInfo(filter));
 
 	ui->parameterFrame->initParams(rpl, rpl, (QWidget*) glArea);
 
 	// by default, the previewCheckBox is visible when the dialog is constructed.
 	// now, we check if the filter is previewable:
-	// - if it is previewable, we set all data structures necessary to make the preview available
 	// - if it is not previewable, we set the previewCheckBox non visible
+	// - if it is previewable, we set all data structures necessary to make the preview available
 	if (!isFilterPreviewable(plugin, filter)) {
 		ui->previewCheckBox->setVisible(false);
 	}
@@ -255,3 +256,9 @@ void FilterDockDialog::updateRenderingData(MainWindow* mw, MeshModel* mesh)
 		}
 	}
 }
+
+void FilterDockDialog::on_copyToClipBoardPushButton_clicked()
+{
+
+}
+
