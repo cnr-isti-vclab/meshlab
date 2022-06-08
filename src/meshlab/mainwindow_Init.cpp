@@ -962,7 +962,6 @@ void MainWindow::loadMeshLabSettings()
 		QDomDocument doc;
 		doc.setContent(settings.value(klist.at(ii)).toString());
 
-		QString st = settings.value(klist.at(ii)).toString();
 		QDomElement docElem = doc.firstChild().toElement();
 
 		if (!docElem.isNull())
@@ -1301,6 +1300,7 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 
 	gbllist.addParam(RichInt(startupWindowWidthParam(), 0, "Startup Window Width (in pixels)", "Window width on startup"));
 	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
+	gbllist.addParam(RichString(meshSetNameParam(), "ms", "Name of the MeshSet object.", "Set the MeshSet name object in the PyMeshLab call copied in the clipboard from the filter dock dialog."));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1314,6 +1314,7 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
 	startupWindowWidth = rpl.getInt(startupWindowWidthParam());
 	startupWindowHeight = rpl.getInt(startupWindowHeightParam());
+	meshSetName = rpl.getString(meshSetNameParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

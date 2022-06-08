@@ -67,7 +67,7 @@ class MainWindowSetting
 {
 public:
 	static void initGlobalParameterList(RichParameterList& gbllist);
-	void updateGlobalParameterList(const RichParameterList& rpl );
+	void updateGlobalParameterList(const RichParameterList& rpl);
 
 	std::ptrdiff_t maxgpumem;
 	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
@@ -89,9 +89,12 @@ public:
 	  
 	int startupWindowWidth;
 	inline static QString startupWindowWidthParam() {return "MeshLab::System::startupWindowWidth";}
-  
+
 	int startupWindowHeight;
 	inline static QString startupWindowHeightParam() {return "MeshLab::System::startupWindowHeight";}
+
+	QString meshSetName;
+	inline static QString meshSetNameParam() {return "MeshLab::System::meshSetName";};
 };
 
 class MainWindow : public QMainWindow

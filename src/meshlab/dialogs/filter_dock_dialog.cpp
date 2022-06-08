@@ -23,6 +23,9 @@
 #include "filter_dock_dialog.h"
 #include "ui_filter_dock_dialog.h"
 
+#include <QSettings>
+#include <QClipboard>
+
 #include "../mainwindow.h"
 
 FilterDockDialog::FilterDockDialog(
@@ -259,6 +262,16 @@ void FilterDockDialog::updateRenderingData(MainWindow* mw, MeshModel* mesh)
 
 void FilterDockDialog::on_copyToClipBoardPushButton_clicked()
 {
-
+	QSettings settings;
+	QString meshSetName = settings.value(MainWindowSetting::meshSetNameParam(), "").toString();
+	QDomDocument doc;
+	doc.setContent(meshSetName);
+	RichParameter* s;
+	RichParameterAdapter::create(doc.firstChild().toElement(), s);
+	QString call = s->value().getString() + "." + plugin->pythonFilterName(filter) + "(";
+	// todo -> fill parameters
+	call += ")";
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(call);
 }
 
