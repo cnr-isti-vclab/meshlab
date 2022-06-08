@@ -58,6 +58,8 @@ public:
 	void resetWidgetToDefaultValue();
 	void setHelpVisible(bool b);
 
+	bool hasBeenChanged() const;
+
 protected slots:
 	void setParameterChanged();
 

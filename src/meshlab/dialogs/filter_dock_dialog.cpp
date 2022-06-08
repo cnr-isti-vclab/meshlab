@@ -269,6 +269,28 @@ void FilterDockDialog::on_copyToClipBoardPushButton_clicked()
 	RichParameter* s;
 	RichParameterAdapter::create(doc.firstChild().toElement(), s);
 	QString call = s->value().getString() + "." + plugin->pythonFilterName(filter) + "(";
+	bool first =  true;
+	for (const auto& p : *ui->parameterFrame) {
+		if (p.second->hasBeenChanged()) {
+			if (first) {
+				first = false;
+			}
+			else {
+				call += ", ";
+			}
+			std::shared_ptr<Value> value = p.second->getWidgetValue();
+			RichParameter& param = parameters.getParameterByName(p.first);
+			call += param.pythonName() + "=";
+			if (param.isOfType<RichBool>()) {
+				if (value->getBool()) {
+					call += "True";
+				}
+				else {
+					call += "False";
+				}
+			}
+		}
+	}
 	// todo -> fill parameters
 	call += ")";
 	QClipboard *clipboard = QApplication::clipboard();

@@ -72,12 +72,18 @@ void RichParameterWidget::setVisible(bool b)
 void RichParameterWidget::resetWidgetToDefaultValue()
 {
 	setWidgetValue(*defaultValue);
+	parameterValueChanged = false;
 }
 
 void RichParameterWidget::setHelpVisible(bool b)
 {
 	helpVisible = b;
 	helpLabel->setVisible(visible && helpVisible);
+}
+
+bool RichParameterWidget::hasBeenChanged() const
+{
+	return parameterValueChanged;
 }
 
 void RichParameterWidget::setParameterChanged()
