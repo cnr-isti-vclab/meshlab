@@ -23,7 +23,7 @@
 
 #include "rich_parameter_widget.h"
 
-#include "../richparameterlistframe.h"
+#include "../rich_parameter_list_frame.h"
 
 RichParameterWidget::RichParameterWidget(
 	QWidget*             p,

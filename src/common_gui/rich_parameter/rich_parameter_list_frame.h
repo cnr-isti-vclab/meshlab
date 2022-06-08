@@ -1,8 +1,8 @@
 /*****************************************************************************
- * VCGLib                                                            o o     *
+ * MeshLab                                                           o o     *
  * Visual and Computer Graphics Library                            o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2004-2021                                           \/)\/    *
+ * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,8 +21,8 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef RICHPARAMETERLISTFRAME_H
-#define RICHPARAMETERLISTFRAME_H
+#ifndef RICH_PARAMETER_LIST_FRAME_H
+#define RICH_PARAMETER_LIST_FRAME_H
 
 #include "widgets/rich_parameter_widgets.h"
 
@@ -97,7 +97,7 @@ private:
 	static RichParameterWidget* createWidgetFromRichParameter(
 		QWidget*             parent,
 		const RichParameter& pd,
-		const RichParameter& def);
+		const Value& defaultValue);
 
 	std::map<QString, RichParameterWidget*> stdfieldwidgets;
 	bool                                    isHelpVisible;
@@ -108,4 +108,4 @@ private:
 	QPushButton*      showHiddenFramePushButton;
 };
 
-#endif // RICHPARAMETERLISTFRAME_H
+#endif // RICH_PARAMETER_LIST_FRAME_H

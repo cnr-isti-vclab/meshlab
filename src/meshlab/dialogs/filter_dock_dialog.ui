@@ -249,7 +249,7 @@
   <customwidget>
    <class>RichParameterListFrame</class>
    <extends>QFrame</extends>
-   <header>common_gui/rich_parameter/richparameterlistframe.h</header>
+   <header>common_gui/rich_parameter/rich_parameter_list_frame.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

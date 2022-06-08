@@ -25,7 +25,7 @@ set(HEADERS
 	rich_parameter/widgets/string_widget.h
 
 	rich_parameter/richparameterlistdialog.h
-	rich_parameter/richparameterlistframe.h
+	rich_parameter/rich_parameter_list_frame.h
 )
 
 set(SOURCES
@@ -54,7 +54,7 @@ set(SOURCES
 	rich_parameter/widgets/string_widget.cpp
 
 	rich_parameter/richparameterlistdialog.cpp
-	rich_parameter/richparameterlistframe.cpp
+	rich_parameter/rich_parameter_list_frame.cpp
 )
 
 set(RESOURCES )
