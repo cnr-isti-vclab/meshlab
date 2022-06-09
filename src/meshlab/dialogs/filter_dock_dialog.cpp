@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QClipboard>
 
+#include <common/filter_history/filter.h>
+
 #include "../mainwindow.h"
 
 FilterDockDialog::FilterDockDialog(
@@ -268,32 +270,12 @@ void FilterDockDialog::on_copyToClipBoardPushButton_clicked()
 	doc.setContent(meshSetName);
 	RichParameter* s;
 	RichParameterAdapter::create(doc.firstChild().toElement(), s);
-	QString call = s->value().getString() + "." + plugin->pythonFilterName(filter) + "(";
-	bool first =  true;
-	for (const auto& p : *ui->parameterFrame) {
-		if (p.second->hasBeenChanged()) {
-			if (first) {
-				first = false;
-			}
-			else {
-				call += ", ";
-			}
-			std::shared_ptr<Value> value = p.second->getWidgetValue();
-			RichParameter& param = parameters.getParameterByName(p.first);
-			call += param.pythonName() + "=";
-			if (param.isOfType<RichBool>()) {
-				if (value->getBool()) {
-					call += "True";
-				}
-				else {
-					call += "False";
-				}
-			}
-		}
-	}
-	// todo -> fill parameters
-	call += ")";
+
+	RichParameterList rpl;// todo: get the RichParameterList
+
+	Filter f(plugin, filter, rpl);
+
 	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(call);
+	clipboard->setText(QString::fromStdString(f.pythonCall(s->value().getString().toStdString())));
 }
 

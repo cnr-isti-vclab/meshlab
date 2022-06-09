@@ -37,7 +37,7 @@ Point3Widget::Point3Widget(
 	vlay = new QHBoxLayout();
 	vlay->setSpacing(0);
 	const Point3Value& p3v = param.value().getPoint3();
-	for (int i = 0; i < 3; ++i) {
+	for (unsigned int i = 0; i < 3; ++i) {
 		coordSB[i]     = new QLineEdit(this);
 		QFont baseFont = coordSB[i]->font();
 		if (baseFont.pixelSize() != -1)
@@ -51,9 +51,12 @@ Point3Widget::Point3Widget(
 		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 		vlay->addWidget(coordSB[i]);
 		widgets.push_back(coordSB[i]);
-		connect(coordSB[i], SIGNAL(textChanged(QString)), this, SLOT(setParameterChanged()));
 	}
 	setValue(paramName, param.value().getPoint3());
+	// connects must be made AFTER setValue
+	for (unsigned int i = 0; i < 3 ; i++) {
+		connect(coordSB[i], SIGNAL(textChanged(QString)), this, SLOT(setParameterChanged()));
+	}
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla) {

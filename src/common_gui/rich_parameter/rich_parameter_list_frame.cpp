@@ -40,32 +40,36 @@ RichParameterListFrame::RichParameterListFrame(QWidget* parent) :
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameterList& curParSet,
-	const RichParameterList& defParSet,
+	const RichParameterList& parameterList,
+	const RichParameterList& defaultValuesList,
 	QWidget*                 p,
 	QWidget*                 gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curParSet, defParSet);
+	loadFrameContent(parameterList, defaultValuesList);
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameterList& curParSet,
+	const RichParameterList& parameterList,
 	QWidget*                 p,
 	QWidget*                 gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curParSet);
+	loadFrameContent(parameterList, parameterList);
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameter& curPar,
-	const RichParameter& defPar,
+	const RichParameter& parameter,
+	const RichParameter& defaultValue,
 	QWidget*             p,
 	QWidget*             gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curPar, defPar);
+	RichParameterList crpl;
+	crpl.addParam(parameter);
+	RichParameterList drpl;
+	drpl.addParam(defaultValue);
+	loadFrameContent(crpl, drpl);
 }
 
 RichParameterListFrame::~RichParameterListFrame()
@@ -195,23 +199,6 @@ void RichParameterListFrame::loadFrameContent(
 	QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 	glay->addItem(spacer, i++, 0);
 	setLayout(glay);
-}
-
-/* creates widgets for the standard parameters */
-void RichParameterListFrame::loadFrameContent(const RichParameterList& curParSet)
-{
-	loadFrameContent(curParSet, curParSet);
-}
-
-void RichParameterListFrame::loadFrameContent(
-	const RichParameter& curPar,
-	const RichParameter& defPar)
-{
-	RichParameterList crpl;
-	crpl.addParam(curPar);
-	RichParameterList drpl;
-	drpl.addParam(defPar);
-	loadFrameContent(crpl, drpl);
 }
 
 RichParameterWidget *RichParameterListFrame::createWidgetFromRichParameter(QWidget *parent, const RichParameter &pd, const Value &defaultValue)

@@ -88,10 +88,5 @@ bool RichParameterWidget::hasBeenChanged() const
 
 void RichParameterWidget::setParameterChanged()
 {
-	parameterValueChanged     = true;
-	QObject*                p = parent();
-	RichParameterListFrame* f = dynamic_cast<RichParameterListFrame*>(p);
-	if (f) {
-		emit f->parameterChanged();
-	}
+	parameterValueChanged = true;
 }

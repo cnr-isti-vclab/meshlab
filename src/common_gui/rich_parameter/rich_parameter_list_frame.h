@@ -52,11 +52,11 @@ public:
 
 	RichParameterListFrame(QWidget* parent);
 	RichParameterListFrame(
-		const RichParameterList& curParSet,
-		const RichParameterList& defParSet,
+		const RichParameterList& parameterList,
+		const RichParameterList& defaultValuesList,
 		QWidget*                 p,
 		QWidget*                 gla = 0);
-	RichParameterListFrame(const RichParameterList& curParSet, QWidget* p, QWidget* gla = 0);
+	RichParameterListFrame(const RichParameterList& parameterList, QWidget* p, QWidget* gla = 0);
 	RichParameterListFrame(
 		const RichParameter& curPar,
 		const RichParameter& defPar,
@@ -82,22 +82,20 @@ public:
 	iterator begin();
 	iterator end();
 
-signals:
-	void parameterChanged();
-
 public slots:
 	void toggleAdvancedParameters();
 
 private:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
-	void loadFrameContent(const RichParameterList& curParSet);
-
-	void loadFrameContent(const RichParameter& curPar, const RichParameter& defPar);
 
 	static RichParameterWidget* createWidgetFromRichParameter(
 		QWidget*             parent,
 		const RichParameter& pd,
 		const Value& defaultValue);
+
+	RichParameterList rpl; // a list containing all the parameters in the frame.
+	// the list does not contain updated values.
+	// it is updated just when someone asks a list containing the current values of the frame
 
 	std::map<QString, RichParameterWidget*> stdfieldwidgets;
 	bool                                    isHelpVisible;

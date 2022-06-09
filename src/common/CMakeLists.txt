@@ -41,6 +41,8 @@ else()
 endif()
 
 set(HEADERS
+	filter_history/filter.h
+	filter_history/filter_history.h
 	ml_document/helpers/mesh_document_state_data.h
 	ml_document/helpers/mesh_model_state_data.h
 	ml_document/base_types.h
@@ -114,6 +116,8 @@ set(HEADERS
 	mlexception.h)
 
 set(SOURCES
+	filter_history/filter.cpp
+	filter_history/filter_history.cpp
 	ml_document/helpers/mesh_document_state_data.cpp
 	ml_document/cmesh.cpp
 	ml_document/mesh_document.cpp
