@@ -89,4 +89,5 @@ bool RichParameterWidget::hasBeenChanged() const
 void RichParameterWidget::setParameterChanged()
 {
 	parameterValueChanged = true;
+	emit parameterChanged();
 }

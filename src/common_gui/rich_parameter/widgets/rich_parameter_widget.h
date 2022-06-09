@@ -60,6 +60,9 @@ public:
 
 	bool hasBeenChanged() const;
 
+signals:
+	void parameterChanged();
+
 protected slots:
 	void setParameterChanged();
 

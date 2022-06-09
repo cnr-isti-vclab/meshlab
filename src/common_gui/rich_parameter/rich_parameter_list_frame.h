@@ -82,6 +82,9 @@ public:
 	iterator begin();
 	iterator end();
 
+signals:
+	void parameterChanged();
+
 public slots:
 	void toggleAdvancedParameters();
 
@@ -89,7 +92,7 @@ private:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
 
 	static RichParameterWidget* createWidgetFromRichParameter(
-		QWidget*             parent,
+		RichParameterListFrame *parent,
 		const RichParameter& pd,
 		const Value& defaultValue);
 
