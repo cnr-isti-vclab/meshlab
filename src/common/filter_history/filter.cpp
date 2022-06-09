@@ -43,7 +43,13 @@ void Filter::setParameterValue(const std::string &parameter, const Value &value)
 	rp.setValue(value);
 }
 
-std::string Filter::pythonCall(std::string meshSetName) const
+/**
+ * @brief returns a string containing a pymeshlab python call of the filter with the current
+ * parameters set.
+ * @param meshSetName: the name of the MeshSet object.
+ * @return
+ */
+std::string Filter::pyMeshLabCall(std::string meshSetName) const
 {
 	bool first = true;
 	std::string call = meshSetName + "." + plugin->pythonFilterName(filter).toStdString() + "(";
@@ -58,6 +64,8 @@ std::string Filter::pythonCall(std::string meshSetName) const
 			else {
 				call += ", ";
 			}
+
+			call += p.pythonName().toStdString() + "=";
 		}
 	}
 	call += ")";

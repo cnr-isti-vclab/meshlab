@@ -76,6 +76,7 @@ public:
 
 	void setName(const QString& newName);
 	void setValue(const Value& ov, bool isDefault = false);
+	void setDefaultValue(bool isDefault = true);
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 

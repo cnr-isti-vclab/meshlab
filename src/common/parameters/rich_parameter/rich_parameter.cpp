@@ -32,6 +32,7 @@ RichParameter::RichParameter(const RichParameter& rp) :
 	fieldDesc(rp.fieldDesc),
 	tooltip(rp.tooltip),
 	advanced(rp.advanced),
+	defaultValue(rp.defaultValue),
 	pCategory(rp.pCategory)
 {
 }
@@ -53,6 +54,7 @@ RichParameter::RichParameter(
 	fieldDesc(desc),
 	tooltip(tltip),
 	advanced(isAdvanced),
+	defaultValue(true),
 	pCategory(category)
 {
 }
@@ -110,6 +112,11 @@ void RichParameter::setValue(const Value& ov, bool isDefault)
 	defaultValue = isDefault;
 }
 
+void RichParameter::setDefaultValue(bool isDefault)
+{
+	defaultValue = isDefault;
+}
+
 QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
 {
 	QDomElement parElem = doc.createElement("Param");
@@ -148,6 +155,9 @@ RichParameter& RichParameter::operator=(const RichParameter& rp)
 		pName = rp.pName;
 		fieldDesc = rp.fieldDesc;
 		tooltip = rp.tooltip;
+		advanced = rp.advanced;
+		defaultValue = rp.defaultValue;
+		pCategory = rp.pCategory;
 	}
 	return *this;
 }

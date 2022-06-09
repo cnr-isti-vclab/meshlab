@@ -49,6 +49,7 @@ class RichParameterListFrame : public QFrame
 	Q_OBJECT
 public:
 	typedef std::map<QString, RichParameterWidget*>::iterator iterator;
+	typedef std::map<QString, RichParameterWidget*>::const_iterator const_iterator;
 
 	RichParameterListFrame(QWidget* parent);
 	RichParameterListFrame(
@@ -79,8 +80,12 @@ public:
 
 	unsigned int size() const;
 
+	RichParameterList currentRichParameterList() const;
+
 	iterator begin();
 	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
 
 signals:
 	void parameterChanged();
@@ -96,7 +101,7 @@ private:
 		const RichParameter& pd,
 		const Value& defaultValue);
 
-	RichParameterList rpl; // a list containing all the parameters in the frame.
+	mutable RichParameterList rpl; // a list containing all the parameters in the frame.
 	// the list does not contain updated values.
 	// it is updated just when someone asks a list containing the current values of the frame
 

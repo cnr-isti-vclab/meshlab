@@ -335,6 +335,13 @@ void RichParameterList::setValue(const QString& name,const Value& newval)
 	getParameterByName(name).setValue(newval);
 }
 
+void RichParameterList::setAllValuesAsDefault()
+{
+	for (auto& p : paramList) {
+		p->setDefaultValue();
+	}
+}
+
 /**
  * @brief adds a RichParameter to the list.
  * @return a reference to the added parameter

@@ -271,11 +271,11 @@ void FilterDockDialog::on_copyToClipBoardPushButton_clicked()
 	RichParameter* s;
 	RichParameterAdapter::create(doc.firstChild().toElement(), s);
 
-	RichParameterList rpl;// todo: get the RichParameterList
+	RichParameterList rpl = ui->parameterFrame->currentRichParameterList();
 
 	Filter f(plugin, filter, rpl);
 
 	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(QString::fromStdString(f.pythonCall(s->value().getString().toStdString())));
+	clipboard->setText(QString::fromStdString(f.pyMeshLabCall(s->value().getString().toStdString())));
 }
 

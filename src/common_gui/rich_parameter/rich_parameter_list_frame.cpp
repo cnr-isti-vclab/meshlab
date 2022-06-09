@@ -121,12 +121,32 @@ unsigned int RichParameterListFrame::size() const
 	return stdfieldwidgets.size();
 }
 
+RichParameterList RichParameterListFrame::currentRichParameterList() const
+{
+	for (const auto& w : *this) {
+		if (w.second->hasBeenChanged()) {
+			rpl.getParameterByName(w.first).setValue(*w.second->getWidgetValue());
+		}
+	}
+	return rpl;
+}
+
 RichParameterListFrame::iterator RichParameterListFrame::begin()
 {
 	return stdfieldwidgets.begin();
 }
 
 RichParameterListFrame::iterator RichParameterListFrame::end()
+{
+	return stdfieldwidgets.end();
+}
+
+RichParameterListFrame::const_iterator RichParameterListFrame::begin() const
+{
+	return stdfieldwidgets.begin();
+}
+
+RichParameterListFrame::const_iterator RichParameterListFrame::end() const
 {
 	return stdfieldwidgets.end();
 }
@@ -199,6 +219,8 @@ void RichParameterListFrame::loadFrameContent(
 	QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 	glay->addItem(spacer, i++, 0);
 	setLayout(glay);
+	rpl = curParSet;
+	rpl.setAllValuesAsDefault();
 }
 
 RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(

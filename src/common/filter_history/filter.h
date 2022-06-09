@@ -38,7 +38,7 @@ public:
 
 	void setParameterValue(const std::string& parameter, const Value& value);
 
-	std::string pythonCall(std::string meshSetName = "ms") const;
+	std::string pyMeshLabCall(std::string meshSetName = "ms") const;
 
 private:
 	const FilterPlugin* plugin;
