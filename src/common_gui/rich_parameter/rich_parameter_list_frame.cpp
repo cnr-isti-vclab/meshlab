@@ -103,6 +103,7 @@ void RichParameterListFrame::resetValues()
 {
 	for (auto& p : stdfieldwidgets) {
 		p.second->resetWidgetToDefaultValue();
+		rpl.getParameterByName(p.first).setValue(*p.second->getWidgetValue(), true);
 	}
 }
 
