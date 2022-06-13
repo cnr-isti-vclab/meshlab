@@ -58,6 +58,7 @@ Matrix44Widget::Matrix44Widget(
 			SIGNAL(textChanged(const QString&)),
 			this,
 			SLOT(invalidateMatrix(const QString&)));
+		connect(coordSB[i], SIGNAL(editingFinished()), this, SLOT(setParameterChanged()));
 	}
 	this->setValue(paramName, param.value().getMatrix44());
 

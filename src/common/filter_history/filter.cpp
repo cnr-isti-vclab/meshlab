@@ -99,7 +99,7 @@ std::string Filter::pyMeshLabCall(std::string meshSetName) const
 				else if (
 					p.isOfType<RichString>() || p.isOfType<RichFileOpen>() ||
 					p.isOfType<RichFileSave>()) {
-					call += p.value().getString().toStdString();
+					call += "'" + p.value().getString().toStdString() + "'";
 				}
 				else if (p.isOfType<RichMatrix44>()) {
 					Matrix44m m = p.value().getMatrix44();
