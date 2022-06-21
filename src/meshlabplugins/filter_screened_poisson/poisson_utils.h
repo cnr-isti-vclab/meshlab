@@ -175,7 +175,7 @@ public:
 		ItersVal=8;
 		CSSolverAccuracyVal=1e-3f;
 
-		VerboseFlag=true;
+		VerboseFlag=false;
 		ThreadsVal=omp_get_num_procs();
 		LinearFitFlag = false;
 		LowResIterMultiplierVal=1.f;
