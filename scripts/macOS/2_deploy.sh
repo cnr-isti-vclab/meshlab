@@ -34,11 +34,12 @@ case $i in
 esac
 done
 
+ARGUMENTS=""
+
+for plugin in $INSTALL_PATH/$APPNAME/Contents/PlugIns/*.so
+do
+    ARGUMENTS="${ARGUMENTS} -executable=${plugin}"
+done
+
 ${QT_DIR}macdeployqt $INSTALL_PATH/$APPNAME \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libedit_align.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_mesh_booleans.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so \
-    -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libio_e57.so
+    $ARGUMENTS
