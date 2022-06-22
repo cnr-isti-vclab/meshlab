@@ -201,7 +201,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 #		meshlabplugins/decorate_shadow
 
 		# Edit Plugins
-#		meshlabplugins/edit_sample
+		meshlabplugins/edit_sample
 #		meshlabplugins/edit_align
 #		meshlabplugins/edit_manipulators
 #		meshlabplugins/edit_measure
