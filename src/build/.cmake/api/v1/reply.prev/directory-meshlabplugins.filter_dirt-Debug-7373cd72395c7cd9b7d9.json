@@ -1,0 +1,53 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install",
+			"add_meshlab_plugin"
+		],
+		"files" : 
+		[
+			"cmake/meshlab_tools.cmake",
+			"meshlabplugins/filter_dirt/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 9,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 27,
+				"parent" : 1
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 2,
+			"component" : "Plugins",
+			"destination" : "plugins",
+			"paths" : 
+			[
+				"distrib/plugins/Debug/filter_dirt.dll"
+			],
+			"targetId" : "filter_dirt::@73b103062914a22f9e46",
+			"targetIndex" : 27,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/filter_dirt",
+		"source" : "meshlabplugins/filter_dirt"
+	}
+}

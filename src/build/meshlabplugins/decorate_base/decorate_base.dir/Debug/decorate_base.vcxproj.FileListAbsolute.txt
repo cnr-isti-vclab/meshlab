@@ -1,0 +1,1 @@
+C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\decorate_base\decorate_base.dir\Debug\decorate_base.vcxproj.CopyComplete

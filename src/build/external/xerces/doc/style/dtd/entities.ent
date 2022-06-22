@@ -1,0 +1,39 @@
+<?xml encoding="ISO-8859-1"?>
+
+<!ENTITY XercesCProjectName     "Xerces">                       <!-- projectname -->
+<!ENTITY XercesCFullName        "Xerces-C++ XML Parser">        <!-- fullproductname -->
+<!ENTITY XercesCName            "Xerces-C++">                   <!-- productname -->
+<!ENTITY XercesCLatest          "3.2.3">                    <!-- versionnumber -->
+<!ENTITY XercesCDevelEmailAddress "c-dev@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCDevelSAddress   "c-dev-subscribe@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCDevelUAddress   "c-dev-unsubscribe@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCDevelHAddress   "c-dev-help@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCUserEmailAddress "c-users@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCUserSAddress    "c-users-subscribe@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCUserUAddress    "c-users-unsubscribe@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY XercesCUserHAddress    "c-users-help@xerces.apache.org"> <!-- emailaddress -->
+<!ENTITY JiraURL  "http&colon;//issues.apache.org/jira/browse/XERCESC "> <!-- url -->
+<!ENTITY XercesDistDir        "xerces.apache.org/xerces-c/download.cgi"> <!-- download directory -->
+
+<!ENTITY colon "&#58;">
+<!ENTITY percent "&#37;">
+
+<!-- The following entities are used in project documentation -->
+
+<!ENTITY HelpURI "http://xerces.apache.org/xerces-c/feedback.html"> <!-- help and feedback -->
+<!ENTITY BugURI  "http://xerces.apache.org/xerces-c/bug-report.html"> <!-- bug reporting -->
+<!ENTITY MailURI "http://xerces.apache.org/xerces-c/mailing-lists.html"> <!-- mailing lists -->
+<!ENTITY RepURI "http://xerces.apache.org/xerces-c/source-repository.html"> <!-- mailing lists -->
+
+<!ENTITY XercesC3Series          "3">       <!-- release series -->
+<!ENTITY XercesC3Version         "3.2.3">                    <!-- 3-series version number -->
+<!ENTITY XercesC3UVersion        "3_2_3"> <!-- 3-series version number with underscores-->
+<!ENTITY XercesC3InstallDir      "xerces-c-3.2.3">           <!-- installdirname -->
+<!ENTITY XercesC3SrcInstallDir   "xerces-c-3.2.3">           <!-- sourcedirectory -->
+<!ENTITY XercesC3ToolsInstallDir "xerces-c-tools-3.2.3">     <!-- sourcedirectory -->
+<!ENTITY XercesC3WindowsLib      "xerces-c_3"> <!-- windowslibname -->
+<!ENTITY XercesC3WindowsDLL      "xerces-c_3_2"> <!-- windowsDLLname -->
+<!ENTITY XercesC3UnixSoVersion   "3.2">        <!-- unixlibversion -->
+<!ENTITY XercesC3UnixLib         "libxerces-c">                  <!-- unixlibname -->
+<!ENTITY XercesC3Namespace       "xercesc">                      <!-- C++ namespace name -->
+<!ENTITY XercesC3NSVersion       "xercesc_3_2"> <!-- C++ namespace name with Version -->

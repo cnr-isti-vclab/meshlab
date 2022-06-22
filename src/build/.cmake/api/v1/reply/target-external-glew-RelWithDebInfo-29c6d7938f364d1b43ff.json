@@ -1,0 +1,313 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "distrib/RelWithDebInfo/external-glew.dll"
+		},
+		{
+			"path" : "external/RelWithDebInfo/external-glew.lib"
+		},
+		{
+			"path" : "distrib/RelWithDebInfo/external-glew.pdb"
+		}
+	],
+	"backtrace" : 3,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"include",
+			"install",
+			"target_link_libraries",
+			"add_compile_options",
+			"add_definitions",
+			"INCLUDE_DIRECTORIES",
+			"target_include_directories"
+		],
+		"files" : 
+		[
+			"external/glew.cmake",
+			"external/CMakeLists.txt",
+			"cmake/meshlab_global_settings.cmake",
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 27,
+				"parent" : 0
+			},
+			{
+				"file" : 0,
+				"parent" : 1
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 30,
+				"parent" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 48,
+				"parent" : 2
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 33,
+				"parent" : 2
+			},
+			{
+				"file" : 3
+			},
+			{
+				"command" : 1,
+				"file" : 3,
+				"line" : 21,
+				"parent" : 6
+			},
+			{
+				"file" : 2,
+				"parent" : 7
+			},
+			{
+				"command" : 4,
+				"file" : 2,
+				"line" : 32,
+				"parent" : 8
+			},
+			{
+				"command" : 5,
+				"file" : 2,
+				"line" : 29,
+				"parent" : 8
+			},
+			{
+				"command" : 5,
+				"file" : 2,
+				"line" : 31,
+				"parent" : 8
+			},
+			{
+				"command" : 6,
+				"file" : 3,
+				"line" : 39,
+				"parent" : 6
+			},
+			{
+				"command" : 7,
+				"file" : 0,
+				"line" : 31,
+				"parent" : 2
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc -DQT_QML_DEBUG /MD /Zi /O2 /Ob1 /DNDEBUG -DQT_QML_DEBUG"
+				},
+				{
+					"backtrace" : 9,
+					"fragment" : "/bigobj"
+				},
+				{
+					"fragment" : "-std:c++14"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 10,
+					"define" : "NOMINMAX"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "_CRT_SECURE_NO_DEPRECATE"
+				},
+				{
+					"define" : "external_glew_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/external/external-glew_autogen/include_RelWithDebInfo"
+				},
+				{
+					"backtrace" : 12,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/embree3_x64-windows-release/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/glew-2.1.0/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					3
+				],
+				"standard" : "14"
+			},
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /Zi /O2 /Ob1 /DNDEBUG"
+				},
+				{
+					"backtrace" : 9,
+					"fragment" : "/bigobj"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 10,
+					"define" : "NOMINMAX"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "_CRT_SECURE_NO_DEPRECATE"
+				},
+				{
+					"define" : "external_glew_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/external/external-glew_autogen/include_RelWithDebInfo"
+				},
+				{
+					"backtrace" : 12,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/embree3_x64-windows-release/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/glew-2.1.0/include"
+				}
+			],
+			"language" : "C",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					3
+				],
+				"standard" : "99"
+			},
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "External"
+	},
+	"id" : "external-glew::@89556154f30252d09d22",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 4,
+				"path" : "."
+			},
+			{
+				"backtrace" : 4,
+				"path" : "."
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "C:/Program Files (x86)/MeshLab"
+		}
+	},
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "opengl32.lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "external-glew",
+	"nameOnDisk" : "external-glew.dll",
+	"paths" : 
+	{
+		"build" : "external",
+		"source" : "external"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"compileGroupIndex" : 0,
+			"isGenerated" : true,
+			"path" : "build/external/external-glew_autogen/mocs_compilation_RelWithDebInfo.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"compileGroupIndex" : 1,
+			"path" : "external/glew-2.1.0/src/glew.c",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}

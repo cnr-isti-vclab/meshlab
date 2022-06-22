@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/filter_io_nxs",
+		"source" : "meshlabplugins/filter_io_nxs"
+	}
+}

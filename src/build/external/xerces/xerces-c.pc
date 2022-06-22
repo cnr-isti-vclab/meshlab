@@ -1,0 +1,11 @@
+prefix=C:/Program Files (x86)/MeshLab
+exec_prefix=C:/Program Files (x86)/MeshLab
+libdir=C:/Program Files (x86)/MeshLab/lib
+includedir=C:/Program Files (x86)/MeshLab/include
+
+Name: Xerces-C++
+Description: Validating XML parser library for C++
+Version: 3.2.3
+Libs: -LC:/Program Files (x86)/MeshLab/lib -lxerces-c
+Libs.private: 
+Cflags: -IC:/Program Files (x86)/MeshLab/include

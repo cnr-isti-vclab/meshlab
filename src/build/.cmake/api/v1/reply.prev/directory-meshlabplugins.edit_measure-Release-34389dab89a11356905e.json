@@ -1,0 +1,53 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install",
+			"add_meshlab_plugin"
+		],
+		"files" : 
+		[
+			"cmake/meshlab_tools.cmake",
+			"meshlabplugins/edit_measure/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 12,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 27,
+				"parent" : 1
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 2,
+			"component" : "Plugins",
+			"destination" : "plugins",
+			"paths" : 
+			[
+				"distrib/plugins/Release/edit_measure.dll"
+			],
+			"targetId" : "edit_measure::@df72f8dd8daedd6f3b85",
+			"targetIndex" : 10,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/edit_measure",
+		"source" : "meshlabplugins/edit_measure"
+	}
+}

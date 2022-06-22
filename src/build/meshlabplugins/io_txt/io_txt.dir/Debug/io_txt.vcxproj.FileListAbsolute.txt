@@ -1,0 +1,1 @@
+C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\io_txt\io_txt.dir\Debug\io_txt.vcxproj.CopyComplete

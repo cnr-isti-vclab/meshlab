@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/io_u3d",
+		"source" : "meshlabplugins/io_u3d"
+	}
+}

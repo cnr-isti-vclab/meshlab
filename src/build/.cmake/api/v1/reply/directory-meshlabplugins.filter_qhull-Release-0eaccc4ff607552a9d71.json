@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/filter_qhull",
+		"source" : "meshlabplugins/filter_qhull"
+	}
+}

@@ -1,0 +1,10 @@
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\BUILD\CMAKEFILES\DB584FC49937CC748AB14D66CA51FF98\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/super/Desktop/devel-meshlab/meshlab/src -BC:/Users/super/Desktop/devel-meshlab/meshlab/src/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/MeshLab.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

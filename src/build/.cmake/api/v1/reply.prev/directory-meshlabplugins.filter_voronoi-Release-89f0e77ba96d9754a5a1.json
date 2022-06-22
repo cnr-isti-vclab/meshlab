@@ -1,0 +1,53 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install",
+			"add_meshlab_plugin"
+		],
+		"files" : 
+		[
+			"cmake/meshlab_tools.cmake",
+			"meshlabplugins/filter_voronoi/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 9,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 27,
+				"parent" : 1
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 2,
+			"component" : "Plugins",
+			"destination" : "plugins",
+			"paths" : 
+			[
+				"distrib/plugins/Release/filter_voronoi.dll"
+			],
+			"targetId" : "filter_voronoi::@b897ef744c3e59367f88",
+			"targetIndex" : 50,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "meshlabplugins/filter_voronoi",
+		"source" : "meshlabplugins/filter_voronoi"
+	}
+}

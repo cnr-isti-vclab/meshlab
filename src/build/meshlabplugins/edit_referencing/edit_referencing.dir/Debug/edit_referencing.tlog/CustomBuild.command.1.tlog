@@ -1,0 +1,42 @@
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\BUILD\CMAKEFILES\8350F137EE63827E5D77BF1AFBD5495F\AUTOUIC_(CONFIG).STAMP.RULE
+setlocal
+cd C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\edit_referencing
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\BUILD\CMAKEFILES\F9CE1B0E4820250FCBC83B0B62D35AB9\QRC_EDIT_REFERENCING.CPP.RULE
+setlocal
+cd C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\edit_referencing
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_referencing/CMakeFiles/edit_referencing_autogen.dir/AutoRcc_edit_referencing_EWIEGA46WW_Info.json Debug
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_referencing/CMakeFiles/edit_referencing_autogen.dir/AutoRcc_edit_referencing_EWIEGA46WW_Info.json Release
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_referencing/CMakeFiles/edit_referencing_autogen.dir/AutoRcc_edit_referencing_EWIEGA46WW_Info.json MinSizeRel
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_referencing/CMakeFiles/edit_referencing_autogen.dir/AutoRcc_edit_referencing_EWIEGA46WW_Info.json RelWithDebInfo
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\MESHLABPLUGINS\EDIT_REFERENCING\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/super/Desktop/devel-meshlab/meshlab/src -BC:/Users/super/Desktop/devel-meshlab/meshlab/src/build --check-stamp-file C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_referencing/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

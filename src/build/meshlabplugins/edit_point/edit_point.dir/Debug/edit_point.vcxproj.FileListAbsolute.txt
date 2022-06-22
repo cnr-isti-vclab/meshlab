@@ -1,0 +1,1 @@
+C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\edit_point\edit_point.dir\Debug\edit_point.vcxproj.CopyComplete

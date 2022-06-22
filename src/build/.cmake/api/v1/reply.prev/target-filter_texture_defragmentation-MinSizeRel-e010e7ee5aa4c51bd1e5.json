@@ -1,0 +1,927 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "distrib/plugins/MinSizeRel/filter_texture_defragmentation.dll"
+		},
+		{
+			"path" : "distrib/plugins/MinSizeRel/filter_texture_defragmentation.pdb"
+		}
+	],
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"add_meshlab_plugin",
+			"install",
+			"target_link_libraries",
+			"set_property",
+			"_populate_OpenGL_target_properties",
+			"find_package",
+			"set_target_properties",
+			"add_compile_options",
+			"include",
+			"add_definitions",
+			"target_compile_definitions",
+			"INCLUDE_DIRECTORIES",
+			"target_include_directories"
+		],
+		"files" : 
+		[
+			"cmake/meshlab_tools.cmake",
+			"meshlabplugins/filter_texture_defragmentation/CMakeLists.txt",
+			"common/CMakeLists.txt",
+			"E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/share/cmake/Qt5OpenGL/Qt5OpenGLConfig.cmake",
+			"E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/share/cmake/Qt5/Qt5Config.cmake",
+			"CMakeLists.txt",
+			"C:/Program Files/CMake/share/cmake-3.23/Modules/FindOpenGL.cmake",
+			"cmake/meshlab_global_settings.cmake"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 50,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 14,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 27,
+				"parent" : 1
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 17,
+				"parent" : 1
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 52,
+				"parent" : 0
+			},
+			{
+				"file" : 2
+			},
+			{
+				"command" : 3,
+				"file" : 2,
+				"line" : 197,
+				"parent" : 6
+			},
+			{
+				"file" : 5
+			},
+			{
+				"command" : 6,
+				"file" : 5,
+				"line" : 27,
+				"parent" : 8
+			},
+			{
+				"file" : 4,
+				"parent" : 9
+			},
+			{
+				"command" : 6,
+				"file" : 4,
+				"line" : 28,
+				"parent" : 10
+			},
+			{
+				"file" : 3,
+				"parent" : 11
+			},
+			{
+				"command" : 5,
+				"file" : 3,
+				"line" : 216,
+				"parent" : 12
+			},
+			{
+				"command" : 4,
+				"file" : 3,
+				"line" : 48,
+				"parent" : 13
+			},
+			{
+				"command" : 6,
+				"file" : 5,
+				"line" : 25,
+				"parent" : 8
+			},
+			{
+				"file" : 6,
+				"parent" : 15
+			},
+			{
+				"command" : 7,
+				"file" : 6,
+				"line" : 559,
+				"parent" : 16
+			},
+			{
+				"command" : 9,
+				"file" : 5,
+				"line" : 21,
+				"parent" : 8
+			},
+			{
+				"file" : 7,
+				"parent" : 18
+			},
+			{
+				"command" : 8,
+				"file" : 7,
+				"line" : 32,
+				"parent" : 19
+			},
+			{
+				"command" : 10,
+				"file" : 7,
+				"line" : 29,
+				"parent" : 19
+			},
+			{
+				"command" : 10,
+				"file" : 7,
+				"line" : 31,
+				"parent" : 19
+			},
+			{
+				"command" : 11,
+				"file" : 1,
+				"line" : 55,
+				"parent" : 0
+			},
+			{
+				"command" : 12,
+				"file" : 5,
+				"line" : 39,
+				"parent" : 8
+			},
+			{
+				"command" : 13,
+				"file" : 0,
+				"line" : 16,
+				"parent" : 1
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O1 /Ob1 /DNDEBUG"
+				},
+				{
+					"backtrace" : 20,
+					"fragment" : "/bigobj"
+				},
+				{
+					"fragment" : "-std:c++14"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 4,
+					"define" : "MESHLAB_SCALAR=float"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "MESHLAB_VERSION=2022.02"
+				},
+				{
+					"backtrace" : 21,
+					"define" : "NOMINMAX"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_CORE_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_GUI_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_NETWORK_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_NO_DEBUG"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_OPENGL_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_WIDGETS_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_XML_LIB"
+				},
+				{
+					"backtrace" : 22,
+					"define" : "_CRT_SECURE_NO_DEPRECATE"
+				},
+				{
+					"backtrace" : 23,
+					"define" : "_USE_MATH_DEFINES"
+				},
+				{
+					"define" : "filter_texture_defragmentation_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/filter_texture_defragmentation/filter_texture_defragmentation_autogen/include_MinSizeRel"
+				},
+				{
+					"backtrace" : 24,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/embree3_x64-windows-release/include"
+				},
+				{
+					"backtrace" : 25,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/meshlabplugins/filter_texture_defragmentation"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/common/.."
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/vcglib"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/vcglib/eigenlib"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/easyexif"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtCore"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/tools/qt5/mkspecs/win32-msvc"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtOpenGL"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtWidgets"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtGui"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtXml"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtNetwork"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/glew-2.1.0/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					4
+				],
+				"standard" : "14"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				20
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /O1 /Ob1 /DNDEBUG"
+				},
+				{
+					"backtrace" : 20,
+					"fragment" : "/bigobj"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 4,
+					"define" : "MESHLAB_SCALAR=float"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "MESHLAB_VERSION=2022.02"
+				},
+				{
+					"backtrace" : 21,
+					"define" : "NOMINMAX"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_CORE_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_GUI_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_NETWORK_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_NO_DEBUG"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_OPENGL_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_WIDGETS_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "QT_XML_LIB"
+				},
+				{
+					"backtrace" : 22,
+					"define" : "_CRT_SECURE_NO_DEPRECATE"
+				},
+				{
+					"backtrace" : 23,
+					"define" : "_USE_MATH_DEFINES"
+				},
+				{
+					"define" : "filter_texture_defragmentation_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/filter_texture_defragmentation/filter_texture_defragmentation_autogen/include_MinSizeRel"
+				},
+				{
+					"backtrace" : 24,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/embree3_x64-windows-release/include"
+				},
+				{
+					"backtrace" : 25,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/meshlabplugins/filter_texture_defragmentation"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/common/.."
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/vcglib"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/vcglib/eigenlib"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/easyexif"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtCore"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/tools/qt5/mkspecs/win32-msvc"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtOpenGL"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtWidgets"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtGui"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtXml"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "E:/vcpkg/vcpkg-master/vcpkg-master/packages/qt5-base_x64-windows/include/qt5/QtNetwork"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "C:/Users/super/Desktop/devel-meshlab/meshlab/src/external/glew-2.1.0/include"
+				}
+			],
+			"language" : "C",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					2
+				],
+				"standard" : "99"
+			},
+			"sourceIndexes" : 
+			[
+				19
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 4,
+			"id" : "external-exif::@89556154f30252d09d22"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "meshlab-common::@bfc844598bd03e848b3c"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "external-glew::@89556154f30252d09d22"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "Plugins"
+	},
+	"id" : "filter_texture_defragmentation::@7286512c86e45c2d3900",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 3,
+				"path" : "plugins"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "C:/Program Files (x86)/MeshLab"
+		}
+	},
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "..\\..\\distrib\\MinSizeRel\\meshlab-common.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "glu32.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5OpenGL.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5Widgets.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 14,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5Gui.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5Xml.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5Network.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "E:\\vcpkg\\vcpkg-master\\vcpkg-master\\packages\\qt5-base_x64-windows\\lib\\Qt5Core.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "..\\..\\external\\MinSizeRel\\external-glew.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "..\\..\\external\\MinSizeRel\\external-exif.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 17,
+				"fragment" : "opengl32.lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "filter_texture_defragmentation",
+	"nameOnDisk" : "filter_texture_defragmentation.dll",
+	"paths" : 
+	{
+		"build" : "meshlabplugins/filter_texture_defragmentation",
+		"source" : "meshlabplugins/filter_texture_defragmentation"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"compileGroupIndex" : 0,
+			"isGenerated" : true,
+			"path" : "build/meshlabplugins/filter_texture_defragmentation/filter_texture_defragmentation_autogen/mocs_compilation_MinSizeRel.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/filter_texture_defragmentation.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/intersection.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh_attribute.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/packing.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/seam_remover.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/seams.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_optimization.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh_graph.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/gl_utils.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_rendering.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/logging.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/matching.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/arap.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/shell.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_object.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "vcglib/wrap/ply/plylib.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "vcglib/wrap/openfbx/src/ofbx.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 1,
+			"path" : "vcglib/wrap/openfbx/src/miniz.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "vcglib/wrap/qt/outline2_rasterizer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/filter_texture_defragmentation.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/intersection.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/packing.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/seam_remover.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/seams.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/timer.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/types.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh_graph.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_rendering.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/math_utils.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_optimization.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/pushpull.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/gl_utils.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/mesh_attribute.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/logging.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/utils.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/matching.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/arap.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/shell.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "meshlabplugins/filter_texture_defragmentation/TextureDefragmentation/src/texture_object.h",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "MODULE_LIBRARY"
+}

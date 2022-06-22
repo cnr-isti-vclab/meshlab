@@ -1,0 +1,30 @@
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\BUILD\CMAKEFILES\B180DF8FAA1DE2140F39ADD7A5B764E7\QRC_EDIT_MANIPULATORS.CPP.RULE
+setlocal
+cd C:\Users\super\Desktop\devel-meshlab\meshlab\src\build\meshlabplugins\edit_manipulators
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_manipulators/CMakeFiles/edit_manipulators_autogen.dir/AutoRcc_edit_manipulators_EWIEGA46WW_Info.json Debug
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_manipulators/CMakeFiles/edit_manipulators_autogen.dir/AutoRcc_edit_manipulators_EWIEGA46WW_Info.json Release
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_manipulators/CMakeFiles/edit_manipulators_autogen.dir/AutoRcc_edit_manipulators_EWIEGA46WW_Info.json MinSizeRel
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autorcc C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_manipulators/CMakeFiles/edit_manipulators_autogen.dir/AutoRcc_edit_manipulators_EWIEGA46WW_Info.json RelWithDebInfo
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\SUPER\DESKTOP\DEVEL-MESHLAB\MESHLAB\SRC\MESHLABPLUGINS\EDIT_MANIPULATORS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/super/Desktop/devel-meshlab/meshlab/src -BC:/Users/super/Desktop/devel-meshlab/meshlab/src/build --check-stamp-file C:/Users/super/Desktop/devel-meshlab/meshlab/src/build/meshlabplugins/edit_manipulators/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
