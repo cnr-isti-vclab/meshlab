@@ -14,6 +14,7 @@ SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 INSTALL_PATH=$SCRIPTS_PATH/../../install
 QT_DIR=""
+APPNAME="meshlab.app"
 
 #checking for parameters
 for i in "$@"
