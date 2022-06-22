@@ -24,7 +24,6 @@
 #include "glarea.h"
 #include <QMouseEvent>
 #include <QMessageBox>
-#include "mainwindow.h"
 #include <common/mlapplication.h>
 
 using namespace vcg;
@@ -34,7 +33,7 @@ Splitter::Splitter(Qt::Orientation orientation, QWidget *parent):QSplitter(orien
 
 QSplitterHandle *Splitter::createHandle()
 {
-	return new SplitterHandle(orientation(), this);
+	return new QSplitterHandle(orientation(), this);
 }
 
 MultiViewer_Container *Splitter::getRootContainer()
@@ -47,19 +46,6 @@ MultiViewer_Container *Splitter::getRootContainer()
 		mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
 	}
 	return mvc;
-}
-
-SplitterHandle::SplitterHandle(Qt::Orientation orientation, QSplitter *parent):QSplitterHandle(orientation, parent){}
-
-void SplitterHandle::mousePressEvent ( QMouseEvent * e )
-{
-	QSplitterHandle::mousePressEvent(e);
-
-	if(e->button()== Qt::RightButton)
-	{
-		MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-		if (window) window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
-	}
 }
 
 MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo, bool highprec,size_t perbatchprimitives, size_t minfacespersmoothrendering,QWidget *parent)
@@ -106,9 +92,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 {
 	
     MLRenderingData dt;
-    MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-    if ((window != NULL) && (scenecontext != NULL))
-    {
+    if (scenecontext != nullptr) {
         //window->defaultPerViewRenderingData(dt);
         scenecontext->addView(viewer->context(),dt);
     }
