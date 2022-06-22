@@ -23,18 +23,12 @@
 
 #include "position_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 PositionWidget::PositionWidget(
 	QWidget*            p,
-	const RichPosition& rpf,
+	const RichPosition& param,
 	const Point3Value&  defaultValue,
 	QWidget*            gla) :
-		Point3Widget(p, rpf, defaultValue, gla)
+		Point3Widget(p, param, defaultValue, gla)
 {
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
@@ -58,10 +52,7 @@ PositionWidget::PositionWidget(
 			this,
 			SLOT(setValue(QString, Point3m)));
 		connect(
-			gla,
-			SIGNAL(transmitShot(QString, Shotm)),
-			this,
-			SLOT(setShotValue(QString, Shotm)));
+			gla, SIGNAL(transmitShot(QString, Shotm)), this, SLOT(setShotValue(QString, Shotm)));
 		connect(
 			gla,
 			SIGNAL(transmitTrackballPos(QString, Point3m)),

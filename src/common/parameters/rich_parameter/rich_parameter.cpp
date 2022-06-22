@@ -32,19 +32,14 @@ RichParameter::RichParameter(const RichParameter& rp) :
 	fieldDesc(rp.fieldDesc),
 	tooltip(rp.tooltip),
 	advanced(rp.advanced),
+	defaultValue(rp.defaultValue),
 	pCategory(rp.pCategory)
 {
 }
 
-RichParameter::RichParameter(RichParameter&& rp) :
-	pName(std::move(rp.pName)),
-	fieldDesc(std::move(rp.fieldDesc)),
-	tooltip(std::move(rp.tooltip)),
-	pCategory(std::move(rp.pCategory))
+RichParameter::RichParameter(RichParameter&& rp)
 {
-	val = rp.val;
-	rp.val = nullptr;
-	advanced = rp.advanced;
+	swap(rp);
 }
 
 RichParameter::RichParameter(
@@ -59,6 +54,7 @@ RichParameter::RichParameter(
 	fieldDesc(desc),
 	tooltip(tltip),
 	advanced(isAdvanced),
+	defaultValue(true),
 	pCategory(category)
 {
 }
@@ -93,6 +89,11 @@ bool RichParameter::isAdvanced() const
 	return advanced;
 }
 
+bool RichParameter::isValueDefault() const
+{
+	return defaultValue;
+}
+
 const QString& RichParameter::category() const
 {
 	return pCategory;
@@ -103,11 +104,17 @@ void RichParameter::setName(const QString& newName)
 	pName = newName;
 }
 
-void RichParameter::setValue(const Value& ov)
+void RichParameter::setValue(const Value& ov, bool isDefault)
 {
 	assert(val->typeName() == ov.typeName());
 	delete val;
 	val = ov.clone();
+	defaultValue = isDefault;
+}
+
+void RichParameter::setDefaultValue(bool isDefault)
+{
+	defaultValue = isDefault;
 }
 
 QDomElement RichParameter::fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip) const
@@ -148,19 +155,32 @@ RichParameter& RichParameter::operator=(const RichParameter& rp)
 		pName = rp.pName;
 		fieldDesc = rp.fieldDesc;
 		tooltip = rp.tooltip;
+		advanced = rp.advanced;
+		defaultValue = rp.defaultValue;
+		pCategory = rp.pCategory;
 	}
 	return *this;
 }
 
 RichParameter& RichParameter::operator=(RichParameter&& rp)
 {
-	assert(&rp != this);
-	val = rp.val;
-	rp.val = nullptr;
-	pName = std::move(rp.pName);
-	fieldDesc = std::move(rp.fieldDesc);
-	tooltip = std::move(rp.tooltip);
+	::swap(*this, rp);
 	return *this;
 }
 
+void RichParameter::swap(RichParameter &rp)
+{
+	::swap(*this, rp);
+}
 
+void swap(RichParameter &rp1, RichParameter &rp2)
+{
+	using std::swap;
+	swap(rp1.pName, rp2.pName);
+	swap(rp1.val, rp2.val);
+	swap(rp1.fieldDesc, rp2.fieldDesc);
+	swap(rp1.tooltip, rp2.tooltip);
+	swap(rp1.advanced, rp2.advanced);
+	swap(rp1.defaultValue, rp2.defaultValue);
+	swap(rp1.pCategory, rp2.pCategory);
+}

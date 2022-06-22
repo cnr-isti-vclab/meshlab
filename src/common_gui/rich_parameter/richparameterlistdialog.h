@@ -26,8 +26,8 @@
 
 #include <QDialog>
 
-#include "../../common/parameters/rich_parameter_list.h"
-#include "richparameterlistframe.h"
+#include <common/parameters/rich_parameter_list.h>
+#include "rich_parameter_list_frame.h"
 
 /**
  * @brief This class provide a modal dialog box for asking a generic parameter list

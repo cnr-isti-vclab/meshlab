@@ -30,14 +30,12 @@ class ColorWidget : public RichParameterWidget
 {
 	Q_OBJECT
 public:
-	ColorWidget(QWidget* p, const RichColor& newColor, const ColorValue& defaultValue);
+	ColorWidget(QWidget* p, const RichColor& param, const ColorValue& defaultValue);
 	~ColorWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
-	void initWidgetValue();
+	void                   setWidgetValue(const Value& nv);
 
 private:
 	void updateColorInfo(const ColorValue& newColor);

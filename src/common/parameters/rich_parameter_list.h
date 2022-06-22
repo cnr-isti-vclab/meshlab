@@ -123,6 +123,7 @@ public:
 	unsigned int numberAdvancedParameters() const;
 
 	void setValue(const QString& name, const Value& val);
+	void setAllValuesAsDefault();
 	RichParameter& addParam(const RichParameter& pd);
 	void join(const RichParameterList& rps);
 

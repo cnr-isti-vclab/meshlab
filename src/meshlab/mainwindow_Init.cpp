@@ -1,26 +1,25 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005, 2006                                          \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
-
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * An extendible mesh processor                                    o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2022                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #include <QToolBar>
 #include <QProgressBar>
@@ -962,7 +961,6 @@ void MainWindow::loadMeshLabSettings()
 		QDomDocument doc;
 		doc.setContent(settings.value(klist.at(ii)).toString());
 
-		QString st = settings.value(klist.at(ii)).toString();
 		QDomElement docElem = doc.firstChild().toElement();
 
 		if (!docElem.isNull())
@@ -1301,6 +1299,7 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 
 	gbllist.addParam(RichInt(startupWindowWidthParam(), 0, "Startup Window Width (in pixels)", "Window width on startup"));
 	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
+	gbllist.addParam(RichString(meshSetNameParam(), "ms", "Name of the MeshSet object.", "Set the MeshSet name object in the PyMeshLab call copied in the clipboard from the filter dock dialog."));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1314,6 +1313,7 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	maxTextureMemory = (std::ptrdiff_t) rpl.getInt(this->maxTextureMemoryParam()) * (float)(1024 * 1024);
 	startupWindowWidth = rpl.getInt(startupWindowWidthParam());
 	startupWindowHeight = rpl.getInt(startupWindowHeightParam());
+	meshSetName = rpl.getString(meshSetNameParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

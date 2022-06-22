@@ -45,11 +45,11 @@ class RichParameterWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	RichParameterWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
+	RichParameterWidget(QWidget* p, const RichParameter& param, const Value& defaultValue);
 	virtual ~RichParameterWidget();
 
-	virtual std::shared_ptr<Value> getWidgetValue() const = 0;
-	virtual void setWidgetValue(const Value& nv) = 0;
+	virtual std::shared_ptr<Value> getWidgetValue() const          = 0;
+	virtual void                   setWidgetValue(const Value& nv) = 0;
 
 	virtual void addWidgetToGridLayout(QGridLayout* lay, const int r) = 0;
 
@@ -57,6 +57,11 @@ public:
 
 	void resetWidgetToDefaultValue();
 	void setHelpVisible(bool b);
+
+	bool hasBeenChanged() const;
+
+signals:
+	void parameterChanged();
 
 protected slots:
 	void setParameterChanged();
@@ -66,7 +71,6 @@ protected:
 	QLabel*               helpLabel;
 	std::vector<QWidget*> widgets; // will contain all the other widgets of this widget
 
-	RichParameter* parameter;
 	Value* defaultValue;
 
 	bool parameterValueChanged = false;

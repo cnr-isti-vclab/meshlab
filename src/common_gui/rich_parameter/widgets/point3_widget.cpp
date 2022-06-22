@@ -23,27 +23,21 @@
 
 #include "point3_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 Point3Widget::Point3Widget(
 	QWidget*             p,
-	const RichParameter& rpf,
+	const RichParameter& param,
 	const Point3Value&   defaultValue,
 	QWidget*             gla) :
-		RichParameterWidget(p, rpf, defaultValue)
+		RichParameterWidget(p, param, defaultValue)
 {
-	assert(rpf.value().isPoint3());
+	assert(param.value().isPoint3());
 
-	paramName = rpf.name();
+	paramName = param.name();
 
 	vlay = new QHBoxLayout();
 	vlay->setSpacing(0);
-	const Point3Value& p3v = rpf.value().getPoint3();
-	for (int i = 0; i < 3; ++i) {
+	const Point3Value& p3v = param.value().getPoint3();
+	for (unsigned int i = 0; i < 3; ++i) {
 		coordSB[i]     = new QLineEdit(this);
 		QFont baseFont = coordSB[i]->font();
 		if (baseFont.pixelSize() != -1)
@@ -55,12 +49,14 @@ Point3Widget::Point3Widget(
 		coordSB[i]->setValidator(new QDoubleValidator());
 		coordSB[i]->setAlignment(Qt::AlignRight);
 		coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-		coordSB[i]->setText(QString::number(p3v.getPoint3()[i]));
 		vlay->addWidget(coordSB[i]);
 		widgets.push_back(coordSB[i]);
+	}
+	setValue(paramName, param.value().getPoint3());
+	// connects must be made AFTER setValue
+	for (unsigned int i = 0; i < 3 ; i++) {
 		connect(coordSB[i], SIGNAL(textChanged(QString)), this, SLOT(setParameterChanged()));
 	}
-	this->setValue(paramName, parameter->value().getPoint3());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla) {
@@ -94,12 +90,6 @@ std::shared_ptr<Value> Point3Widget::getWidgetValue() const
 {
 	return std::make_shared<Point3Value>(Point3m(
 		coordSB[0]->text().toFloat(), coordSB[1]->text().toFloat(), coordSB[2]->text().toFloat()));
-}
-
-void Point3Widget::resetWidgetValue()
-{
-	for (unsigned int ii = 0; ii < 3; ++ii)
-		coordSB[ii]->setText(QString::number(parameter->value().getPoint3()[ii], 'g', 3));
 }
 
 void Point3Widget::setWidgetValue(const Value& nv)

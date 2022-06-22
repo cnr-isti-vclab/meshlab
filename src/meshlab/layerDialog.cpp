@@ -33,7 +33,7 @@ $Log: stdpardialog.cpp,v $
 #include <QFontMetrics>
 #include <QSettings>
 
-#include <common_gui/rich_parameter/richparameterlistframe.h>
+#include <common_gui/rich_parameter/rich_parameter_list_frame.h>
 
 #include "mainwindow.h"
 #include "ui_layerDialog.h"

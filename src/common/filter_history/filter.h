@@ -1,8 +1,8 @@
 /*****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * An extendible mesh processor                                    o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2004-2022                                           \/)\/    *
+ * Copyright(C) 2005-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,28 +21,29 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_DIRECTION_WIDGET_H
-#define MESHLAB_DIRECTION_WIDGET_H
+#ifndef FILTER_H
+#define FILTER_H
 
-#include "point3_widget.h"
+#include <common/parameters/rich_parameter_list.h>
+#include <common/plugins/plugin_manager.h>
 
-class DirectionWidget : public Point3Widget
+class Filter
 {
-	Q_OBJECT
 public:
-	DirectionWidget(
-		QWidget*             p,
-		const RichDirection& param,
-		const Point3Value&   defaultValue,
-		QWidget*             gla);
-	~DirectionWidget();
+	Filter();
+	Filter(
+		const FilterPlugin* plugin,
+		const QAction* filter,
+		const RichParameterList& paramList);
 
-public slots:
-	void getPoint();
+	void setParameterValue(const std::string& parameter, const Value& value);
 
-signals:
-	void askViewDir(QString);
-	void askCameraDir(QString);
+	std::string pyMeshLabCall(std::string meshSetName = "ms") const;
+
+private:
+	const FilterPlugin* plugin;
+	const QAction* filter;
+	RichParameterList paramList;
 };
 
-#endif // MESHLAB_DIRECTION_WIDGET_H
+#endif // FILTER_H

@@ -23,41 +23,28 @@
 
 #include "rich_parameter_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-#include "../richparameterlistframe.h"
+#include "../rich_parameter_list_frame.h"
 
 RichParameterWidget::RichParameterWidget(
 	QWidget*             p,
-	const RichParameter& rpar,
+	const RichParameter& param,
 	const Value&         defaultValue) :
-		QWidget(p),
-		parameter(rpar.clone()),
-		defaultValue(defaultValue.clone()),
-		visible(true),
-		helpVisible(false)
+		QWidget(p), defaultValue(defaultValue.clone()), visible(true), helpVisible(false)
 {
-	if (parameter != nullptr) {
-		descriptionLabel = new ClickableLabel(parameter->fieldDescription(), this);
-		descriptionLabel->setToolTip(parameter->toolTip());
-		descriptionLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	descriptionLabel = new ClickableLabel(param.fieldDescription(), this);
+	descriptionLabel->setToolTip(param.toolTip());
+	descriptionLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
-		helpLabel = new QLabel("<small>" + rpar.toolTip() + "</small>", this);
-		helpLabel->setTextFormat(Qt::RichText);
-		helpLabel->setWordWrap(true);
-		helpLabel->setVisible(false);
-		helpLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-		helpLabel->setMinimumWidth(250);
-	}
+	helpLabel = new QLabel("<small>" + param.toolTip() + "</small>", this);
+	helpLabel->setTextFormat(Qt::RichText);
+	helpLabel->setWordWrap(true);
+	helpLabel->setVisible(false);
+	helpLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+	helpLabel->setMinimumWidth(250);
 }
 
 RichParameterWidget::~RichParameterWidget()
 {
-	delete parameter;
 	delete defaultValue;
 }
 
@@ -85,6 +72,7 @@ void RichParameterWidget::setVisible(bool b)
 void RichParameterWidget::resetWidgetToDefaultValue()
 {
 	setWidgetValue(*defaultValue);
+	parameterValueChanged = false;
 }
 
 void RichParameterWidget::setHelpVisible(bool b)
@@ -93,12 +81,13 @@ void RichParameterWidget::setHelpVisible(bool b)
 	helpLabel->setVisible(visible && helpVisible);
 }
 
+bool RichParameterWidget::hasBeenChanged() const
+{
+	return parameterValueChanged;
+}
+
 void RichParameterWidget::setParameterChanged()
 {
 	parameterValueChanged = true;
-	QObject* p = parent();
-	RichParameterListFrame* f = dynamic_cast<RichParameterListFrame*>(p);
-	if (f) {
-		emit f->parameterChanged();
-	}
+	emit parameterChanged();
 }

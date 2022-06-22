@@ -25,20 +25,17 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 Matrix44Widget::Matrix44Widget(
 	QWidget*             p,
-	const RichMatrix44& rpf,
+	const RichMatrix44&  param,
 	const Matrix44Value& defaultValue,
 	QWidget*             gla) :
-		RichParameterWidget(p, rpf, defaultValue)
+		RichParameterWidget(p, param, defaultValue)
 {
 	valid = false;
 	m.SetIdentity();
-	paramName = rpf.name();
+	paramName = param.name();
 
 	vlay  = new QVBoxLayout();
 	lay44 = new QGridLayout();
@@ -61,8 +58,9 @@ Matrix44Widget::Matrix44Widget(
 			SIGNAL(textChanged(const QString&)),
 			this,
 			SLOT(invalidateMatrix(const QString&)));
+		connect(coordSB[i], SIGNAL(editingFinished()), this, SLOT(setParameterChanged()));
 	}
-	this->setValue(paramName, parameter->value().getMatrix44());
+	this->setValue(paramName, param.value().getMatrix44());
 
 	QLabel* headerL = new QLabel("Matrix:", this);
 	vlay->addWidget(headerL, 0, Qt::AlignTop);
@@ -78,13 +76,10 @@ Matrix44Widget::Matrix44Widget(
 	vlay->addWidget(pasteMatrixButton);
 	widgets.push_back(pasteMatrixButton);
 
-		 // gridLay->addLayout(vlay,row,1,Qt::AlignTop);
+	// gridLay->addLayout(vlay,row,1,Qt::AlignTop);
 
 	connect(
-		gla,
-		SIGNAL(transmitMatrix(QString, Matrix44m)),
-		this,
-		SLOT(setValue(QString, Matrix44m)));
+		gla, SIGNAL(transmitMatrix(QString, Matrix44m)), this, SLOT(setValue(QString, Matrix44m)));
 	connect(getMatrixButton, SIGNAL(clicked()), this, SLOT(getMatrix()));
 	connect(pasteMatrixButton, SIGNAL(clicked()), this, SLOT(pasteMatrix()));
 	connect(this, SIGNAL(askMeshMatrix(QString)), gla, SLOT(sendMeshMatrix(QString)));
@@ -112,17 +107,6 @@ std::shared_ptr<Value> Matrix44Widget::getWidgetValue() const
 	}
 	else {
 		return std::make_shared<Matrix44Value>(m);
-	}
-}
-
-void Matrix44Widget::resetWidgetValue()
-{
-	valid = false;
-	vcg::Matrix44f m;
-	m.SetIdentity();
-	for (unsigned int ii = 0; ii < 16; ++ii) {
-		coordSB[ii]->setText(
-			QString::number(parameter->value().getMatrix44()[ii / 4][ii % 4], 'g', 3));
 	}
 }
 

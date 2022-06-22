@@ -1,8 +1,8 @@
 /*****************************************************************************
  * MeshLab                                                           o o     *
- * Visual and Computer Graphics Library                            o     o   *
+ * An extendible mesh processor                                    o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2004-2022                                           \/)\/    *
+ * Copyright(C) 2005-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,28 +21,24 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef MESHLAB_DIRECTION_WIDGET_H
-#define MESHLAB_DIRECTION_WIDGET_H
+#include "filter_history.h"
 
-#include "point3_widget.h"
-
-class DirectionWidget : public Point3Widget
+FilterHistory::iterator FilterHistory::begin()
 {
-	Q_OBJECT
-public:
-	DirectionWidget(
-		QWidget*             p,
-		const RichDirection& param,
-		const Point3Value&   defaultValue,
-		QWidget*             gla);
-	~DirectionWidget();
+	return history.begin();
+}
 
-public slots:
-	void getPoint();
+FilterHistory::iterator FilterHistory::end()
+{
+	return history.end();
+}
 
-signals:
-	void askViewDir(QString);
-	void askCameraDir(QString);
-};
+FilterHistory::const_iterator FilterHistory::begin() const
+{
+	return history.begin();
+}
 
-#endif // MESHLAB_DIRECTION_WIDGET_H
+FilterHistory::const_iterator FilterHistory::end() const
+{
+	return history.end();
+}

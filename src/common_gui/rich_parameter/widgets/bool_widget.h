@@ -32,10 +32,9 @@ public:
 	BoolWidget(QWidget* p, const RichBool& param, const BoolValue& defaultValue);
 	~BoolWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 private:
 	QCheckBox* cb;

@@ -23,16 +23,10 @@
 
 #include "float_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-FloatWidget::FloatWidget(QWidget *p, const RichFloat &rpar, const FloatValue &defaultValue) :
-	LineEditWidget(p, rpar, defaultValue)
+FloatWidget::FloatWidget(QWidget* p, const RichFloat& param, const FloatValue& defaultValue) :
+		LineEditWidget(p, param, defaultValue)
 {
-	lned->setText(QString::number(parameter->value().getFloat(), 'g', 3));
+	lned->setText(QString::number(param.value().getFloat(), 'g', 3));
 }
 
 FloatWidget::~FloatWidget()
@@ -42,11 +36,6 @@ FloatWidget::~FloatWidget()
 std::shared_ptr<Value> FloatWidget::getWidgetValue() const
 {
 	return std::make_shared<FloatValue>(lned->text().toFloat());
-}
-
-void FloatWidget::resetWidgetValue()
-{
-	lned->setText(QString::number(parameter->value().getFloat(), 'g', 3));
 }
 
 void FloatWidget::setWidgetValue(const Value& nv)

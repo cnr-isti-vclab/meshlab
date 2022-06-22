@@ -31,14 +31,13 @@ class IOFileWidget : public RichParameterWidget
 	Q_OBJECT
 
 protected:
-	IOFileWidget(QWidget* p, const RichParameter& rpar, const StringValue& defaultValue);
+	IOFileWidget(QWidget* p, const RichParameter& param, const StringValue& defaultValue);
 	~IOFileWidget();
 
 public:
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 protected slots:
 	virtual void selectFile() = 0;

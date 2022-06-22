@@ -23,18 +23,12 @@
 
 #include "bool_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-BoolWidget::BoolWidget(QWidget *p, const RichBool &param, const BoolValue &defaultValue) :
+BoolWidget::BoolWidget(QWidget* p, const RichBool& param, const BoolValue& defaultValue) :
 		RichParameterWidget(p, param, defaultValue)
 {
 	cb = new QCheckBox("", this);
-	cb->setToolTip(parameter->toolTip());
-	cb->setChecked(parameter->value().getBool());
+	cb->setToolTip(param.toolTip());
+	cb->setChecked(param.value().getBool());
 	widgets.push_back(cb);
 
 	connect(cb, SIGNAL(stateChanged(int)), this, SLOT(setParameterChanged()));
@@ -58,13 +52,7 @@ std::shared_ptr<Value> BoolWidget::getWidgetValue() const
 	return std::make_shared<BoolValue>(cb->isChecked());
 }
 
-void BoolWidget::resetWidgetValue()
-{
-	cb->setChecked(parameter->value().getBool());
-}
-
 void BoolWidget::setWidgetValue(const Value& nv)
 {
 	cb->setChecked(nv.getBool());
 }
-

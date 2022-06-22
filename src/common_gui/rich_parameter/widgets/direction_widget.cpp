@@ -23,18 +23,12 @@
 
 #include "direction_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
 DirectionWidget::DirectionWidget(
 	QWidget*             p,
-	const RichDirection& rpf,
+	const RichDirection& param,
 	const Point3Value&   defaultValue,
 	QWidget*             gla) :
-		Point3Widget(p, rpf, defaultValue, gla)
+		Point3Widget(p, param, defaultValue, gla)
 {
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
@@ -46,15 +40,9 @@ DirectionWidget::DirectionWidget(
 		getPoint3Combo->addItems(names);
 
 		connect(
-			gla,
-			SIGNAL(transmitViewDir(QString, Point3m)),
-			this,
-			SLOT(setValue(QString, Point3m)));
+			gla, SIGNAL(transmitViewDir(QString, Point3m)), this, SLOT(setValue(QString, Point3m)));
 		connect(
-			gla,
-			SIGNAL(transmitShot(QString, Shotm)),
-			this,
-			SLOT(setShotValue(QString, Shotm)));
+			gla, SIGNAL(transmitShot(QString, Shotm)), this, SLOT(setShotValue(QString, Shotm)));
 		connect(this, SIGNAL(askViewDir(QString)), gla, SLOT(sendViewDir(QString)));
 		connect(this, SIGNAL(askCameraDir(QString)), gla, SLOT(sendRasterShot(QString)));
 

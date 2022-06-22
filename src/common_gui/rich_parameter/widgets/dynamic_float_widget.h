@@ -31,19 +31,18 @@ class DynamicFloatWidget : public RichParameterWidget
 	Q_OBJECT
 
 public:
-	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& rdf, const FloatValue& defaultValue);
+	DynamicFloatWidget(QWidget* p, const RichDynamicFloat& param, const FloatValue& defaultValue);
 	~DynamicFloatWidget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 	float getValue();
 
 public slots:
 	void setValue(int newv);
-	void setValue();
+	void setValueFromTextBox();
 	void setValue(float newValue);
 
 signals:

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * VCGLib                                                            o o     *
+ * MeshLab                                                           o o     *
  * Visual and Computer Graphics Library                            o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2004-2021                                           \/)\/    *
+ * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,7 +21,7 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "richparameterlistframe.h"
+#include "rich_parameter_list_frame.h"
 
 #include <QClipboard>
 #include <QColorDialog>
@@ -40,32 +40,36 @@ RichParameterListFrame::RichParameterListFrame(QWidget* parent) :
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameterList& curParSet,
-	const RichParameterList& defParSet,
+	const RichParameterList& parameterList,
+	const RichParameterList& defaultValuesList,
 	QWidget*                 p,
 	QWidget*                 gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curParSet, defParSet);
+	loadFrameContent(parameterList, defaultValuesList);
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameterList& curParSet,
+	const RichParameterList& parameterList,
 	QWidget*                 p,
 	QWidget*                 gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curParSet);
+	loadFrameContent(parameterList, parameterList);
 }
 
 RichParameterListFrame::RichParameterListFrame(
-	const RichParameter& curPar,
-	const RichParameter& defPar,
+	const RichParameter& parameter,
+	const RichParameter& defaultValue,
 	QWidget*             p,
 	QWidget*             gla) :
 		QFrame(p), isHelpVisible(false), gla(gla)
 {
-	loadFrameContent(curPar, defPar);
+	RichParameterList crpl;
+	crpl.addParam(parameter);
+	RichParameterList drpl;
+	drpl.addParam(defaultValue);
+	loadFrameContent(crpl, drpl);
 }
 
 RichParameterListFrame::~RichParameterListFrame()
@@ -99,6 +103,7 @@ void RichParameterListFrame::resetValues()
 {
 	for (auto& p : stdfieldwidgets) {
 		p.second->resetWidgetToDefaultValue();
+		rpl.getParameterByName(p.first).setValue(*p.second->getWidgetValue(), true);
 	}
 }
 
@@ -117,12 +122,32 @@ unsigned int RichParameterListFrame::size() const
 	return stdfieldwidgets.size();
 }
 
+RichParameterList RichParameterListFrame::currentRichParameterList() const
+{
+	for (const auto& w : *this) {
+		if (w.second->hasBeenChanged()) {
+			rpl.getParameterByName(w.first).setValue(*w.second->getWidgetValue());
+		}
+	}
+	return rpl;
+}
+
 RichParameterListFrame::iterator RichParameterListFrame::begin()
 {
 	return stdfieldwidgets.begin();
 }
 
 RichParameterListFrame::iterator RichParameterListFrame::end()
+{
+	return stdfieldwidgets.end();
+}
+
+RichParameterListFrame::const_iterator RichParameterListFrame::begin() const
+{
+	return stdfieldwidgets.begin();
+}
+
+RichParameterListFrame::const_iterator RichParameterListFrame::end() const
 {
 	return stdfieldwidgets.end();
 }
@@ -175,7 +200,7 @@ void RichParameterListFrame::loadFrameContent(
 		// put the parameter widgets into the grid layout
 		for (const RichParameter* fpi : p.second) {
 			const RichParameter& defrp   = defParSet.getParameterByName(fpi->name());
-			RichParameterWidget* wd      = createWidgetFromRichParameter(this, *fpi, defrp);
+			RichParameterWidget* wd      = createWidgetFromRichParameter(this, *fpi, defrp.value());
 			stdfieldwidgets[fpi->name()] = wd;
 			wd->addWidgetToGridLayout(glay, i++);
 		}
@@ -195,97 +220,86 @@ void RichParameterListFrame::loadFrameContent(
 	QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 	glay->addItem(spacer, i++, 0);
 	setLayout(glay);
-}
-
-/* creates widgets for the standard parameters */
-void RichParameterListFrame::loadFrameContent(const RichParameterList& curParSet)
-{
-	loadFrameContent(curParSet, curParSet);
-}
-
-void RichParameterListFrame::loadFrameContent(
-	const RichParameter& curPar,
-	const RichParameter& defPar)
-{
-	RichParameterList crpl;
-	crpl.addParam(curPar);
-	RichParameterList drpl;
-	drpl.addParam(defPar);
-	loadFrameContent(crpl, drpl);
+	rpl = curParSet;
+	rpl.setAllValuesAsDefault();
 }
 
 RichParameterWidget* RichParameterListFrame::createWidgetFromRichParameter(
-	QWidget*             parent,
-	const RichParameter& pd,
-	const RichParameter& def)
+	RichParameterListFrame* parent,
+	const RichParameter&    pd,
+	const Value&            defaultValue)
 {
-	if (pd.isOfType<RichPercentage>() && def.isOfType<RichPercentage>()) {
-		return new PercentageWidget(parent, (const RichPercentage&) pd, (const FloatValue&) def.value());
+	RichParameterWidget* w = nullptr;
+	if (pd.isOfType<RichPercentage>() && defaultValue.isOfType<FloatValue>()) {
+		w = new PercentageWidget(
+			parent, (const RichPercentage&) pd, (const FloatValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichDynamicFloat>() && def.isOfType<RichDynamicFloat>()) {
-		return new DynamicFloatWidget(
-			parent, (const RichDynamicFloat&) pd, (const FloatValue&) def.value());
+	else if (pd.isOfType<RichDynamicFloat>() && defaultValue.isOfType<FloatValue>()) {
+		w = new DynamicFloatWidget(
+			parent, (const RichDynamicFloat&) pd, (const FloatValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichEnum>() && def.isOfType<RichEnum>()) {
-		return new EnumWidget(parent, (const RichEnum&) pd, (const IntValue&) def.value());
+	else if (pd.isOfType<RichEnum>() && defaultValue.isOfType<IntValue>()) {
+		w = new EnumWidget(parent, (const RichEnum&) pd, (const IntValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichBool>() && def.isOfType<RichBool>()) {
-		return new BoolWidget(parent, (const RichBool&) pd, (const BoolValue&) def.value());
+	else if (pd.isOfType<RichBool>() && defaultValue.isOfType<BoolValue>()) {
+		w = new BoolWidget(parent, (const RichBool&) pd, (const BoolValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichInt>() && def.isOfType<RichInt>()) {
-		return new IntWidget(parent, (const RichInt&) pd, (const IntValue&) def.value());
+	else if (pd.isOfType<RichInt>() && defaultValue.isOfType<IntValue>()) {
+		w = new IntWidget(parent, (const RichInt&) pd, (const IntValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichFloat>() && def.isOfType<RichFloat>()) {
-		return new FloatWidget(parent, (const RichFloat&) pd, (const FloatValue&) def.value());
+	else if (pd.isOfType<RichFloat>() && defaultValue.isOfType<FloatValue>()) {
+		w = new FloatWidget(parent, (const RichFloat&) pd, (const FloatValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichString>() && def.isOfType<RichString>()) {
-		return new StringWidget(parent, (const RichString&) pd, (const StringValue&) def.value());
+	else if (pd.isOfType<RichString>() && defaultValue.isOfType<StringValue>()) {
+		w = new StringWidget(parent, (const RichString&) pd, (const StringValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichMatrix44>() && def.isOfType<RichMatrix44>()) {
-		return new Matrix44Widget(
+	else if (pd.isOfType<RichMatrix44>() && defaultValue.isOfType<Matrix44Value>()) {
+		w = new Matrix44Widget(
 			parent,
 			(const RichMatrix44&) pd,
-			(const Matrix44Value&) def.value(),
+			(const Matrix44Value&) defaultValue,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichPosition>() && def.isOfType<RichPosition>()) {
-		return new PositionWidget(
+	else if (pd.isOfType<RichPosition>() && defaultValue.isOfType<Point3Value>()) {
+		w = new PositionWidget(
 			parent,
 			(const RichPosition&) pd,
-			(const Point3Value&) def.value(),
+			(const Point3Value&) defaultValue,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichDirection>() && def.isOfType<RichDirection>()) {
-		return new DirectionWidget(
+	else if (pd.isOfType<RichDirection>() && defaultValue.isOfType<Point3Value>()) {
+		w = new DirectionWidget(
 			parent,
 			(const RichDirection&) pd,
-			(const Point3Value&) def.value(),
+			(const Point3Value&) defaultValue,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichShot>() && def.isOfType<RichShot>()) {
-		return new ShotWidget(
+	else if (pd.isOfType<RichShot>() && defaultValue.isOfType<ShotValue>()) {
+		w = new ShotWidget(
 			parent,
 			(const RichShot&) pd,
-			(const ShotValue&) def.value(),
+			(const ShotValue&) defaultValue,
 			reinterpret_cast<RichParameterListFrame*>(parent)->gla);
 	}
-	else if (pd.isOfType<RichColor>() && def.isOfType<RichColor>()) {
-		return new ColorWidget(parent, (const RichColor&) pd, (const ColorValue&) def.value());
+	else if (pd.isOfType<RichColor>() && defaultValue.isOfType<ColorValue>()) {
+		w = new ColorWidget(parent, (const RichColor&) pd, (const ColorValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichFileOpen>() && def.isOfType<RichFileOpen>()) {
-		return new OpenFileWidget(
-			parent, (const RichFileOpen&) pd, (const StringValue&) def.value());
+	else if (pd.isOfType<RichFileOpen>() && defaultValue.isOfType<StringValue>()) {
+		w = new OpenFileWidget(
+			parent, (const RichFileOpen&) pd, (const StringValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichFileSave>() && def.isOfType<RichFileSave>()) {
-		return new SaveFileWidget(
-			parent, (const RichFileSave&) pd, (const StringValue&) def.value());
+	else if (pd.isOfType<RichFileSave>() && defaultValue.isOfType<StringValue>()) {
+		w = new SaveFileWidget(
+			parent, (const RichFileSave&) pd, (const StringValue&) defaultValue);
 	}
-	else if (pd.isOfType<RichMesh>() && def.isOfType<RichMesh>()) {
-		return new MeshWidget(parent, (const RichMesh&) pd, (const IntValue&) def.value());
+	else if (pd.isOfType<RichMesh>() && defaultValue.isOfType<IntValue>()) {
+		w = new MeshWidget(parent, (const RichMesh&) pd, (const IntValue&) defaultValue);
 	}
 	else {
 		std::cerr << "RichParameter type not supported for widget creation.\n";
 		assert(0);
 		return nullptr;
 	}
+	connect(w, SIGNAL(parameterChanged()), parent, SIGNAL(parameterChanged()));
+	return w;
 }

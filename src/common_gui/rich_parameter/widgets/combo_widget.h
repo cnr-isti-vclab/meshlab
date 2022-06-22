@@ -33,7 +33,7 @@ protected:
 	QComboBox* enumCombo;
 
 public:
-	ComboWidget(QWidget* p, const RichParameter& rpar, const Value& defaultValue);
+	ComboWidget(QWidget* p, const RichParameter& param, const Value& defaultValue);
 	ComboWidget(
 		QWidget*             p,
 		const RichParameter& rpar,
@@ -44,7 +44,6 @@ public:
 
 	void                           addWidgetToGridLayout(QGridLayout* lay, const int r);
 	virtual std::shared_ptr<Value> getWidgetValue() const          = 0;
-	virtual void                   resetWidgetValue()              = 0;
 	virtual void                   setWidgetValue(const Value& nv) = 0;
 
 	int  getIndex();

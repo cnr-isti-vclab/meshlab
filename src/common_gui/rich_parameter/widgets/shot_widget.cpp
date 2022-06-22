@@ -23,24 +23,20 @@
 
 #include "shot_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
 #include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
 
 ShotWidget::ShotWidget(
 	QWidget*         p,
-	const RichShot& rpf,
+	const RichShot&  param,
 	const ShotValue& defaultValue,
 	QWidget*         gla) :
-		RichParameterWidget(p, rpf, defaultValue)
+		RichParameterWidget(p, param, defaultValue)
 {
-	paramName = rpf.name();
+	paramName = param.name();
 
 	hlay = new QHBoxLayout();
 
-	this->setShotValue(paramName, parameter->value().getShot());
+	this->setShotValue(paramName, param.value().getShot());
 	// if we have a connection to the current glarea we can setup the additional
 	// button for getting the current view direction.
 	if (gla) {
@@ -84,11 +80,6 @@ void ShotWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 std::shared_ptr<Value> ShotWidget::getWidgetValue() const
 {
 	return std::make_shared<ShotValue>(curShot);
-}
-
-void ShotWidget::resetWidgetValue()
-{
-	curShot = parameter->value().getShot();
 }
 
 void ShotWidget::setWidgetValue(const Value& nv)

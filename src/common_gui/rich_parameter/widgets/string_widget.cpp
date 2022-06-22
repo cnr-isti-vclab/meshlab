@@ -23,16 +23,10 @@
 
 #include "string_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-StringWidget::StringWidget(QWidget *p, const RichString &rpar, const StringValue &defaultValue) :
-		LineEditWidget(p, rpar, defaultValue)
+StringWidget::StringWidget(QWidget* p, const RichString& param, const StringValue& defaultValue) :
+		LineEditWidget(p, param, defaultValue)
 {
-	lned->setText(parameter->value().getString());
+	lned->setText(param.value().getString());
 }
 
 StringWidget::~StringWidget()
@@ -42,11 +36,6 @@ StringWidget::~StringWidget()
 std::shared_ptr<Value> StringWidget::getWidgetValue() const
 {
 	return std::make_shared<StringValue>(lned->text());
-}
-
-void StringWidget::resetWidgetValue()
-{
-	lned->setText(parameter->value().getString());
 }
 
 void StringWidget::setWidgetValue(const Value& nv)

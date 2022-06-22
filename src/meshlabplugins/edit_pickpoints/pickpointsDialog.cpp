@@ -30,7 +30,7 @@
 #include <math.h>
 
 #include <common/ml_document/mesh_model.h>
-#include <common_gui/rich_parameter/richparameterlistframe.h>
+#include <common_gui/rich_parameter/rich_parameter_list_frame.h>
 #include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 #include "editpickpoints.h"

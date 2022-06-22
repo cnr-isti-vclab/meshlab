@@ -29,12 +29,11 @@
 class IntWidget : public LineEditWidget
 {
 public:
-	IntWidget(QWidget* p, const RichInt& rpar, const IntValue& defaultValue);
+	IntWidget(QWidget* p, const RichInt& param, const IntValue& defaultValue);
 	~IntWidget();
 
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 };
 
 #endif // MESHLAB_INT_WIDGET_H

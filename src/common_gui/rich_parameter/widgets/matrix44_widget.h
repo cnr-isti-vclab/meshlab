@@ -33,15 +33,14 @@ class Matrix44Widget : public RichParameterWidget
 public:
 	Matrix44Widget(
 		QWidget*             p,
-		const RichMatrix44& rpf,
+		const RichMatrix44&  param,
 		const Matrix44Value& defaultValue,
 		QWidget*             gla);
 	~Matrix44Widget();
 
-	void addWidgetToGridLayout(QGridLayout* lay, const int r);
+	void                   addWidgetToGridLayout(QGridLayout* lay, const int r);
 	std::shared_ptr<Value> getWidgetValue() const;
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
+	void                   setWidgetValue(const Value& nv);
 
 	Matrix44m getValue();
 

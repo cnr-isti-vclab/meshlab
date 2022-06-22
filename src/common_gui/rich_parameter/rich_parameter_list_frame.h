@@ -1,8 +1,8 @@
 /*****************************************************************************
- * VCGLib                                                            o o     *
+ * MeshLab                                                           o o     *
  * Visual and Computer Graphics Library                            o     o   *
  *                                                                _   O  _   *
- * Copyright(C) 2004-2021                                           \/)\/    *
+ * Copyright(C) 2004-2022                                           \/)\/    *
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
@@ -21,8 +21,8 @@
  *                                                                           *
  ****************************************************************************/
 
-#ifndef RICHPARAMETERLISTFRAME_H
-#define RICHPARAMETERLISTFRAME_H
+#ifndef RICH_PARAMETER_LIST_FRAME_H
+#define RICH_PARAMETER_LIST_FRAME_H
 
 #include "widgets/rich_parameter_widgets.h"
 
@@ -49,14 +49,15 @@ class RichParameterListFrame : public QFrame
 	Q_OBJECT
 public:
 	typedef std::map<QString, RichParameterWidget*>::iterator iterator;
+	typedef std::map<QString, RichParameterWidget*>::const_iterator const_iterator;
 
 	RichParameterListFrame(QWidget* parent);
 	RichParameterListFrame(
-		const RichParameterList& curParSet,
-		const RichParameterList& defParSet,
+		const RichParameterList& parameterList,
+		const RichParameterList& defaultValuesList,
 		QWidget*                 p,
 		QWidget*                 gla = 0);
-	RichParameterListFrame(const RichParameterList& curParSet, QWidget* p, QWidget* gla = 0);
+	RichParameterListFrame(const RichParameterList& parameterList, QWidget* p, QWidget* gla = 0);
 	RichParameterListFrame(
 		const RichParameter& curPar,
 		const RichParameter& defPar,
@@ -79,8 +80,12 @@ public:
 
 	unsigned int size() const;
 
+	RichParameterList currentRichParameterList() const;
+
 	iterator begin();
 	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
 
 signals:
 	void parameterChanged();
@@ -90,14 +95,15 @@ public slots:
 
 private:
 	void loadFrameContent(const RichParameterList& curParSet, const RichParameterList& defParSet);
-	void loadFrameContent(const RichParameterList& curParSet);
-
-	void loadFrameContent(const RichParameter& curPar, const RichParameter& defPar);
 
 	static RichParameterWidget* createWidgetFromRichParameter(
-		QWidget*             parent,
+		RichParameterListFrame *parent,
 		const RichParameter& pd,
-		const RichParameter& def);
+		const Value& defaultValue);
+
+	mutable RichParameterList rpl; // a list containing all the parameters in the frame.
+	// the list does not contain updated values.
+	// it is updated just when someone asks a list containing the current values of the frame
 
 	std::map<QString, RichParameterWidget*> stdfieldwidgets;
 	bool                                    isHelpVisible;
@@ -108,4 +114,4 @@ private:
 	QPushButton*      showHiddenFramePushButton;
 };
 
-#endif // RICHPARAMETERLISTFRAME_H
+#endif // RICH_PARAMETER_LIST_FRAME_H

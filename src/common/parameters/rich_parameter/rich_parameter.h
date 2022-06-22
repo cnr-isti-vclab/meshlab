@@ -64,6 +64,7 @@ public:
 	const QString& fieldDescription() const;
 	const QString& toolTip() const;
 	bool isAdvanced() const;
+	bool isValueDefault() const;
 	const QString& category() const;
 
 	template <class RichParam>
@@ -73,10 +74,9 @@ public:
 		return (t != nullptr);
 	}
 
-	virtual QString stringType() const = 0;
-
 	void setName(const QString& newName);
-	void setValue(const Value& ov);
+	void setValue(const Value& ov, bool isDefault = false);
+	void setDefaultValue(bool isDefault = true);
 
 	virtual QDomElement fillToXMLDocument(QDomDocument& doc, bool saveDescriptionAndTooltip = true) const;
 
@@ -84,10 +84,15 @@ public:
 	QString pythonName() const;
 	QString pythonType() const;
 
-	virtual RichParameter* clone() const = 0;
 	RichParameter& operator=(const RichParameter& rp);
 	RichParameter& operator=(RichParameter&& rp);
+
+	virtual RichParameter* clone() const = 0;
+	virtual QString stringType() const = 0;
 	virtual bool operator==(const RichParameter& rp) = 0;
+
+	friend void swap(RichParameter& rp1, RichParameter& rp2);
+	void swap(RichParameter& rp);
 
 protected:
 	QString pName;
@@ -95,7 +100,10 @@ protected:
 	QString fieldDesc;
 	QString tooltip;
 	bool advanced;
+	bool defaultValue;
 	QString pCategory;
 };
+
+void swap(RichParameter& rp1, RichParameter& rp2);
 
 #endif // MESHLAB_RICH_PARAMETER_H

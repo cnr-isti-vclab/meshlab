@@ -23,14 +23,8 @@
 
 #include "enum_widget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <common/ml_document/mesh_document.h>
-
-EnumWidget::EnumWidget(QWidget *p, const RichEnum &rpar, const IntValue &defaultValue) :
-		ComboWidget(p, rpar, defaultValue, rpar.enumvalues, rpar.value().getInt())
+EnumWidget::EnumWidget(QWidget* p, const RichEnum& param, const IntValue& defaultValue) :
+		ComboWidget(p, param, defaultValue, param.enumvalues, param.value().getInt())
 {
 }
 
@@ -41,11 +35,6 @@ EnumWidget::~EnumWidget()
 std::shared_ptr<Value> EnumWidget::getWidgetValue() const
 {
 	return std::make_shared<IntValue>(enumCombo->currentIndex());
-}
-
-void EnumWidget::resetWidgetValue()
-{
-	enumCombo->setCurrentIndex(parameter->value().getInt());
 }
 
 void EnumWidget::setWidgetValue(const Value& nv)
