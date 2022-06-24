@@ -37,6 +37,7 @@ class FilterFunctionPlugin : public QObject, public FilterPlugin
 	Q_INTERFACES(FilterPlugin)
 
 protected:
+	// These variables are used to store the actual values that can be used in side functions
 	double x, y, z, nx, ny, nz, r, g, b, a, q, vtu, vtv, vsel;
 	double x0, y0, z0, x1, y1, z1, x2, y2, z2, nx0, ny0, nz0, nx1, ny1, nz1, nx2, ny2, nz2, r0, g0,
 		b0, a0, r1, g1, b1, a1, r2, g2, b2, a2, q0, q1, q2, wtu0, wtv0, wtu1, wtv1, wtu2, wtv2,
@@ -49,11 +50,16 @@ protected:
 										   // 3x (one foreach coord _x, _y, _z)
 	std::vector<double> v3_attrValue; // values of the <Point3m> per vertex attributes. There are 3x
 									  // (one foreach coord _x, _y, _z)
-	std::vector<std::string>                               f_attrNames;
-	std::vector<double>                                    f_attrValue;
+	std::vector<std::string>   f_attrNames;  // names  of the <Scalarm> per face attributes
+	std::vector<double>        f_attrValue;  // values of the <Scalarm> per face attributes
+	std::vector<std::string>   f3_attrNames; // names  of the <Point3m> per face attributes
+	std::vector<double>        f3_attrValue; // values of the <Point3m> per face attributes
+	
 	std::vector<CMeshO::PerVertexAttributeHandle<Scalarm>> v_handlers;
 	std::vector<CMeshO::PerVertexAttributeHandle<Point3m>> v3_handlers;
 	std::vector<CMeshO::PerFaceAttributeHandle<Scalarm>>   f_handlers;
+	std::vector<CMeshO::PerFaceAttributeHandle<Point3m>> f3_handlers;
+	
 	QString                                                errorMsg;
 
 public:
@@ -66,6 +72,7 @@ public:
 		FF_FACE_COLOR,
 		FF_VERT_COLOR,
 		FF_VERT_NORMAL,
+		FF_FACE_NORMAL,
 		FF_VERT_QUALITY,
 		FF_FACE_QUALITY,
 		FF_DEF_VERT_SCALAR_ATTRIB,
