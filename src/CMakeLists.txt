@@ -204,7 +204,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/edit_sample
 #		meshlabplugins/edit_align
 #		meshlabplugins/edit_manipulators
-#		meshlabplugins/edit_measure
+		meshlabplugins/edit_measure
 #		meshlabplugins/edit_mutualcorrs
 #		meshlabplugins/edit_paint
 #		meshlabplugins/edit_pickpoints
