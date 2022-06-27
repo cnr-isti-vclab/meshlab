@@ -2055,42 +2055,6 @@ void GLArea::initGlobalParameterList(RichParameterList& defaultGlobalParamList)
 	GLAreaSetting::initGlobalParameterList(defaultGlobalParamList);
 }
 
-MultiViewer_Container *GLArea::mvc()
-{
-	return parentmultiview;
-}
-
-void GLArea::updateSelection(int meshid, bool vertsel, bool facesel)
-{
-	makeCurrent();
-	if (md() != NULL)
-	{
-		MeshModel* mm = md()->getMesh(meshid);
-		if (mm != NULL)
-		{
-			CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(mm->cm, MLDefaultMeshDecorators::selectionAttName());
-			if ((selbufhand() != NULL) && (facesel))
-				selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
-
-			if ((selbufhand() != NULL) && (vertsel))
-				selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
-		}
-	}
-}
-
-/*WARNING!!!!! HORRIBLE THING!!!!! Added just to avoid to include the multiViewer_container.cpp file in a MeshLab plugins project in case it needs to update all the GLArea and not just the one passed as parameter*/
-
-void GLArea::updateAllSiblingsGLAreas()
-{
-	if (mvc() == NULL)
-		return;
-	foreach(GLArea* viewer, mvc()->viewerList)
-	{
-		if (viewer != NULL)
-			viewer->update();
-	}
-}
-
 void GLArea::requestForRenderingAttsUpdate(int meshid, MLRenderingData::ATT_NAMES attname)
 {
 	if (parentmultiview != NULL)
@@ -2861,13 +2825,6 @@ MeshModel* GLArea::mm()
 	if (mvc() == nullptr)
 		return nullptr;
 	return mvc()->meshDoc.mm();
-}
-
-MeshDocument *GLArea::md()
-{
-	if (mvc() == nullptr)
-		return nullptr;
-	return &(mvc()->meshDoc);
 }
 
 void GLArea::Log(int Level, const char *f)

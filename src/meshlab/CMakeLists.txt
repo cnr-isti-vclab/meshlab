@@ -29,6 +29,7 @@ set(SOURCES
 set(HEADERS
 	additionalgui.h
 	glarea.h
+	glarea.ipp
 	glarea_setting.h
 	layerDialog.h
 	mainwindow.h
