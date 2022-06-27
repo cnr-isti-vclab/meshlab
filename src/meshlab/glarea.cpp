@@ -72,7 +72,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     takeSnapTile=false;
     activeDefaultTrackball=true;
     infoAreaVisible = true;
-    trackBallVisible = true;
+    trackBallVisible = glas.startupShowTrackball;
     currentShader = NULL;
     lastFilterRef = NULL;
     //lastEditRef = NULL;
