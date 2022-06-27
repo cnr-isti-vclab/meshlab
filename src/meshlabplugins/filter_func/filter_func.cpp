@@ -46,6 +46,7 @@ FilterFunctionPlugin::FilterFunctionPlugin()
 		FF_VERT_COLOR,
 		FF_VERT_QUALITY,
 		FF_VERT_NORMAL,
+		FF_FACE_NORMAL,
 		FF_FACE_QUALITY,
 		FF_DEF_VERT_SCALAR_ATTRIB,
 		FF_DEF_FACE_SCALAR_ATTRIB,
@@ -82,6 +83,7 @@ QString FilterFunctionPlugin::filterName(ActionIDType filterId) const
 	case FF_VERT_TEXTURE_FUNC: return QString("Per Vertex Texture Function");
 	case FF_WEDGE_TEXTURE_FUNC: return QString("Per Wedge Texture Function");
 	case FF_VERT_NORMAL: return QString("Per Vertex Normal Function");
+	case FF_FACE_NORMAL: return QString("Per Face Normal Function");
 	case FF_DEF_VERT_SCALAR_ATTRIB: return QString("Define New Per Vertex Custom Scalar Attribute");
 	case FF_DEF_FACE_SCALAR_ATTRIB: return QString("Define New Per Face Custom Scalar Attribute");
 	case FF_DEF_VERT_POINT_ATTRIB: return QString("Define New Per Vertex Custom Point Attribute");
@@ -107,6 +109,7 @@ QString FilterFunctionPlugin::pythonFilterName(ActionIDType f) const
 	case FF_VERT_TEXTURE_FUNC: return QString("compute_texcoord_by_function_per_vertex");
 	case FF_WEDGE_TEXTURE_FUNC: return QString("compute_texcoord_by_function_per_wedge");
 	case FF_VERT_NORMAL: return QString("compute_normal_by_function_per_vertex");
+	case FF_FACE_NORMAL: return QString("compute_normal_by_function_per_face");
 	case FF_DEF_VERT_SCALAR_ATTRIB: return QString("compute_new_custom_scalar_attribute_per_vertex");
 	case FF_DEF_FACE_SCALAR_ATTRIB: return QString("compute_new_custom_scalar_attribute_per_face");
 	case FF_DEF_VERT_POINT_ATTRIB: return QString("compute_new_custom_point_attribute_per_vertex");
@@ -129,7 +132,8 @@ const QString PerVertexAttributeString(
 	"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> "
 	"(quality), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
 	"index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
-	"and all custom <i>vertex attributes</i> already defined by user.<br>");
+	"and all custom <i>vertex attributes</i> already defined by user."
+	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br>");
 
 const QString PerFaceAttributeString(
 	"It's possible to use the following per-face variables, or variables associated to the three "
@@ -142,7 +146,9 @@ const QString PerFaceAttributeString(
 	"texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex "
 	"selection (1 yes, 0 no) "
 	"<b>fi</b> for face index, <b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, "
-	"<b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
+	"<b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no)."
+	"All user defined <i>face scalar attributes</i> are available."
+	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br><br>");
 
 // long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
@@ -185,11 +191,15 @@ QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
 		return tr("Texture function using muparser to generate new texture coords for every "
 				  "vertex<br>") +
 			   PerVertexAttributeString;
-
+		
 	case FF_VERT_NORMAL:
 		return tr("Normal function using muparser to generate new Normal for every vertex<br>") +
 			   PerVertexAttributeString;
-
+		
+	case FF_FACE_NORMAL:
+		return tr("Normal function using muparser to generate new Normal for every face<br>") +
+			   PerFaceAttributeString;
+		
 	case FF_FACE_QUALITY:
 		return tr("Quality function using muparser to generate new Quality for every face<br>"
 				  "Insert three function each one for quality of the three vertex of a face<br>") +
@@ -262,6 +272,7 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(const QAction* 
 	case FF_VERT_TEXTURE_FUNC: return FilterPlugin::Texture;
 	case FF_VERT_COLOR: return FilterPlugin::VertexColoring;
 	case FF_VERT_NORMAL: return FilterPlugin::Normal;
+	case FF_FACE_NORMAL: return FilterPlugin::Normal;
 	case FF_FACE_COLOR: return FilterPlugin::FaceColoring;
 	case FF_WEDGE_TEXTURE_FUNC: return FilterPlugin::Texture;
 	case FF_ISOSURFACE: return FilterPlugin::MeshCreation;
@@ -288,6 +299,7 @@ int FilterFunctionPlugin::postCondition(const QAction* action) const
 		return MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
 	case FF_VERT_COLOR: return MeshModel::MM_VERTCOLOR;
 	case FF_VERT_NORMAL: return MeshModel::MM_VERTNORMAL;
+	case FF_FACE_NORMAL: return MeshModel::MM_FACENORMAL;
 	case FF_VERT_TEXTURE_FUNC: return MeshModel::MM_VERTTEXCOORD;
 	case FF_WEDGE_TEXTURE_FUNC: return MeshModel::MM_WEDGTEXCOORD;
 	case FF_VERT_QUALITY: return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
@@ -317,6 +329,7 @@ int FilterFunctionPlugin::getRequirements(const QAction* action)
 	case FF_GEOM_FUNC:
 	case FF_VERT_COLOR:
 	case FF_VERT_NORMAL:
+	case FF_FACE_NORMAL:
 	case FF_VERT_QUALITY:
 	case FF_VERT_TEXTURE_FUNC:
 	case FF_DEF_VERT_SCALAR_ATTRIB:
@@ -379,7 +392,7 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 			"only on selection",
 			"if checked, only affects selected vertices"));
 		break;
-
+		
 	case FF_VERT_NORMAL:
 		parlst.addParam(RichString(
 			"x", "-nx", "func nx = ", "insert function to generate new x for the normal"));
@@ -393,7 +406,21 @@ RichParameterList FilterFunctionPlugin::initParameterList(const QAction* action,
 			"only on selection",
 			"if checked, only affects selected vertices"));
 		break;
-
+		
+	case FF_FACE_NORMAL:
+		parlst.addParam(RichString(
+			"x", "-fnx", "func nx = ", "insert function to generate new x for the normal"));
+		parlst.addParam(RichString(
+			"y", "-fny", "func ny = ", "insert function to generate new y for the normal"));
+		parlst.addParam(RichString(
+			"z", "-fnz", "func nz = ", "insert function to generate new z for the normal"));
+		parlst.addParam(RichBool(
+			"onselected",
+			false,
+			"only on selection",
+			"if checked, only affects selected vertices"));
+		break;
+		
 	case FF_VERT_COLOR:
 		parlst.addParam(RichString(
 			"x", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
@@ -1039,6 +1066,71 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		log("%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 	} break;
+		case FF_FACE_NORMAL: {
+		std::string func_nx     = par.getString("x").toStdString();
+		std::string func_ny     = par.getString("y").toStdString();
+		std::string func_nz     = par.getString("z").toStdString();
+		bool        onSelected = par.getBool("onselected");
+		if (onSelected && m.cm.sfn == 0) // if no selection, fail
+		{
+			log("Cannot apply only on selection: there is no selection");
+			throw MLException("Cannot apply only on selection: there is no selection");
+		}
+		m.updateDataMask(MeshModel::MM_FACENORMAL);
+		Parser p_nx, p_ny, p_nz;
+		
+		setPerFaceVariables(p_nx, m.cm);
+		setPerFaceVariables(p_ny, m.cm);
+		setPerFaceVariables(p_nz, m.cm);
+		p_nx.SetExpr(conversion::fromStringToWString(func_nx));
+		p_ny.SetExpr(conversion::fromStringToWString(func_ny));
+		p_nz.SetExpr(conversion::fromStringToWString(func_nz));
+		
+		
+		double nx = 0, ny = 0, nz = 0;
+		errorMsg = "";
+		
+		time_t start = clock();
+		
+		// every parser variables is related to face attributes.
+		for (CMeshO::FaceIterator  fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+			if (!(*fi).IsD())
+				if ((!onSelected) || ((*fi).IsS())) {
+					setAttributes(fi, m.cm);
+					
+					// evaluate functions to generate new color
+					// in case of fail, error dialog contains details of parser's error
+					try {
+						nx = p_nx.Eval();
+					}
+					catch (Parser::exception_type& e) {
+						showParserError("func nx: ", e);
+					}
+					try {
+						ny = p_ny.Eval();
+					}
+					catch (Parser::exception_type& e) {
+						showParserError("func ny: ", e);
+					}
+					try {
+						nz = p_nz.Eval();
+					}
+					catch (Parser::exception_type& e) {
+						showParserError("func nz: ", e);
+					}					
+					
+					if (errorMsg != "")
+						throw MLException(errorMsg);
+					
+					// set new color for this iteration
+					(*fi).N() = Point3m(nx,ny,nz);
+				}
+		
+		// if succeeded log stream contains number of vertices processed and time elapsed
+		log("%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+		
+		
+	} break;
 	case FF_FACE_COLOR: {
 		std::string func_r     = par.getString("r").toStdString();
 		std::string func_g     = par.getString("g").toStdString();
@@ -1659,6 +1751,13 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator& fi, CMeshO& m)
 	//  set variables to explicit value obtained through attribute's handler
 	for (int i = 0; i < (int) f_attrValue.size(); i++)
 		f_attrValue[i] = f_handlers[i][fi];
+	
+	for (int i = 0; i < (int) f3_handlers.size(); i++) {
+		f3_attrValue[i * 3 + 0] = f3_handlers[i][fi].X();
+		f3_attrValue[i * 3 + 1] = f3_handlers[i][fi].Y();
+		f3_attrValue[i * 3 + 2] = f3_handlers[i][fi].Z();
+	}
+	
 }
 
 // Function explicitly define parser variables to perform per-vertex filter action
@@ -1688,11 +1787,9 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser& p, CMeshO& m)
 	v_handlers.clear();
 	v_attrNames.clear();
 	v_attrValue.clear();
-	v3_handlers.clear();
-	v3_attrNames.clear();
-	v3_attrValue.clear();
 	std::vector<std::string> AllVertexAttribName;
 	tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Scalarm>(m, AllVertexAttribName);
+	v_attrValue.reserve(AllVertexAttribName.size());
 	for (int i = 0; i < (int) AllVertexAttribName.size(); i++) {
 		CMeshO::PerVertexAttributeHandle<Scalarm> hh =
 			tri::Allocator<CMeshO>::GetPerVertexAttribute<Scalarm>(m, AllVertexAttribName[i]);
@@ -1703,7 +1800,11 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser& p, CMeshO& m)
 		qDebug("Adding custom per vertex float variable %s", v_attrNames.back().c_str());
 	}
 	AllVertexAttribName.clear();
+	v3_handlers.clear();
+	v3_attrNames.clear();
+	v3_attrValue.clear();
 	tri::Allocator<CMeshO>::GetAllPerVertexAttribute<Point3m>(m, AllVertexAttribName);
+	v3_attrValue.reserve(AllVertexAttribName.size());
 	for (int i = 0; i < (int) AllVertexAttribName.size(); i++) {
 		CMeshO::PerVertexAttributeHandle<Point3m> hh3 =
 			tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m, AllVertexAttribName[i]);
@@ -1811,11 +1912,13 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser& p, CMeshO& m)
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
-	std::vector<std::string> AllFaceAttribName;
-	tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Scalarm>(m, AllFaceAttribName);
 	f_handlers.clear();
 	f_attrNames.clear();
 	f_attrValue.clear();
+	std::vector<std::string> AllFaceAttribName;
+	tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Scalarm>(m, AllFaceAttribName);
+	f_attrValue.reserve(AllFaceAttribName.size());
+	qDebug("Searching for Scalar Face Attributes (%lu)",AllFaceAttribName.size());
 	for (int i = 0; i < (int) AllFaceAttribName.size(); i++) {
 		CMeshO::PerFaceAttributeHandle<Scalarm> hh =
 			tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(m, AllFaceAttribName[i]);
@@ -1823,6 +1926,32 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser& p, CMeshO& m)
 		f_attrNames.push_back(AllFaceAttribName[i]);
 		f_attrValue.push_back(0);
 		p.DefineVar(conversion::fromStringToWString(f_attrNames.back()), &f_attrValue.back());
+	}
+	AllFaceAttribName.clear();
+	f3_handlers.clear();
+	f3_attrNames.clear();
+	f3_attrValue.clear();
+	tri::Allocator<CMeshO>::GetAllPerFaceAttribute<Point3m>(m, AllFaceAttribName);
+	f3_attrValue.reserve(AllFaceAttribName.size());
+	qDebug("Searching for Point3 Face Attributes (%lu)",AllFaceAttribName.size());
+	for (int i = 0; i < (int) AllFaceAttribName.size(); i++) {
+		CMeshO::PerFaceAttributeHandle<Point3m> hh3 =
+			tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3m>(m, AllFaceAttribName[i]);
+		
+		f3_handlers.push_back(hh3);
+		
+		f3_attrValue.push_back(0);
+		f3_attrNames.push_back(AllFaceAttribName[i] + "_x");
+		p.DefineVar(conversion::fromStringToWString(f3_attrNames.back()), &f3_attrValue.back());
+		
+		f3_attrValue.push_back(0);
+		f3_attrNames.push_back(AllFaceAttribName[i] + "_y");
+		p.DefineVar(conversion::fromStringToWString(f3_attrNames.back()), &f3_attrValue.back());
+		
+		f3_attrValue.push_back(0);
+		f3_attrNames.push_back(AllFaceAttribName[i] + "_z");
+		p.DefineVar(conversion::fromStringToWString(f3_attrNames.back()), &f3_attrValue.back());
+		qDebug("Adding custom per face Point3f variable %s", f3_attrNames.back().c_str());
 	}
 }
 
@@ -1853,6 +1982,7 @@ FilterPlugin::FilterArity FilterFunctionPlugin::filterArity(const QAction* filte
 	case FF_VERT_TEXTURE_FUNC:
 	case FF_WEDGE_TEXTURE_FUNC:
 	case FF_VERT_NORMAL:
+	case FF_FACE_NORMAL:
 	case FF_DEF_VERT_SCALAR_ATTRIB:
 	case FF_DEF_FACE_SCALAR_ATTRIB:
 	case FF_REFINE: return FilterPlugin::SINGLE_MESH;

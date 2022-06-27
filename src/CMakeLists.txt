@@ -76,7 +76,7 @@ if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these di
 	if (NOT APPLE)
 		set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
 	else()
-		SET(CMAKE_INSTALL_RPATH $ORIGIN/../Frameworks)
+		SET(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
 	endif()
 
 	get_directory_property(hasParent PARENT_DIRECTORY)

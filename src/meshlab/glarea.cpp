@@ -55,6 +55,7 @@ GLArea::GLArea(MultiViewer_Container* parent, RichParameterList* current) :
 {
 	makeCurrent();
 	this->updateCustomSettingValues(*current);
+	trackBallVisible = glas.startupShowTrackball;
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	fov           = fovDefault();
 	clipRatioFar  = clipRatioFarDefault();

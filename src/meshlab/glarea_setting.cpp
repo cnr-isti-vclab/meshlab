@@ -25,6 +25,7 @@ void GLAreaSetting::initGlobalParameterList(RichParameterList& defaultGlobalPara
 	defaultGlobalParamSet.addParam(RichFloat(pointSizeParam()	, 2.0, "Point Size","The base size of points when drawn"));
 
 	defaultGlobalParamSet.addParam(RichBool(wheelDirectionParam(), false, "Wheel Direction", "If true, inverts the direction of the mouse wheel for zooming in/out in the MeshLab canvas."));
+	defaultGlobalParamSet.addParam(RichBool(showTrackballParam(), true, "Show Trackball", "If true, show the trackball on startup."));
 	defaultGlobalParamSet.addParam(RichInt(matrixDecimalPrecisionParam(), 2, "Rotation Matrix Precision", "Number of decimal values shown in the rotation matrix"));
 }
 
@@ -49,6 +50,7 @@ void GLAreaSetting::updateGlobalParameterSet( const RichParameterList& rps )
 	pointSmooth = rps.getBool(this->pointSmoothParam());
 	pointSize = rps.getFloat(this->pointSizeParam());
 	wheelDirection = rps.getBool(this->wheelDirectionParam());
+        startupShowTrackball = rps.getBool(showTrackballParam());
 	matrixDecimalPrecision = rps.getInt(this->matrixDecimalPrecisionParam());
 	currentGlobalParamSet=&rps;
 }

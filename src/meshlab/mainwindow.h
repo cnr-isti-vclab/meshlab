@@ -356,7 +356,6 @@ public:
 		return _qsb;
 	}
 
-	void setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin);
 	QMenu* meshLayerMenu() { return filterMenuMeshLayer; }
 	QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 
