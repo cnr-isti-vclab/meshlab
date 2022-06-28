@@ -88,7 +88,10 @@ public:
 
 	void updateTrackballInViewers();
 
-	MLSceneGLSharedDataContext* sharedDataContext();
+	inline MLSceneGLSharedDataContext* sharedDataContext()
+	{
+		return &scenecontext;
+	}
 
 	GLLogStream* logger();
 

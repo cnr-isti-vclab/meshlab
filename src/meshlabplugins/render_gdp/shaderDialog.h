@@ -36,18 +36,18 @@
 #include <QSlider>
 #include <QSignalMapper>
 
-class QGLWidget;
+class QOpenGLWidget;
 
 class ShaderDialog : public QDockWidget
 {
     Q_OBJECT
 
 public:
-	ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent = 0);
+	ShaderDialog(ShaderInfo *sInfo, QOpenGLWidget* gla, QWidget *parent = 0);
 	~ShaderDialog();
 
 private:
-	QGLWidget* glarea;
+	QOpenGLWidget* glarea;
 	bool usevertexcolor;
 	ShaderInfo * shaderInfo;
 	QSignalMapper *colorSignalMapper;

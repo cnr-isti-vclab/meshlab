@@ -193,7 +193,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_voronoi
 
 		# Rendering and Decoration Plugins
-#		meshlabplugins/render_gdp
+		meshlabplugins/render_gdp
 #		meshlabplugins/render_radiance_scaling
 #		meshlabplugins/decorate_base
 #		meshlabplugins/decorate_background

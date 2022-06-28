@@ -28,7 +28,7 @@
 #include <QColor>
 #include <QLineEdit>
 #include <QColorDialog>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QCheckBox>
 #include <QPushButton>
 
@@ -36,7 +36,7 @@
 
 using namespace vcg;
 
-ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent)
+ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QOpenGLWidget* gla, QWidget *parent)
 : QDockWidget(parent),usevertexcolor(false)
 {
 	ui.setupUi(this);
@@ -348,13 +348,13 @@ void ShaderDialog::reloadTexture(int i) {
 	glDeleteTextures( 1, &shaderInfo->textureInfo[i].tId);
 
 	glEnable(shaderInfo->textureInfo[i].Target);
-	QImage img, imgScaled, imgGL;
+	QImage img, imgScaled;
 	img.load(shaderInfo->textureInfo[i].path);
 	// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 	int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 	int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
 	imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-	imgGL=QGLWidget::convertToGLFormat(imgScaled);
+	QImage imgGL= imgScaled.convertToFormat(QImage::Format_RGBA8888);
 
 	glGenTextures( 1, &(shaderInfo->textureInfo[i].tId) );
 	glBindTexture( shaderInfo->textureInfo[i].Target, shaderInfo->textureInfo[i].tId );

@@ -362,11 +362,6 @@ void MultiViewer_Container::updateTrackballInViewers()
 	}
 }
 
-MLSceneGLSharedDataContext* MultiViewer_Container::sharedDataContext()
-{
-	return &scenecontext;
-}
-
 GLLogStream* MultiViewer_Container::logger()
 {
 	return &meshDoc.Log;
