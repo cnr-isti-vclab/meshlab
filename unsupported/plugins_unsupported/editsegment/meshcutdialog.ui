@@ -1,0 +1,420 @@
+<ui version="4.0" >
+ <class>MeshCutDialogClass</class>
+ <widget class="QWidget" name="MeshCutDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>305</width>
+    <height>360</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Mesh Segmentation</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>Basic</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout" >
+       <item>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QRadioButton" name="foreRadioButton" >
+           <property name="text" >
+            <string>Select Foreground</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="backRadioButton" >
+           <property name="text" >
+            <string>Select Background</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="penLabel" >
+         <property name="text" >
+          <string>Pen Radius</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QSlider" name="penRadiusSlider" >
+           <property name="maximum" >
+            <number>10</number>
+           </property>
+           <property name="singleStep" >
+            <number>1</number>
+           </property>
+           <property name="pageStep" >
+            <number>2</number>
+           </property>
+           <property name="value" >
+            <number>5</number>
+           </property>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="penRadiusSpinBox" >
+           <property name="maximum" >
+            <number>10</number>
+           </property>
+           <property name="value" >
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="meshSegmentButton" >
+         <property name="text" >
+          <string>Start Segmentation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="updateCurvatureButton" >
+         <property name="text" >
+          <string>Update Curvature</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="resetButton" >
+         <property name="text" >
+          <string>Reset Selection</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3" >
+       <item>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QCheckBox" name="refineCheckBox" >
+           <property name="text" >
+            <string>Refined Segmentation</string>
+           </property>
+           <property name="checked" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" >
+           <item>
+            <widget class="QLabel" name="foregroundLabel" >
+             <property name="text" >
+              <string>Foreground Color</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ColorPicker" native="1" name="foreColorPicker" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" >
+           <item>
+            <widget class="QLabel" name="backgroundLabel" >
+             <property name="text" >
+              <string>Background Color</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ColorPicker" native="1" name="backColorPicker" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" >
+           <item>
+            <widget class="QLabel" name="label" >
+             <property name="text" >
+              <string>Normal Weight</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QSlider" name="normalWeightSlider" >
+               <property name="maximum" >
+                <number>10</number>
+               </property>
+               <property name="pageStep" >
+                <number>2</number>
+               </property>
+               <property name="value" >
+                <number>5</number>
+               </property>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickInterval" >
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="normalWeightSpinBox" >
+               <property name="maximum" >
+                <number>10</number>
+               </property>
+               <property name="value" >
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" >
+           <item>
+            <widget class="QLabel" name="label_2" >
+             <property name="text" >
+              <string>Curvature Weight</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QSlider" name="curvatureWeightSlider" >
+               <property name="maximum" >
+                <number>10</number>
+               </property>
+               <property name="pageStep" >
+                <number>2</number>
+               </property>
+               <property name="value" >
+                <number>5</number>
+               </property>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickInterval" >
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="curvatureWeightSpinBox" >
+               <property name="maximum" >
+                <number>10</number>
+               </property>
+               <property name="value" >
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="debugTab" >
+      <attribute name="title" >
+       <string>Debug</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4" >
+       <item>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="gaussianButton" >
+           <property name="text" >
+            <string>Colorize Gaussian</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="meanButton" >
+           <property name="text" >
+            <string>Colorize Mean</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>ColorPicker</class>
+   <extends>QWidget</extends>
+   <header>colorpicker.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="meshlab.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>penRadiusSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>penRadiusSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>88</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>116</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>penRadiusSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>penRadiusSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>123</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>89</x>
+     <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normalWeightSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>normalWeightSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>77</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>100</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normalWeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>normalWeightSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>115</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>153</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>curvatureWeightSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>curvatureWeightSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>78</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>104</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>curvatureWeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>curvatureWeightSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>118</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

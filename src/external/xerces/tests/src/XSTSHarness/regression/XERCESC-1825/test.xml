@@ -1,0 +1,7 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <qname y="t:y"><a></a></qname>
+
+</t:root>

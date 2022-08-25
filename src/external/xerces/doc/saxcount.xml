@@ -1,0 +1,71 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Sample: SAXCount">
+
+    <s2 title="SAXCount">
+        <p>SAXCount is the simplest application that counts the elements and characters of
+        a given XML file using the (event based) SAX API.</p>
+
+        <s3 title="Running SAXCount">
+
+          <p>The SAXCount sample parses an XML file and prints out the number of
+          elements in the file. To run SAXCount, enter the following </p>
+<source>SAXCount &lt;XML File&gt;</source>
+          <p>The following parameters may be set from the command line </p>
+<source>
+Usage:
+    SAXCount [options] &lt;XML file | List file&gt;
+
+This program invokes the SAX Parser, and then prints the
+number of elements, attributes, spaces and characters found
+in each XML file, using SAX API.
+
+Options:
+    -l          Indicate the input file is a List File that has a list of xml files.
+                Default to off (Input file is an XML file).
+    -v=xxx      Validation scheme [always | never | auto*].
+    -n          Enable namespace processing. Defaults to off.
+    -s          Enable schema processing. Defaults to off.
+    -f          Enable full schema constraint checking. Defaults to off.
+    -locale=ll_CC specify the locale, default: en_US
+    -?          Show this help.
+
+  * = Default if not provided explicitly.
+</source>
+          <p><em>-v=always</em> will force validation<br/>
+             <em>-v=never</em> will not use any validation<br/>
+             <em>-v=auto</em> will validate if a DOCTYPE declaration or a schema declaration is present in the XML document</p>
+          <p>Here is a sample output from SAXCount</p>
+<source>cd &XercesC3InstallDir;/samples/data
+SAXCount -v=always personal.xml
+personal.xml: 60 ms (37 elems, 12 attrs, 134 spaces, 134 chars)</source>
+          <p>Running SAXCount with the validating parser gives a different result because
+          ignorable white-space is counted separately from regular characters.</p>
+<source>SAXCount -v=never personal.xml
+personal.xml: 10 ms (37 elems, 12 attrs, 0 spaces, 268 chars)</source>
+          <p>Note that the sum of spaces and characters in both versions is the same.</p>
+
+          <note>The time reported by the program may be different depending on your
+          processor speed.</note>
+        </s3>
+
+    </s2>
+</s1>

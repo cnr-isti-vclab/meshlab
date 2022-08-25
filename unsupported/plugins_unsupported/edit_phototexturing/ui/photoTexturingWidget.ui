@@ -1,0 +1,259 @@
+<ui version="4.0" >
+ <class>photoTexturingWidget</class>
+ <widget class="QWidget" name="photoTexturingWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>505</width>
+    <height>462</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Photo Texturing</string>
+  </property>
+  <widget class="QFrame" name="main_frame" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>491</width>
+     <height>451</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Raised</enum>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5" >
+    <item>
+     <layout class="QVBoxLayout" >
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QGroupBox" name="groupBox" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title" >
+           <string>Cameras:</string>
+          </property>
+          <property name="flat" >
+           <bool>false</bool>
+          </property>
+          <property name="checkable" >
+           <bool>false</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3" >
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout" >
+             <item>
+              <widget class="QTableWidget" name="cameraTableWidget" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="selectionBehavior" >
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+               <property name="columnCount" >
+                <number>3</number>
+               </property>
+               <column>
+                <property name="text" >
+                 <string>Camera</string>
+                </property>
+               </column>
+               <column>
+                <property name="text" >
+                 <string>Type</string>
+                </property>
+               </column>
+               <column>
+                <property name="text" >
+                 <string>Texture</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout" >
+               <item>
+                <widget class="QPushButton" name="addCameraPushButton" >
+                 <property name="text" >
+                  <string>Add Camera</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="removeCameraPushButton" >
+                 <property name="text" >
+                  <string>Remove Camera</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="assignImagePushButton" >
+                 <property name="text" >
+                  <string>Assign Image</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="convertToTsaiCameraPushButton" >
+                 <property name="text" >
+                  <string>Convert to Tsai</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="exportToMaxScriptPushButton" >
+                 <property name="text" >
+                  <string>export to MaxScript</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2" >
+          <property name="title" >
+           <string>Textures:</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2" >
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="topMargin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QListWidget" name="textureListWidget" />
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_2" >
+             <item>
+              <widget class="QCheckBox" name="checkBoxzBuffer" >
+               <property name="text" >
+                <string>calc. z-Buffer</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="selectedCameraOnlyCheckBox" >
+               <property name="text" >
+                <string>sel. cam only</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="calculateTexturesPushButton" >
+               <property name="text" >
+                <string>Calculate UV Coords.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4" >
+             <item>
+              <widget class="QPushButton" name="combineTexturesPushButton" >
+               <property name="text" >
+                <string>Combine Textures</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="unprojectTexturePushButton" >
+               <property name="text" >
+                <string>Unproject Texture</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="bakeTexturePushButton" >
+               <property name="text" >
+                <string>Bake Texture</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_3" >
+          <property name="title" >
+           <string>Configuration File:</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3" >
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QLineEdit" name="calibrationFileLineEdit" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="configurationLoadPushButton" >
+               <property name="text" >
+                <string>Load</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="configurationSavePushButton" >
+               <property name="text" >
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QPushButton" name="resetPushButton" >
+          <property name="text" >
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="closePushButton" >
+          <property name="text" >
+           <string>Close</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

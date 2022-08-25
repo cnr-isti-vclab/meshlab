@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	    xmlns:b="base"
+	    xmlns:d="derived"
+            targetNamespace="derived">
+
+  <xsd:import namespace="base" schemaLocation="base.xsd"/>
+
+  <xsd:complexType name="derived">
+    <xsd:complexContent>
+      <xsd:restriction base="b:base">
+        <xsd:sequence>
+          <xsd:element name="Value" type="xsd:string"/>
+	</xsd:sequence>  
+      </xsd:restriction>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="bar">
+    <xsd:sequence>
+      <xsd:element name="Value" type="xsd:int"/>
+    </xsd:sequence>      
+  </xsd:complexType>
+
+</xsd:schema>

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:complexType name="rootType">
+		<xs:sequence>
+			<xs:element name="child" maxOccurs="5">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="attr" type="xs:int"/>
+							<xs:attribute name="attr2" type="xs:int"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="root" type="rootType">
+		<xs:unique name="uniqueKey">
+			<xs:selector xpath=".//child"/>
+			<xs:field xpath="@attr"/>
+			<xs:field xpath="@attr2"/>
+		</xs:unique>
+	</xs:element>
+</xs:schema>

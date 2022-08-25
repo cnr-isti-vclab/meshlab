@@ -1,0 +1,200 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2021                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+#include "function_parameter.h"
+
+#include "python_utils.h"
+#include "../parameters/rich_parameter_list.h"
+
+pymeshlab::FunctionParameter::FunctionParameter(const RichParameter& parameter) :
+	parameter(parameter.clone())
+{
+}
+
+pymeshlab::FunctionParameter::FunctionParameter(
+		const pymeshlab::FunctionParameter& oth):
+	parameter(oth.parameter->clone())
+{
+}
+
+pymeshlab::FunctionParameter::FunctionParameter(pymeshlab::FunctionParameter&& oth)
+{
+	parameter = oth.parameter;
+	oth.parameter = nullptr;
+}
+
+pymeshlab::FunctionParameter::~FunctionParameter()
+{
+	delete parameter;
+}
+
+QString pymeshlab::FunctionParameter::pythonName() const
+{
+	return parameter->pythonName();
+}
+
+QString pymeshlab::FunctionParameter::meshlabName() const
+{
+	return parameter->name();
+}
+
+QString pymeshlab::FunctionParameter::pythonTypeString() const
+{
+	return parameter->pythonType();
+}
+
+QString pymeshlab::FunctionParameter::meshlabTypeString() const
+{
+	return parameter->stringType();
+}
+
+QString pymeshlab::FunctionParameter::description() const
+{
+	if (parameter){
+		return parameter->fieldDescription();
+	}
+	return QString();
+}
+
+QString pymeshlab::FunctionParameter::longDescription() const
+{
+	if (parameter){
+		return parameter->toolTip();
+	}
+	return QString();
+}
+
+const Value& pymeshlab::FunctionParameter::defaultValue() const
+{
+	return parameter->value();
+}
+
+const RichParameter& pymeshlab::FunctionParameter::richParameter() const
+{
+	return *parameter;
+}
+
+void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
+{
+	if (!parameter) {
+		o << "no_value";
+		return;
+	}
+	if (parameter->isOfType<RichBool>()) {
+		o << (parameter->value().getBool() ? "True" : "False");
+		return;
+	}
+	if (parameter->isOfType<RichInt>()) {
+		o << parameter->value().getInt();
+		return;
+	}
+	if (parameter->isOfType<RichFloat>()){
+		o << parameter->value().getFloat();
+		return;
+	}
+	if (parameter->isOfType<RichString>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
+		return;
+	}
+	if (parameter->isOfType<RichEnum>()) {
+		RichEnum* ren = dynamic_cast<RichEnum*>(parameter);
+		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
+		return;
+	}
+	if (parameter->isOfType<RichPercentage>()) {
+		RichPercentage* rabs = dynamic_cast<RichPercentage*>(parameter);
+		float abs = parameter->value().getFloat();
+		float perc = (abs - rabs->min) / (rabs->max - rabs->min) * 100;
+		o << perc << "%";
+		return;
+	}
+	if (parameter->isOfType<RichDynamicFloat>()) {
+		RichDynamicFloat* rdyn = dynamic_cast<RichDynamicFloat*>(parameter);
+		o << parameter->value().getFloat() <<
+			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
+		return;
+	}
+	if (parameter->isOfType<RichMatrix44>()){
+		const MESHLAB_SCALAR* v = parameter->value().getMatrix44().V();
+		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
+			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
+			<< "[" << v[8] << ", " << v[9] << ", " << v[10] << ", " << v[11] << "],"
+			<< "[" << v[12] << ", " << v[13] << ", " << v[14] << ", " << v[15] << "]]";
+		return;
+	}
+	if (parameter->isOfType<RichPosition>() || parameter->isOfType<RichDirection>()) {
+		o << "[" << parameter->value().getPoint3().X() << ", "
+			<< parameter->value().getPoint3().Y() << ", "
+			<< parameter->value().getPoint3().Z() << "]";
+		return;
+	}
+	if (parameter->isOfType<RichShot>()) {
+		o << "None";
+		return;
+	}
+	if (parameter->isOfType<RichColor>()) {
+		QColor c = parameter->value().getColor();
+		o <<
+			"[" + std::to_string(c.red()) + "; " +
+			std::to_string(c.green()) + "; " +
+			std::to_string(c.blue()) + "; " +
+			std::to_string(c.alpha()) + "]";
+		return;
+	}
+	if (parameter->isOfType<RichMesh>()){
+		const RichMesh* rm = dynamic_cast<const RichMesh*>(parameter);
+		o << rm->value().getInt();
+		return;
+	}
+	if (parameter->isOfType<RichFileSave>() || parameter->isOfType<RichFileOpen>()){
+		o << "'" << parameter->value().getString().toStdString() << "'";
+		return;
+	}
+}
+
+QString pymeshlab::FunctionParameter::defaultValueString() const
+{
+	std::stringstream ss;
+	printDefaultValue(ss);
+	return QString::fromStdString(ss.str());
+}
+
+pymeshlab::FunctionParameter& pymeshlab::FunctionParameter::operator=(pymeshlab::FunctionParameter oth)
+{
+	this->swap(oth);
+	return *this;
+}
+
+bool pymeshlab::FunctionParameter::operator<(const pymeshlab::FunctionParameter& oth) const
+{
+	return parameter->pythonName() < oth.parameter->pythonName();
+}
+
+bool pymeshlab::FunctionParameter::operator==(const pymeshlab::FunctionParameter& oth) const
+{
+	return parameter->pythonName() == oth.parameter->pythonName();
+}
+
+void pymeshlab::FunctionParameter::swap(pymeshlab::FunctionParameter& oth)
+{
+	std::swap(parameter, oth.parameter);
+}

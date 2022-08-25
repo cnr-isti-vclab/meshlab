@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="root">
+        <xsd:complexType>
+            <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+                <xsd:element name="item">
+                    <xsd:complexType>
+                        <xsd:attribute name="v1" type="xsd:decimal"/>
+                        <xsd:attribute name="v2" type="xsd:string"/>
+                        <xsd:attribute name="v3" type="xsd:time"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+        </xsd:complexType>
+        <xsd:unique name="uniqueCons">
+            <xsd:selector xpath="item"/>
+            <xsd:field xpath="@v1"/>
+            <xsd:field xpath="@v2"/>
+            <xsd:field xpath="@v3"/>
+        </xsd:unique>
+    </xsd:element>
+</xsd:schema>

@@ -1,0 +1,10 @@
+<RCC>
+    <qresource>
+        <file>shaders/reproj.vert</file>
+        <file>shaders/reproj.frag</file>
+        <file>shaders/visibility_check.vert</file>
+        <file>shaders/visibility_check.frag</file>
+        <file>shaders/weight_gen.vert</file>
+        <file>shaders/weight_gen.frag</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>x3d.rendertemplate</file>
+        <file>x3d2.rendertemplate</file>
+        <file>x3d3.rendertemplate</file>
+        <file>x3d4.rendertemplate</file>
+    </qresource>
+</RCC>

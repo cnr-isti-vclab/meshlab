@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><x xmlns="http://www.schemaTest.org/xinclude-test" xml:base="../included/" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test ../tests/tests.xsd">
+   <!-- using xml:base on parent element to move to the included directory -->
+   <elem xml:base="elem.xml" xmlns="http://www.schemaTest.org/xinclude-test"/>
+</x>

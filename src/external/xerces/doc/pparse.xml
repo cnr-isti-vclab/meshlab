@@ -1,0 +1,76 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Sample: PParse">
+
+    <s2 title="PParse">
+        <p>PParse demonstrates progressive parsing.</p>
+        <p>In this example, the application doesn't have to depend upon throwing
+            an exception to terminate the parsing operation. Calling parseFirst() will
+            cause the DTD to be parsed (both internal and external subsets) and any
+            pre-content, i.e. everything up to but not including the root element.
+            Subsequent calls to parseNext() will cause one more piece of markup to
+            be parsed, and propagated from the core scanning code to the parser. You
+            can quit the parse any time by just not calling parseNext() anymore
+            and breaking out of the loop. When you call parseNext() and the end
+            of the root element is the next piece of markup, the parser will
+            continue on to the end of the file and return false, to let you
+			know that the parse is done.</p>
+
+        <s3 title="Running PParse">
+        	<p>PParse parses an XML file and prints out the number of
+          elements in the file.</p>
+<source>Usage:
+    PParse [options] &lt;XML file&gt;
+
+This program demonstrates the progressive parse capabilities of
+the parser system. It allows you to do a scanFirst() call followed by
+a loop which calls scanNext(). You can drop out when you've found what
+ever it is you want. In our little test, our event handler looks for
+16 new elements then sets a flag to indicate its found what it wants.
+At that point, our progressive parse loop exits.
+
+Options:
+      -v=xxx        - Validation scheme [always | never | auto*].
+      -n            - Enable namespace processing [default is off].
+      -s            - Enable schema processing [default is off].
+      -f            - Enable full schema constraint checking [default is off].
+      -?            - Show this help.
+
+  * = Default if not provided explicitly.
+</source>
+          <p><em>-v=always</em> will force validation<br/>
+             <em>-v=never</em> will not use any validation<br/>
+             <em>-v=auto</em> will validate if a DOCTYPE declaration or a schema declaration is present in the XML document</p>
+          <p>Here is a sample output from PParse</p>
+<source>cd &XercesC3InstallDir;/samples/data
+PParse -v=always personal.xml
+personal.xml: 60 ms (37 elems, 12 attrs, 134 spaces, 134 chars)</source>
+          <p>Running PParse with the validating parser gives a different result because
+          ignorable white-space is counted separately from regular characters.</p>
+<source>PParse -v=never personal.xml
+personal.xml: 10 ms (37 elems, 12 attrs, 0 spaces, 268 chars)</source>
+          <p>Note that the sum of spaces and characters in both versions is the same.</p>
+
+          <note>The time reported by the program may be different depending on your
+          processor speed.</note>
+        </s3>
+    </s2>
+</s1>

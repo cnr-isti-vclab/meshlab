@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+<!DOCTYPE elem SYSTEM "../tests/tests.dtd">
+<elem foo="image"
+      xmlns="http://www.schemaTest.org/xinclude-test"/>

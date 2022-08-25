@@ -1,0 +1,123 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Sample: SAX2Print">
+
+    <s2 title="SAX2Print">
+        <p>SAX2Print uses the SAX2 APIs to parse an XML file and print
+		it back. Do note that the output of this sample is not
+		exactly the same as the input (in terms of whitespaces, first
+		line), but the output has the same information content as the
+		input.</p>
+
+        <s3 title="Running SAX2Print">
+
+          <p>The SAX2Print sample parses an XML file and prints out the
+          contents again in XML (some loss occurs). To run SAX2Print,
+          enter the following </p>
+
+<source>SAX2Print &lt;XML file&gt;</source>
+          <p>The following parameters may be set from the command line </p>
+<source>
+Usage:
+    SAX2Print [options] &lt;XML file&gt;
+
+This program invokes the SAX2XMLReader, and then prints the
+data returned by the various SAX2 handlers for the specified
+XML file.
+
+Options:
+    -u=xxx      Handle unrepresentable chars [fail | rep | ref*].
+    -v=xxx      Validation scheme [always | never | auto*].
+    -e          Expand Namespace Alias with URI's.
+    -x=XXX      Use a particular encoding for output (LATIN1*).
+    -f          Enable full schema constraint checking processing. Defaults to off.
+    -p          Enable namespace-prefixes feature. Defaults to off.\n"
+    -n          Disable namespace processing. Defaults to on.\n"
+                NOTE: THIS IS OPPOSITE FROM OTHER SAMPLES.\n"    
+    -s          Disable schema processing. Defaults to on.
+                NOTE: THIS IS OPPOSITE FROM OTHER SAMPLES.
+    -?          Show this help.
+
+  * = Default if not provided explicitly.
+
+The parser has intrinsic support for the following encodings:
+    UTF-8, US-ASCII, ISO8859-1, UTF-16[BL]E, UCS-4[BL]E,
+    WINDOWS-1252, IBM1140, IBM037, IBM1047.
+</source>
+
+          <p><em>-u=fail</em> will fail when unrepresentable characters are encountered<br/>
+             <em>-u=rep</em> will replace with the substitution character for that codepage<br/>
+             <em>-u=ref</em> will report the character as a reference</p>
+          <p><em>-v=always</em> will force validation<br/>
+             <em>-v=never</em>  will not use any validation<br/>
+             <em>-v=auto</em>   will validate if a DOCTYPE declaration or a schema declaration is present in the XML document</p>
+          <p>Here is a sample output from SAX2Print</p>
+<source>cd &XercesC3InstallDir;/samples/data
+SAX2Print -v=always personal.xml
+
+&lt;?xml version="1.0" encoding="LATIN1"?&gt;
+&lt;personnel&gt;
+
+  &lt;person id="Big.Boss"&gt;
+    &lt;name&gt;&lt;family&gt;Boss&lt;/family&gt; &lt;given&gt;Big&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;chief@foo.com&lt;/email&gt;
+    &lt;link subordinates="one.worker two.worker three.worker
+	                       four.worker five.worker"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+  &lt;person id="one.worker"&gt;
+    &lt;name&gt;&lt;family&gt;Worker&lt;/family&gt; &lt;given&gt;One&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;one@foo.com&lt;/email&gt;
+    &lt;link manager="Big.Boss"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+  &lt;person id="two.worker"&gt;
+    &lt;name&gt;&lt;family&gt;Worker&lt;/family&gt; &lt;given&gt;Two&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;two@foo.com&lt;/email&gt;
+    &lt;link manager="Big.Boss"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+  &lt;person id="three.worker"&gt;
+    &lt;name&gt;&lt;family&gt;Worker&lt;/family&gt; &lt;given&gt;Three&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;three@foo.com&lt;/email&gt;
+    &lt;link manager="Big.Boss"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+  &lt;person id="four.worker"&gt;
+    &lt;name&gt;&lt;family&gt;Worker&lt;/family&gt; &lt;given&gt;Four&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;four@foo.com&lt;/email&gt;
+    &lt;link manager="Big.Boss"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+  &lt;person id="five.worker"&gt;
+    &lt;name&gt;&lt;family&gt;Worker&lt;/family&gt; &lt;given&gt;Five&lt;/given&gt;&lt;/name&gt;
+    &lt;email&gt;five@foo.com&lt;/email&gt;
+    &lt;link manager="Big.Boss"&gt;&lt;/link&gt;
+  &lt;/person&gt;
+
+&lt;/personnel&gt;</source>
+          <note>SAX2Print does not reproduce the original XML file.
+		  SAX2Print and DOMPrint produce different results because of
+		  the way the two APIs store data and capture events.</note>
+        </s3>
+
+    </s2>
+</s1>

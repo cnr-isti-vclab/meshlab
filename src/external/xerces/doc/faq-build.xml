@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding = "iso-8859-1" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE faqs SYSTEM "sbk:/style/dtd/faqs.dtd">
+
+<faqs title="Building / Running &XercesCName;">
+
+  <faq title="Why do I get compilation error saying DOMDocument was declared twice using
+              Microsoft Visual C++?">
+
+    <q>Why do I get compilation error saying DOMDocument was declared twice using
+       Microsoft Visual C++?</q>
+
+    <a>
+
+      <p>Your application somehow has picked up the Microsoft SDK header <code>Msxml.h</code>
+         which has its own typedef of <code>DOMDocument</code>.   This confuses
+         with the &XercesCName; &XercesC3Version; <code>&XercesC3Namespace;::DOMDocument</code>
+         and thus lead to the compilation errors.</p>
+
+      <p>Qualifier the use of DOMDocument in your application explicitly e.g.,
+         <br/><br/><code>xercesc::DOMDocument* doc;</code><br/><br/>
+         will eliminate these compilation problems. Alternatively, you
+         may want to get rid of the <code>Msxml.h</code> header inclusion.
+      </p>
+
+    </a>
+  </faq>
+
+  <faq title="Why does my application have unresolved linking errors?">
+
+    <q>Why does my application give unresolved linking errors?</q>
+
+    <a>
+
+      <p>Please check the following:</p>
+      <ol>
+        <li>Verify that you have specified the appropriate option and library path in the linker
+            command line</li>
+        <li>If you're using the binary build of &XercesCName;, make sure that the CPU architecture, OS,
+            and compiler are
+            the same as the ones used to build the application.  Different OS and
+            compiler versions might cause unresolved linking problems or compilation
+            errors. If the versions are different, rebuild the &XercesCName; library on
+            your system before building your application.</li>
+        <li>If you are using Microsoft Visual Studio 2003 (7.1), 2005 (8.0), or 2008 (9.0),
+            check that the
+	    "Treat wchar_t as a built-in type" option has been set to the same value as
+	    used to build &XercesCName;. The binary distribution for Visual Studio 7.1 is
+            built with this option turned off. The binary distributions for Visual Studio 8.0
+            and 9.0 are built with this option turned on.</li>
+      </ol>
+    </a>
+  </faq>
+
+  <faq title="I cannot run the sample applications. What is wrong?">
+
+    <q>I cannot run the sample applications. What is wrong?</q>
+
+    <a>
+
+      <p>In order to run an application built using &XercesCProjectName; you must
+        set up your path and library search path properly. For more information
+        refer to the <link idref="install-&XercesC3Series;">Installation instructions</link>.
+      </p>
+
+    </a>
+  </faq>
+
+
+  <faq title="Why my document is valid on some platforms while invalid on others">
+    <q>Why my document is valid on some platform while invalid on others?</q>
+    <a>
+      <p>The parser relies on the system call, strtod(), to parse a string representation
+         of a double/float data. In the case of no invalid characters found, the strtod()
+         returns a double/float value if it is representable on that platform, or raises
+         ERANGE to indicate either underflow or underflow occurs. And the parser assigns
+         zero to the said data if underflow is found.
+      </p>
+      <p>The threshold, where the strtod() decides if an underflow occurs, varies on
+         platforms. On Windows, it is roughly the order of e-308, on Linux, e-325, and
+         on AIX, HP-UX and Solaris, e-324.
+      </p>
+      <p>So in an instance document, a data of value 1.0e-310 from a type with minExclusive 0,
+         is considered invalid on windows (since it is converted to 0 and therefore violates
+         the minExclusive constraint), but valid on other Unix platforms (since it remains
+         the original value).
+      </p>
+      <p>The discussion above applies to data in xsd file as well.
+      </p>
+    </a>
+  </faq>
+
+</faqs>

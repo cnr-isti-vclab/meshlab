@@ -1,0 +1,512 @@
+= Microsoft Kinect Camera Protocol Documentation =
+The OpenKinect Community
+v1.0, 2010-11-15
+
+== Introduction ==
+
+This document outlines the USB protocol for the Microsoft Kinect
+Camera for the Xbox 360 Console.
+
+== License ==
+
+This documentation is a product of the OpenKinect community, and is
+shared via the Creative Commons license, CC-BY-SA. All attributions
+should be made to the OpenKinect Community. More information on the
+license is available at
+
+http://creativecommons.org/licenses/by-sa/2.0/
+
+== Credits ==
+
+This document was compiled via multiple sources (wiki, IRC logs, code,
+personal knowledge) by Kyle Machulis (qDot), who is contactable at
+kyle@nonpolynomial.com, or http://www.nonpolynomial.com
+
+Credits for early versions of this documentation on the wiki
+
+- Josh Blake (http://nui.joshland.org)
+- Github user ab500 (http://www.github.com/ab500)
+- Github user hddscan (http://www.github.com/hddscan)
+
+Credits for protocol portions
+
+- Héctor Martín Cantero (http://marcansoft.com/blog/) for most of the
+  work on the camera protocol
+- Josh Blake (http://nui.joshland.org) for the LED messages 
+- Limor Fried (http://www.adafruit.com) for the motor commands
+- Whoever cracks the audio first for the audio
+
+Credits for USB dumps leading to protocol info
+
+- Thanks also to Limor Fried (http://www.adafruit.net) for the initial
+  USB dumps for the motor, LED and Camera
+- Rafael Rivera (http://withinwindows.com) for the USB dumps for audio
+  reversing.
+
+== Document Notation ==
+
+The following notation is used in the packet formats in this document
+
+0xXX:: refers to a byte that is ignored and can take any value
+0x??:: refers to a byte that is significant but variable
+
+== Device Description ==
+
+The Kinect consists of a USB hub with 3 different devices:
+
+- A camera device, with endpoints for depth and RGB
+- A audio device, with two in endpoints for microphones and out
+  endpoints for receiving echo cancellation information from the Xbox
+- A motor/LED device, with no endpoints, operating completely from
+  control messages.
+
+== Camera Device ==
+
+=== USB Descriptior ===
+
+-----
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  idVendor           0x045e Microsoft Corp.
+  idProduct          0x02ae
+  bcdDevice            1.0b
+  iManufacturer           2 Microsoft
+  iProduct                1 Xbox NUI Camera
+  iSerial                 3 A00366A08793039A
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           32
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower               16mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass       255 Vendor Specific Class
+      bInterfaceSubClass    255 Vendor Specific Subclass
+      bInterfaceProtocol    255 Vendor Specific Protocol
+      iInterface              0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            1
+          Transfer Type            Isochronous
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0bc0  2x 960 bytes
+        bInterval               1
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes            1
+          Transfer Type            Isochronous
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0bc0  2x 960 bytes
+        bInterval               1
+Device Qualifier (for other device speed):
+  bLength                10
+  bDescriptorType         6
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  bNumConfigurations      1
+Device Status:     0x0001
+  Self Powered
+-----
+
+=== Device Initialization ===
+
+Device initialization of the cameras happens via control messages.
+
+==== Message 1 - STALL ====
+
+- *bmRequestType:* 0x80
+- *bRequest:* 0x3ee
+- *wValue:* 0x0
+- *wIndex:* 0x0
+- *wLength:* 0x12
+- *Data:* 18 byte buffer, zeroed out
+
+*Description:* Message actually results in a stall. Differs from all
+ other init messages.
+
+*Hypothesis:* May turn off firmware loading listener?
+
+==== Messages 2-29
+
+The rest of the messages are the actual initialization for the camera.
+
+- *bmRequestType:* 0x40
+- *bRequest:* 0x0
+- *wValue:* 0x0
+- *wIndex:* 0x0
+- *wLength:* 0x???? (Varies per packet)
+- *Data:* Initialization packet, described below
+
+Initialization headers and replies are expected to be a packed
+struct. The following is the packet header expressed in the C language
+from libfreenect.
+
+-----
+struct cam_hdr {
+	uint8_t magic[2];
+	uint16_t len;
+	uint16_t cmd;
+	uint16_t tag;
+	//data packed after this
+};
+-----
+
+The "magic" value for initialization commands to the camera correspond
+to the ASCII string "GM", and should always be
+
+-----
+0x47 0x4d
+-----
+
+The "magic" value for initialization replies from the camera
+correspond to the ASCII string "RB", and should always be
+
+-----
+0x52 0x42
+-----
+
+The command information for all initialization packets:
+
+- *Command:* 0x03
+- *Tag:* 0x???? - Number increases by 1 every packet. libfreenect
+   starts with 0x1267. Setting too low can cause stalls.
+- *Length:* 0x2 - Command length / 2 (?)
+
+Data is always 4 bytes, but values vary from packet to packet.  Each
+command is listed below, with any information about known usage listed
+next to the data.
+
+.Message Data
+-----
+0x06 0x00 0x00 0x00
+0x12 0x00 0x03 0x00
+0x14 0x00 0x1e 0x00
+0x06 0x00 0x02 0x00
+0x06 0x00 0x00 0x00
+0x12 0x00 0x03 0x00
+0x13 0x00 0x01 0x00
+0x14 0x00 0x1e 0x00
+0x16 0x00 0x01 0x00
+0x18 0x00 0x00 0x00
+0x02 0x00 0x00 0x00
+0x05 0x01 0x00 0x00
+0x24 0x00 0x01 0x00
+0x2d 0x00 0x01 0x00
+0x06 0x00 0x02 0x00
+0x05 0x00 0x00 0x00
+0x0c 0x00 0x01 0x00
+0x0d 0x00 0x01 0x00
+0x0e 0x00 0x1e 0x00
+0x05 0x00 0x01 0x00
+0x47 0x00 0x00 0x00
+0x0c 0x00 0x00 0x00
+0x05 0x00 0x00 0x00
+0x0d 0x00 0x01 0x00
+0x0e 0x00 0x1e 0x00
+0x05 0x00 0x01 0x00
+0x47 0x00 0x00 0x00
+-----
+
+=== Frames ===
+
+Frame transfer happens via isochronous transfers from the two device
+endpoints.
+
+Packet headers are expected to be a packed struct. The
+following is the packet header expressed in the C language from
+libfreenect.
+
+-----
+struct frame_hdr {
+	uint8_t magic[2];
+	uint8_t pad;
+	uint8_t flag;
+	uint8_t unk1;
+	uint8_t seq;
+	uint8_t unk2;
+	uint8_t unk3;
+	uint32_t timestamp;
+};
+-----
+
+The "magic" value for frames from the camera correspond to the ASCII
+string "RB", and should always be
+
+-----
+0x52 0x42
+-----
+
+The high nibble of the flag value will vary based on the endpoint
+(0x7? for depth, 0x8? for RGB), but the low nibble of the byte will
+correspond as follows
+
+- 0x?1 - Beginning of new frame
+- 0x?2 - Current frame
+- 0x?5 - End of frame
+
+Experimentally, timestamp data does not seem to line up between frames
+from the two cameras, with the IR camera experiencing an extremely
+slight drift in relation to the RGB camera.
+
+After the header data, the rest of the data is considered to be frame
+data.
+
+==== Frame Layout - IR Camera ====
+
+Frames for the RGB Camera are received over the 0x81 isochronous endpoint.
+
+- 0x7? - High nibble of all frame header flag values
+- Frame size - 422400
+
+Each frame consists of 242 packets. All packets except the last should
+be 1760 bytes (even though the endpoint denotes 1920 bytes, via 2x960
+byte packets). The last packet will be 1144 bytes.
+
+==== Frame Layout - RGB Camera ====
+
+Packets for the RGB Camera are received over the 0x82 isochronous endpoint.
+
+- 0x8? - High nibble of all frame header flag values
+- Frame size - 307200
+
+Each frame consists of 162 packets. All packets except the last should
+be 1920 bytes. The last packet will be 24 bytes.
+
+==== Frame Decoding - IR Camera ====
+
+The Depth Camera sends a monochrom image made up of 11-bit values per
+pixel, in big-endian format. These values can be shifted and repeated
+into an RGB888 pixel format to make a grayscale image based on the
+depth.
+
+==== Frame Decoding - RGB Camera ====
+
+The RGB Camera lays out frames in a 640x480 Bayer pattern. The Bayer
+pattern is RG, GB.
+
+== Motor/LED Device
+
+=== USB Descriptior ===
+
+-----
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  idVendor           0x045e Microsoft Corp.
+  idProduct          0x02b0
+  bcdDevice            1.05
+  iManufacturer           1 Microsoft
+  iProduct                2 Xbox NUI Motor
+  iSerial                 0
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           18
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower              100mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass       255 Vendor Specific Class
+      bInterfaceSubClass      0
+      bInterfaceProtocol      0
+      iInterface              0
+Device Status:     0x0000
+  (Bus Powered)
+-----
+
+=== Initialization Check ===
+
+- *bmRequestType:* 0xC0
+- *bRequest:* 0x10
+- *wValue:* 0x00
+- *wIndex:* 0x00
+- *wLength:* 0x01
+- *Data:* Read request, pass one byte buffer to read into
+
+If device is ready, will write 0x22 into buffer.
+
+=== Command - LED Setting ===
+
+The LED of the Kinect is set via Control Messages to the Motor/LED
+device.
+
+- *bmRequestType:* 0x40
+- *bRequest:* 0x06
+- *wValue:* 0x?? (LED Config Value, listed below)
+- *wIndex:* 0x0
+- *wLength:* 0x0
+- *Data:* None
+
+The following LED values are available:
+
+- 0x0 - Off
+- 0x1 - Green
+- 0x2 - Red
+- 0x3 - Yellow
+- 0x4 - Blinking Yellow
+- 0x5 - Blinking Green
+- 0x6 - Alternate Red Yellow
+- 0x7 - Alternate Red Green
+
+=== Command - Motor Position ===
+
+The Motor of the Kinect is set via Control Messages to the Motor/LED
+device.
+
+- *bmRequestType:* 0x40
+- *bRequest:* 0x31
+- *wValue:* 0xFF?? (Motor Position Value, low byte explained below)
+- *wIndex:* 0x0
+- *wLength:* 0x0
+- *Data:* None
+
+Motor position is a value 0xc0 (lowest position) < x < 0xff (highest
+position).
+
+*Warning:* There is no physical stop in the Kinect
+hardware. Overdriving the motor device outside of the usable range may
+cause motor breakage.
+
+== Audio Device ==
+
+=== USB Descriptor ===
+
+-----
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass          255 Vendor Specific Class
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  idVendor           0x045e Microsoft Corp.
+  idProduct          0x02ad
+  bcdDevice            1.00
+  iManufacturer           1 Microsoft
+  iProduct                2 Xbox NUI Audio
+  iSerial                 4 A44886D18656039A
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           46
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower                0mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           4
+      bInterfaceClass       255 Vendor Specific Class
+      bInterfaceSubClass      0
+      bInterfaceProtocol      0
+      iInterface              0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0200  1x 512 bytes
+        bInterval               1
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x01  EP 1 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0200  1x 512 bytes
+        bInterval               1
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes           13
+          Transfer Type            Isochronous
+          Synch Type               Synchronous
+          Usage Type               Data
+        wMaxPacketSize     0x020c  1x 524 bytes
+        bInterval               5
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes           13
+          Transfer Type            Isochronous
+          Synch Type               Synchronous
+          Usage Type               Data
+        wMaxPacketSize     0x0048  1x 72 bytes
+        bInterval               1
+Device Qualifier (for other device speed):
+  bLength                10
+  bDescriptorType         6
+  bcdUSB               2.00
+  bDeviceClass          255 Vendor Specific Class
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  bNumConfigurations      1
+Device Status:     0x0001
+  Self Powered
+-----
+
+=== Device Initialization ===
+
+Currently unknown
+
+=== Packet Format - Echo Cancellation Input ===
+
+Currently unknown
+
+=== Packet Format - Microphone Output ===
+
+Currently unknown

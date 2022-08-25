@@ -1,0 +1,20 @@
+/*
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+
+/*!
+  \page vitelotte_example_common_page Vitelotte common utilities
+
+  The <tt>common</tt> directory under the <tt>example/vitelotte</tt> directory contains pieces of code used by several examples.
+
+  This directory contains:
+  - GLLineRenderer and GLPointRenderer respectively renders lines and points in OpenGL. They use custom shader to produce high quality result with antialiasing.
+  - VGNodeRenderer renders a wireframe version of the mesh where constrained edges are bold and doubled if they represent a value discontinuity, and also display nodes per edges. It can be used to have a better understanding of the connectivity of a mesh, making it a useful debugging tool. This class rely on GLLineRenderer and GLPointRenderer and is used by examples doing rendering.
+  - <tt>plotObj.h</tt> contains a function that convert a 2D mvg file in a 3D plot. Used by the <tt>plot</tt> command of mvgtk and useful for debugging.
+  - <tt>textFormatter.h</tt> contains a simple function to break paragraph into multiple lines. Used by mvgtk for help display.
+  - <tt>shaders.cpp</tt> contains the shaders required by the various OpenGL classes in this directory. It is an automatically generated file that regroup the content of the <tt>shaders</tt> directory in a single .cpp.
+
+*/

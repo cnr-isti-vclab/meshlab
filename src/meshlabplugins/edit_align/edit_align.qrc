@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>images/icon_align.png</file>
+        <file>images/cur_align.png</file>
+	<file alias="layer_eye_open.png">../../meshlab/images/layer_eye_open.png</file>
+	<file alias="layer_eye_close.png">../../meshlab/images/layer_eye_close.png</file>
+    </qresource>
+</RCC>

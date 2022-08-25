@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/color_blue.png</file>
+        <file>images/color_green.png</file>
+        <file>images/color_red_ggr.png</file>
+        <file>images/color_red_grg.png</file>
+        <file>images/edgecollapse.png</file>
+        <file>images/edgesplit.png</file>
+        <file>images/rgbt.png</file>
+        <file>images/sel_rect.png</file>
+        <file>images/sel_rect_minus.png</file>
+        <file>images/sel_rect_plus.png</file>
+        <file>images/select_face.png</file>
+        <file>images/select_face_rect.png</file>
+        <file>images/triangle.png</file>
+        <file>images/vertex.png</file>
+        <file>images/brush.png</file>
+        <file>images/eraser.png</file>
+</qresource>
+</RCC>

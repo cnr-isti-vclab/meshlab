@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/" >
+    <file>images/icon_straightener.png</file>
+    <file>images/cur_straightener.png</file>
+  </qresource>
+</RCC>

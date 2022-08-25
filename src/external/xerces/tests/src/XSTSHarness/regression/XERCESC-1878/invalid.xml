@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema.xsd">
+	<item v3="10:44:32+02:00" v1="1" v2="x"/>
+	<item v3="11:44:32.000+03:00" v1="+1.0" v2="x"/>
+</root>

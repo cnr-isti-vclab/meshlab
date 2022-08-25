@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/AmbientOcclusion">
+        <file>shaders/ambient_occlusion8.frag</file>
+        <file>shaders/ambient_occlusion4.frag</file>
+        <file>shaders/ambient_occlusion.vert</file>
+    </qresource>
+</RCC>

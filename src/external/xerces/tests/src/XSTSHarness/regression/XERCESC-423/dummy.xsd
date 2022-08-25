@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     xmlns:pr="http://www.homag.de/proresult"
+     targetNamespace="http://www.homag.de/proresult"
+     elementFormDefault="qualified"
+     attributeFormDefault="unqualified">
+
+  <xs:attributeGroup name="AttrDERIVED1">
+    <xs:attribute name="Derived1Name" type="xs:string" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="DERIVED1">
+    <xs:complexContent>
+      <xs:extension base="pr:BASE">
+        <xs:attributeGroup ref="pr:AttrDERIVED1"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:attributeGroup name="AttrDERIVED2">
+    <xs:attribute name="Derived2Name" type="xs:string" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="DERIVED2">
+    <xs:complexContent>
+      <xs:extension base="pr:BASE">
+        <xs:attributeGroup ref="pr:AttrDERIVED2"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:attributeGroup name="AttrDERIVED3">
+    <xs:attribute name="Derived3Name" type="xs:string" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="DERIVED3">
+    <xs:complexContent>
+      <xs:extension base="pr:BASE">
+        <xs:attributeGroup ref="pr:AttrDERIVED3"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:attributeGroup name="AttrBASE">
+    <xs:attribute name="BaseName" type="xs:string" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="BASE">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="BASE" type="pr:BASE" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="pr:AttrBASE"/>
+  </xs:complexType>
+
+  <xs:element name="PRORESULT">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="BASE" type="pr:BASE" minOccurs="0" maxOccurs="1"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

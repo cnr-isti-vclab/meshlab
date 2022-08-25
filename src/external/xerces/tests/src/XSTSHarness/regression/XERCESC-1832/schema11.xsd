@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="x" elementFormDefault="qualified" targetNamespace="x" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:complexType name="derivedC">
+		<xs:complexContent mixed="false" xmlns:q2="http://www.w3.org/2001/XMLSchema">
+			<xs:extension xmlns:q1="x" base="q1:baseC">
+				<xs:sequence xmlns:q3="http://www.w3.org/2001/XMLSchema">
+					<xs:element minOccurs="0" maxOccurs="1" name="c" type="q2:boolean"/>
+					<xs:element minOccurs="0" maxOccurs="1" name="d" type="q3:boolean"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="baseC">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="1" name="a" type="xs:string" />
+			<xs:element minOccurs="0" maxOccurs="1" name="b" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="baseS" xmlns:q6="http://www.w3.org/2001/XMLSchema">
+		<q6:restriction xmlns:q4="http://www.w3.org/2001/XMLSchema" base="q4:string">
+			<q5:length xmlns:q5="http://www.w3.org/2001/XMLSchema" value="3"/>
+		</q6:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="derivedS">
+		<q7:simpleContent xmlns:q7="http://www.w3.org/2001/XMLSchema">
+			<xs:extension xmlns:q8="x" base="q8:baseS">
+				<xs:attribute name="p" type="q7:string"/>
+			</xs:extension>
+		</q7:simpleContent>
+	</xs:complexType>
+</xs:schema>

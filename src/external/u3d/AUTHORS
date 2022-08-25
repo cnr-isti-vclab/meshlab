@@ -1,0 +1,7 @@
+Intel Corporation
+
+Repackaging for cmake and autotools, minor fixes done by
+Michail Vidiassov <master@iaas.msu.ru>
+
+See Docs/LicensesAdditional.txt for information on authors of 
+bundled 3-rd party tools.

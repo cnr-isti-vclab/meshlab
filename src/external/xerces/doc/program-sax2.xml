@@ -1,0 +1,662 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="SAX2 Programming Guide">
+
+    <anchor name="UsingSAX2API"/>
+    <s2 title="Using the SAX2 API">
+      <p>The SAX2 API for XML parsers was originally developed for
+        Java.  Please be aware that there is no standard SAX2 API for
+        C++, and that use of the &XercesCName; SAX2 API does not
+        guarantee client code compatibility with other C++ XML
+        parsers.</p>
+
+      <p>The SAX2 API presents a callback based API to the parser. An
+        application that uses SAX2 provides an instance of a handler
+        class to the parser. When the parser detects XML constructs,
+        it calls the methods of the handler class, passing them
+        information about the construct that was detected. The most
+        commonly used handler classes are ContentHandler which is
+        called when XML constructs are recognized, and ErrorHandler
+        which is called when an error occurs. The header files for the
+        various SAX2 handler classes are in the <code>xercesc/sax2/</code>
+        directory.</p>
+
+      <p>As a convenience, &XercesCName; provides DefaultHandler,
+        a single class which is publicly derived
+        from all the Handler classes. DefaultHandler's default
+        implementation of the handler callback methods is to do
+        nothing. A convenient way to get started with &XercesCName; is
+        to derive your own handler class from DefaultHandler and override
+        just those methods in HandlerBase which you are interested in
+        customizing. This simple example shows how to create a handler
+        which will print element names, and print fatal error
+        messages. The source code for the sample applications show
+        additional examples of how to write handler classes.</p>
+
+      <p>This is the header file MySAX2Handler.hpp:</p>
+<source>#include &lt;xercesc/sax2/DefaultHandler.hpp>
+
+class MySAX2Handler : public DefaultHandler {
+public:
+    void startElement(
+        const   XMLCh* const    uri,
+        const   XMLCh* const    localname,
+        const   XMLCh* const    qname,
+        const   Attributes&amp;     attrs
+    );
+    void fatalError(const SAXParseException&amp;);
+};</source>
+
+      <p>This is the implementation file MySAX2Handler.cpp:</p>
+
+<source>#include "MySAX2Handler.hpp"
+#include &lt;iostream>
+
+using namespace std;
+
+MySAX2Handler::MySAX2Handler()
+{
+}
+
+void MySAX2Handler::startElement(const   XMLCh* const    uri,
+                            const   XMLCh* const    localname,
+                            const   XMLCh* const    qname,
+                            const   Attributes&amp;     attrs)
+{
+    char* message = XMLString::transcode(localname);
+    cout &lt;&lt; "I saw element: "&lt;&lt; message &lt;&lt; endl;
+    XMLString::release(&amp;message);
+}
+
+void MySAX2Handler::fatalError(const SAXParseException&amp; exception)
+{
+    char* message = XMLString::transcode(exception.getMessage());
+    cout &lt;&lt; "Fatal Error: " &lt;&lt; message
+         &lt;&lt; " at line: " &lt;&lt; exception.getLineNumber()
+         &lt;&lt; endl;
+    XMLString::release(&amp;message);
+}</source>
+
+      <p>The XMLCh and Attributes types are supplied by
+        &XercesCName; and are documented in the API Reference.
+        Examples of their usage appear in the source code to
+        the sample applications.</p>
+    </s2>
+
+    <anchor name="SAX2XMLReader"/>
+    <s2 title="SAX2XMLReader">
+        <anchor name="ConstructParser2"/>
+        <s3 title="Constructing an XML Reader">
+          <p>In order to use &XercesCName; SAX2 to parse XML files, you will
+            need to create an instance of the SAX2XMLReader class. The example
+            below shows the code you need in order to create an instance
+            of SAX2XMLReader. The ContentHandler and ErrorHandler instances
+            required by the SAX2 API are provided using the DefaultHandler
+            class supplied with &XercesCName;.</p>
+
+    <source>
+    #include &lt;xercesc/sax2/SAX2XMLReader.hpp>
+    #include &lt;xercesc/sax2/XMLReaderFactory.hpp>
+    #include &lt;xercesc/sax2/DefaultHandler.hpp>
+    #include &lt;xercesc/util/XMLString.hpp>
+
+    #include &lt;iostream>
+
+    using namespace std;
+    using namespace xercesc;
+
+    int main (int argc, char* args[]) {
+
+        try {
+            XMLPlatformUtils::Initialize();
+        }
+        catch (const XMLException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; "Error during initialization! :\n";
+            cout &lt;&lt; "Exception message is: \n"
+                 &lt;&lt; message &lt;&lt; "\n";
+            XMLString::release(&amp;message);
+            return 1;
+        }
+
+        char* xmlFile = "x1.xml";
+        SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+        parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
+        parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);   // optional
+
+        DefaultHandler* defaultHandler = new DefaultHandler();
+        parser->setContentHandler(defaultHandler);
+        parser->setErrorHandler(defaultHandler);
+
+        try {
+            parser->parse(xmlFile);
+        }
+        catch (const XMLException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; "Exception message is: \n"
+                 &lt;&lt; message &lt;&lt; "\n";
+            XMLString::release(&amp;message);
+            return -1;
+        }
+        catch (const SAXParseException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; "Exception message is: \n"
+                 &lt;&lt; message &lt;&lt; "\n";
+            XMLString::release(&amp;message);
+            return -1;
+        }
+        catch (...) {
+            cout &lt;&lt; "Unexpected Exception \n" ;
+            return -1;
+        }
+
+        delete parser;
+        delete defaultHandler;
+        return 0;
+    }</source>
+        </s3>
+
+        <anchor name="SAX2Features"/>
+        <s3 title="Supported Features in SAX2XMLReader">
+
+           <p>The behavior of the SAX2XMLReader is dependant on the values of the following features.
+           All of the features below can be set using the function <code>SAX2XMLReader::setFeature(cons XMLCh* const, const bool)</code>.
+           And can be queried using the function <code>bool SAX2XMLReader::getFeature(const XMLCh* const)</code>.
+           </p>
+           <p>None of these features can be modified in the middle of a parse, or an exception will be thrown.</p>
+
+           <s4 title="SAX2 Features">
+            <anchor name="namespaces"/>
+            <table>
+                <tr><th colspan="2"><em>http://xml.org/sax/features/namespaces</em></th></tr>
+                <tr><th><em>true:</em></th><td> Perform Namespace processing. </td></tr>
+                <tr><th><em>false:</em></th><td> Do not perform Namespace processing. </td></tr>
+                <tr><th><em>default:</em></th><td> true </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgSAX2CoreNameSpaces </td></tr>
+                <tr><th><em>note:</em></th><td> If the validation feature is set to true, then the
+                document must contain a grammar that supports the use of namespaces. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="namespace-prefixes">http://xml.org/sax/features/namespace-prefixes </link>
+                </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="validation">http://xml.org/sax/features/validation</link>
+                </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="namespace-prefixes"/>
+            <table>
+                <tr><th colspan="2"><em>http://xml.org/sax/features/namespace-prefixes</em></th></tr>
+                <tr><th><em>true:</em></th><td> Report the original prefixed names and attributes used for Namespace declarations. </td></tr>
+                <tr><th><em>false:</em></th><td> Do not report attributes used for Namespace declarations, and optionally do not report original prefixed names. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgSAX2CoreNameSpacePrefixes </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="validation"/>
+            <table>
+                <tr><th colspan="2"><em>http://xml.org/sax/features/validation</em></th></tr>
+                <tr><th><em>true:</em></th><td> Report all validation errors. </td></tr>
+                <tr><th><em>false:</em></th><td> Do not report validation errors. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgSAX2CoreValidation </td></tr>
+                <tr><th><em>note:</em></th><td> If this feature is set to true, the document must
+                specify a grammar.  If this feature is set to false and document specifies a grammar,
+                that grammar might be parsed but no validation of the document contents will be
+                performed. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="validation-dynamic">http://apache.org/xml/features/validation/dynamic</link>
+                </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="load-external-dtd">http://apache.org/xml/features/nonvalidating/load-external-dtd</link>
+                </td></tr>
+            </table>
+
+           </s4>
+
+           <s4 title="Xerces Features">
+            <anchor name="validation-dynamic"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/dynamic</em></th></tr>
+                <tr><th><em>true:</em></th><td> The parser will validate the document only if a grammar is specified.  (http://xml.org/sax/features/validation must be true). </td></tr>
+                <tr><th><em>false:</em></th><td> Validation is determined by the state of the http://xml.org/sax/features/validation feature. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesDynamic </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="validation">http://xml.org/sax/features/validation</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="schema"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/schema</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable the parser's schema support.  </td></tr>
+                <tr><th><em>false:</em></th><td> Disable the parser's schema support. </td></tr>
+                <tr><th><em>default:</em></th><td> true </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSchema </td></tr>
+                <tr><th><em>note</em></th><td> If set to true, namespace processing must also be turned on. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="namespaces">http://xml.org/sax/features/namespaces</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/schema-full-checking</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable full schema constraint checking, including checking
+                             which may be time-consuming or memory intensive. Currently, particle unique
+                             attribution constraint checking and particle derivation restriction checking
+                             are controlled by this option. </td></tr>
+                <tr><th><em>false:</em></th><td> Disable full schema constraint checking. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSchemaFullChecking </td></tr>
+                <tr><th><em>note:</em></th><td> This feature checks the schema grammar itself for
+                additional errors that are time-consuming or memory intensive. It does <em>not</em> affect the
+                level of checking performed on document instances that use schema grammars. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="schema">http://apache.org/xml/features/validation/schema</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="load-schema"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validating/load-schema</em></th></tr>
+                <tr><th><em>true:</em></th><td> Load the schema. </td></tr>
+                <tr><th><em>false:</em></th><td> Don't load the schema if it wasn't found in the grammar pool. </td></tr>
+                <tr><th><em>default:</em></th><td> true </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesLoadSchema </td></tr>
+                <tr><th><em>note:</em></th><td> This feature is ignored and no schemas are loaded if schema processing is disabled. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="schema">http://apache.org/xml/features/validation/schema</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="load-external-dtd"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/nonvalidating/load-external-dtd</em></th></tr>
+                <tr><th><em>true:</em></th><td> Load the external DTD. </td></tr>
+                <tr><th><em>false:</em></th><td> Ignore the external DTD completely. </td></tr>
+                <tr><th><em>default:</em></th><td> true </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesLoadExternalDTD </td></tr>
+                <tr><th><em>note</em></th><td> This feature is ignored and DTD is always loaded when validation is on. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="validation">http://xml.org/sax/features/validation</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="continue-after-fatal"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/continue-after-fatal-error</em></th></tr>
+                <tr><th><em>true:</em></th><td> Attempt to continue parsing after a fatal error. </td></tr>
+                <tr><th><em>false:</em></th><td> Stops parse on first fatal error. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesContinueAfterFatalError </td></tr>
+                <tr><th><em>note:</em></th><td> The behavior of the parser when this feature is set to
+                true is <em>undetermined</em>! Therefore use this feature with extreme caution because
+                the parser may get stuck in an infinite loop or worse. </td></tr>
+            </table>
+
+            <p/>
+
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation-error-as-fatal</em></th></tr>
+                <tr><th><em>true:</em></th><td> The parser will treat validation error as fatal and will
+                exit depends on the state of
+                <link anchor="continue-after-fatal">http://apache.org/xml/features/continue-after-fatal-error</link>.
+                </td></tr>
+                <tr><th><em>false:</em></th><td> The parser will report the error and continue processing. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesValidationErrorAsFatal </td></tr>
+                <tr><th><em>note:</em></th><td> Setting this true does not mean the validation error will
+                be printed with the word "Fatal Error".   It is still printed as "Error", but the parser
+                will exit if
+                <link anchor="continue-after-fatal">http://apache.org/xml/features/continue-after-fatal-error</link>
+                is set to false. </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="continue-after-fatal">http://apache.org/xml/features/continue-after-fatal-error</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="use-cached"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/use-cachedGrammarInParse</em></th></tr>
+                <tr><th><em>true:</em></th><td>Use cached grammar if it exists in the pool.</td></tr>
+                <tr><th><em>false:</em></th><td>Parse the schema grammar.</td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesUseCachedGrammarInParse </td></tr>
+                <tr><th><em>note:</em></th><td>If http://apache.org/xml/features/validation/cache-grammarFromParse is enabled,
+                this feature is set to true automatically and any setting to this feature by the user is a no-op.</td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="cache-grammar">http://apache.org/xml/features/validation/cache-grammarFromParse</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="cache-grammar"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/cache-grammarFromParse</em></th></tr>
+                <tr><th><em>true:</em></th><td>Cache the grammar in the pool for re-use in subsequent parses.</td></tr>
+                <tr><th><em>false:</em></th><td>Do not cache the grammar in the pool</td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesCacheGrammarFromParse </td></tr>
+                <tr><th><em>note:</em></th><td> If set to true, the http://apache.org/xml/features/validation/use-cachedGrammarInParse
+                is also set to true automatically.</td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="use-cached">http://apache.org/xml/features/validation/use-cachedGrammarInParse</link>
+                </td></tr>
+            </table>
+
+            <p/>
+
+            <anchor name="StandardUriConformant"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/standard-uri-conformant</em></th></tr>
+                <tr><th><em>true:</em></th><td> Force standard uri conformance. </td></tr>
+                <tr><th><em>false:</em></th><td> Do not force standard uri conformance. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesStandardUriConformant </td></tr>
+                <tr><th><em>note:</em></th><td> If set to true, malformed uri will be rejected
+                and fatal error will be issued. </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="CalculateSrcOffset"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/calculate-src-ofs</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable src offset calculation. </td></tr>
+                <tr><th><em>false:</em></th><td> Disable src offset calculation. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesCalculateSrcOfs </td></tr>
+                <tr><th><em>note:</em></th><td> If set to true, the user can inquire about
+                the current src offset within the input source. Setting it to false (default)
+                improves the performance.</td></tr>
+            </table>
+            <p/>
+
+            <anchor name="IdentityConstraintChecking"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/identity-constraint-checking</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable identity constraint checking. </td></tr>
+                <tr><th><em>false:</em></th><td> Disable identity constraint checking. </td></tr>
+                <tr><th><em>default:</em></th><td> true </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesIdentityConstraintChecking </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="GenerateSyntheticAnnotations"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/generate-synthetic-annotations</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable generation of synthetic annotations.  A synthetic annotation will be
+                generated when a schema component has non-schema attributes but no child annotation. </td></tr>
+                <tr><th><em>false:</em></th><td> Disable generation of synthetic annotations. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesGenerateSyntheticAnnotations </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="XercesValidateAnnotations"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validate-annotations</em></th></tr>
+                <tr><th><em>true:</em></th><td> Enable validation of annotations. </td></tr>
+                <tr><th><em>false:</em></th><td> Disable validation of annotations. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesValidateAnnotations </td></tr>
+                <tr><th><em>note:</em></th><td> Each annotation is validated independently. </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="IgnoreAnnotations"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/schema/ignore-annotations</em></th></tr>
+                <tr><th><em>true:</em></th><td> Do not generate XSAnnotations when traversing a schema.</td></tr>
+                <tr><th><em>false:</em></th><td> Generate XSAnnotations when traversing a schema.</td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesIgnoreAnnotations </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="DisableDefaultEntityResolution"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/disable-default-entity-resolution</em></th></tr>
+                <tr><th><em>true:</em></th><td> The parser will not attempt to resolve the entity when the resolveEntity method returns NULL.</td></tr>
+                <tr><th><em>false:</em></th><td> The parser will attempt to resolve the entity when the resolveEntity method returns NULL.</td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesDisableDefaultEntityResolution </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="SkipDTDValidation"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/schema/skip-dtd-validation</em></th></tr>
+                <tr><th><em>true:</em></th><td> When schema validation is on the parser will ignore the DTD, except for entities.</td></tr>
+                <tr><th><em>false:</em></th><td> The parser will not ignore DTDs when validating.</td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSkipDTDValidation </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="schema">Schema Validation</link></td></tr>
+            </table>
+            <p/>
+
+           <anchor name="IgnoreCachedDTD"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/ignoreCachedDTD</em></th></tr>
+                <tr><th><em>true:</em></th><td> Ignore a cached DTD when an XML document contains both an
+                								internal and external DTD, and the use cached grammar from parse option
+                								is enabled. Currently, we do not allow using cached DTD grammar when an
+                								internal subset is present in the document. This option will only affect
+                								the behavior of the parser when an internal and external DTD both exist
+                								in a document (i.e. no effect if document has no internal subset).</td></tr>
+                <tr><th><em>false:</em></th><td> Don't ignore cached DTD. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesIgnoreCachedDTD </td></tr>
+                <tr><th><em>see:</em></th><td>
+                <link anchor="use-cached">http://apache.org/xml/features/validation/use-cachedGrammarInParse</link>
+                </td></tr>
+            </table>
+            <p/>
+
+            <anchor name="HandleMultipleImports"/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/features/validation/schema/handle-multiple-imports</em></th></tr>
+                <tr><th><em>true:</em></th><td> During schema validation allow multiple schemas with the same namespace
+                                                to be imported.</td></tr>
+                <tr><th><em>false:</em></th><td> Don't import multiple schemas with the same namespace. </td></tr>
+                <tr><th><em>default:</em></th><td> false </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesHandleMultipleImports </td></tr>
+            </table>
+            <p/>
+            </s4>
+        </s3>
+
+        <anchor name="SAX2Properties"/>
+        <s3 title="Supported Properties in SAX2XMLReader">
+
+           <p>The behavior of the SAX2XMLReader is dependant on the values of the following properties.
+           All of the properties below can be set using the function <code>SAX2XMLReader::setProperty(const XMLCh* const, void*)</code>.
+           It takes a void pointer as the property value.  Application is required to initialize this void
+           pointer to a correct type.  Please check the column "Value Type" below
+           to learn exactly what type of property value each property expects for processing.
+           Passing a void pointer that was initialized with a wrong type will lead to unexpected result.
+           If the same property is set more than once, the last one takes effect.</p>
+
+           <p>Property values can be queried using the function <code>void* SAX2XMLReader::getProperty(const XMLCh* const)</code>.
+            The parser owns the returned pointer, and the memory allocated for the returned pointer will
+            be destroyed when the parser is deleted.  To ensure accessibility of the returned information after
+            the parser is deleted, callers need to copy and store the returned information somewhere else.
+            Since the returned pointer is a generic void pointer, check the column "Value Type" below to learn
+            exactly what type of object each property returns for replication.</p>
+
+           <p>None of these properties can be modified in the middle of a parse, or an exception will be thrown.</p>
+
+           <s4 title="Xerces Properties">
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/properties/schema/external-schemaLocation</em></th></tr>
+                <tr><th><em>Description</em></th><td> The XML Schema Recommendation explicitly states that
+                            the inclusion of schemaLocation/ noNamespaceSchemaLocation attributes in the
+                            instance document is only a hint; it does not mandate that these attributes
+                            must be used to locate schemas.  Similar situation happens to &lt;import&gt;
+                            element in schema documents. This property allows the user to specify a list
+                            of schemas to use.  If the targetNamespace of a schema specified using this
+                            method matches the targetNamespace of a schema occurring in the instance
+                            document in schemaLocation attribute, or
+                            if the targetNamespace matches the namespace attribute of &lt;import&gt;
+                            element, the schema specified by the user using this property will
+                            be used (i.e., the schemaLocation attribute in the instance document
+                            or on the &lt;import&gt; element will be effectively ignored). </td></tr>
+                <tr><th><em>Value</em></th><td> The syntax is the same as for schemaLocation attributes
+                                 in instance documents: e.g, "http://www.example.com file_name.xsd".
+                                 The user can specify more than one XML Schema in the list. </td></tr>
+                <tr><th><em>Value Type</em></th><td> XMLCh* </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSchemaExternalSchemaLocation </td></tr>
+            </table>
+
+            <p/>
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation</em></th></tr>
+                <tr><th><em>Description</em></th><td> The XML Schema Recommendation explicitly states that
+                            the inclusion of schemaLocation/ noNamespaceSchemaLocation attributes in the
+                            instance document is only a hint; it does not mandate that these attributes
+                            must be used to locate schemas.  This property allows the user to specify the
+                            no target namespace XML Schema Location externally.  If specified, the instance
+                            document's noNamespaceSchemaLocation attribute will be effectively ignored. </td></tr>
+                <tr><th><em>Value</em></th><td> The syntax is the same as for the noNamespaceSchemaLocation
+                            attribute that may occur in an instance document: e.g."file_name.xsd". </td></tr>
+                <tr><th><em>Value Type</em></th><td> XMLCh* </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSchemaExternalNoNameSpaceSchemaLocation </td></tr>
+            </table>
+            <p/>
+
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/properties/scannerName</em></th></tr>
+                <tr><th><em>Description</em></th><td> This property allows the user to specify the name of
+                            the XMLScanner to use for scanning XML documents. If not specified, the default
+                            scanner "IGXMLScanner" is used.</td></tr>
+                <tr><th><em>Value</em></th><td> The recognized scanner names are: <br/>
+                            1."WFXMLScanner" - scanner that performs well-formedness checking only.<br/>
+                            2. "DGXMLScanner" - scanner that handles XML documents with DTD grammar information.<br/>
+                            3. "SGXMLScanner" - scanner that handles XML documents with XML schema grammar information.<br/>
+			    4. "IGXMLScanner" - scanner that handles XML documents with DTD or/and XML schema grammar information.<br/>
+                            Users can use the predefined constants defined in XMLUni directly (fgWFXMLScanner, fgDGXMLScanner,
+                            fgSGXMLScanner, or fgIGXMLScanner) or a string that matches the value of
+                            one of those constants.</td></tr>
+                <tr><th><em>Value Type</em></th><td> XMLCh* </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesScannerName </td></tr>
+                <tr><th><em>note: </em></th><td> See <jump href="program-others-&XercesC3Series;.html#UseSpecificScanner">Use Specific Scanner</jump>
+                for more programming details. </td></tr>
+            </table>
+
+            <p/>
+
+            <table>
+                <tr><th colspan="2"><em>http://apache.org/xml/properties/security-manager</em></th></tr>
+                <tr><th><em>Description</em></th>
+                <td>
+                    Certain valid XML and XML Schema constructs can force a
+                    processor to consume more system resources than an
+                    application may wish.  In fact, certain features could
+                    be exploited by malicious document writers to produce a
+                    denial-of-service attack.  This property allows
+                    applications to impose limits on the amount of
+                    resources the processor will consume while processing
+                    these constructs.
+                </td></tr>
+                <tr><th><em>Value</em></th>
+                <td>
+                    An instance of the SecurityManager class (see
+                    <code>xercesc/util/SecurityManager</code>).  This
+                    class's documentation describes the particular limits
+                    that may be set.  Note that, when instantiated, default
+                    values for limits that should be appropriate in most
+                    settings are provided.  The default implementation is
+                    not thread-safe; if thread-safety is required, the
+                    application should extend this class, overriding
+                    methods appropriately.  The parser will not adopt the
+                    SecurityManager instance; the application is
+                    responsible for deleting it when it is finished with
+                    it.  If no SecurityManager instance has been provided to
+                    the parser (the default) then processing strictly
+                    conforming to the relevant specifications will be
+                    performed.
+                </td></tr>
+                <tr><th><em>Value Type</em></th><td> SecurityManager* </td></tr>
+                <tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesSecurityManager </td></tr>
+            </table>
+            <p/>
+
+            <table>
+                <tr><th
+                colspan="2"><em>http://apache.org/xml/properties/low-water-mark</em></th></tr>
+                <tr><th><em>Description</em></th>
+                <td>
+                    If the number of available bytes in the raw buffer is less than
+                    the low water mark the parser will attempt to read more data before
+                    continuing parsing. By default the value for this parameter is 100
+                    bytes. You may want to set this parameter to 0 if you would like
+                    the parser to parse the available data immediately without
+                    potentially blocking while waiting for more date.
+                </td></tr>
+                <tr><th><em>Value</em></th>
+                <td>
+                    New low water mark.
+                </td></tr>
+                <tr><th><em>Value Type</em></th><td> XMLSize_t* </td></tr>
+		<tr><th><em>XMLUni Predefined Constant:</em></th><td> fgXercesLowWaterMark </td></tr>
+            </table>
+            <p/>
+
+            <table>
+                <tr><th
+                colspan="2"><em>setInputBufferSize(const size_t bufferSize)</em></th></tr>
+                <tr><th><em>Description</em></th>
+                <td>
+                    Set maximum input buffer size.
+                    This method allows users to limit the size of buffers used in parsing
+                    XML character data. The effect of setting this size is to limit the
+                    size of a ContentHandler::characters() call.
+                    The parser's default input buffer size is 1 megabyte.
+                </td></tr>
+                <tr><th><em>Value</em></th>
+                <td>
+                    The maximum input buffer size
+                </td></tr>
+                <tr><th><em>Value Type</em></th><td> XMLCh* </td></tr>
+            </table>
+
+            <p/>
+          </s4>
+        </s3>
+    </s2>
+
+</s1>

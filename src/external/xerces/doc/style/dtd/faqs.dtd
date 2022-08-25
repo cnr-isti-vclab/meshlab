@@ -1,0 +1,22 @@
+<?xml encoding='ISO-8859-1'?>
+
+<!-- STYLEBOOK FAQS DTD -->
+
+<!-- import the external blocks.ent dtd -->
+<!ENTITY % blocksEntity SYSTEM "blocks.ent">
+%blocksEntity;
+
+<!ELEMENT faqs (faq)+>
+<!ATTLIST faqs title CDATA #REQUIRED>
+
+<!ELEMENT faq (q,a)>
+<!ATTLIST faq title CDATA #IMPLIED>
+
+
+<!ELEMENT q (#PCDATA)>
+<!ELEMENT a (s3|%blocks;)+>
+<!ELEMENT s3 (%blocks;)*>
+
+<!ATTLIST s3 title CDATA #REQUIRED>
+
+<!-- CVS $Revision$ $Date$ -->

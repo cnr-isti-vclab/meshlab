@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ocme_widget</class>
+ <widget class="QDockWidget" name="ocme_widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>OCME Control</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents"/>
+ </widget>
+ <resources>
+  <include location="edit_ocme.qrc"/>
+  <include location="../../../../meshlab/src/meshlab/meshlab.qrc"/>
+  <include location="../../../../meshlab/src/meshlabplugins/editsegment/meshlab.qrc"/>
+  <include location="../../../../meshlab/src/sampleplugins/sampleedit/sampleedit.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/editsegment.png</file>
+        <file>images/editsegment_cursor.png</file>
+    </qresource>
+</RCC>

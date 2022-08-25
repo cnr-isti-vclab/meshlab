@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<x xmlns="http://www.schemaTest.org/xinclude-test"
+   xmlns:xi="http://www.w3.org/2001/XInclude"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- included file includes another file -->
+   <xi:include parse="xml"
+               href="../included/include.xml"/>
+</x>

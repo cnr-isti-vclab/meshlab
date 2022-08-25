@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/cur_referencing.png</file>
+        <file>images/icon_mutualcorrs.png</file>
+    </qresource>
+</RCC>

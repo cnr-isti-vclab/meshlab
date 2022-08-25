@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+
+<xsd:schema xmlns:xsd= "http://www.w3.org/2001/XMLSchema"
+            xmlns:d=   "http://www.dave.com/Derived"
+            xmlns:b="base"
+	    targetNamespace="http://www.dave.com/Derived"
+            xml:lang=  "en">
+
+<xsd:import namespace="base" schemaLocation = "test-user-config.xsd"/>
+
+<xsd:complexType name="DerivedUserConfig_t">
+
+   <xsd:complexContent>
+      <xsd:extension base="b:TestUserConfig_t">
+         <xsd:sequence>
+   
+            <xsd:element name="Age" type="xsd:unsignedInt"/>
+            
+         </xsd:sequence>
+      </xsd:extension>
+   </xsd:complexContent>
+
+</xsd:complexType>
+
+
+<!-- Add this user type to the substitution group. -->
+<xsd:element name="DerivedUserConfig" type="d:DerivedUserConfig_t" substitutionGroup="b:TestUserConfig"/>
+
+
+</xsd:schema>

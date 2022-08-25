@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- =========================================================================
+Test Type : Schema Valid ( <element> )
+Description: A valid instance document used to test a valid schema with
+             example of <element>s with substitutionGroup=.
+========================================================================== -->
+<svi:Library xmlns:xsi ="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:svi ="http://www.schemaTest.org/m3_3v"
+             xsi:schemaLocation="http://www.schemaTest.org/m3_3v
+                                 test2.xsd">
+
+<svi:Periodical>Weekly Want Ads</svi:Periodical>
+
+<svi:Periodical>Weekly Want Ads</svi:Periodical>
+<svi:Magazine>McLeans</svi:Magazine>
+<svi:Newsletter>Software Developers Monthly</svi:Newsletter>
+
+<svi:Magazine>McLeans</svi:Magazine>
+<svi:Periodical>Weekly Want Ads</svi:Periodical>
+<svi:Newsletter>Software Developers Monthly</svi:Newsletter>
+<svi:Book>O</svi:Book>
+
+<svi:Newsletter>Software Developers Monthly</svi:Newsletter>
+
+</svi:Library> 

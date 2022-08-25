@@ -1,0 +1,65 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Sample: Redirect">
+
+    <s2 title="Redirect">
+        <p>Redirect uses the SAX EntityResolver handler to redirect the
+		input stream for external entities. It installs an entity
+		resolver, traps the call to the external DTD file and redirects
+		it to another file which contains the actual DTD.</p>
+
+        <s3 title="Running Redirect">
+
+          <p>This program illustrates how an application can use the SAX EntityResolver
+                   handler to redirect the input stream for external entities. It installs an entity
+                   resolver, traps the call to the external DTD file and redirects it to another
+                   file which contains the actual DTD.</p>
+
+                    <p>The program then counts and reports the number of elements and attributes in
+                   the given XML file.</p>
+<source>Redirect &lt;XML file&gt;</source>
+
+                   <p>Redirect is invoked as follows:</p>
+<source>cd &XercesC3InstallDir;/samples/data
+Redirect personal.xml</source>
+          <p>The output is the following:</p>
+<source>cd &XercesC3InstallDir;/samples/data
+Redirect personal.xml
+personal.xml: 30 ms (37 elems, 12 attrs, 0 spaces, 268 chars)</source>
+
+          <p>External files required to run this sample are 'personal.xml', 'personal.dtd' and
+             'redirect.dtd', which are all present in the 'samples/data' directory. Make sure
+             that you run redirect in the samples/data directory.</p>
+
+             <p>The 'resolveEntity' callback in this sample looks for an external entity with
+             system id as 'personal.dtd'. When it is asked to resolve this particular external
+             entity, it creates and returns a new InputSource for the file 'redirect.dtd'.</p>
+
+             <p>A real-world XML application can similarly do application specific processing
+             when encountering external entities. For example, an application might want to
+             redirect all references to entities outside of its domain to local cached copies.</p>
+
+          <note>The time reported by the program may be different depending on your
+          processor speed.</note>
+
+        </s3>
+    </s2>
+</s1>

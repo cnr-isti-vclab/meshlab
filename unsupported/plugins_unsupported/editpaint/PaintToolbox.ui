@@ -1,0 +1,1175 @@
+<ui version="4.0" >
+ <class>PaintToolbox</class>
+ <widget class="QWidget" name="PaintToolbox" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>284</width>
+    <height>645</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy>
+    <hsizetype>5</hsizetype>
+    <vsizetype>5</vsizetype>
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle" >
+   <string>Vertex Painting</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>2</number>
+   </property>
+   <property name="spacing" >
+    <number>2</number>
+   </property>
+   <item row="0" column="0" >
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>7</hsizetype>
+       <vsizetype>7</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>0</width>
+       <height>320</height>
+      </size>
+     </property>
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>Painting</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item row="0" column="0" colspan="2" >
+        <widget class="QWidget" native="1" name="widget" >
+         <property name="minimumSize" >
+          <size>
+           <width>0</width>
+           <height>60</height>
+          </size>
+         </property>
+         <widget class="QToolButton" name="fill_button" >
+          <property name="geometry" >
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Fill an area</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/fill.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="gradient_button" >
+          <property name="geometry" >
+           <rect>
+            <x>100</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Fill with gradients</string>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/gradient.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="smooth_button" >
+          <property name="geometry" >
+           <rect>
+            <x>150</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Smooth</string>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/smooth_me.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="pick_button" >
+          <property name="geometry" >
+           <rect>
+            <x>200</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Pick a color</string>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/pick.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="pen_button" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Paint with the pen</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/pinsel2.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QFrame" name="frame_3" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QToolButton" name="redo_button" >
+          <property name="geometry" >
+           <rect>
+            <x>60</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/redo.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="undo_button" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/undo.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QFrame" name="color_frame" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>0</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize" >
+          <size>
+           <width>70</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>16777215</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QToolButton" name="set_bw" >
+          <property name="geometry" >
+           <rect>
+            <x>100</x>
+            <y>10</y>
+            <width>25</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/bw.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>15</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="switch_me" >
+          <property name="geometry" >
+           <rect>
+            <x>100</x>
+            <y>40</y>
+            <width>25</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/switch.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>15</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="ColorWid" native="1" name="back" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>40</width>
+            <height>40</height>
+           </rect>
+          </property>
+          <property name="autoFillBackground" >
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="ColorWid" native="1" name="front" >
+          <property name="geometry" >
+           <rect>
+            <x>50</x>
+            <y>20</y>
+            <width>40</width>
+            <height>40</height>
+           </rect>
+          </property>
+          <property name="autoFillBackground" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2" >
+        <widget class="QFrame" name="gradient_frame" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>5</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_4" >
+            <property name="text" >
+             <string>Type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2" >
+           <widget class="QComboBox" name="gradient_type" >
+            <item>
+             <property name="text" >
+              <string>Foreground to background (RGB)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Foreground to transparency</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2" >
+           <widget class="QLabel" name="label_3" >
+            <property name="text" >
+             <string>Form</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" >
+           <widget class="QComboBox" name="gradient_form" >
+            <item>
+             <property name="text" >
+              <string>Linear</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Circular</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2" >
+        <widget class="QFrame" name="pick_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="0" column="1" >
+           <widget class="QComboBox" name="pick_mode" >
+            <item>
+             <property name="text" >
+              <string>Nearest vertex color</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Pixel color</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_pick" >
+            <property name="text" >
+             <string>Picking mode</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2" >
+        <widget class="QFrame" name="pen_extra_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="1" column="4" >
+           <widget class="QSpinBox" name="decrease_box" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2" >
+           <widget class="QCheckBox" name="backface_culling" >
+            <property name="text" >
+             <string>backfaces</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3" colspan="2" >
+           <widget class="QCheckBox" name="invisible_painting" >
+            <property name="text" >
+             <string>hidden polygons</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" >
+           <widget class="QLabel" name="label" >
+            <property name="text" >
+             <string>Paint on:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QDoubleSpinBox" name="pen_radius" >
+            <property name="decimals" >
+             <number>1</number>
+            </property>
+            <property name="maximum" >
+             <double>100.000000000000000</double>
+            </property>
+            <property name="minimum" >
+             <double>0.100000000000000</double>
+            </property>
+            <property name="singleStep" >
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value" >
+             <double>40.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="3" >
+           <widget class="QComboBox" name="pen_type" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>5</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text" >
+              <string>pixel</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>percentual of bbox diagonal</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>percentual of bbox height</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_pen" >
+            <property name="text" >
+             <string>Pen</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" colspan="2" >
+           <widget class="QSlider" name="decrease_slider" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>50</number>
+            </property>
+            <property name="sliderPosition" >
+             <number>50</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2" >
+           <widget class="QLabel" name="label_percentual_3" >
+            <property name="text" >
+             <string>Smooth borders</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2" >
+        <widget class="QFrame" name="smooth_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="0" column="1" >
+           <widget class="QSlider" name="percentual_slider" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>25</number>
+            </property>
+            <property name="sliderPosition" >
+             <number>25</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_percentual" >
+            <property name="text" >
+             <string>Percentual</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" >
+           <widget class="QSpinBox" name="percentual_box" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>25</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2" >
+        <widget class="QFrame" name="pen_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="0" column="2" >
+           <widget class="QSpinBox" name="deck_box" >
+            <property name="toolTip" >
+             <string>Change the opacity of the color (this is not the opengl alpha value)</string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_deck" >
+            <property name="text" >
+             <string>Opacity</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" >
+           <widget class="QLabel" name="label_penmodus" >
+            <property name="text" >
+             <string>Modus</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2" >
+           <widget class="QComboBox" name="pen_modus" >
+            <item>
+             <property name="text" >
+              <string>Normal</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QSlider" name="deck_slider" >
+            <property name="toolTip" >
+             <string>Change the opacity of the color (this is not the opengl alpha value)</string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>100</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>Selecting &amp;&amp; Editing</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item row="3" column="0" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="0" >
+        <widget class="QFrame" name="pen_select_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="2" column="0" colspan="2" >
+           <widget class="QLabel" name="label_5" >
+            <property name="text" >
+             <string>On:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2" >
+           <widget class="QDoubleSpinBox" name="pen_radius_2" >
+            <property name="decimals" >
+             <number>1</number>
+            </property>
+            <property name="maximum" >
+             <double>100.000000000000000</double>
+            </property>
+            <property name="minimum" >
+             <double>0.100000000000000</double>
+            </property>
+            <property name="singleStep" >
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value" >
+             <double>40.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_pen_2" >
+            <property name="text" >
+             <string>Pen</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3" colspan="2" >
+           <widget class="QSlider" name="decrease_slider_2" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>50</number>
+            </property>
+            <property name="sliderPosition" >
+             <number>50</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5" >
+           <widget class="QSpinBox" name="decrease_box_2" >
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3" >
+           <widget class="QLabel" name="label_6" >
+            <property name="text" >
+             <string>Smooth borders</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3" colspan="3" >
+           <widget class="QComboBox" name="pen_type_2" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>5</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text" >
+              <string>pixel</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>percentual of bbox diagonal</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>percentual of bbox height</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="2" colspan="2" >
+           <widget class="QCheckBox" name="backface_culling_2" >
+            <property name="text" >
+             <string>backfaces</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4" colspan="2" >
+           <widget class="QCheckBox" name="invisible_painting_2" >
+            <property name="text" >
+             <string>hidden polygons</string>
+            </property>
+            <property name="checked" >
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QFrame" name="poly_smooth_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="0" column="1" >
+           <widget class="QSlider" name="percentual_slider_2" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>25</number>
+            </property>
+            <property name="sliderPosition" >
+             <number>25</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_percentual_2" >
+            <property name="text" >
+             <string>Percentual</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" >
+           <widget class="QSpinBox" name="percentual_box_2" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="maximum" >
+             <number>100</number>
+            </property>
+            <property name="value" >
+             <number>25</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0" >
+        <widget class="QWidget" native="1" name="widget_2" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>5</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize" >
+          <size>
+           <width>0</width>
+           <height>60</height>
+          </size>
+         </property>
+         <widget class="QToolButton" name="poly_smooth_button" >
+          <property name="geometry" >
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Smooth the mesh</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/smooth_me.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QToolButton" name="select_button" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>10</y>
+            <width>48</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="toolTip" >
+           <string>Select faces with the pen</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="meshlab.qrc" >:/images/pinsel_select.png</iconset>
+          </property>
+          <property name="iconSize" >
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3" >
+      <attribute name="title" >
+       <string>Configuration</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item row="0" column="1" >
+        <widget class="QComboBox" name="search_mode" >
+         <property name="toolTip" >
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">fast:&lt;/span> works better with big meshes, but can loose some vertexes when faces are not direct connected&lt;br />&lt;span style=" font-weight:600;">slow but accurate: &lt;/span>sholud be used with small meshes, because it finds every vertex during painting&lt;/p>&lt;/body>&lt;/html></string>
+         </property>
+         <item>
+          <property name="text" >
+           <string>fast</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>slow but accurate</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0" >
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Vertex search:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType" >
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorWid</class>
+   <extends>QWidget</extends>
+   <header>colorwid.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="meshlab.qrc" />
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,35 @@
+<RCC>
+  <qresource prefix="/" >
+    <file>images/perlin.png</file>
+    <file>images/add-16.png</file>
+    <file>images/add-24.png</file>
+    <file>images/blend-22.png</file>
+    <file>images/blur-22.png</file>
+    <file>images/bucket-fill-22.png</file>
+    <file>images/bw.png</file>
+    <file>images/circle.png</file>
+    <file>images/clone-22.png</file>
+    <file>images/color-picker-22.png</file>
+    <file>images/cursor_paint.png</file>
+    <file>images/fill.png</file>
+    <file>images/gradient.png</file>
+    <file>images/kcontrol.png</file>
+    <file>images/options-24.png</file>
+    <file>images/paintbrush-22.png</file>
+    <file>images/pick.png</file>
+    <file>images/pickbrush-22.png</file>
+    <file>images/pinsel.png</file>
+    <file>images/pinsel2.png</file>
+    <file>images/pinsel_select.png</file>
+    <file>images/redo-24.png</file>
+    <file>images/redo.png</file>
+    <file>images/sculpt-22.png</file>
+    <file>images/smooth_me.png</file>
+    <file>images/smudge-22.png</file>
+    <file>images/square.png</file>
+    <file>images/swap-colors-12.png</file>
+    <file>images/switch.png</file>
+    <file>images/undo-24.png</file>
+    <file>images/undo.png</file>
+  </qresource>
+</RCC>

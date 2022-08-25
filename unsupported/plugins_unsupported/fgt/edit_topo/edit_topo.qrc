@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/" >		
+		<file>images/icon_topo.png</file>	
+		<file>images/1-Exist_V_Select.png</file>
+        <file>images/1-Free_V_Select.png</file>
+        <file>images/1-Vertex_remove.png</file>
+        <file>images/2-Edge_Collapse.png</file>
+        <file>images/2-Edge_Connect.png</file>
+        <file>images/2-Edge_removal.png</file>
+        <file>images/2-Edge_Split.png</file>
+        <file>images/2-Move_Vertex.png</file>
+        <file>images/3-Face_Select.png</file>
+    </qresource>
+</RCC>

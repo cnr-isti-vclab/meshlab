@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+. ../scripts/run-test
+
+run_test SAXCount2 pass "" samples/SAXCount personal.xml

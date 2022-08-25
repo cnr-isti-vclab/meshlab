@@ -1,0 +1,113 @@
+<ui version="4.0" >
+ <class>ShaderDialogClass</class>
+ <widget class="QWidget" name="ShaderDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>601</width>
+    <height>541</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
+   <item>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="QTabWidget" name="tabWidget" >
+        <property name="currentIndex" >
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="uvTab" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>557</width>
+           <height>437</height>
+          </rect>
+         </property>
+         <attribute name="title" >
+          <string>Uniform Variables</string>
+         </attribute>
+         <widget class="QWidget" name="varListLayer" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>171</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" />
+         </widget>
+        </widget>
+        <widget class="QWidget" name="textureTab" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>640</width>
+           <height>384</height>
+          </rect>
+         </property>
+         <attribute name="title" >
+          <string>Textures</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="glTab" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>557</width>
+           <height>437</height>
+          </rect>
+         </property>
+         <attribute name="title" >
+          <string>OpenGL Status</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="bottomRowLayout" >
+        <item>
+         <spacer name="spacer" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="okButton" >
+          <property name="text" >
+           <string>Close Shader</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- final included element specifies an xml:base attribute, which will be
+        overwritten by the new xml:base attribute -->
+   <!-- redundant path structure --><elem xml:base="../included/dir/" xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xml="http://www.w3.org/XML/1998/namespace"/>
+</x>

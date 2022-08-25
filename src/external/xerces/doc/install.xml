@@ -1,0 +1,225 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Installation">
+
+    <p>Much of this documentation is historical in nature. The only
+    officially supported platforms with committed testing and maintenance
+    at this time are Windows (native, NOT Cygwin or other variants),
+    Linux, and MacOS. All other builds are unsupported and untested
+    and should be expected to require patching and build debugging.
+    Patches are accepted for other platforms, as are maintainers
+    interested in taking over responsibility for supporting them.</p>
+
+    <p>The officially supported Windows platforms consist of only those
+    Windows versions that are actively supported by Microsoft, which at
+    time of writing excludes all releases prior to Server 2008 R2.
+    The currently supported Windows compilers include Visual Studio 2015
+    and later; this set is subject to change in the future.</p>
+
+    <p>Support for C++ RTTI is an absolute requirement when building.</p>
+
+    <anchor name="Windows"/>
+    <s2 title="Windows">
+
+      <p>This section contains installation instructions for the Windows
+         platform.</p>
+
+      <s3 title="Source distribution">
+        <p>The &XercesCName; source is available in the source distribution:
+           &XercesC3SrcInstallDir;.zip.</p>
+
+        <p>Install the &XercesCName; source distribution by using <code>unzip</code>
+		on the &XercesC3SrcInstallDir;.zip archive in the Windows environment. You can
+		use WinZip, or any other UnZip utility:</p>
+<source>
+unzip &XercesC3SrcInstallDir;.zip
+</source>
+        <p>This creates the &apos;&XercesC3SrcInstallDir;&apos; sub-directory
+		containing the &XercesCName; source distribution. </p>
+
+        <p>To build the &XercesCName; source after installation,
+        please follow the <jump href="build-&XercesC3Series;.html">Build Instructions</jump>.</p>
+
+      </s3>
+
+<!--
+      <s3 title="Binary distribution">
+        <p>Install the &XercesCName; binary distribution by using <code>unzip</code>
+	   on the &XercesC3InstallDir;-{arch}-windows-{compiler}.zip archive in
+           the Windows environment. Here {arch} denotes the CPU architecture
+           and {compiler} denotes the C++ compiler of your choice. You can use
+           WinZip, or any other UnZip utility. For example:</p>
+
+<source>
+unzip &XercesC3InstallDir;-x86-windows-vc-8.0.zip
+</source>
+
+        <p>This creates a &apos;&XercesC3InstallDir;-x86-windows-vc-8.0&apos;
+           sub-directory containing the &XercesCName; binary distribution.</p>
+
+        <p>You need to add the &apos;&XercesC3InstallDir;-{arch}-windows-{compiler}\bin&apos;
+	   directory to your path.
+           To do this go to the start menu, click the settings menu and
+           select control panel. When the control panel opens, double
+           click on System and select the &apos;Environment&apos; tab.
+	   Locate the PATH variable under system variables and add
+           &lt;full-path-to-&XercesC3InstallDir;-{arch}-windows-{compiler}>\bin
+           to the PATH variable.</p>
+
+        <p>Additionally, if you don't have the corresponding version of
+           Microsoft Visual C++ installed, you may need to download and
+           install the C/C++ runtime libraries from the Microsoft website.
+           For example, for Visual Studio 2008 (9.0) the package is called
+           "Microsoft Visual C++ 2008 Redistributable Package".</p>
+
+        <p>The binary distribution contains the pre-built parser libraries
+           and sample executables. Please refer to the
+           <jump href="samples-&XercesC3Series;.html">Samples</jump> for how to run the
+           samples.</p>
+
+      </s3>
+-->
+    </s2>
+
+    <anchor name="Unix"/>
+    <s2 title="UNIX">
+
+      <p>This section contains installation instructions for the UNIX,
+         Linux, and Mac OS X platforms.</p>
+
+      <s3 title="Source distribution">
+        <p>The &XercesCName; source is available in the source distribution:
+           &XercesC3SrcInstallDir;.tar.gz (other formats also available).</p>
+
+        <p>Install the &XercesCName; source distribution
+           &XercesC3SrcInstallDir;.tar.gz by extracting the files
+           from the compressed archive:</p>
+<source>
+gzip -d &XercesC3SrcInstallDir;.tar.gz
+tar -xf &XercesC3SrcInstallDir;.tar
+</source>
+        <p>This creates the &apos;&XercesC3SrcInstallDir;&apos; sub-directory
+	   containing the &XercesCName; source distribution. </p>
+
+        <p>To build the &XercesCName; source after installation,
+           please follow the <jump href="build-&XercesC3Series;.html">Build Instructions</jump>.</p>
+
+      </s3>
+
+<!--
+      <s3 title="Binary distribution">
+        <p>Install the binary distribution &XercesC3InstallDir;-{arch}-{os}-{compiler}.tar.gz
+           by extracting the files from the compressed archive. Here {arch}
+           denotes the CPU architecture, {os} denotes the operating system,
+           and {compiler} denotes the C++ compiler of your choice.
+           For example:</p>
+<source>
+gzip -d &XercesC3InstallDir;-x86-linux-gcc-3.4.tar.gz
+tar -xf &XercesC3InstallDir;-x86-linux-gcc-3.4.tar
+</source>
+        <p>This will create an '&XercesC3InstallDir;-x86-linux-gcc-3.4'
+           sub-directory containing the &XercesCName; binary distribution.</p>
+
+        <p>You will need to add the
+           &XercesC3InstallDir;-{arch}-{os}-{compiler}/bin directory to your
+           PATH environment variable:</p>
+
+        <p>For Bourne Shell, K Shell or Bash, type: </p>
+<source>
+export PATH="$PATH:&lt;full-path-to-&XercesC3InstallDir;-{arch}-{os}-{compiler}>/bin"
+</source>
+		<p>For C Shell, type:</p>
+<source>
+setenv PATH "$PATH:&lt;full-path-to-&XercesC3InstallDir;-{arch}-{os}-{compiler}>/bin"
+</source>
+
+        <p>If you wish to make this setting permanent, you need to change
+	   your profile by changing your setup files which can be either
+           .profile or .kshrc.</p>
+
+        <p>In addition, you will also need to set the library search path.
+           (LIBPATH on AIX, LD_LIBRARY_PATH on Solaris and Linux,
+            SHLIB_PATH on HP-UX, and DYLD_LIBRARY_PATH on Mac OS X).</p>
+
+        <p>In the following shell commands, the &lt;xerces-path>
+           denotes the full path to the
+           &XercesC3InstallDir;-{arch}-{os}-{compiler} directory. For
+           Bourne Shell, K Shell or Bash, type:</p>
+<source>
+export LIBPATH=&lt;xerces-path>/lib:$LIBPATH (AIX)
+export LD_LIBRARY_PATH=&lt;xerces-path>/lib:$LD_LIBRARY_PATH (Solaris, Linux)
+export SHLIB_PATH=&lt;xerces-path>/lib:$SHLIB_PATH (HP-UX)
+export DYLD_LIBRARY_PATH=&lt;xerces-path>/lib:$DYLD_LIBRARY_PATH (Mac OS X)
+</source>
+
+    	<p>For C Shell, type:</p>
+<source>
+setenv LIBPATH "&lt;xerces-path>/lib:$LIBPATH" (AIX)
+setenv LD_LIBRARY_PATH "&lt;xerces-path>/lib:$LD_LIBRARY_PATH" (Solaris, Linux)
+setenv SHLIB_PATH "&lt;xerces-path>/lib:$SHLIB_PATH" (HP-UX)
+setenv DYLD_LIBRARY_PATH "&lt;xerces-path>/lib:$DYLD_LIBRARY_PATH" (Mac OS X)
+</source>
+
+        <p>The binary distribution contains the pre-built parser libraries
+           and sample executables. Please refer to the
+           <jump href="samples-&XercesC3Series;.html">Samples</jump> for how to run the
+           samples.</p>
+      </s3>
+-->
+
+   </s2>
+
+    <anchor name="Cygwin"/>
+    <s2 title="Cygwin">
+
+      <p>This section contains installation instructions for the Cygwin
+         platform.</p>
+
+      <s3 title="Source distribution">
+        <p>The &XercesCName; source is available in the source distribution:
+           &XercesC3SrcInstallDir;.tar.gz (other formats available).</p>
+
+        <p>Install the &XercesCName; source distribution
+           &XercesC3SrcInstallDir;.tar.gz by extracting the files
+           from the compressed archive:</p>
+<source>
+tar -xfz &XercesC3SrcInstallDir;.tar.gz
+</source>
+        <p>This creates the &apos;&XercesC3SrcInstallDir;&apos; sub-directory
+	   containing the &XercesCName; source distribution. </p>
+
+        <p>To build the &XercesCName; source after installation,
+           please follow the <jump href="build-&XercesC3Series;.html">Build Instructions</jump>.
+        </p>
+
+      </s3>
+
+      <s3 title="Binary distribution">
+        <p>Precompiled Xerces-C++ libraries for Cygwin may be provided as
+           part of the Cygwin package repository. To install the binary
+           distribution run Cygwin setup.exe.
+           When you reach the Packages step of the Cygwin Setup wizard,
+           expand the Devel category, then click in the New column next
+           to "xerces-c-devel" until it reads "&XercesC3Version;-X".</p>
+
+      </s3>
+   </s2>
+</s1>

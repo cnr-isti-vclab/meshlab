@@ -1,0 +1,10 @@
+debug
+release
+*.sln
+*.vcproj
+*.user
+*.bak
+*.suo
+*.pdb
+*.ncb
+*.idb

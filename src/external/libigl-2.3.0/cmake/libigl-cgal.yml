@@ -1,0 +1,8 @@
+# This is a conda environment that can be used to compile libigl with CGAL on Windows
+# Only boost is required to be installed on the system, CGAL is automatically downloaded
+# by CMake and is built with libigl.
+name: libigl-cgal
+channels:
+  - conda-forge
+dependencies:
+  - boost-cpp=1.65.0

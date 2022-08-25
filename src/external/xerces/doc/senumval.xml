@@ -1,0 +1,145 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Sample: SEnumVal">
+
+    <s2 title="SEnumVal">
+        <p>SEnumVal shows how to enumerate the markup declarations in a Schema Grammar.</p>
+
+        <s3 title="Running SEnumVal">
+          <p>This program parses the specified XML file, then shows how to
+            enumerate the contents of the Schema Grammar. </p>
+<source>
+Usage:
+    SEnumVal &lt;XML file&gt;
+
+This program parses a file, then shows how to enumerate the
+contents of the Schema Grammar. Essentially, shows how one can
+access the Schema information stored in internal data structures.
+</source>
+          <p>Here is a sample output from SEnumVal</p>
+<source>cd &XercesC3InstallDir;/samples/data
+SEnumVal personal-schema.xml
+
+Name:                   personnel
+Model Type:             Children
+Create Reason:  Declared
+ContentType:    OneOrMore
+Content Model:  (person)+
+ComplexType:
+        TypeName:       ,C0
+        ContentType:    OneOrMore
+--------------------------------------------
+Name:                   person
+Model Type:             Children
+Create Reason:  Declared
+ContentType:    Sequence
+Content Model:  (name,email*,url*,link?)
+ComplexType:
+        TypeName:       ,C1
+        ContentType:    Sequence
+Attributes:
+        Name:                   salary
+        Type:                   CDATA
+        Default Type:   #IMPLIED
+        Base Datatype:          Decimal
+Facets:
+        fractionDigits=0
+
+        Name:                   id
+        Type:                   ID
+        Default Type:   #REQUIRED
+        Base Datatype:          ID
+
+        Name:                   contr
+        Type:                   CDATA
+        Default Type:   #DEFAULT
+        Value:                  false
+        Base Datatype:          string
+Enumeration:
+	    true
+	    false
+
+        Name:                   note
+        Type:                   CDATA
+        Default Type:   #IMPLIED
+        Base Datatype:          string
+
+--------------------------------------------
+Name:                   name
+Model Type:             Children
+Create Reason:  Declared
+ContentType:    All
+Content Model:	All(family,given)
+ComplexType:
+        TypeName:       ,C3
+        ContentType:    All
+--------------------------------------------
+Name:                   family
+Model Type:             Simple
+Create Reason:  Declared
+Base Datatype:          string
+--------------------------------------------
+Name:                   given
+Model Type:             Simple
+Create Reason:  Declared
+Base Datatype:          string
+--------------------------------------------
+Name:                   email
+Model Type:             Simple
+Create Reason:  Declared
+Base Datatype:          string
+--------------------------------------------
+Name:                   url
+Model Type:             Empty
+Create Reason:  Declared
+Content Model:  EMPTY
+ComplexType:
+        TypeName:       ,C4
+Attributes:
+        Name:                   href
+        Type:                   CDATA
+        Default Type:   #DEFAULT
+        Value:                  http://
+        Base Datatype:          string
+
+--------------------------------------------
+Name:                   link
+Model Type:             Empty
+Create Reason:  Declared
+Content Model:  EMPTY
+ComplexType:
+        TypeName:       ,C5
+Attributes:
+        Name:                   subordinates
+        Type:                   IDREFS
+        Default Type:   #IMPLIED
+        Base Datatype:          List
+
+        Name:                   manager
+        Type:                   IDREF
+        Default Type:   #IMPLIED
+        Base Datatype:          IDREF
+
+--------------------------------------------
+              </source>
+        </s3>
+    </s2>
+</s1>

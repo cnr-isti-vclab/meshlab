@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- /****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2009                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/ -->
+<GLSLang>
+  <Metadata>
+    <Author Author="" />
+    <Email Email="" />
+    <Company Company="" />
+    <Shader Shader="" />
+    <ShaderDescription ShaderDescription="" />
+    <License License="" />
+    <Version Version="" />
+  </Metadata>
+  <VPCount numero="1">
+    <Filenames>
+      <Filename0 VertexProgram="depthmap.vert" />
+    </Filenames>
+  </VPCount>
+  <FPCount numero="1">
+    <Filenames>
+      <Filename0 FragmentProgram="depthmap.frag" />
+    </Filenames>
+  </FPCount>
+  <TexturesPlugins NumberOfPlugins="0" />
+  <TexturedUsed NumberUsedTU="0" />
+  <UniformVariables NumberOfVariables="2">
+    <Uniform0 Type="5" Name="zmin" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.001">
+      <Values Value0="0.1" />
+    </Uniform0>
+    <Uniform1 Type="5" Name="zmax" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.001">
+      <Values Value0="1" />
+    </Uniform1>
+  </UniformVariables>
+  <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
+  <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
+  <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="False" BlendFuncSRC="770" BlendFuncDST="771" BlendEquation="32774" DepthTest="True" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0.5019608" ClearColorG="0.5019608" ClearColorB="0.5019608" ClearColorA="1" />
+  <MotionData Speed="0.05" Distance="4" Rotation="False" />
+  <BuiltInStates>
+    <ModelAmbient AmbientR="0.2" AmbientG="0.2" AmbientB="0.2" AmbientA="1" />
+    <FrontMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.8000001" DifG="0.8000001" DifB="0.8000001" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" EmiR="0" EmiG="0" EmiB="0" EmiA="1" Shininess="0" />
+    <BackMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.8000001" DifG="0.8000001" DifB="0.8000001" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" EmiR="0" EmiG="0" EmiB="0" EmiA="1" Shininess="0" />
+    <PointParameters Size="1" MinSize="0" MaxSize="1" Threshold="1" ConstantAttenuation="1" LinearAttenuation="0" QuadraticAttenuation="0" />
+    <Light0 Enabled="True" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="1" DifG="1" DifB="1" DifA="1" SpecR="1" SpecG="1" SpecB="1" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light1 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light2 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light3 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light4 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light5 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light6 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light7 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+  </BuiltInStates>
+  <BackGround>
+    <BackGroundMode Mode="0" />
+  </BackGround>
+</GLSLang>

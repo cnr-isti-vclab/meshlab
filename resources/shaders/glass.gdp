@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<GLSLang>
+  <Metadata>
+    <Author Author="" />
+    <Email Email="" />
+    <Company Company="" />
+    <Shader Shader="" />
+    <ShaderDescription ShaderDescription="" />
+    <License License="" />
+    <Version Version="" />
+  </Metadata>
+  <VPCount numero="1">
+    <Filenames>
+      <Filename0 VertexProgram="glass.vert" />
+    </Filenames>
+  </VPCount>
+  <FPCount numero="1">
+    <Filenames>
+      <Filename0 FragmentProgram="glass.frag" />
+    </Filenames>
+  </FPCount>
+  <TexturesPlugins NumberOfPlugins="0" />
+  <TexturedUsed NumberUsedTU="0" />
+  <UniformVariables NumberOfVariables="6">
+    <Uniform0 Type="7" Name="LightPosition" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+      <Values Value0="0" Value1="0" Value2="5" />
+    </Uniform0>
+    <Uniform1 Type="8" Name="GlassColor" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
+      <Values Value0="0.5" Value1="0.5" Value2="0.6" Value3="0.15" />
+    </Uniform1>
+    <Uniform2 Type="8" Name="SpecularColor1" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
+      <Values Value0="0.1" Value1="0.08" Value2="0.05" Value3="1" />
+    </Uniform2>
+    <Uniform3 Type="8" Name="SpecularColor2" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
+      <Values Value0="0.1" Value1="0.1" Value2="0.05" Value3="1" />
+    </Uniform3>
+    <Uniform4 Type="5" Name="SpecularFactor1" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+      <Values Value0="2" />
+    </Uniform4>
+    <Uniform5 Type="5" Name="SpecularFactor2" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+      <Values Value0="2" />
+    </Uniform5>
+  </UniformVariables>
+  <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
+  <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
+  <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="True" BlendFuncSRC="770" BlendFuncDST="1" BlendEquation="32774" DepthTest="False" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0" ClearColorG="0" ClearColorB="0" ClearColorA="1" />
+  <MotionData Speed="0.05" Distance="4" Rotation="False" />
+  <BuiltInStates>
+    <ModelAmbient AmbientR="4.730091E-11" AmbientG="4.730091E-11" AmbientB="4.730091E-11" AmbientA="2.365045E-10" />
+    <FrontMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.2" DifG="0.2" DifB="0.2" DifA="1" SpecR="0.2" SpecG="0.2" SpecB="0.2" SpecA="1" EmiR="0.2" EmiG="0.2" EmiB="0.2" EmiA="1" Shininess="0" />
+    <BackMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.2" DifG="0.2" DifB="0.2" DifA="1" SpecR="0.2" SpecG="0.2" SpecB="0.2" SpecA="1" EmiR="0.2" EmiG="0.2" EmiB="0.2" EmiA="1" Shininess="0" />
+    <PointParameters Size="1" MinSize="0" MaxSize="1" Threshold="1" ConstantAttenuation="1" LinearAttenuation="0" QuadraticAttenuation="0" />
+    <Light0 Enabled="True" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light1 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light2 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light3 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light4 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light5 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light6 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+    <Light7 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="0" DifR="0" DifG="0" DifB="0" DifA="0" SpecR="0" SpecG="0" SpecB="0" SpecA="0" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
+  </BuiltInStates>
+  <BackGround>
+    <BackGroundMode Mode="1" BackGround=".\Art\rag.jpg" />
+  </BackGround>
+</GLSLang>

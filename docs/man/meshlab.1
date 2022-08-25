@@ -1,0 +1,49 @@
+.Dd March 06, 2020
+.Dt MESHLAB 1
+.Os
+.Sh NAME                 \" Section Header - required - don't modify
+.Nm meshlab
+.Nd The open source mesh processing system.
+.Sh SYNOPSIS             \" Section Header - required - don't modify
+.Nm
+.Op Fl h | Fl -help
+.Nm
+.Op Ar
+.Op Ar viewxmlfile
+.Nm
+.Op Ar projectfile
+.Sh DESCRIPTION          \" Section Header - required - don't modify
+.Nm
+is an interactive tool for manipulating meshes.
+.Pp
+The arguments are as follows:
+.Bl -tag -width -indent
+.It Fl h | Fl -help
+Show a brief help.
+.It Ar
+Mesh/model file(s) to load.
+.It Ar viewxmlfile
+An XML file specifying the camera view
+.It Ar projectfile
+An .mlp MeshLab project file to load.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES           \" Section Header - required - don't modify
+Run MeshLab opening the files
+.Pa mesh1.obj
+and
+.Pa mesh2.obj
+with camera view set in
+.Pa view.xml
+:
+.Dl $ meshlab mesh1.obj mesh2.obj view.xml
+.Pp
+Run MeshLab opening the MeshLab project
+.Pa project.mlp
+:
+.Dl $ meshlab project.mlp
+.Pp
+.Sh SEE ALSO
+.Xr meshlabserver 1
+.An Paolo Cignoni, Visual Computing Lab - ISTI - CNR

@@ -1,0 +1,103 @@
+## MeshLab GitIgnore ##
+*.ipch
+*.pdb
+*.sdf
+*.opensdf
+*.sln
+*.vcxproj
+*.ilk
+*.exp
+*.suo
+*.user
+*.log
+*.filters
+*.db
+*.opendb
+*.db-shm
+*.db-wal
+*.AppImage
+.DS_Store
+build/*
+install/*
+src/external/boost_1_75_0
+src/external/CGAL-5.2.1
+install/macos/resources/meshlab_dmg_final.json
+install/windows/resources/meshlab_final.nsi
+install/windows/resources/MeshLab*.exe
+src/common/generated_version_header.h
+
+##Standard cmake gitignore##
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+##standard Qt and C++ gitignore##
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+*.lib
+*.exe
+*.obj
+*.res
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+mocs_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.qm
+*.prl
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCreator CMake
+CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database
+compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+*creator.user*
+
+
+# © 2019 GitHub, Inc.

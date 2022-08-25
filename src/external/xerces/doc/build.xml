@@ -1,0 +1,644 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Build Instructions">
+  <s2 title="Build Instructions">
+
+    <p>Much of this documentation is historical in nature. The only
+    officially supported platforms with committed testing and maintenance
+    at this time are Windows (native, NOT Cygwin or other variants), 
+    Linux, and MacOS. All other builds are unsupported and untested
+    and should be expected to require patching and build debugging.
+    Patches are accepted for other platforms, as are maintainers
+    interested in taking over responsibility for supporting them.</p>
+
+    <p>While the CMake support is portable, officially the autoconf
+    support is intended to be used for Linux and MacOS and CMake used
+    for Windows.</p>
+
+    <p>Build instructions are provided for the following platforms and
+       compilers:</p>
+
+    <ul>
+       <li><link anchor="CMake">All</link></li>
+       <li><link anchor="UNIX">UNIX/Linux/Mac OS X/Cygwin/MinGW</link></li>
+    </ul>
+
+    <anchor name="CMake"/>
+    <s3 title="Building on all platforms with CMake">
+
+        <p>For building on any platform with any supported build
+           system &XercesCName; uses the CMake build generator and
+           requires that you have <jump
+           href="https://cmake.org/">CMake</jump> installed.
+           Additionally, a build tool such as <jump
+           href="http://www.gnu.org/software/make/make.html">GNU
+           make</jump> or <jump
+           href="https://ninja-build.org/">Ninja</jump> is required for
+           building.  CMake supports a wide range of generators for
+           several different compilers, build tools and popular IDEs,
+           including Eclipse, Kate, Visual Studio, Sublime Text and more.
+           Any of these may be used to build &XercesCName;.  Run
+           <code>cmake --help</code> to display the full list of
+           supported generators for your platform.</p>
+
+        <p>As with all CMake projects, the build process is divided
+           into several parts: configuration and building, followed by
+           (optional) testing and installation. The configuration part is
+           performed by running the <code>cmake</code> command.  The
+           build part is performed by invoking the chosen build tool
+           such as <code>make</code> or <code>ninja</code>, or by opening
+           the generated project files in your IDE, and building from
+           within the IDE.</p>
+
+        <p>Besides the standard <code>cmake</code> <jump
+           href="https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html">variables</jump>,
+           &XercesCName; provides a number of project-specific options
+           that are worth mentioning. You can specify one option for each
+           category outlined below. If you do not specify anything for a
+           particular category then <code>cmake</code> will select the
+           most appropriate default, based upon the available options for
+           your system. At the end of its execution <code>cmake</code>
+           prints the selected values for each category.</p>
+
+
+	<p>Net Accessor (used to access network resources):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>-Dnetwork-accessor=curl</code></td>
+            <td>use the libcurl library (only on UNIX)</td>
+          </tr>
+          <tr>
+            <td><code>-Dnetwork-accessor=socket</code></td>
+            <td>use plain sockets (only on UNIX)</td>
+          </tr>
+	  <tr>
+            <td><code>-Dnetwork-accessor=cfurl</code></td>
+            <td>use the CFURL API (only on Mac OS X)</td>
+          </tr>
+	  <tr>
+            <td><code>-Dnetwork-accessor=winsock</code></td>
+            <td>use WinSock (only on Windows, Cygwin, MinGW)</td>
+          </tr>
+          <tr>
+            <td><code>-Dnetwork:BOOL=OFF</code></td>
+            <td>disable network support</td>
+          </tr>
+        </table>
+
+	<p>Transcoder (used to convert between internal UTF-16 and other encodings):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>-Dtranscoder=gnuiconv</code></td>
+            <td>use the GNU iconv library</td>
+          </tr>
+          <tr>
+            <td><code>-Dtranscoder=iconv</code></td>
+            <td>use the iconv library</td>
+          </tr>
+          <tr>
+            <td><code>-Dtranscoder=icu</code></td>
+            <td>use the ICU library</td>
+          </tr>
+          <tr>
+            <td><code>-Dtranscoder=macosunicodeconverter</code></td>
+            <td>use Mac OS X APIs (only on Mac OS X)</td>
+          </tr>
+          <tr>
+            <td><code>-Dtranscoder=windows</code></td>
+            <td>use Windows APIs (only on Windows and MinGW)</td>
+          </tr>
+        </table>
+
+	<p>Message Loader (used to access diagnostics messages):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>-Dmessage-loader=inmemory</code></td>
+            <td>store the messages in memory</td>
+          </tr>
+          <tr>
+            <td><code>-Dmessage-loader=icu</code></td>
+            <td>store the messages using the ICU resource bundles</td>
+          </tr>
+          <tr>
+            <td><code>-Dmessage-loader=iconv</code></td>
+            <td>store the messages in the iconv message catalog</td>
+          </tr>
+        </table>
+
+        <p>XMLCh type (UTF-16 character type):</p>
+
+        <table>
+            <tr>
+                <th>Option</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=char16_t</code></td>
+                <td>use <code>char16_t</code> (requires a C++11 compiler)</td>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=uint16_t</code></td>
+                <td>use <code>uint16_t</code> from
+                    <code>&lt;cstdint&gt;</code> or
+                    <code>&lt;stdint.h&gt;</code>, or another unsigned
+                    16-bit type such as <code>unsigned short</code> if
+                    the standard types are unavailable</td>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=wchar_t</code></td>
+                <td>use <code>wchar_t</code> (Windows only)</td>
+            </tr>
+        </table>
+
+        <p>MFC debug support is enabled by default (Windows only) and
+           can be disabled with the
+           <code>-Dmfc-debug:BOOL=OFF</code> option.</p>
+
+        <p>Thread support is enabled by default and can be disabled
+           with the <code>-Dthreads:BOOL=OFF</code> option.  If disabled,
+           it will not be possible to select a mutex manager other than
+           <code>nothreads</code>.  If enabled, one of the following
+           mutex managers may be selected:</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=standard</code></td>
+            <td>Use Standard C++ mutex (requires a C++11 compiler)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=posix</code></td>
+            <td>Use POSIX threads (pthreads)  mutex (only on UNIX and Cygwin)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=windows</code></td>
+            <td>Use Windows threads mutex (Windows and MinGW only)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=nothreads</code></td>
+            <td>Use dummy implementation (default if threading is disabled)</td>
+          </tr>
+        </table>
+
+        <p>Shared libraries are built by default. You can use the
+           <code>-DBUILD_SHARED_LIBS:BOOL=OFF</code> option to build
+           static libraries.</p>
+
+         <p>If you need to specify compiler executables that should be
+            used to build &XercesCName;, you can set the CC and CXX
+            environment variables when invoking
+            <code>cmake</code>. Similarly, if you need to specify
+            additional compiler or linker options, you can set the
+            CFLAGS, CXXFLAGS, and LDFLAGS environment variables.  For
+            example:</p>
+
+         <source>CC=gcc-5.3 CXX=g++-5.3 CFLAGS=-O3 CXXFLAGS=-O3 cmake ...</source>
+
+         <note>
+           If building on Windows, the specific Visual Studio version
+           may be selected with some generators, and this may be run
+           from a normal command prompt.  If using a generic generator
+           such as <code>Ninja</code>, then <code>cmake</code> should
+           be run from a Visual Studio command prompt, or in a
+           suitably configured environment, so that the correct
+           compiler will be detected.
+         </note>
+
+         <p>Once the configuration part is complete you can run the
+            build tool of choice.  This may be done generically using
+            <code>cmake --build . [--config=Debug|Release]</code>.
+            Alternatively, a specific build tool, e.g. <code>make</code>,
+            <code>gmake</code>, <code>ninja</code> or
+            <code>msbuild</code> corresponding to the chosen generator
+            may be used directly.  When invoked without a specific
+            target, it will build the &XercesCName; library, all examples
+            and all unit tests.</p>
+
+         <p>If you would like to run the automated test suite, run
+            <code>ctest [-V] [-C Debug|Release]</code>.  This will run
+            all tests.  Additional <jump
+            href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">options</jump>
+            are available, such as running a subset of the tests and
+            running the tests in parallel.  If any discrepancies in the
+            output are detected, the differences will be displayed if a
+            <code>diff</code> program is available.</p>
+
+         <p>Finally, install the library and examples.  This may be
+            done generically using <code>cmake --build . --target
+            install</code>.  Alternatively, a specific build tool may be
+            used, e.g. <code>make install</code>.  To change the
+            installation directory, use the
+            <code>-DCMAKE_INSTALL_PREFIX=prefix</code> <code>cmake</code>
+            option.</p>
+
+         <p>Some platforms and configurations may require extra
+            <code>cmake</code> options.  Run <code>cmake -LH</code> to
+            list the additional options, along with a short description
+            for each.  For each of the selection categories mentioned
+            above, the help text will list the valid choices detected for
+            your platform.  Run <code>cmake -LAH</code> for all the
+            additional advanced settings.</p>
+
+         <p>Several examples of configuring, building, testing and
+            installing with CMake using different platforms, generators,
+            and installation options are shown below:</p>
+
+      <table>
+        <tr>
+          <th>Platform</th>
+          <th>Generator</th>
+          <th>Example</th>
+        </tr>
+        <tr>
+          <td>Any</td>
+          <td>Ninja</td>
+          <td><code>mkdir build</code><br/>
+          <code>cd build</code><br/>
+          <code>cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/opt/xerces-c -DCMAKE_BUILD_TYPE=Release -Dnetwork-accessor=curl /path/to/xerces-c/source</code><br/>
+          <code>ninja</code><br/>
+          <code>ctest -V -j 8</code><br/>
+          <code>ninja install</code></td>
+        </tr>
+        <tr>
+          <td>Unix</td>
+          <td>Unix Makefiles</td>
+          <td><code>mkdir build</code><br/>
+          <code>cd build</code><br/>
+          <code>cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/opt/xerces-c -DCMAKE_BUILD_TYPE=Debug -Dmessage-loader=icu /path/to/xerces-c/source</code><br/>
+          <code>make -j8</code><br/>
+          <code>make test</code><br/>
+          <code>make install</code></td>
+        </tr>
+        <tr>
+          <td>Windows</td>
+          <td>msbuild with VS2015 x64</td>
+          <td><code>mkdir build</code><br/>
+          <code>cd build</code><br/>
+          <code>cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=D:\libs &nbsp;&nbsp; \path\to\xerces-c\source</code><br/>
+          <code>cmake --build . --config Debug</code><br/>
+          <code>ctest -V -C Debug -j 4</code><br/>
+          <code>cmake --build . --config Debug --target install</code></td>
+        </tr>
+        </table>
+        <p/>
+
+        <note>
+          Note that different UNIX platforms use different system
+          environment variables for finding shared libraries. On Linux
+          and Solaris, the environment variable name is
+          <code>LD_LIBRARY_PATH</code>, on AIX it is
+          <code>LIBPATH</code>, on Mac OS X it is
+          <code>DYLD_FALLBACK_LIBRARY_PATH</code>, and on HP-UX it is
+          <code>SHLIB_PATH</code>.
+        </note>
+
+	<note>
+          Note that Windows is different from the UNIX platforms in
+          the way it finds shared libraries at run time.  While UNIX
+          platforms may use the <code>LD_LIBRARY_PATH</code>
+          environment variable, Windows uses the <code>PATH</code>
+          environment variable if the library is not in the same
+          directory as the executable.
+        </note>
+    </s3>
+
+    <anchor name="UNIX"/>
+    <s3 title="Building on UNIX/Linux/Mac OS X/Cygwin/MinGW platforms">
+
+        <p>For building on UNIX and UNIX-like (GNU/Linux, Max OS X,
+           Cygwin, MinGW-MSYS) platforms &XercesCName; uses the
+           GNU automake-based build systems and requires that you
+           have <jump href="http://www.gnu.org/software/make/make.html">GNU
+           make</jump> installed. On some platforms GNU make is called gmake
+           instead of make.</p>
+
+        <p>As with all automake-based projects the build process is divided
+           into two parts: configuration and building. The configuration
+           part is performed using the <code>configure</code> script that
+           can be found in the <code>&XercesC3SrcInstallDir;</code> directory.
+           The build part is performed by invoking <code>make</code>.</p>
+
+        <p>Besides the standard <code>configure</code> options which
+           you can view by running <code>configure --help</code>,
+           &XercesCName; provides a number of project-specific options
+           that are worth mentioning. You can specify one option for
+           each category outlined below. If you do not specify anything
+           for a particular category then <code>configure</code> will
+           select the most appropriate default. At the end of its
+           execution <code>configure</code> prints the selected
+           values for each category.</p>
+
+
+	<p>Net Accessor (used to access network resources):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>--enable-netaccessor-curl</code></td>
+            <td>use the libcurl library</td>
+          </tr>
+          <tr>
+            <td><code>--enable-netaccessor-socket</code></td>
+            <td>use plain sockets</td>
+          </tr>
+	  <tr>
+            <td><code>--enable-netaccessor-cfurl</code></td>
+            <td>use the CFURL API (only on Mac OS X)</td>
+          </tr>
+	  <tr>
+            <td><code>--enable-netaccessor-winsock</code></td>
+            <td>use WinSock (only on Windows, Cygwin, MinGW)</td>
+          </tr>
+          <tr>
+            <td><code>--disable-network</code></td>
+            <td>disable network support</td>
+          </tr>
+        </table>
+
+	<p>Transcoder (used to convert between internal UTF-16 and other encodings):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>--enable-transcoder-gnuiconv</code></td>
+            <td>use the GNU iconv library</td>
+          </tr>
+          <tr>
+            <td><code>--enable-transcoder-iconv</code></td>
+            <td>use the iconv library</td>
+          </tr>
+          <tr>
+            <td><code>--enable-transcoder-icu</code></td>
+            <td>use the ICU library</td>
+          </tr>
+          <tr>
+            <td><code>--enable-transcoder-macosunicodeconverter</code></td>
+            <td>use Mac OS X APIs (only on Mac OS X)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-transcoder-windows</code></td>
+            <td>use Windows APIs (only on Windows, Cygwin, MinGW)</td>
+          </tr>
+        </table>
+
+	<p>Message Loader (used to access diagnostics messages):</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>--enable-msgloader-inmemory</code></td>
+            <td>store the messages in memory</td>
+          </tr>
+          <tr>
+            <td><code>--enable-msgloader-icu</code></td>
+            <td>store the messages using the ICU resource bundles</td>
+          </tr>
+          <tr>
+            <td><code>--enable-msgloader-iconv</code></td>
+            <td>store the messages in the iconv message catalog</td>
+          </tr>
+        </table>
+
+        <p>XMLCh type (UTF-16 character type):</p>
+
+        <table>
+            <tr>
+                <th>Option</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-char16_t</code></td>
+                <td>use <code>char16_t</code> (requires a C++11 compiler)</td>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-uint16_t</code></td>
+                <td>use <code>uint16_t</code> from
+                    <code>&lt;cstdint&gt;</code> or
+                    <code>&lt;stdint.h&gt;</code>, or another unsigned
+                    16-bit type such as <code>unsigned short</code> if
+                    the standard types are unavailable</td>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-wchar_t</code></td>
+                <td>use <code>wchar_t</code> (Windows only)</td>
+            </tr>
+        </table>
+
+        <p>Thread support is enabled by default and can be disabled with the
+           <code>--disable-threads</code> option.  If disabled,
+           it will not be possible to select a mutex manager other than
+           <code>nothreads</code>.  If enabled, one of the following
+           mutex managers may be selected:</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-standard</code></td>
+            <td>Use Standard C++ mutex (requires a C++11 compiler)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-posix</code></td>
+            <td>Use POSIX threads (pthreads)  mutex (only on UNIX and Cygwin)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-windows</code></td>
+            <td>Use Windows threads mutex (Windows and MinGW only)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-nothreads</code></td>
+            <td>Use dummy implementation (default if threading is disabled)</td>
+          </tr>
+        </table>
+
+        <p>By default <code>configure</code> selects both shared and static
+           libraries. You can use the <code>--disable-shared</code> and
+           <code>--disable-static</code> options to avoid building the
+           version you don't need.</p>
+
+        <p>Finally, to make the build process cleaner the &XercesCName;
+           build system hides actual compiler commands being executed
+           by <code>make</code>. If you would like to see those then you
+           can specify the <code>--disable-pretty-make</code> option.</p>
+
+         <p>If you need to specify compiler executables that should be
+            used to build &XercesCName;, you can set the CC and CXX
+            variables when invoking <code>configure</code>. Similarly,
+	    if you need to specify additional compiler or linker options,
+            you can set the CFLAGS, CXXFLAGS, and LDFLAGS variables.
+            For example:</p>
+
+         <source>./configure --disable-static CC=gcc-4.3 CXX=g++-4.3 CFLAGS=-O3 CXXFLAGS=-O3</source>
+
+         <p>Once the configuration part is complete you can run
+            <code>make</code> (or <code>gmake</code>). Running
+            <code>make</code> from the <code>&XercesC3SrcInstallDir;</code>
+            directory builds &XercesCName; library and examples. The
+            library is placed into the <code>src/.libs</code> directory. If
+            you like to build only the library, you can run make from
+            <code>&XercesC3SrcInstallDir;/src</code>.</p>
+
+         <p>If you would like to build the tests and run the
+            automated test suite, run <code>make check</code>
+            from the <code>&XercesC3SrcInstallDir;</code>
+            directory. The automated test suite required
+            Perl and the <code>diff</code> command.</p>
+
+         <p>Finally, to install the library and examples you can run
+            <code>make install</code> (or <code>gmake install</code>).
+            To change the installation directory, use the <code>--prefix</code>
+            <code>configure</code> option.</p>
+
+         <p>Some platforms and configurations require extra
+            <code>configure</code> and <code>make</code> options
+            which are shown in the following table.</p>
+
+      <table>
+        <tr>
+          <th>Platform</th>
+          <th>Compiler</th>
+          <th>Options</th>
+        </tr>
+        <tr>
+          <td>Solaris x86</td>
+          <td>Sun CC</td>
+          <td><code>./configure CXX=CC CC=cc</code></td>
+        </tr>
+        <tr>
+          <td>Solaris x86-64</td>
+          <td>Sun CC</td>
+          <td><code>./configure CXX=CC CC=cc CFLAGS=-xarch=amd64 CXXFLAGS=-xarch=amd64</code><br/>
+              (for newer Sun CC versions use -m64 instead of -xarch=amd64)</td>
+        </tr>
+        <tr>
+          <td>Solaris SPARC</td>
+          <td>Sun CC</td>
+          <td><code>./configure CXX=CC CC=cc</code></td>
+        </tr>
+        <tr>
+          <td>Solaris SPARCv9</td>
+          <td>Sun CC</td>
+          <td><code>./configure CXX=CC CC=cc CFLAGS=-xarch=v9 CXXFLAGS=-xarch=v9</code><br/>
+              (for newer Sun CC versions use -m64 instead of -xarch=v9)</td>
+        </tr>
+        <tr>
+          <td>AIX PowerPC</td>
+          <td>IBM XL C++</td>
+          <td><code>./configure CXX=xlC_r CC=xlc_r</code><br/>
+              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code><br/>
+              (for xlC v11-v13, libxerces_c_la_LDFLAGS is not needed, but CXXFLAGS=-rtti is needed otherwise RTTI is disabled by default)</td>
+        </tr>
+        <tr>
+          <td>AIX PowerPC-64</td>
+          <td>IBM XL C++</td>
+          <td><code>export OBJECT_MODE=64</code><br/>
+              <code>./configure CXX=xlC_r CC=xlc_r CXXFLAGS=-q64 CFLAGS=-q64</code><br/>
+              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code><br/>
+              (for xlC v11-v13, libxerces_c_la_LDFLAGS is not needed, but CXXFLAGS="-q64 -rtti" is needed otherwise RTTI is disabled by default)</td>
+        </tr>
+        <tr>
+          <td>HP-UX IA-64-32</td>
+          <td>HP aCC</td>
+          <td><code>./configure CXX=aCC CC=aCC CFLAGS=-mt CXXFLAGS=-mt LDFLAGS=-mt</code></td>
+        </tr>
+        <tr>
+          <td>HP-UX IA-64</td>
+          <td>HP aCC</td>
+          <td><code>./configure CXX=aCC CC=aCC CFLAGS="-mt +DD64" CXXFLAGS="-mt +DD64" LDFLAGS="-mt +DD64"</code></td>
+        </tr>
+        <tr>
+          <td>Mac OS X x86-64</td>
+          <td>GCC</td>
+          <td><code>./configure CFLAGS="-arch x86_64" CXXFLAGS="-arch x86_64" </code></td>
+        </tr>
+        <tr>
+          <td>Mac OS X PowerPC-64</td>
+          <td>GCC</td>
+          <td><code>./configure CFLAGS="-arch ppc64" CXXFLAGS="-arch ppc64"</code></td>
+        </tr>
+        <tr>
+          <td>Mac OS X x86/PowerPC</td>
+          <td>GCC</td>
+          <td><code>./configure --disable-dependency-tracking CFLAGS="-arch i386 -arch ppc" CXXFLAGS="-arch i386 -arch ppc"</code></td>
+        </tr>
+        <tr>
+          <td>Mingw x86</td>
+          <td>GCC</td>
+          <td><code>./configure LDFLAGS=-no-undefined</code></td>
+        </tr>
+        <tr>
+          <td>Cygwin x86</td>
+          <td>GCC</td>
+          <td><code>./configure LDFLAGS=-no-undefined</code></td>
+        </tr>
+        </table>
+        <p/>
+
+        <note>
+         Note that different UNIX platforms use different system
+         environment variable for finding shared libraries. On Linux
+         and Solaris, the environment variable name is
+         <code>LD_LIBRARY_PATH</code>, on AIX it is
+         <code>LIBPATH</code>, on Mac OS X it is
+         <code>DYLD_LIBRARY_PATH</code>, and on HP-UX
+         it is <code>SHLIB_PATH</code>.
+        </note>
+
+	<note>
+          Note that Cygwin and MinGW are different from the UNIX platforms
+          in the way they find shared libraries at run time. While UNIX
+          platforms may use the <code>LD_LIBRARY_PATH</code> environment
+          variable, Cygwin and MinGW use the <code>PATH</code> environment
+          variable.
+        </note>
+    </s3>
+
+  </s2>
+</s1>

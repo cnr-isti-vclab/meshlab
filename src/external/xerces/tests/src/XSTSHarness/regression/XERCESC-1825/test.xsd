@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="qname">
+    <sequence>
+      <element name="a" type="QName" xmlns:z="test" default="z:a"/>
+    </sequence>
+    <attribute name="x" type="QName" default="t:x"/>
+    <attribute name="y" type="QName" fixed="t:y" use="required"/>
+  </complexType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="qname" type="t:qname"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

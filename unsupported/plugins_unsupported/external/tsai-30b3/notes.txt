@@ -1,0 +1,138 @@
+----------------------------------------------------------------------------
+
+From: Reg Willson <rgwillson@mmm.com>
+Subject: Camera Calibration using Tsai's Method - revision 3.0b3
+
+This release of the camera calibration software includes the following
+changes:
+
+    1) source code written entirely in C, 
+
+    2) Unix and PC/DOS (Borland 4.5) compatibility,
+
+    3) cleaner dynamic memory allocation, and 
+  
+    4) a Frequently Asked Questions (FAQ) file and a change log file. 
+
+The release is available via anonymous ftp from
+
+    ftp.teleos.com
+
+The code and documentation are contained in the files
+
+    /VISION-LIST-ARCHIVE/SHAREWARE/CODE/CALIBRATION/Tsai-method-v3.0b3.tar.Z
+    /VISION-LIST-ARCHIVE/SHAREWARE/CODE/CALIBRATION/tsai30b3.zip
+
+The release is also available via the world wide web at URL
+
+    http://www.ius.cs.cmu.edu/afs/cs.cmu.edu/user/rgw/www/TsaiCode.html
+
+Special thanks to
+	Markus Menke <M.Menke@dkfz-Heidelberg.de>,
+	Franz-Josef L|cke <luecke@zinfo.zess.uni-siegen.de>,
+	Piotr Jasiobedzki <piotr@vis.toronto.edu>,
+	Jim Vaughan <vaughan@brighton.ac.uk>,
+	Pete Rander <Peter.Rander@IUS4.IUS.CS.CMU.EDU>, and
+many others for all their help with the PC/DOS port and bug reports.
+
+Comments, suggestions, and bug reports can be directed to me at
+Reg Willson <rgwillson@mmm.com>.
+
+
+Reg Willson, 28-Oct-95
+
+----------------------------------------------------------------------------
+
+From: Reg Willson <rgwillson@mmm.com>
+Subject: Camera Calibration using Tsai's Method - revision 2.1
+
+This revision includes a fully self contained implementation of Roger Tsai's
+camera calibration algorithm using *public domain* MINPACK optimization
+routines (the code may also be built using commercial IMSL optimization
+routines).  Also included is a fix for a bug that reduced the accuracy of
+full coplanar calibration and increased the convergence time of full
+non-coplanar calibration.  Finally, generic macros have been added for three
+less common math routines used in the code.
+
+Thanks to Torfi Thorhallsson (torfit@verk.hi.is) at the University of
+Iceland who provided the self contained MINPACK version of the code.
+Torfi also identified the coplanar calibration bug.
+
+Thanks also to Frederic Devernay <Frederic.Devernay@sophia.inria.fr> who
+also submitted a unified MINPACK/IMSL/NAG version of the calibration code.
+Future code revisions will likely use Fred's macros for isolating and
+simplifying the interfaces to the various optimization packages.  Also in
+the works is a PC compatible version of the code.
+
+Comments, suggestions, and bug reports can be directed to me at
+Reg Willson <rgwillson@mmm.com>.
+
+
+Reg Willson, 04-Jun-94
+
+----------------------------------------------------------------------------
+
+From: Reg Willson <rgw@cs.cmu.edu>
+Subject: Camera Calibration using Tsai's Method - revision 2.0
+
+This software release represents a set of updates to the software placed in
+the VISLIST ARCHIVE in 1993 by Jon Owen.  The release contains a bug fix,
+improvements to several routines, and new code for exterior orientation
+calibration.  The code should also be much easier to compile than the
+previous release.
+
+The bug fix occurs in the routines ncc_compute_R and ncc_compute_better_R.
+In the corrected routines the r4, r5, and r6 terms are not divided by cp.sx.
+This bug was reported by Volker Rodehorst <vr@cs.tu-berlin.de>.
+
+Included in this release is Frederic Devernay's
+<Frederic.Devernay@sophia.inria.fr> significantly improved routine for
+converting from undistorted to distorted sensor coordinates.  Rather than
+iteratively solving a system of two non-linear equations to perform the
+conversion, the new routine algebraically solves a cubic polynomial in Rd
+(using the Cardan method).
+
+This release also contains improved routines for calculating calibration
+error statistics, including the new routines:
+
+	object_space_error_stats ()
+and
+	normalized_calibration_error ()
+
+The first routine calculates the statistics for the magnitude of the
+distance of closest approach (i.e. 3D error) between points in object space
+and the line of sight formed by back projecting the measured 2D coordinates
+out through the camera model.  The second routine is based on an error
+measure proposed by Weng in IEEE PAMI, October 1992.
+
+Finally this release contains new checks for coordinate handedness problems
+in the calibration data.
+
+This release uses optimization routines from the IMSL commercial software
+package.  An updated version of the code set up for the NAG commercial
+software package will hopefully be available soon.  Bug reports can be
+directed to either Jon or myself.
+
+
+Reg Willson, 17-Feb-94
+
+----------------------------------------------------------------------------
+
+From: jcowen@cs.utah.edu
+Subject: Camera Calibration using Tsai's Method
+
+Several months ago, I posted to the vision list asking for camera
+calibration help.  One response led me to contact Reg Willson, who was
+extremely helpful, and sent me his implementation
+of Roger Tsai's calibration algorithm.  He said I could re-distribute it
+as needed, and we've made it ftp'able from cs.utah.edu.  It's in the
+pub/ReverseEngineering/src/CameraCalibration directory.  
+
+I'd like to get bug reports, so I can filter them and pass them on to
+Reg.  Also, if anybody replaces the IMSL stuff w/public domain routines,
+I'd like to know.
+
+Thanks,
+Jon
+
+----------------------------------------------------------------------------

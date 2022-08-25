@@ -1,0 +1,867 @@
+<HTML><HEAD><META content="text/html; charset=utf8" http-equiv="Content-Type"><SCRIPT language="JavaScript" src="resources/script.js" type="text/javascript"></SCRIPT><TITLE>SAX Programming Guide</TITLE></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="graphics/program-sax-3-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','resources/button-xml-hi.gif','resources/button-xml-lo.gif');" src="resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','resources/button-asf-hi.gif','resources/button-asf-lo.gif');" src="resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','resources/button-w3c-hi.gif','resources/button-w3c-lo.gif');" src="resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="resources/join.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Xerces Project" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','graphics/ext-2-label-2.jpg','graphics/ext-2-label-3.jpg');" src="graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+     <A href="index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Overview" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','graphics/index-label-2.jpg','graphics/index-label-3.jpg');" src="graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="charter.html" onMouseOut="rolloverOff('side-charter');" onMouseOver="rolloverOn('side-charter');"><IMG alt="Charter" border="0" height="12" hspace="0" name="side-charter" onLoad="rolloverLoad('side-charter','graphics/charter-label-2.jpg','graphics/charter-label-3.jpg');" src="graphics/charter-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','graphics/releases-label-2.jpg','graphics/releases-label-3.jpg');" src="graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="secadv.html" onMouseOut="rolloverOff('side-secadv');" onMouseOver="rolloverOn('side-secadv');"><IMG alt="Advisories" border="0" height="12" hspace="0" name="side-secadv" onLoad="rolloverLoad('side-secadv','graphics/secadv-label-2.jpg','graphics/secadv-label-3.jpg');" src="graphics/secadv-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     <A href="http://xerces.apache.org/xerces-c/download.cgi" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','graphics/ext-18-label-2.jpg','graphics/ext-18-label-3.jpg');" src="graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+  <IMG alt="Xerces-C++ 3.2.3" border="0" height="17" hspace="0" name="side-sect-24" src="graphics/sect-24-label.jpg" vspace="0" width="120"><BR>
+
+     <A href="install-3.html" onMouseOut="rolloverOff('side-install-3');" onMouseOver="rolloverOn('side-install-3');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install-3" onLoad="rolloverLoad('side-install-3','graphics/install-3-label-2.jpg','graphics/install-3-label-3.jpg');" src="graphics/install-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="build-3.html" onMouseOut="rolloverOff('side-build-3');" onMouseOver="rolloverOn('side-build-3');"><IMG alt="Build Instructions" border="0" height="12" hspace="0" name="side-build-3" onLoad="rolloverLoad('side-build-3','graphics/build-3-label-2.jpg','graphics/build-3-label-3.jpg');" src="graphics/build-3-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator-space.gif" vspace="0" width="120"><BR>
+
+     <A href="program-3.html" onMouseOut="rolloverOff('side-program-3');" onMouseOver="rolloverOn('side-program-3');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program-3" onLoad="rolloverLoad('side-program-3','graphics/program-3-label-2.jpg','graphics/program-3-label-3.jpg');" src="graphics/program-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     
+     
+     
+
+     <A href="samples-3.html" onMouseOut="rolloverOff('side-samples-3');" onMouseOver="rolloverOn('side-samples-3');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples-3" onLoad="rolloverLoad('side-samples-3','graphics/samples-3-label-2.jpg','graphics/samples-3-label-3.jpg');" src="graphics/samples-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+
+     <A href="faqs-3.html" onMouseOut="rolloverOff('side-faqs-3');" onMouseOver="rolloverOn('side-faqs-3');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs-3" onLoad="rolloverLoad('side-faqs-3','graphics/faqs-3-label-2.jpg','graphics/faqs-3-label-3.jpg');" src="graphics/faqs-3-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator-space.gif" vspace="0" width="120"><BR>
+
+     <A href="api-3.html" onMouseOut="rolloverOff('side-api-3');" onMouseOver="rolloverOn('side-api-3');"><IMG alt="API Reference" border="0" height="12" hspace="0" name="side-api-3" onLoad="rolloverLoad('side-api-3','graphics/api-3-label-2.jpg','graphics/api-3-label-3.jpg');" src="graphics/api-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-84');" onMouseOver="rolloverOn('side-ext-84');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-84" onLoad="rolloverLoad('side-ext-84','graphics/ext-84-label-2.jpg','graphics/ext-84-label-3.jpg');" src="graphics/ext-84-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="migrate-3.html" onMouseOut="rolloverOff('side-migrate-3');" onMouseOver="rolloverOn('side-migrate-3');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate-3" onLoad="rolloverLoad('side-migrate-3','graphics/migrate-3-label-2.jpg','graphics/migrate-3-label-3.jpg');" src="graphics/migrate-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','graphics/feedback-label-2.jpg','graphics/feedback-label-3.jpg');" src="graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','graphics/bug-report-label-2.jpg','graphics/bug-report-label-3.jpg');" src="graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="mailing-lists.html" onMouseOut="rolloverOff('side-mailing-lists');" onMouseOver="rolloverOn('side-mailing-lists');"><IMG alt="Mailing Lists" border="0" height="12" hspace="0" name="side-mailing-lists" onLoad="rolloverLoad('side-mailing-lists','graphics/mailing-lists-label-2.jpg','graphics/mailing-lists-label-3.jpg');" src="graphics/mailing-lists-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+   <A href="source-repository.html" onMouseOut="rolloverOff('side-source-repository');" onMouseOver="rolloverOn('side-source-repository');"><IMG alt="Source Repository" border="0" height="12" hspace="0" name="side-source-repository" onLoad="rolloverLoad('side-source-repository','graphics/source-repository-label-2.jpg','graphics/source-repository-label-3.jpg');" src="graphics/source-repository-label-3.jpg" vspace="0" width="120"></A><BR>
+   <A href="applications.html" onMouseOut="rolloverOff('side-applications');" onMouseOver="rolloverOn('side-applications');"><IMG alt="Applications" border="0" height="12" hspace="0" name="side-applications" onLoad="rolloverLoad('side-applications','graphics/applications-label-2.jpg','graphics/applications-label-3.jpg');" src="graphics/applications-label-3.jpg" vspace="0" width="120"></A><BR>
+
+<IMG border="0" height="14" hspace="0" src="resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+
+    <A name="UsingSAX1API"><!--anchor--></A>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Using the SAX API</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>The SAX API for XML parsers was originally developed for
+        Java.  Please be aware that there is no standard SAX API for
+        C++, and that use of the Xerces-C++ SAX API does not
+        guarantee client code compatibility with other C++ XML
+        parsers.</P>
+
+      <P>The SAX API presents a callback based API to the parser. An
+        application that uses SAX provides an instance of a handler
+        class to the parser. When the parser detects XML constructs,
+        it calls the methods of the handler class, passing them
+        information about the construct that was detected. The most
+        commonly used handler classes are DocumentHandler which is
+        called when XML constructs are recognized, and ErrorHandler
+        which is called when an error occurs. The header files for the
+        various SAX handler classes are in the <CODE><FONT face="courier, monospaced">xercesc/sax/</FONT></CODE>
+        directory.</P>
+
+      <P>As a convenience, Xerces-C++ provides
+        HandlerBase, a single class which is publicly derived
+        from all the Handler classes. HandlerBase's default
+        implementation of the handler callback methods is to do
+        nothing. A convenient way to get started with Xerces-C++ is
+        to derive your own handler class from HandlerBase and override
+        just those methods in HandlerBase which you are interested in
+        customizing. This simple example shows how to create a handler
+        which will print element names, and print fatal error
+        messages. The source code for the sample applications show
+        additional examples of how to write handler classes.</P>
+
+      <P>This is the header file MySAXHandler.hpp:</P>
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>#include &lt;xercesc/sax/HandlerBase.hpp&gt;
+
+class MySAXHandler : public HandlerBase {
+public:
+    void startElement(const XMLCh* const, AttributeList&amp;);
+    void fatalError(const SAXParseException&amp;);
+};</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>This is the implementation file MySAXHandler.cpp:</P>
+
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>#include &quot;MySAXHandler.hpp&quot;
+#include &lt;iostream&gt;
+
+using namespace std;
+
+MySAXHandler::MySAXHandler()
+{
+}
+
+void MySAXHandler::startElement(const XMLCh* const name,
+                           AttributeList&amp; attributes)
+{
+    char* message = XMLString::transcode(name);
+    cout &lt;&lt; &quot;I saw element: &quot;&lt;&lt; message &lt;&lt; endl;
+    XMLString::release(&amp;message);
+}
+
+void MySAXHandler::fatalError(const SAXParseException&amp; exception)
+{
+    char* message = XMLString::transcode(exception.getMessage());
+    cout &lt;&lt; &quot;Fatal Error: &quot; &lt;&lt; message
+         &lt;&lt; &quot; at line: &quot; &lt;&lt; exception.getLineNumber()
+         &lt;&lt; endl;
+    XMLString::release(&amp;message);
+}</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>The XMLCh and AttributeList types are supplied by
+        Xerces-C++ and are documented in the API reference.
+        Examples of their usage appear in the source code for
+        the sample applications.</P>
+    </FONT></TD></TR></TABLE><BR>
+
+    <A name="SAXParser"><!--anchor--></A>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>SAXParser</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+        <A name="ConstructParser"><!--anchor--></A>
+        <TABLE border="0" cellpadding="0" cellspacing="0" width="484"><TR><TD bgcolor="ffffff" colspan="2" width="484"><TABLE border="0" cellpadding="0" cellspacing="0" width="484"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="482"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="482"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="482"><FONT color="#ffffff" face="arial,helvetica,sanserif"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Constructing a SAXParser</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="482"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="482"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="474"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+          <P>In order to use Xerces-C++ SAX to parse XML files, you will
+            need to create an instance of the SAXParser class. The example
+            below shows the code you need in order to create an instance
+            of SAXParser. The DocumentHandler and ErrorHandler instances
+            required by the SAX API are provided using the HandlerBase
+            class supplied with Xerces-C++.</P>
+
+    <DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+    #include &lt;xercesc/parsers/SAXParser.hpp&gt;
+    #include &lt;xercesc/sax/HandlerBase.hpp&gt;
+    #include &lt;xercesc/util/XMLString.hpp&gt;
+
+    #include &lt;iostream&gt;
+
+    using namespace std;
+    using namespace xercesc;
+
+    int main (int argc, char* args[]) {
+
+        try {
+            XMLPlatformUtils::Initialize();
+        }
+        catch (const XMLException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; &quot;Error during initialization! :\n&quot;
+                 &lt;&lt; message &lt;&lt; &quot;\n&quot;;
+            XMLString::release(&amp;message);
+            return 1;
+        }
+
+        char* xmlFile = &quot;x1.xml&quot;;
+        SAXParser* parser = new SAXParser();
+        parser-&gt;setDoValidation(true);
+        parser-&gt;setDoNamespaces(true);    // optional
+
+        DocumentHandler* docHandler = new HandlerBase();
+        ErrorHandler* errHandler = (ErrorHandler*) docHandler;
+        parser-&gt;setDocumentHandler(docHandler);
+        parser-&gt;setErrorHandler(errHandler);
+
+        try {
+            parser-&gt;parse(xmlFile);
+        }
+        catch (const XMLException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; &quot;Exception message is: \n&quot;
+                 &lt;&lt; message &lt;&lt; &quot;\n&quot;;
+            XMLString::release(&amp;message);
+            return -1;
+        }
+        catch (const SAXParseException&amp; toCatch) {
+            char* message = XMLString::transcode(toCatch.getMessage());
+            cout &lt;&lt; &quot;Exception message is: \n&quot;
+                 &lt;&lt; message &lt;&lt; &quot;\n&quot;;
+            XMLString::release(&amp;message);
+            return -1;
+        }
+        catch (...) {
+            cout &lt;&lt; &quot;Unexpected Exception \n&quot; ;
+            return -1;
+        }
+
+        delete parser;
+        delete docHandler;
+        return 0;
+    }</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+        </FONT></TD></TR></TABLE><BR>
+
+        <A name="SAXFeatures"><!--anchor--></A>
+        <TABLE border="0" cellpadding="0" cellspacing="0" width="484"><TR><TD bgcolor="ffffff" colspan="2" width="484"><TABLE border="0" cellpadding="0" cellspacing="0" width="484"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="482"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="482"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="482"><FONT color="#ffffff" face="arial,helvetica,sanserif"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>SAXParser Supported Features</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="482"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="482"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="474"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+
+           <P>The behavior of the SAXParser is dependant on the values of the following features.  All
+           of the features below are set using the &quot;setter&quot; methods (e.g. <CODE><FONT face="courier, monospaced">setDoNamespaces</FONT></CODE>),
+           and are queried using the corresponding &quot;getter&quot; methods (e.g. <CODE><FONT face="courier, monospaced">getDoNamespaces</FONT></CODE>).
+           The following only gives you a quick summary of supported features.  Please
+           refer to <A href="api-3.html">API Documentation</A> for complete detail.
+           </P>
+           <P>None of these features can be modified in the middle of a parse, or an exception will be thrown.</P>
+
+
+            <A name="namespaces"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setDoNamespaces(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Perform Namespace processing. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Do not perform Namespace processing. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If the validation scheme is set to Val_Always or Val_Auto, then the
+                document must contain a grammar that supports the use of namespaces. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#validation-dynamic">setValidationScheme</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="validation-dynamic"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setValidationScheme(const ValSchemes)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Val_Auto:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will report validation errors only if a grammar is specified. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Val_Always:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will always report validation errors. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Val_Never:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Do not report validation errors. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Val_Never &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If set to Val_Always, the document must
+                specify a grammar.  If this feature is set to Val_Never and document specifies a grammar,
+                that grammar might be parsed but no validation of the document contents will be
+                performed. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#load-external-dtd">setLoadExternalDTD</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="schema"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setDoSchema(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable the parser's schema support.  &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable the parser's schema support. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If set to true, namespace processing must also be turned on. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#namespaces">setDoNamespaces</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setValidationSchemaFullChecking(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable full schema constraint checking, including checking
+                             which may be time-consuming or memory intensive. Currently, particle unique
+                             attribution constraint checking and particle derivation restriction checking
+                             are controlled by this option. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable full schema constraint checking. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> This feature checks the Schema grammar itself for
+                additional errors that are time-consuming or memory intensive. It does <B>not</B> affect the
+                level of checking performed on document instances that use Schema grammars. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#schema">setDoSchema</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="load-schema"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setLoadSchema(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Load the schema. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Don't load the schema if it wasn't found in the grammar pool. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> true &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> This feature is ignored and no schemas are loaded if schema processing is disabled. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#schema">setDoSchema</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="load-external-dtd"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setLoadExternalDTD(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Load the External DTD. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Ignore the external DTD completely. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> true &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> This feature is ignored and DTD is always loaded
+                if the validation scheme is set to Val_Always or Val_Auto. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#validation-dynamic">setValidationScheme</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="continue-after-fatal"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setExitOnFirstFatalError(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Stops parse on first fatal error. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Attempt to continue parsing after a fatal error. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> true &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The behavior of the parser when this feature is set to
+                false is <B>undetermined</B>! Therefore use this feature with extreme caution because
+                the parser may get stuck in an infinite loop or worse. &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setValidationConstraintFatal(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will treat validation error as fatal and will
+                exit depends on the state of
+                <A href="#continue-after-fatal">setExitOnFirstFatalError</A>.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will report the error and continue processing. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Setting this true does not mean the validation error will
+                be printed with the word &quot;Fatal Error&quot;.   It is still printed as &quot;Error&quot;, but the parser
+                will exit if
+                <A href="#continue-after-fatal">setExitOnFirstFatalError</A>
+                is set to true. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#continue-after-fatal">setExitOnFirstFatalError</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="use-cached"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void useCachedGrammarInParse(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">Use cached grammar if it exists in the pool.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">Parse the schema grammar.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">The getter function for this method is called isUsingCachedGrammarInParse.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">If the grammar caching option is enabled, this option is set to true automatically
+                and any setting to this option by the user is a no-op.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#cache-grammar">cacheGrammarFromParse</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="cache-grammar"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void cacheGrammarFromParse(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">Cache the grammar in the pool for re-use in subsequent parses.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">Do not cache the grammar in the pool&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">The getter function for this method is called isCachingGrammarFromParse&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If set to true, the useCachedGrammarInParse
+                is also set to true automatically.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#use-cached">useCachedGrammarInParse</A>
+                &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <A name="StandardUriConformant"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setStandardUriConformant(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Force standard uri conformance. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Do not force standard uri conformance. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If set to true, malformed uri will be rejected
+                and fatal error will be issued. &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="CalculateSrcOffset"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setCalculateSrcOfs(const bool)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable src offset calculation. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable src offset calculation. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> If set to true, the user can inquire about
+                the current src offset within the input source. Setting it to false (default)
+                improves the performance.&nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="IdentityConstraintChecking"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setIdentityConstraintChecking(const bool);</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable identity constraint checking. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable identity constraint checking. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> true &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="GenerateSyntheticAnnotations"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setGenerateSyntheticAnnotations(const bool);</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable generation of synthetic annotations.  A synthetic annotation will be
+                generated when a schema component has non-schema attributes but no child annotation. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable generation of synthetic annotations. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="XercesValidateAnnotations"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setValidateAnnotation</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Enable validation of annotations. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Disable validation of annotations. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Each annotation is validated independently. &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="IgnoreAnnotations"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setIgnoreAnnotations</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Do not generate XSAnnotations when traversing a schema.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Generate XSAnnotations when traversing a schema.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="DisableDefaultEntityResolution"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setDisableDefaultEntityResolution</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will not attempt to resolve the entity when the resolveEntity method returns NULL.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will attempt to resolve the entity when the resolveEntity method returns NULL.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="SkipDTDValidation"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setSkipDTDValidation</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> When schema validation is on the parser will ignore the DTD, except for entities.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The parser will not ignore DTDs when validating.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#schema">DoSchema</A>&nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+			<A name="XercesIgnoreCachedDTD"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setIgnoreCachedDTD</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Ignore a cached DTD when an XML document contains both an
+                								internal and external DTD, and the use cached grammar from parse option
+                								is enabled. Currently, we do not allow using cached DTD grammar when an
+                								internal subset is present in the document. This option will only affect
+                								the behavior of the parser when an internal and external DTD both exist
+                								in a document (i.e. no effect if document has no internal subset).&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Don't ignore cached DTD. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>see:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                <A href="#use-cached">useCachedGrammarInParse</A>&nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <A name="XercesHandleMultipleImports"><!--anchor--></A>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setHandleMultipleImports</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>true:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> During schema validation allow multiple schemas with the same namespace
+                                                to be imported.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>false:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> Don't import multiple schemas with the same namespace. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>default:</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> false &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setExternalSchemaLocation(const XMLCh* const)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The XML Schema Recommendation explicitly states that
+                            the inclusion of schemaLocation/ noNamespaceSchemaLocation attributes in the
+                            instance document is only a hint; it does not mandate that these attributes
+                            must be used to locate schemas.  Similar situation happens to &lt;import&gt;
+                            element in schema documents. This property allows the user to specify a list
+                            of schemas to use.  If the targetNamespace of a schema specified using this
+                            method matches the targetNamespace of a schema occurring in the instance
+                            document in schemaLocation attribute, or
+                            if the targetNamespace matches the namespace attribute of &lt;import&gt;
+                            element, the schema specified by the user using this property will
+                            be used (i.e., the schemaLocation attribute in the instance document
+                            or on the &lt;import&gt; element will be effectively ignored). &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The syntax is the same as for schemaLocation attributes
+                                 in instance documents: e.g, &quot;http://www.example.com file_name.xsd&quot;.
+                                 The user can specify more than one XML Schema in the list. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> XMLCh* &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void setExternalNoNamespaceSchemaLocation(const XMLCh* const)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The XML Schema Recommendation explicitly states that
+                            the inclusion of schemaLocation/ noNamespaceSchemaLocation attributes in the
+                            instance document is only a hint; it does not mandate that these attributes
+                            must be used to locate schemas.  This property allows the user to specify the
+                            no target namespace XML Schema Location externally.  If specified, the instance
+                            document's noNamespaceSchemaLocation attribute will be effectively ignored. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The syntax is the same as for the noNamespaceSchemaLocation
+                            attribute that may occur in an instance document: e.g.&quot;file_name.xsd&quot;. &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> XMLCh* &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>void useScanner(const XMLCh* const)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> This property allows the user to specify the name of
+                            the XMLScanner to use for scanning XML documents. If not specified, the default
+                            scanner &quot;IGXMLScanner&quot; is used.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> The recognized scanner names are: <BR>
+                            1.&quot;WFXMLScanner&quot; - scanner that performs well-formedness checking only.<BR>
+                            2. &quot;DGXMLScanner&quot; - scanner that handles XML documents with DTD grammar information.<BR>
+                            3. &quot;SGXMLScanner&quot; - scanner that handles XML documents with XML schema grammar information.<BR>
+			    4. &quot;IGXMLScanner&quot; - scanner that handles XML documents with DTD or/and XML schema grammar information.<BR>
+                            Users can use the predefined constants defined in XMLUni directly (fgWFXMLScanner, fgDGXMLScanner,
+                            fgSGXMLScanner, or fgIGXMLScanner) or a string that matches the value of one of those constants.&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> XMLCh* &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>note: </B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> See <A href="program-others-3.html#UseSpecificScanner">Use Specific Scanner</A>
+                for more programming details. &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setSecurityManager(Security Manager * const)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    Certain valid XML and XML Schema constructs can force a
+                    processor to consume more system resources than an
+                    application may wish.  In fact, certain features could
+                    be exploited by malicious document writers to produce a
+                    denial-of-service attack.  This property allows
+                    applications to impose limits on the amount of
+                    resources the processor will consume while processing
+                    these constructs.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    An instance of the SecurityManager class (see
+                    <CODE><FONT face="courier, monospaced">xercesc/util/SecurityManager</FONT></CODE>).  This
+                    class's documentation describes the particular limits
+                    that may be set.  Note that, when instantiated, default
+                    values for limits that should be appropriate in most
+                    settings are provided.  The default implementation is
+                    not thread-safe; if thread-safety is required, the
+                    application should extend this class, overriding
+                    methods appropriately.  The parser will not adopt the
+                    SecurityManager instance; the application is
+                    responsible for deleting it when it is finished with
+                    it.  If no SecurityManager instance has been provided to
+                    the parser (the default) then processing strictly
+                    conforming to the relevant specifications will be
+                    performed.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> SecurityManager* &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setLowWaterMark(XMLSize_t)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    If the number of available bytes in the raw buffer is less than
+                    the low water mark the parser will attempt to read more data before
+                    continuing parsing. By default the value for this parameter is 100
+                    bytes. You may want to set this parameter to 0 if you would like
+                    the parser to parse the available data immediately without
+                    potentially blocking while waiting for more date.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    New low water mark.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> XMLSize_t &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+
+            <P></P>
+
+            <TABLE border="0" cellpadding="2" cellspacing="2" width="100%">
+                <TR><TD align="center" bgcolor="#039acc" colspan="2" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>setInputBufferSize(const size_t bufferSize)</B></B>&nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Description</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    Set maximum input buffer size.
+                    This method allows users to limit the size of buffers used in parsing
+                    XML character data. The effect of setting this size is to limit the
+                    size of a ContentHandler::characters() call.
+                    The parser's default input buffer size is 1 megabyte.
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value</B></B>&nbsp;
+      </FONT></TD>
+                <TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1">
+                    The maximum input buffer size
+                &nbsp;
+      </FONT></TD></TR>
+                <TR><TD align="center" bgcolor="#039acc" colspan="1" rowspan="1" valign="center"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="-1"><B><B>Value Type</B></B>&nbsp;
+      </FONT></TD><TD align="" bgcolor="#a0ddf0" colspan="1" rowspan="1" valign="top"><FONT color="#000000" face="arial,helvetica,sanserif" size="-1"> XMLCh* &nbsp;
+      </FONT></TD></TR>
+            </TABLE>
+            <P></P>
+        </FONT></TD></TR></TABLE><BR>
+    </FONT></TD></TR></TABLE><BR>
+
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="resources/dot.gif" width="1"></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1999-2017 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

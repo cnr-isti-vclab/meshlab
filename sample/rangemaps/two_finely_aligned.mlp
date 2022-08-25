@@ -1,0 +1,22 @@
+<!DOCTYPE MeshLabDocument>
+<MeshLabProject>
+ <MeshGroup>
+  <MLMesh filename="faccia045.ply" label="faccia045.ply">
+   <MLMatrix44>
+0.692008 -0.283785 0.66377 534.844 
+0.267057 0.954895 0.129833 109.193 
+-0.670675 0.0874183 0.736582 -224.435 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh filename="faccia000.ply" label="faccia000.ply">
+   <MLMatrix44>
+0.999599 0.00537689 0.0277901 21.4297 
+-0.00648404 0.999182 0.0399042 31.8078 
+-0.0275528 -0.0400684 0.998817 -1.74597 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+ </MeshGroup>
+ <RasterGroup/>
+</MeshLabProject>

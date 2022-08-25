@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget</class>
+ <widget class="QDockWidget" name="Widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>175</width>
+    <height>654</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Laser scanner settings</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="scanbutton">
+      <property name="text">
+       <string>Scan (S)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="saveButton">
+      <property name="text">
+       <string>Export cloud...</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="drawLineCheckBox">
+      <property name="text">
+       <string>Draw Lines</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="box_freq">
+      <property name="title">
+       <string>Frequency (beams/s)</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QDial" name="dial_freq"/>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="sbox_freq"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="box_width">
+      <property name="title">
+       <string>Beam width (% bbox)</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QDial" name="dial_width"/>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="sbox_width"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="box_numsamples">
+      <property name="title">
+       <string>Beam #samples</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QDial" name="dial_numsamples"/>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="sbox_numsamples"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>dial_numsamples</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sbox_numsamples</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>506</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>84</x>
+     <y>585</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dial_freq</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sbox_freq</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>84</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dial_width</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sbox_width</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>84</x>
+     <y>389</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

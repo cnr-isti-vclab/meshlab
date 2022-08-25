@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault="unqualified"  xmlns:foo="http://anothernamespace.com" >
+
+<xs:import namespace="http://www.secondSchema" schemaLocation="SecondSchema.xsd" />
+
+
+<xs:element name="root" type="rootType" />
+
+<xs:complexType name="rootType" >
+  <xs:sequence>
+    <xs:element name="attrTest" type="attrTestType" />
+    <xs:element name="eleTest" type="eleTestType" />
+    <xs:element name="simpleDerTest" type="simpleDerTestType" />
+    <xs:element name="complexTest" type="complexTestType" />
+    <xs:element name="complexDerTest" type="complexDerTestType" />
+    <xs:element name="unionTest" type="unionTest" />
+    <xs:element name="anonymousTest" >
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element name="quantity">
+            <xs:simpleType>
+              <xs:restriction base="xs:positiveInteger">
+                <xs:maxExclusive value="100"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:element>
+          <xs:element name='size'>
+            <xs:simpleType>
+              <xs:union>
+                <xs:simpleType>
+                  <xs:restriction base='xs:integer'/>
+                </xs:simpleType>
+                <xs:simpleType>
+                  <xs:restriction base='xs:string'/>
+                </xs:simpleType>
+              </xs:union>
+            </xs:simpleType>
+          </xs:element>
+          <xs:element ref="anonElement" />
+        </xs:sequence>
+        <xs:attribute name="partNum" >
+          <xs:simpleType>
+            <xs:restriction base="xs:positiveInteger">
+              <xs:maxExclusive value="100"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:complexType>       
+    </xs:element>
+    <xs:element name="xsiTypeTest" type="xsiTypeTestType" />
+    <xs:element name="anyTestPartial" type="anyTestPartialType" />
+    <xs:element name="anyTest" type="anyTestType" />
+    <xs:element name="anyTestAttr1" type="anyTestAttr1Type" />
+    <xs:element name="anyTestAttr2" type="anyTestAttr2Type" />
+    <xs:element name="anyTestMissing" type="anyTestType" />
+    <xs:element name="invalidTest" type="invalidTestType" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="anyTestPartialType" >
+  <xs:sequence >
+     <xs:any namespace="http://www.w3.org/1999/xhtml" processContents="skip" />
+     <xs:any namespace="http://www.w3.org/1999/xhtml" processContents="lax" />
+     <xs:any namespace="http://www.secondSchema" processContents="lax" />
+ </xs:sequence>
+  <xs:anyAttribute namespace="http://www.w3.org/1999/xhtml" processContents="skip" />
+</xs:complexType>
+
+<xs:complexType name="anyTestType" >
+  <xs:sequence >
+     <xs:any namespace="http://www.secondSchema" processContents="lax"/>
+     <xs:any namespace="http://www.secondSchema" processContents="strict"/>
+     <xs:any namespace="http://www.secondSchema" processContents="strict"/>
+ </xs:sequence>
+  <xs:anyAttribute namespace="http://www.secondSchema" processContents="lax" />
+</xs:complexType>
+
+<xs:complexType name="anyTestAttr1Type" >
+  <xs:anyAttribute namespace="http://www.secondSchema" processContents="strict" />
+</xs:complexType>
+
+<xs:complexType name="anyTestAttr2Type" >
+  <xs:anyAttribute namespace="http://www.secondSchema" processContents="lax" />
+</xs:complexType>
+
+<xs:complexType name="invalidTestType" >
+  <xs:sequence >
+    <xs:element name="simple" type="stringDerivedType" />
+    <xs:element name="complex" type="baseComplex" />
+    <xs:element name="number" type="base" />
+    <xs:element name="complexXsi" type="baseComplex" />
+    <xs:element name="unionTest" type="uType" />
+    <xs:element name="invalidAttrTest" type="attrOnlyType" />
+    <xs:element name="missingAttrTest" type="attrOnlyType" />
+    <xs:element name="prohibitedAttrTest" type="prohibitedAttrType" />
+  </xs:sequence>
+  <xs:attribute name="simple" type="stringDerivedType" />
+</xs:complexType>
+
+
+<xs:complexType name="prohibitedAttrType" >
+  <xs:attribute name="attr" type="stringDerivedType"  use="prohibited" />
+</xs:complexType>
+
+<xs:complexType name="attrOnlyType" >
+  <xs:attribute name="attr" type="stringDerivedType"  use="required" />
+</xs:complexType>
+
+<xs:simpleType name="uType" >
+  <xs:union memberTypes="stringDerivedType" />
+</xs:simpleType>
+
+
+<xs:complexType name="xsiTypeTestType" >
+  <xs:sequence>
+    <xs:element name="number" type="base" maxOccurs="3"/>
+    <xs:element name="complexXsi" type="baseComplex" maxOccurs="3"/>
+  </xs:sequence>
+</xs:complexType>
+
+
+<xs:complexType name="baseComplex" >
+  <xs:sequence>
+    <xs:element name="a" type="xs:string" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="level1Complex" >
+  <xs:complexContent >
+    <xs:extension base="baseComplex" >
+      <xs:sequence>
+        <xs:element name="b" type="xs:string"/>
+      </xs:sequence>
+    </xs:extension>
+  </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="level2Complex" >
+  <xs:complexContent >
+    <xs:extension base="level1Complex" >
+      <xs:sequence>
+        <xs:element name="c" type="xs:string"/>
+      </xs:sequence>
+    </xs:extension>
+  </xs:complexContent>
+</xs:complexType>
+
+
+<xs:simpleType name="base" >
+  <xs:restriction base="xs:decimal" >
+    <xs:maxExclusive value="100"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="level1" >
+  <xs:restriction base="base" >
+    <xs:maxExclusive value="75"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="level2" >
+  <xs:restriction base="level1" >
+    <xs:maxExclusive value="50"/>
+  </xs:restriction>
+</xs:simpleType>
+
+
+<xs:element name="anonElement" >
+  <xs:simpleType >
+    <xs:restriction base="xs:decimal" >
+      <xs:maxExclusive value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:element>
+
+<xs:complexType name="eleTestType" >
+  <xs:sequence >
+    <xs:element name="level1string" type="xs:string" />
+    <xs:element name="level1boolean" type="xs:boolean" />
+    <xs:element name="level1decimal" type="xs:decimal" />
+    <xs:element name="level1float" type="xs:float" />
+    <xs:element name="level1double" type="xs:double" />
+    <xs:element name="level1duration" type="xs:duration" />
+    <xs:element name="level1dateTime" type="xs:dateTime" />
+    <xs:element name="level1time" type="xs:time" />
+    <xs:element name="level1date" type="xs:date" />
+    <xs:element name="level1gYearMonth" type="xs:gYearMonth" />
+    <xs:element name="level1gYear" type="xs:gYear" />
+    <xs:element name="level1gMonthDay" type="xs:gMonthDay" />
+    <xs:element name="level1gDay" type="xs:gDay" />
+    <xs:element name="level1gMonth" type="xs:gMonth" />
+    <xs:element name="level1hexBinary" type="xs:hexBinary" />
+    <xs:element name="level1base64Binary" type="xs:base64Binary" />
+    <xs:element name="level1anyURI" type="xs:anyURI" />
+    <xs:element name="level1QName" type="xs:QName" />
+    <xs:element name="level1normalizedString" type="xs:normalizedString" />
+    <xs:element name="level1token" type="xs:token" />
+    <xs:element name="level1language" type="xs:language" />
+    <xs:element name="level1NMTOKEN" type="xs:NMTOKEN" />
+    <xs:element name="level1NMTOKENS" type="xs:NMTOKENS" />
+    <xs:element name="level1Name" type="xs:Name" />
+    <xs:element name="level1NCName" type="xs:NCName" />
+    <xs:element name="level1integer" type="xs:integer" />
+    <xs:element name="level1nonPositiveInteger" type="xs:nonPositiveInteger" />
+    <xs:element name="level1negativeInteger" type="xs:negativeInteger" />
+    <xs:element name="level1long" type="xs:long" />
+    <xs:element name="level1int" type="xs:int" />
+    <xs:element name="level1short" type="xs:short" />
+    <xs:element name="level1byte" type="xs:byte" />
+    <xs:element name="level1nonNegativeInteger" type="xs:nonNegativeInteger" />
+    <xs:element name="level1unsignedLong" type="xs:unsignedLong" />
+    <xs:element name="level1unsignedInt" type="xs:unsignedInt" />
+    <xs:element name="level1unsignedShort" type="xs:unsignedShort" />
+    <xs:element name="level1unsignedByte" type="xs:unsignedByte" />
+    <xs:element name="level1positiveInteger" type="xs:positiveInteger" />
+    <xs:element name="level1anyType" type="xs:anyType" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="attrTestType" >
+  <xs:attribute name="anySimpleType" type="xs:anySimpleType" />
+  <xs:attribute name="string" type="xs:string" />
+  <xs:attribute name="boolean" type="xs:boolean" />
+  <xs:attribute name="decimal" type="xs:decimal" />
+  <xs:attribute name="float" type="xs:float" />
+  <xs:attribute name="double" type="xs:double" />
+  <xs:attribute name="duration" type="xs:duration" />
+  <xs:attribute name="dateTime" type="xs:dateTime" />
+  <xs:attribute name="time" type="xs:time" />
+  <xs:attribute name="date" type="xs:date" />
+  <xs:attribute name="gYearMonth" type="xs:gYearMonth" />
+  <xs:attribute name="gYear" type="xs:gYear" />
+  <xs:attribute name="gMonthDay" type="xs:gMonthDay" />
+  <xs:attribute name="gDay" type="xs:gDay" />
+  <xs:attribute name="gMonth" type="xs:gMonth" />
+  <xs:attribute name="hexBinary" type="xs:hexBinary" />
+  <xs:attribute name="base64Binary" type="xs:base64Binary" />
+  <xs:attribute name="anyURI" type="xs:anyURI" />
+  <xs:attribute name="QName" type="xs:QName" />
+  <xs:attribute name="normalizedString" type="xs:normalizedString" />
+  <xs:attribute name="token" type="xs:token" />
+  <xs:attribute name="language" type="xs:language" />
+  <xs:attribute name="NMTOKEN" type="xs:NMTOKEN" />
+  <xs:attribute name="NMTOKENS" type="xs:NMTOKENS" />
+  <xs:attribute name="Name" type="xs:Name" />
+  <xs:attribute name="NCName" type="xs:NCName" />
+  <xs:attribute name="ID" type="xs:ID" />
+  <xs:attribute name="IDREF" type="xs:IDREF" />
+  <xs:attribute name="IDREFS" type="xs:IDREFS" />
+  <xs:attribute name="integer" type="xs:integer" />
+  <xs:attribute name="nonPositiveInteger" type="xs:nonPositiveInteger" />
+  <xs:attribute name="negativeInteger" type="xs:negativeInteger" />
+  <xs:attribute name="long" type="xs:long" />
+  <xs:attribute name="int" type="xs:int" />
+  <xs:attribute name="short" type="xs:short" />
+  <xs:attribute name="byte" type="xs:byte" />
+  <xs:attribute name="nonNegativeInteger" type="xs:nonNegativeInteger" />
+  <xs:attribute name="unsignedLong" type="xs:unsignedLong" />
+  <xs:attribute name="unsignedInt" type="xs:unsignedInt" />
+  <xs:attribute name="unsignedShort" type="xs:unsignedShort" />
+  <xs:attribute name="unsignedByte" type="xs:unsignedByte" />
+  <xs:attribute name="positiveInteger" type="xs:positiveInteger" />
+  <xs:attribute name="defaultString" type="xs:string" default="hello" />
+  <xs:attribute name="defaultInt" type="xs:integer" default="12" />
+</xs:complexType>
+
+<xs:complexType name="simpleDerTestType" >
+  <xs:sequence>
+    <xs:element name="decimalDerived" type="decimalDerivedType" />
+    <xs:element name="stringDerived" type="stringDerivedType" />
+  </xs:sequence>
+  <xs:attribute name="decimalDerived" type="decimalDerivedType" />
+  <xs:attribute name="stringDerived" type="stringDerivedType" />
+</xs:complexType>
+
+<xs:simpleType name="stringDerivedType" >
+  <xs:restriction base="xs:string" >
+    <xs:pattern value="hello"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="decimalDerivedType" >
+  <xs:restriction base="xs:decimal" >
+    <xs:maxExclusive value="100"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="complexTestType" >
+  <xs:sequence>
+    <xs:element name="a" type="xs:string"/>
+    <xs:element name="b" type="stringDerivedType"/>
+    <xs:element name="c" type="decimalDerivedType"/>
+  </xs:sequence>
+  <xs:attribute name="a" type="xs:string" />
+  <xs:attribute name="b" type="stringDerivedType" />
+  <xs:attribute name="c" type="decimalDerivedType" />
+</xs:complexType>
+
+<xs:complexType name="complexDerTestType" >
+  <xs:complexContent >
+    <xs:extension base="complexTestType" >
+      <xs:sequence>
+        <xs:element name="d" type="xs:string"/>
+      </xs:sequence>
+    </xs:extension>
+  </xs:complexContent>
+</xs:complexType>
+
+<xs:simpleType name="unionTestType" >
+  <xs:union memberTypes="decimalDerivedType stringDerivedType xs:decimal xs:string" />
+</xs:simpleType>
+
+
+<xs:complexType name="unionTest" >
+  <xs:sequence >
+    <xs:element name="testEle" maxOccurs="4"  type="unionTestType" />
+    <xs:element name="testEle2" maxOccurs="4" >
+      <xs:complexType >
+         <xs:attribute name="testAttr" type="unionTestType" />
+         <xs:attribute name="testAttr2" type="unionTestType" />
+      </xs:complexType>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="unionTest2" >
+  <xs:sequence >
+    <xs:element name="testEle" maxOccurs="4"  >
+      <xs:complexType >
+        <xs:simpleContent >
+          <xs:extension base="unionTestType" >
+            <xs:attribute name="testAttr" type="unionTestType" />
+          </xs:extension >
+        </xs:simpleContent>
+      </xs:complexType>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="testtype2" >
+<xs:sequence>
+<xs:element name="poo" type="xs:string"/>
+</xs:sequence>
+<xs:attribute name="a" type="xs:IDREF" />
+<xs:attribute name="b" type="xs:ID" />
+<xs:attribute name="c" type="xs:string" />
+
+</xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<x xmlns="http://www.schemaTest.org/xinclude-test"
+   xmlns:xi="http://www.w3.org/2001/XInclude"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
+   <!-- tests that a fallback is used when the include is unsuccessful -->
+   <xi:include parse="xml"
+               href="../included/elem.xml">
+       <xi:fallback>
+           <elem/>
+       </xi:fallback>
+   </xi:include>
+</x>

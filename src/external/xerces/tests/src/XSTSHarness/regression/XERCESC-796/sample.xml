@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<xscRoot
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="sample.xsd">
+        <ExternallyVisible>yes</ExternallyVisible>
+        <ListeningStates>
+                <state>a-state-1</state>
+                <hello><![CDATA[unsl]]></hello>
+                <state>a-state-2</state>
+        </ListeningStates>
+</xscRoot>

@@ -1,0 +1,514 @@
+<HTML><HEAD><META content="text/html; charset=utf8" http-equiv="Content-Type"><SCRIPT language="JavaScript" src="resources/script.js" type="text/javascript"></SCRIPT><TITLE>Programming Xerces-C++</TITLE></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="graphics/faq-parse-3-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','resources/button-xml-hi.gif','resources/button-xml-lo.gif');" src="resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','resources/button-asf-hi.gif','resources/button-asf-lo.gif');" src="resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','resources/button-w3c-hi.gif','resources/button-w3c-lo.gif');" src="resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="resources/join.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Xerces Project" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','graphics/ext-2-label-2.jpg','graphics/ext-2-label-3.jpg');" src="graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+     <A href="index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Overview" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','graphics/index-label-2.jpg','graphics/index-label-3.jpg');" src="graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="charter.html" onMouseOut="rolloverOff('side-charter');" onMouseOver="rolloverOn('side-charter');"><IMG alt="Charter" border="0" height="12" hspace="0" name="side-charter" onLoad="rolloverLoad('side-charter','graphics/charter-label-2.jpg','graphics/charter-label-3.jpg');" src="graphics/charter-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','graphics/releases-label-2.jpg','graphics/releases-label-3.jpg');" src="graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="secadv.html" onMouseOut="rolloverOff('side-secadv');" onMouseOver="rolloverOn('side-secadv');"><IMG alt="Advisories" border="0" height="12" hspace="0" name="side-secadv" onLoad="rolloverLoad('side-secadv','graphics/secadv-label-2.jpg','graphics/secadv-label-3.jpg');" src="graphics/secadv-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     <A href="http://xerces.apache.org/xerces-c/download.cgi" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','graphics/ext-18-label-2.jpg','graphics/ext-18-label-3.jpg');" src="graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+  <IMG alt="Xerces-C++ 3.2.3" border="0" height="17" hspace="0" name="side-sect-24" src="graphics/sect-24-label.jpg" vspace="0" width="120"><BR>
+
+     <A href="install-3.html" onMouseOut="rolloverOff('side-install-3');" onMouseOver="rolloverOn('side-install-3');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install-3" onLoad="rolloverLoad('side-install-3','graphics/install-3-label-2.jpg','graphics/install-3-label-3.jpg');" src="graphics/install-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="build-3.html" onMouseOut="rolloverOff('side-build-3');" onMouseOver="rolloverOn('side-build-3');"><IMG alt="Build Instructions" border="0" height="12" hspace="0" name="side-build-3" onLoad="rolloverLoad('side-build-3','graphics/build-3-label-2.jpg','graphics/build-3-label-3.jpg');" src="graphics/build-3-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator-space.gif" vspace="0" width="120"><BR>
+
+     <A href="program-3.html" onMouseOut="rolloverOff('side-program-3');" onMouseOver="rolloverOn('side-program-3');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program-3" onLoad="rolloverLoad('side-program-3','graphics/program-3-label-2.jpg','graphics/program-3-label-3.jpg');" src="graphics/program-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     
+     
+     
+
+     <A href="samples-3.html" onMouseOut="rolloverOff('side-samples-3');" onMouseOver="rolloverOn('side-samples-3');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples-3" onLoad="rolloverLoad('side-samples-3','graphics/samples-3-label-2.jpg','graphics/samples-3-label-3.jpg');" src="graphics/samples-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+
+     <A href="faqs-3.html" onMouseOut="rolloverOff('side-faqs-3');" onMouseOver="rolloverOn('side-faqs-3');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs-3" onLoad="rolloverLoad('side-faqs-3','graphics/faqs-3-label-2.jpg','graphics/faqs-3-label-3.jpg');" src="graphics/faqs-3-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator-space.gif" vspace="0" width="120"><BR>
+
+     <A href="api-3.html" onMouseOut="rolloverOff('side-api-3');" onMouseOver="rolloverOn('side-api-3');"><IMG alt="API Reference" border="0" height="12" hspace="0" name="side-api-3" onLoad="rolloverLoad('side-api-3','graphics/api-3-label-2.jpg','graphics/api-3-label-3.jpg');" src="graphics/api-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-84');" onMouseOver="rolloverOn('side-ext-84');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-84" onLoad="rolloverLoad('side-ext-84','graphics/ext-84-label-2.jpg','graphics/ext-84-label-3.jpg');" src="graphics/ext-84-label-3.jpg" vspace="0" width="120"></A><BR>
+     <A href="migrate-3.html" onMouseOut="rolloverOff('side-migrate-3');" onMouseOver="rolloverOn('side-migrate-3');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate-3" onLoad="rolloverLoad('side-migrate-3','graphics/migrate-3-label-2.jpg','graphics/migrate-3-label-3.jpg');" src="graphics/migrate-3-label-3.jpg" vspace="0" width="120"></A><BR>
+     
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','graphics/feedback-label-2.jpg','graphics/feedback-label-3.jpg');" src="graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','graphics/bug-report-label-2.jpg','graphics/bug-report-label-3.jpg');" src="graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="mailing-lists.html" onMouseOut="rolloverOff('side-mailing-lists');" onMouseOver="rolloverOn('side-mailing-lists');"><IMG alt="Mailing Lists" border="0" height="12" hspace="0" name="side-mailing-lists" onLoad="rolloverLoad('side-mailing-lists','graphics/mailing-lists-label-2.jpg','graphics/mailing-lists-label-3.jpg');" src="graphics/mailing-lists-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="resources/separator.gif" vspace="0" width="120"><BR>
+
+   <A href="source-repository.html" onMouseOut="rolloverOff('side-source-repository');" onMouseOver="rolloverOn('side-source-repository');"><IMG alt="Source Repository" border="0" height="12" hspace="0" name="side-source-repository" onLoad="rolloverLoad('side-source-repository','graphics/source-repository-label-2.jpg','graphics/source-repository-label-3.jpg');" src="graphics/source-repository-label-3.jpg" vspace="0" width="120"></A><BR>
+   <A href="applications.html" onMouseOut="rolloverOff('side-applications');" onMouseOver="rolloverOn('side-applications');"><IMG alt="Applications" border="0" height="12" hspace="0" name="side-applications" onLoad="rolloverLoad('side-applications','graphics/applications-label-2.jpg','graphics/applications-label-3.jpg');" src="graphics/applications-label-3.jpg" vspace="0" width="120"></A><BR>
+
+<IMG border="0" height="14" hspace="0" src="resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Questions</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif"><UL><LI><A href="#faq-1">Does Xerces-C++ support XML Schema?</A></LI><LI><A href="#faq-2">Does Xerces-C++ support XPath?</A></LI><LI><A href="#faq-3">Why does my application crash when instantiating the parser?</A></LI><LI><A href="#faq-4">Is it OK to call the XMLPlatformUtils::Initialize/Terminate pair of routines multiple times in one program?</A></LI><LI><A href="#faq-5">Why does my application crash after calling XMLPlatformUtils::Terminate()?</A></LI><LI><A href="#faq-6">Is Xerces-C++ thread-safe?</A></LI><LI><A href="#faq-7">I am seeing memory leaks in Xerces-C++. Are they real?</A></LI><LI><A href="#faq-8">Can Xerces-C++ create an XML skeleton based on a DTD</A></LI><LI><A href="#faq-9">Can I use Xerces-C++ to perform write validation</A></LI><LI><A href="#faq-10">Can I validate the data contained in a DOM tree?</A></LI><LI><A href="#faq-11">How to write out a DOM tree into a string or an XML file?</A></LI><LI><A href="#faq-12">Why doesn't DOMNode::cloneNode() clone the pointer assigned to a DOMNode via DOMNode::setUserData()?</A></LI><LI><A href="#faq-13">How are entity reference nodes handled in DOM?</A></LI><LI><A href="#faq-14">Can I use Xerces-C++ to parse HTML?</A></LI><LI><A href="#faq-15">I keep getting an error: &quot;invalid UTF-8 character&quot;. What's wrong?</A></LI><LI><A href="#faq-16">What encodings are supported by Xerces-C++?</A></LI><LI><A href="#faq-17">What character encoding should I use when creating XML documents?</A></LI><LI><A href="#faq-18">Why does deleting a transcoded string result in assertion on windows?</A></LI><LI><A href="#faq-19">How do I transcode to/from something besides the local code page?</A></LI><LI><A href="#faq-20">Why does the parser still try to locate the DTD even validation is turned off        and how to ignore external DTD reference?</A></LI><LI><A href="#faq-21">Why does the XML data generated by the DOMLSSerializer does not match my original XML input?</A></LI><LI><A href="#faq-22">Why does my application crash when deleting the parser after releasing a document?</A></LI></UL></FONT></TD></TR></TABLE><BR><BR><A name="faq-1"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B> Does Xerces-C++ support Schema?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>Yes, Xerces-C++ 3.2.3 contains an implementation
+         of the W3C XML Schema Language, a recommendation of the Worldwide Web Consortium
+         available in three parts:
+         <A href="http://www.w3.org/TR/xmlschema-0/">XML Schema: Primer</A> and
+         <A href="http://www.w3.org/TR/xmlschema-1/">XML Schema: Structures</A> and
+         <A href="http://www.w3.org/TR/xmlschema-2/">XML Schema: Datatypes</A>.
+         We consider this implementation complete.  See the
+         <A href="schema-3.html#limitation">XML Schema Support</A> page for limitations.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-2"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B> Does Xerces-C++ support XPath?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>Xerces-C++ 3.2.3 provides partial XPath 1 implementation
+         for the purposes of handling XML Schema identity constraints.
+         The same engine is made available through the DOMDocument::evaluate API to
+         let the user perform simple XPath queries involving DOMElement nodes only,
+         with no predicate testing and allowing the &quot;//&quot; operator only as the initial
+         step. For full XPath 1 and 2 support refer to the
+         <A href="http://xqilla.sourceforge.net">XQilla</A> and
+         <A href="http://xml.apache.org/xalan-c/overview.html">Apache Xalan C++</A>
+         open source projects.
+      </P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-3"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does my application crash when instantiating the parser?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>In order to work with the Xerces-C++ parser, you have to first
+        initialize the XML subsystem. The most common mistake is to forget this
+        initialization. Before you make any calls to Xerces-C++ APIs, you must
+        call XMLPlatformUtils::Initialize(): </P>
+
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+try {
+   XMLPlatformUtils::Initialize();
+}
+catch (const XMLException&amp; toCatch) {
+   // Do your failure processing here
+}</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>This initializes the Xerces system and sets its internal
+        variables. Note that you must include the <CODE><FONT face="courier, monospaced">xercesc/util/PlatformUtils.hpp</FONT></CODE> file for this to work.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-4"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Is it OK to call the XMLPlatformUtils::Initialize/Terminate pair of routines multiple times in one program?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>Yes. Note, however, that the application needs to guarantee that the
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         methods are called from the same thread (usually the initial
+         thread executing main()) or proper synchronization is performed
+         by the application if multiple threads call
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         concurrently.</P>
+
+      <P>If you are calling XMLPlatformUtils::Initialize() a number of times, and then follow with
+         XMLPlatformUtils::Terminate() the same number of times, only the first XMLPlatformUtils::Initialize()
+         will do the initialization, and only the last XMLPlatformUtils::Terminate() will clean up
+         the memory.  The other calls are ignored.
+      </P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-5"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does my application crash after calling XMLPlatformUtils::Terminate()?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>Please make sure the XMLPlatformUtils::Terminate() is the last Xerces-C++ function to be called
+         in your program.  NO explicit nor implicit Xerces-C++ destructor (those local data that are
+         destructed when going out of scope) should be called after XMLPlatformUtils::Terminate().
+      </P>
+      <P>
+         For example consider the following code snippet which is incorrect:
+      </P>
+
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+1: {
+2:    XMLPlatformUtils::Initialize();
+3:    XercesDOMParser parser;
+4:    XMLPlatformUtils::Terminate();
+5: }
+</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>The XercesDOMParser object &quot;parser&quot; is destructed when going out of scope at line 5 before the closing
+         brace.  As a result, XercesDOMParser destructor is called at line 5 after
+         XMLPlatformUtils::Terminate() which is incorrect.  Correct code should be:
+      </P>
+
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+1: {
+2:    XMLPlatformUtils::Initialize();
+2a:    {
+3:           XercesDOMParser parser;
+3a:    }
+4:    XMLPlatformUtils::Terminate();
+5: }
+</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>The extra pair of braces (line 2a and 3a) ensures that all implicit destructors are called
+         before terminating Xerces-C++.</P>
+
+      <P>Note also that the application needs to guarantee that the
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         methods are called from the same thread (usually the initial
+         thread executing main()) or proper synchronization is performed
+         by the application if multiple threads call
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         concurrently.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-6"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Is Xerces-C++ thread-safe?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+     <P>The answer is yes if you observe the following rules for using
+        Xerces-C++ in a multi-threaded environment:</P>
+
+      <P>Within an address space, an instance of the parser may be used without
+        restriction from a single thread, or an instance of the parser can be accessed
+        from multiple threads, provided the application guarantees that only one thread
+        has entered a method of the parser at any one time.</P>
+
+      <P>When two or more parser instances exist in a process, the instances can
+        be used concurrently, without external synchronization. That is, in an
+        application containing two parsers and two threads, one parser can be running
+        within the first thread concurrently with the second parser running within the
+        second thread.</P>
+
+      <P>The same rules apply to Xerces-C++ DOM documents. Multiple document
+        instances may be concurrently accessed from different threads, but any given
+        document instance can only be accessed by one thread at a time.</P>
+
+      <P>The application also needs to guarantee that the
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         methods are called from the same thread (usually the initial
+         thread executing main()) or proper synchronization is performed
+         by the application if multiple threads call
+         XMLPlatformUtils::Initialize() and XMLPlatformUtils::Terminate()
+         concurrently.</P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-7"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>I am seeing memory leaks in Xerces-C++. Are they real?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>The Xerces-C++ library allocates and caches some commonly reused
+        items. The storage for these may be reported as memory leaks by some heap
+        analysis tools; to avoid the problem, call the function <CODE><FONT face="courier, monospaced">XMLPlatformUtils::Terminate()</FONT></CODE> before your application exits. This will free all memory that was being
+        held by the library.</P>
+
+      <P>For most applications, the use of <CODE><FONT face="courier, monospaced">Terminate()</FONT></CODE> is optional. The system will recover all memory when the application
+        process shuts down. The exception to this is the use of Xerces-C++ from DLLs
+        that will be repeatedly loaded and unloaded from within the same process. To
+        avoid memory leaks with this kind of use, <CODE><FONT face="courier, monospaced">Terminate()</FONT></CODE> must be called before unloading the Xerces-C++ library</P>
+
+      <P>To ensure all the memory held by the parser are freed, the number of XMLPlatformUtils::Terminate() calls
+         should match the number of XMLPlatformUtils::Initialize() calls.
+      </P>
+
+      <P>If you have built Xerces-C++ with dependency on ICU then you may
+         want to call the u_cleanup() ICU function to clean up
+         ICU static data. Refer to the ICU documentation for details.
+      </P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-8"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Is there a function that creates an XML file from a DTD (obviously
+       with the values missing, a skeleton)?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>No, there is no such functionality.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-9"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Can I use Xerces-C++ to perform &quot;write validation&quot;? That is, having an
+      appropriate Grammar and being able to add elements to the DOM whilst validating
+      against the grammar?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>No, there is no such functionality.</P>
+
+      <P>The best you can do for now is to create the DOM document, write it back
+        as XML and re-parse it with validation turned on.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-10"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Is there a facility in Xerces-C++ to validate the data contained in a
+      DOM tree? That is, without saving and re-parsing the source document?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>No, there is no such functionality. The best you can do for now is to create the DOM document, write it back
+        as XML and re-parse it with validation turned on.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-11"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>How to write out a DOM tree into a string or an XML file?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>You can use
+         the DOMLSSerializer::writeToString, or DOMLSSerializer::writeNode to serialize a DOM tree.
+         Please refer to the sample DOMPrint or the API documentation for more details of
+         DOMLSSerializer.</P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-12"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why doesn't DOMNode::cloneNode() clone the pointer assigned to a DOMNode via DOMNode::setUserData()?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>Xerces-C++ supports the DOMNode::userData specified
+      in <A href="http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-3A0ED0A4">
+      the DOM level 3 Node interface</A>.  As
+      is made clear in the description of the behavior of
+      <CODE><FONT face="courier, monospaced">cloneNode()</FONT></CODE>, userData that has been set on the
+      Node is not cloned.  Thus, if the userData is to be copied
+      to the new Node, this copy must be effected manually.
+      Note further that the operation of <CODE><FONT face="courier, monospaced">importNode()</FONT></CODE>
+      is specified similarly.
+      </P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-13"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>How are entity reference nodes handled in DOM?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>If you are using the native DOM classes, the function <CODE><FONT face="courier, monospaced">setCreateEntityReferenceNodes</FONT></CODE>
+        controls how entities appear in the DOM tree. When
+        setCreateEntityReferenceNodes is set to true (the default), an occurrence of an
+        entity reference in the XML document will be represented by a subtree with an
+        EntityReference node at the root whose children represent the entity expansion.
+        Entity expansion will be a DOM tree representing the structure of the entity
+        expansion, not a text node containing the entity expansion as text.</P>
+
+      <P>If setCreateEntityReferenceNodes is false, an entity reference in the XML
+        document is represented by only the nodes that represent the entity expansion.
+        The DOM tree will not contain any entityReference nodes.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-14"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Can I use Xerces-C++ to parse HTML?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>Yes, but only if the HTML follows the rules given in the
+        <A href="http://www.w3.org/TR/REC-xml">XML specification</A>. Most HTML,
+        however, does not follow the XML rules, and will generate XML well-formedness
+        errors.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-15"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>I keep getting an error: &quot;invalid UTF-8 character&quot;. What's wrong?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>Most commonly, the XML <CODE><FONT face="courier, monospaced">encoding =</FONT></CODE> declaration is either incorrect or missing. Without a declaration, XML
+        defaults to the use utf-8 character encoding, which is not compatible with the
+        default text file encoding on most systems.</P>
+
+      <P>The XML declaration should look something like this:</P>
+
+      <P><CODE><FONT face="courier, monospaced">&lt;?xml version=&quot;1.0&quot; encoding=&quot;iso-8859-1&quot;?&gt;</FONT></CODE></P>
+
+      <P>Make sure to specify the encoding that is actually used by file. The
+        encoding for &quot;plain&quot; text files depends both on the operating system and the
+        locale (country and language) in use.</P>
+
+      <P>Another common source of problems is characters that are not
+        allowed in XML documents, according to the XML spec. Typical disallowed
+        characters are control characters, even if you escape them using the Character
+        Reference form. See the XML specification, sections 2.2 and 4.1 for details.
+        If the parser is generating an <CODE><FONT face="courier, monospaced">Invalid character (Unicode: 0x???)</FONT></CODE> error, it is very likely that there's a character in there that you
+        can't see. You can generally use a UNIX command like &quot;od -hc&quot; to find it.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-16"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>What encodings are supported by Xerces-C++?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>Xerces-C++ has intrinsic support for ASCII, UTF-8, UTF-16 (Big/Small
+        Endian), UCS4 (Big/Small Endian), EBCDIC code pages IBM037, IBM1047 and IBM1140
+        encodings, ISO-8859-1 (aka Latin1) and Windows-1252. This means that it can
+        always parse input XML files in these above mentioned encodings.</P>
+
+      <P>Furthermore, if you build Xerces-C++ with the International Components
+         for Unicode (ICU) as a transcoder then the list of supported encodings
+         extends to over 100 different encodings that are supported by
+         ICU.  In particular, all the encodings registered with the
+         Internet Assigned Numbers Authority (IANA) are supported
+         in this configuration.</P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-17"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>What character encoding should I use when creating XML documents?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>The best choice in most cases is either utf-8 or utf-16. Advantages of
+        these encodings include:</P>
+
+      <UL>
+        <LI>The best portability. These encodings are more widely supported by
+          XML processors than any others, meaning that your documents will have the best
+          possible chance of being read correctly, no matter where they end up.</LI>
+        <LI>Full international character support. Both utf-8 and utf-16 cover the
+          full Unicode character set, which includes all of the characters from all major
+          national, international and industry character sets.</LI>
+        <LI>Efficient. utf-8 has the smaller storage requirements for documents
+          that are primarily composed of characters from the Latin alphabet. utf-16 is
+          more efficient for encoding Asian languages. But both encodings cover all
+          languages without loss.</LI>
+      </UL>
+
+      <P>The only drawback of utf-8 or utf-16 is that they are not the native
+        text file format for most systems, meaning that some text file editors
+        and viewers can not be directly used.</P>
+
+      <P>A second choice of encoding would be any of the others listed in the
+        table above. This works best when the xml encoding is the same as the default
+        system encoding on the machine where the XML document is being prepared,
+        because the document will then display correctly as a plain text file. For UNIX
+        systems in countries speaking Western European languages, the encoding will
+        usually be iso-8859-1.</P>
+
+      <P>A word of caution for Windows users: The default character set on
+        Windows systems is windows-1252, not iso-8859-1. While Xerces-C++ does
+        recognize this Windows encoding, it is a poor choice for portable XML data
+        because it is not widely recognized by other XML processing tools. If you are
+        using a Windows-based editing tool to generate XML, check which character set
+        it generates, and make sure that the resulting XML specifies the correct name
+        in the <CODE><FONT face="courier, monospaced">encoding=&quot;...&quot;</FONT></CODE> declaration.</P>
+
+    </FONT></TD></TR></TABLE><BR><A name="faq-18"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does deleting a transcoded string result in assertion on windows?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>Both your application program and the Xerces-C++ DLL must use the same DLL version of the
+         runtime library.  If either statically links to the runtime library, this
+		 problem will still occur.</P>
+
+      <P>For a Visual Studio build the runtime library setting MUST
+         be &quot;Multithreaded DLL&quot; for release builds and &quot;Debug Multithreaded DLL&quot; for
+	 debug builds.</P>
+
+      <P>To bypass such problem, instead of calling operator delete[] directly, you can use the
+         provided function XMLString::release to delete any string that was allocated by the parser.
+         This will ensure the string is allocated and deleted by the same DLL and such assertion
+         problem should be resolved.</P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-19"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>How do I transcode to/from something besides the local code page?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+      <P>XMLString::transcode() will transcode from XMLCh to the local code page, and
+         other APIs which take a char* assume that the source text is in the local
+         code page. If this is not true, you must transcode the text yourself. You
+         can do this using local transcoding support on your OS, such as Iconv on
+         Unix or IBM's ICU package. However, if your transcoding needs are simple,
+         you can achieve better portability by using the Xerces-C++ parser's
+         transcoder wrappers. You get a transcoder like this:
+       </P>
+       <UL>
+         <LI>
+            Call XMLPlatformUtils::fgTransServer-&gt;MakeNewTranscoderFor() and provide
+            the name of the encoding you wish to create a transcoder for. This will
+            return a transcoder to you, which you own and must delete when you are
+            through with it.
+
+           NOTE: You must provide a maximum block size that you will pass to the transcoder
+           at one time, and you must pass blocks of characters of this count or smaller when
+           you do your transcoding. The reason for this is that this is really an
+           internal API and is used by the parser itself to do transcoding. The parser
+           always does transcoding in known block sizes, and this allows transcoders to
+           be much more efficient for internal use since it knows the max size it will
+           ever have to deal with and can set itself up for that internally. In
+           general, you should stick to block sizes in the 4 to 64K range.
+         </LI>
+         <LI>
+            The returned transcoder is something derived from XMLTranscoder, so they
+            are all returned to you via that interface.
+         </LI>
+         <LI>
+            This object is really just a wrapper around the underlying transcoding
+            system actually in use by your version of Xerces-C++, and does whatever is
+            necessary to handle differences between the XMLCh representation and the
+            representation used by that underlying transcoding system.
+         </LI>
+         <LI>
+            The transcoder object has two primary APIs, transcodeFrom() and
+            transcodeTo(). These transcode between the XMLCh format and the encoding you
+            indicated.
+         </LI>
+         <LI>
+            These APIs will transcode as much of the source data as will fit into the
+            outgoing buffer you provide. They will tell you how much of the source they
+            ate and how much of the target they filled. You can use this information to
+            continue the process until all source is consumed.
+         </LI>
+         <LI>
+            char* data is always dealt with in terms of bytes, and XMLCh data is
+            always dealt with in terms of characters. Don't mix up which you are dealing
+            with or you will not get the correct results, since many encodings don't
+            have a one to one relationship of characters to bytes.
+         </LI>
+         <LI>
+            When transcoding from XMLCh to the target encoding, the transcodeTo()
+            method provides an 'unrepresentable flag' parameter, which tells the
+            transcoder how to deal with an XMLCh code point that cannot be converted
+            legally to the target encoding, which can easily happen since XMLCh is
+            Unicode and can represent thousands of code points. The options are to use a
+            default replacement character (which the underlying transcoding service will
+            choose, and which is guaranteed to be legal for the target encoding), or to
+            throw an exception.
+         </LI>
+       </UL>
+         <P>Here is an example:</P>
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+// Create an XMLTranscoder that is able to transcode between
+// Unicode and UTF-8.
+//
+XMLTranscoder* t = XMLPlatformUtils::fgTransService-&gt;makeNewTranscoderFor(
+  &quot;UTF-8&quot;, failReason, 16*1024);
+
+// Source string is in Unicode, want to transcode to UTF-8
+t-&gt;transcodeTo(source_unicode,
+                  length,
+                  result_utf8,
+                  length,
+                  charsEaten,
+                  XMLTranscoder::UnRep_Throw);
+
+// Source string in UTF-8, want to transcode to Unicode.
+t-&gt;transcodeFrom(source_utf8,
+                    length,
+                    result_unicode,
+                    length,
+                    bytesEaten,
+                    (unsigned char*)charSz);
+</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+        <P>An even simpler way to transcode to a different encoding is
+           to use the TranscodeToStr and TranscodeFromStr wrapper classes
+           which represent a one-time transcoding and encapsulate all the
+           memory management. Refer to the API Reference for more information.</P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-20"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does the parser still try to locate the DTD even validation is turned off
+       and how to ignore external DTD reference?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>When DTD is referenced, the parser will try to read it, because DTDs can
+         provide a lot more information than just validation. It defines entities and
+         notations, external unparsed entities, default attributes, character
+         entities, etc. Therefore the parser will always try to read it if present, even if
+         validation is turned off.
+      </P>
+
+      <P>To ignore external DTDs completely you can call
+         <CODE><FONT face="courier, monospaced">setLoadExternalDTD(false)</FONT></CODE> (or
+         <CODE><FONT face="courier, monospaced">setFeature(XMLUni::fgXercesLoadExternalDTD, false)</FONT></CODE>
+         to disable the loading of external DTD.   The parser will then ignore
+         any external DTD completely if the validationScheme is set to Val_Never.
+      </P>
+
+      <P>Note: This flag is ignored if the validationScheme is set to Val_Always or Val_Auto.
+      </P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-21"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does the XML data generated by the DOMLSSerializer does not match my original XML input?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>If you parse an xml document using XercesDOMParser or DOMLSParser and pass such DOMNode
+         to DOMLSSerializer for serialization, you may not get something that is exactly the same
+         as the original XML data.   The parser may have done normalization, end of line conversion,
+         or has expanded the entity reference as per the XML 1.0 specification, 4.4 XML Processor Treatment of
+         Entities and References.   From DOMLSSerializer perspective, it does not know what the original
+         string was, all it sees is a processed DOMNode generated by the parser.
+         But since the DOMLSSerializer is supposed to generate something that is parsable if sent
+         back to the parser, it will not print the DOMNode node value as is. The DOMLSSerializer
+         may do some &quot;touch up&quot; to the output data for it to be parsable.</P>
+
+      <P>See <A href="program-dom-3.html#DOMLSSerializerEntityRef">How does DOMLSSerializer handle built-in entity
+         Reference in node value?</A> to understand further how DOMLSSerializer touches up the entity reference.
+      </P>
+    </FONT></TD></TR></TABLE><BR><A name="faq-22"><!--anchor--></A><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="ffffff" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="resources/void.gif" vspace="0" width="2"><B>Why does my application crash when deleting the parser after releasing a document?</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+      <P>In most cases, the parser handles deleting documents when the parser gets deleted.  However, if an application
+         needs to release a document, it shall adopt the document before releasing it, so that the parser
+         knows that the ownership of this particular document is transfered to the application and will not
+         try to delete it once the parser gets deleted.
+      </P>
+
+<DIV align="left"><TABLE border="0" cellpadding="0" cellspacing="4" width="464"><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#ffffff" width="462"><FONT size="-1"><PRE>
+XercesDOMParser *parser = new XercesDOMParser;
+...
+try
+{
+    parser-&gt;parse(xml_file);
+}
+catch ()
+{
+...
+}
+DOMNode *doc = parser-&gt;getDocument();
+...
+parser-&gt;adoptDocument();
+doc-&gt;release();
+...
+delete parser;
+</PRE></FONT></TD><TD bgcolor="#0086b2" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" height="1" width="462"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="462"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></DIV>
+
+      <P>The alternative to release document is to call parser's resetDocumentPool(), which releases
+         all the documents parsed.
+      </P>
+
+    </FONT></TD></TR></TABLE><BR></TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="resources/dot.gif" width="1"></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1999-2017 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

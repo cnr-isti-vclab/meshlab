@@ -1,0 +1,7 @@
+** Freenect C Synchronous Interface **
+- Brandyn White (bwhite@dappervision.com)
+- Andrew Miller (amiller@dappervision.com)
+
+Provides a synchronous interface (e.g., freenect_get_depth and freenect_get_rgb) as opposed to callbacks.  Uses pthreads.  The Cython Syncrhonous interfaces uses these, that is the simplest way to test this.
+
+See http://openkinect.org/wiki/C_Sync_Wrapper for up-to-date info

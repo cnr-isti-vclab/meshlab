@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/collapse.png</file>
+        <file>images/edit_texture.png</file>
+        <file>images/flipH.png</file>
+        <file>images/flipV.png</file>
+        <file>images/invertsel.png</file>
+        <file>images/rotate.png</file>
+        <file>images/scale.png</file>
+        <file>images/sel_rect.png</file>
+        <file>images/sel_rect_minus.png</file>
+        <file>images/sel_rect_plus.png</file>
+        <file>images/selarea.png</file>
+        <file>images/selcanc.png</file>
+        <file>images/selcon.png</file>
+        <file>images/selpan.png</file>
+        <file>images/selver.png</file>
+        <file>images/unify.png</file>
+    </qresource>
+</RCC>

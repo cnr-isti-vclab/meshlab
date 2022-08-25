@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="two" targetNamespace="two" xmlns:one="one" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xs:import namespace="one" schemaLocation="one.xsd"/>
+
+    <xs:complexType name="Book">
+        <xs:attribute name="name" type="one:BookName"/>
+    </xs:complexType>
+
+    <xs:complexType name="BookDetails">
+        <xs:attribute name="title">
+            <xs:simpleType>
+                <xs:restriction base="one:BookTitle">
+                     <xs:minLength value="1" /> 
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <xs:element name="mybook" type="one:BookName"/>
+
+    <xs:simpleType name="test">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="20"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

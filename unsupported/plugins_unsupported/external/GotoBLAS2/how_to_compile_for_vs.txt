@@ -1,0 +1,3 @@
+- cygwin with mingw64 on a "old" pc (problems with new sandy bridge architectures)
+- ./quickbuild.win64
+- the generated static lib works also with visual studio

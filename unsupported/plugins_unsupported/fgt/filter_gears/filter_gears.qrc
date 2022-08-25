@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>filter_gears_description.txt</file>
+    </qresource>
+</RCC>

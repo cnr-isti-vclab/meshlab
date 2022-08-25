@@ -1,0 +1,70 @@
+#!/bin/sh
+
+top_srcdir=@abs_top_srcdir@
+top_builddir=@abs_top_builddir@
+
+wd="${top_srcdir}/samples/data"
+
+run_test() {
+    name=$1
+    shift
+    expect_status=$1
+    shift
+    input_file=$1
+    shift
+    cmd=$1
+    shift
+
+    export XERCESC_NLS_HOME=${top_builddir}/src
+
+    builddir=$(pwd)
+    if [ ! -d observed ]; then
+        mkdir -p observed
+    fi
+    output="${builddir}/observed/${name}.log"
+
+    test_status=fail
+    cd "$wd"
+    if [ -n "$input_file" ]; then
+        echo "Running ${top_builddir}/$cmd $@ < "$input_file" > \"$output\" 2> \"$output\" $input"
+        "${top_builddir}/$cmd" "$@" < "$input_file" > "$output" 2> "$output" $input && test_status=pass
+    else
+        echo "Running ${top_builddir}/$cmd $@ > \"$output\" 2> \"$output\" $input"
+        "${top_builddir}/$cmd" "$@" > "$output" 2> "$output" $input && test_status=pass
+    fi
+    echo "Result: $test_status"
+    if [ "$expect_status" != "$test_status" ]; then
+        echo "$name: Expected $expect_status status but got $test_status status" >&2
+        if [ "$expect_status" = pass ]; then
+            exit 1
+        fi
+        exit 0
+    fi
+
+    cd "$builddir"
+    # Replace timings in output
+    sed -i -e 's;\( *[0-9][0-9]* *ms *\);{timing removed};' "$output"
+
+    exp=$(cat "${srcdir}/expected/${name}.log")
+    obs=$(cat "$output")
+
+    echo "------"
+    echo "obs=$obs"
+    echo "------"
+    echo "exp=$exp"
+    echo "------"
+    # If the observed and expected logs differ, output a diff and fail
+    if [ "$exp" != "$obs" ]; then
+        diff -u "${srcdir}/expected/${name}.log" "$output"
+        echo "Observed output does not match expected output" >&2
+        if [ "$expect_status" = pass ]; then
+            exit 1
+        fi
+        exit 0
+    fi
+
+    if [ "$expect_status" = pass ]; then
+        exit 0
+    fi
+    exit 1
+}

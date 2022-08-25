@@ -1,0 +1,1806 @@
+<html>
+	<head>
+		<title>U3D Sample Software Release Notes</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<meta name="description" content="Contains notes about a U3D software &#13;&#10;release.">
+		<meta name="keywords" content="Release Notes, License, Known Issues, Issues, &#13;&#10;Universal 3D, U3D, 3DIF, 3D Industry Forum">
+		<meta name="robots" content="noindex">
+	</head>
+	<body bgcolor="#eeeeee">
+		<div align="center">
+			<h1>Universal 3D Sample Software<br>
+				Release Notes</h1>
+		</div>
+		<h3>
+			Gold Update Version 1.2.852.0<br>
+			21 Dec 2006</h3>
+		<hr>
+		<a name="SectionContents"></a>
+		<h2>Contents</h2>
+		<ul>
+			<li>
+				<a href="#SectionIntroduction">Introduction</a>
+			<li>
+				<a href="#SectionRequirements">Requirements</a>
+			<li>
+				<a href="#SectionInstallation">Installation</a>
+			<li>
+				<a href="#SectionOrganization">Organization</a>
+			<li>
+				<a href="#SectionUpdates">Updates</a>
+			<li>
+				<a href="#SectionKnownIssues">Known Issues</a></li>
+		</ul>
+		<hr>
+		<a name="SectionIntroduction"></a>
+		<h2>Introduction</h2>
+		<p>These are the release notes for the Universal 3D (U3D) Sample Software for 
+			Microsoft Windows* and Red Hat Enterprise Linux* platforms. This software 
+			release implements the 3rd edition of Ecma International's ECMA-363 <em>Universal 
+				3D File Format</em> Standard. The specification is available publicly from 
+			the <a href="http://www.ecma-international.org/publications/standards/Ecma-363.htm">
+				ECMA website</a>. This software is only sample software and is intended to 
+			provide a starting point for ISVs to develop U3D applications (it has received 
+			only limited validation and testing). It includes a few usage examples for 
+			software developers which are not complete or polished applications. The 
+			intention is to allow other companies to innovate and develop solutions 
+			appropriate for different target user groups. Refer to the <a href="#SectionKnownIssues">
+				Known Issues</a> section for a list of any known deviations from the 
+			specification, unimplemented functionality and issues that may be encountered 
+			with this software.</p>
+		<p>Detailed information on building and working with the U3D Sample Software can be 
+			found in the <a href="Doxygen\Output\HTML_U3D\index.html">main documentation</a>.</p>
+		<p>
+			The license agreement is located in the <a href="License.txt">License.txt</a> file 
+			in this directory. Included software that is governed by other licenses are 
+			identified in the <a href="LicensesAdditional.txt">LicensesAdditional.txt</a> file 
+			also located in this directory.</p>
+		<hr>
+		<a name="SectionRequirements"></a>
+		<h2>Requirements</h2>
+		<h3>Hardware</h3>
+		<ul>
+			<li>
+				x86 32-bit system with 3D accelerator. <em>No 3D software-based renderer is 
+					currently provided.</em>
+				<ul>
+					<li>
+					Usage of a modern 3D accelerator is recommended.
+					<li>
+						It is highly recommended that the most recent, stable display drivers are 
+						installed that are available.</li>
+				</ul>
+			<li>
+				160 MB hard-drive space to hold the final unzipped package and build system 
+				tools.
+				<ul>
+					<li>
+						626 MB of additional hard-drive space are recommended for compiling various 
+						configurations of the U3D Sample Software.</li>
+				</ul>
+			</li>
+		</ul>
+		<h3>Software</h3>
+		<UL>
+			<li>
+				Win32
+				<UL>
+					<LI>
+						Microsoft* Win32 OS, such as Windows XP* or Windows 2000* with DirectX* 7 
+						and/or OpenGL* installed.
+						<UL>
+							<LI>
+								It is recommended to always use the latest version of DirectX*.
+							</LI>
+						</UL>
+					<li>
+						Microsoft Visual Studio .NET 2003* if recompiling the U3D Sample Software is 
+						desired.</li></UL>
+			<li>
+				Linux
+				<UL>
+					<LI>
+					Red Hat Enterprise Linux 3 (kernel 2.4.21-20)
+					<LI>
+						GCC version 3.2.3 to build the U3D Sample Software libraries.</LI></UL>
+			<LI>
+			Web browser to view HTML documentation.
+			<li>
+			Intel® C++ Compiler 9.0 and 9.1 for Windows* and Linux* can be used to build 
+			the U3D Sample Software.<li>
+				<a href="http://www.intel.com/software/products/ipp/index.htm">Intel® Integrated 
+					Performance Primitives (Intel® IPP)</a> usage is recommended for an 
+				additional automatic run-time performance improvement.
+				<p>Additional requirements for compilation of the software are defined in the <a href="Doxygen%5COutput%5CHTML_U3D%5Cindex.html">
+						main documentation</a>.</p>
+			</li>
+		</UL>
+		<hr>
+		<a name="SectionInstallation"></a>
+		<h2>Installation</h2>
+		<p>There is no installer for the U3D Sample Software, so installation is as basic 
+			as unzipping the U3D package.</p>
+		<p>
+			<em>Note: If the software is going to be recompiled, it is currently necessary to 
+				place it in a directory with a path that contains no SPACE characters. For 
+				example, "<code>C:\Software\U3D</code>" is a compatible path while "<code>C:\Documents 
+					and Settings\jdoe\My Documents\U3D</code>" is not and results in build 
+				system failures. In addition, there are several <a href="Doxygen%5COutput%5CHTML_U3D%5Cpagesetupprocedure.html">
+					additional steps</a> to perform detailed in the main documentation.</em></p>
+		<hr>
+		<a name="SectionOrganization"></a>
+		<h2>Organization</h2>
+		<p>Files in this distribution are organized in the following manner:</p>
+		<table width="95%" border="2" align="center">
+			<tr align="center" valign="top">
+				<td><strong>Path</strong></td>
+				<td><strong>Description</strong></td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Art</code></td>
+				<td>Artwork used by the Doxygen* automatic HTML generation system.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Bin</code></td>
+				<td>Binary files that are a duplicate of the generated files located in <code>Source\RTL\Build</code>
+					or <code>Source\Build\U3D</code> (debug and release, including map files) when 
+					the U3D DLs are compiled.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Docs</code></td>
+				<td>Documentation including this file, license information and a compressed HTML 
+					file version of the <a href="Doxygen%5COutput%5CHTML_U3D%5Cindex.html">main 
+						documentation</a>.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Docs\Doxygen</code></td>
+				<td>Scripts and setup for the Doxygen* automatic HTML generation system. Also 
+					contains the loose HTML <a href="Doxygen%5COutput%5CHTML_U3D%5Cindex.html">main 
+						documentation</a> files.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Docs\IntermediateFormat</code></td>
+				<td>Documentation on the format of Intermediate Data Text Format (IDTF) files that 
+					are understood by the U3D <code>IDTFConverter</code> example application..</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Docs\Templates</code></td>
+				<td>Documentation templates.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Include</code></td>
+				<td>Header files for SDK-style usage that are duplicated from <code>Source\RTL\Component\Include</code>,
+					<code>Source\RTL\Kernel\Include</code> and <code>Source\RTL\Platform\Include</code>.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Lib</code></td>
+				<td>Libraries files for SDK-style usage that are duplicated from the generated 
+					files placed in <code>Source\RTL\Build</code>.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source</code></td>
+				<td>Source code and files for compiling the U3D run-time libraries.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Config</code></td>
+				<td>Configuration files used by the build system.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\RTL</code></td>
+				<td>Source code for the U3D run-time libraries.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\RTL\Component</code></td>
+				<td>Source code for the main components.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\RTL\Dependencies</code></td>
+				<td>Source code for miscellaneous third-party modules and libraries that are used.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\RTL\Kernel</code></td>
+				<td>Source code for the component system and common data types.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\RTL\Platform</code></td>
+				<td>Source code for the main platform abstraction layer.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\BaseMeshConverter</code></td>
+				<td>Converts mesh in u3d files to alternative representation (see NewBaseMesh 
+					sample)</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\Data</code></td>
+				<td>Example U3D files.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\HelloWorld</code></td>
+				<td>Example U3D exporter application that creates a simple hard-coded scene using a 
+					single source code module.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\IntermediateFormat</code></td>
+				<td>Example Intermediate Data Text Format (IDTF) to U3D format file converter 
+					application. Also includes an example Discreet* 3ds max* 7 plug-in IDTF 
+					exporter.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\IntermediateFormat\TestScenes</code></td>
+				<td>Example IDTF files.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\NewBaseMesh</code></td>
+				<td>U3D RTL extension plugin example that provides alternative representation of 
+					the mesh geometry.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\NURBS</code></td>
+				<td>U3D RTL extension plugin that adds NURBS geometry resource type to RTL with 
+					exporting/importing capabilities. Can be used both stand-alone and as IFXCOM 
+					plug-in. NURBS tesselation is not implemented.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\QrtzPlayer</code></td>
+				<td>Example U3D file player application for Mac OS* X</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\SamplePlayer</code></td>
+				<td>Example U3D file player application for Microsoft Windows*.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\SampleViewerQrtz</code></td>
+				<td>Example viewer for Mac OS* X</td>
+			</tr>
+			<TR>
+				<TD vAlign="top" align="left" height="21"><CODE>Source\Samples\SampleViewerWin32</CODE></TD>
+				<TD height="21">Example viewer for Microsoft Windows*.</TD>
+			</TR>
+			<TR>
+				<TD vAlign="top" align="left"><CODE>Source\Samples\SampleViewerX</CODE></TD>
+				<TD>Example viewer for X Window System.</TD>
+			</TR>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\SceneHelpers</code></td>
+				<td>Example U3D helper/utility code.</td>
+			</tr>
+			<TR>
+				<TD vAlign="top" align="left"><CODE>Source\Samples\TextureModifier</CODE></TD>
+				<TD>Example extension texture modifier plug-in.</TD>
+			</TR>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\TrueType</code></td>
+				<td>Example U3D application that creates a Glyph 2D modifier by setting up glyphs 
+					that represent a string using various TrueType fonts.</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top"><code>Source\Samples\u3dparser</code></td>
+				<td>U3D parser tool makes a text dump of U3D binary file in XML format</td>
+			</tr>
+			<TR>
+				<TD vAlign="top" align="left"><CODE>Source\Samples\winXPlayer</CODE></TD>
+				<TD>Example U3D file player application for Linux*.</TD>
+			</TR>
+			<TR>
+				<TD align="left" valign="top"><CODE>Source\Templates</CODE></TD>
+				<TD>Templates for plug-in dynamic libraries, interfaces, components and project 
+					configuration files.</TD>
+			</TR>
+			<tr>
+				<td align="left" valign="top"><code>Source\Tools\BuildSystem</code></td>
+				<td>Build system used to perform command-line based compiles and also scripts to 
+					generate Microsoft Visual Studio .NET 2003* solution and project files.</td>
+			</tr>
+		</table>
+		<hr>
+		<a name="SectionUpdates"></a>
+		<h2>Updates</h2>
+		<p>
+			This section describes the updates and changes that have been made to 
+			significant releases of the software. <em>Note: After the build version for each 
+				release, the U3D file version generated by it is provided in parenthesis.</em></p>
+		<UL>
+			<li>
+				1.2.852.0 <CODE>(0x00000100)</CODE>
+			</li>
+			<UL>
+				<LI>
+				Added MacOS support for Core, Exporting and Importing functionality
+				<LI>
+				Added MacOS rendering functionality and simple player for MacOS
+				<LI>
+				Added NURBS modifier extension sample, which includes importing, exporting 
+				functionality according U3D spec and simple tesselator
+				<LI>
+				Added U3D parser sample with bitencoder and bitdecoder functionality, which 
+				creates a dump of U3D files in text XML format
+				<LI>
+				Added NewBaseMesh extension sample, which shows how to use extensibility for 
+				new geometry representation
+				<LI>
+				Added BaseMeshConverter sample, which shows how to write U3D files with 
+				compressed base mesh block
+				<LI>
+				Added big-endian platfroms support
+				<LI>
+				Added test system with unit tests
+				<LI>
+				Fixed extensibility issue with wrong position of New Object Type Block in the 
+				U3D stream if extension generator is used
+				<LI>
+				Code changed to compile with Microsoft Visual Studio 2005 compiler
+				<LI>
+				Code changed to build on 64-bit platforms
+				<LI>
+				Made minor code clean-up in bones functionality
+				<LI>
+				Changed encoding field in project option files from "windows-1252" to "utf-8"
+				<LI>
+				Improved robustness of IFXPackWeights class functionality to avoid possible 
+				read overruns
+				<LI>
+				Improved IPPReallocate function for large scenes
+				<LI>
+				Fixed reading of transformation matrix in IDTFConverter
+				<LI>
+				Improving calculation accuracy in CLODAuthor functionality
+				<LI>
+				Predicates functionality moved from Glyph folder to Dependencies folder
+				<LI>
+				IDTFConverter now configures IFXAuthorCLODCompiler not to generate CLOD updates 
+				if only base mesh should be written
+				<LI>
+					IFXSetDefaultLocale function added to the Platfrom project
+				</LI>
+			</UL>
+			<LI>
+				1.2.723.0 <CODE>(0x00000100)</CODE><UL>
+					<LI>
+					Added support for minor version number.
+					<li>
+					Added units scaling factor support to IDTFConverter.
+					<li>
+					Improved handling of glyph and shading modifier attributes. Old files were 
+					generated with shading modifier attribute equals 0. Such files will not be 
+					shaded in current version of U3D RTLs.
+					<li>
+					Improved bones animation support.
+					<li>
+					Improved units scaling factor support.
+					<li>
+					Improved Glyph billboarding. Now billboarded Glyph can be applied to animated 
+					nodes.
+					<li>
+					Fixed initial displacement and rotation issues in bones functionality.
+					<li>
+					Fixed rotation and displacement for bind pose in bones functionality.
+					<li>
+					Fixed depth buffer wrong initialization in OpenGL* renderer on Linux*.
+					<li>
+					Fixed issue when Sample Player does not show "File | Open" dialog window after 
+					"File | Load from URL" dialog window was used.
+					<li>
+					Fixed minimal project rebuild from Cygwin* command-line shell.
+					<li>
+					Fixed issue with switching between DirectX* renderers on release build.
+					<li>
+					Fixed issue when file with textures loaded after another file with textures 
+					might not be shown properly in Sample Player.
+					<li>
+					Fixed IFXMatrix4x4::Invert method.
+					<li>
+					Fixed handling of default view and light resources when view and light node in 
+					file refer to them.
+					<li>
+					Point and Line sets now can be encoded without normals.
+					<li>
+					Corrected normal vertex attribute handling, added normal check to 
+					ShaderLitTexture and MeshCompiler.
+					<li>
+					Fixed issue with exporting transform matrices in IDTFExporter.
+					<li>
+					Fixed export of scenes with models that have complex bones in IDTFExporter.
+					<li>
+						Fixed problem with texture layers in IDTFExporter.</li>
+				</UL>
+			<li>
+				1.2.639.0 <CODE>(0x00000000)</CODE><UL>
+					<LI>
+					Second U3D Sample Software open source release.<li>
+					Improved build system to produce Microsoft Visual Studio .NET 2003* solution 
+					and project files that contain only relative paths.
+					<li>
+					Improved build system to use consistent code generation settings for static and 
+					dynamic libraries.
+					<li>
+					Added exclude normals mode to IDTFConverter.
+					<LI>
+					Fixed possible issue with floating point overflow during encoding of CLOD, Line 
+					Set and Point Set objects if large position values are used.<li>
+						Fixed memory leak in <CODE>CIFXLoadManager</CODE>
+					when FileReferenceBlock is handled.
+					<LI>
+					Fixed Bone Weight Modifier encoding crash if number of bone weights less when 
+					number of positions in author mesh.
+					<li>
+					Fixed lineset and pointset encoding crash on U3D files without normals.
+					<li>
+						Fixed multi-dimension texture coordinates handling issue in <CODE>CIFXMeshCompiler::PreviewCompile</CODE>
+					method.
+					<li>
+					Fixed issue with texture coordinates generation in debug mode.
+					<li>
+					Fixed crash in SamplePlayer during switching of views after appending third 
+					file.
+					<li>
+						Fixed possible data misinterpretation during <CODE>CIFXMesh</CODE>
+					transfer.
+					<li>
+					Fixed setting of bind pose matrix for each bone. Previously it was not set 
+					properly from values read from file.
+					<li>
+					Fixed issue with optimization of BitStream project by GCC compiler.
+					<li>
+						Fixed camera panning in <CODE>U3DViewer</CODE>.
+					<li>
+					Fixed quaternion rotations interpretation in IDTFConverter.
+					<li>
+					Resolved conflict of the perspective selection definitions with screen position 
+					definitions.
+					<li>
+						Improved external plug-ins support by adding <CODE>IFXModifierBaseDecoder</CODE>
+					functionality to CorePluginStatic project.
+					<li>
+						<CODE>CIFXString</CODE> type replaced with <CODE>IFXString</CODE> type.</li>
+				</UL>
+			<LI>
+				1.2.555.0 <CODE>(0x00000000)</CODE>
+				<UL>
+					<LI>
+						Improved and updated native extensibility support.
+						<UL>
+							<LI>
+								Added support for <code>RESOURCE</code> and <code>TEXTURE</code>
+							modifier chain's types.
+							<LI>
+							Added support of arbitrary order of multiple continuation blocks.
+							<LI>
+							Added extension texture modifier sample.
+							<LI>
+							Added 'dummy' modifier functionality, which is used in case if decoder and/or 
+							encoder for external modifier aren't present.
+							<LI>
+							Removed external DIDs duplication.
+							<LI>
+								Updated source code templates.</LI></UL>
+					<LI>
+						Added rendering functionality and sample viewer for Linux*. Note: <code>libX11.so</code>
+						<code>libGL.so</code>
+					shared libraries should be installed.
+					<LI>
+						Added support of Units Scaling Factor. Interfaces affected: <code>IFXEncoderX, 
+							IFXDecoderX, IFXBitStreamX, IFXAnimationModifier, IFXCoreServices, 
+							IFXMotionMixer, IFXNameMap</code>.
+					<LI>
+						Added internet streaming functionality based on socket API for Microsoft 
+						Windows* and Linux*. HTTP and FTP connections are supported. For FTP user and 
+						password can be specified or anonymous connection can be used. Note: FTP server 
+						should support passive mode. Note: <code>ws2_32.dll</code>
+					should be installed on Windows* systems (included to Windows* XP by default).
+					<LI>
+						Internal color representation was changed from <code>U32</code> to <code>IFXVector4</code>
+					in geometry objects, encoders and decoders.
+					<LI>
+					Support for Intel® IPP was enabled on Linux*.
+					<LI>
+						Added case functionality to <code>IFXString</code>
+					for Linux.
+					<LI>
+					Fixed problem with texture resource continuation blocks.
+					<LI>
+					Fixed Unicode support on Windows and Linux.
+					<LI>
+						Fixed in-place scrubbing in <code>CIFXAuthorGeomCompiler::Compile</code>
+					method in case of small faces.
+					<LI>
+						cpuid functionality in <code>IFXOSUtilities.cpp</code>
+					now works on Linux.
+					<LI>
+						Fixed bug in <code>CIFXStdioWriteBuffer</code> and <code>CIFXStdioReadBuffer</code>
+					components when file is attempted to be closed again.
+					<LI>
+						Fixed memory leak in <code>ContractionRecorder::reOrderIndeces</code>.
+					<LI>
+					Fixed memory leaks in external texture reference functionality.
+					<LI>
+					Fixed memory leak in texture modifier encoder if more than one shading list is 
+					used by modifier.
+					<LI>
+						Fixed memory leak in <code>CIFXBoneWeightsModifier</code>
+					component.
+					<LI>
+						Removed all usages of <code>IFXString::LengthU8()</code>
+					method which does not return error code and it was marked as depricated.
+					<LI>
+						Removed conversion to multi-byte string in <code>CIFXHashMap::HashFunction</code>
+					method.
+					<LI>
+						Removed unused <code>CIFXTexturePriorityManager</code>
+					component.
+					<LI>
+					GCC compiler options were changed for debugging and performance optimization.
+					<LI>
+						Reworked <code>IFXString::ToString</code>
+					to use optional radix.
+					<LI>
+						Definition of <code>I8</code> was changed from signed char to char in <code>IFXDataTypes.h</code>
+						to reduce the number of explicit convertions from <code>I8*</code> to <code>char*</code>
+					due to compiler warnings.
+					<LI>
+					Improved build system to track source code modifications in order to avoid 
+					unnecessary rebuild.
+					<LI>
+						The declaration of all methods in component's interfaces changed to use <code>IFXAPI</code>
+					call type.
+					<LI>
+						<code>IFXAuthorFaceUpdate2</code> renamed to <code>IFXAuthorFaceUpdate</code>.
+					<LI>
+						<code>IFXAuthorVertexUpdate2</code> renamed to <code>IFXAuthorVertexUpdate</code>.
+					<LI>
+						<code>CID_IFXSceneGraphCuller</code> component is created in the <code>CIFXView::GetCullingSubsytem</code>
+					method now and used only if it is needed.
+					<LI>
+						Improved error handling in <code>CIFXMeshCompiler::PreviewCompile</code>
+					method.
+					<LI>
+						Removal of all textures from render system was moved from <code>CIFXTextureObject</code>
+						component's destructor to <code>CIFXRenderDevice</code>
+					component's destructor.
+					<LI>
+						All warnings reported by GCC compiler were removed.
+					</LI>
+				</UL>
+			<LI>
+				1.2.488.0 <CODE>(0x00000000)</CODE>
+				<UL>
+					<LI>
+					Added Native Extensibility feature. Extensible profile is now supported.
+					<LI>
+						Fixed memory consumption issue during exporting. Mesh Group is not generated 
+						now. Removed outdated <code>RenderableCache</code>
+					functionality.
+					<LI>
+						Fixed issue when client application must create a fully constructed Texture 
+						Object if the texture will be saved as an external texture reference, including 
+						allocating a buffer of the proper size.
+					</LI>
+				</UL>
+			<LI>
+				1.1.456.0 <code>(0x00000000)</code>
+				<ul>
+					<li>
+					Improved code portability. Lots of code changes were made for compatibility 
+					with GCC compiler and Intel® C++ Compiler. Many changes were made to remove 
+					compiler warnings. Lots of platform specific code moved to the Platform 
+					project.
+					<li>
+					Updated and reworked Platform project to support Linux*.
+					<li>
+					Moved Memory files from Platform project. The Memory project is now considered 
+					as cross-platform.
+					<li>
+					Updated IFXString functionality to support Unicode on Linux*.
+					<li>
+					Build system reworked to support Linux* and multiple compilers.
+					<li>
+					Updated ApplyTransformToNode and GetSubgraphBound methods of CIFXNode class to 
+					support multiple parents.
+					<li>
+					Updated SamplePlayer. The track bar has been removed and a toolbar has been 
+					added. Added options to edit menu.
+					<li>
+						Added view and file reference export options to IDTFConverter.</li>
+				</ul>
+			<LI>
+				1.0.303.0 <code>(0x00000000)</code>
+				<UL>
+					<li>
+					First U3D Sample Software open source release.<li>
+						Updated and improved the <a href="Doxygen%5COutput%5CHTML_U3D%5Cindex.html">documentation</a>. 
+					Added more descriptive usage data. Added the beginnings of a Frequently Asked 
+					Questions (FAQ) page. Updated build information for the latest state of the 
+					example applications. Merged various independent documents into the main 
+					documentation.
+					<li>
+						Author CLOD generation/compilation and encoding implementation has been 
+						improved to handle very small models with near-zero-area. The geometry <em>scrubbing</em>
+						step still automatically defaults to removing triangles with near-zero-area and 
+						truly zero-area to make the implementation more robust. However, if it is known 
+						that there are truly no zero-area triangles in the model resource this 
+						scrubbing aspect can be disabled and the CLOD generation and later encoding 
+						should handle the model successfully. Command-line support for controlling this 
+						process has been added to the IDTF converter with the <code>-removezerofaces</code>
+						and <code>-zerofacetolerance</code>
+					options.
+					<li>
+					Added full line set and point set support for skeletons. Additionally, the 
+					animation modifier was updated to add support for line set and point set bones 
+					hierarchies.
+					<li>
+					Modifiers that depend upon the transform set data element, such as the 
+					animation and CLOD modifiers, can now be added to the model resource modifier 
+					chain. However, the CLOD modifier must have the screen space error metric 
+					disabled because of another dependency on the view size data element that is 
+					not met in the model resourse modifier chain.
+					<li>
+						Added a new example exporting application called <code>HelloWorld.exe</code> that 
+						creates a simple hard-coded scene which is directly exported to a U3D file 
+						called <code>output.u3d</code>
+					in the current or active directory. This example is contained in a single 
+					source code file.
+					<li>
+						Added new example application called <code>TrueType.exe</code> that 
+						demonstrates how to create a Glyph 2D modifier by setting up glyphs that 
+						represent a string by using various TrueType fonts. At run-time to simplify the 
+						code, this example depends upon the <code>shading.u3d</code> example U3D file 
+						which it currently locates by using the <code>U3D_SOURCE</code> environment 
+						variable to load it from the <code>Source\Samples\TrueType</code>
+					directory.
+					<LI>
+					Example Discreet* 3ds max* IDTF exporter has been improved to support resource 
+					sharing for all types of resources. Texture blending mode now better reflects 
+					the result shown in Discreet* 3ds max*. Absolute texture paths are only 
+					included in IDTF files if they are valid on the system being used.
+					<li>
+					Added new scene debugging option to the example player that allows the current 
+					view resource's background clear color to be changed.
+					<li>
+						Example player allows the node transforms associated with individual models to 
+						be manipulated by right-clicking on them with the mouse dragging the model. 
+						Keyboard modifier keys such as <code>ALT</code>, <code>CTRL</code> and <code>SHIFT</code>
+					can be used also at the same time.
+					<li>
+						Redesigned the child node functionality of the <code>IFXNode</code> interface 
+						in conjunction with an improved multiple-parent implementation. This allows a 
+						single scene graph node hierarchy to have more than one node which has a parent 
+						node that in turn has a child that is also parented to the root node. Added or 
+						changed the following functions: <code>AddChild</code>, <code>GetChildNR</code>,
+						<code>GetNumberOfChildren</code>, <code>GetNumberOfParents</code>, <code>GetParentNR</code>,
+						<code>RemoveChild</code> and <code>RemoveParent</code>. Removed the following 
+						functions: <code>GetFirstChildNR</code>, <code>GetParentNRByIndex</code>, <code>GetPreviousSibling</code>,
+						<code>GetSiblingNextNR</code>, <code>SetFirstChild</code>, <code>SetNextSibling</code>, 
+						and <code>SetPreviousSibling</code>.
+					<li>
+						Improved <code>IFXViewResource</code> interface's root node handling so that it 
+						uses the associated node palette entry id. Changed the <code>SetRootNode </code>
+						function, added <code>GetRootNode</code> and removed <code>GetRootNodeNR</code>.
+					<li>
+						Improved the <code>IFXAuthorCLODCompressionParams2</code> structure. Removed 
+						the <code>2</code> from its name. Changed the default quality factors to use <code>IFX_DEFAULT_QUALITY_FACTOR</code>
+						instead of the misleading magic number 100.Improved quality factor 
+						documentation (also in the <code>IFXMarkerX</code>
+					interface).
+					<li>
+						Renamed most <code>.xml</code>
+					project configuration files so that they match the actual names of the 
+					directories that contain the associated source code compiled by them.
+					<LI>
+						Renamed <code>STextureSourceInfo::m_encoding</code> to <code>STextureSourceInfo::m_imageType</code>.
+					<LI>
+						Renamed the data element ids called <CODE>DID_IFXMeshGroup</CODE> and <CODE>DID_IFXMeshGroupBounds</CODE>
+						to <CODE>DID_IFXRenderableGroup</CODE> and <CODE>DID_IFXRenderableGroupBounds</CODE>.
+					<LI>
+						Removed the data element ids called <CODE>DID_IFXShaderSet</CODE>, <CODE>DID_IFXLineSetGroupBounds</CODE>,
+						<CODE>DID_IFXEdgeGroup</CODE> and <CODE>DID_IFXEdgeGroupBounds</CODE>.
+					<LI>
+					Renamed the Shader Set to Shader List as described in the specification.
+					<LI>
+						Eliminated unnecessary <code>IFXCoreServices::GetImageCodec</code>
+					function.
+					<li>
+						Improved the Glyph 2D modifier's billboarding feature. When billboarding is 
+						enabled, glyphs are now dynamically reoriented using the current view node's 
+						transform so that the glyphs are parallel to the view projection plane. This 
+						occurs as part of the <code>IFXView::RenderView</code> implementation in the <code>CIFXView</code>
+						component which uses the <code>IFXGlyph2DModifier</code> interface's newly 
+						added <code>SetViewTransform</code>
+					function.
+					<li>
+						Eliminated the unnecessary extra Glyph 2D modifier shading technique and the 
+						associated <code>IFXGlyph2DModifier::SetGlyphShaderSet</code>
+					function. The proper way to shade the geometry generated by the Glyph 2D 
+					modifier is by using the Shading modifier.
+					<li>
+						Reorganized and moved source code located in the following previous 
+						directories: <code>Source\RTL\Component\CLOD</code>, <code>Source\RTL\Component\ChangeManager</code>,
+						<code>Source\RTL\Component\Generators\Primitives</code>, <code>Source\RTL\Component\Generators\UVGenerator</code>,
+						<code>Source\RTL\Component\ImageCodecU</code>, <code>Source\RTL\Component\Octree</code>
+						and <code>Source\RTL\Component\TextureManager</code>. Also changed the expected 
+						location of the following previous directories to the <code>Source\RTL\Dependencies</code>
+						area: <code>Source\RTL\Component\Include\DX</code> and <code>Source\RTL\Component\Include\GL</code>.
+					<li>
+						Removed legacy <code>IFXString::GetRaw</code> function. Use the existing <code>IFXString::ConvertToRawU8</code>
+					function.
+					<li>
+						Removed legacy <code>IFXUserPropertyList</code> interface and the related <code>IFXNode</code>
+						interface's <code>GetUserPropertyList</code> and <code>SetUserPropertyList</code>
+					functions.
+					<li>
+						Removed unused <code>IFXPalette::CompactPalette</code>
+					function.
+					<li>
+						Removed legacy <code>IFXSimple.h</code>
+					header file.
+					<LI>
+						Removed unused <code>SetCameraName</code>, <code>ResetPalettes</code>, <code>CleanPalette</code>
+						functions of <code>U3DSceneUtilities</code>
+					class.
+					<LI>
+						Removed a couple of unused parameters from <code>U3DSceneUtilities::SetMaterialResource</code>
+					function.
+					<li>
+					Shading modifier was fixed to use the U3D specification's shading attributes 
+					(9.7.5.3) at run-time and work properly with other shading modifiers in the 
+					modifier chain.
+					<li>
+					Modifier chain now correctly invalidates data elements in the resulting output 
+					data packet when the same type of data element is invalidated earlier in the 
+					chain. This results in observers of the modifier chain's output data packet to 
+					be notified when changes of interest occur. Before this fix, it was discovered 
+					for example, that when an animation modifier was applied to a child node's 
+					grand parent, the child node's transform was not being updated and thus was not 
+					appearing to be animated as part of the grand parent's subgraph.
+					<li>
+					Externally referenced texture image handling has been improved to resize an 
+					image to match the size defined in the texture declaration block if the 
+					external image does not match what is expected.
+					<li>
+					When multiple file URLs are included in an external texture file reference 
+					block and the first is not found, an error notification is no longer posted 
+					prior to the next file being tested.
+					<li>
+					All model nodes now properly animate when scenes that contain animation are 
+					loaded using non-atomic mode. Previously, some model nodes failed to animate 
+					and were disconnected from their associated motions.
+					<li>
+						Fixed uninitialized data member in <code>IFXAuthorGeomCompilerParams</code>
+					constructor.
+					<li>
+					Fixed rendering exception that occurred if all textures were not found.
+					<li>
+						Fixed the Write Manager to use and respect the <code>IFXEXPORT_LIGHTS</code> export 
+						option flags, and also added the missing <code>IFXEXPORT_VIEWS</code>
+					export option flag.
+					<li>
+					Quantization constants used for Line and Point Set encoding have been updated 
+					to match those constants used for Author CLOD Mesh. This results in the quality 
+					factor settings for them behaving similarly.
+					<li>
+					Player creates a default view node to use and render with when one is not 
+					available in a loaded U3D file, which is allowed in U3D files since there is no 
+					requirement for there to be any view nodes present.
+					<li>
+					IDTF converter's handling of view resource root nodes was improved.
+					<li>
+					Added more geometry compression parameters to the IDTF converter.
+					<li>
+					Corrected additional memory and resource leaks that were identified.
+					<li>
+					Updated IDTF format documentation related to shading modifiers, animation 
+					modifiers and motion resources.
+					<li>
+						Additional example IDTF files were added and some existing ones were updated.</li>
+				</UL>
+			<li>
+				0.9.215.1<code>(0x00000000)</code>
+				<ul>
+					<li>
+						Bone count (9.6.1.1.6.1) as now written as zero if no <code>IFXSkeleton</code> object 
+						is available for all model resources (meshes, line sets and point sets). In 
+						previous releases, if no <code>IFXSkeleton</code> object was available, no bone 
+						count was written. <em>Note: The existence of this defect means that all U3D 
+							importing implementations will need to now be backwards compatible and support 
+							the reading of model resource declaration blocks that end immediately prior to 
+							the bone count.</em> This can be detected by first checking if any bytes 
+						remain to be read from the block before reading the bone count. If there is, 
+						then proceed with reading as normal. If there is not, then consider the bone 
+						count to be zero and jump to the next block. The importing implementation in 
+						the U3D Sample Software Gold release already handles this situation via another 
+						technique related to how the <code>CIFXBitStream</code>
+					component is implemented.
+					<li>
+					Eliminated the 32-bit overflow due to large quantization factors that can 
+					result in vertex positions being significantly distorted and the quality of a 
+					model being severely impacted.
+					<li>
+					When encoding motion tracks, the client specified quality level is now used 
+					instead of zero. This results in vastly improve animations.
+					<li>
+						Fixed a memory buffer overrun in the <code>CIFXView::RenderView</code>
+					function that can occur when the number of shaders used by the scene exceeds 
+					the allocated quantity.
+					<li>
+						Removed private functionality from the <code>IFXViewResource</code> interface 
+						that was needed by the <code>CIFXView</code> component. The associated 
+						implementation was migrated to the <code>CIFXView</code>
+					component where it belongs.
+					<li>
+						Fixed the <code>IFXQuaternion::ComputeAngleAxis</code> function to prevent a 
+						possible floating point exception.</li>
+				</ul>
+			<li>
+				0.9.214.0 <code>(0x00000000)</code>
+				<ul>
+					<li>
+						Support for nodes with multiple parents has improved, however more work is 
+						still required. The <a href="#SectionKnownIssuesMultipleParents">known issues</a>
+					section describes where support is not yet complete and about the existing 
+					behavior, as well as limitations that exist.
+					<li>
+						Vertex colors are now correct when encoding diffuse colors at lower quality 
+						level settings and they are not in the range 0.0 to 1.0. Resolved by adding 
+						clamping to the <code>IFXVector4</code> class <code>GetRBBA</code> and <code>GetBGRA</code>
+					functions.
+					<li>
+						Due to adjusting the contents of the static libraries, <code>IFXExportingStatic.lib</code>
+						and <code>IFXSchedulingStatic.lib</code>
+					have been removed and it is no longer necessary to link to them.
+					<li>
+					User-defined progress callback function is now serviced and called periodically 
+					during CLOD mesh creation and serialization. This feature can be used by 
+					clients to update a visual progress bar or meter during the exporting process.
+					<li>
+						<code>IFXLight::Enable</code>
+					function was changed to allow the light node's instance index to be identified.
+					<li>
+						<code>IFXLightSet::GetLight</code>
+					function was changed to also hand back the light node's instance index 
+					associated with the specified light index.
+					<li>
+						Device or screen-space independent viewport coordinates are now supported by 
+						view nodes and used during rendering if enabled by the <code>IFXView</code> interface's 
+						new functions called <code>GetAttributes</code> and <code>SetAttributes</code>. 
+						The interface's <code>GetViewport</code> and <code>SetViewport</code> functions 
+						have been changed to now work with floating point rectangles defined by the <code>IFXF32Rect</code>
+					structure.
+					<li>
+						<code>IFXViewResource</code> interface's <code>SetRootNode</code> function was 
+						updated to allow the root node's instance index to be specified and <code>GetRootNodeNR</code>
+					was updated to hand back the root node instance index. The node instance index 
+					identifies exactly what scene graph is used when the view is rendered.
+					<li>
+						2D glyph modifier source code references using the "3D" naming have been 
+						corrected. The following related changes were done: <code>IFX3DGlyphCommands</code>
+						was renamed to <code>IFXGlyph2DCommands</code>, and <code>IFX3DGlyphGenerator</code>
+						was renamed to <code>IFXGlyph3DGenerator</code>.
+					<li>
+						The following private 2D glyph headers were relocated to the <code>RTL\Component\Generators\Glyph2D</code>
+						directory: <code>IFXContour.h</code>, <code>IFXContour.h</code>, <code>IFXContourExtruder.h</code>,
+						<code>IFXContourGenerator.h</code>, <code>IFXContourTessellator.h</code> and <code>IFXGlyph3DGenerator.h</code>. 
+					In addition, some unused parameters were removed from some of the glyph command 
+					related functionality.
+					<li>
+						Fixed <code>IFXDevice</code> interface support for multiple parents and view 
+						node instances used during rendering. The <code>IFXDevice</code> interface now 
+						fully manages an array of views plus instance indices with the addition of the 
+						following functions: <code>AppendView</code>, <code>GetView</code>, <code>GetViewCount</code>
+						and <code>RemoveLastView</code>. Removed the <code>IFXDevice::Render</code> function's 
+						instance parameter, as well as the <code>GetFirstView</code> and <code>SetFirstView </code>
+						functions. Also removed the <code>GetNextView</code> and <code>SetNextView</code>
+						functions from the <code>IFXView</code>
+					interface.
+					<li>
+						Made numerous Scheduler related code clean-ups and legacy functionality 
+						removal. Replaced unneeded status and idle tasks with a much more flexible 
+						callback task that clients can use that's implemented by the <code>CIFXTaskCallback</code>
+					module.
+					<li>
+						Finished the <code>IFXNotificationManager::SubmitError</code>
+					function implementation and clarified usage documentation.
+					<li>
+						Created a new notification type named <code>IFXNotificationId_UnknownBlockSkipped</code>
+					to allow the Load Manager to notify clients when files contain unrecognized 
+					blocks.
+					<li>
+					Added to the player a Notification Manager demonstration of how to handle 
+					Scheduler task failures and the ability to determine if unrecognized block 
+					types are present in the files that are loaded.
+					<li>
+						Parameter added to the <code>IFXNode::Pick</code>
+					function to define the subgraph instance in which picking is performed.
+					<li>
+						BGR image format support has be added back to the <code>IFXTextureObject</code> 
+						interface. The <code>IFXTextureObject::Format</code> enumeration now has <code>IFXTEXTUREMAP_FORMAT_BGR24</code>
+						and <code>IFXTEXTUREMAP_FORMAT_BGRA32</code>
+					defined.
+					<li>
+					When an animation modifier has no motions specified, the default motion is 
+					used. This results in the initial skeleton bones positions and orientations 
+					being used for rendering of a model resource, if it has a bones hierarchy or 
+					skeleton defined, as well as some associated bones weights defined in the 
+					modifier chain by a Bones Weight modifier.
+					<li>
+					Fixed rendering of view node backdrops and overlays. The run-time also 
+					describes these as view layers.
+					<li>
+					Visual results of scenes rendered after non-atomic mode loading match those 
+					achieved with atomic loading.
+					<li>
+						Fixed <code>CArrayList</code>
+					template so that an element could actually be accessed without using the 
+					internal data members, by using the existing [] operator as designed.
+					<li>
+						Updated wildcard functionality in the <code>wcmatch</code> module to support 
+						UNICODE. Also added to the <code>IFXString</code> class a <code>Match</code>
+					function.
+					<li>
+					Made an initial attempt to make file header name inclusion case match the 
+					actual file names and visa versa.
+					<li>
+					Support for optimized memory functionality included with Intel® Integrated 
+					Performance Primitives (Intel® IPP) was enabled. If the dynamic libraries for 
+					Intel® IPP are in the common search path, they will be used automatically.
+					<li>
+					Player has improved exception catching and provides notification of such an 
+					error when it is encountered.
+					<li>
+					Example player better manages the control bar used for making manual CLOD 
+					resolution updates to an active object with an attached CLOD modifier. The 
+					active object is selected by right-clicking on it in the viewport.
+					<li>
+					Converter now has support for CLOD, glyph 2D and subdivision modifiers in IDTF. 
+					Support for external texture references was added, as well as view node 
+					viewports, backdrops and overlays also.
+					<li>
+					Converter allows texture encoding to be fully configured from IDTF and uses the 
+					new texture object API.
+					<li>
+					Converter's default geometry quality setting is now 300 to demonstrate that 
+					compression is performed. Currently, the converter's geometry quality setting 
+					is also used for other quality settings such as diffuse color quality.
+					<li>
+					Converter support for the fast specular attribute was removed since it was 
+					removed from the specification a long time ago.
+					<li>
+					Modifier chain index is no longer required since it was unused by the 
+					converter.
+					<li>
+					Outputting debugging information is functional again in the converter and 
+					related memory leaks have been fixed.
+					<li>
+					IDTF format and documentation changes have been made.
+					<li>
+					Additional example IDTF files were added and existing ones were updated.
+					<li>
+						Added an example IDTF file exporter plug-in for Discreet* 3ds max* 5.1. It is 
+						in the early stages of development, has received insufficient testing and does 
+						not support some common features used in Discreet* 3ds max* and supported by 
+						IDTF. In addition, some key features such as resource sharing and unused 
+						resource elimination have not been implemented either. The main source code is 
+						located in the <code>Source\Samples\IntermediateFormat\Exporter</code>
+					directory.
+					<li>
+					Updated IFXCOM coding conventions document.
+					<li>
+						Corrected numerous memory and resource leaks.</li>
+				</ul>
+			<li>
+				0.5.186.0 <code>(0x00000000)</code>
+				<ul>
+					<li>
+						Changed the file version to zero which is the first edition value that is 
+						considered compatibility tested and validated to match the specification (it no 
+						longer identifies a testing or development version). No file format encoding 
+						changes were made from the Beta release and the <code>CIFXLoadManager</code>
+					will still read those equivalent Beta version files.
+					<li>
+						The following functions were depreciated and have been removed from the <code>IFXModel</code>
+						interface: <code>GetNumElements</code>, <code>GetNumShaderSets</code>, <code>GetShaderSet</code>,
+						<code>SetShaderSet</code>, <code>GetShaderSetMapping</code>, <code>SetShaderSetMapping</code>,
+						<code>GetMappingShaderSet</code> and <code>SetMappingShaderSet</code>. They 
+						were legacy shading functionality and were superseded by the Shading Modifier 
+						with the Alpha release. Shader sets can be associated with models by attaching 
+						a Shading Modifier to either the model resource modifier chain or the model 
+						node modifier chain as demonstrated by the IDTFConverter. There is an example 
+						of one way to obtain a shader set from the model node modifier chain in the <code>U3DSceneUtilities::SetMaterialResource</code>
+						function in the <code>SceneHelpers</code>
+					sample code.
+					<li>
+						The following functions were depreciated and have been removed from the <code>IFXGenerator</code>
+						interface: <code>GetNumShaderSets</code>, <code>GetShaderSet</code> and <code>SetShaderSet</code>. 
+					They were legacy shading functionality and have been superseded by the Shading 
+					Modifier with the Alpha release.
+					<li>
+						Changes were made to the <code>IFXMetaDataX</code> interface. It now has 
+						support for meta-data additional attributes that may be defined as part of the 
+						Key string. In the interfaces, additional attributes are called subattributes. 
+						Some changes were made to accomplish this. To retrieve the encoded key that 
+						matches the string written to a bitstream during serialization, the new <code>GetEncodedKeyX</code>
+						function must now be used instead of <code>GetKeyX</code> (all set functions 
+						can still be used to define an encoded key after which parsing and validation 
+						is performed). The <code>IFXMetaDataValueType</code> enumeration and has been 
+						replaced with <code>IFXMetaDataAttribute</code> (the old <code>IFXMETADATATYPE_STRING</code>
+						enumerator is now called <code>IFXMETADATAATTRIBUTE_STRING</code>, and <code>IFXMETADATATYPE_BINARY</code>
+						is now called <code>IFXMETADATAATTRIBUTE_BINARY</code>). The <code>GetValueTypeX</code>
+						function has been replaced by <code>GetAttributeX</code>. The following 
+						additional functions have been added: <code>GetEncodedKeyX</code>, <code>GetSubattributesCountX</code>,
+						<code>GetSubattributeIndex</code>, <code>GetSubattributeNameX</code>, <code>GetSubattributeValueX</code>,
+						<code>SetSubattributeValueX</code>, <code>DeleteSubattributeX</code> and <code>DeleteAllSubattributes</code>.
+					<li>
+						Renamed the following interface and structures by removing the "2" suffix: <code>IFXAuthorFace2</code>,
+						<code>IFXAuthorGeomCompilerParams2</code>, <code>IFXAuthorMeshScrubParams2</code>
+						and <code>IFXAuthorCLODGenParam2</code>.
+					<li>
+						Removed the rest of basic primitive support that was not previously removed. 
+						This includes the following interfaces and supporting classes: <code>IFXPrimitive</code>,
+						<code>IFXPrimitiveGenerator</code>, <code>CIFXPrimitiveShape</code>, <code>CIFXSpherePrimitive</code>,
+						<code>CIFXCylinderPrimitive</code>, <code>CIFXConePrimitive</code>, <code>CIFXPlanePrimitive</code>
+						and <code>CIFXBoxPrimitive</code>.
+					<li>
+					In the CLOD encoder, forced the encoding of the root bone's parent name to the 
+					emptry string if it was not already to match the specification.
+					<li>
+						Removed unneeded <code>IFXTEXTUREMAP_FORMAT_RENDERER</code>
+					texture map type.
+					<li>
+						Removed unneeded block type constants from <code>IFXBlockTypes.h</code>.
+					<li>
+						Added the ability to fully configure texture continuation block encoding. This 
+						was done by modifying the <code>STextureSourceInfo</code> structure and adding 
+						the following new functions to the <code>IFXTextureObject</code> interface: <code>GetImageType</code>,
+						<code>GetContinuationImageCount</code>, <code>GetImageCompressionProperties</code>
+						and <code>SetImageCompressionProperties</code>.
+					<li>
+						<code>IFXAuthorLineSet</code> and <code>IFXAuthorPointSet</code> interfaces no 
+						longer require the <code>SetMeshDesc</code> function to be explicitly called so 
+						that they are more similar in usage to <code>IFXAuthorMesh</code>.
+					<li>
+						Renamed defines with prefix <code>UI_DEFAULT_</code> in <code>UIDefaults.h</code>
+						to instead have the prefix <code>PALETTE_DEFAULT_</code>. Moved them to <code>IFXCoreServices.h</code>
+						and removed <code>UIDefaults.h</code>.
+					<li>
+					Improved stability of author CLOD generation.
+					<li>
+					Added check to prevent divide by zero during normalization.
+					<li>
+					Varous external file reference filter and name collision handling defects were 
+					fixed.
+					<li>
+					External texture reference support was improved for both atomic and non-atomic 
+					loading.
+					<li>
+						Non-atomic loading now allows better interactive loading behavior by 
+						distributing its workload and not processing an entire block when it is becomes 
+						available. As in previous releases, the estimated number of millisconds of work 
+						performed per file load before yielding can be configured by the <code>IFXLoadManager</code>
+					interface.
+					<li>
+					Texture handling during non-atomic loading has been fixed.
+					<li>
+					Some Octree culling fixes were made.
+					<li>
+					Converter support for file references has been added.
+					<li>
+					File reference and collision policy handling have been fixed.
+					<li>
+						Converter model visibility handling has been fixed. Converter's default has 
+						been changed to <code>FRONT</code>.
+					<li>
+					Converter handling of TGA image indentification field has been fixed.
+					<li>
+					Converter and IDTF format for how resources are references has changed. It is 
+					now performed by name.
+					<li>
+					Converter now allows modifiers to be applied to model resources.
+					<li>
+					Converter texture resource configuration has changed and allows more 
+					configuration.
+					<li>
+						Fixed spot light angle handling in the <code>CIFXLightResource</code> component. 
+						It was incorrectly doubling the spot light angle when configuring the <code>IFXRenderLight</code>
+					thus resulting in them being rendered too wide.
+					<li>
+					Improved node bounding sphere calculations.
+					<li>
+					Updated dependent libraries used for PNG to version 1.2.7 and for ZLIB to 
+					version 1.2.1.
+					<li>
+					Point sets are now rendered by the DirectX* 7 renderer, however the shading 
+					used is incorrect.
+					<li>
+					Performance of line and point set encoding and decoding has been improved.
+					<li>
+						Enabled SSE2 or MMX bitstream optimizations to be used in the <code>CIFXOSHistogramDynamic</code>
+					class if the processor used supports them.
+					<li>
+					Setup an optimization framework so that the performance of various functions 
+					can be improved, such as memory, matrix and image operations. If the dynamic 
+					libraries for Intel® Integrated Performance Primitives (Intel® IPP) are in the 
+					common search path, they will be used automatically.
+					<li>
+					Example player now allows the CLOD resolution is be adjusted with a control bar 
+					for the active object, if it has an attached CLOD modifier. The active object 
+					is selected by right-clicking on it in the viewport.
+					<li>
+					More user friendly error reporting has been added to the example player when 
+					unsupported or invalid U3D files are loaded.
+					<li>
+						Additional example IDTF files were added and existing ones were updated.</li>
+				</ul>
+			<li>
+				0.5.176.0 <code>(0xFF000020)</code>
+				<ul>
+					<li>
+					Changed the default mesh scrubbing parameters so that faces of essentially zero 
+					area are removed. This is an important step prior to CLOD generation and 
+					encoding.
+					<li>
+						Fixed buffer overrun defect related to PNG handling in the <code>CIFXImageTools</code>
+					module.
+					<li>
+					On decode, shading modifier names are now remapped if necessary.
+					<li>
+					Shading modifiers have been fixed so that there is correct data packet, data 
+					element management occurring between instances of them in node modifier chains. 
+					Previously, shading modifiers managed the data packets incorrectly when the 
+					modifiers were applied to different model nodes that used the same model 
+					resource, resulting in the incorrect appearance of the same shading used for 
+					all of those model nodes.
+					<li>
+						DirectX* 7 and 8 renderers now properly display models that use textures with 
+						an alpha channel. Previously, the red and blue channels were reversed.</li>
+				</ul>
+			<li>
+				0.5.175.0<code> (0xFF000020)</code>
+				<ul>
+					<li>
+						Encoder changes were made, so U3D files previously created are <em>not</em> compatible 
+						and <em>must</em>
+					be recreated.
+					<li>
+						In <code>IFXBlockTypes.h</code>, changed <code>FileHeader_VersionFirstEdition</code>
+						to <code>0</code> to match the specification. Removed <code>FileHeader_VersionPreRelease</code>
+					since it was not needed.
+					<li>
+						Fixed the encoding and decoding of the Texture Continuation block in the <code>CIFXImageTools</code>
+					component so that it matches the specification. Previously, a variable number 
+					of extra bytes were mistakenly being inserted after the Continuation Image 
+					Index and before the Image Data.
+					<li>
+						Support for textures with an alpha channel and other forms of texturing have 
+						been fixed in the <code>CIFXImageTools</code>
+					component. This is the first release that will encode and save 32-bpp RGBA 
+					images. This is done using a single PNG Texture Continuation block. The known 
+					issues section describes the current API limitation regarding there not being 
+					any way to configure how textures are encoded.
+					<li>
+						Fixed non-ambient lights so that they were not being influenced by ambient 
+						light by correcting the <code>CIFXLightResource</code>
+					constructor to set the ambient color to black.
+					<li>
+					Fixed light resource decoding defect for non-ambient lights related to the 
+					light intensity field. The manner in which the light intensity was being stored 
+					prevented several dependent values from being recalculated.
+					<li>
+						Updated the <code>CIFXMaterialResource</code>
+					component's behavior to use attribute disabled states and return disabled 
+					values for those attributes that are not enabled. Otherwise, if enabled the 
+					stored values are returned.
+					<li>
+					Masked out unspecified material resource attributes during encoding and 
+					decoding.
+					<li>
+					Fixed material resource decoding so that all attribute values decoded are 
+					stored with a valid forth component.
+					<li>
+						Moved the material <code>Attributes</code> enumeration into the <code>IFXMaterialResource</code>
+					interface to prevent clashes with other similarly named enumerations.
+					<li>
+						Removed legacy <code>Attributes</code> enumerators (<code>DENSITY</code> and <code>ELASTICITY</code>) 
+						and <code>IFXMaterialResource</code>
+					functions related to physics and collision detection/resolution.
+					<li>
+						Fixed texture decompression defects in the <code>CIFXImageTools::DecompressBlockQueueToImage</code>
+						and <code>CIFXImageTools::EvaluateContinuationFormat</code>
+					functions.
+					<li>
+						Fixed <code>IFXString::GetRaw</code>
+					function to better validate input assumptions.
+					<li>
+					Modified hash function used during CLOD creation to not depend upon vertex 
+					positions.
+					<li>
+						Fixed data block resource leaks in the <code>CIFXWriteManager::PutPalette</code>
+					function.
+					<li>
+					OpenGL* renderer now properly culls triangles for models when their visibility 
+					is set to only back or front facing.
+					<li>
+					Converter support for Alpha Texture Channels in the Shader Lit Texture was 
+					added.
+					<li>
+					Converter support for material attributes was added.
+					<li>
+					IDTF format and documentation changes have been made.
+					<li>
+						Additional example IDTF files were added and existing ones were updated.</li>
+				</ul>
+			<li>
+				0.5.174.0 <code>(0xFF00001F)</code>
+				<ul>
+					<li>
+					CLOD modifier has been updated to handle model nodes with multiple parents. 
+					Currently, if a different CLOD resolution is appropriate for each instance, the 
+					highest of those resolutions is used.
+					<li>
+					Dynamically switching between renderers has been improved, but still requires 
+					additional fixes.
+					<li>
+					DirectX* 7 renderer is now functioning and usable again.
+					<li>
+						Addressed /MACHINE linker warning in SceneHelpers project.</li>
+				</ul>
+			<li>
+				0.5.173.0 <code>(0xFF00001F)</code>
+				<ul>
+					<li>
+						Encoder changes were made, so U3D files previously created are <em>not</em> compatible 
+						and <em>must</em>
+					be recreated.
+					<li>
+					Point set generator encoding, decoding and run-time support is provided.
+					<li>
+					Line set generator encoding and decoding now matches the specification.
+					<li>
+					Glyph 2D modifier billboard run-time functionality is implemented.
+					<li>
+					Texture encoding, decoding and run-time support for the PNG format.
+					<li>
+						Updated encoding and decoding of the Shader Lit Texture component to match 
+						changes made to the specification and because deviations were found to exist. 
+						The <code>IFXShaderLitTexture</code> interface provides more functionality than 
+						supported by the specification. During normal usage, only the <code>IFXShaderLitTexture::MATERIAL</code>
+						and <code>IFXShaderLitTexture::USEDIFFUSE</code> flags should be set and the 
+						rest of the <code>IFXShaderLitTexture::Flags</code>
+					should be clear. These flags are solely provided for debugging models/scenes 
+					and for authoring purposes. They are not intended to be saved in U3D files.
+					<li>
+						Reduced the <code>IFXShaderLitTexure::TextureMode</code>
+					automatic texture coordinate generation modes to just those supported by the 
+					specification.
+					<li>
+						View Resource component encoding and decoding have been updated to match the 
+						specification. This means that the settings maintained by the <code>IFXViewResource</code>
+					interface related to the color buffer, depth buffer and stencil buffer, for 
+					each render pass, are not currently saved in U3D files. When decoding, the 
+					default implementation settings are used for these. On the first pass: color 
+					buffer clearing is enabled using black; depth buffer testing (compare function 
+					used is depth value must be less than or equal to reference value) and writing 
+					is enabled; depth buffer clearing is enabled using depth value 1.0; and stencil 
+					buffer is disabled. On all other passes: clearing of all buffers is disabled; 
+					depth buffer testing and writing is disabled; and the stencil buffer is 
+					disabled.
+					<li>
+						Moved the <code>IFXCLODResource</code> interface's functionality into the <code>IFXAuthorCLODResource</code>
+						interface and then removed the <code>IFXCLODResource</code>
+					interface.
+					<li>
+						Renamed the <code>IFXAuthorMeshMaterial</code> structure to <code>IFXAuthorMaterial</code>.
+					<li>
+						Improved the <code>IFXAuthorMeshMap</code>
+					interface and the underlying component's implementation.
+					<li>
+						The <code>IFXNode</code> interface's <code>Pick</code>
+					function will now allow the node instance to be specified if there are multiple 
+					parents.
+					<li>
+					Adjusted the Shader Lit Texture component's default settings to conform to the 
+					specification.
+					<li>
+					Load Manager now supports placing modifiers in the model resource modifier 
+					chain again. Previously, they could only be placed in the model instance or 
+					node modifier chain.
+					<li>
+						The Scene Graph component no longer supports the <code>IFXMetaData</code> and <code>
+							IFXMarker</code> interfaces because they were not necessary for it. A few 
+						of the <code>IFXMarker</code> function implementations that served as 
+						helpers/utilities were retained and added to the <code>IFXSceneGraph</code>
+					interface.
+					<li>
+						Updated the Palette component's implementation so that the private <code>IFXUniqueModePalette</code>
+					interface could be removed. Hidden palette functionality is still available and 
+					functional, which is useful for creating user interface elements that are not 
+					encoded and serialized by the Write Manager.
+					<li>
+					Fully removed all interfaces and component implementations for basic primitives 
+					such as spheres and boxes since they were removed from the specification.
+					<li>
+						Removed the legacy <code>IFXSceneGraph::GetPrimitiveOrientation</code> and <code>IFXSceneGraph::SetPrimitiveOrientation</code>
+					functions which are no longer useful since basic primitives have been removed.
+					<li>
+						Removed the <code>IFXDeformModifier</code>
+					and associated component implementation since it is not a part of the 
+					specification and accidentally had not been taken out yet.
+					<li>
+						Removed the legacy <code>IFXModifierParam</code>
+					interface which was unused and not necessary.
+					<li>
+						Load Manager no longer caches U3D data blocks from files after they are fully 
+						decoded to reduce the run-time memory footprint required for importers and 
+						players. If this is desired functionality, it can be reenabled by adding the 
+						preprocessor define <code>KEEP_DATA_BLOCKS</code> to the <code>IFXImporting.xml</code>
+						project configuration file or to the <code>IFXDataBlockQueueX.h</code>
+					header file.
+					<li>
+					U3D encoding performance was aided by reducing excessive memory reallocations 
+					related to arrays that hold normals.
+					<li>
+					Player now allows the culling solution used to be specified.
+					<li>
+					Converter support for point-sets was added.
+					<li>
+					Converter and IDTF format now supports full resource sharing.
+					<li>
+					Converter supports multiple modifier chain types.
+					<li>
+						Converter now correctly uses mesh maps to set up the vertex indices for the 
+						bone weight modifier in <code>ModifierConverter::ConvertBoneWeightModifier</code>.
+					<li>
+					Converter handling of meta-data has been fixed and improved.
+					<li>
+					IDTF documentation has been updated.
+					<li>
+					Additional example IDTF files were added and existing ones were updated.
+					<li>
+					Eliminated player access violation after converting or displaying a scene graph 
+					with multiple parents loaded.
+					<li>
+						Debug assertion due to modifier chain construction no longer occurs when 
+						loading U3D files that contain a bones weight modifier.</li>
+				</ul>
+			<li>
+				0.4.167.0 <code>(0xFF00001E)</code>
+				<ul>
+					<li>
+						Encoder changes were made, so U3D files previously created are <em>not</em> compatible 
+						and <em>must</em>
+					be recreated.
+					<li>
+					Numerous memory and resource leaks were plugged. Some more still remain.
+					<li>
+					Bounding sphere calculation for nodes which have multiple parents have been 
+					improved.
+					<li>
+					Line sets rendering has been fixed. There was previously an encoding problem 
+					with them.
+					<li>
+					JPEG file created by the converter now have correct color channel data. 
+					Previously, the JPEG textures embedded in U3D files were wrong.
+					<li>
+					AuthorGeomCompiler allows the bCLOD parameter to be FALSE now without failing.
+					<li>
+						<code>IFXView</code>
+					interface now allows 1 and 2-point projections to be specified that match the 
+					U3D specification, as well as their encoding and decoding. However, rendering 
+					of these are not supported.
+					<li>
+					Shader lit texture encoding and decoding now match the U3D specification. 
+					However, the defaults are not specified yet in the specification so those may 
+					change in the implementation in the future.
+					<li>
+					Fixed encoding of base mesh. Previously progressive was also still being 
+					encoded and written.
+					<li>
+					Removed double CLOD compilation. Previously a second compile was done using 
+					default parameters.
+					<li>
+					Made numerous author CLOD creation and mesh/vertex map stability improvements.
+					<li>
+					Bitstream improved to better handle static histogram compression edge cases. 
+					Previously, encoding a zero value was causing an escape to be written.
+					<li>
+					Quality settings close to 1000 now look fairly similar to results for 1000.
+					<li>
+						<code>IFXNode::GetNumberOfChildren</code>
+					fixed to now return success when there are no children.
+					<li>
+					Animation modifier now supports all type of nodes. Previously only model nodes 
+					could have an animation modifier attached to them.
+					<li>
+					Texture modifier chain support was added.
+					<li>
+						One of the <code>IFXView</code> interface's <code>Pick</code>
+					functions now allows the instance to be specified if there are multiple 
+					parents.
+					<li>
+						<code>IFXShaderLitTexture</code>
+					interface has changed to eliminate legacy functionality no longer needed and to 
+					remove enumerators that were not functional.
+					<li>
+						Improvements were made to the <code>IFXString</code>
+					class.
+					<li>
+					IDTF documentation has been updated.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.4.151.0
+				<ul>
+					<li>
+					Support is now provided for encoding and decoding models that contain both both 
+					a base mesh block and progressive CLOD mesh blocks. Minimum resolution can now 
+					be any value greater than or equal to minimum resolution and less than or equal 
+					to maximum resolution.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.4.150.0
+				<ul>
+					<li>
+						Encoder changes were made, so U3D files previously created are <em>not</em> compatible 
+						and <em>must</em>
+					be recreated.
+					<li>
+					Corrections made to base CLOD mesh encoding and decoding. Combined use of both 
+					base and progressive CLOD meshes in the same model is not functioning yet.
+					<li>
+					Unused empty base blocks are no longer saved during export for models.
+					<li>
+					Debug build preprocessor defines generated by the build system were corrected.
+					<li>
+					Converter multiple textures defect fixed.
+					<li>
+					Converter support for base CLOD meshes added.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.4.149.0
+				<ul>
+					<li>
+						Significant encoder changes were made, so U3D files previously created are <em>not</em>
+						compatible and <em>must</em>
+					be recreated.
+					<li>
+					Corrections made to CLOD encoding which was discovered to deviate from the 
+					specification in several ways.
+					<li>
+					Load Manager was updated to make priority update blocks optional.
+					<li>
+					Uncompressed profile run-time, encoding and decoding support added.
+					<li>
+					Numerous memory and resource leaks were plugged. Some more still remain.
+					<li>
+					Removed core and importing dynamic library dependency on the exporting dynamic 
+					library.
+					<li>
+						Removed legacy <code>IFXQualityFactor</code> interface and associated header 
+						file. Quality factory defines were moved to <code>IFXMarkerX.h</code>.
+					<li>
+					Eliminated unused legacy style palette.
+					<li>
+					Converter shading modifier parsing was fixed.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.3.148.0
+				<ul>
+					<li>
+						Many encoder changes were made, so U3D files previously created are <em>not</em>
+						compatible and <em>must</em>
+					be recreated.
+					<li>
+					Unicode support was added. There is now an IFXCHAR data type for UTF-16 wide 
+					characters. The main format for strings (including IFXString) in the 
+					implementation is now UTF-16. Strings are stored exclusively as UTF-8 in U3D 
+					formatted data files.
+					<li>
+					Texture encoding, decoding and run-time component support are now implemented 
+					to match the specification, with exceptions for the newly added external 
+					texture references and PNG support. Removed zlib usage as part of this effort. 
+					Known issues are included in the appropriate section below.
+					<li>
+						Skeleton support has been added to <code>CIFXAuthorCLODResource</code>.
+					<li>
+					Bones weight modifier has been added.
+					<li>
+					Animation modifier has been added.
+					<li>
+					Newly added meta-data attributes are supported.
+					<li>
+						The <code>IFXLoadManager</code> interface's Load<code></code>
+					function now has a world alias parameter.
+					<li>
+					Palette entry name handling is now case-sensitive.
+					<li>
+					Resource palettes now have default entries that match the defaults in the 
+					specification.
+					<li>
+						Run-time primitive generators have been mostly isolated into the <code>IFXShapes</code>
+						dynamic library that is included in the <code>Testing</code>
+					directory.
+					<li>
+						For glyph handling the <code>CIFXGlyphCommandList</code>
+					component was added.
+					<li>
+					Discard collision policy used by Load Manager during importing has been fixed.
+					<li>
+					Removed specialized CIFXAnimationModifier factory function that was not 
+					necessary for key-frame animation.
+					<li>
+						Created and added cyclic reference count prevention component called <code>CIFXConnector</code>.
+					<li>
+						Renamed <code>IFXBoneWeights</code> interface to <code>IFXBoneWeightsModifier</code>.
+					<li>
+						Moved <code>IFXBoneWeightsModifier</code> interface from <code>IFXSkeleton.h</code>
+						to <code>IFXBoneWeightsModifier.h</code>.
+					<li>
+						Removed unneeded client specific task handling functionality from the <code>IFXNode</code>
+					interface.
+					<li>
+						Removed the legacy, unneeded <code>CIFXCLODResource</code> component, including 
+						the <code>IFXClassicCLODResource</code>
+					interface.
+					<li>
+					Improvements made to make scheduling and rendering dynamic libraries optional.
+					<li>
+					Converter support for bones and vertex weights have been added, including the 
+					bones weight modifier.
+					<li>
+					Converter support for rigid-body and bones-based animation have been added, 
+					including the animation modifier.
+					<li>
+					Converter now supports multiple modifiers.
+					<li>
+					Converter handling of missing input file has been improved.
+					<li>
+					IDTF documentation has been updated.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.2.133.0
+				<ul>
+					<li>
+						Encoder changes were made, so U3D files previously created are <em>not</em> compatible 
+						and <em>must</em>
+					be recreated.
+					<li>
+					Author line set and renderable line set functionality have been added. Known 
+					issues are included in the section below.
+					<li>
+					Converter support for line sets has been added.
+					<li>
+					2D glyph modifier functionality has been added. Known issues are included in 
+					the section below.
+					<li>
+					Rendering of textures has been fixed.
+					<li>
+					General picking and 2D view-based picking have both been fixed for nodes with a 
+					single parent. Known issues are included in the section below.
+					<li>
+						Overlay/backdrop view layer functionality was migrated from the view resource's <code>
+							IFXViewResource</code> interface to the view node's <code>IFXView</code>
+					interface.
+					<li>
+					Primitive generators (box, sphere, cylinder and plane) were moved out of 
+					IFXCore into new IFXShapes DL. Two dependencies exist in IFXCore on them but 
+					will be removed in a future release. Change done in preparation for making 
+					their usage completely optional. No encoding of them is done when writes are 
+					performed.
+					<li>
+					Author mesh defect related to normals has been fixed.
+					<li>
+					Player supports object picking by right-clicking in the viewport. Selected 
+					object is displayed in one of the bottom status bar fields.
+					<li>
+					Player is now more robust when switching to the next view.
+					<li>
+					Player after opening multiple files no longer requires a switch to the next 
+					view to see the newly loaded file rendered.
+					<li>
+					Player saving of multiple appended files has been improved.
+					<li>
+					Player non-atomic file loading functionality can now enabled to allow U3D file 
+					loads to be performed asynchronously and decompression to occur gradually.
+					<li>
+					Player utility code that is in common with the converter and our internal test 
+					system has been move into the Samples\SceneHelpers directory.
+					<li>
+					Converter support for multiple parents has been added.
+					<li>
+					Converter now properly parses directional lights.
+					<li>
+					Converter now better supports vertex color usage in IDTF files and related 
+					random encoding/decoding failures have been fixed.
+					<li>
+					IDTF documentation has been updated. Some changes were made to view nodes, view 
+					resources and colors.
+					<li>
+						Additional example IDTF files were added.</li>
+				</ul>
+			<li>
+				0.2.118.0
+				<ul>
+					<li>
+						Initial Alpha release.</li>
+				</ul>
+			</li>
+		</UL>
+		<hr>
+		<a name="SectionKnownIssues"></a>
+		<h2>Known Issues</h2>
+		<p>This section describes the issues that have been identified. Please submit 
+			reports of defects and other issues found at the Universal 3D Sample Software 
+			project website on <A href="http://sourceforge.net/projects/u3d/">Source Forge*</A>
+			(<A href="http://sourceforge.net/projects/u3d/">http://sourceforge.net/projects/u3d/</A>) 
+			using the <A href="http://sourceforge.net/tracker/?group_id=133107">online tracking 
+				tool</A>.</p>
+		<h3>Functionality</h3>
+		<UL>
+			<LI>
+				U3D DLs
+				<UL>
+					<LI>
+					Only last Bone Weigh Modifier output is used if 2 Bone Weights Modifiers are 
+					attached to one model.
+					<li>
+					File references are considered to be relative to the work directory, not 
+					relative to the file which contains them. Please use full paths to a reference 
+					in the file or change the work directory.<li>
+						Areas where support for nodes with multiple parents is not complete:
+						<ul>
+							<LI>
+							Octree culler might not work properly for complex animated scenes with multiple 
+							parents hierarchy.
+							<li>
+								Octree module <code>COctreeNode</code> should be reworked to handle node 
+								instances. <code>CIFXOctreeCollection::GetSpatials</code> returns <code>IFX_E_UNSUPPORTED</code>.
+								<code>CIFXOctreeCollection::ResursivelyAddSpatialsToList</code>
+							is unimplemented.
+							<li>
+								Some functions which work with <code>IFXSpatial</code> interface pointers may 
+								need to be updated to track spatial/node instances with <code>IFXSpatialInstance</code>
+								and <code>SPATIALINSTANCE_LIST</code>.</li>
+						</ul>
+					<li>
+					Number of light sources visible in some scenes is different depending upon the 
+					culling solution used, either View Frustum or Octree-based culling.
+					<li>
+					CLODGenerator will cause an exception to occur and fail to generate a CLOD mesh 
+					if the mesh description improperly declares that texture layers exist and there 
+					are actually no texture coordinates provided with the author mesh.
+					<li>
+					Single instance of a texture object does not support some channels being 
+					internal and other channels being an external texture reference. This is 
+					allowed by the specification.
+					<li>
+					Point set shading is not rendered properly by the DirectX* 7 renderer.
+					<li>
+					Configuration of line set and point set rendering is not provided, such as if 
+					these scale based on distance from the camera or they are always visible. 
+					Currently, they are always displayed regardless of distance from the view and 
+					the presentation size is hard-coded.
+					<li>
+					Implementation of the Glyph 2D modifier has some internal extrusion and 
+					beveling functionality that will eventually be removed.
+					<li>
+					Some code clean-up activities remain. The largest work includes reducing the 
+					multiple layers of wrapping in the bones animation code and reworking the 
+					interface API style that is out of sync with the rest of the engine.
+					<LI>
+						Not yet implemented:
+						<ul>
+							<li>
+							Write Manager mode to not write file references and blocks loaded from file 
+							references.<li>
+							Thread-safe component system and threading abstractions.
+							<li>
+							TIFF texture format encoding, decoding and run-time support.
+							<li>
+							Writing and using the optional bounding information for geometry and file 
+							references.
+							<li>
+								Rendering of 1 and 2-point projection modes that can be set on the <code>IFXView</code>
+							interface.
+							<li>
+								Internet Streaming functionality does not work with proxy.</li></ul>
+					</LI>
+				</UL>
+			<li>
+				Intermediate Data Text Format (IDTF) Converter
+				<ul>
+					<li>
+					Depends upon many of the default parameters used by the U3D DLs.
+					<li>
+						Not yet supported:
+						<ul>
+							<li>
+								IDTF <em>single line</em> and <em>rest of line</em>
+							comments are not defined.
+							<li>
+							Meta-data binary key/value pairs.
+							<li>
+							JPEG texture support.
+							<li>
+							TIFF texture support.
+							<li>
+							16-bpp TGA texture support.
+							<li>
+							Quality levels (per-object).
+							<li>
+							Priority levels.
+							<li>
+								Skeleton support for line sets and point sets.</li>
+						</ul>
+					</li>
+				</ul>
+			<li>
+				Intermediate Data Text Format (IDTF) Exporter
+				<ul>
+					<li>
+					Work in progress that has received minimal testing and does not support some 
+					common features used in Discreet* 3ds max* and supported by IDTF.<li>
+					View resource root node is always the world which is represented as the empty 
+					NULL string.
+					<li>
+					Light attenuation is predefined as (1,0,0).
+					<li>
+						Not yet supported:
+						<ul>
+							<li>
+							Line sets.
+							<li>
+							Point sets.
+							<li>
+							Meta-data definitions using the user properties available per-object in 
+							Discreet* 3ds max*.
+							<li>
+							Texture layer blending modes.
+							<li>
+							Configuration dialog box to provide user control over the exporter. For 
+							example, to allow the user to define what types of data are exported and the 
+							various quality level settings.
+							<li>
+							Physique*.
+							<li>
+								Bipeds.</li>
+						</ul>
+					</li>
+				</ul>
+			<li>
+				Player
+				<ul>
+					<li>
+						Not yet demonstarted:
+						<ul>
+							<li>
+							Frame-rate based CLOD metric usage.
+							<li>
+								Debug rendering modes such as vertex or wireframe rendering, and displaying 
+								bounding spheres.</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+		</UL>
+		<h3>Documentation</h3>
+		<ul>
+			<li>
+				Lots of work to be done. :)</li>
+		</ul>
+		<hr>
+		<p>
+			<font size="-1"><em>© 1999 - 2006 Intel Corporation. All rights reserved. </em><em>Intel 
+					is a trademark or registered trademark of Intel Corporation or its subsidiaries 
+					in the United States and other countries.</em> </font>
+		</p>
+		<p>
+			<font size="-1"><em>* Other names and brands may be claimed as the property of others.</em>
+			</font>
+		</p>
+	</body>
+</html>

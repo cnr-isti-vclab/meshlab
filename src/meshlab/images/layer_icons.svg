@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.44.1"
+   sodipodi:docbase="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images"
+   sodipodi:docname="layer_icons.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient2999">
+      <stop
+         style="stop-color:black;stop-opacity:1;"
+         offset="0"
+         id="stop3001" />
+      <stop
+         id="stop3019"
+         offset="0.42857143"
+         style="stop-color:#7f7f7f;stop-opacity:1;" />
+      <stop
+         id="stop3009"
+         offset="0.5"
+         style="stop-color:white;stop-opacity:1;" />
+      <stop
+         style="stop-color:#7f7f7f;stop-opacity:1;"
+         offset="0.58571428"
+         id="stop3017" />
+      <stop
+         style="stop-color:black;stop-opacity:1;"
+         offset="1"
+         id="stop3003" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient2984">
+      <stop
+         style="stop-color:olive;stop-opacity:1;"
+         offset="0"
+         id="stop2986" />
+      <stop
+         id="stop3021"
+         offset="0.74285716"
+         style="stop-color:#fafa47;stop-opacity:1;" />
+      <stop
+         style="stop-color:#898900;stop-opacity:1;"
+         offset="1"
+         id="stop2988" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2984"
+       id="linearGradient2990"
+       x1="307.83224"
+       y1="437.82755"
+       x2="357.65425"
+       y2="437.82755"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.001485,0,0,0.859002,0.488951,61.24134)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2999"
+       id="radialGradient3007"
+       cx="331.62613"
+       cy="418.47134"
+       fx="331.62613"
+       fy="418.47134"
+       r="23.276581"
+       gradientTransform="matrix(1.641657,-0.13482,0.185211,2.255264,-289.0416,-482.2163)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2999"
+       id="radialGradient3029"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.102811,-1.223528,1.680849,1.515013,-838.548,177.7291)"
+       cx="331.62613"
+       cy="418.47134"
+       fx="331.62613"
+       fy="418.47134"
+       r="23.276581" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2984"
+       id="linearGradient3031"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.001485,0,0,0.859002,-95.84439,61.24134)"
+       x1="307.83224"
+       y1="437.82755"
+       x2="357.65425"
+       y2="437.82755" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.0519028"
+     inkscape:cx="267.11002"
+     inkscape:cy="706.37106"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1162"
+     inkscape:window-height="751"
+     inkscape:window-x="43"
+     inkscape:window-y="22" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="opacity:1;display:inline">
+    <path
+       sodipodi:type="arc"
+       style="fill:lime;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="path1872"
+       sodipodi:cx="234.28572"
+       sodipodi:cy="316.64789"
+       sodipodi:rx="22.857143"
+       sodipodi:ry="24.285715"
+       d="M 257.14286 316.64789 A 22.857143 24.285715 0 1 1  211.42858,316.64789 A 22.857143 24.285715 0 1 1  257.14286 316.64789 z"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       sodipodi:type="arc"
+       style="fill:black"
+       id="path1880"
+       sodipodi:cx="209.86906"
+       sodipodi:cy="357.87741"
+       sodipodi:rx="7.0447855"
+       sodipodi:ry="7.0447855"
+       d="M 216.91385 357.87741 A 7.0447855 7.0447855 0 1 1  202.82428,357.87741 A 7.0447855 7.0447855 0 1 1  216.91385 357.87741 z"
+       transform="matrix(1.395349,0,0,1.418605,-58.56049,-191.7502)"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       sodipodi:type="arc"
+       style="fill:white;display:inline"
+       id="path1882"
+       sodipodi:cx="209.86906"
+       sodipodi:cy="357.87741"
+       sodipodi:rx="7.0447855"
+       sodipodi:ry="7.0447855"
+       d="M 216.91385 357.87741 A 7.0447855 7.0447855 0 1 1  202.82428,357.87741 A 7.0447855 7.0447855 0 1 1  216.91385 357.87741 z"
+       transform="matrix(0.744186,0,0,1.046512,85.96235,-63.66546)"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:#e6e6e6;stroke:black;stroke-opacity:1"
+       d="M 191.34375,274.5 L 191.34375,365.25 L 282.125,365.25 L 282.125,274.5 L 191.34375,274.5 z M 275.0749,309.35984 C 267.86477,330.84348 248.35439,342.66424 206.0749,330.20359 C 205.61133,306.92643 251.387,291.60271 275.0749,309.35984 z "
+       id="rect1891"
+       sodipodi:nodetypes="cccccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2846"
+       d="M 208.65499,317.02386 C 207.31484,313.40442 203.67788,311.27594 200.84329,308.83582 C 198.03529,306.29508 195.57929,303.41119 193.20134,300.47516 L 193.23591,300.43574 C 195.61361,303.37157 198.0694,306.25525 200.87715,308.79579 C 203.68754,311.21509 206.43445,314.34487 210.11091,315.25633 L 208.65499,317.02386 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2848"
+       d="M 217.74156,309.1047 C 218.74808,306.61364 217.80264,304.27458 217.04706,301.84915 L 217.09303,301.82395 C 217.77953,304.02754 218.21553,306.35607 220.01812,307.94474 L 217.74156,309.1047 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2850"
+       d="M 226.61803,305.11849 C 227.2671,301.57443 225.03202,298.26651 223.63271,295.11508 L 223.67839,295.08934 C 225.05482,298.18925 225.99635,301.92487 228.83554,303.98861 L 226.61803,305.11849 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2852"
+       d="M 236.41844,302.55141 C 237.39535,300.47751 237.7123,298.20998 238.02495,295.96294 L 238.07199,295.93979 C 237.79509,297.92873 237.45968,299.69528 238.69499,301.39144 L 236.41844,302.55141 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2854"
+       d="M 246.6684,301.08728 C 250.05228,298.82209 251.42765,295.22986 252.79679,291.56703 L 252.84432,291.54492 C 251.72977,294.52752 250.23711,297.30181 248.917,300.15588 L 246.6684,301.08728 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2856"
+       d="M 259.59997,300.93205 C 261.87167,300.49768 263.61358,298.17884 265.12431,296.45131 L 265.17261,296.43092 C 263.04888,298.86058 260.66518,301.36013 257.5329,302.43387 L 259.59997,300.93205 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2860"
+       d="M 213.54748,314.55745 C 213.30815,311.96106 211.59626,310.2931 209.96182,308.40189 C 208.17973,306.29629 206.42183,304.17167 204.73559,301.98851 L 204.78064,301.96169 C 206.46684,304.14476 208.22468,306.2693 210.00672,308.37483 C 211.6294,310.25243 213.15919,312.35157 215.61455,313.05564 L 213.54748,314.55745 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-width:1;stroke-opacity:1"
+       id="path2862"
+       d="M 205.74382,322.64579 C 203.74475,319.6719 199.62023,318.95632 196.42827,317.71666 C 193.48125,316.46892 194.90454,317.10272 192.15486,315.82333 L 192.18878,315.78336 C 194.93828,317.06259 193.51508,316.42887 196.46193,317.67647 C 199.97203,319.0397 203.52377,321.08473 207.38631,320.72459 L 205.74382,322.64579 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2864"
+       d="M 265.17027,301.58738 C 266.53112,301.74928 267.65942,301.14043 268.90237,300.59199 C 272.4342,298.8895 275.76978,296.83201 278.87104,294.43888 L 278.91973,294.41943 C 275.79153,296.83416 272.42225,298.90407 268.8613,300.62457 C 266.96773,301.48823 265.10274,302.4983 263.10319,303.0892 L 265.17027,301.58738 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2866"
+       d="M 271.72356,304.53636 C 272.89336,305.02988 274.01377,304.63887 275.21322,304.33534 C 277.06517,303.81634 278.85581,303.12205 280.6359,302.40174 L 280.5947,302.43416 C 278.81447,303.15428 277.02371,303.84839 275.1717,304.36735 C 273.34356,304.95636 271.55674,305.71166 269.65648,306.03818 L 271.72356,304.53636 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2868"
+       d="M 208.2393,333.35187 C 207.21802,333.01524 206.01265,333.37338 204.94083,333.66448 C 202.59003,334.48006 203.73551,334.05542 201.5025,334.93333 L 201.54373,334.90095 C 203.77692,334.02326 202.63135,334.4478 204.98232,333.63244 C 206.69115,333.06818 208.7903,331.93698 210.51585,332.1919 L 208.2393,333.35187 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2870"
+       d="M 218.04226,333.34963 C 215.75481,334.68724 213.6217,336.20665 211.59356,337.91257 C 211.12978,338.33352 210.666,338.75448 210.20223,339.17543 L 210.1537,339.19526 C 210.61745,338.77424 211.0812,338.35323 211.54495,337.93222 C 212.93912,336.75929 214.49722,335.66536 215.70707,334.3169 L 218.04226,333.34963 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2872"
+       d="M 223.59291,334.61818 C 222.99621,336.16855 222.23731,337.64759 221.57717,339.17156 L 221.17115,339.35962 C 221.61443,338.10023 222.06871,336.97161 221.3754,335.74806 L 223.59291,334.61818 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2874"
+       d="M 232.02305,336.06495 C 230.45046,338.20475 229.57998,340.69762 228.67431,343.16287 L 228.62679,343.18501 C 229.34511,341.22962 230.54274,339.17886 229.90542,337.07938 L 232.02305,336.06495 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2876"
+       d="M 241.61947,335.55426 C 241.62264,337.0072 242.04668,338.37198 242.54276,339.72116 C 242.75361,340.2446 242.98536,340.75912 243.20666,341.2781 L 242.09565,341.88575 C 241.96759,341.31816 241.93115,340.73012 241.71147,340.18299 C 241.21299,338.87862 240.61572,337.63049 239.47031,336.77796 L 241.61947,335.55426 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2878"
+       d="M 249.15073,334.61818 C 248.76941,336.44161 249.49313,338.2283 250.09454,339.93339 L 249.95981,340.00853 C 249.24733,338.37608 248.44424,336.78213 246.93322,335.74806 L 249.15073,334.61818 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2880"
+       d="M 254.72903,331.86228 C 255.21643,333.46345 256.69983,334.37877 258.05241,335.23287 L 257.98352,335.27758 C 256.27507,334.36638 254.49252,333.53174 252.57391,333.18294 L 254.72903,331.86228 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2882"
+       d="M 261.93689,328.64931 C 262.52533,329.86964 263.74008,330.48701 264.8938,331.11927 L 264.56301,331.33839 C 263.02627,330.74381 261.46305,330.2995 259.86167,329.92101 L 261.93689,328.64931 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2884"
+       d="M 267.83561,323.99833 C 268.42756,324.50324 269.19031,324.62569 269.91855,324.85892 L 269.36082,325.25838 C 268.15487,325.32443 266.85915,325.60497 265.68048,325.319 L 267.83561,323.99833 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2886"
+       d="M 272.70655,318.95359 C 273.6325,319.72751 274.74399,319.98791 275.90377,320.20925 L 275.11189,320.76091 C 273.63615,320.50264 272.13669,320.11747 270.63948,320.45541 L 272.70655,318.95359 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_open"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:#e6e6e6;stroke:black;stroke-opacity:1;display:inline"
+       d="M 285.87812,274.32951 L 285.87812,365.07951 L 376.65937,365.07951 L 376.65937,274.32951 L 285.87812,274.32951 z M 369.60927,309.18935 C 362.39914,330.67299 342.88876,342.49375 300.60927,330.0331 C 311.50048,336.40452 365.53999,342.65861 369.60927,309.18935 z "
+       id="path2894"
+       sodipodi:nodetypes="cccccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2916"
+       d="M 302.77367,333.18138 C 301.75239,332.84475 300.54702,333.20289 299.4752,333.49399 C 297.1244,334.30957 298.26988,333.88493 296.03687,334.76284 L 296.0781,334.73046 C 298.31129,333.85277 297.16572,334.27731 299.51669,333.46195 C 301.22552,332.89769 303.32467,331.76649 305.05022,332.02141 L 302.77367,333.18138 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2918"
+       d="M 312.57663,333.17914 C 310.28918,334.51675 308.15607,336.03616 306.12793,337.74208 C 305.66415,338.16303 305.20037,338.58399 304.7366,339.00494 L 304.68807,339.02477 C 305.15182,338.60375 305.61557,338.18274 306.07932,337.76173 C 307.47349,336.5888 309.03159,335.49487 310.24144,334.14641 L 312.57663,333.17914 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2920"
+       d="M 318.12728,334.44769 C 317.53058,335.99806 316.77168,337.4771 316.11154,339.00107 L 315.70552,339.18913 C 316.1488,337.92974 316.60308,336.80112 315.90977,335.57757 L 318.12728,334.44769 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2922"
+       d="M 326.55742,335.89446 C 324.98483,338.03426 324.11435,340.52713 323.20868,342.99238 L 323.16116,343.01452 C 323.87948,341.05913 325.07711,339.00837 324.43979,336.90889 L 326.55742,335.89446 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2924"
+       d="M 336.15384,335.38377 C 336.15701,336.83671 336.58105,338.20149 337.07713,339.55067 C 337.28798,340.07411 337.51973,340.58863 337.74103,341.10761 L 336.63002,341.71526 C 336.50196,341.14767 336.46552,340.55963 336.24584,340.0125 C 335.74736,338.70813 335.15009,337.46 334.00468,336.60747 L 336.15384,335.38377 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2926"
+       d="M 343.6851,334.44769 C 343.30378,336.27112 344.0275,338.05781 344.62891,339.7629 L 344.49418,339.83804 C 343.7817,338.20559 342.97861,336.61164 341.46759,335.57757 L 343.6851,334.44769 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2928"
+       d="M 349.2634,331.69179 C 349.7508,333.29296 351.2342,334.20828 352.58678,335.06238 L 352.51789,335.10709 C 350.80944,334.19589 349.02689,333.36125 347.10828,333.01245 L 349.2634,331.69179 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2930"
+       d="M 356.47126,328.47882 C 357.0597,329.69915 358.27445,330.31652 359.42817,330.94878 L 359.09738,331.1679 C 357.56064,330.57332 355.99742,330.12901 354.39604,329.75052 L 356.47126,328.47882 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2932"
+       d="M 362.36998,323.82784 C 362.96193,324.33275 363.72468,324.4552 364.45292,324.68843 L 363.89519,325.08789 C 362.68924,325.15394 361.39352,325.43448 360.21485,325.14851 L 362.36998,323.82784 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:black;stroke:black;stroke-opacity:1;display:inline"
+       id="path2934"
+       d="M 367.24092,318.7831 C 368.16687,319.55702 369.27836,319.81742 370.43814,320.03876 L 369.64626,320.59042 C 368.17052,320.33215 366.67106,319.94698 365.17385,320.28492 L 367.24092,318.7831 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2936"
+       d="M 308.16585,331.93957 C 306.86993,333.43774 305.13885,334.68072 303.58279,335.93883 C 301.33497,337.72125 302.47954,336.83947 300.14797,338.58274 L 300.09925,338.60211 C 302.35643,336.91485 301.30704,337.76576 303.26308,336.06877 C 304.20718,335.15463 305.21798,334.25696 305.8773,333.10565 L 308.16585,331.93957 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2938"
+       d="M 313.40849,333.90556 C 312.61592,335.75793 311.39957,337.39245 310.2146,339.00873 C 308.80355,340.85227 307.17236,342.49884 305.53654,344.13817 L 305.4881,344.15824 C 307.05685,342.58643 308.70513,341.0562 309.88618,339.15335 C 310.54844,337.87475 311.34432,336.52804 311.11993,335.07164 L 313.40849,333.90556 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2940"
+       d="M 320.551,334.34987 C 320.22437,336.85732 318.78383,339.49761 317.87069,341.9396 C 316.21239,345.87746 313.72369,349.34159 311.15613,352.72121 L 311.10797,352.74193 C 313.67562,349.36274 316.16445,345.89907 317.82316,341.96172 C 318.58357,339.9289 319.51662,337.77035 318.47304,335.8596 L 320.551,334.34987 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2942"
+       d="M 331.73417,333.95674 C 330.69351,336.62977 329.56619,339.25519 328.644,341.97444 C 327.52896,344.94786 328.09139,343.49684 326.96043,346.32893 L 326.91285,346.35094 C 328.04387,343.51899 327.4814,344.96993 328.59654,341.9967 C 329.34953,339.77678 330.18124,337.42198 329.49266,335.09884 L 331.73417,333.95674 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2944"
+       d="M 339.60224,335.78928 C 340.1279,338.80553 342.36364,340.92853 344.31846,343.11205 L 344.27361,343.1392 C 342.23642,340.86365 340.29066,338.39895 337.43088,337.11989 L 339.60224,335.78928 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2948"
+       d="M 347.81325,332.92256 C 348.30964,335.43094 349.95327,337.36816 351.678,339.18604 C 352.31901,339.813 352.96003,340.43997 353.60104,341.06693 L 353.55637,341.09437 C 352.91532,340.46735 352.27427,339.84033 351.63323,339.21331 C 349.78517,337.26538 347.83375,335.48106 345.5247,334.08864 L 347.81325,332.92256 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2950"
+       d="M 354.30044,330.74556 C 355.13368,333.41734 357.35326,335.08006 359.44661,336.77965 C 360.07697,337.28232 360.70733,337.78498 361.33769,338.28765 L 361.29329,338.31554 C 360.66293,337.81286 360.03256,337.31018 359.40219,336.8075 C 357.19768,335.01764 354.91701,333.20619 352.22247,332.25529 L 354.30044,330.74556 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2952"
+       d="M 308.56472,334.54894 C 314.11223,331.49639 305.65265,336.21181 304.68471,336.74761 C 300.46559,339.06042 296.14839,341.1848 291.78728,343.21447 L 291.82832,343.18184 C 296.18934,341.15206 300.5065,339.02764 304.72547,336.71463 C 306.73462,335.52102 308.5449,334.07924 310.64268,333.03921 L 308.56472,334.54894 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2954"
+       d="M 361.18139,325.83059 C 361.57432,326.21801 362.10828,326.49589 362.56934,326.81333 C 364.46939,327.91522 366.62516,328.3265 368.76471,328.6832 C 371.57916,329.20857 368.06245,328.54974 370.72449,329.05564 L 369.58218,329.8443 C 367.10054,329.18549 370.54548,330.00856 367.7827,329.36659 C 365.59257,328.81986 363.40006,328.28465 361.21494,327.72088 C 360.54768,327.58887 359.73728,327.40043 359.10343,327.34032 L 361.18139,325.83059 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2956"
+       d="M 366.75169,322.55395 C 367.98976,323.97992 369.62045,324.43328 371.39691,324.92778 L 371.35379,324.9576 C 369.15421,324.52134 366.91574,324.11867 364.67372,324.06368 L 366.75169,322.55395 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2958"
+       d="M 356.31222,327.90268 C 357.60521,330.24901 359.97231,331.44872 362.29473,332.60608 C 362.93022,332.89574 363.5657,333.18539 364.20119,333.47504 L 364.15749,333.50401 C 363.52198,333.21431 362.88646,332.92461 362.25094,332.63491 C 359.65175,331.33948 357.01478,330.09614 354.22105,329.2786 L 356.31222,327.90268 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="fill:black;stroke:black;stroke-opacity:1"
+       id="path2960"
+       d="M 370.40269,314.81875 C 371.18526,315.44609 372.20617,315.55979 373.16706,315.75196 L 372.7258,316.06908 C 371.24975,316.14995 369.68954,316.38712 368.23133,316.14937 L 370.40269,314.81875 z "
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_eye_close.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:#e6e6e6;stroke:black;stroke-opacity:1;display:inline"
+       d="M 287.51644,374.59482 L 287.51644,465.34482 L 378.29769,465.34482 L 378.29769,374.59482 L 287.51644,374.59482 z "
+       id="path2980"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_locked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="font-size:36.2588501px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:url(#radialGradient3007);fill-opacity:1;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       d="M 309.60341,424.09073 L 317.87139,424.09073 L 317.87139,419.25628 C 317.87138,410.77259 319.05252,404.65727 321.41479,400.91032 C 323.77708,397.19871 327.60558,395.34294 332.90037,395.34294 C 338.16795,395.34294 341.98288,397.19871 344.34519,400.91032 C 346.70742,404.65727 347.88856,410.77259 347.88862,419.25628 L 347.88862,424.09073 L 356.15657,424.09073 L 356.15657,417.9307 C 356.15653,407.60888 354.18798,399.81453 350.25087,394.54758 C 346.34086,389.28064 340.55737,386.64719 332.90037,386.64719 C 325.21615,386.64719 319.40549,389.28064 315.46839,394.54758 C 311.55841,399.81453 309.60341,407.60888 309.60341,417.9307 L 309.60341,424.09073"
+       id="text2994"
+       sodipodi:nodetypes="ccccsccccccsccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_locked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <rect
+       style="fill:url(#linearGradient2990);fill-opacity:1;stroke:black;stroke-width:0.92751133;stroke-opacity:1"
+       id="rect2982"
+       width="50.860489"
+       height="33.494232"
+       x="307.31302"
+       y="420.58893"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_locked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="opacity:1;fill:#e6e6e6;stroke:black;stroke-opacity:1;display:inline"
+       d="M 191.1831,374.59482 L 191.1831,465.34482 L 281.96435,465.34482 L 281.96435,374.59482 L 191.1831,374.59482 z "
+       id="path3023"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_unlocked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <path
+       style="font-size:36.2588501px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;opacity:1;fill:url(#radialGradient3029);fill-opacity:1;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
+       d="M 218.58562,427.20205 L 224.60524,421.53428 L 221.29118,418.01449 C 215.47553,411.83782 212.14337,406.5758 211.29469,402.22842 C 210.47024,397.90676 211.98549,393.93117 215.84043,390.30154 C 219.67557,386.69057 223.72523,385.42652 227.98949,386.50942 C 232.27791,387.61811 237.32996,391.26077 243.14565,397.4374 L 246.45971,400.95719 L 252.47931,395.28944 L 248.25655,390.80454 C 241.18082,383.28962 234.40449,378.96429 227.92748,377.82854 C 221.47021,376.67422 215.4542,378.72153 209.87942,383.97048 C 204.28481,389.23808 201.85953,395.13866 202.60361,401.67225 C 203.36743,408.18725 207.28717,415.20221 214.36287,422.71715 L 218.58562,427.20205"
+       id="path3025"
+       sodipodi:nodetypes="ccccsccccccsccc"
+       inkscape:transform-center-x="-8.2955127"
+       inkscape:transform-center-y="-19.720621"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_unlocked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+    <rect
+       style="opacity:1;fill:url(#linearGradient3031);fill-opacity:1;stroke:black;stroke-width:0.92751133;stroke-opacity:1;display:inline"
+       id="rect3027"
+       width="50.860489"
+       height="33.494232"
+       x="210.97969"
+       y="420.58893"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlab/images/layer_edit_unlocked.png"
+       inkscape:export-xdpi="31.379999"
+       inkscape:export-ydpi="31.379999" />
+  </g>
+</svg>

@@ -1,0 +1,31 @@
+@PACKAGE_INIT@
+
+include(${CMAKE_CURRENT_LIST_DIR}/libigl-export.cmake)
+
+# Check if Eigen3 target is avaiable, if not try to locate it
+# with find_package.
+message(STATUS "[libigl] Looking for Eigen3")
+if (NOT TARGET Eigen3::Eigen)
+  # Try if Eigen3 can be found with find_package
+  find_package(Eigen3 CONFIG REQUIRED)
+endif()
+
+
+if (TARGET igl::core)
+  if (TARGET Eigen3::Eigen)
+    # Inject dependency
+    set_target_properties(igl::core PROPERTIES INTERFACE_LINK_LIBRARIES Eigen3::Eigen)
+    set(libigl_core_FOUND TRUE)
+  endif()
+endif()
+
+if (TARGET igl::common)
+  if (TARGET Eigen3::Eigen)
+    # Inject dependency
+    set_target_properties(igl::common PROPERTIES INTERFACE_LINK_LIBRARIES Eigen3::Eigen)
+    set(libigl_common_FOUND TRUE)
+  endif()
+endif()
+
+check_required_components(libigl)
+

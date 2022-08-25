@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns="http://www.openuri.org/mySchema" elementFormDefault="qualified" targetNamespace="http://www.openuri.org/mySchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="purchaseOrder" type="PurchaseOrderType"/>
+	<xsd:complexType name="PurchaseOrderType">
+		<xsd:sequence>
+			<xsd:element name="shipTo" type="USAddress"/>
+			<xsd:element name="billTo" type="USAddress"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="USAddress">
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string"/>
+			<xsd:element name="element_of_any_type"/>
+		</xsd:sequence>
+		<!-- declaration of this attribute is necessary to reproduce -->
+		<xsd:attribute fixed="US" name="country" type="xsd:NMTOKEN"/>
+	</xsd:complexType>
+	<xsd:simpleType name="USState">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AK"/>
+			<xsd:enumeration value="AL"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

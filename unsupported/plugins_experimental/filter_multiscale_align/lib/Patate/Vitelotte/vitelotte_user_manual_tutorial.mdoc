@@ -1,0 +1,97 @@
+/*
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+namespace Vitelotte {
+
+/*!
+  \page vitelotte_user_manual_tutorial_page Vitelotte's Tutorial
+
+  \section vitelotte_user_manual_tutorial_introduction_sec Introduction
+
+  This tutorial will guide you through a simple program while introducing the main concepts of Vitelotte. We will load a `.obj` mesh in a VGMesh, then we will set a few point constraints and solve the diffusion before saving the result in a `.mvg`. While we will not manipulate diffusion curves for the sake of simplicity, we will show enough to get you started. The result can be visualized using the [mvg_viewer example](@ref vitelotte_example_mvg_viewer_page) program.
+
+  \image html vitelotte/tutorial_overview.svg "The final program takes a mesh as input, adds some random color constraints and diffuses them using the solver."
+
+  The complete source is available in `examples/Vitelotte/tutorial`.
+
+
+  Our program is composed of 2 steps. First, we will load a mesh (from an obj file) and assign some random color constraints on it. Second, we will send the mesh to the solver to get the final result that will be saved in the mvg file format.
+
+
+  \section vitelotte_user_manual_tutorial_preparing_the_mesh_sec Preparing the mesh
+
+  We will first declare our mesh type. As most of the Patate lib, VGMesh is templated so typedefs really help to keep the code simple.
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Declare the Mesh class
+
+  Here we say that we want to use floats for vectors and colors coefficients, and that the dimension of vectors and the number of coefficients will be specified at runtime. Now let's create a `Mesh`:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Create the mesh
+
+  We declare the mesh to be 3D because we are about to load a `.obj`, and those represent only 3D meshes. The FV_FLAGS parameter tells the mesh that faces represent _FV elements_ (for details about available elements, see the [solver manual](@ref vitelotte_user_manual_fem_solver_page)). In practice, it asks the mesh to enable a specific set of _attributes_ (which are described [here](@ref vitelotte_user_manual_vg_mesh_nodes_sec)), which just allocates some internal buffers.
+
+  Now, we want to load a mesh defined in an `obj` file. VGMesh inherits PatateCommon::SurfaceMesh, a generic mesh representation adapted from the [Surface_mesh](http://opensource.cit-ec.de/projects/surface_mesh) library (with some modifications). This class comes with an other template class PatateCommon::OBJReader that permits to read `obj` files. We can use it directly to load our VGMesh like this:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Load a .obj
+
+  You might wonder why we need to create a temporary ObjReader object. This can have several uses. One of them is that it permits to customize error reporting: by default it prints errors on `stderr`, but you can set your own callbacks. Another is that you can use the same reader for several files to avoid to reallocate some internal buffers. Other readers like the MVGReader use the same principle.
+
+  We assume that the obj file we just loaded contains only vertices on the x-y plane, so we will discard the z coordinate. This results in a 2D mesh that represents our image. This is simply done by changing the number of dimensions of the mesh with VGMesh::setNDims(). Note that this function is naive: if you reduce the number of dimensions it will just discard extra coordinates, and if you increase it, new coordinates _will not be initialized_.
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Convert the mesh in 2D
+
+  Time for some theory. Each face of the mesh contains a number of _attachment points_ that depend on the currently active attributes. To be a valid input for the solver, each attachment point must be linked to a _node_. Nodes can either be a constraint (when they have an associated value) or be a placeholder for an unknown value that the solver has to compute (we call these _unknown nodes_). Now, we can control the diffusion by wisely connecting nodes to attachment points. For example, if you want to diffuse color across an edge, attachment points on both sides must be linked to the same nodes (constrained or not), which esnures they will have the same color.
+
+  We will now pick a random set of vertices and assign a random color constraint to each one. The rest of the mesh is unconstrained. So, all attachment points around a constrained vertex must point to the same constrained nodes, and all attachment points around the other vertices must point to their respective unknown node. FV elements also have some attachment points on the edges of the mesh that must be set correctly.
+
+  \image html vitelotte/tutorial_constraints.svg "The first step is to add color constraints to some vectices."
+
+  It may seems complicated, but in practice we will use the VGMesh::finalize method to do most of the job. All we have to do is to set _one_ attachment point somewhere around each constrained vertex before calling this method and we are done. This gives us:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Color dots and finalize
+
+  So, for each vertex we throw a dice such that we have 1 chance out of 10 to add a constraint for this vertex. If so, we just select an outgoing halfedge and assign a node with a random color to the "fromVertexValue" attachment point (it corresponds to the source vertex). We don't need to set this node for each adjacent halfedges as VGMesh::finalize will do it for us.
+
+  Note that finalize uses some heuristics and does not handle all tricky cases. For instance, it is not guaranteed to work for non-local constraints (if a same node is used at different places on the mesh). This method is described in details in [the dedicated section of VGMesh's user manual](@ref vitelotte_user_manual_vg_mesh_finalize_subsec).
+
+  If we display the mesh now with `mvg_viewer`, we see a black image with a few colored points. This is because our viewer shows unknown nodes as black.
+
+  \image html vitelotte/tutorial_finalized.png "The mesh after finalization."
+
+
+  \section vitelotte_user_manual_tutorial_solving_diffusion_sec Solving diffusion
+
+  Now we are ready to solve the diffusion. First, we need to create our solver object:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Create the solver
+
+  The FemSolver class is parametrized with the mesh and an `ElementBuilder`. The element builder describes how to build the stiffness matrix and so varies in function of the element type we want to use. FVElementBuilder uses FV elements that allow to compute biharmonic diffusion and obtain quadratic color interpolation in the end. Element builders do not support singular elements directly, so we need to decorate them with the SingularElementDecorator. This may seem complicated, but in practice we always do this, so there is no need to worry about the details (unless you want to implement your own element type).
+
+  \image html vitelotte/tutorial_solver.svg "The sover interpolates color constraints. Here, we do biharmonic interpolation."
+
+  Solving is now straightforward:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Solve the diffusion
+
+  Why are there two steps ? FemSolver::build constructs the matrix and inverts it. It is time consuming but does not depend on the right hand side of the problem, i.e. the actual values of the constraints. This means that you don't need to call this costly step if you only modify the values, which typically happens in interactive applications like `mvg_editor`. However, if there is a change in geometry, in connectivity (including nodes) or in the type of some node (switching to unknown or constraint), then you _need_ to call it again. In case of doubt, just call it to be sure.
+
+  FemSolver::solve does what its name states. This will set a value to all unknown nodes, thus producing the final image. Note that the solver may fail, either because the input mesh is invalid or because the problem is numerically unstable, so check for errors.
+
+  \section vitelotte_user_manual_tutorial_output_sec Writing to mvg
+
+  All is left to do is to save our VGMesh in the `.mvg` file format to load it with `mvg_viewer`. We will not describe the format here, it has [its own page](@ref vitelotte_user_manual_mvg_file_format_page). Just know that it is a simple text-based format inspired from the obj mesh format.
+
+  Saving is straightforward and really similar to the code to read the mesh:
+
+  \snippet Vitelotte/tutorial/tutorial.cpp Write the mesh
+
+  We change the attributes of the mesh from VGMesh::FV_FLAGS to VGMesh::QUADRATIC_FLAGS. It has the effect of discarding the attribute VGMesh::EDGE_GRADIENT which is necessary for the solver (with FV elements) but useless for rendering. This permits to slightly reduce the output size.
+
+  This is it ! If you want to dive further in Vitelotte, you should [take a look at the VGMesh class manual page](@ref vitelotte_user_manual_vg_mesh_page), because we overlooked some important details here.
+
+ */
+
+ }

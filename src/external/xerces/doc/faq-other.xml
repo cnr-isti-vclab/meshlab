@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE faqs SYSTEM "sbk:/style/dtd/faqs.dtd">
+<faqs title="Other &XercesCName; Questions">
+
+  <faq title="How do I determine the version of &XercesCName; I am using?">
+        <q>How do I determine the version of &XercesCName; I am using?</q>
+        <a>
+           <p>The version string for &XercesCName; is in one of the header files. Look
+           inside the file <code>src/xercesc/util/XercesVersion.hpp</code> or, in the binary distribution,
+           look in <code>include/xercesc/utils/XercesVersion.hpp</code>. </p>
+
+           <p>If you don't have the header files, you have to find the version
+           information from the shared library name. On Windows right click on
+           the DLL name in the bin directory and look up
+           properties. The version information can be found in the Version tab.</p>
+
+           <p>On UNIX/Linux/Mac OS X platforms the version is
+              embedded into the library name.</p>
+        </a>
+  </faq>
+
+  <faq title="Is there any kind of support available for &XercesCName;?">
+    <q>Is there any kind of support available for &XercesCName;?</q>
+    <a>
+      <p>&XercesCName; comes with <em>no</em> formal support.</p>
+
+      <p>Every volunteer project obtains its strength from the people involved in
+         it. Mailing lists provide a simple and effective communication mechanism. You
+	 are welcome to join any of these mailing lists (or all of them if you wish).
+	 You can choose to lurk, or to actively participate. It is up to you.</p>
+
+      <p>Instructions for subscribing as well as archives are available at the
+         <jump href="&MailURI;">&XercesCName; mailing lists</jump> page.</p>
+    </a>
+  </faq>
+
+
+  <faq title="I found a defect -- how do I report it?">
+
+    <q>I found a defect -- how do I report it?</q>
+
+    <a>
+      <p>See <jump href="&BugURI;">Bug Reporting</jump>.
+      </p>
+    </a>
+  </faq>
+
+</faqs>

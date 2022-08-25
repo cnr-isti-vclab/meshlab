@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CongratsDialog</class>
+ <widget class="QDialog" name="CongratsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>758</width>
+    <height>486</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Congratulations!</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="3">
+    <widget class="QPushButton" name="closeButton">
+     <property name="text">
+      <string>Close</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../meshlab.qrc">
+       <normaloff>:/images/stop.png</normaloff>:/images/stop.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="emailButton">
+     <property name="text">
+      <string>Send us an email</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../meshlab.qrc">
+       <normaloff>:/images/email-icon.png</normaloff>:/images/email-icon.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="5">
+    <widget class="QPushButton" name="githubButton">
+     <property name="text">
+      <string>Share on GitHub</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../meshlab.qrc">
+       <normaloff>:/images/github-icon.png</normaloff>:/images/github-icon.png</iconset>
+     </property>
+     <property name="default">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="dontShowCheckBox">
+     <property name="text">
+      <string>Don't show this message again.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="6">
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="documentTitle">
+      <string>Congratulations</string>
+     </property>
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;title&gt;Congratulations&lt;/title&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-size:18pt;&quot;&gt;Congratulations! &lt;/span&gt;&lt;br /&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;&lt;br /&gt;You have successfully used MeshLab to open and process more than &lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-style:italic;&quot;&gt;one hundred meshes&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;!&lt;br /&gt;We hope that this means that you have found MeshLab useful.&lt;br /&gt;&lt;br /&gt;Please consider to share your experience on GitHub, or to send a short email to the developers of MeshLab, describing how MeshLab fitted your needs. Attach some screenshots of your processed meshes and tell us your impression about MeshLab. &lt;br /&gt;&lt;br /&gt;MeshLab is developed on public funding and assessment of its impact on the whole community is necessary, so, &lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-style:italic;&quot;&gt;please&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;, spend a couple of minutes sharing your experience to us (or at least connect with the MeshLab FaceBook page).&lt;br /&gt;&lt;br /&gt;Thanks for using MeshLab&lt;br /&gt;&lt;br /&gt;Paolo Cignoni&lt;br /&gt;&lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://www.facebook.com/MeshLab&quot;&gt;&lt;img src=&quot;:images/facebook.gif&quot; /&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../meshlab.qrc"/>
+ </resources>
+ <connections/>
+</ui>

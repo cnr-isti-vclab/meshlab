@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<purchaseOrder xmlns="http://www.openuri.org/mySchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openuri.org/mySchema test.xsd">
+	<shipTo>
+		<name>ship-to-name</name>
+		<element_of_any_type>
+			<unknown_element xsi:type="USState">AK</unknown_element>
+		</element_of_any_type>
+	</shipTo>
+	<billTo>
+		<name>bill-to-name</name>
+		<element_of_any_type/>
+	</billTo>
+</purchaseOrder>

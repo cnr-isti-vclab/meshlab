@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:element name="collection" type="collectionType" nillable="true" id="collection.e">
+	</xsd:element>
+	<xsd:element name="record" type="xsd:string" id="record.e">
+	</xsd:element>
+	<xsd:complexType name="collectionType" id="collection.ct">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element ref="record"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

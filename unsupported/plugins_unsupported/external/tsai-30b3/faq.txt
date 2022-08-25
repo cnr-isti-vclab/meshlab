@@ -1,0 +1,257 @@
+###########################################################
+Tsai Camera Calibration FAQ - Reg Willson
+Date: Oct 27, 1995
+
+If you have any questions, comments, or suggestions about this document,
+the software, or camera calibration in general, please read item 5.
+
+---------------------------
+ Table of contents
+---------------------------
+1 - What is Tsai's camera model?
+2 - Where can I find the required intrinsic camera constants?
+    2.1 - Why is the calibrated focal length not the same as the
+          number printed on the lens?
+3 - How do I collect calibration data?
+    3.1 - Coplanar and non-coplanar data
+    3.2 - Distribution of data points
+    3.3 - Placement of world coordinate origin
+    3.4 - Perspective projection effects (or lack thereof)
+    3.5 - Subpixel measurement of image features
+4 - What are some of the nonlinear optimization issues?
+5 - Where can I find more information on Tsai's algorithm?
+6 - Comments and thanks
+
+---------------------------
+  Contents
+---------------------------
+
+1 - What is Tsai's camera model?
+
+Tsai's camera model is based on the pin-hole model of 3D-2D perspective
+projection with 1st order radial lens distortion. The model has 11
+parameters: five internal (also called intrinsic or interior) parameters:
+
+        f      - effective focal length of the pin-hole camera,
+        kappa1 - 1st order radial lens distortion coefficient,
+        Cx, Cy - coordinates of center of radial lens distortion -and-
+                 the piercing point of the camera coordinate frame's
+                 Z axis with the camera's sensor plane,
+        sx     - scale factor to account for any uncertainty in the
+                 framegrabber's resampling of the horizontal scanline.
+
+and six external (also called extrinsic or exterior) parameters:
+
+        Rx, Ry, Rz - rotation angles for the transform between the
+                     world and camera coordinate frames,
+        Tx, Ty, Tz - translational components for the transform between the
+                     world and camera coordinate frames.
+
+In addition to the 11 variable camera parameters Tsai's model has six fixed
+intrinsic camera constants:
+
+        Ncx - number of sensor elements in camera's x direction (in sels),
+        Nfx - number of pixels in frame grabber's x direction (in pixels),
+        dx  - X dimension of camera's sensor element (in mm/sel),
+        dy  - Y dimension of camera's sensor element (in mm/sel),
+        dpx - effective X dimension of pixel in frame grabber (in mm/pixel), and
+        dpy - effective Y dimension of pixel in frame grabber (in mm/pixel).
+
+
+2 - Where can I find the required intrinsic camera constants?
+
+Commercial and industrial cameras often list Ncx, dx, and dy in their
+user guides.  With consumer cameras you will generally need to contact
+the manufacturer.
+
+You don't need to know the actual values of the intrinsic constants to
+calibrate an "accurate" camera model. For most applications "accurate"
+simply means that given the 3D world coordinates of a point P the camera
+model will accurately predict the 2D position of the point's image P' in
+the frame buffer.  In these cases the true intrinsic constants aren't
+necessary.  To get the camera calibration to converge to a solution you
+only need the aspect ratio of the camera/frame grabber set up, i.e. the
+ratio between dpx and dpy. You can get a good estimate for this from a
+straight-on image of a rectangular target.  Measuring the rectangle, the
+ratio
+
+  (pixels from side-to-side in image) / (mm from side-to-side on target)
+  ------------------------------------------------------------------------
+  (pixels from top-to-bottom in image) / (mm from top-to-bottom on target)
+
+should be an accurate enough estimate of dpx / dpy to allow the
+calibration to converge.  The calibration algorithms (with the exception
+of the basic Tsai coplanar calibration) will adjust the sx parameter to
+automatically compensate for any error in the ratio of dpx / dpy.
+
+Given the ratio of dpx to dpy, simply pick some value for dpy, say 10um (or
+if you know it you can use the actual vertical pixel pitch) and use that to
+back calculate dpx, dx, and dy. Set Ncx = Nfx, sx = 1.0, and Cx and Cy to
+be the center of the frame buffer.  When you calibrate the model the
+algorithm will adjust sx, Cx, and Cy to give a best fit set of intrinsic
+parameters.
+
+Observe if you double dpx and dpy, all the extrinsic parameters, Cx, Cy,
+and sx, and the calibration error should remain the same.  The calibrated
+camera model will be just as accurate.  The only thing that will change is
+f and k1.
+
+
+2.1 - Why is the calibrated focal length not the same as the number
+      printed on the lens?
+
+Even if you use the exact intrinsic camera parameters specified by the
+manufacturer, the calibrated value of the effective focal length f is
+unlikely to be the same as the focal length specified on the lens.  In
+these calibration algorithms the effective focal length is a parameter
+in a pin-hole camera model.  The focal length printed on the lens is a
+parameter in a thick-lens camera model.  While the two parameters have
+similar effects on the image they are actually quite different
+quantities.
+
+
+3 - How do I collect calibration data?
+
+Calibration for the model consists of the 3D (x,y,z) world coordinates of a
+feature point (in mm) and the corresponding coordinates (Xf,Yf) (in pixels)
+of the feature point in the image.  The 3D coordinates must be specified in
+a right-handed coordinate system.
+
+Once a camera has been calibrated, subsequent calibrations at different
+poses (i.e. with the camera rotated and/or translated) can be speeded up by
+using the intrinsic parameters from the first calibration as a starting
+point.
+
+
+3.1 - Coplanar and non-coplanar data
+
+Tsai's algorithm has two variants: one for coplanar data and one for
+non-coplanar data.  For coplanar data Tsai's algorithm requires the z
+component of the 3D coordinates to be 0.
+
+Basic coplanar calibration requires at least five data points.  Basic
+non-coplanar calibration requires at least seven data points.  Fully
+optimized calibration requires at least 11 data points for either
+coplanar and non-coplanar data.
+
+The sx camera parameter cannot be calibrated for using coplanar data.  Its
+value is left unchanged in the coplanar calibration routines.
+
+
+3.2 - Distribution of data points
+
+To accurately estimate the radial lens distortion and image center
+parameters the calibration data should be distributed broadly across the
+field of view.  The distribution of data points should, if possible, span
+the range of depths that you expect to use the model over.
+
+
+3.3 - Placement of world coordinate system origin
+
+Tsai's algorithm fails if the origin of the world coordinate system is
+near the center of the camera's field of view or near the Y axis of the
+camera coordinate system.  The Y axis requirement ensures Ty is not
+exactly zero which is an explicit requirement in Tsai's algorithm.
+
+If your calibration data doesn't meet the above criteria you can simply
+create a new, artificial coordinate frame for the data that is offset
+from the world coordinate frame that you plan on working with.  Just add
+the offset into the data before you calibrate with it.
+
+
+3.4 - Perspective projection effects (or lack thereof)
+
+To be able to separate the effects of f and Tz on the image there needs
+to be perspective distortion (foreshortening) effects in the calibration
+data.  For useable perspective distortion the distance between the
+calibration points nearest and farthest from the camera should be on the
+same scale as the distance between the calibration points and the
+camera.  This applies both to coplanar and non-coplanar calibration.
+
+For co-planar calibration the worst case situation is to have the 3D
+points lie in a plane parallel to the camera's image plane (all points
+an equal distance away).  Simple geometry tells us we can't separate the
+effects of f and Tz.  A relative angle of 30 degrees or more is
+recommended to give some effective depth to the data points.
+
+For non-coplanar calibration the worse case situation is to have the 3D
+points lie in a volume of space that is relatively small compared to the
+volume's distance to the camera.  From a distance the image formation
+process is closer to orthographic (not perspective) projection and the
+calibration problem becomes poorly conditioned.
+
+
+3.5 - Subpixel measurement of image features
+
+To obtain accurate calibration data we need to measure the location of
+features in the image plane to subpixel accuracy.  Three good starting
+points on the subject are:
+
+ "Accuracy in Image Measure", Pascal Brand and Roger Mohr, LIFIA - INRIA
+ Rhones-Alpes, SPIE Vol. 2350 Videometrics III (1994) pages 218-228,
+
+ "An evaluation of subpixel feature localisation methods for precision
+ measurement", Robert J. Valkenburg, Alan M. McIvor, and P. Wayne Power,
+ Machine Vision Group, Industrial Research Limited, SPIE Vol. 2350
+ Videometrics III (1994) pages 229-238,
+
+and
+
+ "A comparison of some techniques for the subpixel location of discrete
+ target images", M. R. Shortis, T. A. Clarke, and T. Short, Department of
+ Surveying and Land Information, University of Melbourne, SPIE Vol. 2350
+ Videometrics III (1994) pages 239-250.
+
+
+4 - What are some of the nonlinear optimization issues?
+
+Nonlinear optimization for these camera calibration routines is
+performed by the MINPACK "lmdif" subroutine.  "lmdif" uses a modified
+Levenberg-Marquardt algorithm with a jacobian calculated by a
+forward-difference approximation.  The MINPACK FORTRAN source was
+translated into C using the f2c program.
+
+The function "dpmpar" provides double precision machine parameters for
+the MINPACK functions.  The routines in this release are set up to use
+the machine constants for the IEEE double precision floating point.  If
+your machine uses a different floating point standard try looking in the
+"dpmpar" source to see if the appropriate machine constants are
+available.
+
+
+5 - Where can I find more information on Tsai's algorithm?
+
+An explanation of the basic algorithms and description of the variables
+can be found in several publications, including:
+
+ "An Efficient and Accurate Camera Calibration Technique for 3D Machine
+ Vision", Roger Y. Tsai, Proceedings of IEEE Conference on Computer Vision
+ and Pattern Recognition, Miami Beach, FL, 1986, pages 364-374.
+
+and
+
+ "A versatile Camera Calibration Technique for High-Accuracy 3D Machine
+ Vision Metrology Using Off-the-Shelf TV Cameras and Lenses", Roger Y. Tsai,
+ IEEE Journal of Robotics and Automation, Vol. RA-3, No. 4, August 1987,
+ pages 323-344.
+
+
+6 - Comments and thanks
+
+Questions, comments, suggestions, or bug reports on Tsai's algorithm, this
+implementation, or camera calibration in general can be mailed to:
+rgwillson@mmm.com.  Special thanks to the following persons for
+contributing their time, effort, and code!
+
+ o Piotr Jasiobedzki <piotr@vis.toronto.edu> 
+ o Jim Vaughan <vaughan@brighton.ac.uk>
+ o Franz-Josef L|cke <luecke@zinfo.zess.uni-siegen.de>
+ o Pete Rander <Peter.Rander@ius4.ius.cs.cmu.edu>
+ o Markus Menke <extern31@radsy1.inet.dkfz-heidelberg.de>
+ o Ron Steriti <steriti@dragon.cpe.uml.edu>
+ o Torfi Thorhallsson <torfit@verk.hi.is>
+ o Frederic Devernay <Frederic.Devernay@sophia.inria.fr>
+ o Volker Rodehorst <vr@cs.tuoberlin.de>
+ o Jon Owen <jcowen@cs.utah.edu>
+
+###########################################################
