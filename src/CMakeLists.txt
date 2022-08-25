@@ -8,7 +8,7 @@ project(MeshLab)
 ### Build options
 option(BUILD_MESHLAB_MINI "Build only common and meshlab - other plugin targets must be set manually" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
-option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
+option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" ON)
 option(ENABLE_MESHLAB_DEBUG_LOG_FILE "If enabled, all the logs of MeshLab will be also saved into a log file" OFF)
 
 option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
@@ -20,6 +20,10 @@ option(MESHLAB_IS_NIGHTLY_VERSION "Nightly version of meshlab will be used inste
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_global_settings.cmake" NO_POLICY_SCOPE)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_tools.cmake")
+
+## added part
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+##
 
 #message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
@@ -161,7 +165,10 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_clean
 		meshlabplugins/filter_color_projection
 		meshlabplugins/filter_colorproc
-		meshlabplugins/filter_create
+		meshlabplugins/filter_create		
+                ### Cubic stylization added part ####
+                meshlabplugins/filter_cubization
+                ########
 		meshlabplugins/filter_dirt
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
