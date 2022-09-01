@@ -159,8 +159,8 @@ public:
   bool storeBarycentricCoordsAsAttributesFlag=false;
 
   CMeshO::PerVertexAttributeHandle<Point3m> PerVertBaricentricCoordsHandle;
-  CMeshO::PerVertexAttributeHandle<int> PerVertNearestFaceIndex;
-  CMeshO::PerVertexAttributeHandle<int> PerVertNearestVertexIndex;
+  CMeshO::PerVertexAttributeHandle<Scalarm> PerVertNearestFaceIndex;
+  CMeshO::PerVertexAttributeHandle<Scalarm> PerVertNearestVertexIndex;
   float dist_upper_bound;
   void init(CMeshO *_m_src, CMeshO* _m_trg=0, CallBackPos *_cb=0)
   {
@@ -180,9 +180,9 @@ public:
           if(useVertexSampling==false){
               qDebug("adding attribute to target mesh\n");
               PerVertBaricentricCoordsHandle = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Point3m> (*_m_trg,std::string("BarycentricCoords"));
-              PerVertNearestFaceIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestFaceIndex"));
+              PerVertNearestFaceIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Scalarm> (*_m_trg,std::string("NearestFaceIndex"));
           } else {
-              PerVertNearestVertexIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestVertexIndex"));
+              PerVertNearestVertexIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Scalarm> (*_m_trg,std::string("NearestVertexIndex"));
           }
       }
   }
@@ -1297,7 +1297,7 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
 			throw MLException("Cannot compute, it is the same mesh");
 		}
-		if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
+        if (!colorT && !geomT && !qualityT && !normalT && !selectionT && !saveBarycentric)
 		{
 			log("Vertex Attribute Transfer: you have to choose at least one attribute to be sampled");
 			throw MLException("You have to choose at least one attribute to be sampled");
