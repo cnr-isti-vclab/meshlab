@@ -160,26 +160,31 @@ public:
 
   CMeshO::PerVertexAttributeHandle<Point3m> PerVertBaricentricCoordsHandle;
   CMeshO::PerVertexAttributeHandle<int> PerVertNearestFaceIndex;
+  CMeshO::PerVertexAttributeHandle<int> PerVertNearestVertexIndex;
   float dist_upper_bound;
   void init(CMeshO *_m_src, CMeshO* _m_trg=0, CallBackPos *_cb=0)
   {
-    m=_m_src;
-    tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
-    if(m->fn==0) useVertexSampling = true;
+      m=_m_src;
+      tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
+      if(m->fn==0) useVertexSampling = true;
 
-    if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
-    else  unifGridFace.Set(m->face.begin(),m->face.end());
-    markerFunctor.SetMesh(m);
-    // sampleNum and sampleCnt are used only for the progress callback.
-    cb=_cb;
-    sampleNum = _m_trg->vn;
-    sampleCnt = 0;
-    if(storeBarycentricCoordsAsAttributesFlag){
-        qDebug("adding attribute to target mesh\n");
-        PerVertBaricentricCoordsHandle = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Point3m> (*_m_trg,std::string("BarycentricCoords"));
-        PerVertNearestFaceIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestFaceIndex"));
-    }
-
+      if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
+      else  unifGridFace.Set(m->face.begin(),m->face.end());
+      markerFunctor.SetMesh(m);
+      // sampleNum and sampleCnt are used only for the progress callback.
+      cb=_cb;
+      sampleNum = _m_trg->vn;
+      sampleCnt = 0;
+      if(storeBarycentricCoordsAsAttributesFlag)
+      {
+          if(useVertexSampling==false){
+              qDebug("adding attribute to target mesh\n");
+              PerVertBaricentricCoordsHandle = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Point3m> (*_m_trg,std::string("BarycentricCoords"));
+              PerVertNearestFaceIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestFaceIndex"));
+          } else {
+              PerVertNearestVertexIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestVertexIndex"));
+          }
+      }
   }
 
   // this function is called for each vertex of the target mesh.
@@ -198,8 +203,14 @@ public:
       nearestV =  tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*m,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
       if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
       if(storeDistanceAsQualityFlag)  p.Q() = dist;
-      if(dist == dist_upper_bound) return ;
-
+      if(dist == dist_upper_bound)
+      {
+          if(storeBarycentricCoordsAsAttributesFlag)
+              PerVertNearestVertexIndex[p]=-1;
+          return ;
+      }
+      if(storeBarycentricCoordsAsAttributesFlag)
+          PerVertNearestVertexIndex[p]=tri::Index(*m,nearestV);
       if(coordFlag) p.P()=nearestV->P();
       if(colorFlag) p.C() = nearestV->C();
       if(normalFlag) p.N() = nearestV->N();
@@ -734,7 +745,7 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
     parlst.addParam(RichBool ("QualityDistance", false, "Store dist. as quality",
                                   "if enabled, we store the distance of the transferred value as in the vertex quality"));
     parlst.addParam(RichBool ("SaveBarycentric", false, "Save barycentric coords",
-                                  "if enabled, we store as per vertex attributes of the target mesh, the index of the closest face and the barycentric coordinates of its position inside that face."));
+                                  "if enabled, we store as per vertex attributes of the target mesh, the index of the closest face and the barycentric coordinates of its position inside that face of the src mesh. If vertex sampling is enabled or if source mesh is a point cloud, only the index of the corresponding closest vertex on the src is saved."));
     parlst.addParam(RichPercentage("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering attributes.")));
     parlst.addParam(RichBool ("onSelected", false, "Only on selection",	"If checked, only transfer to selected vertices on TARGET mesh"));
