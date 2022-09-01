@@ -155,11 +155,15 @@ public:
   bool qualityFlag=false;
   bool selectionFlag=false;
   
-  bool storeDistanceAsQualityFlag;
+  bool storeDistanceAsQualityFlag=false;
+  bool storeBarycentricCoordsAsAttributesFlag=false;
+
+  CMeshO::PerVertexAttributeHandle<Point3m> PerVertBaricentricCoordsHandle;
+  CMeshO::PerVertexAttributeHandle<int> PerVertNearestFaceIndex;
   float dist_upper_bound;
-  void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
+  void init(CMeshO *_m_src, CMeshO* _m_trg=0, CallBackPos *_cb=0)
   {
-    m=_m;
+    m=_m_src;
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
     if(m->fn==0) useVertexSampling = true;
 
@@ -168,8 +172,14 @@ public:
     markerFunctor.SetMesh(m);
     // sampleNum and sampleCnt are used only for the progress callback.
     cb=_cb;
-    sampleNum = targetSz;
+    sampleNum = _m_trg->vn;
     sampleCnt = 0;
+    if(storeBarycentricCoordsAsAttributesFlag){
+        qDebug("adding attribute to target mesh\n");
+        PerVertBaricentricCoordsHandle = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<Point3m> (*_m_trg,std::string("BarycentricCoords"));
+        PerVertNearestFaceIndex = vcg::tri::Allocator<CMeshO>:: GetPerVertexAttribute<int> (*_m_trg,std::string("NearestFaceIndex"));
+    }
+
   }
 
   // this function is called for each vertex of the target mesh.
@@ -203,12 +213,21 @@ public:
       dist=dist_upper_bound;
       if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
       nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+
+      if(!nearestF && storeBarycentricCoordsAsAttributesFlag){
+          PerVertBaricentricCoordsHandle[p]=Point3f(0,0,0);
+          PerVertNearestFaceIndex[p]=-1;
+      }
       if(dist == dist_upper_bound) return ;
 
       Point3m interp;
       InterpolationParameters(*nearestF,(*nearestF).cN(),closestPt, interp);
       interp[2]=1.0-interp[1]-interp[0];
-
+      if(storeBarycentricCoordsAsAttributesFlag)
+      {
+          PerVertBaricentricCoordsHandle[p]=interp;
+          PerVertNearestFaceIndex[p]=tri::Index(*m,nearestF);
+      }
       if(coordFlag) p.P()=closestPt;
       if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
       if(normalFlag) p.N() = nearestF->V(0)->N()*interp[0] + nearestF->V(1)->N()*interp[1] + nearestF->V(2)->N()*interp[2];
@@ -218,6 +237,7 @@ public:
 		  if (nearestF->IsS()) p.SetS();
 		  else if (nearestF->V(0)->IsS() || nearestF->V(1)->IsS() || nearestF->V(2)->IsS()) p.SetS();
 	  }
+
     }
   }
 }; // end class RedetailSampler
@@ -713,6 +733,8 @@ RichParameterList FilterDocSampling::initParameterList(const QAction *action, co
                                   "if enabled,  each vertex of the target mesh will be selected if the corresponding closest point on the source mesh falls in a selected face"));
     parlst.addParam(RichBool ("QualityDistance", false, "Store dist. as quality",
                                   "if enabled, we store the distance of the transferred value as in the vertex quality"));
+    parlst.addParam(RichBool ("SaveBarycentric", false, "Save barycentric coords",
+                                  "if enabled, we store as per vertex attributes of the target mesh, the index of the closest face and the barycentric coordinates of its position inside that face."));
     parlst.addParam(RichPercentage("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering attributes.")));
     parlst.addParam(RichBool ("onSelected", false, "Only on selection",	"If checked, only transfer to selected vertices on TARGET mesh"));
@@ -1258,7 +1280,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		bool selectionT = par.getBool("SelectionTransfer");
 		bool distquality = par.getBool("QualityDistance");
 		bool vertSampling = par.getBool("VertexSampling");
-		
+        bool saveBarycentric = par.getBool("SaveBarycentric");
+
 		if (srcMesh == trgMesh){
 			log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
 			throw MLException("Cannot compute, it is the same mesh");
@@ -1298,8 +1321,9 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		rs.qualityFlag = qualityT;
 		rs.selectionFlag = selectionT;
 		rs.storeDistanceAsQualityFlag = distquality;
-		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
-		qDebug("apply: using vertex samping %s\n",rs.useVertexSampling?"True":"False");
+        rs.storeBarycentricCoordsAsAttributesFlag = saveBarycentric;
+        rs.init(&(srcMesh->cm),&(trgMesh->cm),cb);
+        qDebug("apply: using vertex sampling %s\n",rs.useVertexSampling?"True":"False");
 		if(rs.colorFlag) trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 		if(rs.qualityFlag || rs.storeDistanceAsQualityFlag)
 			trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
