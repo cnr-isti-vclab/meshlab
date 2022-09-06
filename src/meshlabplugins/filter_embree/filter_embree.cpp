@@ -139,7 +139,7 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
  */
 FilterEmbreePlugin::FilterClass FilterEmbreePlugin::getClass(const QAction *a) const
 {
-	return FilterPlugin::Generic;
+    return FilterPlugin::Quality;
 	/*
 	switch(ID(a)) {	
 	default :
@@ -240,22 +240,26 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
 	
 	switch(ID(action)) {
 	case FP_OBSCURANCE:
-		adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
   		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
 		break;
-	case FP_AMBIENT_OCCLUSION:			
-		adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
+    case FP_AMBIENT_OCCLUSION:
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
   		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
 		break;
 	case FP_SDF:
-		adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("degree"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("degree"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
   		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
 		break;
 	case FP_SELECT_VISIBLE_FACES:
-		adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
   		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
 		break;	
