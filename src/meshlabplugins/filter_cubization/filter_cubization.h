@@ -36,8 +36,7 @@ class CubizationPlugin : public QObject, public FilterPlugin
 public:
     enum {
         // mesh improvement by edge flipping
-        FP_CUBIZATION,
-        FP_CUBIZATION_COLORIZE
+        FP_CUBIZATION
     };
 
     CubizationPlugin();
@@ -64,10 +63,11 @@ private:
         MeshDocument&                md,
         const RichParameterList&     par,
         double& totalEnergy,
-        bool isColorizing = false);
+        bool isColorizing);
 
 protected:
     bool cubic_ApplyEdgeFlip;
+    bool cubic_ApplyColorize;
 };
 
 #endif // FILTER_CUBIZATION_H

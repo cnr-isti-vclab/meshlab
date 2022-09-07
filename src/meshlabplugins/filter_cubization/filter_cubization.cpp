@@ -39,6 +39,7 @@
 #include "curvedgeflip.h"
 #include "curvdata.h"
 
+using namespace std;
 using namespace vcg;
 
 // forward declarations
@@ -60,14 +61,14 @@ public:
 CubizationPlugin::CubizationPlugin()
 {
     typeList = {
-            FP_CUBIZATION,
-            FP_CUBIZATION_COLORIZE
+            FP_CUBIZATION
     };
 
     for(ActionIDType tt: types())
         actionList.push_back(new QAction(filterName(tt), this));
 
     cubic_ApplyEdgeFlip = false;
+    cubic_ApplyColorize = false;
 }
 
 QString CubizationPlugin::pluginName() const
@@ -79,7 +80,6 @@ QString CubizationPlugin::pythonFilterName(ActionIDType f) const
 {
     switch (f) {
     case FP_CUBIZATION: return tr("applying_cubic_stylization");
-    case FP_CUBIZATION_COLORIZE: return tr("applying_cubization_filter_colorizing_vertices");
     default: assert(0); return QString();
     }
 }
@@ -88,7 +88,6 @@ QString CubizationPlugin::filterName(ActionIDType filterId) const
 {
     switch (filterId) {
     case FP_CUBIZATION: return tr("Cubic stylization");
-    case FP_CUBIZATION_COLORIZE: return tr("Cubic stylization and colorize");
     default: assert(0); return QString();
     }
 }
@@ -97,7 +96,6 @@ FilterPlugin::FilterArity CubizationPlugin::filterArity(const QAction*) const
 {
     return SINGLE_MESH;
 }
-
 
 int CubizationPlugin::getPreConditions(const QAction*) const
 {
@@ -108,7 +106,6 @@ int CubizationPlugin::getRequirements(const QAction *action)
 {
     switch (ID(action)) {
         case FP_CUBIZATION:
-        case FP_CUBIZATION_COLORIZE:
             return MeshModel::MM_VERTCOORD |
                 MeshModel::MM_FACEFACETOPO |
                 MeshModel::MM_VERTFACETOPO |
@@ -122,9 +119,11 @@ QString CubizationPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(filterId) {
         case FP_CUBIZATION:
-            return tr("Cubic stylization of the mesh. For all detailed about cubic stylization see: <br> Hsueh-Ti Derek Liu and Alec Jacobson, 'Cubic Stylization', ACM Transactions on Graphics 2019<br> ");
-        case FP_CUBIZATION_COLORIZE:
-            return tr("Colorize the vertices of a mesh with cubic stylization. For all detailed about cubic stylization see: <br> Hsueh-Ti Derek Liu and Alec Jacobson, 'Cubic Stylization', ACM Transactions on Graphics 2019<br> ");
+            return tr("Turn a mesh into a cube's style maintaining its original shape."
+                      "<br>For all detailed about cubic stylization see:<br>"
+                      "<br><i> Hsueh-Ti Derek Liu and Alec Jacobson.</i><br>"
+                      "<b>Cubic Stylization</b> (<a href='https://www.dgp.toronto.edu/projects/cubic-stylization/cubicStyle_high.pdf'>pdf</a>)<br>"
+                      "in ACM Transactions on Graphics, 2019<br/><br/> ");
         default : assert(0);
     }
     return {};
@@ -134,7 +133,6 @@ QString CubizationPlugin::filterInfo(ActionIDType filterId) const
 {
     switch(ID(action)) {
         case FP_CUBIZATION:             return FilterPlugin::Remeshing;
-        case FP_CUBIZATION_COLORIZE:             return FilterPlugin::Remeshing;
     }
  return FilterPlugin::Generic;
 }
@@ -143,9 +141,8 @@ int CubizationPlugin::postCondition(const QAction *a) const
 {
     switch(ID(a))
     {
-        case FP_CUBIZATION      :   return MeshModel::MM_ALL;
-        case FP_CUBIZATION_COLORIZE   : return MeshModel::MM_ALL |
-                                      MeshModel::MM_VERTQUALITY;
+        case FP_CUBIZATION      :   return MeshModel::MM_ALL |
+                                    MeshModel::MM_VERTQUALITY;
         default                       : assert(0);
     }
     return {};
@@ -169,17 +166,26 @@ RichParameterList CubizationPlugin::initParameterList(const QAction *action, con
 
 
         parlst.addParam(RichBool("applyef", cubic_ApplyEdgeFlip, tr("Apply edge flipping"), tr("Apply edge flip optimization on cubic stylization.")));
-
-    }
-    if (ID(action) == FP_CUBIZATION_COLORIZE) {
-        parlst.addParam(RichFloat("lcubeness", 0.2f,
-                                            tr("Cubeness parameter (λ)"),
-                                            tr("Control the cubeness of the mesh. Generally, the higher the cubeness parameter, the more cubic the mesh is. λ ∈ [0, 1] ")));
-
-
-        parlst.addParam(RichBool("applyef", cubic_ApplyEdgeFlip, tr("Apply edge flipping"), tr("Apply edge flip optimization on cubic stylization.")));
+        parlst.addParam(RichBool("applycol", cubic_ApplyColorize, tr("Colorize by vertex Quality"), tr("Color vertices depending on their cubization energy.")));
     }
     return parlst;
+}
+
+void Freeze(MeshModel &m)
+{
+    tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
+    tri::UpdateBounding<CMeshO>::Box(m.cm);
+    m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+    m.cm.Tr.SetIdentity();
+}
+
+void ApplyTransform(MeshModel &m, const Matrix44m &tr, bool freeze,
+                    bool invertFlag=false, bool composeFlage=true)
+{
+    if(invertFlag) m.cm.Tr = Inverse(m.cm.Tr);
+    if(composeFlage) m.cm.Tr = tr * m.cm.Tr;
+    else m.cm.Tr=tr;
+    if(freeze) Freeze(m);
 }
 
 // The Real Core Function doing the actual mesh processing.
@@ -192,27 +198,58 @@ std::map<std::string, QVariant> CubizationPlugin::applyFilter(
         vcg::CallBackPos *cb)
 {
 
+    //get bounding box
+    Box3m bbox = md.mm()->cm.bbox;
+    Matrix44m transfM, prevScaleTran, scaleTran, trTran, trTranInv, prevTransfM;
+    Point3m tranVec = Point3m(0, 0, 0);
+    float maxSide = max(bbox.DimX(), max(bbox.DimY(), bbox.DimZ()));
+
+    if(maxSide >= 1.0){
+        //compute unit box scale
+        scaleTran.SetScale(1.0 / maxSide, 1.0 / maxSide, 1.0 / maxSide);
+
+        //reverse scale computation
+        prevScaleTran.SetScale(1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide));
+
+        //compute translate
+        trTran.SetTranslate(tranVec);
+        trTranInv.SetTranslate(-tranVec);
+
+        transfM = trTran*scaleTran*trTranInv;
+        prevTransfM = trTran*prevScaleTran*trTranInv;
+    }
+
     MeshModel &m=*(md.mm());
+
+    if(maxSide >= 1.0){
+        //apply transform
+        ApplyTransform(m,transfM, true);
+    }
+
     double energyTotal = 0.f;
     time_t start = clock();
 
+    bool isColorizing = par.getBool("applycol");
+
     if (ID(filter) == FP_CUBIZATION) {
-         m = ComputeCubicStylization(md, par, energyTotal);
+         m = ComputeCubicStylization(md, par, energyTotal, isColorizing);
+
+         if(isColorizing){
+             m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+             m.updateDataMask(MeshModel::MM_VERTCOLOR);
+             m.updateDataMask(MeshModel::MM_VERTQUALITY);
+
+             Histogramm H;
+             vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, H);
+             vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
+                 m.cm, H.Percentile(0.01f), H.Percentile(0.99f));
+         }
     }
 
-    if (ID(filter) == FP_CUBIZATION_COLORIZE) {
-        m = ComputeCubicStylization(md, par, energyTotal, true);
-
-        m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-        m.updateDataMask(MeshModel::MM_VERTCOLOR);
-        m.updateDataMask(MeshModel::MM_VERTQUALITY);
-
-        Histogramm H;
-        vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, H);
-        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
-            m.cm, H.Percentile(0.01f), H.Percentile(0.99f));
+    if(maxSide >= 1.0){
+        //re-apply transform to get previous mesh scale
+        ApplyTransform(m,prevTransfM, true);
     }
-
     m.updateBoxAndNormals();
 
     log( "cubic stylization performed in %.2f sec. with cubic energy equal to %.5f", (clock() - start) / (float) CLOCKS_PER_SEC, energyTotal);
@@ -226,6 +263,7 @@ MeshModel CubizationPlugin::ComputeCubicStylization(
         bool isColorizing){
 
     MeshModel &m=*(md.mm());
+
     float limit = -std::numeric_limits<float>::epsilon();
 
     int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
@@ -289,7 +327,8 @@ MeshModel CubizationPlugin::ComputeCubicStylization(
             optimiz.h.clear();
 
             Mesh2Matrix(m.cm, u_verts, faces);
-        }
+            log( "Iteration %d: %d curvature edge flips performed", iter, optimiz.nPerformedOps);
+         }
 
         if (reldV < stopReldV) break;
     }
@@ -301,7 +340,6 @@ MeshModel CubizationPlugin::ComputeCubicStylization(
         for(int i = 0; i < energy_verts.size(); i++){
             m.cm.vert[i].Q() = energy_verts[i];
         }
-
     }
 
     return m;
