@@ -25,9 +25,10 @@ class Cubization{
 
             Mesh2Matrix(m, V, F);
     	    
-    	    normalize_unitbox(V);
+            /*normalize_unitbox(V);
+
             Eigen::RowVector3d meanV = V.colwise().mean();
-            V = V.rowwise() - meanV;
+            V = V.rowwise() - meanV;*/
             U = V;
 	    
             data.bc.resize(1,3);
