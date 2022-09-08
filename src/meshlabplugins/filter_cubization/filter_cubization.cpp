@@ -234,10 +234,11 @@ std::map<std::string, QVariant> CubizationPlugin::applyFilter(
     if (ID(filter) == FP_CUBIZATION) {
          m = ComputeCubicStylization(md, par, energyTotal, isColorizing);
 
+         m.updateDataMask(MeshModel::MM_VERTQUALITY);
+
          if(isColorizing){
              m.updateDataMask(MeshModel::MM_FACEFACETOPO);
              m.updateDataMask(MeshModel::MM_VERTCOLOR);
-             m.updateDataMask(MeshModel::MM_VERTQUALITY);
 
              Histogramm H;
              vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, H);
