@@ -21,10 +21,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_global_settings.cmake" NO_POLICY_SCOPE)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_tools.cmake")
 
-## added part
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-##
-
 #message(STATUS "Searching for required components")
 find_package(OpenGL REQUIRED)
 
