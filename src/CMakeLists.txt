@@ -8,7 +8,7 @@ project(MeshLab)
 ### Build options
 option(BUILD_MESHLAB_MINI "Build only common and meshlab - other plugin targets must be set manually" OFF)
 option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
-option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" ON)
+option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
 option(ENABLE_MESHLAB_DEBUG_LOG_FILE "If enabled, all the logs of MeshLab will be also saved into a log file" OFF)
 
 option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
