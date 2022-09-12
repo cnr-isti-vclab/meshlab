@@ -64,15 +64,15 @@ QString FilterEmbreePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_OBSCURANCE :
-		return "Compute Obscurance (embree)";
+		return "Compute Obscurance with Embree";
 	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient occlusion (Embree)";
+		return "Compute Ambient occlusion with Embree";
 	case FP_SDF:
-		return "Compute Shape-Diameter Function (embree)";
+		return "Compute Shape-Diameter Function with Embree";
 	case FP_SELECT_VISIBLE_FACES:
-		return "Compute Visible Faces Select (embree)";
+		return "Compute Visible Faces Select with Embree";
 	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis (embree)";
+		return "Compute Face Normal Analysis with Embree";
 	default :
 		assert(0);
 		return QString();
@@ -89,15 +89,15 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 {
 	switch(f) {
 	case FP_OBSCURANCE :
-		return "Compute Obscurance (embree)";
+		return "Compute Obscurance with Embree";
 	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient occlusion (embree)";
+		return "Compute Ambient occlusion with Embree";
 	case FP_SDF:
-		return "Compute Shape-Diameter Function (embree)";
+		return "Compute Shape-Diameter Function with Embree";
 	case FP_SELECT_VISIBLE_FACES:
-		return "Compute Visible Faces Select (embree)";
+		return "Compute Visible Faces Select with Embree";
 	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis (embree)";
+		return "Compute Face Normal Analysis with Embree";
 	default :
 		assert(0);
 		return QString();
@@ -115,15 +115,15 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 {
 	switch(filterId) {
 	case FP_OBSCURANCE:
-		return "Compute Obscurance (embree); requires the number of rays used to calculate the obscurance and a tau value used. The Obscurance value is saved into face quality and mapped into a gray shade.";
+		return "Compute Obscurance: using the number of rays and a tau value it calculates the obscurance which value is saved into face quality and mapped into a gray shade.";
 	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient occlusion (embree):  requires the number of rays used to calculate the occlusion; The ambient occlusion value is saved into face quality and mapped into a gray shade. ";
+		return "Compute Ambient Occlusion:  using a user-defined number of rays calculates the ambient occlusion which value is saved into face quality and mapped into a gray shade. ";
 	case FP_SDF:
-		return "Compute Shape-Diameter Function (embree):  requires the number of rays used to calculate the SDF; The SDF value is saved into face quality and mapped into a color ramp. ";
+		return "Compute Shape-Diameter Function:  using a user-defined number of rays and degree for the shooting angle, the SDF value is computed and saved into face quality than is mapped into a color ramp. ";
 	case FP_SELECT_VISIBLE_FACES:
-		return "Compute visible face select (embree): given the number of rays and a point3f direction, computes a simple shadow; Shadow value is saved into face quality and mapped into a gray shade. ";
+		return "Compute visible face select: given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; The shadow value is saved into face quality and mapped into a gray shade. ";
 	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis (embree): given a mesh this filter analyzes the mesh and corrects the normals pointing inwards";
+		return "Compute Face Normal Analysis: given a mesh this filter analyzes the mesh and corrects the normals pointing inwards";
 	default :
 		assert(0);
 		return "Unknown Filter";
