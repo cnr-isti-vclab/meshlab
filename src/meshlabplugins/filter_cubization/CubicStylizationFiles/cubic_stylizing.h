@@ -9,6 +9,8 @@
 #include <vcg/complex/algorithms/mesh_to_matrix.h>
 #include <vcg/complex/allocate.h>
 
+#include <common/utilities/eigen_mesh_conversions.h>
+
 #include <CubicStylizationFiles/conversionMeshes.h>
 
 namespace vcg{
@@ -25,10 +27,7 @@ class Cubization{
 
             Mesh2Matrix(m, V, F);
     	    
-            /*normalize_unitbox(V);
-
-            Eigen::RowVector3d meanV = V.colwise().mean();
-            V = V.rowwise() - meanV;*/
+            //normalize_unitbox(V);
             U = V;
 	    
             data.bc.resize(1,3);

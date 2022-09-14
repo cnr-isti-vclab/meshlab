@@ -3,6 +3,7 @@
 
 #include <vcg/complex/algorithms/mesh_to_matrix.h>
 #include <vcg/complex/allocate.h>
+#include <vector>
 
 namespace vcg{
 namespace tri{
@@ -25,18 +26,16 @@ namespace tri{
 
         //reconvert V and F matrixes in a mesh
         convertedMesh.Clear();
-        //vcg::tri::Allocator<MeshType>::AddVertices(convertedMesh,vertexes);
-        //vcg::tri::Allocator<MeshType>::AddFaces(convertedMesh,faces);
 
         Allocator<MeshType>::AddVertices(convertedMesh,vertexes.rows());
         Allocator<MeshType>::AddFaces(convertedMesh,faces.rows());
-        VertexPointer ivp[vertexes.rows()];
+        std::vector<VertexPointer> ivp;
 
         int i;
         for (i=0; i < vertexes.rows(); i++){
             for (int j = 0; j < 3; j++)
                 convertedMesh.vert[i].P()[j] = vertexes(i,j);
-            ivp[i]=&convertedMesh.vert[i];
+            ivp.push_back(&convertedMesh.vert[i]);
         }
 
         FaceIterator fi;
