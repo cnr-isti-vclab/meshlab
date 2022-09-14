@@ -289,6 +289,7 @@ MeshModel CubizationPlugin::ComputeCubicStylization(
     Eigen::MatrixXd u_verts;
     Eigen::VectorXd energy_verts;
 
+
     float lambda = par.getFloat("lcubeness");
     cube_style_data data;
 
@@ -328,6 +329,7 @@ MeshModel CubizationPlugin::ComputeCubicStylization(
             optimiz.h.clear();
 
             Mesh2Matrix(m.cm, u_verts, faces);
+
             log( "Iteration %d: %d curvature edge flips performed", iter, optimiz.nPerformedOps);
          }
 
