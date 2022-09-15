@@ -61,8 +61,8 @@ class DecorateBasePlugin : public QObject, public DecoratePlugin
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 	
-	void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
-	void drawHistogram(QGLWidget *gla, CHist &ch);
+	void drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
+	void drawHistogram(QOpenGLWidget *gla, CHist &ch);
 	
 	vcg::Color4b textColor;
 public:
