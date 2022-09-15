@@ -355,6 +355,7 @@ void ShaderDialog::reloadTexture(int i) {
 	int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
 	imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 	QImage imgGL= imgScaled.convertToFormat(QImage::Format_RGBA8888);
+	imgGL = imgGL.mirrored();
 
 	glGenTextures( 1, &(shaderInfo->textureInfo[i].tId) );
 	glBindTexture( shaderInfo->textureInfo[i].Target, shaderInfo->textureInfo[i].tId );
