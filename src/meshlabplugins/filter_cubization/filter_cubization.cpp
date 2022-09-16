@@ -79,7 +79,7 @@ QString CubizationPlugin::pluginName() const
 QString CubizationPlugin::pythonFilterName(ActionIDType f) const
 {
     switch (f) {
-    case FP_CUBIZATION: return tr("applying_cubic_stylization");
+    case FP_CUBIZATION: return tr("apply_coord_cubic_stylization");
     default: assert(0); return QString();
     }
 }
@@ -188,73 +188,76 @@ void ApplyTransform(MeshModel &m, const Matrix44m &tr, bool freeze,
     if(freeze) Freeze(m);
 }
 
-// The Real Core Function doing the actual mesh processing.
-// Run mesh optimization
 std::map<std::string, QVariant> CubizationPlugin::applyFilter(
-        const QAction *filter,
-        const RichParameterList & par,
-        MeshDocument &md,
-        unsigned int& /*postConditionMask*/,
-        vcg::CallBackPos *cb)
+	const QAction*           filter,
+	const RichParameterList& par,
+	MeshDocument&            md,
+	unsigned int&,
+	vcg::CallBackPos*)
 {
+	if (ID(filter) == FP_CUBIZATION) {
+		// get bounding box
+		Box3m     bbox = md.mm()->cm.bbox;
+		Matrix44m transfM, prevScaleTran, scaleTran, trTran, trTranInv, prevTransfM;
+		Point3m   tranVec = Point3m(0, 0, 0);
+		float     maxSide = max(bbox.DimX(), max(bbox.DimY(), bbox.DimZ()));
 
-    //get bounding box
-    Box3m bbox = md.mm()->cm.bbox;
-    Matrix44m transfM, prevScaleTran, scaleTran, trTran, trTranInv, prevTransfM;
-    Point3m tranVec = Point3m(0, 0, 0);
-    float maxSide = max(bbox.DimX(), max(bbox.DimY(), bbox.DimZ()));
+		if (maxSide >= 1.0) {
+			// compute unit box scale
+			scaleTran.SetScale(1.0 / maxSide, 1.0 / maxSide, 1.0 / maxSide);
 
-    if(maxSide >= 1.0){
-        //compute unit box scale
-        scaleTran.SetScale(1.0 / maxSide, 1.0 / maxSide, 1.0 / maxSide);
+			// reverse scale computation
+			prevScaleTran.SetScale(
+				1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide));
 
-        //reverse scale computation
-        prevScaleTran.SetScale(1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide), 1.0 / (1.0 / maxSide));
+			// compute translate
+			trTran.SetTranslate(tranVec);
+			trTranInv.SetTranslate(-tranVec);
 
-        //compute translate
-        trTran.SetTranslate(tranVec);
-        trTranInv.SetTranslate(-tranVec);
+			transfM     = trTran * scaleTran * trTranInv;
+			prevTransfM = trTran * prevScaleTran * trTranInv;
+		}
 
-        transfM = trTran*scaleTran*trTranInv;
-        prevTransfM = trTran*prevScaleTran*trTranInv;
-    }
+		MeshModel& m = *(md.mm());
 
-    MeshModel &m=*(md.mm());
+		if (maxSide >= 1.0) {
+			// apply transform
+			ApplyTransform(m, transfM, true);
+		}
 
-    if(maxSide >= 1.0){
-        //apply transform
-        ApplyTransform(m,transfM, true);
-    }
+		double energyTotal = 0.f;
+		time_t start       = clock();
 
-    double energyTotal = 0.f;
-    time_t start = clock();
+		bool isColorizing = par.getBool("applycol");
 
-    bool isColorizing = par.getBool("applycol");
+		m = ComputeCubicStylization(md, par, energyTotal, isColorizing);
 
-    if (ID(filter) == FP_CUBIZATION) {
-         m = ComputeCubicStylization(md, par, energyTotal, isColorizing);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY);
 
-         m.updateDataMask(MeshModel::MM_VERTQUALITY);
+		if (isColorizing) {
+			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+			m.updateDataMask(MeshModel::MM_VERTCOLOR);
 
-         if(isColorizing){
-             m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-             m.updateDataMask(MeshModel::MM_VERTCOLOR);
+			Histogramm H;
+			vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, H);
+			vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
+				m.cm, H.Percentile(0.01f), H.Percentile(0.99f));
+		}
 
-             Histogramm H;
-             vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm, H);
-             vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(
-                 m.cm, H.Percentile(0.01f), H.Percentile(0.99f));
-         }
-    }
+		if (maxSide >= 1.0) {
+			// re-apply transform to get previous mesh scale
+			ApplyTransform(m, prevTransfM, true);
+		}
+		m.updateBoxAndNormals();
 
-    if(maxSide >= 1.0){
-        //re-apply transform to get previous mesh scale
-        ApplyTransform(m,prevTransfM, true);
-    }
-    m.updateBoxAndNormals();
-
-    log( "cubic stylization performed in %.2f sec. with cubic energy equal to %.5f", (clock() - start) / (float) CLOCKS_PER_SEC, energyTotal);
-    return std::map<std::string, QVariant>();
+		log("cubic stylization performed in %.2f sec. with cubic energy equal to %.5f",
+			(clock() - start) / (float) CLOCKS_PER_SEC,
+			energyTotal);
+	}
+	else {
+		wrongActionCalled(filter);
+	}
+	return std::map<std::string, QVariant>();
 }
 
 MeshModel CubizationPlugin::ComputeCubicStylization(
