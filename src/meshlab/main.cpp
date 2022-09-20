@@ -24,7 +24,6 @@
 #include <common/GLExtensionsManager.h>
 #include <QMessageBox>
 #include "mainwindow.h"
-#include <QGLFormat>
 #include <QString>
 #include <clocale>
 

@@ -173,7 +173,7 @@ void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, co
 			}
 
             MLSceneGLSharedDataContext* shared = NULL;
-            QGLContext* cont = NULL;
+            QOpenGLContext* cont = NULL;
             if ((gla != NULL) && (gla->mvc() != NULL))
             {
                 cont = gla->context();
@@ -181,7 +181,7 @@ void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, co
             }
 
             DrawGriddedCube(shared,cont,*m.mm(), bb, majorTick, minorTick, backFlag, shadowFlag, backColor, frontColor,baseLineWidth);
-        } 
+        }
         break;
     }
 }
@@ -310,7 +310,7 @@ bool FrontFacing(Point3m viewPos,
     return vpc*N > 0;
 }
 
-void DrawFlatMesh(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, int axis, int side, Point3m minG, Point3m maxG)
+void DrawFlatMesh(MLSceneGLSharedDataContext* shared,QOpenGLContext* cont,MeshModel &m, int axis, int side, Point3m minG, Point3m maxG)
 {
     if ((shared == NULL) || (cont == NULL))
         return;
@@ -330,7 +330,7 @@ void DrawFlatMesh(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel 
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* shared, QGLContext* cont, MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, 
+void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* shared, QOpenGLContext* cont, MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick,
                                                bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, float baseLineWidth)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
