@@ -25,19 +25,19 @@
 #include <stdlib.h>
 #include <iostream>
 #include <common/GLExtensionsManager.h>
-#include <QGLWidget>
 #include <QTextStream>
 #include <QResource>
 #include "meshlab/glarea.h"
 
 using namespace std;
 
-#define GL_TEST_ERR							\
-  {									\
-   GLenum eCode;							\
-   if((eCode=glGetError())!=GL_NO_ERROR)				\
-     std::cerr << "OpenGL error : " <<  gluErrorString(eCode) << " in " <<  __FILE__ << " : " << __LINE__ << std::endl;	\
- }
+#define GL_TEST_ERR \
+    { \
+        GLenum eCode; \
+        if((eCode=glGetError())!=GL_NO_ERROR) \
+            std::cerr << "OpenGL error : " <<  gluErrorString(eCode) \
+                      << " in " <<  __FILE__ << " : " << __LINE__ << std::endl; \
+    }
 
 RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
 	: _supported(false),
@@ -69,17 +69,17 @@ void RadianceScalingRendererPlugin::init(QAction *, MeshDocument &, MLSceneGLSha
 	gla->makeCurrent();
 	GLExtensionsManager::initializeGLextensions();
 
-	GL_TEST_ERR
+	GL_TEST_ERR;
 
-		if (!GLEW_ARB_vertex_program ||
-			!GLEW_ARB_fragment_program ||
-			!GLEW_ARB_texture_float ||
-			!GLEW_ARB_draw_buffers ||
-			!GLEW_EXT_framebuffer_object) {
+	if (!GLEW_ARB_vertex_program ||
+		!GLEW_ARB_fragment_program ||
+		!GLEW_ARB_texture_float ||
+		!GLEW_ARB_draw_buffers ||
+		!GLEW_EXT_framebuffer_object) {
 
-			_supported = false;
-			return;
-		}
+		_supported = false;
+		return;
+	}
 
 	_supported = true;
 	_sDialog = new ShaderDialog(this, gla, gla);
@@ -93,10 +93,10 @@ void RadianceScalingRendererPlugin::init(QAction *, MeshDocument &, MLSceneGLSha
 	createLit(":/RadianceScalingRenderer/litSpheres/ls01.png", 1);
 
 	initFBOs();
-	GL_TEST_ERR
+	GL_TEST_ERR;
 
-		initShaders();
-	GL_TEST_ERR
+	initShaders();
+	GL_TEST_ERR;
 }
 
 void RadianceScalingRendererPlugin::render(QAction *, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
@@ -172,7 +172,9 @@ void RadianceScalingRendererPlugin::createLit(const QString &filename, int type)
 		return;
 	}
 
-	t = QGLWidget::convertToGLFormat(b);
+	//t = QGLWidget::convertToGLFormat(b);
+	t = b.convertToFormat(QImage::Format_RGBA8888);
+	t = t.mirrored();
 
 	if (type == 0) {
 		if (_convexLS != NULL) {

@@ -28,7 +28,6 @@
 #include <common/globals.h>
 #include <common/mlapplication.h>
 #include "meshrender.h"
-#include <QGLWidget>
 #include <QTextStream>
 #include <QDir>
 #include <QMessageBox>
@@ -354,7 +353,9 @@ void MeshShaderRenderPlugin::init(QAction *a, MeshDocument &/*md*/, MLSceneGLSha
 						int bestW = pow(2.0, floor(::log(double(img.width())) / ::log(2.0)));
 						int bestH = pow(2.0, floor(::log(double(img.height())) / ::log(2.0)));
 						imgScaled = img.scaled(bestW, bestH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-						imgGL = QGLWidget::convertToGLFormat(imgScaled);
+						//imgGL = QGLWidget::convertToGLFormat(imgScaled);
+						imgGL = imgScaled.convertToFormat(QImage::Format_RGBA8888);
+						imgGL = imgGL.mirrored();
 
 						glGenTextures(1, &(tIter->tId));
 						glBindTexture(tIter->Target, tIter->tId);
