@@ -138,6 +138,8 @@ public:
 	void drawLight();
 	float& getFov();
 	float  getFov() const;
+	vcg::Matrix44f trackballMatrix() const { return trackball.Matrix(); };
+	vcg::Similarityf trackballTrack() const { return trackball.track; };
 	bool showInterruptButton() const;
 	void showInterruptButton(const bool& show);
 	bool isInfoAreaVisible() const;
