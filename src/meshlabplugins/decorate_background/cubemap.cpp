@@ -30,7 +30,6 @@
 #include<string>
 
 #include<QImage>
-#include<QGLWidget>
 #include <wrap/qt/checkGLError.h>
 
 using namespace vcg;
@@ -116,25 +115,26 @@ void CICubeMap::DrawEnvCubeOld(Matrix44f &tr)
 
 }
 
-void CICubeMap::DrawEnvCubeExt(Matrix44f &tr)
+void CICubeMap::DrawEnvCubeExt(Matrix44f& tr)
 {
-	Matrix44f ii=Inverse(tr);
+	Matrix44f ii = Inverse(tr);
 
 	glMatrixMode(GL_MODELVIEW);
-	glPushAttrib(GL_ENABLE_BIT|GL_CURRENT_BIT | GL_TEXTURE_BIT ); // saves the current state of opengl
+	glPushAttrib(
+		GL_ENABLE_BIT | GL_CURRENT_BIT | GL_TEXTURE_BIT); // saves the current state of opengl
 	glPushMatrix();
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
-	glScalef(radius,radius,radius);
+	glScalef(radius, radius, radius);
 
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_1D);
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-    //CIMsg::checkGLError("glEnable(GL_TEXTURE_CUBE_MAP_ARB);");
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARB,ti);
-    //CIMsg::checkGLError("glBindTexture(GL_TEXTURE_CUBE_MAP_ARB,ti);");
-    glDepthMask(false);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_CUBE_MAP_ARB);
+	// CIMsg::checkGLError("glEnable(GL_TEXTURE_CUBE_MAP_ARB);");
+	glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, ti);
+	// CIMsg::checkGLError("glBindTexture(GL_TEXTURE_CUBE_MAP_ARB,ti);");
+	glDepthMask(false);
 
 	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP_ARB);
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP_ARB);
@@ -147,31 +147,29 @@ void CICubeMap::DrawEnvCubeExt(Matrix44f &tr)
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
+	// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
+	// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glMatrixMode(GL_TEXTURE);
-	glPushMatrix();// Texture
+	glPushMatrix(); // Texture
 	glLoadIdentity();
 	glMultMatrix(ii);
 
- //	LQ.track.inverse().applyGL();
+	// LQ.track.inverse().applyGL();
 
-  for (int i=0; i<6; ++i)
-    {
-    glBegin(GL_QUADS);
-        for (int j=0; j<4; ++j) {
-            glNormal(-cube_vertices[cube_faces[i][j]]);
-      glVertex(cube_vertices[cube_faces[i][j]]);
-    }
-    glEnd();
-
-  }
-    glMatrixMode(GL_TEXTURE);
-    glPopMatrix();// Texture
-    glMatrixMode(GL_MODELVIEW);
+	for (int i = 0; i < 6; ++i) {
+		glBegin(GL_QUADS);
+		for (int j = 0; j < 4; ++j) {
+			glNormal(-cube_vertices[cube_faces[i][j]]);
+			glVertex(cube_vertices[cube_faces[i][j]]);
+		}
+		glEnd();
+	}
+	glMatrixMode(GL_TEXTURE);
+	glPopMatrix(); // Texture
+	glMatrixMode(GL_MODELVIEW);
 
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
@@ -179,131 +177,140 @@ void CICubeMap::DrawEnvCubeExt(Matrix44f &tr)
 	glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 	glDepthMask(true);
 
-glPopMatrix();
-glPopAttrib();
+	glPopMatrix();
+	glPopAttrib();
 }
-bool CICubeMap::GetName(int i, QString basename, QString &filename)
+
+bool CICubeMap::GetName(int i, QString basename, QString& filename)
 {
 	QString exts[6];
 
-	exts[0]="_negx";
-	exts[1]="_posx";
-	exts[2]="_negy";
-	exts[3]="_posy";
-	exts[4]="_negz";
-	exts[5]="_posz";
-//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
-  filename=basename;
-    QString ext= basename.right(4);
-    filename=filename.left(filename.length()-4);
-    filename.append(exts[i]);
-    filename.append(ext);
-//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
-    return true;
+	exts[0] = "_negx";
+	exts[1] = "_posx";
+	exts[2] = "_negy";
+	exts[3] = "_posy";
+	exts[4] = "_negz";
+	exts[5] = "_posz";
+	//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
+	filename    = basename;
+	QString ext = basename.right(4);
+	filename    = filename.left(filename.length() - 4);
+	filename.append(exts[i]);
+	filename.append(ext);
+	//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
+	return true;
 }
 
-bool CICubeMap::Load(const char *basename)
+bool CICubeMap::Load(const char* basename)
 {
-  if(basename==0) return false;
-    bool ret;
-    if(!GLEW_ARB_texture_cube_map)
-        ret= LoadOld(basename);
-    else ret =LoadExt(basename);
-    if(!ret) SetInvalid();
-    return ret;
+	if (basename == 0)
+		return false;
+	bool ret;
+	if (!GLEW_ARB_texture_cube_map)
+		ret = LoadOld(basename);
+	else
+		ret = LoadExt(basename);
+	if (!ret)
+		SetInvalid();
+	return ret;
 }
 
-bool CICubeMap::LoadOld(const char *basename)
+bool CICubeMap::LoadOld(const char* basename)
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_TEXTURE_1D);
-  glEnable(GL_TEXTURE_2D);
-    if(oti[0]==0) glGenTextures(6,&(oti[0]));
-    QString filename;
+	glEnable(GL_TEXTURE_2D);
+	if (oti[0] == 0)
+		glGenTextures(6, &(oti[0]));
+	QString filename;
 
-	for(int i=0;i<6;++i)
-		{
-			glBindTexture(GL_TEXTURE_2D,oti[i]);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER)");
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER)");
+	for (int i = 0; i < 6; ++i) {
+		glBindTexture(GL_TEXTURE_2D, oti[i]);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER)");
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER)");
 
-			QImage tt;
+		QImage tt;
 
-		  if(!GetName(i,basename,filename)) {
-					glPopAttrib();
-					return false;
-				}
-			if(!tt.load(filename)) {
-					glPopAttrib();
-					return false;
-				}
-
-			QImage tx = QGLWidget::convertToGLFormat ( tt);
-
-			glBindTexture(GL_TEXTURE_2D, oti[i]);
-			glTexImage2D( GL_TEXTURE_2D, 0, 3, tx.width(), tx.height(), 0,
-													GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-			//gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tx.width(), tx.height(), GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-            glGenerateMipmap(GL_TEXTURE_2D);
-			//CIMsg::checkGLError("glTexImage2D");
+		if (!GetName(i, basename, filename)) {
+			glPopAttrib();
+			return false;
+		}
+		if (!tt.load(filename)) {
+			glPopAttrib();
+			return false;
 		}
 
-    glPopAttrib();
-  return true;
+		// QImage tx = QGLWidget::convertToGLFormat ( tt);
+		tt        = tt.convertToFormat(QImage::Format_RGBA8888);
+		QImage tx = tt.mirrored();
+
+		glBindTexture(GL_TEXTURE_2D, oti[i]);
+		glTexImage2D(
+			GL_TEXTURE_2D, 0, 3, tx.width(), tx.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tx.bits());
+		// gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tx.width(), tx.height(), GL_RGBA, GL_UNSIGNED_BYTE,
+		// tx.bits() );
+		glGenerateMipmap(GL_TEXTURE_2D);
+		// CIMsg::checkGLError("glTexImage2D");
+	}
+
+	glPopAttrib();
+	return true;
 }
-bool CICubeMap::LoadExt(const char *basename)
+bool CICubeMap::LoadExt(const char* basename)
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_TEXTURE_CUBE_MAP_ARB);
 	glDisable(GL_TEXTURE_1D);
-  glDisable(GL_TEXTURE_2D);
-    if(ti==0) 		glGenTextures(1,&ti);
+	glDisable(GL_TEXTURE_2D);
+	if (ti == 0)
+		glGenTextures(1, &ti);
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP_ARB,ti);
+	glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, ti);
 	GLenum targets[6];
-	targets[0]=GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB;
-	targets[1]=GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB;
-	targets[2]=GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB;
-	targets[3]=GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB;
-	targets[4]=GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB;
-	targets[5]=GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB;
+	targets[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB;
+	targets[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB;
+	targets[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB;
+	targets[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB;
+	targets[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB;
+	targets[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB;
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
+	// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
 	glTexParameterf(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
+	// CIMsg::checkGLError("glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER)");
 
-
-	for(int i=0;i<6;++i)
-		{
-			QString filename;
-			QImage tt;
-			if(!GetName(i,basename,filename)) {
-					glPopAttrib();
-					return false;
-				}
-
-			if(!tt.load(filename)) {
-					glPopAttrib();
-		  //QMessageBox::warning(0,"Cubemapped background decoration","Warning unable to load cube map images: " + filename );
-					return false;
-				}
-
-			QImage tx = QGLWidget::convertToGLFormat ( tt);
-
-			glTexImage2D( targets[i], 0,  3, tx.width(), tx.height(), 0,	GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-//			gluBuild2DMipmaps(targets[i], 4, tx.width(), tx.height(),     GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-            glGenerateMipmap(targets[i]);
-
-			//CIMsg::checkGLError("glTexImage2D");
-
+	for (int i = 0; i < 6; ++i) {
+		QString filename;
+		QImage  tt;
+		if (!GetName(i, basename, filename)) {
+			glPopAttrib();
+			return false;
 		}
+
+		if (!tt.load(filename)) {
+			glPopAttrib();
+			// QMessageBox::warning(0,"Cubemapped background decoration","Warning unable to load
+			// cube map images: " + filename );
+			return false;
+		}
+
+		// QImage tx = QGLWidget::convertToGLFormat ( tt);
+		tt        = tt.convertToFormat(QImage::Format_RGBA8888);
+		QImage tx = tt.mirrored();
+
+		glTexImage2D(
+			targets[i], 0, 3, tx.width(), tx.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tx.bits());
+		// gluBuild2DMipmaps(targets[i], 4, tx.width(), tx.height(), GL_RGBA, GL_UNSIGNED_BYTE,
+		// tx.bits() );
+		glGenerateMipmap(targets[i]);
+
+		// CIMsg::checkGLError("glTexImage2D");
+	}
 
 	glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 
 	glPopAttrib();
 	return true;
 }
-
