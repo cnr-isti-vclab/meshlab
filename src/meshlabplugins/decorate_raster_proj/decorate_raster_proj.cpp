@@ -27,15 +27,15 @@
 #include <meshlab/glarea.h>
 #include <vcg/math/matrix44.h>
 
-void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
+void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QOpenGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
-    if ((m_Mesh == NULL) || ( !m_Mesh->isVisible() ) || (ctx == NULL))
-        return;
+	if ((m_Mesh == NULL) || (!m_Mesh->isVisible()) || (ctx == NULL))
+		return;
 
-    glPushAttrib( GL_TRANSFORM_BIT );
-    glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
-    glMultMatrix(m_Mesh->cm.Tr);
+	glPushAttrib(GL_TRANSFORM_BIT);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(m_Mesh->cm.Tr);
 
 	MLRenderingData currdt;
 	ctx->getRenderInfoPerMeshView(m_Mesh->id(), glctx, currdt);
@@ -45,10 +45,10 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneG
 	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
 	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-	for (MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0); pm < MLRenderingData::PR_ARITY; pm = MLRenderingData::next(pm))
-	{
-		if (currdt.isPrimitiveActive(pm))
-		{
+	for (MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0);
+		 pm < MLRenderingData::PR_ARITY;
+		 pm = MLRenderingData::next(pm)) {
+		if (currdt.isPrimitiveActive(pm)) {
 			if (pm == MLRenderingData::PR_SOLID)
 				sl_atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
 			dt.set(pm, sl_atts);
@@ -57,21 +57,21 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneG
 
 	ctx->drawAllocatedAttributesSubset(m_Mesh->id(), glctx, dt);
 
-    glPopMatrix();
-    glPopAttrib();
-
+	glPopMatrix();
+	glPopAttrib();
 }
 
-
-void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
+void DecorateRasterProjPlugin::MeshDrawer::draw(
+	QOpenGLContext*             glctx,
+	MLSceneGLSharedDataContext* ctx)
 {
 	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->isVisible()))
 		return;
 
-    glPushAttrib( GL_TRANSFORM_BIT );
-    glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
-    glMultMatrix(m_Mesh->cm.Tr);
+	glPushAttrib(GL_TRANSFORM_BIT);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(m_Mesh->cm.Tr);
 
 	MLRenderingData currdt;
 	ctx->getRenderInfoPerMeshView(m_Mesh->id(), glctx, currdt);
@@ -96,50 +96,6 @@ void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLShar
     glPopMatrix();
     glPopAttrib();
 }
-
-
-//void DecorateRasterProjPlugin::MeshDrawer::update( glw::Context &context, bool useVBO )
-//{
-    //// Initialize the VBO if required.
-    //if( useVBO && m_Mesh->visible )
-    //{
-    //    if( m_VBOVertices.isNull() )
-    //    {
-    //        // Transfer of vertex positions on GPU.
-    //        CMeshO &meshData = m_Mesh->cm;
-    //        vcg::Point3f *vertBuffer = new vcg::Point3f [ 2*meshData.vn ];
-    //        for( int i=0, n=0; i<meshData.vn; ++i )
-    //        {
-    //            vertBuffer[n++].Import(meshData.vert[i].P());
-    //            vertBuffer[n++].Import(meshData.vert[i].N());
-    //        }
-
-    //        m_VBOVertices = glw::createBuffer( context, 2*meshData.vn*sizeof(vcg::Point3f), vertBuffer );
-    //        delete [] vertBuffer;
-
-    //        // Transfer of face indices on GPU.
-    //        unsigned int *indexBuffer = new unsigned int [ 3*meshData.fn ];
-    //        for( int i=0, n=0; i<meshData.fn; ++i )
-    //        {
-    //            indexBuffer[n++] = meshData.face[i].V(0) - &meshData.vert[0];
-    //            indexBuffer[n++] = meshData.face[i].V(1) - &meshData.vert[0];
-    //            indexBuffer[n++] = meshData.face[i].V(2) - &meshData.vert[0];
-    //        }
-
-    //        m_VBOIndices = glw::createBuffer( context, 3*meshData.fn*sizeof(unsigned int), indexBuffer );
-    //        delete [] indexBuffer;
-    //    }
-    //}
-    //else
-    //{
-    //    m_VBOIndices.setNull();
-    //    m_VBOVertices.setNull();
-    //}
-//}
-
-
-//bool DecorateRasterProjPlugin::s_AreVBOSupported;
-
 
 DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
   m_CurrentMesh(NULL),
@@ -269,68 +225,76 @@ void DecorateRasterProjPlugin::updateCurrentMesh(
 	}
 }
 
-
 void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 {
-    // Recover the near and far clipping planes by considering the bounding box of the current mesh
-    // in the camera space of the current raster.
-    Scalarm zNear, zFar;
-    vcg::Shotf tmpshot;
-    GlShot< Shotm >::GetNearFarPlanes( m_CurrentRaster->shot, m_SceneBox, zNear, zFar );
-    if( zNear < Scalarm(0.0001) )
-        zNear = Scalarm(0.1);
-    if( zFar < zNear )
-        zFar = zNear + Scalarm(1000.0);
+	// Recover the near and far clipping planes by considering the bounding box of the current mesh
+	// in the camera space of the current raster.
+	Scalarm    zNear, zFar;
+	vcg::Shotf tmpshot;
+	GlShot<Shotm>::GetNearFarPlanes(m_CurrentRaster->shot, m_SceneBox, zNear, zFar);
+	if (zNear < Scalarm(0.0001))
+		zNear = Scalarm(0.1);
+	if (zFar < zNear)
+		zFar = zNear + Scalarm(1000.0);
 
+	// Recover the view frustum of the current raster.
+	Scalarm l, r, b, t, focal;
+	m_CurrentRaster->shot.Intrinsics.GetFrustum(l, r, b, t, focal);
 
-    // Recover the view frustum of the current raster.
-    Scalarm l, r, b, t, focal;
-    m_CurrentRaster->shot.Intrinsics.GetFrustum( l, r, b, t, focal );
+	// Compute from the frustum values the camera projection matrix.
+	const float normFactor = zNear / focal;
+	l *= normFactor;
+	r *= normFactor;
+	b *= normFactor;
+	t *= normFactor;
 
+	m_RasterProj.SetZero();
+	m_RasterProj[0][0] = Scalarm(2.0) * zNear / (r - l);
+	m_RasterProj[2][0] = (r + l) / (r - l);
+	m_RasterProj[1][1] = Scalarm(2.0) * zNear / (t - b);
+	m_RasterProj[2][1] = (t + b) / (t - b);
+	m_RasterProj[2][2] = (zNear + zFar) / (zNear - zFar);
+	m_RasterProj[3][2] = Scalarm(2.0) * zNear * zFar / (zNear - zFar);
+	m_RasterProj[2][3] = Scalarm(-1.0);
 
-    // Compute from the frustum values the camera projection matrix.
-    const float normFactor = zNear / focal;
-    l *= normFactor;
-    r *= normFactor;
-    b *= normFactor;
-    t *= normFactor;
+	// Extract the pose matrix from the current raster.
+	m_RasterPose.Import(m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix().transpose());
 
-    m_RasterProj.SetZero();
-    m_RasterProj[0][0] = Scalarm(2.0)*zNear / (r-l);
-    m_RasterProj[2][0] = (r+l) / (r-l);
-    m_RasterProj[1][1] = Scalarm(2.0)*zNear / (t-b);
-    m_RasterProj[2][1] = (t+b) / (t-b);
-    m_RasterProj[2][2] = (zNear+zFar) / (zNear-zFar);
-    m_RasterProj[3][2] = Scalarm(2.0)*zNear*zFar / (zNear-zFar);
-    m_RasterProj[2][3] = Scalarm(-1.0);
+	// Define the bias matrix that will enable to go from clipping space to texture space.
+	const Scalarm biasMatData[16] = {
+		Scalarm(0.5),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.5),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.0),
+		Scalarm(0.5),
+		Scalarm(0.0),
+		Scalarm(0.5),
+		Scalarm(0.5),
+		Scalarm(0.5),
+		Scalarm(1.0)};
+	Matrix44m biasMat(biasMatData);
 
-
-    // Extract the pose matrix from the current raster.
-    m_RasterPose.Import(m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix().transpose());
-
-
-    // Define the bias matrix that will enable to go from clipping space to texture space.
-    const Scalarm biasMatData[16] = { Scalarm(0.5), Scalarm(0.0), Scalarm(0.0), Scalarm(0.0),
-                                    Scalarm(0.0), Scalarm(0.5), Scalarm(0.0), Scalarm(0.0),
-                                    Scalarm(0.0), Scalarm(0.0), Scalarm(0.5), Scalarm(0.0),
-                                    Scalarm(0.5), Scalarm(0.5), Scalarm(0.5), Scalarm(1.0) };
-    Matrix44m biasMat( biasMatData );
-
-
-    // Update the shadow map projection matrix.
-    m_ShadowProj = m_RasterPose * m_RasterProj * biasMat;
+	// Update the shadow map projection matrix.
+	m_ShadowProj = m_RasterPose * m_RasterProj * biasMat;
 }
-
 
 void DecorateRasterProjPlugin::updateColorTexture()
 {
-    glPushAttrib( GL_TEXTURE_BIT );
+	glPushAttrib(GL_TEXTURE_BIT);
 
-    const int w = m_CurrentRaster->currentPlane->image.width();
-    const int h = m_CurrentRaster->currentPlane->image.height();
+	const int w = m_CurrentRaster->currentPlane->image.width();
+	const int h = m_CurrentRaster->currentPlane->image.height();
 
-	 QImage tximg = QGLWidget::convertToGLFormat(m_CurrentRaster->currentPlane->image);
-    // Recover image data and convert pixels to the adequate format for transfer onto the GPU.
+	//QImage tximg = QGLWidget::convertToGLFormat(m_CurrentRaster->currentPlane->image);
+	QImage tximg = m_CurrentRaster->currentPlane->image.convertToFormat(QImage::Format_RGBA8888);
+	tximg        = tximg.mirrored();
+	// Recover image data and convert pixels to the adequate format for transfer onto the GPU.
 	GLubyte *texData = new GLubyte [ 4*w*h ];
 	for( int y=h-1, n=0; y>=0; --y )
 	for( int x=0; x<w; ++x )
@@ -342,95 +306,91 @@ void DecorateRasterProjPlugin::updateColorTexture()
 	texData[n++] = (GLubyte) qBlue ( pixel );
 	texData[n++] = (GLubyte) qAlpha ( pixel );
 	}
-    // Create and initialize the OpenGL texture object.
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-    m_ColorTexture = glw::createTexture2D( m_Context, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, texData );
-    delete [] texData;
+	// Create and initialize the OpenGL texture object.
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	m_ColorTexture =
+		glw::createTexture2D(m_Context, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	delete[] texData;
 
-    glw::BoundTexture2DHandle t = m_Context.bindTexture2D( m_ColorTexture, 0 );
-    t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_REPEAT,GL_REPEAT,GL_REPEAT) );
-    m_Context.unbindTexture2D( 0 );
+	glw::BoundTexture2DHandle t = m_Context.bindTexture2D(m_ColorTexture, 0);
+	t->setSampleMode(glw::TextureSampleMode(GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT, GL_REPEAT));
+	m_Context.unbindTexture2D(0);
 
-    glPopAttrib();
+	glPopAttrib();
 }
 
-
-void DecorateRasterProjPlugin::updateDepthTexture(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
+void DecorateRasterProjPlugin::updateDepthTexture(
+	QOpenGLContext*             glctx,
+	MLSceneGLSharedDataContext* ctx)
 {
-    glPushAttrib( GL_TEXTURE_BIT   |
-                  GL_ENABLE_BIT    |
-                  GL_POLYGON_BIT   |
-                  GL_CURRENT_BIT   |
-                  GL_TRANSFORM_BIT |
-                  GL_VIEWPORT_BIT  );
+	glPushAttrib(
+		GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT |
+		GL_VIEWPORT_BIT);
 
-    const int w = m_CurrentRaster->currentPlane->image.width();
-    const int h = m_CurrentRaster->currentPlane->image.height();
+	const int w = m_CurrentRaster->currentPlane->image.width();
+	const int h = m_CurrentRaster->currentPlane->image.height();
 
+	// Create and initialize the OpenGL texture object used to store the shadow map.
+	m_DepthTexture =
+		glw::createTexture2D(m_Context, GL_DEPTH_COMPONENT, w, h, GL_DEPTH_COMPONENT, GL_INT, NULL);
+	glw::BoundTexture2DHandle t = m_Context.bindTexture2D(m_DepthTexture, 0);
+	t->setSampleMode(glw::TextureSampleMode(GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT, GL_REPEAT));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_INTENSITY);
+	m_Context.unbindTexture2D(0);
 
-    // Create and initialize the OpenGL texture object used to store the shadow map.
-    m_DepthTexture = glw::createTexture2D( m_Context, GL_DEPTH_COMPONENT, w, h, GL_DEPTH_COMPONENT, GL_INT, NULL );
-    glw::BoundTexture2DHandle t = m_Context.bindTexture2D( m_DepthTexture, 0 );
-    t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_REPEAT,GL_REPEAT,GL_REPEAT) );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
-    glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_INTENSITY );
-    m_Context.unbindTexture2D( 0 );
-
-
-    // Perform an off-screen rendering pass so as to generate the a depth map of the model
-    // from the viewpoint of the current raster's camera.
-    glMatrixMode( GL_PROJECTION );
-    glPushMatrix();
+	// Perform an off-screen rendering pass so as to generate the a depth map of the model
+	// from the viewpoint of the current raster's camera.
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
 	vcg::Matrix44f tmp_rast = vcg::Matrix44f::Construct(m_RasterProj);
-    glLoadMatrixf( (GLfloat*) tmp_rast.V() );
+	glLoadMatrixf((GLfloat*) tmp_rast.V());
 
-    glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	vcg::Matrix44f tmp_rastpose = vcg::Matrix44f::Construct(m_RasterPose);
-    glLoadMatrixf( (GLfloat*) tmp_rastpose.V() );
+	glLoadMatrixf((GLfloat*) tmp_rastpose.V());
 
+	glw::FramebufferHandle fbuffer =
+		glw::createFramebuffer(m_Context, glw::texture2DTarget(m_DepthTexture));
+	m_Context.bindReadDrawFramebuffer(fbuffer);
 
+	glViewport(0, 0, m_DepthTexture->width(), m_DepthTexture->height());
 
-    glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::texture2DTarget(m_DepthTexture) );
-    m_Context.bindReadDrawFramebuffer( fbuffer );
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(2.0f, 2.0f);
 
-    glViewport( 0, 0, m_DepthTexture->width(), m_DepthTexture->height() );
+	glClear(GL_DEPTH_BUFFER_BIT);
+	for (QMap<int, MeshDrawer>::iterator m = m_Scene.begin(); m != m_Scene.end(); ++m)
+		m->drawShadow(glctx, ctx);
 
-    glEnable( GL_DEPTH_TEST );
-    glEnable( GL_POLYGON_OFFSET_FILL );
-    glPolygonOffset( 2.0f, 2.0f );
+	m_Context.unbindReadDrawFramebuffer();
 
-    glClear( GL_DEPTH_BUFFER_BIT );
-    for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-        m->drawShadow( glctx,ctx );
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
 
-    m_Context.unbindReadDrawFramebuffer();
-
-
-
-    glPopMatrix();
-    glMatrixMode( GL_PROJECTION );
-    glPopMatrix();
-
-    glPopAttrib();
+	glPopAttrib();
 }
 
-
-void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
+void DecorateRasterProjPlugin::updateCurrentRaster(
+	MeshDocument&               m,
+	QOpenGLContext*             glctx,
+	MLSceneGLSharedDataContext* ctx)
 {
-    // Update the stored raster with the one provided by the mesh document.
-    // If both are identical, the update is simply skipped.
-    if( m.rm() == m_CurrentRaster )
-        return;
+	// Update the stored raster with the one provided by the mesh document.
+	// If both are identical, the update is simply skipped.
+	if (m.rm() == m_CurrentRaster)
+		return;
 
-    m_CurrentRaster = m.rm();
+	m_CurrentRaster = m.rm();
 
-    updateColorTexture();
-    updateShadowProjectionMatrix();
+	updateColorTexture();
+	updateShadowProjectionMatrix();
 	updateDepthTexture(glctx, ctx);
 }
-
 
 bool DecorateRasterProjPlugin::initShaders(std::string &logs)
 {
@@ -635,102 +595,98 @@ void DecorateRasterProjPlugin::decorateDoc(
 		QPainter          *,
 		GLLogStream &)
 {
-    switch( ID(act) )
-    {
-        case DP_PROJECT_RASTER:
-        {
-			MLSceneGLSharedDataContext* ctx = NULL;
-			if ((gla == NULL) || (gla->mvc() == NULL))
-				return;
-			ctx = gla->mvc()->sharedDataContext();
-			if (ctx == NULL)
-				return;
+	switch (ID(act)) {
+	case DP_PROJECT_RASTER: {
+		MLSceneGLSharedDataContext* ctx = NULL;
+		if ((gla == NULL) || (gla->mvc() == NULL))
+			return;
+		ctx = gla->mvc()->sharedDataContext();
+		if (ctx == NULL)
+			return;
 
-            glPushAttrib( GL_ALL_ATTRIB_BITS );
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-            updateCurrentMesh( m, *par );
-            updateCurrentRaster( m,gla->context(),ctx );
+		updateCurrentMesh(m, *par);
+		updateCurrentRaster(m, gla->context(), ctx);
 
-            glEnable( GL_DEPTH_TEST );
+		glEnable(GL_DEPTH_TEST);
 
-           /* bool notDrawn = false;
-            switch( rm.drawMode )
-            {
-                case vcg::GLW::DMPoints:
-                {
-                    glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-                    glEnable( GL_POLYGON_OFFSET_POINT );
-                    break;
-                }
-                case vcg::GLW::DMHidden:
-                case vcg::GLW::DMWire:
-                {
-                    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-                    glEnable( GL_POLYGON_OFFSET_LINE );
-                    break;
-                }
-                case vcg::GLW::DMFlat:
-                case vcg::GLW::DMFlatWire:
-                case vcg::GLW::DMSmooth:
-                {
-                    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-                    glEnable( GL_POLYGON_OFFSET_FILL );
-                    break;
-                }
-                default: notDrawn = true;
-            }*/
-			glEnable(GL_POLYGON_OFFSET_POINT);
-			glEnable(GL_POLYGON_OFFSET_LINE);
-			glEnable(GL_POLYGON_OFFSET_FILL);
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glPolygonOffset( -2.0f, 1.0f );
-            glEnable( GL_COLOR_MATERIAL );
-            glColor3ub( 255, 255, 255 );
+		/* bool notDrawn = false;
+		 switch( rm.drawMode )
+		 {
+			 case vcg::GLW::DMPoints:
+			 {
+				 glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
+				 glEnable( GL_POLYGON_OFFSET_POINT );
+				 break;
+			 }
+			 case vcg::GLW::DMHidden:
+			 case vcg::GLW::DMWire:
+			 {
+				 glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+				 glEnable( GL_POLYGON_OFFSET_LINE );
+				 break;
+			 }
+			 case vcg::GLW::DMFlat:
+			 case vcg::GLW::DMFlatWire:
+			 case vcg::GLW::DMSmooth:
+			 {
+				 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+				 glEnable( GL_POLYGON_OFFSET_FILL );
+				 break;
+			 }
+			 default: notDrawn = true;
+		 }*/
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glPolygonOffset(-2.0f, 1.0f);
+		glEnable(GL_COLOR_MATERIAL);
+		glColor3ub(255, 255, 255);
 
-            glEnable( GL_PROGRAM_POINT_SIZE );
-            glw::BoundProgramHandle shader = m_Context.bindProgram( m_ShadowMapShader );
-            m_Context.bindTexture2D( m_ColorTexture, 0 );
-            m_Context.bindTexture2D( m_DepthTexture, 1 );
-            shader->setUniform( "u_ColorMap", 0 );
-            shader->setUniform( "u_DepthMap", 1 );
-            vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glw::BoundProgramHandle shader = m_Context.bindProgram(m_ShadowMapShader);
+		m_Context.bindTexture2D(m_ColorTexture, 0);
+		m_Context.bindTexture2D(m_DepthTexture, 1);
+		shader->setUniform("u_ColorMap", 0);
+		shader->setUniform("u_DepthMap", 1);
+		vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
 
-            shader->setUniform4x4( "u_ProjMat", tmp_shadowproj.V(), false );
-            vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
-            shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
-            vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
-            shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
-            shader->setUniform( "u_AlphaValue", (float)par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
-            shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
-			shader->setUniform("u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
-            shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
-            for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-            {
-				MLRenderingData dt;
-				ctx->getRenderInfoPerMeshView(m.key(), gla->context(), dt);
-				if (dt.isPrimitiveActive(MLRenderingData::PR_POINTS))
-                    setPointParameters( m.value(), par );
-				MLPerViewGLOptions opts;
-				dt.get(opts);
-				vcg::Matrix44f tmpmat = vcg::Matrix44f::Construct(m->mm()->cm.Tr);
-				shader->setUniform4x4( "u_ModelXf", tmpmat.transpose().V(), false );
-                m->draw(gla->context(),ctx);
-            }
+		shader->setUniform4x4("u_ProjMat", tmp_shadowproj.V(), false);
+		vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
+		shader->setUniform3("u_Viewpoint", tmp_viewpoint.V());
+		vcg::Matrix44f lightToObj =
+			(Inverse(gla->trackballMatrix()) * gla->trackballLightMatrix()).transpose();
+		shader->setUniform4x4("u_LightToObj", lightToObj.V(), false);
+		shader->setUniform(
+			"u_AlphaValue", (float) par->getFloat("MeshLab::Decoration::ProjRasterAlpha"));
+		shader->setUniform("u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha"));
+		shader->setUniform(
+			"u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
+		shader->setUniform("u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha"));
+		for (QMap<int, MeshDrawer>::iterator m = m_Scene.begin(); m != m_Scene.end(); ++m) {
+			MLRenderingData dt;
+			ctx->getRenderInfoPerMeshView(m.key(), gla->context(), dt);
+			if (dt.isPrimitiveActive(MLRenderingData::PR_POINTS))
+				setPointParameters(m.value(), par);
+			MLPerViewGLOptions opts;
+			dt.get(opts);
+			vcg::Matrix44f tmpmat = vcg::Matrix44f::Construct(m->mm()->cm.Tr);
+			shader->setUniform4x4("u_ModelXf", tmpmat.transpose().V(), false);
+			m->draw(gla->context(), ctx);
+		}
 
-            m_Context.unbindProgram();
-            m_Context.unbindTexture2D( 0 );
-            m_Context.unbindTexture2D( 1 );
+		m_Context.unbindProgram();
+		m_Context.unbindTexture2D(0);
+		m_Context.unbindTexture2D(1);
 
-
-            glPopAttrib();
-            break;
-        }
-        default: assert(0);
-    }
+		glPopAttrib();
+		break;
+	}
+	default: assert(0);
+	}
 }
-
-
-
 
 MESHLAB_PLUGIN_NAME_EXPORTER(DecorateRasterProjPlugin)

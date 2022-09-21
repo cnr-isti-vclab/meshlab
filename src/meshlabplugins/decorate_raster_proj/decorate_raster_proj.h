@@ -54,8 +54,8 @@ class DecorateRasterProjPlugin : public QObject, public DecoratePlugin
 		inline              MeshDrawer(const MeshModel *mm ) : m_Mesh(mm)    {}
 
 		//void                update(MLSceneGLSharedDataContext* ctx);
-		void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
-		void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		void                drawShadow(QOpenGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		void                draw(QOpenGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
 		inline const MeshModel*   mm()                                        { return m_Mesh; }
 	};
@@ -95,7 +95,7 @@ public:
 private:
     void                    updateCurrentMesh( MeshDocument &m,
 											   const RichParameterList &par );
-    void                    updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+    void                    updateCurrentRaster( MeshDocument &m, QOpenGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
 	void                    setPointParameters(MeshDrawer &md,
 												const RichParameterList* par );
@@ -103,7 +103,7 @@ private:
     void                    drawSceneShadow();
     void                    updateShadowProjectionMatrix();
     void                    updateColorTexture();
-    void                    updateDepthTexture(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+    void                    updateDepthTexture(QOpenGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
     bool                    initShaders(std::string &logs);
 
