@@ -23,6 +23,7 @@
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
 #include <common/GLExtensionsManager.h>
+#include <GL/glew.h>
 #include <QFile>
 #include <QImage>
 #include <cassert>

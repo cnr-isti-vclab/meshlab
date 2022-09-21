@@ -70,7 +70,7 @@ void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
     glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
     vcg::Point3f light = -vcg::Point3f(lP[0],lP[1],lP[2]);
 
-    vcg::Matrix44f tm = gla->trackball.Matrix();
+    vcg::Matrix44f tm = gla->trackballMatrix();
 
     glMatrixMode(GL_PROJECTION);
 
@@ -95,7 +95,7 @@ void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
 
     //get the rotation matrix from the trackball
     vcg::Matrix44f rotation;
-    vcg::Similarityf track = gla->trackball.track;
+    vcg::Similarityf track = gla->trackballTrack();
     track.rot.ToMatrix(rotation);
     glMultMatrixf(rotation.transpose().V());
 

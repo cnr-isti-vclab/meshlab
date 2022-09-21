@@ -307,8 +307,8 @@ bool SSAO::loadNoiseTxt(){
         noiseWidth=image.width();
         noiseHeight=image.height();
 
-        QImage tmpGL = QGLWidget::convertToGLFormat(image);
-        image = QImage(tmpGL);
+        image = image.convertToFormat(QImage::Format_RGBA8888);
+        image = image.mirrored();
     }
     else {
         qDebug("Warning failed to load noise texture!");
