@@ -22,6 +22,9 @@
 ****************************************************************************/
 
 #include "decorate_base.h"
+
+#include <QOpenGLShaderProgram>
+
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/bitquad_support.h>
@@ -29,7 +32,6 @@
 #include <meshlab/glarea.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
-#include <QGLShader>
 #include <meshlab/glarea_setting.h>
 #include <wrap/gl/gl_type_name.h>
 using namespace vcg;
@@ -292,8 +294,8 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthRange (0.0, 0.9999);
 		glDepthFunc(GL_LEQUAL);
-		//      glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
-		QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
+		// glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
+		QOpenGLShaderProgram *glp=this->contourShaderProgramMap[&m];
 		
 		std::pair<float,float> mmqH = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 		this->realTimeLog("Quality Contour", m.label(),
@@ -316,9 +318,8 @@ void DecorateBasePlugin::decorateMesh(const QAction* a, MeshModel &m, const Rich
 		
 		int vert_quality = glp->attributeLocation("vert_quality");
 		glBegin(GL_TRIANGLES);
-		for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-		{
-			glp->setAttributeValue(vert_quality,fi->V(0)->Q());
+		for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) {
+			glp->setAttributeValue(vert_quality, fi->V(0)->Q());
 			glVertex(fi->V(0)->P());
 			glp->setAttributeValue(vert_quality,fi->V(1)->Q());
 			glVertex(fi->V(1)->P());
@@ -747,12 +748,12 @@ bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, con
 		if(this->contourShaderProgramMap[&m] == 0)
 		{
 			bool ret=true;
-			this->contourShaderProgramMap[&m] = new QGLShaderProgram(gla);
-			QGLShaderProgram *gsp =  this->contourShaderProgramMap[&m];
+			this->contourShaderProgramMap[&m] = new QOpenGLShaderProgram(gla);
+			QOpenGLShaderProgram *gsp =  this->contourShaderProgramMap[&m];
 			
-			ret &= gsp->addShaderFromSourceFile(QGLShader::Vertex,":/decorate/contour.vert");
+			ret &= gsp->addShaderFromSourceFile(QOpenGLShader::Vertex,":/decorate/contour.vert");
 			//      qDebug("Compiled shader. Log is %s", qUtf8Printable(contourShaderProgram->log()));
-			ret &= gsp->addShaderFromSourceFile(QGLShader::Fragment,":/decorate/contour.frag");
+			ret &= gsp->addShaderFromSourceFile(QOpenGLShader::Fragment,":/decorate/contour.frag");
 			//      qDebug("Compiled shader. Log is %s", qUtf8Printable(contourShaderProgram->log()));
 			ret &= gsp->link();
 			QString rs = gsp->log();

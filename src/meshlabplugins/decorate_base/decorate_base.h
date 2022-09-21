@@ -30,7 +30,7 @@
 #include <wrap/gui/coordinateframe.h>
 #include "colorhistogram.h"
 
-class QGLShaderProgram;
+class QOpenGLShaderProgram;
 typedef vcg::ColorHistogram<float>  CHist;
 
 typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
@@ -195,7 +195,7 @@ public slots:
 private:
 	vcg::Shotf curShot;
 	
-	QMap<MeshModel *, QGLShaderProgram *> contourShaderProgramMap;
+	QMap<MeshModel *, QOpenGLShaderProgram *> contourShaderProgramMap;
 };
 
 #endif
