@@ -13,13 +13,13 @@ template<typename MeshType>
 using Star = std::vector<typename MeshType::FacePointer>;
 
 template<typename MeshType>
-using StarVertAttrHandle = typename MeshType::PerVertexAttributeHandle<Star<MeshType>>;
+using StarVertAttrHandle = typename MeshType:: template PerVertexAttributeHandle<Star<MeshType>>;
 
 template<typename MeshType>
-using AreaFaceAttrHandle = typename MeshType::PerFaceAttributeHandle<double>;
+using AreaFaceAttrHandle = typename MeshType:: template PerFaceAttributeHandle<double>;
 
 template<typename MeshType>
-using GradientVertAttrHandle = typename MeshType::PerVertexAttributeHandle<vcg::Point3d>;
+using GradientVertAttrHandle = typename MeshType:: template PerVertexAttributeHandle<vcg::Point3d>;
 
 
 template<typename MeshType>
