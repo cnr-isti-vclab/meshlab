@@ -27,7 +27,7 @@
 
 using namespace std;
 
-ShaderDialog::ShaderDialog(RadianceScalingRendererPlugin* wrp,QGLWidget* gla,QWidget *parent)
+ShaderDialog::ShaderDialog(RadianceScalingRendererPlugin* wrp, QOpenGLWidget* gla, QWidget *parent)
   : QDockWidget(parent),
     _wrp(wrp),
     _gla(gla) {

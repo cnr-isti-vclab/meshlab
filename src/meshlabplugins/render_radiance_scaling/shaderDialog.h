@@ -24,8 +24,8 @@
 #define SHADERDIALOG_H
 
 #include <GL/glew.h>
-#include <QGLWidget>
 #include <QDockWidget>
+#include <QOpenGLWidget>
 #include "ui_shaderDialog.h"
 
 class RadianceScalingRendererPlugin;
@@ -34,18 +34,18 @@ class ShaderDialog : public QDockWidget {
   Q_OBJECT
     
   public:
-  ShaderDialog(RadianceScalingRendererPlugin* wrp,QGLWidget* gla,QWidget *parent = 0);
+  ShaderDialog(RadianceScalingRendererPlugin* wrp, QOpenGLWidget* gla, QWidget* parent = 0);
   ~ShaderDialog();
   
-  void changeIcon(QString path,int icon);
+  void changeIcon(QString path, int icon);
   
   static const int convex_icon=0;
   static const int concav_icon=1;
 
  private:
-  RadianceScalingRendererPlugin *_wrp;
+  RadianceScalingRendererPlugin* _wrp;
   Ui::ShaderDialogClass          _ui;
-  QGLWidget                     *_gla;
+  QOpenGLWidget*                 _gla;
 
   private slots:
   void enableChanged(int);

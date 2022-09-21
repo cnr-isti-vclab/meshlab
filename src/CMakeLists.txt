@@ -166,7 +166,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_dirt
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
-#		meshlabplugins/filter_img_patch_param
+		meshlabplugins/filter_img_patch_param
 		meshlabplugins/filter_icp
 		meshlabplugins/filter_io_nxs
 		meshlabplugins/filter_isoparametrization
@@ -195,7 +195,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 
 		# Rendering and Decoration Plugins
 		meshlabplugins/render_gdp
-#		meshlabplugins/render_radiance_scaling
+		meshlabplugins/render_radiance_scaling
 		meshlabplugins/decorate_base
 		meshlabplugins/decorate_background
 #		meshlabplugins/decorate_raster_proj
