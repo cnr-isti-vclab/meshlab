@@ -113,7 +113,7 @@ class LayerDialog : public QDockWidget
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-    void updateLog(const GLLogStream& Log);
+    void updateLog(GLLogStream& Log);
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
@@ -148,6 +148,8 @@ public slots:
 private slots:
 	/*WARNING!!! ADDED just to avoid usual mac strange behavior. Please, avoid to use it if it's not absolutely necessary*/
 	void updateTable();
+	void on_cleanLogPushButton_clicked();
+
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;
