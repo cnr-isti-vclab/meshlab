@@ -1,31 +1,34 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2022                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #include "decorate_raster_proj.h"
-#include <common/GLExtensionsManager.h>
-#include <wrap/gl/shot.h>
-#include <meshlab/glarea.h>
+
 #include <vcg/math/matrix44.h>
+#include <wrap/gl/shot.h>
+
+#include <common/GLExtensionsManager.h>
+
+#include <meshlab/glarea.h>
 
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QOpenGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
@@ -477,12 +480,11 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
     return m_ShadowMapShader->isLinked();
 }
 
-
 bool DecorateRasterProjPlugin::startDecorate(
-		const QAction* act,
-		MeshDocument     & m,
-		const RichParameterList * /*par*/,
-		GLArea           * /*gla*/ )
+	const QAction* act,
+	MeshDocument&  m,
+	const RichParameterList* /*par*/,
+	GLArea* gla)
 {
     switch( ID(act) )
     {
@@ -586,7 +588,6 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
     }
 }
 
-
 void DecorateRasterProjPlugin::decorateDoc(
 		const QAction* act,
 		MeshDocument      &m  ,
@@ -611,32 +612,6 @@ void DecorateRasterProjPlugin::decorateDoc(
 
 		glEnable(GL_DEPTH_TEST);
 
-		/* bool notDrawn = false;
-		 switch( rm.drawMode )
-		 {
-			 case vcg::GLW::DMPoints:
-			 {
-				 glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-				 glEnable( GL_POLYGON_OFFSET_POINT );
-				 break;
-			 }
-			 case vcg::GLW::DMHidden:
-			 case vcg::GLW::DMWire:
-			 {
-				 glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				 glEnable( GL_POLYGON_OFFSET_LINE );
-				 break;
-			 }
-			 case vcg::GLW::DMFlat:
-			 case vcg::GLW::DMFlatWire:
-			 case vcg::GLW::DMSmooth:
-			 {
-				 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-				 glEnable( GL_POLYGON_OFFSET_FILL );
-				 break;
-			 }
-			 default: notDrawn = true;
-		 }*/
 		glEnable(GL_POLYGON_OFFSET_POINT);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glEnable(GL_POLYGON_OFFSET_FILL);
