@@ -24,9 +24,7 @@
 //#include <GL/glew.h>
 
 #include "AlignPairWidget.h"
-#include "AlignPairDialog.h"
-#include "edit_align.h"
-#include <QGLWidget>
+
 #include <common/GLExtensionsManager.h>
 #include <wrap/gl/pick.h>
 
@@ -38,7 +36,7 @@
 #include <meshlab/glarea.h>
 
 AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget* parent) :
-		QGLWidget(parent, ar->mvc()->sharedDataContext())
+		QOpenGLWidget(parent)
 {
 	gla                = ar;
 	shared             = ar->mvc()->sharedDataContext();

@@ -26,7 +26,7 @@
 
 #include <GL/glew.h>
 #include <QDialog>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QObject>
 #include <vcg/space/point2.h>
 #include <wrap/gui/trackball.h>
@@ -38,7 +38,7 @@ typedef vcg::MeshTree<MeshModel, Scalarm> MeshTreem;
 
 class GLArea;
 
-class AlignPairWidget : public QGLWidget
+class AlignPairWidget : public QOpenGLWidget
 {
 	Q_OBJECT
 public:
