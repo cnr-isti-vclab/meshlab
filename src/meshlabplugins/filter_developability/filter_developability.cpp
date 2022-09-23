@@ -58,7 +58,7 @@ QString FilterDevelopabilityPlugin::pythonFilterName(ActionIDType f) const
 {
     switch(f) {
     case FP_MAKE_DEVELOPABLE :
-        return "meshing_make_developable";
+        return "apply_coord_developability_of_mesh";
     default :
         assert(0);
         return QString();

@@ -30,6 +30,8 @@ public:
         fAttrArea = vcg::tri::Allocator<MeshType>:: template GetPerFaceAttribute<double>(m, std::string("Area"));
     }
 
+    virtual ~Optimizer() {}
+
     /*
      * Routine that must be called when the mesh geometry and/or topology changes
      */
