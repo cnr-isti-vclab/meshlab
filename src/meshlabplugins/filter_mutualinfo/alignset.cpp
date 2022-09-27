@@ -2,13 +2,13 @@
 
 #include <GL/glew.h>
 
-#include <QGLContext>
+#include <QOpenGLContext>
 #include <QDomNode>
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
 #include <QTextStream>
-#include <QGLFramebufferObject>
+#include <QOpenGLFramebufferObject>
 
 
 #include "alignset.h"
@@ -162,10 +162,10 @@ void AlignSet::resize(int max_side) {
 void AlignSet::renderScene(vcg::Shot<MESHLAB_SCALAR> &view, int component) 
 {
     QSize fbosize(wt,ht);
-    QGLFramebufferObjectFormat frmt;
+    QOpenGLFramebufferObjectFormat frmt;
     frmt.setInternalTextureFormat(GL_RGBA);
-    frmt.setAttachment(QGLFramebufferObject::Depth);
-    QGLFramebufferObject fbo(fbosize,frmt);
+    frmt.setAttachment(QOpenGLFramebufferObject::Depth);
+    QOpenGLFramebufferObject fbo(fbosize,frmt);
 
     MESHLAB_SCALAR _near, _far;
     _near=0.1;
@@ -276,10 +276,10 @@ void AlignSet::renderScene(vcg::Shot<MESHLAB_SCALAR> &view, int component)
 
 void AlignSet::readRender(int component) {
     QSize fbosize(wt,ht);
-    QGLFramebufferObjectFormat frmt;
+    QOpenGLFramebufferObjectFormat frmt;
     frmt.setInternalTextureFormat(GL_RGBA);
-    frmt.setAttachment(QGLFramebufferObject::Depth);
-    QGLFramebufferObject fbo(fbosize,frmt);
+    frmt.setAttachment(QOpenGLFramebufferObject::Depth);
+    QOpenGLFramebufferObject fbo(fbosize,frmt);
 
     fbo.bind();
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
