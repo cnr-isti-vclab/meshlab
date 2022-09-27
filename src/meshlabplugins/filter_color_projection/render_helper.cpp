@@ -25,8 +25,8 @@
 #include <common/ml_document/mesh_model.h>
 
 #include <QObject>
-#include <QGLContext>
-#include <QGLFramebufferObject>
+#include <QOpenGLContext>
+#include <QOpenGLFramebufferObject>
 
 #include "render_helper.h"
 
@@ -195,10 +195,10 @@ void RenderHelper::renderScene(const Shotm &view, MeshModel *mesh, RenderingMode
   rendmode = mode;
 
   QSize fbosize(wt, ht);
-  QGLFramebufferObjectFormat frmt;
+  QOpenGLFramebufferObjectFormat frmt;
   frmt.setInternalTextureFormat(GL_RGBA);
-  frmt.setAttachment(QGLFramebufferObject::Depth);
-  QGLFramebufferObject fbo(fbosize,frmt);
+  frmt.setAttachment(QOpenGLFramebufferObject::Depth);
+  QOpenGLFramebufferObject fbo(fbosize,frmt);
 
   CMeshO::ScalarType _near, _far;
 
