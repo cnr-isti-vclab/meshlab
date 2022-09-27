@@ -408,7 +408,7 @@ void loadRaster(const QString& filename, RasterModel& rm, GLLogStream* log, vcg:
 		log->log(GLLogStream::FILTER, "Warning: unable to parse exif for file " + filename);
 	}
 
-	if (code && ImageInfo.FocalLengthIn35mm == 0.0f) {
+	if (code || ImageInfo.FocalLengthIn35mm == 0.0f) {
 		rm.shot.Intrinsics.ViewportPx =
 			vcg::Point2i(rm.currentPlane->image.width(), rm.currentPlane->image.height());
 		rm.shot.Intrinsics.CenterPx = Point2m(

@@ -163,6 +163,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_colorproc
 		meshlabplugins/filter_create
 		meshlabplugins/filter_cubization
+		meshlabplugins/filter_developability
 		meshlabplugins/filter_dirt
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
@@ -176,7 +177,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_meshing
 		meshlabplugins/filter_mls
 #		meshlabplugins/filter_mutualglobal
-#		meshlabplugins/filter_mutualinfo
+		meshlabplugins/filter_mutualinfo
 		meshlabplugins/filter_parametrization
 		meshlabplugins/filter_plymc
 		meshlabplugins/filter_qhull
@@ -204,14 +205,14 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		# Edit Plugins
 		meshlabplugins/edit_sample
 #		meshlabplugins/edit_align
-#		meshlabplugins/edit_manipulators
+		meshlabplugins/edit_manipulators
 		meshlabplugins/edit_measure
 #		meshlabplugins/edit_mutualcorrs
 #		meshlabplugins/edit_paint
-#		meshlabplugins/edit_pickpoints
-#		meshlabplugins/edit_point
-#		meshlabplugins/edit_referencing
-#		meshlabplugins/edit_quality
+		meshlabplugins/edit_pickpoints
+		meshlabplugins/edit_point
+		meshlabplugins/edit_referencing
+		meshlabplugins/edit_quality
 		meshlabplugins/edit_select
 	)
 endif()
