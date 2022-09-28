@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "edit_align.h"
-#include <QGLWidget>
 #include "AlignPairDialog.h"
 #include <QLabel>
 #include <QDialogButtonBox>
