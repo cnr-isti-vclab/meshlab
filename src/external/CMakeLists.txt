@@ -42,6 +42,9 @@ if ((NOT BUILD_MESHLAB_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 	# cgal - optional for filter_mesh_booleans
 	include(${CMAKE_CURRENT_SOURCE_DIR}/cgal.cmake)
 
+	# embree - optional for filter_embree
+	include(${CMAKE_CURRENT_SOURCE_DIR}/embree.cmake)
+
 	# levmar - optional, for several plugins
 	include(${CMAKE_CURRENT_SOURCE_DIR}/levmar.cmake)
 

@@ -34,15 +34,6 @@ endif()
 find_package(OpenMP)
 find_package(Threads)
 
-# looking for embree for the filter_embree
-FIND_PACKAGE(embree 3.0 REQUIRED)
-INCLUDE_DIRECTORIES(${EMBREE_INCLUDE_DIRS})
-FIND_PACKAGE( tbb REQUIRED )
-INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
-
-
-
-
 message(STATUS "Searching for required components with bundled fallback")
 find_package(GLEW)
 find_package(Eigen3)
