@@ -17,3 +17,7 @@ rm CGAL-5.2.1.zip
 wget https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip
 unzip -o CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip -d CGAL-5.2.1/
 rm CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip
+
+wget https://github.com/embree/embree/archive/refs/tags/v3.13.5.zip
+unzip -o embree-3.13.5.zip
+rm embree-3.13.5.zip

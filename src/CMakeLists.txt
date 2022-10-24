@@ -163,6 +163,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_colorproc
 		meshlabplugins/filter_create
 		meshlabplugins/filter_dirt
+		meshlabplugins/filter_embree
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
 		meshlabplugins/filter_img_patch_param
@@ -191,7 +192,6 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_trioptimize
 		meshlabplugins/filter_unsharp
 		meshlabplugins/filter_voronoi
-		meshlabplugins/filter_embree
 
 		# Rendering and Decoration Plugins
 		meshlabplugins/render_gdp
