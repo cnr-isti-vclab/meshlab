@@ -22,21 +22,9 @@ Expand-Archive -Path CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip -Destinat
 Remove-Item CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip
 
 # embree
-Invoke-WebRequest -Uri "https://github.com/embree/embree/archive/refs/tags/v3.13.5.zip" -OutFile "embree-3.13.5.zip"
+Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v3.13.5/embree-3.13.5.x64.vc14.windows.zip" -OutFile "embree-3.13.5.zip"
 Expand-Archive -Path embree-3.13.5.zip -DestinationPath .\
 Remove-Item embree-3.13.5.zip
-
-# ispc
-Invoke-WebRequest -Uri "https://github.com/ispc/ispc/releases/download/v1.18.0/ispc-v1.18.0-windows.zip" -OutFile "ispc-1.18.0.zip"
-Expand-Archive -Path ispc-1.18.0.zip -DestinationPath .\
-Remove-Item ispc-1.18.0.zip
-
-# tbb
-Invoke-WebRequest -Uri "https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip" -OutFile "tbb-2021.6.0.zip"
-Expand-Archive -Path tbb-2021.6.0.zip -DestinationPath .\embree-3.13.5\
-Rename-Item .\embree-3.13.5\oneapi-tbb-2021.6.0\ tbb
-Remove-Item tbb-2021.6.0.zip
-
 
 #going back to original location
 cd $DIR
