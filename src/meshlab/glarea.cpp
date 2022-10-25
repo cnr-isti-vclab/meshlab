@@ -2242,9 +2242,9 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
 
 	// in MeshLab, fov < 5.0 means orthographic camera
 	if (fov > 5.0)
-		shot.Intrinsics.cameraType = 0; //perspective
+		shot.Intrinsics.cameraType = Shotm::CameraType::CameraType::PERSPECTIVE; //perspective
 	else
-		shot.Intrinsics.cameraType = 1; //orthographic
+		shot.Intrinsics.cameraType = Shotm::CameraType::CameraType::ORTHO; //orthographic
 
     float cameraDist = getCameraDistance();
 
