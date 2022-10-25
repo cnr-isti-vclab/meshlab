@@ -15,7 +15,7 @@ if(ALLOW_SYSTEM_EMBREE AND TARGET embree AND TBB_FOUND)
 	message(STATUS "- embree - using system-provided library")
 	add_library(external-embree INTERFACE)
 	target_link_libraries(external-embree INTERFACE embree tbb)
-elseif(ALLOW_BUNDLED_EMBREE AND WIN32 AND EXISTS "${EMBREE_DIR}/lib/embree3.lib")
+elseif(ALLOW_BUNDLED_EMBREE AND WIN32 AND EXISTS "${EMBREE_WIN_DIR}/lib/embree3.lib")
 	message(STATUS "- embree - using bundled dll")
 
 	set(TBB_DIR "${TBB_WIN_DIR}/lib/cmake/tbb")
@@ -24,6 +24,24 @@ elseif(ALLOW_BUNDLED_EMBREE AND WIN32 AND EXISTS "${EMBREE_DIR}/lib/embree3.lib"
 
 	add_library(external-embree INTERFACE)
 	target_link_libraries(external-embree INTERFACE embree)
+
+	if (DEFINED MESHLAB_LIB_OUTPUT_DIR)
+		file(
+			COPY
+			    ${EMBREE_WIN_DIR}/bin/embree3.dll
+				${EMBREE_WIN_DIR}/bin/tbb12.dll
+			DESTINATION
+			    ${MESHLAB_LIB_OUTPUT_DIR})
+	endif()
+	if (DEFINED MESHLAB_LIB_INSTALL_DIR)
+		install(
+			FILES
+			    ${EMBREE_WIN_DIR}/bin/embree3.dll
+				${EMBREE_WIN_DIR}/bin/tbb12.dll
+			DESTINATION
+			    ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
+
 else()
 	message(STATUS "- embree - skipping embree library")
 endif()
