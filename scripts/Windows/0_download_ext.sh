@@ -21,6 +21,11 @@ wget https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1-win64-auxi
 unzip -o CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip -d CGAL-5.2.1/
 rm CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip
 
+# tbb
+wget https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip
+unzip -o oneapi-tbb-2021.6.0-win.zip
+rm oneapi-tbb-2021.6.0-win.zip
+
 # embree
 wget https://github.com/embree/embree/releases/download/v3.13.5/embree-3.13.5.x64.vc14.windows.zip
 unzip -o embree-3.13.5.x64.vc14.windows.zip

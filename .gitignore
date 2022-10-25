@@ -22,6 +22,7 @@ install/*
 src/external/boost_1_75_0
 src/external/CGAL-5.2.1
 src/external/embree-3.13.5.x64.vc14.windows
+src/external/oneapi-tbb-2021.6.0
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe

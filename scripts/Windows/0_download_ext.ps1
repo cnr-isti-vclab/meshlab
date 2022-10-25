@@ -21,6 +21,11 @@ Invoke-WebRequest -Uri "https://github.com/CGAL/cgal/releases/download/v5.2.1/CG
 Expand-Archive -Path CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip -DestinationPath .\CGAL-5.2.1\ -Force
 Remove-Item CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip
 
+# tbb
+Invoke-WebRequest -Uri "https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip" -OutFile "oneapi-tbb-2021.6.0-win.zip"
+Expand-Archive -Path oneapi-tbb-2021.6.0-win.zip -DestinationPath .\
+Remove-Item oneapi-tbb-2021.6.0-win.zip
+
 # embree
 Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v3.13.5/embree-3.13.5.x64.vc14.windows.zip" -OutFile "embree-3.13.5.zip"
 Expand-Archive -Path embree-3.13.5.zip -DestinationPath .\
