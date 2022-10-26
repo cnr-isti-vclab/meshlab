@@ -10,6 +10,8 @@ find_package(TBB)
 
 set(TBB_WIN_DIR "${CMAKE_CURRENT_LIST_DIR}/oneapi-tbb-2021.6.0")
 set(EMBREE_WIN_DIR "${CMAKE_CURRENT_LIST_DIR}/embree-3.13.5.x64.vc14.windows")
+set(EMBREE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/embree-3.13.5")
+set(ISPC_DIR "${CMAKE_CURRENT_LIST_DIR}/ispc-v1.18.1-linux")
 
 if(ALLOW_SYSTEM_EMBREE AND TARGET embree AND TBB_FOUND)
 	message(STATUS "- embree - using system-provided library")
@@ -41,7 +43,18 @@ elseif(ALLOW_BUNDLED_EMBREE AND WIN32 AND EXISTS "${EMBREE_WIN_DIR}/lib/embree3.
 			DESTINATION
 			    ${MESHLAB_LIB_INSTALL_DIR})
 	endif()
+elseif(ALLOW_BUNDLED_EMBREE AND (UNIX AND NOT APPLE) AND EXISTS "${EMBREE_SRC_DIR}/CMakeLists.txt" )
+	message(STATUS "- embree - using bundled source")
 
+	if (EXISTS "${ISPC_DIR}/bin/ispc")
+		set(EMBREE_ISPC_EXECUTABLE "${ISPC_DIR}/bin/ispc")
+	else()
+		set(EMBREE_ISPC_SUPPORT OFF)
+	endif()
+
+	add_subdirectory(${EMBREE_SRC_DIR})
+	add_library(external-embree INTERFACE)
+	target_link_libraries(external-embree INTERFACE embree)
 else()
 	message(STATUS "- embree - skipping embree library")
 endif()
