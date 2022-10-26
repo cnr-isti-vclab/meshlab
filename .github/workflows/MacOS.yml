@@ -45,6 +45,8 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
+        LDFLAGS="-L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++"
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
     - name: Deploy
       shell: bash
