@@ -8,7 +8,7 @@ if (TARGET external-embree)
 
 	add_meshlab_plugin(filter_embree ${SOURCES} ${HEADERS})
 
-	target_link_libraries(filter_embree PRIVATE external-embree)
+	target_link_libraries(filter_embree PRIVATE external-embree OpenMP::OpenMP_CXX)
 else()
 	message(
 		STATUS "Skipping filter_embree - don't know about embree or omp on this system.")
