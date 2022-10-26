@@ -52,9 +52,16 @@ elseif(ALLOW_BUNDLED_EMBREE AND (UNIX AND NOT APPLE) AND EXISTS "${EMBREE_SRC_DI
 		set(EMBREE_ISPC_SUPPORT OFF)
 	endif()
 
+	set(EMBREE_TUTORIALS OFF)
+
+	set(MESSAGE_QUIET ON)
 	add_subdirectory(${EMBREE_SRC_DIR} EXCLUDE_FROM_ALL)
+	unset(MESSAGE_QUIET)
+
 	add_library(external-embree INTERFACE)
 	target_link_libraries(external-embree INTERFACE embree)
+
+	install(TARGETS embree DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 else()
 	message(STATUS "- embree - skipping embree library")
 endif()
