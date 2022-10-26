@@ -20,7 +20,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install libomp cgal xerces-c embree
+        brew install libomp cgal xerces-c tbb embree
         npm install -g appdmg
     - name: Cache Qt
       id: cache-qt
