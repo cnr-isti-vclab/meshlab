@@ -29,5 +29,4 @@ elseif(ALLOW_BUNDLED_XERCES AND EXISTS "${XERCES_DIR}/CMakeLists.txt")
 		external-xerces INTERFACE
 		${XERCES_DIR}/src
 		${CMAKE_CURRENT_BINARY_DIR}/xerces/src)
-
 endif()

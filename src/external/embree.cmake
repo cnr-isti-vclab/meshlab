@@ -52,7 +52,7 @@ elseif(ALLOW_BUNDLED_EMBREE AND (UNIX AND NOT APPLE) AND EXISTS "${EMBREE_SRC_DI
 		set(EMBREE_ISPC_SUPPORT OFF)
 	endif()
 
-	add_subdirectory(${EMBREE_SRC_DIR})
+	add_subdirectory(${EMBREE_SRC_DIR} EXCLUDE_FROM_ALL)
 	add_library(external-embree INTERFACE)
 	target_link_libraries(external-embree INTERFACE embree)
 else()
