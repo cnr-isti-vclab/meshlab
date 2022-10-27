@@ -45,13 +45,13 @@ jobs:
       id: cache-qt
       uses: actions/cache@v3
       with:
-        path: ../Qt
+        path: $GITHUB_WORKSPACE/../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
+        cache: true
+        version: ${{ env.QT_VERSION }}
     - name: Install dependencies
       run: |
         bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
@@ -106,13 +106,13 @@ jobs:
       id: cache-qt
       uses: actions/cache@v3
       with:
-        path: ../Qt
+        path: $GITHUB_WORKSPACE/../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
+        cache: true
+        version: ${{ env.QT_VERSION }}
     - name: Setup env variables
       id: envs
       shell: bash
@@ -182,13 +182,13 @@ jobs:
       id: cache-qt
       uses: actions/cache@v3
       with:
-        path: ../Qt
+        path: $GITHUB_WORKSPACE/../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
+        cache: true
+        version: ${{ env.QT_VERSION }}
     - name: Setup env variables
       shell: bash
       id: envs

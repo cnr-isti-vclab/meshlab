@@ -19,16 +19,10 @@ jobs:
         submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v3
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        cache: ${{ steps.cache-qt.outputs.cache-hit }}
+        cache: true
         version: ${{ env.QT_VERSION }}
     - name: Setup env variables
       shell: bash
