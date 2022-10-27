@@ -31,7 +31,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        cache: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ env.QT_VERSION }}
     - name: Setup env variables
       id: envs
