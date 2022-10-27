@@ -15,7 +15,7 @@ jobs:
         precision: [single_precision, double_precision]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
@@ -24,12 +24,12 @@ jobs:
         npm install -g appdmg
     - name: Cache Qt
       id: cache-qt
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ env.QT_VERSION }}
@@ -55,12 +55,12 @@ jobs:
       run: |
         bash scripts/${{ runner.os }}/3_dmg.sh
     - name: Upload MeshLab Portable
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/MeshLab*.app
     - name: Upload DMG
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
         path: install/MeshLab*.dmg

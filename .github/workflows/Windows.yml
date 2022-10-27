@@ -14,19 +14,19 @@ jobs:
         precision: [single_precision, double_precision]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Cache Qt
       id: cache-qt
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ env.QT_VERSION }}
@@ -61,7 +61,7 @@ jobs:
       run: |
         bash scripts/${{ runner.os }}/internal/nsis_script.sh
     - name: Create Installer
-      uses: joncloud/makensis-action@v1
+      uses: joncloud/makensis-action@v3.7
       with:
         script-file: "install/meshlab_final.nsi"
     - name: Move Installer
@@ -73,12 +73,12 @@ jobs:
         rm install/ExecWaitJob.nsh
         rm install/FileAssociation.nsh
     - name: Uploading MeshLab Portable
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_windows_portable${{steps.envs.outputs.artifact_suffix}}
         path: install
     - name: Upload Meshlab Installer
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
         path: installer/MeshLab*-windows.exe
