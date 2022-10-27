@@ -37,10 +37,14 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
+    - name: Ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --ccache
     - name: Deploy and AppImage
       shell: bash
       run: |

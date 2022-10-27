@@ -19,6 +19,7 @@ INSTALL_PATH=$SOURCE_PATH/../install
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 QT_DIR=""
+CCACHE=""
 
 #check parameters
 for i in "$@"
@@ -42,6 +43,10 @@ case $i in
         ;;
     -qt=*|--qt_dir=*)
         QT_DIR=${i#*=}
+        shift # past argument=value
+        ;;
+    --ccache)
+        CCACHE="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
         shift # past argument=value
         ;;
     *)
@@ -71,6 +76,6 @@ then
     export Qt5_DIR=$QT_DIR
 fi
 
-cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $CCACHE $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 ninja
 ninja install
