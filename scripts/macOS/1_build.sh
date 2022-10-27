@@ -75,11 +75,12 @@ fi
 
 if [ "$USE_BREW_LLVM" = true ] ; then
     export PATH="$(brew --prefix llvm)/bin:$PATH";
-    export COMPILER=/usr/local/opt/llvm/bin/clang++
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+    export COMPILER=${CXX}
     export CFLAGS="-I /usr/local/include -I/usr/local/opt/llvm/include"
     export CXXFLAGS="-I /usr/local/include -I/usr/local/opt/llvm/include"
     export LDFLAGS="-L /usr/local/lib -L/usr/local/opt/llvm/lib"
-    export CXX=${COMPILER}
 fi
 
 cd $BUILD_PATH
