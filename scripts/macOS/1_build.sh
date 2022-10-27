@@ -20,6 +20,7 @@ INSTALL_PATH=$SOURCE_PATH/../install
 CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
+USE_BREW_LLVM=false
 QT_DIR=""
 
 #check parameters
@@ -50,6 +51,10 @@ case $i in
         QT_DIR=${i#*=}
         shift # past argument=value
         ;;
+    --use_brew_llvm)
+        USE_BREW_LLVM=true
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
@@ -66,6 +71,16 @@ fi
 if ! [ -d $INSTALL_PATH ]
 then
     mkdir -p $INSTALL_PATH
+fi
+
+if [ "$USE_BREW_LLVM" = true ] ; then
+    export PATH="$(brew --prefix llvm)/bin:$PATH";
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+    export COMPILER=${CXX}
+    export CFLAGS="-I /usr/local/include -I/usr/local/opt/llvm/include"
+    export CXXFLAGS="-I /usr/local/include -I/usr/local/opt/llvm/include"
+    export LDFLAGS="-L /usr/local/lib -L/usr/local/opt/llvm/lib"
 fi
 
 cd $BUILD_PATH

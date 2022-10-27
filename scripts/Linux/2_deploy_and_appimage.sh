@@ -41,16 +41,8 @@ fi
 
 chmod +x $INSTALL_PATH/usr/bin/meshlab
 
-ARGUMENTS=""
-
-for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
-do
-    ARGUMENTS="${ARGUMENTS} --executable ${plugin}"
-done
-
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
-  $ARGUMENTS \
   --plugin qt --output appimage
 
 #get version
