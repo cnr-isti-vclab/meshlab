@@ -20,7 +20,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install libomp cgal xerces-c
+        brew install llvm libomp cgal xerces-c
         npm install -g appdmg
     - name: Cache Qt
       id: cache-qt
@@ -45,7 +45,7 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --use_brew_llvm
     - name: Deploy
       shell: bash
       run: |
