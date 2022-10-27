@@ -39,9 +39,9 @@ jobs:
       shell: bash
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
         else
-          echo  ::set-output name=artifact_suffix::""
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
     - name: Configure and Build
       shell: bash

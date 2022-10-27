@@ -62,9 +62,9 @@ jobs:
       shell: bash
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
         else
-          echo  ::set-output name=artifact_suffix::""
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
     - name: Configure and Build
       shell: bash
@@ -118,9 +118,9 @@ jobs:
       shell: bash
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
         else
-          echo  ::set-output name=artifact_suffix::""
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
     - name: Configure and Build
       shell: bash
@@ -194,9 +194,9 @@ jobs:
       id: envs
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
         else
-          echo  ::set-output name=artifact_suffix::""
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC" >> $GITHUB_ENV
     - name: Install wget
@@ -296,11 +296,11 @@ jobs:
         STR_VERSION=$(meshlab_linux_portable/usr/bin/meshlab --version)
         read -a strarr <<< "$STR_VERSION"
         ML_VERSION=${strarr[1]} #get the meshlab version from the string
-        echo  ::set-output name=ml_version::"$ML_VERSION"
+        echo "ml_version=$ML_VERSION" >> $GITHUB_OUTPUT
         STR_VERSION=$(meshlab_linux_portable_double/usr/bin/meshlab --version)
         read -a strarrd <<< "$STR_VERSION"
         ML_VERSION_D=${strarrd[1]} #get the meshlab version from the string
-        echo  ::set-output name=ml_version_d::"$ML_VERSION_D"
+        echo "ml_version_d=$ML_VERSION_D" >> $GITHUB_OUTPUT
         #access to this variable using ${{steps.envs.outputs.ml_version}} or ${{steps.envs.outputs.ml_version_d}}
     - name: Create MeshLab Portable Linux Archive
       run: |
