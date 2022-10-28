@@ -124,7 +124,7 @@ QString meshlab::defaultShadersPath()
 QString meshlab::logDebugFileName()
 {
 	static QString filename = QDir::homePath() + "/MeshLab" +
-							  QString::fromStdString(meshlab::meshlabVersion()) + " " +
+							  QString::fromStdString(meshlab::meshlabCompleteVersion()) + " " +
 							  QDateTime::currentDateTime().toString() + ".log";
 	return filename;
 }
@@ -145,6 +145,20 @@ ActionSearcher& meshlab::actionSearcherInstance()
 {
 	static ActionSearcher as;
 	return as;
+}
+
+std::string meshlab::meshlabCompleteVersion()
+{
+	std::string ver = meshlabVersion();
+#ifdef MESHLAB_IS_NIGHTLY
+	QFile f(":/resources/git_sha.txt");
+	if (f.open(QFile::ReadOnly | QFile::Text)) {
+		QTextStream in(&f);
+		ver += "_nightly_" + in.readAll().toStdString();
+		f.close();
+	}
+#endif
+	return ver;
 }
 
 pymeshlab::FunctionSet& pymeshlab::functionSetInstance()

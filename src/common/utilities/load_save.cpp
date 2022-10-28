@@ -339,7 +339,7 @@ QImage loadImage(const QString& filename, GLLogStream* log, vcg::CallBackPos* cb
 
 QImage getDummyTexture()
 {
-	return QImage(":/img/dummy.png");
+	return QImage(":/resources/images/dummy.png");
 }
 
 void saveImage(

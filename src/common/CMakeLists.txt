@@ -5,13 +5,14 @@ if (MESHLAB_IS_NIGHTLY_VERSION)
 	# nightly version is in the form:
 	# YYYY.mm[d]_nightly_GIT_SHA1
 	# YYYY and mm are computed by cmake and not read from file
+	# the GIT_SHA1 is stored in file, which will be read at runtime
 	find_package(Git)
 	execute_process(COMMAND
 		"${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=7
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		OUTPUT_VARIABLE GIT_SHA1
 		ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-	set(MESHLAB_VERSION "${MESHLAB_VERSION}_nightly_${GIT_SHA1}")
+	file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/resources/git_sha.txt ${GIT_SHA1})
 else()
 	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 		# YYYY and mm are read from file
@@ -19,18 +20,17 @@ else()
 	endif()
 endif()
 
-# if double precision version, "d" is inserted after 7 chars (YYYY.mmd*)
 if (BUILD_WITH_DOUBLE_SCALAR)
-	string(LENGTH ${MESHLAB_VERSION} MLV_LEN)
-	MATH(EXPR MLV_POSTFIX_LEN "${MLV_LEN}-7") # how many chars there are adter YYYY.mm
-	string(SUBSTRING ${MESHLAB_VERSION} 0 7 MLV_PREFIX)
-	string(SUBSTRING ${MESHLAB_VERSION} 7 ${MLV_POSTFIX_LEN} MLV_POSTFIX)
-	set(MESHLAB_VERSION "${MLV_PREFIX}d${MLV_POSTFIX}")
+	set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 endif()
 
 
 set(MESHLAB_VERSION ${MESHLAB_VERSION} PARENT_SCOPE)
-message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
+if (MESHLAB_IS_NIGHTLY_VERSION)
+	message(STATUS "MeshLab version: ${MESHLAB_VERSION}_nightly_${GIT_SHA1}")
+else()
+	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
+endif()
 
 if (BUILD_WITH_DOUBLE_SCALAR)
 	message(STATUS "Building with double precision")
@@ -137,6 +137,12 @@ target_compile_definitions(meshlab-common
 	PUBLIC
 		MESHLAB_VERSION=${MESHLAB_VERSION}
 		MESHLAB_SCALAR=${MESHLAB_SCALAR})
+
+if (MESHLAB_IS_NIGHTLY_VERSION)
+	target_compile_definitions(meshlab-common
+		PUBLIC
+			MESHLAB_IS_NIGHTLY)
+endif()
 
 target_include_directories(meshlab-common
 	PUBLIC
