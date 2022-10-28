@@ -15,37 +15,35 @@ jobs:
         precision: [single_precision, double_precision]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
       run: |
         brew install llvm libomp cgal xerces-c tbb embree
         npm install -g appdmg
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        cache: true
         version: ${{ env.QT_VERSION }}
     - name: Setup env variables
       id: envs
       shell: bash
       run: |
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
         else
-          echo  ::set-output name=artifact_suffix::""
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
+    - name: Ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --use_brew_llvm
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --use_brew_llvm --ccache
     - name: Deploy
       shell: bash
       run: |
@@ -55,12 +53,12 @@ jobs:
       run: |
         bash scripts/${{ runner.os }}/3_dmg.sh
     - name: Upload MeshLab Portable
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/MeshLab*.app
     - name: Upload DMG
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
         path: install/MeshLab*.dmg
