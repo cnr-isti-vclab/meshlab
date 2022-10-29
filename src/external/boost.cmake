@@ -7,7 +7,6 @@ option(MESHLAB_ALLOW_SYSTEM_BOOST "Allow use of system-provided boost" ON)
 
 find_package(Boost COMPONENTS thread)
 
-
 if(MESHLAB_ALLOW_SYSTEM_BOOST AND TARGET Boost::boost)
 	message(STATUS "- Boost - using system-provided library")
 	add_library(external-boost INTERFACE)
@@ -15,22 +14,22 @@ if(MESHLAB_ALLOW_SYSTEM_BOOST AND TARGET Boost::boost)
 	if (TARGET Boost::thread)
 		target_link_libraries(external-boost INTERFACE Boost::thread)
 	endif()
-elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_BOOST )
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_BOOST)
 	set(BOOST_DIR ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0)
+	set(BOOST_ZIP ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0.zip)
 
 	if (NOT EXISTS "${BOOST_DIR}/boost/version.hpp")
-		message("Downloading Boost....")
+		message("Downloading Boost...")
 		set(BOOST_LINK https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.zip)
 
-
-		file(DOWNLOAD ${BOOST_LINK} ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0.zip)
+		file(DOWNLOAD ${BOOST_LINK} ${BOOST_ZIP})
 		message("Boost downloaded.")
 		message("Extracting Boost archive...")
 		file(ARCHIVE_EXTRACT
-			INPUT ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0.zip
+			INPUT ${BOOST_ZIP}
 			DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 		message("Boost archive extracted.")
-		file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0.zip)
+		file(REMOVE ${BOOST_ZIP})
 	endif()
 
 	message(STATUS "- Boost - using downloaded source")
