@@ -1,6 +1,7 @@
 # Copyright 2019, 2021, Collabora, Ltd.
 # Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
+
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL "Allow download and use of bundled CGAL source" ON)
 option(MESHLAB_ALLOW_SYSTEM_CGAL "Allow use of system-provided CGAL" ON)
 
@@ -15,38 +16,16 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 	set(CGAL_DIR "${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1")
 
 	if (NOT EXISTS "${CGAL_DIR}/include/CGAL/version.h")
-		message("Downloading CGAL...")
 		set(CGAL_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1.zip)
-		set(CGAL_ZIP ${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1.zip)
-
-		file(DOWNLOAD ${CGAL_LINK} ${CGAL_ZIP})
-		message("CGAL downloaded.")
-		message("Extracting CGAL archive...")
-		file(ARCHIVE_EXTRACT
-			INPUT ${CGAL_ZIP}
-			DESTINATION ${CMAKE_CURRENT_LIST_DIR})
-		message("CGAL archive extracted.")
-		file(REMOVE ${CGAL_ZIP})
+		download_and_unzip(${CGAL_LINK} ${CMAKE_CURRENT_LIST_DIR} "CGAL")
 
 		if (WIN32)
-			message("Downloading CGAL auxiliary libraries (gmp and mpfr)...")
 			set(CGAL_AUX_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip)
-			set(CGAL_AUX_LINK_ZIP ${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip)
-
-			file(DOWNLOAD ${CGAL_AUX_LINK} ${CGAL_AUX_LINK_ZIP})
-			message("CGAL auxiliary libraries downloaded.")
-			message("Extracting CGAL auxiliary libraries archive...")
-			file(ARCHIVE_EXTRACT
-				INPUT ${CGAL_AUX_LINK_ZIP}
-				DESTINATION ${CGAL_DIR})
-			message("CGAL auxiliary libraries archive extracted.")
-			file(REMOVE ${CGAL_AUX_LINK_ZIP})
+			download_and_unzip(${CGAL_AUX_LINK} ${CGAL_DIR} "CGAL auxiliary libraries")
 		endif()
 	endif()
 
-
-
-	message(STATUS "- CGAL - using bundled source")
+	message(STATUS "- CGAL - using downloaded source")
 	add_library(external-cgal INTERFACE)
 	target_include_directories(external-cgal INTERFACE "${CGAL_DIR}/include/")
 	
