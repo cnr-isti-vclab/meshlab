@@ -48,7 +48,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
     - name: Install dependencies
       run: |
-        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
+        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dont_install_cgal_and_boost
         #needed by qt 5.15 on linux
         sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
@@ -181,19 +181,11 @@ jobs:
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
         echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC" >> $GITHUB_ENV
-    - name: Install wget
-      run: |
-        $env:PATH = "${{ env.PATH }};C:\msys64\mingw64\bin;C:\msys64\usr\bin"
-        pacman.exe -S --noconfirm --noprogressbar wget unzip
     - name: Set Certificate
       run: |
         New-Item -ItemType directory -Path certificate
         Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
         certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Download external libraries
-      shell: C:\shells\msys2bash.cmd {0}
-      run: |
-        bash scripts/${{ runner.os }}/0_download_ext.sh
     - name: Configure and Build
       shell: bash
       run: |
