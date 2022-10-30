@@ -1,19 +1,31 @@
 # Copyright 2019, 2021, Collabora, Ltd.
 # Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
-option(ALLOW_BUNDLED_CGAL "Allow use of bundled CGAL source" ON)
-option(ALLOW_SYSTEM_CGAL "Allow use of system-provided CGAL" ON)
+
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL "Allow download and use of bundled CGAL source" ON)
+option(MESHLAB_ALLOW_SYSTEM_CGAL "Allow use of system-provided CGAL" ON)
 
 find_package(Threads REQUIRED)
 find_package(CGAL)
-set(CGAL_DIR "${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1")
 
-if(ALLOW_SYSTEM_CGAL AND TARGET CGAL::CGAL)
+if(MESHLAB_ALLOW_SYSTEM_CGAL AND TARGET CGAL::CGAL)
 	message(STATUS "- CGAL - using system-provided library")
 	add_library(external-cgal INTERFACE)
 	target_link_libraries(external-cgal INTERFACE CGAL::CGAL Threads::Threads)
-elseif(ALLOW_BUNDLED_CGAL AND EXISTS "${CGAL_DIR}/include/CGAL/version.h")
-	message(STATUS "- CGAL - using bundled source")
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
+	set(CGAL_DIR "${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1")
+
+	if (NOT EXISTS "${CGAL_DIR}/include/CGAL/version.h")
+		set(CGAL_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1.zip)
+		download_and_unzip(${CGAL_LINK} ${CMAKE_CURRENT_LIST_DIR} "CGAL")
+
+		if (WIN32)
+			set(CGAL_AUX_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip)
+			download_and_unzip(${CGAL_AUX_LINK} ${CGAL_DIR} "CGAL auxiliary libraries")
+		endif()
+	endif()
+
+	message(STATUS "- CGAL - using downloaded source")
 	add_library(external-cgal INTERFACE)
 	target_include_directories(external-cgal INTERFACE "${CGAL_DIR}/include/")
 	
