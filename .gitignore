@@ -25,6 +25,7 @@ install/*
 # external libraries automatically downloaded by cmake
 src/external/boost*
 src/external/CGAL*
+src/external/easyexif*
 src/external/libigl*
 
 # files created/modified during deploy stage

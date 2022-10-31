@@ -158,7 +158,7 @@ target_link_libraries(
 		Qt5::Network
 		vcglib
 		external-glew
-		external-exif
+		external-easyexif
 )
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)
