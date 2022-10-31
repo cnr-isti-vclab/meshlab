@@ -2,28 +2,26 @@
 # Copyright 2019, 2020, 2021 Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_LIBE57_FORMAT "Allow use of bundled libE57Format source" ON)
-option(ALLOW_SYSTEM_LIBE57_FORMAT "Allow use of system-provided libE57Format" ON)
-
-set(E57Format_DIR ${EXTERNAL_DIR}/e57)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57 "Allow download and use of libE57Format source" ON)
 
 if (TARGET external-xerces)
-	if(ALLOW_SYSTEM_LIBE57_FORMAT AND TARGET E57Format::E57Format)
+	if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57)
 
-		message(STATUS "- libE57Format - using system-provided library")
-		add_library(external-libE57Format INTERFACE)
-		target_link_libraries(external-libE57Format INTERFACE E57Format::E57Format)
+		set(LIBE57_DIR ${CMAKE_CURRENT_LIST_DIR}/libE57Format-2.3.0)
 
-	elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
+		if (NOT EXISTS ${LIBE57_DIR}/CMakeLists.txt)
+			set(LIBE57_LINK https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip)
+			download_and_unzip(${LIBE57_LINK} ${CMAKE_CURRENT_LIST_DIR} "LibE57")
+		endif()
 
-		message(STATUS "- libE57Format - using bundled source")
+		message(STATUS "- libE57 - using downloaded source")
 
 		set(MESSAGE_QUIET ON)
-		add_subdirectory(e57 EXCLUDE_FROM_ALL)
+		add_subdirectory(${LIBE57_DIR} EXCLUDE_FROM_ALL)
 		unset(MESSAGE_QUIET)
 
-		add_library(external-libE57Format INTERFACE)
-		target_link_libraries(external-libE57Format INTERFACE E57Format)
+		add_library(external-libE57 INTERFACE)
+		target_link_libraries(external-libE57 INTERFACE E57Format)
 
 	endif()
 endif()

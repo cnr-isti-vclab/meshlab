@@ -27,7 +27,7 @@
 
 #include <common/plugins/interfaces/io_plugin.h>
 #include <common/ml_document/mesh_model.h>
-#include <external/e57/include/E57Format.h>
+
 #include <E57SimpleReader.h>
 
 typedef typename CMeshO::VertexIterator VertexIterator;
