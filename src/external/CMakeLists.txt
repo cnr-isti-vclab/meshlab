@@ -12,6 +12,8 @@ option(
 	"Should warnings be disabled on bundled source code?"
 	ON)
 
+set(MESHLAB_EXTERNAL_DOWNLOAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/downloads/")
+
 add_library(external-disable-warnings INTERFACE)
 if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
 	if(MSVC)

@@ -24,11 +24,11 @@ if(MESHLAB_ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
 		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
 	endif()
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
-	set(GLEW_DIR ${CMAKE_CURRENT_LIST_DIR}/glew-2.2.0)
+	set(GLEW_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/glew-2.2.0)
 
 	if (NOT EXISTS "${GLEW_DIR}/src/glew.c")
 		set(GLEW_LINK https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
-		download_and_unzip(${GLEW_LINK} ${CMAKE_CURRENT_LIST_DIR} "GLEW")
+		download_and_unzip(${GLEW_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "GLEW")
 	endif()
 
 	message(STATUS "- GLEW - using downloaded source")

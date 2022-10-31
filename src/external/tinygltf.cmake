@@ -5,11 +5,11 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_TINYGLTF "Allow download and use of tinyglTF source" ON)
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_TINYGLTF)
-	set(TINYGLTF_DIR ${CMAKE_CURRENT_LIST_DIR}/tinygltf-2.6.3)
+	set(TINYGLTF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/tinygltf-2.6.3)
 
 	if (NOT EXISTS "${TINYGLTF_DIR}/tiny_gltf.h")
 		set(TINYGLTF_LINK https://github.com/syoyo/tinygltf/archive/refs/tags/v2.6.3.zip)
-		download_and_unzip(${TINYGLTF_LINK} ${CMAKE_CURRENT_LIST_DIR} "tinygltf")
+		download_and_unzip(${TINYGLTF_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "tinygltf")
 	endif()
 
 	message(STATUS "- tiny glTF - using downloaded source")
