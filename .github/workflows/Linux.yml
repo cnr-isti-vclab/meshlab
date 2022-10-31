@@ -37,6 +37,12 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
+    - name: Cache external libraries sources
+      id: cache-ext-libs
+      uses: actions/cache@v3
+      with:
+        path: src/external/downloads/*
+        key: ${{ runner.os }}-external-libraries
     - name: Ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:

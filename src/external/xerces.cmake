@@ -35,7 +35,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	target_include_directories(
 		external-xerces INTERFACE
 		${XERCES_C_DIR}/src
-		${CMAKE_CURRENT_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
+		${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
 	add_library(XercesC::XercesC ALIAS external-xerces)
 
 endif()
