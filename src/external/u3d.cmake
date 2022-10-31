@@ -2,12 +2,20 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_U3D "Allow use of bundled u3d source" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D "Allow download and use of u3d source" ON)
 
-if(ALLOW_BUNDLED_U3D AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/u3d/CMakeLists.txt")
+if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
+	# todo - make release of u3d
+	set(U3D_DIR ${CMAKE_CURRENT_LIST_DIR}/u3d-master)
+
+	if (NOT EXISTS ${U3D_DIR}/CMakeLists.txt)
+		set(U3D_LINK https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip)
+		download_and_unzip(${U3D_LINK} ${CMAKE_CURRENT_LIST_DIR} "u3d")
+	endif()
+
 	message(STATUS "- u3d - using bundled source")
 
 	set(MESSAGE_QUIET ON)
-	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/u3d)
+	add_subdirectory(${U3D_DIR})
 	unset(MESSAGE_QUIET)
 endif()

@@ -29,6 +29,7 @@ src/external/easyexif*
 src/external/libigl*
 src/external/libE57Format*
 src/external/xerces-c*
+src/external/u3d*
 
 # files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
