@@ -27,6 +27,7 @@ src/external/boost*
 src/external/CGAL*
 src/external/libigl*
 src/external/libE57Format*
+src/external/xerces-c*
 
 # files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json

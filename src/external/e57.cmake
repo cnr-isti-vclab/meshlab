@@ -4,7 +4,7 @@
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57 "Allow download and use of libE57Format source" ON)
 
-if (TARGET external-xerces)
+if (TARGET XercesC::XercesC)
 	if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57)
 
 		set(LIBE57_DIR ${CMAKE_CURRENT_LIST_DIR}/libE57Format-2.3.0)
@@ -22,6 +22,7 @@ if (TARGET external-xerces)
 
 		add_library(external-libE57 INTERFACE)
 		target_link_libraries(external-libE57 INTERFACE E57Format)
-
 	endif()
+else()
+	message(STATUS - "Cannot build e57 because Xerces dependence not satisfied.")
 endif()
