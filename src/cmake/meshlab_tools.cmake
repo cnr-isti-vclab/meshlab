@@ -38,15 +38,15 @@ endfunction()
 function(download_and_unzip link dir name)
 	set(ZIP ${CMAKE_CURRENT_LIST_DIR}/tmp.zip)
 
-	message("Downloading ${name}...")
+	message(STATUS "Downloading ${name}...")
 
 	file(DOWNLOAD ${link} ${ZIP})
-	message("${name} downloaded.")
-	message("Extracting ${name} archive...")
+	message(STATUS "${name} downloaded.")
+	message(STATUS "Extracting ${name} archive...")
 	file(ARCHIVE_EXTRACT
 		INPUT ${ZIP}
 		DESTINATION ${dir})
-	message("${name} archive extracted.")
+	message(STATUS "${name} archive extracted.")
 	file(REMOVE ${ZIP})
 endfunction()
 

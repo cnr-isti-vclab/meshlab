@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
-   <!-- test including a resource that isn't there, when parse="text" -->
-   <!-- EXPECT FAILURE -->
-   [Warning] test26.xml:9:48
-[Fatal Error] test26.xml:9:48

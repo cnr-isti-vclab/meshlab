@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test DOMCount3 pass "" samples/DOMCount -n -s personal-schema.xml

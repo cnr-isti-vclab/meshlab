@@ -25,7 +25,12 @@ install/*
 # external libraries automatically downloaded by cmake
 src/external/boost*
 src/external/CGAL*
+src/external/easyexif*
 src/external/libigl*
+src/external/libE57Format*
+src/external/tinygltf*
+src/external/u3d*
+src/external/xerces-c*
 
 # files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
