@@ -13,11 +13,11 @@ if(MESHLAB_ALLOW_SYSTEM_CGAL AND TARGET CGAL::CGAL)
 	add_library(external-cgal INTERFACE)
 	target_link_libraries(external-cgal INTERFACE CGAL::CGAL Threads::Threads)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
-	set(CGAL_DIR "${CMAKE_CURRENT_LIST_DIR}/CGAL-5.2.1")
+	set(CGAL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/CGAL-5.2.1")
 
 	if (NOT EXISTS "${CGAL_DIR}/include/CGAL/version.h")
 		set(CGAL_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1.zip)
-		download_and_unzip(${CGAL_LINK} ${CMAKE_CURRENT_LIST_DIR} "CGAL")
+		download_and_unzip(${CGAL_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "CGAL")
 
 		if (WIN32)
 			set(CGAL_AUX_LINK https://github.com/CGAL/cgal/releases/download/v5.2.1/CGAL-5.2.1-win64-auxiliary-libraries-gmp-mpfr.zip)

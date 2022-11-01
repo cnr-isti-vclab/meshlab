@@ -6,11 +6,11 @@ option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D "Allow download and use of u3d source" 
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
 	# todo - make release of u3d
-	set(U3D_DIR ${CMAKE_CURRENT_LIST_DIR}/u3d-master)
+	set(U3D_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/u3d-master)
 
 	if (NOT EXISTS ${U3D_DIR}/CMakeLists.txt)
 		set(U3D_LINK https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip)
-		download_and_unzip(${U3D_LINK} ${CMAKE_CURRENT_LIST_DIR} "u3d")
+		download_and_unzip(${U3D_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "u3d")
 	endif()
 
 	message(STATUS "- u3d - using bundled source")

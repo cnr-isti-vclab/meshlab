@@ -6,12 +6,11 @@ option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57 "Allow download and use of libE57For
 
 if (TARGET XercesC::XercesC)
 	if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57)
-
-		set(LIBE57_DIR ${CMAKE_CURRENT_LIST_DIR}/libE57Format-2.3.0)
+		set(LIBE57_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/libE57Format-2.3.0)
 
 		if (NOT EXISTS ${LIBE57_DIR}/CMakeLists.txt)
 			set(LIBE57_LINK https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip)
-			download_and_unzip(${LIBE57_LINK} ${CMAKE_CURRENT_LIST_DIR} "LibE57")
+			download_and_unzip(${LIBE57_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "LibE57")
 		endif()
 
 		message(STATUS "- libE57 - using downloaded source")

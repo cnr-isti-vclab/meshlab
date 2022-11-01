@@ -15,12 +15,11 @@ if(MESHLAB_ALLOW_SYSTEM_BOOST AND TARGET Boost::boost)
 		target_link_libraries(external-boost INTERFACE Boost::thread)
 	endif()
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_BOOST)
-	set(BOOST_DIR ${CMAKE_CURRENT_LIST_DIR}/boost_1_75_0)
+	set(BOOST_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/boost_1_75_0)
 
 	if (NOT EXISTS "${BOOST_DIR}/boost/version.hpp")
 		set(BOOST_LINK https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.zip)
-
-		download_and_unzip(${BOOST_LINK} ${CMAKE_CURRENT_LIST_DIR} "Boost")
+		download_and_unzip(${BOOST_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "Boost")
 	endif()
 
 	message(STATUS "- Boost - using downloaded source")

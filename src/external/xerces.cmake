@@ -17,11 +17,11 @@ if(MESHLAB_ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
 
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	set(XERCES_C_VER 3.2.4)
-	set(XERCES_C_DIR ${CMAKE_CURRENT_LIST_DIR}/xerces-c-${XERCES_C_VER})
+	set(XERCES_C_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/xerces-c-${XERCES_C_VER})
 
 	if (NOT EXISTS ${XERCES_C_DIR}/CMakeLists.txt)
 		set(XERCES_C_LINK https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-${XERCES_C_VER}.zip)
-		download_and_unzip(${XERCES_C_LINK} ${CMAKE_CURRENT_LIST_DIR} "Xerces-C")
+		download_and_unzip(${XERCES_C_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "Xerces-C")
 	endif()
 
 	message(STATUS "- XercesC - using downloaded source")
@@ -35,7 +35,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	target_include_directories(
 		external-xerces INTERFACE
 		${XERCES_C_DIR}/src
-		${CMAKE_CURRENT_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
+		${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
 	add_library(XercesC::XercesC ALIAS external-xerces)
 
 endif()
