@@ -14,7 +14,7 @@
 
 #include <local_parametrization.h>
 #include <mesh_operators.h>
-#include <lm.h>
+#include <levmar.h>
 #include <uv_grid.h>
 
 #include "opt_patch.h"
