@@ -3,18 +3,25 @@
 # SPDX-License-Identifier: BSL-1.0
 
 
-option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
-option(ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS "Allow download and use of lib3ds source" ON)
+option(MESHLAB_ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
 
 find_package(Lib3ds)
-set(LIB3DS_DIR ${CMAKE_CURRENT_LIST_DIR}/lib3ds-1.3.0)
 
-if(ALLOW_SYSTEM_LIB3DS AND TARGET Lib3ds::Lib3ds)
+if(MESHLAB_ALLOW_SYSTEM_LIB3DS AND TARGET Lib3ds::Lib3ds)
 	message(STATUS "- lib3ds - using system-provided library")
 	add_library(external-lib3ds INTERFACE)
 	target_link_libraries(external-lib3ds INTERFACE Lib3ds::Lib3ds)
-elseif(ALLOW_BUNDLED_LIB3DS AND EXISTS "${LIB3DS_DIR}/lib3ds/types.h")
-	message(STATUS "- lib3ds - using bundled source")
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS)
+	set(LIB3DS_VER 1.3.0)
+	set(LIB3DS_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3ds-${LIB3DS_VER})
+
+	if (NOT EXISTS "${LIB3DS_DIR}/lib3ds/types.h")
+		set(LIB3DS_LINK https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lib3ds/lib3ds-${LIB3DS_VER}.zip)
+		download_and_unzip(${LIB3DS_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "Lib3DS")
+	endif()
+
+	message(STATUS "- lib3ds - using downloaded source")
 	add_library(
 		external-lib3ds STATIC
 		"${LIB3DS_DIR}/lib3ds/atmosphere.c"
@@ -55,8 +62,8 @@ elseif(ALLOW_BUNDLED_LIB3DS AND EXISTS "${LIB3DS_DIR}/lib3ds/types.h")
 		"${LIB3DS_DIR}/lib3ds/vector.h"
 		"${LIB3DS_DIR}/lib3ds/viewport.c"
 		"${LIB3DS_DIR}/lib3ds/viewport.h")
+
 	target_include_directories(external-lib3ds SYSTEM PUBLIC "${LIB3DS_DIR}")
 	target_compile_definitions(external-lib3ds PUBLIC LIB3DS_STATIC)
-	set_property(TARGET external-lib3ds PROPERTY FOLDER External)
 	target_link_libraries(external-lib3ds PRIVATE external-disable-warnings)
 endif()
