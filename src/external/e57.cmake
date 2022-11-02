@@ -21,6 +21,7 @@ if (TARGET XercesC::XercesC)
 
 		add_library(external-libE57 INTERFACE)
 		target_link_libraries(external-libE57 INTERFACE E57Format)
+		install(TARGETS E57Format DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 	endif()
 else()
 	message(STATUS - "Cannot build e57 because Xerces dependence not satisfied.")
