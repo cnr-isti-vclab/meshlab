@@ -22,6 +22,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
 
 	message(STATUS "- muparser - using downloaded source")
 
+	set(BUILD_SHARED_LIBS OFF)
 	set(ENABLE_SAMPLES OFF)
 	set(MESSAGE_QUIET ON)
 	add_subdirectory(${MUPARSER_DIR})
