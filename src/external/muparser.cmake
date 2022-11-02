@@ -27,6 +27,8 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
 	set(MESSAGE_QUIET ON)
 	add_subdirectory(${MUPARSER_DIR})
 	unset(MESSAGE_QUIET)
+	unset(BUILD_SHARED_LIBS)
+	unset(ENABLE_SAMPLES)
 
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser)
