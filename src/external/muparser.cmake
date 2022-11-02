@@ -22,14 +22,13 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
 
 	message(STATUS "- muparser - using downloaded source")
 
-	set(BUILD_SHARED_LIBS OFF)
 	set(ENABLE_SAMPLES OFF)
 	set(MESSAGE_QUIET ON)
 	add_subdirectory(${MUPARSER_DIR})
 	unset(MESSAGE_QUIET)
-	unset(BUILD_SHARED_LIBS)
 	unset(ENABLE_SAMPLES)
 
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser)
+	install(TARGETS external-muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
