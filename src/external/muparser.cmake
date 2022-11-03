@@ -2,7 +2,7 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER "Allow use of bundled muparser source" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER "Allow download and use of muparser source" ON)
 option(MESHLAB_ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 
 find_package(muparser)
