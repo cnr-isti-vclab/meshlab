@@ -28,7 +28,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 	message(STATUS "- CGAL - using downloaded source")
 	add_library(external-cgal INTERFACE)
 	target_include_directories(external-cgal INTERFACE "${CGAL_DIR}/include/")
-	
+
 	if (WIN32)
 		add_library(mpfr SHARED IMPORTED GLOBAL)
 		set_property(TARGET mpfr PROPERTY IMPORTED_IMPLIB "${CGAL_DIR}/auxiliary/gmp/lib/libmpfr-4.lib")
@@ -44,7 +44,6 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 		target_include_directories(external-cgal SYSTEM INTERFACE ${GMP_INCLUDE_DIRS})
 		target_link_libraries(external-cgal INTERFACE ${GMP_LIBRARIES} mpfr Threads::Threads)
 	endif()
-	
 
 	if (WIN32)
 		if (DEFINED MESHLAB_LIB_OUTPUT_DIR)

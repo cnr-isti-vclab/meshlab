@@ -2,31 +2,33 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_MUPARSER "Allow use of bundled muparser source" ON)
-option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER "Allow use of bundled muparser source" ON)
+option(MESHLAB_ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 
 find_package(muparser)
-set(MUPARSER_DIR ${CMAKE_CURRENT_LIST_DIR}/muparser_v225)
 
-if(ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
+if(MESHLAB_ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
 	message(STATUS "- muparser - using system-provided library")
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser::muparser)
-elseif(ALLOW_BUNDLED_MUPARSER AND EXISTS "${MUPARSER_DIR}/src/muParser.cpp")
-	message(STATUS "- muparser - using bundled source")
-	add_library(
-		external-muparser STATIC
-		"${MUPARSER_DIR}/src/muParser.cpp"
-		"${MUPARSER_DIR}/src/muParserBase.cpp"
-		"${MUPARSER_DIR}/src/muParserBytecode.cpp"
-		"${MUPARSER_DIR}/src/muParserCallback.cpp"
-		"${MUPARSER_DIR}/src/muParserDLL.cpp"
-		"${MUPARSER_DIR}/src/muParserError.cpp"
-		"${MUPARSER_DIR}/src/muParserInt.cpp"
-		"${MUPARSER_DIR}/src/muParserTest.cpp"
-		"${MUPARSER_DIR}/src/muParserTokenReader.cpp")
-	target_include_directories(external-muparser SYSTEM PUBLIC ${MUPARSER_DIR}/include)
-	target_compile_definitions(external-muparser PUBLIC _UNICODE)
-	set_property(TARGET external-muparser PROPERTY FOLDER External)
-	target_link_libraries(external-muparser PRIVATE external-disable-warnings)
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
+	set(MUPARSER_VER 2.3.3-1)
+	set(MUPARSER_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/muparser-${MUPARSER_VER})
+
+	if (NOT EXISTS "${MUPARSER_DIR}/src/muParser.cpp")
+		set(MUPARSER_LINK https://github.com/beltoforion/muparser/archive/refs/tags/v${MUPARSER_VER}.zip)
+		download_and_unzip(${MUPARSER_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "muparser")
+	endif()
+
+	message(STATUS "- muparser - using downloaded source")
+
+	set(ENABLE_SAMPLES OFF)
+	set(MESSAGE_QUIET ON)
+	add_subdirectory(${MUPARSER_DIR})
+	unset(MESSAGE_QUIET)
+	unset(ENABLE_SAMPLES)
+
+	add_library(external-muparser INTERFACE)
+	target_link_libraries(external-muparser INTERFACE muparser)
+	install(TARGETS muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
