@@ -10,11 +10,9 @@ find_package(XercesC)
 # https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-3.2.4.zip
 
 if(MESHLAB_ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
-
 	message(STATUS "- XercesC - using system-provided library")
 	add_library(external-xerces INTERFACE)
 	target_link_libraries(external-xerces INTERFACE XercesC::XercesC)
-
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	set(XERCES_C_VER 3.2.4)
 	set(XERCES_C_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/xerces-c-${XERCES_C_VER})
@@ -37,5 +35,5 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 		${XERCES_C_DIR}/src
 		${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
 	add_library(XercesC::XercesC ALIAS external-xerces)
-
+	install(TARGETS xerces-c DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
