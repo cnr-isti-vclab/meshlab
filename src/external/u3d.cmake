@@ -18,4 +18,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
 	set(MESSAGE_QUIET ON)
 	add_subdirectory(${U3D_DIR})
 	unset(MESSAGE_QUIET)
+	install(
+		TARGETS
+			IFXCore
+			IFXExporting
+			IFXScheduling
+			IDTF-to-U3D-converter
+		DESTINATION
+			${MESHLAB_LIB_INSTALL_DIR})
 endif()
