@@ -24,6 +24,7 @@ install/*
 
 # external libraries automatically downloaded by cmake
 src/external/downloads/*
+src/external/tmp.zip
 
 # files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
