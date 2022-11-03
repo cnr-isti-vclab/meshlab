@@ -30,5 +30,5 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
 
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser)
-	install(TARGETS external-muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	install(TARGETS muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
