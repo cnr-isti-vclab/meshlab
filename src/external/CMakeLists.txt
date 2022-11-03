@@ -83,5 +83,4 @@ if ((NOT BUILD_MESHLAB_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 
 	# libe57Format - optional, for io_e57
 	include(${CMAKE_CURRENT_SOURCE_DIR}/e57.cmake)
-
 endif()

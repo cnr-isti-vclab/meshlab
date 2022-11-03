@@ -20,6 +20,8 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
 	set(MESSAGE_QUIET ON)
 	add_subdirectory(${LEVMAR_DIR})
 	unset(MESSAGE_QUIET)
+	unset(HAVE_LAPACK)
+	unset(BUILD_DEMO)
 
 	add_library(external-levmar INTERFACE)
 	target_link_libraries(external-levmar INTERFACE levmar)
