@@ -16,7 +16,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_OPENCTM)
 	set(OPENCTM_CHECK "${OPENCTM_DIR}/lib/openctm.c")
 
 	if (NOT EXISTS ${OPENCTM_CHECK})
-		set(OPENCTM_LINK https://sourceforge.net/projects/openctm/files/OpenCTM-1.0.3/OpenCTM-1.0.3-src.zip/download)
+		set(OPENCTM_LINK
+			https://sourceforge.net/projects/openctm/files/OpenCTM-1.0.3/OpenCTM-1.0.3-src.zip/download
+			https://www.meshlab.net/data/libs/OpenCTM-1.0.3-src.zip)
 		set(OPENCTM_MD5 a87b6a6509ae0712b4a55f8887dc6a54)
 		download_and_unzip(
 			NAME "OpenCTM"

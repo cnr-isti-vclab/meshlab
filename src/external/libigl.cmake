@@ -9,7 +9,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBIGL)
 	set(LIBIGL_CHECK "${LIBIGL_DIR}/include/igl/igl_inline.h")
 
 	if (NOT EXISTS ${LIBIGL_CHECK})
-		set(LIBIGL_LINK https://github.com/libigl/libigl/archive/refs/tags/v2.4.0.zip)
+		set(LIBIGL_LINK
+			https://github.com/libigl/libigl/archive/refs/tags/v2.4.0.zip
+			https://www.meshlab.net/data/libs/libigl-2.4.0.zip)
 		set(LIBIGL_MD5 0b4fea5dba2117b8db85c99a39a71f83)
 		download_and_unzip(
 			NAME "LibIGL"

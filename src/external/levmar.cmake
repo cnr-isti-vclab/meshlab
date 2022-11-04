@@ -9,7 +9,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
 	set(LEVMAR_CHECK "${LEVMAR_DIR}/lm.h")
 
 	if (NOT EXISTS ${LEVMAR_CHECK})
-		set(LEVMAR_LINK http://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz)
+		set(LEVMAR_LINK
+			http://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz
+			https://www.meshlab.net/data/libs/levmar-2.6.tgz)
 		set(LEVMAR_MD5 16bc34efa1617219f241eef06427f13f)
 		download_and_unzip(
 			NAME "Levmar"

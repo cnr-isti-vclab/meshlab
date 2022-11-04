@@ -16,7 +16,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
 	set(QHULL_CHECK "${QHULL_DIR}/src/libqhull_r/libqhull_r.h")
 
 	if (NOT EXISTS ${QHULL_CHECK})
-		set(QHULL_LINK https://github.com/qhull/qhull/archive/refs/tags/2020.2.zip)
+		set(QHULL_LINK
+			https://github.com/qhull/qhull/archive/refs/tags/2020.2.zip
+			https://www.meshlab.net/data/libs/qhull-2020.2.zip)
 		set(QHULL_MD5 a0a9b0e69bdbd9461319b8d2ac3d2f2e)
 		download_and_unzip(
 			NAME "Qhull"

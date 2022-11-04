@@ -10,7 +10,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
 	set(U3D_CHECK "${U3D_DIR}/CMakeLists.txt")
 
 	if (NOT EXISTS ${U3D_CHECK})
-		set(U3D_LINK https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip)
+		set(U3D_LINK
+			https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip
+			https://www.meshlab.net/data/libs/u3d-master.zip)
 		#set(U3D_MD5 3b15b2f75206ea24b8991333562aa9ca)
 		download_and_unzip(
 			NAME "u3d"

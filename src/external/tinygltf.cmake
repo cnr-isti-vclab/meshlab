@@ -9,7 +9,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_TINYGLTF)
 	set(TINYGLTF_CHECK "${TINYGLTF_DIR}/tiny_gltf.h")
 
 	if (NOT EXISTS ${TINYGLTF_CHECK})
-		set(TINYGLTF_LINK https://github.com/syoyo/tinygltf/archive/refs/tags/v2.6.3.zip)
+		set(TINYGLTF_LINK
+			https://github.com/syoyo/tinygltf/archive/refs/tags/v2.6.3.zip
+			https://www.meshlab.net/data/libs/tinygltf-2.6.3.zip)
 		set(TINYGLTF_MD5 f63ab0fb59e5de059d9719cc14057dc8)
 		download_and_unzip(
 			NAME "tinygltf"

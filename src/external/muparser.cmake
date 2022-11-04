@@ -16,7 +16,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
 	set(MUPARSER_CHECK "${MUPARSER_DIR}/src/muParser.cpp")
 
 	if (NOT EXISTS ${MUPARSER_CHECK})
-		set(MUPARSER_LINK https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.3-1.zip)
+		set(MUPARSER_LINK
+			https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.3-1.zip
+			https://www.meshlab.net/data/libs/muparser-2.3.3-1.zip)
 		set(MUPARSER_MD5 8cf887ce460a405b8d8b966e0d5c94e3)
 		download_and_unzip(
 			NAME "muparser"

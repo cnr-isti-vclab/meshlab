@@ -17,7 +17,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	set(XERCES_C_CHECK "${XERCES_C_DIR}/CMakeLists.txt")
 
 	if(NOT EXISTS ${XERCES_C_CHECK})
-		set(XERCES_C_LINK https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-${XERCES_C_VER}.zip)
+		set(XERCES_C_LINK
+			https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-${XERCES_C_VER}.zip
+			https://www.meshlab.net/data/libs/xerces-c-${XERCES_C_VER}.zip)
 		set(XERCES_C_MD5 f84488fc2b8f62c4afca2f9943a42c00)
 		download_and_unzip(
 			NAME "Xerces-C"

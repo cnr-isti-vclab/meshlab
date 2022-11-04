@@ -9,7 +9,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_EASYEXIF)
 	set(EASYEXIF_CHECK "${EASYEXIF_DIR}/exif.h")
 
 	if (NOT EXISTS ${EASYEXIF_CHECK})
-		set(EASYEXIF_LINK https://github.com/mayanklahiri/easyexif/archive/refs/tags/v1.0.zip)
+		set(EASYEXIF_LINK
+			https://github.com/mayanklahiri/easyexif/archive/refs/tags/v1.0.zip
+			https://www.meshlab.net/data/libs/easyexif-1.0.zip)
 		set(EASYEXIF_MD5 d46ec21b5c8ce13cda0fe66a4477a8c3)
 		download_and_unzip(
 			NAME "EasyExif"

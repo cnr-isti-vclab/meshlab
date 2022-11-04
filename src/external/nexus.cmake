@@ -12,7 +12,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 	set(CORTO_CHECK "${CORTO_DIR}/CMakeLists.txt")
 
 	if (NOT EXISTS ${NEXUS_CHECK})
-		set(NEXUS_LINK https://github.com/cnr-isti-vclab/nexus/archive/refs/heads/master.zip)
+		set(NEXUS_LINK
+			https://github.com/cnr-isti-vclab/nexus/archive/refs/heads/master.zip
+			https://www.meshlab.net/data/libs/nexus-master.zip)
 		#set(NEXUS_MD5 3e50878dbaedd140f3e8c34d5af9a9d9)
 		download_and_unzip(
 			NAME "nexus"
@@ -26,7 +28,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 
 	if (NOT EXISTS ${CORTO_CHECK})
 		file(REMOVE_RECURSE ${NEXUS_DIR}/src/corto)
-		set(CORTO_LINK https://github.com/cnr-isti-vclab/corto/archive/refs/heads/master.zip)
+		set(CORTO_LINK
+			https://github.com/cnr-isti-vclab/corto/archive/refs/heads/master.zip
+			https://www.meshlab.net/data/libs/corto-master.zip)
 		#set(CORTO_MD5 ede1b41e369a8117d8f2f46fba89e11d)
 		download_and_unzip(
 			NAME "corto"

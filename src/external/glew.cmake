@@ -28,7 +28,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
 	set(GLEW_CHECK "${GLEW_DIR}/src/glew.c")
 
 	if (NOT EXISTS ${GLEW_CHECK})
-		set(GLEW_LINK https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
+		set(GLEW_LINK
+			https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+			https://www.meshlab.net/data/libs/glew-2.2.0.zip)
 		set(GLEW_MD5 970535b75b1b69ebd018a0fa05af63d1)
 		download_and_unzip(
 			NAME "GLEW"

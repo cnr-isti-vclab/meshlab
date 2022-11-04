@@ -9,7 +9,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_STRUCTURE_SYNTH)
 	set(SSYNTH_CHECK "${SSYNTH_DIR}/StructureSynth/Model/Action.h")
 
 	if (NOT EXISTS ${SSYNTH_CHECK})
-		set(SSYNTH_LINK https://github.com/alemuntoni/StructureSynth/archive/refs/tags/1.5.1.zip)
+		set(SSYNTH_LINK
+			https://github.com/alemuntoni/StructureSynth/archive/refs/tags/1.5.1.zip
+			https://www.meshlab.net/data/libs/StructureSynth-1.5.1.zip)
 		set(SSYNTH_MD5 e2122c5e6e370fb36c885bccf59562b7)
 		download_and_unzip(
 			NAME "Structure Synth"

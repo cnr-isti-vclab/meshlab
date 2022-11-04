@@ -17,7 +17,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS)
 	set(LIB3DS_CHECK "${LIB3DS_DIR}/lib3ds/types.h")
 
 	if (NOT EXISTS ${LIB3DS_CHECK})
-		set(LIB3DS_LINK http://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lib3ds/lib3ds-1.3.0.zip)
+		set(LIB3DS_LINK
+			http://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lib3ds/lib3ds-1.3.0.zip
+			https://www.meshlab.net/data/libs/lib3ds-1.3.0.zip)
 		set(LIB3DS_MD5 2572f7b0f29b591d494c1a0658b35c86)
 		download_and_unzip(
 			NAME "Lib3DS"

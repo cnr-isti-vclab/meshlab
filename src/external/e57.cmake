@@ -10,7 +10,9 @@ if (TARGET XercesC::XercesC)
 		set(LIBE57_CHECK "${LIBE57_DIR}/CMakeLists.txt")
 
 		if (NOT EXISTS ${LIBE57_CHECK})
-			set(LIBE57_LINK https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip)
+			set(LIBE57_LINK
+				https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip
+				https://www.meshlab.net/data/libs/libE57Format-2.3.0.zip)
 			set(LIBE57_MD5 958ada3883f9b60195f79bbab156f3e3)
 			download_and_unzip(
 				NAME "LibE57"
