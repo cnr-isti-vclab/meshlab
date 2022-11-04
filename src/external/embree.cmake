@@ -17,7 +17,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE AND WIN32)
 	set(EMBREE_WIN_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/embree-3.13.5.x64.vc14.windows")
 	set(EMBREE_WIN_CHECK "${EMBREE_WIN_DIR}/lib/embree3.lib")
 	set(TBB_WIN_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/oneapi-tbb-2021.6.0")
-	set(TBB_WIN_CHECK "${TBB_WIN_DIR}/lib/cmake/tbb")
+	set(TBB_WIN_CHECK "${TBB_WIN_DIR}/lib/cmake/tbb/TBBConfig.cmake")
 
 	if (NOT EXISTS ${TBB_WIN_CHECK})
 		set(TBB_WIN_LINK https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip)
@@ -33,7 +33,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE AND WIN32)
 	endif()
 
 	if(NOT EXISTS ${EMBREE_WIN_CHECK})
-		set(EMBREE_WIN_LINK https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip)
+		set(EMBREE_WIN_LINK https://github.com/embree/embree/releases/download/v3.13.5/embree-3.13.5.x64.vc14.windows.zip)
 		#set(EMBREE_WIN_MD5 )
 		download_and_unzip(
 			NAME "embree dll"
