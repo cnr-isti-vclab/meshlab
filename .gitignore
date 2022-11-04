@@ -17,18 +17,23 @@
 *.db-wal
 *.AppImage
 .DS_Store
+
+# build and install directories
 build/*
 install/*
-src/external/boost_1_75_0
-src/external/CGAL-5.2.1
+
+# external libraries automatically downloaded by cmake
+src/external/downloads/*
+src/external/tmp.zip
 src/external/embree-3.13.5.x64.vc14.windows
 src/external/embree-3.13.5
 src/external/ispc-v1.18.1-linux
 src/external/oneapi-tbb-2021.6.0
+
+# files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe
-src/common/generated_version_header.h
 
 ##Standard cmake gitignore##
 CMakeLists.txt.user

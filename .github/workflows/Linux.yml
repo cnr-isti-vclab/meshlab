@@ -25,7 +25,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
     - name: Install dependencies
       run: |
-        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src --download_embree_src
+        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dont_install_cgal_and_boost
         #needed by qt 5.15 on linux
         sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
     - name: Setup env variables
@@ -37,6 +37,12 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
+    - name: Cache external libraries sources
+      id: cache-ext-libs
+      uses: actions/cache@v3
+      with:
+        path: src/external/downloads/*
+        key: ${{ runner.os }}-external-libraries
     - name: Ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:

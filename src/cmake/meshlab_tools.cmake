@@ -30,6 +30,58 @@ function(add_meshlab_plugin target_name)
 		COMPONENT Plugins)
 endfunction()
 
+# function that dowloads and unzips an archive
+# params:
+# - link: download link
+# - dir: directory where the archive will be extracted
+# - name: a name used only for log
+function(download_and_unzip)
+	set(download_and_unzip_SUCCESS FALSE PARENT_SCOPE)
+	set(options)
+	set(oneValueArgs MD5 NAME DIR)
+	set(multiValueArgs LINK)
+	cmake_parse_arguments(DAU
+		"${options}" "${oneValueArgs}"
+		"${multiValueArgs}" ${ARGN})
+
+	list(LENGTH DAU_LINK NUMBER_OF_LINKS)
+	if(NUMBER_OF_LINKS LESS 1)
+		message(FATAL_ERROR "Need to specify at least a download link.")
+	endif()
+
+	set(ZIP ${CMAKE_CURRENT_LIST_DIR}/tmp.zip)
+
+	foreach(LINK ${DAU_LINK})
+		message(STATUS "Downloading ${DAU_NAME} from ${LINK}")
+
+		file(DOWNLOAD ${LINK} ${ZIP})
+
+		file(MD5 ${ZIP} MD5SUM)
+
+		# no md5 argument given, no checksum needed...
+		if (NOT DEFINED DAU_MD5)
+			set(DAU_MD5 ${MD5SUM})
+		endif()
+
+		# manual md5 check, avoid to fail when a download fails
+		if(MD5SUM STREQUAL ${DAU_MD5}) # download successful
+			message(STATUS "${DAU_NAME} downloaded.")
+			message(STATUS "Extracting ${DAU_NAME} archive...")
+			file(ARCHIVE_EXTRACT
+				INPUT ${ZIP}
+				DESTINATION ${DAU_DIR})
+			message(STATUS "${DAU_NAME} archive extracted.")
+			file(REMOVE ${ZIP})
+			set(download_and_unzip_SUCCESS TRUE PARENT_SCOPE)
+			break() # done
+		else()
+			file(REMOVE ${ZIP})
+			message(STATUS "${DAU_NAME} download failed...")
+			# next link in DAU_LINK list...
+		endif()
+	endforeach()
+endfunction()
+
 # make quiet some portions of cmake
 # usage
 #
