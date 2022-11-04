@@ -57,17 +57,4 @@ if [ "$DONT_INSTALL_EMBREE" = false ] ; then
     sudo apt-get install -y libembree-dev
 else
 	echo "=== jumping installation of embree package..."
-    #default paths wrt the script folder
-    #SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
-    #EXTERNAL_PATH=$SCRIPTS_PATH/../../src/external
-
-    #cd $EXTERNAL_PATH
-
-    #wget https://github.com/ispc/ispc/releases/download/v1.18.1/ispc-v1.18.1-linux.tar.gz
-    #tar -xf ispc-v1.18.1-linux.tar.gz
-    #rm ispc-v1.18.1-linux.tar.gz
-
-    #wget https://github.com/embree/embree/archive/refs/tags/v3.13.5.zip
-    #unzip v3.13.5.zip
-    #rm v3.13.5.zip
 fi

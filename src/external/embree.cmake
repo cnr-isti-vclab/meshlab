@@ -1,67 +1,131 @@
 # Copyright 2019, 2021, Collabora, Ltd.
 # Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
-option(ALLOW_BUNDLED_EMBREE "Allow use of bundled embree dll (windows only)" ON)
-option(ALLOW_SYSTEM_EMBREE "Allow use of system-provided embree" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_EMBREE "Allow download and use of embree source (linux only)" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE "Allow download and use of embree dll (windows only)" ON)
+option(MESHLAB_ALLOW_SYSTEM_EMBREE "Allow use of system-provided embree" ON)
 
 # looking for embree for the filter_embree
 find_package(embree 3.0)
 find_package(TBB)
 
-set(TBB_WIN_DIR "${CMAKE_CURRENT_LIST_DIR}/oneapi-tbb-2021.6.0")
-set(EMBREE_WIN_DIR "${CMAKE_CURRENT_LIST_DIR}/embree-3.13.5.x64.vc14.windows")
-set(EMBREE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/embree-3.13.5")
-set(ISPC_DIR "${CMAKE_CURRENT_LIST_DIR}/ispc-v1.18.1-linux")
-
-if(ALLOW_SYSTEM_EMBREE AND TARGET embree AND TBB_FOUND)
+if(MESHLAB_ALLOW_SYSTEM_EMBREE AND TARGET embree AND TBB_FOUND)
 	message(STATUS "- embree - using system-provided library")
 	add_library(external-embree INTERFACE)
 	target_link_libraries(external-embree INTERFACE embree tbb)
-elseif(ALLOW_BUNDLED_EMBREE AND WIN32 AND EXISTS "${EMBREE_WIN_DIR}/lib/embree3.lib")
-	message(STATUS "- embree - using bundled dll")
+elseif(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE AND WIN32)
+	set(EMBREE_WIN_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/embree-3.13.5.x64.vc14.windows")
+	set(EMBREE_WIN_CHECK "${EMBREE_WIN_DIR}/lib/embree3.lib")
+	set(TBB_WIN_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/oneapi-tbb-2021.6.0")
+	set(TBB_WIN_CHECK "${TBB_WIN_DIR}/lib/cmake/tbb")
 
-	set(TBB_DIR "${TBB_WIN_DIR}/lib/cmake/tbb")
-	set(embree_DIR "${EMBREE_WIN_DIR}/lib/cmake/embree-3.13.5")
-	find_package(embree)
-
-	add_library(external-embree INTERFACE)
-	target_link_libraries(external-embree INTERFACE embree)
-
-	if (DEFINED MESHLAB_LIB_OUTPUT_DIR)
-		file(
-			COPY
-			    ${EMBREE_WIN_DIR}/bin/embree3.dll
-				${EMBREE_WIN_DIR}/bin/tbb12.dll
-			DESTINATION
-			    ${MESHLAB_LIB_OUTPUT_DIR})
-	endif()
-	if (DEFINED MESHLAB_LIB_INSTALL_DIR)
-		install(
-			FILES
-			    ${EMBREE_WIN_DIR}/bin/embree3.dll
-				${EMBREE_WIN_DIR}/bin/tbb12.dll
-			DESTINATION
-			    ${MESHLAB_LIB_INSTALL_DIR})
-	endif()
-elseif(ALLOW_BUNDLED_EMBREE AND (UNIX AND NOT APPLE) AND EXISTS "${EMBREE_SRC_DIR}/CMakeLists.txt" )
-	message(STATUS "- embree - using bundled source")
-
-	if (EXISTS "${ISPC_DIR}/bin/ispc")
-		set(EMBREE_ISPC_EXECUTABLE "${ISPC_DIR}/bin/ispc")
-	else()
-		set(EMBREE_ISPC_SUPPORT OFF)
+	if (NOT EXISTS ${TBB_WIN_CHECK})
+		set(TBB_WIN_LINK https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip)
+		#set(TBB_WIN_MD5 )
+		download_and_unzip(
+			NAME "TBB"
+			LINK ${TBB_WIN_LINK}
+			#MD5 ${TBB_WIN_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- TBB - download failed.")
+		endif()
 	endif()
 
-	set(EMBREE_TUTORIALS OFF)
+	if(NOT EXISTS ${EMBREE_WIN_CHECK})
+		set(EMBREE_WIN_LINK https://github.com/oneapi-src/oneTBB/releases/download/v2021.6.0/oneapi-tbb-2021.6.0-win.zip)
+		#set(EMBREE_WIN_MD5 )
+		download_and_unzip(
+			NAME "embree dll"
+			LINK ${EMBREE_WIN_LINK}
+			#MD5 ${EMBREE_WIN_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- embree dll - download failed.")
+		endif()
+	endif()
 
-	set(MESSAGE_QUIET ON)
-	add_subdirectory(${EMBREE_SRC_DIR} EXCLUDE_FROM_ALL)
-	unset(MESSAGE_QUIET)
+	if (EXISTS ${TBB_WIN_CHECK} AND EXISTS ${EMBREE_WIN_CHECK})
+		message(STATUS "- embree - using downloaded dll")
 
-	add_library(external-embree INTERFACE)
-	target_link_libraries(external-embree INTERFACE embree)
+		set(TBB_DIR "${TBB_WIN_DIR}/lib/cmake/tbb")
+		set(embree_DIR "${EMBREE_WIN_DIR}/lib/cmake/embree-3.13.5")
+		find_package(embree)
 
-	install(TARGETS embree DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		add_library(external-embree INTERFACE)
+		target_link_libraries(external-embree INTERFACE embree)
+
+		if (DEFINED MESHLAB_LIB_OUTPUT_DIR)
+			file(
+				COPY
+					${EMBREE_WIN_DIR}/bin/embree3.dll
+					${EMBREE_WIN_DIR}/bin/tbb12.dll
+				DESTINATION
+					${MESHLAB_LIB_OUTPUT_DIR})
+		endif()
+		if (DEFINED MESHLAB_LIB_INSTALL_DIR)
+			install(
+				FILES
+					${EMBREE_WIN_DIR}/bin/embree3.dll
+					${EMBREE_WIN_DIR}/bin/tbb12.dll
+				DESTINATION
+					${MESHLAB_LIB_INSTALL_DIR})
+		endif()
+	endif()
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_EMBREE AND (UNIX AND NOT APPLE))
+	set(EMBREE_SRC_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/embree-3.13.5")
+	set(EMBREE_CHECK "${EMBREE_SRC_DIR}/CMakeLists.txt")
+	set(ISPC_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/ispc-v1.18.1-linux")
+	set(ISPC_CHECK "${ISPC_DIR}/bin/ispc")
+
+	if (NOT EXISTS ${ISPC_CHECK})
+		set(ISPC_LINK
+			https://github.com/ispc/ispc/releases/download/v1.18.1/ispc-v1.18.1-linux.tar.gz)
+		#set(ISPC_MD5 )
+		download_and_unzip(
+			NAME "embree ispc"
+			LINK ${ISPC_LINK}
+			#MD5 ${ISPC_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- embree ispc - download failed.")
+		endif()
+	endif()
+
+	if (NOT EXISTS ${EMBREE_CHECK})
+		set(EMBREE_LINK
+			https://github.com/embree/embree/archive/refs/tags/v3.13.5.zip)
+		#set(EMBREE_MD5 )
+		download_and_unzip(
+			NAME "embree"
+			LINK ${EMBREE_LINK}
+			#MD5 ${EMBREE_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- embree - download failed.")
+		endif()
+	endif()
+
+	if (EXISTS ${EMBREE_CHECK})
+		message(STATUS "- embree - using downloaded source")
+
+		if (EXISTS ${ISPC_CHECK})
+			set(EMBREE_ISPC_EXECUTABLE ${ISPC_CHECK})
+		else()
+			set(EMBREE_ISPC_SUPPORT OFF)
+		endif()
+
+		set(EMBREE_TUTORIALS OFF)
+
+		set(MESSAGE_QUIET ON)
+		add_subdirectory(${EMBREE_SRC_DIR} EXCLUDE_FROM_ALL)
+		unset(MESSAGE_QUIET)
+
+		add_library(external-embree INTERFACE)
+		target_link_libraries(external-embree INTERFACE embree)
+
+		install(TARGETS embree DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
 else()
 	message(STATUS "- embree - skipping embree library")
 endif()
