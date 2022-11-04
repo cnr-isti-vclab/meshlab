@@ -35,19 +35,35 @@ endfunction()
 # - link: download link
 # - dir: directory where the archive will be extracted
 # - name: a name used only for log
-function(download_and_unzip link dir name)
+function(download_and_unzip)
+	set(download_and_unzip_SUCCESS FALSE PARENT_SCOPE)
+	set(options)
+	set(oneValueArgs SHA NAME DIR)
+	set(multiValueArgs LINK)
+	cmake_parse_arguments(DAU
+		"${options}" "${oneValueArgs}"
+		"${multiValueArgs}" ${ARGN})
+
+	list(LENGTH DAU_LINK NUMBER_OF_LINKS)
+	if(NUMBER_OF_LINKS LESS 1)
+		message(FATAL_ERROR "Need to specify at least a download link.")
+	endif()
+
 	set(ZIP ${CMAKE_CURRENT_LIST_DIR}/tmp.zip)
 
-	message(STATUS "Downloading ${name}...")
+	foreach(LINK ${DAU_LINK})
+		message(STATUS "Downloading ${DAU_NAME} from ${LINK}")
 
-	file(DOWNLOAD ${link} ${ZIP})
-	message(STATUS "${name} downloaded.")
-	message(STATUS "Extracting ${name} archive...")
-	file(ARCHIVE_EXTRACT
-		INPUT ${ZIP}
-		DESTINATION ${dir})
-	message(STATUS "${name} archive extracted.")
-	file(REMOVE ${ZIP})
+		file(DOWNLOAD ${LINK} ${ZIP})
+		message(STATUS "${DAU_NAME} downloaded.")
+		message(STATUS "Extracting ${DAU_NAME} archive...")
+		file(ARCHIVE_EXTRACT
+			INPUT ${ZIP}
+			DESTINATION ${DAU_DIR})
+		message(STATUS "${DAU_NAME} archive extracted.")
+		file(REMOVE ${ZIP})
+		set(download_and_unzip_SUCCESS TRUE PARENT_SCOPE)
+	endforeach()
 endfunction()
 
 # make quiet some portions of cmake

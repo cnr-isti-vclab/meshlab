@@ -7,33 +7,40 @@ option(MESHLAB_ALLOW_SYSTEM_XERCES "Allow use of system-provided Xerces-C" ON)
 
 find_package(XercesC)
 
-# https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-3.2.4.zip
-
 if(MESHLAB_ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
-	message(STATUS "- XercesC - using system-provided library")
+	message(STATUS "- Xerces-C - using system-provided library")
 	add_library(external-xerces INTERFACE)
 	target_link_libraries(external-xerces INTERFACE XercesC::XercesC)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 	set(XERCES_C_VER 3.2.4)
-	set(XERCES_C_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/xerces-c-${XERCES_C_VER})
+	set(XERCES_C_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/xerces-c-${XERCES_C_VER}")
+	set(XERCES_C_CHECK "${XERCES_C_DIR}/CMakeLists.txt")
 
-	if (NOT EXISTS ${XERCES_C_DIR}/CMakeLists.txt)
+	if(NOT EXISTS ${XERCES_C_CHECK})
 		set(XERCES_C_LINK https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-${XERCES_C_VER}.zip)
-		download_and_unzip(${XERCES_C_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "Xerces-C")
+		download_and_unzip(
+			LINK ${XERCES_C_LINK}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
+			NAME "Xerces-C")
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- Xerces-C - download failed.")
+		endif()
 	endif()
 
-	message(STATUS "- XercesC - using downloaded source")
+	if(EXISTS ${XERCES_C_CHECK})
+		message(STATUS "- Xerces-C - using downloaded source")
 
-	set(MESSAGE_QUIET ON)
-	add_subdirectory(${XERCES_C_DIR} EXCLUDE_FROM_ALL)
-	unset(MESSAGE_QUIET)
+		set(MESSAGE_QUIET ON)
+		add_subdirectory(${XERCES_C_DIR} EXCLUDE_FROM_ALL)
+		unset(MESSAGE_QUIET)
 
-	add_library(external-xerces INTERFACE)
-	target_link_libraries(external-xerces INTERFACE xerces-c)
-	target_include_directories(
-		external-xerces INTERFACE
-		${XERCES_C_DIR}/src
-		${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
-	add_library(XercesC::XercesC ALIAS external-xerces)
-	install(TARGETS xerces-c DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		add_library(external-xerces INTERFACE)
+		target_link_libraries(external-xerces INTERFACE xerces-c)
+		target_include_directories(
+			external-xerces INTERFACE
+			${XERCES_C_DIR}/src
+			${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
+		add_library(XercesC::XercesC ALIAS external-xerces)
+		install(TARGETS xerces-c DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
 endif()
