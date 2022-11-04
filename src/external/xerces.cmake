@@ -18,10 +18,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 
 	if(NOT EXISTS ${XERCES_C_CHECK})
 		set(XERCES_C_LINK https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-${XERCES_C_VER}.zip)
+		set(XERCES_C_MD5 f84488fc2b8f62c4afca2f9943a42c00)
 		download_and_unzip(
+			NAME "Xerces-C"
 			LINK ${XERCES_C_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "Xerces-C")
+			MD5 ${XERCES_C_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Xerces-C - download failed.")
 		endif()

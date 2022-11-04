@@ -18,10 +18,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS)
 
 	if (NOT EXISTS ${LIB3DS_CHECK})
 		set(LIB3DS_LINK http://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lib3ds/lib3ds-1.3.0.zip)
+		set(LIB3DS_MD5 2572f7b0f29b591d494c1a0658b35c86)
 		download_and_unzip(
+			NAME "Lib3DS"
 			LINK ${LIB3DS_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "Lib3DS")
+			MD5 ${LIB3DS_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Lib3DS - download failed.")
 		endif()

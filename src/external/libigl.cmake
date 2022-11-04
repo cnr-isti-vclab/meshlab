@@ -10,10 +10,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBIGL)
 
 	if (NOT EXISTS ${LIBIGL_CHECK})
 		set(LIBIGL_LINK https://github.com/libigl/libigl/archive/refs/tags/v2.4.0.zip)
+		set(LIBIGL_MD5 0b4fea5dba2117b8db85c99a39a71f83)
 		download_and_unzip(
+			NAME "LibIGL"
 			LINK ${LIBIGL_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "LibIGL")
+			MD5 ${LIBIGL_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- LibIGL - download failed.")
 		endif()

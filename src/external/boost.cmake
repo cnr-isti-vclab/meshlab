@@ -20,10 +20,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_BOOST)
 
 	if (NOT EXISTS ${BOOST_CHECK})
 		set(BOOST_LINK https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.zip)
+		set(BOOST_MD5 d3b276f6d22246171f93282910a1d583)
 		download_and_unzip(
+			NAME "Boost"
+			MD5 ${BOOST_MD5}
 			LINK ${BOOST_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "Boost")
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Boost - download failed.")
 		endif()

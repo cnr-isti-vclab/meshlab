@@ -10,10 +10,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_TINYGLTF)
 
 	if (NOT EXISTS ${TINYGLTF_CHECK})
 		set(TINYGLTF_LINK https://github.com/syoyo/tinygltf/archive/refs/tags/v2.6.3.zip)
+		set(TINYGLTF_MD5 f63ab0fb59e5de059d9719cc14057dc8)
 		download_and_unzip(
+			NAME "tinygltf"
 			LINK ${TINYGLTF_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "tinygltf")
+			MD5 ${TINYGLTF_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- tinygltf - download failed.")
 		endif()

@@ -29,10 +29,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
 
 	if (NOT EXISTS ${GLEW_CHECK})
 		set(GLEW_LINK https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
+		set(GLEW_MD5 970535b75b1b69ebd018a0fa05af63d1)
 		download_and_unzip(
+			NAME "GLEW"
 			LINK ${GLEW_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "GLEW")
+			MD5 ${GLEW_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(FATAL_ERROR "- GLEW - download failed.")
 		endif()

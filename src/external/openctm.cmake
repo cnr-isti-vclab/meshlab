@@ -17,10 +17,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_OPENCTM)
 
 	if (NOT EXISTS ${OPENCTM_CHECK})
 		set(OPENCTM_LINK https://sourceforge.net/projects/openctm/files/OpenCTM-1.0.3/OpenCTM-1.0.3-src.zip/download)
+		set(OPENCTM_MD5 a87b6a6509ae0712b4a55f8887dc6a54)
 		download_and_unzip(
+			NAME "OpenCTM"
 			LINK ${OPENCTM_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "OpenCTM")
+			MD5 ${OPENCTM_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- OpenCTM - download failed.")
 		endif()

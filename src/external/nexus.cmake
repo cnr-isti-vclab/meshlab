@@ -13,10 +13,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 
 	if (NOT EXISTS ${NEXUS_CHECK})
 		set(NEXUS_LINK https://github.com/cnr-isti-vclab/nexus/archive/refs/heads/master.zip)
+		#set(NEXUS_MD5 3e50878dbaedd140f3e8c34d5af9a9d9)
 		download_and_unzip(
+			NAME "nexus"
 			LINK ${NEXUS_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "nexus")
+			#MD5 ${NEXUS_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- nexus - download failed.")
 		endif()
@@ -25,10 +27,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 	if (NOT EXISTS ${CORTO_CHECK})
 		file(REMOVE_RECURSE ${NEXUS_DIR}/src/corto)
 		set(CORTO_LINK https://github.com/cnr-isti-vclab/corto/archive/refs/heads/master.zip)
+		#set(CORTO_MD5 ede1b41e369a8117d8f2f46fba89e11d)
 		download_and_unzip(
+			NAME "corto"
 			LINK ${CORTO_LINK}
-			DIR "${NEXUS_DIR}/src/"
-			NAME "corto")
+			#MD5 ${CORTO_MD5}
+			DIR "${NEXUS_DIR}/src/")
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- corto - download failed.")
 		else()

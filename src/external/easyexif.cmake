@@ -10,10 +10,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_EASYEXIF)
 
 	if (NOT EXISTS ${EASYEXIF_CHECK})
 		set(EASYEXIF_LINK https://github.com/mayanklahiri/easyexif/archive/refs/tags/v1.0.zip)
+		set(EASYEXIF_MD5 d46ec21b5c8ce13cda0fe66a4477a8c3)
 		download_and_unzip(
+			NAME "EasyExif"
 			LINK ${EASYEXIF_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "EasyExif")
+			MD5 ${EASYEXIF_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(FATAL_ERROR "- EasyExif - download failed.")
 		endif()

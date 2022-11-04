@@ -10,10 +10,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
 
 	if (NOT EXISTS ${LEVMAR_CHECK})
 		set(LEVMAR_LINK http://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz)
+		set(LEVMAR_MD5 16bc34efa1617219f241eef06427f13f)
 		download_and_unzip(
+			NAME "Levmar"
 			LINK ${LEVMAR_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "Levmar")
+			MD5 ${LEVMAR_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Levmar - download failed.")
 		endif()

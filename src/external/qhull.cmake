@@ -17,10 +17,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
 
 	if (NOT EXISTS ${QHULL_CHECK})
 		set(QHULL_LINK https://github.com/qhull/qhull/archive/refs/tags/2020.2.zip)
+		set(QHULL_MD5 a0a9b0e69bdbd9461319b8d2ac3d2f2e)
 		download_and_unzip(
+			NAME "Qhull"
 			LINK ${QHULL_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "Qhull")
+			MD5 ${QHULL_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Qhull - download failed.")
 		endif()

@@ -11,10 +11,12 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
 
 	if (NOT EXISTS ${U3D_CHECK})
 		set(U3D_LINK https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip)
+		#set(U3D_MD5 3b15b2f75206ea24b8991333562aa9ca)
 		download_and_unzip(
+			NAME "u3d"
 			LINK ${U3D_LINK}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-			NAME "u3d")
+			#MD5 ${U3D_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- u3d - download failed.")
 		endif()

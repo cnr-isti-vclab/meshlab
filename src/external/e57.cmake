@@ -11,10 +11,12 @@ if (TARGET XercesC::XercesC)
 
 		if (NOT EXISTS ${LIBE57_CHECK})
 			set(LIBE57_LINK https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip)
+			set(LIBE57_MD5 958ada3883f9b60195f79bbab156f3e3)
 			download_and_unzip(
+				NAME "LibE57"
+				MD5 ${LIBE57_MD5}
 				LINK ${LIBE57_LINK}
-				DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}
-				NAME "LibE57")
+				DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 			if (NOT download_and_unzip_SUCCESS)
 				message(STATUS "- LibE57 - download failed.")
 			endif()
