@@ -2,19 +2,24 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_OPENCTM "Allow use of bundled OpenCTM source" ON)
-option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_OPENCTM "Allow download and use of OpenCTM source" ON)
+option(MESHLAB_ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 
 find_package(OpenCTM)
-set(OPENCTM_DIR ${CMAKE_CURRENT_LIST_DIR}/OpenCTM-1.0.3)
 
-if(ALLOW_SYSTEM_OPENCTM AND TARGET OpenCTM::OpenCTM)
+if(MESHLAB_ALLOW_SYSTEM_OPENCTM AND TARGET OpenCTM::OpenCTM)
 	message(STATUS "- OpenCTM - using system-provided library")
 	add_library(external-openctm INTERFACE)
 	target_link_libraries(external-openctm INTERFACE OpenCTM::OpenCTM)
-elseif(ALLOW_BUNDLED_OPENCTM AND EXISTS "${OPENCTM_DIR}/lib/openctm.c")
-	message(STATUS "- OpenCTM - using bundled source")
-	# Modified liblzma included - can't build against system version
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_OPENCTM)
+	set(OPENCTM_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/OpenCTM-1.0.3)
+
+	if (NOT EXISTS "${OPENCTM_DIR}/lib/openctm.c")
+		set(OPENCTM_LINK https://sourceforge.net/projects/openctm/files/OpenCTM-1.0.3/OpenCTM-1.0.3-src.zip/download)
+		download_and_unzip(${OPENCTM_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "OpenCTM")
+	endif()
+
+	message(STATUS "- OpenCTM - using downloaded source")
 	add_library(
 		external-openctm STATIC
 		"${OPENCTM_DIR}/lib/openctm.c"
@@ -35,6 +40,5 @@ elseif(ALLOW_BUNDLED_OPENCTM AND EXISTS "${OPENCTM_DIR}/lib/openctm.c")
 	if(MSVC)
 		target_compile_definitions(external-openctm PRIVATE _CRT_SECURE_NO_WARNINGS)
 	endif()
-	set_property(TARGET external-openctm PROPERTY FOLDER External)
 	target_link_libraries(external-openctm PRIVATE external-disable-warnings)
 endif()
