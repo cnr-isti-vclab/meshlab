@@ -12,23 +12,35 @@ if(MESHLAB_ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser::muparser)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
-	set(MUPARSER_VER 2.3.3-1)
-	set(MUPARSER_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/muparser-${MUPARSER_VER})
+	set(MUPARSER_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/muparser-2.3.3-1")
+	set(MUPARSER_CHECK "${MUPARSER_DIR}/src/muParser.cpp")
 
-	if (NOT EXISTS "${MUPARSER_DIR}/src/muParser.cpp")
-		set(MUPARSER_LINK https://github.com/beltoforion/muparser/archive/refs/tags/v${MUPARSER_VER}.zip)
-		download_and_unzip(${MUPARSER_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "muparser")
+	if (NOT EXISTS ${MUPARSER_CHECK})
+		set(MUPARSER_LINK
+			https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.3-1.zip
+			https://www.meshlab.net/data/libs/muparser-2.3.3-1.zip)
+		set(MUPARSER_MD5 8cf887ce460a405b8d8b966e0d5c94e3)
+		download_and_unzip(
+			NAME "muparser"
+			LINK ${MUPARSER_LINK}
+			MD5 ${MUPARSER_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- muparser - download failed.")
+		endif()
 	endif()
 
-	message(STATUS "- muparser - using downloaded source")
+	if (EXISTS ${MUPARSER_CHECK})
+		message(STATUS "- muparser - using downloaded source")
 
-	set(ENABLE_SAMPLES OFF)
-	set(MESSAGE_QUIET ON)
-	add_subdirectory(${MUPARSER_DIR})
-	unset(MESSAGE_QUIET)
-	unset(ENABLE_SAMPLES)
+		set(ENABLE_SAMPLES OFF)
+		set(MESSAGE_QUIET ON)
+		add_subdirectory(${MUPARSER_DIR})
+		unset(MESSAGE_QUIET)
+		unset(ENABLE_SAMPLES)
 
-	add_library(external-muparser INTERFACE)
-	target_link_libraries(external-muparser INTERFACE muparser)
-	install(TARGETS muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		add_library(external-muparser INTERFACE)
+		target_link_libraries(external-muparser INTERFACE muparser)
+		install(TARGETS muparser DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
 endif()

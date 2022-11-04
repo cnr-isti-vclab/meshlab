@@ -24,26 +24,39 @@ if(MESHLAB_ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
 		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
 	endif()
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
-	set(GLEW_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/glew-2.2.0)
+	set(GLEW_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/glew-2.2.0")
+	set(GLEW_CHECK "${GLEW_DIR}/src/glew.c")
 
-	if (NOT EXISTS "${GLEW_DIR}/src/glew.c")
-		set(GLEW_LINK https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
-		download_and_unzip(${GLEW_LINK} ${MESHLAB_EXTERNAL_DOWNLOAD_DIR} "GLEW")
+	if (NOT EXISTS ${GLEW_CHECK})
+		set(GLEW_LINK
+			https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+			https://www.meshlab.net/data/libs/glew-2.2.0.zip)
+		set(GLEW_MD5 970535b75b1b69ebd018a0fa05af63d1)
+		download_and_unzip(
+			NAME "GLEW"
+			LINK ${GLEW_LINK}
+			MD5 ${GLEW_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(FATAL_ERROR "- GLEW - download failed.")
+		endif()
 	endif()
 
-	message(STATUS "- GLEW - using downloaded source")
-	add_library(external-glew SHARED "${GLEW_DIR}/src/glew.c")
-	target_include_directories(external-glew SYSTEM PUBLIC ${GLEW_DIR}/include)
-	if(TARGET OpenGL::GL)
-		target_link_libraries(external-glew PUBLIC OpenGL::GL)
-	elseif(TARGET OpenGL::OpenGL)
-		target_link_libraries(external-glew PUBLIC OpenGL::OpenGL)
-	else()
-		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
-	endif()
+	if (EXISTS ${GLEW_CHECK})
+		message(STATUS "- GLEW - using downloaded source")
+		add_library(external-glew SHARED "${GLEW_DIR}/src/glew.c")
+		target_include_directories(external-glew SYSTEM PUBLIC ${GLEW_DIR}/include)
+		if(TARGET OpenGL::GL)
+			target_link_libraries(external-glew PUBLIC OpenGL::GL)
+		elseif(TARGET OpenGL::OpenGL)
+			target_link_libraries(external-glew PUBLIC OpenGL::OpenGL)
+		else()
+			message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
+		endif()
 
-	target_link_libraries(external-glew PRIVATE external-disable-warnings)
-	install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		target_link_libraries(external-glew PRIVATE external-disable-warnings)
+		install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
 else()
 	message(
 		FATAL_ERROR
