@@ -49,7 +49,7 @@ jobs:
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --use_brew_llvm --ccache
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --ccache
     - name: Deploy
       shell: bash
       run: |
