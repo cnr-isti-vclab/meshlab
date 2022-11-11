@@ -21,6 +21,7 @@ CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 QT_DIR=""
+CCACHE=""
 
 #check parameters
 for i in "$@"
@@ -50,6 +51,10 @@ case $i in
         QT_DIR=${i#*=}
         shift # past argument=value
         ;;
+    --ccache)
+        CCACHE="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
@@ -69,6 +74,6 @@ then
 fi
 
 cd $BUILD_PATH
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $CCACHE $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 make $CORES
 make install

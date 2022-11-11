@@ -12,6 +12,9 @@ option(
 	"Should warnings be disabled on bundled source code?"
 	ON)
 
+set(MESHLAB_EXTERNAL_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloads")
+set(MESHLAB_EXTERNAL_DOWNLOAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/downloads")
+
 add_library(external-disable-warnings INTERFACE)
 if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
 	if(MSVC)
@@ -80,5 +83,4 @@ if ((NOT BUILD_MESHLAB_MINI) AND ALLOW_OPTIONAL_EXTERNAL_MESHLAB_LIBRARIES)
 
 	# libe57Format - optional, for io_e57
 	include(${CMAKE_CURRENT_SOURCE_DIR}/e57.cmake)
-
 endif()

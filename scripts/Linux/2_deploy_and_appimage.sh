@@ -41,7 +41,12 @@ fi
 
 chmod +x $INSTALL_PATH/usr/bin/meshlab
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib/meshlab
+for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
+do
+    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN' $plugin
+done
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
   --plugin qt --output appimage
 

@@ -3,7 +3,7 @@
 
 
 # Only build if we have u3d
-if(TARGET external-IDTFConverter)
+if(TARGET IDTF-to-U3D-converter)
 
 	set(SOURCES io_u3d.cpp)
 
@@ -11,7 +11,7 @@ if(TARGET external-IDTFConverter)
 
 	add_meshlab_plugin(io_u3d ${SOURCES} ${HEADERS})
 
-	target_link_libraries(io_u3d PUBLIC external-IDTFConverter IFXCoreStatic ${CMAKE_DL_LIBS})
+	target_link_libraries(io_u3d PUBLIC IDTF-to-U3D-converter IFXCoreStatic ${CMAKE_DL_LIBS})
 
 else()
 	message(STATUS "Skipping io_u3d - missing u3d in external directory.")

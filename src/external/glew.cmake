@@ -2,10 +2,8 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
-option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
-
-set(GLEW_DIR ${CMAKE_CURRENT_LIST_DIR}/glew-2.1.0)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW "Allow download and use of GLEW source" ON)
+option(MESHLAB_ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
 
 unset(HAVE_SYSTEM_GLEW)
 if(DEFINED GLEW_VERSION)
@@ -14,8 +12,8 @@ if(DEFINED GLEW_VERSION)
 	endif()
 endif()
 
-if(ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
-	message(STATUS "- glew - using system-provided library")
+if(MESHLAB_ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
+	message(STATUS "- GLEW - using system-provided library")
 	add_library(external-glew INTERFACE)
 	target_link_libraries(external-glew INTERFACE GLEW::GLEW)
 	if(TARGET OpenGL::GL)
@@ -25,29 +23,42 @@ if(ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
 	else()
 		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
 	endif()
-elseif(ALLOW_BUNDLED_GLEW AND EXISTS "${GLEW_DIR}/src/glew.c")
-	message(STATUS "- glew - using bundled source")
-	add_library(external-glew SHARED "${GLEW_DIR}/src/glew.c")
-	target_include_directories(external-glew SYSTEM PUBLIC ${GLEW_DIR}/include)
-	if(TARGET OpenGL::GL)
-		target_link_libraries(external-glew PUBLIC OpenGL::GL)
-	elseif(TARGET OpenGL::OpenGL)
-		target_link_libraries(external-glew PUBLIC OpenGL::OpenGL)
-	else()
-		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
+	set(GLEW_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/glew-2.2.0")
+	set(GLEW_CHECK "${GLEW_DIR}/src/glew.c")
+
+	if (NOT EXISTS ${GLEW_CHECK})
+		set(GLEW_LINK
+			https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+			https://www.meshlab.net/data/libs/glew-2.2.0.zip)
+		set(GLEW_MD5 970535b75b1b69ebd018a0fa05af63d1)
+		download_and_unzip(
+			NAME "GLEW"
+			LINK ${GLEW_LINK}
+			MD5 ${GLEW_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(FATAL_ERROR "- GLEW - download failed.")
+		endif()
 	endif()
-	set_property(TARGET external-glew PROPERTY FOLDER External)
 
-	set_property(TARGET external-glew
-		PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
+	if (EXISTS ${GLEW_CHECK})
+		message(STATUS "- GLEW - using downloaded source")
+		add_library(external-glew SHARED "${GLEW_DIR}/src/glew.c")
+		target_include_directories(external-glew SYSTEM PUBLIC ${GLEW_DIR}/include)
+		if(TARGET OpenGL::GL)
+			target_link_libraries(external-glew PUBLIC OpenGL::GL)
+		elseif(TARGET OpenGL::OpenGL)
+			target_link_libraries(external-glew PUBLIC OpenGL::OpenGL)
+		else()
+			message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
+		endif()
 
-	set_property(TARGET external-glew
-		PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
-
-	target_link_libraries(external-glew PRIVATE external-disable-warnings)
-	install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		target_link_libraries(external-glew PRIVATE external-disable-warnings)
+		install(TARGETS external-glew DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+	endif()
 else()
 	message(
 		FATAL_ERROR
-			"GLEW is required - at least one of ALLOW_SYSTEM_GLEW or ALLOW_BUNDLED_GLEW must be enabled and found.")
+			"GLEW is required - at least one of MESHLAB_ALLOW_SYSTEM_GLEW or MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW must be ON and found.")
 endif()

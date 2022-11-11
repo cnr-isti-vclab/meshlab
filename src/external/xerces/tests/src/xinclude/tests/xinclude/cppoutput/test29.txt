@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
-   <elem bar="jpg"/>
-   <!-- test including a document with a conflicting notation -->
-   <!-- EXPECT FAILURE -->
-   [Fatal Error] not2.xml:12:56
-[Fatal Error] test29.xml:11:45

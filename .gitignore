@@ -17,14 +17,19 @@
 *.db-wal
 *.AppImage
 .DS_Store
+
+# build and install directories
 build/*
 install/*
-src/external/boost_1_75_0
-src/external/CGAL-5.2.1
+
+# external libraries automatically downloaded by cmake
+src/external/downloads/*
+src/external/tmp.zip
+
+# files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe
-src/common/generated_version_header.h
 
 ##Standard cmake gitignore##
 CMakeLists.txt.user

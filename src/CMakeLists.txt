@@ -2,7 +2,7 @@
 # Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 project(MeshLab)
 
 ### Build options
@@ -57,8 +57,8 @@ if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these di
 	include(GNUInstallDirs)
 	if(INSTALL_TO_UNIX_LAYOUT)
 		set(MESHLAB_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
-		set(MESHLAB_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/meshlab)
-		set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_LIB_INSTALL_DIR}/plugins)
+		set(MESHLAB_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+		set(MESHLAB_PLUGIN_INSTALL_DIR ${MESHLAB_LIB_INSTALL_DIR}/meshlab/plugins)
 		set(MESHLAB_SHADER_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/meshlab/shaders)
 	elseif(APPLE)
 		set(MESHLAB_BIN_INSTALL_DIR .)
