@@ -5,19 +5,18 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D "Allow download and use of u3d source" ON)
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
-	# todo - make release of u3d
-	set(U3D_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/u3d-master")
+	set(U3D_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/u3d-1.5.0")
 	set(U3D_CHECK "${U3D_DIR}/CMakeLists.txt")
 
 	if (NOT EXISTS ${U3D_CHECK})
 		set(U3D_LINK
-			https://github.com/alemuntoni/u3d/archive/refs/heads/master.zip
-			https://www.meshlab.net/data/libs/u3d-master.zip)
-		#set(U3D_MD5 3b15b2f75206ea24b8991333562aa9ca)
+			https://github.com/alemuntoni/u3d/archive/refs/tags/1.5.0.zip
+			https://www.meshlab.net/data/libs/u3d-1.5.0.zip)
+		set(U3D_MD5 9f940835cfc08d17169b8003fabec1c6)
 		download_and_unzip(
 			NAME "u3d"
 			LINK ${U3D_LINK}
-			#MD5 ${U3D_MD5}
+			MD5 ${U3D_MD5}
 			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- u3d - download failed.")
@@ -25,17 +24,22 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
 	endif()
 
 	if (EXISTS ${U3D_CHECK})
-		message(STATUS "- u3d - using bundled source")
+		message(STATUS "- u3d - using downloaded source")
 
+		set(U3D_BUILD_LIBIDTF_TEST OFF)
+		set(U3D_BUILD_IDTF_TO_U3D_BIN OFF)
+		set(U3D_BUILD_STATIC_IDTF_LIB OFF)
 		set(MESSAGE_QUIET ON)
 		add_subdirectory(${U3D_DIR})
 		unset(MESSAGE_QUIET)
+		unset(U3D_BUILD_LIBIDTF_TEST)
+		unset(U3D_BUILD_IDTF_TO_U3D_BIN)
 		install(
 			TARGETS
+				IDTF
 				IFXCore
 				IFXExporting
 				IFXScheduling
-				IDTF-to-U3D-converter
 			DESTINATION
 				${MESHLAB_LIB_INSTALL_DIR})
 	endif()

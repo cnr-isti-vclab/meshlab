@@ -33,10 +33,22 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QSettings>
-#include "Converter.h"
+#include <IDTF/Converter.h>
 
 using namespace std;
 using namespace vcg;
+
+#ifdef BUILD_MODE
+const std::string LIB_IDTF_PATH = "../external/downloads/u3d-1.5.0";
+#else
+#ifdef __APPLE__
+const std::string LIB_IDTF_PATH = "../Frameworks";
+#elif __linux__
+const std::string LIB_IDTF_PATH = "../lib";
+#else
+const std::string LIB_IDTF_PATH = ".";
+#endif
+#endif
 
 
 U3DIOPlugin::U3DIOPlugin() :
@@ -94,7 +106,12 @@ void U3DIOPlugin::save(
 
 		//conversion from idtf to u3d
 		int resCode = 0;
-		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, resCode, _param.positionQuality);
+		bool result = IDTFConverter::IDTFToU3d(
+			tmp.toStdString(),
+			filename,
+			resCode,
+			LIB_IDTF_PATH,
+			_param.positionQuality);
 
 		if(result==false) {
 			throw MLException("Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")");
