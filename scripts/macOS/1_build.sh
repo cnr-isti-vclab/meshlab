@@ -40,7 +40,7 @@ case $i in
         shift # past argument=value
         ;;
     -d|--double_precision)
-        DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
+        DOUBLE_PRECISION_OPTION="-DMESHLAB_BUILD_WITH_DOUBLE_SCALAR=ON"
         shift # past argument=value
         ;;
     -n|--nightly)

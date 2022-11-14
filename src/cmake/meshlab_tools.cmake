@@ -5,7 +5,7 @@
 #function used to add plugins
 function(add_meshlab_plugin target_name)
 	set(EXCLUDE_ALL_ARG "")
-	if (BUILD_MESHLAB_MINI)
+	if (MESHLAB_BUILD_MINI)
 		set(EXCLUDE_ALL_ARG "EXCLUDE_FROM_ALL")
 	endif()
 
