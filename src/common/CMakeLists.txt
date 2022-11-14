@@ -20,7 +20,7 @@ else()
 	endif()
 endif()
 
-if (BUILD_WITH_DOUBLE_SCALAR)
+if (MESHLAB_BUILD_WITH_DOUBLE_SCALAR)
 	set(MESHLAB_VERSION "${MESHLAB_VERSION}d")
 endif()
 
@@ -32,7 +32,7 @@ else()
 	message(STATUS "MeshLab version: ${MESHLAB_VERSION}")
 endif()
 
-if (BUILD_WITH_DOUBLE_SCALAR)
+if (MESHLAB_BUILD_WITH_DOUBLE_SCALAR)
 	message(STATUS "Building with double precision")
 	set(MESHLAB_SCALAR "double")
 else()
@@ -175,7 +175,7 @@ if (WIN32)
 		PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${MESHLAB_LIB_OUTPUT_DIR})
 endif()
 
-if(ENABLE_MESHLAB_DEBUG_LOG_FILE)
+if(MESHLAB_ENABLE_DEBUG_LOG_FILE)
 	target_compile_definitions(meshlab-common PUBLIC MESHLAB_LOG_FILE_ENABLED)
 endif()
 
