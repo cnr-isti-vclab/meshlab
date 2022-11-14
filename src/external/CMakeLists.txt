@@ -8,15 +8,15 @@ option(
 	ON)
 
 option(
-	BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS
-	"Should warnings be disabled on bundled source code?"
+	MESHLAB_BUILD_EXTERNAL_SOURCES_WITHOUT_WARNINGS
+	"Should warnings be disabled on external libraries code?"
 	ON)
 
 set(MESHLAB_EXTERNAL_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloads")
 set(MESHLAB_EXTERNAL_DOWNLOAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/downloads")
 
 add_library(external-disable-warnings INTERFACE)
-if(BUILD_BUNDLED_SOURCES_WITHOUT_WARNINGS)
+if(MESHLAB_BUILD_EXTERNAL_SOURCES_WITHOUT_WARNINGS)
 	if(MSVC)
 		# TODO
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
