@@ -57,7 +57,7 @@ jobs:
     - name: Create DMG
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/3_dmg.sh
+        bash scripts/${{ runner.os }}/3_pack.sh
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
