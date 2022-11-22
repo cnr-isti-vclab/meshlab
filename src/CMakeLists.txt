@@ -6,13 +6,13 @@ cmake_minimum_required(VERSION 3.18)
 project(MeshLab)
 
 ### Build options
-option(BUILD_MESHLAB_MINI "Build only common and meshlab - other plugin targets must be set manually" OFF)
-option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
-option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
-option(ENABLE_MESHLAB_DEBUG_LOG_FILE "If enabled, all the logs of MeshLab will be also saved into a log file" OFF)
+option(MESHLAB_BUILD_MINI "Build only common and meshlab - other plugin targets must be set manually" OFF)
+option(MESHLAB_BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
+option(MESHLAB_BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
+option(MESHLAB_ENABLE_DEBUG_LOG_FILE "If enabled, all the logs of MeshLab will be also saved into a log file" OFF)
 
-option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
-option(USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)
+option(MESHLAB_BUILD_ONLY_LIBRARIES "Build only meshlab-common and plugins, excluding executables" OFF)
+option(MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)
 
 option(MESHLAB_IS_NIGHTLY_VERSION "Nightly version of meshlab will be used instead of ML_VERSION" OFF)
 
@@ -41,7 +41,7 @@ find_package(Eigen3)
 set(MESHLAB_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../resources)
 
 ### Build directories
-if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these dirs are defined in parent dir
+if (MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these dirs are defined in parent dir
 	set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
 	set(MESHLAB_LIB_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR})
 	set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
@@ -120,7 +120,7 @@ add_subdirectory(${EXTERNAL_DIR})
 add_subdirectory(common)
 add_subdirectory(common_gui)
 
-if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
+if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
 	add_subdirectory(meshlab)
 	if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/use_cpu_opengl")
 		add_subdirectory(use_cpu_opengl)
@@ -234,7 +234,7 @@ endforeach()
 # This variable keeps track of the output filenames that need to be copied at build time
 set(COPIED_FILES)
 
-if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
+if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
 	# shaders
 	set(SHADER_BASE_DIR "${MESHLAB_RESOURCES_DIR}/shaders")
 	file(

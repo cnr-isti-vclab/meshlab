@@ -140,8 +140,8 @@ RichParameterList QhullPlugin::initParameterList(const QAction* action, const Me
 	RichParameterList parlst;
 	switch (ID(action)) {
 	case FP_QHULL_CONVEX_HULL: {
-		// parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient
-		// all faces coherentely"));
+		// parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherently","Re-orient
+		// all faces coherently"));
 		break;
 	}
 	case FP_QHULL_VORONOI_FILTERING: {
@@ -214,7 +214,7 @@ RichParameterList QhullPlugin::initParameterList(const QAction* action, const Me
 			"Show a triangulation of the visible points",
 			"Show a triangulation of the visible points"));
 		// parlst.addParam(RichBool("reorient", false,"Re-orient all faces of the CH
-		// coherentely","Re-orient all faces of the CH coherentely."
+		// coherently","Re-orient all faces of the CH coherently."
 		//                "If no Convex Hulls are selected , this value is ignored"));
 		break;
 		break;
