@@ -11,7 +11,6 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-QT_DIR=""
 
 #checking for parameters
 for i in "$@"
@@ -21,34 +20,15 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
-    -qt=*|--qt_dir=*)
-        QT_DIR=${i#*=}
-        shift # past argument=value
-        ;;
     *)
         # unknown option
         ;;
 esac
 done
 
-bash $SCRIPTS_PATH/internal/make_bundle.sh -i=$INSTALL_PATH
-
-if [ ! -z "$QT_DIR" ]
-then
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_DIR/lib
-    export QMAKE=$QT_DIR/bin/qmake
-fi
-
-chmod +x $INSTALL_PATH/usr/bin/meshlab
-
-for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
-do
-    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN' $plugin
-done
-
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
-  --plugin qt --output appimage
+  --output appimage
 
 #get version
 IFS=' ' #space delimiter
@@ -57,6 +37,3 @@ read -a strarr <<< "$STR_VERSION"
 ML_VERSION=${strarr[1]} #get the meshlab version from the string
 
 mv MeshLab-*.AppImage MeshLab$ML_VERSION-linux.AppImage
-
-#at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$INSTALL_PATH is now a self contained meshlab application"
