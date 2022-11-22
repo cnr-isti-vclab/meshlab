@@ -12,7 +12,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-
+PACKAGE_PATH=$SCRIPTS_PATH/../../package
 
 #checking for parameters
 for i in "$@"
@@ -20,6 +20,10 @@ do
 case $i in
     -i=*|--install_path=*)
         INSTALL_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
+    -p=*|--package_path=*)
+        PACKAGE_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -35,3 +39,6 @@ makensis.exe $INSTALL_PATH/meshlab_final.nsi
 rm $INSTALL_PATH/meshlab_final.nsi
 rm $INSTALL_PATH/ExecWaitJob.nsh
 rm $INSTALL_PATH/FileAssociation.nsh
+
+mkdir $PACKAGE_PATH
+mv $INSTALL_PATH/MeshLab*-windows.exe  $PACKAGE_PATH

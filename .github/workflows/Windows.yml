@@ -40,6 +40,7 @@ jobs:
         choco install ccache
         choco install ninja
         choco install wget
+        choco install nsis
     - name: Cache external libraries sources
       id: cache-ext-libs
       uses: actions/cache@v3
@@ -58,22 +59,10 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: NSIS script
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/internal/nsis_script.sh
     - name: Create Installer
-      uses: joncloud/makensis-action@v3.7
-      with:
-        script-file: "install/meshlab_final.nsi"
-    - name: Move Installer
       shell: bash
       run: |
-        mkdir installer
-        mv install/MeshLab*-windows.exe  installer/
-        rm install/meshlab_final.nsi
-        rm install/ExecWaitJob.nsh
-        rm install/FileAssociation.nsh
+        bash scripts/${{ runner.os }}/3_pack.sh
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
@@ -83,4 +72,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: installer/MeshLab*-windows.exe
+        path: package/MeshLab*-windows.exe
