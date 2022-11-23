@@ -12,7 +12,7 @@
 SCRIPTS_PATH=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-PACKAGE_PATH=$SCRIPTS_PATH/../../package
+PACKAGE_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"

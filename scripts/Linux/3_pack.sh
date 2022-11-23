@@ -11,7 +11,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-PACKAGE_PATH=$SCRIPTS_PATH/../../package
+PACKAGE_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"

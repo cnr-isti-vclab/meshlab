@@ -69,4 +69,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: package/MeshLab*
+        path: packages/MeshLab*
