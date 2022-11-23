@@ -7,7 +7,7 @@ env:
   QT_VERSION: 5.15.2
 
 jobs:
-  linux_build:
+  meshlab_build:
     name: Build MeshLab
     runs-on: ${{ matrix.os }}
     strategy:
