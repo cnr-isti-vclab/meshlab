@@ -11,6 +11,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
+PACKAGE_PATH=$SCRIPTS_PATH/../../package
 
 #checking for parameters
 for i in "$@"
@@ -18,6 +19,10 @@ do
 case $i in
     -i=*|--install_path=*)
         INSTALL_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
+    -p=*|--package_path=*)
+        PACKAGE_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -36,4 +41,5 @@ STR_VERSION=$($INSTALL_PATH/AppRun --version)
 read -a strarr <<< "$STR_VERSION"
 ML_VERSION=${strarr[1]} #get the meshlab version from the string
 
-mv MeshLab-*.AppImage MeshLab$ML_VERSION-linux.AppImage
+mkdir $PACKAGE_PATH
+mv MeshLab-*.AppImage $PACKAGE_PATH/MeshLab$ML_VERSION-linux.AppImage

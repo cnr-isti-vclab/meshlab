@@ -37,10 +37,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        choco install ccache
-        choco install ninja
-        choco install wget
-        choco install nsis
+        choco install ccache ninja wget nsis
     - name: Cache external libraries sources
       id: cache-ext-libs
       uses: actions/cache@v3
@@ -72,4 +69,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: package/MeshLab*-windows.exe
+        path: package/MeshLab*
