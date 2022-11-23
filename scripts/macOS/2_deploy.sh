@@ -43,3 +43,7 @@ done
 
 ${QT_DIR}macdeployqt $INSTALL_PATH/$APPNAME \
     $ARGUMENTS
+
+# remove everything from install path, except the appbundle
+cd $INSTALL_PATH
+ls | grep -xv "${APPNAME}" | xargs rm
