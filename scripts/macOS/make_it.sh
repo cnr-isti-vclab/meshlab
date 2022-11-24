@@ -17,10 +17,10 @@
 # bash make_it.sh --build_path=path/to/build --install_path=path/to/install -j8
 
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-SOURCE_PATH=$SCRIPTS_PATH/../../src
-BUILD_PATH=$SOURCE_PATH/../build
-INSTALL_PATH=$SOURCE_PATH/../install
-PACKAGE_PATH=$SOURCE_PATH/../packages
+SOURCE_PATH=$SCRIPTS_PATH/../..
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
+PACKAGE_PATH=$SOURCE_PATH/packages
 
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""

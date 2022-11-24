@@ -13,10 +13,9 @@
 
 #default paths wrt the script folder
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-SOURCE_PATH=$SCRIPTS_PATH/../../src
-RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-BUILD_PATH=$SOURCE_PATH/../build
-INSTALL_PATH=$SOURCE_PATH/../install
+SOURCE_PATH=$SCRIPTS_PATH/../..
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 QT_DIR=""

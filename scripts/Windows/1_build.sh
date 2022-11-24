@@ -13,9 +13,9 @@
 
 #default paths wrt the script folder
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
-SOURCE_PATH=$SCRIPTS_PATH/../../src
-BUILD_PATH=$SOURCE_PATH/../build
-INSTALL_PATH=$SOURCE_PATH/../install
+SOURCE_PATH=$SCRIPTS_PATH/../..
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 QT_DIR=""
