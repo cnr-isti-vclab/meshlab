@@ -89,5 +89,5 @@ bash 3_pack.sh --install_path=path/to/install --package_path=path/to/packages
 
 ## `make_it.sh`
 
-This script computes all the three previous scripts: starting from the source code, it will produce a self-contained package/installer of MeshLab. 
+This script computes all the three previous scripts: starting from the source code, it will produce a self-contained package/installer of MeshLab. Input arguments are a union of all the arguments of the previous scripts.
 
