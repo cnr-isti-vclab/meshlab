@@ -30,7 +30,7 @@ echo "=== installing mesa packages..."
 sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
 
 echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
-sudo apt-get install -y cmake patchelf libgmp-dev libmpfr-dev libxerces-c-dev
+sudo apt-get install -y cmake ninja-build patchelf libgmp-dev libmpfr-dev libxerces-c-dev
 
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
