@@ -17,7 +17,6 @@ SOURCE_PATH=$SCRIPTS_PATH/../../src
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 BUILD_PATH=$SOURCE_PATH/../build
 INSTALL_PATH=$SOURCE_PATH/../install
-CORES="-j4"
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 QT_DIR=""
@@ -33,10 +32,6 @@ case $i in
         ;;
     -i=*|--install_path=*)
         INSTALL_PATH="${i#*=}"
-        shift # past argument=value
-        ;;
-    -j*)
-        CORES=$i
         shift # past argument=value
         ;;
     -d|--double_precision)
@@ -74,6 +69,7 @@ then
 fi
 
 cd $BUILD_PATH
+export NINJA_STATUS="[%p (%f/%t) ] "
 cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $CCACHE $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
 ninja
 ninja install
