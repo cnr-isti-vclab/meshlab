@@ -26,22 +26,10 @@ jobs:
       with:
         cache: true
         version: ${{ env.QT_VERSION }}
-    - name: Install Linux dependencies
-      if: runner.os == 'Linux'
-      run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
-        #needed by qt 5.15 on linux
-        sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
-    - name: Install macOS dependencies
-      if: runner.os == 'macOS'
-      run: |
-        brew install llvm libomp cgal xerces-c
-        npm install -g appdmg
-    - name: Install Windows dependencies
-      if: runner.os == 'Windows'
+    - name: Install dependencies
       shell: bash
       run: |
-        choco install ccache ninja wget nsis
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
     - name: Setup env variables
       id: envs
       shell: bash
