@@ -29,15 +29,17 @@ sudo apt-get update
 echo "=== installing mesa packages..."
 sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
 
+echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
+sudo apt-get install -y cmake patchelf libgmp-dev libmpfr-dev libxerces-c-dev
+
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
     sudo apt-get install -y qt5-default qttools5-dev-tools qtdeclarative5-dev
 else
     echo "=== jumping installation of qt packages..."
+    # libraries that qt requires in any case
+    sudo apt-get install -y libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
 fi
-
-echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
-sudo apt-get install -y cmake patchelf libgmp-dev libmpfr-dev libxerces-c-dev
 
 # possibility to use always system libraries starting from ubuntu 20.04, since cgal is header only
 if [ "$DONT_INSTALL_CGAL_BOOST" = false ] ; then
