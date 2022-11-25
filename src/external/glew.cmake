@@ -2,7 +2,7 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW "Allow download and use of GLEW source" ON)
+option(MESHLAB_ALLOW_BUNDLED_SOURCE_GLEW "Allow use bundled source of GLEW" ON)
 option(MESHLAB_ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
 
 unset(HAVE_SYSTEM_GLEW)
@@ -23,10 +23,11 @@ if(MESHLAB_ALLOW_SYSTEM_GLEW AND HAVE_SYSTEM_GLEW)
 	else()
 		message(FATAL_ERROR "OpenGL not found or your CMake version is too old!")
 	endif()
-elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
-	set(GLEW_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/glew-2.2.0")
+elseif(MESHLAB_ALLOW_BUNDLED_SOURCE_GLEW)
+	set(GLEW_DIR "${MESHLAB_EXTERNAL_DIR}/glew-2.2.0")
 	set(GLEW_CHECK "${GLEW_DIR}/src/glew.c")
 
+	# just to be sure, but this library is bundled in meshlab repo and download shouldn't be necessary
 	if (NOT EXISTS ${GLEW_CHECK})
 		set(GLEW_LINK
 			https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
@@ -36,14 +37,14 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
 			NAME "GLEW"
 			LINK ${GLEW_LINK}
 			MD5 ${GLEW_MD5}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+			DIR ${MESHLAB_EXTERNAL_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(FATAL_ERROR "- GLEW - download failed.")
 		endif()
 	endif()
 
 	if (EXISTS ${GLEW_CHECK})
-		message(STATUS "- GLEW - using downloaded source")
+		message(STATUS "- GLEW - using bundled source")
 		add_library(external-glew SHARED "${GLEW_DIR}/src/glew.c")
 		target_include_directories(external-glew SYSTEM PUBLIC ${GLEW_DIR}/include)
 		if(TARGET OpenGL::GL)
@@ -60,5 +61,5 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW)
 else()
 	message(
 		FATAL_ERROR
-			"GLEW is required - at least one of MESHLAB_ALLOW_SYSTEM_GLEW or MESHLAB_ALLOW_DOWNLOAD_SOURCE_GLEW must be ON and found.")
+			"GLEW is required - at least one of MESHLAB_ALLOW_SYSTEM_GLEW or MESHLAB_ALLOW_BUNDLED_SOURCE_GLEW must be ON and found.")
 endif()
