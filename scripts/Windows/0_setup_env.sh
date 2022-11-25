@@ -22,7 +22,7 @@ case $i in
 esac
 done
 
-choco install ccache ninja wget nsis
+choco install cmake ninja ccache wget nsis
 
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."

@@ -28,7 +28,7 @@ The script uses a system package manager to install dependencies, which is:
 
 Please be sure to have these package managers before running this script.
 
-It takes as input the `--dont_install_qt` option, that allows the user to choose whether to install or not qt using the system package manager. It could be useful if Qt is installed using other sources. For example, in our GitHub actions workflows we use a specific action step to install Qt, in order to choose a specific version of Qt. 
+It takes as input the `--dont_install_qt` option, that allows the user to choose whether to install or not qt using the system package manager. It could be useful if Qt is installed using other sources. For example, in our GitHub actions workflows we use a specific action step to install Qt, in order to choose a specific version. 
 
 Please see the readme inside the desired platform folder for system dependent additional arguments and further details.
 
@@ -91,3 +91,50 @@ bash 3_pack.sh --install_path=path/to/install --package_path=path/to/packages
 
 This script computes all the three previous scripts: starting from the source code, it will produce a self-contained package/installer of MeshLab. Input arguments are a union of all the arguments of the previous scripts.
 
+# Examples
+
+The following examples can be run on Linux, macOS and Windows (using linux subsystem).
+
+### Building MeshLab on a clean environment
+
+The build directory will be placed in `meshlab/build`:
+
+	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+	bash meshlab/scripts/[platform]/0_setup_env.sh
+	bash meshlab/scripts/[platform]/1_build.sh
+
+### Building, deploying and packaging MeshLab using a custom Qt installation
+
+For example, let assume that Qt 5.15.2 is installed in the path `/opt/Qt`. We assume also that the compiler/architecture used by Qt is `gcc_64` (you can check yours in the directory `path/to/Qt/5.15.2/`). 
+
+* build directory: `meshlab/build`
+* AppDir/portable version: `meshlab/install`
+* package (installer, dmg, AppImage) path: `meshlab/packages`
+
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+bash meshlab/scripts/[platform]/0_setup_env.sh --dont_install_qt
+bash meshlab/scripts/[platform]/1_build.sh --qt_dir=/opt/Qt/5.15.2/gcc_64
+bash meshlab/scripts/[platform]/2_deploy.sh --qt_dir=/opt/Qt/5.15.2/gcc_64
+bash meshlab/scripts/[plarform]/3_pack.sh
+```
+
+Or, alternatively:
+
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+bash meshlab/scripts/[platform]/0_setup_env.sh --dont_install_qt
+bash meshlab/scripts/[platform]/make_it.sh --qt_dir=/opt/Qt/5.15.2/gcc_64
+```
+
+### Building, deploying and packaging MeshLab using custom directories
+
+* build directory: `/my/meshlab/build`
+* AppDir/portable version: `/my/meshlab/install`
+* AppImage path: `/my/meshlab/packages`
+
+```
+git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+bash meshlab/scripts/[platform]/0_setup_env.sh
+bash meshlab/scripts/[platform]/make_it.sh --build_path="/my/meshlab/build" --install_path="/my/meshlab/install" --package_path="/my/meshlab/packages"
+```
