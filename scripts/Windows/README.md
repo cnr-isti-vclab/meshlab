@@ -2,6 +2,12 @@
 
 This folder contains a series of scripts to build and deploy MeshLab under a Windows environment.
 
+## Note about the compiler
+
+On Windows, we use MSVC compiler to build MeshLab. Before trying to build MeshLab, you should download and install VisualStudio with the C++ developer package, which contains the MSVC compiler.
+
+Other compilers are not tested.
+
 ## Note about Qt
 
 MeshLab requires Qt 5.15. You can both install Qt5 using `choco` or manually in your system. 
