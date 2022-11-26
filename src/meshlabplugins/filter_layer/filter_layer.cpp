@@ -453,9 +453,9 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 	} break;
 
 	case FP_SPLITCONNECTED: {
-		MeshModel* currentModel = md.mm();
-		CMeshO&    cm           = md.mm()->cm;
-		bool removeSourceMesh = par.getBool("delete_source_mesh");
+		MeshModel* currentModel     = md.mm();
+		CMeshO&    cm               = md.mm()->cm;
+		bool       removeSourceMesh = par.getBool("delete_source_mesh");
 		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		std::vector<std::pair<int, CMeshO::FacePointer>> connectedCompVec;
 		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm, connectedCompVec);
@@ -488,7 +488,6 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 			// init new layer
 			destModel->updateBoxAndNormals();
 			destModel->cm.Tr = currentModel->cm.Tr;
-
 		}
 		if (removeSourceMesh)
 			md.delMesh(currentModel->id());
@@ -811,10 +810,15 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 									node1.attributes().namedItem("width").nodeValue().toInt();
 								int height =
 									node1.attributes().namedItem("height").nodeValue().toInt();
+								// TODO: read cu, cv
+								// float cu                           = .0f;
+								// float cv                           = .0f;
 								shots[id].Intrinsics.ViewportPx[0] = width;
 								shots[id].Intrinsics.ViewportPx[1] = height;
 								shots[id].Intrinsics.CenterPx[0]   = (float) width / 2.0f;
 								shots[id].Intrinsics.CenterPx[1]   = (float) height / 2.0f;
+								// shots[id].Intrinsics.CenterPx[0]   = cu;
+								// shots[id].Intrinsics.CenterPx[1]   = cv;
 								// Log("Width %f, Height %f", shots[id].Intrinsics.CenterPx[0],
 								// shots[id].Intrinsics.CenterPx[1]);
 							}

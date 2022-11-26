@@ -67,7 +67,7 @@ jobs:
     - name: Deploy and AppImage
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh
+        bash scripts/${{ runner.os }}/2_deploy.sh
     - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v3
       with:
