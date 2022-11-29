@@ -35,21 +35,34 @@
 #include <QSettings>
 #include <IDTF/Converter.h>
 
+#ifdef __linux__
+
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <dlfcn.h>
+
+/**
+ * @brief returns the path of the shared object file that contains this function, which is
+ * the path where the shared object (libio_u3d.so) is placed in the system.
+ */
+std::string getLibPath() {
+	Dl_info dlInfo;
+	dladdr((void*)getLibPath, &dlInfo);
+	if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL) {
+		// the full path, included libio_u3d.so
+		std::string path = dlInfo.dli_fname;
+		// remove from the path everything after the last occurrence of '/'
+		path = path.substr(0, path.find_last_of('/'));
+		return path;
+	}
+	else {
+		return std::string(".");
+	}
+}
+#endif
+
 using namespace std;
 using namespace vcg;
-
-#ifdef BUILD_MODE
-const std::string LIB_IDTF_PATH = "../external/downloads/u3d-1.5.0";
-#else
-#ifdef __APPLE__
-const std::string LIB_IDTF_PATH = "../Frameworks";
-#elif __linux__
-const std::string LIB_IDTF_PATH = "../lib";
-#else
-const std::string LIB_IDTF_PATH = ".";
-#endif
-#endif
-
 
 U3DIOPlugin::U3DIOPlugin() :
 	QObject(), IOPlugin()
@@ -75,6 +88,18 @@ void U3DIOPlugin::save(
 		const RichParameterList & par, 
 		vcg::CallBackPos *)
 {
+#ifdef BUILD_MODE
+	const std::string LIB_IDTF_PATH = "../external/downloads/u3d-1.5.1";
+#else
+#ifdef __APPLE__
+	const std::string LIB_IDTF_PATH = "../Frameworks";
+#elif __linux__
+	const std::string LIB_IDTF_PATH = getLibPath() + "/..";
+#else
+	const std::string LIB_IDTF_PATH = ".";
+#endif
+#endif
+
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 
