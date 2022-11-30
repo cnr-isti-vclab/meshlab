@@ -43,12 +43,18 @@ chmod +x $INSTALL_PATH/usr/bin/meshlab
 
 for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
 do
-    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN' $plugin
+    # allow plugins to find linked libraries in usr/lib, usr/lib/meshlab and usr/lib/meshlab/plugins
+    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN/../:$ORIGIN' $plugin
 done
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
   --plugin qt
+
+# after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
+# usr/lib/meshlab (except for the ones that are loaded at runtime)
+shopt -s extglob
+cd $INSTALL_PATH/usr/lib/meshlab
+rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "$INSTALL_PATH is now a self contained meshlab application"

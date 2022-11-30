@@ -31,7 +31,6 @@ case $i in
 esac
 done
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/usr/lib
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
   --output appimage
 
