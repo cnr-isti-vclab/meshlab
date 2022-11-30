@@ -2,7 +2,7 @@
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-QT_DIR=""
+QT_DIR_OPTION=""
 PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
@@ -14,7 +14,7 @@ case $i in
         shift # past argument=value
         ;;
     -qt=*|--qt_dir=*)
-        QT_DIR=${i#*=}
+        QT_DIR_OPTION=-qt=${i#*=}
         shift # past argument=value
         ;;
     -p=*|--packages_path=*)
@@ -35,7 +35,7 @@ bash $SCRIPTS_PATH/internal/2b_deb.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
 echo "======= Deb Created ======="
 
-bash $SCRIPTS_PATH/internal/2c_portable.sh -i=$INSTALL_PATH -qt=$QT_DIR
+bash $SCRIPTS_PATH/internal/2c_portable.sh -i=$INSTALL_PATH $QT_DIR_OPTION
 
 echo "======= Portable Version Created ======="
 

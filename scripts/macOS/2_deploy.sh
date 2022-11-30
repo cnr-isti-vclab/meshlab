@@ -1,20 +1,10 @@
 #!/bin/bash
-# this is a script shell for deploying a meshlab-portable app.
-# Requires a properly built meshlab.
-#
-# Without given arguments, the folder that will be deployed is meshlab/install.
-#
-# You can give as argument the INSTALL_PATH in the following way:
-# bash 2_deploy.sh  --install_path=/path/to/install
-# -i argument is also supported.
-#
-# After running this script, $INSTALL_PATH/meshlab.app will be a portable meshlab application.
 
-SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-QT_DIR=""
-APPNAME="meshlab.app"
+QT_DIR_OPTION=""
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -25,7 +15,11 @@ case $i in
         shift # past argument=value
         ;;
     -qt=*|--qt_dir=*)
-        QT_DIR=${i#*=}/bin/
+        QT_DIR_OPTION=-qt=${i#*=}
+        shift # past argument=value
+        ;;
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -34,16 +28,10 @@ case $i in
 esac
 done
 
-ARGUMENTS=""
+bash $SCRIPTS_PATH/internal/2a_appbundle.sh -i=$INSTALL_PATH $QT_DIR_OPTION
 
-for plugin in $INSTALL_PATH/$APPNAME/Contents/PlugIns/*.so
-do
-    ARGUMENTS="${ARGUMENTS} -executable=${plugin}"
-done
+echo "======= AppBundle Created ======="
 
-${QT_DIR}macdeployqt $INSTALL_PATH/$APPNAME \
-    $ARGUMENTS
+bash $SCRIPTS_PATH/internal/2b_dmg.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
-# remove everything from install path, except the appbundle
-cd $INSTALL_PATH
-ls | grep -xv "${APPNAME}" | xargs rm
+echo "======= DMG Created ======="
