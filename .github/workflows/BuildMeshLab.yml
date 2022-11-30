@@ -67,11 +67,6 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Packaging
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/3_pack.sh
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:

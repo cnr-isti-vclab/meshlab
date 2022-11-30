@@ -1,15 +1,10 @@
 #!/bin/bash
-# This is a script shell for deploying a meshlab-portable folder.
-# Requires a properly built meshlab (see 1_build.sh).
-#
-# Without given arguments, the folder that will be deployed is meshlab/install.
-#
-# You can give as argument the path where meshlab is installed.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-QT_DIR=""
+QT_DIR_OPTION=""
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -20,7 +15,11 @@ case $i in
         shift # past argument=value
         ;;
     -qt=*|--qt_dir=*)
-        QT_DIR=${i#*=}/bin/
+        QT_DIR_OPTION=qt=${i#*=}
+        shift # past argument=value
+        ;;
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -29,17 +28,10 @@ case $i in
 esac
 done
 
-${QT_DIR}windeployqt $INSTALL_PATH/meshlab.exe
+bash $SCRIPTS_PATH/internal/2a_portable.sh -i=$INSTALL_PATH $QT_DIR_OPTION
 
-${QT_DIR}windeployqt $INSTALL_PATH/plugins/filter_sketchfab.dll --libdir $INSTALL_PATH/
+echo "======= Portable Version Created ======="
 
-mv $INSTALL_PATH/lib/meshlab/IFX* $INSTALL_PATH
-cp $INSTALL_PATH/IFXCoreStatic.lib $INSTALL_PATH/lib/meshlab/
-cp $RESOURCES_PATH/LICENSE.txt $INSTALL_PATH/
-cp $RESOURCES_PATH/privacy.txt $INSTALL_PATH/
+bash $SCRIPTS_PATH/internal/2b_installer.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
-if [ ! -f $INSTALL_PATH/vc_redist.x64.exe ]
-then
-    echo "Downloading vc_redist because it was missing..."
-    wget https://aka.ms/vs/17/release/vc_redist.x64.exe --output-document=$INSTALL_PATH/vc_redist.x64.exe
-fi
+echo "======= Installer Created ======="
