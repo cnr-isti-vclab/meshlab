@@ -78,9 +78,9 @@ It takes the following input arguments:
   - `--install_path`: the directory containing MeshLab deployed; it should be the same argument given to the `2_deploy.sh` script;
     - default: `[meshlab_repo]/install`
     - example: `--install_path=path/to/install`
-  - `--package_path`: the directory where the output package(s) will be placed;
+  - `--packages_path`: the directory where the output package(s) will be placed;
     - default: `[meshlab_repo]/packages`
-    - example: `--package_path=path/to/packages`
+    - example: `--packages_path=path/to/packages`
 
 Example of call:
 ```

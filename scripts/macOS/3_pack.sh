@@ -12,7 +12,7 @@
 SCRIPTS_PATH=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-PACKAGE_PATH=$SCRIPTS_PATH/../../packages
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -22,8 +22,8 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
-    -p=*|--package_path=*)
-        PACKAGE_PATH="${i#*=}"
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -54,8 +54,8 @@ rm -f $INSTALL_PATH/*.dmg
 
 mv $INSTALL_PATH/meshlab.app $INSTALL_PATH/MeshLab$ML_VERSION.app
 
-mkdir $PACKAGE_PATH
+mkdir $PACKAGES_PATH
 
-appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGE_PATH/MeshLab$ML_VERSION-macos.dmg
+appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGES_PATH/MeshLab$ML_VERSION-macos.dmg
 
 rm $RESOURCES_PATH/macos/meshlab_dmg_final.json

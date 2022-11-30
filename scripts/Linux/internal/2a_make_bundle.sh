@@ -1,11 +1,4 @@
 #!/bin/bash
-# this is a script shell for setting up the application bundle for linux
-# Requires a properly built meshlab.
-#
-# Without given arguments, the application boundle will be placed in the meshlab/install
-# directory.
-#
-# You can give as argument the path were meshlab has been installed.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/../
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
@@ -25,8 +18,6 @@ case $i in
         ;;
 esac
 done
-
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH
 
 #check if we have an exec in distrib
 if ! [ -f $INSTALL_PATH/usr/bin/meshlab ]
@@ -70,6 +61,10 @@ cp $RESOURCES_PATH/LICENSE.txt $INSTALL_PATH/usr/share/doc/meshlab/
 cp $RESOURCES_PATH/privacy.txt $INSTALL_PATH/usr/share/doc/meshlab/
 cp $RESOURCES_PATH/readme.txt $INSTALL_PATH/usr/share/doc/meshlab/
 
-for filename in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so; do
-    patchelf --set-rpath '$ORIGIN/../' $filename
+for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
+do
+    # allow plugins to find linked libraries in usr/lib, usr/lib/meshlab and usr/lib/meshlab/plugins
+    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN/../:$ORIGIN' $plugin
 done
+
+chmod +x $INSTALL_PATH/usr/bin/meshlab

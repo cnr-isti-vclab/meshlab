@@ -12,7 +12,7 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-PACKAGE_PATH=$SCRIPTS_PATH/../../packages
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -22,8 +22,8 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
-    -p=*|--package_path=*)
-        PACKAGE_PATH="${i#*=}"
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -40,5 +40,5 @@ rm $INSTALL_PATH/meshlab_final.nsi
 rm $INSTALL_PATH/ExecWaitJob.nsh
 rm $INSTALL_PATH/FileAssociation.nsh
 
-mkdir $PACKAGE_PATH
-mv $INSTALL_PATH/MeshLab*-windows.exe  $PACKAGE_PATH
+mkdir $PACKAGES_PATH
+mv $INSTALL_PATH/MeshLab*-windows.exe  $PACKAGES_PATH

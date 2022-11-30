@@ -1,17 +1,9 @@
 #!/bin/bash
-# This is a script shell for deploying a meshlab-portable folder and create an AppImage.
-# Requires a properly built MeshLab (see 1_build.sh).
-#
-# Without given arguments, the folder that will be deployed is meshlab/install, which
-# should be the path where MeshLab has been installed (default output of 1_build.sh).
-# The AppImage will be placed in the directory where the script is run.
-#
-# You can give as argument the path where you installed MeshLab.
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
-RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
 QT_DIR=""
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -25,36 +17,28 @@ case $i in
         QT_DIR=${i#*=}
         shift # past argument=value
         ;;
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
 esac
 done
 
-bash $SCRIPTS_PATH/internal/make_bundle.sh -i=$INSTALL_PATH
+bash $SCRIPTS_PATH/internal/2a_make_bundle.sh -i=$INSTALL_PATH
 
-if [ ! -z "$QT_DIR" ]
-then
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_DIR/lib
-    export QMAKE=$QT_DIR/bin/qmake
-fi
+echo "======= Bundle created ======="
 
-chmod +x $INSTALL_PATH/usr/bin/meshlab
+bash $SCRIPTS_PATH/internal/2b_deb.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
-for plugin in $INSTALL_PATH/usr/lib/meshlab/plugins/*.so
-do
-    # allow plugins to find linked libraries in usr/lib, usr/lib/meshlab and usr/lib/meshlab/plugins
-    patchelf --set-rpath '$ORIGIN/../../:$ORIGIN/../:$ORIGIN' $plugin
-done
+echo "======= Deb Created ======="
 
-$RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
-  --plugin qt
+bash $SCRIPTS_PATH/internal/2c_portable.sh -i=$INSTALL_PATH -qt=$QT_DIR
 
-# after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
-# usr/lib/meshlab (except for the ones that are loaded at runtime)
-shopt -s extglob
-cd $INSTALL_PATH/usr/lib/meshlab
-rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
+echo "======= Portable Version Created ======="
 
-#at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$INSTALL_PATH is now a self contained meshlab application"
+bash $SCRIPTS_PATH/internal/2d_appimage.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
+
+echo "======= AppImage Created ======="

@@ -19,7 +19,7 @@ SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 SOURCE_PATH=$SCRIPTS_PATH/../..
 BUILD_PATH=$SOURCE_PATH/build
 INSTALL_PATH=$SOURCE_PATH/install
-PACKAGE_PATH=$SOURCE_PATH/packages
+PACKAGES_PATH=$SOURCE_PATH/packages
 
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
@@ -38,8 +38,8 @@ case $i in
         INSTALL_PATH="${i#*=}"/usr/
         shift # past argument=value
         ;;
-    -p=*|--package_path=*)
-        PACKAGE_PATH="${i#*=}"
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     --double_precision)
@@ -66,5 +66,5 @@ done
 
 bash $SCRIPTS_PATH/1_build.sh -b=$BUILD_PATH -i=$INSTALL_PATH $NIGHTLY_OPTION $DOUBLE_PRECISION_OPTION $QT_DIR_OPTION $CCACHE_OPTION
 bash $SCRIPTS_PATH/2_deploy.sh -i=$INSTALL_PATH $QT_DIR_OPTION
-bash $SCRIPTS_PATH/3_pack.sh -i=$INSTALL_PATH -p=$PACKAGE_PATH
+bash $SCRIPTS_PATH/3_pack.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
