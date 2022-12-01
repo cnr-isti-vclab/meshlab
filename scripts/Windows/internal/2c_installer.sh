@@ -1,20 +1,11 @@
-# This is a powershell script for computing the meshlab_final.nsi script.
-# Requires:
-# - a properly deployed meshlab (see windows_deploy.ps1);
-#
-# Without given arguments, the folder that will be deployed is meshlab/distrib.
-#
-# You can give as argument the DISTRIB_PATH.
-#
-# After running this script, a meshlab_final.script can be found in the resources folder.
-# This script is ready to be run by makensis.exe
+#!/bin/bash
 
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-SOURCE_PATH=$SCRIPTS_PATH/../../src
-INSTALL_PATH=$SOURCE_PATH/../install
+INSTALL_PATH=$SCRIPTS_PATH/../../install
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
-#check parameters
+#checking for parameters
 for i in "$@"
 do
 case $i in
@@ -22,11 +13,17 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
 esac
 done
+
+# Make nsis script
 
 #get version
 IFS=' ' #space delimiter
@@ -40,3 +37,14 @@ sed -i "s%DISTRIB_PATH%.%g" $RESOURCES_PATH/windows/meshlab_final.nsi
 mv $RESOURCES_PATH/windows/meshlab_final.nsi $INSTALL_PATH/
 cp $RESOURCES_PATH/windows/ExecWaitJob.nsh $INSTALL_PATH/
 cp $RESOURCES_PATH/windows/FileAssociation.nsh $INSTALL_PATH/
+
+# Make Installer
+
+makensis.exe $INSTALL_PATH/meshlab_final.nsi
+
+rm $INSTALL_PATH/meshlab_final.nsi
+rm $INSTALL_PATH/ExecWaitJob.nsh
+rm $INSTALL_PATH/FileAssociation.nsh
+
+mkdir $PACKAGES_PATH
+mv $INSTALL_PATH/MeshLab*-windows.exe $PACKAGES_PATH
