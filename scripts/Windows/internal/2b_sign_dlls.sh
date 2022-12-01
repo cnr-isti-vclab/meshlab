@@ -29,14 +29,14 @@ done
 
 cd $INSTALL_PATH
 
-CERT_REL=$(realpath --relative-to=$INSTALL_PATH $CERT_FILE)
-CERT_WIN=$(echo "$CERT_REL" | sed 's/^\///' | sed 's/\//\\/g')
-echo "=== Cert win path: $CERT_WIN" 
 
+CERT_REL=$(realpath --relative-to=$INSTALL_PATH $CERT_FILE) # get relative path of the cert file
+CERT_WIN=$(echo "$CERT_REL" | sed 's/^\///' | sed 's/\//\\/g') # get windows relative path (with backslashes) of the cert
+
+# will sign all dll and exe files inside INSTALL_PATH, recursively
 for file in $(find $INSTALL_PATH -name '*.dll' -or -name '*.exe');
 do
-    FILE_REL=$(realpath --relative-to=$INSTALL_PATH $file)
-    FILE_WIN=$(echo "$FILE_REL" | sed 's/^\///' | sed 's/\//\\/g')
-    echo "=== File win path: $FILE_WIN" 
+    FILE_REL=$(realpath --relative-to=$INSTALL_PATH $file) # relative path
+    FILE_WIN=$(echo "$FILE_REL" | sed 's/^\///' | sed 's/\//\\/g')  # win relative path
     signtool.exe sign //fd SHA256 //f $CERT_WIN //p $CERT_PSSW //t http://timestamp.comodoca.com/authenticode $FILE_WIN
 done

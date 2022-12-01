@@ -53,3 +53,9 @@ fi
 bash $SCRIPTS_PATH/internal/2c_installer.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
 echo "======= Installer Created ======="
+
+if [ "$SIGN" = true ] ; then
+    bash $SCRIPTS_PATH/internal/2b_sign_dlls.sh -i=$PACKAGES_PATH  $CERT_FILE_OPTION -cp=$CERT_PSSW
+
+    echo "======= Installer Signed ======="
+fi

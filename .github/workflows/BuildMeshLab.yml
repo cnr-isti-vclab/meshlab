@@ -21,7 +21,13 @@ jobs:
         submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Set Certificate Windows
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS'
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+    - name: Set CodeSign Certificate Windows
       if: runner.os == 'Windows'
       run: |
         New-Item -ItemType directory -Path certificate
@@ -62,7 +68,7 @@ jobs:
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}'
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
