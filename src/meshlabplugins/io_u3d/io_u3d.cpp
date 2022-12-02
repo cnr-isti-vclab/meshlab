@@ -48,7 +48,8 @@
  * @brief returns the path of the shared object file that contains this function, which is
  * the path where the shared object (libio_u3d.so) is placed in the system.
  */
-std::string getLibPath() {
+std::string getLibPath()
+{
 	Dl_info dlInfo;
 	dladdr((void*)getLibPath, &dlInfo);
 	if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL) {
@@ -62,6 +63,31 @@ std::string getLibPath() {
 		return std::string(".");
 	}
 }
+#elif _WIN32
+
+#include "Windows.h"
+
+std::string getLibPath()
+{
+	char cstr[2048] = ".";
+	HMODULE hm = NULL;
+
+	auto res = GetModuleHandleEx(
+		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+			GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		(LPCSTR) &getLibPath,
+		&hm);
+
+	if (res != 0) {
+		GetModuleFileName(hm, cstr, sizeof(cstr));
+	}
+	std::string path(cstr);
+	std::replace(path.begin(), path.end(), '\\', '/');
+	path = path.substr(0, path.find_last_of('/'));
+
+	return path;
+}
+
 #endif
 
 using namespace std;
@@ -91,21 +117,20 @@ void U3DIOPlugin::save(
 		const RichParameterList & par, 
 		vcg::CallBackPos *)
 {
-#ifdef BUILD_MODE
-#if defined(__linux__) || defined(__APPLE__)
-	const std::string LIB_IDTF_PATH = getLibPath() + "/../../external/downloads/u3d-1.5.1";
-#else
-	const std::string LIB_IDTF_PATH = "../external/downloads/u3d-1.5.1";
-#endif
-#else
-#ifdef __APPLE__
-	const std::string LIB_IDTF_PATH = getLibPath() + "/../Frameworks";
-#elif __linux__
+#ifdef _WIN32 // on windows, path is the same regardless BUILD_MODE
 	const std::string LIB_IDTF_PATH = getLibPath() + "/..";
-#else
-	const std::string LIB_IDTF_PATH = ".";
-#endif
-#endif
+#else //_WIN32
+	#ifdef BUILD_MODE
+		// same position wrt plugin dir on linux and macos
+		const std::string LIB_IDTF_PATH = getLibPath() + "/../../external/downloads/u3d-1.5.1";
+	#else // BUILD_MODE
+		#ifdef __APPLE__
+			const std::string LIB_IDTF_PATH = getLibPath() + "/../Frameworks";
+		#else // linux
+			const std::string LIB_IDTF_PATH = getLibPath() + "/..";
+		#endif
+	#endif // BUILD_MODE
+#endif  //_WIN32
 
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
