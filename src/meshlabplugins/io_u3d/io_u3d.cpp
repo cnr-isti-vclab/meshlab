@@ -35,9 +35,12 @@
 #include <QSettings>
 #include <IDTF/Converter.h>
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif //_GNU_SOURCE
+
 #include <stdio.h>
 #include <dlfcn.h>
 
@@ -89,10 +92,14 @@ void U3DIOPlugin::save(
 		vcg::CallBackPos *)
 {
 #ifdef BUILD_MODE
+#if defined(__linux__) || defined(__APPLE__)
+	const std::string LIB_IDTF_PATH = getLibPath() + "/../../external/downloads/u3d-1.5.1";
+#else
 	const std::string LIB_IDTF_PATH = "../external/downloads/u3d-1.5.1";
+#endif
 #else
 #ifdef __APPLE__
-	const std::string LIB_IDTF_PATH = "../Frameworks";
+	const std::string LIB_IDTF_PATH = getLibPath() + "/../Frameworks";
 #elif __linux__
 	const std::string LIB_IDTF_PATH = getLibPath() + "/..";
 #else
@@ -107,7 +114,6 @@ void U3DIOPlugin::save(
 	string filename = QFile::encodeName(fileName).constData();
 	std::string ex = formatName.toUtf8().data();
 
-	
 	QStringList textures_to_be_restored;
 	QStringList lst = 
 			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
@@ -119,7 +125,7 @@ void U3DIOPlugin::save(
 					m.cm.bbox.Center(),m.cm.bbox.Diag());
 		saveParameters(par, _param);
 		QSettings settings;
-		
+
 		//tmp idtf
 		QString tmp(QDir::tempPath());
 		QString curr = QDir::currentPath();
@@ -141,7 +147,7 @@ void U3DIOPlugin::save(
 		if(result==false) {
 			throw MLException("Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")");
 		}
-		
+
 		//saving latex:
 		QDir::setCurrent(curr);
 		QString lat (fileName);
