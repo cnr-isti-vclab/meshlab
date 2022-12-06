@@ -1,18 +1,9 @@
 #!/bin/bash
-# this is a script shell for setting up the application DMG for MacOS.
-# Requires a properly built and deployed meshlab (requires to run the
-# 2_deploy.sh script first).
-#
-# Without given arguments, meshlab.app will be looked for in meshlab/install
-# folder. MeshLab DMG will be placed in the same directory of meshlab.app.
-#
-# You can give as argument the INSTALL_PATH containing meshlab.app, with -i or
-# --install_path option.
 
-SCRIPTS_PATH=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-PACKAGE_PATH=$SCRIPTS_PATH/../../packages
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 
 #checking for parameters
 for i in "$@"
@@ -22,8 +13,8 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
-    -p=*|--package_path=*)
-        PACKAGE_PATH="${i#*=}"
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -54,8 +45,8 @@ rm -f $INSTALL_PATH/*.dmg
 
 mv $INSTALL_PATH/meshlab.app $INSTALL_PATH/MeshLab$ML_VERSION.app
 
-mkdir $PACKAGE_PATH
+mkdir $PACKAGES_PATH
 
-appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGE_PATH/MeshLab$ML_VERSION-macos.dmg
+appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGES_PATH/MeshLab$ML_VERSION-macos.dmg
 
 rm $RESOURCES_PATH/macos/meshlab_dmg_final.json

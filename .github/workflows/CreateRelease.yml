@@ -40,8 +40,21 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
+        ref: main
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS'
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+    - name: Set CodeSign Certificate Windows
+      if: runner.os == 'Windows'
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
+        certutil -decode certificate\certificate.txt certificate\certificate.pfx
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
@@ -74,50 +87,30 @@ jobs:
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --ccache
-    - name: Set Certificate Windows
-      if: runner.os == 'Windows'
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
-        certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Sign Portable content Windows
-      if: runner.os == 'Windows'
-      run: |
-        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'install\'
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Import macOS Cert and Key
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
+    - name: Get AppBundle Name
       if: runner.os == 'macOS'
-      uses: apple-actions/import-codesign-certs@v1
-      with:
-        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-    - name: Sign macOS
-      if: runner.os == 'macOS'
+      id: abn
+      shell: bash
       run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} install/meshlab.app
+        cd install
+        NAME=$(ls -d MeshLab*)
+        echo "app_bundle_name=$NAME" >> $GITHUB_OUTPUT
     - name: Notarize macOS
       if: runner.os == 'macOS'
       uses: devbotsxyz/xcode-notarize@v1
       with:
-        product-path: "install/meshlab.app"
+        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
         appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
         appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
     - name: Staple Release macOS
       if: runner.os == 'macOS'
       uses: devbotsxyz/xcode-staple@v1
       with:
-        product-path: "install/meshlab.app"
-    - name: Packaging
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/3_pack.sh
-    - name: Sign Installer Windows
-      if: runner.os == 'Windows'
-      run: |
-        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'packages\'
+        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
