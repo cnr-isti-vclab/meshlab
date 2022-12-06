@@ -29,15 +29,6 @@
 #include "import_3ds.h"
 #include <wrap/io_trimesh/export_3ds.h>
 
-#include <wrap/io_trimesh/export_obj.h>
-#include <wrap/io_trimesh/export_vrml.h>
-#include <wrap/io_trimesh/export_dxf.h>
-
-#include <wrap/io_trimesh/import_obj.h>
-#include <wrap/io_trimesh/import_off.h>
-#include <wrap/io_trimesh/import_ptx.h>
-
-#include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QFile>
