@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test SAX2Print2 pass "" samples/SAX2Print personal.xml

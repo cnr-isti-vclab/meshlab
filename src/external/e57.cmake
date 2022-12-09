@@ -2,28 +2,40 @@
 # Copyright 2019, 2020, 2021 Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_LIBE57_FORMAT "Allow use of bundled libE57Format source" ON)
-option(ALLOW_SYSTEM_LIBE57_FORMAT "Allow use of system-provided libE57Format" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57 "Allow download and use of libE57Format source" ON)
 
-set(E57Format_DIR ${EXTERNAL_DIR}/e57)
+if (TARGET XercesC::XercesC)
+	if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57)
+		set(LIBE57_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/libE57Format-2.3.0")
+		set(LIBE57_CHECK "${LIBE57_DIR}/CMakeLists.txt")
 
-if (TARGET external-xerces)
-	if(ALLOW_SYSTEM_LIBE57_FORMAT AND TARGET E57Format::E57Format)
+		if (NOT EXISTS ${LIBE57_CHECK})
+			set(LIBE57_LINK
+				https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.3.0.zip
+				https://www.meshlab.net/data/libs/libE57Format-2.3.0.zip)
+			set(LIBE57_MD5 958ada3883f9b60195f79bbab156f3e3)
+			download_and_unzip(
+				NAME "LibE57"
+				MD5 ${LIBE57_MD5}
+				LINK ${LIBE57_LINK}
+				DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+			if (NOT download_and_unzip_SUCCESS)
+				message(STATUS "- LibE57 - download failed.")
+			endif()
+		endif()
 
-		message(STATUS "- libE57Format - using system-provided library")
-		add_library(external-libE57Format INTERFACE)
-		target_link_libraries(external-libE57Format INTERFACE E57Format::E57Format)
+		if (EXISTS ${LIBE57_CHECK})
+			message(STATUS "- libE57 - using downloaded source")
 
-	elseif(ALLOW_BUNDLED_LIBE57_FORMAT)
+			set(MESSAGE_QUIET ON)
+			add_subdirectory(${LIBE57_DIR} EXCLUDE_FROM_ALL)
+			unset(MESSAGE_QUIET)
 
-		message(STATUS "- libE57Format - using bundled source")
-
-		set(MESSAGE_QUIET ON)
-		add_subdirectory(e57 EXCLUDE_FROM_ALL)
-		unset(MESSAGE_QUIET)
-
-		add_library(external-libE57Format INTERFACE)
-		target_link_libraries(external-libE57Format INTERFACE E57Format)
-
+			add_library(external-libE57 INTERFACE)
+			target_link_libraries(external-libE57 INTERFACE E57Format)
+			install(TARGETS E57Format DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		endif()
 	endif()
+else()
+	message(STATUS - "Cannot build e57 because Xerces dependence not satisfied.")
 endif()

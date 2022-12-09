@@ -42,7 +42,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 
 const QString MeshLabApplication::appVer()
 {
-	return QString::fromStdString(meshlab::meshlabVersion());
+	return QString::fromStdString(meshlab::meshlabCompleteVersion());
 }
 
 const QString MeshLabApplication::compilerVersion()

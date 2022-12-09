@@ -2,20 +2,6 @@
 # Copyright 2019, 2021, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-cmake_minimum_required(VERSION 3.10)
-project(MeshLab)
-
-### Build options
-option(BUILD_MESHLAB_MINI "Build only common and meshlab - other plugin targets must be set manually" OFF)
-option(BUILD_STRICT "Strictly enforce resolution of all symbols" ON)
-option(BUILD_WITH_DOUBLE_SCALAR "Use double type instead of float type for scalars" OFF)
-option(ENABLE_MESHLAB_DEBUG_LOG_FILE "If enabled, all the logs of MeshLab will be also saved into a log file" OFF)
-
-option(BUILD_ONLY_MESHLAB_LIBRARIES "Build only meshlab-common and plugins" OFF)
-option(USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects that you set manually the binary and install directories" ON)
-
-option(MESHLAB_IS_NIGHTLY_VERSION "Nightly version of meshlab will be used instead of ML_VERSION" OFF)
-
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/meshlab_global_settings.cmake" NO_POLICY_SCOPE)
@@ -41,7 +27,7 @@ find_package(Eigen3)
 set(MESHLAB_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../resources)
 
 ### Build directories
-if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these dirs are defined in parent dir
+if (MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these dirs are defined in parent dir
 	set(MESHLAB_BUILD_DISTRIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/distrib)
 	set(MESHLAB_LIB_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR})
 	set(MESHLAB_PLUGIN_OUTPUT_DIR ${MESHLAB_BUILD_DISTRIB_DIR}/plugins)
@@ -74,7 +60,7 @@ if (USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all these di
 
 	### Install Settings
 	if (NOT APPLE)
-		set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
+		set(CMAKE_INSTALL_RPATH $ORIGIN/../lib/meshlab)
 	else()
 		SET(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
 	endif()
@@ -120,7 +106,7 @@ add_subdirectory(${EXTERNAL_DIR})
 add_subdirectory(common)
 add_subdirectory(common_gui)
 
-if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
+if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
 	add_subdirectory(meshlab)
 	if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/use_cpu_opengl")
 		add_subdirectory(use_cpu_opengl)
@@ -163,6 +149,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_colorproc
 		meshlabplugins/filter_create
 		meshlabplugins/filter_cubization
+		meshlabplugins/filter_developability
 		meshlabplugins/filter_dirt
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
@@ -176,7 +163,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_meshing
 		meshlabplugins/filter_mls
 #		meshlabplugins/filter_mutualglobal
-#		meshlabplugins/filter_mutualinfo
+		meshlabplugins/filter_mutualinfo
 		meshlabplugins/filter_parametrization
 		meshlabplugins/filter_plymc
 		meshlabplugins/filter_qhull
@@ -204,14 +191,14 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		# Edit Plugins
 		meshlabplugins/edit_sample
 #		meshlabplugins/edit_align
-#		meshlabplugins/edit_manipulators
+		meshlabplugins/edit_manipulators
 		meshlabplugins/edit_measure
 #		meshlabplugins/edit_mutualcorrs
 		meshlabplugins/edit_paint
-#		meshlabplugins/edit_pickpoints
-#		meshlabplugins/edit_point
-#		meshlabplugins/edit_referencing
-#		meshlabplugins/edit_quality
+		meshlabplugins/edit_pickpoints
+		meshlabplugins/edit_point
+		meshlabplugins/edit_referencing
+		meshlabplugins/edit_quality
 		meshlabplugins/edit_select
 	)
 endif()
@@ -233,7 +220,7 @@ endforeach()
 # This variable keeps track of the output filenames that need to be copied at build time
 set(COPIED_FILES)
 
-if (NOT BUILD_ONLY_MESHLAB_LIBRARIES)
+if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
 	# shaders
 	set(SHADER_BASE_DIR "${MESHLAB_RESOURCES_DIR}/shaders")
 	file(

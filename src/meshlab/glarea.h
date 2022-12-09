@@ -77,7 +77,12 @@ public:
 
 	MainWindow * mw();
 
-	MeshModel *mm();
+	MeshModel *mm()
+	{
+		if (mvc() == nullptr)
+			return nullptr;
+		return mvc()->meshDoc.mm();
+	}
 
 	template <typename... Ts>
 	void Logf(int Level, const char * f, Ts&&... ts);

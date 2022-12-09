@@ -1,7 +1,0 @@
-<?xml version='1.0'?>
-<!DOCTYPE view [
- <!ELEMENT view EMPTY>
- <!NOTATION xjpg SYSTEM "jpg">
- <!ENTITY image SYSTEM "gris.jpg" NDATA xjpg>
- <!ATTLIST view sun ENTITY #IMPLIED>]>
-<view sun="image"/>
