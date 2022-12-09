@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?><!DOCTYPE x SYSTEM "tests.dtd"><x xmlns="http://www.schemaTest.org/xinclude-test" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.schemaTest.org/xinclude-test tests.xsd">
-   <elem bar="xjpg"/>
-   <!-- test including a document with a non-conflicting notation -->
-   <elem bar="jpg" xml:base="../included/not.xml" xmlns="http://www.schemaTest.org/xinclude-test"/>
-</x>

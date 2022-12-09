@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 		if (versOpt1==argv[1] || versOpt2==argv[1]){
-			std::cout << "MeshLab " << meshlab::meshlabVersion() << "\n";
+			std::cout << "MeshLab " << meshlab::meshlabCompleteVersion() << "\n";
 			return 0;
 		}
 	}

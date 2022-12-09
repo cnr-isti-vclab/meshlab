@@ -17,269 +17,138 @@ jobs:
     name: Update ML_VERSION
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Update MeshLab version
       run : |
         echo ${{ github.event.inputs.version }} | tr -d '\n'> ML_VERSION
     - name: commit ML_VERSION change
-      uses: stefanzweifel/git-auto-commit-action@v4.1.1
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Set MeshLab version to ${{ github.event.inputs.version }}
 
-  linux_build:
+  meshlab_build:
     needs: [update_ml_version]
-    name: Build MeshLab (Linux)
-    runs-on: ubuntu-18.04 #in order to deploy, need to use oldest supported version
+    name: Build MeshLab
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: ['ubuntu-18.04', 'macos-latest', 'windows-latest']
         precision: [single_precision, double_precision]
-
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
-        ref: main
         submodules: recursive
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Install dependencies
-      run: |
-        bash scripts/${{ runner.os }}/0_setup_env_ubuntu.sh --dont_install_qt --dowload_cgal_and_boost_src
-        #needed by qt 5.15 on linux
-        sudo apt-get install libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
-    - name: Setup env variables
-      id: envs
-      shell: bash
-      run: |
-        if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
-        else
-          echo  ::set-output name=artifact_suffix::""
-        fi
-    - name: Configure and Build
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
-    - name: Deploy and AppImage
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy_and_appimage.sh
-    - name: Upload Meshlab Portable
-      uses: actions/upload-artifact@v2
-      with:
-        name: meshlab_linux_portable${{steps.envs.outputs.artifact_suffix}}
-        path: install/
-    - name: Upload Meshlab AppImage
-      uses: actions/upload-artifact@v2
-      with:
-        name: meshlab_linux_appimage${{steps.envs.outputs.artifact_suffix}}
-        path: MeshLab*-linux.AppImage
-
-  macos_build:
-    needs: [update_ml_version]
-    name: Build MeshLab (MacOS)
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        precision: [single_precision, double_precision]
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
         ref: main
-        submodules: recursive
-    - name: Install dependencies
-      run: |
-        brew install libomp cgal xerces-c
-        npm install -g appdmg
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Setup env variables
-      id: envs
-      shell: bash
-      run: |
-        if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
-        else
-          echo  ::set-output name=artifact_suffix::""
-        fi
-    - name: Configure and Build
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
-    - name: Deploy
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh
-    - name: Import Cert and Key
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS'
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-    - name: Sign
-      run: |
-        codesign --options "runtime" --timestamp --force --deep --sign ${{ secrets.MACOS_CERT_ID }} install/meshlab.app
-    - name: Notarize
-      uses: devbotsxyz/xcode-notarize@v1
-      with:
-        product-path: "install/meshlab.app"
-        appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
-        appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
-    - name: "Staple Release"
-      uses: devbotsxyz/xcode-staple@v1
-      with:
-        product-path: "install/meshlab.app"
-    - name: Create MeshLab DMG
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/3_dmg.sh
-    - name: Upload MeshLab Portable
-      uses: actions/upload-artifact@v2
-      with:
-        name: meshlab_macos_portable${{steps.envs.outputs.artifact_suffix}}
-        path: install/MeshLab*.app
-    - name: Upload DMG
-      uses: actions/upload-artifact@v2
-      with:
-        name: meshlab_macos_dmg${{steps.envs.outputs.artifact_suffix}}
-        path: install/MeshLab*-macos.dmg
-
-  windows_build:
-    needs: [update_ml_version]
-    name: Build MeshLab (Windows)
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        precision: [single_precision, double_precision]
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: main
-        submodules: recursive
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
-    - name: Setup env variables
-      shell: bash
-      id: envs
-      run: |
-        if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo  ::set-output name=artifact_suffix::"_double"
-        else
-          echo  ::set-output name=artifact_suffix::""
-        fi
-        echo "VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC" >> $GITHUB_ENV
-    - name: Install wget
-      run: |
-        $env:PATH = "${{ env.PATH }};C:\msys64\mingw64\bin;C:\msys64\usr\bin"
-        pacman.exe -S --noconfirm --noprogressbar wget unzip
-    - name: Set Certificate
+    - name: Set CodeSign Certificate Windows
+      if: runner.os == 'Windows'
       run: |
         New-Item -ItemType directory -Path certificate
         Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
         certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Download external libraries
-      shell: C:\shells\msys2bash.cmd {0}
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        cache: true
+        version: ${{ env.QT_VERSION }}
+    - name: Install dependencies
+      shell: bash
       run: |
-        bash scripts/${{ runner.os }}/0_download_ext.sh
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+        else
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+        fi
+    - name: Cache external libraries sources
+      id: cache-ext-libs
+      uses: actions/cache@v3
+      with:
+        path: src/external/downloads/*
+        key: ${{ runner.os }}-external-libraries
+    - name: Ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }}
-    - name: Sign Portable content
-      run: |
-        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'install\'
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --ccache
     - name: Deploy
-      shell: C:\shells\msys2bash.cmd {0}
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh -qt=${{ env.Qt5_DIR }}
-    - name: NSIS script
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/internal/nsis_script.sh
-    - name: Create Installer
-      uses: joncloud/makensis-action@v1
-      with:
-        script-file: "install/meshlab_final.nsi"
-    - name: Move Installer
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
+    - name: Get AppBundle Name
+      if: runner.os == 'macOS'
+      id: abn
       shell: bash
       run: |
-        mkdir installer
-        mv install/MeshLab*-windows.exe  installer
-        rm install/meshlab_final.nsi
-        rm install/ExecWaitJob.nsh
-        rm install/FileAssociation.nsh
-    - name: Sign Installer
-      run: |
-        .\scripts\Windows\internal\sign_dlls.ps1 -pssw '${{ secrets.WIN_CERTIFICATE_PSSW }}' -path 'installer\'
-    - name: Uploading MeshLab Portable
-      uses: actions/upload-artifact@v2
+        cd install
+        NAME=$(ls -d MeshLab*)
+        echo "app_bundle_name=$NAME" >> $GITHUB_OUTPUT
+    - name: Notarize macOS
+      if: runner.os == 'macOS'
+      uses: devbotsxyz/xcode-notarize@v1
       with:
-        name: meshlab_windows_portable${{steps.envs.outputs.artifact_suffix}}
-        path: install
-    - name: Upload Meshlab Installer
-      uses: actions/upload-artifact@v2
+        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
+        appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
+        appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
+    - name: Staple Release macOS
+      if: runner.os == 'macOS'
+      uses: devbotsxyz/xcode-staple@v1
       with:
-        name: meshlab_windows_installer${{steps.envs.outputs.artifact_suffix}}
-        path: installer/MeshLab*-windows.exe
+        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
+    - name: Upload MeshLab Portable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
+        path: install/
+    - name: Upload MeshLab Packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
+        path: packages/MeshLab*
 
   #after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
-    needs: [linux_build, macos_build, windows_build]
+    needs: [meshlab_build]
     runs-on: ubuntu-latest
     steps:
 
     #Download Linux Packages
     - name: Download Linux ZIP
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_linux_portable
+        name: MeshLab_Linux_portable
         path: meshlab_linux_portable
     - name: Download Linux ZIP-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_linux_portable_double
+        name: MeshLab_Linux_portable_double
         path: meshlab_linux_portable_double
     - name: Download Linux AppImage
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_linux_appimage
+        name: MeshLab_Linux_packages
         path: meshlab_linux_appimage
     - name: Download Linux AppImage-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_linux_appimage_double
+        name: MeshLab_Linux_packages_double
         path: meshlab_linux_appimage_double
     - name: Change Permissions
       run: |
@@ -296,11 +165,11 @@ jobs:
         STR_VERSION=$(meshlab_linux_portable/usr/bin/meshlab --version)
         read -a strarr <<< "$STR_VERSION"
         ML_VERSION=${strarr[1]} #get the meshlab version from the string
-        echo  ::set-output name=ml_version::"$ML_VERSION"
+        echo "ml_version=$ML_VERSION" >> $GITHUB_OUTPUT
         STR_VERSION=$(meshlab_linux_portable_double/usr/bin/meshlab --version)
         read -a strarrd <<< "$STR_VERSION"
         ML_VERSION_D=${strarrd[1]} #get the meshlab version from the string
-        echo  ::set-output name=ml_version_d::"$ML_VERSION_D"
+        echo "ml_version_d=$ML_VERSION_D" >> $GITHUB_OUTPUT
         #access to this variable using ${{steps.envs.outputs.ml_version}} or ${{steps.envs.outputs.ml_version_d}}
     - name: Create MeshLab Portable Linux Archive
       run: |
@@ -312,24 +181,24 @@ jobs:
 
     #Download MacOS Package
     - name: Download MacOS DMG
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_macos_dmg
+        name: MeshLab_macOS_packages
         path: meshlab_macos_dmg
     - name: Download MacOS DMG-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_macos_dmg_double
+        name: MeshLab_macOS_packages_double
         path: meshlab_macos_dmg_double
     - name: Download MacOS Portable
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_macos_portable
+        name: MeshLab_macOS_portable
         path: meshlab_macos_portable
     - name: Download MacOS Portable-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_macos_portable_double
+        name: MeshLab_macOS_portable_double
         path: meshlab_macos_portable_double
     - name: Change Permissions
       run: |
@@ -345,24 +214,24 @@ jobs:
 
     #Download Windows Packages
     - name: Download Windows ZIP
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_windows_portable
+        name: MeshLab_Windows_portable
         path: meshlab_windows_portable
     - name: Download Windows ZIP-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_windows_portable_double
+        name: MeshLab_Windows_portable_double
         path: meshlab_windows_portable_double
     - name: Download Windows Installer
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_windows_installer
+        name: MeshLab_Windows_packages
         path: meshlab_windows_installer
     - name: Download Windows Installer-d
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
-        name: meshlab_windows_installer_double
+        name: MeshLab_Windows_packages_double
         path: meshlab_windows_installer_double
     - name: Create MeshLab Portable Windows Archive
       run: |

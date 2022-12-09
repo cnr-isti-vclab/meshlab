@@ -8,7 +8,6 @@ if(TARGET external-tinygltf)
 	set(HEADERS
 		io_gltf.h
 		callback_progress.h
-		tinygltf_include.h
 		gltf_loader.h)
 
 	add_meshlab_plugin(io_gltf MODULE ${SOURCES} ${HEADERS})

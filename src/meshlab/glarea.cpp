@@ -2811,13 +2811,6 @@ MainWindow* GLArea::mw()
 	return qobject_cast<MainWindow*>(curParent);
 }
 
-MeshModel* GLArea::mm()
-{
-	if (mvc() == nullptr)
-		return nullptr;
-	return mvc()->meshDoc.mm();
-}
-
 void GLArea::Log(int Level, const char *f)
 {
 	makeCurrent();

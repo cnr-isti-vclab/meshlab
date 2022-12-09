@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test XSerializerTest4 pass "" tests/XSerializerTest -v=always personal-schema.xml
