@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test SAX2Count3 pass "" samples/SAX2Count -p personal-schema.xml

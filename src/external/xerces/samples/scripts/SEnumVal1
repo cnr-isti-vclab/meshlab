@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test SEnumVal1 pass "" samples/SEnumVal personal-schema.xml
