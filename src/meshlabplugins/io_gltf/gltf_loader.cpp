@@ -21,6 +21,12 @@
 *                                                                           *
 ****************************************************************************/
 
+// From tinygltf example:
+// Define these only in *one* .cc file.
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include "gltf_loader.h"
 
 #include <regex>

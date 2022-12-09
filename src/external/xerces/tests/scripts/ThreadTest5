@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test ThreadTest5 pass "" tests/ThreadTest -parser=dom -v=always -quiet -threads 10 -time 20 personal.xml
