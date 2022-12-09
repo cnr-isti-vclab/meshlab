@@ -28,6 +28,11 @@
 #define mlstringify(a) #a
 
 #include <QString>
+#ifdef MESHLAB_IS_NIGHTLY
+#include <QFile>
+#include <QTextStream>
+#endif
+
 #ifndef MESHLAB_VERSION
 #error "MESHLAB_VERSION needs to be defined!"
 #endif
@@ -56,6 +61,8 @@ inline std::string meshlabVersion()
 {
 	return std::string(meshlab_xstr(MESHLAB_VERSION));
 }
+
+std::string meshlabCompleteVersion();
 
 inline bool builtWithDoublePrecision()
 {

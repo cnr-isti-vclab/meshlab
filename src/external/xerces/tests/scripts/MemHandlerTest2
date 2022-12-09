@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test MemHandlerTest2 pass "" tests/MemHandlerTest -v=always -n -r=2 -s -f personal-schema.xml

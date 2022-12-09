@@ -1639,7 +1639,12 @@ bool MainWindow::openProject(QString fileName, bool append)
 	}
 
 	meshDoc()->setBusy(false);
-	if(this->GLA() == 0)  return false;
+
+	// here we update the visibility of all the meshes.
+	// yet another workaround for a problem that would be easy to solve in a well structured
+	// codebase.
+	if(this->GLA() == 0) return false;
+	else GLA()->updateMeshSetVisibilities();
 	
 	MultiViewer_Container* mvc = currentViewContainer();
 	if (mvc != NULL)

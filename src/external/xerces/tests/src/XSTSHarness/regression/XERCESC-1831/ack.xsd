@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://www.theriak.is/namespace/\:*?&quot;&lt;&gt;|" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.theriak.is/namespace/\:*?&quot;&lt;&gt;|" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xs:element name="ack">
-		<xs:complexType>
-			<xs:attribute name="message_id" type="xs:string" use="required"/>
-		</xs:complexType>
-	</xs:element>
-</xs:schema>

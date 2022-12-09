@@ -32,7 +32,7 @@
 #include <vcg/space/color4.h>
 #include <dual_coord_optimization.h>
 #include <float.h>
-#include <lm.h>
+#include <levmar.h>
 #ifndef _MESHLAB
 #include <wrap/io_trimesh/export_ply.h>
 #endif
