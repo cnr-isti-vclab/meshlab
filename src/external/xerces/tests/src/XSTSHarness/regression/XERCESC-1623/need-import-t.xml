@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<lib:library xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://dyomedea.com/ns/library need-import-t.xsd"
- xmlns:lib="http://dyomedea.com/ns/library"> 
-    <lib:importTest>
-      <name>String</name>
-    </lib:importTest>
-</lib:library>

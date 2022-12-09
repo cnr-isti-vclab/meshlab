@@ -1,37 +1,27 @@
 # MacOS Scripts
 
-This folder contains a series of scripts to build and deploy MeshLab under a MacOS environment.
+This folder contains a series of scripts to build and deploy MeshLab under a MacOS x86_64 environment.
 
-* `0_setup_env.sh`: this script installs all the required dependencies that are necessary to build MeshLab and to create its DMG in a MacOS machine (tested in 10.15 Catalina). It requires [homebrew](https://brew.sh/) installed;
-* `1_build.sh`: this script builds MeshLab in a MacOS environment:
-	* it requires a properly set Qt environment (see `0_setup_env.sh`);
-	* takes as arguments:
-		* the build directory (default: `src/build`): `--build_path=path/to/build`
-		* the install directory (default: `src/install`): `--install_path=path/to/install`
-		* the number of cores used to build MeshLab (default: `-j4`)`
-		* the possibility to build MeshLab with double precision scalar: `--double_precision`
-* `2_deploy.sh`: this script makes portable a `meshlab.app` appdir. Takes as arguments:
-    * the path where the output install path of the `1_build.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
-* `3_dmg.sh`: this script generates a [DMG](https://en.wikipedia.org/wiki/Apple_Disk_Image) that can be used to install MeshLab. Takes as arguments:
-    * the path where the install path of the `2_deploy.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
-    * if MeshLab has been built with double precision scalar, add: `--double_precision`
-* `make_it.sh`: this script builds, deploys and generates a [DMG](https://en.wikipedia.org/wiki/Apple_Disk_Image) that can be used to install MeshLab. Arguments are the same of the `1_build.sh` script.
+Arm (Apple M1) is still not supported. It will be supported soon.
+## Note about Qt
 
-## Examples
+MeshLab requires Qt 5.15. You can both install Qt5 using `brew` or manually in your system. 
+If you install Qt manually. you can then give the path of the Qt installation directory to the various scripts, or you can add Qt to your `LD_LIBRARY_PATH`.
 
-Building MeshLab on a clean MacOS environment (build placed in `meshlab/src/build`):
+The `0_setup_env.sh` script won't install qt from `brew` if you pass the argument `dont_install_qt`.
 
-	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	sh meshlab/scripts/macOS/0_setup_env.sh
-	sh meshlab/scripts/macOS/1_build.sh
+## Dependencies 
 
-Building and generating a DMG on a clean MacOS environment:
-* build directory: `./meshlab-build`
-* install directory: `./meshlab-install`
-* DMG path: `./`
+Dependencies are automatically installed by the `0_setup_env.sh` script, which uses [`brew`](https://brew.sh/) as package manager.
+Be sure to have `brew` installed before running this script.
 
-```
-git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-sh meshlab/scripts/macOS/0_setup_env.sh
-sh meshlab/scripts/macOS/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
-```
+Libraries installed by the `0_setup_env.sh` are the following:
+  - Required by MeshLab:
+    - `coreutils` (required by these scripts) 
+	- `cmake`
+	- `ninja`
+	- `libomp`
+	- `node` (for package stage, to download appdmg)
+  - Optional:
+	- `xerces-c` (required by libe57)
+	- `cgal` (required by several MeshLab plugins)

@@ -391,16 +391,6 @@ void GLArea::drawLight()
 		trackball_light.DrawPostApply();
 }
 
-float &GLArea::getFov()
-{
-	return fov;
-}
-
-float GLArea::getFov() const
-{
-	return fov;
-}
-
 int GLArea::RenderForSelection(int pickX, int pickY)
 {
 	makeCurrent();
@@ -2268,6 +2258,7 @@ void GLArea::setTarget(QImage& image)
 	// create texture
 	glGenTextures(1, &targetTex);
 	QImage tximg = image.convertToFormat(QImage::Format_RGBA8888);
+	tximg = tximg.mirrored();
 	glBindTexture(GL_TEXTURE_2D, targetTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -2818,13 +2809,6 @@ MainWindow* GLArea::mw()
 		curParent = curParent->parent();
 	}
 	return qobject_cast<MainWindow*>(curParent);
-}
-
-MeshModel* GLArea::mm()
-{
-	if (mvc() == nullptr)
-		return nullptr;
-	return mvc()->meshDoc.mm();
 }
 
 void GLArea::Log(int Level, const char *f)

@@ -38,7 +38,7 @@ if(APPLE)
 	add_definitions(-DGL_SILENCE_DEPRECATION)
 endif()
 
-if(BUILD_STRICT AND NOT MSVC AND NOT APPLE)
+if(MESHLAB_BUILD_STRICT AND NOT MSVC AND NOT APPLE)
 	# Make sure that our shared libraries were appropriately linked
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")

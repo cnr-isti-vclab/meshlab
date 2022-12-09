@@ -4,7 +4,7 @@
 
 #include <QString>
 #include <QImage>
-#include <QGLFramebufferObject>
+#include <QOpenGLFramebufferObject>
 
 // local headers
 #include <common/ml_document/mesh_model.h>
@@ -16,8 +16,6 @@
 //#include "fbo.h"
 
 #include "pointCorrespondence.h"
-
-class QGLFramebufferObject;
 
 class AlignSet {
   //typedef vcg::Camera<float> Camera;

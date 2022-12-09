@@ -2,51 +2,43 @@
 # Copyright 2019, 2020, Visual Computing Lab, ISTI - Italian National Research Council
 # SPDX-License-Identifier: BSL-1.0
 
-option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
-option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
+option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL "Allow download and use of Qhull source" ON)
+option(MESHLAB_ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
 
 find_package(Qhull 8 COMPONENTS qhull_r CONFIG)
-set(QHULL_DIR ${CMAKE_CURRENT_LIST_DIR}/qhull-2020.2/src)
 
-if(ALLOW_SYSTEM_QHULL AND TARGET Qhull::qhull_r)
+if(MESHLAB_ALLOW_SYSTEM_QHULL AND TARGET Qhull::qhull_r)
 	message(STATUS "- qhull - using system-provided library")
 	add_library(external-qhull INTERFACE)
 	target_link_libraries(external-qhull INTERFACE Qhull::qhull_r)
-	target_compile_definitions(external-qhull INTERFACE SYSTEM_QHULL)
-elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/libqhull_r/libqhull_r.h")
-	message(STATUS "- qhull - using bundled source")
-	add_library(
-		external-qhull STATIC
-		"${QHULL_DIR}/libqhull_r/geom2_r.c"
-		"${QHULL_DIR}/libqhull_r/io_r.c"
-		"${QHULL_DIR}/libqhull_r/io_r.h"
-		"${QHULL_DIR}/libqhull_r/mem_r.c"
-		"${QHULL_DIR}/libqhull_r/mem_r.h"
-		"${QHULL_DIR}/libqhull_r/merge_r.c"
-		"${QHULL_DIR}/libqhull_r/merge_r.h"
-		"${QHULL_DIR}/libqhull_r/poly_r.c"
-		"${QHULL_DIR}/libqhull_r/poly_r.h"
-		"${QHULL_DIR}/libqhull_r/poly2_r.c"
-		"${QHULL_DIR}/libqhull_r/libqhull_r.c"
-		"${QHULL_DIR}/libqhull_r/libqhull_r.h"
-		"${QHULL_DIR}/libqhull_r/qset_r.c"
-		"${QHULL_DIR}/libqhull_r/qset_r.h"
-		"${QHULL_DIR}/libqhull_r/stat_r.c"
-		"${QHULL_DIR}/libqhull_r/stat_r.h"
-		"${QHULL_DIR}/libqhull_r/geom_r.c"
-		"${QHULL_DIR}/libqhull_r/geom_r.h"
-		"${QHULL_DIR}/libqhull_r/user_r.c"
-		"${QHULL_DIR}/libqhull_r/user_r.h"
-		"${QHULL_DIR}/libqhull_r/qhull_ra.h"
-		"${QHULL_DIR}/libqhull_r/global_r.c"
-		"${QHULL_DIR}/libqhull_r/random_r.h"
-		"${QHULL_DIR}/libqhull_r/random_r.c"
-		"${QHULL_DIR}/libqhull_r/usermem_r.c"
-		"${QHULL_DIR}/libqhull_r/userprintf_r.c"
-		"${QHULL_DIR}/libqhull_r/rboxlib_r.c"
-		"${QHULL_DIR}/libqhull_r/userprintf_rbox_r.c"
-		)
-	target_include_directories(external-qhull INTERFACE "${QHULL_DIR}")
-	set_property(TARGET external-qhull PROPERTY FOLDER External)
-	target_link_libraries(external-qhull PRIVATE external-disable-warnings)
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
+	set(QHULL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/qhull-2020.2")
+	set(QHULL_CHECK "${QHULL_DIR}/src/libqhull_r/libqhull_r.h")
+
+	if (NOT EXISTS ${QHULL_CHECK})
+		set(QHULL_LINK
+			https://github.com/qhull/qhull/archive/refs/tags/2020.2.zip
+			https://www.meshlab.net/data/libs/qhull-2020.2.zip)
+		set(QHULL_MD5 a0a9b0e69bdbd9461319b8d2ac3d2f2e)
+		download_and_unzip(
+			NAME "Qhull"
+			LINK ${QHULL_LINK}
+			MD5 ${QHULL_MD5}
+			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+		if (NOT download_and_unzip_SUCCESS)
+			message(STATUS "- Qhull - download failed.")
+		endif()
+	endif()
+
+	if (EXISTS ${QHULL_CHECK})
+		message(STATUS "- qhull - using downloaded source")
+
+		set(MESSAGE_QUIET ON)
+		add_subdirectory(${QHULL_DIR} EXCLUDE_FROM_ALL)
+		unset(MESSAGE_QUIET)
+
+		add_library(external-qhull INTERFACE)
+		target_link_libraries(external-qhull INTERFACE qhullstatic_r)
+		target_include_directories(external-qhull INTERFACE "${QHULL_DIR}/src")
+	endif()
 endif()

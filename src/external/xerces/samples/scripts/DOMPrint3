@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test DOMPrint3 pass "" samples/DOMPrint -wfpp=on -wddc=on personal.xml

@@ -571,7 +571,7 @@ void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea
   mesh_zaxis = original_Transform.GetColumn3(2);
   float manipsize = model.cm.bbox.Diag() / 2.0;
   Matrix44f track_rotation;
-  gla->trackball.track.rot.ToMatrix(track_rotation);
+  gla->trackballTrack().rot.ToMatrix(track_rotation);
 
   glLineWidth(2.0);
 
@@ -641,7 +641,7 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
   Matrix44m original_rot = original_Transform;
   original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
-  gla->trackball.track.rot.ToMatrix(track_rotation);
+  gla->trackballTrack().rot.ToMatrix(track_rotation);
 
   glLineWidth(2.0);
 	
@@ -742,7 +742,7 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
   Matrix44m original_rot = original_Transform;
   original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
-  gla->trackball.track.rot.ToMatrix(track_rotation);
+  gla->trackballTrack().rot.ToMatrix(track_rotation);
   
   glLineWidth(2.0);
 

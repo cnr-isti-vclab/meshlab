@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include <vcg/space/colorspace.h>
+#include <vcg/space/colormap.h>
 #include "filter_colorproc.h"
 
 #include <vcg/complex/algorithms/clean.h>
@@ -87,7 +88,7 @@ FilterColorProc::~FilterColorProc()
 
 QString FilterColorProc::pluginName() const
 {
-    return "FilterColorProc";
+	return "FilterColorProc";
 }
 
 QString FilterColorProc::pythonFilterName(ActionIDType f) const
@@ -229,6 +230,8 @@ int FilterColorProc::getRequirements(const QAction *action)
 
 RichParameterList FilterColorProc::initParameterList(const QAction *a, const MeshDocument& md)
 {
+	QStringList colorMaps = (QStringList() << "RGB" << "Viridis" << "Plasma" << "Cividis" << "Turbo" << "RdPu");
+
 	RichParameterList par;
 	switch(ID(a))
 	{
@@ -399,6 +402,9 @@ RichParameterList FilterColorProc::initParameterList(const QAction *a, const Mes
 		par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
 		par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
 		par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
+		par.addParam(RichEnum("colorMap", 0, colorMaps, "Color Map",
+							  "The color map to use. RGB is the VCGLib default, other colormaps are sampled from Matplotlib "
+							  "<a href=\"https://matplotlib.org\">https://matplotlib.org</a>"));
 		break;
 	}
 	case CP_MAP_FQUALITY_INTO_COLOR:
@@ -409,6 +415,9 @@ RichParameterList FilterColorProc::initParameterList(const QAction *a, const Mes
 		par.addParam(RichFloat("maxVal", minmax.second, "Max", "The value that will be mapped with the upper end of the scale (blue)"));
 		par.addParam(RichDynamicFloat("perc", 0, 0, 100, "Percentile Crop [0..100]", "If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the faces have a quality <b>lower or greater</b> than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
 		par.addParam(RichBool("zeroSym", false, "Zero Symmetric", "If true the min max range will be enlarged to be symmetric (so that green is always Zero)"));
+		par.addParam(RichEnum("colorMap", 0, colorMaps, "Color Map",
+							  "The color map to use. RGB is the VCGLib default, other colormaps are sampled from Matplotlib "
+							  "<a href=\"https://matplotlib.org\">https://matplotlib.org</a>"));
 		break;
 	}
 	case CP_FACE_TO_VERTEX_QUALITY:
@@ -629,13 +638,15 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 				PercHi = max(math::Abs(PercLo), PercHi);
 			}
 
+			ColorMap cmap = vcg::ColorMapEnums[par.getEnum("colorMap")];
+
 			if (usePerc)
 			{
-				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi);
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi, cmap);
 				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
 			}
 			else {
-				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax, cmap);
 				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			break;
@@ -695,13 +706,15 @@ std::map<std::string, QVariant> FilterColorProc::applyFilter(const QAction *filt
 				PercHi = max(math::Abs(PercLo), PercHi);
 			}
 
+			ColorMap cmap = vcg::ColorMapEnums[par.getEnum("colorMap")];
+
 			if (usePerc){
-				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi);
+				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi, false, cmap);
 				log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
 					H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100 - perc);
 			}
 			else {
-				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
+				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax, false, cmap);
 				log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
 			}
 			break;
@@ -1071,7 +1084,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 		case CP_COLOURISATION:
 		case CP_SCATTER_PER_MESH:
 		case CP_PERLIN_COLOR:
-		case CP_COLOR_NOISE:                
+		case CP_COLOR_NOISE:
 		case CP_MESH_TO_FACE:               return MeshModel::MM_NONE;
 		case CP_THRESHOLDING:
 		case CP_CONTR_BRIGHT:
@@ -1079,7 +1092,7 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 		case CP_EQUALIZE:
 		case CP_DESATURATION:
 		case CP_WHITE_BAL:
-		case CP_LEVELS:                     
+		case CP_LEVELS:
 		case CP_VERTEX_SMOOTH:
 		case CP_VERTEX_TO_FACE:             return MeshModel::MM_VERTCOLOR;
 		case CP_TRIANGLE_QUALITY:
@@ -1103,8 +1116,8 @@ int FilterColorProc::getPreConditions(const QAction* filter ) const
 
 FilterPlugin::FilterArity FilterColorProc::filterArity(const QAction* act ) const
 {
-    switch(ID(act))
-    {
+	switch(ID(act))
+	{
 		case CP_FILLING:
 		case CP_COLOURISATION:
 		case CP_PERLIN_COLOR:
@@ -1135,7 +1148,7 @@ FilterPlugin::FilterArity FilterColorProc::filterArity(const QAction* act ) cons
 		case CP_SCATTER_PER_MESH:           return FilterPlugin::VARIABLE;
 
 		default: assert(0);
-    }
+	}
 	return FilterPlugin::SINGLE_MESH;
 }
 

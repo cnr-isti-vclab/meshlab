@@ -25,10 +25,9 @@
 #include <cmath>
 #include <memory>
 
-#include <external/e57/include/E57SimpleReader.h>
-#include <external/e57/include/E57SimpleWriter.h>
-
 #include "io_e57.h"
+
+#include <E57SimpleWriter.h>
 
 #define E57_FILE_EXTENSION      "E57"
 #define E57_FILE_DESCRIPTION    "E57 (E57 points cloud)"
