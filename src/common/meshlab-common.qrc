@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>img/dummy.png</file>
+        <file>resources/images/dummy.png</file>
+        <file>resources/git_sha.txt</file>
     </qresource>
 </RCC>

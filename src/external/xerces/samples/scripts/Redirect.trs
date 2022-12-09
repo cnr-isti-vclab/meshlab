@@ -1,4 +1,0 @@
-:test-result: XFAIL
-:global-test-result: XFAIL
-:recheck: no
-:copy-in-global-log: yes

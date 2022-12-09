@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Alert xmlns:s="http://smerf" xmlns:g="http://gargamel" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='http://smerf smerf.xsd' >
-        <g:Data>
-          <g:Object>
-                pawel
-          </g:Object>
-        </g:Data>
-</s:Alert> 

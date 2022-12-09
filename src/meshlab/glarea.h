@@ -77,7 +77,12 @@ public:
 
 	MainWindow * mw();
 
-	MeshModel *mm();
+	MeshModel *mm()
+	{
+		if (mvc() == nullptr)
+			return nullptr;
+		return mvc()->meshDoc.mm();
+	}
 
 	template <typename... Ts>
 	void Logf(int Level, const char * f, Ts&&... ts);
@@ -133,11 +138,11 @@ public:
 	//add a MeshEditInterface for the given action
 	void addMeshEditor(QAction *editAction, EditTool *editor){ actionToMeshEditMap.insert(editAction, editor); }
 	bool readyToClose();
-	float lastRenderingTime() { return lastTime;}
+	float lastRenderingTime() { return lastTime; }
 	void drawGradient();
 	void drawLight();
-	float& getFov();
-	float  getFov() const;
+	float& getFov() { return fov; }
+	float  getFov() const { return fov; }
 	vcg::Matrix44f trackballMatrix() const { return trackball.Matrix(); }
 	vcg::Similarityf trackballTrack() const { return trackball.track; }
 	vcg::Matrix44f trackballLightMatrix() const { return trackball_light.Matrix(); }

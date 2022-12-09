@@ -39,7 +39,7 @@
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/algorithms/closest.h>
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QDebug>
 #include <QMessageBox>
 
@@ -527,7 +527,7 @@ PickPointsDialog::Mode PickPointsDialog::getMode() {
 	return currentMode;
 }
 
-void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, QGLWidget *gla) {
+void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, QOpenGLWidget *gla) {
 	meshModel = newMeshModel;
 	assert(meshModel);
 	_glArea = gla;

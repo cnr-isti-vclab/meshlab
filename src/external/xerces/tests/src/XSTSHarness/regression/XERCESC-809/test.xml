@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<sm:root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="SP test.xsd" xmlns:sm="SP">
-	<sm:a aID="1" x="1" y="1"/>
-</sm:root>

@@ -262,7 +262,7 @@ QString ExtraMeshFilterPlugin::pythonFilterName(ActionIDType f) const
 		return tr("meshing_decimation_quadric_edge_collapse_with_texture");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("meshing_isotropic_explicit_remeshing");
 	case FP_CLUSTERING: return tr("meshing_decimation_clustering");
-	case FP_REORIENT: return tr("meshing_re_orient_faces_coherentely");
+	case FP_REORIENT: return tr("meshing_re_orient_faces_coherently");
 	case FP_INVERT_FACES: return tr("meshing_invert_face_orientation");
 	case FP_SCALE: return tr("compute_matrix_from_scaling_or_normalization");
 	case FP_CENTER: return tr("compute_matrix_from_translation");
@@ -308,7 +308,7 @@ QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 		return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("Remeshing: Isotropic Explicit Remeshing");
 	case FP_CLUSTERING: return tr("Simplification: Clustering Decimation");
-	case FP_REORIENT: return tr("Re-Orient all faces coherentely");
+	case FP_REORIENT: return tr("Re-Orient all faces coherently");
 	case FP_INVERT_FACES: return tr("Invert Faces Orientation");
 	case FP_SCALE: return tr("Transform: Scale, Normalize");
 	case FP_CENTER: return tr("Transform: Translate, Center, set Origin");

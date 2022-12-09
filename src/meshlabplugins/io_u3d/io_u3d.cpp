@@ -33,11 +33,65 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include <QSettings>
-#include "Converter.h"
+#include <IDTF/Converter.h>
+
+#if defined(__linux__) || defined(__APPLE__)
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif //_GNU_SOURCE
+
+#include <stdio.h>
+#include <dlfcn.h>
+
+/**
+ * @brief returns the path of the shared object file that contains this function, which is
+ * the path where the shared object (libio_u3d.so) is placed in the system.
+ */
+std::string getLibPath()
+{
+	Dl_info dlInfo;
+	dladdr((void*)getLibPath, &dlInfo);
+	if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL) {
+		// the full path, included libio_u3d.so
+		std::string path = dlInfo.dli_fname;
+		// remove from the path everything after the last occurrence of '/'
+		path = path.substr(0, path.find_last_of('/'));
+		return path;
+	}
+	else {
+		return std::string(".");
+	}
+}
+#elif _WIN32
+
+#include "Windows.h"
+
+std::string getLibPath()
+{
+	char cstr[2048] = ".";
+	HMODULE hm = NULL;
+
+	auto res = GetModuleHandleEx(
+		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+			GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		(LPCSTR) &getLibPath,
+		&hm);
+
+	if (res != 0) {
+		GetModuleFileName(hm, cstr, sizeof(cstr));
+	}
+	std::string path(cstr);
+	std::replace(path.begin(), path.end(), '\\', '/');
+	path = path.substr(0, path.find_last_of('/'));
+
+	return path;
+}
+
+#endif
 
 using namespace std;
 using namespace vcg;
-
 
 U3DIOPlugin::U3DIOPlugin() :
 	QObject(), IOPlugin()
@@ -63,6 +117,21 @@ void U3DIOPlugin::save(
 		const RichParameterList & par, 
 		vcg::CallBackPos *)
 {
+#ifdef _WIN32 // on windows, path is the same regardless BUILD_MODE
+	const std::string LIB_IDTF_PATH = getLibPath() + "/..";
+#else //_WIN32
+	#ifdef BUILD_MODE
+		// same position wrt plugin dir on linux and macos
+		const std::string LIB_IDTF_PATH = getLibPath() + "/../../external/downloads/u3d-1.5.1";
+	#else // BUILD_MODE
+		#ifdef __APPLE__
+			const std::string LIB_IDTF_PATH = getLibPath() + "/../Frameworks";
+		#else // linux
+			const std::string LIB_IDTF_PATH = getLibPath() + "/..";
+		#endif
+	#endif // BUILD_MODE
+#endif  //_WIN32
+
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 
@@ -70,7 +139,6 @@ void U3DIOPlugin::save(
 	string filename = QFile::encodeName(fileName).constData();
 	std::string ex = formatName.toUtf8().data();
 
-	
 	QStringList textures_to_be_restored;
 	QStringList lst = 
 			vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(
@@ -82,7 +150,7 @@ void U3DIOPlugin::save(
 					m.cm.bbox.Center(),m.cm.bbox.Diag());
 		saveParameters(par, _param);
 		QSettings settings;
-		
+
 		//tmp idtf
 		QString tmp(QDir::tempPath());
 		QString curr = QDir::currentPath();
@@ -94,12 +162,17 @@ void U3DIOPlugin::save(
 
 		//conversion from idtf to u3d
 		int resCode = 0;
-		bool result = IDTFConverter::IDTFToU3d(tmp.toStdString(), filename, resCode, _param.positionQuality);
+		bool result = IDTFConverter::IDTFToU3d(
+			tmp.toStdString(),
+			filename,
+			resCode,
+			LIB_IDTF_PATH,
+			_param.positionQuality);
 
 		if(result==false) {
 			throw MLException("Error saving " + QString::fromStdString(filename) + ": \n" + vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(resCode) + " (" + QString::number(resCode) + ")");
 		}
-		
+
 		//saving latex:
 		QDir::setCurrent(curr);
 		QString lat (fileName);

@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ../scripts/run-test
-
-run_test DOMPrint5 pass "" samples/DOMPrint -v=never -xpath=//name personal.xml
