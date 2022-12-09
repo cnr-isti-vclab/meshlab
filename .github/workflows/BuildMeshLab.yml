@@ -1,0 +1,81 @@
+name: BuildMeshLab
+
+on:
+  [push, pull_request]
+
+env:
+  QT_VERSION: 5.15.2
+
+jobs:
+  meshlab_build:
+    name: Build MeshLab
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-18.04', 'macos-latest', 'windows-latest']
+        precision: [single_precision, double_precision]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS'
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+    - name: Set CodeSign Certificate Windows
+      if: runner.os == 'Windows'
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
+        certutil -decode certificate\certificate.txt certificate\certificate.pfx
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        cache: true
+        version: ${{ env.QT_VERSION }}
+    - name: Install dependencies
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+        else
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+        fi
+    - name: Cache external libraries sources
+      id: cache-ext-libs
+      uses: actions/cache@v3
+      with:
+        path: src/external/downloads/*
+        key: ${{ runner.os }}-external-libraries
+    - name: Ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
+    - name: Configure and Build
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --ccache
+    - name: Deploy
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
+    - name: Upload MeshLab Portable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
+        path: install/
+    - name: Upload MeshLab Packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
+        path: packages/MeshLab*

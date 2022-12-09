@@ -24,10 +24,11 @@
 #ifndef GLTF_LOADER_H
 #define GLTF_LOADER_H
 
-#include "tinygltf_include.h"
 #include "callback_progress.h"
 
 #include <common/ml_document/mesh_model.h>
+
+#include <tiny_gltf.h>
 
 namespace gltf {
 

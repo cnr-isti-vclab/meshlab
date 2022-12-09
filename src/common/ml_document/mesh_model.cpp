@@ -87,7 +87,7 @@ QString MeshModel::relativePathName(const QString& path) const
  * and these names will be mapped with the actual loaded image in the map
  * "textures".
  *
- * When a texture is not found, a dummy texture will be used (":/img/dummy.png").
+ * When a texture is not found, a dummy texture will be used (":/resources/images/dummy.png").
  *
  * Returns the list of non-loaded textures that have been modified with
  * ":/img/dummy.png" in the contained mesh.
@@ -99,7 +99,7 @@ std::list<std::string> MeshModel::loadTextures(
 	std::list<std::string> unloadedTextures;
 	for (std::string& textName : cm.textures){
 		if (textures.find(textName) == textures.end()){
-			QImage img(":/img/dummy.png");
+			QImage img(":/resources/images/dummy.png");
 			QFileInfo finfo(QString::fromStdString(textName));
 			try {
 				img = meshlab::loadImage(finfo.absoluteFilePath(), log, cb);
