@@ -2281,34 +2281,35 @@ void MainWindow::reload()
 	}
 }
 
-bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
+bool MainWindow::exportMesh(QString fileName, MeshModel* mod, const bool saveAllPossibleAttributes)
 {
 	const QStringList& suffixList = PM.outputMeshFormatListDialog();
 	if (fileName.isEmpty()) {
 		//QHash<QString, MeshIOInterface*> allKnownFormats;
 		//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
-		//QString defaultExt = "*." + mod->suffixName().toLower();
-		QString defaultExt = "*.ply";
 		if (mod == NULL)
 			return false;
 		mod->setMeshModified(false);
 		QString laylabel = "Save \"" + mod->label() + "\" Layer";
-		QFileDialog* saveDialog = new QFileDialog(this,laylabel, lastUsedDirectory.path());
-		//saveDialog->setOption(QFileDialog::DontUseNativeDialog);
+
+		QFileDialog* saveDialog = new QFileDialog(this, laylabel, lastUsedDirectory.path());
 		saveDialog->setNameFilters(suffixList);
 		saveDialog->setAcceptMode(QFileDialog::AcceptSave);
 		saveDialog->setFileMode(QFileDialog::AnyFile);
-		saveDialog->selectFile(fileName);
-		QStringList matchingExtensions=suffixList.filter(defaultExt);
+
+		QString extension = mod->suffixName().toLower();
+		if (extension.isEmpty())
+			extension = "ply";
+		QString defaultExt = "*." + extension;
+		QStringList matchingExtensions = suffixList.filter(defaultExt);
 		if(!matchingExtensions.isEmpty())
-			saveDialog->selectNameFilter(matchingExtensions.last());
-		//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+			saveDialog->selectNameFilter(matchingExtensions.first());
 
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected)
 			return false;
-		fileName=saveDialog->selectedFiles().at(0);
+		fileName = saveDialog->selectedFiles().at(0);
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty()) {
 			QString ext = saveDialog->selectedNameFilter();
@@ -2444,12 +2445,12 @@ void MainWindow::changeFileExtension(const QString& st)
 
 bool MainWindow::save(const bool saveAllPossibleAttributes)
 {
-	return exportMesh(meshDoc()->mm()->fullName(),meshDoc()->mm(),saveAllPossibleAttributes);
+	return exportMesh(meshDoc()->mm()->fullName(), meshDoc()->mm(), saveAllPossibleAttributes);
 }
 
-bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
+bool MainWindow::saveAs(QString fileName, const bool saveAllPossibleAttributes)
 {
-	return exportMesh(fileName,meshDoc()->mm(),saveAllPossibleAttributes);
+	return exportMesh(fileName, meshDoc()->mm(), saveAllPossibleAttributes);
 }
 
 void MainWindow::readViewFromFile(QString const& filename){
