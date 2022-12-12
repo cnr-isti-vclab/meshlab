@@ -22,16 +22,14 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <common/GLExtensionsManager.h>
+
 #include <GL/glew.h>
 #include <QFile>
 #include <QImage>
 #include <cassert>
 
-//#include <QObject>
+#include <common/GLExtensionsManager.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
-//#include <meshlab/glarea.h>
-
 
 class GLArea;
 

@@ -27,9 +27,6 @@
 #include <common/plugins/interfaces/decorate_plugin.h>
 
 #include "decorate_shader.h"
-#include "shadow_mapping.h"
-#include "variance_shadow_mapping.h"
-#include "variance_shadow_mapping_blur.h"
 #include "ssao.h"
 
 class DecorateShadowPlugin : public QObject, public DecoratePlugin

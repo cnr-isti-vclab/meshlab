@@ -23,6 +23,10 @@
 
 #include "decorate_shadow.h"
 
+#include "shadow_mapping.h"
+#include "variance_shadow_mapping.h"
+#include "variance_shadow_mapping_blur.h"
+
 using namespace vcg;
 
 QString DecorateShadowPlugin::decorationInfo(ActionIDType id) const

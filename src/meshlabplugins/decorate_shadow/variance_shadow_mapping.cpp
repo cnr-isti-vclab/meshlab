@@ -21,11 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "decorate_shader.h"
-#include "variance_shadow_mapping.h"
 #include <common/globals.h>
 #include <meshlab/glarea.h>
 
+#include "variance_shadow_mapping.h"
 
 VarianceShadowMapping::VarianceShadowMapping(float intensity):ShadowMapping(intensity)
 {
