@@ -174,7 +174,7 @@ private slots:
 	void reloadAllMesh();
 	void openRecentMesh();
 	void openRecentProj();
-	bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
+	bool saveAs(QString fileName = QString(), const bool saveAllPossibleAttributes = false);
 	bool save(const bool saveAllPossibleAttributes = false);
 	bool saveSnapshot();
 	void changeFileExtension(const QString&);
