@@ -533,9 +533,10 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		
 
 	case FP_CLUSTERING:
+		// TODO implement selection
 		maxVal = m.cm.bbox.Diag();
 		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+		//parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 		break;
 
 	case FP_CYLINDER_UNWRAP:
@@ -885,6 +886,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 	case FP_CLUSTERING:
 	{
+		// TODO implement selection
 		Scalarm threshold = par.getAbsPerc("Threshold");
 		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
 		ClusteringGrid.Init(m.cm.bbox,100000,threshold);
