@@ -535,8 +535,20 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	case FP_CLUSTERING:
 		// TODO implement selection
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		//parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+		parlst.addParam(RichPercentage(
+			"Threshold",
+			maxVal * 0.01,
+			0,
+			maxVal,
+			"Cell Size",
+			"The size of the cell of the clustering grid. Smaller the cell finer the resulting "
+			"mesh. For obtaining a very coarse mesh use larger values."));
+		//TODO: implement selection on clustering algorithm
+//		parlst.addParam(RichBool(
+//			"Selected",
+//			m.cm.sfn > 0,
+//			"Affect only selected points/faces",
+//			"If selected the filter affect only the selected points/faces"));
 		break;
 
 	case FP_CYLINDER_UNWRAP:
@@ -802,7 +814,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			throw MLException("Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"); // text
 		}
 
-		bool  selected  = par.getBool("Selected");
+		bool selected  = par.getBool("Selected");
 		Scalarm threshold = par.getAbsPerc("Threshold");
 		int iterations = par.getInt("Iterations");
 
@@ -888,14 +900,17 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 	{
 		// TODO implement selection
 		Scalarm threshold = par.getAbsPerc("Threshold");
-		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-		ClusteringGrid.Init(m.cm.bbox,100000,threshold);
-		if(m.cm.FN() ==0)
+		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO>> ClusteringGrid(
+			m.cm.bbox, 100000, threshold);
+		if(m.cm.FN() == 0) {
 			ClusteringGrid.AddPointSet(m.cm);
-		else
+			ClusteringGrid.ExtractPointSet(m.cm);
+		}
+		else {
 			ClusteringGrid.AddMesh(m.cm);
+			ClusteringGrid.ExtractMesh(m.cm);
+		}
 
-		ClusteringGrid.ExtractMesh(m.cm);
 		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;
