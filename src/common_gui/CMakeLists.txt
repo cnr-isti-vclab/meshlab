@@ -79,4 +79,7 @@ set_property(TARGET meshlab-common-gui
 set_target_properties(meshlab-common-gui PROPERTIES
 	INSTALL_RPATH "${MESHLAB_LIB_INSTALL_DIR}:${INSTALL_RPATH}")
 
+set_target_properties(meshlab-common-gui PROPERTIES
+	INSTALL_RPATH "$ORIGIN")
+
 install(TARGETS meshlab-common-gui DESTINATION ${MESHLAB_LIB_INSTALL_DIR})

@@ -5,6 +5,8 @@ on:
 
 env:
   QT_VERSION: 5.15.2
+  MAC_CERT: ${{secrets.MACOS_CERT_ID}}
+  WIN_CERT: ${{secrets.WIN_CERTIFICATE}}
 
 jobs:
   meshlab_build:
@@ -22,13 +24,13 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Set CodeSign Certificate macOS
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && env.MAC_CERT != null
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
         p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Set CodeSign Certificate Windows
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && env.WIN_CERT != null
       run: |
         New-Item -ItemType directory -Path certificate
         Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
