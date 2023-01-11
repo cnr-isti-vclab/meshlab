@@ -25,9 +25,9 @@ void MutualInfo::setBins(unsigned int _nbins) {
   nbins = _nbins;
   assert(!(nbins & (nbins-1)));
 
-  if(histo2D) delete []histo2D;
-  if(histoA) delete []histoA;
-  if(histoB) delete []histoB;
+  delete []histo2D;
+  delete []histoA;
+  delete []histoB;
   histo2D = new unsigned int[nbins*nbins];
   histoA = new unsigned int[nbins];
   histoB = new unsigned int[nbins];
