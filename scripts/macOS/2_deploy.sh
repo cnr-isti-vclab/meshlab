@@ -25,8 +25,10 @@ case $i in
         shift # past argument=value
         ;;
     -ci=*|--cert_id=*)
-        SIGN=true
-        CERT_ID="${i#*=}"
+        if [ -z "${i#*=}" ]; then
+            SIGN=true
+            CERT_ID="${i#*=}"
+        fi
         shift # past argument=value
         ;;
     *)
