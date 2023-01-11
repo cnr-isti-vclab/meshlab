@@ -30,8 +30,10 @@ case $i in
         shift # past argument=value
         ;;
     -cp=*|--cert_pssw=*)
-        SIGN=true
-        CERT_PSSW="${i#*=}"
+        if [ -z "${i#*=}" ]; then
+            SIGN=true
+            CERT_PSSW="${i#*=}"
+        fi
         shift # past argument=value
         ;;
     *)
