@@ -35,8 +35,19 @@ $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
 # after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
 # usr/lib/meshlab (except for the ones that are loaded at runtime)
 shopt -s extglob
-cd $INSTALL_PATH/usr/lib/meshlab
-rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
 
+# If the script fails for some reason, it causes the deletion of files that weren't meant to be deleted.
+# We can fix this with a simple if statement
+
+if [[ -d $INSTALL_PATH/usr/lib/meshlab ]]
+then
+
+  cd $INSTALL_PATH/usr/lib/meshlab
+  rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
+
+  echo "$INSTALL_PATH is now a self contained meshlab application"
+
+else
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$INSTALL_PATH is now a self contained meshlab application"
+  echo "$INSTALL_PATH/usr/lib/meshlab was not created. Script could not continue running."
+fi
