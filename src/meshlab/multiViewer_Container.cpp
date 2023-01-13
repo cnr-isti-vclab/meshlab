@@ -66,7 +66,7 @@ MultiViewer_Container::~MultiViewer_Container()
 	
     //WARNING!!!! Here just the pointer to the MLSceneGLSharedDataContext is destroyed.
     // The data contained in the GPU gets deallocated in the closeEvent function.
-    delete scenecontext;
+    scenecontext->deleteLater();
 }
 
 int MultiViewer_Container::getNextViewerId(){

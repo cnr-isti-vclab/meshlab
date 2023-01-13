@@ -1,23 +1,10 @@
 #!/bin/bash
-# this is a script shell for compiling meshlab in a MacOS environment.
-# Requires a Qt environment which is set-up properly, and an accessible
-# cmake binary.
-#
-# Without given arguments, MeshLab will be built in the meshlab/build
-# directory, and installed in meshlab/install.
-#
-# You can give as argument the BUILD_PATH and the INSTALL_PATH in the
-# following way:
-# bash 1_build.sh --build_path=/path/to/build --install_path=/path/to/install
-# -b and -i arguments are also supported.
 
 #default paths wrt the script folder
 SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-SOURCE_PATH=$SCRIPTS_PATH/../../src
-RESOURCES_PATH=$SCRIPTS_PATH/../../resources
-BUILD_PATH=$SOURCE_PATH/../build
-INSTALL_PATH=$SOURCE_PATH/../install
-CORES="-j4"
+SOURCE_PATH=$SCRIPTS_PATH/../..
+BUILD_PATH=$SOURCE_PATH/build
+INSTALL_PATH=$SOURCE_PATH/install
 DOUBLE_PRECISION_OPTION=""
 NIGHTLY_OPTION=""
 USE_BREW_LLVM=false
@@ -36,12 +23,8 @@ case $i in
         INSTALL_PATH="${i#*=}"
         shift # past argument=value
         ;;
-    -j*)
-        CORES=$i
-        shift # past argument=value
-        ;;
     -d|--double_precision)
-        DOUBLE_PRECISION_OPTION="-DBUILD_WITH_DOUBLE_SCALAR=ON"
+        DOUBLE_PRECISION_OPTION="-DMESHLAB_BUILD_WITH_DOUBLE_SCALAR=ON"
         shift # past argument=value
         ;;
     -n|--nightly)
@@ -78,6 +61,11 @@ then
     mkdir -p $INSTALL_PATH
 fi
 
+if [ ! -z "$QT_DIR" ]
+then
+    export Qt5_DIR=$QT_DIR
+fi
+
 if [ "$USE_BREW_LLVM" = true ] ; then
     export PATH="$(brew --prefix llvm)/bin:$PATH";
     export CC=/usr/local/opt/llvm/bin/clang
@@ -88,7 +76,11 @@ if [ "$USE_BREW_LLVM" = true ] ; then
     export LDFLAGS="-L /usr/local/lib -L/usr/local/opt/llvm/lib"
 fi
 
+BUILD_PATH=$(realpath $BUILD_PATH)
+INSTALL_PATH=$(realpath $INSTALL_PATH)
+
 cd $BUILD_PATH
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $CCACHE $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
-make $CORES
-make install
+export NINJA_STATUS="[%p (%f/%t) ] "
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH $CCACHE $DOUBLE_PRECISION_OPTION $NIGHTLY_OPTION $SOURCE_PATH
+ninja
+ninja install

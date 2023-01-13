@@ -262,7 +262,7 @@ QString ExtraMeshFilterPlugin::pythonFilterName(ActionIDType f) const
 		return tr("meshing_decimation_quadric_edge_collapse_with_texture");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("meshing_isotropic_explicit_remeshing");
 	case FP_CLUSTERING: return tr("meshing_decimation_clustering");
-	case FP_REORIENT: return tr("meshing_re_orient_faces_coherentely");
+	case FP_REORIENT: return tr("meshing_re_orient_faces_coherently");
 	case FP_INVERT_FACES: return tr("meshing_invert_face_orientation");
 	case FP_SCALE: return tr("compute_matrix_from_scaling_or_normalization");
 	case FP_CENTER: return tr("compute_matrix_from_translation");
@@ -308,7 +308,7 @@ QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 		return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("Remeshing: Isotropic Explicit Remeshing");
 	case FP_CLUSTERING: return tr("Simplification: Clustering Decimation");
-	case FP_REORIENT: return tr("Re-Orient all faces coherentely");
+	case FP_REORIENT: return tr("Re-Orient all faces coherently");
 	case FP_INVERT_FACES: return tr("Invert Faces Orientation");
 	case FP_SCALE: return tr("Transform: Scale, Normalize");
 	case FP_CENTER: return tr("Transform: Translate, Center, set Origin");
@@ -533,9 +533,22 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		
 
 	case FP_CLUSTERING:
+		// TODO implement selection
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+		parlst.addParam(RichPercentage(
+			"Threshold",
+			maxVal * 0.01,
+			0,
+			maxVal,
+			"Cell Size",
+			"The size of the cell of the clustering grid. Smaller the cell finer the resulting "
+			"mesh. For obtaining a very coarse mesh use larger values."));
+		//TODO: implement selection on clustering algorithm
+//		parlst.addParam(RichBool(
+//			"Selected",
+//			m.cm.sfn > 0,
+//			"Affect only selected points/faces",
+//			"If selected the filter affect only the selected points/faces"));
 		break;
 
 	case FP_CYLINDER_UNWRAP:
@@ -801,7 +814,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			throw MLException("Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"); // text
 		}
 
-		bool  selected  = par.getBool("Selected");
+		bool selected  = par.getBool("Selected");
 		Scalarm threshold = par.getAbsPerc("Threshold");
 		int iterations = par.getInt("Iterations");
 
@@ -885,15 +898,19 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 	case FP_CLUSTERING:
 	{
+		// TODO implement selection
 		Scalarm threshold = par.getAbsPerc("Threshold");
-		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-		ClusteringGrid.Init(m.cm.bbox,100000,threshold);
-		if(m.cm.FN() ==0)
+		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO>> ClusteringGrid(
+			m.cm.bbox, 100000, threshold);
+		if(m.cm.FN() == 0) {
 			ClusteringGrid.AddPointSet(m.cm);
-		else
+			ClusteringGrid.ExtractPointSet(m.cm);
+		}
+		else {
 			ClusteringGrid.AddMesh(m.cm);
+			ClusteringGrid.ExtractMesh(m.cm);
+		}
 
-		ClusteringGrid.ExtractMesh(m.cm);
 		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;

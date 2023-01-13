@@ -6,11 +6,35 @@
 #
 # Requires: homebrew
 
-brew install libomp qt cgal xerces-c
+DONT_INSTALL_QT=false
+
+#checking for parameters
+for i in "$@"
+do
+case $i in
+    --dont_install_qt)
+        DONT_INSTALL_QT=true
+        shift # past argument=value
+        ;;
+    *)
+        # unknown option
+        ;;
+esac
+done
+
+brew install coreutils node cmake ninja llvm libomp cgal xerces-c tbb embree
 npm install -g appdmg
 
-echo "export QTDIR=/usr/local/opt/qt" >> ~/.bash_profile
-echo "export PATH=$QTDIR/bin:$PATH" >> ~/.bash_profile
-echo "export LD_LIBRARY_PATH=/usr/local/opt/qt/lib:$LD_LIBRARY_PATH" >> ~/.bash_profile
-echo "export PKG_CONFIG_PATH=/usr/local/opt/qt/lib:$PKG_CONFIG_PATH" >> ~/.bash_profile
-. ~/.bash_profile
+if [ "$DONT_INSTALL_QT" = false ] ; then
+    echo "=== installing qt packages..."
+
+    brew install qt
+
+    echo "export QTDIR=/usr/local/opt/qt" >> ~/.bash_profile
+    echo "export PATH=$QTDIR/bin:$PATH" >> ~/.bash_profile
+    echo "export LD_LIBRARY_PATH=/usr/local/opt/qt/lib:$LD_LIBRARY_PATH" >> ~/.bash_profile
+    echo "export PKG_CONFIG_PATH=/usr/local/opt/qt/lib:$PKG_CONFIG_PATH" >> ~/.bash_profile
+    . ~/.bash_profile
+else
+    echo "=== jumping installation of qt packages..."
+fi

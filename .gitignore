@@ -23,6 +23,11 @@ build/*
 install/*
 
 # external libraries automatically downloaded by cmake
+src/external/easyexif*/test-images/*
+src/external/glew*/auto/*
+src/external/glew*/build/*
+src/external/glew*/config/*
+src/external/glew*/doc/*
 src/external/downloads/*
 src/external/tmp.zip
 
