@@ -102,11 +102,11 @@ void Lib3MFPlugin::open(
   while(object_iterator->MoveNext())
   {
     const auto& mesh_object = object_iterator->GetCurrentMeshObject();
+    m.setLabel(QString::fromStdString(mesh_object->GetName()));
     const auto n_vertices  = mesh_object->GetVertexCount();
     const auto n_triangles = mesh_object->GetTriangleCount();
     auto vertex_iterator = vcg::tri::Allocator<decltype(m.cm)>::AddVertices(m.cm, n_vertices);
     auto face_iterator = vcg::tri::Allocator<decltype(m.cm)>::AddFaces(m.cm, n_triangles);
-    m.cm.face.reserve(n_triangles);
     for(size_t i = 0; i < n_vertices; ++i)
     {
       const auto& pos = mesh_object->GetVertex(i).m_Coordinates;
