@@ -37,6 +37,19 @@ class Lib3MFPlugin : public QObject, public IOPlugin
   std::list<FileFormat> importFormats() const override;
   std::list<FileFormat> exportFormats() const override;
 
+  unsigned int numberMeshesContainedInFile(
+                                           const QString& format,
+                                           const QString& fileName,
+                                           const RichParameterList& preParams) const override;
+
+  void open(
+            const QString &format,
+            const QString &fileName,
+            const std::list<MeshModel*>& meshModelList,
+            std::list<int>& maskList,
+            const RichParameterList & par,
+            vcg::CallBackPos *cb = nullptr) override;
+
   void open(
             const QString& formatName,
             const QString& fileName,
