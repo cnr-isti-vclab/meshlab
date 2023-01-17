@@ -210,7 +210,7 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 			break;
 		case FP_SDF:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the SDF but at the cost of the calculation time"));
-			parlst.addParam(RichFloat("cone_amplitude",0.1f,"Cone amplitude ", "The value for the angle of the cone for which we consider a ray shooting direction as a valid direction"));
+            parlst.addParam(RichFloat("cone_amplitude",0.01f,"Cone amplitude ", "The value for the angle of the cone for which we consider a ray shooting direction as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
@@ -257,7 +257,7 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
         adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("cone_amplitude"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
+        tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm);
 		break;
 	case FP_SELECT_VISIBLE_FACES:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
