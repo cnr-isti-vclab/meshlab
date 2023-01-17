@@ -238,7 +238,7 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
 {
 	
 	MeshModel *m = md.mm();
-    EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm,1);
+    EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm);
 	
 	switch(ID(action)) {
 	case FP_OBSCURANCE:
