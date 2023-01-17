@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_embree.h"
-#include <wrap/embree/EmbreeAdaptor.h>
+//#include <wrap/embree/EmbreeAdaptor.h>
 
 /**
  * @brief Constructor usually performs only two simple tasks of filling the two lists
@@ -64,15 +64,15 @@ QString FilterEmbreePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_OBSCURANCE :
-		return "Compute Obscurance with Embree";
+		return QString("Compute Obscurance with Embree");
 	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient occlusion with Embree";
+		return QString("Compute Ambient occlusion with Embree");
 	case FP_SDF:
-		return "Compute Shape-Diameter Function with Embree";
+		return QString("Compute Shape-Diameter Function with Embree");
 	case FP_SELECT_VISIBLE_FACES:
-		return "Compute Visible Faces Select with Embree";
+		return QString("Compute Visible Faces Select with Embree");
 	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis with Embree";
+		return QString("Compute Face Normal Analysis with Embree");
 	default :
 		assert(0);
 		return QString();
@@ -89,15 +89,15 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 {
 	switch(f) {
 	case FP_OBSCURANCE :
-		return "Compute Obscurance with Embree";
+		return QString("Compute Obscurance with Embree");
 	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient occlusion with Embree";
+		return QString("Compute Ambient occlusion with Embree");
 	case FP_SDF:
-		return "Compute Shape-Diameter Function with Embree";
+		return QString("Compute Shape-Diameter Function with Embree");
 	case FP_SELECT_VISIBLE_FACES:
-		return "Compute Visible Faces Select with Embree";
+		return QString("Compute Visible Faces Select with Embree");
 	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis with Embree";
+		return QString("Compute Face Normal Analysis with Embree");
 	default :
 		assert(0);
 		return QString();
@@ -114,19 +114,19 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
  QString FilterEmbreePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
-	case FP_OBSCURANCE:
-		return "Compute Obscurance: using the number of rays and a tau value it calculates the obscurance which value is saved into face quality and mapped into a gray shade.";
-	case FP_AMBIENT_OCCLUSION:
-		return "Compute Ambient Occlusion:  using a user-defined number of rays calculates the ambient occlusion which value is saved into face quality and mapped into a gray shade. ";
-	case FP_SDF:
-		return "Compute Shape-Diameter Function:  using a user-defined number of rays and degree for the shooting angle, the SDF value is computed and saved into face quality than is mapped into a color ramp. ";
-	case FP_SELECT_VISIBLE_FACES:
-		return "Compute visible face select: given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; The shadow value is saved into face quality and mapped into a gray shade. ";
-	case FP_ANALYZE_NORMALS:
-		return "Compute Face Normal Analysis: given a mesh this filter analyzes the mesh and corrects the normals pointing inwards";
-	default :
-		assert(0);
-		return "Unknown Filter";
+		case FP_OBSCURANCE:
+			return QString("Compute Obscurance: using the number of rays and a tau value it calculates the obscurance which value is saved into face quality and mapped into a gray shade.");
+		case FP_AMBIENT_OCCLUSION:
+			return QString("Compute Ambient Occlusion:  using a user-defined number of rays calculates the ambient occlusion which value is saved into face quality and mapped into a gray shade. ");
+		case FP_SDF:
+			return QString("Compute Shape-Diameter Function:  using a user-defined number of rays and degree for the shooting angle, the SDF value is computed and saved into face quality than is mapped into a color ramp. ");
+		case FP_SELECT_VISIBLE_FACES:
+			return QString("Compute visible face select: given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; The shadow value is saved into face quality and mapped into a gray shade. ");
+		case FP_ANALYZE_NORMALS:
+			return QString("Compute Face Normal Analysis: given a mesh this filter analyzes the mesh and corrects the normals pointing inwards");
+		default :
+			assert(0);
+			return QString("Unknown Filter");
 	}
 }
 
@@ -193,29 +193,25 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 	switch(ID(action)) {
 		case FP_OBSCURANCE :
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichBool ("Parallelize", true, "Parallelize", "If toggled openMP threads are used to speedup the process, the threads used are 4."));
 			parlst.addParam(RichFloat("TAU",0.1f,"Tau value", "The value to control spatial decay"));
 			break;
 		case FP_AMBIENT_OCCLUSION:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichBool ("Parallelize", true, "Parallelize", "If toggled openMP threads are used to speedup the process, the threads used are 4."));
 			break;
 		case FP_SDF:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichBool ("Parallelize", true, "Parallelize", "If toggled openMP threads are used to speedup the process, the threads used are 4."));
 			parlst.addParam(RichFloat("degree",0.1f,"Degree ", "The value for the angle of the cone for which we consider a point as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichPosition("dir", Point3f(1.0f, 0.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+			//parlst.addParam(RichPosition("dir", Point3f(1.0f, 0.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
 			break;
 		case FP_ANALYZE_NORMALS:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichBool ("Parallelize", true, "Parallelize", "If toggled openMP threads are used to speedup the process, the threads used are 4."));
 			break;
 		default :
-			assert(0);
+			break;
 	}
 	return parlst;
 }
@@ -231,40 +227,36 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * action, const RichParameterList & parameters, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	
-	MeshModel *m = md.mm();
-	EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm,1);
-	
-	if(parameters.getBool("Parallelize")){
-		adaptor = EmbreeAdaptor<CMeshO>(m->cm,4);			
-	}			
+	//MeshModel *m = md.mm();
+    //EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm,1);
 	
 	switch(ID(action)) {
 	case FP_OBSCURANCE:
-        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
+        //m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        /* adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
 		break;
     case FP_AMBIENT_OCCLUSION:
-        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
+       // m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+       /*  adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
 		break;
 	case FP_SDF:
-        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("degree"));
+       // m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+       /*  adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("degree"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
 		break;
 	case FP_SELECT_VISIBLE_FACES:
-        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
+        //m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        /* adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
 		break;	
 	case FP_ANALYZE_NORMALS:
-		adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
+		//adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
 		break;
 	default :
 		wrongActionCalled(action);
