@@ -22,8 +22,8 @@
 ****************************************************************************/
 
 #include "filter_embree.h"
-//#include <wrap/embree/EmbreeAdaptor.h>
-
+#include <wrap/embree/EmbreeAdaptor.h>
+#include <QCoreApplication>
 /**
  * @brief Constructor usually performs only two simple tasks of filling the two lists
  *  - typeList: with all the possible id of the filtering actions
@@ -110,20 +110,51 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
  * (this string is used in the About plugin dialog)
  * @param filterId: the id of the filter
  * @return an info string of the filter
+ * 
+ * Calculate the SDF (shape diameter function) on the mesh, you can visualize the result colorizing the mesh. The SDF is a scalar function 
+ * on the mesh surface and represents the neighborhood diameter of the object at each point. Given a point on the 
+ * mesh surface,several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. 
+ * The result is a weighted sum of all rays lengths. 
+ * 
  */
  QString FilterEmbreePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_OBSCURANCE:
-			return QString("Compute Obscurance: using the number of rays and a tau value it calculates the obscurance which value is saved into face quality and mapped into a gray shade.");
+			return QString("Compute ambient Obscurance using the Embree3 library by INTEL. \n
+				Ambient obscurance is a computer graphics technique used to simulate the effect of global ambient light in a 3D scene, making it appear more realistic.\n
+				It requires two values:\n
+				- the number of rays(defined by the user), which will be shot from the barycenter of each face in order to compute how many time it is visible from these directions;\n
+				- the tau value which represent the T spatial decay; \n
+				The resulting values are saved into face quality and mapped into a gray shade. \n
+				For further details see the reference paper: Iones Krupkin Sbert Zhukov Fast, Realistic Lighting for Video Games IEEECG&A 2003 ");
+
 		case FP_AMBIENT_OCCLUSION:
-			return QString("Compute Ambient Occlusion:  using a user-defined number of rays calculates the ambient occlusion which value is saved into face quality and mapped into a gray shade. ");
+			return QString("Compute Ambient Occlusion using the Embree3 library by INTEL. \n 
+				It requires a number of rays(defined by the user), which will be shot from the barycenter of each face in order to compute
+ 				how many time it is visible from these directions. This value is saved into face quality and mapped into a gray shade. ");
+
 		case FP_SDF:
-			return QString("Compute Shape-Diameter Function:  using a user-defined number of rays and degree for the shooting angle, the SDF value is computed and saved into face quality than is mapped into a color ramp. ");
+			return QString("Compute Shape-Diameter Function using the Embree3 library by INTEL. \n
+				The SDF defines the distance between a point in 3D space and the nearest point on the object's surface. We use this method shooting rays from a face towards the inside of the mash to see the thickness
+				of the different parts of the mesh. \n 
+				It requires two values:\n
+				- the number of rays which will be shot from the barycenter of each face \n
+				- the cone amplitude of the cone which we value as valid for the shooting angle \n 
+				The SDF value is computed and saved into face quality than is mapped into a color ramp. \n
+				For further details see the reference paper: Shapira Shamir Cohen-Or, Consistent Mesh Partitioning and Skeletonisation using the shaper diameter function, Visual Comput. J. (2008) ");
+		
 		case FP_SELECT_VISIBLE_FACES:
-			return QString("Compute visible face select: given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; The shadow value is saved into face quality and mapped into a gray shade. ");
+			return QString("Compute visible face select using the Embree3 library by INTEL. 
+				given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; 
+				The shadow value is saved into face quality and mapped into a gray shade. ");
+		
 		case FP_ANALYZE_NORMALS:
-			return QString("Compute Face Normal Analysis: given a mesh this filter analyzes the mesh and corrects the normals pointing inwards");
+			return QString("Compute Face Normal Analysis using the Embree3 library by INTEL. \n
+				The aim of this filter is to fix the incorrect orientations of facets in an input polygon mesh.
+				Given a mesh this filter analyzes the mesh and corrects the normals pointing inwards only requiring sampling visibilities by shooting many rays. 
+				The number of rays is defined by ther user, the higher the number the higher the precision but at the cost of the computation time.
+				For further details see the reference paper: Kenshi Takayama, Alec Jacobson, Ladislav Kavan, Olga Sorkine-Hornung. A Simple Method for Correcting Facet Orientations in Polygon Meshes Based on Ray Casting. Journal of Computer Graphics Techniques 3(4), 2014");
 		default :
 			assert(0);
 			return QString("Unknown Filter");
@@ -192,23 +223,23 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 	RichParameterList parlst;
 	switch(ID(action)) {
 		case FP_OBSCURANCE :
-			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichFloat("TAU",0.1f,"Tau value", "The value to control spatial decay"));
+			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the ambient obscurance but at the cost of the calculation time "));
+			parlst.addParam(RichFloat("TAU",0.1f,"Tau value", "The value to control spatial decay, the higher the value, the grater the influence that the distance (where the ray hits another face) has on the result "));
 			break;
 		case FP_AMBIENT_OCCLUSION:
-			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
+			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the ambient occlusion but at the cost of the calculation time "));
 			break;
 		case FP_SDF:
-			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichFloat("degree",0.1f,"Degree ", "The value for the angle of the cone for which we consider a point as a valid direction"));
+			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the SDF but at the cost of the calculation time"));
+			parlst.addParam(RichFloat("cone_amplitude",0.1f,"Cone amplitude ", "The value for the angle of the cone for which we consider a ray shooting direction as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			//parlst.addParam(RichPosition("dir", Point3f(1.0f, 0.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+			parlst.addParam(RichPosition("dir", Point3f(1.0f, 0.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
 			break;
 		case FP_ANALYZE_NORMALS:
-			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
+			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
 			break;
 		default :
 			break;
@@ -227,36 +258,36 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * action, const RichParameterList & parameters, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	
-	//MeshModel *m = md.mm();
-    //EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm,1);
+	MeshModel *m = md.mm();
+    EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm,1);
 	
 	switch(ID(action)) {
 	case FP_OBSCURANCE:
-        //m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        /* adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
 		break;
     case FP_AMBIENT_OCCLUSION:
-       // m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-       /*  adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
 		break;
 	case FP_SDF:
-       // m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-       /*  adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("degree"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("cone_amplitude"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
 		break;
 	case FP_SELECT_VISIBLE_FACES:
-        //m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        /* adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
+        m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); */
+  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
 		break;	
 	case FP_ANALYZE_NORMALS:
-		//adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
+		adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
 		break;
 	default :
 		wrongActionCalled(action);
