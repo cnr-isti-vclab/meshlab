@@ -64,15 +64,15 @@ QString FilterEmbreePlugin::filterName(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_OBSCURANCE :
-		return QString("Compute Obscurance with Embree");
+		return QString("Compute Obscurance");
 	case FP_AMBIENT_OCCLUSION:
-		return QString("Compute Ambient occlusion with Embree");
+		return QString("Compute Ambient occlusion");
 	case FP_SDF:
-		return QString("Compute Shape-Diameter Function with Embree");
+		return QString("Compute Shape-Diameter Function");
 	case FP_SELECT_VISIBLE_FACES:
-		return QString("Compute Visible Faces Select with Embree");
+		return QString("Select Visible Faces ");
 	case FP_ANALYZE_NORMALS:
-		return QString("Compute Face Normal Analysis with Embree");
+		return QString("Reorient inward pointing faces");
 	default :
 		assert(0);
 		return QString();
@@ -97,7 +97,7 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 	case FP_SELECT_VISIBLE_FACES:
 		return QString("Compute Visible Faces Select with Embree");
 	case FP_ANALYZE_NORMALS:
-		return QString("Compute Face Normal Analysis with Embree");
+		return QString("Reorient inward pointing faces");
 	default :
 		assert(0);
 		return QString();
@@ -110,30 +110,60 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
  * (this string is used in the About plugin dialog)
  * @param filterId: the id of the filter
  * @return an info string of the filter
- * 
- * Calculate the SDF (shape diameter function) on the mesh, you can visualize the result colorizing the mesh. The SDF is a scalar function 
- * on the mesh surface and represents the neighborhood diameter of the object at each point. Given a point on the 
- * mesh surface,several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. 
- * The result is a weighted sum of all rays lengths. 
- * 
+ *  
  */
  QString FilterEmbreePlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 		case FP_OBSCURANCE:
-            return QString("Compute ambient Obscurance using the Embree3 library by INTEL. \n Ambient obscurance is a computer graphics technique used to simulate the effect of global ambient light in a 3D scene, making it appear more realistic.\nIt requires two values:\n- the number of rays(defined by the user), which will be shot from the barycenter of each face in order to compute how many time it is visible from these directions;\n- the tau value which represent the T spatial decay; \nThe resulting values are saved into face quality and mapped into a gray shade. \nFor further details see the reference paper: Iones Krupkin Sbert Zhukov Fast, Realistic Lighting for Video Games IEEECG&A 2003 ");
+            return QString("Compute ambient Obscurance. <br />"
+						   "Ambient obscurance is a computer graphics technique used to simulate the effect of global ambient light in a 3D scene, making the mesh appear more realistic. <br />"
+						   "This filter requires two values: <br />"
+						   "<ul>"
+						   "	<li> the number of rays(defined by the user), which will be shot from the barycenter of each face in order to compute how many time it is visible from these directions;"
+						   "	<li> the tau value which represent the T spatial decay; </li>"
+						   "</ul>"
+						   "The resulting values for the obscurance are saved into face quality and mapped on the mesh into a gray shade. <br />"
+						   "<b>For further details see the reference paper: Iones Krupkin Sbert Zhukov Fast, Realistic Lighting for Video Games IEEECG&A 2003 </b> <br />"
+						   "This filter uses Embree3 library by INTEL.");
+							
 
 		case FP_AMBIENT_OCCLUSION:
-			return QString("Compute Ambient Occlusion using the Embree3 library by INTEL. \n It requires a number of rays(defined by the user), which will be shot from the barycenter of each face in order to computehow many time it is visible from these directions. This value is saved into face quality and mapped into a gray shade. ");
+			return QString("Compute Ambient Occlusion<br />"
+						   "This filter is a shading technique used in computer graphics to simulate the way light interacts with surfaces in a realistic manner. <br/>"
+						   "The parameter for the number of rays  is defined by the user; this parameter represent the number of rays which will be shot from the barycenter of each face. <br/>"
+						   "The higher the number of rays the longer the time to compute but the better the results.<br />"
+						   "This results are saved into face quality and mapped into a gray shade on the mesh. <br />"
+						   "This filter uses Embree3 library by INTEL.");
+						   
 
 		case FP_SDF:
-			return QString("Compute Shape-Diameter Function using the Embree3 library by INTEL. \nThe SDF defines the distance between a point in 3D space and the nearest point on the object's surface. We use this method shooting rays from a face towards the inside of the mash to see the thicknessof the different parts of the mesh. \n It requires two values:\n- the number of rays which will be shot from the barycenter of each face \n- the cone amplitude of the cone which we value as valid for the shooting angle \n The SDF value is computed and saved into face quality than is mapped into a color ramp. \nFor further details see the reference paper: Shapira Shamir Cohen-Or, Consistent Mesh Partitioning and Skeletonisation using the shaper diameter function, Visual Comput. J. (2008) ");
-		
+			return QString("Compute Shape-Diameter Function <br />"
+						   "The SDF defines the distance between a point in 3D space and the nearest point on the object's surface."
+						   "This filter can be used to find out the thickness of the mesh <br />"
+						   "Given a face, a set of rays are shoot inward and an average of the the distance to hit a face is saved in the face quality. The face quality than is mapped into a color ramp. <br /> "
+						   "This filter requires two values: <br />"
+						   "<ul>"
+						   "	<li> the number of rays which will be shot from the barycenter of each face </li>"
+						   "	<li> the cone amplitude (in degrees) of the cone which we value as valid for the shooting angle </li>"
+						   "</ul>"
+						   " <br />"
+						   "<b>For further details see the reference paper: Shapira Shamir Cohen-Or, Consistent Mesh Partitioning and Skeletonisation using the shaper diameter function, Visual Comput. J. (2008) </b> <br />"
+						   "This filter uses Embree3 library by INTEL.");
+							
+
 		case FP_SELECT_VISIBLE_FACES:
-            return QString("Compute visible face select using the Embree3 library by INTEL. Given the number of rays and a point3f direction, selects all the visible faces for that direction and computes a simple shadow; The shadow value is saved into face quality and mapped into a gray shade. ");
+            return QString("Select visible face <br />"
+						   "This filter shows all the visible faces from a given direction changing the faces color in white if they are visible from the direction, black otherwise"				
+						   "This filter uses Embree3 library by INTEL.");
 		
 		case FP_ANALYZE_NORMALS:
-			return QString("Compute Face Normal Analysis using the Embree3 library by INTEL. \nThe aim of this filter is to fix the incorrect orientations of facets in an input polygon mesh.Given a mesh this filter analyzes the mesh and corrects the normals pointing inwards only requiring sampling visibilities by shooting many rays. The number of rays is defined by ther user, the higher the number the higher the precision but at the cost of the computation time.For further details see the reference paper: Kenshi Takayama, Alec Jacobson, Ladislav Kavan, Olga Sorkine-Hornung. A Simple Method for Correcting Facet Orientations in Polygon Meshes Based on Ray Casting. Journal of Computer Graphics Techniques 3(4), 2014");
+			return QString("Reorient inward pointing faces <br />"
+						   "Given the input mesh, this filter using raytracing finds out if any faces are pointing inward and correct their orientation <br />"
+						   "The number of rays is defined by ther user, the higher the number the higher the precision but at the cost of the computation time. <br />"
+						   "<b> For further details see the reference paper: Kenshi Takayama, Alec Jacobson, Ladislav Kavan, Olga Sorkine-Hornung. </b><br />"
+						   "<b> A Simple Method for Correcting Facet Orientations in Polygon Meshes Based on Ray Casting. Journal of Computer Graphics Techniques 3(4), 2014 </b> <br />"
+						   "This filter uses Embree3 library by INTEL.");
 		default :
 			assert(0);
 			return QString("Unknown Filter");
@@ -210,7 +240,7 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 			break;
 		case FP_SDF:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the SDF but at the cost of the calculation time"));
-            parlst.addParam(RichFloat("cone_amplitude",0.01f,"Cone amplitude ", "The value for the angle of the cone for which we consider a ray shooting direction as a valid direction"));
+            parlst.addParam(RichFloat("cone_amplitude",0.01f,"Cone amplitude ", "The value for the angle (in degrees) of the cone for which we consider a ray shooting direction as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
@@ -267,6 +297,7 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
 		break;	
 	case FP_ANALYZE_NORMALS:
 		adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
+		tri::UpdateNormal<CMeshO>::PerVertexNormalized(m->cm);
 		break;
 	default :
 		wrongActionCalled(action);
