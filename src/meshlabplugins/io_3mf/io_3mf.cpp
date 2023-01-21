@@ -61,9 +61,14 @@ namespace
     return model->GetMeshObjects();
   }
 
-  void load_mesh_to_meshmodel(const Lib3MF::PMeshObject& lib3mf_mesh_object, MeshModel& mesh_model)
+  void load_mesh_to_meshmodel(const Lib3MF::PMeshObject& lib3mf_mesh_object, MeshModel& mesh_model, const std::string& name_postfix)
   {
-    mesh_model.setLabel(QString::fromStdString(lib3mf_mesh_object->GetName()));
+    std::string mesh_name = lib3mf_mesh_object->GetName();
+    if(mesh_name.empty())
+    {
+      mesh_name = "Mesh" + name_postfix;
+    }
+    mesh_model.setLabel(QString::fromStdString(mesh_name));
     const auto n_vertices  = lib3mf_mesh_object->GetVertexCount();
     const auto n_triangles = lib3mf_mesh_object->GetTriangleCount();
     auto vertex_iterator = vcg::tri::Allocator<decltype(mesh_model.cm)>::AddVertices(mesh_model.cm, n_vertices);
@@ -159,7 +164,7 @@ void Lib3MFPlugin::open(
       throw MLException(errorMsgFormat.arg(fileName, "Internal error while loading mesh objects: invalid mesh model"));
     }
 
-    load_mesh_to_meshmodel(current_mesh_object, *current_mesh_model);
+    load_mesh_to_meshmodel(current_mesh_object, *current_mesh_model, "_" + std::to_string(i_mesh));
     maskList.push_back(Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
     current_mesh_model->enable( Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
 
@@ -193,7 +198,7 @@ void Lib3MFPlugin::open(
     throw MLException(errorMsgFormat.arg(fileName, "Invalid mesh object encountered"));
   }
 
-  load_mesh_to_meshmodel(mesh_object, m);
+  load_mesh_to_meshmodel(mesh_object, m, "_0");
 
   m.enable(mask);
 
