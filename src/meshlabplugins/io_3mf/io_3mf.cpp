@@ -24,13 +24,16 @@
 #include "io_3mf.h"
 
 #include "common/ml_document/mesh_model.h"
+#include "vcg/complex/algorithms/update/position.h"
 #include "wrap/io_trimesh/io_mask.h"
 
 #include "lib3mf_implicit.hpp"
+#include <memory>
 
 namespace
 {
-  Lib3MF::PLib3MFMeshObjectIterator get_mesh_iterator(const QString& fileName)
+
+  Lib3MF::PModel get_model_from_file(const QString& fileName)
   {
     const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
@@ -58,7 +61,21 @@ namespace
     }
 
     reader->ReadFromFile(fileName.toStdString());
+    return model;
+  }
+
+  Lib3MF::PLib3MFMeshObjectIterator get_mesh_iterator(const QString& fileName)
+  {
+    const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+
+    const auto& model = get_model_from_file(fileName);
+
     return model->GetMeshObjects();
+  }
+
+  Lib3MF::PLib3MFBuildItemIterator get_build_item_iterator(const Lib3MF::PModel& model)
+  {
+    return model->GetBuildItems();
   }
 
   void load_mesh_to_meshmodel(const Lib3MF::PMeshObject& lib3mf_mesh_object, MeshModel& mesh_model, const std::string& name_postfix)
@@ -119,13 +136,14 @@ unsigned int Lib3MFPlugin::numberMeshesContainedInFile(
 {
   const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-  const auto& object_iterator = get_mesh_iterator(fileName);
-  if( object_iterator == nullptr )
-  {
-    throw MLException(errorMsgFormat.arg(fileName, "Failed to iterate over objects in file"));
-  }
-  return object_iterator->Count();
+  const auto& model = get_model_from_file(fileName);
+  const auto& build_item_iterator = get_build_item_iterator(model);
 
+  if( build_item_iterator == nullptr )
+  {
+    throw MLException(errorMsgFormat.arg(fileName, "Failed to iterate over build items in file"));
+  }
+  return build_item_iterator->Count();
 }
 
 void Lib3MFPlugin::open(
@@ -141,18 +159,27 @@ void Lib3MFPlugin::open(
 
   const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-  auto mesh_iterator = get_mesh_iterator(fileName);
+  auto lib3mf_model = get_model_from_file(fileName);
+  auto build_item_iterator = get_build_item_iterator(lib3mf_model);
   auto mesh_model_iterator = meshModelList.begin();
 
-  if(meshModelList.size() != mesh_iterator->Count())
+  if(meshModelList.size() != build_item_iterator->Count())
   {
     throw MLException(errorMsgFormat.arg(fileName, "Internal error while loading mesh objects: inconsistent number of meshes encontered"));
   }
 
   for(size_t i_mesh = 0; i_mesh < meshModelList.size(); ++i_mesh)
   {
-    mesh_iterator->MoveNext();
-    const auto& current_mesh_object = mesh_iterator->GetCurrentMeshObject();
+    build_item_iterator->MoveNext();
+    auto current_build_item = build_item_iterator->GetCurrent();
+    const auto& object = current_build_item->GetObjectResource();
+    if(!object->IsMeshObject())
+    {
+      throw MLException(errorMsgFormat.arg(fileName, "Error while loading mesh object: build item is not a mesh"));
+    }
+
+    const auto& current_mesh_object = lib3mf_model->GetMeshObjectByID(object->GetResourceID());
+
     if(current_mesh_object == nullptr)
     {
       throw MLException(errorMsgFormat.arg(fileName, "Internal error while loading mesh objects: invalid mesh object"));
@@ -165,6 +192,28 @@ void Lib3MFPlugin::open(
     }
 
     load_mesh_to_meshmodel(current_mesh_object, *current_mesh_model, "_" + std::to_string(i_mesh));
+
+    if(current_build_item->HasObjectTransform())
+    {
+      auto transform = current_build_item->GetObjectTransform();
+      Matrix44m tr;
+      tr.SetZero();
+      tr.V()[0]  = transform.m_Fields[0][0];
+      tr.V()[1]  = transform.m_Fields[0][1];
+      tr.V()[2]  = transform.m_Fields[0][2];
+      tr.V()[4]  = transform.m_Fields[1][0];
+      tr.V()[5]  = transform.m_Fields[1][1];
+      tr.V()[6]  = transform.m_Fields[1][2];
+      tr.V()[8]  = transform.m_Fields[2][0];
+      tr.V()[9]  = transform.m_Fields[2][1];
+      tr.V()[10] = transform.m_Fields[2][2];
+      tr.V()[12] = transform.m_Fields[3][0];
+      tr.V()[13] = transform.m_Fields[3][1];
+      tr.V()[14] = transform.m_Fields[3][2];
+      tr.V()[15] = 1.0;
+      vcg::tri::UpdatePosition<decltype(current_mesh_model->cm)>::Matrix(current_mesh_model->cm, tr.transpose(), true);
+    }
+
     maskList.push_back(Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
     current_mesh_model->enable( Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
 
