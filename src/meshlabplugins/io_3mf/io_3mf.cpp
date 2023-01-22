@@ -61,6 +61,7 @@ namespace
     }
 
     reader->ReadFromFile(fileName.toStdString());
+
     return model;
   }
 
@@ -171,7 +172,12 @@ void Lib3MFPlugin::open(
   for(size_t i_mesh = 0; i_mesh < meshModelList.size(); ++i_mesh)
   {
     build_item_iterator->MoveNext();
-    auto current_build_item = build_item_iterator->GetCurrent();
+    const auto& current_build_item = build_item_iterator->GetCurrent();
+    if(current_build_item == nullptr)
+    {
+      throw MLException(errorMsgFormat.arg(fileName, "Failed to access build item"));
+    }
+
     const auto& object = current_build_item->GetObjectResource();
     if(!object->IsMeshObject())
     {
@@ -235,19 +241,49 @@ void Lib3MFPlugin::open(
 
   const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-  const auto& object_iterator = get_mesh_iterator(fileName);
-  if( object_iterator == nullptr )
+  const auto& lib3mf_model = get_model_from_file(fileName);
+
+  const auto& build_item_iterator = get_build_item_iterator(lib3mf_model);
+  build_item_iterator->MoveNext();
+  const auto& current_build_item = build_item_iterator->GetCurrent();
+  if(current_build_item == nullptr)
   {
-    throw MLException(errorMsgFormat.arg(fileName, "Failed to iterate over objects in file"));
+    throw MLException(errorMsgFormat.arg(fileName, "Failed to access build item"));
   }
 
-  const auto& mesh_object = object_iterator->GetCurrentMeshObject();
+  const auto& object = current_build_item->GetObjectResource();
+  if( !object->IsMeshObject() )
+  {
+    throw MLException(errorMsgFormat.arg(fileName, "Error while loading mesh object: build item is not a mesh"));
+  }
+
+  const auto& mesh_object = lib3mf_model->GetMeshObjectByID(object->GetResourceID());
   if(mesh_object == nullptr)
   {
     throw MLException(errorMsgFormat.arg(fileName, "Invalid mesh object encountered"));
   }
 
   load_mesh_to_meshmodel(mesh_object, m, "_0");
+  if(current_build_item->HasObjectTransform())
+  {
+    auto transform = current_build_item->GetObjectTransform();
+    Matrix44m tr;
+    tr.SetZero();
+    tr.V()[0]  = transform.m_Fields[0][0];
+    tr.V()[1]  = transform.m_Fields[0][1];
+    tr.V()[2]  = transform.m_Fields[0][2];
+    tr.V()[4]  = transform.m_Fields[1][0];
+    tr.V()[5]  = transform.m_Fields[1][1];
+    tr.V()[6]  = transform.m_Fields[1][2];
+    tr.V()[8]  = transform.m_Fields[2][0];
+    tr.V()[9]  = transform.m_Fields[2][1];
+    tr.V()[10] = transform.m_Fields[2][2];
+    tr.V()[12] = transform.m_Fields[3][0];
+    tr.V()[13] = transform.m_Fields[3][1];
+    tr.V()[14] = transform.m_Fields[3][2];
+    tr.V()[15] = 1.0;
+    vcg::tri::UpdatePosition<decltype(m.cm)>::Matrix(m.cm, tr.transpose(), true);
+  }
 
   m.enable(mask);
 
