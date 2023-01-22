@@ -24,7 +24,9 @@
 #include "io_3mf.h"
 
 #include "common/ml_document/mesh_model.h"
+#include "lib3mf_types.hpp"
 #include "vcg/complex/algorithms/update/position.h"
+#include "vcg/complex/allocate.h"
 #include "wrap/io_trimesh/io_mask.h"
 
 #include "lib3mf_implicit.hpp"
@@ -298,6 +300,65 @@ void Lib3MFPlugin::save(
                         const RichParameterList& par,
                         vcg::CallBackPos* cb)
 {
+  const QString errorMsgFormat = "Error encountered while saving file:\n\"%1\"\n\nError details: %2";
+
+  const auto& wrapper = Lib3MF::CWrapper::loadLibrary();
+  if(wrapper == nullptr)
+  {
+    throw MLException(errorMsgFormat.arg(fileName, "Could not init 3mf library"));
+  }
+
+  const auto& model = wrapper->CreateModel();
+  if(model == nullptr)
+  {
+    throw MLException(errorMsgFormat.arg(fileName, "Could not create model for writing"));
+  }
+
+  const auto& metadata_group = model->GetMetaDataGroup();
+  metadata_group->AddMetaData("","Application", "Meshlab", "string", false);
+
+  const auto& mesh = model->AddMeshObject();
+  mesh->SetName(m.label().toStdString());
+
+  std::vector<Lib3MF::sPosition> vertex_buffer;
+  vertex_buffer.reserve(m.cm.vert.size());
+
+  std::vector<int> vertex_ids(m.cm.vert.size());
+
+  std::vector<Lib3MF::sTriangle> triangle_buffer;
+  triangle_buffer.reserve(m.cm.face.size());
+
+  int number_of_vertices = 0;
+  for(auto vertex_it = m.cm.vert.begin(); vertex_it != m.cm.vert.end(); ++vertex_it)
+  {
+    if(vertex_it->IsD()) continue;
+    vertex_ids[vertex_it - m.cm.vert.begin()] = number_of_vertices;
+    Lib3MF::sPosition pos;
+    pos.m_Coordinates[0] = vertex_it->P()[0];
+    pos.m_Coordinates[1] = vertex_it->P()[1];
+    pos.m_Coordinates[2] = vertex_it->P()[2];
+    vertex_buffer.push_back(pos);
+    number_of_vertices++;
+  }
+
+  for(auto face_it = m.cm.face.begin(); face_it != m.cm.face.end(); ++face_it)
+  {
+    if(face_it->IsD()) continue;
+    if(face_it->VN() != 3)
+    {
+      throw MLException(errorMsgFormat.arg(fileName, "Only triangular meshes can be written to 3mf files"));
+    }
+    Lib3MF::sTriangle triangle;
+    triangle.m_Indices[0] = vertex_ids[vcg::tri::Index(m.cm, face_it->V(0))];
+    triangle.m_Indices[1] = vertex_ids[vcg::tri::Index(m.cm, face_it->V(1))];
+    triangle.m_Indices[2] = vertex_ids[vcg::tri::Index(m.cm, face_it->V(2))];
+    triangle_buffer.push_back(triangle);
+  }
+
+  mesh->SetGeometry(vertex_buffer, triangle_buffer);
+  model->AddBuildItem(mesh.get(), wrapper->GetIdentityTransform());
+  const auto& writer = model->QueryWriter("3mf");
+  writer->WriteToFile(fileName.toStdString());
 }
 
 void Lib3MFPlugin::exportMaskCapability(
