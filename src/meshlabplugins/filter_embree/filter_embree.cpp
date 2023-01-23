@@ -118,7 +118,7 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 		case FP_OBSCURANCE:
             return QString("Compute ambient Obscurance. <br />"
 						   "Ambient obscurance is a computer graphics technique used to simulate the effect of global ambient light in a 3D scene, making the mesh appear more realistic. <br />"
-						   "This filter requires two values: <br />"
+                           "This filter requires two values:"
 						   "<ul>"
 						   "	<li> the number of rays(defined by the user), which will be shot from the barycenter of each face in order to compute how many time it is visible from these directions;"
 						   "	<li> the tau value which represent the T spatial decay; </li>"
@@ -142,7 +142,7 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 						   "The SDF defines the distance between a point in 3D space and the nearest point on the object's surface."
 						   "This filter can be used to find out the thickness of the mesh <br />"
 						   "Given a face, a set of rays are shoot inward and an average of the the distance to hit a face is saved in the face quality. The face quality than is mapped into a color ramp. <br /> "
-						   "This filter requires two values: <br />"
+                           "This filter requires two values:"
 						   "<ul>"
 						   "	<li> the number of rays which will be shot from the barycenter of each face </li>"
 						   "	<li> the cone amplitude (in degrees) of the cone which we value as valid for the shooting angle </li>"
@@ -240,12 +240,12 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 			break;
 		case FP_SDF:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the SDF but at the cost of the calculation time"));
-            parlst.addParam(RichFloat("cone_amplitude",0.01f,"Cone amplitude ", "The value for the angle (in degrees) of the cone for which we consider a ray shooting direction as a valid direction"));
+            parlst.addParam(RichFloat("cone_amplitude",90.0f,"Cone amplitude ", "The value for the angle (in degrees) of the cone for which we consider a ray shooting direction as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-			parlst.addParam(RichPosition("dir", Point3f(1.0f, 0.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+            parlst.addParam(RichPosition("dir", Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
 			break;
 		case FP_ANALYZE_NORMALS:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
@@ -285,19 +285,17 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
 		break;
 	case FP_SDF:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.computeSDF(m->cm,parameters.getInt("Rays"),parameters.getFloat("cone_amplitude"));
+        adaptor.computeSDF(m->cm,parameters.getInt("Rays"), parameters.getFloat("cone_amplitude"));
 		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
         tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm);
 		break;
 	case FP_SELECT_VISIBLE_FACES:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
         adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
-		tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-  		tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm); 
 		break;	
 	case FP_ANALYZE_NORMALS:
-		adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
-		tri::UpdateNormal<CMeshO>::PerVertexNormalized(m->cm);
+        adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
+        tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 		break;
 	default :
 		wrongActionCalled(action);
