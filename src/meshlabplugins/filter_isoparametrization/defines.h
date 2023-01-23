@@ -1,5 +1,5 @@
-#ifndef _ISO_DEFINES
-#define _ISO_DEFINES
+#ifndef MESHLAB_ISO_DEFINES_H
+#define MESHLAB_ISO_DEFINES_H
 
 #define abstraction_num 10
 #define flip_factor 1.5f
@@ -10,4 +10,4 @@
 #define _MESHLAB
 
 
-#endif
+#endif // MESHLAB_ISO_DEFINES_H

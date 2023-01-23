@@ -1,5 +1,5 @@
-#ifndef _PARAMETRIZATOR
-#define _PARAMETRIZATOR
+#ifndef MESHLAB_PARAMETRIZATOR
+#define MESHLAB_PARAMETRIZATOR
 
 #include <defines.h>
 
@@ -1273,4 +1273,4 @@ public:
 
 };
 
-#endif
+#endif // MESHLAB_PARAMETRIZATOR

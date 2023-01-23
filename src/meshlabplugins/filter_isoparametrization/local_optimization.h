@@ -1,5 +1,5 @@
-#ifndef _LOCAL_OPTIMIZATION
-#define _LOCAL_OPTIMIZATION
+#ifndef MESHLAB_LOCAL_OPTIMIZATION
+#define MESHLAB_LOCAL_OPTIMIZATION
 
 #include "statistics.h"
 
@@ -344,4 +344,4 @@ bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_doma
 		OptimizeStar<MeshType>(center,base_domain,accuracy,En);
 	return true;
 }
-#endif
+#endif // MESHLAB_LOCAL_OPTIMIZATION
