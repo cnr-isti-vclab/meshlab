@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef MESHLAB_QUALITY_MAPPER_PLUGIN_H
-#define MESHLAB_QUALITY_MAPPER_PLUGIN_H
+#ifndef MESHLAB_QUALITY_MAPPER_DIALOG_H
+#define MESHLAB_QUALITY_MAPPER_DIALOG_H
 
 #include <QDockWidget>
 #include <QGraphicsItem>
@@ -236,4 +236,4 @@ private slots:
 
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2);
 
-#endif // MESHLAB_QUALITY_MAPPER_PLUGIN_H
+#endif // MESHLAB_QUALITY_MAPPER_DIALOG_H
