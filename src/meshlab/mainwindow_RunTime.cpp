@@ -344,6 +344,7 @@ void MainWindow::updateMenus()
 	showInfoPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
 	preferencesMenu->setEnabled(activeDoc);
+	checkUpdatesAct->setEnabled(mwsettings.checkForUpdate);
 	
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(activeDoc && GLA())

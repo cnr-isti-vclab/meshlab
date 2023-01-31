@@ -95,6 +95,9 @@ public:
 
 	QString meshSetName;
 	inline static QString meshSetNameParam() {return "MeshLab::System::meshSetName";};
+	
+	bool checkForUpdate;
+	inline static QString checkForUpdateParam() {return "MeshLab::System::checkForUpdate";};
 };
 
 class MainWindow : public QMainWindow

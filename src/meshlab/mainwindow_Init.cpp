@@ -1071,6 +1071,8 @@ void MainWindow::saveRecentProjectList(const QString &projName)
 
 void MainWindow::checkForUpdates(bool verboseFlag)
 {
+	// if the user has chosen to do not check for updates in the settings skip everything
+	if(!mwsettings.checkForUpdate) return; 
 	verboseCheckingFlag = verboseFlag;
 
 	bool checkForMonthlyAndBetasVal = false;
@@ -1300,6 +1302,7 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 	gbllist.addParam(RichInt(startupWindowWidthParam(), 0, "Startup Window Width (in pixels)", "Window width on startup"));
 	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
 	gbllist.addParam(RichString(meshSetNameParam(), "ms", "Name of the MeshSet object.", "Set the MeshSet name object in the PyMeshLab call copied in the clipboard from the filter dock dialog."));
+	gbllist.addParam(RichBool(checkForUpdateParam(), true, "Online Check for updated version of MeshLab", "If true MeshLab periodically will check online if a new version has been released and will send a few aggregated statistic of usage (number of opened and saved mesh and total number of vertices loaded)"));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1314,6 +1317,7 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	startupWindowWidth = rpl.getInt(startupWindowWidthParam());
 	startupWindowHeight = rpl.getInt(startupWindowHeightParam());
 	meshSetName = rpl.getString(meshSetNameParam());
+	checkForUpdate = rpl.getBool(checkForUpdateParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
