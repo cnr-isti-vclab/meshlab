@@ -44,14 +44,16 @@ SettingDialog::SettingDialog(
 	applybut = new QPushButton("Apply",this);
 	loadbut = new QPushButton("Load",this);
 	closebut = new QPushButton("Close",this);
-
+	helpLabel = new QLabel(currentParam.toolTip(),this);
+	helpLabel->setWordWrap(true);
 	QGridLayout* dialoglayout = new QGridLayout(parent);
-
-	dialoglayout->addWidget(savebut,1,0);
-	dialoglayout->addWidget(resetbut,1,1);
-	dialoglayout->addWidget(loadbut,1,2);
-	dialoglayout->addWidget(applybut,1,3);
-	dialoglayout->addWidget(closebut,1,4);
+	
+	dialoglayout->addWidget(helpLabel,1,0,1,5);
+	dialoglayout->addWidget(savebut,2,0);
+	dialoglayout->addWidget(resetbut,2,1);
+	dialoglayout->addWidget(loadbut,2,2);
+	dialoglayout->addWidget(applybut,2,3);
+	dialoglayout->addWidget(closebut,2,4);
 
 
 	dialoglayout->addWidget(&frame,0,0,1,5);
