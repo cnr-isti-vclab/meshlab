@@ -1142,8 +1142,13 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		float errorSum = 0;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
-		log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
-		log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		float fpAvgError = errorSum / float(selected_pts.size());
+		Point3m fpNormal(plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		log("Fitting Plane avg error is %f", fpAvgError);
+		log("Fitting Plane normal is [%f, %f, %f]", fpNormal.X(), fpNormal.Y(), fpNormal.Z());
+		outputValues["fitting_plane_avg_error"] = QVariant::fromValue(fpAvgError);
+		outputValues["fitting_plane_normal"] = QVariant::fromValue(fpNormal);
+
 
 		Matrix44m tr1; // translation matrix the centroid of selected points
 		tr1.SetTranslate(-selBox.Center());
@@ -1198,6 +1203,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 		log("Rotation axis is [%f, %f, %f]", rotAxis.X(), rotAxis.Y(), rotAxis.Z());
 		log("Rotation angle is %f", -angleRad);
+		outputValues["rotation_axis"] = QVariant::fromValue(rotAxis);
+		outputValues["rotation_angle"] = QVariant::fromValue(-angleRad);
 
 		Matrix44m transfM;
 		if (par.getBool("ToOrigin"))
