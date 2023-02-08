@@ -102,7 +102,7 @@ MainWindow::MainWindow() :
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(switchCurrentContainer(QMdiSubWindow *)));
 	//httpReq = new QNetworkAccessManager(this);
-	connect(&httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
+	connect(&httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdatesConnectionDone(QNetworkReply*)));
 
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
@@ -1071,41 +1071,49 @@ void MainWindow::saveRecentProjectList(const QString &projName)
 
 void MainWindow::checkForUpdates(bool verboseFlag)
 {
-	// if the user has chosen to do not check for updates in the settings skip everything
-	if(!mwsettings.checkForUpdate) return; 
-	verboseCheckingFlag = verboseFlag;
-
-	const QString urlCheck = "https://www.meshlab.net/ML_VERSION";
 	QSettings settings;
-	int totalKV = settings.value("totalKV", 0).toInt();
-	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
-	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
-	QString UID = settings.value("UID", QString("")).toString();
-	if (UID.isEmpty()) {
-		UID = QUuid::createUuid().toString();
-		settings.setValue("UID", UID);
+
+	// if the user has chosen to do not send anonymous data, skip
+	if (mwsettings.sendAnonymousData) {
+		int totalKV = settings.value("totalKV", 0).toInt();
+		int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
+		int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
+		QString UID = settings.value("UID", QString("")).toString();
+		if (UID.isEmpty()) {
+			UID = QUuid::createUuid().toString();
+			settings.setValue("UID", UID);
+		}
+
+		QString baseCommand("/~cignoni/meshlab_latest.php");
+
+		#ifdef Q_OS_WIN
+			QString OS = "Win";
+		#elif defined( Q_OS_OSX)
+			QString OS = "Mac";
+		#else
+			QString OS = "Lin";
+		#endif
+		QString message = baseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+
+		QNetworkAccessManager stats;
+		QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
+		stats.get(statreq);
 	}
-	QString baseCommand("/~cignoni/meshlab_latest.php");
 
-	#ifdef Q_OS_WIN
-		QString OS = "Win";
-	#elif defined( Q_OS_OSX)
-		QString OS = "Mac";
-	#else
-		QString OS = "Lin";
-	#endif
-	QString message = baseCommand + QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+	// if the user has chosen to do not check for updates in the settings skip the check
+	if(mwsettings.checkForUpdate) {
+		verboseCheckingFlag = verboseFlag;
+		const QString urlCheck = "https://www.meshlab.net/ML_VERSION";
 
-	QNetworkAccessManager stats;
-	QNetworkRequest statreq(MeshLabApplication::organizationHost() + message);
-	stats.get(statreq);
-
-	QNetworkRequest request(urlCheck);
-	httpReq.get(request);
+		QNetworkRequest request(urlCheck);
+		httpReq.get(request);
+	}
 }
 
-void MainWindow::connectionDone(QNetworkReply *reply)
+void MainWindow::checkForUpdatesConnectionDone(QNetworkReply *reply)
 {
+	qDebug() << QSslSocket::sslLibraryBuildVersionString();
+	qDebug() << QSslSocket::sslLibraryVersionString();
 	QSettings settings;
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
 
@@ -1122,6 +1130,7 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 
 	QByteArray ddata = reply->readAll();
 	QString onlineVersion = QString::fromStdString(ddata.toStdString());
+	std::cerr << "Online version: " << onlineVersion.toStdString() << "\n";
 	QStringList splitOnlineVersion = onlineVersion.split(".");
 
 
@@ -1173,6 +1182,7 @@ void MainWindow::connectionDone(QNetworkReply *reply)
 	}
 	else if (verboseCheckingFlag && !newVersionAvailable) {
 		msgBox.setText("<center>Your MeshLab version is the most recent one: " + onlineVersion + ".</center>");
+		dontShowCheckBox.setVisible(false);
 	}
 	reply->deleteLater();
 
@@ -1269,7 +1279,8 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 	gbllist.addParam(RichInt(startupWindowWidthParam(), 0, "Startup Window Width (in pixels)", "Window width on startup"));
 	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
 	gbllist.addParam(RichString(meshSetNameParam(), "ms", "Name of the MeshSet object.", "Set the MeshSet name object in the PyMeshLab call copied in the clipboard from the filter dock dialog."));
-	gbllist.addParam(RichBool(checkForUpdateParam(), true, "Online Check for updated version of MeshLab", "If true MeshLab periodically will check online if a new version has been released and will send a few aggregated statistic of usage (number of opened and saved mesh and total number of vertices loaded)"));
+	gbllist.addParam(RichBool(checkForUpdateParam(), true, "Automatic online check for updated version of MeshLab", "If true, MeshLab periodically will check online if a new version has been released"));
+	gbllist.addParam(RichBool(sendAnonymousDataParam(), true, "Send anonymous and aggregate statistics", "If true, MeshLab periodically will send a few aggregated statistic of usage (number of opened and saved mesh and total number of vertices loaded)"));
 }
 
 void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
@@ -1285,6 +1296,7 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	startupWindowHeight = rpl.getInt(startupWindowHeightParam());
 	meshSetName = rpl.getString(meshSetNameParam());
 	checkForUpdate = rpl.getBool(checkForUpdateParam());
+	sendAnonymousData = rpl.getBool(sendAnonymousDataParam());
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const

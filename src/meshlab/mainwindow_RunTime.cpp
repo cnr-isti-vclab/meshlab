@@ -344,8 +344,7 @@ void MainWindow::updateMenus()
 	showInfoPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
 	preferencesMenu->setEnabled(activeDoc);
-	checkUpdatesAct->setEnabled(mwsettings.checkForUpdate);
-	
+
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(activeDoc && GLA())
 	{
@@ -2692,6 +2691,44 @@ void MainWindow::showEvent(QShowEvent * event)
 	QWidget::showEvent(event);
 	QSettings settings;
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+	const QString informativeSettingString = "informativeShown";
+	QVariant informativeShown = settings.value(informativeSettingString);
+	if (!informativeShown.isValid()) {
+		// the user never agreed or declined the informative about sending anonymous data...
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(
+			this,
+			"Send Anonymous Statistics",
+			"MeshLab will send periodically some few aggregate statistics of usage (number of "
+			"opened and saved mesh and total number of vertices loaded). <br>"
+			"We really need this information in order to assess how diffusely MeshLab is used and "
+			"what is its impact on the 3D community. <br>"
+			"Do you allow MeshLab to periodically send aggregated statistics? <br>"
+			"You can always change this setting in the MeshLab options.",
+			QMessageBox::Yes | QMessageBox::No, // buttons to show
+			QMessageBox::Yes);
+
+		mwsettings.sendAnonymousData = (reply == QMessageBox::Yes);
+
+		informativeShown.setValue(true);
+		settings.setValue(informativeSettingString, informativeShown);
+
+		// TODO: manage of settings in meshlab needs to be completely remade.
+		// It was thinked to actually save the values of the settings **exclusively from the
+		// GUI settings dialog**. A proper class that manages settings **outside GUI and
+		// MainWindow** is needed.
+		// Right now, the only way to actually save a setting is outside the dialog is
+		// doing the following mess:
+		RichBool& p = dynamic_cast<RichBool&>(currentGlobalParams.getParameterByName(mwsettings.sendAnonymousDataParam()));
+		p.setValue(BoolValue(mwsettings.sendAnonymousData));
+		QDomDocument doc("MeshLabSettings");
+		doc.appendChild(p.fillToXMLDocument(doc));
+		QString docstring =  doc.toString();
+		settings.setValue(p.name(),QVariant(docstring));
+	}
+
 	const QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
 	QDate today = QDate::currentDate();
 	QString todayStr = today.toString();
