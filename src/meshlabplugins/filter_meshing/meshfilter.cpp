@@ -410,7 +410,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 	case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 	case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 	case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with different algorithms");
-	case FP_CLOSE_HOLES                        : return tr("Close holes smaller than a given threshold");
+	case FP_CLOSE_HOLES                        : return tr("Close holes whose boundary is composed by a number of edges smaller than a given trheshold");
 	case FP_CYLINDER_UNWRAP                    : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
 	case FP_QUAD_PAIRING                       : return tr("Convert a tri-mesh into a quad mesh by pairing triangles.");
 	case FP_QUAD_DOMINANT                      : return tr("Convert a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
@@ -512,6 +512,9 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed"));
 		parlst.addParam(RichBool("NewFaceSelected",true,"Select the newly created faces","After closing a hole the faces that have been created are left selected. Any previous selection is lost. Useful for example for smoothing the newly created holes."));
 		parlst.addParam(RichBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete."));
+		parlst.addParam(RichBool("RefineHole",false,"Refine Filled Hole","After closing the hole it will refine the newly created triangles to make the surface more smooth and the triangulation more evenly spaced"));
+		maxVal = m.cm.bbox.Diag();
+		parlst.addParam(RichPercentage("RefineHoleEdgeLen",maxVal*0.03,0,maxVal,"Hole Refinement Edge Len", "The target edge lenght of the triangulation inside the filled hole."));
 		break;
 
 	case FP_LOOP_SS:
@@ -1478,6 +1481,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		bool SelectedFlag = par.getBool("Selected");
 		bool SelfIntersectionFlag = par.getBool("SelfIntersection");
 		bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
+		bool RefineHoleFlag = par.getBool("RefineHole");
+		float RefineHoleEdgeLen = par.getAbsPerc("RefineHoleEdgeLen");
 		int holeCnt;
 		if( SelfIntersectionFlag )
 			holeCnt = tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
@@ -1496,6 +1501,44 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			for(size_t i=OriginalSize;i<m.cm.face.size();++i)
 				if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
 		}
+		
+		if(RefineHoleFlag)
+		{
+			m.updateDataMask( MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTFACETOPO |
+							 MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK |
+							 MeshModel::MM_FACEFLAG | MeshModel::MM_VERTMARK );
+			
+			tri::IsotropicRemeshing<CMeshO>::Params params;
+			params.SetFeatureAngleDeg(181.0f);
+			params.adapt        = false;
+			params.selectedOnly = true;
+			params.splitFlag    = true;
+			params.collapseFlag = true;
+			params.swapFlag     = true;
+			params.smoothFlag   = true;
+			params.projectFlag  = false;
+			params.surfDistCheck= false;
+			
+			// Refinement and smoothing can be tricky. Usually it is good to
+			// 1) start with large tris to get fast convergence to the min surf
+			// 2) switch a bit to small tri to unfold bad things at the boundary
+			// 3) go for the desired edge len
+			// Rinse and repeat. 
+			
+			for(int k=0;k<3;k++)
+			{				
+				params.SetTargetLen(RefineHoleEdgeLen*3.0); params.iter = 5;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+				
+				params.SetTargetLen(RefineHoleEdgeLen/3.0); params.iter = 3;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+				
+				params.SetTargetLen(RefineHoleEdgeLen    ); params.iter = 2;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+			}
+						
+		}
+		
 	} break;
 
 	case FP_CYLINDER_UNWRAP:
