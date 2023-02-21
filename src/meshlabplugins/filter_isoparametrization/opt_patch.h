@@ -1,5 +1,5 @@
-#ifndef _OPT_PATCHES
-#define _OPT_PATCHES
+#ifndef MESHLAB_OPT_PATCHES
+#define MESHLAB_OPT_PATCHES
 
 #include <algorithm>
 #include <vcg/complex/complex.h>
@@ -498,4 +498,4 @@ void OptimizePatches()
 	}
 
 };
-#endif
+#endif // MESHLAB_OPT_PATCHES

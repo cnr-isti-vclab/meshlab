@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef _HANDLE_H_
-#define _HANDLE_H_
+#ifndef MESHLAB_HANDLE_H
+#define MESHLAB_HANDLE_H
 
 #include <QGraphicsObject>
 #include <limits>
@@ -70,4 +70,4 @@ private slots:
 
 };
 
-#endif // HANDLE_H
+#endif // MESHLAB_HANDLE_H

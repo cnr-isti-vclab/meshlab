@@ -1,5 +1,5 @@
-#ifndef _DIAMONDPARA
-#define _DIAMONDPARA
+#ifndef MESHLAB_DIAMONDPARA_H
+#define MESHLAB_DIAMONDPARA_H
 
 #include <algorithm>
 #include <ctime>
@@ -553,4 +553,4 @@ public:
     }
 
 };
-#endif
+#endif // MESHLAB_DIAMONDPARA_H

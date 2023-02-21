@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef _EQHANDLE_H_
-#define _EQHANDLE_H_
+#ifndef MESHLAB_EQHANDLE_H
+#define MESHLAB_EQHANDLE_H
 
 #include "handle.h"
 #include <QDoubleSpinBox>
@@ -111,4 +111,4 @@ public slots:
 	void setXBySpinBoxValueChanged (double spinBoxValue); // changing equalizer spinboxes moves the connected handle
 };
 
-#endif // EQHANDLE_H
+#endif // MESHLAB_EQHANDLE_H

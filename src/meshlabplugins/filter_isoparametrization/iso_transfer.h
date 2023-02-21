@@ -1,5 +1,5 @@
-#ifndef _ISO_TRANSFER
-#define _ISO_TRANSFER
+#ifndef MESHLAB_ISO_TRANSFER
+#define MESHLAB_ISO_TRANSFER
 
 #include <iso_parametrization.h>
 
@@ -132,4 +132,4 @@ class IsoTransfer
 
 };
 
-#endif
+#endif // MESHLAB_ISO_TRANSFER
