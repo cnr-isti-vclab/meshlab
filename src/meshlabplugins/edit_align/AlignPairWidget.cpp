@@ -53,8 +53,7 @@ AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget* parent) :
 	hasToPick   = false;
 	hasToDelete = false;
 	pointToPick = vcg::Point2i(-1, -1);
-	shared->addView(context());
-	setAutoFillBackground(false);
+//	setAutoFillBackground(false);
 }
 
 void AlignPairWidget::initMesh(MeshTreem::MeshNode* _freeMesh, MeshTreem* _gluedTree)
@@ -84,15 +83,32 @@ void AlignPairWidget::initializeGL()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void AlignPairWidget::paintEvent(QPaintEvent*)
+void AlignPairWidget::paintEvent(QPaintEvent* p)
+{
+	QOpenGLWidget::paintEvent(p);
+
+	QPainter painter(this);
+//	painter.setBrush(QBrush(QColor(0,0,255)));
+//	QPen pen(QColor(255, 0, 0));
+//	painter.setPen(pen);
+//	painter.drawRect(0,0,100, 100);
+//	painter.drawLine(QPoint(0,0), QPoint(3000, 3000));
+
+	painter.beginNativePainting();
+	drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
+	drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+	painter.endNativePainting();
+}
+
+void AlignPairWidget::paintGL()
 {
 	if ((shared == NULL) || (gla == NULL))
 		return;
-	QPainter painter(this);
-	painter.beginNativePainting();
-	makeCurrent();
-	if (!isValid())
-		return;
+	//QPainter painter(this);
+	//painter.beginNativePainting();
+	//makeCurrent();
+	//if (!isValid())
+	//	return;
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
@@ -156,7 +172,7 @@ void AlignPairWidget::paintEvent(QPaintEvent*)
 		vcg::glTranslate(-bb.Center());
 		if (i == 0) {
 			shared->draw(freeMesh->Id(), context());
-			drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
+			//drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
 		}
 		else {
 			for (auto ni = gluedTree->nodeMap.begin(); ni != gluedTree->nodeMap.end(); ++ni) {
@@ -166,7 +182,7 @@ void AlignPairWidget::paintEvent(QPaintEvent*)
 					shared->draw(mn->m->id(), context());
 				}
 			}
-			drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+			//drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
 		}
 
 		int pickSide = (pointToPick[0] < QTLogicalToDevice(this, (width() / 2))) ? 0 : 1;
@@ -205,7 +221,7 @@ void AlignPairWidget::paintEvent(QPaintEvent*)
 		glPopMatrix();
 		tt[i]->DrawPostApply();
 	}
-	painter.endNativePainting();
+	//painter.endNativePainting();
 }
 
 void AlignPairWidget::drawPickedPoints(

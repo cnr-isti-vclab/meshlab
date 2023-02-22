@@ -54,7 +54,7 @@ protected:
 	/// opengl initialization and drawing calls
 	void initializeGL();
 	void paintEvent(QPaintEvent*);
-	// void paintGL ();
+	void paintGL();
 	/// keyboard and mouse event callbacks
 	void keyReleaseEvent(QKeyEvent* e);
 	void keyPressEvent(QKeyEvent* e);

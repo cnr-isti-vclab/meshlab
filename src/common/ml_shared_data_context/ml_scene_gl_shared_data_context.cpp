@@ -413,24 +413,17 @@ void MLSceneGLSharedDataContext::getRenderInfoPerMeshView(QOpenGLContext * ctx, 
 	}
 }
 
-bool MLSceneGLSharedDataContext::manageBuffers( int mmid )
+void MLSceneGLSharedDataContext::manageBuffers( int mmid )
 {
-	bool didsomething = false;
 	MeshModel* mm = _md.getMesh(mmid);
 
-	if (mm == NULL)
-		return didsomething;
+	if (mm != NULL) {
+		PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
 
-	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
-
-	if (man != NULL)
-	{
-//		makeCurrent(&_surface);
-		makeCurrent();
-		man->manageBuffers();
-		doneCurrent();
+		if (man != NULL) {
+			man->manageBuffers();
+		}
 	}
-	return didsomething;
 }
 
 void MLSceneGLSharedDataContext::setDebugMode(int mmid,bool activatedebugmodality )
