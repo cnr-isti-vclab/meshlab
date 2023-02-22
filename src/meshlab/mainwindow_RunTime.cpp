@@ -463,6 +463,9 @@ void MainWindow::setSplit(QAction *qa)
 		updateMenus();
 		
 		glwClone->update();
+
+		// assert the new view shares the data of the current view
+		assert(QOpenGLContext::areSharing(glArea->context(), glwClone->context()));
 	}
 	
 }
