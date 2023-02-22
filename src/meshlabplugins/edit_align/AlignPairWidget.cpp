@@ -75,41 +75,33 @@ void AlignPairWidget::initializeGL()
 
 	shared->addView(context());
 	glClearColor(0.f, 0.f, 0.f, 1.f);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
 }
 
 void AlignPairWidget::paintEvent(QPaintEvent* p)
 {
 	QOpenGLWidget::paintEvent(p);
 
-	QPainter painter(this);
-//	painter.setBrush(QBrush(QColor(0,0,255)));
-//	QPen pen(QColor(255, 0, 0));
-//	painter.setPen(pen);
-//	painter.drawRect(0,0,100, 100);
-//	painter.drawLine(QPoint(0,0), QPoint(3000, 3000));
-
-	painter.beginNativePainting();
-	drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
-	drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
-	painter.endNativePainting();
+//	QPainter painter(this);
+//	painter.beginNativePainting();
+//	drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
+//	drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+//	painter.endNativePainting();
 }
 
 void AlignPairWidget::paintGL()
 {
 	if ((shared == NULL) || (gla == NULL))
 		return;
-	//QPainter painter(this);
-	//painter.beginNativePainting();
-	//makeCurrent();
-	//if (!isValid())
-	//	return;
+	QPainter painter(this);
+	painter.beginNativePainting();
 
+	glPushAttrib(GL_ENABLE_BIT);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,7 +164,7 @@ void AlignPairWidget::paintGL()
 		vcg::glTranslate(-bb.Center());
 		if (i == 0) {
 			shared->draw(freeMesh->Id(), context());
-			//drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
+			drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
 		}
 		else {
 			for (auto ni = gluedTree->nodeMap.begin(); ni != gluedTree->nodeMap.end(); ++ni) {
@@ -182,7 +174,7 @@ void AlignPairWidget::paintGL()
 					shared->draw(mn->m->id(), context());
 				}
 			}
-			//drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+			drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
 		}
 
 		int pickSide = (pointToPick[0] < QTLogicalToDevice(this, (width() / 2))) ? 0 : 1;
@@ -221,7 +213,9 @@ void AlignPairWidget::paintGL()
 		glPopMatrix();
 		tt[i]->DrawPostApply();
 	}
-	//painter.endNativePainting();
+
+	glPopAttrib();
+	painter.endNativePainting();
 }
 
 void AlignPairWidget::drawPickedPoints(
