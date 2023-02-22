@@ -230,7 +230,7 @@ void GLArea::pasteTile()
 				tileBuffer.format());
 
 		uchar* snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) +
-						 ((totalCols * tileRow) * tileBuffer.byteCount());
+						 ((totalCols * tileRow) * tileBuffer.sizeInBytes());
 		uchar* tilePtr = tileBuffer.bits();
 
 		for (int y = 0; y < tileBuffer.height(); y++) {
@@ -2788,10 +2788,29 @@ void GLArea::setupTextureEnv(GLuint textid)
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textid);
+
+	switch(glas.textureWrapST)
+	{
+	case 0:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		break;
+	case 1:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+		break;
+	case 2:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		break;
+	default: assert(0); break;
+	}
+	
 	if (glas.textureMagFilter == 0)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	else
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
 	if (glas.textureMinFilter == 0)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	else

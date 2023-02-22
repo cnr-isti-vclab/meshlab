@@ -32,6 +32,12 @@ cp $INSTALL_PATH/IFXCoreStatic.lib $INSTALL_PATH/lib/meshlab/
 cp $RESOURCES_PATH/LICENSE.txt $INSTALL_PATH/
 cp $RESOURCES_PATH/privacy.txt $INSTALL_PATH/
 
+# remove all .lib files
+for file in $(find $INSTALL_PATH -name '*.lib');
+do
+    rm $file
+done
+
 if [ ! -f $INSTALL_PATH/vc_redist.x64.exe ]
 then
     echo "Downloading vc_redist because it was missing..."

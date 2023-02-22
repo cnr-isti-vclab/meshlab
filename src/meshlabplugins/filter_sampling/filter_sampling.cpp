@@ -998,9 +998,9 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 		{
 		case 0 :
 		{
-			tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-			ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
-			ClusteringGrid.AddPointSet(curMM->cm,selected);
+			tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO>> ClusteringGrid(
+				curMM->cm.bbox, 100000, threshold);
+			ClusteringGrid.AddPointSet(curMM->cm, selected);
 			ClusteringGrid.ExtractPointSet(mm->cm);
 			ClusteringGrid.SelectPointSet(curMM->cm);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
@@ -1009,8 +1009,8 @@ std::map<std::string, QVariant> FilterDocSampling::applyFilter(
 			
 		case 1 :
 		{
-			vcg::tri::Clustering<CMeshO, vcg::tri::NearestToCenter<CMeshO> > ClusteringGrid;
-			ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
+			vcg::tri::Clustering<CMeshO, vcg::tri::NearestToCenter<CMeshO>> ClusteringGrid(
+				curMM->cm.bbox, 100000, threshold);
 			ClusteringGrid.AddPointSet(curMM->cm,selected);
 			ClusteringGrid.SelectPointSet(curMM->cm);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);

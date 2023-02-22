@@ -78,15 +78,19 @@ std::list<std::string> loadMesh(
 		std::list<std::string> tmp = mm->loadTextures(nullptr, cb);
 		unloadedTextures.insert(unloadedTextures.end(), tmp.begin(), tmp.end());
 
+		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
+		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+		vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+		if (delVertNum > 0 || delFaceNum > 0)
+			ioPlugin->reportWarning(QString("Warning mesh contains %1 vertices with NAN coords and "
+											"%2 degenerated faces.\nCorrected.")
+										.arg(delVertNum)
+										.arg(delFaceNum));
+
 		// In case of polygonal meshes the normal should be updated accordingly
 		if (mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) {
 			mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be
 														 // done in the plugin...
-			int degNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-			if (degNum)
-				ioPlugin->log(
-					"Warning model contains " + std::to_string(degNum) +
-					" degenerate faces. Removed them.");
 			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
@@ -104,14 +108,6 @@ std::list<std::string> loadMesh(
 		}
 
 		// updateMenus();
-		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
-		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-		vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-		if (delVertNum > 0 || delFaceNum > 0)
-			ioPlugin->reportWarning(QString("Warning mesh contains %1 vertices with NAN coords and "
-											"%2 degenerated faces.\nCorrected.")
-										.arg(delVertNum)
-										.arg(delFaceNum));
 
 		// computeRenderingDataOnLoading(mm,isareload, rendOpt);
 		++itmesh;

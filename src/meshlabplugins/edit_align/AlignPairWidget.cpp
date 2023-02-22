@@ -24,9 +24,7 @@
 //#include <GL/glew.h>
 
 #include "AlignPairWidget.h"
-#include "AlignPairDialog.h"
-#include "edit_align.h"
-#include <QGLWidget>
+
 #include <common/GLExtensionsManager.h>
 #include <wrap/gl/pick.h>
 
@@ -38,7 +36,7 @@
 #include <meshlab/glarea.h>
 
 AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget* parent) :
-		QGLWidget(parent, ar->mvc()->sharedDataContext())
+		QOpenGLWidget(parent)
 {
 	gla                = ar;
 	shared             = ar->mvc()->sharedDataContext();
@@ -55,8 +53,7 @@ AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget* parent) :
 	hasToPick   = false;
 	hasToDelete = false;
 	pointToPick = vcg::Point2i(-1, -1);
-	shared->addView(context());
-	setAutoFillBackground(false);
+//	setAutoFillBackground(false);
 }
 
 void AlignPairWidget::initMesh(MeshTreem::MeshNode* _freeMesh, MeshTreem* _gluedTree)
@@ -78,24 +75,33 @@ void AlignPairWidget::initializeGL()
 
 	shared->addView(context());
 	glClearColor(0.f, 0.f, 0.f, 1.f);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
 }
 
-void AlignPairWidget::paintEvent(QPaintEvent*)
+void AlignPairWidget::paintEvent(QPaintEvent* p)
+{
+	QOpenGLWidget::paintEvent(p);
+
+//	QPainter painter(this);
+//	painter.beginNativePainting();
+//	drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
+//	drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+//	painter.endNativePainting();
+}
+
+void AlignPairWidget::paintGL()
 {
 	if ((shared == NULL) || (gla == NULL))
 		return;
 	QPainter painter(this);
 	painter.beginNativePainting();
-	makeCurrent();
-	if (!isValid())
-		return;
 
+	glPushAttrib(GL_ENABLE_BIT);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -207,6 +213,8 @@ void AlignPairWidget::paintEvent(QPaintEvent*)
 		glPopMatrix();
 		tt[i]->DrawPostApply();
 	}
+
+	glPopAttrib();
 	painter.endNativePainting();
 }
 

@@ -344,7 +344,7 @@ void MainWindow::updateMenus()
 	showInfoPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
 	preferencesMenu->setEnabled(activeDoc);
-	
+
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(activeDoc && GLA())
 	{
@@ -463,6 +463,9 @@ void MainWindow::setSplit(QAction *qa)
 		updateMenus();
 		
 		glwClone->update();
+
+		// assert the new view shares the data of the current view
+		assert(QOpenGLContext::areSharing(glArea->context(), glwClone->context()));
 	}
 	
 }
@@ -1726,7 +1729,10 @@ void MainWindow::newProject(const QString& projName)
 {
 	if (gpumeminfo == NULL)
 		return;
-	MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,mdiarea);
+
+        // The parent of mvcont is set to null, because mdiarea->addSubWindow
+        // will put it into a QMDISubWindow that will take ownership
+	MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,nullptr);
 	connect(&mvcont->meshDoc,SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
 	connect(&mvcont->meshDoc,SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 	connect(&mvcont->meshDoc, SIGNAL(documentUpdated()), this, SLOT(documentUpdateRequested()));
@@ -2287,34 +2293,35 @@ void MainWindow::reload()
 	}
 }
 
-bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
+bool MainWindow::exportMesh(QString fileName, MeshModel* mod, const bool saveAllPossibleAttributes)
 {
 	const QStringList& suffixList = PM.outputMeshFormatListDialog();
 	if (fileName.isEmpty()) {
 		//QHash<QString, MeshIOInterface*> allKnownFormats;
 		//PM.LoadFormats( suffixList, allKnownFormats,PluginManager::EXPORT);
-		//QString defaultExt = "*." + mod->suffixName().toLower();
-		QString defaultExt = "*.ply";
 		if (mod == NULL)
 			return false;
 		mod->setMeshModified(false);
 		QString laylabel = "Save \"" + mod->label() + "\" Layer";
-		QFileDialog* saveDialog = new QFileDialog(this,laylabel, lastUsedDirectory.path());
-		//saveDialog->setOption(QFileDialog::DontUseNativeDialog);
+
+		QFileDialog* saveDialog = new QFileDialog(this, laylabel, lastUsedDirectory.path());
 		saveDialog->setNameFilters(suffixList);
 		saveDialog->setAcceptMode(QFileDialog::AcceptSave);
 		saveDialog->setFileMode(QFileDialog::AnyFile);
-		saveDialog->selectFile(fileName);
-		QStringList matchingExtensions=suffixList.filter(defaultExt);
+
+		QString extension = mod->suffixName().toLower();
+		if (extension.isEmpty())
+			extension = "ply";
+		QString defaultExt = "*." + extension;
+		QStringList matchingExtensions = suffixList.filter(defaultExt);
 		if(!matchingExtensions.isEmpty())
-			saveDialog->selectNameFilter(matchingExtensions.last());
-		//connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+			saveDialog->selectNameFilter(matchingExtensions.first());
 
 		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected)
 			return false;
-		fileName=saveDialog->selectedFiles().at(0);
+		fileName = saveDialog->selectedFiles().at(0);
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty()) {
 			QString ext = saveDialog->selectedNameFilter();
@@ -2450,12 +2457,12 @@ void MainWindow::changeFileExtension(const QString& st)
 
 bool MainWindow::save(const bool saveAllPossibleAttributes)
 {
-	return exportMesh(meshDoc()->mm()->fullName(),meshDoc()->mm(),saveAllPossibleAttributes);
+	return exportMesh(meshDoc()->mm()->fullName(), meshDoc()->mm(), saveAllPossibleAttributes);
 }
 
-bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
+bool MainWindow::saveAs(QString fileName, const bool saveAllPossibleAttributes)
 {
-	return exportMesh(fileName,meshDoc()->mm(),saveAllPossibleAttributes);
+	return exportMesh(fileName, meshDoc()->mm(), saveAllPossibleAttributes);
 }
 
 void MainWindow::readViewFromFile(QString const& filename){
@@ -2693,6 +2700,44 @@ void MainWindow::showEvent(QShowEvent * event)
 	QWidget::showEvent(event);
 	QSettings settings;
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+	const QString informativeSettingString = "informativeShown";
+	QVariant informativeShown = settings.value(informativeSettingString);
+	if (!informativeShown.isValid()) {
+		// the user never agreed or declined the informative about sending anonymous data...
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(
+			this,
+			"Send Anonymous Statistics",
+			"MeshLab will send periodically some few aggregate statistics of usage (number of "
+			"opened and saved mesh and total number of vertices loaded). <br>"
+			"We really need this information in order to assess how diffusely MeshLab is used and "
+			"what is its impact on the 3D community. <br>"
+			"Do you allow MeshLab to periodically send aggregated statistics? <br>"
+			"You can always change this setting in the MeshLab options.",
+			QMessageBox::Yes | QMessageBox::No, // buttons to show
+			QMessageBox::Yes);
+
+		mwsettings.sendAnonymousData = (reply == QMessageBox::Yes);
+
+		informativeShown.setValue(true);
+		settings.setValue(informativeSettingString, informativeShown);
+
+		// TODO: manage of settings in meshlab needs to be completely remade.
+		// It was thinked to actually save the values of the settings **exclusively from the
+		// GUI settings dialog**. A proper class that manages settings **outside GUI and
+		// MainWindow** is needed.
+		// Right now, the only way to actually save a setting is outside the dialog is
+		// doing the following mess:
+		RichBool& p = dynamic_cast<RichBool&>(currentGlobalParams.getParameterByName(mwsettings.sendAnonymousDataParam()));
+		p.setValue(BoolValue(mwsettings.sendAnonymousData));
+		QDomDocument doc("MeshLabSettings");
+		doc.appendChild(p.fillToXMLDocument(doc));
+		QString docstring =  doc.toString();
+		settings.setValue(p.name(),QVariant(docstring));
+	}
+
 	const QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
 	QDate today = QDate::currentDate();
 	QString todayStr = today.toString();
