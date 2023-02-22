@@ -55,6 +55,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// make sure that all the created windows are sharing the same OpenGL data
+	// e.g. the Edit Align plugin that creates windows, dialogs and so on
+	MeshLabApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
 	// FIXME GL: is this the right place?
 	{
 		QSurfaceFormat format;

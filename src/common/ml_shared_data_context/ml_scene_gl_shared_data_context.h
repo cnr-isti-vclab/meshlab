@@ -82,7 +82,7 @@ public:
 	void getRenderInfoPerMeshView(int mmid, QOpenGLContext* ctx, MLRenderingData& dt);
 	void meshInserted(int mmid);
 	void meshRemoved(int mmid);
-	bool manageBuffers(int mmid);
+	void manageBuffers(int mmid);
 	void setDebugMode(int mmid, bool activatedebugmodality);
 	void getLog(int mmid, MLRenderingData::DebugInfo& debug);
 	bool isBORenderingAvailable(int mmid);
