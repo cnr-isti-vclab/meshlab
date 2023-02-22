@@ -61,6 +61,7 @@ private:
 	QPushButton* resetbut;
 	QPushButton* closebut;
 	QPushButton* loadbut;
+	QLabel *helpLabel;
 };
 
 #endif // MESHLAB_SETTING_DIALOG_H

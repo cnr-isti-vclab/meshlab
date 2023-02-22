@@ -1,5 +1,5 @@
-#ifndef _DIAMSAMPLER
-#define _DIAMSAMPLER
+#ifndef MESHLAB_DIAMSAMPLER
+#define MESHLAB_DIAMSAMPLER
 #include <stat_remeshing.h>
 #include <vcg/complex/algorithms/clean.h>
 
@@ -222,4 +222,4 @@ public:
 
 
 };
-#endif
+#endif // MESHLAB_DIAMSAMPLER

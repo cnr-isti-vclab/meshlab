@@ -1,5 +1,5 @@
-#ifndef _ISO_STATISTICS
-#define _ISO_STATISTICS
+#ifndef MESHLAB_ISO_STATISTICS
+#define MESHLAB_ISO_STATISTICS
 
 #include <iso_parametrization.h>
 
@@ -322,4 +322,4 @@ typename MeshType::ScalarType ApproxL2Error(MeshType &mesh)
         return sum;
     }
 
-#endif
+#endif // MESHLAB_ISO_STATISTICS

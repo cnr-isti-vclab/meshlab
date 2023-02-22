@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef _QUALITY_MAPPER_PLUGIN_H_
-#define _QUALITY_MAPPER_PLUGIN_H_
+#ifndef MESHLAB_QUALITY_MAPPER_PLUGIN_H
+#define MESHLAB_QUALITY_MAPPER_PLUGIN_H
 
 #include <QObject>
 #include <QAction>
@@ -62,4 +62,4 @@ public:
 	bool haveToPick;
 };
 
-#endif
+#endif // MESHLAB_QUALITY_MAPPER_PLUGIN_H

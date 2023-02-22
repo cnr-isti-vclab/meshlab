@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef _TFHANDLE_H_
-#define _TFHANDLE_H_
+#ifndef MESHLAB_TFHANDLE_H
+#define MESHLAB_TFHANDLE_H
 
 #include "handle.h"
 #include "common/transferfunction.h"
@@ -80,4 +80,4 @@ private slots:
 
 };
 
-#endif // EQHANDLE_H
+#endif // MESHLAB_TFHANDLE_H
