@@ -1812,6 +1812,15 @@ void MainWindow::newProject(const QString& projName)
 	if (gpumeminfo == NULL)
 		return;
 
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(
+		this,
+		"New Project Confirmation",
+		"Are you sure you want to create a new project?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::No) {
+		return;
+	}
         // The parent of mvcont is set to null, because mdiarea->addSubWindow
         // will put it into a QMDISubWindow that will take ownership
 	MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,nullptr);
@@ -2287,6 +2296,15 @@ void MainWindow::reloadAllMesh()
 {
 	// Discards changes and reloads current file
 	// save current file name
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(
+		this,
+		"You are reloading all mesh!",
+		"Are You sure to Reload?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::No) {
+		return;
+	}
 	qb->show();
 	QElapsedTimer t;
 	t.start();
@@ -2335,6 +2353,14 @@ void MainWindow::reload()
 		return;
 	// Discards changes and reloads current file
 	// save current file name
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+		"You are reloading the current mesh",
+		"Are you sure to reload?",
+		QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::No) {
+		return;
+	}
 	qb->show();
 
 	QString fileName = meshDoc()->mm()->fullName();
