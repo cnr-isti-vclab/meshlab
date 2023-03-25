@@ -1812,15 +1812,7 @@ void MainWindow::newProject(const QString& projName)
 	if (gpumeminfo == NULL)
 		return;
 
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(
-		this,
-		"New Project Confirmation",
-		"Are you sure you want to create a new project?",
-		QMessageBox::Yes | QMessageBox::No);
-	if (reply == QMessageBox::No) {
-		return;
-	}
+
         // The parent of mvcont is set to null, because mdiarea->addSubWindow
         // will put it into a QMDISubWindow that will take ownership
 	MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,nullptr);
