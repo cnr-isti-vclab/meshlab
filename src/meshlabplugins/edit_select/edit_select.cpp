@@ -266,15 +266,16 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
 
 void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, GLArea *gla)
 {
+
 	if (selectionMode == SELECT_AREA_MODE)
 		return;
+        gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
 
-    gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 	Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
-    if(selectionMode == SELECT_VERT_MODE)
+    if(selectionMode == SELECT_AREA_MODE)
     {
         if (mod & Qt::ControlModifier)
-            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
         else if (mod & Qt::ShiftModifier)
             gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
     }
@@ -283,7 +284,7 @@ void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, G
         if (mod & Qt::AltModifier)
         {
             if (mod & Qt::ControlModifier)
-                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
             else if (mod & Qt::ShiftModifier)
                 gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
             else
@@ -292,7 +293,7 @@ void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, G
         else
         {
             if (mod & Qt::ControlModifier)
-                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
             else if (mod & Qt::ShiftModifier)
                 gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
         }
@@ -310,8 +311,8 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 	LastSelVert.clear();
 	LastSelFace.clear();
 
-	if ((event->modifiers() & Qt::ControlModifier) ||
-		(event->modifiers() & Qt::ShiftModifier))
+    if ((!(event->modifiers() & Qt::ControlModifier) ||
+        (event->modifiers() & Qt::ShiftModifier)))
 	{
 		CMeshO::FaceIterator fi;
 		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
@@ -324,14 +325,14 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 				LastSelVert.push_back(&*vi);
 	}
 
-	composingSelMode = SMClear;
+    composingSelMode = SMAdd;
     if (event->modifiers() & Qt::ControlModifier)
-		composingSelMode = SMAdd;
+        composingSelMode = SMClear;
     else if (event->modifiers() & Qt::ShiftModifier)
 		composingSelMode = SMSub;
 
 	if (event->modifiers() & Qt::AltModifier)
-		selectFrontFlag = true;
+        selectFrontFlag = true;
 	else
 		selectFrontFlag = false;
 
@@ -526,9 +527,9 @@ void EditSelectPlugin::decorate(MeshModel &m, GLArea * gla)
 
 		line1 = "Drag to select";
 		if ((selectionMode == SELECT_FACE_MODE) || (selectionMode == SELECT_CONN_MODE))
-			line2 = "you may hold:<br>- CTRL to add<br>- SHIFT to subtract<br>- ALT to select only visible";
+            line2 = "you may hold:<br>- CTRL to NEW selection<br>- SHIFT to subtract<br>- ALT to select only visible";
 		else
-			line2 = "you may hold:<br>- CTRL to add<br>- SHIFT to subtract";
+            line2 = "you may hold:<br>- CTRL to NEW selection<br>- SHIFT to subtract";
 		line3 = "<br>A select all, D de-select all, I invert all";
 
 		this->realTimeLog("Interactive Selection", m.shortName(), "%s<br>%s<br>%s", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());
