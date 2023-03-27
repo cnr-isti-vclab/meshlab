@@ -37,9 +37,11 @@ if [ "$DONT_INSTALL_QT" = false ] ; then
     sudo apt-get install -y qt5-default qttools5-dev-tools qtdeclarative5-dev
 else
     echo "=== jumping installation of qt packages..."
-    # libraries that qt requires in any case
-    sudo apt-get install -y libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
 fi
+
+# libraries that qt requires in any case
+echo "=== intalling libraries required for qt deployment..."
+sudo apt-get install -y libxkbcommon-x11-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev
 
 # possibility to use always system libraries starting from ubuntu 20.04, since cgal is header only
 if [ "$DONT_INSTALL_CGAL_BOOST" = false ] ; then
