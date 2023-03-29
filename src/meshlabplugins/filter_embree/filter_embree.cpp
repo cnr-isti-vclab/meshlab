@@ -249,7 +249,8 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 			break;
 		case FP_ANALYZE_NORMALS:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
-			break;
+            parlst.addParam(RichBool("visibility_sampling", false, "Fast computation", "If checked, the normal analysis will be performed using the visibility sampling algorithm. This algorithm is faster than the parity sampling but less precise"));
+            break;
 		default :
 			break;
 	}
@@ -294,8 +295,9 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
         adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
 		break;	
 	case FP_ANALYZE_NORMALS:
-        adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"));
-        tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+        adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"), parameters.getBool("visibility_sampling"));
+        //tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+        m->updateBoxAndNormals();
 		break;
 	default :
 		wrongActionCalled(action);
