@@ -14,6 +14,10 @@ CCACHE=""
 for i in "$@"
 do
 case $i in
+    -s=*|--source_path=*)
+        SOURCE_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
     -b=*|--build_path=*)
         BUILD_PATH="${i#*=}"
         shift # past argument=value
