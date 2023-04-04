@@ -42,4 +42,5 @@ if $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH --plugin qt; then
 
 else
   echo "linuxdeploy failed with error code $?. Script was not completed successfully."
+  exit 1
 fi

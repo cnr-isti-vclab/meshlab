@@ -27,6 +27,9 @@ case $i in
 esac
 done
 
+# The script will terminate after the first line that fails
+set -e
+
 bash $SCRIPTS_PATH/internal/2a_make_bundle.sh -i=$INSTALL_PATH
 
 echo "======= Bundle created ======="
