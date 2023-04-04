@@ -43,7 +43,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
     - name: Setup env variables
       id: envs
       shell: bash
