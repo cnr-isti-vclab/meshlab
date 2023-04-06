@@ -2291,8 +2291,8 @@ void MainWindow::reloadAllMesh()
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(
 		this,
-		"You are reloading all mesh!",
-		"Are You sure to Reload?",
+        tr("You are reloading all mesh!"),
+        tr("Are You sure to Reload?"),
 		QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::No) {
 		return;
@@ -2347,8 +2347,8 @@ void MainWindow::reload()
 	// save current file name
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this,
-		"You are reloading the current mesh",
-		"Are you sure to reload?",
+        tr("You are reloading the current mesh"),
+        tr("Are you sure to reload?"),
 		QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::No) {
 		return;
