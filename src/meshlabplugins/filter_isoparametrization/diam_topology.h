@@ -1,5 +1,5 @@
-#ifndef _DIAMONDTOPOLOGY
-#define _DIAMONDTOPOLOGY
+#ifndef MESHLAB_DIAMONDTOPOLOGY
+#define MESHLAB_DIAMONDTOPOLOGY
 
 #include <algorithm>
 #include <ctime>
@@ -172,4 +172,4 @@ public:
 	}
 
 };
-#endif
+#endif // MESHLAB_DIAMONDTOPOLOGY
