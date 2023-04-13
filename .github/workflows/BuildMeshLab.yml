@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
     - uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
     - name: Setup env variables
       id: envs
       shell: bash

@@ -60,7 +60,7 @@ if (MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all 
 
 	### Install Settings
 	if (NOT APPLE)
-		set(CMAKE_INSTALL_RPATH $ORIGIN/../lib/meshlab)
+		set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR})
 	else()
 		SET(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
 	endif()
