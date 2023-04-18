@@ -422,7 +422,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 			                                               "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 			                                               "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
 	case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
-	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
+	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with an edge mesh (polyline) composed by the selected edges of the current mesh. It can be used to convert the boundary edges of a mesh into a polyline by selecting all the faces of the mesh.");
 	case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the selected edges of the current mesh");
 
 	default                                  : assert(0);
