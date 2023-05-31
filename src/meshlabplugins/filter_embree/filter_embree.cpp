@@ -246,17 +246,17 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 			break;
 		case FP_SDF:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the SDF but at the cost of the calculation time"));
-            parlst.addParam(RichFloat("cone_amplitude",90.0f,"Cone amplitude ", "The value for the angle (in degrees) of the cone for which we consider a ray shooting direction as a valid direction"));
+			parlst.addParam(RichFloat("cone_amplitude",90.0f,"Cone amplitude ", "The value for the angle (in degrees) of the cone for which we consider a ray shooting direction as a valid direction"));
 			
 			break;
 		case FP_SELECT_VISIBLE_FACES:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
-            parlst.addParam(RichPosition("dir", Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+			parlst.addParam(RichDirection("dir", Point3f(0.0f, 0.0f, 1.0f), "Direction", "This values indicates the direction of the shadows"));
 			break;
 		case FP_ANALYZE_NORMALS:
 			parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
-            parlst.addParam(RichBool("visibility_sampling", false, "Fast computation", "If checked, the normal analysis will be performed using the visibility sampling algorithm. This algorithm is faster than the parity sampling but less precise"));
-            break;
+			parlst.addParam(RichBool("visibility_sampling", false, "Fast computation", "If checked, the normal analysis will be performed using the visibility sampling algorithm. This algorithm is faster than the parity sampling but less precise"));
+			break;
 		default :
 			break;
 	}
