@@ -62,7 +62,7 @@ if [ "$SIGN" = true ] ; then
 fi
 
 if [ "$NOTARIZE" = true ] ; then
-    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOT_USER -np=$NOTAR_PASSWORD
+    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOTAR_USER -np=$NOTAR_PASSWORD
 
     echo "======= AppBundle Notarized ======="
 fi
