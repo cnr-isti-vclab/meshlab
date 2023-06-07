@@ -8,8 +8,8 @@ PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 SIGN=false
 NOTARIZE=false
 CERT_ID=""
-NOT_USER=""
-NOT_PASSWORD=""
+NOTAR_USER=""
+NOTAR_PASSWORD=""
 
 #checking for parameters
 for i in "$@"
@@ -28,17 +28,21 @@ case $i in
         shift # past argument=value
         ;;
     -ci=*|--cert_id=*)
-        SIGN=true
         CERT_ID="${i#*=}"
+        if [ -n "$CERT_ID" ]; then
+          SIGN=true
+        fi
         shift # past argument=value
         ;;
     -nu=*|--notarization_user=*)
-        NOTARIZE=true
         NOT_USER="${i#*=}"
+        if [ -n "$NOT_USER" ]; then
+          NOTARIZE=true
+        fi
         shift # past argument=value
         ;;
     -np=*|--notarization_password=*)
-        NOT_PASSWORD="${i#*=}"
+        NOTAR_PASSWORD="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -58,7 +62,7 @@ if [ "$SIGN" = true ] ; then
 fi
 
 if [ "$NOTARIZE" = true ] ; then
-    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOT_USER -np=$NOT_PASSWORD
+    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOT_USER -np=$NOTAR_PASSWORD
 
     echo "======= AppBundle Notarized ======="
 fi

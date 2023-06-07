@@ -3,8 +3,8 @@
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 
 INSTALL_PATH=$SCRIPTS_PATH/../../install
-NOT_USER=""
-NOT_PASSWORD=""
+NOTAR_USER=""
+NOTAR_PASSWORD=""
 
 #checking for parameters
 for i in "$@"
@@ -15,11 +15,11 @@ case $i in
         shift # past argument=value
         ;;
     -nu=*|--notarization_user=*)
-        NOT_USER="${i#*=}"
+        NOTAR_USER="${i#*=}"
         shift # past argument=value
         ;;
     -np=*|--notarization_password=*)
-        NOT_PASSWORD="${i#*=}"
+        NOTAR_PASSWORD="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -28,7 +28,7 @@ case $i in
 esac
 done
 
-xcrun notarytool store-credentials "notarytool-profile" --apple-id "$NOT_USER" --password "$NOT_PASSWORD"
+xcrun notarytool store-credentials "notarytool-profile" --apple-id "$NOTAR_USER" --password "$NOTAR_PASSWORD"
 
 ditto -c -k --keepParent "$INSTALL_PATH/meshlab.app" "$INSTALL_PATH/notarization.zip"
 
