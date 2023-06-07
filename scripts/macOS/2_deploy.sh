@@ -28,17 +28,13 @@ case $i in
         shift # past argument=value
         ;;
     -ci=*|--cert_id=*)
-        if [ -z "${i#*=}" ]; then
-            SIGN=true
-            CERT_ID="${i#*=}"
-        fi
+        SIGN=true
+        CERT_ID="${i#*=}"
         shift # past argument=value
         ;;
     -nu=*|--notarization_user=*)
-        if [ -z "${i#*=}" ]; then
-            NOTARIZE=true
-            NOT_USER="${i#*=}"
-        fi
+        NOTARIZE=true
+        NOT_USER="${i#*=}"
         shift # past argument=value
         ;;
     -np=*|--notarization_password=*)
