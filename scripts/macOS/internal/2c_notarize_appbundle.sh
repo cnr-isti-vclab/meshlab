@@ -28,7 +28,7 @@ case $i in
 esac
 done
 
-xcrun notarytool store-credentials "notarytool-profile" --apple-id $NOTAR_USER --password $NOTAR_PASSWORD
+xcrun notarytool store-credentials "notarytool-profile" --apple-id "$NOTAR_USER" --password "$NOTAR_PASSWORD"
 
 ditto -c -k --keepParent "$INSTALL_PATH/meshlab.app" "$INSTALL_PATH/notarization.zip"
 
