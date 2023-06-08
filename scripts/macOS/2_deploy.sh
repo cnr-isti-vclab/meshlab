@@ -9,6 +9,7 @@ SIGN=false
 NOTARIZE=false
 CERT_ID=""
 NOTAR_USER=""
+NOTAR_TEAM_ID=""
 NOTAR_PASSWORD=""
 
 #checking for parameters
@@ -45,6 +46,10 @@ case $i in
         NOTAR_PASSWORD="${i#*=}"
         shift # past argument=value
         ;;
+    -nt=*|--notarization_team=*)
+        NOTAR_TEAM_ID="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
@@ -62,7 +67,7 @@ if [ "$SIGN" = true ] ; then
 fi
 
 if [ "$NOTARIZE" = true ] ; then
-    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOTAR_USER -np=$NOTAR_PASSWORD
+    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOTAR_USER -nt=$NOTAR_TEAM_ID -np=$NOTAR_PASSWORD
 
     echo "======= AppBundle Notarized ======="
 fi
