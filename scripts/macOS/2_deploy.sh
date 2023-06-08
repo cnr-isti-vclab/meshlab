@@ -35,8 +35,8 @@ case $i in
         shift # past argument=value
         ;;
     -nu=*|--notarization_user=*)
-        NOT_USER="${i#*=}"
-        if [ -n "$NOT_USER" ]; then
+        NOTAR_USER="${i#*=}"
+        if [ -n "$NOTAR_USER" ]; then
           NOTARIZE=true
         fi
         shift # past argument=value
