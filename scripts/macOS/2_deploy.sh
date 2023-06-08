@@ -6,7 +6,11 @@ INSTALL_PATH=$SCRIPTS_PATH/../../install
 QT_DIR_OPTION=""
 PACKAGES_PATH=$SCRIPTS_PATH/../../packages
 SIGN=false
+NOTARIZE=false
 CERT_ID=""
+NOTAR_USER=""
+NOTAR_TEAM_ID=""
+NOTAR_PASSWORD=""
 
 #checking for parameters
 for i in "$@"
@@ -25,10 +29,25 @@ case $i in
         shift # past argument=value
         ;;
     -ci=*|--cert_id=*)
-        if [ -z "${i#*=}" ]; then
-            SIGN=true
-            CERT_ID="${i#*=}"
+        CERT_ID="${i#*=}"
+        if [ -n "$CERT_ID" ]; then
+          SIGN=true
         fi
+        shift # past argument=value
+        ;;
+    -nu=*|--notarization_user=*)
+        NOTAR_USER="${i#*=}"
+        if [ -n "$NOTAR_USER" ]; then
+          NOTARIZE=true
+        fi
+        shift # past argument=value
+        ;;
+    -np=*|--notarization_pssw=*)
+        NOTAR_PASSWORD="${i#*=}"
+        shift # past argument=value
+        ;;
+    -nt=*|--notarization_team=*)
+        NOTAR_TEAM_ID="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -47,6 +66,12 @@ if [ "$SIGN" = true ] ; then
     echo "======= AppBundle Signed ======="
 fi
 
-bash $SCRIPTS_PATH/internal/2c_dmg.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
+if [ "$NOTARIZE" = true ] ; then
+    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOTAR_USER -nt=$NOTAR_TEAM_ID -np=$NOTAR_PASSWORD
+
+    echo "======= AppBundle Notarized ======="
+fi
+
+bash $SCRIPTS_PATH/internal/2d_dmg.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
 
 echo "======= DMG Created ======="

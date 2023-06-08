@@ -90,27 +90,7 @@ jobs:
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
-    - name: Get AppBundle Name
-      if: runner.os == 'macOS'
-      id: abn
-      shell: bash
-      run: |
-        cd install
-        NAME=$(ls -d MeshLab*)
-        echo "app_bundle_name=$NAME" >> $GITHUB_OUTPUT
-    - name: Notarize macOS
-      if: runner.os == 'macOS'
-      uses: devbotsxyz/xcode-notarize@v1
-      with:
-        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
-        appstore-connect-username: ${{ secrets.MACOS_NOTARIZATION_USER }}
-        appstore-connect-password: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
-    - name: Staple Release macOS
-      if: runner.os == 'macOS'
-      uses: devbotsxyz/xcode-staple@v1
-      with:
-        product-path: "install/${{steps.abn.outputs.app_bundle_name}}"
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id='${{ secrets.MACOS_CERT_ID }}' --notarization_user='${{ secrets.MACOS_NOTARIZATION_USER }}' --notarization_team='${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}' --notarization_pssw='${{ secrets.MACOS_NOTARIZATION_PSSW }}'
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
@@ -242,7 +222,7 @@ jobs:
         cd ..
 
     #Create release and upload
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - uses: "marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
