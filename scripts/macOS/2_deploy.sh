@@ -41,7 +41,7 @@ case $i in
         fi
         shift # past argument=value
         ;;
-    -np=*|--notarization_password=*)
+    -np=*|--notarization_pssw=*)
         NOTAR_PASSWORD="${i#*=}"
         shift # past argument=value
         ;;
