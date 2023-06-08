@@ -222,7 +222,7 @@ jobs:
         cd ..
 
     #Create release and upload
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - uses: "marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
