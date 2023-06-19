@@ -196,6 +196,7 @@ std::map<std::string, QVariant> FilterHeatGeodesicPlugin::applyFilter(const QAct
             break;
         }
 
+
         cb(100*2/10, "Building Linear System (Heatflow)...");
         Eigen::SparseMatrix<double> mass(mesh.VN(), mesh.VN());
         buildMassMatrix(mesh, mass);
