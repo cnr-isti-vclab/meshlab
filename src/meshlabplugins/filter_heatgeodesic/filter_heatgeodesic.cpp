@@ -37,7 +37,7 @@ QString FilterHeatGeodesicPlugin::filterName(ActionIDType filterId) const
 {
     switch(filterId) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
-        return "Compute Geodesic From Selection (Heat)";
+        return QString("Compute Geodesic From Selection (Heat)");
     default :
         assert(0);
         return QString();
@@ -54,7 +54,7 @@ QString FilterHeatGeodesicPlugin::pythonFilterName(ActionIDType f) const
 {
     switch(f) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
-        return "compute_heat_geodesic_from_selection";
+        return "compute_approximate_geodesic_from_selection";
     default :
         assert(0);
         return QString();
@@ -72,10 +72,10 @@ QString FilterHeatGeodesicPlugin::pythonFilterName(ActionIDType f) const
 {
     switch(filterId) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
-        return "Computes an approximated geodesic distance from the selected vertices to all others. This algorithm implements the heat method.";
+        return QString("Computes an approximated geodesic distance from the selected vertices to all others. This algorithm implements the heat method.");
     default :
         assert(0);
-        return "Unknown Filter";
+        return QString("Unknown Filter");
     }
 }
 
@@ -90,7 +90,8 @@ FilterHeatGeodesicPlugin::FilterClass FilterHeatGeodesicPlugin::getClass(const Q
 {
     switch(ID(a)) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
-        return FilterPlugin::Measure;
+        return FilterPlugin::Measure; // Note: not sure
+        // return FilterGeodesic::FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Quality);
     default :
         assert(0);
         return FilterPlugin::Generic;
@@ -113,10 +114,7 @@ FilterPlugin::FilterArity FilterHeatGeodesicPlugin::filterArity(const QAction*) 
 int FilterHeatGeodesicPlugin::getPreConditions(const QAction*) const
 {
     // NOTE: note sure about these
-    return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTQUALITY |
-           MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFACETOPO |
-           MeshModel::MM_FACEQUALITY | MeshModel::MM_FACENORMAL |
-           MeshModel::MM_VERTFLAGSELECT;
+    return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFACETOPO;
 }
 
 /**
@@ -126,7 +124,7 @@ int FilterHeatGeodesicPlugin::getPreConditions(const QAction*) const
 int FilterHeatGeodesicPlugin::postCondition(const QAction*) const
 {
     // NOTE: note sure about these
-    return MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY;
+    return MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR;
 }
 
 /**
@@ -164,19 +162,39 @@ RichParameterList FilterHeatGeodesicPlugin::initParameterList(const QAction *act
  */
 std::map<std::string, QVariant> FilterHeatGeodesicPlugin::applyFilter(const QAction * action, const RichParameterList & parameters, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
+    MeshModel &mm=*(md.mm());
     switch(ID(action)) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
     {
-        CMeshO &mesh = md.mm()->cm;
-        cb(100*0/10, "Computing Boundary Conditions...");
-        Eigen::VectorXd initialConditions(mesh.VN());
-        for(int i=0; i < mesh.vert.size(); i++){
-            initialConditions[i] = mesh.vert[i].IsS() ? 1 : 0;
-        }
-        cb(100*1/10, "Updating Topology and Computing Face Normals...");
+        mm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+        mm.updateDataMask(MeshModel::MM_VERTFACETOPO);
+        mm.updateDataMask(MeshModel::MM_FACEQUALITY);
+        mm.updateDataMask(MeshModel::MM_FACENORMAL);
+        mm.updateDataMask(MeshModel::MM_VERTQUALITY);
+        mm.updateDataMask(MeshModel::MM_VERTCOLOR);
+        CMeshO &mesh = mm.cm;
+
+        cb(100*0/10, "Updating Topology and Computing Face Normals...");
         vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
         vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
         vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mesh);
+
+        cb(100*1/10, "Computing Boundary Conditions...");
+        Eigen::VectorXd initialConditions(mesh.VN());
+        int selection_count = 0;
+        for(int i=0; i < mesh.vert.size(); i++){
+            if (mesh.vert[i].IsS()){
+                initialConditions[i] = 1;
+                ++selection_count;
+            }
+            else {
+                initialConditions[i] = 0;
+            }
+        }
+        if (selection_count < 1){
+            log("Warning: no vertices are selected! aborting computation.");
+            break;
+        }
 
         cb(100*2/10, "Building Linear System (Heatflow)...");
         Eigen::SparseMatrix<double> mass(mesh.VN(), mesh.VN());
@@ -230,18 +248,16 @@ std::map<std::string, QVariant> FilterHeatGeodesicPlugin::applyFilter(const QAct
 
         // set geodesic distance as quality
         for(int i=0; i < mesh.vert.size(); i++){
-            mesh.vert[i].Q() = geodesicDistance(0);
+            mesh.vert[i].Q() = geodesicDistance(i);
         }
+
+        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh);
     }
         break;
     default :
         wrongActionCalled(action);
     }
     return std::map<std::string, QVariant>();
-}
-
-void computeHeatGeodesicFromSelection(MeshDocument &md, vcg::CallBackPos *cb, float m){
-
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterSamplePlugin)
