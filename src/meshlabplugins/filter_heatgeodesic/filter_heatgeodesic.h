@@ -33,7 +33,7 @@ public:
 			vcg::CallBackPos * cb);
 
 private:
-    void computeHeatGeodesicFromSelection(MeshDocument& mesh, vcg::CallBackPos* cb, float m);
+    void computeHeatGeodesicFromSelection(CMeshO& mesh, vcg::CallBackPos* cb, float m);
 };
 
 #endif

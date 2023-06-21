@@ -9,30 +9,26 @@
 #include <common/plugins/interfaces/filter_plugin.h>
 
 
-// foward declarations
-inline Eigen::Vector3d toEigen(const vcg::Point3f& p);
-inline double cotan(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1);
-inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass);
-inline void buildCotanMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &cotanOperator);
-inline double computeAverageEdgeLength(CMeshO &mesh);
-inline Eigen::MatrixX3d computeVertexGradient(CMeshO &mesh, const Eigen::VectorXd &heat);
-inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::MatrixX3d &field);
-inline Eigen::MatrixX3d normalizeVectorField(const Eigen::MatrixX3d &field);
+// LOCAL FUNCTIONS
 
-inline Eigen::Vector3d toEigen(const vcg::Point3f& p)
-{
-    return Eigen::Vector3d(p.X(), p.Y(), p.Z());
-};
+namespace {
+    inline Eigen::Vector3d toEigen(const vcg::Point3f& p)
+    {
+        return Eigen::Vector3d(p.X(), p.Y(), p.Z());
+    };
 
 
-inline double cotan(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
-{
-    // cos(theta) / sin(theta)
-    return v0.dot(v1) / v0.cross(v1).norm();
-};
+    inline double cotan(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
+    {
+        // cos(theta) / sin(theta)
+        return v0.dot(v1) / v0.cross(v1).norm();
+    };
+}
 
+// GLOBAL FUNCTIONS
 
 inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass){
+    mass.resize(mesh.VN(), mesh.VN());
     // compute area of all faces
     for (CMeshO::FaceIterator fi = mesh.face.begin(); fi != mesh.face.end(); ++fi)
     {
@@ -55,7 +51,7 @@ inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass){
         std::vector<CMeshO::FaceType*> faces;
         std::vector<int> indices;
         vcg::face::VFStarVF<CMeshO::FaceType>(vp, faces, indices);
-        
+
         double area = 0;
         for (int j = 0; j < faces.size(); ++j)
         {
@@ -67,55 +63,65 @@ inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass){
 }
 
 
-inline void buildCotanMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &cotanOperator){
+inline void buildCotanLowerTriMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &cotanOperator, vcg::CallBackPos* cb = NULL){
+    cotanOperator.resize(mesh.VN(), mesh.VN());
     // initialize a hashtable from vertex pointers to ids
     std::unordered_map<CMeshO::VertexType*, int> vertex_ids;
     for (int i = 0; i < mesh.VN(); ++i){
         vertex_ids[&mesh.vert[i]] = i;
     }
 
-    // iterate over all vertices to fill cotan matrix
-    for (int i = 0; i < mesh.VN(); ++i){
-        CMeshO::VertexType *vp = &mesh.vert[i];
-        CMeshO::FaceType *fp = vp->VFp();
-        vcg::face::Pos<CMeshO::FaceType> pos(fp, vp);
-        vcg::face::Pos<CMeshO::FaceType> start(fp, vp);
-        // iterate over all incident edges of vp
-        do {
-            // get the vertex opposite to vp
-            pos.FlipV();
-            CMeshO::VertexType *vo = pos.V();
-            // move to left vertex
-            pos.FlipE();pos.FlipV();
-            CMeshO::VertexType *vl = pos.V();
-            // move back then to right vertex
-            pos.FlipV();pos.FlipE(); // back to vo
-            pos.FlipF();pos.FlipE();pos.FlipV();
-            CMeshO::VertexType *vr = pos.V();
-            pos.FlipV();pos.FlipE();pos.FlipF();pos.FlipV(); // back to vp
+    // progress bar variables
+    int update_size = mesh.FN() / 90;  // 90 updates (90% weight of the progress bar)
+    int progress = 0;
 
-            // compute cotan of left edges and right edges
-            Eigen::Vector3d elf = toEigen(vo->P() - vl->P()); // far left edge
-            Eigen::Vector3d eln = toEigen(vp->P() - vl->P()); // near left edge
-            Eigen::Vector3d erf = toEigen(vp->P() - vr->P()); // far right edge
-            Eigen::Vector3d ern = toEigen(vo->P() - vr->P()); // near right edge
+    // compute cotan weights
+    for (int i = 0; i < mesh.FN(); ++i){
+        // progress bar update
+        if (cb != NULL && i % update_size == 89){
+            cb(++progress, "Computing Cotan Weights...");
+        }
+        CMeshO::FaceType* fi = &mesh.face[i];
 
-            double cotan_l = cotan(elf, eln);
-            double cotan_r = cotan(ern, erf);
+        CMeshO::VertexType* v0 = fi->V(0);
+        CMeshO::VertexType* v1 = fi->V(1);
+        CMeshO::VertexType* v2 = fi->V(2);
 
-            // add to the matrix
-            cotanOperator.coeffRef(vertex_ids[vp], vertex_ids[vo]) = (cotan_l + cotan_r)/2;
+        vcg::Point3f p0 = v0->P();
+        vcg::Point3f p1 = v1->P();
+        vcg::Point3f p2 = v2->P();
 
-            // move to the next edge
-            pos.FlipF();pos.FlipE();
-        } while (pos != start);
+        Eigen::Vector3d e0 = toEigen(p2 - p1);
+        Eigen::Vector3d e1 = toEigen(p0 - p2);
+        Eigen::Vector3d e2 = toEigen(p1 - p0);
+
+        // first edge is inverted to get correct orientation
+        double alpha0 = cotan(-e1, e2) / 2;
+        double alpha1 = cotan(-e2, e0) / 2;
+        double alpha2 = cotan(-e0, e1) / 2;
+
+        int i0 = vertex_ids[v0];
+        int i1 = vertex_ids[v1];
+        int i2 = vertex_ids[v2];
+
+        // save only lower triangular part
+        if (i0 > i1)
+            cotanOperator.coeffRef(i0, i1) += alpha2;
+        else
+            cotanOperator.coeffRef(i1, i0) += alpha2;
+        if (i0 > i2)
+            cotanOperator.coeffRef(i0, i2) += alpha1;
+        else
+            cotanOperator.coeffRef(i2, i0) += alpha1;
+        if (i1 > i2)
+            cotanOperator.coeffRef(i1, i2) += alpha0;
+        else
+            cotanOperator.coeffRef(i2, i1) += alpha0;
+
+        cotanOperator.coeffRef(i0, i0) -= (alpha1 + alpha2);
+        cotanOperator.coeffRef(i1, i1) -= (alpha0 + alpha2);
+        cotanOperator.coeffRef(i2, i2) -= (alpha0 + alpha1);
     }
-
-    // compute diagonal entries
-    for (int i = 0; i < mesh.VN(); ++i){
-        cotanOperator.coeffRef(i, i) = -cotanOperator.row(i).sum();
-    }
-    
 }
 
 
@@ -156,8 +162,7 @@ inline Eigen::MatrixX3d computeVertexGradient(CMeshO &mesh, const Eigen::VectorX
         n /= n.norm();
         // face area
         double faceArea = fp->Q();
-        // (ORDERING): edge unit vectors (assuming counter-clockwise ordering)
-        // note if the ordering is clockwise, the gradient will point in the opposite direction
+        // edge unit vectors (counter-clockwise)
         Eigen::Vector3d e0 = toEigen(p2 - p1);
         e0 /= e0.norm();
         Eigen::Vector3d e1 = toEigen(p0 - p2);
@@ -170,13 +175,13 @@ inline Eigen::MatrixX3d computeVertexGradient(CMeshO &mesh, const Eigen::VectorX
         Eigen::Vector3d g2 = n.cross(e2); //v2 grad
 
         // add vertex gradient contributions
-        Eigen::Vector3d total_grad = (
-            g0 * heat(vertex_ids[fp->V(0)]) + 
-            g1 * heat(vertex_ids[fp->V(1)]) + 
-            g2 * heat(vertex_ids[fp->V(2)])
+        Eigen::Vector3d tri_grad = (
+           g0 * heat(vertex_ids[fp->V(0)]) +
+           g1 * heat(vertex_ids[fp->V(1)]) +
+           g2 * heat(vertex_ids[fp->V(2)])
         ) / (2 * faceArea);
 
-        heatGradientField.row(i) = total_grad;
+        heatGradientField.row(i) = tri_grad;
     }
     return heatGradientField;
 }
@@ -227,14 +232,14 @@ inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::Matrix
                 el = toEigen(p0 - p1); //-e2
                 er = toEigen(p2 - p1); //e0
                 eo = toEigen(p0 - p2); //e1
-            } else if (index == 2){ 
+            } else if (index == 2){
                 el = toEigen(p1 - p2); //-e0
                 er = toEigen(p0 - p2); //e1
                 eo = toEigen(p1 - p0); //e2
             }
             // compute left and right cotangents
-            double cotl = cotan(-el, eo); // -el -> angle between el and eo
-            double cotr = cotan(er, eo);
+            double cotl = cotan(-el, -eo);
+            double cotr = cotan(-er, eo);
             // normalize edge vectors after cotangent computation
             el /= el.norm();
             er /= er.norm();
