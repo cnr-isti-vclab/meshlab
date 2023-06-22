@@ -8,6 +8,8 @@
 
 #include <common/plugins/interfaces/filter_plugin.h>
 
+#include <memory>
+
 
 // LOCAL FUNCTIONS
 
@@ -251,5 +253,65 @@ inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::Matrix
     return divergence;
 }
 
+
+class HeatMethodSolver {
+public:
+    HeatMethodSolver(Eigen::SparseMatrix<double> &&massMatrix, Eigen::SparseMatrix<double> &&cotanMatrix, double averageEdgeLength, double m)
+        : massMatrix(std::move(massMatrix)), cotanMatrix(std::move(cotanMatrix)), averageEdgeLength(averageEdgeLength), m(m)
+    {
+        // initialize pointers
+        solver1 = std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>(new Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>);
+        solver2 = std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>(new Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>);
+
+        // build factorization
+        double timestep = m * averageEdgeLength * averageEdgeLength;
+        solver1->compute(massMatrix - timestep * cotanMatrix);
+        solver2->compute(cotanMatrix);
+        if((solver1->info() != Eigen::Success) || (solver2->info() != Eigen::Success))
+            factorizationFailed = true;
+        else
+            factorizationFailed = false;
+    }
+    HeatMethodSolver() = delete;
+    HeatMethodSolver& operator=(const HeatMethodSolver&) = delete;
+    void rebuildFactorization(double new_m){
+        m = new_m;
+        double timestep = m * averageEdgeLength * averageEdgeLength;
+        solver1->compute(massMatrix - timestep * cotanMatrix);
+        solver2->compute(cotanMatrix);
+        if((solver1->info() != Eigen::Success) || (solver2->info() != Eigen::Success))
+            factorizationFailed = true;
+        else
+            factorizationFailed = false;
+    }
+    Eigen::VectorXd solve(CMeshO &mesh, Eigen::VectorXd &sourcePoints){
+        Eigen::VectorXd heatflow = solver1->solve(sourcePoints); // (VN)
+        Eigen::MatrixX3d heatGradient = computeVertexGradient(mesh, heatflow); // (FN, 3)
+        Eigen::MatrixX3d unitVectorField = normalizeVectorField(-heatGradient); // (FN, 3)
+        Eigen::VectorXd divergence = computeVertexDivergence(mesh, unitVectorField); // (VN)
+        Eigen::VectorXd geodesicDistance = solver2->solve(divergence); // (VN)
+        if((solver1->info() != Eigen::Success) || (solver2->info() != Eigen::Success))
+            solverFailed = true;
+        else
+            solverFailed = false;
+        // shift to impose dist(d) = 0 \forall d \in sourcePoints
+        geodesicDistance.array() -= geodesicDistance.minCoeff();
+        return geodesicDistance;
+    }
+    double get_m(){return m;}
+    bool factorization_failed(){return factorizationFailed;}
+    bool solver_failed(){return solverFailed;}
+private:
+    // Eigen::SimplicialLDLT has no copy/move constructor
+    std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>> solver1;
+    std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>> solver2;
+    Eigen::SparseMatrix<double> massMatrix;
+    Eigen::SparseMatrix<double> cotanMatrix;
+    double averageEdgeLength;
+    double m;
+
+    bool factorizationFailed;
+    bool solverFailed;
+};
 
 #endif

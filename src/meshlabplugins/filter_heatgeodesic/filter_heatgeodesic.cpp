@@ -184,106 +184,72 @@ std::map<std::string, QVariant> FilterHeatGeodesicPlugin::applyFilter(const QAct
 }
 
 inline void FilterHeatGeodesicPlugin::computeHeatGeodesicFromSelection(CMeshO& mesh, vcg::CallBackPos* cb, float m){
+    vcg::tri::Allocator<CMeshO>::CompactEveryVector(mesh);
+
     // build boundary conditions
-    Eigen::VectorXd boundaryConditions(mesh.VN());
+    Eigen::VectorXd sourcePoints(mesh.VN());
     int selection_count = 0;
     for(int i=0; i < mesh.VN(); i++){
-        boundaryConditions(i) = mesh.vert[i].IsS() ? (++selection_count, 1) : 0;
+        sourcePoints(i) = mesh.vert[i].IsS() ? (++selection_count, 1) : 0;
     }
     if (selection_count < 1){
         log("Warning: no vertices are selected! aborting computation.");
         return;
     }
 
-    // update topology and face normals
-    vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
-    vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
-    vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mesh);
+    std::shared_ptr<HeatMethodSolver> HMSolver;
 
-    // state variables
-    Eigen::SparseMatrix<double> massMatrix;
-    Eigen::SparseMatrix<double> cotanMatrix;
-    double avg_edge_len;
-
-    typedef std::tuple<
-        Eigen::SparseMatrix<double>, // system1 fact
-        Eigen::SparseMatrix<double>, // system2 fact
-        double                       // avg edge len
-    > HeatMethodData;
+    // delete state if the mesh has changed
+    bool meshHasChanged = false; // Update with appropriate function
+    if (meshHasChanged) {
+        auto handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
+        vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, handle);
+    }
 
     // recover state if it exists
-    if (!vcg::tri::HasPerMeshAttribute(mesh, "HeatMethodData")){
-        // current solution saves matrices not factorizations
-        // if we save factorization it is best to at least also save cotanMatrix
-        // to avoid an expensive reconstruction when parameter("m") changes
+    if (!vcg::tri::HasPerMeshAttribute(mesh, "HeatMethodSolver")){
+
+        // update topology and face normals
+        vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
+        vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
+        vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mesh);
+
+        // state variables
+        Eigen::SparseMatrix<double> massMatrix;
+        Eigen::SparseMatrix<double> cotanMatrix;
+        double averageEdgeLength;
+
         buildMassMatrix(mesh, massMatrix);
         // this step is very slow (95% of total time) hence we pass the callback
         // to update progress and avoid freezes
         buildCotanLowerTriMatrix(mesh, cotanMatrix, cb);
-        avg_edge_len = computeAverageEdgeLength(mesh);
+        averageEdgeLength = computeAverageEdgeLength(mesh);
 
-        HeatMethodData &HMData = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<HeatMethodData>(mesh, std::string("HeatMethodData"))();
-        HMData = HeatMethodData(massMatrix, cotanMatrix, avg_edge_len);
+        cb(91, "Matrix Factorization...");
+        HMSolver = std::make_shared<HeatMethodSolver>(HeatMethodSolver(std::move(massMatrix), std::move(cotanMatrix), averageEdgeLength, m));
+        if (HMSolver->factorization_failed())
+            log("Warning: factorization has failed. The mesh is non-manifold or badly conditioned (angles ~ 0deg)");
+        auto HMSolverHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
+        HMSolverHandle() = HMSolver;
     }
     else {
-        HeatMethodData &HMData = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<HeatMethodData>(mesh, std::string("HeatMethodData"))();
-        std::tie (massMatrix, cotanMatrix, avg_edge_len) = HMData;
+        // recover solver
+        HMSolver = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"))();
+        // if m has changed rebuild factorizations from existing matrices
+        if (HMSolver->get_m() != m){
+            cb(91, "Rebuilding Factorization...");
+            HMSolver->rebuildFactorization(m);
+        }
     }
 
-    // cholesky type solver
-    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
+    cb(95, "Computing Geodesic Distance...");
+    Eigen::VectorXd geodesicDistance = HMSolver->solve(mesh, sourcePoints);
+    if (HMSolver->solver_failed())
+        log("Warning: solver has failed.");
 
-    // build system 1
-    double timestep = m * avg_edge_len * avg_edge_len;
-    Eigen::SparseMatrix<double> system1(mesh.VN(), mesh.VN());
-    system1 = massMatrix - timestep * cotanMatrix;
-
-    cb(91, "Computing Factorization 1...");
-
-    // factorize system 1
-    solver.compute(system1);
-    if(solver.info() != Eigen::Success) {
-        log("Error: Factorization Failed (Heatflow).");
-    }
-
-    cb(93, "Solving System 1...");
-    // solve system 1
-    Eigen::VectorXd heatflow = solver.solve(boundaryConditions); // (VN)
-    if(solver.info() != Eigen::Success) {
-        log("Error: Solver Failed (Heatflow).");
-    }
-
-    cb(95, "Computing Gradient, VectorField, Divergence...");
-    // intermediate steps
-    Eigen::MatrixX3d heatGradient = computeVertexGradient(mesh, heatflow); // (FN, 3)
-    Eigen::MatrixX3d normalizedVectorField = normalizeVectorField(-heatGradient); // (FN, 3)
-    Eigen::VectorXd divergence = computeVertexDivergence(mesh, normalizedVectorField); // (VN)
-
-    // build system 2
-    Eigen::SparseMatrix<double> system2(mesh.VN(), mesh.VN());
-    system2 = cotanMatrix; //+ 1e-6 * Eigen::Matrix<double,-1,-1>::Identity(mesh.VN(), mesh.VN());
-
-    cb(96, "Computing Factorization 2...");
-    // factorize system 2
-    solver.compute(system2);
-    if(solver.info() != Eigen::Success) {
-        log("Error: Factorization Failed (Geodesic).");
-    }
-
-    cb(97, "Solving System 2...");
-    // solve system 2
-    Eigen::VectorXd geodesicDistance = solver.solve(divergence);
-
-    if(solver.info() != Eigen::Success) {
-        log("Error: Solver Failed (Geodesic).");
-    }
-
-    // shift to impose boundary conditions (dist(d) = 0 \forall d \in init_cond)
-    geodesicDistance.array() -= geodesicDistance.minCoeff();
-
-    cb(99, "Updating Quality and Color...");
+    cb(99, "Updating Mesh...");
     // set geodesic distance as quality and color
-    for(int i=0; i < mesh.vert.size(); i++){
+    for(int i=0; i < mesh.VN(); i++){
         mesh.vert[i].Q() = geodesicDistance(i);
     }
     vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mesh);
