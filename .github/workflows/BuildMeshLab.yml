@@ -25,6 +25,7 @@ jobs:
     - name: Setup Environment
       uses: ./.github/actions/0_setup
       with:
+        runner-os: ${{ runner.os }}
         mac-certificate: $MAC_CERT
         mac-certificate-pssw: $MAC_CERT_PSSW
     - name: Set CodeSign Certificate macOS
