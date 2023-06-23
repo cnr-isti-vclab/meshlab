@@ -2,9 +2,6 @@ name: 'Setup Environment'
 description: 'Setup Environment'
 
 inputs:
-  runner-os:
-    description: 'Runner OS'
-    required: true
   mac-certificate:
     description: 'MacOS Certificate'
     required: false
@@ -18,7 +15,7 @@ runs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Try
-      if: ${{ inputs.runner-os  == 'macOS' }}
+      if: ${{ runner.os  == 'macOS' }}
       shell: bash
       run: |
         echo "Hello World ${{ inputs.runner-os }}"
