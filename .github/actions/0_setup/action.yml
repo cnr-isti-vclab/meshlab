@@ -15,7 +15,7 @@ runs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Try
-      if: ${{ runner.os }} == 'macOS'
+      if: 'Windows' == 'macOS'
       shell: bash
       run: |
         echo "Hello World ${{ runner.os }}"
