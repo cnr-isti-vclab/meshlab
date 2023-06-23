@@ -27,6 +27,12 @@ jobs:
       with:
         mac-certificate: $MAC_CERT
         mac-certificate-pssw: $MAC_CERT_PSSW
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS' && env.MAC_CERT != null
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Set CodeSign Certificate Windows
       if: runner.os == 'Windows' && env.WIN_CERT != null
       run: |
