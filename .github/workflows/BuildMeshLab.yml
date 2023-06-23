@@ -25,8 +25,8 @@ jobs:
     - name: Setup Environment
       uses: ./.github/actions/0_setup
       with:
-        mac-certificate: $MAC_CERT
-        mac-certificate-pssw: $MAC_CERT_PSSW
+        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
+        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
     - name: Set CodeSign Certificate Windows
       if: runner.os == 'Windows' && env.WIN_CERT != null
       run: |
