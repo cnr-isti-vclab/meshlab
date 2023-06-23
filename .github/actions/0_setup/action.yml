@@ -30,6 +30,7 @@ runs:
         p12-file-base64: ${{ inputs.mac-certificate }}
         p12-password: ${{ inputs.mac-certificate-pssw }}
     - name: Set CodeSign Certificate Windows
+      shell: powershell
       if: ${{ runner.os == 'Windows' && inputs.win-certificate != '' }}
       run: |
         New-Item -ItemType directory -Path certificate
