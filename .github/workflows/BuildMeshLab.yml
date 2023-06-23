@@ -28,10 +28,6 @@ jobs:
         mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
         mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
         win-certificate: ${{ secrets.WIN_CERTIFICATE }}
-    - name: Install dependencies
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
     - name: Setup env variables
       id: envs
       shell: bash
@@ -41,20 +37,13 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
-    - name: Cache external libraries sources
-      id: cache-ext-libs
-      uses: actions/cache@v3
+    - name: Build
+      uses: ./.github/actions/1_build
       with:
-        path: src/external/downloads/*
-        key: ${{ runner.os }}-external-libraries
-    - name: Ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
-    - name: Configure and Build
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --ccache
+        cache-path: src/external/downloads/*
+        cache-key: external-libraries
+        build-option: ${{matrix.precision}}
+        nightly: true
     - name: Deploy
       shell: bash
       run: |
