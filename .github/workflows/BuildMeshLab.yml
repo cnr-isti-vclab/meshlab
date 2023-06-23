@@ -27,17 +27,7 @@ jobs:
       with:
         mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
         mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-    - name: Set CodeSign Certificate Windows
-      if: runner.os == 'Windows' && env.WIN_CERT != null
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
-        certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        cache: true
-        version: ${{ env.QT_VERSION }}
+        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
     - name: Install dependencies
       shell: bash
       run: |
