@@ -52,12 +52,12 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
-        - name: Build
-        uses: ./.github/actions/1_build
-        with:
-          cache-path: src/external/downloads/*
-          cache-key: external-libraries
-          build-option: ${{matrix.precision}}
+    - name: Build
+      uses: ./.github/actions/1_build
+      with:
+        cache-path: src/external/downloads/*
+        cache-key: external-libraries
+        build-option: ${{matrix.precision}}
     - name: Deploy
       uses: ./.github/actions/2_deploy
       with:
