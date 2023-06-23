@@ -186,7 +186,8 @@ std::map<std::string, QVariant> FilterHeatGeodesicPlugin::applyFilter(const QAct
 inline void FilterHeatGeodesicPlugin::computeHeatGeodesicFromSelection(CMeshO& mesh, vcg::CallBackPos* cb, float m){
     vcg::tri::Allocator<CMeshO>::CompactEveryVector(mesh);
 
-    // build boundary conditions
+    cb(1, "Checking Selection...");
+    // build and check source vertices
     Eigen::VectorXd sourcePoints(mesh.VN());
     int selection_count = 0;
     for(int i=0; i < mesh.VN(); i++){
@@ -208,7 +209,7 @@ inline void FilterHeatGeodesicPlugin::computeHeatGeodesicFromSelection(CMeshO& m
 
     // recover state if it exists
     if (!vcg::tri::HasPerMeshAttribute(mesh, "HeatMethodSolver")){
-
+        cb(10, "Updating Topology...");
         // update topology and face normals
         vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
         vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
@@ -222,27 +223,29 @@ inline void FilterHeatGeodesicPlugin::computeHeatGeodesicFromSelection(CMeshO& m
         buildMassMatrix(mesh, massMatrix);
         // this step is very slow (95% of total time) hence we pass the callback
         // to update progress and avoid freezes
-        buildCotanLowerTriMatrix(mesh, cotanMatrix, cb);
+        cb(20, "Building Cotan Matrix...");
+        buildCotanLowerTriMatrix(mesh, cotanMatrix);
         averageEdgeLength = computeAverageEdgeLength(mesh);
 
-        cb(91, "Matrix Factorization...");
+        cb(70, "Matrix Factorization...");
         HMSolver = std::make_shared<HeatMethodSolver>(HeatMethodSolver(std::move(massMatrix), std::move(cotanMatrix), averageEdgeLength, m));
         if (HMSolver->factorization_failed())
-            log("Warning: factorization has failed. The mesh is non-manifold or badly conditioned (angles ~ 0deg)");
+            log("Warning: factorization has failed. The mesh is non-manifold or badly conditioned (e.g. angles ~ 0deg) or has disconnected components");
         auto HMSolverHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
         HMSolverHandle() = HMSolver;
     }
     else {
+        cb(10, "Recovering State...");
         // recover solver
         HMSolver = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"))();
         // if m has changed rebuild factorizations from existing matrices
         if (HMSolver->get_m() != m){
-            cb(91, "Rebuilding Factorization...");
+            cb(70, "Rebuilding Factorization...");
             HMSolver->rebuildFactorization(m);
         }
     }
 
-    cb(95, "Computing Geodesic Distance...");
+    cb(85, "Computing Geodesic Distance...");
     Eigen::VectorXd geodesicDistance = HMSolver->solve(mesh, sourcePoints);
     if (HMSolver->solver_failed())
         log("Warning: solver has failed.");

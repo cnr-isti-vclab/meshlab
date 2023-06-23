@@ -27,10 +27,18 @@ namespace {
     };
 }
 
-// GLOBAL FUNCTIONS
+// simple struct to track progress bar status
+struct ProgressBarCallbackT {
+    vcg::CallBackPos* callback;
+    int current_progress;
+    int allocated_progress;
+};
+
 
 inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass){
     mass.resize(mesh.VN(), mesh.VN());
+    mass.reserve(Eigen::VectorXi::Constant(mesh.VN(),1));
+
     // compute area of all faces
     for (CMeshO::FaceIterator fi = mesh.face.begin(); fi != mesh.face.end(); ++fi)
     {
@@ -60,29 +68,22 @@ inline void buildMassMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &mass){
             area += faces[j]->Q();
         }
         area /= 3;
-        mass.coeffRef(i, i) = area;
+        mass.insert(i, i) = area;
     }
+
+    mass.makeCompressed();
 }
 
 
-inline void buildCotanLowerTriMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &cotanOperator, vcg::CallBackPos* cb = NULL){
+inline void buildCotanLowerTriMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &cotanOperator){
     cotanOperator.resize(mesh.VN(), mesh.VN());
-    // initialize a hashtable from vertex pointers to ids
-    std::unordered_map<CMeshO::VertexType*, int> vertex_ids;
-    for (int i = 0; i < mesh.VN(); ++i){
-        vertex_ids[&mesh.vert[i]] = i;
-    }
 
-    // progress bar variables
-    int update_size = mesh.FN() / 90;  // 90 updates (90% weight of the progress bar)
-    int progress = 0;
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> tripletList;
+    tripletList.reserve(3*mesh.VN() + 3*mesh.FN());
 
     // compute cotan weights
     for (int i = 0; i < mesh.FN(); ++i){
-        // progress bar update
-        if (cb != NULL && i % update_size == 89){
-            cb(++progress, "Computing Cotan Weights...");
-        }
         CMeshO::FaceType* fi = &mesh.face[i];
 
         CMeshO::VertexType* v0 = fi->V(0);
@@ -102,28 +103,31 @@ inline void buildCotanLowerTriMatrix(CMeshO &mesh, Eigen::SparseMatrix<double> &
         double alpha1 = cotan(-e2, e0) / 2;
         double alpha2 = cotan(-e0, e1) / 2;
 
-        int i0 = vertex_ids[v0];
-        int i1 = vertex_ids[v1];
-        int i2 = vertex_ids[v2];
+        int i0 = vcg::tri::Index(mesh,v0);
+        int i1 = vcg::tri::Index(mesh,v1);
+        int i2 = vcg::tri::Index(mesh,v2);
 
         // save only lower triangular part
         if (i0 > i1)
-            cotanOperator.coeffRef(i0, i1) += alpha2;
+            tripletList.push_back(T(i0,i1,alpha2));
         else
-            cotanOperator.coeffRef(i1, i0) += alpha2;
+            tripletList.push_back(T(i1,i0,alpha2));
         if (i0 > i2)
-            cotanOperator.coeffRef(i0, i2) += alpha1;
+            tripletList.push_back(T(i0,i2,alpha1));
         else
-            cotanOperator.coeffRef(i2, i0) += alpha1;
+            tripletList.push_back(T(i2,i0,alpha1));
         if (i1 > i2)
-            cotanOperator.coeffRef(i1, i2) += alpha0;
+            tripletList.push_back(T(i1,i2,alpha0));
         else
-            cotanOperator.coeffRef(i2, i1) += alpha0;
+            tripletList.push_back(T(i2,i1,alpha0));
 
-        cotanOperator.coeffRef(i0, i0) -= (alpha1 + alpha2);
-        cotanOperator.coeffRef(i1, i1) -= (alpha0 + alpha2);
-        cotanOperator.coeffRef(i2, i2) -= (alpha0 + alpha1);
+        tripletList.push_back(T(i0,i0,-(alpha1 + alpha2)));
+        tripletList.push_back(T(i1,i1,-(alpha0 + alpha2)));
+        tripletList.push_back(T(i2,i2,-(alpha0 + alpha1)));
     }
+
+    cotanOperator.setFromTriplets(tripletList.begin(), tripletList.end());
+    cotanOperator.makeCompressed();
 }
 
 
@@ -146,18 +150,21 @@ inline double computeAverageEdgeLength(CMeshO &mesh){
 
 inline Eigen::MatrixX3d computeVertexGradient(CMeshO &mesh, const Eigen::VectorXd &heat){
     Eigen::MatrixX3d heatGradientField(mesh.FN(), 3);
-    // initialize a hashtable from vertex pointers to ids
-    std::unordered_map<CMeshO::VertexType*, int> vertex_ids;
-    for (int i = 0; i < mesh.VN(); ++i){
-        vertex_ids[&mesh.vert[i]] = i;
-    }
     // compute gradient of heat function at each vertex
     for (int i = 0; i < mesh.FN(); ++i){
         CMeshO::FaceType *fp = &mesh.face[i];
 
-        vcg::Point3f p0 = fp->V(0)->P();
-        vcg::Point3f p1 = fp->V(1)->P();
-        vcg::Point3f p2 = fp->V(2)->P();
+        CMeshO::VertexType* v0 = fp->V(0);
+        CMeshO::VertexType* v1 = fp->V(1);
+        CMeshO::VertexType* v2 = fp->V(2);
+
+        vcg::Point3f p0 = v0->P();
+        vcg::Point3f p1 = v1->P();
+        vcg::Point3f p2 = v2->P();
+
+        int i0 = vcg::tri::Index(mesh,v0);
+        int i1 = vcg::tri::Index(mesh,v1);
+        int i2 = vcg::tri::Index(mesh,v2);
 
         // normal unit vector
         Eigen::Vector3d n = toEigen(fp->N());
@@ -177,11 +184,7 @@ inline Eigen::MatrixX3d computeVertexGradient(CMeshO &mesh, const Eigen::VectorX
         Eigen::Vector3d g2 = n.cross(e2); //v2 grad
 
         // add vertex gradient contributions
-        Eigen::Vector3d tri_grad = (
-           g0 * heat(vertex_ids[fp->V(0)]) +
-           g1 * heat(vertex_ids[fp->V(1)]) +
-           g2 * heat(vertex_ids[fp->V(2)])
-        ) / (2 * faceArea);
+        Eigen::Vector3d tri_grad = (g0 * heat(i0) + g1 * heat(i1) + g2 * heat(i2)) / (2 * faceArea);
 
         heatGradientField.row(i) = tri_grad;
     }
@@ -204,11 +207,6 @@ inline Eigen::MatrixX3d normalizeVectorField(const Eigen::MatrixX3d &field){
 inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::MatrixX3d &field){
     Eigen::VectorXd divergence(mesh.VN());
     divergence.setZero();
-    // initialize a hashtable from face pointers to ids
-    std::unordered_map<CMeshO::FaceType*, int> face_ids;
-    for (int i = 0; i < mesh.FN(); ++i){
-        face_ids[&mesh.face[i]] = i;
-    }
 
     // compute divergence of vector field at each vertex
     for (int i = 0; i < mesh.VN(); ++i){
@@ -221,9 +219,11 @@ inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::Matrix
         {
             CMeshO::FaceType *fp = faces[j];
             int index = indices[j];
+
             vcg::Point3f p0 = fp->V(0)->P();
             vcg::Point3f p1 = fp->V(1)->P();
             vcg::Point3f p2 = fp->V(2)->P();
+
             // (ORDERING) edge vectors
             Eigen::Vector3d el, er, eo; //left, right, opposite to vp
             if (index == 0){
@@ -246,7 +246,7 @@ inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::Matrix
             el /= el.norm();
             er /= er.norm();
             // add divergence contribution of given face
-            Eigen::Vector3d x = field.row(face_ids[fp]);
+            Eigen::Vector3d x = field.row(vcg::tri::Index(mesh,fp));
             divergence(i) += (cotl * er.dot(x) + cotr * el.dot(x)) / 2;
         }
     }
