@@ -13,6 +13,18 @@ inputs:
   mac-certificate-pssw:
     description: 'MacOS Certificate Password'
     required: false
+  mac-notarization-user:
+    description: 'MacOS Notarization User'
+    required: false
+    default: ''
+  mac-notarization-team:
+    description: 'MacOS Notarization Team'
+    required: false
+    default: ''
+  mac-notarization-pssw:
+    description: 'MacOS Notarization Password'
+    required: false
+    default: ''
   win-certificate:
     description: 'Windows Certificate'
     required: false
@@ -25,6 +37,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set Notarization settings
+      id: notarization
+      shell: bash
+      run: |
+        if [ "${{ inputs.mac-notarization-user }}" != "" ]; then
+          echo "not_setting=--notarization_user='${{ inputs.mac-notarization-user }}' --notarization_team='${{ inputs.mac-notarization-team }}' --notarization_pssw='${{ inputs.mac-notarization-pssw }}'" >> $GITHUB_OUTPUT
+        else
+          echo "not_setting=" >> $GITHUB_OUTPUT
+        fi
     - name: Set CodeSign Certificate macOS
       if: ${{ runner.os  == 'macOS' && inputs.mac-certificate != ''}} 
       uses: apple-actions/import-codesign-certs@v2
@@ -41,4 +62,4 @@ runs:
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ inputs.win-certificate-pssw }}' --cert_id='${{ inputs.mac-certificate-id }}'
+        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ inputs.win-certificate-pssw }}' --cert_id='${{ inputs.mac-certificate-id }}' ${{ steps.notarization.outputs.not_setting }}
