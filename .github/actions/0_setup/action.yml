@@ -2,17 +2,6 @@ name: 'Setup Environment'
 description: 'Setup Environment'
 
 inputs:
-  mac-certificate:
-    description: 'MacOS Certificate'
-    required: false
-    default: ''
-  mac-certificate-pssw:
-    description: 'MacOS Certificate Password'
-    required: false
-  win-certificate:
-    description: 'Windows Certificate'
-    required: false
-    default: ''
   qt-version:
     description: 'Qt Version'
     required: false
@@ -23,19 +12,6 @@ runs:
   steps:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Set CodeSign Certificate macOS
-      if: ${{ runner.os  == 'macOS' && inputs.mac-certificate != ''}} 
-      uses: apple-actions/import-codesign-certs@v2
-      with:
-        p12-file-base64: ${{ inputs.mac-certificate }}
-        p12-password: ${{ inputs.mac-certificate-pssw }}
-    - name: Set CodeSign Certificate Windows
-      shell: powershell
-      if: ${{ runner.os == 'Windows' && inputs.win-certificate != '' }}
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate\certificate.txt -Value '${{ inputs.win-certificate }}'
-        certutil -decode certificate\certificate.txt certificate\certificate.pfx
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:

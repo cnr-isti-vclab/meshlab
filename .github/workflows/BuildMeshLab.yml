@@ -24,10 +24,6 @@ jobs:
         submodules: recursive
     - name: Setup Environment
       uses: ./.github/actions/0_setup
-      with:
-        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
-        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
     - name: Setup env variables
       id: envs
       shell: bash
@@ -45,9 +41,13 @@ jobs:
         build-option: ${{matrix.precision}}
         nightly: true
     - name: Deploy
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id='${{ secrets.MACOS_CERT_ID }}'
+      uses: ./.github/actions/2_deploy
+      with:
+        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
+        mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
+        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
+        win-certificate-pssw: ${{ secrets.WIN_CERTIFICATE_PSSW }}
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
