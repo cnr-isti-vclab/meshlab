@@ -6,6 +6,7 @@ on:
 env:
   QT_VERSION: 5.15.2
   MAC_CERT: ${{secrets.MACOS_CERT_ID}}
+  MAC_CERT_PSSW: ${{secrets.MACOS_CERTIFICATE_PSSW}}
   WIN_CERT: ${{secrets.WIN_CERTIFICATE}}
 
 jobs:
@@ -21,14 +22,11 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Set CodeSign Certificate macOS
-      if: runner.os == 'macOS' && env.MAC_CERT != null
-      uses: apple-actions/import-codesign-certs@v2
+    - name: Setup Environment
+      uses: ./.github/actions/0_setup
       with:
-        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+        mac-certificate: $MAC_CERT
+        mac-certificate-pssw: $MAC_CERT_PSSW
     - name: Set CodeSign Certificate Windows
       if: runner.os == 'Windows' && env.WIN_CERT != null
       run: |

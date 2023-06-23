@@ -1,0 +1,22 @@
+name: 'Setup Environment'
+description: 'Setup Environment'
+
+inputs:
+  mac-certificate:
+    description: 'MacOS Certificate'
+    required: false
+  mac-certificate-pssw:
+    description: 'MacOS Certificate Password'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Set CodeSign Certificate macOS
+      if: runner.os == 'macOS' && ${{ inputs.mac-certificate }} != null
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ inputs.mac-certificate }}
+        p12-password: ${{ inputs.mac-certificate-pssw }}
