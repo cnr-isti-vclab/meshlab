@@ -258,7 +258,7 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
             break;
         case FP_SELECT_VISIBLE_FACES:
             parlst.addParam(RichDirection("dir", Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
-            parlst.addParam(RichBool("incrementalSelection", false, "Incremental Selection", "If checked, multiple selectons from different directions can be performed"));
+            parlst.addParam(RichBool("incrementalSelection", false, "don't clean selection", "If checked, any previous selection of the faces will not be reset"));
             break;
         case FP_ANALYZE_NORMALS:
             parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
