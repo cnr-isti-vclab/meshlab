@@ -41,29 +41,8 @@ jobs:
       with:
         submodules: recursive
         ref: main
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Set CodeSign Certificate macOS
-      if: runner.os == 'macOS'
-      uses: apple-actions/import-codesign-certs@v2
-      with:
-        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-    - name: Set CodeSign Certificate Windows
-      if: runner.os == 'Windows'
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
-        certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        cache: true
-        version: ${{ env.QT_VERSION }}
-    - name: Install dependencies
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
+    - name: Setup Environment
+      uses: ./.github/actions/0_setup
     - name: Setup env variables
       id: envs
       shell: bash
@@ -73,24 +52,23 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
-    - name: Cache external libraries sources
-      id: cache-ext-libs
-      uses: actions/cache@v3
+    - name: Build
+      uses: ./.github/actions/1_build
       with:
-        path: src/external/downloads/*
-        key: ${{ runner.os }}-external-libraries
-    - name: Ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
-    - name: Configure and Build
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --ccache
+        cache-path: src/external/downloads/*
+        cache-key: external-libraries
+        build-option: ${{matrix.precision}}
     - name: Deploy
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id='${{ secrets.MACOS_CERT_ID }}' --notarization_user='${{ secrets.MACOS_NOTARIZATION_USER }}' --notarization_team='${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}' --notarization_pssw='${{ secrets.MACOS_NOTARIZATION_PSSW }}'
+      uses: ./.github/actions/2_deploy
+      with:
+        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
+        mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
+        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+        mac-notarization-user: ${{ secrets.MACOS_NOTARIZATION_USER }}
+        mac-notarization-team: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        mac-notarization-pssw: ${{ secrets.MACOS_NOTARIZATION_PSSW }}
+        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
+        win-certificate-pssw: ${{ secrets.WIN_CERTIFICATE_PSSW }}
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v3
       with:
