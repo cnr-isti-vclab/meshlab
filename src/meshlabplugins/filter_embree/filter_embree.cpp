@@ -216,9 +216,16 @@ int FilterEmbreePlugin::getPreConditions(const QAction*) const
  * @brief FilterSamplePlugin::postCondition
  * @return
  */
-int FilterEmbreePlugin::postCondition(const QAction*) const
+int FilterEmbreePlugin::postCondition(const QAction* act) const
 {
-    return MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY;
+	switch(ID(act)) {
+	case FP_ANALYZE_NORMALS:
+			return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
+	case FP_SELECT_VISIBLE_FACES:
+			return MeshModel::MM_FACEFLAGSELECT;
+	}
+
+	return MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY;
 }
 
 /**
