@@ -154,7 +154,7 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 
         case FP_SELECT_VISIBLE_FACES:
             return QString("Select visible face <br />"
-                            "This filter displays all visible faces from a given direction, changing their color to white if they are visible and black if they are not."
+                            "This filter displays all visible faces from a given direction, selecting the face is is visible from the point given."
                             "This filter utilizes the Embree3 library by INTEL.");
 
         case FP_ANALYZE_NORMALS:
@@ -257,8 +257,8 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 
             break;
         case FP_SELECT_VISIBLE_FACES:
-            parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face."));
             parlst.addParam(RichDirection("dir", Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+            parlst.addParam(RichBool("incrementalSelection", false, "Incremental Selection", "If checked, multiple selectons from different directions can be performed"));
             break;
         case FP_ANALYZE_NORMALS:
             parlst.addParam(RichInt("Rays", 64, "Number of rays", "The number of rays shoot from the barycenter of the face. The higher the number the higher the definition of the normal analysis but at the cost of the calculation time"));
@@ -305,7 +305,7 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
         break;
     case FP_SELECT_VISIBLE_FACES:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"));
+        adaptor.selectVisibleFaces(m->cm,parameters.getPoint3m("dir"), parameters.getBool("incrementalSelection"));
         break;
     case FP_ANALYZE_NORMALS:
         adaptor.computeNormalAnalysis(m->cm,parameters.getInt("Rays"), parameters.getBool("parity_sampling"));
