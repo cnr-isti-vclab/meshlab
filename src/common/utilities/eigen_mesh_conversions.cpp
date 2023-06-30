@@ -74,18 +74,20 @@ class PolyMesh :
  * The only matrix required to be non-empty is the 'vertices' matrix.
  * Other matrices may be empty.
  *
- * If normals and quality matrices are give, their sizes must be coherent with
+ * If normals and quality matrices are given, their sizes must be coherent with
  * the sizes of vertex and face matrices. If this requirement is not satisfied,
  * a MLException will be thrown.
  *
- * @param vertices: #V*3 matrix of scalars (vertex coordinates)
- * @param faces: #F*3 matrix of integers (vertex indices composing the faces)
- * @param vertexNormals: #V*3 matrix of scalars (vertex normals)
- * @param faceNormals: #F*3 matrix of scalars (face normals)
+ * @param vertices: #V×3 matrix of scalars (vertex coordinates)
+ * @param faces: #F×3 matrix of integers (vertex indices composing the faces)
+ * @param vertexNormals: #V×3 matrix of scalars (vertex normals)
+ * @param faceNormals: #F×3 matrix of scalars (face normals)
  * @param vertexQuality: #V vector of scalars (vertex quality)
  * @param faceQuality: #F vector of scalars (face quality)
  * @param vertexColor: #V*4 vector of scalars (RGBA vertex colors in interval [0-1])
  * @param faceColor: #F*4 vector of scalars (RGBA face colors in interval [0-1])
+ * @param vertexTexCoords: #V×2 matrix of scalars (vertex texture coordinates)
+ * @param wedgeTexCoords: #F*3×2 matrix scalars (texture coordinates for each face edge)
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::meshFromMatrices(
@@ -97,16 +99,19 @@ CMeshO meshlab::meshFromMatrices(
 	const EigenVectorXm&    vertexQuality,
 	const EigenVectorXm&    faceQuality,
 	const EigenMatrixX4m&   vertexColor,
-	const EigenMatrixX4m&   faceColor)
+	const EigenMatrixX4m&   faceColor,
+	const EigenMatrixX2m&   vertexTexCoords,
+	const EigenMatrixX2m&   wedgeTexCoords)
 {
 	CMeshO m;
 	if (vertices.rows() > 0) {
 		// add vertices and their associated normals and quality if any
 		std::vector<CMeshO::VertexPointer> ivp(vertices.rows());
 
-		bool hasVNormals = vertexNormals.rows() > 0;
-		bool hasVQuality = vertexQuality.rows() > 0;
-		bool hasVColors  = vertexColor.rows() > 0;
+		bool hasVNormals   = vertexNormals.rows() > 0;
+		bool hasVQuality   = vertexQuality.rows() > 0;
+		bool hasVColors    = vertexColor.rows() > 0;
+		bool hasVTexCoords = vertexTexCoords.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of vertex normals "
@@ -122,6 +127,14 @@ CMeshO meshlab::meshFromMatrices(
 				"Error while creating mesh: the number of vertex colors "
 				"is different from the number of vertices.");
 		}
+		if (hasVTexCoords) {
+			if ((vertices.rows() != vertexTexCoords.rows())) {
+				throw MLException(
+					"Error while creating mesh: the number of vertex texture coordinates "
+					"is different from the number of vertices.");
+			}
+			m.vert.EnableTexCoord();
+		}
 		CMeshO::VertexIterator vi = vcg::tri::Allocator<CMeshO>::AddVertices(m, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
 			ivp[i]  = &*vi;
@@ -134,19 +147,25 @@ CMeshO meshlab::meshFromMatrices(
 				vi->Q() = vertexQuality(i);
 			}
 			if (hasVColors) {
-				vi->C() = CMeshO::VertexType::ColorType(
+				vi->C().Construct(CMeshO::VertexType::ColorType(
 					vertexColor(i, 0) * 255,
 					vertexColor(i, 1) * 255,
 					vertexColor(i, 2) * 255,
-					vertexColor(i, 3) * 255);
+					vertexColor(i, 3) * 255));
+			}
+			if (hasVTexCoords) {
+				vi->T() = CMeshO::VertexType::TexCoordType(
+					vertexTexCoords(i, 0),
+					vertexTexCoords(i, 1));
 			}
 		}
 
 		// add faces and their associated normals and quality if any
 
-		bool hasFNormals = faceNormals.rows() > 0;
-		bool hasFQuality = faceQuality.rows() > 0;
-		bool hasFColors  = faceColor.rows() > 0;
+		bool hasFNormals        = faceNormals.rows() > 0;
+		bool hasFQuality        = faceQuality.rows() > 0;
+		bool hasFColors         = faceColor.rows() > 0;
+		bool hasFWedgeTexCoords = wedgeTexCoords.rows() > 0;
 		if (hasFNormals && (faces.rows() != faceNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of face normals "
@@ -167,6 +186,15 @@ CMeshO meshlab::meshFromMatrices(
 					"is different from the number of faces.");
 			}
 			m.face.EnableColor();
+		}
+		if (hasFWedgeTexCoords) {
+			if (faces.rows() * 3 != wedgeTexCoords.rows()) {
+				throw MLException(
+					"Error while creating mesh: the number of wedge texture coords "
+					"is different from three times the number of faces (a texture coordinate for "
+					"each edge of a face.");
+			}
+			m.face.EnableWedgeTexCoord();
 		}
 		CMeshO::FaceIterator fi = vcg::tri::Allocator<CMeshO>::AddFaces(m, faces.rows());
 		for (unsigned int i = 0; i < faces.rows(); ++i, ++fi) {
@@ -190,11 +218,17 @@ CMeshO meshlab::meshFromMatrices(
 				fi->Q() = faceQuality(i);
 			}
 			if (hasFColors) {
-				fi->C() = CMeshO::FaceType::ColorType(
+				fi->C().Construct(CMeshO::FaceType::ColorType(
 					faceColor(i, 0) * 255,
 					faceColor(i, 1) * 255,
 					faceColor(i, 2) * 255,
-					faceColor(i, 3) * 255);
+					faceColor(i, 3) * 255));
+			}
+			if (hasFWedgeTexCoords) {
+				for (uint j = 0; j < 3; j++) {
+					fi->WT(j).U() = wedgeTexCoords(i*3 + j, 0);
+					fi->WT(j).V() = wedgeTexCoords(i*3 + j, 1);
+				}
 			}
 		}
 
@@ -241,14 +275,15 @@ CMeshO meshlab::meshFromMatrices(
  * called 'poly_birth_faces', which stores for each triangle of the mesh, the id
  * of its polygonal birth face of the polygon mesh given in input.
  *
- * @param vertices: #V*3 matrix of scalars (vertex coordinates)
+ * @param vertices: #V×3 matrix of scalars (vertex coordinates)
  * @param faces: #F list of vector of integers (vertex indices composing the faces)
- * @param vertexNormals: #V*3 matrix of scalars (vertex normals)
- * @param faceNormals: #F*3 matrix of scalars (face normals)
+ * @param vertexNormals: #V×3 matrix of scalars (vertex normals)
+ * @param faceNormals: #F×3 matrix of scalars (face normals)
  * @param vertexQuality: #V vector of scalars (vertex quality)
  * @param faceQuality: #F vector of scalars (face quality)
  * @param vertexColor: #V*4 vector of scalars (RGBA vertex colors in interval [0-1])
  * @param faceColor: #F*4 vector of scalars (RGBA face colors in interval [0-1])
+ * @param vertexTexCoords: #V×2 matrix of scalars (vertex texture coordinates)
  * @return a CMeshO made of the given components
  */
 CMeshO meshlab::polyMeshFromMatrices(
@@ -259,7 +294,8 @@ CMeshO meshlab::polyMeshFromMatrices(
 	const EigenVectorXm&             vertexQuality,
 	const EigenVectorXm&             faceQuality,
 	const EigenMatrixX4m&            vertexColor,
-	const EigenMatrixX4m&            faceColor)
+	const EigenMatrixX4m&            faceColor,
+	const EigenMatrixX2m&            vertexTexCoords)
 {
 	PolyMesh pm;
 	CMeshO   m;
@@ -267,9 +303,10 @@ CMeshO meshlab::polyMeshFromMatrices(
 		// add vertices and their associated normals and quality if any
 		std::vector<PolyMesh::VertexPointer> ivp(vertices.rows());
 
-		bool hasVNormals = vertexNormals.rows() > 0;
-		bool hasVQuality = vertexQuality.rows() > 0;
-		bool hasVColors  = vertexColor.rows() > 0;
+		bool hasVNormals   = vertexNormals.rows() > 0;
+		bool hasVQuality   = vertexQuality.rows() > 0;
+		bool hasVColors    = vertexColor.rows() > 0;
+		bool hasVTexCoords = vertexTexCoords.rows() > 0;
 		if (hasVNormals && (vertices.rows() != vertexNormals.rows())) {
 			throw MLException(
 				"Error while creating mesh: the number of vertex normals "
@@ -285,6 +322,14 @@ CMeshO meshlab::polyMeshFromMatrices(
 				"Error while creating mesh: the number of vertex colors "
 				"is different from the number of vertices.");
 		}
+		if (hasVTexCoords) {
+			if ((vertices.rows() != vertexTexCoords.rows())) {
+				throw MLException(
+					"Error while creating mesh: the number of vertex texture coordinates "
+					"is different from the number of vertices.");
+			}
+			m.vert.EnableTexCoord();
+		}
 		PolyMesh::VertexIterator vi =
 			vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
@@ -298,11 +343,16 @@ CMeshO meshlab::polyMeshFromMatrices(
 				vi->Q() = vertexQuality(i);
 			}
 			if (hasVColors) {
-				vi->C() = CMeshO::VertexType::ColorType(
+				vi->C().Construct(CMeshO::VertexType::ColorType(
 					vertexColor(i, 0) * 255,
 					vertexColor(i, 1) * 255,
 					vertexColor(i, 2) * 255,
-					vertexColor(i, 3) * 255);
+					vertexColor(i, 3) * 255));
+			}
+			if (hasVTexCoords) {
+				vi->T() = CMeshO::VertexType::TexCoordType(
+					vertexTexCoords(i, 0),
+					vertexTexCoords(i, 1));
 			}
 		}
 
@@ -353,11 +403,11 @@ CMeshO meshlab::polyMeshFromMatrices(
 				fi->Q() = faceQuality(i);
 			}
 			if (hasFColors) {
-				fi->C() = CMeshO::FaceType::ColorType(
+				fi->C().Construct(CMeshO::FaceType::ColorType(
 					faceColor(i, 0) * 255,
 					faceColor(i, 1) * 255,
 					faceColor(i, 2) * 255,
-					faceColor(i, 3) * 255);
+					faceColor(i, 3) * 255));
 			}
 		}
 
