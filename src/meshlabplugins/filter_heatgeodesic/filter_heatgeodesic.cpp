@@ -72,7 +72,12 @@ QString FilterHeatGeodesicPlugin::pythonFilterName(ActionIDType f) const
 {
     switch(filterId) {
     case FP_COMPUTE_HEATGEODESIC_FROM_SELECTION :
-        return QString("Computes an approximated geodesic distance from the selected vertices to all others. This algorithm implements the heat method.");
+        return QString(
+            "Computes an approximated geodesic distance from the selected vertices to all others. "
+            "This algorithm implements the heat method. "
+            "If the mesh has changed, update m to a different value to reflect these changes as"
+            " this rebuilds the existing cache."
+        );
     default :
         assert(0);
         return QString("Unknown Filter");
@@ -198,51 +203,34 @@ inline void FilterHeatGeodesicPlugin::computeHeatGeodesicFromSelection(CMeshO& m
         return;
     }
 
+    // TODO detect if the mesh has changed and if so delete state
+    //      NOW changing the value of m rebuilds the cache
+    //
+    //  if (meshHasChanged) {
+    //      auto handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
+    //      vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, handle);
+    //  }
+
     std::shared_ptr<HeatMethodSolver> HMSolver;
-
-    // delete state if the mesh has changed
-    bool meshHasChanged = false; // Update with appropriate function
-    if (meshHasChanged) {
-        auto handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
-        vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, handle);
-    }
-
-    // recover state if it exists
+    // if no state can be recovered, initialize it
     if (!vcg::tri::HasPerMeshAttribute(mesh, "HeatMethodSolver")){
-        cb(10, "Updating Topology...");
-        // update topology and face normals
-        vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
-        vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
-        vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mesh);
-
-        // state variables
-        Eigen::SparseMatrix<double> massMatrix;
-        Eigen::SparseMatrix<double> cotanMatrix;
-        double averageEdgeLength;
-
-        buildMassMatrix(mesh, massMatrix);
-        // this step is very slow (95% of total time) hence we pass the callback
-        // to update progress and avoid freezes
-        cb(20, "Building Cotan Matrix...");
-        buildCotanLowerTriMatrix(mesh, cotanMatrix);
-        averageEdgeLength = computeAverageEdgeLength(mesh);
-
-        cb(70, "Matrix Factorization...");
-        HMSolver = std::make_shared<HeatMethodSolver>(HeatMethodSolver(std::move(massMatrix), std::move(cotanMatrix), averageEdgeLength, m));
+        HMSolver = std::make_shared<HeatMethodSolver>(HeatMethodSolver(mesh, m, cb));
         if (HMSolver->factorization_failed())
-            log("Warning: factorization has failed. The mesh is non-manifold or badly conditioned (e.g. angles ~ 0deg) or has disconnected components");
+            log("Warning: factorization has failed. The mesh is non-manifold or badly conditioned (e.g. angles ~ 0deg) or disconnected components");
         auto HMSolverHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
         HMSolverHandle() = HMSolver;
     }
     else {
-        cb(10, "Recovering State...");
+        cb(5, "Attempting to Recover State...");
         // recover solver
-        HMSolver = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"))();
-        // if m has changed rebuild factorizations from existing matrices
-        if (HMSolver->get_m() != m){
-            cb(70, "Rebuilding Factorization...");
-            HMSolver->rebuildFactorization(m);
+        auto HMSolverHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::shared_ptr<HeatMethodSolver>>(mesh, std::string("HeatMethodSolver"));
+        // if m has changed rebuild everything
+        if (HMSolverHandle()->get_m() != m){
+            HMSolverHandle() = std::make_shared<HeatMethodSolver>(HeatMethodSolver(mesh, m, cb));
+            if (HMSolverHandle()->factorization_failed())
+                log("Warning: factorization has failed. The changed mesh is non-manifold or badly conditioned (e.g. angles ~ 0deg) or disconnected components");
         }
+        HMSolver = HMSolverHandle();
     }
 
     cb(85, "Computing Geodesic Distance...");

@@ -256,34 +256,47 @@ inline Eigen::VectorXd computeVertexDivergence(CMeshO &mesh, const Eigen::Matrix
 
 class HeatMethodSolver {
 public:
-    HeatMethodSolver(Eigen::SparseMatrix<double> &&massMatrix, Eigen::SparseMatrix<double> &&cotanMatrix, double averageEdgeLength, double m)
-        : massMatrix(std::move(massMatrix)), cotanMatrix(std::move(cotanMatrix)), averageEdgeLength(averageEdgeLength), m(m)
+    HeatMethodSolver(CMeshO& mesh, float m, vcg::CallBackPos* cb = NULL)
+        : m(m)
     {
+        if(cb != NULL)  cb(10, "Updating Topology...");
+        // update topology and face normals
+        vcg::tri::UpdateTopology<CMeshO>::VertexFace(mesh);
+        vcg::tri::UpdateTopology<CMeshO>::FaceFace(mesh);
+        vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mesh);
+
+        // state variables
+        Eigen::SparseMatrix<double> massMatrix;
+        Eigen::SparseMatrix<double> cotanMatrix;
+        double averageEdgeLength;
+
+        buildMassMatrix(mesh, massMatrix);
+        // this step is very slow (95% of total time) hence we pass the callback
+        // to update progress and avoid freezes
+        if(cb != NULL)  cb(20, "Building Cotan Matrix...");
+        buildCotanLowerTriMatrix(mesh, cotanMatrix);
+        averageEdgeLength = computeAverageEdgeLength(mesh);
+
         // initialize pointers
         solver1 = std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>(new Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>);
         solver2 = std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>(new Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>);
 
         // build factorization
         double timestep = m * averageEdgeLength * averageEdgeLength;
+        if(cb != NULL)  cb(50, "Matrix Factorization...");
         solver1->compute(massMatrix - timestep * cotanMatrix);
+        if(cb != NULL)  cb(75, "Matrix Factorization...");
         solver2->compute(cotanMatrix);
         if((solver1->info() != Eigen::Success) || (solver2->info() != Eigen::Success))
             factorizationFailed = true;
         else
             factorizationFailed = false;
     }
+
     HeatMethodSolver() = delete;
+
     HeatMethodSolver& operator=(const HeatMethodSolver&) = delete;
-    void rebuildFactorization(double new_m){
-        m = new_m;
-        double timestep = m * averageEdgeLength * averageEdgeLength;
-        solver1->compute(massMatrix - timestep * cotanMatrix);
-        solver2->compute(cotanMatrix);
-        if((solver1->info() != Eigen::Success) || (solver2->info() != Eigen::Success))
-            factorizationFailed = true;
-        else
-            factorizationFailed = false;
-    }
+
     Eigen::VectorXd solve(CMeshO &mesh, Eigen::VectorXd &sourcePoints){
         Eigen::VectorXd heatflow = solver1->solve(sourcePoints); // (VN)
         Eigen::MatrixX3d heatGradient = computeVertexGradient(mesh, heatflow); // (FN, 3)
@@ -294,22 +307,21 @@ public:
             solverFailed = true;
         else
             solverFailed = false;
-        // shift to impose dist(d) = 0 \forall d \in sourcePoints
+        // shift to impose dist(source) = 0
         geodesicDistance.array() -= geodesicDistance.minCoeff();
         return geodesicDistance;
     }
+
     double get_m(){return m;}
+
     bool factorization_failed(){return factorizationFailed;}
+
     bool solver_failed(){return solverFailed;}
 private:
     // Eigen::SimplicialLDLT has no copy/move constructor
     std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>> solver1;
     std::shared_ptr<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>> solver2;
-    Eigen::SparseMatrix<double> massMatrix;
-    Eigen::SparseMatrix<double> cotanMatrix;
-    double averageEdgeLength;
     double m;
-
     bool factorizationFailed;
     bool solverFailed;
 };
