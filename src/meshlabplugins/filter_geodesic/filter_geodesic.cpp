@@ -263,25 +263,26 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
 
         if (seedVec.size() > 0){
             // cache factorizations to reduce runtime on successive computations
-            std::pair<float, tri::GeodesicHeatCache> cache;
+            std::pair<float, tri::GeodesicHeat<CMeshO>::GeodesicHeatCache> cache;
             if (!vcg::tri::HasPerMeshAttribute(m.cm, "GeodesicHeatCache")){
-                cb(10, "Building Cache: Computing Factorizations.");
+                cb(20, "Building Cache: Computing Factorizations...");
                 cache = std::make_pair(param_m, tri::GeodesicHeat<CMeshO>::BuildCache(m.cm, param_m));
                 // save cache for next compute
-                auto GeodesicHeatCacheHandle = tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
+                auto GeodesicHeatCacheHandle = tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeat<CMeshO>::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
                 GeodesicHeatCacheHandle() = cache;
             }
             else {
-                cb(70, "Recovering Cache.");
+                cb(10, "Recovering Cache...");
                 // recover cache
-                auto GeodesicHeatCacheHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
+                auto GeodesicHeatCacheHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeat<CMeshO>::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
                 // if m has changed rebuild everything
                 if (std::get<0>(GeodesicHeatCacheHandle()) != param_m){
+                    cb(20, "Parameter Changed: Rebuilding Factorizations...");
                     GeodesicHeatCacheHandle() = std::make_pair(param_m, tri::GeodesicHeat<CMeshO>::BuildCache(m.cm, param_m));
                 }
                 cache = GeodesicHeatCacheHandle();
             }
-            cb(80, "Computing Geodesic Distance.");
+            cb(80, "Computing Geodesic Distance...");
 
             if (tri::GeodesicHeat<CMeshO>::ComputeFromCache(m.cm, seedVec, std::get<1>(cache))){
                 tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
@@ -289,8 +290,8 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
             else{
                 log("Warning: heat method has failed. The mesh is most likely badly conditioned (e.g. angles ~ 0deg) or has disconnected components");
                 // delete cache as its most likely useless after failure
-                auto GeodesicHeatCacheHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
-                tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, GeodesicHeatCacheHandle);
+                auto GeodesicHeatCacheHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeat<CMeshO>::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
+                tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::pair<float, tri::GeodesicHeat<CMeshO>::GeodesicHeatCache>>(m.cm, GeodesicHeatCacheHandle);
             }
         }
         else
