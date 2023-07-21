@@ -95,7 +95,7 @@ QString FilterGeodesic::filterInfo(ActionIDType filterId) const
     case FP_QUALITY_BORDER_GEODESIC        : return tr("Store in the quality field the geodesic distance from borders and color the mesh accordingly.");
     case FP_QUALITY_POINT_GEODESIC         : return tr("Store in the quality field the geodesic distance from a given point on the mesh surface and color the mesh accordingly.");
     case FP_QUALITY_SELECTED_GEODESIC      : return tr("Store in the quality field the geodesic distance from the selected points on the mesh surface and color the mesh accordingly.");
-    case FP_QUALITY_SELECTED_GEODESIC_HEAT : return tr("Store in the quality field the approximated geodesic distance, computed via heat method, from the selected points on the mesh surface and color the mesh accordingly. This method is very sensitive to triangulation and currently does not support disconnected components.");
+    case FP_QUALITY_SELECTED_GEODESIC_HEAT : return tr("Store in the quality field the approximated geodesic distance, computed via heat method (Crane et al.), from the selected points on the mesh surface and color the mesh accordingly. As this implementation does not use intrinsic triangulation it is very sensitive to trinagulation. First run takes longer as factorization has to be build. ");
 	default                             : assert(0);
 	}
 	return QString("error!");
@@ -107,7 +107,7 @@ FilterGeodesic::FilterClass FilterGeodesic::getClass(const QAction *a) const
 	{
     case FP_QUALITY_BORDER_GEODESIC        :
     case FP_QUALITY_SELECTED_GEODESIC      :
-    case FP_QUALITY_POINT_GEODESIC         : return FilterGeodesic::FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Quality);
+    case FP_QUALITY_POINT_GEODESIC         :
     case FP_QUALITY_SELECTED_GEODESIC_HEAT : return FilterGeodesic::FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Quality);
 	default                          : assert(0);
 	}
@@ -127,7 +127,7 @@ int FilterGeodesic::getRequirements(const QAction *action)
 	return 0;
 }
 
-std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filter, const RichParameterList & par, MeshDocument &md, unsigned int& /*postConditionMask*/, vcg::CallBackPos *cb)
 {
 	MeshModel &m=*(md.mm());
 	CMeshO::VertexIterator vi;
@@ -265,12 +265,14 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
             // cache factorizations to reduce runtime on successive computations
             std::pair<float, tri::GeodesicHeatCache> cache;
             if (!vcg::tri::HasPerMeshAttribute(m.cm, "GeodesicHeatCache")){
+                cb(10, "Building Cache: Computing Factorizations.");
                 cache = std::make_pair(param_m, tri::GeodesicHeat<CMeshO>::BuildCache(m.cm, param_m));
                 // save cache for next compute
                 auto GeodesicHeatCacheHandle = tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
                 GeodesicHeatCacheHandle() = cache;
             }
             else {
+                cb(70, "Recovering Cache.");
                 // recover cache
                 auto GeodesicHeatCacheHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::pair<float, tri::GeodesicHeatCache>>(m.cm, std::string("GeodesicHeatCache"));
                 // if m has changed rebuild everything
@@ -279,6 +281,7 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
                 }
                 cache = GeodesicHeatCacheHandle();
             }
+            cb(80, "Computing Geodesic Distance.");
 
             if (tri::GeodesicHeat<CMeshO>::ComputeFromCache(m.cm, seedVec, std::get<1>(cache))){
                 tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
@@ -314,7 +317,7 @@ RichParameterList FilterGeodesic::initParameterList(const QAction *action, const
 		parlst.addParam(RichPercentage("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
         break;
     case FP_QUALITY_SELECTED_GEODESIC_HEAT :
-        parlst.addParam(RichFloat("m", 1, "m", "Multiplier used in backward Euler timestep."));
+        parlst.addParam(RichFloat("m", 1.0, tr("Euler Step"), tr("Multiplier used in backward Euler timestep. Changing this value will reset the cache.")));
         break;
 	default: break; // do not add any parameter for the other filters
 	}
@@ -328,7 +331,7 @@ int FilterGeodesic::postCondition(const QAction * filter) const
     case FP_QUALITY_BORDER_GEODESIC        :
     case FP_QUALITY_SELECTED_GEODESIC      :
     case FP_QUALITY_POINT_GEODESIC         : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
-    case FP_QUALITY_SELECTED_GEODESIC_HEAT : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
+    case FP_QUALITY_SELECTED_GEODESIC_HEAT : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY + MeshModel::MM_FACEQUALITY;
     default                                : return MeshModel::MM_ALL;
 	}
 }
