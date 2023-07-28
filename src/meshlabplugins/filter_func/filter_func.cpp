@@ -38,7 +38,7 @@ std::default_random_engine rndEngine(randomDev());
 //Function to generate a random double number in [0..1) interval
 double ML_Rnd() { return std::generate_canonical<double, 24>(rndEngine); }
 //Function to generate a random integer number in [0..a) interval
-double ML_RandInt(const double a) { return std::floor(a*MyRnd()); }
+double ML_RandInt(const double a) { return std::floor(a*ML_Rnd()); }
 
 //Add rnd() and randint() custom functions to a mu::Parser
 void setCustomFunctions(mu::Parser& p)
