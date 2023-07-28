@@ -22,8 +22,8 @@
  ****************************************************************************/
 
 #include "filter_func.h"
+#include <random>
 #include <vcg/complex/algorithms/create/platonic.h>
-
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
