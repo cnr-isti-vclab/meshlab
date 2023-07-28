@@ -123,12 +123,14 @@ QString FilterFunctionPlugin::pythonFilterName(ActionIDType f) const
 }
 
 const QString PossibleOperators(
-	"<br>It's possible to use parenthesis <b>()</b>, and predefined operators:<br>"
+	"<br>It's possible to use parenthesis <b>()</b>, and predefined "
+	"<a href='https://beltoforion.de/en/muparser/features.php#idDef2'>muparser built-in operators</a>, like:<br>"
 	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, "
-	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator)<br><br>");
+	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator).<br><br>");
 
 const QString PerVertexAttributeString(
-	"It's possible to use the following per-vertex variables in the expression:<br>"
+	"It's possible to use <a href='https://beltoforion.de/en/muparser/features.php#idDef1'>muparser built-in functions</a>"
+	"and the following per-vertex variables in the expression:<br>"
 	"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> "
 	"(quality), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
 	"index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
@@ -136,8 +138,8 @@ const QString PerVertexAttributeString(
 	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br>");
 
 const QString PerFaceAttributeString(
-	"It's possible to use the following per-face variables, or variables associated to the three "
-	"vertex of every face:<br>"
+	"It's possible to use <a href='https://beltoforion.de/en/muparser/features.php#idDef1'>muparser built-in functions</a>"
+	"and the following per-face or per-vertex variables:<br>"
 	"<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex "
 	"position, <b>x2,y2,z2</b> for the third vertex position, "
 	"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 "
