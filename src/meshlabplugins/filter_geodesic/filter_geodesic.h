@@ -26,6 +26,7 @@
 #include <QObject>
 #include <common/plugins/interfaces/filter_plugin.h>
 #include <vcg/complex/algorithms/geodesic.h>
+#include <vcg/complex/algorithms/geodesic_heat.h>
 
 
 class FilterGeodesic : public QObject, public FilterPlugin
@@ -42,7 +43,8 @@ class FilterGeodesic : public QObject, public FilterPlugin
 	    enum {
 		FP_QUALITY_BORDER_GEODESIC,
 		        FP_QUALITY_POINT_GEODESIC,
-		        FP_QUALITY_SELECTED_GEODESIC
+                FP_QUALITY_SELECTED_GEODESIC,
+                FP_QUALITY_SELECTED_GEODESIC_HEAT
 
 	} ;
 	
