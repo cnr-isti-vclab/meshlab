@@ -28,20 +28,19 @@ SampleEditFactory::SampleEditFactory()
 {
 	editSample = new QAction(QIcon(":/images/icon_info.png"),"Get Info", this);
 	
-	actionList << editSample;
+	actionList.push_back(editSample);
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> SampleEditFactory::actions() const
+
+QString SampleEditFactory::pluginName() const
 {
-	return actionList;
+	return "EditSample";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* SampleEditFactory::getMeshEditInterface(const QAction *action)
+EditTool* SampleEditFactory::getEditTool(const QAction *action)
 {
 	if(action == editSample)
 	{
@@ -52,7 +51,7 @@ EditPluginInterface* SampleEditFactory::getMeshEditInterface(const QAction *acti
 
 QString SampleEditFactory::getEditToolDescription(const QAction *)
 {
-	return SampleEditPlugin::Info();
+	return SampleEditPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(SampleEditFactory)

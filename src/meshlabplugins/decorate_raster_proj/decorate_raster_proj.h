@@ -27,38 +27,38 @@
 
 
 #include <QObject>
-#include <common/interfaces/decorate_plugin_interface.h>
-#include <common/ml_shared_data_context.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
+#include <common/ml_shared_data_context/ml_scene_gl_shared_data_context.h>
 #include <common/ml_document/raster_model.h>
 #include <wrap/glw/glw.h>
 
 
 
 
-class DecorateRasterProjPlugin : public QObject, public DecoratePluginInterface
+class DecorateRasterProjPlugin : public QObject, public DecoratePlugin
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES( DecoratePluginInterface )
+    MESHLAB_PLUGIN_IID_EXPORTER(DECORATE_PLUGIN_IID)
+    Q_INTERFACES( DecoratePlugin )
 
 
     // Types.
     enum { DP_PROJECT_RASTER };
 
-    class MeshDrawer
-    {
-        MeshModel           *m_Mesh;
+	class MeshDrawer
+	{
+		const MeshModel           *m_Mesh;
 
-    public:
-        inline              MeshDrawer() : m_Mesh(NULL)                 {}
-        inline              MeshDrawer( MeshModel *mm ) : m_Mesh(mm)    {}
+	public:
+		inline              MeshDrawer() : m_Mesh(NULL)                 {}
+		inline              MeshDrawer(const MeshModel *mm ) : m_Mesh(mm)    {}
 
-        //void                update(MLSceneGLSharedDataContext* ctx);
-        void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
-        void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		//void                update(MLSceneGLSharedDataContext* ctx);
+		void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+		void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
-        inline MeshModel*   mm()                                        { return m_Mesh; }
-    };
+		inline const MeshModel*   mm()                                        { return m_Mesh; }
+	};
 
 
     // Class variables.
@@ -108,8 +108,8 @@ private:
     bool                    initShaders(std::string &logs);
 
 
-    virtual QString         decorationInfo( FilterIDType filter ) const;
-    virtual QString         decorationName( FilterIDType filter ) const;
+    virtual QString         decorationInfo( ActionIDType filter ) const;
+    virtual QString         decorationName( ActionIDType filter ) const;
 
 public:
     inline QList<QAction*>  actions() const                             { return actionList; }

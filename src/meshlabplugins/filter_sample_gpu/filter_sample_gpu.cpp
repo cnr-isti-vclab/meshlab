@@ -34,10 +34,10 @@ using namespace glw;
 
 ExtraSampleGPUPlugin::ExtraSampleGPUPlugin()
 {
-	typeList << FP_GPU_EXAMPLE;
+	typeList = {FP_GPU_EXAMPLE};
 
-  foreach(FilterIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString ExtraSampleGPUPlugin::pluginName() const
@@ -47,18 +47,25 @@ QString ExtraSampleGPUPlugin::pluginName() const
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
+QString ExtraSampleGPUPlugin::filterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-		case FP_GPU_EXAMPLE :  return QString("GPU Filter Example ");
-		default : assert(0);
-	}
-  return QString();
+	if (filterId == FP_GPU_EXAMPLE)
+		return "GPU Filter Example";
+	else
+		return "";
+}
+
+QString ExtraSampleGPUPlugin::pythonFilterName(ActionIDType filterId) const
+{
+	if (filterId == FP_GPU_EXAMPLE)
+		return "save_snapshot";
+	else
+		return "";
 }
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-QString ExtraSampleGPUPlugin::filterInfo(FilterIDType filterId) const
+QString ExtraSampleGPUPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_GPU_EXAMPLE : 
@@ -87,10 +94,10 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *
 {
 	switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE:  return FilterPluginInterface::RasterLayer;  //should be generic, but better avoid it
+		case FP_GPU_EXAMPLE:  return FilterPlugin::RasterLayer;  //should be generic, but better avoid it
 		default : assert(0);
 	}
-	return FilterPluginInterface::Generic;
+	return FilterPlugin::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -100,10 +107,9 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(const QAction *
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterList(const QAction * action, MeshModel & m, RichParameterList & parlst)
+RichParameterList ExtraSampleGPUPlugin::initParameterList(const QAction * action, const MeshModel &)
 {
-	(void)m;
-
+	RichParameterList parlst;
 	switch(ID(action))
 	{
 		case FP_GPU_EXAMPLE :
@@ -112,27 +118,30 @@ void ExtraSampleGPUPlugin::initParameterList(const QAction * action, MeshModel &
 			parlst.addParam(RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
 			parlst.addParam(RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
 			//QString curr = QDir::currentPath();
-			parlst.addParam(RichSaveFile ("ImageFileName",        /*curr + "/" */+"gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
+			parlst.addParam(RichFileSave ("ImageFileName",        /*curr + "/" */+"gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0);
 	}
+	return parlst;
 }
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos * /*cb*/)
+std::map<std::string, QVariant> ExtraSampleGPUPlugin::applyFilter(const QAction * a, const RichParameterList & par, MeshDocument & md , unsigned int& /*postConditionMask*/, vcg::CallBackPos * /*cb*/)
 {
 	if (glContext == nullptr){
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
+		//errorMessage = "Fatal error: glContext not initialized";
+		//return false;
 	}
 	switch(ID(a))
 	{
 		case FP_GPU_EXAMPLE:
 		{
 			CMeshO & mesh = md.mm()->cm;
-			if ((mesh.vn < 3) || (mesh.fn < 1)) return false;
+			if ((mesh.vn < 3) || (mesh.fn < 1))
+				throw MLException("Error: number of vertices less than three or zero number of faces on selected mesh.");
 
 //			const unsigned char * p0      = (const unsigned char *)(&(mesh.vert[0].P()));
 //			const unsigned char * p1      = (const unsigned char *)(&(mesh.vert[1].P()));
@@ -270,14 +279,14 @@ bool ExtraSampleGPUPlugin::applyFilter(const QAction * a, MeshDocument & md , st
 			glPopAttrib();
 			glContext->doneCurrent();
 
-			QString st = par.getSaveFileName("ImageFileName");
-
 			image.rgbSwapped().mirrored().save(par.getSaveFileName("ImageFileName"));
 
 			break;
 		}
+	default:
+		wrongActionCalled(a);
 	}
-	return true;
+	return std::map<std::string, QVariant>();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSampleGPUPlugin)

@@ -146,7 +146,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Manual Rough Glueing</string>
+             <string>Manual Rough Gluing</string>
             </property>
            </widget>
           </item>
@@ -170,7 +170,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Point Based Glueing</string>
+             <string>Point Based Gluing</string>
             </property>
            </widget>
           </item>

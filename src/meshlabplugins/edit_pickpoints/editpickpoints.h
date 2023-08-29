@@ -30,14 +30,13 @@
 #ifndef EDIT_PickPoints_PLUGIN_H
 #define EDIT_PickPoints_PLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include "pickpointsDialog.h"
 
-class EditPickPointsPlugin : public QObject, public EditPluginInterface
+class EditPickPointsPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-	Q_INTERFACES(EditPluginInterface)
-	
+
 public:
 	//constructor
 	EditPickPointsPlugin();
@@ -48,12 +47,11 @@ public:
 		delete pickPointsDialog;
 	}
 	
-	static const QString Info();
-	QString pluginName() const;
+	static const QString info();
 
-	virtual bool StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
-	virtual void EndEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
-  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *);
+	virtual bool startEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
+	virtual void endEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
+  virtual void decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *);
 	virtual void mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );

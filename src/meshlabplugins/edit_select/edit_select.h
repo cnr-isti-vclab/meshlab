@@ -23,12 +23,11 @@
 #ifndef EDITPLUGIN_H
 #define EDITPLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 
-class EditSelectPlugin : public QObject, public EditPluginInterface
+class EditSelectPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
 
 
 public:
@@ -38,12 +37,11 @@ public:
 
 	virtual ~EditSelectPlugin() {}
 
-	static QString Info();
-	QString pluginName() const;
+	static QString info();
 	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
-	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
-	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
+	void decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
@@ -66,9 +64,9 @@ public:
 	GLdouble mvMatrix_f[16];
 	GLdouble prMatrix_f[16];
 	GLint viewpSize[4];
-    Eigen::Matrix<Scalarm,4,4> SelMatrix;
-    Scalarm SelViewport[4];
-    
+	Eigen::Matrix<Scalarm,4,4> SelMatrix;
+	Scalarm SelViewport[4];
+
 signals:
 	void setDecorator(QString, bool);
 

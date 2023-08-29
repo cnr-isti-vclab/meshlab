@@ -9,26 +9,9 @@ if(TARGET external-openctm)
 
     set(HEADERS io_ctm.h)
 
-    add_library(io_ctm MODULE ${SOURCES} ${HEADERS})
-
-    target_include_directories(io_ctm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(io_ctm PUBLIC meshlab-common)
+	add_meshlab_plugin(io_ctm ${SOURCES} ${HEADERS})
 
     target_link_libraries(io_ctm PRIVATE external-openctm)
-
-    set_property(TARGET io_ctm PROPERTY FOLDER Plugins)
-
-    set_property(TARGET io_ctm PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                        ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    set_property(TARGET io_ctm PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                        ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    install(
-        TARGETS io_ctm
-        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-        COMPONENT Plugins)
-
 else()
     message(STATUS "Skipping io_ctm - missing OpenCTM.")
 endif()

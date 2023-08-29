@@ -173,13 +173,14 @@ static void Dijkstra(_MyMeshType& m, VertexType& v, int numOfNeighbours, float m
 
 static void DeletePerVertexAttribute(_MyMeshType& m)
 {
-    KNNGraph<_MyMeshType>::DeleteKNNTree(m);
+	KNNGraph<_MyMeshType>::DeleteKNNTree(m);
 
-    bool hasDistParam = tri::HasPerVertexAttribute(m, "DistParam");
-    if (hasDistParam) {
-        Allocator<_MyMeshType>::DeletePerVertexAttribute(m, "DistParam");
-    }
-    return;
+	//keeping the DistParam attribute, it could be useful to other plugins
+	//bool hasDistParam = tri::HasPerVertexAttribute(m, "DistParam");
+	//if (hasDistParam) {
+	//    Allocator<_MyMeshType>::DeletePerVertexAttribute(m, "DistParam");
+	//}
+	return;
 }
 
 }; // end ComponentFinder Class

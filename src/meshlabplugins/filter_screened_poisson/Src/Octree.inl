@@ -705,7 +705,7 @@ template< bool CreateNodes >
 bool OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getChildNeighbors( int cIdx , int d , Neighbors< Width >& cNeighbors , void (*Initializer)( OctNode& ) ) const
 {
 	Neighbors< Width >& pNeighbors = neighbors[d];
-	// Check that we actuall have a center node
+	// Check that we actually have a center node
 	if( !pNeighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] ) return false;
 	
 	// Get the indices of the child node that would contain the point (and its antipode)
@@ -756,7 +756,7 @@ template< bool CreateNodes , class Real >
 bool OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getChildNeighbors( Point3D< Real > p , int d , Neighbors< Width >& cNeighbors , void (*Initializer)( OctNode& ) ) const
 {
 	Neighbors< Width >& pNeighbors = neighbors[d];
-	// Check that we actuall have a center node
+	// Check that we actually have a center node
 	if( !pNeighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] ) return false;
 	Point3D< Real > c;
 	Real w;

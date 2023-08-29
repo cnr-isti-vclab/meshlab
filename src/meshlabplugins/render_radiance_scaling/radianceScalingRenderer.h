@@ -24,7 +24,7 @@
 #define RADIANCESCALINGRENDERER_H
 
 #include <GL/glew.h>
-#include <common/interfaces/render_plugin_interface.h>
+#include <common/plugins/interfaces/render_plugin.h>
 
 #include <QAction>
 #include <QString>
@@ -35,10 +35,10 @@
 #include "framebufferObject.h"
 #include "texture2D.h"
 
-class RadianceScalingRendererPlugin : public QObject, public RenderPluginInterface {
-    Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_INTERFACE_IID)
-    Q_INTERFACES(RenderPluginInterface)
+class RadianceScalingRendererPlugin : public QObject, public RenderPlugin {
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_IID)
+	Q_INTERFACES(RenderPlugin)
 
     bool             _supported;
     QList<QAction *> _actionList;
@@ -56,9 +56,9 @@ class RadianceScalingRendererPlugin : public QObject, public RenderPluginInterfa
     void initActionList();
     
     virtual bool isSupported() {return _supported;}
-    virtual void Init(QAction *a, MeshDocument &m, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla);
-    virtual void Finalize(QAction *a, MeshDocument *m, GLArea * gla);
-    virtual void Render(QAction *a, MeshDocument &m, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla);
+    virtual void init(QAction *a, MeshDocument &m, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla);
+    virtual void finalize(QAction *a, MeshDocument *m, GLArea * gla);
+    virtual void render(QAction *a, MeshDocument &m, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla);
 
     inline void setEnable(bool enabled);
     inline void setLit(bool lit);

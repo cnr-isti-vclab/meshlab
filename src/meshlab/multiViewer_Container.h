@@ -32,13 +32,12 @@
 #include <QSplitterHandle>
 
 #include <common/ml_document/mesh_document.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 
 // Class list
 class GLArea;
 class RichParameterList;
 class MultiViewer_Container;
-class MainWindow;
 
 class Splitter : public QSplitter
 {
@@ -54,18 +53,6 @@ public:
 
 protected:
 	QSplitterHandle *createHandle();
-};
-
-class SplitterHandle : public QSplitterHandle
-{
-	Q_OBJECT
-
-public:
-	SplitterHandle(Qt::Orientation orientation, QSplitter *parent);
-    ~SplitterHandle() {}
-
-protected:
-	void mousePressEvent ( QMouseEvent * e ); 
 };
 
 class MultiViewer_Container : public Splitter

@@ -26,15 +26,13 @@
 
 //#include <wrap/io_trimesh/export.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace vcg;
 
 bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
-void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
+RichParameterList TxtIOPlugin::initPreOpenParameter(const QString &format) const
 {
+	RichParameterList parlst;
 	if(format.toUpper() == tr("TXT"))
 	{
             QStringList separator = (QStringList() << ";" << "," << "SPACE");
@@ -60,39 +58,38 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
             parlst.addParam(RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
             parlst.addParam(RichEnum("onerror", 0, onerror, "On Parsing Error", "When a line is not properly parsed, it is possible to 'skip' it and continue with the following lines, or 'stop' importing at that point"));
     }
+    return parlst;
 }
 
-bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos * /*cb*/)
 {
-    bool result=false;
+	if(formatName.toUpper() == tr("TXT")) {
+		int rowToSkip = parlst.getInt("rowToSkip");
+		int dataSeparator = parlst.getEnum("separator");
+		int dataFormat = parlst.getEnum("strformat");
+		int rgbMode = parlst.getEnum("rgbmode");
+		int onError = parlst.getEnum("onerror");
 
-    if(formatName.toUpper() == tr("TXT"))
-		{
-            int rowToSkip = parlst.getInt("rowToSkip");
-            int dataSeparator = parlst.getEnum("separator");
-            int dataFormat = parlst.getEnum("strformat");
-            int rgbMode = parlst.getEnum("rgbmode");
-			int onError = parlst.getEnum("onerror");
+		if(!(dataFormat==0) && !(dataFormat==6) && !(dataFormat==10))
+			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		if(!(dataFormat==0) && !(dataFormat==10))
+			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+		if((dataFormat==3) || (dataFormat==4) || (dataFormat==5) || (dataFormat>=8))
+			mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 
-            if(!(dataFormat==0) && !(dataFormat==6) && !(dataFormat==10))
-                mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-            if(!(dataFormat==0) && !(dataFormat==10))
-                mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-            if((dataFormat==3) || (dataFormat==4) || (dataFormat==5) || (dataFormat>=8))
-                mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+		m.enable(mask);
 
-            m.Enable(mask);
-
-            return parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError);
-		}
-
-	return result;
+		if (!parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError))
+			throw MLException("Error while opening TXT file.");
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
-bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
+void TxtIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
-	assert(0);
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
@@ -103,28 +100,24 @@ QString TxtIOPlugin::pluginName() const
 	return "IOTXT";
 }
 
-QList<FileFormat> TxtIOPlugin::importFormats() const
+std::list<FileFormat> TxtIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-    formatList << FileFormat("TXT (Generic ASCII point list)", tr("TXT"));
-
-	return formatList;
+	return {FileFormat("TXT (Generic ASCII point list)", tr("TXT"))};
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> TxtIOPlugin::exportFormats() const
+std::list<FileFormat> TxtIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	return formatList;
+	return {};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TxtIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
+void TxtIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
 	capability=defaultBits=0;
 	return;
@@ -171,7 +164,7 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
         {
             // reading and tokenizing
             freshLine = QString(impFile.readLine()).simplified();
-            tokenizedLine = freshLine.split(separator, QString::SkipEmptyParts);
+            tokenizedLine = freshLine.split(separator, Qt::SkipEmptyParts);
 
             switch(dataFormat)
             {

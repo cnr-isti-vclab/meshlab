@@ -17,16 +17,24 @@
 *.db-wal
 *.AppImage
 .DS_Store
-distrib*
-src/install/*
+
+# build and install directories
+build/*
+install/*
+
+# external libraries automatically downloaded by cmake
+src/external/easyexif*/test-images/*
+src/external/glew*/auto/*
+src/external/glew*/build/*
+src/external/glew*/config/*
+src/external/glew*/doc/*
+src/external/downloads/*
+src/external/tmp.zip
+
+# files created/modified during deploy stage
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe
-#install/snap20????/prime
-#install/snap20????/parts
-#install/snap20????/stage
-#install/snap20????/*.snap
-src/common/generated_version_header.h
 
 ##Standard cmake gitignore##
 CMakeLists.txt.user
@@ -95,7 +103,7 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# QtCreator 4.8< compilation database 
+# QtCreator 4.8< compilation database
 compile_commands.json
 
 # QtCreator local machine specific files for imported projects

@@ -26,8 +26,9 @@
 #include "ui_filter_script_dialog.h"
 #include "filter_script_dialog.h"
 #include "mainwindow.h"
-#include "../common/mlexception.h"
-#include "rich_parameter_gui/richparameterlistdialog.h"
+#include <common/mlexception.h>
+#include <common/globals.h>
+#include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 FilterScriptDialog::FilterScriptDialog(FilterScript& fs, QWidget * parent):
 	QDialog(parent),
@@ -198,8 +199,8 @@ void FilterScriptDialog::editOldParameters( const int row )
 	
 	//get a pointer to this action and filter from the main window so we can get the
 	//description of the parameters from the filter
-	QAction *action = mainWindow->pluginManager().actionFilterMap[actionName];
-	FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(action->parent());
+	QAction *action = meshlab::pluginManagerInstance().filterAction(actionName);
+	FilterPlugin *iFilter = qobject_cast<FilterPlugin *>(action->parent());
 	
 	if(NULL == iFilter){
 		qDebug() << "null filter";
@@ -208,8 +209,7 @@ void FilterScriptDialog::editOldParameters( const int row )
 	
 	//fill the parameter set with all the names and descriptions which are lost in the
 	//filter script
-	RichParameterList newParameterSet;
-	iFilter->initParameterList(action, *(mainWindow->meshDoc()), newParameterSet);
+	RichParameterList newParameterSet = iFilter->initParameterList(action, *(mainWindow->meshDoc()));
 	
 	if(newParameterSet.size() == oldParameterSet.size()) {
 		RichParameterList::iterator i = newParameterSet.begin();

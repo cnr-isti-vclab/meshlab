@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -24,50 +24,48 @@
 #include "mesh_document.h"
 
 template <class LayerElement>
-QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
+QString nameDisambiguator(std::list<LayerElement> &elemList, QString meshLabel)
 {
 	QString newName=std::move(meshLabel);
-	typename QList<LayerElement*>::iterator mmi;
-	
+	typename std::list<LayerElement>::iterator mmi;
+
 	for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
 	{
-		if((*mmi)->label() == newName) // if duplicated name found
+		if((*mmi).label() == newName) // if duplicated name found
 		{
-			QFileInfo fi((*mmi)->label());
+			QFileInfo fi((*mmi).label());
 			QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
 			QString suffix = fi.suffix();
 			bool ok;
-			
+
 			// if name ends with a number between parenthesis (XXX),
 			// it was himself a duplicated name, and we need to
 			// just increase the number between parenthesis
 			int numDisamb;
 			int startDisamb;
 			int endDisamb;
-			
+
 			startDisamb = baseName.lastIndexOf("(");
 			endDisamb   = baseName.lastIndexOf(")");
 			if((startDisamb!=-1)&&(endDisamb!=-1))
-				numDisamb = (baseName.mid((startDisamb+1),(endDisamb-startDisamb-1))).toInt(&ok);
+				numDisamb = baseName.midRef((startDisamb+1),(endDisamb-startDisamb-1)).toInt(&ok);
 			else
 				numDisamb = 0;
-			
+
 			if(startDisamb!=-1)
 				newName = baseName.left(startDisamb)+ "(" + QString::number(numDisamb+1) + ")";
 			else
 				newName = baseName + "(" + QString::number(numDisamb+1) + ")";
-			
+
 			if (suffix != QString(""))
 				newName = newName + "." + suffix;
-			
+
 			// now recurse to see if the new name is free
-			newName = NameDisambiguator(elemList, newName);
+			newName = nameDisambiguator(elemList, newName);
 		}
 	}
 	return newName;
 }
-
-
 
 MeshDocument::MeshDocument() 
 {
@@ -78,25 +76,15 @@ MeshDocument::MeshDocument()
 	busy=false;
 }
 
-//deletes each meshModel
 MeshDocument::~MeshDocument()
 {
-	for(MeshModel *mmp : meshList)
-		delete mmp;
-	for(RasterModel* rmp : rasterList)
-		delete rmp;
 }
 
 void MeshDocument::clear()
 {
-	for(MeshModel *mmp : meshList)
-		delete mmp;
 	meshList.clear();
-	
-	for(RasterModel* rmp :rasterList)
-		delete rmp;
 	rasterList.clear();
-	
+
 	meshIdCounter=0;
 	rasterIdCounter=0;
 	currentMesh = nullptr;
@@ -108,28 +96,28 @@ void MeshDocument::clear()
 	meshDocStateData().clear();
 }
 
-const MeshModel* MeshDocument::getMesh(int id) const
+const MeshModel* MeshDocument::getMesh(unsigned int id) const
 {
-	for (const MeshModel* m : meshList)
-		if (m->id() == id)
-			return m;
+	for (const MeshModel& m : meshList)
+		if ((unsigned int)m.id() == id)
+			return &m;
 	return nullptr;
 }
 
-//returns the mesh ata given position in the list
-MeshModel* MeshDocument::getMesh(int id)
+MeshModel* MeshDocument::getMesh(unsigned int id)
 {
-	for (MeshModel* m : meshList)
-		if (m->id() == id)
-			return m;
+	for (MeshModel& m : meshList) {
+		if ((unsigned int)m.id() == id) {
+			return &m;
+		}
+	}
 	return nullptr;
 }
 
 void MeshDocument::setCurrentMesh(int new_curr_id)
 {
-	if(new_curr_id<0)
-	{
-		currentMesh=0;
+	if(new_curr_id<0) {
+		currentMesh = nullptr;
 		return;
 	}
 	currentMesh = getMesh(new_curr_id);
@@ -137,35 +125,32 @@ void MeshDocument::setCurrentMesh(int new_curr_id)
 	assert(currentMesh);
 }
 
-//returns the raster at a given position in the list
-RasterModel *MeshDocument::getRaster(int i)
+void MeshDocument::setVisible(int meshId, bool val)
 {
-	foreach(RasterModel *rmp, rasterList)
-	{
-		if(rmp->id() == i) return rmp;
-	}
-	//assert(0);
-	return 0;
+	getMesh(meshId)->setVisible(val);
+	emit meshSetChanged();
 }
 
-//if i is <0 it means that no currentRaster is set
-void MeshDocument::setCurrentRaster( int new_curr_id)
+//returns the raster at a given position in the list
+RasterModel *MeshDocument::getRaster(unsigned int i)
 {
-	if(new_curr_id<0)
-	{
-		currentRaster=0;
-		return;
-	}
-	
-	foreach(RasterModel *rmp, rasterList)
-	{
-		if(rmp->id() == new_curr_id)
-		{
-			currentRaster = rmp;
-			return;
+	for(RasterModel& rmp : rasterList) {
+		if(rmp.id() == i) {
+			return &rmp;
 		}
 	}
-	assert(0);
+	return nullptr;
+}
+
+void MeshDocument::setCurrentRaster(int new_curr_id)
+{
+	if(new_curr_id<0) {
+		currentRaster = nullptr;
+		return;
+	}
+
+	currentRaster = getRaster(new_curr_id);
+	assert(currentRaster);
 }
 
 void MeshDocument::setCurrent(MeshModel* newCur)
@@ -183,7 +168,7 @@ MeshModel* MeshDocument::nextVisibleMesh(MeshModel* _m)
 	MeshModel *newM = nextMesh(_m);
 	if(newM==0)
 		return newM;
-	
+
 	if(newM->isVisible())
 		return newM;
 	else
@@ -192,27 +177,32 @@ MeshModel* MeshDocument::nextVisibleMesh(MeshModel* _m)
 
 MeshModel* MeshDocument::nextMesh(MeshModel* _m)
 {
-	if(_m==0 && meshList.size()>0)
-		return meshList.at(0);
-	for (int i = 0; i < meshList.size(); ++i) {
-		if (meshList.at(i) == _m) {
-			if(i+1 < meshList.size())
-				return meshList.at(i+1);
+	if(_m == nullptr && meshList.size()>0)
+		return &meshList.front();
+	for (auto it = meshList.begin(); it != meshList.end(); ++it) {
+		if (&(*it) == _m) {
+			auto next = it;
+			next++;
+			if(next != meshList.end())
+				return &(*next);
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 RasterModel* MeshDocument::nextRaster(RasterModel* _rm)
 {
-	for (int i = 0; i < rasterList.size(); ++i) {
-		if (rasterList.at(i) == _rm)
-		{
-			if(i+1 < rasterList.size())
-				return rasterList.at(i+1);
+	if(_rm == nullptr && rasterList.size()>0)
+		return &rasterList.front();
+	for (auto it = rasterList.begin(); it != rasterList.end(); ++it) {
+		if (&(*it) == _rm) {
+			auto next = it;
+			next++;
+			if(next != rasterList.end())
+				return &(*next);
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 MeshModel* MeshDocument::mm()
@@ -230,18 +220,13 @@ RasterModel* MeshDocument::rm()
 	return currentRaster;
 }
 
-unsigned int MeshDocument::newMeshId()
+const RasterModel* MeshDocument::rm() const
 {
-	return meshIdCounter++;
-}
-
-unsigned int MeshDocument::newRasterId()
-{
-	return rasterIdCounter++;
+	return currentRaster;
 }
 
 void MeshDocument::requestUpdatingPerMeshDecorators(int mesh_id)
-{	
+{
 	emit updateDecorators(mesh_id);
 }
 
@@ -271,12 +256,12 @@ void MeshDocument::setFileName(const QString& newFileName)
 	fullPathFilename = newFileName;
 }
 
-int MeshDocument::size() const
+unsigned int MeshDocument::meshNumber() const
 {
 	return meshList.size();
 }
 
-int MeshDocument::sizeRasters() const
+unsigned int MeshDocument::rasterNumber() const
 {
 	return rasterList.size();
 }
@@ -291,137 +276,260 @@ void MeshDocument::setBusy(bool _busy)
 	busy=_busy;
 }
 
-MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
+/**
+ * @brief Adds a new mesh to the MeshDocument. The added mesh is a COPY of the mesh
+ * passed as parameter.
+ */
+MeshModel* MeshDocument::addNewMesh(
+		const CMeshO& mesh,
+		const QString& label,
+		bool setAsCurrent)
 {
-	QString newlabel = NameDisambiguator(this->meshList,std::move(label));
-	
+	MeshModel* m = addNewMesh("", label, setAsCurrent);
+	m->cm = mesh;
+	m->updateBoxAndNormals();
+	m->updateDataMask();
+	return m;
+}
+
+MeshModel* MeshDocument::addNewMesh(
+		QString fullPath,
+		const QString& label,
+		bool setAsCurrent)
+{
+	QString newlabel = nameDisambiguator(this->meshList, label);
+
 	if(!fullPath.isEmpty())
 	{
 		QFileInfo fi(fullPath);
 		fullPath = fi.absoluteFilePath();
 	}
-	
-	MeshModel *newMesh = new MeshModel(this, newMeshId(), fullPath,newlabel);
-	meshList.push_back(newMesh);
-	
+
+	meshList.push_back(MeshModel(newMeshId(), fullPath,newlabel));
+	MeshModel& newMesh = meshList.back();
+
 	if(setAsCurrent)
-		this->setCurrentMesh(newMesh->id());
-	
+		this->setCurrentMesh(newMesh.id());
+
 	emit meshSetChanged();
-	emit meshAdded(newMesh->id());
-	return newMesh;
+	emit meshAdded(newMesh.id());
+	return &newMesh;
 }
 
-MeshModel * MeshDocument::addOrGetMesh(QString fullPath, const QString& label, bool setAsCurrent)
+MeshModel* MeshDocument::addOrGetMesh(
+		const QString& fullPath,
+		const QString& label,
+		bool setAsCurrent)
 {
-	MeshModel *newMesh = nullptr;
-	for (MeshModel* m : meshList)
-		if (m->shortName() == label)
-			newMesh = m;
+	MeshModel* newMesh = nullptr;
+	for (MeshModel& m : meshList)
+		if (m.shortName() == label)
+			newMesh = &m;
 	if(newMesh) {
 		if(setAsCurrent)
 			this->setCurrentMesh(newMesh->id());
 		return newMesh;
 	}
-	return addNewMesh(std::move(fullPath),label,setAsCurrent);
+	return addNewMesh(fullPath,label,setAsCurrent);
 }
 
-bool MeshDocument::delMesh(MeshModel *mmToDel)
+/**
+ * Returns the ordered list of the meshes loaded from the same
+ * file in which has been loaded the model mm.
+ */
+std::list<MeshModel*> MeshDocument::getMeshesLoadedFromSameFile(MeshModel& mm)
 {
-	if(!meshList.removeOne(mmToDel))
+	std::list<MeshModel*> ml;
+	if (mm.idInFile() == -1){
+		ml.push_back(&mm);
+	}
+	else {
+		if (!mm.fullName().isEmpty()){
+			for (MeshModel& m : meshList){
+				if (m.fullName() == mm.fullName())
+					ml.push_back(&m);
+			}
+		}
+	}
+	return ml;
+}
+
+bool MeshDocument::delMesh(unsigned int id)
+{
+	auto pos = meshList.end();
+	for (auto it = meshList.begin(); it != meshList.end(); ++it)
+		if ((unsigned int)it->id() == id)
+			pos = it;
+	if (pos == meshList.end())
 		return false;
-	if((currentMesh == mmToDel) && (!meshList.empty()))
-		setCurrentMesh(this->meshList.at(0)->id());
-	else if (meshList.empty())
-		setCurrentMesh(-1);
-	
-	int index = mmToDel->id();
-	delete mmToDel;
-	
-	emit meshSetChanged();
-	emit meshRemoved(index);
+
+	eraseMesh(pos);
 	return true;
+}
+
+MeshDocument::MeshIterator MeshDocument::eraseMesh(MeshIterator it)
+{
+	if (it != meshList.end()) {
+		int id = it->id();
+		// no other meshes, therefore no current mesh after deleting this one
+		if (meshList.size() == 1) {
+			setCurrentMesh(-1);
+		}
+		else { // other meshes, I need to choose which one will become the current mesh
+			auto next = it;
+			next++;
+			if (next != meshList.end()) // if there is a next, will be the next one
+				setCurrentMesh(next->id());
+			else // no next, I set the first mesh as current
+				setCurrentMesh(this->meshList.front().id());
+		}
+
+		it = meshList.erase(it);
+
+		emit meshSetChanged();
+		emit meshRemoved(id);
+	}
+
+	return it;
 }
 
 RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 {
 	QFileInfo info(fullPathFilename);
 	QString newLabel=info.fileName();
-	QString newName = NameDisambiguator(this->rasterList, newLabel);
-	
-	RasterModel *newRaster=new RasterModel(this, newRasterId(), newLabel);
-	rasterList.push_back(newRaster);
-	
-	//Add new plane
-	//Plane *plane = new Plane(newRaster, fullPathFilename, QString());
-	//newRaster->addPlane(plane);
-	
-	this->setCurrentRaster(newRaster->id());
-	
+
+	rasterList.push_back(RasterModel(newRasterId(), newLabel));
+	RasterModel& newRaster = rasterList.back();
+
+	this->setCurrentRaster(newRaster.id());
+
 	emit rasterSetChanged();
-	return newRaster;
+	return &newRaster;
 }
 
-bool MeshDocument::delRaster(RasterModel *rasterToDel)
+bool MeshDocument::delRaster(unsigned int id)
 {
-	QMutableListIterator<RasterModel *> i(rasterList);
-	
-	while (i.hasNext())
-	{
-		RasterModel *r = i.next();
-		
-		if (r==rasterToDel)
-		{
-			i.remove();
-			delete rasterToDel;
-		}
-	}
-	
-	if(currentRaster == rasterToDel)
-	{
-		if (!rasterList.empty())
-			setCurrentRaster(rasterList.at(0)->id());
-		else
-			setCurrentRaster(-1);
-	}
+	auto pos = rasterList.end();
+	for (auto it = rasterList.begin(); it != rasterList.end(); ++it)
+		if (it->id() == id)
+			pos = it;
+	if (pos == rasterList.end())
+		return false;
+
+	if((currentRaster == &(*pos)) && (!rasterList.empty()))
+		setCurrentRaster(rasterList.front().id());
+	else if (rasterList.empty())
+		setCurrentRaster(-1);
+
+	rasterList.erase(pos);
+
 	emit rasterSetChanged();
-	
+
 	return true;
 }
 
-int MeshDocument::vn()
+MeshDocument::RasterIterator MeshDocument::eraseRaster(RasterIterator it)
+{
+	return rasterList.erase(it);
+}
+
+int MeshDocument::vn() const
 {
 	int tot=0;
-	for(MeshModel* mmp : meshList)
-		tot+= mmp->cm.vn;
+	for(const MeshModel& mmp : meshList)
+		tot+= mmp.cm.vn;
 	return tot;
 }
 
-int MeshDocument::fn()
+int MeshDocument::fn() const
 {
 	int tot=0;
-	for(MeshModel *mmp : meshList)
-		tot+= mmp->cm.fn;
+	for(const MeshModel& mmp : meshList)
+		tot+= mmp.cm.fn;
 	return tot;
 }
 
-Box3m MeshDocument::bbox()
+Box3m MeshDocument::bbox() const
 {
 	Box3m FullBBox;
-	for(MeshModel * mp : meshList)
-		FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
+	for(const MeshModel& mp : meshList)
+		FullBBox.Add(mp.cm.Tr,mp.cm.bbox);
 	return FullBBox;
 }
 
-bool MeshDocument::hasBeenModified()
+bool MeshDocument::hasBeenModified() const
 {
-	for(MeshModel *m : meshList)
-		if(m->meshModified()) return true;
+	for(const MeshModel& m : meshList)
+		if(m.meshModified()) return true;
 	return false;
+}
+
+MeshDocument::MeshIterator MeshDocument::meshBegin()
+{
+	return meshList.begin();
+}
+
+MeshDocument::MeshIterator MeshDocument::meshEnd()
+{
+	return meshList.end();
+}
+
+MeshDocument::RasterIterator MeshDocument::rasterBegin()
+{
+	return rasterList.begin();
+}
+
+MeshDocument::RasterIterator MeshDocument::rasterEnd()
+{
+	return rasterList.end();
+}
+
+MeshDocument::ConstMeshIterator MeshDocument::meshBegin() const
+{
+	return meshList.begin();
+}
+
+MeshDocument::ConstMeshIterator MeshDocument::meshEnd() const
+{
+	return meshList.end();
+}
+
+MeshDocument::ConstRasterIterator MeshDocument::rasterBegin() const
+{
+	return rasterList.begin();
+}
+
+MeshDocument::ConstRasterIterator MeshDocument::rasterEnd() const
+{
+	return rasterList.end();
 }
 
 MeshDocument::MeshRangeIterator MeshDocument::meshIterator()
 {
-	return MeshRangeIterator(this);
+	return MeshRangeIterator(*this);
 }
 
+MeshDocument::ConstMeshRangeIterator MeshDocument::meshIterator() const
+{
+	return ConstMeshRangeIterator(*this);
+}
+
+MeshDocument::RasterRangeIterator MeshDocument::rasterIterator()
+{
+	return RasterRangeIterator(*this);
+}
+
+MeshDocument::ConstRasterRangeIterator MeshDocument::rasterIterator() const
+{
+	return ConstRasterRangeIterator(*this);
+}
+
+unsigned int MeshDocument::newMeshId()
+{
+	return meshIdCounter++;
+}
+
+unsigned int MeshDocument::newRasterId()
+{
+	return rasterIdCounter++;
+}

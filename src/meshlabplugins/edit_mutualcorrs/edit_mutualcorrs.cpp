@@ -58,14 +58,9 @@ EditMutualCorrsPlugin::EditMutualCorrsPlugin() {
 
     }
 
-const QString EditMutualCorrsPlugin::Info()
+const QString EditMutualCorrsPlugin::info()
 {
     return tr("Registration of images on 3D models using mutual correspondences");
-}
-
-QString EditMutualCorrsPlugin::pluginName() const
-{
-    return "EditMutualCorrs";
 }
  
 void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -74,9 +69,9 @@ void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
   
-void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
+void EditMutualCorrsPlugin::decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
-	if (gla->md()->rasterList.size() == 0 || !gla->isRaster())
+	if (gla->md()->rasterNumber() == 0 || !gla->isRaster())
 	{
 		return;
 	}
@@ -199,7 +194,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 
 }
 
-bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditMutualCorrsPlugin::startEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -209,7 +204,7 @@ bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLS
     {
         mutualcorrsDialog = new edit_mutualcorrsDialog(gla->window(), this);
 
-		if (glArea->md()->rasterList.size() == 0 || !glArea->isRaster())
+		if (glArea->md()->rasterNumber() == 0 || !glArea->isRaster())
 		{
 			QMessageBox::warning(gla, tr("Mutual Correspondences"), tr("You need at least a raster layer, and to be in Current Raster View mode!"), QMessageBox::Ok);
 			return false;
@@ -247,7 +242,7 @@ bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLS
     return true;
 }
 
-void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditMutualCorrsPlugin::endEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     assert(mutualcorrsDialog);
@@ -474,7 +469,7 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
             QTextStream openFileTS(&openFile);
 
             openFileTS << "-------RASTER ALIGNMENT DATA---------" << "\n";
-			openFileTS << "3D Model: " << glArea->md()->mm()->relativePathName() << "\n";
+			openFileTS << "3D Model: " << glArea->md()->mm()->relativePathName(glArea->md()->pathName()) << "\n";
 			openFileTS << "Raster: " << glArea->md()->rm()->currentPlane->fullPathFileName << "\n";
 
             // writing reference

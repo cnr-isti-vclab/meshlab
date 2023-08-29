@@ -33,7 +33,7 @@ class VertexSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
 
-    vector <QImage> &srcImgs;
+    std::vector <QImage> &srcImgs;
     float dist_upper_bound;
 
     MetroMeshGrid unifGridFace;
@@ -45,7 +45,7 @@ class VertexSampler
     int vertexNo, vertexCnt, start, offset;
 
 public:
-	VertexSampler(CMeshO &_srcMesh, vector <QImage> &_srcImg, float upperBound) :
+	VertexSampler(CMeshO &_srcMesh, std::vector <QImage> &_srcImg, float upperBound) :
 	srcImgs(_srcImg), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
@@ -103,7 +103,7 @@ public:
 
 class RasterSampler
 {
-    vector<QImage> &trgImgs;
+    std::vector<QImage> &trgImgs;
 
     // Callback stuff
     vcg::CallBackPos *cb;
@@ -111,7 +111,7 @@ class RasterSampler
     int faceNo, faceCnt, start, offset;
 
 public:
-	RasterSampler(vector<QImage> &_imgs) : trgImgs(_imgs) {}
+	RasterSampler(std::vector<QImage> &_imgs) : trgImgs(_imgs) {}
 
     void InitCallback(vcg::CallBackPos *_cb, int _faceNo, int _start=0, int _offset=100)
     {
@@ -139,7 +139,7 @@ public:
         if (edgeDist != 0.0)
             alpha=254-edgeDist*128;
 
-		if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
+        if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
         {
             c.lerp(f.cV(0)->cC(), f.cV(1)->cC(), f.cV(2)->cC(), p);
 			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
@@ -157,8 +157,8 @@ class TransferColorSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
-    vector <QImage> &trgImgs;
-	vector <QImage> *srcImgs;
+    std::vector <QImage> &trgImgs;
+    std::vector <QImage> *srcImgs;
     float dist_upper_bound;
     bool fromTexture;
     MetroMeshGrid unifGridFace;
@@ -206,7 +206,7 @@ class TransferColorSampler
     }*/
 
 public:
-    TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, float upperBound, int _vertexMode)
+    TransferColorSampler(CMeshO &_srcMesh, std::vector <QImage> &_trgImgs, float upperBound, int _vertexMode)
     : trgImgs(_trgImgs), dist_upper_bound(upperBound)
     {
         srcMesh=&_srcMesh;
@@ -224,7 +224,7 @@ public:
         }
     }
 
-	TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, vector <QImage> *_srcImgs, float upperBound)
+	TransferColorSampler(CMeshO &_srcMesh, std::vector <QImage> &_trgImgs, std::vector <QImage> *_srcImgs, float upperBound)
 		: trgImgs(_trgImgs), srcImgs(_srcImgs), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
@@ -267,6 +267,8 @@ public:
         startPt[1] = bary[0]*f.cV(0)->cP().Y()+bary[1]*f.cV(1)->cP().Y()+bary[2]*f.cV(2)->cP().Y();
         startPt[2] = bary[0]*f.cV(0)->cP().Z()+bary[1]*f.cV(1)->cP().Z()+bary[2]*f.cV(2)->cP().Z();
 
+        if (!srcMesh->bbox.IsInEx(startPt)) return;
+
         // Retrieve closest point on source mesh
 
         if(usePointCloudSampling)
@@ -274,7 +276,7 @@ public:
             CMeshO::VertexType   *nearestV=0;
             CMeshO::ScalarType dist=dist_upper_bound;
             nearestV =  vcg::tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*srcMesh,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-        //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+            //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
             //if(storeDistanceAsQualityFlag)  p.Q() = dist;
             if(dist == dist_upper_bound) return ;
 
@@ -298,7 +300,13 @@ public:
                     rr = gg = bb = q;
                 } break;
             }
-			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(rr, gg, bb, 255));
+            int cx = tp.X();
+            int cy = trgImgs[f.cWT(0).N()].height() - 1 - tp.Y();
+            if (cx >= 0 && cx < trgImgs[f.cWT(0).N()].size().width()) {
+                if (cy >= 0 && cy < trgImgs[f.cWT(0).N()].size().height()){
+                    trgImgs[f.cWT(0).N()].setPixel(cx, cy, qRgba(rr, gg, bb, 255));
+                }
+            }
         }
         else // sampling from a mesh
         {

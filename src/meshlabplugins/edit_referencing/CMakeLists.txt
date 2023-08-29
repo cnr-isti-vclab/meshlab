@@ -18,22 +18,6 @@ set(RESOURCES
 set(UI
 	edit_referencingDialog.ui)
 
-add_library(edit_referencing MODULE ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
-
-target_include_directories(edit_referencing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_referencing PUBLIC meshlab-common)
+add_meshlab_plugin(edit_referencing ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
 target_link_libraries(edit_referencing PRIVATE OpenGL::GLU)
-
-set_property(TARGET edit_referencing PROPERTY FOLDER Plugins)
-
-set_property(TARGET edit_referencing PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                              ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET edit_referencing PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                              ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS edit_referencing
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)

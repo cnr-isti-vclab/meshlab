@@ -27,21 +27,20 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef _QUALITY_MAPPER_PLUGIN_H_
-#define _QUALITY_MAPPER_PLUGIN_H_
+#ifndef MESHLAB_QUALITY_MAPPER_PLUGIN_H
+#define MESHLAB_QUALITY_MAPPER_PLUGIN_H
 
 #include <QObject>
 #include <QAction>
 #include <QList>
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include "qualitymapperdialog.h"
 
 //This class defines the plugin interface
-class QualityMapperPlugin : public QObject, public EditPluginInterface
+class QualityMapperPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
 
 private:
 	QualityMapperDialog *_qualityMapperDialog;
@@ -50,10 +49,9 @@ public:
 	QualityMapperPlugin(void);
 	~QualityMapperPlugin(void) {};
 
-	static const QString Info();
-	QString pluginName() const;
-	bool StartEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
-	void EndEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	static const QString info();
+	bool startEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	void endEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
 	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
     //virtual void Decorate(MeshModel&, GLArea*);
     void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
@@ -64,4 +62,4 @@ public:
 	bool haveToPick;
 };
 
-#endif
+#endif // MESHLAB_QUALITY_MAPPER_PLUGIN_H

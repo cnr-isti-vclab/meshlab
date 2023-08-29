@@ -24,13 +24,13 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class ExtraMeshFilterPlugin : public QObject, public FilterPluginInterface
+class ExtraMeshFilterPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	    MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 		enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 
@@ -69,6 +69,7 @@ public:
 		FP_CLOSE_HOLES,
 		FP_CYLINDER_UNWRAP,
 		FP_REFINE_CATMULL,
+		FP_REFINE_DOOSABIN,
 		FP_REFINE_HALF_CATMULL,
 		FP_QUAD_DOMINANT,
 		FP_MAKE_PURE_TRI,
@@ -84,16 +85,22 @@ public:
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin(){}
 	QString pluginName() const;
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
+	QString pythonFilterName(ActionIDType f) const;
+	QString filterName(ActionIDType filter) const;
+	QString filterInfo(ActionIDType filter) const;
 
 	FilterClass getClass(const QAction*) const;
-	void initParameterList(const QAction*, MeshModel &/*m*/, RichParameterList & /*parent*/);
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & /*parent*/, vcg::CallBackPos * cb) ;
+	RichParameterList initParameterList(const QAction*, const MeshModel &/*m*/);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	int postCondition(const QAction *filter) const;
 	int getPreConditions(const QAction *filter) const;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
-
+	int getRequirements(const QAction* filter);
+	FilterArity filterArity(const QAction *) const {return SINGLE_MESH;}
 protected:
 
 	float lastq_QualityThr;

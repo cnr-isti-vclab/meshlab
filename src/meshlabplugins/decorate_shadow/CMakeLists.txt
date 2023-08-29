@@ -22,22 +22,6 @@ set(HEADERS
 
 set(RESOURCES noise.qrc)
 
-add_library(decorate_shadow MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
-
-target_include_directories(decorate_shadow PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(decorate_shadow PUBLIC meshlab-common)
+add_meshlab_plugin(decorate_shadow ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_link_libraries(decorate_shadow PRIVATE OpenGL::GLU)
-
-set_property(TARGET decorate_shadow PROPERTY FOLDER Plugins)
-
-set_property(TARGET decorate_shadow PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET decorate_shadow PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS decorate_shadow
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)

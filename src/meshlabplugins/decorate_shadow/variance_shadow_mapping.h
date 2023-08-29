@@ -36,7 +36,7 @@ public:
 
     /**
       * Performs init commands.
-      * Initializes GLEW and performs setup, thes compiles and links the shaders.
+      * Initializes GLEW and performs setup, then compiles and links the shaders.
       * If something went wrong return false, otherwise true.
       * @return false if something went wrong, true otherwise.
       */

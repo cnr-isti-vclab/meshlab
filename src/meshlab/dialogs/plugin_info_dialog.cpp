@@ -24,34 +24,35 @@
 #include "plugin_info_dialog.h"
 #include "ui_plugin_info_dialog.h"
 
-#include <QDir>
-#include <QPluginLoader>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
 
-#include <common/interfaces/filter_plugin_interface.h>
-#include <common/interfaces/iomesh_plugin_interface.h>
-#include <common/interfaces/decorate_plugin_interface.h>
-#include <common/interfaces/render_plugin_interface.h>
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
+#include <common/plugins/interfaces/io_plugin.h>
+#include <common/plugins/interfaces/decorate_plugin.h>
+#include <common/plugins/interfaces/render_plugin.h>
+#include <common/plugins/interfaces/edit_plugin.h>
+#include <common/globals.h>
+#include <common/mlexception.h>
+#include <common/mlapplication.h>
+#include <common/plugins/plugin_manager.h>
+#include <common/plugins/meshlab_plugin_type.h>
 
 PluginInfoDialog::PluginInfoDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::PluginInfoDialog)
 {
 	ui->setupUi(this);
-}
-
-PluginInfoDialog::PluginInfoDialog(const QString& path, const QStringList& fileNames, QWidget* parent) :
-	QDialog(parent),
-	ui(new Ui::PluginInfoDialog),
-	pathDirectory(path)
-{
-	ui->setupUi(this);
 	
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
 	interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
 	featureIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
+	uninstallIcon.addPixmap(style()->standardPixmap(QStyle::SP_DialogCancelButton));
 	
-	populateTreeWidget(path, fileNames);
+	populateTreeWidget();
 }
 
 PluginInfoDialog::~PluginInfoDialog()
@@ -59,146 +60,212 @@ PluginInfoDialog::~PluginInfoDialog()
 	delete ui;
 }
 
-void PluginInfoDialog::populateTreeWidget(const QString& path, const QStringList& fileNames)
+/**
+ * @brief This function will be called every time the user sets
+ * a plugin to enabled or disabled.
+ */
+void PluginInfoDialog::chechBoxStateChanged(int state)
 {
-	if (fileNames.isEmpty()) {
-		ui->label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::toNativeSeparators(path)));
+	QCheckBox* cb = (QCheckBox*)QObject::sender(); 
+	int nPlug = cb->property("np").toInt();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	MeshLabPlugin* fpi = pm[nPlug];
+	if (state == Qt::Checked){
+		pm.enablePlugin(fpi);
+	}
+	else {
+		pm.disablePlugin(fpi);
+	}
+}
+
+/**
+ * @brief This function will be called every time the user wants to uninstall 
+ * a plugin.
+ */
+void PluginInfoDialog::uninstallPluginPushButtonClicked()
+{
+	QPushButton* pb = (QPushButton*)QObject::sender();
+	int nPlug = pb->property("np").toInt();
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	MeshLabPlugin* fpi = pm[nPlug];
+	QFileInfo fdel = fpi->pluginFileInfo();
+	pm.unloadPlugin(fpi);
+	bool res = QFile::remove(fdel.absoluteFilePath());
+	if (!res){
+		QSettings settings;
+		QStringList toDeletePlugins = settings.value("ToDeletePlugins").value<QStringList>();
+		toDeletePlugins.append(fdel.absoluteFilePath());
+		settings.setValue("ToDeletePlugins", toDeletePlugins);
+		//pm.loadPlugin(fdel.absoluteFilePath());
+		//QMessageBox::warning(
+		//			this, "Error while deleting plugin.",
+		//			"Impossible to delete the plugin. Please delete manually the following file (or disable the plugin):\n"
+		//			+ fdel.absoluteFilePath());
+	}
+	ui->treeWidget->clear();
+	populateTreeWidget();
+	ui->treeWidget->update();
+}
+
+void PluginInfoDialog::on_loadPluginsPushButton_clicked()
+{
+#ifdef _WIN32
+	QString pluginFileFormat = "*MeshLab Plugin (*.dll)";
+#elif __APPLE__ //other os
+	QString pluginFileFormat = "All known formats (*.so *.dylib);;MeshLab Plugin (*.so);;MeshLab Plugin (*.dylib)";
+#else
+	QString pluginFileFormat = "*MeshLab Plugin (*.so)";
+#endif
+	QStringList fileList = QFileDialog::getOpenFileNames(this, "Load Plugins", "", pluginFileFormat);
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	bool loadOk = false;
+	for (const QString& fileName : qAsConst(fileList)){
+		QFileInfo finfo(fileName);
+		
+		try {
+			PluginManager::checkPlugin(fileName);
+			
+			QString newFileName = MeshLabApplication::extraPluginsLocation() + "/" +finfo.fileName();
+			
+			if (QFile::exists(newFileName)){
+				throw MLException("A plugin called " + finfo.fileName() + " already exists. Please uninstall it before installing a new one.");
+			}
+			
+			QFile::copy(fileName, newFileName);
+			
+			pm.loadPlugin(newFileName);
+			loadOk = true;
+		}
+		catch(const MLException& e){
+			QMessageBox::warning(this, "Error while loading plugin", e.what());
+		}
+	}
+	if (loadOk){
+		ui->treeWidget->clear();
+		populateTreeWidget();
+		ui->treeWidget->update();
+	}
+}
+
+void PluginInfoDialog::populateTreeWidget()
+{
+	ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+	ui->treeWidget->header()->setStretchLastSection(false);
+	ui->treeWidget->header()->setSectionResizeMode(PLUGINS, QHeaderView::Stretch);
+	PluginManager& pm = meshlab::pluginManagerInstance();
+	if (pm.size() == 0){
+		ui->label->setText(tr("No plugin has been loaded."));
 		ui->treeWidget->hide();
 	}
 	else {
-		int nPlugins = 0;
-		QDir dir(path);
-		for (const QString& fileName : fileNames) {
-			QPluginLoader loader(dir.absoluteFilePath(fileName));
-			QObject *plugin = loader.instance();
-			
-			QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
-			pluginItem->setText(0, fileName);
-			pluginItem->setIcon(0, interfaceIcon);
-			ui->treeWidget->setItemExpanded(pluginItem, false);
-			
-			QFont boldFont = pluginItem->font(0);
-			boldFont.setBold(true);
-			pluginItem->setFont(0, boldFont);
-			
-			if (plugin) {
-				IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
-				if (iMeshIO){
-					nPlugins++;
-					QStringList Templist;
-					for(const FileFormat& f: iMeshIO->importFormats()){
-						QString formats;
-						for(const QString& s : f.extensions)
-							formats+="Importer_"+s+" ";
-						Templist.push_back(formats);
-					}
-					for(const FileFormat& f: iMeshIO->exportFormats()){
-						QString formats;
-						for(const QString& s: f.extensions)
-							formats+="Exporter_"+s+" ";
-						Templist.push_back(formats);
-					}
-					addItems(pluginItem,Templist);
+		int nPlug = 0;
+		for (MeshLabPlugin* fp : pm.pluginIterator(true)){
+			MeshLabPluginType type(fp);
+			QString pluginType = type.pluginTypeString();
+			QStringList tmplist;
+			if (type.isDecoratePlugin()){
+				DecoratePlugin* dpi = dynamic_cast<DecoratePlugin*>(fp);
+				for(QAction *a: dpi->actions())
+					tmplist.push_back(a->text());
+			}
+			if (type.isEditPlugin()){
+				EditPlugin* epi = dynamic_cast<EditPlugin*>(fp);
+				for(QAction *a: epi->actions())
+					tmplist.push_back(a->text());
+			}
+			if (type.isFilterPlugin()){
+				FilterPlugin* fpi = dynamic_cast<FilterPlugin*>(fp);
+				for(QAction *a: fpi->actions())
+					tmplist.push_back(a->text());
+			}
+			if (type.isIOPlugin()){
+				IOPlugin* iopi = dynamic_cast<IOPlugin*>(fp);
+				for(const FileFormat& f: iopi->importFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="Importer_"+s+" ";
+					tmplist.push_back(formats);
 				}
-				DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
-				if (iDecorate){
-					nPlugins++;
-					QStringList Templist;
-					for(QAction *a: iDecorate->actions())
-						Templist.push_back(a->text());
-					addItems(pluginItem,Templist);
+				for(const FileFormat& f: iopi->exportFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="Exporter_"+s+" ";
+					tmplist.push_back(formats);
 				}
-				FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-				if (iFilter){
-					nPlugins++;
-					QStringList Templist;
-					for(QAction *a: iFilter->actions())
-						Templist.push_back(a->text());
-					addItems(pluginItem,Templist);
+				for(const FileFormat& f: iopi->importImageFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="IMG_Importer_"+s+" ";
+					tmplist.push_back(formats);
 				}
-				RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-				if (iRender){
-					nPlugins++;
-					QStringList Templist;
-					for(QAction *a: iRender->actions())
-						Templist.push_back(a->text());
-					addItems(pluginItem,Templist);
+				for(const FileFormat& f: iopi->exportImageFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="IMG_Exporter_"+s+" ";
+					tmplist.push_back(formats);
 				}
-				EditPluginInterfaceFactory *iEdit = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-				if (iEdit){
-					nPlugins++;
-					QStringList Templist;
-					for(QAction *a: iEdit->actions())
-						Templist.push_back(a->text());
-					addItems(pluginItem,Templist);
+				for(const FileFormat& f: iopi->importProjectFormats()){
+					QString formats;
+					for(const QString& s : f.extensions)
+						formats+="PRJ_Importer_"+s+" ";
+					tmplist.push_back(formats);
+				}
+				for(const FileFormat& f: iopi->exportProjectFormats()){
+					QString formats;
+					for(const QString& s: f.extensions)
+						formats+="PRJ_Exporter_"+s+" ";
+					tmplist.push_back(formats);
 				}
 			}
+			if (type.isRenderPlugin()){
+				RenderPlugin* rpi = dynamic_cast<RenderPlugin*>(fp);
+				for(QAction *a: rpi->actions())
+					tmplist.push_back(a->text());
+			}
+			addItems(fp, nPlug++, pluginType, tmplist);
 		}
-		std::string lbl = "Number of plugin loaded: " + std::to_string(nPlugins);
-		ui->label->setText(tr(lbl.c_str()).arg(QDir::toNativeSeparators(path)));
+		
+		std::string lbl = "Number of plugin loaded: " + std::to_string(pm.size());
+		ui->label->setText(tr(lbl.c_str()));
 	}
 }
 
-void PluginInfoDialog::addItems(QTreeWidgetItem* pluginItem, const QStringList& features)
+void PluginInfoDialog::addItems(const MeshLabPlugin* fpi, int nPlug, const QString& pluginType, const QStringList& features)
 {
+	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(ui->treeWidget);
+	pluginItem->setText(PLUGINS, fpi->pluginName());
+	pluginItem->setIcon(PLUGINS, interfaceIcon);
+	pluginItem->setText(TYPE, pluginType);
+	pluginItem->setText(FILE, fpi->pluginFileInfo().fileName());
+	pluginItem->setToolTip(FILE, fpi->pluginFileInfo().absoluteFilePath());
+	pluginItem->setText(VENDOR, fpi->vendor());
+	
+	QCheckBox* cb = new QCheckBox(this);
+	cb->setProperty("np", nPlug);
+	cb->setChecked(fpi->isEnabled());
+	connect(cb, SIGNAL(stateChanged(int)),
+			this, SLOT(chechBoxStateChanged(int)));
+	if (fpi->pluginFileInfo().absolutePath() == meshlab::defaultPluginPath())
+		cb->setEnabled(false);
+	ui->treeWidget->setItemWidget(pluginItem, ENABLED, cb);
+	
+	QPushButton* pb = new QPushButton(this);
+	pb->setProperty("np", nPlug);
+	pb->setIcon(uninstallIcon);
+	connect(pb, SIGNAL(clicked()),
+			this, SLOT(uninstallPluginPushButtonClicked()));
+	if (fpi->pluginFileInfo().absolutePath() == meshlab::defaultPluginPath())
+		pb->setEnabled(false);
+	ui->treeWidget->setItemWidget(pluginItem, UNINSTALL, pb);
+	
+	//pluginItem->setIcon(UNINSTALL, uninstallIcon);
+	ui->treeWidget->setItemExpanded(pluginItem, false);
+	QFont boldFont = pluginItem->font(PLUGINS);
+	boldFont.setBold(true);
+	pluginItem->setFont(PLUGINS, boldFont);
 	for (const QString& feature: features) {
 		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
-		featureItem->setText(0, feature);
-		featureItem->setIcon(0, featureIcon);
-	}
-}
-
-void PluginInfoDialog::on_treeWidget_itemClicked(QTreeWidgetItem *item, int)
-{
-	QString parent;
-	QString actionName;
-	if(item==NULL) return;
-	if (item->parent()!=NULL){
-		parent=item->parent()->text(0);
-		actionName=item->text(0);
-	}
-	else parent=item->text(0);
-	QString fileName=pathDirectory+"/"+parent;
-	QDir dir(pathDirectory);
-	QPluginLoader loader(fileName);
-	qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
-	QObject *plugin = loader.instance();
-	if (plugin) {
-		IOMeshPluginInterface *iMeshIO = qobject_cast<IOMeshPluginInterface *>(plugin);
-		if (iMeshIO){
-			for(const FileFormat& f: iMeshIO->importFormats()){
-				QString formats;
-				for(const QString& s: f.extensions)
-					formats+="Importer_"+s+" ";
-				if (actionName==formats) ui->labelInfo->setText(f.description);
-			}
-			for(const FileFormat& f: iMeshIO->exportFormats()){
-				QString formats;
-				for(const QString& s: f.extensions)
-					formats+="Exporter_"+s+" ";
-				if (actionName==formats) ui->labelInfo->setText(f.description);
-			}
-		}
-		DecoratePluginInterface *iDecorate = qobject_cast<DecoratePluginInterface *>(plugin);
-		if (iDecorate) {
-			for(QAction *a: iDecorate->actions())
-				if (actionName==a->text())
-					ui->labelInfo->setText(iDecorate->decorationInfo(a));
-		}
-		FilterPluginInterface *iFilter = qobject_cast<FilterPluginInterface *>(plugin);
-		if (iFilter) {
-			for(QAction *a: iFilter->actions())
-				if (actionName==a->text()) 
-					ui->labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
-		}
-//		RenderPluginInterface *iRender = qobject_cast<RenderPluginInterface *>(plugin);
-//		if (iRender){
-//		}
-		EditPluginInterfaceFactory *iEditFactory = qobject_cast<EditPluginInterfaceFactory *>(plugin);
-		if (iEditFactory) {
-			for(QAction *a: iEditFactory->actions())
-				if(iEditFactory)
-					ui->labelInfo->setText(iEditFactory->getEditToolDescription(a));
-		}
+		featureItem->setText(PLUGINS, feature);
+		featureItem->setIcon(PLUGINS, featureIcon);
 	}
 }

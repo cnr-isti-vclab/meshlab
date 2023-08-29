@@ -1,0 +1,60 @@
+name: BuildMeshLab
+
+on:
+  [push, pull_request]
+
+env:
+  QT_VERSION: 5.15.2
+  MAC_CERT: ${{secrets.MACOS_CERT_ID}}
+  MAC_CERT_PSSW: ${{secrets.MACOS_CERTIFICATE_PSSW}}
+  WIN_CERT: ${{secrets.WIN_CERTIFICATE}}
+
+jobs:
+  meshlab_build:
+    name: Build MeshLab
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
+        precision: [single_precision, double_precision]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Setup Environment
+      uses: ./.github/actions/0_setup
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        if [ "${{matrix.precision}}" == "double_precision" ]; then
+          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+        else
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+        fi
+    - name: Build
+      uses: ./.github/actions/1_build
+      with:
+        cache-path: src/external/downloads/*
+        cache-key: external-libraries
+        build-option: ${{matrix.precision}}
+        nightly: true
+    - name: Deploy
+      uses: ./.github/actions/2_deploy
+      with:
+        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
+        mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
+        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
+        win-certificate-pssw: ${{ secrets.WIN_CERTIFICATE_PSSW }}
+    - name: Upload MeshLab Portable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
+        path: install/
+    - name: Upload MeshLab Packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
+        path: packages/MeshLab*

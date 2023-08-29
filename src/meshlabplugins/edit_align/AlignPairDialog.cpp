@@ -28,7 +28,7 @@
 #include <QDialogButtonBox>
 #include <QDesktopWidget>
 
-AlignPairDialog::AlignPairDialog (GLArea* gla,QWidget * parent) : QDialog(parent)
+AlignPairDialog::AlignPairDialog (GLArea* gla, QWidget * parent) : QDialog(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout();
 	

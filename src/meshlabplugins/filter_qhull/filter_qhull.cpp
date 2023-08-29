@@ -1,30 +1,25 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
-/****************************************************************************
-  History
-
-
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #include "filter_qhull.h"
 
@@ -35,390 +30,344 @@
 using namespace std;
 using namespace vcg;
 
-
-// Constructor usually performs only two simple tasks of filling the two lists
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-
 QhullPlugin::QhullPlugin()
 {
-    typeList << FP_QHULL_CONVEX_HULL
-             <<	FP_QHULL_DELAUNAY_TRIANGULATION
-             <<	FP_QHULL_VORONOI_FILTERING
-             << FP_QHULL_ALPHA_COMPLEX_AND_SHAPE
-             << FP_QHULL_VISIBLE_POINTS;
+	typeList = {
+		FP_QHULL_CONVEX_HULL,
+		FP_QHULL_VORONOI_FILTERING,
+		FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
+		FP_QHULL_VISIBLE_POINTS};
 
-  foreach(FilterIDType tt , types())
-      actionList << new QAction(filterName(tt), this);
+	for (ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QhullPlugin::~QhullPlugin()
 {
-    for (int i = 0; i < actionList.count() ; i++ )
-        delete actionList.at(i);
 }
 
 QString QhullPlugin::pluginName() const
 {
-    return "FilterQHull";
+	return "FilterQHull";
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
- QString QhullPlugin::filterName(FilterIDType filterId) const
+QString QhullPlugin::filterName(ActionIDType f) const
 {
-  switch(filterId) {
-        case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull");
-        case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Delaunay Triangulation");
-        case FP_QHULL_VORONOI_FILTERING :  return QString("Voronoi Filtering");
-        case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE : return QString("Alpha Complex/Shape");
-        case FP_QHULL_VISIBLE_POINTS: return QString("Select Visible Points");
-        default : assert(0);
-    }
-  return QString("Error: Unknown Filter");
+	switch (f) {
+	case FP_QHULL_CONVEX_HULL: return QString("Convex Hull");
+	case FP_QHULL_VORONOI_FILTERING: return QString("Voronoi Filtering");
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Alpha Complex/Shape");
+	case FP_QHULL_VISIBLE_POINTS: return QString("Select Convex Hull Visible Points");
+	default: assert(0); return QString();
+	}
 }
 
-// Info() must return the longer string describing each filtering action
-// (this string is used in the About plugin dialog)
- QString QhullPlugin::filterInfo(FilterIDType filterId) const
+QString QhullPlugin::pythonFilterName(ActionIDType filterId) const
 {
-  switch(filterId) {
-        case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "
-                                         "The convex hull of a set of points is the boundary of the minimal convex set containing the given non-empty finite set of points.");
-        case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate the <b>Delaunay triangulation</b> with Qhull library (http://www.qhull.org/html/qdelaun.htm).<br><br>"
-                                                    "The Delaunay triangulation DT(P) of a set of points P in d-dimensional spaces is a triangulation of the convex hull "
-                                                    "such that no point in P is inside the circum-sphere of any simplex in DT(P).<br> ");
-        case FP_QHULL_VORONOI_FILTERING :  return QString("Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). <br><br>"
-                                               "The algorithm calculates a triangulation of the input point cloud without requiring vertex normals."
-                                               "It uses a subset of the Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
-                                               "After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices."
-                                               "Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep "
-                                               "only those triangles in witch all three vertices are sample points.");
-        case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Calculate the <b>Alpha Shape</b> of the mesh(Edelsbrunner and P.Mucke 1994) with Qhull library (http://www.qhull.org/). <br><br>"
-                                        "From a given finite point set in the space it computes 'the shape' of the set."
-                                        "The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation of the given point set.<br>"
-                                        "For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
-                                        "triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'.<br>"
-                                        "The filter inserts the minimum value of alpha (the circumradius of the triangle) in attribute Quality foreach face.");
-        case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
-                                          "It uses the Qhull library (http://www.qhull.org/ <br><br>"
-                                          "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-                                          "A point is considered visible if its transformed point lies on the convex hull of a transformed points cloud from the original mesh points.");
-        default : assert(0);
-    }
-    return QString("Error: Unknown Filter");
+	switch (filterId) {
+	case FP_QHULL_CONVEX_HULL: return QString("generate_convex_hull");
+	case FP_QHULL_VORONOI_FILTERING: return QString("generate_voronoi_filtering");
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("generate_alpha_shape");
+	case FP_QHULL_VISIBLE_POINTS: return QString("compute_selection_of_visible_convex_hull_per_vertex");
+	default: assert(0); return QString();
+	}
 }
 
-// The FilterClass describes in which generic class of filters it fits.
-// This choice affect the submenu in which each filter will be placed
-// More than a single class can be chosen.
- QhullPlugin::FilterClass QhullPlugin::getClass(const QAction *a) const
+QString QhullPlugin::filterInfo(ActionIDType filterId) const
 {
-  switch(ID(a))
-    {
-        case FP_QHULL_CONVEX_HULL :
-        case FP_QHULL_DELAUNAY_TRIANGULATION :
-        case FP_QHULL_VORONOI_FILTERING :
-        case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            return FilterClass (FilterPluginInterface::Remeshing) ;
-        case FP_QHULL_VISIBLE_POINTS:
-            return FilterClass (FilterPluginInterface::Selection + FilterPluginInterface::PointSet);
-        default : assert(0);
-    }
-  return FilterClass(0);
+	switch (filterId) {
+	case FP_QHULL_CONVEX_HULL:
+		return QString(
+			"Calculate the <b>convex hull</b> with Qhull library "
+			"(http://www.qhull.org/html/qconvex.htm).<br><br> "
+			"The convex hull of a set of points is the boundary of the minimal convex set "
+			"containing the given non-empty finite set of points.");
+	case FP_QHULL_VORONOI_FILTERING:
+		return QString(
+			"Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library "
+			"(http://www.qhull.org/). <br><br>"
+			"The algorithm calculates a triangulation of the input point cloud without requiring "
+			"vertex normals."
+			"It uses a subset of the Voronoi vertices to remove triangles from the Delaunay "
+			"triangulation. <br>"
+			"After computing the Voronoi diagram, foreach sample point it chooses the two farthest "
+			"opposite Voronoi vertices."
+			"Then computes a Delaunay triangulation of the sample points and the selected Voronoi "
+			"vertices, and keep "
+			"only those triangles in witch all three vertices are sample points.");
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
+		return QString(
+			"Calculate the <b>Alpha Shape</b> of the mesh(Edelsbrunner and P.Mucke 1994) with "
+			"Qhull library (http://www.qhull.org/). <br><br>"
+			"From a given finite point set in the space it computes 'the shape' of the set."
+			"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the "
+			"Delaunay triangulation of the given point set.<br>"
+			"For a given value of 'alpha', the alpha complex includes all the simplices in the "
+			"Delaunay "
+			"triangulation which have an empty circumsphere with radius equal or smaller than "
+			"'alpha'.<br>"
+			"The filter inserts the minimum value of alpha (the circumradius of the triangle) in "
+			"attribute Quality foreach face.");
+	case FP_QHULL_VISIBLE_POINTS:
+		return QString(
+			"Select the <b>visible points</b> in the convex hull of a point cloud, as viewed from "
+			"a given viewpoint.<br>"
+			"It uses the Qhull library (http://www.qhull.org/ <br><br>"
+			"The algorithm used (Katz, Tal and Basri 2007) determines visibility without "
+			"reconstructing a surface or estimating normals."
+			"A point is considered visible if its transformed point lies on the convex hull of a "
+			"transformed points cloud from the original mesh points.");
+	default: assert(0);
+	}
+	return QString("Error: Unknown Filter");
 }
 
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define,
-// - the name of the parameter,
-// - the string shown in the dialog
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterList(const QAction *action,MeshModel &m, RichParameterList & parlst)
+QhullPlugin::FilterClass QhullPlugin::getClass(const QAction* a) const
 {
-     switch(ID(action))	 {
-        case FP_QHULL_CONVEX_HULL :
-            {
-               //parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
-                break;
-            }
-        case FP_QHULL_DELAUNAY_TRIANGULATION :
-            {
-                break;
-            }
-        case FP_QHULL_VORONOI_FILTERING :
-            {
-                parlst.addParam(RichDynamicFloat("threshold",10.0f, 0.0f, 2000.0f,"Pole Discard Thr",
-                "Threshold used to discard the Voronoi vertices too far from the origin."
-                "We discard vertices are further than this factor times the bbox diagonal <br>"
-                "Growing values of this value will add more Voronoi vertices for a better tightier surface reconstruction."
-                "On the other hand they will increase processing time and could cause numerical problems to the qhull library.<br>"
-                                                                                         ));
-                break;
-            }
-        case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            {
-                parlst.addParam(RichAbsPerc("alpha",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
-                parlst.addParam(RichEnum("Filtering", 0,
-                                    QStringList() << "Alpha Complex" << "Alpha Shape" ,
-                                    tr("Get:"),
-                                    tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex")));
-                break;
-            }
-        case FP_QHULL_VISIBLE_POINTS:
-            {
-                parlst.addParam(RichDynamicFloat("radiusThreshold",
-                                                 0.0f, 0.0f, 7.0f,
-                                                 "radius threshold ","Bounds the radius of the sphere used to select visible points."
-                                                 "It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) "
-                                                 "according to the following equation: <br>"
-                                                 "radius = radius * pow(10,threshold); <br>"
-                                                 "As the radius increases more points are marked as visible."
-                                                 "Use a big threshold for dense point clouds, a small one for sparse clouds."));
-
-                parlst.addParam(RichBool ("usecamera",
-                                                false,
-                                                "Use ViewPoint from Mesh Camera",
-                                                "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
-                parlst.addParam(RichPoint3f("viewpoint",
-                                                Point3f(0.0f, 0.0f, 0.0f),
-                                                "ViewPoint",
-                                                "if UseCamera is true, this value is ignored"));
-
-                parlst.addParam(RichBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud"));
-                parlst.addParam(RichBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points"));
-                //parlst.addParam(RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
-                //                "If no Convex Hulls are selected , this value is ignored"));
-                break;
-                break;
-            }
-   default: break; // do not add any parameter for the other filters
-    }
+	switch (ID(a)) {
+	case FP_QHULL_CONVEX_HULL:
+	case FP_QHULL_VORONOI_FILTERING:
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return FilterClass(FilterPlugin::Remeshing);
+	case FP_QHULL_VISIBLE_POINTS:
+		return FilterClass(FilterPlugin::Selection + FilterPlugin::PointSet);
+	default: assert(0);
+	}
+	return FilterClass(0);
 }
 
-// The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(const QAction *filter, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos */* cb*/)
+RichParameterList QhullPlugin::initParameterList(const QAction* action, const MeshModel& m)
 {
-    switch(ID(filter))
-    {
-        case FP_QHULL_CONVEX_HULL :
-            {
-                MeshModel &m=*md.mm();
-                MeshModel &pm =*md.addNewMesh("","Convex Hull");
-                pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
-                pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-                pm.UpdateBoxAndNormals();
-                return result;
-            }
-        case FP_QHULL_DELAUNAY_TRIANGULATION:
-            {
-                MeshModel &m=*md.mm();
-          MeshModel &pm =*md.addNewMesh("","Delaunay Triangulation");
+	RichParameterList parlst;
+	switch (ID(action)) {
+	case FP_QHULL_CONVEX_HULL: {
+		// parlst.addParam(RichBool("reorient", false,"Re-orient all faces coherently","Re-orient
+		// all faces coherently"));
+		break;
+	}
+	case FP_QHULL_VORONOI_FILTERING: {
+		parlst.addParam(RichDynamicFloat(
+			"threshold",
+			10.0f,
+			0.0f,
+			2000.0f,
+			"Pole Discard Thr",
+			"Threshold used to discard the Voronoi vertices too far from the origin."
+			"We discard vertices are further than this factor times the bbox diagonal <br>"
+			"Growing values of this value will add more Voronoi vertices for a better tightier "
+			"surface reconstruction."
+			"On the other hand they will increase processing time and could cause numerical "
+			"problems to the qhull library.<br>"));
+		break;
+	}
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: {
+		parlst.addParam(RichPercentage(
+			"alpha",
+			m.cm.bbox.Diag() / 100.0,
+			0,
+			m.cm.bbox.Diag(),
+			tr("Alpha value"),
+			tr("Compute the alpha value as percentage of the diagonal of the bbox")));
+		parlst.addParam(RichEnum(
+			"Filtering",
+			0,
+			QStringList() << "Alpha Complex"
+						  << "Alpha Shape",
+			tr("Get:"),
+			tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex")));
+		break;
+	}
+	case FP_QHULL_VISIBLE_POINTS: {
+		parlst.addParam(RichDynamicFloat(
+			"radiusThreshold",
+			0.0f,
+			0.0f,
+			7.0f,
+			"radius threshold ",
+			"Bounds the radius of the sphere used to select visible points."
+			"It is used to adjust the radius of the sphere (calculated as distance between the "
+			"center and the farthest point from it) "
+			"according to the following equation: <br>"
+			"radius = radius * pow(10,threshold); <br>"
+			"As the radius increases more points are marked as visible."
+			"Use a big threshold for dense point clouds, a small one for sparse clouds."));
 
-                    m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                    m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+		parlst.addParam(RichBool(
+			"usecamera",
+			false,
+			"Use ViewPoint from Mesh Camera",
+			"Uses the ViewPoint from the camera associated to the current mesh\n if there is no "
+			"camera, an error occurs"));
+		parlst.addParam(RichDirection(
+			"viewpoint",
+			Point3f(0.0f, 0.0f, 0.0f),
+			"ViewPoint",
+			"if UseCamera is true, this value is ignored"));
 
-                int dim= 3;				/* dimension of points */
-                int numpoints= m.cm.vn;	/* number of mesh vertices */
+		parlst.addParam(RichBool(
+			"convex_hullFP",
+			false,
+			"Show Partial Convex Hull of flipped points",
+			"Show Partial Convex Hull of the transformed point cloud"));
+		parlst.addParam(RichBool(
+			"triangVP",
+			false,
+			"Show a triangulation of the visible points",
+			"Show a triangulation of the visible points"));
+		// parlst.addParam(RichBool("reorient", false,"Re-orient all faces of the CH
+		// coherently","Re-orient all faces of the CH coherently."
+		//                "If no Convex Hulls are selected , this value is ignored"));
+		break;
+		break;
+	}
+	default: break; // do not add any parameter for the other filters
+	}
+	return parlst;
+}
 
-                //facet_list contains the Delaunauy triangulation as a list of tetrahedral facets */
-                facetT *facet_list = compute_delaunay(dim,numpoints,m);
+std::map<std::string, QVariant> QhullPlugin::applyFilter(
+	const QAction*           filter,
+	const RichParameterList& par,
+	MeshDocument&            md,
+	unsigned int& /*postConditionMask*/,
+	vcg::CallBackPos* /* cb*/)
+{
+	qhT  qh_qh = {};
+	qhT* qh    = &qh_qh;
 
-                if(facet_list!=NULL){
+	switch (ID(filter)) {
+	case FP_QHULL_CONVEX_HULL: {
+		MeshModel& m  = *md.mm();
+		MeshModel& pm = *md.addNewMesh("", "Convex Hull");
+		pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
+		pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		pm.updateBoxAndNormals();
+		if (!result)
+			throw MLException("Failed computing convex hull.");
+	} break;
+	case FP_QHULL_VORONOI_FILTERING: {
+		MeshModel& m  = *md.mm();
+		MeshModel& pm = *md.addNewMesh("", "Voronoi Filtering");
 
-                    int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-                    assert( qh num_vertices == convexNumVert);
+		m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 
-                    tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+		int dim       = 3;       /* dimension of points */
+		int numpoints = m.cm.vn; /* number of mesh vertices */
 
-                    vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
-                    vertexT *vertex;
-                    int i=0;
-                    FORALLvertices{
-                        if ((*vertex).point){
-                            pm.cm.vert[i].P()[0] = (*vertex).point[0];
-                            pm.cm.vert[i].P()[1] = (*vertex).point[1];
-                            pm.cm.vert[i].P()[2] = (*vertex).point[2];
-                            ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
-                            i++;
-                        }
-                    }
+		Scalarm threshold = par.getDynamicFloat("threshold");
 
-                    // In 3-d Delaunay triangulation each facet is a tetrahedron. If triangulated,
-                    //each ridge (d-1 vertices between two neighboring facets) is a triangle.
+		bool result = compute_voronoi(qh, dim, numpoints, m, pm, threshold);
 
-                    facetT *facet, *neighbor;
-                    qh visit_id++;
-                    int ridgeCount=0;
+		if (result) {
+			// vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+			// vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+			pm.updateBoxAndNormals();
+			log("Successfully created a mesh of %i vert and %i faces", pm.cm.vn, pm.cm.fn);
+		}
+		else
+			throw MLException("Failed computing voronoi filtering.");
+	} break;
+	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: {
+		MeshModel& m = *md.mm();
 
-                    //Compute each ridge (triangle) once
-                    FORALLfacet_(facet_list)
-                    if (!facet->upperdelaunay) {
-                        facet->visitid= qh visit_id;
-                        qh_makeridges(facet);
-                        ridgeT *ridge, **ridgep;
-                        FOREACHridge_(facet->ridges) {
-                            neighbor= otherfacet_(ridge, facet);
-                            if (neighbor->visitid != qh visit_id) {
-                                tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
-                                ridgeCount++;
-                                int vertex_n, vertex_i;
-                                FOREACHvertex_i_(ridge->vertices)
-                                    (*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
-                            }
-                        }
-                    }
+		if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) {
+			m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+		}
+		if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)) {
+			m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+		}
 
-                    assert(pm.cm.fn == ridgeCount);
-                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-                    //m.cm.Clear();
+		int dim       = 3;       /* dimension of points */
+		int numpoints = m.cm.vn; /* number of mesh vertices */
 
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-                    pm.UpdateBoxAndNormals();
+		double alpha = par.getAbsPerc("alpha");
 
-                    int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-                    qh_freeqhull(!qh_ALL);
-                    qh_memfreeshort (&curlong, &totlong);
-                    if (curlong || totlong)
-                        fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
-                                     totlong, curlong);
-                    return true;
-                }
-                else
-                    return false;
-            }
-            case FP_QHULL_VORONOI_FILTERING:
-            {
-                MeshModel &m=*md.mm();
-          MeshModel &pm =*md.addNewMesh("","Voronoi Filtering");
+		bool    alphashape = false;
+		QString name;
+		switch (par.getEnum("Filtering")) {
+		case 0:
+			alphashape = false;
+			name       = QString("Alpha Complex");
+			break;
+		case 1:
+			alphashape = true;
+			name       = QString("Alpha Shapes");
+			break;
+		}
 
-                    m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                    m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+		MeshModel& pm = *md.addNewMesh("", qUtf8Printable(name));
 
-                int dim= 3;				/* dimension of points */
-                int numpoints= m.cm.vn;	/* number of mesh vertices */
+		if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY)) {
+			pm.updateDataMask(MeshModel::MM_FACEQUALITY);
+		}
 
-                Scalarm threshold = par.getDynamicFloat("threshold");
+		bool result = compute_alpha_shapes(qh, dim, numpoints, m, pm, alpha, alphashape);
 
-                bool result = compute_voronoi(dim,numpoints,m,pm,threshold);
+		if (result) {
+			// vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+			// vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+			pm.updateBoxAndNormals();
+			log("Successfully created a mesh of %i vert and %i faces", pm.cm.vn, pm.cm.fn);
+			log("Alpha = %f ", alpha);
+			// m.cm.Clear();
+		}
+		else
+			throw MLException("Failed computing alpha complex shape.");
+	} break;
+	case FP_QHULL_VISIBLE_POINTS: {
+		MeshModel& m = *md.mm();
+		m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
 
-                if(result){
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-                    pm.UpdateBoxAndNormals();
-                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+		// Clear old selection
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 
-                    return true;
-                }
+		bool    usecam    = par.getBool("usecamera");
+		Point3m viewpoint = par.getPoint3m("viewpoint");
+		Scalarm threshold = par.getDynamicFloat("radiusThreshold");
 
-                else return false;
-            }
-            case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
-            {
-                MeshModel &m=*md.mm();
+		// if usecamera but mesh does not have one
+		if (usecam && !m.hasDataMask(MeshModel::MM_CAMERA)) {
+			throw MLException(
+				"Mesh has not a camera that can be used to compute view direction. Please set a "
+				"view direction.");
+		}
+		if (usecam) {
+			viewpoint = m.cm.shot.GetViewPoint();
+		}
 
-                if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
-                    m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                }
-                if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
-                    m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-                }
+		// MeshModel &pm2 =*md.addNewMesh("","Visible Points Triangulation");
+		CMeshO visiblePointsTriangulationMesh;
+		visiblePointsTriangulationMesh.face.EnableFFAdjacency();
 
-                int dim= 3;				/* dimension of points */
-                int numpoints= m.cm.vn;	/* number of mesh vertices */
+		bool convex_hullFP = par.getBool("convex_hullFP");
+		bool triangVP      = par.getBool("triangVP");
+		vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputePointVisibility(
+			m.cm, visiblePointsTriangulationMesh, viewpoint, threshold);
+		if (convex_hullFP) {
+			MeshModel& pm = *md.addNewMesh("", "CH Flipped Points");
+			pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+			vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(
+				visiblePointsTriangulationMesh, pm.cm);
+		}
+		if (triangVP) {
+			MeshModel* tm =
+				md.addNewMesh(visiblePointsTriangulationMesh, "Visible Points Triangulation");
+			tm->clearDataMask(MeshModel::MM_VERTCOLOR);
+			tm->clearDataMask(MeshModel::MM_VERTQUALITY);
+		}
 
-                double alpha = par.getAbsPerc("alpha");
+		int result = visiblePointsTriangulationMesh.vert.size();
+		if (result >= 0) {
+			log("Selected %i visible points", result);
+		}
+		else {
+			throw MLException("Failed computing " + filter->text());
+		}
+	} break;
+	default: wrongActionCalled(filter);
+	}
 
-                bool alphashape = false;
-        QString name;
-                switch(par.getEnum("Filtering"))
-                {
-                    case 0 :
-                        alphashape=false;
-            name = QString("Alpha Complex");
-                        break;
-                    case 1 :
-                        alphashape=true;
-            name =QString("Alpha Shapes");
-                        break;
-                }
-
-        MeshModel &pm =*md.addNewMesh("",qUtf8Printable(name));
-
-                if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY))
-                {
-                    pm.updateDataMask(MeshModel::MM_FACEQUALITY);
-                }
-
-                bool result =compute_alpha_shapes(dim,numpoints,m,pm,alpha,alphashape);
-
-                if(result){
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-                    pm.UpdateBoxAndNormals();
-                    log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-                    log("Alpha = %f ",alpha);
-                    //m.cm.Clear();
-
-                    return true;
-                }
-                else
-                    return false;
-            }
-            case FP_QHULL_VISIBLE_POINTS:
-            {
-                MeshModel &m=*md.mm();
-                m.updateDataMask(MeshModel::MM_VERTCOLOR);
-                m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
-
-                //Clear old selection
-                tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
-
-                int dim= 3;				/* dimension of points */
-                int numpoints= m.cm.vn;	/* number of mesh vertices */
-
-                bool usecam = par.getBool("usecamera");
-                Point3m viewpoint = par.getPoint3m("viewpoint");
-                Scalarm threshold = par.getDynamicFloat("radiusThreshold");
-
-                // if usecamera but mesh does not have one
-                if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
-                {
-                    errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction.";
-                    return false;
-                }
-                if(usecam)
-                {
-                    viewpoint = m.cm.shot.GetViewPoint();
-                }
-
-                MeshModel &pm2 =*md.addNewMesh("","Visible Points Triangulation");
-                bool convex_hullFP = par.getBool("convex_hullFP");
-                bool triangVP = par.getBool("triangVP");
-                pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputePointVisibility(m.cm, pm2.cm, viewpoint, threshold);
-                if (!convex_hullFP)
-                {
-                  MeshModel &pm = *md.addNewMesh("", "CH Flipped Points");
-                  pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                  vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(pm2.cm, pm.cm);
-                }
-                int result = pm2.cm.vert.size();
-
-                if(!triangVP)
-                    md.delMesh(&pm2);
-                if(result>=0){
-                    log("Selected %i visible points", result);
-                    return true;
-                }
-                else return false;
-            }
-    }
-
-  assert(0);
-  return false;
+	return std::map<std::string, QVariant>();
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(QhullPlugin)

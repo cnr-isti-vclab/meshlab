@@ -30,10 +30,7 @@ if(TARGET external-newuoa AND TARGET external-levmar)
 		texcoord_optimization.h
 		uv_grid.h)
 
-	add_library(filter_isoparametrization MODULE ${SOURCES} ${HEADERS})
-
-	target_include_directories(filter_isoparametrization PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	target_link_libraries(filter_isoparametrization PUBLIC meshlab-common)
+	add_meshlab_plugin(filter_isoparametrization ${SOURCES} ${HEADERS})
 
 	target_link_libraries(filter_isoparametrization PRIVATE external-newuoa external-levmar)
 
@@ -41,17 +38,6 @@ if(TARGET external-newuoa AND TARGET external-levmar)
 		target_link_libraries(filter_isoparametrization PRIVATE OpenMP::OpenMP_CXX)
 		target_compile_definitions(filter_isoparametrization PRIVATE _USE_OMP)
 	endif()
-
-	set_property(TARGET filter_isoparametrization PROPERTY FOLDER Plugins)
-
-	set_property(TARGET filter_isoparametrization PROPERTY RUNTIME_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	set_property(TARGET filter_isoparametrization PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	install(
-		TARGETS filter_isoparametrization
-		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-		COMPONENT Plugins)
 
 else()
 	message(STATUS "Skipping filter_isoparametrization - missing either newuoa or levmar in external directory.")

@@ -58,8 +58,6 @@ public:
     int semantic;
     QString fullPathFileName;
     QImage image;
-    QImage thumb;
-    float *buf;
 
     bool IsInCore() { return !image.isNull(); }
     void Load();
@@ -72,6 +70,7 @@ public:
 
     RasterPlane(const RasterPlane& pl);
     RasterPlane(const QString& pathName, const int _semantic);
+    RasterPlane(const QImage& image, const QString& pathName, const int _semantic);
 
 }; //end class Plane
 

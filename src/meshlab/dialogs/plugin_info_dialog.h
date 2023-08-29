@@ -32,6 +32,7 @@ class PluginInfoDialog;
 }
 
 class QTreeWidgetItem;
+class MeshLabPlugin;
 
 class PluginInfoDialog : public QDialog
 {
@@ -39,19 +40,24 @@ class PluginInfoDialog : public QDialog
 	
 public:
 	explicit PluginInfoDialog(QWidget *parent = nullptr);
-	explicit PluginInfoDialog(const QString &path, const QStringList &fileNames,QWidget *parent);
 	~PluginInfoDialog();
-
+	
 private slots:
-	void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+	void chechBoxStateChanged(int state);
+	void uninstallPluginPushButtonClicked();
+
+	void on_loadPluginsPushButton_clicked();
 	
 private:
-	void populateTreeWidget(const QString &path, const QStringList &fileNames);
-	void addItems(QTreeWidgetItem *, const QStringList &features);
+	enum PluginDialogColumn{PLUGINS = 0, ENABLED, TYPE, VENDOR, FILE, UNINSTALL};
 	
+	void populateTreeWidget();
+	void addItems(const MeshLabPlugin* fpi, int nPlug, const QString& pluginType, const QStringList &features);
+
 	Ui::PluginInfoDialog *ui;
 	QIcon interfaceIcon;
 	QIcon featureIcon;
+	QIcon uninstallIcon;
 	QString pathDirectory;
 };
 

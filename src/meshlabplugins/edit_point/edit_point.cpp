@@ -45,22 +45,25 @@ using namespace vcg;
 
 EditPointPlugin::EditPointPlugin(int _editType) : editType(_editType) {}
 
-const QString EditPointPlugin::Info() {
+const QString EditPointPlugin::info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 
-QString EditPointPlugin::pluginName() const
+void EditPointPlugin::decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
 {
-    return "EditPoint";
-}
-
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
-{
-  this->realTimeLog("Point Selection",m.shortName(),
-                    "<table>"
-                    "<tr><td width=50> Hop Thr:</td><td width=100 align=right><b >%8.3f </b></td><td><i> (Wheel to change it)</i> </td></tr>"
-                    "<tr><td>          Radius: </td><td width=70 align=right><b> %8.3f </b></td><td><i> (Drag or Alt+Wheel to change it)</i></td></tr>"
-                    "</table>",this->maxHop,this->dist);
+	const char *methodName = (editType==SELECT_FITTING_PLANE_MODE)?"Fitting Plane":"Point Cluster Selection";
+	char keyInstrutionBuf[1024]="";
+	if(editType==SELECT_FITTING_PLANE_MODE)
+		snprintf(keyInstrutionBuf,1024,
+				 "<tr><td>       PlaneDist: </td><td width=70 align=right><b> %9.4f </b></td><td><i> (C / D to decrease/increase)</i></td></tr>"
+				 "<tr><td>     Radius Perc: </td><td width=70 align=right><b> %9.4f </b></td><td><i> (S / X to decrease/increase)</i></td></tr>",
+				 this->planeDist);
+	this->realTimeLog("Point Selection",m.shortName(), "%s"
+					  "<table>"
+					  "<tr><td width=50> Hop Thr:</td><td width=100 align=right><b >%9.4f </b></td><td><i> (Wheel to change it)</i> </td></tr>"
+					  "<tr><td>          Radius: </td><td width=70 align=right><b> %9.4f </b></td><td><i> (Drag or Alt+Wheel to change it)</i></td></tr>"
+					  "%s"
+					  "</table>",methodName,this->maxHop,this->dist,keyInstrutionBuf);
 
     /* When the user first click we have to find the point under the mouse pointer.
        At the same time we need to compute the Dijkstra algorithm over the knn-graph in order
@@ -191,7 +194,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
     }
 }
 
-bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
+bool EditPointPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
     for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {
         if (vi->IsS()) OldComponentVector.push_back(&*vi);
     }
@@ -212,7 +215,7 @@ bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedData
     return true;
 }
 
-void EditPointPlugin::EndEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {
+void EditPointPlugin::endEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {
     //delete the circle if present.
     fittingCircle.Clear();
     tri::ComponentFinder<CMeshO>::DeletePerVertexAttribute(m.cm);

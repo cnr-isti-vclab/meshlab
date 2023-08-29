@@ -40,14 +40,9 @@ EditMeasurePlugin::EditMeasurePlugin()
 	mName = 0;
 }
 
-const QString EditMeasurePlugin::Info()
+const QString EditMeasurePlugin::info()
 {
 	return tr("Allows one to measure distances between points of a model");
-}
-
-QString EditMeasurePlugin::pluginName() const
-{
-	return "EditMeasure";
 }
 
 void EditMeasurePlugin::mousePressEvent(QMouseEvent *, MeshModel &, GLArea * gla)
@@ -71,7 +66,7 @@ void EditMeasurePlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLAr
   gla->update();
 }
 
-void EditMeasurePlugin::Decorate(MeshModel & m, GLArea * gla,QPainter* p)
+void EditMeasurePlugin::decorate(MeshModel & m, GLArea * gla,QPainter* p)
 {
   float measuredDistance = -1.0;
 
@@ -177,7 +172,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 	}
 }
 
-bool EditMeasurePlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditMeasurePlugin::startEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
   gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
@@ -189,7 +184,7 @@ bool EditMeasurePlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLShare
   return true;
 }
 
-void EditMeasurePlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditMeasurePlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
   rubberband.Reset();
 }

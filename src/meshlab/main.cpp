@@ -37,6 +37,24 @@ void handleCriticalError(const MLException& exc);
 
 int main(int argc, char *argv[])
 {
+	//first thing: if help or version params, then print and close.
+	//nothing else needs to be done
+	if (argc > 1){
+		const QString helpOpt1 = "-h";
+		const QString helpOpt2 = "--help";
+		const QString versOpt1 = "-v";
+		const QString versOpt2 = "--version";
+		if(helpOpt1==argv[1] || helpOpt2==argv[1]) {
+			std::cout << "Usage:\n"
+				  << "  meshlab [<camera_view>] [<meshes>] [<projects>]\n"
+				  << "See https://www.meshlab.net for a longer documentation.\n";
+			return 0;
+		}
+		if (versOpt1==argv[1] || versOpt2==argv[1]){
+			std::cout << "MeshLab " << meshlab::meshlabCompleteVersion() << "\n";
+			return 0;
+		}
+	}
 
 	MeshLabApplication app(argc, argv);
 	std::setlocale(LC_ALL, "C");
@@ -63,8 +81,17 @@ int main(int argc, char *argv[])
 		handleCriticalError(exc);
 		return -1;
 	}
-	window->showMaximized();
 
+	// The Meshlab window dimensions. The default is to start maximized.
+	int width = window->mwsettings.startupWindowWidth;
+	int height = window->mwsettings.startupWindowHeight;
+	if (width > 0 && height > 0) {
+		window->resize(width, height);
+		window->show();
+	} else {
+		window->showMaximized();
+	}
+	
 	// This event filter is installed to intercept the open events sent directly by the Operative System.
 	FileOpenEater *filterObj=new FileOpenEater(window.get());
 	app.installEventFilter(filterObj);
@@ -72,18 +99,6 @@ int main(int argc, char *argv[])
 
 	// Can load multiple meshes and projects, and also a camera view
 	if(argc>1) {
-		QString helpOpt1="-h";
-		QString helpOpt2="--help";
-		if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) ) {
-			printf(
-						"Usage:\n"
-						"meshlab <meshfile>\n"
-						"Look at http://www.meshlab.net\n"
-						"for a longer documentation\n"
-						);
-			return 0;
-		}
-
 		std::vector<QString> cameraViews;
 		for (int i = 1; i < argc; ++i) {
 			QString arg = QString::fromLocal8Bit(argv[i]);

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include <common/plugins/interfaces/filter_plugin.h>
 
 #include <gpuProgram.h>
 #include <framebufferObject.h>
@@ -11,11 +11,11 @@
 
 enum ONPRIMITIVE{ON_VERTICES=0, ON_FACES=1};
 
-class SdfGpuPlugin : public QObject, public FilterPluginInterface
+class SdfGpuPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 	
 	public:
 		
@@ -25,24 +25,31 @@ class SdfGpuPlugin : public QObject, public FilterPluginInterface
 	
 	QString pluginName() const;
 	
-	QString filterName(FilterIDType filterId) const;
+	QString filterName(ActionIDType filterId) const;
+
+	QString pythonFilterName(ActionIDType f) const;
 	
-	QString filterInfo(FilterIDType filterId) const;
+	QString filterInfo(ActionIDType filterId) const;
 	
 	FilterClass getClass(const QAction *) const
 	{
-		return FilterPluginInterface::VertexColoring;
+		return FilterPlugin::VertexColoring;
 	}
 	
-	FILTER_ARITY filterArity(const QAction* act) const;
+	FilterArity filterArity(const QAction* act) const;
 	
 	bool requiresGLContext(const QAction* action) const;
 	
 	//Main plugin function
-	bool applyFilter(const QAction* filter, MeshDocument &md, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList & par, vcg::CallBackPos *cb);
+	std::map<std::string, QVariant> applyFilter(
+			const QAction* action,
+			const RichParameterList & parameters,
+			MeshDocument &md,
+			unsigned int& postConditionMask,
+			vcg::CallBackPos * cb);
 	
 	//Parameters init for user interface
-	virtual void initParameterList(const QAction* action, MeshModel &m, RichParameterList &parlst);
+	RichParameterList initParameterList(const QAction* action, const MeshModel &m);
 	
 	//Draw the mesh
 	void fillFrameBuffer(bool front,  MeshModel* mm);
@@ -92,7 +99,6 @@ class SdfGpuPlugin : public QObject, public FilterPluginInterface
 	void preRender(unsigned int peelingIteration);
 	
 	bool postRender(unsigned int peelingIteration);
-	
 protected:
 	
 	ONPRIMITIVE        mOnPrimitive;

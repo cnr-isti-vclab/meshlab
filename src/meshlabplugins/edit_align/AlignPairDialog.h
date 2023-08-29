@@ -35,7 +35,7 @@ class AlignPairDialog: public QDialog
 public:
     AlignPairWidget *aa;
 
-    AlignPairDialog (GLArea* gla, QWidget * parent = 0);
+    AlignPairDialog (GLArea* gla, QWidget * parent = nullptr);
 
 
 private slots:

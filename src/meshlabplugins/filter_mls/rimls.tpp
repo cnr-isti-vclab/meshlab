@@ -201,8 +201,8 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
                 for (unsigned int i=0; i<nofSamples; i++)
                 {
                         int id = mNeighborhood.index(i);
-                        VectorType diff = source - mPoints[id].cP();
-                        VectorType normal = mPoints[id].cN();
+                        VectorType diff = source - mMesh.vert[id].cP();
+                        VectorType normal = mMesh.vert[id].cN();
                         Scalar f = diff *normal;
 
                         Scalar refittingWeight = 1;
@@ -276,17 +276,17 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
         for (unsigned int i=0; i<nofSamples; i++)
         {
             int id = mNeighborhood.index(i);
-            VectorType p = mPoints[id].cP();
+            VectorType p = mMesh.vert[id].cP();
             VectorType diff = x - p;
-            Scalar f = (diff * mPoints[id].cN());
+            Scalar f = (diff * mMesh.vert[id].cN());
 
             VectorType gradW = mCachedWeightGradients.at(i) * mCachedRefittingWeights.at(i);
             VectorType dGradW = (x-p) * ( mCachedWeightSecondDerivatives.at(i) * (x[k]-p[k]) * mCachedRefittingWeights.at(i));
             dGradW[k] += mCachedWeightDerivatives.at(i);
 
             sumDGradWeight += dGradW;
-            sumDWeightNormal += mPoints[id].cN() * gradW[k];
-            sumGradWeightNk += gradW * mPoints[id].cN()[k];
+            sumDWeightNormal += mMesh.vert[id].cN() * gradW[k];
+            sumGradWeightNk += gradW * mMesh.vert[id].cN()[k];
             sumDGradWeightPotential += dGradW * f;
         }
 

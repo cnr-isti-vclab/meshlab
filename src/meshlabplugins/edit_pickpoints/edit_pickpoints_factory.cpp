@@ -27,21 +27,20 @@
 EditPickPointsFactory::EditPickPointsFactory()
 {
 	editPickPoints = new QAction(QIcon(":/images/pickpoints.png"), "PickPoints", this);
-		
-	actionList << editPickPoints;
+
+	actionList.push_back(editPickPoints);
 	
 	for(QAction *editAction : actionList)
 		editAction->setCheckable(true); 	
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> EditPickPointsFactory::actions() const
+
+QString EditPickPointsFactory::pluginName() const
 {
-	return actionList;
+	return "EditPickPoints";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* EditPickPointsFactory::getMeshEditInterface(const QAction *action)
+EditTool* EditPickPointsFactory::getEditTool(const QAction *action)
 {
 	if(action == editPickPoints) {
 		return new EditPickPointsPlugin();
@@ -53,7 +52,7 @@ EditPluginInterface* EditPickPointsFactory::getMeshEditInterface(const QAction *
 
 QString EditPickPointsFactory::getEditToolDescription(const QAction *)
 {
-	return EditPickPointsPlugin::Info();
+	return EditPickPointsPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(EditPickPointsFactory)

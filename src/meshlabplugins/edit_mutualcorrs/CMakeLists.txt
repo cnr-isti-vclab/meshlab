@@ -30,30 +30,13 @@ if(TARGET external-newuoa AND TARGET external-levmar)
 
     set(UI edit_mutualcorrsDialog.ui)
 
-    add_library(edit_mutualcorrs MODULE ${SOURCES} ${HEADERS} ${RESOURCES}
+	add_meshlab_plugin(edit_mutualcorrs ${SOURCES} ${HEADERS} ${RESOURCES}
                                         ${UI})
-
-    target_include_directories(edit_mutualcorrs
-                               PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(edit_mutualcorrs PUBLIC meshlab-common)
 
     target_link_libraries(edit_mutualcorrs PRIVATE external-newuoa
                                                    external-levmar)
 
     target_link_libraries(edit_mutualcorrs PRIVATE OpenGL::GLU)
-
-    set_property(TARGET edit_mutualcorrs PROPERTY FOLDER Plugins)
-
-    set_property(TARGET edit_mutualcorrs PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                                  ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    set_property(TARGET edit_mutualcorrs PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                                  ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    install(
-        TARGETS edit_mutualcorrs
-        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-        COMPONENT Plugins)
 
 else()
     message(

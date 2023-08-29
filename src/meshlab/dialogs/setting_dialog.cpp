@@ -44,14 +44,16 @@ SettingDialog::SettingDialog(
 	applybut = new QPushButton("Apply",this);
 	loadbut = new QPushButton("Load",this);
 	closebut = new QPushButton("Close",this);
-
+	helpLabel = new QLabel(currentParam.toolTip(),this);
+	helpLabel->setWordWrap(true);
 	QGridLayout* dialoglayout = new QGridLayout(parent);
-
-	dialoglayout->addWidget(savebut,1,0);
-	dialoglayout->addWidget(resetbut,1,1);
-	dialoglayout->addWidget(loadbut,1,2);
-	dialoglayout->addWidget(applybut,1,3);
-	dialoglayout->addWidget(closebut,1,4);
+	
+	dialoglayout->addWidget(helpLabel,1,0,1,5);
+	dialoglayout->addWidget(savebut,2,0);
+	dialoglayout->addWidget(resetbut,2,1);
+	dialoglayout->addWidget(loadbut,2,2);
+	dialoglayout->addWidget(applybut,2,3);
+	dialoglayout->addWidget(closebut,2,4);
 
 
 	dialoglayout->addWidget(&frame,0,0,1,5);
@@ -79,7 +81,6 @@ void SettingDialog::save()
 	QDomDocument doc("MeshLabSettings");
 	doc.appendChild(currentParameter->fillToXMLDocument(doc));
 	QString docstring =  doc.toString();
-	qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(currentParameter->name()), qUtf8Printable(docstring));
 	QSettings setting;
 	setting.setValue(currentParameter->name(),QVariant(docstring));
 }
@@ -87,7 +88,7 @@ void SettingDialog::save()
 void SettingDialog::apply()
 {
 	assert(frame.size() == 1);
-	currentParameter->setValue(frame.at(0)->widgetValue());
+	currentParameter->setValue(*frame.begin()->second->getWidgetValue());
 	emit applySettingSignal(*currentParameter);
 }
 
@@ -96,13 +97,13 @@ void SettingDialog::reset()
 	qDebug("resetting the value of param %s to the hardwired default", qUtf8Printable(currentParameter->name()));
 
 	assert(frame.size() == 1);
-	frame.at(0)->setValue(defaultParameter.value());
+	frame.begin()->second->resetWidgetToDefaultValue();
 	apply();
 }
 
 void SettingDialog::load()
 {
 	assert(frame.size() == 1);
-	frame.at(0)->setWidgetValue(savedParameter->value());
+	frame.begin()->second->setWidgetValue(savedParameter->value());
 	apply();
 }

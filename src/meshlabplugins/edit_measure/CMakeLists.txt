@@ -9,22 +9,6 @@ set(HEADERS edit_measure.h edit_measure_factory.h)
 
 set(RESOURCES edit_measure.qrc)
 
-add_library(edit_measure MODULE ${SOURCES} ${HEADERS} ${RESOURCES})
-
-target_include_directories(edit_measure PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(edit_measure PUBLIC meshlab-common)
+add_meshlab_plugin(edit_measure ${SOURCES} ${HEADERS} ${RESOURCES})
 
 target_link_libraries(edit_measure PRIVATE OpenGL::GLU)
-
-set_property(TARGET edit_measure PROPERTY FOLDER Plugins)
-
-set_property(TARGET edit_measure PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET edit_measure PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS edit_measure
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)

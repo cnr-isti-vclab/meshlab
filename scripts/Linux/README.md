@@ -1,39 +1,40 @@
 # Linux Scripts
 
-This folder contains a series of scripts to build and deploy MeshLab under a Linux environment (tested on Ubuntu 16.04, 18.04 and 20.04).
+This folder contains a series of scripts to build and deploy MeshLab under a Linux environment (tested on Ubuntu 18.04, 20.04 and 22.04).
 
-* `0_setup_env_ubuntu.sh`: this script installs all the required dependencies that are necessary to build MeshLab in an Ubuntu distro (tested in 16.04, 18.04 and 20.04). If you never installed Qt and other libraries, you should run it before any other script;
-* `1_build.sh`: this script builds MeshLab in a Linux environment:
-	* it requires a properly set Qt environment (see `0_setup_env_ubuntu.sh`);
-	* takes as arguments:
-		* the build directory (default: `src/build`): `--build_path=path/to/build`
-		* the install directory (default: `src/install`): `--install_path=path/to/install`
-		* the number of cores used to build MeshLab (default: `-j4`)`
-		* the possibility to build MeshLab with double precision scalar: `--double_precision`
-* `2_deploy.sh`: this script makes the given path a portable version of MeshLab. Takes as arguments:
-    *  the path where the output install path of the `1_build.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
-* `3_appimage.sh`: this script computes, starting from the portable folder of MeshLab, an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies. Takes as arguments:
-    * the path where the output install path of the `2_deploy.sh` script is placed (default: `src/install`): `--install_path=path/to/install`
-    * if MeshLab has been built with double precision scalar, add: `--double_precision`
-* `make_it.sh`: this script builds, deploys and generates an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies. Arguments are the same of the `1_build.sh` script.
+## Note about Qt
 
-__NOTE__: `linux_deploy.sh`and `linux_make_it.sh` use [LinuxDeployQt](https://github.com/probonopd/linuxdeployqt), which allows to deploy applications **only running the oldest supported linux distro** (see [this](https://github.com/probonopd/linuxdeployqt/issues/340)) in order to guarantee the largest support possible. Therefore, before running these scripts, be sure that your Linux distribution is the oldest supported one.
+Old versions of Ubuntu (< than 22.04) are shipped with old versions of Qt, but MeshLab requires Qt 5.15.
+Therefore, you must install manually Qt separatelly in your system. You can then give the path of the Qt installation
+directory to the various scripts, or you can add Qt to your `LD_LIBRARY_PATH`.
 
-## Examples
+The `0_setup_env.sh` script won't install qt from apt if you pass the argument `dont_install_qt`.
 
-Building MeshLab on a clean Linux environment (build placed in `meshlab/src/build`):
+## Dependencies 
 
-	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	bash meshlab/scripts/Linux/0_setup_env_ubuntu.sh
-	bash meshlab/scripts/Linux/1_build.sh
+Dependencies are automatically installed by the `0_setup_env.sh` script, which uses [`apt-get`](https://linux.die.net/man/8/apt-get) as package manager.
+Be sure to have `apt-get` installed before running this script.
 
-Building and generating AppImage on a clean Ubuntu 16.04 (last supported distro) environment:
-* build directory: `./meshlab-build`
-* install directory: `./meshlab-install`
-* AppImage path: `./`
+Libraries installed by the `0_setup_env.sh` are the following:
+  - Required by MeshLab:
+    - `mesa-common-dev` 
+	- `libglu1-mesa-dev`
+	- `cmake`
+	- `ninja-build`
+	- `patchelf` (for deploy stage)
+  - Required by Qt5:
+    - `libxcb-icccm4-dev` 
+	- `libxcb-image0-dev` 
+	- `libxcb-keysyms1-dev` 
+	- `libxcb-render-util0-dev` 
+	- `libxcb-xinerama0-dev`
+  - Optional:
+    - `libgmp-dev` and `libmpfr-dev` (required by cgal)
+	- `libxerces-c-dev` (required by libe57)
+	- `libcgal-dev` and `libboost-all-dev` (required by several MeshLab plugins)
 
-```
-git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-bash meshlab/scripts/Linux/0_setup_env_ubuntu.sh
-bash meshlab/scripts/Linux/make_it.sh --build_path="./meshlab-build" --install_path="./meshlab-install"
-```
+The script won't install `cgal` and `boost` (and then they will be downloaded by `cmake` during configuration) if you pass the argument `--dont_install_cgal_and_boost`. 
+
+## Note about deployment and AppImage packaging on Linux
+
+To deploy MeshLab and make it portable, we use the tool [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy). The authors of this tool suggest to use the last still-supported LTS version of Linux when deploying and generating an AppImage, in order to provide wide support of the application.

@@ -24,16 +24,12 @@
 #include "decorate_raster_proj.h"
 #include <common/GLExtensionsManager.h>
 #include <wrap/gl/shot.h>
-#include <common/pluginmanager.h>
 #include <meshlab/glarea.h>
 #include <vcg/math/matrix44.h>
 
-
-
-
 void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
-    if ((m_Mesh == NULL) || ( !m_Mesh->visible ) || (ctx == NULL))
+    if ((m_Mesh == NULL) || ( !m_Mesh->isVisible() ) || (ctx == NULL))
         return;
 
     glPushAttrib( GL_TRANSFORM_BIT );
@@ -69,7 +65,7 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneG
 
 void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
-	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->visible))
+	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->isVisible()))
 		return;
 
     glPushAttrib( GL_TRANSFORM_BIT );
@@ -151,7 +147,7 @@ DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
 {
     typeList << DP_PROJECT_RASTER;
 
-    foreach( FilterIDType tt, types() )
+    foreach( ActionIDType tt, types() )
         actionList << new QAction(decorationName(tt), this);
 
     foreach( QAction *ap, actionList )
@@ -169,7 +165,7 @@ QString DecorateRasterProjPlugin::pluginName() const
 }
 
 
-QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationInfo( ActionIDType id ) const
 {
     switch( id )
     {
@@ -179,7 +175,7 @@ QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
 }
 
 
-QString DecorateRasterProjPlugin::decorationName( FilterIDType id ) const
+QString DecorateRasterProjPlugin::decorationName( ActionIDType id ) const
 {
     switch( id )
     {
@@ -236,44 +232,41 @@ void DecorateRasterProjPlugin::initGlobalParameterList(const QAction* act, RichP
 }
 
 
-void DecorateRasterProjPlugin::updateCurrentMesh(MeshDocument &m,
-												  const RichParameterList& par )
+void DecorateRasterProjPlugin::updateCurrentMesh(
+		MeshDocument &m,
+		const RichParameterList& par )
 {
-    if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") )
-    {
-        QMap<int,MeshDrawer> tmpScene = m_Scene;
-        m_Scene.clear();
+	if( par.getBool("MeshLab::Decoration::ProjRasterOnAllMeshes") ) {
+		QMap<int,MeshDrawer> tmpScene = m_Scene;
+		m_Scene.clear();
 
-        foreach( MeshModel *md, m.meshList )
-        {
-            QMap<int,MeshDrawer>::iterator t = tmpScene.find( md->id() );
-            if( t != tmpScene.end() )
-                m_Scene[ t.key() ] = t.value();
-            else
-                m_Scene[ md->id() ] = MeshDrawer( md );
-        }
-    }
-    else
-    {
-        if( m_CurrentMesh && m.mm()==m_CurrentMesh->mm() )
-            return;
+		for(const MeshModel& md : m.meshIterator() ) {
+			QMap<int,MeshDrawer>::iterator t = tmpScene.find(md.id());
+			if(t != tmpScene.end())
+				m_Scene[t.key()] = t.value();
+			else
+				m_Scene[md.id()] = MeshDrawer(&md);
+		}
+	}
+	else {
+		if( m_CurrentMesh && m.mm()==m_CurrentMesh->mm() )
+			return;
 
-        m_Scene.clear();
-        m_CurrentMesh = &( m_Scene[m.mm()->id()] = MeshDrawer(m.mm()) );
-    }
+		m_Scene.clear();
+		m_CurrentMesh = &( m_Scene[m.mm()->id()] = MeshDrawer(m.mm()) );
+	}
 
-    /*if( !s_AreVBOSupported )
-    {
-        par.setValue( "MeshLab::Decoration::ProjRasterUseVBO", BoolValue(false) );
-    }*/
+	/*if( !s_AreVBOSupported )
+	{
+		par.setValue( "MeshLab::Decoration::ProjRasterUseVBO", BoolValue(false) );
+	}*/
 
-    m_SceneBox.SetNull();
+	m_SceneBox.SetNull();
 
-    for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-    {
-        m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
-        /*m->update( m_Context, areVBORequired );*/
-    }
+	for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m ) {
+		m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
+		/*m->update( m_Context, areVBORequired );*/
+	}
 }
 
 
@@ -427,7 +420,7 @@ void DecorateRasterProjPlugin::updateDepthTexture(QGLContext* glctx, MLSceneGLSh
 void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
     // Update the stored raster with the one provided by the mesh document.
-    // If both are identical, the update is simply skiped.
+    // If both are identical, the update is simply skipped.
     if( m.rm() == m_CurrentRaster )
         return;
 

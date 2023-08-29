@@ -1,75 +1,101 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+/*****************************************************************************
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005-2021                                           \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 
 #ifndef MLSPLUGIN_H
 #define MLSPLUGIN_H
 
 #include <QObject>
 
-#include <common/interfaces/filter_plugin_interface.h>
+#include "mlssurface.h"
+#include <common/plugins/interfaces/filter_plugin.h>
 
-class MlsPlugin : public QObject, public FilterPluginInterface
+class MlsPlugin : public QObject, public FilterPlugin
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_INTERFACE_IID)
-	Q_INTERFACES(FilterPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(FILTER_PLUGIN_IID)
+	Q_INTERFACES(FilterPlugin)
 
 public:
-
 	enum {
-		_RIMLS_       = 0x1,
-		_APSS_        = 0x2,
-		_PROJECTION_  = 0x1000,
-		_AFRONT_      = 0x2000,
-		_MCUBE_       = 0x4000,
-		_COLORIZE_    = 0x8000,
-
-		FP_RIMLS_PROJECTION = _RIMLS_ | _PROJECTION_,
-		FP_APSS_PROJECTION	= _APSS_  | _PROJECTION_,
-
-		FP_RIMLS_AFRONT = _RIMLS_ | _AFRONT_,
-		FP_APSS_AFRONT  = _APSS_  | _AFRONT_,
-
-		FP_RIMLS_MCUBE = _RIMLS_ | _MCUBE_,
-		FP_APSS_MCUBE  = _APSS_  | _MCUBE_,
-
-		FP_RIMLS_COLORIZE = _RIMLS_ | _COLORIZE_,
-		FP_APSS_COLORIZE  = _APSS_  | _COLORIZE_,
-
-		FP_RADIUS_FROM_DENSITY       = 0x10000,
-		FP_SELECT_SMALL_COMPONENTS   = 0x20000
+		FP_RIMLS_PROJECTION,
+		FP_APSS_PROJECTION,
+		FP_RIMLS_MCUBE,
+		FP_APSS_MCUBE,
+		FP_RIMLS_COLORIZE,
+		FP_APSS_COLORIZE,
+		FP_RADIUS_FROM_DENSITY,
+		FP_SELECT_SMALL_COMPONENTS
 	};
 
 	MlsPlugin();
 
-	QString pluginName() const;
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(const QAction *a) const;
-	virtual void initParameterList(const QAction*, MeshDocument &md, RichParameterList &parent);
-    virtual int getRequirements(const QAction* action);
-    virtual bool applyFilter(const QAction* filter, MeshDocument &m, std::map<std::string, QVariant>& outputValues, unsigned int& postConditionMask, const RichParameterList &parent, vcg::CallBackPos *cb) ;
-	FILTER_ARITY filterArity(const QAction *) const {return SINGLE_MESH;}
+	QString     pluginName() const;
+	QString     filterName(ActionIDType filter) const;
+	QString     pythonFilterName(ActionIDType f) const;
+	QString     filterInfo(ActionIDType filter) const;
+	FilterClass getClass(const QAction* a) const;
+	int         getRequirements(const QAction* action);
+
+	RichParameterList initParameterList(const QAction*, const MeshDocument& md);
+
+	std::map<std::string, QVariant> applyFilter(
+		const QAction*           action,
+		const RichParameterList& parameters,
+		MeshDocument&            md,
+		unsigned int&            postConditionMask,
+		vcg::CallBackPos*        cb);
+	FilterArity filterArity(const QAction*) const { return SINGLE_MESH; }
+
+private:
+	void addProjectionParameters(RichParameterList& parlst, const MeshDocument& md);
+	void addMlsParameters(RichParameterList& parlst);
+	void addApssParameters(RichParameterList& parlst, bool colorize);
+	void addRimlsParameters(RichParameterList& parlst);
+	void addColorizeParameters(RichParameterList& parlst, bool apss);
+	void addMarchingCubesParameters(RichParameterList& parlst);
+
+	void       initMLS(MeshDocument& md);
+	MeshModel* getProjectionPointsMesh(MeshDocument& md, const RichParameterList& params);
+	GaelMls::MlsSurface<CMeshO>* createMlsRimls(MeshModel* pPoints, const RichParameterList& par);
+	GaelMls::MlsSurface<CMeshO>*
+		 createMlsApss(MeshModel* pPoints, const RichParameterList& par, bool colorize);
+	void computeProjection(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		MeshModel*                   pPoints,
+		vcg::CallBackPos*            cb);
+	void computeColorize(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		MeshModel*                   pPoints,
+		vcg::CallBackPos*            cb);
+	void computeMarchingCubes(
+		MeshDocument&                md,
+		const RichParameterList&     par,
+		GaelMls::MlsSurface<CMeshO>* mls,
+		vcg::CallBackPos*            cb);
 };
 
 #endif

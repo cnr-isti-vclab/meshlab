@@ -36,10 +36,10 @@
 
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
 {
-	typeList << FP_IMAGE_MUTUALINFO;
+	typeList= {FP_IMAGE_MUTUALINFO};
 
-	for(FilterIDType tt : types())
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt : types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 QString FilterMutualInfoPlugin::pluginName() const
@@ -47,18 +47,23 @@ QString FilterMutualInfoPlugin::pluginName() const
 	return "FilterMutualInfo";
 }
 
-QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
+QString FilterMutualInfoPlugin::filterName(ActionIDType filterId) const
 {
-	switch(filterId) {
-	case FP_IMAGE_MUTUALINFO:
-		return "Image alignment: Mutual Information";
-	default :
-		assert(0);
-		return "";
+	switch (filterId) {
+	case FP_IMAGE_MUTUALINFO: return "Image alignment: Mutual Information";
+	default: assert(0); return QString();
 	}
 }
 
-QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
+QString FilterMutualInfoPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch (f) {
+	case FP_IMAGE_MUTUALINFO: return "raster_alignment_mutual_information";
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterMutualInfoPlugin::filterInfo(ActionIDType filterId) const
 {
 	switch(filterId) {
 	case FP_IMAGE_MUTUALINFO:
@@ -73,10 +78,10 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(const QActi
 {
 	switch(ID(a)) {
 	case FP_IMAGE_MUTUALINFO:
-		return FilterPluginInterface::Camera;
+		return FilterPlugin::Camera;
 	default :
 		assert(0);
-		return FilterPluginInterface::Generic;
+		return FilterPlugin::Generic;
 	}
 }
 
@@ -91,13 +96,14 @@ bool FilterMutualInfoPlugin::requiresGLContext(const QAction* action) const
 	return false;
 }
 
-FilterPluginInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(const QAction*) const
+FilterPlugin::FilterArity FilterMutualInfoPlugin::filterArity(const QAction*) const
 {
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocument & /*md*/, RichParameterList & parlst)
+RichParameterList FilterMutualInfoPlugin::initParameterList(const QAction *action, const MeshDocument & /*md*/)
 {
+	RichParameterList parlst;
 	QStringList rendList;
 	rendList.push_back("Combined");
 	rendList.push_back("Normal map");
@@ -108,7 +114,7 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO:
 		parlst.addParam(RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
-		parlst.addParam(RichShotf("Shot", Shotm(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
+		parlst.addParam(RichShot("Shot", Shotm(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
 		parlst.addParam(RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
 		parlst.addParam(RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
 		parlst.addParam(RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));
@@ -119,17 +125,22 @@ void FilterMutualInfoPlugin::initParameterList(const QAction *action,MeshDocumen
 	default :
 		assert(0);
 	}
+	return parlst;
 }
 
-bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md, std::map<std::string, QVariant>&, unsigned int& /*postConditionMask*/, const RichParameterList & par, vcg::CallBackPos* )
+std::map<std::string, QVariant> FilterMutualInfoPlugin::applyFilter(
+		const QAction *action,
+		const RichParameterList & par,
+		MeshDocument &md,
+		unsigned int& /*postConditionMask*/,
+		vcg::CallBackPos* )
 {
 	if (glContext == nullptr){
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 	switch(ID(action))	 {
 	case FP_IMAGE_MUTUALINFO :
-		return imageMutualInfoAlign(
+		imageMutualInfoAlign(
 					md,
 					par.getEnum("Rendering Mode"), par.getBool("Estimate Focal"),
 					par.getBool("Fine"), par.getFloat("ExpectedVariance"),
@@ -137,9 +148,9 @@ bool FilterMutualInfoPlugin::applyFilter(const QAction *action, MeshDocument &md
 					par.getInt("BackgroundWeight"), par.getShotf("Shot"));
 		break;
 	default :
-		assert(0);
-		return false;
+		wrongActionCalled(action);
 	}
+	return std::map<std::string, QVariant>();
 }
 
 int FilterMutualInfoPlugin::postCondition(const QAction*) const
@@ -147,7 +158,7 @@ int FilterMutualInfoPlugin::postCondition(const QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-bool FilterMutualInfoPlugin::imageMutualInfoAlign(
+void FilterMutualInfoPlugin::imageMutualInfoAlign(
 		MeshDocument& md,
 		int rendmode,
 		bool estimateFocal,
@@ -162,12 +173,12 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 	MutualInfo mutual;
 	if (!shot.IsValid()){
 		log(GLLogStream::FILTER, "Error: shot not valid. Press 'Get Shot' button before applying!");
-		return false;
+		throw MLException("Error: shot not valid. Press 'Get Shot' button before applying!");
 	}
 
-	if (md.rasterList.size()==0) {
+	if (md.rasterNumber()==0) {
 		log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
-		return false;
+		throw MLException("You need a Raster Model to apply this filter!");
 	}
 	else {
 		align.image=&md.rm()->currentPlane->image;
@@ -219,7 +230,7 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 	align.setGLContext(glContext);
 	glContext->makeCurrent();
 	if (initGLMutualInfo() == false)
-		return false;
+		throw MLException("Error while initializing GL.");
 
 	log( "Done");
 
@@ -253,20 +264,18 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		md.documentUpdated();
 	}
 	this->glContext->doneCurrent();
-
-	return true;
 }
 
 bool FilterMutualInfoPlugin::initGLMutualInfo()
 {
-	log(0, "GL Initialization");
+	log("GL Initialization");
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-		log(0, "GLEW initialization error!");
+		log("GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-		log(0, "Graphics hardware does not support FBOs");
+		log("Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -276,11 +285,11 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-		log(0,"Graphics hardware does not support non-power-of-two textures");
+		log("Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-		log(0, "Graphics hardware does not support vertex buffer objects");
+		log("Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -297,7 +306,7 @@ bool FilterMutualInfoPlugin::initGLMutualInfo()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-	log(0, "GL Initialization done");
+	log("GL Initialization done");
 	return true;
 }
 

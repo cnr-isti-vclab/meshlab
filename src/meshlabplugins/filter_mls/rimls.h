@@ -45,7 +45,7 @@ class RIMLS : public MlsSurface<_MeshType>
 		using Base::mCachedWeightGradients;
 		using Base::mCachedWeightSecondDerivatives;
 		using Base::mBallTree;
-		using Base::mPoints;
+		using Base::mMesh;
 		using Base::mFilterScale;
 		using Base::mMaxNofProjectionIterations;
 		using Base::mAveragePointSpacing;

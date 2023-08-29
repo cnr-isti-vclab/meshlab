@@ -6,20 +6,4 @@ set(SOURCES cleanfilter.cpp)
 
 set(HEADERS cleanfilter.h)
 
-add_library(filter_clean MODULE ${SOURCES} ${HEADERS})
-
-target_include_directories(filter_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_clean PUBLIC meshlab-common)
-
-set_property(TARGET filter_clean PROPERTY FOLDER Plugins)
-
-set_property(TARGET filter_clean PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-set_property(TARGET filter_clean PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                          ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-install(
-    TARGETS filter_clean
-    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-    COMPONENT Plugins)
+add_meshlab_plugin(filter_clean ${SOURCES} ${HEADERS})

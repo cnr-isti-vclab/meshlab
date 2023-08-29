@@ -24,19 +24,21 @@
 #ifndef EditAlignPLUGIN_H
 #define EditAlignPLUGIN_H
 
-#include <common/interfaces/edit_plugin_interface.h>
+#include <common/plugins/interfaces/edit_plugin.h>
 #include <vcg/complex/algorithms/align_pair.h>
-#include "align/OccupancyGrid.h"
-#include "meshtree.h"
+#include <vcg/complex/algorithms/occupancy_grid.h>
+
+//#include "align/OccupancyGrid.h"
+
+#include <vcg/complex/algorithms/meshtree.h>
 #include <wrap/gui/trackball.h>
 #include "alignDialog.h"
 
-class EditAlignPlugin : public QObject, public EditPluginInterface
+class EditAlignPlugin : public QObject, public EditTool
 {
 	Q_OBJECT
-		Q_INTERFACES(EditPluginInterface)
 
-		enum
+	enum
 	{
 		ALIGN_IDLE = 0x01,
 		ALIGN_INSPECT_ARC = 0x02,
@@ -47,17 +49,16 @@ class EditAlignPlugin : public QObject, public EditPluginInterface
 
 public:
 	EditAlignPlugin();
-	virtual ~EditAlignPlugin() {
-	}
+    virtual ~EditAlignPlugin() {
+    }
 
-	static const QString Info();
+	static QString info();
 
-	QString pluginName() const;
 	bool isSingleMeshEdit() const { return false; }
 	void suggestedRenderingData(MeshModel &m, MLRenderingData& dt);
-	bool StartEdit(MeshDocument &md, GLArea *parent, MLSceneGLSharedDataContext* cont);
-	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	bool startEdit(MeshDocument &md, GLArea *parent, MLSceneGLSharedDataContext* cont);
+	void decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 	void mousePressEvent(QMouseEvent *, MeshModel &, GLArea *);
 	void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea *);
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
@@ -72,15 +73,16 @@ public:
 	vcg::Trackball trackball;
 	GLArea* _gla;
 	MeshDocument* _md;
-	MeshNode *currentNode() { return meshTree.find(_md->mm()); }
-	vcg::AlignPair::Result *currentArc() { return  alignDialog->currentArc; }
-	MeshTree meshTree;
+    MeshTreem::MeshNode *currentNode() { return meshTree.find(_md->mm()); }
+	vcg::AlignPair::Result *currentArc() const { return alignDialog->currentArc; }
+	MeshTreem meshTree;
+
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
-	MeshTree::Param defaultMTP;  // default MeshTree parameters
+	MeshTreem::Param defaultMTP;  // default MeshTree parameters
 
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-	void LayerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* )
+	void layerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* )
 	{
 		// add code here to manage the external layer switching
 	}

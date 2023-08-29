@@ -249,8 +249,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
     else if (nofSamples==1)
     {
         int id = mNeighborhood.index(0);
-        LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
-        LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
+        LVector p = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cP());
+        LVector n = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cN());
 
         uLinear = n;
         uConstant = -(p*uLinear);
@@ -267,8 +267,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
     for (unsigned int i=0; i<nofSamples; i++)
     {
         int id = mNeighborhood.index(i);
-        LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
-        LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
+        LVector p = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cP());
+        LVector n = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cN());
         LScalar w = mCachedWeights.at(i);
 
         sumP += p * w;
@@ -349,8 +349,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
         for (unsigned int i=0; i<nofSamples; i++)
         {
             int id = mNeighborhood.index(i);
-            LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
-            LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
+            LVector p = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cP());
+            LVector n = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cN());
             LScalar dw = mCachedWeightGradients.at(i)[k];
 
             dSumW += dw;
@@ -438,8 +438,8 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
             for (unsigned int i=0; i<nofSamples; i++)
             {
                 int id = mNeighborhood.index(i);
-                LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
-                LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
+                LVector p = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cP());
+                LVector n = vcg::Point3<LScalar>::Construct(mMesh.vert[id].cN());
                 //LScalar dw = mCachedWeightGradients.at(i)[j];
                 LScalar d2w = ((x[k]-p[k]))*((x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
 

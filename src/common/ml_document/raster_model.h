@@ -39,11 +39,12 @@ class RasterModel : public MeshLabRenderRaster
 {
 public:
 	RasterModel();
-	RasterModel(MeshDocument *parent, unsigned int id, QString _rasterName=QString());
+	RasterModel(unsigned int id, const QString& _rasterName=QString());
 	
-	MeshDocument* par;
-	bool visible;
-	inline int id() const {return _id;}
+
+	bool isVisible() const {return visible;}
+	void setVisible(bool vis = true) {visible = vis;};
+	inline unsigned int id() const {return _id;}
 	
 	void setLabel(QString newLabel) {_label = newLabel;}
 	
@@ -60,7 +61,8 @@ public:
 	};
 	
 private:
-	int _id;
+	bool visible;
+	unsigned int _id;
 	QString _label;
 };// end class RasterModel
 

@@ -47,7 +47,7 @@ struct Patch
 };
 
 typedef QVector<Patch>              PatchVec;
-typedef QMap<RasterModel*,PatchVec> RasterPatchMap;
+typedef QHash<RasterModel*,PatchVec> RasterPatchMap;
 
 
 

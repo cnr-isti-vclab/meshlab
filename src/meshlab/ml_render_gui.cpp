@@ -146,10 +146,7 @@ void MLRenderingToolbar::addColorPicker( MLRenderingUserDefinedGeneralColorActio
 	pick->setFixedSize(height() / 2, height() /2);
 	addWidget(pick);
 	_colpicks[act] = pick;
-	//_colpickacts.push_back(addWidget(pick));
-//    connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
-    connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
-	//connect(this, SIGNAL(), pick, SLOT());
+	connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
 }
 
 void MLRenderingToolbar::extraUpdateRequired( int,MLRenderingAction* act )
@@ -751,13 +748,7 @@ void MLRenderingBBoxParametersFrame::initGui()
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingBBoxPerMeshColorAction(_meshid, _colortool));
 	_colortool->addRenderingAction(new MLRenderingBBoxUserDefinedColorAction(_colortool));
-    //MLRenderingBBoxColorPicker* colbut = new MLRenderingBBoxColorPicker(_meshid,_colortool);
-    //MLPerViewGLOptions tmp; 
-    //MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
-    ////tmp._perbbox_fixed_color = vcg::Color4b(255,85,0,255);
-    //colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perbbox_fixed_color));
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
-	/*_colortool->addColorPicker(colbut);*/
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
@@ -773,7 +764,7 @@ void MLRenderingBBoxParametersFrame::initGui()
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
     showNormal();
-    adjustSize();   
+    adjustSize();
 }
 
 MLRenderingDefaultDecoratorParametersFrame::MLRenderingDefaultDecoratorParametersFrame( QWidget* parent )
@@ -1117,14 +1108,13 @@ void MLRenderingParametersTab::getCurrentRenderingDataAccordingToGUI( MLRenderin
 MLRenderingColorPicker::MLRenderingColorPicker(int, MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
     :QPushButton(p),_act(colact)
 {
-    //_act->setColor(vcg::ColorConverter::ToColor4b(def));
-    initGui();
+	initGui();
 }
 
 MLRenderingColorPicker::MLRenderingColorPicker(MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
     :QPushButton(p),_act(colact)
 {
-    initGui();
+	initGui();
 }
 
 MLRenderingColorPicker::~MLRenderingColorPicker()
@@ -1133,58 +1123,41 @@ MLRenderingColorPicker::~MLRenderingColorPicker()
 //
 void MLRenderingColorPicker::updateColorInfo()
 {
-    if (_act == NULL)
-        return;
-    const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    QPalette pal(cc);
-    setPalette(pal);
+	if (_act == NULL)
+		return;
+
+	const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
+	this->setStyleSheet(QString("background-color: %1; border: none;").arg(cc.name()));
 }
 
 void MLRenderingColorPicker::pickColor()
 {
-    if (_act == NULL)
-        return;
-    const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    QColor ret = QColorDialog::getColor(cc,this);
-    if (ret.isValid())
-    {
-        _act->setColor(vcg::ColorConverter::ToColor4b(ret));
-        updateColorInfo();
-        emit userDefinedColorAction(_act->meshId(),_act);
-    }
+	if (_act == NULL)
+		return;
+
+	const QColor initialCol = vcg::ColorConverter::ToQColor(_act->getColor());
+	const QColor newCol     = QColorDialog::getColor(initialCol,this);
+	if (newCol.isValid())
+	{
+		_act->setColor(newCol);
+		updateColorInfo();
+		emit userDefinedColorAction(_act->meshId(), _act);
+	}
 }
 
 void MLRenderingColorPicker::initGui()
 {
-    if (_act == NULL)
-        return;
-    //setDefaultAction(_act);
-    ////setText(_act->text());
-    //QMenu* colmenu = new QMenu();
-    //QWidgetAction* wa = new QWidgetAction(colmenu);
-    //_cbutton = new QPushButton(colmenu);
-    //_cbutton->setAutoFillBackground(true);
-    //_cbutton->setFlat(true);
-    //_cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    //wa->setDefaultWidget(_cbutton);
-    //colmenu->addAction(wa);
-    //setMenu(colmenu);
-	//QVBoxLayout* lay = new QVBoxLayout();
-	setAutoFillBackground(true);
-	setFlat(true);
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	//lay->addWidget(this);
-	//lay->setMargin(2);
-	//lay->setSizeConstraint(QLayout::SetFixedSize);
-	//setLayout(lay);
-    updateColorInfo();
-    connect(this,SIGNAL(clicked()),this,SLOT(pickColor()));
+	if (_act == NULL)
+		return;
+
+	updateColorInfo();
+	connect(this,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
 
 void MLRenderingColorPicker::setColor( const QColor& def )
 {
-    _act->setColor(def);
-    updateColorInfo();
+	_act->setColor(def);
+	updateColorInfo();
 }
 
 void MLRenderingColorPicker::setColor(const vcg::Color4b& def)
@@ -1192,7 +1165,6 @@ void MLRenderingColorPicker::setColor(const vcg::Color4b& def)
 	_act->setColor(def);
 	updateColorInfo();
 }
-
 
 
 MLRenderingOnOffToolbar::MLRenderingOnOffToolbar( int meshid,QWidget* parent /*= NULL*/ )

@@ -5,30 +5,14 @@
 # Only build if we have qhull
 if(TARGET external-qhull)
 
-    set(SOURCES filter_qhull.cpp qhull_tools.cpp)
+	set(SOURCES filter_qhull.cpp qhull_tools.cpp)
 
-    set(HEADERS filter_qhull.h qhull_tools.h)
+	set(HEADERS filter_qhull.h qhull_tools.h)
 
-    add_library(filter_qhull MODULE ${SOURCES} ${HEADERS})
+	add_meshlab_plugin(filter_qhull ${SOURCES} ${HEADERS})
 
-    target_include_directories(filter_qhull PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(filter_qhull PUBLIC meshlab-common)
-
-    target_link_libraries(filter_qhull PRIVATE external-qhull)
-
-    set_property(TARGET filter_qhull PROPERTY FOLDER Plugins)
-
-    set_property(TARGET filter_qhull PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                              ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    set_property(TARGET filter_qhull PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                              ${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-    install(
-        TARGETS filter_qhull
-        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-        COMPONENT Plugins)
+	target_link_libraries(filter_qhull PRIVATE external-qhull)
 
 else()
-    message(STATUS "Skipping filter_qhull - missing qhull")
+	message(STATUS "Skipping filter_qhull - missing qhull")
 endif()

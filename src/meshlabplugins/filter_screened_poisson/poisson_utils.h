@@ -175,7 +175,7 @@ public:
 		ItersVal=8;
 		CSSolverAccuracyVal=1e-3f;
 
-		VerboseFlag=true;
+		VerboseFlag=false;
 		ThreadsVal=omp_get_num_procs();
 		LinearFitFlag = false;
 		LowResIterMultiplierVal=1.f;
@@ -535,6 +535,9 @@ int _Execute(
 template <class MeshType>
 void PoissonClean(MeshType &m, bool scaleNormal, bool cleanFlag)
 {
+	vcg::tri::UpdatePosition<MeshType>::Matrix(m, m.Tr,true);
+	vcg::tri::UpdateBounding<MeshType>::Box(m);
+	m.Tr.SetIdentity();
 	vcg::tri::UpdateNormal<MeshType>::NormalizePerVertex(m);
 
 	if(cleanFlag) {

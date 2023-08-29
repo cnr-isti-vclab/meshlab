@@ -32,7 +32,7 @@
 #include <QCheckBox>
 #include <QTimer>
 #include <common/parameters/rich_parameter_list.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include "ml_render_gui.h"
 
 
@@ -43,7 +43,7 @@ class GLLogStream;
 class MeshModel;
 class RasterModel;
 class MeshDocument;
-class DecoratePluginInterface;
+class DecoratePlugin;
 class RichParameterListFrame;
 class QGridLayout;
 class QToolBar;
@@ -114,12 +114,13 @@ class LayerDialog : public QDockWidget
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-    void updateLog(const GLLogStream& Log);
+    void updateLog(GLLogStream& Log);
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
 	void setCurrentTab(const MLRenderingData& dt);
     MLRenderingParametersTab* createRenderingParametersTab();
+    static void updateTreeWidgetSizes(QTreeWidget* tree);
 protected:
     void keyPressEvent ( QKeyEvent * event );
 	void keyReleaseEvent(QKeyEvent * event);
@@ -154,6 +155,8 @@ public slots:
 private slots:
 	/*WARNING!!! ADDED just to avoid usual mac strange behavior. Please, avoid to use it if it's not absolutely necessary*/
 	void updateTable();
+	void on_cleanLogPushButton_clicked();
+
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;

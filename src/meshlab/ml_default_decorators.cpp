@@ -151,7 +151,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
                     inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
                 else
                     inf += "<b>" + QString::number(beH().size()/2) + " </b> edges";
-                log.RealTimeLog("Boundary",m.shortName(),inf);
+                log.realTimeLog("Boundary",m.shortName(),inf);
             }
 
             if (opts._peredge_faceboundary_enabled)
@@ -161,7 +161,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
                     inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
                 else
                     inf += "<b>" + QString::number(bfH().size()/3) + " </b> faces";
-                log.RealTimeLog("Boundary Faces",m.shortName(),inf);
+                log.realTimeLog("Boundary Faces",m.shortName(),inf);
             }      
         }
 
@@ -175,7 +175,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 
               QString inf;
               inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size() / 3) + "</b> faces over non manifold edges";
-              log.RealTimeLog("Non Manifold Vertices",m.shortName(),inf);
+              log.realTimeLog("Non Manifold Vertices",m.shortName(),inf);
         }
 
         if (opts._peredge_edgemanifold_enabled)
@@ -187,7 +187,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             drawTriVector(m.cm.Tr, fvH());
             QString inf;
             inf += "<b>" + QString::number(bvH().size()/2) + " </b> non manifold edges<br><b>" + QString::number(fvH().size()/3) + "</b> faces over non manifold edges";
-            log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
+            log.realTimeLog("Non Manifold Edges",m.shortName(),inf);
         }
 
         if (opts._peredge_text_boundary_enabled)

@@ -33,14 +33,12 @@
 #include "export_xyz.h"
 // #include "export_expe.h"
 
-#include <QMessageBox>
-
 using namespace std;
 using namespace vcg;
 
 
 
-bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & /*parlst*/, CallBackPos *cb, QWidget*/*parent*/)
+void ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & /*parlst*/, CallBackPos *cb)
 {
 	// initializing mask
 	mask = 0;
@@ -59,26 +57,25 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 		if (!vcg::tri::io::ImporterExpePTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
 		{
 			useXYZ=true;
-			if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)) 
-				return false;
-		}        
-		m.Enable(loadMask);
+			if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)){
+				throw MLException("Error while loading [A]PTS mask.");
+			}
+		}
+		m.enable(loadMask);
 		int result;
 		if(useXYZ) {
-			result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);     
+			result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 			if (result != 0)
 			{
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result)));
 			}
 		}
 		else 
 		{
-			result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);     
+			result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 			if (result != 0)
 			{
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterExpePTS<CMeshO>::ErrorMsg(result));
-				return false;
+				throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterExpePTS<CMeshO>::ErrorMsg(result)));
 			}
 		}
 		
@@ -86,16 +83,16 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	else if (formatName.toLower() == tr("xyz"))
 	{
 		int loadMask;
-		if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask))
-			return false;
-		m.Enable(loadMask);
+		if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask)) {
+			throw MLException("Error while loading XYZ mask.");
+		}
+		m.enable(loadMask);
 		
 		
 		int result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	
@@ -103,11 +100,9 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	
 	if (cb != NULL)
 		(*cb)(99, "Done");
-	
-	return true;
 }
 
-bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/, QWidget *parent)
+void ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos * /*cb*/)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -129,14 +124,12 @@ bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, Mesh
 		int result = vcg::tri::io::ExporterXYZ<CMeshO>::Save(m.cm,filename.c_str(),mask);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result)));
-			return false;
+			throw MLException("Saving Error: " + errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result)));
 		}
-		return true;
 	}
-	
-	assert(0); // unknown format
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*
@@ -147,24 +140,26 @@ QString ExpeIOPlugin::pluginName() const
 	return "IOExpe";
 }
 
-QList<FileFormat> ExpeIOPlugin::importFormats() const
+std::list<FileFormat> ExpeIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Expe's point set (binary)"		,tr("pts"));
-	formatList << FileFormat("Expe's point set (ascii)"			,tr("apts"));
-	formatList << FileFormat("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
+	std::list<FileFormat> formatList = {
+		FileFormat("Expe's point set (binary)" ,tr("pts")),
+		FileFormat("Expe's point set (ascii)" ,tr("apts")),
+		FileFormat("XYZ Point Cloud (with or without normal)",tr("xyz"))
+	};
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> ExpeIOPlugin::exportFormats() const
+std::list<FileFormat> ExpeIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	// 	formatList << Format("Expe's point set (binary)"		,tr("pts"));
-	// 	formatList << Format("Expe's point set (ascii)"			,tr("apts"));
-	formatList << FileFormat("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
+	std::list<FileFormat> formatList = {
+		// FileFormat("Expe's point set (binary)" ,tr("pts")),
+		// FileFormat("Expe's point set (ascii)" ,tr("apts")),
+		FileFormat("XYZ Point Cloud (with or without normal)" ,tr("xyz"))
+	};
 	return formatList;
 }
 
@@ -172,7 +167,7 @@ QList<FileFormat> ExpeIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void ExpeIOPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void ExpeIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	// 	if(format.toLower() == tr("apts")){capability=defaultBits= vcg::tri::io::ExporterExpeAPTS<CMeshO>::GetExportMaskCapability();}
 	// 	if(format.toLower() == tr("pts")){capability=defaultBits= vcg::tri::io::ExporterExpePTS<CMeshO>::GetExportMaskCapability();}

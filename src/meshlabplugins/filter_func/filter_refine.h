@@ -23,6 +23,7 @@
 
 #include <common/ml_document/mesh_model.h>
 #include "string_conversion.h"
+#include "muParser.h"
 
 using namespace vcg;
 using namespace mu;

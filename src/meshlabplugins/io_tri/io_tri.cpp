@@ -31,52 +31,50 @@
 #include <wrap/io_trimesh/import_asc.h>
 #include <wrap/io_trimesh/export.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterList & parlst)
+RichParameterList TriIOPlugin::initPreOpenParameter(const QString &format) const
 {
+	RichParameterList parlst;
 	if(format.toUpper() == tr("ASC"))
 	{
 			parlst.addParam(RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
 			parlst.addParam(RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Length of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
 	}
+	return parlst;
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget *)
+void TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	if(formatName.toUpper() == tr("TRI"))
+	{
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		m.enable(mask);
+		if (!parseTRI(qUtf8Printable(fileName), m.cm))
+			throw MLException("Error while opening TRI file");
+	}
+	else if(formatName.toUpper() == tr("ASC"))
+	{
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		m.enable(mask);
+		bool triangulate = parlst.getBool("triangulate");
+		int rowToSkip = parlst.getInt("rowToSkip");
+		int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);
+		if (result != 0) // all the importers return 0 on success
 		{
-			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
-			m.Enable(mask);			
-			return parseTRI(qUtf8Printable(fileName), m.cm);
+			throw MLException("Error while opening ASC file");
 		}
-	if(formatName.toUpper() == tr("ASC"))
-		{
-			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-			m.Enable(mask);			
-			bool triangulate = parlst.getBool("triangulate");
-			int rowToSkip = parlst.getInt("rowToSkip");
-			int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);
-			if (result != 0) // all the importers return 0 on success
-			{
-				errorMessage = QString("Failed to open:")+fileName;
-				return false;
-			}
-			
-		return true;
-		}
-	return false;
+	}
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
-bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *, QWidget *)
+void TriIOPlugin::save(const QString& formatName, const QString &, MeshModel &, const int, const RichParameterList &, vcg::CallBackPos *)
 {
-	assert(0);
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
@@ -87,29 +85,28 @@ QString TriIOPlugin::pluginName() const
 	return "IOTRI";
 }
 
-QList<FileFormat> TriIOPlugin::importFormats() const
+std::list<FileFormat> TriIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList 
-		<< FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) 
-	  << FileFormat("ASC (ascii triplets of points)", tr("ASC"));
+	std::list<FileFormat> formatList = {
+		FileFormat("TRI (photogrammetric reconstructions)", tr("TRI")) ,
+		FileFormat("ASC (ascii triplets of points)", tr("ASC"))
+	};
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> TriIOPlugin::exportFormats() const
+std::list<FileFormat> TriIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	return formatList;
+	return {};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TriIOPlugin::GetExportMaskCapability(const QString &, int &capability, int &defaultBits) const
+void TriIOPlugin::exportMaskCapability(const QString &, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;

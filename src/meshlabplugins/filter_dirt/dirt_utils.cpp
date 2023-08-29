@@ -217,9 +217,9 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,Scalarm m,
 
 void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
     if(tri::HasPerWedgeTexCoord(base_mesh->cm) && base_mesh->cm.textures.size()>0){
-        QImage img;
+        QImage img = base_mesh->getTexture(base_mesh->cm.textures[0]);
         //QFileInfo text_file=QFileInfo(base_mesh->cm.textures[0].c_str());
-        img.load(base_mesh->cm.textures[0].c_str());
+        //img.load(base_mesh->cm.textures[0].c_str());
         QPainter painter(&img);
         Scalarm w=img.width();
         Scalarm h=img.height();
@@ -242,10 +242,7 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
             dbc=p0*bc[0]+p1*bc[1]+p2*bc[2];
             painter.drawPoint(dbc[0],dbc[1]);
         }
-        QString path=QDir::currentPath()+"/dirt_texture.png";
-        img.save(path,"PNG");
-        base_mesh->cm.textures.clear();
-        base_mesh->cm.textures.push_back(path.toStdString());
+        base_mesh->setTexture(base_mesh->cm.textures[0], img);
     }
 }
 

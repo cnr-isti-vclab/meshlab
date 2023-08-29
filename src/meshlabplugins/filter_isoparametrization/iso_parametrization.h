@@ -1754,7 +1754,7 @@ public:
         typedef std::map<AbstractVertex*,int>::iterator iteMapVert;
 
         ///add vertices
-        fprintf(f,"%d,%d \n",AbsMesh()->fn,AbsMesh()->vn);
+		fprintf(f,"%d,%d \n",AbsMesh()->vn,AbsMesh()->fn);
         int index=0;
         for (unsigned int i=0;i<AbsMesh()->vert.size();i++)
         {

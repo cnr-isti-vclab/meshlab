@@ -1,0 +1,11 @@
+
+Privacy Disclaimer
+Please read it carefully.
+
+MeshLab will automatically check for the availability of updated versions and will notify the need of upgrading the software to the users. For this reason, from time to time, MeshLab will issue a http network connection. If you prefer that MeshLab does not communicate in any way with its developers, simply use a plain firewall and prevent any MeshLab access to the network, or disable the update check in the system preferences. This will not limit in any way the normal behaviour of MeshLab apart from getting notified when new releases are distributed. 
+Important: when using MeshLab the following aggregated statistical data are collected: the number of opened meshes, the number of saved meshes, and the total sum of the number of vertices opened by the user. This statistically aggregated information (three integers) is sent back to the developer when checking for updates. Disabling the check for updates also disable this data collection. 
+
+We would like to remark that the kind of aggregated information collected by MeshLab is probably by far less sensitive than the information that is silently collected by most web sites when you surf them: ip address, visited pages, frequency of return. We would also like to stress that we really need this information in order to assess how diffusely MeshLab is used and what is its impact on the 3D community. 
+
+Thanks for your patience. 
+The Developers.

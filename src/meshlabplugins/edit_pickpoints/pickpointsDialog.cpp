@@ -30,8 +30,8 @@
 #include <math.h>
 
 #include <common/ml_document/mesh_model.h>
-#include <meshlab/rich_parameter_gui/richparameterlistframe.h>
-#include <meshlab/rich_parameter_gui/richparameterlistdialog.h>
+#include <common_gui/rich_parameter/rich_parameter_list_frame.h>
+#include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"
@@ -103,7 +103,7 @@ PickedPointTreeWidgetItem::PickedPointTreeWidgetItem(
 	setName(name);
 
 	active = _active;
-	//would set the checkbox but qt doesnt allow a way to do this in the constructor
+	//would set the checkbox but qt doesn't allow a way to do this in the constructor
 
 	//set point and normal
 	setPointAndNormal(intputPoint, faceNormal);

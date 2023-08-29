@@ -1,6 +1,30 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2004-2021                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
 #include "rich_parameter_list.h"
 
 #include "../mlexception.h"
+#include "../ml_document/mesh_document.h"
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
@@ -128,7 +152,7 @@ QString RichParameterList::getString(const QString& name) const
  */
 Matrix44m RichParameterList::getMatrix44(const QString& name) const
 {
-	return getParameterByName(name).value().getMatrix44f();
+	return getParameterByName(name).value().getMatrix44();
 }
 
 /**
@@ -137,7 +161,7 @@ Matrix44m RichParameterList::getMatrix44(const QString& name) const
  */
 Point3m RichParameterList::getPoint3m(const QString& name) const
 {
-	return getParameterByName(name).value().getPoint3f();
+	return getParameterByName(name).value().getPoint3();
 }
 
 /**
@@ -146,7 +170,7 @@ Point3m RichParameterList::getPoint3m(const QString& name) const
  */
 Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
 {
-	return Shot<Scalarm>::Construct(getParameterByName(name).value().getShotf());
+	return Shot<Scalarm>::Construct(getParameterByName(name).value().getShot());
 }
 
 /**
@@ -155,7 +179,7 @@ Shot<Scalarm> RichParameterList::getShotf(const QString& name) const
  */
 Scalarm RichParameterList::getAbsPerc(const QString& name) const
 {
-	return getParameterByName(name).value().getAbsPerc();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
@@ -164,16 +188,16 @@ Scalarm RichParameterList::getAbsPerc(const QString& name) const
  */
 int RichParameterList::getEnum(const QString& name) const
 {
-	return getParameterByName(name).value().getEnum();
+	return getParameterByName(name).value().getInt();
 }
 
 /**
  * @return the mesh of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
  */
-MeshModel * RichParameterList::getMesh(const QString& name) const
+unsigned int RichParameterList::getMeshId(const QString& name) const
 {
-	return getParameterByName(name).value().getMesh();
+	return getParameterByName(name).value().getInt();
 }
 
 /**
@@ -182,7 +206,7 @@ MeshModel * RichParameterList::getMesh(const QString& name) const
  */
 Scalarm RichParameterList::getDynamicFloat(const QString& name) const
 {
-	return getParameterByName(name).value().getDynamicFloat();
+	return getParameterByName(name).value().getFloat();
 }
 
 /**
@@ -191,7 +215,7 @@ Scalarm RichParameterList::getDynamicFloat(const QString& name) const
  */
 QString RichParameterList::getOpenFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**
@@ -200,7 +224,7 @@ QString RichParameterList::getOpenFileName(const QString& name) const
  */
 QString RichParameterList::getSaveFileName(const QString& name) const
 {
-	return getParameterByName(name).value().getFileName();
+	return getParameterByName(name).value().getString();
 }
 
 /**
@@ -292,6 +316,16 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 	return **it;
 }
 
+unsigned int RichParameterList::numberAdvancedParameters() const
+{
+	unsigned int n = 0;
+	for (const RichParameter& rp : *this){
+		if (rp.isAdvanced())
+			++n;
+	}
+	return n;
+}
+
 /**
  * @brief sets the value of the RichParameter having the given name.
  * @throws an MLException if the name is not found in the list
@@ -299,6 +333,13 @@ const RichParameter& RichParameterList::at(unsigned int i) const
 void RichParameterList::setValue(const QString& name,const Value& newval)
 {
 	getParameterByName(name).setValue(newval);
+}
+
+void RichParameterList::setAllValuesAsDefault()
+{
+	for (auto& p : paramList) {
+		p->setDefaultValue();
+	}
 }
 
 /**
@@ -330,7 +371,7 @@ void RichParameterList::join( const RichParameterList& rps )
 void RichParameterList::pushFromQDomElement(QDomElement np)
 {
 	RichParameter* rp = nullptr;
-	bool b = RichParameterAdapter::create(np, &rp);
+	bool b = RichParameterAdapter::create(np, rp);
 	if (b)
 		paramList.push_back(rp);
 }

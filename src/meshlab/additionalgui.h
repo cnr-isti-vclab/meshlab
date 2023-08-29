@@ -20,7 +20,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSlider>
-#include "../common/searcher.h"
+#include "../common/plugins/action_searcher.h"
 #include <QToolTip>
 #include <QSyntaxHighlighter>
 #include <QProxyStyle>
@@ -75,7 +75,7 @@ class SearchMenu : public MenuWithToolTip
 {
     Q_OBJECT
 public:
-    SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth = -1);
+    SearchMenu(const ActionSearcher& wm,const int max,QWidget* parent,const int fixedwidth = -1);
     int& searchLineWidth();
     void clearResults();
     QSize sizeHint () const;
@@ -84,7 +84,7 @@ protected:
     void resizeEvent ( QResizeEvent * event);
 private:
     MenuLineEdit* searchline;
-    const WordActionsMapAccessor& wama;
+    const ActionSearcher& wama;
     int maxres;
     int fixedwidthsize;
 

@@ -28,7 +28,7 @@
 
 
 #include <common/ml_document/raster_model.h>
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_plugin_gl_context.h>
 #include <wrap/glw/glw.h>
 
 
@@ -81,7 +81,7 @@ private:
 public:
     VisibleSet( glw::Context &ctx,MLPluginGLContext* plugctx,int meshid,
                 CMeshO &mesh,
-                QList<RasterModel*> &rasterList,
+                std::list<RasterModel*> &rasterList,
                 int weightMask );
 
     float               getWeight( const RasterModel *rm, CFaceO &f );

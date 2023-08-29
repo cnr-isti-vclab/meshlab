@@ -24,7 +24,7 @@
 #ifndef ML_DEFAULT_DECORATORS_H
 #define ML_DEFAULT_DECORATORS_H
 
-#include <common/ml_shared_data_context.h>
+#include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include <common/ml_document/mesh_model.h>
 #include <common/GLLogStream.h>
 

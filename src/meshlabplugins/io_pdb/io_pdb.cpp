@@ -36,15 +36,13 @@
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 using namespace std;
 using namespace vcg;
 typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
-void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterList &parlst)
+RichParameterList PDBIOPlugin::initPreOpenParameter(const QString &formatName) const
 {
+	RichParameterList parlst;
 	if (formatName.toUpper() == tr("PDB"))
 	{
 		parlst.addParam(RichBool("usecolors",true,"Use Atoms colors","Atoms are colored according to atomic type"));
@@ -65,9 +63,10 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString 
 		parlst.addParam(RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 		*/
 	}
+	return parlst;
 }
 
-bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb, QWidget * /*parent*/)
+void PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &parlst, CallBackPos *cb)
 {
 	//bool normalsUpdated = false;
 
@@ -75,69 +74,30 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	mask = 0;
 	
 	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+	if (cb != NULL)
+		(*cb)(0, "Loading...");
 
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-
-	//string filename = fileName.toUtf8().data();
 	string filename = QFile::encodeName(fileName).constData ();
-  
-  if (formatName.toUpper() == tr("PDB"))
+
+	if (formatName.toUpper() == tr("PDB"))
 	{
 		
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		m.Enable(mask);
+		m.enable(mask);
 
-		return parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb);
- 
-
-		/*
-		tri::io::ImporterPTX<CMeshO>::Info importparams;
-
-		importparams.meshnum = parlst.getInt("meshindex");
-		importparams.anglecull =parlst.getBool("anglecull");
-		importparams.angle = parlst.getFloat("angle");
-		importparams.savecolor = parlst.getBool("usecolor");
-		importparams.pointcull = parlst.getBool("pointcull");
-		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
-		importparams.flipfaces = parlst.getBool("flipfaces");
-
-		// if color, add to mesh
-		if(importparams.savecolor)
-			importparams.mask |= tri::io::Mask::IOM_VERTCOLOR;
-
-		// reflectance is stored in quality
-		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
-
-		m.Enable(importparams.mask);
-
-		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
-		if (result == 1)
-		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
-			return false;
-		}
-
-		// update mask
-		mask = importparams.mask;
-		*/
+		if (!parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb))
+			throw MLException("Error while opening PDB file");
+		if (cb != NULL)
+			(*cb)(99, "Done");
 	}
-	else 
-	{
-		assert(0); // Unknown File type
-		return false;
+	else {
+		wrongOpenFormat(formatName);
 	}
-
-	if (cb != NULL)	(*cb)(99, "Done");
-
-	return true;
 }
 
-bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
+void PDBIOPlugin::save(const QString & formatName, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterList & /*par*/, CallBackPos * /*cb*/)
 {
-  assert(0); 
-	return false;
+	wrongSaveFormat(formatName);
 }
 
 /*
@@ -148,58 +108,26 @@ QString PDBIOPlugin::pluginName() const
 	return "IOPDB";
 }
 
-QList<FileFormat> PDBIOPlugin::importFormats() const
+std::list<FileFormat> PDBIOPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("Protein Data Bank"	, tr("PDB"));
-
-	return formatList;
+	return {FileFormat("Protein Data Bank" , tr("PDB"))};
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> PDBIOPlugin::exportFormats() const
+std::list<FileFormat> PDBIOPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
 //	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
-
-	return formatList;
+	return {};
 }
 
 /*
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void PDBIOPlugin::GetExportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
+void PDBIOPlugin::exportMaskCapability(const QString & /*format*/, int &capability, int &defaultBits) const
 {
-  capability=defaultBits=0;
-	return;
-}
-
-void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
-{
-	/*
-	if(format.toUpper() == tr("STL"))
-		par.addBool("Unify",true, "Unify Duplicated Vertices",
-								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
-	*/
-}
-void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterList & /*par*/) 
-{
-	/*
-	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
-  */
-}
-void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterList & /*par*/) 
-{
-  /*
-	if(format.toUpper() == tr("STL"))
-		if(par.getBool("Unify"))
-			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-	*/
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)

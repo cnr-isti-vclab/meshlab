@@ -1,7 +1,7 @@
 // to be included in the library
 
-#ifndef __VCGLIB__TEXTCOOORD_OPTIMIZATION
-#define __VCGLIB__TEXTCOOORD_OPTIMIZATION
+#ifndef MESHLAB_VCGLIB__TEXTCOOORD_OPTIMIZATION
+#define MESHLAB_VCGLIB__TEXTCOOORD_OPTIMIZATION
 
 
 #include <vcg/container/simple_temporary_data.h>
@@ -43,7 +43,7 @@ protected:
   SimpleTempData<typename MESH_TYPE::VertContainer, int > isFixed;
 public:
 
-  /* Tpyes */
+  /* Types */
   typedef MESH_TYPE MeshType;
   typedef typename MESH_TYPE::VertexIterator VertexIterator;
   typedef typename MESH_TYPE::FaceIterator FaceIterator;

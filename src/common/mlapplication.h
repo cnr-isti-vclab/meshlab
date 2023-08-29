@@ -34,6 +34,9 @@ public:
 	static const QString versionRegisterKeyName() {return tr("version");}
 	static const QString wordSizeKeyName() {return tr("wordSize");}
 	
+	static const QString extraPluginsLocation();
+	static const QString extraShadersLocation();
+	
 private:
 	static std::string versionString(int a, int b, int c);
 };

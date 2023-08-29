@@ -24,34 +24,84 @@
 #define BASEIOPLUGIN_H
 
 #include <common/ml_document/mesh_model.h>
-#include <common/interfaces/iomesh_plugin_interface.h>
+#include <common/plugins/interfaces/io_plugin.h>
 
-class BaseMeshIOPlugin : public QObject, public IOMeshPluginInterface
+class BaseMeshIOPlugin : public QObject, public IOPlugin
 {
 	Q_OBJECT
-		MESHLAB_PLUGIN_IID_EXPORTER(IOMESH_PLUGIN_INTERFACE_IID)
-		Q_INTERFACES(IOMeshPluginInterface)
+	MESHLAB_PLUGIN_IID_EXPORTER(IO_PLUGIN_IID)
+	Q_INTERFACES(IOPlugin)
 
 
 public:
 
-	BaseMeshIOPlugin() : IOMeshPluginInterface() {}
+	BaseMeshIOPlugin();
 	QString pluginName() const;
 
-	QList<FileFormat> importFormats() const;
-	QList<FileFormat> exportFormats() const;
+	std::list<FileFormat> importFormats() const;
+	std::list<FileFormat> exportFormats() const;
+	std::list<FileFormat> importImageFormats() const;
+	std::list<FileFormat> exportImageFormats() const;
+	std::list<FileFormat> importProjectFormats() const;
+	std::list<FileFormat> exportProjectFormats() const;
 
-	void GetExportMaskCapability(const QString& format, int &capability, int &defaultBits) const;
+	void exportMaskCapability(
+			const QString& format,
+			int& capability,
+			int& defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
-	//void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
-	//void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
-	void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterList &parlst);
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterList & par);
+	void open(
+			const QString& formatName,
+			const QString& fileName,
+			MeshModel& m,
+			int& mask,
+			const RichParameterList& par,
+			vcg::CallBackPos* cb);
+
+	void save(
+			const QString &formatName,
+			const QString &fileName,
+			MeshModel &m,
+			const int mask,
+			const RichParameterList& par,
+			vcg::CallBackPos* cb);
+
+	QImage openImage(
+			const QString& format,
+			const QString& fileName,
+			vcg::CallBackPos* cb);
+
+	void saveImage(
+			const QString& format,
+			const QString& fileName,
+			const QImage& image,
+			int quality,
+			vcg::CallBackPos* cb);
+
+	std::list<FileFormat> projectFileRequiresAdditionalFiles(
+			const QString& format,
+			const QString& filename);
+
+	std::vector<MeshModel*> openProject(
+			const QString& format,
+			const QStringList& filenames,
+			MeshDocument& md,
+			std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* cb);
+
+	virtual void saveProject(
+			const QString& format,
+			const QString& fileName,
+			const MeshDocument& md,
+			bool onlyVisibleMeshes,
+			const std::vector<MLRenderingData>& rendOpt,
+			vcg::CallBackPos* /*cb*/ = nullptr);
+
+	RichParameterList initPreOpenParameter(const QString &formatName) const;
+	RichParameterList initSaveParameter(const QString &format, const MeshModel &/*m*/) const;
 
 private:
-	static QString stlUnifyParName() { return QString("MeshLab::IO::STL::UnifyVertices"); }
+	QImage loadTga(const char* filePath);
 };
 
 #endif

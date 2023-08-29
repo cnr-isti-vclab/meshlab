@@ -1,36 +1,27 @@
 # Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-
 # Only build if we have u3d
-if(TARGET external-IDTFConverter)
+if(TARGET IDTF)
+	# IDTF to U3D converter loads some dll/so files at runtime, thar may be placed in different
+	# places, depending on:
+	# - build or deploy stage
+	# - operative system
+	# The default paths are set for deploy stage (OS is detected automatically).
+	# If you are building (not deploying) MeshLab and you want to test the U3D exporter, enable this
+	# option.
+	# Without enabling this option, the U3D exporter WILL NOT WORK ON BUILD STAGE.
+	option(MESHLAB_U3D_BUILD_MODE "If you need to test u3d exporter in build mode (not deploy), enable this" OFF)
 
 	set(SOURCES io_u3d.cpp)
-
 	set(HEADERS io_u3d.h)
-	include_directories("${EXTERNAL_DIR}/u3d/src/IDTF")
 
-	add_library(io_u3d MODULE ${SOURCES} ${HEADERS})
+	add_meshlab_plugin(io_u3d ${SOURCES} ${HEADERS})
+	target_link_libraries(io_u3d PUBLIC IDTF)
 
-	target_include_directories(io_u3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-	
-	target_link_libraries(io_u3d PUBLIC meshlab-common)
-
-	target_link_libraries(io_u3d PUBLIC external-IDTFConverter IFXCoreStatic ${CMAKE_DL_LIBS})
-
-	set_property(TARGET io_u3d PROPERTY FOLDER Plugins)
-
-	set_property(TARGET io_u3d PROPERTY RUNTIME_OUTPUT_DIRECTORY
-										${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	set_property(TARGET io_u3d PROPERTY LIBRARY_OUTPUT_DIRECTORY
-										${MESHLAB_PLUGIN_OUTPUT_DIR})
-
-	install(
-		TARGETS io_u3d
-		DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-		COMPONENT Plugins)
-
+	if(MESHLAB_U3D_BUILD_MODE)
+		target_compile_definitions(io_u3d PRIVATE BUILD_MODE)
+	endif()
 else()
 	message(STATUS "Skipping io_u3d - missing u3d in external directory.")
 endif()

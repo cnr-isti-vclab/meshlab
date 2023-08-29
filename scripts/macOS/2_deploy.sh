@@ -1,48 +1,77 @@
 #!/bin/bash
-# this is a script shell for deploying a meshlab-portable app.
-# Requires a properly built meshlab.
-#
-# Without given arguments, the folder that will be deployed is meshlab/distrib.
-#
-# You can give as argument the DISTRIB_PATH.
-#
-# After running this script, $DISTRIB_PATH/meshlab.app will be a portable meshlab application.
 
-#realpath function
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
+SCRIPTS_PATH="$(dirname "$(realpath "$0")")"
 
-SCRIPTS_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-INSTALL_PATH=$SCRIPTS_PATH/../../src/install
-APPNAME="meshlab.app"
+INSTALL_PATH=$SCRIPTS_PATH/../../install
+QT_DIR_OPTION=""
+PACKAGES_PATH=$SCRIPTS_PATH/../../packages
+SIGN=false
+NOTARIZE=false
+CERT_ID=""
+NOTAR_USER=""
+NOTAR_TEAM_ID=""
+NOTAR_PASSWORD=""
 
 #checking for parameters
 for i in "$@"
 do
 case $i in
     -i=*|--install_path=*)
-    INSTALL_PATH="${i#*=}"
-    shift # past argument=value
-    ;;
+        INSTALL_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
+    -qt=*|--qt_dir=*)
+        QT_DIR_OPTION=-qt=${i#*=}
+        shift # past argument=value
+        ;;
+    -p=*|--packages_path=*)
+        PACKAGES_PATH="${i#*=}"
+        shift # past argument=value
+        ;;
+    -ci=*|--cert_id=*)
+        CERT_ID="${i#*=}"
+        if [ -n "$CERT_ID" ]; then
+          SIGN=true
+        fi
+        shift # past argument=value
+        ;;
+    -nu=*|--notarization_user=*)
+        NOTAR_USER="${i#*=}"
+        if [ -n "$NOTAR_USER" ]; then
+          NOTARIZE=true
+        fi
+        shift # past argument=value
+        ;;
+    -np=*|--notarization_pssw=*)
+        NOTAR_PASSWORD="${i#*=}"
+        shift # past argument=value
+        ;;
+    -nt=*|--notarization_team=*)
+        NOTAR_TEAM_ID="${i#*=}"
+        shift # past argument=value
+        ;;
     *)
-          # unknown option
-    ;;
+        # unknown option
+        ;;
 esac
 done
 
-echo "Hopefully I should find " $INSTALL_PATH/$APPNAME
+bash $SCRIPTS_PATH/internal/2a_appbundle.sh -i=$INSTALL_PATH $QT_DIR_OPTION
 
-if ! [ -e $INSTALL_PATH/$APPNAME -a -d $INSTALL_PATH/$APPNAME ]
-then
-    echo "Started in the wrong dir: I have not found the meshlab.app"
-    exit -1
+echo "======= AppBundle Created ======="
+
+if [ "$SIGN" = true ] ; then
+    bash $SCRIPTS_PATH/internal/2b_sign_appbundle.sh -i=$INSTALL_PATH -ci=$CERT_ID
+
+    echo "======= AppBundle Signed ======="
 fi
 
-if [ -e $QTDIR/bin/macdeployqt ]
-then
-    $QTDIR/bin/macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_globalregistration.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
-    
-else
-    macdeployqt $INSTALL_PATH/$APPNAME -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_csg.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_globalregistration.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_isoparametrization.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_screened_poisson.so -executable=$INSTALL_PATH/$APPNAME/Contents/PlugIns/libfilter_sketchfab.so
+if [ "$NOTARIZE" = true ] ; then
+    bash $SCRIPTS_PATH/internal/2c_notarize_appbundle.sh -i=$INSTALL_PATH -nu=$NOTAR_USER -nt=$NOTAR_TEAM_ID -np=$NOTAR_PASSWORD
+
+    echo "======= AppBundle Notarized ======="
 fi
+
+bash $SCRIPTS_PATH/internal/2d_dmg.sh -i=$INSTALL_PATH -p=$PACKAGES_PATH
+
+echo "======= DMG Created ======="

@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004-2020                                           \/)\/    *
+* Copyright(C) 2004-2021                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RICH_PARAMETER_LIST_H
 #define MESHLAB_RICH_PARAMETER_LIST_H
 
-#include "rich_parameter.h"
+#include "rich_parameters.h"
 
 /**
  * @brief The RichParameterList class
@@ -108,7 +108,7 @@ public:
 	vcg::Color4b getColor4b(const QString& name) const;
 	Scalarm getAbsPerc(const QString& name) const;
 	int getEnum(const QString& name) const;
-	MeshModel* getMesh(const QString& name) const;
+	unsigned int getMeshId(const QString& name) const;
 	Scalarm getDynamicFloat(const QString& name) const;
 	QString getOpenFileName(const QString& name) const;
 	QString getSaveFileName(const QString& name) const;
@@ -120,8 +120,10 @@ public:
 	const_iterator findParameter(const QString& name) const;
 	RichParameter& at(unsigned int i);
 	const RichParameter& at(unsigned int i) const;
+	unsigned int numberAdvancedParameters() const;
 
 	void setValue(const QString& name, const Value& val);
+	void setAllValuesAsDefault();
 	RichParameter& addParam(const RichParameter& pd);
 	void join(const RichParameterList& rps);
 

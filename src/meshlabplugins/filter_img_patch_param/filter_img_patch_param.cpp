@@ -36,20 +36,21 @@
 
 FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
 {
-	typeList << FP_PATCH_PARAM_ONLY
-			 << FP_PATCH_PARAM_AND_TEXTURING
-			 << FP_RASTER_VERT_COVERAGE
-			 << FP_RASTER_FACE_COVERAGE;
+	typeList = {
+		FP_PATCH_PARAM_ONLY,
+		FP_PATCH_PARAM_AND_TEXTURING,
+		FP_RASTER_VERT_COVERAGE,
+		FP_RASTER_FACE_COVERAGE
+	};
 	
-	foreach( FilterIDType tt , types() )
-		actionList << new QAction(filterName(tt), this);
+	for(ActionIDType tt: types())
+		actionList.push_back(new QAction(filterName(tt), this));
 }
 
 
 FilterImgPatchParamPlugin::~FilterImgPatchParamPlugin()
 {
 	delete m_Context;
-	m_Context = NULL;
 }
 
 QString FilterImgPatchParamPlugin::pluginName() const
@@ -58,25 +59,39 @@ QString FilterImgPatchParamPlugin::pluginName() const
 }
 
 
-QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
+QString FilterImgPatchParamPlugin::filterName( ActionIDType id ) const
 {
-	switch( id )
+	switch (id) {
+	case FP_PATCH_PARAM_ONLY: return QString("Parameterization from registered rasters");
+	case FP_PATCH_PARAM_AND_TEXTURING:
+		return QString("Parameterization + texturing from registered rasters");
+	case FP_RASTER_VERT_COVERAGE: return QString("Quality from raster coverage (Vertex)");
+	case FP_RASTER_FACE_COVERAGE: return QString("Quality from raster coverage (Face)");
+	default: assert(0); return QString();
+	}
+}
+
+QString FilterImgPatchParamPlugin::pythonFilterName(ActionIDType f) const
+{
+	switch(f)
 	{
-	case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
-	case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
-	case FP_RASTER_VERT_COVERAGE:  return QString( "Quality from raster coverage (Vertex)" );
-	case FP_RASTER_FACE_COVERAGE:  return QString( "Quality from raster coverage (Face)" );
+	case FP_PATCH_PARAM_ONLY:
+		return QString("compute_texcoord_parametrization_from_registered_rasters");
+	case FP_PATCH_PARAM_AND_TEXTURING:
+		return QString("compute_texcoord_parametrization_and_texture_from_registered_rasters");
+	case FP_RASTER_VERT_COVERAGE: return QString("compute_scalar_from_raster_coverage_per_vertex");
+	case FP_RASTER_FACE_COVERAGE: return QString("compute_scalar_from_raster_coverage_per_face");
 	default: assert(0); return QString();
 	}
 }
 
 
-QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
+QString FilterImgPatchParamPlugin::filterInfo( ActionIDType id ) const
 {
 	switch( id )
 	{
-	case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
-	case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+	case FP_PATCH_PARAM_ONLY: return QString("The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+	case FP_PATCH_PARAM_AND_TEXTURING: return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
 	case FP_RASTER_VERT_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each vertex of the active mesh is visible." );
 	case FP_RASTER_FACE_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each face of the active mesh is visible." );
 	default: assert(0); return QString();
@@ -111,7 +126,7 @@ bool FilterImgPatchParamPlugin::requiresGLContext(const QAction* action) const
 }
 
 
-FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
+FilterPlugin::FilterClass FilterImgPatchParamPlugin::getClass(const QAction *act ) const
 {
 	switch( ID(act) )
 	{
@@ -119,7 +134,7 @@ FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAc
 	case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
 	case FP_RASTER_VERT_COVERAGE:
 	case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
-	default:  assert(0); return FilterPluginInterface::Generic;
+	default:  assert(0); return FilterPlugin::Generic;
 	}
 }
 
@@ -139,10 +154,11 @@ FilterPluginInterface::FilterClass FilterImgPatchParamPlugin::getClass(const QAc
 //}
 
 
-void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
-												  MeshDocument &/*md*/,
-												  RichParameterList &par )
+RichParameterList FilterImgPatchParamPlugin::initParameterList(
+		const QAction *act,
+		const MeshDocument &/*md*/)
 {
+	RichParameterList par;
 	switch( ID(act) )
 	{
 	case FP_PATCH_PARAM_AND_TEXTURING:
@@ -202,71 +218,61 @@ void FilterImgPatchParamPlugin::initParameterList(const QAction *act,
 		break;
 	}
 	}
+	return par;
 }
 
 
-bool FilterImgPatchParamPlugin::applyFilter(
+std::map<std::string, QVariant> FilterImgPatchParamPlugin::applyFilter(
 		const QAction *act,
-		MeshDocument &md, 
-		std::map<std::string, QVariant>&,
-		unsigned int& /*postConditionMask*/,
 		const RichParameterList &par,
+		MeshDocument &md, 
+		unsigned int& /*postConditionMask*/,
 		vcg::CallBackPos * /*cb*/ )
 {
 	if (glContext != nullptr){
 		glContext->makeCurrent();
 		if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
 		{
-			this->errorMessage="Failed GLEW initialization";
-			return false;
+			throw MLException("Failed GLEW initialization");
 		}
-		
+
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		
+
 		delete m_Context;
 		m_Context = new glw::Context();
 		m_Context->acquire();
-		
+
 		if( !VisibilityCheck::GetInstance(*m_Context) )
 		{
-			this->errorMessage="VisibilityCheck failed";
-			return false;
+			throw MLException("VisibilityCheck failed");
 		}
 		VisibilityCheck::ReleaseInstance();
-		
-		
+
 		bool retValue = true;
-		
+
 		CMeshO &mesh = md.mm()->cm;
-		
+
 		std::list<Shotm> initialShots;
-		QList<RasterModel*> activeRasters;
-		foreach( RasterModel *rm, md.rasterList )
-		{
-			initialShots.push_back( rm->shot );
-			rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
-			if( rm->visible )
-				activeRasters.push_back( rm );
+		std::list<RasterModel*> activeRasters;
+		for(RasterModel& rm : md.rasterIterator()) {
+			initialShots.push_back(rm.shot);
+			rm.shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
+			if( rm.isVisible() )
+				activeRasters.push_back(&rm );
 		}
-		
-		if( activeRasters.empty() )    {
-			this->errorMessage="No active Raster";
-			{
-				glContext->doneCurrent();
-				errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
-				return false;
-			}
+
+		if( activeRasters.empty() ) {
+			glContext->doneCurrent();
+			throw MLException("You need to have at least one valid raster layer in your project, to apply this filter"); // text
 		}
-		
+
 		switch( ID(act) )
 		{
 		case FP_PATCH_PARAM_ONLY:
 		{
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) {
 				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
+				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
 			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
@@ -275,22 +281,21 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
 			RasterPatchMap patches;
 			PatchVec nullPatches;
-			patchBasedTextureParameterization( patches,
-											   nullPatches,
-											   md.mm()->id(),
-											   mesh,
-											   activeRasters,
-											   par );
-			
+			patchBasedTextureParameterization(
+						patches,
+						nullPatches,
+						md.mm()->id(),
+						mesh,
+						activeRasters,
+						par);
+
 			break;
 		}
 		case FP_PATCH_PARAM_AND_TEXTURING:
 		{
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) {
 				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
+				throw MLException("Mesh has some not 2-manifold faces, this filter requires manifoldness"); // text
 			}
 			vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
@@ -300,36 +305,34 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
 			if( pathEnd != -1 )
 				texName = texName.right( texName.size()-pathEnd-1 );
-			
-			if( (retValue = texName.size()!=0) )
-			{
+
+			if( (retValue = texName.size()!=0) ) {
 				RasterPatchMap patches;
 				PatchVec nullPatches;
-				patchBasedTextureParameterization( patches,
-												   nullPatches,
-												   md.mm()->id(),
-												   mesh,
-												   activeRasters,
-												   par );
-				
+				patchBasedTextureParameterization(
+							patches,
+							nullPatches,
+							md.mm()->id(),
+							mesh,
+							activeRasters,
+							par);
+
 				TexturePainter painter( *m_Context, par.getInt("textureSize") );
-				if( (retValue = painter.isInitialized()) )
-				{
+				if( (retValue = painter.isInitialized()) ) {
 					QElapsedTimer t; t.start();
 					painter.paint( patches );
 					if( par.getBool("colorCorrection") )
 						painter.rectifyColor( patches, par.getInt("colorCorrectionFilterSize") );
 					log( "TEXTURE PAINTING: %.3f sec.", 0.001f*t.elapsed() );
-					
+
 					QImage tex = painter.getTexture();
-					if( tex.save(texName) )
-					{
-						mesh.textures.clear();
-						mesh.textures.push_back( texName.toStdString() );
-					}
+					md.mm()->clearTextures();
+					md.mm()->addTexture(texName.toStdString(), tex);
 				}
 			}
-			
+			if (!retValue)
+				throw MLException(act->text() + " filter failed.");
+
 			break;
 		}
 		case FP_RASTER_VERT_COVERAGE:
@@ -339,76 +342,69 @@ bool FilterImgPatchParamPlugin::applyFilter(
 			visibility.m_plugcontext = glContext;
 			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
 				vi->Q() = 0.0f;
-			
-			foreach( RasterModel *rm, activeRasters )
-			{
+
+			for( RasterModel *rm: activeRasters ) {
 				visibility.setRaster( rm );
 				visibility.checkVisibility();
 				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
 					if( visibility.isVertVisible(vi) )
 						vi->Q() += 1.0f;
 			}
-			
-			if( par.getBool("normalizeQuality") )
-			{
-				const float normFactor = 1.0f / md.rasterList.size();
+
+			if( par.getBool("normalizeQuality") ) {
+				const float normFactor = 1.0f / md.rasterNumber();
 				for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
 					vi->Q() *= normFactor;
 			}
-			
+
 			break;
 		}
-		case FP_RASTER_FACE_COVERAGE:
-		{
+		case FP_RASTER_FACE_COVERAGE: {
 			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
 			visibility.setMesh(md.mm()->id(),&mesh );
 			visibility.m_plugcontext = glContext;
-			
+
 			for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
 				fi->Q() = 0.0f;
-			
-			foreach( RasterModel *rm, activeRasters )
-			{
+
+			for( RasterModel *rm: activeRasters ) {
 				visibility.setRaster( rm );
 				visibility.checkVisibility();
 				for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
 					if( visibility.isFaceVisible(fi) )
 						fi->Q() += 1.0f;
 			}
-			
+
 			if( par.getBool("normalizeQuality") )
 			{
-				const float normFactor = 1.0f / md.rasterList.size();
+				const float normFactor = 1.0f / md.rasterNumber();
 				for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
 					fi->Q() *= normFactor;
 			}
 			
 			break;
 		}
+		default:
+			wrongActionCalled(act);
 		}
-		
-		
-		foreach( RasterModel *rm, md.rasterList )
-		{
-			rm->shot = *initialShots.begin();
+
+		for(RasterModel& rm: md.rasterIterator() ) {
+			rm.shot = *initialShots.begin();
 			initialShots.erase( initialShots.begin() );
 		}
-		
+
 		VisibilityCheck::ReleaseInstance();
-		
-		
+
 		delete m_Context;
 		m_Context = NULL;
-		
+
 		glPopAttrib();
 		glContext->doneCurrent();
-		
-		
-		return retValue;
+
+		return std::map<std::string, QVariant>();
 	}
 	else {
-		errorMessage = "Fatal error: glContext not initialized";
-		return false;
+		throw MLException("Fatal error: glContext not initialized");
 	}
 }
 
@@ -630,11 +626,11 @@ int FilterImgPatchParamPlugin::extractPatches( RasterPatchMap &patches,
 											   PatchVec &nullPatches,
 											   CMeshO &mesh,
 											   VisibleSet &faceVis,
-											   QList<RasterModel*> &rasterList )
+											   std::list<RasterModel*> &rasterList )
 {
 	int nbPatches = 0;
 	
-	foreach( RasterModel *rm, rasterList )
+	for( RasterModel *rm: rasterList )
 		patches[rm] = PatchVec();
 	
 	for( CMeshO::FaceIterator fSeed=mesh.face.begin(); fSeed!=mesh.face.end(); ++fSeed )
@@ -918,12 +914,13 @@ void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
 }
 
 
-void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMap &patches,
-																   PatchVec &nullPatches,
-																   int meshid,
-																   CMeshO &mesh,
-																   QList<RasterModel*> &rasterList,
-																   const RichParameterList &par )
+void FilterImgPatchParamPlugin::patchBasedTextureParameterization(
+		RasterPatchMap &patches,
+		PatchVec &nullPatches,
+		int meshid,
+		CMeshO &mesh,
+		std::list<RasterModel*> &rasterList,
+		const RichParameterList &par)
 {
 	// Computes the visibility set for all mesh faces. It contains the set of all images
 	// into which the face is visible, as well as a reference image, namely the one with
@@ -959,7 +956,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 	
 	// Recovers patches by extracting connected components of faces having the same reference image.
 	t.start();
-	float oldArea = computeTotalPatchArea( patches );
+	//float oldArea = computeTotalPatchArea( patches );
 	int nbPatches = extractPatches( patches, nullPatches, mesh, faceVis, rasterList );
 	log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
 	log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
@@ -967,7 +964,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 	
 	// Extends each patch so as to include faces that belong to the other side of its boundary.
 	t.start();
-	oldArea = computeTotalPatchArea( patches );
+	//oldArea = computeTotalPatchArea( patches );
 	for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
 		for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
 			constructPatchBoundary( *p, faceVis );
@@ -977,7 +974,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 	// Compute the UV coordinates of all patches by projecting them onto their reference images.
 	// UV are then defined in image space, ranging from [0,0] to [w,h].
 	t.start();
-	oldArea = computeTotalPatchArea( patches );
+	//oldArea = computeTotalPatchArea( patches );
 	for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
 		computePatchUV( mesh, rp.key(), rp.value() );
 	log( "PATCHES UV COMPUTATION: %.3f sec.", 0.001f*t.elapsed() );
@@ -985,7 +982,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 	
 	// Merge patches so as to reduce the occupied texture area when their bounding boxes overlap.
 	t.start();
-	oldArea = computeTotalPatchArea( patches );
+	float oldArea = computeTotalPatchArea( patches );
 	for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
 		mergeOverlappingPatches( *rp );
 	log( "PATCH MERGING: %.3f sec.", 0.001f*t.elapsed() );
@@ -1012,24 +1009,24 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 }
 
 
-float FilterImgPatchParamPlugin::computeTotalPatchArea( RasterPatchMap &patches )
+float FilterImgPatchParamPlugin::computeTotalPatchArea(const RasterPatchMap &patches )
 {
 	float totalArea = 0;
 	
-	for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
-		for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
-			totalArea += p->bbox.Area();
+	for(const QVector<Patch>& rp : patches)
+		for(const Patch& p : rp)
+			totalArea += p.bbox.Area();
 	
 	return totalArea;
 }
 
 
-int FilterImgPatchParamPlugin::computePatchCount( RasterPatchMap &patches )
+int FilterImgPatchParamPlugin::computePatchCount(const RasterPatchMap &patches )
 {
 	int nbPatches = 0;
 	
-	for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
-		nbPatches += rp->size();
+	for(const QVector<Patch>& rp : patches)
+		nbPatches += rp.size();
 	
 	return nbPatches;
 }

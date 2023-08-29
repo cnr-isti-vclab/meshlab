@@ -73,14 +73,9 @@ EditReferencingPlugin::EditReferencingPlugin() {
     referencingResults.reserve(4096);
 }
 
-const QString EditReferencingPlugin::Info()
+const QString EditReferencingPlugin::info()
 {
     return tr("Reference layer(s) using fiducial points or scale layer(s) using reference distances.");
-}
-
-QString EditReferencingPlugin::pluginName() const
-{
-    return "EditReferencing";
 }
  
 void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -89,7 +84,7 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
 
-void EditReferencingPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
+void EditReferencingPlugin::decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
 	if (referencingMode == EditReferencingPlugin::REF_ABSOLUTE)
 		DecorateAbsolute(m, gla, p);
@@ -306,7 +301,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	}
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
+bool EditReferencingPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -336,33 +331,32 @@ bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
 
         //connecting other actions
     }
-    referencingDialog->show();
+	referencingDialog->show();
 
-    // signals for asking clicked point
-    connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
-    connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
+	// signals for asking clicked point
+	connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
+	connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
 
-    status_line1 = "";
-    status_line2 = "";
-    status_line3 = "";
-    status_error = "";
+	status_line1 = "";
+	status_line2 = "";
+	status_line3 = "";
+	status_error = "";
 
 	// reading current transformations for all layers
-	layersOriginalTransf.resize(glArea->md()->meshList.size());
+	layersOriginalTransf.resize(glArea->md()->meshNumber());
 	int lind = 0;
-	foreach(MeshModel *mmp, glArea->md()->meshList)
-	{
-		layersOriginalTransf[lind].Import(mmp->cm.Tr);
+	for(const MeshModel& mmp: glArea->md()->meshIterator()) {
+		layersOriginalTransf[lind].Import(mmp.cm.Tr);
 		lind++;
 	}
 	originalTransf.Import(m.cm.Tr);
 
-    glArea->update();
+	glArea->update();
 
-    return true;
+	return true;
 }
 
-void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+void EditReferencingPlugin::endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     delete(referencingDialog);
@@ -813,30 +807,26 @@ void EditReferencingPlugin::calculateMatrix()
 
 void EditReferencingPlugin::applyMatrix()
 {
-    status_error = "";
+	status_error = "";
 
-    Matrix44m newMat;
+	Matrix44m newMat;
 
-    newMat.Import(transfMatrix);
+	newMat.Import(transfMatrix);
 
-    if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
-    {
+	if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked) {
 		int lind = 0;
-        foreach(MeshModel *mmp, glArea->md()->meshList)
-        {
-            if(mmp->visible)
-            {
-				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
-            }
+		for(MeshModel& mmp: glArea->md()->meshIterator()) {
+			if(mmp.isVisible()) {
+				mmp.cm.Tr = newMat * layersOriginalTransf[lind];
+			}
 			lind++;
-        }
-    }
-    else
-    {
+		}
+	}
+	else {
 		glArea->mm()->cm.Tr = newMat * originalTransf;
-    }
+	}
 
-    glArea->update();
+	glArea->update();
 }
 
 void EditReferencingPlugin::updateDistances()
@@ -999,20 +989,16 @@ void EditReferencingPlugin::applyScale()
 	newMat.Identity();
 	newMat.SetScale(globalScale, globalScale, globalScale);
 
-	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
-	{
+	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked) {
 		int lind = 0;
-		foreach(MeshModel *mmp, glArea->md()->meshList)
-		{
-			if (mmp->visible)
-			{
-				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
+		for(MeshModel& mmp: glArea->md()->meshIterator()) {
+			if (mmp.isVisible()) {
+				mmp.cm.Tr = newMat * layersOriginalTransf[lind];
 			}
 			lind++;
 		}
 	}
-	else
-	{
+	else {
 		glArea->mm()->cm.Tr = newMat * originalTransf;
 	}
 

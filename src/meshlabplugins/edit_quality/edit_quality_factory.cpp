@@ -29,20 +29,19 @@ QualityMapperFactory::QualityMapperFactory()
 	//setting-up plugin
 	editQuality = new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper", this);
 	
-	actionList << editQuality;
+	actionList.push_back(editQuality);
 	
 	foreach(QAction *editAction, actionList)
-		editAction->setCheckable(true); 	
+		editAction->setCheckable(true);
 }
-	
-//gets a list of actions available from this plugin
-QList<QAction *> QualityMapperFactory::actions() const
+
+QString QualityMapperFactory::pluginName() const
 {
-	return actionList;
+	return "EditQuality";
 }
 
 //get the edit tool for the given action
-EditPluginInterface* QualityMapperFactory::getMeshEditInterface(const QAction *action)
+EditTool* QualityMapperFactory::getEditTool(const QAction *action)
 {
 	if(action == editQuality)
 	{
@@ -53,7 +52,7 @@ EditPluginInterface* QualityMapperFactory::getMeshEditInterface(const QAction *a
 
 QString QualityMapperFactory::getEditToolDescription(const QAction *)
 {
-	return QualityMapperPlugin::Info();
+	return QualityMapperPlugin::info();
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(QualityMapperFactory)

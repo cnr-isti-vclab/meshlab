@@ -31,7 +31,7 @@
 using namespace std;
 using namespace vcg;
 
-bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb, QWidget */*parent*/)
+void IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterList &, CallBackPos *cb)
 {
 	// initializing mask
 	mask = 0;
@@ -52,9 +52,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMaskVrml(filename.c_str(), info);
 		if ( result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
-			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD)
 		{
@@ -65,7 +63,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGCOLOR);
 		if (info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGNORMAL);
-		m.Enable(info->mask);
+		m.enable(info->mask);
 		
 		errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nLine number: %3\nError details: %4";
 		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info, cb);
@@ -74,57 +72,56 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QString fileError = info->filenameStack[info->filenameStack.size()-1];
 			QString lineError;
 			lineError.setNum(info->lineNumberError);
-			errorMessage = errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result));
 			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (m.cm.vert.size() == 0)
 		{
 			errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: File without a geometry";
-			errorMessage = errorMsgFormat.arg(fileName);
 			delete info;
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName));
 		}
 		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
 		
-		QString missingTextureFilesMsg = "The following texture files were not found:\n";
-		bool someTextureNotFound = false;
-		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
-		{
-			FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
-			if (pFile == NULL)
-			{
-				missingTextureFilesMsg.append("\n");
-				missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
-				someTextureNotFound = true;
-			}
-			else
-			{
-				m.cm.textures.push_back(info->textureFile[tx].toStdString());
-				fclose (pFile);
-			}
-		}
+//		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+//		bool someTextureNotFound = false;
+//		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
+//		{
+//			FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
+//			if (pFile == NULL)
+//			{
+//				missingTextureFilesMsg.append("\n");
+//				missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
+//				someTextureNotFound = true;
+//			}
+//			else
+//			{
+//				m.cm.textures.push_back(info->textureFile[tx].toStdString());
+//				fclose (pFile);
+//			}
+//		}
 		
 		
-		if (someTextureNotFound)
-			errorMessage = missingTextureFilesMsg;
+//		if (someTextureNotFound){
+//			reportWarning(missingTextureFilesMsg);
+//		}
 		
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 		if (!normalsUpdated)
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
 		
 		delete info;
+		if (cb != NULL)	(*cb)(99, "Done");
 	}
-	// verify if texture files are present
-	
-	if (cb != NULL)	(*cb)(99, "Done");
-	return true;
+	else {
+		wrongOpenFormat(formatName);
+	}
 }
 
 
-bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb, QWidget *)
+void IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterList &, vcg::CallBackPos *cb)
 {
 	QString errorMsgFormat = "Error encountered while exportering file:\n%1\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -133,14 +130,13 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		int result = vcg::tri::io::ExporterX3D<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
 		if(result!=0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result));
-			return false;
+			throw MLException(errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result)));
 		}
 		if (cb !=NULL) (*cb)(99, "Saving X3D File...");
-		return true;
 	}
-	assert(0);
-	return false;
+	else {
+		wrongSaveFormat(formatName);
+	}
 }
 
 /*
@@ -151,30 +147,29 @@ QString IoX3DPlugin::pluginName() const
 	return "IOX3D";
 }
 
-QList<FileFormat> IoX3DPlugin::importFormats() const
+std::list<FileFormat> IoX3DPlugin::importFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("X3D File Format - XML encoding", tr("X3D"));
-	formatList << FileFormat("X3D File Format - VRML encoding", tr("X3DV"));
-	formatList << FileFormat("VRML 2.0 File Format", tr("WRL"));
+	std::list<FileFormat> formatList = {
+		FileFormat("X3D File Format - XML encoding", tr("X3D")),
+		FileFormat("X3D File Format - VRML encoding", tr("X3DV")),
+		FileFormat("VRML 2.0 File Format", tr("WRL"))
+	};
 	return formatList;
 }
 
 /*
 	returns the list of the file's type which can be exported
 */
-QList<FileFormat> IoX3DPlugin::exportFormats() const
+std::list<FileFormat> IoX3DPlugin::exportFormats() const
 {
-	QList<FileFormat> formatList;
-	formatList << FileFormat("X3D File Format", tr("X3D"));
-	return formatList;
+	return {FileFormat("X3D File Format", tr("X3D"))};
 }
 
 /*
 	returns the mask on the basis of the file's type.
 	otherwise it returns 0 if the file format is unknown
 */
-void IoX3DPlugin::GetExportMaskCapability(const QString &format, int &capability, int &defaultBits) const
+void IoX3DPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("X3D")){
 		capability = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
