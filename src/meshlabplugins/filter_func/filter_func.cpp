@@ -22,8 +22,8 @@
  ****************************************************************************/
 
 #include "filter_func.h"
+#include <random>
 #include <vcg/complex/algorithms/create/platonic.h>
-
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
@@ -32,6 +32,20 @@
 
 using namespace mu;
 using namespace vcg;
+
+std::random_device randomDev;
+std::default_random_engine rndEngine(randomDev());
+//Function to generate a random double number in [0..1) interval
+double ML_Rnd() { return std::generate_canonical<double, 24>(rndEngine); }
+//Function to generate a random integer number in [0..a) interval
+double ML_RandInt(const double a) { return std::floor(a*ML_Rnd()); }
+
+//Add rnd() and randint() custom functions to a mu::Parser
+void setCustomFunctions(mu::Parser& p)
+{
+	p.DefineFun("rnd", ML_Rnd);
+	p.DefineFun("randInt", ML_RandInt);
+}
 
 // Constructor
 FilterFunctionPlugin::FilterFunctionPlugin()
@@ -123,12 +137,14 @@ QString FilterFunctionPlugin::pythonFilterName(ActionIDType f) const
 }
 
 const QString PossibleOperators(
-	"<br>It's possible to use parenthesis <b>()</b>, and predefined operators:<br>"
+	"<br>It's possible to use parenthesis <b>()</b>, and predefined "
+	"<a href='https://beltoforion.de/en/muparser/features.php#idDef2'>muparser built-in operators</a>, like:<br>"
 	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, "
-	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator)<br><br>");
+	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator).<br><br>");
 
 const QString PerVertexAttributeString(
-	"It's possible to use the following per-vertex variables in the expression:<br>"
+	"It's possible to use <a href='https://beltoforion.de/en/muparser/features.php#idDef1'>muparser built-in functions</a>"
+	"and the following per-vertex variables in the expression:<br>"
 	"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> "
 	"(quality), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
 	"index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
@@ -136,8 +152,8 @@ const QString PerVertexAttributeString(
 	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br>");
 
 const QString PerFaceAttributeString(
-	"It's possible to use the following per-face variables, or variables associated to the three "
-	"vertex of every face:<br>"
+	"It's possible to use <a href='https://beltoforion.de/en/muparser/features.php#idDef1'>muparser built-in functions</a>"
+	"and the following per-face or per-vertex variables:<br>"
 	"<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex "
 	"position, <b>x2,y2,z2</b> for the third vertex position, "
 	"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 "
@@ -701,7 +717,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		// muparser initialization and explicitly define parser variables
 		Parser p;
+
 		setPerVertexVariables(p, m.cm);
+		setCustomFunctions(p);
 
 		// set expression inserted by user as string (required by muparser)
 		p.SetExpr(wexpr);
@@ -747,7 +765,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and explicitly define parser variables
 		Parser p;
 		setPerFaceVariables(p, m.cm);
-
+		setCustomFunctions(p);
+		
 		// set expression inserted by user as string (required by muparser)
 		p.SetExpr(conversion::fromStringToWString(select.toStdString()));
 
@@ -815,11 +834,15 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and explicitly define parser variables
 		// function for x,y and z must use different parser and variables
 		Parser p1, p2, p3, p4;
-
 		setPerVertexVariables(p1, m.cm);
 		setPerVertexVariables(p2, m.cm);
 		setPerVertexVariables(p3, m.cm);
 		setPerVertexVariables(p4, m.cm);
+
+		setCustomFunctions(p1);
+		setCustomFunctions(p2);
+		setCustomFunctions(p3);
+		setCustomFunctions(p4);
 
 		p1.SetExpr(conversion::fromStringToWString(func_x));
 		p2.SetExpr(conversion::fromStringToWString(func_y));
@@ -916,6 +939,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		Parser p;
 		setPerVertexVariables(p, m.cm);
 
+		//Add rnd() and randInt() internal functions
+		setCustomFunctions(p);
+
 		// set expression to calc with parser
 		p.SetExpr(conversion::fromStringToWString(func_q));
 
@@ -975,6 +1001,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		Parser pu, pv;
 		setPerVertexVariables(pu, m.cm);
 		setPerVertexVariables(pv, m.cm);
+		setCustomFunctions(pu);
+		setCustomFunctions(pv);
 
 		// set expression to calc with parser
 #ifdef _UNICODE
@@ -1033,6 +1061,12 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(pv1, m.cm);
 		setPerFaceVariables(pu2, m.cm);
 		setPerFaceVariables(pv2, m.cm);
+		setCustomFunctions(pu0);
+		setCustomFunctions(pv0);
+		setCustomFunctions(pu1);
+		setCustomFunctions(pv1);
+		setCustomFunctions(pu2);
+		setCustomFunctions(pv2);
 
 		// set expression to calc with parser
 		pu0.SetExpr(conversion::fromStringToWString(func_u0));
@@ -1082,6 +1116,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p_nx, m.cm);
 		setPerFaceVariables(p_ny, m.cm);
 		setPerFaceVariables(p_nz, m.cm);
+		setCustomFunctions(p_nx);
+		setCustomFunctions(p_ny);
+		setCustomFunctions(p_nz);
+			
 		p_nx.SetExpr(conversion::fromStringToWString(func_nx));
 		p_ny.SetExpr(conversion::fromStringToWString(func_ny));
 		p_nz.SetExpr(conversion::fromStringToWString(func_nz));
@@ -1154,6 +1192,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p2, m.cm);
 		setPerFaceVariables(p3, m.cm);
 		setPerFaceVariables(p4, m.cm);
+		setCustomFunctions(p1);
+		setCustomFunctions(p2);
+		setCustomFunctions(p3);
+		setCustomFunctions(p4);
 
 		p1.SetExpr(conversion::fromStringToWString(func_r));
 		p2.SetExpr(conversion::fromStringToWString(func_g));
@@ -1227,6 +1269,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and define custom variables
 		Parser pf;
 		setPerFaceVariables(pf, m.cm);
+		setCustomFunctions(pf);
 
 		// set expression to calc with parser
 		pf.SetExpr(conversion::fromStringToWString(func_q));
@@ -1286,6 +1329,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		Parser p;
 		setPerVertexVariables(p, m.cm);
+		setCustomFunctions(p);
 
 		p.SetExpr(conversion::fromStringToWString(expr));
 
@@ -1338,6 +1382,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(m.cm, name);
 		Parser p;
 		setPerFaceVariables(p, m.cm);
+		setCustomFunctions(p);		
 		p.SetExpr(conversion::fromStringToWString(expr));
 
 		time_t start = clock();
@@ -1384,6 +1429,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerVertexVariables(p_x, m.cm);
 		setPerVertexVariables(p_y, m.cm);
 		setPerVertexVariables(p_z, m.cm);
+		setCustomFunctions(p_x);
+		setCustomFunctions(p_y);
+		setCustomFunctions(p_z);
+
 		p_x.SetExpr(conversion::fromStringToWString(x_expr));
 		p_y.SetExpr(conversion::fromStringToWString(y_expr));
 		p_z.SetExpr(conversion::fromStringToWString(z_expr));
@@ -1443,6 +1492,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p_x, m.cm);
 		setPerFaceVariables(p_y, m.cm);
 		setPerFaceVariables(p_z, m.cm);
+		setCustomFunctions(p_x);
+		setCustomFunctions(p_y);
+		setCustomFunctions(p_z);
 		p_x.SetExpr(conversion::fromStringToWString(x_expr));
 		p_y.SetExpr(conversion::fromStringToWString(y_expr));
 		p_z.SetExpr(conversion::fromStringToWString(z_expr));
@@ -1524,6 +1576,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		Parser p;
 		double x, y, z;
+		setCustomFunctions(p);
+		
 		p.DefineVar(conversion::fromStringToWString("x"), &x);
 		p.DefineVar(conversion::fromStringToWString("y"), &y);
 		p.DefineVar(conversion::fromStringToWString("z"), &z);
