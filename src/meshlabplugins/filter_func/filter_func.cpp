@@ -130,7 +130,7 @@ const QString PossibleOperators(
 	"<a href='https://beltoforion.de/en/muparser/features.php#idDef1'>functions</a>, like: "
 	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, "
 	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator), and "
-	"<b>rnd()</b> (random value in [0..1])" );
+	"<b>rnd()</b> (random value in [0..1]), and these values:" );
 
 const QString PerVertexAttributeString(
 	"<ul><li>Per-vertex variables:<br>"
@@ -139,7 +139,8 @@ const QString PerVertexAttributeString(
 	"index), <b>vsel</b> ( 1 if selected, 0 if not selected)."
 	"</li><li>Bounding Box variables:<br>"
 	"<b>xmin,ymin,zmin</b> (min coordinates), <b>xmax,ymax,zmax</b> (max coordinates), "
-	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), <b>bbdiag</b> (diagonal length)"
+	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), "
+	"<b>bbdiag</b> (diagonal length)"
 	"</li><li>User-defined attributes:<br>"
 	"All user defined custom <i>vertex attributes</i> are available. "
 	"Point3 attribute are available as 3 variables with _x, _y, _z appended to the attribute name."
@@ -148,17 +149,18 @@ const QString PerVertexAttributeString(
 const QString PerFaceAttributeString(
 	"<ul><li>Per-face variables:<br>"
 	"<b>fi</b> (face index), <b>fr,fg,fb,fa</b> (face color), <b>fq</b> (face quality), "
-	"<b>fnx,fny,fnz</b> (face normal), <b>fsel</b> ( 1 if selected, 0 if not selected)."
+	"<b>fnx,fny,fnz</b> (face normal), <b>fsel</b> ( 1 if face is selected, 0 if not selected)."
 	"</li><li>Per-vertex variables:<br>"
 	"<b>x0,y0,z0</b> (first vertex position), <b>x1,y1,z1</b> (second vertex position),"
 	"<b>x2,y2,z2</b> (third vertex position), "
 	"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> (vertex normals), <b>r0,g0,b0,a0 r1,g1,b1,a1 "
 	"r2,g2,b2,a2</b> (vertex colors), <b>vi0, vi1, vi2</b> (vertex indices), "
-	"<b>q0,q1,q2</b> (vertex quality), <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> (per-wedge "
-	"texture coords), <b>ti</b> (face texture index), <b>vsel0,vsel1,vsel2</b> (vertex selected (1 yes, 0 no))."
+	"<b>q0,q1,q2</b> (vertex quality), <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> (per-wedge texture coords), "
+	"<b>ti</b> (face texture index), <b>vsel0,vsel1,vsel2</b> (1 if vertex is selected, 0 if not)."
 	"</li><li>Bounding Box variables:<br>"
 	"<b>xmin,ymin,zmin</b> (min coordinates), <b>xmax,ymax,zmax</b> (max coordinates), "
-	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), <b>bbdiag</b> (diagonal length)."
+	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), "
+	"<b>bbdiag</b> (diagonal length)."
 	"</li><li>User-defined attributes:<br>"
 	"All user defined custom <i>face scalar attributes</i> are available. "
 	"Point3 attribute are available as 3 variables with _x, _y, _z appended to the attribute name."
@@ -711,7 +713,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 	Q_UNUSED(cb);
 
 	//Set values to parser variables related to BBox
-	vcg::Box3f bbox = m.cm.bbox;
+	const auto &bbox = m.cm.bbox;
 	xmin = bbox.min.X();
 	ymin = bbox.min.Y();
 	zmin = bbox.min.Z();
@@ -722,7 +724,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 	ydim = bbox.DimY();
 	zdim = bbox.DimZ();
 	bbdiag = bbox.Diag();
-	vcg::Point3f bbCenter = bbox.Center();
+	auto bbCenter = bbox.Center();
 	xmid = bbCenter.X();
 	ymid = bbCenter.Y();
 	zmid = bbCenter.Z();
