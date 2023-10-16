@@ -44,6 +44,10 @@ protected:
 		vsel0, vsel1, vsel2;
 	double                   fr, fg, fb, fa, fnx, fny, fnz, fq, fsel;
 	double                   v, f, v0i, v1i, v2i, ti;
+
+	//Bounding Box of the mesh
+	double xmin, ymin, zmin, xmax, ymax, zmax, xdim, ydim, zdim, bbdiag, xmid, ymid, zmid;
+
 	std::vector<std::string> v_attrNames;  // names of the <float> per vertex attributes
 	std::vector<double>      v_attrValue;  // values of the <Scalarm> per vertex attributes
 	std::vector<std::string> v3_attrNames; // names of the <Point3f> per vertex attributes There are
@@ -61,6 +65,9 @@ protected:
 	std::vector<CMeshO::PerFaceAttributeHandle<Point3m>> f3_handlers;
 	
 	QString                                                errorMsg;
+
+	// Generate a random double in [0.0, 1.0] interval
+	static double random();
 
 public:
 	enum {
