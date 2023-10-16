@@ -35,6 +35,7 @@ jobs:
         fi
     - name: Build
       uses: ./.github/actions/1_build
+      with:
         cache-path: src/external/downloads/*
         cache-key: external-libraries
         build-option: ${{matrix.precision}}
