@@ -36,7 +36,7 @@ FilterEmbreePlugin::FilterEmbreePlugin()
         FP_OBSCURANCE,
         FP_AMBIENT_OCCLUSION,
         FP_SDF,
-        FP_SELECT_VISIBLE_FACES,
+        //FP_SELECT_VISIBLE_FACES,
         FP_ANALYZE_NORMALS
         };
 
@@ -89,15 +89,15 @@ QString FilterEmbreePlugin::pythonFilterName(ActionIDType f) const
 {
     switch(f) {
     case FP_OBSCURANCE :
-        return QString("Compute Obscurance with Embree");
+        return QString("compute_scalar_by_volumetric_obscurance");
     case FP_AMBIENT_OCCLUSION:
-        return QString("Compute Ambient occlusion with Embree");
+        return QString("compute_scalar_ambient_occlusion");
     case FP_SDF:
-        return QString("Compute Shape-Diameter Function with Embree");
+        return QString("compute_scalar_by_shape_diameter_function_per_vertex");
     case FP_SELECT_VISIBLE_FACES:
-        return QString("Compute Visible Faces Select with Embree");
+        return QString("compute_selection_by_visibility_per_face");
     case FP_ANALYZE_NORMALS:
-        return QString("Reorient face normals by geometry");
+        return QString("meshing_re_orient_faces_by_geometry");
     default :
         assert(0);
         return QString();
