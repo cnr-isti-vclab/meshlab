@@ -6,6 +6,7 @@
 
 DONT_INSTALL_QT=false
 DONT_INSTALL_CGAL_BOOST=false
+DONT_INSTALL_EMBREE=false
 
 #checking for parameters
 for i in "$@"
@@ -19,6 +20,10 @@ case $i in
         DONT_INSTALL_CGAL_BOOST=true
         shift # past argument=value
         ;;
+    --dont_install_embree)
+        DONT_INSTALL_EMBREE=true
+        shift # past argument=value
+        ;;
     *)
         # unknown option
         ;;
@@ -30,7 +35,7 @@ echo "=== installing mesa packages..."
 sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
 
 echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
-sudo apt-get install -y cmake ninja-build patchelf libgmp-dev libmpfr-dev libxerces-c-dev
+sudo apt-get install -y cmake ninja-build patchelf libgmp-dev libmpfr-dev libxerces-c-dev libtbb-dev
 
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
@@ -49,4 +54,11 @@ if [ "$DONT_INSTALL_CGAL_BOOST" = false ] ; then
     sudo apt-get install -y libcgal-dev libboost-all-dev
 else
     echo "=== jumping installation of cgal and boost packages..."
+fi
+
+if [ "$DONT_INSTALL_EMBREE" = false ] ; then
+    echo "=== installing embree..."
+    sudo apt-get install -y libembree-dev
+else
+	echo "=== jumping installation of embree package..."
 fi

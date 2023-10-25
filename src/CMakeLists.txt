@@ -151,8 +151,9 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_cubization
 		meshlabplugins/filter_developability
 		meshlabplugins/filter_dirt
+		meshlabplugins/filter_embree
 		meshlabplugins/filter_fractal
-                meshlabplugins/filter_func
+		meshlabplugins/filter_func
 		meshlabplugins/filter_img_patch_param
 		meshlabplugins/filter_icp
 		meshlabplugins/filter_io_nxs
