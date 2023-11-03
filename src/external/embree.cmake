@@ -43,7 +43,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE AND WIN32)
 			NAME "embree dll"
 			LINK ${EMBREE_WIN_LINK}
 			#MD5 ${EMBREE_WIN_MD5}
-			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+			DIR ${EMBREE_WIN_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- embree dll - download failed.")
 		endif()
