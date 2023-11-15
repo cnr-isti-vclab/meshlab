@@ -31,16 +31,20 @@ do
     ARGUMENTS="${ARGUMENTS} -executable=${plugin}"
 done
 
-# Make sure that deploy succeeds
-if ${QT_DIR}macdeployqt $INSTALL_PATH/$APPNAME \
-    $ARGUMENTS; \
-then
-    # remove everything from install path, except the appbundle
-    cd $INSTALL_PATH
-    ls | grep -xv "${APPNAME}" | xargs rm
+# save in message the output of macdeployqt
+message=$(${QT_DIR}macdeployqt $INSTALL_PATH/$APPNAME \
+    $ARGUMENTS 2>&1)
 
-    echo "$INSTALL_PATH is now a self contained meshlab application"
-else
-    echo "macdeployqt failed with error code $?. Script was not completed successfully."
+# if message contains "ERROR" then macdeployqt failed
+if [[ $message == *"ERROR"* ]]; then
+    echo "macdeployqt failed."
+    echo "macdeployqt output:"
+    echo $message
     exit 1
 fi
+
+# remove everything from install path, except the appbundle
+cd $INSTALL_PATH
+ls | grep -xv "${APPNAME}" | xargs rm
+
+echo "$INSTALL_PATH is now a self contained meshlab application"
