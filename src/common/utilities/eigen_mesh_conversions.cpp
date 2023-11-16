@@ -529,7 +529,7 @@ void meshlab::addVertexVectorAttribute(
 			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
+	for (unsigned int i = 0; i < attributeValues.rows(); ++i) {
 		h[i][0] = attributeValues(i, 0);
 		h[i][1] = attributeValues(i, 1);
 		h[i][2] = attributeValues(i, 2);
@@ -564,7 +564,7 @@ void meshlab::addFaceVectorAttribute(
 			QString::fromStdString(attributeName));
 	}
 	h = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3m>(mesh, attributeName);
-	for (unsigned int i = 0; i < attributeValues.size(); ++i) {
+	for (unsigned int i = 0; i < attributeValues.rows(); ++i) {
 		h[i][0] = attributeValues(i, 0);
 		h[i][1] = attributeValues(i, 1);
 		h[i][2] = attributeValues(i, 2);
