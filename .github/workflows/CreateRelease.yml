@@ -200,13 +200,13 @@ jobs:
         cd ..
 
     #Create release and upload
-    - uses: "marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303"
+    - name: Create Release
+      uses: "ncipollo/release-action@v1"
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
-        prerelease: false #${{ github.event.inputs.release_candidate }}
-        title: "MeshLab-${{steps.envs.outputs.ml_version}}"
-        files: |
+        token: "${{ secrets.GITHUB_TOKEN }}"
+        tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
+        name: "MeshLab-${{steps.envs.outputs.ml_version}}"
+        artifacts: |
           MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz
           MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
           meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
