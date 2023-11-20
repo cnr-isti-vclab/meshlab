@@ -504,7 +504,7 @@ bool loadAttribute(
 	else { //if the attribute is triangle indices
 
 		//if the mode is GL_TRIANGLES and we have triangle indices
-		if (p.mode == 4 && p.indices >= 0 &&
+		if (p.mode == TINYGLTF_MODE_TRIANGLES && p.indices >= 0 &&
 				(unsigned int)p.indices < model.accessors.size()) {
 			accessor = &model.accessors[p.indices];
 		}
@@ -577,9 +577,12 @@ bool loadAttribute(
 	//the mesh is not indexed, and triplets of contiguous vertices
 	//generate triangles
 	else if (attr == INDICES) {
-		//this case is managed when passing nullptr as data
-		populateAttr<unsigned char>(attr, m, ivp, nullptr, 0, 0);
-		attrLoaded = true;
+		// avoid explicitly the point clouds
+		if (p.mode != TINYGLTF_MODE_POINTS) {
+			//this case is managed when passing nullptr as data
+			populateAttr<unsigned char>(attr, m, ivp, nullptr, 0, 0);
+			attrLoaded = true;
+		}
 	}
 	return attrLoaded;
 }
