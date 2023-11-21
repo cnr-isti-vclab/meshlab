@@ -67,32 +67,7 @@ public:
 		vcg::CallBackPos*        cb);
 
 private:
-	// generic boolean operation function
-	/*static void booleanOperation(
-		MeshDocument&    md,
-		const MeshModel& m1,
-		const MeshModel& m2,
-		int              op,
-		bool             transfFaceQuality,
-		bool             transfFaceColor,
-		bool             transfVertQuality,
-		bool             transfVertColor);
-*/
-	// transfer functions
-	static void transferFaceAttributes(
-		MeshModel&             res,
-		const Eigen::VectorXi& faceIndices,
-		const MeshModel&       m1,
-		const MeshModel&       m2,
-		bool                   quality,
-		bool                   color);
-	static void transferVertexAttributes(
-		MeshModel&             res,
-		const Eigen::VectorXi& faceIndices,
-		const MeshModel&       m1,
-		const MeshModel&       m2,
-		bool                   quality,
-		bool                   color);
+
 };
 
 #endif // MESHLAB_FILTER_MESH_ALPHAWRAP_H

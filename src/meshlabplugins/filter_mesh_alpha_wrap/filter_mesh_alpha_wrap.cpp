@@ -102,9 +102,12 @@ QString FilterMeshAlphaWrap::filterInfo(ActionIDType filterId) const
 		"This filter extecutes an Alpha Wrap based on the input mesh. <br>"
 		"The filter uses the original code provided in CGAL "
 		"<a href=\"https://doc.cgal.org/latest/Alpha_wrap_3/index.html#Chapter_3D_Alpha_wrapping\">3D Alpha Wrapping</a>.<br>"
+		"<br>"
+		"Alpha: this is the size of the 'ball', specified as the fraction of the length of the largest diagonal of the bounding box. So, if this value is 0.02 then the size of the ball is 2% of the largest diagonal. Note that the run-time and memory consumption will increase with a smaller ball size.<br><br>"
+		"Offset: the offset distance that is added to the surface, always larger than 0, as a fraction of the length of the largest diagonal. A value of 0.001 means that the surface will be offset by a thousandth of this length.<br><br>"
 		"The implementation is based on the following paper:<br>"
-		"<i>Cédric Portaneri, Mael Rouxel-Labbé, Michael Hemmer, David Cohen-Steiner, Pierre Alliez</i>,<br>"
-		"<a href=\"https://inria.hal.science/hal-03688637\"><b>\"Alpha Wrapping with an Offset\"</b></a><br><br>This plugin was created by Lex van der Sluijs at PTC.";
+		"Cédric Portaneri, Mael Rouxel-Labbé, Michael Hemmer, David Cohen-Steiner, Pierre Alliez,<br>"
+		"<a href=\"https://inria.hal.science/hal-03688637\"><b>\"Alpha Wrapping with an Offset\"</b></a> (2022)<br><br>This plugin was created by Lex van der Sluijs at PTC.<br>";
 	switch (filterId) {
 	case MESH_ALPHA_WRAP: return description;
 	default: assert(0); return "Unknown Filter";
@@ -134,7 +137,7 @@ FilterMeshAlphaWrap::FilterClass FilterMeshAlphaWrap::getClass(const QAction* a)
  */
 FilterPlugin::FilterArity FilterMeshAlphaWrap::filterArity(const QAction*) const
 {
-	return FIXED;
+    return FIXED;
 }
 
 /**
@@ -178,13 +181,13 @@ FilterMeshAlphaWrap::initParameterList(const QAction* action, const MeshDocument
 		parlst.addParam(RichFloat(
 			"Alpha fraction",
 			0.02,
-			tr("The size of the ball (fraction)"),
-			tr("This size is specified as the fraction of the length of the largest diagonal of the bounding box. So, if this value is 0.02 then the size of the ball is 2% of the largest diagonal. Note that the run-time and memory consumption will increase with a smaller ball size.")));
+			tr("Alpha: the size of the ball (fraction)"),
+			tr("")));
 		parlst.addParam(RichFloat(
 			"Offset fraction",
 			0.001,
-			tr("Offset (fraction)"),
-			tr("The offset that is applied to the surface, always larger than 0, as a fraction of the length of the largest diagonal. A value of 0.001 means that the surface will be offset by a thousandth of the length of the largest diagonal.")));
+			tr("Offset added to the surface (fraction)"),
+			tr("")));
 	} break;
 	default: assert(0);
 	}
@@ -261,7 +264,10 @@ std::map<std::string, QVariant> FilterMeshAlphaWrap::applyFilter(
 
 		CGAL::alpha_wrap_3(inputMesh, diag_length * alpha_fraction, diag_length * offset_fraction, wrapResult);
 
-		QString newName = QString::asprintf("Alpha Wrap a=%.4f, o=%.4f").arg(alpha_fraction, offset_fraction);
+		// making a nice label that has the used parameter doesn't work, since it will be interpreted
+		// as a file name and the UI will manipulate the string based on where the dots are.
+		// QString newName = QString::asprintf("Alpha Wrap a=%.4f, o=%.4f").arg(alpha_fraction, offset_fraction);
+		QString newName = "Alpha wrap";
 		MeshModel* mesh = md.addNewMesh("", newName, true);
 
 		EigenMatrixX3m   VR;
@@ -343,306 +349,5 @@ std::map<std::string, QVariant> FilterMeshAlphaWrap::applyFilter(
 	return std::map<std::string, QVariant>();
 }
 
-/**
- * @brief Executes the boolean operation between m1 and m2, and puts the result
- * as a new mesh into md.
- * @param md: mesh document
- * @param m1: first mesh
- * @param m2: second mesh
- * @param op: type of boolean operation
- * @param transfQuality: if true, face quality will be transferred in the res mesh
- * @param transfColor: if true, face color will be transferred in the res mesh
-
-void FilterMeshAlphaWrap::booleanOperation(
-	MeshDocument&    md,
-	const MeshModel& m1,
-	const MeshModel& m2,
-	int              op,
-	bool             transfFaceQuality,
-	bool             transfFaceColor,
-	bool             transfVertQuality,
-	bool             transfVertColor)
-{
-	QString name;
-	switch (op) {
-	case igl::MESH_BOOLEAN_TYPE_INTERSECT: name = "intersection"; break;
-	case igl::MESH_BOOLEAN_TYPE_MINUS: name = "difference"; break;
-	case igl::MESH_BOOLEAN_TYPE_XOR: name = "xor"; break;
-	case igl::MESH_BOOLEAN_TYPE_UNION: name = "union"; break;
-	default:
-		throw MLException(
-			"Boolean Operation not found! Please report this issue on "
-			"https://github.com/cnr-isti-vclab/meshlab/issues");
-	}
-
-	// vcg to eigen meshes
-	EigenMatrixX3m   V1 = meshlab::vertexMatrix(m1.cm);
-	Eigen::MatrixX3i F1 = meshlab::faceMatrix(m1.cm);
-	EigenMatrixX3m   V2 = meshlab::vertexMatrix(m2.cm);
-	Eigen::MatrixX3i F2 = meshlab::faceMatrix(m2.cm);
-
-	EigenMatrixX3m   VR;
-	Eigen::MatrixX3i FR;
-	Eigen::VectorXi  indices; // mapping indices for birth faces
-
-	bool result = igl::copyleft::cgal::mesh_boolean(
-		V1, F1, V2, F2, (igl::MeshBooleanType) op, VR, FR, indices);
-
-	if (!result) {
-		throw MLException(
-			"Mesh inputs must induce a piecewise constant winding number field.<br>"
-			"Make sure that both the input mesh are watertight (closed).");
-	}
-	else {
-		// everything ok, create new mesh into md
-		MeshModel* mesh = md.addNewMesh("", name);
-		mesh->cm        = meshlab::meshFromMatrices(VR, FR);
-
-		// if transfer option enabled
-		if (transfFaceColor || transfFaceQuality)
-			transferFaceAttributes(*mesh, indices, m1, m2, transfFaceQuality, transfFaceColor);
-		if (transfVertColor || transfVertQuality)
-			transferVertexAttributes(*mesh, indices, m1, m2, transfVertQuality, transfVertColor);
-	}
-}
-*/
-
-/**
- * @brief Allows to transfer face attributes from m1 and m2 to res, depending on the
- * birth faces indices.
- *
- * If one mesh does not have the required attribute, a default value will be
- * placed in the result:
- * - quality: 0
- * - color: 128,128,128
- *
- * @param res
- * @param indices
- * @param m1
- * @param m2
- * @param quality: if true, face quality will be transferred
- * @param color: if true, face color will be transferred
- */
-void FilterMeshAlphaWrap::transferFaceAttributes(
-	MeshModel&             res,
-	const Eigen::VectorXi& faceIndices,
-	const MeshModel&       m1,
-	const MeshModel&       m2,
-	bool                   quality,
-	bool                   color)
-{
-	// checking if m1 and m2 have quality and color
-	bool m1HasQuality = true, m1HasColor = true, m2HasQuality = true, m2HasColor = true;
-	if (quality) {
-		res.updateDataMask(MeshModel::MM_FACEQUALITY);
-		if (!m1.hasDataMask(MeshModel::MM_FACEQUALITY))
-			m1HasQuality = false;
-		if (!m2.hasDataMask(MeshModel::MM_FACEQUALITY))
-			m2HasQuality = false;
-	}
-	if (color) {
-		res.updateDataMask(MeshModel::MM_FACECOLOR);
-		if (!m1.hasDataMask(MeshModel::MM_FACECOLOR))
-			m1HasColor = false;
-		if (!m2.hasDataMask(MeshModel::MM_FACECOLOR))
-			m2HasColor = false;
-	}
-
-	// for each index in the birth faces vector
-	for (unsigned int i = 0; i < faceIndices.size(); ++i) {
-		bool         fromM1 = true;
-		unsigned int mIndex = faceIndices[i];
-
-		// if the index is >= FN of m1, it means that the index is of m2
-		if (faceIndices[i] >= m1.cm.FN()) {
-			fromM1 = false;
-			mIndex -= m1.cm.FN();
-		}
-
-		// if we need to transfer quality
-		if (quality) {
-			Scalarm q = 0; // default quality value
-			if (fromM1 && m1HasQuality)
-				q = m1.cm.face[mIndex].Q();
-			if (!fromM1 && m2HasQuality)
-				q = m2.cm.face[mIndex].Q();
-			res.cm.face[i].Q() = q;
-		}
-
-		// if we need to transfer color
-		if (color) {
-			vcg::Color4b c(128, 128, 128, 255); // default color value
-			if (fromM1 && m1HasColor)
-				c = m1.cm.face[mIndex].C();
-			if (!fromM1 && m2HasColor)
-				c = m2.cm.face[mIndex].C();
-			res.cm.face[i].C() = c;
-		}
-	}
-}
-
-/**
- * @brief Allows to transfer vertex attributes from m1 and m2 to res, depending on the
- * birth faces indices.
- *
- * If one mesh does not have the required attribute, a default value will be
- * placed in the result:
- * - quality: 0
- * - color: 128,128,128
- *
- * @param res
- * @param indices
- * @param m1
- * @param m2
- * @param quality: if true, vertex quality will be transferred
- * @param color: if true, vertex color will be transferred
- */
-void FilterMeshAlphaWrap::transferVertexAttributes(
-	MeshModel&             res,
-	const Eigen::VectorXi& faceIndices,
-	const MeshModel&       m1,
-	const MeshModel&       m2,
-	bool                   quality,
-	bool                   color)
-{
-	res.updateDataMask(MeshModel::MM_VERTFACETOPO);
-	vcg::tri::UpdateTopology<CMeshO>::VertexFace(res.cm);
-
-	// checking if m1 and m2 have quality and color
-	bool m1HasQuality = true, m1HasColor = true, m2HasQuality = true, m2HasColor = true;
-	if (quality) {
-		res.updateDataMask(MeshModel::MM_VERTQUALITY);
-		if (!m1.hasDataMask(MeshModel::MM_VERTQUALITY))
-			m1HasQuality = false;
-		if (!m2.hasDataMask(MeshModel::MM_VERTQUALITY))
-			m2HasQuality = false;
-	}
-	if (color) {
-		res.updateDataMask(MeshModel::MM_VERTCOLOR);
-		if (!m1.hasDataMask(MeshModel::MM_VERTCOLOR))
-			m1HasColor = false;
-		if (!m2.hasDataMask(MeshModel::MM_VERTCOLOR))
-			m2HasColor = false;
-	}
-
-	// vertIndices construction
-	Eigen::VectorXi vertIndices(res.cm.VN());
-	vertIndices.setConstant(-1);
-
-	for (unsigned int i = 0; i < faceIndices.size(); ++i) {
-		bool         fromM1 = true;
-		unsigned int mIndex = faceIndices[i];
-
-		// if the index is >= FN of m1, it means that the index is of m2
-		if (faceIndices[i] >= m1.cm.FN()) {
-			fromM1 = false;
-			mIndex -= m1.cm.FN();
-		}
-
-		CMeshO::ConstFacePointer fBirth;
-		CMeshO::FacePointer      fRes = &(res.cm.face[i]);
-		if (fromM1)
-			fBirth = &(m1.cm.face[mIndex]);
-		else
-			fBirth = &(m2.cm.face[mIndex]);
-
-		for (unsigned int j = 0; j < 3; ++j) {
-			CMeshO::VertexPointer vp = fRes->V(j);
-			unsigned int          vi = vcg::tri::Index(res.cm, vp);
-			if (vertIndices[vi] == -1) {
-				// look if there is an equal vertex in fBirth
-				for (unsigned k = 0; k < 3; ++k) {
-					if (fRes->V(j)->P() == fBirth->V(k)->P()) {
-						unsigned int birthVertIndex;
-						if (fromM1)
-							birthVertIndex = vcg::tri::Index(m1.cm, fBirth->V(k));
-						else
-							birthVertIndex = vcg::tri::Index(m2.cm, fBirth->V(k)) + m1.cm.VN();
-						vertIndices[vi] = birthVertIndex;
-					}
-				}
-			}
-		}
-	}
-
-	// update birth vertices
-	for (unsigned int i = 0; i < vertIndices.size(); ++i) {
-		bool fromM1 = false;
-		bool fromM2 = false;
-
-		int mIndex = vertIndices[i];
-		if (vertIndices[i] >= m1.cm.VN()) {
-			fromM2 = true;
-			mIndex -= m1.cm.VN();
-		}
-		else if (vertIndices[i] >= 0) {
-			fromM1 = true;
-		}
-
-		// if we need to transfer quality
-		if (quality) {
-			Scalarm q = 0; // default quality value
-			if (fromM1 && m1HasQuality)
-				q = m1.cm.vert[mIndex].Q();
-			if (!fromM1 && m2HasQuality)
-				q = m2.cm.vert[mIndex].Q();
-			res.cm.vert[i].Q() = q;
-		}
-
-		// if we need to transfer color
-		if (color) {
-			vcg::Color4b c(128, 128, 128, 255); // default color value
-			if (fromM1 && m1HasColor)
-				c = m1.cm.vert[mIndex].C();
-			if (fromM2 && m2HasColor)
-				c = m2.cm.vert[mIndex].C();
-			res.cm.vert[i].C() = c;
-		}
-	}
-
-	// update newly created vertices
-	for (unsigned int i = 0; i < vertIndices.size(); ++i) {
-		if (vertIndices[i] == -1) {
-			// base values
-			unsigned int avgr = 0, avgg = 0, avgb = 0, avga = 0;
-			Scalarm      avgq  = 0;
-			unsigned int nAdjs = 0;
-
-			CMeshO::VertexPointer                   vp = &res.cm.vert[i];
-			vcg::face::VFIterator<CMeshO::FaceType> fadjit(vp);
-			// for each incident face fadj to vp
-			for (; !fadjit.End(); ++fadjit) {
-				for (unsigned int j = 0; j < 3; j++) {
-					// get each vertex  to f
-					CMeshO::VertexPointer vadj = fadjit.F()->V(j);
-					unsigned int          vi   = vcg::tri::Index(res.cm, vadj);
-					// if the vertex is not i and it is not newly created
-					if (vi != i && vertIndices[vi] != -1) {
-						nAdjs++;
-						// if we need to transfer color
-						if (color) {
-							avgr += res.cm.vert[vi].C()[0];
-							avgg += res.cm.vert[vi].C()[1];
-							avgb += res.cm.vert[vi].C()[2];
-							avga += res.cm.vert[vi].C()[3];
-						}
-						if (quality) {
-							avgq += res.cm.vert[vi].Q();
-						}
-					}
-				}
-			}
-			if (nAdjs != 0) {
-				if (color) {
-					res.cm.vert[i].C() =
-						vcg::Color4b(avgr / nAdjs, avgg / nAdjs, avgb / nAdjs, avga / nAdjs);
-				}
-				if (quality) {
-					res.cm.vert[i].Q() = avgq / nAdjs;
-				}
-			}
-		}
-	}
-}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeshAlphaWrap)
