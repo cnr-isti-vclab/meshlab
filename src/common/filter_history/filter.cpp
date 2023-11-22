@@ -126,7 +126,7 @@ std::string Filter::pyMeshLabCall(std::string meshSetName) const
 				else if (p.isOfType<RichPercentage>()) {
 					const RichPercentage& rp = dynamic_cast<const RichPercentage&>(p);
 					float per = (p.value().getFloat() / (rp.max - rp.min) ) * 100;
-					call += "pymeshlab.PercentageValue(" + std::to_string(per) + ")";
+					call += "pymeshlab.Percentage(" + std::to_string(per) + ")";
 				}
 			}
 		}
