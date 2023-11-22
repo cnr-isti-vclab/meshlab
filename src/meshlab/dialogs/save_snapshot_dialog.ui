@@ -120,10 +120,38 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="alllayersCheckBox">
-       <property name="text">
-        <string>Snap All Layers</string>
+      <widget class="QFrame" name="frame">
+       <property name="minimumSize">
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QCheckBox" name="alllayersCheckBox">
+          <property name="text">
+           <string>Snap All Layers</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="useLayerNameCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Use Layer Name</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>

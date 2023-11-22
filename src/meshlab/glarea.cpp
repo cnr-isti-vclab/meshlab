@@ -219,11 +219,14 @@ void GLArea::pasteTile()
 
 		if (tileRow >= totalRows) {
 			if (ss.snapAllLayers) {
-				outfile = QString("%1/%2%3_L%4.png")
+				QString lname = ss.basename;
+				if (ss.useLayerName) {
+					lname = md()->getMesh(snapshotCounter)->label();
+				}
+				outfile = QString("%1/%2%3.png")
 							  .arg(ss.outdir)
-							  .arg(ss.basename)
-							  .arg(ss.counter, 2, 10, QChar('0'))
-							  .arg(snapshotCounter, 2, 10, QChar('0'));
+							  .arg(lname)
+							  .arg(ss.counter, 2, 10, QChar('0'));
 			}
 			else {
 				outfile = QString("%1/%2%3.png")
