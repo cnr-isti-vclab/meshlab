@@ -85,7 +85,7 @@ QString FilterMeshAlphaWrap::filterName(ActionIDType filterId) const
 QString FilterMeshAlphaWrap::pythonFilterName(ActionIDType f) const
 {
 	switch (f) {
-	case MESH_ALPHA_WRAP: return "generate_alpha_wrap";
+	case MESH_ALPHA_WRAP: return "create_alpha_wrap";
 	default: assert(0); return QString();
 	}
 }
@@ -106,8 +106,8 @@ QString FilterMeshAlphaWrap::filterInfo(ActionIDType filterId) const
 		"Alpha: this is the size of the 'ball', specified as the fraction of the length of the largest diagonal of the bounding box. So, if this value is 0.02 then the size of the ball is 2% of the largest diagonal. Note that the run-time and memory consumption will increase with a smaller ball size.<br><br>"
 		"Offset: the offset distance that is added to the surface, always larger than 0, as a fraction of the length of the largest diagonal. A value of 0.001 means that the surface will be offset by a thousandth of this length.<br><br>"
 		"The implementation is based on the following paper:<br>"
-		"Cédric Portaneri, Mael Rouxel-Labbé, Michael Hemmer, David Cohen-Steiner, Pierre Alliez,<br>"
-		"<a href=\"https://inria.hal.science/hal-03688637\"><b>\"Alpha Wrapping with an Offset\"</b></a> (2022)<br><br>This plugin was created by Lex van der Sluijs at PTC.<br>";
+		"Cédric Portaneri, Mael Rouxel-Labbé, Michael Hemmer, David Cohen-Steiner, Pierre Alliez, "
+		"<a href=\"https://inria.hal.science/hal-03688637\"><b>\"Alpha Wrapping with an Offset\"</b></a> (2022)<br><br>This plugin is contributed by Lex van der Sluijs at PTC.<br>";
 	switch (filterId) {
 	case MESH_ALPHA_WRAP: return description;
 	default: assert(0); return "Unknown Filter";
@@ -273,71 +273,37 @@ std::map<std::string, QVariant> FilterMeshAlphaWrap::applyFilter(
 		EigenMatrixX3m   VR;
 		Eigen::MatrixX3i FR;
 
-		bool testWithInputMesh = false;
-		if(testWithInputMesh)
+
+		VR.resize(wrapResult.num_vertices(), Eigen::NoChange);
+		FR.resize(wrapResult.num_faces(), Eigen::NoChange);
+
+		// --------- copy results from wrap into Eigen matrices --------------
+		// 'rvi' = result vertex iterator, vi = vertex index
+		int vi = 0;
+		for(auto rvi = wrapResult.vertices().begin(); rvi != wrapResult.vertices().end(); ++rvi)
 		{
-			VR.resize(inputMesh.num_vertices(), Eigen::NoChange);
-			FR.resize(inputMesh.num_faces(), Eigen::NoChange);
-
-			// --------- copy results from wrap into Eigen matrices --------------
-			// 'rvi' = result vertex iterator
-			int vi = 0;
-			for(auto rvi = inputMesh.vertices().begin(); rvi != inputMesh.vertices().end(); ++rvi)
-			{
-				VR(vi, 0) = inputMesh.point(*rvi).x();
-				VR(vi, 1) = inputMesh.point(*rvi).y();
-				VR(vi, 2) = inputMesh.point(*rvi).z();
-				++vi;
-			}
-
-			int faceIndex = 0;
-			for(auto rfi = inputMesh.faces().begin(); rfi != inputMesh.faces().end(); ++rfi)
-			{
-				//qDebug() << "vertices around face " << *rfi;
-				CGAL::Vertex_around_face_iterator<CgalMesh> vbegin, vend;
-				int i = 0;
-				for(boost::tie(vbegin, vend) = vertices_around_face(inputMesh.halfedge( *rfi), inputMesh);   vbegin != vend;  ++vbegin)
-				{
-					//qDebug() << *vbegin << " vbegin->idx() " << vbegin->idx();
-					FR(faceIndex, i) = vbegin->idx();
-					++i;
-				}
-
-				++faceIndex;
-			}
+			VR(vi, 0) = wrapResult.point(*rvi).x();
+			VR(vi, 1) = wrapResult.point(*rvi).y();
+			VR(vi, 2) = wrapResult.point(*rvi).z();
+			++vi;
 		}
-		else
+
+		int faceIndex = 0;
+		for(auto rfi = wrapResult.faces().begin(); rfi != wrapResult.faces().end(); ++rfi)
 		{
-			VR.resize(wrapResult.num_vertices(), Eigen::NoChange);
-			FR.resize(wrapResult.num_faces(), Eigen::NoChange);
-
-			// --------- copy results from wrap into Eigen matrices --------------
-			// 'rvi' = result vertex iterator, vi = vertex index
-			int vi = 0;
-			for(auto rvi = wrapResult.vertices().begin(); rvi != wrapResult.vertices().end(); ++rvi)
+			// qDebug() << "vertices around face " << *rfi;
+			CGAL::Vertex_around_face_iterator<CgalMesh> vbegin, vend;
+			int i = 0;
+			for(boost::tie(vbegin, vend) = vertices_around_face(wrapResult.halfedge( *rfi), wrapResult);   vbegin != vend;  ++vbegin)
 			{
-				VR(vi, 0) = wrapResult.point(*rvi).x();
-				VR(vi, 1) = wrapResult.point(*rvi).y();
-				VR(vi, 2) = wrapResult.point(*rvi).z();
-				++vi;
+				// qDebug() << *vbegin << " vbegin->idx() " << vbegin->idx();
+				FR(faceIndex, i) = vbegin->idx();
+				++i;
 			}
 
-			int faceIndex = 0;
-			for(auto rfi = wrapResult.faces().begin(); rfi != wrapResult.faces().end(); ++rfi)
-			{
-				// qDebug() << "vertices around face " << *rfi;
-				CGAL::Vertex_around_face_iterator<CgalMesh> vbegin, vend;
-				int i = 0;
-				for(boost::tie(vbegin, vend) = vertices_around_face(wrapResult.halfedge( *rfi), wrapResult);   vbegin != vend;  ++vbegin)
-				{
-					// qDebug() << *vbegin << " vbegin->idx() " << vbegin->idx();
-					FR(faceIndex, i) = vbegin->idx();
-					++i;
-				}
-
-				++faceIndex;
-			}
+			++faceIndex;
 		}
+
 
 		// ------------- then initialize the new mesh using these Eigen matrices ----------
 		mesh->cm        = meshlab::meshFromMatrices(VR, FR);
