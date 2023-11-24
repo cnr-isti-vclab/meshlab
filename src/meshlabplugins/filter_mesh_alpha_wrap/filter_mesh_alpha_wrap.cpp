@@ -85,7 +85,7 @@ QString FilterMeshAlphaWrap::filterName(ActionIDType filterId) const
 QString FilterMeshAlphaWrap::pythonFilterName(ActionIDType f) const
 {
 	switch (f) {
-	case MESH_ALPHA_WRAP: return "create_alpha_wrap";
+	case MESH_ALPHA_WRAP: return "generate_alpha_wrap";
 	default: assert(0); return QString();
 	}
 }
