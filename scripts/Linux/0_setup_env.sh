@@ -5,8 +5,8 @@
 # Run this script if you never installed any of the MeshLab dependencies.
 
 DONT_INSTALL_QT=false
-DONT_INSTALL_CGAL_BOOST=false
-DONT_INSTALL_EMBREE=false
+DONT_INSTALL_CGAL_BOOST=true
+DONT_INSTALL_EMBREE=true
 
 #checking for parameters
 for i in "$@"

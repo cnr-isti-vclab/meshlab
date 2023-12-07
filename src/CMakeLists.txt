@@ -161,6 +161,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_layer
 		meshlabplugins/filter_measure
 		meshlabplugins/filter_mesh_booleans
+		meshlabplugins/filter_mesh_alpha_wrap
 		meshlabplugins/filter_meshing
 		meshlabplugins/filter_mls
 		meshlabplugins/filter_mutualglobal
