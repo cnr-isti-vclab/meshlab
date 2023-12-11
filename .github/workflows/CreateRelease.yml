@@ -128,7 +128,6 @@ jobs:
         read -a strarrd <<< "$STR_VERSION"
         ML_VERSION_D=${strarrd[1]} #get the meshlab version from the string
         echo "ml_version_d=$ML_VERSION_D" >> $GITHUB_OUTPUT
-        #access to this variable using ${{steps.envs.outputs.ml_version}} or ${{steps.envs.outputs.ml_version_d}}
     - name: Create MeshLab Portable Linux Archive
       run: |
         cd meshlab_linux_portable
@@ -148,27 +147,6 @@ jobs:
       with:
         name: MeshLab_macOS_packages_double
         path: meshlab_macos_dmg_double
-    - name: Download MacOS Portable
-      uses: actions/download-artifact@v3
-      with:
-        name: MeshLab_macOS_portable
-        path: meshlab_macos_portable
-    - name: Download MacOS Portable-d
-      uses: actions/download-artifact@v3
-      with:
-        name: MeshLab_macOS_portable_double
-        path: meshlab_macos_portable_double
-    - name: Change Permissions
-      run: |
-        chmod +x meshlab_macos_portable/MeshLab*.app/Contents/MacOS/meshlab
-        chmod +x meshlab_macos_portable_double/MeshLab*.app/Contents/MacOS/meshlab
-    - name: Create MeshLab Portable MacOS
-      run: |
-        cd meshlab_macos_portable
-        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-macos.tar.gz *
-        cd ../meshlab_macos_portable_double
-        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-macos.tar.gz *
-        cd ..
 
     #Download Windows Packages
     - name: Download Windows ZIP
@@ -211,8 +189,6 @@ jobs:
           MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
           meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
           meshlab_linux_appimage_double/MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
-          MeshLab${{steps.envs.outputs.ml_version}}-macos.tar.gz
-          MeshLab${{steps.envs.outputs.ml_version_d}}-macos.tar.gz
           meshlab_macos_dmg/MeshLab${{steps.envs.outputs.ml_version}}-macos.dmg
           meshlab_macos_dmg_double/MeshLab${{steps.envs.outputs.ml_version_d}}-macos.dmg
           MeshLab${{steps.envs.outputs.ml_version}}-windows.zip
