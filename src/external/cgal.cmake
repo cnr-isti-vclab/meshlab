@@ -22,7 +22,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 	if (NOT EXISTS ${CGAL_CHECK})
 		set(CGAL_LINK
 			https://github.com/CGAL/cgal/releases/download/v5.6/CGAL-5.6.zip
-			# https://www.meshlab.net/data/libs/CGAL-5.6.zip # Note by LvdS: please host this file on the MeshLab site as well, then remove this comment
+			https://www.meshlab.net/data/libs/CGAL-5.6.zip
 			) 
 		set(CGAL_MD5 6d1d067b88e20f7080d07d5108b4c772)
 		download_and_unzip(
@@ -39,7 +39,7 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 	if (WIN32 AND NOT EXISTS ${CGAL_WIN_CHECK})
 		set(CGAL_AUX_LINK
 			https://github.com/CGAL/cgal/releases/download/v5.6/CGAL-5.6-win64-auxiliary-libraries-gmp-mpfr.zip
-			# https://www.meshlab.net/data/libs/CGAL-5.6-win64-auxiliary-libraries-gmp-mpfr.zip # Note by LvdS: please host this file on the MeshLab site as well, then remove this comment
+			https://www.meshlab.net/data/libs/CGAL-5.6-win64-auxiliary-libraries-gmp-mpfr.zip
 			) 
 		set(CGAL_AUX_MD5 247f4dca741c6b9a9be76286414070fa)
 		download_and_unzip(
