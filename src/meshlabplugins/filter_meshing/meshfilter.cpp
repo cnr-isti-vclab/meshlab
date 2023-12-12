@@ -34,6 +34,7 @@
 #include <vcg/complex/algorithms/update/curvature_fitting.h>
 #include <vcg/complex/algorithms/pointcloud_normal.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
+#include <vcg/complex/algorithms/refine_doosabin.h>
 #include <vcg/space/fitting3.h>
 #include <wrap/gl/glu_tessellator_cap.h>
 #include "quadric_simp.h"
@@ -41,6 +42,28 @@
 using namespace std;
 using namespace vcg;
 using namespace vcg::tri;
+
+// Polygonal mesh used by doo sabin refinement
+class PEdge;
+class PFace;
+class PVertex;
+struct PUsedTypes : public UsedTypes<Use<PVertex>   ::AsVertexType,
+									 Use<PEdge>     ::AsEdgeType,
+									 Use<PFace>     ::AsFaceType> {};
+
+class PVertex : public Vertex<PUsedTypes, vertex::Coord3f, vertex::Normal3f, vertex::Qualityf, vertex::Color4b, vertex::BitFlags  > {};
+class PEdge : public Edge< PUsedTypes, edge::VertexRef, edge::BitFlags> {};
+class PFace :public vcg::Face<
+				  PUsedTypes,
+				  face::PolyInfo, // this is necessary  if you use component in vcg/simplex/face/component_polygon.h
+				  face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
+				  face::PFFAdj,   // Pointer to the vertices (just like FVAdj )
+				  face::Color4b,
+				  face::BitFlags, // bit flags
+				  face::Normal3f, // normal
+				  face::WedgeTexCoord2f
+				  > {};
+class PMesh : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
@@ -73,6 +96,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		FP_CYLINDER_UNWRAP,
 		FP_REFINE_CATMULL,
 		FP_REFINE_HALF_CATMULL,
+		FP_REFINE_DOOSABIN,
 		FP_QUAD_DOMINANT,
 		FP_MAKE_PURE_TRI,
 		FP_QUAD_PAIRING,
@@ -101,7 +125,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastqtex_QualityThr       = 0.3f;
 	lastqtex_extratw          = 1.0;
 
-	lastisor_Iterations          = 3;
+	lastisor_Iterations          = 10;
 	lastisor_RemeshingAdaptivity = false;
 	lastisor_SelectedOnly        = false;
 	lastisor_RefineFlag          = true;
@@ -135,6 +159,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(const QAction
 	case FP_REFINE_LS3_LOOP	                 : return FilterPlugin::Remeshing;
 	case FP_REFINE_CATMULL                   :
 	case FP_REFINE_HALF_CATMULL              :
+	case FP_REFINE_DOOSABIN                  :
 	case FP_QUAD_DOMINANT                    :
 	case FP_MAKE_PURE_TRI                    :
 	case FP_QUAD_PAIRING                     : return FilterClass(Remeshing+Polygonal);
@@ -186,6 +211,7 @@ int ExtraMeshFilterPlugin::getPreConditions(const QAction *filter) const
 	case FP_CLOSE_HOLES                      :
 	case FP_CYLINDER_UNWRAP                  :
 	case FP_REFINE_HALF_CATMULL              :
+	case FP_REFINE_DOOSABIN                  :
 	case FP_QUAD_DOMINANT					 :
 	case FP_QUAD_PAIRING                     :
 	case FP_FAUX_CREASE                      :
@@ -230,12 +256,13 @@ QString ExtraMeshFilterPlugin::pythonFilterName(ActionIDType f) const
 	case FP_BUTTERFLY_SS: return tr("meshing_surface_subdivision_butterfly");
 	case FP_MIDPOINT: return tr("meshing_surface_subdivision_midpoint");
 	case FP_REFINE_CATMULL: return tr("meshing_surface_subdivision_catmull_clark");
+	case FP_REFINE_DOOSABIN: return tr("meshing_surface_subdivision_doo_sabin");
 	case FP_QUADRIC_SIMPLIFICATION: return tr("meshing_decimation_quadric_edge_collapse");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		return tr("meshing_decimation_quadric_edge_collapse_with_texture");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("meshing_isotropic_explicit_remeshing");
 	case FP_CLUSTERING: return tr("meshing_decimation_clustering");
-	case FP_REORIENT: return tr("meshing_re_orient_faces_coherentely");
+	case FP_REORIENT: return tr("meshing_re_orient_faces_coherently");
 	case FP_INVERT_FACES: return tr("meshing_invert_face_orientation");
 	case FP_SCALE: return tr("compute_matrix_from_scaling_or_normalization");
 	case FP_CENTER: return tr("compute_matrix_from_translation");
@@ -275,12 +302,13 @@ QString ExtraMeshFilterPlugin::filterName(ActionIDType filter) const
 	case FP_BUTTERFLY_SS: return tr("Subdivision Surfaces: Butterfly Subdivision");
 	case FP_MIDPOINT: return tr("Subdivision Surfaces: Midpoint");
 	case FP_REFINE_CATMULL: return tr("Subdivision Surfaces: Catmull-Clark");
+	case FP_REFINE_DOOSABIN: return tr("Subdivision Surfaces: Doo Sabin");
 	case FP_QUADRIC_SIMPLIFICATION: return tr("Simplification: Quadric Edge Collapse Decimation");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
 	case FP_EXPLICIT_ISOTROPIC_REMESHING: return tr("Remeshing: Isotropic Explicit Remeshing");
 	case FP_CLUSTERING: return tr("Simplification: Clustering Decimation");
-	case FP_REORIENT: return tr("Re-Orient all faces coherentely");
+	case FP_REORIENT: return tr("Re-Orient all faces coherently");
 	case FP_INVERT_FACES: return tr("Invert Faces Orientation");
 	case FP_SCALE: return tr("Transform: Scale, Normalize");
 	case FP_CENTER: return tr("Transform: Translate, Center, set Origin");
@@ -332,6 +360,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 	case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is split on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
 	case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. "
 			                                               "If the mesh is triangle based (no <a href='https://stackoverflow.com/questions/59392193'>faux edges</a>) it generates a quad mesh, otherwise it honores it the faux-edge bits");
+	case FP_REFINE_DOOSABIN                     : return tr("Apply the DooSabin Subdivision Surfaces. It is a Dual approximating refinement scheme that creates a new face for each vertex, edge and face. On a pure quad mesh it will add non quad face for each extraordinarhy vertex in the mesh (e.g. in a cube it will add a triangular face for each corner. On the other hand after a refinement step all the vertices will have degree 4.");
 	case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
 			                                               "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
 			                                               "(it adds only a single vertex for each triangle instead of four)."
@@ -381,7 +410,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 	case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 	case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 	case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with different algorithms");
-	case FP_CLOSE_HOLES                        : return tr("Close holes smaller than a given threshold");
+	case FP_CLOSE_HOLES                        : return tr("Close holes whose boundary is composed by a number of edges smaller than a given trheshold");
 	case FP_CYLINDER_UNWRAP                    : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
 	case FP_QUAD_PAIRING                       : return tr("Convert a tri-mesh into a quad mesh by pairing triangles.");
 	case FP_QUAD_DOMINANT                      : return tr("Convert a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
@@ -393,7 +422,7 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 			                                               "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 			                                               "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
 	case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
-	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
+	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with an edge mesh (polyline) composed by the selected edges of the current mesh. It can be used to convert the boundary edges of a mesh into a polyline by selecting all the faces of the mesh.");
 	case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the selected edges of the current mesh");
 
 	default                                  : assert(0);
@@ -427,7 +456,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
 		parlst.addParam(RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
 		parlst.addParam(RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
-		parlst.addParam(RichAbsPerc("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
+		parlst.addParam(RichPercentage("Scale",maxVal*0.1,0,maxVal,"Curvature Scale","This parameter is used only for scale dependent methods: 'Scale Dependent Quadric Fitting' and 'PCA'."
 									" It specifies the scale at which the curvature is computed. e.g. for SDQF it specify how large is the patch where we fit the quadric used to compute curvature dirs."));
 		parlst.addParam(RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove any unreference vertex (for which curvature values are not defined)"));
 		break;
@@ -467,10 +496,10 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
 		parlst.addParam(RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applied only to the selected faces."));
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
+		parlst.addParam(RichPercentage("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
 		parlst.addParam(RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Crease Angle", "Minimum angle between faces of the original to consider the shared edge as a feature to be preserved."));
 		parlst.addParam(RichBool ("CheckSurfDist", lastisor_CheckSurfDist, "Check Surface Distance", "If toggled each local operation must deviate from original mesh by [Max. surface distance]"));
-		parlst.addParam(RichAbsPerc ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
+		parlst.addParam(RichPercentage ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
 		parlst.addParam(RichBool ("SplitFlag", lastisor_RefineFlag, "Refine Step", "If checked the remeshing operations will include a refine step."));
 		parlst.addParam(RichBool ("CollapseFlag", lastisor_CollapseFlag, "Collapse Step", "If checked the remeshing operations will include a collapse step."));
 		parlst.addParam(RichBool ("SwapFlag", lastisor_SwapFlag, "Edge-Swap Step", "If checked the remeshing operations will include a edge-swap step, aimed at improving the vertex valence of the resulting mesh."));
@@ -483,6 +512,9 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed"));
 		parlst.addParam(RichBool("NewFaceSelected",true,"Select the newly created faces","After closing a hole the faces that have been created are left selected. Any previous selection is lost. Useful for example for smoothing the newly created holes."));
 		parlst.addParam(RichBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete."));
+		parlst.addParam(RichBool("RefineHole",false,"Refine Filled Hole","After closing the hole it will refine the newly created triangles to make the surface more smooth and the triangulation more evenly spaced"));
+		maxVal = m.cm.bbox.Diag();
+		parlst.addParam(RichPercentage("RefineHoleEdgeLen",maxVal*0.03,0,maxVal,"Hole Refinement Edge Len", "The target edge lenght of the triangulation inside the filled hole."));
 		break;
 
 	case FP_LOOP_SS:
@@ -494,16 +526,32 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	case FP_MIDPOINT:
 		parlst.addParam(RichInt("Iterations", 3, "Iterations", "Number of time the model is subdivided."));
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
+		parlst.addParam(RichPercentage("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
 		parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 		break;
-
+		
+	case FP_REFINE_DOOSABIN:
+		parlst.addParam(RichInt("Iterations", 2, "Iterations", "Number of times the model is subdivided."));
+		break;
+		
 
 	case FP_CLUSTERING:
 		// TODO implement selection
 		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		//parlst.addParam(RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+		parlst.addParam(RichPercentage(
+			"Threshold",
+			maxVal * 0.01,
+			0,
+			maxVal,
+			"Cell Size",
+			"The size of the cell of the clustering grid. Smaller the cell finer the resulting "
+			"mesh. For obtaining a very coarse mesh use larger values."));
+		//TODO: implement selection on clustering algorithm
+//		parlst.addParam(RichBool(
+//			"Selected",
+//			m.cm.sfn > 0,
+//			"Affect only selected points/faces",
+//			"If selected the filter affect only the selected points/faces"));
 		break;
 
 	case FP_CYLINDER_UNWRAP:
@@ -539,7 +587,7 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 	case FP_SET_TRANSFORM_MATRIX:
 	{
 		Matrix44m mat; mat.SetIdentity();
-		parlst.addParam(RichMatrix44f("TransformMatrix", mat, ""));
+		parlst.addParam(RichMatrix44("TransformMatrix", mat, ""));
 		parlst.addParam(RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
 		parlst.addParam(RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(RichBool ("allLayers",false,"Apply to all visible Layers","If selected, the filter will be applied to all visible mesh layers"));
@@ -701,7 +749,6 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		parlst.addParam(RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
 	}
 		break;
-
 	default:
 		break;
 	}
@@ -770,7 +817,7 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			throw MLException("Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"); // text
 		}
 
-		bool  selected  = par.getBool("Selected");
+		bool selected  = par.getBool("Selected");
 		Scalarm threshold = par.getAbsPerc("Threshold");
 		int iterations = par.getInt("Iterations");
 
@@ -856,14 +903,17 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 	{
 		// TODO implement selection
 		Scalarm threshold = par.getAbsPerc("Threshold");
-		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-		ClusteringGrid.Init(m.cm.bbox,100000,threshold);
-		if(m.cm.FN() ==0)
+		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO>> ClusteringGrid(
+			m.cm.bbox, 100000, threshold);
+		if(m.cm.FN() == 0) {
 			ClusteringGrid.AddPointSet(m.cm);
-		else
+			ClusteringGrid.ExtractPointSet(m.cm);
+		}
+		else {
 			ClusteringGrid.AddMesh(m.cm);
+			ClusteringGrid.ExtractMesh(m.cm);
+		}
 
-		ClusteringGrid.ExtractMesh(m.cm);
 		m.updateBoxAndNormals();
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	} break;
@@ -1095,8 +1145,13 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		float errorSum = 0;
 		for (size_t i = 0; i < selected_pts.size(); ++i)
 			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
-		log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
-		log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		float fpAvgError = errorSum / float(selected_pts.size());
+		Point3m fpNormal(plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		log("Fitting Plane avg error is %f", fpAvgError);
+		log("Fitting Plane normal is [%f, %f, %f]", fpNormal.X(), fpNormal.Y(), fpNormal.Z());
+		outputValues["fitting_plane_avg_error"] = QVariant::fromValue(fpAvgError);
+		outputValues["fitting_plane_normal"] = QVariant::fromValue(fpNormal);
+
 
 		Matrix44m tr1; // translation matrix the centroid of selected points
 		tr1.SetTranslate(-selBox.Center());
@@ -1151,6 +1206,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 		log("Rotation axis is [%f, %f, %f]", rotAxis.X(), rotAxis.Y(), rotAxis.Z());
 		log("Rotation angle is %f", -angleRad);
+		outputValues["rotation_axis"] = QVariant::fromValue(rotAxis);
+		outputValues["rotation_angle"] = QVariant::fromValue(-angleRad);
 
 		Matrix44m transfM;
 		if (par.getBool("ToOrigin"))
@@ -1424,6 +1481,8 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		bool SelectedFlag = par.getBool("Selected");
 		bool SelfIntersectionFlag = par.getBool("SelfIntersection");
 		bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
+		bool RefineHoleFlag = par.getBool("RefineHole");
+		float RefineHoleEdgeLen = par.getAbsPerc("RefineHoleEdgeLen");
 		int holeCnt;
 		if( SelfIntersectionFlag )
 			holeCnt = tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
@@ -1442,6 +1501,44 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 			for(size_t i=OriginalSize;i<m.cm.face.size();++i)
 				if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
 		}
+		
+		if(RefineHoleFlag)
+		{
+			m.updateDataMask( MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTFACETOPO |
+							 MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK |
+							 MeshModel::MM_FACEFLAG | MeshModel::MM_VERTMARK );
+			
+			tri::IsotropicRemeshing<CMeshO>::Params params;
+			params.SetFeatureAngleDeg(181.0f);
+			params.adapt        = false;
+			params.selectedOnly = true;
+			params.splitFlag    = true;
+			params.collapseFlag = true;
+			params.swapFlag     = true;
+			params.smoothFlag   = true;
+			params.projectFlag  = false;
+			params.surfDistCheck= false;
+			
+			// Refinement and smoothing can be tricky. Usually it is good to
+			// 1) start with large tris to get fast convergence to the min surf
+			// 2) switch a bit to small tri to unfold bad things at the boundary
+			// 3) go for the desired edge len
+			// Rinse and repeat. 
+			
+			for(int k=0;k<3;k++)
+			{				
+				params.SetTargetLen(RefineHoleEdgeLen*3.0); params.iter = 5;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+				
+				params.SetTargetLen(RefineHoleEdgeLen/3.0); params.iter = 3;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+				
+				params.SetTargetLen(RefineHoleEdgeLen    ); params.iter = 2;
+				tri::IsotropicRemeshing<CMeshO>::Do(m.cm, params);
+			}
+						
+		}
+		
 	} break;
 
 	case FP_CYLINDER_UNWRAP:
@@ -1570,7 +1667,23 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.updateDataMask(MeshModel::MM_POLYGONAL);
 	} break;
-
+		
+	case FP_REFINE_DOOSABIN :
+	{
+		PMesh baseIn, refinedOut;
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);		
+		tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(baseIn,m.cm);
+		tri::Clean<PMesh>::RemoveUnreferencedVertex(baseIn);
+		tri::Allocator<PMesh>::CompactEveryVector(baseIn);
+		tri::DooSabin<PMesh>::Refine(baseIn, refinedOut);
+		m.cm.Clear();
+		tri::PolygonSupport<CMeshO,PMesh>::ImportFromPolyMesh(m.cm,refinedOut);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		tri::UpdateNormal<CMeshO>::PerBitPolygonFaceNormalized(m.cm);
+		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+	} break;
+		
 	case FP_QUAD_PAIRING :
 	{
 		m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO );

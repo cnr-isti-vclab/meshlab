@@ -110,9 +110,9 @@ QString SdfGpuPlugin::filterName(ActionIDType filterId) const
 QString SdfGpuPlugin::pythonFilterName(ActionIDType f) const
 {
 	switch (f) {
-	case SDF_SDF: return QString("compute_scalar_by_shape_diameter_function_per_vertex");
+	case SDF_SDF: return QString("compute_scalar_by_shape_diameter_function_per_vertex_gpu");
 	case SDF_DEPTH_COMPLEXITY: return QString("get_depth_complexity");
-	case SDF_OBSCURANCE: return QString("compute_scalar_by_volumetric_obscurance");
+	case SDF_OBSCURANCE: return QString("compute_scalar_by_volumetric_obscurance_gpu");
 
 	default: assert(0); return QString();
 	}

@@ -26,6 +26,7 @@
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/create/plymc/plymc.h>
 #include <vcg/complex/algorithms/create/plymc/simplemeshprovider.h>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
 
 using namespace vcg;
@@ -112,7 +113,7 @@ RichParameterList PlyMCPlugin::initParameterList(const QAction *action,const Mes
 	switch(ID(action))
 	{
 	case FP_PLYMC :
-		parlst.addParam(RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
+		parlst.addParam(RichPercentage("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
 		parlst.addParam(    RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. A value of '3' means that a 3x3x3 regular space subdivision is created and the reconstruction process generate 8 matching meshes. It is useful for reconsruction objects at a very high resolution. Default value (1) means no splitting."));
 		parlst.addParam(  RichFloat("geodesic",2.0,"Geodesic Weighting","The influence of each range map is weighted with its geodesic distance from the borders. In this way when two (or more ) range maps overlaps their contribution blends smoothly hiding possible misalignments. "));
 		parlst.addParam(   RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
@@ -142,13 +143,21 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 	case  FP_PLYMC:
 	{
 		srand(time(NULL));
-		
-		//check if folder is writable
-		QTemporaryFile file("./_tmp_XXXXXX.tmp");
-		if (!file.open()) 
-		{
-			log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
-			throw MLException("current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.");
+
+		QDir currDir = QDir::current();
+
+		//Using tmp dir
+		QTemporaryDir tmpdir;
+		QTemporaryFile file(tmpdir.path());
+		if (!file.open()) {
+			log("ERROR - tmp folder is not writable. VCG Merging needs to save intermediate files "
+				"in the tmp folder.");
+			throw MLException(
+				"tmp folder is not writable.<br> VCG Merging needs to save intermediate files in "
+				"the tmp folder.");
+		}
+		else {
+			QDir::setCurrent(tmpdir.path());
 		}
 		
 		tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
@@ -170,10 +179,8 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		p.FullyPreprocessedFlag=true;
 		p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
 		p.SimplificationFlag = par.getBool("simplification");
-		for(MeshModel& mm: md.meshIterator())
-		{
-			if(mm.isVisible())
-			{
+		for(MeshModel& mm: md.meshIterator()) {
+			if(mm.isVisible()) {
 				SMesh sm;
 				mm.updateDataMask(MeshModel::MM_FACEQUALITY);
 				tri::Append<SMesh,CMeshO>::Mesh(sm, mm.cm/*,false,p.VertSplatFlag*/); // note the last parameter of the append to prevent removal of unreferenced vertices...
@@ -189,8 +196,7 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 				QString mshTmpPath=QString("__TMP")+QString(mm.shortName())+QString(".vmi");
 				qDebug("Saving tmp file %s",qUtf8Printable(mshTmpPath));
 				int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qUtf8Printable(mshTmpPath) );
-				if(retVal!=0)
-				{
+				if(retVal!=0) {
 					qDebug("Failed to write vmi temp file %s",qUtf8Printable(mshTmpPath));
 
 					log("ERROR - Failed to write vmi temp file %s", qUtf8Printable(mshTmpPath));
@@ -201,14 +207,12 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 			}
 		}
 		
-		if(pmc.Process(cb)==false)
-		{
+		if(pmc.Process(cb)==false) {
 			throw MLException(pmc.errorMessage.c_str());
 		}
 		
 		
-		if(par.getBool("openResult"))
-		{
+		if(par.getBool("openResult")) {
 			for(size_t i=0;i<p.OutNameVec.size();++i)
 			{std::string name;
 				if(!p.SimplificationFlag) name = p.OutNameVec[i].c_str();
@@ -225,6 +229,8 @@ std::map<std::string, QVariant> PlyMCPlugin::applyFilter(
 		
 		for(int i=0;i<pmc.MP.size();++i)
 			QFile::remove(pmc.MP.MeshName(i).c_str());
+
+		QDir::setCurrent(currDir.path());
 	} break;
 	case FP_MC_SIMPLIFY:
 	{

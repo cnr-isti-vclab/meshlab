@@ -62,14 +62,6 @@ void pymeshlab::FunctionSet::loadFilterPlugin(FilterPlugin* fp)
 			f.addParameter(par);
 		}
 		filterSet.insert(f);
-
-		// Just for actual PyMeshLab version; this portion of code will be removed soon
-		QString oldPythonFilterName = computePythonName(fp->filterName(act));
-		f.setPythonFunctionName(oldPythonFilterName);
-		f.setDeprecated("You should use '" + pythonFilterName.toStdString() +
-						"' instead of '" + oldPythonFilterName.toStdString() + "'. See "
-						"https://pymeshlab.readthedocs.io/en/latest/index.html#filters-renaming");
-		filterSet.insert(f);
 	}
 }
 
@@ -85,7 +77,7 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			//filename parameter
 			QString sv = "file_name." + inputFormat;
 			QStringList sl(inputFormat);
-			RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
+			RichFileOpen of("file_name", sv, sl, "File Name", "The name of the file to load");
 			FunctionParameter par(of);
 			f.addParameter(par);
 
@@ -125,7 +117,7 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			}
 			//filename parameter
 			QString sv = "file_name." + outputFormat;
-			RichSaveFile of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
+			RichFileSave of("file_name", sv, outputFormat, "File Name", "The name of the file to save");
 			FunctionParameter par(of);
 			f.addParameter(par);
 
@@ -150,7 +142,7 @@ void pymeshlab::FunctionSet::loadIOPlugin(IOPlugin* iop)
 			//filename parameter
 			QString sv = "file_name." + inputImageFormat;
 			QStringList sl(inputImageFormat);
-			RichOpenFile of("file_name", sv, sl, "File Name", "The name of the file to load");
+			RichFileOpen of("file_name", sv, sl, "File Name", "The name of the file to load");
 			FunctionParameter par(of);
 			f.addParameter(par);
 

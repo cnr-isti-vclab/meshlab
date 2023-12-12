@@ -30,6 +30,7 @@
 #include <QTabWidget>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QTimer>
 #include <common/parameters/rich_parameter_list.h>
 #include <common/ml_shared_data_context/ml_shared_data_context.h>
 #include "ml_render_gui.h"
@@ -113,7 +114,7 @@ class LayerDialog : public QDockWidget
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-    void updateLog(const GLLogStream& Log);
+    void updateLog(GLLogStream& Log);
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
@@ -140,6 +141,12 @@ public slots:
 	void clickW2();
 	void clickW3();
 	void clickW4();
+	void clickAnimSlower();
+	void clickAnimStepBackward();
+	void clickAnimPlay();
+	void clickAnimStepForward();
+	void clickAnimFaster();
+	void updateAnim();
 	void clickV1();
 	void clickV2();
 	void clickV3();
@@ -148,6 +155,8 @@ public slots:
 private slots:
 	/*WARNING!!! ADDED just to avoid usual mac strange behavior. Please, avoid to use it if it's not absolutely necessary*/
 	void updateTable();
+	void on_cleanLogPushButton_clicked();
+
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;
@@ -174,6 +183,16 @@ private:
 	bool isRecording;
 	QString viewState[4];
 	QMap<int, bool> visibilityState[4];
+
+	int animIndex;
+	std::vector<int> animMeshIDs;
+	int animMsecDelay;
+	QTimer* animTimer;
+
+	bool startAnim();
+	int stepAnim(int offset);
+	void pauseAnim();
+	void resetAnim();
 
     QTreeWidgetItem* _docitem;
     int _previd;

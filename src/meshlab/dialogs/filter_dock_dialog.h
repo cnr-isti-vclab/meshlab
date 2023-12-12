@@ -62,6 +62,8 @@ private slots:
 	void applyDynamic();
 	void changeCurrentMesh(int meshId);
 
+	void on_copyToClipBoardPushButton_clicked();
+
 private:
 	bool isPreviewable() const;
 

@@ -72,7 +72,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     takeSnapTile=false;
     activeDefaultTrackball=true;
     infoAreaVisible = true;
-    trackBallVisible = true;
+    trackBallVisible = glas.startupShowTrackball;
     currentShader = NULL;
     lastFilterRef = NULL;
     //lastEditRef = NULL;
@@ -202,7 +202,7 @@ void GLArea::pasteTile()
 				tileBuffer.format());
 
 		uchar* snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) +
-						 ((totalCols * tileRow) * tileBuffer.byteCount());
+						 ((totalCols * tileRow) * tileBuffer.sizeInBytes());
 		uchar* tilePtr = tileBuffer.bits();
 
 		for (int y = 0; y < tileBuffer.height(); y++) {
@@ -219,11 +219,14 @@ void GLArea::pasteTile()
 
 		if (tileRow >= totalRows) {
 			if (ss.snapAllLayers) {
-				outfile = QString("%1/%2%3_L%4.png")
+				QString lname = ss.basename;
+				if (ss.useLayerName) {
+					lname = md()->getMesh(snapshotCounter)->label();
+				}
+				outfile = QString("%1/%2%3.png")
 							  .arg(ss.outdir)
-							  .arg(ss.basename)
-							  .arg(ss.counter, 2, 10, QChar('0'))
-							  .arg(snapshotCounter, 2, 10, QChar('0'));
+							  .arg(lname)
+							  .arg(ss.counter, 2, 10, QChar('0'));
 			}
 			else {
 				outfile = QString("%1/%2%3.png")
@@ -1882,7 +1885,7 @@ void GLArea::loadRaster(int id)
 			//load his shot or a default shot
 
 			if (rm.shot.IsValid()) {
-				fov = (rm.shot.Intrinsics.cameraType == 0) ? rm.shot.GetFovFromFocal() : 5.0;
+				fov = (rm.shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? rm.shot.GetFovFromFocal() : 5.0;
 
 				// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
 				//float cameraDist = getCameraDistance();
@@ -2128,7 +2131,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     // The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
     // The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation
     // introduced by the shot.
-	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+	fov = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
 
     // float cameraDist = getCameraDistance();
 
@@ -2166,7 +2169,7 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
             trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
             nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
             farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
-            fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+            fov = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
             clipRatioNear = nearPlane/getCameraDistance();
             clipRatioFar = farPlane/getCameraDistance();
         }
@@ -2242,9 +2245,9 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
 
 	// in MeshLab, fov < 5.0 means orthographic camera
 	if (fov > 5.0)
-		shot.Intrinsics.cameraType = 0; //perspective
+		shot.Intrinsics.cameraType = vcg::Camera<Scalarm>::PERSPECTIVE; //perspective
 	else
-		shot.Intrinsics.cameraType = 1; //orthographic
+		shot.Intrinsics.cameraType = vcg::Camera<Scalarm>::ORTHO; //orthographic
 
     float cameraDist = getCameraDistance();
 
@@ -2279,7 +2282,7 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
 
     Shotm shot = shotAndScale.first;
 
-	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
+	fov = (shot.Intrinsics.cameraType == vcg::Camera<Scalarm>::PERSPECTIVE) ? shot.GetFovFromFocal() : 5.0;
 
     float cameraDist = getCameraDistance();
 
@@ -2473,10 +2476,28 @@ void GLArea::setupTextureEnv( GLuint textid )
     glPushAttrib(GL_ENABLE_BIT);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D,textid);
-    if(glas.textureMagFilter == 0 ) 	
+	switch(glas.textureWrapST)
+	{
+	case 0:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		break;
+	case 1:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+		break;
+	case 2:
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		break;
+	default: assert(0); break;
+	}
+	
+	if(glas.textureMagFilter == 0 ) 	
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     else	
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	
     if(glas.textureMinFilter == 0 ) 	
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     else	

@@ -45,6 +45,10 @@ public:
 	
 private slots:
 	void on_browseDir_clicked();
+	void on_alllayersCheckBox_stateChanged(int arg1);
+
+	void on_useLayerNameCheckBox_stateChanged(int arg1);
+
 private:
 	Ui::SaveSnapShotDialog* ui;
 	SnapshotSetting settings;

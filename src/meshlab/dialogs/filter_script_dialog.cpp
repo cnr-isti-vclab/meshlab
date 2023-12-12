@@ -28,7 +28,7 @@
 #include "mainwindow.h"
 #include <common/mlexception.h>
 #include <common/globals.h>
-#include "rich_parameter_gui/richparameterlistdialog.h"
+#include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 FilterScriptDialog::FilterScriptDialog(FilterScript& fs, QWidget * parent):
 	QDialog(parent),

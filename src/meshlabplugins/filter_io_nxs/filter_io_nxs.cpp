@@ -153,18 +153,23 @@ QString FilterIONXSPlugin::pythonFilterName(ActionIDType f) const
 QString FilterIONXSPlugin::filterInfo(ActionIDType filter) const
 {
 	QString commonDescription =
-			"<a href=\"http://vcg.isti.cnr.it/nexus/\">Nexus</a> is a collection "
-			"of tools for streaming visualization of large 3D models in OpenGL.<br>";
+		"<a href=\"http://vcg.isti.cnr.it/nexus/\"> Nexus </a> is set of  c++/javascript libraries and tools "
+		"for the creation and efficient visualization of multiresolution 3D models. "
+		"Nexus it is tailored for the processing and the streaming visualization of very large unstructured 3d models"
+		"like the ones coming from 3D scanning. "
+		"<br>";
 	switch(filter) {
 	case FP_NXS_BUILDER :
 		return commonDescription +
-				"This filter is the equivalent of calling "
-				"<a href=\"http://vcg.isti.cnr.it/nexus/#nxsbuild\">nxsbuild</a>: "
-				"it creates a nxs file starting from a obj, ply or stl.";
+			   "This filter is the equivalent of calling "
+			   "<a href=\"http://vcg.isti.cnr.it/nexus/#nxsbuild\">nxsbuild</a>: "
+			   "it creates a nxs file starting from a file containing a 3D object, without the need of loading it before. "
+			   "It supports only the following 3D formats: obj, ply or stl.";
 	case FP_NXS_COMPRESS:
 		return commonDescription +
-				"This filter is the equivalent of calling nxscompress, which"
-				"creates a nxz (compressed nexus) file starting from a nxs.";
+			   "This filter is the equivalent of calling nxscompress, which "
+			   "creates a .nxz (compressed nexus) file starting from a file .nxs (uncompressed nxs). "
+			   "It is useful for exploring different lossy compression settings without the need of recreating the whole multiresolution structure.";
 	default :
 		assert(0);
 		return "Unknown Filter";
@@ -203,13 +208,13 @@ RichParameterList FilterIONXSPlugin::initParameterList(const QAction* action, co
 	RichParameterList params;
 	switch(ID(action)) {
 	case FP_NXS_BUILDER :
-		params.addParam(RichOpenFile("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
-		params.addParam(RichSaveFile("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
+		params.addParam(RichFileOpen("input_file", "", {"*.ply *.obj *.stl", "*.ply", "*.obj", "*.stl"}, "Input File", "The input file from which create the .nxs file."));
+		params.addParam(RichFileSave("output_file", "", "*.nxs", "Output File", "The name of the output nxs file."));
 		params.join(nxsParameters());
 		break;
 	case FP_NXS_COMPRESS:
-		params.addParam(RichOpenFile("input_file", "", {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
-		params.addParam(RichSaveFile("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
+		params.addParam(RichFileOpen("input_file", "", {"*.nxs"}, "Input File", "The input nxs file to compress into an nxz file."));
+		params.addParam(RichFileSave("output_file", "", "*.nxz", "Output File", "The name of the output nxz file."));
 		params.join(nxzParameters(false));
 		break;
 	default :

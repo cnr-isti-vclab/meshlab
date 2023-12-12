@@ -17,14 +17,18 @@ void GLAreaSetting::initGlobalParameterList(RichParameterList& defaultGlobalPara
 
 	QStringList textureMinFilterModes =  (QStringList() << "Nearest" << "MipMap");
 	QStringList textureMagFilterModes =  (QStringList() << "Nearest" << "Linear");
+	QStringList textureWrapSTModes =  (QStringList() << "Repeat" << "Mirrored Repeat" << "Clamp to Edge");
+	
 	defaultGlobalParamSet.addParam(RichEnum(textureMinFilterParam()	, 1,textureMinFilterModes,"MeshLab Texture Minification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
 	defaultGlobalParamSet.addParam(RichEnum(textureMagFilterParam()	, 1,textureMagFilterModes,"MeshLab Texture Magnification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
-
+	defaultGlobalParamSet.addParam(RichEnum(textureWrapSTParam()	, 0,textureWrapSTModes,"MeshLab Texture Clamping","MeshLab Texture Clamping"));
+	
 	defaultGlobalParamSet.addParam(RichBool(pointDistanceAttenuationParam()	, true,"Perspective Varying Point Size","If true the size of the points is drawn with a size proprtional to the distance from the observer."));
 	defaultGlobalParamSet.addParam(RichBool(pointSmoothParam()	, false,"Antialiased Point","If true the points are drawn with small circles instead of fast squared dots."));
 	defaultGlobalParamSet.addParam(RichFloat(pointSizeParam()	, 2.0, "Point Size","The base size of points when drawn"));
 
 	defaultGlobalParamSet.addParam(RichBool(wheelDirectionParam(), false, "Wheel Direction", "If true, inverts the direction of the mouse wheel for zooming in/out in the MeshLab canvas."));
+	defaultGlobalParamSet.addParam(RichBool(showTrackballParam(), true, "Show Trackball", "If true, show the trackball on startup."));
 	defaultGlobalParamSet.addParam(RichInt(matrixDecimalPrecisionParam(), 2, "Rotation Matrix Precision", "Number of decimal values shown in the rotation matrix"));
 }
 
@@ -44,11 +48,13 @@ void GLAreaSetting::updateGlobalParameterSet( const RichParameterList& rps )
 
 	textureMinFilter = rps.getEnum(this->textureMinFilterParam());
 	textureMagFilter = rps.getEnum(this->textureMagFilterParam());
+	textureWrapST    = rps.getEnum(this->textureWrapSTParam());
 
 	pointDistanceAttenuation = rps.getBool(this->pointDistanceAttenuationParam());
 	pointSmooth = rps.getBool(this->pointSmoothParam());
 	pointSize = rps.getFloat(this->pointSizeParam());
 	wheelDirection = rps.getBool(this->wheelDirectionParam());
+        startupShowTrackball = rps.getBool(showTrackballParam());
 	matrixDecimalPrecision = rps.getInt(this->matrixDecimalPrecisionParam());
 	currentGlobalParamSet=&rps;
 }

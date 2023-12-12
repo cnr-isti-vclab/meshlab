@@ -24,7 +24,7 @@
 #ifndef MESHLAB_RICH_PARAMETER_LIST_H
 #define MESHLAB_RICH_PARAMETER_LIST_H
 
-#include "rich_parameter.h"
+#include "rich_parameters.h"
 
 /**
  * @brief The RichParameterList class
@@ -123,6 +123,7 @@ public:
 	unsigned int numberAdvancedParameters() const;
 
 	void setValue(const QString& name, const Value& val);
+	void setAllValuesAsDefault();
 	RichParameter& addParam(const RichParameter& pd);
 	void join(const RichParameterList& rps);
 

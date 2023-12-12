@@ -33,6 +33,7 @@ public:
 	int resolution;
 	int background;
 	bool snapAllLayers;
+	bool useLayerName;
 	bool tiledSave; // if true all the tiles are saved as separated files and not joined.
 	bool addToRasters;
 		
@@ -44,6 +45,7 @@ public:
 		resolution=1;
 		background=0;
 		snapAllLayers=false;
+		useLayerName=false;
 		tiledSave=false;
 		addToRasters=false;
 	};

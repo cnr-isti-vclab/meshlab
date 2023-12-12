@@ -120,8 +120,8 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << "'" << ren->enumvalues.at(ren->value().getInt()).toStdString() << "'";
 		return;
 	}
-	if (parameter->isOfType<RichAbsPerc>()) {
-		RichAbsPerc* rabs = dynamic_cast<RichAbsPerc*>(parameter);
+	if (parameter->isOfType<RichPercentage>()) {
+		RichPercentage* rabs = dynamic_cast<RichPercentage*>(parameter);
 		float abs = parameter->value().getFloat();
 		float perc = (abs - rabs->min) / (rabs->max - rabs->min) * 100;
 		o << perc << "%";
@@ -133,8 +133,8 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 			 " [min: " << rdyn->min << "; max: " << rdyn->max << "]";
 		return;
 	}
-	if (parameter->isOfType<RichMatrix44f>()){
-		const MESHLAB_SCALAR* v = parameter->value().getMatrix44f().V();
+	if (parameter->isOfType<RichMatrix44>()){
+		const MESHLAB_SCALAR* v = parameter->value().getMatrix44().V();
 		o << "[[" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << "],"
 			<< "[" << v[4] << ", " << v[5] << ", " << v[6] << ", " << v[7] << "],"
 			<< "[" << v[8] << ", " << v[9] << ", " << v[10] << ", " << v[11] << "],"
@@ -142,12 +142,12 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		return;
 	}
 	if (parameter->isOfType<RichPosition>() || parameter->isOfType<RichDirection>()) {
-		o << "[" << parameter->value().getPoint3f().X() << ", "
-			<< parameter->value().getPoint3f().Y() << ", "
-			<< parameter->value().getPoint3f().Z() << "]";
+		o << "[" << parameter->value().getPoint3().X() << ", "
+			<< parameter->value().getPoint3().Y() << ", "
+			<< parameter->value().getPoint3().Z() << "]";
 		return;
 	}
-	if (parameter->isOfType<RichShotf>()) {
+	if (parameter->isOfType<RichShot>()) {
 		o << "None";
 		return;
 	}
@@ -165,7 +165,7 @@ void pymeshlab::FunctionParameter::printDefaultValue(std::ostream& o) const
 		o << rm->value().getInt();
 		return;
 	}
-	if (parameter->isOfType<RichSaveFile>() || parameter->isOfType<RichOpenFile>()){
+	if (parameter->isOfType<RichFileSave>() || parameter->isOfType<RichFileOpen>()){
 		o << "'" << parameter->value().getString().toStdString() << "'";
 		return;
 	}

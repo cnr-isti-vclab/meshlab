@@ -34,10 +34,11 @@ $Log: stdpardialog.cpp,v $
 #include <QFontMetrics>
 #include <QSettings>
 
+#include <common_gui/rich_parameter/rich_parameter_list_frame.h>
+
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
-#include "rich_parameter_gui/richparameterlistframe.h"
 #include "../common/mlexception.h"
 
 using namespace std;
@@ -81,17 +82,30 @@ LayerDialog::LayerDialog(QWidget *parent )
 	// The following connection is used to associate the click with the switch between raster and mesh view.
 	connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
-	// state buttons
+	// state and animation buttons
 	isRecording = false;
 	viewState[0] = viewState[1] = viewState[2] = viewState[3] = "";
 	connect(ui->bW1, SIGNAL(clicked()), this, SLOT(clickW1()));
 	connect(ui->bW2, SIGNAL(clicked()), this, SLOT(clickW2()));
 	connect(ui->bW3, SIGNAL(clicked()), this, SLOT(clickW3()));
 	connect(ui->bW4, SIGNAL(clicked()), this, SLOT(clickW4()));
+	connect(ui->animSlower, SIGNAL(clicked()), this, SLOT(clickAnimSlower()));
+	connect(ui->animStepBackward, SIGNAL(clicked()), this, SLOT(clickAnimStepBackward()));
+	connect(ui->animPlay, SIGNAL(clicked()), this, SLOT(clickAnimPlay()));
+	connect(ui->animStepForward, SIGNAL(clicked()), this, SLOT(clickAnimStepForward()));
+	connect(ui->animFaster, SIGNAL(clicked()), this, SLOT(clickAnimFaster()));
 	connect(ui->bV1, SIGNAL(clicked()), this, SLOT(clickV1()));
 	connect(ui->bV2, SIGNAL(clicked()), this, SLOT(clickV2()));
 	connect(ui->bV3, SIGNAL(clicked()), this, SLOT(clickV3()));
 	connect(ui->bV4, SIGNAL(clicked()), this, SLOT(clickV4()));
+
+	animIndex = -1;
+	animMsecDelay = 500;
+	animTimer = new QTimer(this);
+	resetAnim();
+	connect(animTimer, SIGNAL(timeout()), this, SLOT(updateAnim()));
+	// Make wide enough to accommodate alternate text ("||") from clickAnimPlay()
+	ui->animPlay->setMinimumSize(ui->animPlay->size().width() + 6, ui->animPlay->size().height());
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -216,6 +230,61 @@ void LayerDialog::clickW4()
 	}
 	else
 		mw->meshDoc()->Log.log(0, "No View to Restore");
+}
+
+void LayerDialog::clickAnimSlower()
+{
+	if (animMsecDelay < 3000)
+	{
+		animMsecDelay = int(animMsecDelay * 1.2);
+	}
+}
+
+void LayerDialog::clickAnimStepBackward()
+{
+	pauseAnim();
+	stepAnim(-1);
+}
+
+void LayerDialog::clickAnimPlay()
+{
+	if (!animTimer->isActive() && startAnim())
+	{
+		ui->animPlay->setText(tr("||"));
+		ui->animPlay->setToolTip(tr("Pause animation"));
+		stepAnim(1);
+		animTimer->start(animMsecDelay);
+	}
+	else
+	{
+		pauseAnim();
+	}
+}
+
+void LayerDialog::clickAnimStepForward()
+{
+	pauseAnim();
+	stepAnim(1);
+}
+
+void LayerDialog::clickAnimFaster()
+{
+	if (animMsecDelay > 10)
+	{
+		animMsecDelay = int(animMsecDelay / 1.2f);
+	}
+}
+
+void LayerDialog::updateAnim()
+{
+	if (stepAnim(1) > 1)
+	{
+		animTimer->start(animMsecDelay);  // Restart in case animMsecDelay changed
+	}
+	else
+	{
+		pauseAnim();
+	}
 }
 
 void LayerDialog::clickV1()
@@ -405,6 +474,13 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 				mw->GLA()->meshSetVisibility(*md->getMesh(clickedId), !md->getMesh(clickedId)->isVisible());
 			}
 			updatePerMeshItemVisibility();
+
+			// If not animating, or a mesh in the animation set was clicked, reset the animation
+			if (!ui->animPlay->isChecked() ||
+				std::find(animMeshIDs.begin(), animMeshIDs.end(), clickedId) != animMeshIDs.end())
+			{
+				resetAnim();
+			}
 		} break;
 		case 1 :
 
@@ -567,11 +643,10 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	}
 }
 
-void LayerDialog::updateLog(const GLLogStream &log)
+void LayerDialog::updateLog(GLLogStream &log)
 {
 	const QList< pair<int,QString> > &logStringList=log.logStringList();
-	ui->logPlainTextEdit->clear();
-	//ui->logPlainTextEdit->setFont(QFont("Courier",10));
+	//ui->logPlainTextEdit->clear();
 
 	pair<int,QString> logElem;
 #ifdef __APPLE__
@@ -600,6 +675,7 @@ void LayerDialog::updateLog(const GLLogStream &log)
 		logText += "<BR>";
 	}
 	ui->logPlainTextEdit->appendHtml(logText);
+	log.clear();
 }
 
 void LayerDialog::updateTable()
@@ -674,6 +750,28 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 			throw MLException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
 	}
 	_docitem->addChildren(itms);
+
+	// Delete any animation IDs no longer in the layer dialog
+	for (auto animIter = animMeshIDs.begin(); animIter != animMeshIDs.end(); )
+	{
+		bool foundInMeshList = false;
+		for(MeshModel& m : md->meshIterator())
+		{
+			if (m.id() == *animIter)
+			{
+				foundInMeshList = true;
+				break;
+			}
+		}
+		if (foundInMeshList)
+		{
+			++animIter;
+		}
+		else
+		{
+			animIter = animMeshIDs.erase(animIter);
+		}
+	}
 
 	updateTreeWidgetSizes(ui->meshTreeWidget);
 	updatePerMeshItemVisibility();
@@ -858,6 +956,114 @@ void LayerDialog::actionActivated(MLRenderingAction* ract)
 {
 	if (ract != NULL)
 		_tabw->switchTab(ract->meshId(),ract->text());
+}
+
+bool LayerDialog::startAnim()
+{
+	if (animMeshIDs.size() > 1)
+	{
+		return true;
+	}
+
+	MeshDocument *md = mw->meshDoc();
+	bool canAnimate = md->meshNumber() > 1;
+
+	if (canAnimate)
+	{
+		int visibleCount = 0;
+		for(MeshModel& m : md->meshIterator())
+		{
+			if (m.isVisible())
+			{
+				++visibleCount;
+			}
+		}
+		// If fewer than two meshes were visible select all meshes, else select only the visible ones
+		animIndex = -1;
+		animMeshIDs.clear();
+		for(MeshModel& m : md->meshIterator())
+		{
+			if (m.isVisible() && animIndex < 0)
+			{
+				animIndex = animMeshIDs.size();  // Remember first visible mesh
+			}
+			if (m.isVisible() || visibleCount < 2)
+			{
+				animMeshIDs.push_back(m.id());
+			}
+		}
+		if (animIndex >= 0)
+		{
+			--animIndex;
+		}
+		ui->animStepBackward->setEnabled(true);
+		ui->animStepForward->setEnabled(true);
+	}
+	return canAnimate;
+}
+
+// Advance the animation by the specified offset (1 = forward, -1 = backward)
+int LayerDialog::stepAnim(int offset)
+{
+	bool foundVisible = false;
+	int animatingCount = 0;
+	MeshDocument *md = mw->meshDoc();
+
+	if (md->meshNumber() > 1)
+	{
+		MeshModel* lastMP = nullptr;
+
+		while (!foundVisible && animMeshIDs.size() > 1)
+		{
+			animIndex = (animMeshIDs.size() + animIndex + offset) % animMeshIDs.size();
+			animatingCount = 0;
+			for (const auto& id : animMeshIDs)
+			{
+				for(MeshModel& m : md->meshIterator())
+				{
+					if (m.id() == id)
+					{
+						bool makeVisible = m.id() == animMeshIDs[animIndex];
+						mw->GLA()->meshSetVisibility(m, makeVisible);
+						foundVisible |= makeVisible;
+						++animatingCount;
+						lastMP = &m;
+					}
+				}
+			}
+			if (!foundVisible)
+			{
+				// The mesh being animated to was deleted; remove it from the list and try again
+				animMeshIDs.erase(animMeshIDs.begin() + animIndex);
+				animIndex -= offset;
+			}
+		}
+		if (animMeshIDs.size() == 1 && lastMP != nullptr)
+		{
+			mw->GLA()->meshSetVisibility(*lastMP, true);
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+	}
+	return animatingCount;
+}
+
+void LayerDialog::pauseAnim()
+{
+	animTimer->stop();
+	ui->animPlay->setChecked(false);
+	ui->animPlay->setText(tr(">"));
+	ui->animPlay->setToolTip(tr("Resume animation"));
+}
+
+void LayerDialog::resetAnim()
+{
+	pauseAnim();
+	animMeshIDs.clear();
+	ui->animStepBackward->setEnabled(false);
+	ui->animStepForward->setEnabled(false);
+	ui->animPlay->setToolTip(tr("Animate visible meshes, or all if < 2 are visible"));
 }
 
 LayerDialog::~LayerDialog()
@@ -1288,7 +1494,7 @@ void DecoratorParamsTreeWidget::save()
 void DecoratorParamsTreeWidget::reset()
 {
 	for(auto& p : *frame)
-		p.second->resetValue();
+		p.second->resetWidgetToDefaultValue();
 	apply();
 }
 
@@ -1298,7 +1504,7 @@ void DecoratorParamsTreeWidget::apply()
 	for(auto& p : *frame) {
 		current.setValue(
 					p.first,
-					p.second->widgetValue());
+					*p.second->getWidgetValue());
 	}
 	mainWin->updateCustomSettings();
 	if (mainWin->GLA())
@@ -1329,3 +1535,9 @@ DecoratorParamItem::DecoratorParamItem( QAction* action):
 	QTreeWidgetItem(), act(action)
 {
 }
+
+void LayerDialog::on_cleanLogPushButton_clicked()
+{
+	ui->logPlainTextEdit->clear();
+}
+

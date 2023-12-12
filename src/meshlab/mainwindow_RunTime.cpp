@@ -48,7 +48,7 @@
 #include <common/globals.h>
 #include <common/utilities/load_save.h>
 
-#include "rich_parameter_gui/richparameterlistdialog.h"
+#include <common_gui/rich_parameter/richparameterlistdialog.h>
 
 #include <wrap/io_trimesh/alnParser.h>
 #include "dialogs/about_dialog.h"
@@ -344,7 +344,7 @@ void MainWindow::updateMenus()
 	showInfoPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
 	preferencesMenu->setEnabled(activeDoc);
-	
+
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(activeDoc && GLA())
 	{
@@ -484,97 +484,6 @@ void MainWindow::setUnsplit()
 				this, SLOT(updateMenus()));
 	}
 }
-
-//set the split/unsplit menu that appears right clicking on a splitter's handle
-void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin)
-{
-	MultiViewer_Container *mvc =  currentViewContainer();
-	int epsilon =10;
-	splitMenu->clear();
-	unSplitMenu->clear();
-	//the viewer to split/unsplit is chosen through picking
-	
-	//Vertical handle allows to split horizontally
-	if(orientation == Qt::Vertical)
-	{
-		splitUpAct->setData(point);
-		splitDownAct->setData(point);
-		
-		//check if the viewer on the top is splittable according to its size
-		int pickingId = mvc->getViewerByPicking(QPoint(point.x(), point.y()-epsilon));
-		if(pickingId>=0)
-			splitUpAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
-		
-		//the viewer on top can be closed only if the splitter over the handle that originated the event has one child
-		bool unSplittabilityUp = true;
-		Splitter * upSplitter = qobject_cast<Splitter *>(origin->widget(0));
-		if(upSplitter)
-			unSplittabilityUp = !(upSplitter->count()>1);
-		unsplitUpAct->setEnabled(unSplittabilityUp);
-		
-		//check if the viewer below is splittable according to its size
-		pickingId = mvc->getViewerByPicking(QPoint(point.x(), point.y()+epsilon));
-		if(pickingId>=0)
-			splitDownAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
-		
-		//the viewer below can be closed only if the splitter ounder the handle that originated the event has one child
-		bool unSplittabilityDown = true;
-		Splitter * downSplitter = qobject_cast<Splitter *>(origin->widget(1));
-		if(downSplitter)
-			unSplittabilityDown = !(downSplitter->count()>1);
-		unsplitDownAct->setEnabled(unSplittabilityDown);
-		
-		splitMenu->addAction(splitUpAct);
-		splitMenu->addAction(splitDownAct);
-		
-		unsplitUpAct->setData(point);
-		unsplitDownAct->setData(point);
-		
-		unSplitMenu->addAction(unsplitUpAct);
-		unSplitMenu->addAction(unsplitDownAct);
-	}
-	//Horizontal handle allows to split vertically
-	else if (orientation == Qt::Horizontal)
-	{
-		splitRightAct->setData(point);
-		splitLeftAct->setData(point);
-		
-		//check if the viewer on the right is splittable according to its size
-		int pickingId =mvc->getViewerByPicking(QPoint(point.x()+epsilon, point.y()));
-		if(pickingId>=0)
-			splitRightAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
-		
-		//the viewer on the right can be closed only if the splitter on the right the handle that originated the event has one child
-		bool unSplittabilityRight = true;
-		Splitter * rightSplitter = qobject_cast<Splitter *>(origin->widget(1));
-		if(rightSplitter)
-			unSplittabilityRight = !(rightSplitter->count()>1);
-		unsplitRightAct->setEnabled(unSplittabilityRight);
-		
-		//check if the viewer on the left is splittable according to its size
-		pickingId =mvc->getViewerByPicking(QPoint(point.x()-epsilon, point.y()));
-		if(pickingId>=0)
-			splitLeftAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
-		
-		//the viewer on the left can be closed only if the splitter on the left of the handle that originated the event has one child
-		bool unSplittabilityLeft = true;
-		Splitter * leftSplitter = qobject_cast<Splitter *>(origin->widget(0));
-		if(leftSplitter)
-			unSplittabilityLeft = !(leftSplitter->count()>1);
-		unsplitLeftAct->setEnabled(unSplittabilityLeft);
-		
-		splitMenu->addAction(splitRightAct);
-		splitMenu->addAction(splitLeftAct);
-		
-		unsplitRightAct->setData(point);
-		unsplitLeftAct->setData(point);
-		
-		unSplitMenu->addAction(unsplitRightAct);
-		unSplitMenu->addAction(unsplitLeftAct);
-	}
-	handleMenu->popup(point);
-}
-
 
 void MainWindow::splitFromHandle(QAction *qa )
 {
@@ -2782,6 +2691,44 @@ void MainWindow::showEvent(QShowEvent * event)
 	QWidget::showEvent(event);
 	QSettings settings;
 	QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+	const QString informativeSettingString = "informativeShown";
+	QVariant informativeShown = settings.value(informativeSettingString);
+	if (!informativeShown.isValid()) {
+		// the user never agreed or declined the informative about sending anonymous data...
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(
+			this,
+			"Send Anonymous Statistics",
+			"MeshLab will send periodically some few aggregate statistics of usage (number of "
+			"opened and saved mesh and total number of vertices loaded). <br>"
+			"We really need this information in order to assess how diffusely MeshLab is used and "
+			"what is its impact on the 3D community. <br>"
+			"Do you allow MeshLab to periodically send aggregated statistics? <br>"
+			"You can always change this setting in the MeshLab options.",
+			QMessageBox::Yes | QMessageBox::No, // buttons to show
+			QMessageBox::Yes);
+
+		mwsettings.sendAnonymousData = (reply == QMessageBox::Yes);
+
+		informativeShown.setValue(true);
+		settings.setValue(informativeSettingString, informativeShown);
+
+		// TODO: manage of settings in meshlab needs to be completely remade.
+		// It was thinked to actually save the values of the settings **exclusively from the
+		// GUI settings dialog**. A proper class that manages settings **outside GUI and
+		// MainWindow** is needed.
+		// Right now, the only way to actually save a setting is outside the dialog is
+		// doing the following mess:
+		RichBool& p = dynamic_cast<RichBool&>(currentGlobalParams.getParameterByName(mwsettings.sendAnonymousDataParam()));
+		p.setValue(BoolValue(mwsettings.sendAnonymousData));
+		QDomDocument doc("MeshLabSettings");
+		doc.appendChild(p.fillToXMLDocument(doc));
+		QString docstring =  doc.toString();
+		settings.setValue(p.name(),QVariant(docstring));
+	}
+
 	const QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
 	QDate today = QDate::currentDate();
 	QString todayStr = today.toString();

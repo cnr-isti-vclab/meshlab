@@ -635,9 +635,27 @@ bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, con
 		vector<PointPC> *CVp = &cvH();
 		CVp->clear();
 		float NormalLen=rm->getFloat(CurvatureLength());
+		bool curvScale =rm->getBool(CurvatureScaling());
 		float LineLen = m.cm.bbox.Diag()*NormalLen;
+		float scale1,scale2;
 		if (rm->getBool(this->ShowPerVertexCurvature()) && m.hasDataMask(MeshModel::MM_VERTCURVDIR))
 		{
+			if(curvScale) // get range of curvature values
+			{
+				auto minmaxPD = tri::Stat<CMeshO>::ComputePerVertexCurvatureDirMinMax(m.cm);
+				scale1=minmaxPD.first.second;
+				scale2=minmaxPD.second.second;
+				for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+					if(!(*vi).IsD())
+					{
+						CVp->push_back(make_pair((*vi).P(), Color4b::Green));
+						CVp->push_back(make_pair((*vi).P() +Point3m::Construct((*vi).PD1()*scale1*LineLen*0.25), Color4b::Green));
+						CVp->push_back(make_pair((*vi).P(),  Color4b::Red));
+						CVp->push_back(make_pair((*vi).P()+Point3m::Construct((*vi).PD2()*scale2*LineLen*0.25),  Color4b::Red));
+					}
+			}
+			else
+			{
 			for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
 				if(!(*vi).IsD())
 				{
@@ -650,6 +668,7 @@ bool DecorateBasePlugin::startDecorate(const QAction * action, MeshModel &m, con
 					CVp->push_back(make_pair((*vi).P()+Point3m::Construct((*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25),
 											 Color4b::Red));
 				}
+			}
 		}
 		if (rm->getBool(this->ShowPerFaceCurvature()) && m.hasDataMask(MeshModel::MM_FACECURVDIR))
 		{
@@ -819,8 +838,8 @@ void DecorateBasePlugin::DisplayCamera(QString who, const Shotm &ls, int cameraS
 	}
 	
 	const char *typeBuf;
-	if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) typeBuf="Persp";
-	if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       typeBuf="Ortho";
+	if(ls.Intrinsics.cameraType == Camera<Scalarm>::PERSPECTIVE) typeBuf="Persp";
+	if(ls.Intrinsics.cameraType == Camera<Scalarm>::ORTHO)       typeBuf="Ortho";
 	
 	Point3m vp = ls.GetViewPoint();
 	Point3m ax0 = ls.Axis(0);
@@ -869,7 +888,7 @@ void DecorateBasePlugin::DrawCamera(const MeshModel* m, const Shotm &ls, vcg::Co
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	
-	if (ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
+	if (ls.Intrinsics.cameraType == Camera<Scalarm>::PERSPECTIVE)
 	{
 		// draw scale
 		float drawscale = 1.0;
@@ -1154,7 +1173,8 @@ void DecorateBasePlugin::initGlobalParameterList(const QAction* action, RichPara
 		
 	case DP_SHOW_CURVATURE : 
 	{
-		parset.addParam(RichFloat(CurvatureLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+		parset.addParam(RichFloat(CurvatureLength(),0.05f,"Vector Length","The max length of the curvature vectors expressed as a percentage of the bbox of the mesh"));
+		parset.addParam(RichBool(CurvatureScaling(),false,"Vector Scaling","The length of the curvature vectors is proportional to the curvature along that direction."));
 		parset.addParam(RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
 		parset.addParam(RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
 	} break;

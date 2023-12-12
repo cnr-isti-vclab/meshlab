@@ -44,6 +44,7 @@ void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
 	ui->counterSpinBox->setValue(settings.counter);
 	ui->backgroundComboBox->setCurrentIndex(settings.background);
 	ui->alllayersCheckBox->setChecked(settings.snapAllLayers);
+	ui->useLayerNameCheckBox->setChecked(settings.useLayerName);
 	ui->tiledSaveCheckBox->setChecked(settings.tiledSave);
 	ui->addToRastersCheckBox->setChecked(settings.addToRasters);
 }
@@ -56,6 +57,7 @@ SnapshotSetting SaveSnapshotDialog::getValues()
 	settings.resolution=ui->resolutionSpinBox->value();
 	settings.background = ui->backgroundComboBox->currentIndex();
 	settings.snapAllLayers=ui->alllayersCheckBox->isChecked();
+	settings.useLayerName=ui->useLayerNameCheckBox->isChecked();
 	settings.tiledSave=ui->tiledSaveCheckBox->isChecked();
 	settings.addToRasters=ui->addToRastersCheckBox->isChecked();
 	return settings;
@@ -80,3 +82,23 @@ void SaveSnapshotDialog::on_browseDir_clicked()
 		ui->outDirLineEdit->setText(selection.at(0));	
 	}
 }
+
+void SaveSnapshotDialog::on_alllayersCheckBox_stateChanged(int arg1)
+{
+	if (arg1 == Qt::Checked)
+		ui->useLayerNameCheckBox->setEnabled(true);
+	else {
+		ui->useLayerNameCheckBox->setEnabled(false);
+		ui->useLayerNameCheckBox->setChecked(false);
+	}
+}
+
+
+void SaveSnapshotDialog::on_useLayerNameCheckBox_stateChanged(int arg1)
+{
+	if (arg1 == Qt::Checked)
+		ui->baseNameLineEdit->setEnabled(false);
+	else
+		ui->baseNameLineEdit->setEnabled(true);
+}
+

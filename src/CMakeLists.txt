@@ -104,6 +104,7 @@ set(EXTERNAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 add_subdirectory(${EXTERNAL_DIR})
 
 add_subdirectory(common)
+add_subdirectory(common_gui)
 
 if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
 	add_subdirectory(meshlab)
@@ -147,7 +148,10 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_color_projection
 		meshlabplugins/filter_colorproc
 		meshlabplugins/filter_create
+		meshlabplugins/filter_cubization
+		meshlabplugins/filter_developability
 		meshlabplugins/filter_dirt
+		meshlabplugins/filter_embree
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
 		meshlabplugins/filter_img_patch_param
@@ -157,6 +161,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_layer
 		meshlabplugins/filter_measure
 		meshlabplugins/filter_mesh_booleans
+		meshlabplugins/filter_mesh_alpha_wrap
 		meshlabplugins/filter_meshing
 		meshlabplugins/filter_mls
 		meshlabplugins/filter_mutualglobal

@@ -7,11 +7,7 @@ set(SOURCES
 	editpickpoints.cpp
 	pickPointsTemplate.cpp
 	pickedPoints.cpp
-	pickpointsDialog.cpp
-	../../meshlab/gui_utils/clickable_label.cpp
-	../../meshlab/rich_parameter_gui/richparameterwidgets.cpp
-	../../meshlab/rich_parameter_gui/richparameterlistframe.cpp
-	../../meshlab/rich_parameter_gui/richparameterlistdialog.cpp)
+	pickpointsDialog.cpp)
 
 set(HEADERS
 	edit_pickpoints_factory.h
@@ -26,4 +22,4 @@ set(UI pickpointsDialog.ui)
 
 add_meshlab_plugin(edit_pickpoints ${SOURCES} ${HEADERS} ${RESOURCES} ${UI})
 
-target_link_libraries(edit_pickpoints PRIVATE OpenGL::GLU)
+target_link_libraries(edit_pickpoints PRIVATE meshlab-common-gui OpenGL::GLU)

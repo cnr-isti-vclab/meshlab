@@ -212,7 +212,7 @@ FilterLayerPlugin::initParameterList(const QAction* action, const MeshDocument& 
 			"Name of the output file, it will be saved in the same folder as the project file."));
 		break;
 	case FP_IMPORT_CAMERAS:
-		parlst.addParam(RichOpenFile(
+		parlst.addParam(RichFileOpen(
 			"ImportFile",
 			"",
 			QStringList(

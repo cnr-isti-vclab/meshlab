@@ -172,7 +172,7 @@ RichParameterList FilterCameraPlugin::initParameterList(const QAction *action, c
 		behaviour.push_back("The matrix is the transformation to apply to the extrinsics");
 		behaviour.push_back("The matrix represent the new extrinsics");
 		
-		parlst.addParam(RichMatrix44f("TransformMatrix",Matrix44m::Identity(),""));
+		parlst.addParam(RichMatrix44("TransformMatrix",Matrix44m::Identity(),""));
 		parlst.addParam(RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
 		parlst.addParam(RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
 		parlst.addParam(RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
@@ -180,11 +180,11 @@ RichParameterList FilterCameraPlugin::initParameterList(const QAction *action, c
 		
 	}
 		break;  case FP_SET_RASTER_CAMERA :
-		parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
+		parlst.addParam(RichShot ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
 		break;
 		
 	case FP_SET_MESH_CAMERA :
-		parlst.addParam(RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
+		parlst.addParam(RichShot ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
 		break;
 	case FP_QUALITY_FROM_CAMERA :
 		parlst.addParam(RichBool ("Depth", true, "Depth", "Use depth as a factor."));

@@ -25,8 +25,8 @@
 #define MESHLAB_SETTING_DIALOG_H
 
 #include <QDialog>
-#include <common/parameters/rich_parameter.h>
-#include "../rich_parameter_gui/richparameterlistframe.h"
+#include <common/parameters/rich_parameters.h>
+#include <common_gui/rich_parameter/rich_parameter_list_frame.h>
 
 /**
  * @brief This class describes a dialog to load, save, modify and reset a
@@ -61,6 +61,7 @@ private:
 	QPushButton* resetbut;
 	QPushButton* closebut;
 	QPushButton* loadbut;
+	QLabel *helpLabel;
 };
 
 #endif // MESHLAB_SETTING_DIALOG_H

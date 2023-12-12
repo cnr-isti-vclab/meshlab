@@ -160,7 +160,7 @@ RichParameterList QhullPlugin::initParameterList(const QAction* action, const Me
 		break;
 	}
 	case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: {
-		parlst.addParam(RichAbsPerc(
+		parlst.addParam(RichPercentage(
 			"alpha",
 			m.cm.bbox.Diag() / 100.0,
 			0,

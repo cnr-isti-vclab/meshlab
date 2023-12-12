@@ -33,6 +33,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
 	if (EXISTS ${QHULL_CHECK})
 		message(STATUS "- qhull - using downloaded source")
 
+		# remove target uninstall to avoid duplicates
+		# todo - make PR to Qhull to solve this
+		file(READ "${QHULL_DIR}/CMakeLists.txt" FILE_CONTENTS)
+		string(REPLACE "uninstall" "qhull-uninstall" FILE_CONTENTS "${FILE_CONTENTS}")
+		file(WRITE "${QHULL_DIR}/CMakeLists.txt" "${FILE_CONTENTS}")
+
 		set(MESSAGE_QUIET ON)
 		add_subdirectory(${QHULL_DIR} EXCLUDE_FROM_ALL)
 		unset(MESSAGE_QUIET)

@@ -57,9 +57,11 @@ public:
 
 	int textureMagFilter;
 	int textureMinFilter;
+	int textureWrapST;
 	inline static QString textureMinFilterParam() {return "MeshLab::Appearance::textureMinFilter";}
 	inline static QString textureMagFilterParam() {return "MeshLab::Appearance::textureMagFilter";}
-
+	inline static QString textureWrapSTParam() {return "MeshLab::Appearance::textureWrapST";}
+	
 	bool pointDistanceAttenuation;
 	inline static QString pointDistanceAttenuationParam() {return "MeshLab::Appearance::pointDistanceAttenuation";}
 	bool pointSmooth;
@@ -68,6 +70,8 @@ public:
 	inline static QString pointSizeParam() {return "MeshLab::Appearance::pointSize";}
 	bool wheelDirection;
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}
+	bool startupShowTrackball;
+	inline static QString showTrackballParam() {return "MeshLab::Appearance::showTrackball";}
 	int matrixDecimalPrecision;
 	inline static QString matrixDecimalPrecisionParam() {return "MeshLab::Appearance::matrixDecimalPrecision";}
 

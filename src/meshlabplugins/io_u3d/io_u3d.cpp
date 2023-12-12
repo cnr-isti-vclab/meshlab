@@ -296,19 +296,19 @@ void U3DIOPlugin::saveLatex(const QString& file,const vcg::tri::io::u3dparameter
 	std::string u3d_final = 
 			vcg::tri::io::QtUtilityFunctions::fileNameFromTrimmedPath(file_trim).toStdString();
 	latex.write(0,"\\documentclass[a4paper]{article}");
-	latex.write(0,"\\usepackage[3D]{movie15}");
+	latex.write(0,"\\usepackage[3Dmenu]{media9}");
 	latex.write(0,"\\usepackage{hyperref}");
 	latex.write(0,"\\usepackage[UKenglish]{babel}");
 	latex.write(0,"\\begin{document}");
-	latex.write(0,"\\includemovie[");
-	latex.write(1,"poster,");
-	latex.write(1,"toolbar, %same as `controls\'");
+	latex.write(0,"\\includemedia[");
+	latex.write(1,"width=\\linewidth,height=\\linewidth,");
+	latex.write(1,"3Dmenu,'");
 
 
 	QString u3d_text = QString::fromStdString(u3d_final);
 	substituteChar(u3d_text,QChar('_'),QString(""));
 	latex.write(1,"label=" + u3d_text.toStdString() + ",");
-	latex.write(1,"text=(" + u3d_text.toStdString() + "),");
+	latex.write(1,"activate=pageopen,");
 	std::string cam_string;
 	typename vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO>::CameraParameters* cam = mov_par._campar;
 	if (cam != NULL) {
@@ -319,8 +319,8 @@ void U3DIOPlugin::saveLatex(const QString& file,const vcg::tri::io::u3dparameter
 				", 3Dcoo=" + TextUtility::nmbToStr(-cam->_obj_pos.X()) + " " + TextUtility::nmbToStr(cam->_obj_pos.Z()) + " " + TextUtility::nmbToStr(cam->_obj_pos.Y()) + ",";
 		latex.write(1,cam_string);
 	}
-	latex.write(1,"3Dlights=CAD,");
-	latex.write(0,"]{\\linewidth}{\\linewidth}{" + u3d_final + "}");
+	latex.write(1,"3Dlights=CAD");
+	latex.write(0,"]{}{" + u3d_final + "}");
 	latex.write(0,"\\end{document}");
 }
 
