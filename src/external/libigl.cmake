@@ -4,14 +4,16 @@
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBIGL "Allow download and use of LibIGL source" ON)
 
+set(LIBIGL_VER 2.4.0)
+
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBIGL)
-	set(LIBIGL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/libigl-2.4.0")
+	set(LIBIGL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/libigl-${LIBIGL_VER}")
 	set(LIBIGL_CHECK "${LIBIGL_DIR}/include/igl/igl_inline.h")
 
 	if (NOT EXISTS ${LIBIGL_CHECK})
 		set(LIBIGL_LINK
-			https://github.com/libigl/libigl/archive/refs/tags/v2.4.0.zip
-			https://www.meshlab.net/data/libs/libigl-2.4.0.zip)
+			https://github.com/libigl/libigl/archive/refs/tags/v${LIBIGL_VER}.zip
+			https://www.meshlab.net/data/libs/libigl-${LIBIGL_VER}.zip)
 		set(LIBIGL_MD5 0b4fea5dba2117b8db85c99a39a71f83)
 		download_and_unzip(
 			NAME "LibIGL"
