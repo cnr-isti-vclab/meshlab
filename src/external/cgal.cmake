@@ -5,15 +5,17 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL "Allow download and use of CGAL source" ON)
 option(MESHLAB_ALLOW_SYSTEM_CGAL "Allow use of system-provided CGAL" ON)
 
+set(CGAL_VER 5.6)
+
 find_package(Threads REQUIRED)
-find_package(CGAL)
+find_package(CGAL ${CGAL_VER} QUIET)
 
 if(MESHLAB_ALLOW_SYSTEM_CGAL AND TARGET CGAL::CGAL)
 	message(STATUS "- CGAL - using system-provided library")
 	add_library(external-cgal INTERFACE)
 	target_link_libraries(external-cgal INTERFACE CGAL::CGAL Threads::Threads)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
-	set(CGAL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/CGAL-5.6")
+	set(CGAL_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/CGAL-${CGAL_VER}")
 	set(CGAL_CHECK "${CGAL_DIR}/include/CGAL/version.h")
 	set(CGAL_WIN_CHECK "${CGAL_DIR}/auxiliary/gmp/lib/libmpfr-4.lib")
 
@@ -21,8 +23,8 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 
 	if (NOT EXISTS ${CGAL_CHECK})
 		set(CGAL_LINK
-			https://github.com/CGAL/cgal/releases/download/v5.6/CGAL-5.6.zip
-			https://www.meshlab.net/data/libs/CGAL-5.6.zip
+			https://github.com/CGAL/cgal/releases/download/v${CGAL_VER}/CGAL-${CGAL_VER}.zip
+			https://www.meshlab.net/data/libs/CGAL-${CGAL_VER}.zip
 			) 
 		set(CGAL_MD5 6d1d067b88e20f7080d07d5108b4c772)
 		download_and_unzip(
@@ -38,8 +40,8 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_CGAL)
 
 	if (WIN32 AND NOT EXISTS ${CGAL_WIN_CHECK})
 		set(CGAL_AUX_LINK
-			https://github.com/CGAL/cgal/releases/download/v5.6/CGAL-5.6-win64-auxiliary-libraries-gmp-mpfr.zip
-			https://www.meshlab.net/data/libs/CGAL-5.6-win64-auxiliary-libraries-gmp-mpfr.zip
+			https://github.com/CGAL/cgal/releases/download/v${CGAL_VER}/CGAL-${CGAL_VER}-win64-auxiliary-libraries-gmp-mpfr.zip
+			https://www.meshlab.net/data/libs/CGAL-${CGAL_VER}-win64-auxiliary-libraries-gmp-mpfr.zip
 			) 
 		set(CGAL_AUX_MD5 247f4dca741c6b9a9be76286414070fa)
 		download_and_unzip(

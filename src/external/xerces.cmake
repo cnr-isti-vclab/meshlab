@@ -5,6 +5,8 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES "Allow download and use of Xerces-C sources" ON)
 option(MESHLAB_ALLOW_SYSTEM_XERCES "Allow use of system-provided Xerces-C" ON)
 
+set(XERCES_C_VER 3.2.4)
+
 find_package(XercesC)
 
 if(MESHLAB_ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
@@ -12,7 +14,6 @@ if(MESHLAB_ALLOW_SYSTEM_XERCES AND TARGET XercesC::XercesC)
 	add_library(external-xerces INTERFACE)
 	target_link_libraries(external-xerces INTERFACE XercesC::XercesC)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
-	set(XERCES_C_VER 3.2.4)
 	set(XERCES_C_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/xerces-c-${XERCES_C_VER}")
 	set(XERCES_C_CHECK "${XERCES_C_DIR}/CMakeLists.txt")
 
