@@ -33,8 +33,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS)
 
 	if (EXISTS ${LIB3DS_CHECK})
 		message(STATUS "- lib3ds - using downloaded source")
+		set(MODE SHARED)
+		if (APPLE)
+			set(MODE STATIC)
+		endif()
 		add_library(
-			external-lib3ds STATIC
+			external-lib3ds ${MODE}
 			"${LIB3DS_DIR}/lib3ds/atmosphere.c"
 			"${LIB3DS_DIR}/lib3ds/atmosphere.h"
 			"${LIB3DS_DIR}/lib3ds/background.c"
@@ -76,6 +80,8 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS)
 
 		target_include_directories(external-lib3ds SYSTEM PUBLIC "${LIB3DS_DIR}")
 		target_link_libraries(external-lib3ds PRIVATE external-disable-warnings)
-		#install(TARGETS external-lib3ds DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		if (NOT APPLE)
+			install(TARGETS external-lib3ds DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+		endif()
 	endif()
 endif()
