@@ -147,11 +147,11 @@ CMeshO meshlab::meshFromMatrices(
 				vi->Q() = vertexQuality(i);
 			}
 			if (hasVColors) {
-				vi->C().Construct(CMeshO::VertexType::ColorType(
+				vi->C() = CMeshO::VertexType::ColorType(
 					vertexColor(i, 0) * 255,
 					vertexColor(i, 1) * 255,
 					vertexColor(i, 2) * 255,
-					vertexColor(i, 3) * 255));
+					vertexColor(i, 3) * 255);
 			}
 			if (hasVTexCoords) {
 				vi->T() = CMeshO::VertexType::TexCoordType(
@@ -218,11 +218,11 @@ CMeshO meshlab::meshFromMatrices(
 				fi->Q() = faceQuality(i);
 			}
 			if (hasFColors) {
-				fi->C().Construct(CMeshO::FaceType::ColorType(
+				fi->C() = CMeshO::FaceType::ColorType(
 					faceColor(i, 0) * 255,
 					faceColor(i, 1) * 255,
 					faceColor(i, 2) * 255,
-					faceColor(i, 3) * 255));
+					faceColor(i, 3) * 255);
 			}
 			if (hasFWedgeTexCoords) {
 				for (uint j = 0; j < 3; j++) {
@@ -343,11 +343,11 @@ CMeshO meshlab::polyMeshFromMatrices(
 				vi->Q() = vertexQuality(i);
 			}
 			if (hasVColors) {
-				vi->C().Construct(CMeshO::VertexType::ColorType(
+				vi->C() = CMeshO::VertexType::ColorType(
 					vertexColor(i, 0) * 255,
 					vertexColor(i, 1) * 255,
 					vertexColor(i, 2) * 255,
-					vertexColor(i, 3) * 255));
+					vertexColor(i, 3) * 255);
 			}
 			if (hasVTexCoords) {
 				vi->T() = CMeshO::VertexType::TexCoordType(
@@ -403,11 +403,11 @@ CMeshO meshlab::polyMeshFromMatrices(
 				fi->Q() = faceQuality(i);
 			}
 			if (hasFColors) {
-				fi->C().Construct(CMeshO::FaceType::ColorType(
+				fi->C() = CMeshO::FaceType::ColorType(
 					faceColor(i, 0) * 255,
 					faceColor(i, 1) * 255,
 					faceColor(i, 2) * 255,
-					faceColor(i, 3) * 255));
+					faceColor(i, 3) * 255);
 			}
 		}
 
