@@ -57,7 +57,7 @@ jobs:
       with:
         cache-path: src/external/downloads/*
         cache-key: external-libraries
-        build-option: ${{matrix.precision}}
+        build-precision: ${{matrix.precision}}
     - name: Deploy
       uses: ./.github/actions/2_deploy
       with:
