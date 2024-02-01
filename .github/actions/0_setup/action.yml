@@ -18,6 +18,7 @@ runs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Check
+      shell: bash
       run: |
         echo "Install Qt Action: ${{ inputs.use-jurpel-qt-action }}"
     - name: Install Qt
