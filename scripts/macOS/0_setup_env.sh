@@ -28,13 +28,7 @@ npm install -g appdmg
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
 
-    brew install qt
-
-    echo "export QTDIR=/usr/local/opt/qt" >> ~/.bash_profile
-    echo "export PATH=$QTDIR/bin:$PATH" >> ~/.bash_profile
-    echo "export LD_LIBRARY_PATH=/usr/local/opt/qt/lib:$LD_LIBRARY_PATH" >> ~/.bash_profile
-    echo "export PKG_CONFIG_PATH=/usr/local/opt/qt/lib:$PKG_CONFIG_PATH" >> ~/.bash_profile
-    . ~/.bash_profile
+    brew install qt5
 else
     echo "=== jumping installation of qt packages..."
 fi
