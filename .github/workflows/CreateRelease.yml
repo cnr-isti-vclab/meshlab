@@ -52,12 +52,20 @@ jobs:
         else
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
         fi
+        if [ "${{matrix.os}}" == "macos-14" ]; then
+          echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
+          echo "artifact_os=${{ runner.os }}_arm64" >> $GITHUB_OUTPUT
+        else
+          echo "build_options=" >> $GITHUB_OUTPUT
+          echo "artifact_os=${{ runner.os }}" >> $GITHUB_OUTPUT
+        fi
     - name: Build
       uses: ./.github/actions/1_build
       with:
         cache-path: src/external/downloads/*
         cache-key: external-libraries
         build-precision: ${{matrix.precision}}
+        build-options: ${{steps.envs.outputs.build_options}}
     - name: Deploy
       uses: ./.github/actions/2_deploy
       with:

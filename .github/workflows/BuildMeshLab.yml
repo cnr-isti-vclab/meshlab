@@ -38,9 +38,12 @@ jobs:
         fi
         if [ "${{matrix.os}}" == "macos-14" ]; then
           echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
+          echo "artifact_os=${{ runner.os }}_arm64" >> $GITHUB_OUTPUT
         else
           echo "build_options=" >> $GITHUB_OUTPUT
+          echo "artifact_os=${{ runner.os }}" >> $GITHUB_OUTPUT
         fi
+
     - name: Build
       uses: ./.github/actions/1_build
       with:
@@ -60,10 +63,10 @@ jobs:
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_${{ steps.envs.outputs.artifact_os }}_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/
     - name: Upload MeshLab Packages
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_${{ steps.envs.outputs.artifact_os }}_packages${{steps.envs.outputs.artifact_suffix}}
         path: packages/MeshLab*
