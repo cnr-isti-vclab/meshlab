@@ -17,6 +17,9 @@ runs:
   steps:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Check
+      run: |
+        echo "Install Qt Action: ${{ inputs.use-jurpel-qt-action }}"
     - name: Install Qt
       if: ${{ inputs.use-jurpel-qt-action }}
       uses: jurplel/install-qt-action@v3
