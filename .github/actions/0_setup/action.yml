@@ -13,18 +13,18 @@ runs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
-      if: ${{ runner.os }} != 'macos-14'
+      if: ${{ matrix.os }} != 'macos-14'
       uses: jurplel/install-qt-action@v3
       with:
         cache: true
         version: ${{ inputs.qt-version }}
     - name: Install dependencies
-      if: ${{ runner.os }} != 'macos-14'
+      if: ${{ matrix.os }} != 'macos-14'
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
     - name: Install dependencies
-      if: ${{ runner.os }} == 'macos-14'
+      if: ${{ matrix.os }} == 'macos-14'
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/0_setup_env.sh
