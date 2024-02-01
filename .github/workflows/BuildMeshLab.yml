@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-20.04', 'macos-latest', 'macos-14', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
     - uses: actions/checkout@v3
