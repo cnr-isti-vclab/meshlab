@@ -2,6 +2,11 @@ name: 'Setup Environment'
 description: 'Setup Environment'
 
 inputs:
+  use-jurpel-qt-action:
+    description: 'Use jurpel/qt-action'
+    required: false
+    type: boolean
+    default: true
   qt-version:
     description: 'Qt Version'
     required: false
@@ -13,18 +18,18 @@ runs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
-      if: ${{ matrix.os }} != 'macos-14'
+      if: ${{ inputs.use-jurpel-qt-action }}
       uses: jurplel/install-qt-action@v3
       with:
         cache: true
         version: ${{ inputs.qt-version }}
     - name: Install dependencies
-      if: ${{ matrix.os }} != 'macos-14'
+      if: ${{ inputs.use-jurpel-qt-action }}
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
     - name: Install dependencies
-      if: ${{ matrix.os }} == 'macos-14'
+      if: ${{ !inputs.use-jurpel-qt-action }}
       shell: bash
       run: |
         bash scripts/${{ runner.os }}/0_setup_env.sh
