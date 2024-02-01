@@ -53,7 +53,7 @@ runs:
     - name: Ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-${{ github.ref }}-${{ inputs.build-precision }}
+        key: ${{ matrix.os }}-${{ github.ref }}-${{ inputs.build-precision }}
     - name: Configure and Build
       shell: bash
       run: |
