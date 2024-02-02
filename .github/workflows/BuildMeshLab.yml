@@ -57,10 +57,10 @@ jobs:
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_portable${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/
     - name: Upload MeshLab Packages
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_packages${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
         path: packages/MeshLab*
