@@ -19,7 +19,7 @@ jobs:
         os: ['ubuntu-20.04', 'macos-latest', 'macos-14', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Setup Environment
@@ -36,6 +36,11 @@ jobs:
           echo "artifact_suffix=_double_$ARCH" >> $GITHUB_OUTPUT
         else
           echo "artifact_suffix=_$ARCH" >> $GITHUB_OUTPUT
+        fi
+        if [ "${{matrix.os}}" == "macos-14" ]; then
+          echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
+        else
+          echo "build_options=" >> $GITHUB_OUTPUT
         fi
     - name: Build
       uses: ./.github/actions/1_build

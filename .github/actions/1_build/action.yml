@@ -46,7 +46,7 @@ runs:
     - name: Cache external libraries sources
       id: cache-ext-libs
       if: ${{ inputs.cache-path != '' }}
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ inputs.cache-path }}
         key: ${{ runner.os }}-${{ inputs.cache-key }}
