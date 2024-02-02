@@ -17,7 +17,7 @@ jobs:
     name: Update ML_VERSION
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Update MeshLab version
@@ -37,7 +37,7 @@ jobs:
         os: ['ubuntu-20.04', 'macos-latest', 'macos-14', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         ref: main
