@@ -24,6 +24,10 @@ case $i in
         QT_DIR_OPTION=-qt=${i#*=}
         shift # past argument=value
         ;;
+    --use_brew_qt)
+        QT_DIR_OPTION="--use_brew_qt"
+        shift # past argument=value
+        ;;
     -p=*|--packages_path=*)
         PACKAGES_PATH="${i#*=}"
         shift # past argument=value

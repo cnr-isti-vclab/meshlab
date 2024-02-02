@@ -31,19 +31,12 @@ jobs:
       id: envs
       shell: bash
       run: |
+        ARCH=$(uname -m)
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_double_$ARCH" >> $GITHUB_OUTPUT
         else
-          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_$ARCH" >> $GITHUB_OUTPUT
         fi
-        if [ "${{matrix.os}}" == "macos-14" ]; then
-          echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
-          echo "artifact_os=${{ runner.os }}_arm64" >> $GITHUB_OUTPUT
-        else
-          echo "build_options=" >> $GITHUB_OUTPUT
-          echo "artifact_os=${{ runner.os }}" >> $GITHUB_OUTPUT
-        fi
-
     - name: Build
       uses: ./.github/actions/1_build
       with:
@@ -55,6 +48,7 @@ jobs:
     - name: Deploy
       uses: ./.github/actions/2_deploy
       with:
+        use-brew-qt: ${{matrix.os == 'macos-14'}}
         mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
         mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
         mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
@@ -63,10 +57,10 @@ jobs:
     - name: Upload MeshLab Portable
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_${{ steps.envs.outputs.artifact_os }}_portable${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/
     - name: Upload MeshLab Packages
       uses: actions/upload-artifact@v4
       with:
-        name: MeshLab_${{ steps.envs.outputs.artifact_os }}_packages${{steps.envs.outputs.artifact_suffix}}
+        name: MeshLab_packages${{steps.envs.outputs.artifact_suffix}}
         path: packages/MeshLab*

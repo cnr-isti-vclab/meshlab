@@ -48,3 +48,7 @@ rm $INSTALL_PATH/FileAssociation.nsh
 
 mkdir $PACKAGES_PATH
 mv $INSTALL_PATH/MeshLab*-windows.exe $PACKAGES_PATH
+
+# get running architecture
+ARCH=$(uname -m)
+mv $PACKAGES_PATH/MeshLab*-windows.exe $PACKAGES_PATH/MeshLab*-windows_$ARCH.exe
