@@ -71,6 +71,7 @@ fi
 
 if [ ! -z "$QT_DIR" ]
 then
+    export Qt5_Dir=$QT_DIR
     export Qt5_DIR=$QT_DIR
 fi
 

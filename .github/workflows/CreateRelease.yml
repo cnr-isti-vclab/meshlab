@@ -17,7 +17,7 @@ jobs:
     name: Update ML_VERSION
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Update MeshLab version
@@ -34,33 +34,44 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-20.04', 'macos-latest', 'macos-14', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         ref: main
     - name: Setup Environment
       uses: ./.github/actions/0_setup
+      with:
+        qt-version: ${{env.QT_VERSION}}
+        use-jurpel-qt-action: ${{matrix.os != 'macos-14'}}
     - name: Setup env variables
       id: envs
       shell: bash
       run: |
+        ARCH=$(uname -m)
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_double_$ARCH" >> $GITHUB_OUTPUT
         else
-          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_$ARCH" >> $GITHUB_OUTPUT
+        fi
+        if [ "${{matrix.os}}" == "macos-14" ]; then
+          echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
+        else
+          echo "build_options=" >> $GITHUB_OUTPUT
         fi
     - name: Build
       uses: ./.github/actions/1_build
       with:
         cache-path: src/external/downloads/*
         cache-key: external-libraries
-        build-option: ${{matrix.precision}}
+        build-precision: ${{matrix.precision}}
+        build-options: ${{steps.envs.outputs.build_options}}
     - name: Deploy
       uses: ./.github/actions/2_deploy
       with:
+        use-brew-qt: ${{matrix.os == 'macos-14'}}
         mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
         mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
         mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
@@ -91,90 +102,100 @@ jobs:
     - name: Download Linux ZIP
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Linux_portable
-        path: meshlab_linux_portable
+        name: MeshLab_Linux_portable_x86_64
+        path: meshlab_linux_portable_x86_64
     - name: Download Linux ZIP-d
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Linux_portable_double
-        path: meshlab_linux_portable_double
+        name: MeshLab_Linux_portable_double_x86_64
+        path: meshlab_linux_portable_double_x86_64
     - name: Download Linux AppImage
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Linux_packages
-        path: meshlab_linux_appimage
+        name: MeshLab_Linux_packages_x86_64
+        path: meshlab_linux_appimage_x86_64
     - name: Download Linux AppImage-d
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Linux_packages_double
-        path: meshlab_linux_appimage_double
+        name: MeshLab_Linux_packages_double_x86_64
+        path: meshlab_linux_appimage_double_x86_64
     - name: Change Permissions
       run: |
-        chmod +x meshlab_linux_portable/usr/bin/meshlab
-        chmod +x meshlab_linux_portable/AppRun
-        chmod +x meshlab_linux_portable_double/usr/bin/meshlab
-        chmod +x meshlab_linux_portable_double/AppRun
+        chmod +x meshlab_linux_portable_x86_64/usr/bin/meshlab
+        chmod +x meshlab_linux_portable_x86_64/AppRun
+        chmod +x meshlab_linux_portable_double_x86_64/usr/bin/meshlab
+        chmod +x meshlab_linux_portable_double_x86_64/AppRun
     - name: Setup env variables
       id: envs
       shell: bash
       run: |
         #get version of meshlab
         IFS=' ' #space delimiter
-        STR_VERSION=$(meshlab_linux_portable/usr/bin/meshlab --version)
+        STR_VERSION=$(meshlab_linux_portable_x86_64/usr/bin/meshlab --version)
         read -a strarr <<< "$STR_VERSION"
         ML_VERSION=${strarr[1]} #get the meshlab version from the string
         echo "ml_version=$ML_VERSION" >> $GITHUB_OUTPUT
-        STR_VERSION=$(meshlab_linux_portable_double/usr/bin/meshlab --version)
+        STR_VERSION=$(meshlab_linux_portable_double_x86_64/usr/bin/meshlab --version)
         read -a strarrd <<< "$STR_VERSION"
         ML_VERSION_D=${strarrd[1]} #get the meshlab version from the string
         echo "ml_version_d=$ML_VERSION_D" >> $GITHUB_OUTPUT
     - name: Create MeshLab Portable Linux Archive
       run: |
-        cd meshlab_linux_portable
-        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz *
-        cd ../meshlab_linux_portable_double
-        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz *
+        cd meshlab_linux_portable_x86_64
+        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.tar.gz *
+        cd ../meshlab_linux_portable_double_x86_64
+        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz *
         cd ..
 
-    #Download MacOS Package
-    - name: Download MacOS DMG
+    #Download MacOS Packages
+    - name: Download MacOS DMG x86_64
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_macOS_packages
-        path: meshlab_macos_dmg
-    - name: Download MacOS DMG-d
+        name: MeshLab_macOS_packages_x86_64
+        path: meshlab_macos_dmg_x86_64
+    - name: Download MacOS DMG-d x86_64
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_macOS_packages_double
-        path: meshlab_macos_dmg_double
+        name: MeshLab_macOS_packages_double_x86_64
+        path: meshlab_macos_dmg_double_x86_64
+    - name: Download MacOS DMG arm64
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_macOS_packages_arm64
+        path: meshlab_macos_dmg_arm64
+    - name: Download MacOS DMG-d arm64
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_macOS_packages_double_arm64
+        path: meshlab_macos_dmg_double_arm64
 
     #Download Windows Packages
     - name: Download Windows ZIP
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Windows_portable
-        path: meshlab_windows_portable
+        name: MeshLab_Windows_portable_x86_64
+        path: meshlab_windows_portable_x86_64
     - name: Download Windows ZIP-d
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Windows_portable_double
-        path: meshlab_windows_portable_double
+        name: MeshLab_Windows_portable_double_x86_64
+        path: meshlab_windows_portable_double_x86_64
     - name: Download Windows Installer
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Windows_packages
-        path: meshlab_windows_installer
+        name: MeshLab_Windows_packages_x86_64
+        path: meshlab_windows_installer_x86_64
     - name: Download Windows Installer-d
       uses: actions/download-artifact@v4
       with:
-        name: MeshLab_Windows_packages_double
-        path: meshlab_windows_installer_double
+        name: MeshLab_Windows_packages_double_x86_64
+        path: meshlab_windows_installer_double_x86_64
     - name: Create MeshLab Portable Windows Archive
       run: |
-        cd meshlab_windows_portable
-        zip -r ../MeshLab${{steps.envs.outputs.ml_version}}-windows.zip *
-        cd ../meshlab_windows_portable_double
-        zip -r ../MeshLab${{steps.envs.outputs.ml_version_d}}-windows.zip *
+        cd meshlab_windows_portable_x86_64
+        zip -r ../MeshLab${{steps.envs.outputs.ml_version}}-windows_x86_64.zip *
+        cd ../meshlab_windows_portable_double_x86_64
+        zip -r ../MeshLab${{steps.envs.outputs.ml_version_d}}-windows_x86_64.zip *
         cd ..
 
     #Create release and upload
@@ -185,13 +206,15 @@ jobs:
         tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
         name: "MeshLab-${{steps.envs.outputs.ml_version}}"
         artifacts: |
-          MeshLab${{steps.envs.outputs.ml_version}}-linux.tar.gz
-          MeshLab${{steps.envs.outputs.ml_version_d}}-linux.tar.gz
-          meshlab_linux_appimage/MeshLab${{steps.envs.outputs.ml_version}}-linux.AppImage
-          meshlab_linux_appimage_double/MeshLab${{steps.envs.outputs.ml_version_d}}-linux.AppImage
-          meshlab_macos_dmg/MeshLab${{steps.envs.outputs.ml_version}}-macos.dmg
-          meshlab_macos_dmg_double/MeshLab${{steps.envs.outputs.ml_version_d}}-macos.dmg
-          MeshLab${{steps.envs.outputs.ml_version}}-windows.zip
-          MeshLab${{steps.envs.outputs.ml_version_d}}-windows.zip
-          meshlab_windows_installer/MeshLab${{steps.envs.outputs.ml_version}}-windows.exe
-          meshlab_windows_installer_double/MeshLab${{steps.envs.outputs.ml_version_d}}-windows.exe
+          MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.tar.gz
+          MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz
+          meshlab_linux_appimage_x86_64/MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.AppImage
+          meshlab_linux_appimage_double_x86_64/MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.AppImage
+          meshlab_macos_dmg_x86_64/MeshLab${{steps.envs.outputs.ml_version}}-macos_x86_64.dmg
+          meshlab_macos_dmg_double_x86_64/MeshLab${{steps.envs.outputs.ml_version_d}}-macos_x86_64.dmg
+          meshlab_macos_dmg_arm64/MeshLab${{steps.envs.outputs.ml_version}}-macos_arm64.dmg
+          meshlab_macos_dmg_double_arm64/MeshLab${{steps.envs.outputs.ml_version_d}}-macos_arm64.dmg
+          MeshLab${{steps.envs.outputs.ml_version}}-windows_x86_64.zip
+          MeshLab${{steps.envs.outputs.ml_version_d}}-windows_x86_64.zip
+          meshlab_windows_installer_x86_64/MeshLab${{steps.envs.outputs.ml_version}}-windows_x86_64.exe
+          meshlab_windows_installer_double_x86_64/MeshLab${{steps.envs.outputs.ml_version_d}}-windows_x86_64.exe

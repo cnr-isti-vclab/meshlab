@@ -10,8 +10,12 @@ inputs:
     description: 'Cache key'
     required: false
     default: ''
-  build-option:
-    description: 'Build option'
+  build-precision:
+    description: 'Build precision'
+    required: false
+    default: ''
+  build-options:
+    description: 'Build options'
     required: false
     default: ''
   nightly:
@@ -27,9 +31,9 @@ runs:
       id: envs
       shell: bash
       run: |
-        if [ "${{ inputs.build-option }}" != "" ]; then
-          echo "build_option=--${{ inputs.build-option }}" >> $GITHUB_OUTPUT
-          echo "artifact_suffix=_${{ inputs.build-option }}" >> $GITHUB_OUTPUT
+        if [ "${{ inputs.build-precision }}" != "" ]; then
+          echo "build_option=--${{ inputs.build-precision }}" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_${{ inputs.build-precision }}" >> $GITHUB_OUTPUT
         else
           echo "build_option=" >> $GITHUB_OUTPUT
           echo "artifact_suffix=" >> $GITHUB_OUTPUT
@@ -42,15 +46,15 @@ runs:
     - name: Cache external libraries sources
       id: cache-ext-libs
       if: ${{ inputs.cache-path != '' }}
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ inputs.cache-path }}
         key: ${{ runner.os }}-${{ inputs.cache-key }}
     - name: Ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-${{ github.ref }}-${{ inputs.build-option }}
+        key: ${{ matrix.os }}-${{ github.ref }}-${{ inputs.build-precision }}
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh ${{ steps.envs.outputs.build_option }} ${{ steps.envs.outputs.nightly }} --use_brew_llvm --ccache
+        bash scripts/${{ runner.os }}/1_build.sh ${{ steps.envs.outputs.build_option }} ${{ inputs.build-options }} ${{ steps.envs.outputs.nightly }} --use_brew_llvm --ccache

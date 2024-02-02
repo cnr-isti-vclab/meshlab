@@ -33,18 +33,27 @@ inputs:
     description: 'Windows Certificate Password'
     required: false
     default: ''
+  use-brew-qt:
+    description: 'Qt Option'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
   steps:
     - name: Set Notarization settings
-      id: notarization
+      id: envs
       shell: bash
       run: |
         if [ "${{ inputs.mac-notarization-user }}" != "" ]; then
           echo "not_setting=--notarization_user='${{ inputs.mac-notarization-user }}' --notarization_team='${{ inputs.mac-notarization-team }}' --notarization_pssw='${{ inputs.mac-notarization-pssw }}'" >> $GITHUB_OUTPUT
         else
           echo "not_setting=" >> $GITHUB_OUTPUT
+        fi
+        if [ "${{ inputs.use-brew-qt }}" == "true" ]; then
+          echo "qt-option=--use_brew_qt" >> $GITHUB_OUTPUT
+        else
+          echo "qt-option=" >> $GITHUB_OUTPUT
         fi
     - name: Set CodeSign Certificate macOS
       if: ${{ runner.os  == 'macOS' && inputs.mac-certificate != ''}} 
@@ -62,4 +71,4 @@ runs:
     - name: Deploy
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ inputs.win-certificate-pssw }}' --cert_id='${{ inputs.mac-certificate-id }}' ${{ steps.notarization.outputs.not_setting }}
+        bash scripts/${{ runner.os }}/2_deploy.sh ${{ steps.envs.outputs.qt-option }} --cert_pssw='${{ inputs.win-certificate-pssw }}' --cert_id='${{ inputs.mac-certificate-id }}' ${{ steps.envs.outputs.not_setting }}

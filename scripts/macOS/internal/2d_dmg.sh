@@ -47,6 +47,9 @@ mv $INSTALL_PATH/meshlab.app $INSTALL_PATH/MeshLab$ML_VERSION.app
 
 mkdir $PACKAGES_PATH
 
-appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGES_PATH/MeshLab$ML_VERSION-macos.dmg
+# get running architecture
+ARCH=$(uname -m)
+
+appdmg $RESOURCES_PATH/macos/meshlab_dmg_final.json $PACKAGES_PATH/MeshLab$ML_VERSION-macos_$ARCH.dmg
 
 rm $RESOURCES_PATH/macos/meshlab_dmg_final.json

@@ -47,4 +47,23 @@ rm $INSTALL_PATH/ExecWaitJob.nsh
 rm $INSTALL_PATH/FileAssociation.nsh
 
 mkdir $PACKAGES_PATH
-mv $INSTALL_PATH/MeshLab*-windows.exe $PACKAGES_PATH
+
+# get the name of the installer file, without the path
+INSTALLER_NAME=$(basename $INSTALL_PATH/MeshLab*-windows.exe)
+
+# get the name of the installer without the extension
+INSTALLER_NAME=${INSTALLER_NAME%.*}
+
+# get running architecture
+ARCH=$(uname -m)
+
+# append the architecture and extension to the installer name
+INSTALLER_NAME=${INSTALLER_NAME}_$ARCH.exe
+
+# rename the installer and move it to the packages folder
+mv $INSTALL_PATH/MeshLab*-windows.exe $INSTALL_PATH/$INSTALLER_NAME
+mv $INSTALL_PATH/$INSTALLER_NAME $PACKAGES_PATH
+
+
+
+
