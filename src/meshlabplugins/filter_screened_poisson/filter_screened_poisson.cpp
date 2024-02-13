@@ -197,7 +197,9 @@ std::map<std::string, QVariant> FilterScreenedPoissonPlugin::applyFilter(
 		}
 		else {
 			MeshModelPointStream<Scalarm> meshStream(md.mm()->cm);
-			_Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,md.mm()->cm.bbox,pm->cm,pp,cb);
+			Box3m bb;
+			bb.Add(md.mm()->cm.Tr, md.mm()->cm.bbox);
+			_Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,bb,pm->cm,pp,cb);
 		}
 		pm->updateBoxAndNormals();
 		md.setVisible(pm->id(),true);
