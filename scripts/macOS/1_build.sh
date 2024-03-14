@@ -44,7 +44,7 @@ case $i in
         shift # past argument=value
         ;;
     --use_brew_qt)
-        QT_DIR=$(brew --prefix qt5)
+        QT_DIR=$(brew --prefix qt@5)
         shift # past argument=value
         ;;
     --ccache)
