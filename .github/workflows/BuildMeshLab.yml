@@ -47,7 +47,7 @@ jobs:
       with:
         cache-path: src/external/downloads/*
         cache-key: external-libraries
-        build-precision: ${{matrix.precision}} 
+        build-precision: ${{matrix.precision}}
         build-options: ${{steps.envs.outputs.build_options}}
         nightly: true
     - name: Deploy

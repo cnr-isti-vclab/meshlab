@@ -57,4 +57,4 @@ runs:
     - name: Configure and Build
       shell: bash
       run: |
-        bash scripts/${{ runner.os }}/1_build.sh ${{ steps.envs.outputs.build_option }} ${{ inputs.build-options }} ${{ steps.envs.outputs.nightly }} --use_brew_llvm --ccache
+        bash scripts/${{ runner.os }}/1_build.sh ${{ steps.envs.outputs.build_option }} ${{ inputs.build-options }} ${{ steps.envs.outputs.nightly }} --ccache
