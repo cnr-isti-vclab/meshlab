@@ -42,7 +42,7 @@ namespace tri
  * This flip happens only if decreases the curvature of the surface
  * Edge flip optimization based on the paper
  * "optimizing 3d triangulations using discrete curvature analysis"
- * http://www2.in.tu-clausthal.de/~hormann/papers/Dyn.2001.OTU.pdf
+ * https://www.inf.usi.ch/faculty/hormann/papers/Dyn.2001.OTU.pdf
  */
 template <class TRIMESH_TYPE, class MYTYPE, class CURVEVAL>
 class CurvEdgeFlip : public TopoEdgeFlip<TRIMESH_TYPE, MYTYPE>
