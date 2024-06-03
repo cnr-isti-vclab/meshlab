@@ -58,13 +58,13 @@ namespace vcg {
                 std::vector<int8_t> sphericalInvalidState;
 
                 // Intensity
-                std::vector<float> intensity; /* Quality */
+                std::vector<double> intensity; /* Quality */
                 std::vector<int8_t> intensityInvalid;
 
                 // Colors
-                std::vector<uint8_t> colorRed;
-                std::vector<uint8_t> colorGreen;
-                std::vector<uint8_t> colorBlue;
+                std::vector<uint16_t> colorRed;
+                std::vector<uint16_t> colorGreen;
+                std::vector<uint16_t> colorBlue;
                 std::vector<int8_t> colorInvalid;
 
                 // Normals
@@ -136,8 +136,8 @@ namespace vcg {
                         }
                     }
 
-                    if (scanHeader.pointFields.normalX && scanHeader.pointFields.normalY &&
-                        scanHeader.pointFields.normalZ) {
+                    if (scanHeader.pointFields.normalXField && scanHeader.pointFields.normalYField &&
+                        scanHeader.pointFields.normalZField) {
 
                         normalX.resize(buffSize); normalY.resize(buffSize); normalZ.resize(buffSize);
 
