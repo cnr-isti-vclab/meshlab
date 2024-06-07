@@ -1193,7 +1193,7 @@ Eigen::MatrixX3i meshlab::faceFaceAdjacencyMatrix(const CMeshO& mesh)
 				faceFaceMatrix(i, j) = -1;
 			}
 			else {
-				faceFaceMatrix(i, j) = mesh.face[i].FFi(j);
+				faceFaceMatrix(i, j) = vcg::tri::Index(mesh, AdjF);
 			}
 		}
 	}
