@@ -1901,8 +1901,12 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		if(par.getBool("splitSurfaceWithSection"))
 		{
 			MeshModel* underM= md.addNewMesh("",sectionName+"_under");
+			underM->updateDataMask(orig);
 			underM->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			underM->updateDataMask(MeshModel::MM_VERTQUALITY);
+			for (const std::string& tex : orig->cm.textures) {
+				underM->addTexture(tex, orig->getTexture(tex));
+			}
 
 			tri::Append<CMeshO,CMeshO>::Mesh(underM->cm,orig->cm);
 			tri::UpdateQuality<CMeshO>::VertexFromPlane(underM->cm, slicingPlane);
@@ -1921,9 +1925,15 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 				tri::UpdateSelection<CMeshO>::VertexFromQualityRange(underM->cm,0,std::numeric_limits<float>::max());
 				tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(underM->cm);
 				tri::UpdateSelection<CMeshO>::FaceInvert(underM->cm);
+				tri::UpdateSelection<CMeshO>::VertexClear(underM->cm);
 
 				MeshModel* overM= md.addNewMesh("",sectionName+"_over");
+				overM->updateDataMask(underM);
+				for (const std::string& tex : underM->cm.textures) {
+					overM->addTexture(tex, underM->getTexture(tex));
+				}
 				tri::Append<CMeshO,CMeshO>::Mesh(overM->cm,underM->cm,true);
+				tri::UpdateSelection<CMeshO>::Clear(overM->cm);
 
 				tri::UpdateSelection<CMeshO>::VertexClear(underM->cm);
 				tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(underM->cm);
