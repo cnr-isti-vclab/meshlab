@@ -11,7 +11,10 @@
                 "ms-vscode.cpptools",
                 "ms-vscode.cpptools-extension-pack",
                 "ms-vscode.cmake-tools"
-            ]
+            ],
+            "settings": {
+                "cmake.buildDirectory": "${workspaceFolder}/build"
+            }
         }
     }
 }

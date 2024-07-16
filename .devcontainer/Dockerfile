@@ -2,11 +2,13 @@ FROM ubuntu:20.04
 
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     build-essential \
+    dbus-x11 \
     fontconfig \
     fuse \
     git \
     kmod \
     libboost-dev \
+    libcanberra-gtk3-0 \
     libdbus-1-3 \
     libegl-dev \
     libfuse2 \
@@ -25,6 +27,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     libxkbcommon-x11-dev \
     ninja-build \
     patchelf \
+    packagekit-gtk3-module \
     python3 \
     python3-pip
 
@@ -53,3 +56,6 @@ RUN apt purge --auto-remove cmake && \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Generating a universally unique ID for the Container
+RUN  dbus-uuidgen > /etc/machine-id
