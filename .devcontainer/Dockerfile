@@ -6,6 +6,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     fuse \
     git \
     kmod \
+    libboost-dev \
     libdbus-1-3 \
     libegl-dev \
     libfuse2 \
@@ -40,11 +41,14 @@ ENV QT_PLUGIN_PATH=/opt/qt/${QT}/gcc_64/plugins/
 ENV QML_IMPORT_PATH=/opt/qt/${QT}/gcc_64/qml/
 ENV QML2_IMPORT_PATH=/opt/qt/${QT}/gcc_64/qml/
 
-# install latest cmake
+# install latest cmake and embree
 RUN apt purge --auto-remove cmake && \
     apt-get -y install wget && \
     wget -qO- "https://cmake.org/files/v3.19/cmake-3.19.2-Linux-x86_64.tar.gz" \
-    | tar --strip-components=1 -xz -C /usr/local && \
+    | tar --strip-components=1 -xz -C /usr/local &&\
+    wget -qO- "https://github.com/embree/embree/releases/download/v4.3.2/embree-4.3.2.x86_64.linux.tar.gz" \
+    | tar -xz -C /usr/local && \
+    bash /usr/local/embree-vars.sh  && \
     apt-get -y remove wget && \
     apt-get -y autoremove && \
     apt-get -y clean && \
