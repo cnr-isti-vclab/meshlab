@@ -6,7 +6,7 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3DS "Allow download and use of lib3ds source" ON)
 option(MESHLAB_ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
 
-find_package(Lib3ds)
+find_package(Lib3ds QUIET)
 
 if(MESHLAB_ALLOW_SYSTEM_LIB3DS AND TARGET Lib3ds::Lib3ds)
 	message(STATUS "- lib3ds - using system-provided library")
